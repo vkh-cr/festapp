@@ -1,6 +1,8 @@
 // events_panel.dart
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/services/utilities_all.dart';
+import 'package:intl/intl.dart';
 import 'activities_component_strings.dart';
 import 'activity_timeline_controller.dart';
 
@@ -14,13 +16,20 @@ class EventsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final normalizedFilter =
+    Utilities.removeDiacritics(controller.eventFilter.toLowerCase());
     final filtered = controller.allEvents
-        .where((e) => (e.title ?? "").toLowerCase().contains(controller.eventFilter.toLowerCase()))
-        .toList();
+        .where((e) => Utilities.removeDiacritics(
+        (e.title ?? "").toLowerCase())
+        .contains(normalizedFilter))
+        .toList()
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
     final hintColor = controller.hintColor;
     final textColor = controller.textColor;
-    final chipBgColor = controller.isDark ? Colors.orange[800] : Colors.orange[100];
-    final chipTextColor = controller.isDark ? Colors.white.withOpacity(0.9) : Colors.black87;
+    final chipBgColor =
+    controller.isDark ? Colors.orange[800] : Colors.orange[100];
+    final chipTextColor =
+    controller.isDark ? Colors.white.withOpacity(0.9) : Colors.black87;
 
     return Container(
       padding: const EdgeInsets.all(2),
@@ -39,7 +48,8 @@ class EventsPanel extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 8, right: 4),
                 child: Icon(Icons.search, size: 14, color: hintColor),
               ),
-              prefixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+              prefixIconConstraints:
+              const BoxConstraints(minWidth: 24, minHeight: 24),
               contentPadding: const EdgeInsets.symmetric(vertical: 6),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -54,31 +64,68 @@ class EventsPanel extends StatelessWidget {
         Expanded(
           child: SingleChildScrollView(
             child: Wrap(
-              spacing: 3,
-              runSpacing: 3,
+              spacing: 4,
+              runSpacing: 4,
               children: filtered.map((e) {
+                // Format the start time to show weekday and time, e.g., "Sat 14:30"
+                final locale = Localizations.localeOf(context).toString();
+                final formattedTime =
+                DateFormat('E HH:mm', locale).format(e.startTime);
+
                 return Draggable<ActivityEventModel>(
                   data: e,
                   onDragStarted: controller.hideAssignmentDetailOverlay,
                   feedback: Material(
-                    elevation: 3.0,
+                    elevation: 4.0,
                     color: Colors.transparent,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: chipBgColor?.withOpacity(0.85),
-                        borderRadius: BorderRadius.circular(14),
+                        color: chipBgColor?.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(
-                        e.title ?? ActivitiesComponentStrings.textUnnamedEvent,
-                        style: TextStyle(fontSize: 12, color: chipTextColor),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            e.title ?? ActivitiesComponentStrings.textUnnamedEvent,
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: chipTextColor,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            formattedTime,
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: chipTextColor.withOpacity(0.8)),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   child: Chip(
                     backgroundColor: chipBgColor,
-                    label: Text(e.title ?? ActivitiesComponentStrings.textUnnamedEvent, style: TextStyle(fontSize: 11, color: chipTextColor)),
-                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+                    label: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                            e.title ??
+                                ActivitiesComponentStrings.textUnnamedEvent,
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: chipTextColor,
+                                fontWeight: FontWeight.bold)),
+                        Text(formattedTime,
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: chipTextColor.withOpacity(0.8))),
+                      ],
+                    ),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                 );

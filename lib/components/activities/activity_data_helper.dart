@@ -3,7 +3,6 @@ import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/activity_model.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_services/db_events.dart';
 import 'package:intl/intl.dart';
 
 class ActivityDataHelper {
@@ -84,7 +83,7 @@ class ActivityDataHelper {
       }
     }
 
-    final assignmentsByActivityId = <int, List<ActivityAssignmentModel>>{};
+    final assignmentsByActivityId = <String, List<ActivityAssignmentModel>>{};
     for (final assignment in allAssignments) {
       final String assignmentUuid = assignment.id;
 
@@ -121,7 +120,6 @@ class ActivityDataHelper {
 
     for (final activity in allActivities) {
       final activityId = activity.id;
-      if (activityId == null) continue;
       activity.assignments = assignmentsByActivityId[activityId] ?? [];
     }
   }

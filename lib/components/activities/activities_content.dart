@@ -1,34 +1,40 @@
-// activities_content.dart
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/data_models/activity_model.dart';
 import 'package:fstapp/data_services/db_activities.dart';
 import 'package:fstapp/dialogs/detail_dialog.dart';
+import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/router_service.dart';
+import 'package:fstapp/services/responsive_service.dart';
 import 'package:fstapp/services/time_helper.dart';
-import 'package:multi_split_view/multi_split_view.dart';
+import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
+import 'package:multi_split_view/multi_split_view.dart';
+
+import 'activities_component_strings.dart';
+import 'activity_data_helper.dart';
+import 'activity_history_helper.dart';
+import 'activity_timeline_controller.dart';
 import 'constants.dart';
+import 'events_panel.dart';
+import 'places_panel.dart';
 import 'time_clamping_service.dart';
 import 'timeline_painter.dart';
 import 'timeline_row.dart';
-import 'verticla_grid_lines_painter.dart';
-import 'activities_component_strings.dart';
-
-import 'activity_timeline_controller.dart';
 import 'users_panel.dart';
-import 'places_panel.dart';
-import 'events_panel.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart'; // Import HtmlEditorPage
-import 'package:fstapp/router_service.dart'; // Import RouterService
-import 'package:fstapp/app_router.gr.dart'; // Import app_router.gr.dart for route
-
+import 'verticla_grid_lines_painter.dart';
 
 class ActivitiesContent extends StatefulWidget {
   final int occasionId;
-  const ActivitiesContent({Key? key, required this.occasionId}) : super(key: key);
+
+  const ActivitiesContent({Key? key, required this.occasionId})
+      : super(key: key);
 
   @override
   _ActivitiesContentState createState() => _ActivitiesContentState();
@@ -38,70 +44,64 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     with SingleTickerProviderStateMixin {
   EditDataBundle? _bundle;
   DateTime? _timelineStart, _timelineEnd;
-
-  // Constants for timeline
-  static const double kInitialScale = 0.2;
-  static const double kMinScale = 0.05;
-  static const double kMaxScale = 2.0;
-  static const double kScaleFactor = 1.25;
-  static const double kInitialPanOffset = 0.0;
-  static const double kBasePixelsPerSecond = 0.05;
-
-  double _scale = kInitialScale;
-  double _panOffset = kInitialPanOffset;
-  final ValueNotifier<double> _currentPanOffsetNotifier = ValueNotifier<double>(kInitialPanOffset);
-
+  late final ActivityHistoryHelper _historyHelper;
+  Timer? _autosaveDebounce;
+  bool _isPublishing = false;
+  double _scale = ActivityConstants.kInitialScale;
+  double _panOffset = ActivityConstants.kInitialPanOffset;
+  final ValueNotifier<double> _currentPanOffsetNotifier =
+      ValueNotifier<double>(ActivityConstants.kInitialPanOffset);
   double _gesturePanOffsetStart = 0.0;
   double _gestureDragStartX = 0.0;
-
   double _scrollbarGestureDragStartX = 0.0;
   double _scrollbarGesturePanOffsetStartValue = 0.0;
-
-  final double _basePps = kBasePixelsPerSecond;
-
+  final double _basePps = ActivityConstants.kBasePixelsPerSecond;
   late List<ActivityUserInfoModel> _allUsers;
   late List<ActivityPlaceModel> _allPlaces;
   late List<ActivityEventModel> _allEvents;
   String _userFilter = '';
   String _placeFilter = '';
   String _eventFilter = '';
-  final Map<ActivityModel, List<ActivityAssignmentModel>> _activityAssignments = {};
+  final Map<ActivityModel, List<ActivityAssignmentModel>> _activityAssignments =
+      {};
   final Map<String, Duration> _userAssignedHours = {};
-
   final Set<ActivityModel> _selectedActivities = {};
-
   late MultiSplitViewController _mainController;
   late MultiSplitViewController _topController;
-
   ActivityUserInfoModel? _currentlyDraggedUser;
   ActivityModel? _hoveredActivityForPreview;
   DateTime? _previewStartTime;
-
+  ActivityAssignmentModel? _copyDragSource;
+  ActivityAssignmentModel? _copyDragPreview;
   OverlayEntry? _detailOverlayEntry;
   ActivityAssignmentModel? _selectedAssignmentForDetail;
   LayerLink? _selectedAssignmentLayerLink;
-
   String _globalTimelineFilter = '';
   final TextEditingController _globalFilterController = TextEditingController();
   List<ActivityModel> _filteredActivities = [];
-
   bool _isTimelineFullscreen = false;
-
   double _currentViewportWidth = 0;
-
   static const int kTimelinePaddingDaysBefore = 1;
   static const int kTimelinePaddingDaysAfter = 1;
-
   bool _isModifierKeyPressedForScroll = false;
-
   late AnimationController _animationController;
   late Animation<double> _animationX;
+  bool _justAutosaved = false;
+  bool _isAutosaveLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    _mainController = MultiSplitViewController(areas: [Area(data: 'top', size: 160, min: 100), Area(data: 'bottom', flex: 1)]);
-    _topController = MultiSplitViewController(areas: [Area(data: 'users', flex: 1), Area(data: 'places', flex: 1), Area(data: 'events', flex: 1)]);
+    _historyHelper = ActivityHistoryHelper();
+    _mainController = MultiSplitViewController(areas: [
+      Area(data: 'top', size: 160, min: 100),
+      Area(data: 'bottom', flex: 1)
+    ]);
+    _topController = MultiSplitViewController(areas: [
+      Area(data: 'users', flex: 1),
+      Area(data: 'places', flex: 1),
+      Area(data: 'events', flex: 1)
+    ]);
     _allUsers = [];
     _allPlaces = [];
     _allEvents = [];
@@ -114,9 +114,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         });
       }
     });
-
-    _isModifierKeyPressedForScroll = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
-
+    _isModifierKeyPressedForScroll =
+        HardwareKeyboard.instance.isControlPressed ||
+            HardwareKeyboard.instance.isMetaPressed;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -129,6 +129,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   @override
   void dispose() {
     _hideAssignmentDetailOverlay();
+    _autosaveDebounce?.cancel();
     _mainController.dispose();
     _topController.dispose();
     _globalFilterController.dispose();
@@ -137,59 +138,295 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     super.dispose();
   }
 
-  Future<void> _loadData({double? initialPanOffset, double? initialScale}) async {
-    final data = await DbActivities.getForEdit(widget.occasionId);
-    if (data != null) {
-      data.activities!.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+  void _triggerAutosaveDebounce() {
+    // This block handles hiding the "Autosaved" text on a new edit.
+    if (_justAutosaved) {
       setState(() {
-        _bundle = data;
-        _allPlaces = data.places ?? [];
-        _allEvents = data.events ?? [];
-        _allUsers = data.users ?? [];
-        _computeTimelineBounds();
-
-        _activityAssignments.clear();
-        _userAssignedHours.clear();
-        if (data.activityAssignments != null) {
-          for (var assignment in data.activityAssignments!) {
-            final activity = data.activities?.firstWhereOrNull((act) {
-              bool isMatch = (act.id == assignment.activityId);
-              if (assignment.activityId == -1 && act.id == null) isMatch = true;
-              return isMatch;
-            });
-            if (activity != null) {
-              _activityAssignments.putIfAbsent(activity, () => []).add(assignment);
-              if (assignment.userInfo != null && assignment.startTime != null && assignment.endTime != null) {
-                final duration = assignment.endTime!.difference(assignment.startTime!);
-                _userAssignedHours.update(assignment.userInfo!, (value) => value + duration,
-                    ifAbsent: () => duration);
-              }
-            }
-          }
-        }
-
-        // Restore pan and scale if provided, otherwise set to initial values
-        if (initialPanOffset != null && initialScale != null) {
-          _panOffset = initialPanOffset;
-          _scale = initialScale;
-        } else {
-          _panOffset = kInitialPanOffset;
-          _scale = kInitialScale; // Your default initial scale
-        }
-        _currentPanOffsetNotifier.value = _panOffset;
-
-
-        _updateFilteredActivities();
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if(mounted) {
-            if (initialPanOffset == null && initialScale == null) {
-              _performInitialTimelineScroll();
-            }
-          }
-        });
+        _justAutosaved = false;
       });
     }
+
+    _autosaveDebounce?.cancel();
+    _autosaveDebounce = Timer(ActivityConstants.autosaveInterval, _autosave);
+  }
+
+  void _recordStateChange() {
+    if (_bundle == null) return;
+
+    _bundle!.activities?.forEach((activity) {
+      activity.assignments = _activityAssignments[activity]
+              ?.where((a) => a.data?['isDragPreview'] != true)
+              .toList() ??
+          [];
+    });
+    _historyHelper.record(_bundle!);
+    _triggerAutosaveDebounce();
+    setState(() {});
+  }
+
+  void _undo() {
+    if (_historyHelper.canUndo) {
+      final stateToRestore = _historyHelper.undo();
+      if (stateToRestore != null) {
+        _processBundle(stateToRestore, preservePanAndScale: true);
+        _triggerAutosaveDebounce();
+      }
+    }
+  }
+
+  void _redo() {
+    if (_historyHelper.canRedo) {
+      final stateToRestore = _historyHelper.redo();
+      if (stateToRestore != null) {
+        _processBundle(stateToRestore, preservePanAndScale: true);
+        _triggerAutosaveDebounce(); // Trigger autosave, but don't record history
+      }
+    }
+  }
+
+  bool _isShowingConflictDialog = false;
+
+  Future<void> _autosave() async {
+    if (!mounted || _bundle == null || _isShowingConflictDialog) return;
+
+    setState(() {
+      _justAutosaved = false;
+    });
+
+    bool didSaveSuccessfully = false;
+    try {
+      final response = await DbActivities.autosaveActivities(widget.occasionId, _bundle!);
+
+      if (response != null && response['code'] == 409) {
+        final conflictData = response['data'] as Map<String, dynamic>?;
+        final latestPublishId = conflictData?['latest_publish_id'] as int?;
+        final publishedAtStr = conflictData?['published_at'] as String?;
+
+        String conflictMessage = ActivitiesComponentStrings.conflictMessageDefault;
+        if (publishedAtStr != null) {
+          final publishedAt = DateTime.parse(publishedAtStr).toLocal();
+          final formattedTime = DateFormat.jm(context.locale.toString()).format(publishedAt);
+          final formattedDate = DateFormat.yMMMd(context.locale.toString()).format(publishedAt);
+          conflictMessage = ActivitiesComponentStrings.conflictMessageWithTime(formattedTime, formattedDate);
+        }
+
+        final choice = await _showConflictDialog(conflictMessage);
+
+        if (mounted) {
+          if (choice == 'reload') {
+            await _loadData(forcePublished: true);
+            return;
+          } else if (choice == 'continue') {
+            setState(() {
+              _bundle!.parentHistoryId = latestPublishId;
+            });
+            _autosave();
+            return;
+          }
+        }
+      } else if (response != null && response['code'] == 200) {
+        didSaveSuccessfully = true;
+      } else {
+        print("Autosave failed: ${response?['message']}");
+      }
+    } catch (e) {
+      print("Autosave failed with exception: $e");
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _justAutosaved = didSaveSuccessfully;
+    });
+  }
+
+
+  Future<String?> _showConflictDialog(String message) async {
+    if (_isShowingConflictDialog) return null;
+    setState(() => _isShowingConflictDialog = true);
+
+    final String? choice = await showDialog<String>(
+      context: context,
+      barrierDismissible: true, // Allow dismissing by tapping the background
+      builder: (ctx) => AlertDialog(
+        title: Text(ActivitiesComponentStrings.dialogTitleUpdateConflict),
+        content: Text(message),
+        actions: <Widget>[
+          // Both buttons are now TextButton for a neutral choice
+          TextButton(
+            child: Text(ActivitiesComponentStrings.buttonContinueWithDraft),
+            onPressed: () {
+              Navigator.of(ctx).pop('continue');
+            },
+          ),
+          TextButton(
+            child: Text(ActivitiesComponentStrings.buttonLoadNewestVersion),
+            onPressed: () {
+              Navigator.of(ctx).pop('reload');
+            },
+          ),
+        ],
+      ),
+    );
+
+    if(mounted) {
+      setState(() => _isShowingConflictDialog = false);
+    }
+
+    return choice;
+  }
+
+  void _processBundle(EditDataBundle bundle,
+      {bool preservePanAndScale = false}) {
+    // Create a new, complete bundle for the new state.
+    // If the incoming bundle from history is missing static data (users, places, events),
+    // this merge operation populates it from the current state's master lists (_bundle).
+    // If the incoming bundle is from the initial _loadData, it will be complete already.
+    final newCompleteBundle = EditDataBundle(
+      users: bundle.users ?? _bundle?.users,
+      places: bundle.places ?? _bundle?.places,
+      events: bundle.events ?? _bundle?.events,
+
+      // Copy the dynamic, historical data from the incoming bundle
+      activities: bundle.activities,
+      activityAssignments: bundle.activityAssignments,
+      assignmentPlaceLinks: bundle.assignmentPlaceLinks,
+      assignmentEventLinks: bundle.assignmentEventLinks,
+
+      // Copy the metadata
+      id: bundle.id,
+      parentHistoryId: bundle.parentHistoryId,
+    );
+
+    // The new bundle is now logically complete, but object references might be
+    // broken if they came from a deserialized object. Re-link everything.
+    ActivityDataHelper.linkAssignmentsToActivities(newCompleteBundle);
+
+    // Sort activities by their specified order.
+    newCompleteBundle.activities?.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+
+    setState(() {
+      // Set the main state bundle to our newly constructed complete bundle.
+      _bundle = newCompleteBundle;
+
+      // Ensure the top-level master lists are also updated.
+      _allUsers = _bundle!.users ?? [];
+      _allPlaces = _bundle!.places ?? [];
+      _allEvents = _bundle!.events ?? [];
+
+      // Re-calculate all derived data and update UI.
+      _computeTimelineBounds();
+      _activityAssignments.clear();
+      if (_bundle!.activities != null) {
+        for (final activity in _bundle!.activities!) {
+          _activityAssignments[activity] = List.from(activity.assignments ?? []);
+        }
+      }
+      _recalculateUserAssignedHours();
+      if (!preservePanAndScale) {
+        _panOffset = ActivityConstants.kInitialPanOffset;
+        _scale = ActivityConstants.kInitialScale;
+      }
+      _currentPanOffsetNotifier.value = _panOffset;
+      _updateFilteredActivities();
+    });
+  }
+
+  Future<void> _loadData({ bool forcePublished = false, double? initialPanOffset, double? initialScale }) async {
+    // Prevent multiple load operations from running concurrently
+    if (_isShowingConflictDialog) return;
+
+    // Step 1: Always fetch the complete data bundle first. This provides the master lists
+    // of all users, places, and events for the entire session.
+    final baseBundle = await DbActivities.getForEdit(widget.occasionId);
+    if (baseBundle == null) {
+      if (mounted) {
+        // Handle the critical failure to load essential data
+        ToastHelper.Show(context, ActivitiesComponentStrings.toastFailedToLoad, severity: ToastSeverity.NotOk);
+      }
+      return;
+    }
+
+    // Step 2: Now, check for autosaves and the latest published version ID.
+    final autosaveInfo = await DbActivities.getAutosaveAndPublishInfo(widget.occasionId);
+    final latestPublishId = autosaveInfo.latestPublishId;
+    // If forcePublished is true, we ignore the returned autosave bundle.
+    final autosavedBundle = forcePublished ? null : autosaveInfo.autosavedBundle;
+
+    EditDataBundle? dataToLoad;
+    bool loadedFromAutosave = false;
+
+    if (autosavedBundle != null) {
+      // An autosave exists. It only contains activity-specific data.
+      final isStale = latestPublishId != null && autosavedBundle.parentHistoryId != latestPublishId;
+      if (isStale) {
+        // The user's autosave is based on an older published version.
+        final choice = await _showConflictDialog(
+            ActivitiesComponentStrings.staleAutosaveConflictMessage
+        );
+
+        if (choice == 'reload') {
+          await DbActivities.deleteAutosave(widget.occasionId);
+          // Use the fresh baseBundle we already fetched.
+          dataToLoad = baseBundle;
+        } else if (choice == 'continue') {
+          // User wants to keep their draft. MERGE it with the base data.
+          baseBundle.activities = autosavedBundle.activities;
+          baseBundle.activityAssignments = autosavedBundle.activityAssignments;
+          baseBundle.assignmentEventLinks = autosavedBundle.assignmentEventLinks;
+          baseBundle.assignmentPlaceLinks = autosavedBundle.assignmentPlaceLinks;
+          // Re-base the merged bundle on the new published version.
+          baseBundle.parentHistoryId = latestPublishId;
+          dataToLoad = baseBundle;
+          loadedFromAutosave = true;
+        } else {
+          // User dismissed the dialog. Default to loading the fresh data without the autosave.
+          dataToLoad = baseBundle;
+        }
+
+      } else {
+        // Autosave is not stale. MERGE its data into the base bundle.
+        baseBundle.activities = autosavedBundle.activities;
+        baseBundle.activityAssignments = autosavedBundle.activityAssignments;
+        baseBundle.assignmentEventLinks = autosavedBundle.assignmentEventLinks;
+        baseBundle.assignmentPlaceLinks = autosavedBundle.assignmentPlaceLinks;
+        baseBundle.parentHistoryId = autosavedBundle.parentHistoryId;
+        dataToLoad = baseBundle;
+        loadedFromAutosave = true;
+      }
+    }
+
+    // If dataToLoad is still null, it means no autosave existed. Use the base bundle.
+    if (dataToLoad == null) {
+      dataToLoad = baseBundle;
+      dataToLoad.parentHistoryId = latestPublishId; // Base this session on the latest publish
+      loadedFromAutosave = false;
+    }
+
+    setState(() {
+      _isAutosaveLoaded = loadedFromAutosave;
+      _justAutosaved = loadedFromAutosave;
+    });
+
+    // _processBundle will now always receive a complete bundle for initial processing.
+    _processBundle(dataToLoad, preservePanAndScale: initialPanOffset != null);
+    _historyHelper.clear(dataToLoad);
+
+    if (initialPanOffset != null && initialScale != null) {
+      setState(() {
+        _panOffset = initialPanOffset;
+        _scale = initialScale;
+        _currentPanOffsetNotifier.value = _panOffset;
+      });
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        if (initialPanOffset == null) {
+          _performInitialTimelineScroll();
+        }
+      }
+    });
   }
 
   void _performInitialTimelineScroll() {
@@ -199,29 +436,27 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       });
       return;
     }
-
     DateTime? earliestTimeToShow;
     List<DateTime> allPossibleStartTimes = [];
-
     if (_bundle?.events?.isNotEmpty ?? false) {
       allPossibleStartTimes.addAll(_bundle!.events!.map((e) => e.startTime));
     }
     _activityAssignments.values.expand((list) => list).forEach((assignment) {
-      if (assignment.startTime != null && assignment.data?['isDragPreview'] != true) {
+      if (assignment.startTime != null &&
+          assignment.data?['isDragPreview'] != true) {
         allPossibleStartTimes.add(assignment.startTime!);
       }
     });
-
     if (allPossibleStartTimes.isNotEmpty) {
       allPossibleStartTimes.sort((a, b) => a.compareTo(b));
       earliestTimeToShow = allPossibleStartTimes.first;
     }
-
-    if (earliestTimeToShow != null && _timelineStart != null && _timelineEnd != null) {
+    if (earliestTimeToShow != null &&
+        _timelineStart != null &&
+        _timelineEnd != null) {
       _shiftTimelineToDateTime(earliestTimeToShow);
     }
   }
-
 
   void _computeTimelineBounds() {
     final allStarts = <DateTime>[], allEnds = <DateTime>[];
@@ -231,24 +466,28 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         allEnds.add(e.endTime);
       }
     }
-    if (_bundle!.activityAssignments != null) {
-      for (var au in _bundle!.activityAssignments!) {
-        if (au.startTime != null && au.endTime != null) {
-          allStarts.add(au.startTime!);
-          allEnds.add(au.endTime!);
+    if (_bundle!.activities != null) {
+      for (var activity in _bundle!.activities!) {
+        for (var au in activity.assignments ?? []) {
+          if (au.startTime != null && au.endTime != null) {
+            allStarts.add(au.startTime!);
+            allEnds.add(au.endTime!);
+          }
         }
       }
     }
-
     if (allStarts.isNotEmpty && allEnds.isNotEmpty) {
       allStarts.sort();
       allEnds.sort();
       DateTime earliestActivityDate = allStarts.first;
       DateTime latestActivityDate = allEnds.last;
-
-      _timelineStart = DateTime(earliestActivityDate.year, earliestActivityDate.month, earliestActivityDate.day).toOccasionTime()
+      _timelineStart = DateTime(earliestActivityDate.year,
+              earliestActivityDate.month, earliestActivityDate.day)
+          .toOccasionTime()
           .subtract(const Duration(days: kTimelinePaddingDaysBefore));
-      _timelineEnd = DateTime(latestActivityDate.year, latestActivityDate.month, latestActivityDate.day, 23, 59, 59, 999).toOccasionTime()
+      _timelineEnd = DateTime(latestActivityDate.year, latestActivityDate.month,
+              latestActivityDate.day, 23, 59, 59, 999)
+          .toOccasionTime()
           .add(const Duration(days: kTimelinePaddingDaysAfter));
     } else {
       final now = TimeHelper.now();
@@ -258,28 +497,32 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   void _shiftTimelineToDateTime(DateTime targetTime) {
-    if (_timelineStart == null || _timelineEnd == null || _currentViewportWidth <= 0 || !mounted) return;
-
+    if (_timelineStart == null ||
+        _timelineEnd == null ||
+        _currentViewportWidth <= 0 ||
+        !mounted) {
+      return;
+    }
     final pps = _basePps * _scale;
-    final timelineWidth = _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble() * pps;
-    final visibleTimelineAreaWidth = _currentViewportWidth - kTimelineLabelWidth;
-
+    final timelineWidth =
+        _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble() * pps;
+    final visibleTimelineAreaWidth =
+        _currentViewportWidth - ActivityConstants.kTimelineLabelWidth;
     DateTime effectiveTargetTime = targetTime;
     if (effectiveTargetTime.isBefore(_timelineStart!)) {
       effectiveTargetTime = _timelineStart!;
     }
-
-    final Duration durationFromStart = effectiveTargetTime.difference(_timelineStart!);
-    final double pixelOffsetFromTimelineStart = durationFromStart.inSeconds * pps;
-
+    final Duration durationFromStart =
+        effectiveTargetTime.difference(_timelineStart!);
+    final double pixelOffsetFromTimelineStart =
+        durationFromStart.inSeconds * pps;
     double newPanOffset = -pixelOffsetFromTimelineStart;
-
     newPanOffset = newPanOffset.clamp(
-        (visibleTimelineAreaWidth - timelineWidth).clamp(double.negativeInfinity, 0.0),
-        0.0
-    );
-
-    if ((_panOffset - newPanOffset).abs() > 0.01 || (_currentPanOffsetNotifier.value - newPanOffset).abs() > 0.01) {
+        (visibleTimelineAreaWidth - timelineWidth)
+            .clamp(double.negativeInfinity, 0.0),
+        0.0);
+    if ((_panOffset - newPanOffset).abs() > 0.01 ||
+        (_currentPanOffsetNotifier.value - newPanOffset).abs() > 0.01) {
       setState(() {
         _panOffset = newPanOffset;
         _currentPanOffsetNotifier.value = _panOffset;
@@ -287,44 +530,57 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     }
   }
 
-
   void _onAddNewActivity() {
     _hideAssignmentDetailOverlay();
     final newOrder = _bundle?.activities?.length ?? 0;
+
+    // The ActivityModel constructor now automatically generates a client-side UUID.
     final newAct = ActivityModel(
-      id: null, createdAt: DateTime.now(), updatedAt: DateTime.now(),
-      title: '${ActivitiesComponentStrings.textNewActivityAddedDragDrop} ${newOrder + 1}',
-      description: '', type: null,
-      occasion: widget.occasionId, unit: null, isHidden: false,
-      order: newOrder, data: {}, assignments: [],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      title:
+      '${ActivitiesComponentStrings.textUntitledActivity} ${newOrder + 1}',
+      description: '',
+      type: null,
+      occasion: widget.occasionId,
+      unit: null,
+      isHidden: false,
+      order: newOrder,
+      data: {},
+      assignments: [],
     );
+
     setState(() {
       _bundle?.activities?.add(newAct);
+      _activityAssignments[newAct] = [];
       _updateFilteredActivities();
+      _recordStateChange();
     });
   }
 
   void _zoomIn(double vpWidth, double totalSec) {
     _hideAssignmentDetailOverlay();
     if (_timelineStart == null) return;
-
     final double oldScale = _scale;
-    final double newScale = (_scale * kScaleFactor).clamp(kMinScale, kMaxScale);
-
+    final double newScale = (_scale * ActivityConstants.kScaleFactor)
+        .clamp(ActivityConstants.kMinScale, ActivityConstants.kMaxScale);
     final double oldPps = _basePps * oldScale;
     final double newPps = _basePps * newScale;
-
-    final double visibleTimelineAreaWidth = vpWidth - kTimelineLabelWidth;
-    final double timelinePointAtViewportCenterPx = -_panOffset + (visibleTimelineAreaWidth / 2);
-    final Duration durationOffsetFromStart = Duration(seconds: (timelinePointAtViewportCenterPx / oldPps).round());
-    final double newTimelinePointAtViewportCenterPx = durationOffsetFromStart.inSeconds * newPps;
-    double newPanOffset = (visibleTimelineAreaWidth / 2) - newTimelinePointAtViewportCenterPx;
-
+    final double visibleTimelineAreaWidth =
+        vpWidth - ActivityConstants.kTimelineLabelWidth;
+    final double timelinePointAtViewportCenterPx =
+        -_panOffset + (visibleTimelineAreaWidth / 2);
+    final Duration durationOffsetFromStart =
+        Duration(seconds: (timelinePointAtViewportCenterPx / oldPps).round());
+    final double newTimelinePointAtViewportCenterPx =
+        durationOffsetFromStart.inSeconds * newPps;
+    double newPanOffset =
+        (visibleTimelineAreaWidth / 2) - newTimelinePointAtViewportCenterPx;
     final double newTimelineWidth = totalSec * newPps;
     newPanOffset = newPanOffset.clamp(
-        (vpWidth - (kTimelineLabelWidth + newTimelineWidth)).clamp(double.negativeInfinity, 0.0),
+        (vpWidth - (ActivityConstants.kTimelineLabelWidth + newTimelineWidth))
+            .clamp(double.negativeInfinity, 0.0),
         0.0);
-
     setState(() {
       _scale = newScale;
       _panOffset = newPanOffset;
@@ -335,24 +591,26 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   void _zoomOut(double vpWidth, double totalSec) {
     _hideAssignmentDetailOverlay();
     if (_timelineStart == null) return;
-
     final double oldScale = _scale;
-    final double newScale = (_scale / kScaleFactor).clamp(kMinScale, kMaxScale);
-
+    final double newScale = (_scale / ActivityConstants.kScaleFactor)
+        .clamp(ActivityConstants.kMinScale, ActivityConstants.kMaxScale);
     final double oldPps = _basePps * oldScale;
     final double newPps = _basePps * newScale;
-
-    final double visibleTimelineAreaWidth = vpWidth - kTimelineLabelWidth;
-    final double timelinePointAtViewportCenterPx = -_panOffset + (visibleTimelineAreaWidth / 2);
-    final Duration durationOffsetFromStart = Duration(seconds: (timelinePointAtViewportCenterPx / oldPps).round());
-    final double newTimelinePointAtViewportCenterPx = durationOffsetFromStart.inSeconds * newPps;
-    double newPanOffset = (visibleTimelineAreaWidth / 2) - newTimelinePointAtViewportCenterPx;
-
+    final double visibleTimelineAreaWidth =
+        vpWidth - ActivityConstants.kTimelineLabelWidth;
+    final double timelinePointAtViewportCenterPx =
+        -_panOffset + (visibleTimelineAreaWidth / 2);
+    final Duration durationOffsetFromStart =
+        Duration(seconds: (timelinePointAtViewportCenterPx / oldPps).round());
+    final double newTimelinePointAtViewportCenterPx =
+        durationOffsetFromStart.inSeconds * newPps;
+    double newPanOffset =
+        (visibleTimelineAreaWidth / 2) - newTimelinePointAtViewportCenterPx;
     final double newTimelineWidth = totalSec * newPps;
     newPanOffset = newPanOffset.clamp(
-        (vpWidth - (kTimelineLabelWidth + newTimelineWidth)).clamp(double.negativeInfinity, 0.0),
+        (vpWidth - (ActivityConstants.kTimelineLabelWidth + newTimelineWidth))
+            .clamp(double.negativeInfinity, 0.0),
         0.0);
-
     setState(() {
       _scale = newScale;
       _panOffset = newPanOffset;
@@ -362,102 +620,162 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   void _deleteSelectedActivities() {
     _hideAssignmentDetailOverlay();
-    setState(() {
-      _bundle!.activities!.removeWhere((act) => _selectedActivities.contains(act));
-      _selectedActivities.forEach(_activityAssignments.remove);
-      _selectedActivities.clear();
-      _updateFilteredActivities();
-    });
+    if (_selectedActivities.isEmpty) return;
+
+    _bundle!.activities!
+        .removeWhere((act) => _selectedActivities.contains(act));
+    _selectedActivities.forEach(_activityAssignments.remove);
+    _selectedActivities.clear();
+    _updateFilteredActivities();
+    _recalculateUserAssignedHours();
+    _recordStateChange(); // This will handle the rebuild
   }
 
   Future<void> _showRenameDialog(ActivityModel a) async {
     _hideAssignmentDetailOverlay();
     final controller = TextEditingController(text: a.title);
-    final isDark = isDarkMode(context);
+    final isDark = ActivityConstants.isDarkMode(context);
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: isDark ? Colors.grey[800] : Colors.white,
         titleTextStyle: TextStyle(color: isDark ? Colors.white : Colors.black),
-        contentTextStyle: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+        contentTextStyle:
+            TextStyle(color: isDark ? Colors.white70 : Colors.black87),
         title: Text(ActivitiesComponentStrings.dialogRenameActivity),
         content: TextField(
             controller: controller,
+            autofocus: true,
             style: TextStyle(color: isDark ? Colors.white : Colors.black),
             decoration: InputDecoration(
                 labelText: ActivitiesComponentStrings.labelTitle,
-                labelStyle: TextStyle(color: isDark ? Colors.white70 : Colors.black54)
-            )
-        ),
+                labelStyle: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black54))),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(ActivitiesComponentStrings.buttonCancel, style: TextStyle(color: Theme.of(ctx).colorScheme.secondary))),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, controller.text), child: Text(ActivitiesComponentStrings.buttonOK)),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(ActivitiesComponentStrings.buttonCancel,
+                  style:
+                      TextStyle(color: Theme.of(ctx).colorScheme.secondary))),
+          ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, controller.text),
+              child: Text(ActivitiesComponentStrings.buttonOK)),
         ],
       ),
     );
-    if (result != null && result.trim().isNotEmpty) {
+    if (result != null &&
+        result.trim().isNotEmpty &&
+        result.trim() != a.title) {
       setState(() {
         a.title = result.trim();
         _updateFilteredActivities();
+        _recordStateChange();
       });
     }
   }
 
-  DateTime _calculateSnappedTimeFromOffset(Offset globalOffset, double timelineRenderWidth) {
-    if (_timelineStart == null || _timelineEnd == null || !mounted) return _timelineStart ?? TimeHelper.now();
-    final RenderBox? timelineAreaRenderBox = context.findRenderObject() as RenderBox?;
-    if (timelineAreaRenderBox == null || !timelineAreaRenderBox.hasSize) return _timelineStart!;
+  Duration _getSnappedDragDuration() {
+    const double baseDurationHours = 4.0;
+    const double minDurationHours = 0.25;
+    final double constant = baseDurationHours * ActivityConstants.kInitialScale;
+    double calculatedHours = constant / _scale;
+    calculatedHours =
+        calculatedHours.clamp(minDurationHours, baseDurationHours);
+    Duration calculatedDuration =
+        Duration(minutes: (calculatedHours * 60).round());
+    final Duration snapInterval = _scale < 0.5
+        ? ActivityConstants.kSnapStepCoarse
+        : ActivityConstants.kSnapStepFine;
+    if (snapInterval.inSeconds > 0) {
+      final int numSnapIntervals =
+          (calculatedDuration.inSeconds / snapInterval.inSeconds).round();
+      calculatedDuration =
+          Duration(seconds: numSnapIntervals * snapInterval.inSeconds);
+    }
+    if (calculatedDuration < ActivityConstants.kMinTimeLength) {
+      return ActivityConstants.kMinTimeLength;
+    }
+    return calculatedDuration;
+  }
 
-    final Offset localOffset = timelineAreaRenderBox.globalToLocal(globalOffset);
-    final double dxOnTimelineCanvas = (localOffset.dx - kTimelineLabelWidth - _currentPanOffsetNotifier.value).clamp(0.0, timelineRenderWidth);
-    final double pct = timelineRenderWidth > 0 ? dxOnTimelineCanvas / timelineRenderWidth : 0.0;
-    final int totalTimelineSeconds = _timelineEnd!.difference(_timelineStart!).inSeconds;
-    DateTime calculatedTime = _timelineStart!.add(Duration(seconds: (totalTimelineSeconds * pct).round()));
-    final Duration snapStep = _scale < 0.5 ? kSnapStepCoarse : kSnapStepFine;
+  DateTime _calculateSnappedTimeFromOffset(
+      Offset globalOffset, double timelineRenderWidth) {
+    if (_timelineStart == null || _timelineEnd == null || !mounted) {
+      return _timelineStart ?? TimeHelper.now();
+    }
+    final RenderBox? timelineAreaRenderBox =
+        context.findRenderObject() as RenderBox?;
+    if (timelineAreaRenderBox == null || !timelineAreaRenderBox.hasSize) {
+      return _timelineStart!;
+    }
+    final Offset localOffset =
+        timelineAreaRenderBox.globalToLocal(globalOffset);
+    final double dxOnTimelineCanvas = (localOffset.dx -
+            ActivityConstants.kTimelineLabelWidth -
+            _currentPanOffsetNotifier.value)
+        .clamp(0.0, timelineRenderWidth);
+    final double pct = timelineRenderWidth > 0
+        ? dxOnTimelineCanvas / timelineRenderWidth
+        : 0.0;
+    final int totalTimelineSeconds =
+        _timelineEnd!.difference(_timelineStart!).inSeconds;
+    DateTime calculatedTime = _timelineStart!
+        .add(Duration(seconds: (totalTimelineSeconds * pct).round()));
+    final Duration snapStep = _scale < 0.5
+        ? ActivityConstants.kSnapStepCoarse
+        : ActivityConstants.kSnapStepFine;
     if (snapStep.inSeconds > 0) {
-      final int numSnapSteps = (calculatedTime.difference(_timelineStart!).inSeconds / snapStep.inSeconds).round();
-      calculatedTime = _timelineStart!.add(Duration(seconds: numSnapSteps * snapStep.inSeconds));
+      final int numSnapSteps =
+          (calculatedTime.difference(_timelineStart!).inSeconds /
+                  snapStep.inSeconds)
+              .round();
+      calculatedTime = _timelineStart!
+          .add(Duration(seconds: numSnapSteps * snapStep.inSeconds));
     }
     return calculatedTime;
   }
 
-  void _handlePlaceOrEventDropOnAssignment(ActivityAssignmentModel assignment, dynamic droppedItemData) {
+  void _handlePlaceOrEventDropOnAssignment(
+      ActivityAssignmentModel assignment, dynamic droppedItemData) {
     bool changed = false;
     if (droppedItemData is ActivityPlaceModel) {
-      assignment.places ??= [];
       if (!assignment.places.any((p) => p.id == droppedItemData.id)) {
         assignment.places.add(droppedItemData);
         changed = true;
       }
     } else if (droppedItemData is ActivityEventModel) {
-      assignment.events ??= [];
       if (!assignment.events.any((e) => e.id == droppedItemData.id)) {
         assignment.events.add(droppedItemData);
         changed = true;
       }
     }
     if (changed) {
-      setState(() {});
-      if (_detailOverlayEntry != null && _selectedAssignmentForDetail == assignment) {
+      if (_detailOverlayEntry != null &&
+          _selectedAssignmentForDetail == assignment) {
         _detailOverlayEntry!.markNeedsBuild();
       }
+      _recordStateChange();
     }
   }
 
-  void _removePlaceFromAssignment(ActivityAssignmentModel assignment, ActivityPlaceModel place) {
+  void _removePlaceFromAssignment(
+      ActivityAssignmentModel assignment, ActivityPlaceModel place) {
     assignment.places.removeWhere((p) => p.id == place.id);
-    setState(() {});
-    if (_detailOverlayEntry != null && _selectedAssignmentForDetail == assignment) {
+    if (_detailOverlayEntry != null &&
+        _selectedAssignmentForDetail == assignment) {
       _detailOverlayEntry!.markNeedsBuild();
     }
+    _recordStateChange();
   }
 
-  void _removeEventFromAssignment(ActivityAssignmentModel assignment, ActivityEventModel event) {
+  void _removeEventFromAssignment(
+      ActivityAssignmentModel assignment, ActivityEventModel event) {
     assignment.events.removeWhere((e) => e.id == event.id);
-    setState(() {});
-    if (_detailOverlayEntry != null && _selectedAssignmentForDetail == assignment) {
+    if (_detailOverlayEntry != null &&
+        _selectedAssignmentForDetail == assignment) {
       _detailOverlayEntry!.markNeedsBuild();
     }
+    _recordStateChange();
   }
 
   void _hideAssignmentDetailOverlay() {
@@ -471,36 +789,18 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   void _deleteAssignment(ActivityAssignmentModel assignmentToDelete) {
     ActivityModel? targetActivity;
-    for (ActivityModel activity in _bundle?.activities ?? []) {
-      bool isMatch = (activity.id == assignmentToDelete.activityId);
-      if (assignmentToDelete.activityId == -1 && activity.id == null) {
-        isMatch = true;
-      }
-      if (isMatch) {
-        if (_activityAssignments.containsKey(activity)) {
-          targetActivity = activity;
-          break;
-        }
+    for (var entry in _activityAssignments.entries) {
+      if (entry.value.any((a) => a.id == assignmentToDelete.id)) {
+        targetActivity = entry.key;
+        break;
       }
     }
-
     if (targetActivity != null) {
-      setState(() {
-        final assignmentsForActivity = _activityAssignments[targetActivity]!;
-        assignmentsForActivity.removeWhere((assignment) {
-          bool startTimeMatch = (assignment.startTime == null && assignmentToDelete.startTime == null) ||
-              (assignment.startTime != null && assignmentToDelete.startTime != null && assignment.startTime!.isAtSameMomentAs(assignmentToDelete.startTime!));
-          bool endTimeMatch = (assignment.endTime == null && assignmentToDelete.endTime == null) ||
-              (assignment.endTime != null && assignmentToDelete.endTime != null && assignment.endTime!.isAtSameMomentAs(assignmentToDelete.endTime!));
-          return assignment.userInfo == assignmentToDelete.userInfo &&
-              startTimeMatch &&
-              endTimeMatch &&
-              assignment.activityId == assignmentToDelete.activityId &&
-              assignment.data?['isDragPreview'] != true;
-        });
-        _updateFilteredActivities();
-        _recalculateUserAssignedHours();
-      });
+      // Mutate state directly, without wrapping in setState
+      _activityAssignments[targetActivity]?.removeWhere((a) => a.id == assignmentToDelete.id);
+      _recalculateUserAssignedHours();
+      // Now call the method that triggers the rebuild
+      _recordStateChange();
     }
     _hideAssignmentDetailOverlay();
   }
@@ -508,29 +808,125 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   void _recalculateUserAssignedHours() {
     _userAssignedHours.clear();
     _activityAssignments.values.expand((list) => list).forEach((assignment) {
-      if (assignment.userInfo != null && assignment.startTime != null && assignment.endTime != null && assignment.data?['isDragPreview'] != true) {
+      if (assignment.userInfo != null &&
+          assignment.startTime != null &&
+          assignment.endTime != null &&
+          assignment.data?['isDragPreview'] != true) {
         final duration = assignment.endTime!.difference(assignment.startTime!);
-        _userAssignedHours.update(assignment.userInfo!, (value) => value + duration,
+        _userAssignedHours.update(
+            assignment.userInfo!, (value) => value + duration,
             ifAbsent: () => duration);
       }
     });
   }
 
+  Future<void> _showHistoryDialog() async {
+    // Fetch the latest publish ID *before* showing the dialog,
+    // so we have it ready for the restore operation.
+    final autosaveInfo = await DbActivities.getAutosaveAndPublishInfo(widget.occasionId);
+    final latestPublishId = autosaveInfo.latestPublishId;
+
+    final historyItems =
+    await DbActivities.listActivityHistory(widget.occasionId);
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final isDark = ActivityConstants.isDarkMode(ctx);
+        return AlertDialog(
+          title: Text(ActivitiesComponentStrings.dialogTitleVersionHistory),
+          backgroundColor: isDark ? Colors.grey[800] : Colors.white,
+          titleTextStyle:
+          TextStyle(color: isDark ? Colors.white : Colors.black),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              itemCount: historyItems.length,
+              itemBuilder: (context, index) {
+                final item = historyItems[index];
+                final isAutosave = item.historyType == 'AUTOSAVE';
+                final formattedDate =
+                DateFormat.yMMMd(context.locale.toString())
+                    .add_jms()
+                    .format(item.createdAt.toLocal());
+
+                final typeString = isAutosave
+                    ? ActivitiesComponentStrings.textAutosavedDraft
+                    : ActivitiesComponentStrings.textPublishedVersion;
+
+                // Define a unique icon and color based on the history type for clear visual differentiation.
+                final IconData versionIcon;
+                final Color versionColor;
+                if (isAutosave) {
+                  versionIcon = Icons.history_toggle_off; // Icon for an in-progress draft
+                  versionColor = isDark ? Colors.orange.shade300 : Colors.orange.shade700;
+                } else { // Published
+                  versionIcon = Icons.publish_outlined; // Icon for a finalized, published version
+                  versionColor = isDark ? Colors.green.shade300 : Colors.green.shade600;
+                }
+
+                return ListTile(
+                  // Add the leading icon to the list tile.
+                  leading: Icon(versionIcon, color: versionColor),
+                  title: Text(
+                    ActivitiesComponentStrings.historyLabel(typeString, item.userFullName),
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.white : Colors.black),
+                  ),
+                  subtitle: Text(
+                    formattedDate,
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white70 : Colors.black54),
+                  ),
+                  trailing: TextButton(
+                    child: Text(ActivitiesComponentStrings.buttonRestore),
+                    onPressed: () async {
+                      Navigator.of(ctx).pop(); // Close dialog
+                      final bundleToRestore =
+                      await DbActivities.getActivityHistoryVersion(
+                          widget.occasionId, item.id);
+
+                      if (bundleToRestore != null) {
+                        // Re-base the restored version on the CURRENT latest publish ID.
+                        bundleToRestore.parentHistoryId = latestPublishId;
+
+                        _processBundle(bundleToRestore,
+                            preservePanAndScale: true);
+                        _recordStateChange();
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(ActivitiesComponentStrings.buttonClose),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Widget _buildAssignmentDetailContent() {
     if (_selectedAssignmentForDetail == null) return const SizedBox.shrink();
     final assignment = _selectedAssignmentForDetail!;
-    final isDark = isDarkMode(context);
-
+    final isDark = ActivityConstants.isDarkMode(context);
     String formatTime(DateTime time) {
       return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     }
+
     final textColor = isDark ? Colors.white : Colors.black87;
     final chipTextColor = isDark ? Colors.white : Colors.black87;
-    final chipBackgroundColor = isDark ? Colors.grey[700] : Colors.blueGrey[200];
+    final chipBackgroundColor =
+        isDark ? Colors.grey[700] : Colors.blueGrey[200];
     final chipDeleteIconColor = isDark ? Colors.white70 : Colors.black54;
-
-
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setStateInPopup) {
         return Column(
@@ -545,28 +941,29 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     padding: const EdgeInsets.only(bottom: 4.0, right: 8.0),
                     child: Text(
                       assignment.user!.toFullNameString(),
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor),
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: textColor),
                     ),
                   ),
                 ),
                 SizedBox(
                   height: 24,
                   child: TextButton(
-                    onPressed: () {
-                      _deleteAssignment(assignment);
-                    },
+                    onPressed: () => _deleteAssignment(assignment),
                     style: TextButton.styleFrom(
                         foregroundColor: Colors.redAccent,
                         padding: EdgeInsets.zero,
                         minimumSize: Size(30, 20),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap
-                    ),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.delete_outline, size: 14),
                         SizedBox(width: 2),
-                        Text(ActivitiesComponentStrings.menuDelete, style: TextStyle(fontSize: 10)),
+                        Text(ActivitiesComponentStrings.menuDelete,
+                            style: TextStyle(fontSize: 10)),
                       ],
                     ),
                   ),
@@ -578,29 +975,45 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
                   '${formatTime(assignment.startTime!)} – ${formatTime(assignment.endTime!)}',
-                  style: TextStyle(fontSize: 12, color: textColor.withOpacity(0.8)),
+                  style: TextStyle(
+                      fontSize: 12, color: textColor.withOpacity(0.8)),
                 ),
               ),
             if (assignment.places.isNotEmpty) ...[
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 4.0),
-                child: Text(ActivitiesComponentStrings.labelPlaces, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: textColor)),
+                child: Text(ActivitiesComponentStrings.labelPlaces,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: textColor)),
               ),
               Wrap(
-                spacing: 6, runSpacing: 4,
-                children: assignment.places.map((place) => Chip(
-                  avatar: Icon(Icons.location_pin, size: 14, color: chipTextColor),
-                  label: Text(place.title ?? ActivitiesComponentStrings.textUnnamedPlace, style: TextStyle(color: chipTextColor, fontSize: 11)),
-                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  backgroundColor: chipBackgroundColor,
-                  onDeleted: () {
-                    _removePlaceFromAssignment(assignment, place);
-                    setStateInPopup(() {});
-                  },
-                  deleteIconColor: chipDeleteIconColor,
-                  deleteButtonTooltipMessage: ActivitiesComponentStrings.tooltipRemovePlace,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                )).toList(),
+                spacing: 6,
+                runSpacing: 4,
+                children: assignment.places
+                    .map((place) => Chip(
+                          avatar: Icon(Icons.location_pin,
+                              size: 14, color: chipTextColor),
+                          label: Text(
+                              place.title ??
+                                  ActivitiesComponentStrings.textUnnamedPlace,
+                              style: TextStyle(
+                                  color: chipTextColor, fontSize: 11)),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          backgroundColor: chipBackgroundColor,
+                          onDeleted: () {
+                            _removePlaceFromAssignment(assignment, place);
+                            setStateInPopup(() {});
+                          },
+                          deleteIconColor: chipDeleteIconColor,
+                          deleteButtonTooltipMessage:
+                              ActivitiesComponentStrings.tooltipRemovePlace,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ))
+                    .toList(),
               ),
             ],
             if (assignment.places.isNotEmpty && assignment.events.isNotEmpty)
@@ -608,30 +1021,49 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             if (assignment.events.isNotEmpty) ...[
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 4.0),
-                child: Text(ActivitiesComponentStrings.labelEvents, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: textColor)),
+                child: Text(ActivitiesComponentStrings.labelEvents,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: textColor)),
               ),
               Wrap(
-                spacing: 6, runSpacing: 4,
-                children: assignment.events.map((event) => Chip(
-                  avatar: Icon(Icons.event, size: 14, color: chipTextColor),
-                  label: Text(event.title ?? ActivitiesComponentStrings.textUnnamedEvent, style: TextStyle(color: chipTextColor, fontSize: 11)),
-                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  backgroundColor: isDark ? Colors.grey[600] : Colors.orange[200],
-                  onDeleted: () {
-                    _removeEventFromAssignment(assignment, event);
-                    setStateInPopup(() {});
-                  },
-                  deleteIconColor: chipDeleteIconColor,
-                  deleteButtonTooltipMessage: ActivitiesComponentStrings.tooltipRemoveEvent,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                )).toList(),
+                spacing: 6,
+                runSpacing: 4,
+                children: assignment.events
+                    .map((event) => Chip(
+                          avatar:
+                              Icon(Icons.event, size: 14, color: chipTextColor),
+                          label: Text(
+                              event.title ??
+                                  ActivitiesComponentStrings.textUnnamedEvent,
+                              style: TextStyle(
+                                  color: chipTextColor, fontSize: 11)),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          backgroundColor:
+                              isDark ? Colors.grey[600] : Colors.orange[200],
+                          onDeleted: () {
+                            _removeEventFromAssignment(assignment, event);
+                            setStateInPopup(() {});
+                          },
+                          deleteIconColor: chipDeleteIconColor,
+                          deleteButtonTooltipMessage:
+                              ActivitiesComponentStrings.tooltipRemoveEvent,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ))
+                    .toList(),
               ),
             ],
-            if ((assignment.places.isEmpty) &&
-                (assignment.events.isEmpty))
+            if ((assignment.places.isEmpty) && (assignment.events.isEmpty))
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(ActivitiesComponentStrings.textNoItemsAssigned, style: TextStyle(fontStyle: FontStyle.italic, color: textColor.withOpacity(0.6), fontSize: 11)),
+                child: Text(ActivitiesComponentStrings.textNoItemsAssigned,
+                    style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: textColor.withOpacity(0.6),
+                        fontSize: 11)),
               ),
           ],
         );
@@ -639,76 +1071,65 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     );
   }
 
-  void _showAssignmentDetailOverlay(ActivityAssignmentModel assignment, LayerLink layerLink) {
+// In _ActivitiesContentState class
+
+  void _showAssignmentDetailOverlay(ActivityAssignmentModel assignment, Offset globalTapPosition) {
     _hideAssignmentDetailOverlay();
     _selectedAssignmentForDetail = assignment;
-    _selectedAssignmentLayerLink = layerLink;
-    final isDark = isDarkMode(context);
+    final isDark = ActivityConstants.isDarkMode(context);
+
+    // Use the root overlay
+    final overlay = Overlay.of(context);
+    final screenSize = MediaQuery.of(context).size;
+
+    // Correct coordinate mapping for nested scrollviews or tabviews
+    final RenderBox overlayRenderBox = overlay.context.findRenderObject() as RenderBox;
+    final Offset localTapPosition = overlayRenderBox.globalToLocal(globalTapPosition);
+    var realHeightAddition = ActivityConstants.realHeightAddition;
 
     _detailOverlayEntry = OverlayEntry(
-      builder: (overlayContext) {
-        final MediaQueryData mediaQueryData = MediaQuery.of(overlayContext);
-        final screenHeight = mediaQueryData.size.height;
-        final popupWidth = 280.0;
+      builder: (context) {
+        double left = localTapPosition.dx + 15;
+        double top = localTapPosition.dy + 15;
+        const double popupWidth = 280.0;
+        const double popupMaxHeight = 350.0;
 
-        double estimatedContentHeight = 30.0;
-        estimatedContentHeight += 20.0;
-        final double chipHeight = 35.0;
-        final double sectionHeaderHeight = 20.0;
-
-        if (assignment.places.isNotEmpty) {
-          estimatedContentHeight += sectionHeaderHeight;
-          estimatedContentHeight += (assignment.places.length / 2).ceil() * chipHeight;
+        // Prevent the popup from rendering off the right side of the screen
+        if (left + popupWidth > screenSize.width) {
+          left = screenSize.width - popupWidth - 10;
         }
-        if (assignment.events.isNotEmpty) {
-          estimatedContentHeight += sectionHeaderHeight;
-          estimatedContentHeight += (assignment.events.length / 2).ceil() * chipHeight;
-        }
-        if ((assignment.places.isEmpty) &&
-            (assignment.events.isEmpty)) {
-          estimatedContentHeight += 30;
-        }
-        estimatedContentHeight += 24.0;
 
-        final popupMaxHeight = screenHeight * 0.6;
-        final actualPopupHeight = estimatedContentHeight.clamp(80.0, popupMaxHeight);
-
-        Alignment followerAnchor = Alignment.topLeft;
-        Alignment targetAnchor = Alignment.topRight;
-        Offset offset = const Offset(10, 0);
-
-        try {
-          _selectedAssignmentLayerLink!.leader!.offset;
-        } catch (e) {
-          // Could not get leader offset
+        // Prevent the popup from rendering off the bottom of the screen
+        if (top + popupMaxHeight > screenSize.height + realHeightAddition) {
+          top = (screenSize.height + realHeightAddition) - popupMaxHeight - 10;
         }
+
+        // Prevent rendering off the left or top edges
+        if (left < 10) left = 10;
+        if (top < 10) top = 10;
 
         return Stack(
           children: [
             Positioned.fill(
-                child: GestureDetector(
-                    onTap: _hideAssignmentDetailOverlay,
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(color: Colors.transparent))),
-            CompositedTransformFollower(
-              link: _selectedAssignmentLayerLink!,
-              showWhenUnlinked: false,
-              offset: offset,
-              followerAnchor: followerAnchor,
-              targetAnchor: targetAnchor,
-              child: Align(
-                alignment: followerAnchor,
-                child: Container(
-                  width: popupWidth,
-                  constraints: BoxConstraints(maxHeight: actualPopupHeight),
-                  child: Material(
-                    elevation: 2.0,
-                    color: isDark ? Colors.grey[850] : Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(12.0),
-                      child: _buildAssignmentDetailContent(),
-                    ),
+              child: GestureDetector(
+                onTap: _hideAssignmentDetailOverlay,
+                behavior: HitTestBehavior.opaque,
+                child: Container(color: Colors.transparent),
+              ),
+            ),
+            Positioned(
+              left: left,
+              top: top,
+              child: Container(
+                width: popupWidth,
+                constraints: const BoxConstraints(maxHeight: popupMaxHeight),
+                child: Material(
+                  elevation: 4.0,
+                  color: isDark ? Colors.grey[850] : Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(12.0),
+                    child: _buildAssignmentDetailContent(),
                   ),
                 ),
               ),
@@ -717,7 +1138,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         );
       },
     );
-    Overlay.of(context).insert(_detailOverlayEntry!);
+
+    overlay.insert(_detailOverlayEntry!);
   }
 
   void _updateFilteredActivities() {
@@ -728,28 +1150,33 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (_globalTimelineFilter.isEmpty) {
       _filteredActivities = List.from(_bundle!.activities!);
     } else {
-      final normalizedFilter = Utilities.removeDiacritics(_globalTimelineFilter.toLowerCase());
+      final normalizedFilter =
+          Utilities.removeDiacritics(_globalTimelineFilter.toLowerCase());
       if (normalizedFilter.isEmpty) {
         _filteredActivities = List.from(_bundle!.activities!);
       } else {
         _filteredActivities = _bundle!.activities!.where((activity) {
-          if (Utilities.removeDiacritics(activity.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
+          if (Utilities.removeDiacritics(activity.title?.toLowerCase() ?? "")
+              .contains(normalizedFilter)) {
             return true;
           }
           final assignmentsForActivity = _activityAssignments[activity] ?? [];
           for (var assignment in assignmentsForActivity) {
             if (assignment.data?['isDragPreview'] == true) continue;
-
-            if (Utilities.removeDiacritics(assignment.user?.toFullNameString().toLowerCase() ?? "").contains(normalizedFilter)) {
+            if (Utilities.removeDiacritics(
+                    assignment.user?.toFullNameString().toLowerCase() ?? "")
+                .contains(normalizedFilter)) {
               return true;
             }
             for (var place in assignment.places) {
-              if (Utilities.removeDiacritics(place.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
+              if (Utilities.removeDiacritics(place.title?.toLowerCase() ?? "")
+                  .contains(normalizedFilter)) {
                 return true;
               }
             }
             for (var event in assignment.events) {
-              if (Utilities.removeDiacritics(event.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
+              if (Utilities.removeDiacritics(event.title?.toLowerCase() ?? "")
+                  .contains(normalizedFilter)) {
                 return true;
               }
             }
@@ -762,8 +1189,27 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   KeyEventResult _handleKeyEvent(KeyEvent event) {
     if (event is KeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.delete && _selectedActivities.isNotEmpty) {
-        _deleteSelectedActivities(); return KeyEventResult.handled;
+      final isControl = HardwareKeyboard.instance.isControlPressed;
+      final isMeta = HardwareKeyboard.instance.isMetaPressed;
+      final isShift = HardwareKeyboard.instance.isShiftPressed;
+      if ((isControl || isMeta) &&
+          event.logicalKey == LogicalKeyboardKey.keyZ) {
+        if (isShift) {
+          _redo();
+        } else {
+          _undo();
+        }
+        return KeyEventResult.handled;
+      }
+      if ((isControl && event.logicalKey == LogicalKeyboardKey.keyY) ||
+          (isMeta && isShift && event.logicalKey == LogicalKeyboardKey.keyZ)) {
+        _redo();
+        return KeyEventResult.handled;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.delete &&
+          _selectedActivities.isNotEmpty) {
+        _deleteSelectedActivities();
+        return KeyEventResult.handled;
       } else if (event.logicalKey == LogicalKeyboardKey.escape) {
         if (_detailOverlayEntry != null) {
           _hideAssignmentDetailOverlay();
@@ -779,7 +1225,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     return KeyEventResult.ignored;
   }
 
-  // Callbacks for UserPanel Draggable, to be passed to the controller
   void _handleUserDragStarted(ActivityUserInfoModel user) {
     _hideAssignmentDetailOverlay();
     setState(() => _currentlyDraggedUser = user);
@@ -793,7 +1238,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
   }
 
-  // New method to show the HTML editor for an activity's description
   void _showActivityDescriptionEditor(ActivityModel activity) {
     RouterService.navigatePageInfo(
       context,
@@ -805,10 +1249,11 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         occasionId: widget.occasionId,
       ),
     ).then((value) {
-      if (value != null && value is String) {
+      if (value != null && value is String && value != activity.description) {
         setState(() {
           activity.description = value;
         });
+        _recordStateChange();
       }
     });
   }
@@ -818,9 +1263,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (_bundle == null || _timelineStart == null || _timelineEnd == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    final isDarkTheme = isDarkMode(context);
-
-    // Create the controller instance
+    final isDarkTheme = ActivityConstants.isDarkMode(context);
     final timelineController = ActivityTimelineController(
       allUsers: _allUsers,
       allPlaces: _allPlaces,
@@ -837,9 +1280,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       hideAssignmentDetailOverlay: _hideAssignmentDetailOverlay,
       isDark: isDarkTheme,
     );
-
     Widget mainContent;
-
     if (_isTimelineFullscreen) {
       mainContent = Column(
         children: [
@@ -865,7 +1306,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       return PlacesPanel(controller: timelineController);
                     case 'events':
                       return EventsPanel(controller: timelineController);
-                    default: return const SizedBox();
+                    default:
+                      return const SizedBox();
                   }
                 });
           } else {
@@ -874,11 +1316,12 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         },
       );
     }
-
     return Focus(
       autofocus: true,
       onKeyEvent: (_, KeyEvent event) {
-        final bool newModifierState = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
+        final bool newModifierState =
+            HardwareKeyboard.instance.isControlPressed ||
+                HardwareKeyboard.instance.isMetaPressed;
         if (_isModifierKeyPressedForScroll != newModifierState) {
           setState(() {
             _isModifierKeyPressedForScroll = newModifierState;
@@ -892,25 +1335,25 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             dividerPainter: _isTimelineFullscreen
                 ? null
                 : DividerPainters.background(
-                color: isDarkTheme ? Colors.black54 : Colors.black12,
-                highlightedColor: isDarkTheme ? Colors.black87 : Colors.black38)),
+                    color: isDarkTheme ? Colors.black54 : Colors.black12,
+                    highlightedColor:
+                        isDarkTheme ? Colors.black87 : Colors.black38)),
         child: mainContent,
       ),
     );
   }
 
-  // _buildUsersPanel, _buildPlacesPanel, _buildEventsPanel are REMOVED.
-  // Their logic is now in users_panel.dart, places_panel.dart, events_panel.dart respectively.
-
   Widget _buildTimelineArea() {
-    final isDark = isDarkMode(context); // Keep local isDark for timeline specific parts
+    final isDark = ActivityConstants.isDarkMode(context);
     return LayoutBuilder(builder: (ctx, constraints) {
-      if (_currentViewportWidth != constraints.maxWidth && constraints.maxWidth > 0) {
+      if (_currentViewportWidth != constraints.maxWidth &&
+          constraints.maxWidth > 0) {
         Future.microtask(() {
           if (mounted) {
             final oldWidth = _currentViewportWidth;
             _currentViewportWidth = constraints.maxWidth;
-            if (oldWidth == 0 && _panOffset == kInitialPanOffset) {
+            if (oldWidth == 0 &&
+                _panOffset == ActivityConstants.kInitialPanOffset) {
               _performInitialTimelineScroll();
             }
           }
@@ -918,12 +1361,26 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       }
       final vpWidth = _currentViewportWidth;
       if (vpWidth <= 0) return const SizedBox.shrink();
-
-
-      final totalSec = _timelineStart != null && _timelineEnd != null ? _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble() : 0.0;
+      final totalSec = _timelineStart != null && _timelineEnd != null
+          ? _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble()
+          : 0.0;
       final pps = _basePps * _scale;
       final timelineWidth = totalSec * pps;
-      final bool isScrollable = timelineWidth > (vpWidth - kTimelineLabelWidth);
+      final bool isScrollable =
+          timelineWidth > (vpWidth - ActivityConstants.kTimelineLabelWidth);
+
+      // Logic to determine button state and tooltip message
+      final bool canPublish =
+          (_historyHelper.changesCount > 0 || _isAutosaveLoaded) &&
+              !_isPublishing;
+      String publishTooltip;
+      if (_isPublishing) {
+        publishTooltip = ActivitiesComponentStrings.textPublishing;
+      } else if (canPublish) {
+        publishTooltip = ActivitiesComponentStrings.tooltipClickToPublish;
+      } else {
+        publishTooltip = ActivitiesComponentStrings.textEverythingIsPublished;
+      }
 
       return GestureDetector(
         onTap: _hideAssignmentDetailOverlay,
@@ -937,7 +1394,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         onHorizontalDragUpdate: (d) {
           final dx = d.globalPosition.dx - _gestureDragStartX;
           double newPanOffsetValue = (_gesturePanOffsetStart + dx).clamp(
-              (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
+              (vpWidth -
+                  (ActivityConstants.kTimelineLabelWidth + timelineWidth))
+                  .clamp(double.negativeInfinity, 0.0),
               0.0);
           _currentPanOffsetNotifier.value = newPanOffsetValue;
         },
@@ -945,11 +1404,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           if (d.primaryVelocity != null && d.primaryVelocity!.abs() > 100) {
             final double start = _currentPanOffsetNotifier.value;
             final double end = (start + d.primaryVelocity! * 0.1).clamp(
-                (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
-                0.0
-            );
+                (vpWidth -
+                    (ActivityConstants.kTimelineLabelWidth + timelineWidth))
+                    .clamp(double.negativeInfinity, 0.0),
+                0.0);
             _animationX = Tween<double>(begin: start, end: end).animate(
-                CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
+                CurvedAnimation(
+                    parent: _animationController, curve: Curves.easeOutQuad));
             _animationController.reset();
             _animationController.forward();
           }
@@ -958,7 +1419,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         child: Listener(
           onPointerSignal: (pointerSignal) {
             if (pointerSignal is PointerScrollEvent) {
-              final bool canZoom = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
+              final bool canZoom = HardwareKeyboard.instance.isControlPressed ||
+                  HardwareKeyboard.instance.isMetaPressed;
               if (canZoom) {
                 _hideAssignmentDetailOverlay();
                 if (pointerSignal.scrollDelta.dy < 0) {
@@ -968,10 +1430,14 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 }
               } else {
                 _animationController.stop();
-                double newPanOffsetValue = (_currentPanOffsetNotifier.value - pointerSignal.scrollDelta.dx).clamp(
-                    (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
-                    0.0
-                );
+                double newPanOffsetValue = (_currentPanOffsetNotifier.value -
+                    pointerSignal.scrollDelta.dx)
+                    .clamp(
+                    (vpWidth -
+                        (ActivityConstants.kTimelineLabelWidth +
+                            timelineWidth))
+                        .clamp(double.negativeInfinity, 0.0),
+                    0.0);
                 _currentPanOffsetNotifier.value = newPanOffsetValue;
                 _panOffset = newPanOffsetValue;
               }
@@ -979,7 +1445,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           },
           child: Column(children: [
             Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top:8.0, bottom: 4.0),
+              padding: const EdgeInsets.only(
+                  left: 16.0, right: 16.0, top: 8.0, bottom: 4.0),
               child: Row(
                 children: [
                   if (!_isTimelineFullscreen)
@@ -994,39 +1461,101 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     ),
                   if (!_isTimelineFullscreen) const SizedBox(width: 10),
                   Expanded(
-                    child: Text(ActivitiesComponentStrings.titleActivitiesTimeline, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: isDark ? Colors.white : Colors.black87)),
+                    child: Text(
+                        ActivitiesComponentStrings.titleActivitiesTimeline,
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87)),
+                  ),
+                  AnimatedOpacity(
+                    opacity: _justAutosaved ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 500),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle_outline,
+                              size: 12, color: Colors.green),
+                          SizedBox(width: 6),
+                          Text(ActivitiesComponentStrings.textAutosaved,
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontStyle: FontStyle.italic,
+                                  color:
+                                  isDark ? Colors.white54 : Colors.black54))
+                        ],
+                      ),
+                    ),
                   ),
                   if (!_isTimelineFullscreen)
-                    ElevatedButton.icon(
-                      icon: Icon(Icons.save_outlined, size: 14),
-                      label: Text(ActivitiesComponentStrings.buttonSave, style: TextStyle(fontSize: 11)),
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          foregroundColor: isDarkMode(context) ? Colors.black : Colors.white, // Use isDarkMode(context) here for button theme
-                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          minimumSize: Size(60, 30)
-                      ),
-                      onPressed: () async {
-                        _bundle!.activities ??= [];
-                        for (var activityInBundle in _bundle!.activities!) {
-                          List<ActivityAssignmentModel>? assignmentsForThisActivity = _activityAssignments[activityInBundle];
-                          if (assignmentsForThisActivity != null) {
-                            activityInBundle.assignments = assignmentsForThisActivity
-                                .where((assign) => assign.data?['isDragPreview'] != true)
-                                .toList();
-                          } else {
-                            activityInBundle.assignments = [];
+                    Tooltip(
+                      message: publishTooltip,
+                      child: ElevatedButton.icon(
+                        icon: _isPublishing
+                            ? SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color:
+                                isDark ? Colors.black : Colors.white))
+                            : Icon(Icons.publish_outlined, size: 14),
+                        label: Text(ActivitiesComponentStrings.buttonPublish,
+                            style: TextStyle(fontSize: 11)),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor:
+                            ActivityConstants.isDarkMode(context)
+                                ? Colors.black
+                                : Colors.white,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            minimumSize: Size(60, 30)),
+                        onPressed: canPublish
+                            ? () async {
+                          // Cancel any pending autosave operation to prevent race conditions.
+                          _autosaveDebounce?.cancel();
+
+                          setState(() => _isPublishing = true);
+                          _bundle!.activities ??= [];
+                          for (var activityInBundle
+                          in _bundle!.activities!) {
+                            List<ActivityAssignmentModel>?
+                            assignmentsForThisActivity =
+                            _activityAssignments[activityInBundle];
+                            if (assignmentsForThisActivity != null) {
+                              activityInBundle.assignments =
+                                  assignmentsForThisActivity
+                                      .where((assign) =>
+                                  assign.data?['isDragPreview'] !=
+                                      true)
+                                      .toList();
+                            } else {
+                              activityInBundle.assignments = [];
+                            }
+                          }
+                          try {
+                            await DbActivities.saveActivitiesForEdit(
+                                context, widget.occasionId, _bundle!);
+                            await DbActivities.deleteAutosave(
+                                widget.occasionId);
+                            _isAutosaveLoaded = false;
+                            await _loadData(
+                                initialPanOffset: _panOffset,
+                                initialScale: _scale);
+                          } catch (e) {
+                            print(
+                                "Error publishing activities from UI: $e");
+                          } finally {
+                            if (mounted) {
+                              setState(() => _isPublishing = false);
+                            }
                           }
                         }
-                        try {
-                          await DbActivities.saveActivitiesForEdit(context, widget.occasionId, _bundle!);
-                          // Pass current pan and scale to reloadData
-                          _loadData(initialPanOffset: _panOffset, initialScale: _scale);
-                        } catch (e) {
-                          print("Error saving activities from UI: $e");
-                        }
-                      },
+                            : null,
+                      ),
                     ),
                 ],
               ),
@@ -1037,28 +1566,47 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 Expanded(
                   child: TextField(
                     controller: _globalFilterController,
-                    style: TextStyle(fontSize: 12, color: isDark ? Colors.white : Colors.black),
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white : Colors.black),
                     decoration: InputDecoration(
                       hintText: ActivitiesComponentStrings.hintGlobalFilter,
-                      hintStyle: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.black54),
+                      hintStyle: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white54 : Colors.black54),
                       isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
-                      prefixIcon: Icon(Icons.search, size: 14, color: isDark ? Colors.white54 : Colors.black54),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 6.0, horizontal: 8.0),
+                      prefixIcon: Icon(Icons.search,
+                          size: 14,
+                          color: isDark ? Colors.white54 : Colors.black54),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: isDark ? Colors.grey.shade700 : Colors.grey.shade400, width: 0.5),
+                        borderSide: BorderSide(
+                            color: isDark
+                                ? Colors.grey.shade700
+                                : Colors.grey.shade400,
+                            width: 0.5),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: isDark ? Colors.grey.shade700 : Colors.grey.shade400, width: 0.5),
+                        borderSide: BorderSide(
+                            color: isDark
+                                ? Colors.grey.shade700
+                                : Colors.grey.shade400,
+                            width: 0.5),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1),
+                        borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor, width: 1),
                       ),
                       suffixIcon: _globalTimelineFilter.isNotEmpty
                           ? IconButton(
-                        icon: Icon(Icons.clear, size: 14, color: isDark ? Colors.white54 : Colors.black54),
+                        icon: Icon(Icons.clear,
+                            size: 14,
+                            color:
+                            isDark ? Colors.white54 : Colors.black54),
                         padding: EdgeInsets.zero,
                         constraints: BoxConstraints(),
                         onPressed: () {
@@ -1071,48 +1619,106 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 ),
                 const SizedBox(width: 10),
                 IconButton(
-                  icon: Icon(_isTimelineFullscreen ? Icons.fullscreen_exit : Icons.fullscreen),
+                  icon: Icon(_isTimelineFullscreen
+                      ? Icons.fullscreen_exit
+                      : Icons.fullscreen),
                   iconSize: 20,
+                  splashRadius: 20,
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(minWidth: 36, minHeight: 36),
-                  tooltip: _isTimelineFullscreen ? ActivitiesComponentStrings.tooltipExitFullscreen : ActivitiesComponentStrings.tooltipEnterFullscreen,
+                  tooltip: _isTimelineFullscreen
+                      ? ActivitiesComponentStrings.tooltipExitFullscreen
+                      : ActivitiesComponentStrings.tooltipEnterFullscreen,
                   color: isDark ? Colors.white70 : Colors.black54,
                   onPressed: () {
                     setState(() {
                       _isTimelineFullscreen = !_isTimelineFullscreen;
-                      if (!_isTimelineFullscreen && _mainController.areas.first.size != 160) {
+                      if (!_isTimelineFullscreen &&
+                          _mainController.areas.first.size != 160) {
                         _mainController.areas.first.size = 160;
                       }
                     });
                   },
                 ),
-                IconButton(icon: const Icon(Icons.zoom_in), iconSize: 20, padding: EdgeInsets.zero, constraints: BoxConstraints(minWidth: 36, minHeight: 36), onPressed: () => _zoomIn(vpWidth, totalSec), color: isDark ? Colors.white70 : Colors.black54),
-                IconButton(icon: const Icon(Icons.zoom_out), iconSize: 20, padding: EdgeInsets.zero, constraints: BoxConstraints(minWidth: 36, minHeight: 36), onPressed: () => _zoomOut(vpWidth, totalSec), color: isDark ? Colors.white70 : Colors.black54),
+                IconButton(
+                    icon: const Icon(Icons.history),
+                    tooltip: ActivitiesComponentStrings.tooltipVersionHistory,
+                    splashRadius: 20,
+                    iconSize: 20,
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                    onPressed: _showHistoryDialog,
+                    color: isDark ? Colors.white70 : Colors.black54),
+                IconButton(
+                    icon: const Icon(Icons.undo),
+                    tooltip: ActivitiesComponentStrings.tooltipUndo,
+                    splashRadius: 20,
+                    iconSize: 20,
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                    onPressed: _historyHelper.canUndo ? _undo : null,
+                    color: isDark ? Colors.white70 : Colors.black54),
+                IconButton(
+                    icon: const Icon(Icons.redo),
+                    tooltip: ActivitiesComponentStrings.tooltipRedo,
+                    splashRadius: 20,
+                    iconSize: 20,
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                    onPressed: _historyHelper.canRedo ? _redo : null,
+                    color: isDark ? Colors.white70 : Colors.black54),
+                IconButton(
+                    icon: const Icon(Icons.zoom_in),
+                    tooltip: ActivitiesComponentStrings.tooltipZoomIn,
+                    splashRadius: 20,
+                    iconSize: 20,
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                    onPressed: () => _zoomIn(vpWidth, totalSec),
+                    color: isDark ? Colors.white70 : Colors.black54),
+                IconButton(
+                    icon: const Icon(Icons.zoom_out),
+                    tooltip: ActivitiesComponentStrings.tooltipZoomOut,
+                    splashRadius: 20,
+                    iconSize: 20,
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                    onPressed: () => _zoomOut(vpWidth, totalSec),
+                    color: isDark ? Colors.white70 : Colors.black54),
               ]),
             ),
             ValueListenableBuilder<double>(
                 valueListenable: _currentPanOffsetNotifier,
                 builder: (context, currentPanOffsetValue, child) {
                   return SizedBox(
-                    height: kTotalTimelineRulerHeightConstant,
+                    height: ActivityConstants.kTotalTimelineRulerHeightConstant,
                     child: Row(children: [
-                      SizedBox(width: kTimelineLabelWidth),
+                      SizedBox(width: ActivityConstants.kTimelineLabelWidth),
                       Expanded(
                         child: ClipRect(
                           child: Transform.translate(
                             offset: Offset(currentPanOffsetValue, 0),
                             child: RepaintBoundary(
                               child: CustomPaint(
-                                size: Size(timelineWidth, kTotalTimelineRulerHeightConstant),
+                                size: Size(
+                                    timelineWidth,
+                                    ActivityConstants
+                                        .kTotalTimelineRulerHeightConstant),
                                 painter: TimelinePainter(
                                   start: _timelineStart!,
                                   end: _timelineEnd!,
                                   pps: pps,
                                   isDarkMode: isDark,
-                                  weekdays: ActivitiesComponentStrings.getWeekdayAbbreviations(context.locale.languageCode),
-                                  monthAbbreviations: ActivitiesComponentStrings.getMonthAbbreviations(context.locale.languageCode),
-                                  dateHeaderHeight: kDateHeaderHeightConstant,
-                                  timeTickAreaHeight: kTimeTickAreaHeightConstant,
+                                  weekdays: ActivitiesComponentStrings
+                                      .getWeekdayAbbreviations(
+                                      context.locale.languageCode),
+                                  monthAbbreviations: ActivitiesComponentStrings
+                                      .getMonthAbbreviations(
+                                      context.locale.languageCode),
+                                  dateHeaderHeight: ActivityConstants
+                                      .kDateHeaderHeightConstant,
+                                  timeTickAreaHeight: ActivityConstants
+                                      .kTimeTickAreaHeightConstant,
                                 ),
                               ),
                             ),
@@ -1121,18 +1727,22 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       ),
                     ]),
                   );
-                }
-            ),
+                }),
             Expanded(
               child: Container(
                 color: isDark ? Colors.grey[900] : Colors.white,
-                child: _filteredActivities.isEmpty && _globalTimelineFilter.isNotEmpty
+                child: _filteredActivities.isEmpty &&
+                    _globalTimelineFilter.isNotEmpty
                     ? Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
                       ActivitiesComponentStrings.textNoFilterMatch,
-                      style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 14),
+                      style: TextStyle(
+                          color: isDark
+                              ? Colors.grey[400]
+                              : Colors.grey[600],
+                          fontSize: 14),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -1142,94 +1752,140 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      ActivitiesComponentStrings.textNoActivitiesAvailable +
-                          (!_isTimelineFullscreen ? " ${ActivitiesComponentStrings.textClickPlusToAddOne}" : ""),
-                      style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 14),
+                      ActivitiesComponentStrings
+                          .textNoActivitiesAvailable +
+                          (!_isTimelineFullscreen
+                              ? " ${ActivitiesComponentStrings.textClickPlusToAddOne}"
+                              : ""),
+                      style: TextStyle(
+                          color: isDark
+                              ? Colors.grey[400]
+                              : Colors.grey[600],
+                          fontSize: 14),
                       textAlign: TextAlign.center,
                     ),
                   ),
                 )
                     : ReorderableListView.builder(
-                  physics: _isModifierKeyPressedForScroll ? NeverScrollableScrollPhysics() : null,
+                  physics: _isModifierKeyPressedForScroll
+                      ? NeverScrollableScrollPhysics()
+                      : null,
                   buildDefaultDragHandles: false,
                   itemCount: _filteredActivities.length,
-                  onReorderStart: (_) => _hideAssignmentDetailOverlay(),
+                  onReorderStart: (_) =>
+                      _hideAssignmentDetailOverlay(),
                   onReorder: (oldI, newI) {
                     _hideAssignmentDetailOverlay();
                     setState(() {
                       final itemToMove = _filteredActivities[oldI];
                       final originalList = _bundle!.activities!;
-                      int originalIndexOld = originalList.indexOf(itemToMove);
-
+                      int originalIndexOld =
+                      originalList.indexOf(itemToMove);
                       if (originalIndexOld == -1) return;
-
                       int targetOriginalIndexInAllActivities;
                       if (newI >= _filteredActivities.length) {
                         if (_filteredActivities.isNotEmpty) {
-                          final lastFilteredItem = _filteredActivities.last;
-                          targetOriginalIndexInAllActivities = originalList.indexOf(lastFilteredItem) + 1;
+                          final lastFilteredItem =
+                              _filteredActivities.last;
+                          targetOriginalIndexInAllActivities =
+                              originalList.indexOf(lastFilteredItem) +
+                                  1;
                         } else {
-                          targetOriginalIndexInAllActivities = originalList.length;
+                          targetOriginalIndexInAllActivities =
+                              originalList.length;
                         }
                       } else {
-                        final itemAtNewFilteredPosition = _filteredActivities[newI];
-                        targetOriginalIndexInAllActivities = originalList.indexOf(itemAtNewFilteredPosition);
+                        if (newI > oldI) newI--;
+                        final itemAtNewFilteredPosition =
+                        _filteredActivities[newI];
+                        targetOriginalIndexInAllActivities =
+                            originalList
+                                .indexOf(itemAtNewFilteredPosition);
                       }
-
-                      if (targetOriginalIndexInAllActivities == -1) {
-                        targetOriginalIndexInAllActivities = (newI > oldI) ? originalList.length : 0;
+                      final item =
+                      originalList.removeAt(originalIndexOld);
+                      if (targetOriginalIndexInAllActivities >
+                          originalList.length) {
+                        targetOriginalIndexInAllActivities =
+                            originalList.length;
                       }
-
-                      final item = originalList.removeAt(originalIndexOld);
-                      if (targetOriginalIndexInAllActivities > originalIndexOld && targetOriginalIndexInAllActivities > 0) {
-                        originalList.insert(targetOriginalIndexInAllActivities -1, item);
-                      } else {
-                        originalList.insert(targetOriginalIndexInAllActivities.clamp(0, originalList.length), item);
+                      originalList.insert(
+                          targetOriginalIndexInAllActivities, item);
+                      for (var i = 0; i < originalList.length; i++) {
+                        originalList[i].order = i;
                       }
-
-                      for (var i = 0; i < originalList.length; i++) originalList[i].order = i;
                       _updateFilteredActivities();
+                      _recordStateChange();
                     });
                   },
-                  itemBuilder: (context, index) => _buildActivityWithAssignments(_filteredActivities[index], timelineWidth, vpWidth, index),
+                  itemBuilder: (context, index) =>
+                      _buildActivityWithAssignments(
+                          _filteredActivities[index],
+                          timelineWidth,
+                          vpWidth,
+                          index),
                 ),
               ),
             ),
             if (isScrollable)
               Container(
                 height: 10,
-                margin: EdgeInsets.only(left: kTimelineLabelWidth + 2, right: 2, top: 4, bottom: 2),
+                margin: EdgeInsets.only(
+                    left: ActivityConstants.kTimelineLabelWidth + 2,
+                    right: 2,
+                    top: 4,
+                    bottom: 2),
                 child: LayoutBuilder(
                   builder: (context, scrollbarConstraints) {
                     final double trackWidth = scrollbarConstraints.maxWidth;
-                    final double visibleContentWidth = vpWidth - kTimelineLabelWidth;
-                    final double contentRatio = timelineWidth > 0 ? visibleContentWidth / timelineWidth : 1.0;
-                    final double thumbWidth = (trackWidth * contentRatio).clamp(20.0, trackWidth);
-
-                    final double maxScrollableTrackWidth = trackWidth - thumbWidth;
-                    final double maxTimelineScrollOffset = timelineWidth - visibleContentWidth;
-
+                    final double visibleContentWidth =
+                        vpWidth - ActivityConstants.kTimelineLabelWidth;
+                    final double contentRatio = timelineWidth > 0
+                        ? visibleContentWidth / timelineWidth
+                        : 1.0;
+                    final double thumbWidth =
+                    (trackWidth * contentRatio).clamp(20.0, trackWidth);
+                    final double maxScrollableTrackWidth =
+                        trackWidth - thumbWidth;
+                    final double maxTimelineScrollOffset =
+                        timelineWidth - visibleContentWidth;
                     return ValueListenableBuilder<double>(
                       valueListenable: _currentPanOffsetNotifier,
-                      builder: (context, currentPanOffsetValue, gestureDetectorChild){
-                        final double currentTimelineScrollOffset = -currentPanOffsetValue;
-                        final double thumbPosition = maxScrollableTrackWidth > 0 && maxTimelineScrollOffset > 0
-                            ? (currentTimelineScrollOffset / maxTimelineScrollOffset) * maxScrollableTrackWidth
+                      builder: (context, currentPanOffsetValue,
+                          gestureDetectorChild) {
+                        final double currentTimelineScrollOffset =
+                        -currentPanOffsetValue;
+                        final double thumbPosition =
+                        maxScrollableTrackWidth > 0 &&
+                            maxTimelineScrollOffset > 0
+                            ? (currentTimelineScrollOffset /
+                            maxTimelineScrollOffset) *
+                            maxScrollableTrackWidth
                             : 0.0;
-
                         return Container(
                           width: trackWidth,
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.grey.shade700.withOpacity(0.7) : Colors.grey.shade300.withOpacity(0.7),
+                            color: isDark
+                                ? Colors.grey.shade700.withOpacity(0.7)
+                                : Colors.grey.shade300.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(5),
                           ),
                           child: Stack(
                             children: [
                               Positioned(
-                                left: (thumbPosition.isNaN || thumbPosition.isInfinite ? 0 : thumbPosition).clamp(0.0, maxScrollableTrackWidth).toDouble(),
+                                left: (thumbPosition.isNaN ||
+                                    thumbPosition.isInfinite
+                                    ? 0
+                                    : thumbPosition)
+                                    .clamp(0.0, maxScrollableTrackWidth)
+                                    .toDouble(),
                                 top: 0,
                                 bottom: 0,
-                                width: (thumbWidth.isNaN || thumbWidth.isInfinite ? trackWidth : thumbWidth).clamp(0.0, trackWidth),
+                                width:
+                                (thumbWidth.isNaN || thumbWidth.isInfinite
+                                    ? trackWidth
+                                    : thumbWidth)
+                                    .clamp(0.0, trackWidth),
                                 child: gestureDetectorChild!,
                               ),
                             ],
@@ -1238,20 +1894,31 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       },
                       child: GestureDetector(
                         onHorizontalDragStart: (details) {
-                          _scrollbarGestureDragStartX = details.globalPosition.dx;
-                          _scrollbarGesturePanOffsetStartValue = _currentPanOffsetNotifier.value;
+                          _scrollbarGestureDragStartX =
+                              details.globalPosition.dx;
+                          _scrollbarGesturePanOffsetStartValue =
+                              _currentPanOffsetNotifier.value;
                         },
                         onHorizontalDragUpdate: (details) {
-                          if (maxScrollableTrackWidth <= 0 || maxTimelineScrollOffset <= 0) return;
-
-                          double dragDeltaX = details.globalPosition.dx - _scrollbarGestureDragStartX;
-                          double contentPanDelta = (dragDeltaX / maxScrollableTrackWidth) * maxTimelineScrollOffset;
-
-                          double newPanOffsetValue = (_scrollbarGesturePanOffsetStartValue - contentPanDelta).clamp(
-                              (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
-                              0.0
-                          );
-
+                          if (maxScrollableTrackWidth <= 0 ||
+                              maxTimelineScrollOffset <= 0) {
+                            return;
+                          }
+                          double dragDeltaX = details.globalPosition.dx -
+                              _scrollbarGestureDragStartX;
+                          double contentPanDelta =
+                              (dragDeltaX / maxScrollableTrackWidth) *
+                                  maxTimelineScrollOffset;
+                          double newPanOffsetValue =
+                          (_scrollbarGesturePanOffsetStartValue -
+                              contentPanDelta)
+                              .clamp(
+                              (vpWidth -
+                                  (ActivityConstants
+                                      .kTimelineLabelWidth +
+                                      timelineWidth))
+                                  .clamp(double.negativeInfinity, 0.0),
+                              0.0);
                           _currentPanOffsetNotifier.value = newPanOffsetValue;
                         },
                         onHorizontalDragEnd: (details) {
@@ -1263,7 +1930,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+                            color: isDark
+                                ? Colors.grey.shade500
+                                : Colors.grey.shade500,
                             borderRadius: BorderRadius.circular(5),
                           ),
                         ),
@@ -1278,94 +1947,120 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
   }
 
-  Widget _buildActivityWithAssignments(ActivityModel a, double timelineWidth, double viewportWidth, int itemIndexInFilteredList) {
+  Widget _buildActivityWithAssignments(ActivityModel a, double timelineWidth,
+      double viewportWidth, int itemIndexInFilteredList) {
     final allAssignmentsForActivity = _activityAssignments[a] ?? [];
-    final validAssignments = allAssignmentsForActivity.where((assign) => assign.userInfo != null && assign.user != null && assign.data?['isDragPreview'] != true).toList();
-    final isDark = isDarkMode(context);
-
-    final String normalizedFilter = Utilities.removeDiacritics(_globalTimelineFilter.toLowerCase());
-    bool activityTitleMatchesFilter = _globalTimelineFilter.isEmpty || Utilities.removeDiacritics(a.title?.toLowerCase() ?? "").contains(normalizedFilter);
-
-    Map<String?, List<ActivityAssignmentModel>> assignmentsByUser = groupBy<ActivityAssignmentModel, String?>(
-        validAssignments, (assignment) => assignment.userInfo
-    );
-
+    final validAssignments = allAssignmentsForActivity
+        .where((assign) =>
+    assign.userInfo != null &&
+        assign.user != null &&
+        assign.data?['isDragPreview'] != true)
+        .toList();
+    final isDark = ActivityConstants.isDarkMode(context);
+    final String normalizedFilter =
+    Utilities.removeDiacritics(_globalTimelineFilter.toLowerCase());
+    bool activityTitleMatchesFilter = _globalTimelineFilter.isEmpty ||
+        Utilities.removeDiacritics(a.title?.toLowerCase() ?? "")
+            .contains(normalizedFilter);
+    Map<String?, List<ActivityAssignmentModel>> assignmentsByUser =
+    groupBy<ActivityAssignmentModel, String?>(
+        validAssignments, (assignment) => assignment.userInfo);
     List<String?> sortedUserInfos = assignmentsByUser.keys.toList();
     sortedUserInfos.sort((userInfoA, userInfoB) {
       if (userInfoA == null || userInfoB == null) return 0;
       final assignmentsA = assignmentsByUser[userInfoA] ?? [];
       final assignmentsB = assignmentsByUser[userInfoB] ?? [];
-
       bool hasPlaceA = assignmentsA.any((assign) => (assign.places).isNotEmpty);
       bool hasPlaceB = assignmentsB.any((assign) => (assign.places).isNotEmpty);
       if (hasPlaceA && !hasPlaceB) return -1;
       if (!hasPlaceA && hasPlaceB) return 1;
-
       bool hasEventA = assignmentsA.any((assign) => (assign.events).isNotEmpty);
       bool hasEventB = assignmentsB.any((assign) => (assign.events).isNotEmpty);
       if (hasEventA && !hasEventB) return -1;
       if (!hasEventA && hasEventB) return 1;
-
-      final userA = assignmentsA.firstOrNull?.user?.toFullNameString().toLowerCase() ?? userInfoA.toLowerCase();
-      final userB = assignmentsB.firstOrNull?.user?.toFullNameString().toLowerCase() ?? userInfoB.toLowerCase();
+      final userA =
+          assignmentsA.firstOrNull?.user?.toFullNameString().toLowerCase() ??
+              userInfoA.toLowerCase();
+      final userB =
+          assignmentsB.firstOrNull?.user?.toFullNameString().toLowerCase() ??
+              userInfoB.toLowerCase();
       return userA.compareTo(userB);
     });
-
-
     List<Widget> userRowsAndPreviews = [];
     Set<String?> usersWithRenderedRows = {};
-
     for (var userInfoId in sortedUserInfos) {
       if (userInfoId == null) continue;
       final userAssignmentsList = assignmentsByUser[userInfoId]!;
       List<ActivityAssignmentModel>? assignmentsToConsiderForRendering;
-
       if (_globalTimelineFilter.isEmpty) {
         assignmentsToConsiderForRendering = List.from(userAssignmentsList);
       } else {
         if (activityTitleMatchesFilter) {
           assignmentsToConsiderForRendering = List.from(userAssignmentsList);
         } else {
-          List<ActivityAssignmentModel> filteredUserAssignmentsByName = userAssignmentsList.where((assign) {
-            if (Utilities.removeDiacritics(assign.user!.toFullNameString().toLowerCase()).contains(normalizedFilter)) {
+          List<ActivityAssignmentModel> filteredUserAssignmentsByName =
+          userAssignmentsList.where((assign) {
+            if (Utilities.removeDiacritics(
+                assign.user!.toFullNameString().toLowerCase())
+                .contains(normalizedFilter)) {
               return true;
             }
             for (var place in assign.places) {
-              if (Utilities.removeDiacritics(place.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
+              if (Utilities.removeDiacritics(place.title?.toLowerCase() ?? "")
+                  .contains(normalizedFilter)) {
                 return true;
               }
             }
             for (var event in assign.events) {
-              if (Utilities.removeDiacritics(event.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
+              if (Utilities.removeDiacritics(event.title?.toLowerCase() ?? "")
+                  .contains(normalizedFilter)) {
                 return true;
               }
             }
             return false;
           }).toList();
-
           if (filteredUserAssignmentsByName.isNotEmpty) {
             assignmentsToConsiderForRendering = filteredUserAssignmentsByName;
           }
         }
       }
-
-      if (assignmentsToConsiderForRendering != null && assignmentsToConsiderForRendering.isNotEmpty) {
-        List<ActivityAssignmentModel> assignmentsToRender = List.from(assignmentsToConsiderForRendering);
+      if (assignmentsToConsiderForRendering != null &&
+          assignmentsToConsiderForRendering.isNotEmpty) {
+        List<ActivityAssignmentModel> assignmentsToRender =
+        List.from(assignmentsToConsiderForRendering);
         final userForThisRow = assignmentsToRender[0].user;
         if (userForThisRow == null) continue;
-
-        if (_hoveredActivityForPreview == a && _currentlyDraggedUser?.id == userInfoId && _previewStartTime != null) {
-          final draggedDuration = kDefaultUserAssignmentDuration;
-          final DateTimeRange pr = TimeClampingService.clampDateTimeRange(initialStartTime: _previewStartTime!, itemDuration: draggedDuration, timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
-          assignmentsToRender.add(ActivityAssignmentModel(activityId: a.id ?? -1, user: _currentlyDraggedUser, userInfo: _currentlyDraggedUser!.id, startTime: pr.start, endTime: pr.end, data: {'isDragPreview': true}, places: [], events: []));
-          assignmentsToRender.sort((a1, b1) => a1.startTime!.compareTo(b1.startTime!));
+        if (_hoveredActivityForPreview == a &&
+            _currentlyDraggedUser?.id == userInfoId &&
+            _previewStartTime != null) {
+          final draggedDuration = _getSnappedDragDuration();
+          final DateTimeRange pr = TimeClampingService.clampDateTimeRange(
+              initialStartTime: _previewStartTime!,
+              itemDuration: draggedDuration,
+              timelineStart: _timelineStart!,
+              timelineEnd: _timelineEnd!,
+              minAllowedDuration: ActivityConstants.kMinTimeLength);
+          assignmentsToRender.add(ActivityAssignmentModel(
+              activityId: a.id,
+              user: _currentlyDraggedUser,
+              userInfo: _currentlyDraggedUser!.id,
+              startTime: pr.start,
+              endTime: pr.end,
+              data: {'isDragPreview': true},
+              places: [],
+              events: []));
+          assignmentsToRender
+              .sort((a1, b1) => a1.startTime!.compareTo(b1.startTime!));
         }
-        userRowsAndPreviews.add(_buildUserRow(a, userForThisRow, assignmentsToRender, timelineWidth));
+        userRowsAndPreviews.add(_buildUserRow(
+            a, userForThisRow, assignmentsToRender, timelineWidth));
         usersWithRenderedRows.add(userInfoId);
       }
     }
-
-    if (_hoveredActivityForPreview == a && _currentlyDraggedUser != null && _previewStartTime != null && !usersWithRenderedRows.contains(_currentlyDraggedUser!.id)) {
+    if (_hoveredActivityForPreview == a &&
+        _currentlyDraggedUser != null &&
+        _previewStartTime != null &&
+        !usersWithRenderedRows.contains(_currentlyDraggedUser!.id)) {
       bool showDraggedUserPreviewForThisActivity = false;
       if (_globalTimelineFilter.isEmpty) {
         showDraggedUserPreviewForThisActivity = true;
@@ -1373,26 +2068,44 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         if (activityTitleMatchesFilter) {
           showDraggedUserPreviewForThisActivity = true;
         } else {
-          if (Utilities.removeDiacritics(_currentlyDraggedUser!.toFullNameString().toLowerCase()).contains(normalizedFilter)) {
+          if (Utilities.removeDiacritics(
+              _currentlyDraggedUser!.toFullNameString().toLowerCase())
+              .contains(normalizedFilter)) {
             showDraggedUserPreviewForThisActivity = true;
           }
         }
       }
-
       if (showDraggedUserPreviewForThisActivity) {
-        final draggedDuration = kDefaultUserAssignmentDuration;
-        final DateTimeRange pr = TimeClampingService.clampDateTimeRange(initialStartTime: _previewStartTime!, itemDuration: draggedDuration, timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
-        userRowsAndPreviews.add(_buildUserRow(a, _currentlyDraggedUser!, [ActivityAssignmentModel(activityId: a.id ?? -1, user: _currentlyDraggedUser, userInfo: _currentlyDraggedUser!.id!, startTime: pr.start, endTime: pr.end, data: {'isDragPreview': true}, places: [], events: [])], timelineWidth));
+        final draggedDuration = _getSnappedDragDuration();
+        final DateTimeRange pr = TimeClampingService.clampDateTimeRange(
+            initialStartTime: _previewStartTime!,
+            itemDuration: draggedDuration,
+            timelineStart: _timelineStart!,
+            timelineEnd: _timelineEnd!,
+            minAllowedDuration: ActivityConstants.kMinTimeLength);
+        userRowsAndPreviews.add(_buildUserRow(
+            a,
+            _currentlyDraggedUser!,
+            [
+              ActivityAssignmentModel(
+                  activityId: a.id,
+                  user: _currentlyDraggedUser,
+                  userInfo: _currentlyDraggedUser!.id!,
+                  startTime: pr.start,
+                  endTime: pr.end,
+                  data: {'isDragPreview': true},
+                  places: [],
+                  events: [])
+            ],
+            timelineWidth));
       }
     }
-
-    if (_globalTimelineFilter.isNotEmpty && !activityTitleMatchesFilter && userRowsAndPreviews.isEmpty) {
+    if (_globalTimelineFilter.isNotEmpty &&
+        !activityTitleMatchesFilter &&
+        userRowsAndPreviews.isEmpty) {
       return SizedBox.shrink(key: ObjectKey(a));
     }
-
-    final int displayIndex = itemIndexInFilteredList;
-
-
+    final int displayIndex = _filteredActivities.indexOf(a);
     return Padding(
       key: ObjectKey(a),
       padding: const EdgeInsets.symmetric(vertical: 0),
@@ -1400,174 +2113,309 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         onWillAcceptWithDetails: (details) {
           _hideAssignmentDetailOverlay();
           if (a.isHidden!) return false;
-
           if (_timelineStart != null && _timelineEnd != null) {
             bool needsStateUpdate = false;
-            DateTime snappedStartTime = _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
-            final DateTimeRange clampedRange = TimeClampingService.clampDateTimeRange(initialStartTime: snappedStartTime, itemDuration: kDefaultUserAssignmentDuration, timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
-
-            if (_hoveredActivityForPreview != a) { _hoveredActivityForPreview = a; needsStateUpdate = true; }
-            if (_previewStartTime != clampedRange.start) { _previewStartTime = clampedRange.start; needsStateUpdate = true; }
-
+            DateTime snappedStartTime =
+            _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
+            final Duration dynamicDuration = _getSnappedDragDuration();
+            final DateTimeRange clampedRange =
+            TimeClampingService.clampDateTimeRange(
+                initialStartTime: snappedStartTime,
+                itemDuration: dynamicDuration,
+                timelineStart: _timelineStart!,
+                timelineEnd: _timelineEnd!,
+                minAllowedDuration: ActivityConstants.kMinTimeLength);
+            if (_hoveredActivityForPreview != a) {
+              _hoveredActivityForPreview = a;
+              needsStateUpdate = true;
+            }
+            if (_previewStartTime != clampedRange.start) {
+              _previewStartTime = clampedRange.start;
+              needsStateUpdate = true;
+            }
             if (needsStateUpdate) setState(() {});
             return true;
           }
-          if (_hoveredActivityForPreview == a) setState(() { _hoveredActivityForPreview = null; _previewStartTime = null; });
+          if (_hoveredActivityForPreview == a) {
+            setState(() {
+              _hoveredActivityForPreview = null;
+              _previewStartTime = null;
+            });
+          }
           return false;
         },
         onMove: (details) {
           if (a.isHidden!) return;
-          if (_hoveredActivityForPreview == a && _timelineStart != null && _timelineEnd != null) {
-            DateTime snappedStartTime = _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
-            final DateTimeRange clampedRange = TimeClampingService.clampDateTimeRange(initialStartTime: snappedStartTime, itemDuration: kDefaultUserAssignmentDuration, timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
-            if (_previewStartTime != clampedRange.start) setState(() => _previewStartTime = clampedRange.start);
+          if (_hoveredActivityForPreview == a &&
+              _timelineStart != null &&
+              _timelineEnd != null) {
+            DateTime snappedStartTime =
+            _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
+            final Duration dynamicDuration = _getSnappedDragDuration();
+            final DateTimeRange clampedRange =
+            TimeClampingService.clampDateTimeRange(
+                initialStartTime: snappedStartTime,
+                itemDuration: dynamicDuration,
+                timelineStart: _timelineStart!,
+                timelineEnd: _timelineEnd!,
+                minAllowedDuration: ActivityConstants.kMinTimeLength);
+            if (_previewStartTime != clampedRange.start) {
+              setState(() => _previewStartTime = clampedRange.start);
+            }
           }
         },
         onLeave: (data) {
-          if (_hoveredActivityForPreview == a) setState(() { _hoveredActivityForPreview = null; _previewStartTime = null; });
+          if (_hoveredActivityForPreview == a) {
+            setState(() {
+              _hoveredActivityForPreview = null;
+              _previewStartTime = null;
+            });
+          }
         },
         onAcceptWithDetails: (details) {
-          if (_timelineStart == null || _timelineEnd == null || a.isHidden!) return;
-
+          if (_timelineStart == null || _timelineEnd == null || a.isHidden!) {
+            return;
+          }
           final draggedDataOnDrop = details.data;
-          DateTime finalSnappedStartTime = _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
-          final DateTimeRange finalClampedRange = TimeClampingService.clampDateTimeRange(initialStartTime: finalSnappedStartTime, itemDuration: kDefaultUserAssignmentDuration, timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
-
+          DateTime finalSnappedStartTime =
+          _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
+          final Duration dynamicDuration = _getSnappedDragDuration();
+          final DateTimeRange finalClampedRange =
+          TimeClampingService.clampDateTimeRange(
+              initialStartTime: finalSnappedStartTime,
+              itemDuration: dynamicDuration,
+              timelineStart: _timelineStart!,
+              timelineEnd: _timelineEnd!,
+              minAllowedDuration: ActivityConstants.kMinTimeLength);
           final newAssignment = ActivityAssignmentModel(
-              activityId: a.id ?? -1,
+              activityId: a.id,
               userInfo: draggedDataOnDrop.id!,
               user: draggedDataOnDrop,
               startTime: finalClampedRange.start,
               endTime: finalClampedRange.end,
               data: null,
               places: [],
-              events: []
-          );
+              events: []);
           setState(() {
             _activityAssignments.putIfAbsent(a, () => []).add(newAssignment);
-            _hoveredActivityForPreview = null; _previewStartTime = null;
-            _updateFilteredActivities();
+            _hoveredActivityForPreview = null;
+            _previewStartTime = null;
             _recalculateUserAssignedHours();
+            _recordStateChange();
           });
         },
         builder: (ctx, candidateData, rejectedData) {
-          bool isHighlighted = candidateData.isNotEmpty && _hoveredActivityForPreview == a && !a.isHidden!;
+          bool isHighlighted = candidateData.isNotEmpty &&
+              _hoveredActivityForPreview == a &&
+              !a.isHidden!;
           Color activityHeaderBgColor;
           Color activityHeaderTextColor;
           Color activityHiddenOverlayColor;
           Color activityContentBgColor;
-
           if (isDark) {
-            activityHeaderBgColor = a.isHidden! ? Colors.grey.shade700.withOpacity(0.7) : Colors.blueGrey.shade800.withOpacity(0.7);
-            activityHeaderTextColor = a.isHidden! ? Colors.white60 : Colors.white;
+            activityHeaderBgColor = a.isHidden!
+                ? Colors.grey.shade700.withOpacity(0.7)
+                : Colors.blueGrey.shade800.withOpacity(0.7);
+            activityHeaderTextColor =
+            a.isHidden! ? Colors.white60 : Colors.white;
             activityHiddenOverlayColor = Colors.grey.shade600.withOpacity(0.3);
-            activityContentBgColor = isHighlighted ? Theme.of(context).primaryColor.withAlpha(30) : Colors.transparent;
+            activityContentBgColor = isHighlighted
+                ? Theme.of(context).primaryColor.withAlpha(30)
+                : Colors.transparent;
           } else {
-            activityHeaderBgColor = a.isHidden! ? Colors.grey.shade400.withOpacity(0.7) : Colors.blueGrey.shade50.withOpacity(0.7);
-            activityHeaderTextColor = a.isHidden! ? Colors.white70 : Colors.black87;
+            activityHeaderBgColor = a.isHidden!
+                ? Colors.grey.shade400.withOpacity(0.7)
+                : Colors.blueGrey.shade50.withOpacity(0.7);
+            activityHeaderTextColor =
+            a.isHidden! ? Colors.white70 : Colors.black87;
             activityHiddenOverlayColor = Colors.grey.shade500.withOpacity(0.3);
-            activityContentBgColor = isHighlighted ? Colors.lightBlue.shade50.withOpacity(0.6) : Colors.transparent;
+            activityContentBgColor = isHighlighted
+                ? Colors.lightBlue.shade50.withOpacity(0.6)
+                : Colors.transparent;
           }
-
           List<Widget> activityContentChildren = [];
           if (!a.isHidden!) {
             if (userRowsAndPreviews.isNotEmpty) {
               activityContentChildren.addAll(userRowsAndPreviews);
-            } else if (a.id == null &&
-                (_activityAssignments[a] == null || _activityAssignments[a]!.where((asg) => asg.data?['isDragPreview'] != true).isEmpty) &&
+            } else if ((_activityAssignments[a] == null ||
+                _activityAssignments[a]!.isEmpty) &&
                 _globalTimelineFilter.isEmpty) {
-              activityContentChildren.add(
-                  Padding(
-                    padding: EdgeInsets.only(left: kTimelineLabelWidth + 8.0, top: 8.0, bottom: 8.0, right: 8.0),
-                    child: Text(
-                      ActivitiesComponentStrings.textDragUsersFromTopDropHere,
-                      style: TextStyle(fontSize: 11, color: isDark ? Colors.grey[400] : Colors.grey[600], fontStyle: FontStyle.italic),
-                    ),
-                  )
-              );
-            } else if (userRowsAndPreviews.isEmpty && _globalTimelineFilter.isNotEmpty && activityTitleMatchesFilter) {
               activityContentChildren.add(Padding(
-                padding: const EdgeInsets.only(left: kTimelineLabelWidth + 8.0, top: 4, bottom: 4),
-                child: Text(ActivitiesComponentStrings.textNoUsersAssignedYet, style: TextStyle(fontSize: 10, color: (isDark? Colors.grey[500] : Colors.grey[600]), fontStyle: FontStyle.italic)),
+                padding: EdgeInsets.only(
+                    left: ActivityConstants.kTimelineLabelWidth + 8.0,
+                    top: 8.0,
+                    bottom: 8.0,
+                    right: 8.0),
+                child: Text(
+                  a.id == null
+                      ? ActivitiesComponentStrings.textNewActivityAddedDragDrop
+                      : ActivitiesComponentStrings.textDragUsersFromTopDropHere,
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      fontStyle: FontStyle.italic),
+                ),
+              ));
+            } else if (userRowsAndPreviews.isEmpty &&
+                _globalTimelineFilter.isNotEmpty &&
+                activityTitleMatchesFilter) {
+              activityContentChildren.add(Padding(
+                padding: const EdgeInsets.only(
+                    left: ActivityConstants.kTimelineLabelWidth + 8.0,
+                    top: 4,
+                    bottom: 4),
+                child: Text(ActivitiesComponentStrings.textNoUsersAssignedYet,
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: (isDark ? Colors.grey[500] : Colors.grey[600]),
+                        fontStyle: FontStyle.italic)),
               ));
             }
           } else {
             activityContentChildren.add(Padding(
-              padding: const EdgeInsets.only(left: kTimelineLabelWidth + 8.0, top: 6, bottom: 6),
-              child: Text(ActivitiesComponentStrings.textActivityHidden, style: TextStyle(fontSize: 10, color: (isDark ? Colors.grey[400] : Colors.grey[700]), fontStyle: FontStyle.italic)),
+              padding: const EdgeInsets.only(
+                  left: ActivityConstants.kTimelineLabelWidth + 8.0,
+                  top: 6,
+                  bottom: 6),
+              child: Text(ActivitiesComponentStrings.textActivityHidden,
+                  style: TextStyle(
+                      fontSize: 10,
+                      color: (isDark ? Colors.grey[400] : Colors.grey[700]),
+                      fontStyle: FontStyle.italic)),
             ));
           }
-
           return Container(
             decoration: BoxDecoration(
               color: activityContentBgColor,
-              border: Border(bottom: BorderSide(color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, width: 0.8)),
+              border: Border(
+                  bottom: BorderSide(
+                      color:
+                      isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                      width: 0.8)),
             ),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child:
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Container(
                 color: activityHeaderBgColor,
                 child: Row(children: [
                   ReorderableDragStartListener(
                       index: displayIndex,
-                      child: SizedBox(width: kTimelineLabelWidth, height: 24, child: Row(children: [
-                        IconButton(
-                          icon: Icon(a.isHidden! ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 13, color: activityHeaderTextColor.withOpacity(0.8)),
-                          padding: EdgeInsets.zero,
-                          constraints: BoxConstraints(minWidth: 22, minHeight: 22),
-                          splashRadius: 12,
-                          tooltip: a.isHidden! ? ActivitiesComponentStrings.tooltipMarkVisible : ActivitiesComponentStrings.tooltipMarkHidden,
-                          onPressed: () {
-                            setState(() { a.isHidden = !a.isHidden!; });
-                          },
-                        ),
-                        Expanded(child: Padding(padding: const EdgeInsets.only(left: 1.0), child: Text(a.title ?? ActivitiesComponentStrings.textUntitledActivity, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: activityHeaderTextColor), overflow: TextOverflow.ellipsis))),
-                        PopupMenuButton<String>(
-                          icon: Icon(Icons.more_vert, size: 15, color: activityHeaderTextColor.withOpacity(0.8)),
-                          tooltip: ActivitiesComponentStrings.tooltipActivityOptions,
-                          color: isDark ? Colors.grey[800] : Colors.white,
-                          splashRadius: 10,
-                          padding: EdgeInsets.zero,
-                          itemBuilder: (_) => [
-                            PopupMenuItem(value: 'rename', height: 30, child: Text(ActivitiesComponentStrings.menuRename, style: TextStyle(fontSize: 12, color: isDark ? Colors.white : Colors.black))),
-                            PopupMenuItem(
-                                value: 'details',
-                                height: 30,
-                                child: Text(ActivitiesComponentStrings.menuDetails,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: isDark ? Colors.white : Colors.black))),
-                            PopupMenuItem(value: 'delete', height: 30, child: Text(ActivitiesComponentStrings.menuDelete, style: TextStyle(fontSize: 12, color: isDark ? Colors.white : Colors.black))),
-                          ],
-                          onSelected: (v) {
-                            _hideAssignmentDetailOverlay();
-                            if (v == 'delete') {
-                              setState(() {
-                                _bundle!.activities!.remove(a);
-                                _activityAssignments.remove(a);
-                                _selectedActivities.remove(a);
-                                _updateFilteredActivities();
-                                _recalculateUserAssignedHours();
-                              });
-                            } else if (v == 'rename') {
-                              _showRenameDialog(a);
-                            } else if (v == 'details') {
-                              showDialog(
-                                context: context,
-                                builder: (ctx) => DetailDialog(
-                                  title: a.title ?? ActivitiesComponentStrings.textUntitledActivity,
-                                  htmlDescription: a.description,
-                                  canEdit: true,
-                                  onEditPressed: () => _showActivityDescriptionEditor(a),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ]))),
+                      child: SizedBox(
+                          width: ActivityConstants.kTimelineLabelWidth,
+                          height: 24,
+                          child: Row(children: [
+                            IconButton(
+                              icon: Icon(
+                                  a.isHidden!
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  size: 13,
+                                  color:
+                                  activityHeaderTextColor.withOpacity(0.8)),
+                              padding: EdgeInsets.zero,
+                              constraints:
+                              BoxConstraints(minWidth: 22, minHeight: 22),
+                              splashRadius: 12,
+                              tooltip: a.isHidden!
+                                  ? ActivitiesComponentStrings
+                                  .tooltipMarkVisible
+                                  : ActivitiesComponentStrings
+                                  .tooltipMarkHidden,
+                              onPressed: () {
+                                setState(() {
+                                  a.isHidden = !a.isHidden!;
+                                  _recordStateChange();
+                                });
+                              },
+                            ),
+                            Expanded(
+                                child: Padding(
+                                    padding: const EdgeInsets.only(left: 1.0),
+                                    child: Text(
+                                        a.title ??
+                                            ActivitiesComponentStrings
+                                                .textUntitledActivity,
+                                        style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            color: activityHeaderTextColor),
+                                        overflow: TextOverflow.ellipsis))),
+                            PopupMenuButton<String>(
+                              icon: Icon(Icons.more_vert,
+                                  size: 15,
+                                  color:
+                                  activityHeaderTextColor.withOpacity(0.8)),
+                              tooltip: ActivitiesComponentStrings
+                                  .tooltipActivityOptions,
+                              color: isDark ? Colors.grey[800] : Colors.white,
+                              splashRadius: 10,
+                              padding: EdgeInsets.zero,
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                    value: 'rename',
+                                    height: 30,
+                                    child: Text(
+                                        ActivitiesComponentStrings.menuRename,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: isDark
+                                                ? Colors.white
+                                                : Colors.black))),
+                                PopupMenuItem(
+                                    value: 'details',
+                                    height: 30,
+                                    child: Text(
+                                        ActivitiesComponentStrings.menuDetails,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: isDark
+                                                ? Colors.white
+                                                : Colors.black))),
+                                PopupMenuItem(
+                                    value: 'delete',
+                                    height: 30,
+                                    child: Text(
+                                        ActivitiesComponentStrings.menuDelete,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: isDark
+                                                ? Colors.white
+                                                : Colors.black))),
+                              ],
+                              onSelected: (v) {
+                                _hideAssignmentDetailOverlay();
+                                if (v == 'delete') {
+                                  setState(() {
+                                    _bundle!.activities!.remove(a);
+                                    _activityAssignments.remove(a);
+                                    _selectedActivities.remove(a);
+                                    _updateFilteredActivities();
+                                    _recalculateUserAssignedHours();
+                                    _recordStateChange();
+                                  });
+                                } else if (v == 'rename') {
+                                  _showRenameDialog(a);
+                                } else if (v == 'details') {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => DetailDialog(
+                                      title: a.title ??
+                                          ActivitiesComponentStrings
+                                              .textUntitledActivity,
+                                      htmlDescription: a.description,
+                                      canEdit: true,
+                                      onEditPressed: () =>
+                                          _showActivityDescriptionEditor(a),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ]))),
                   Expanded(
                       child: ValueListenableBuilder<double>(
                           valueListenable: _currentPanOffsetNotifier,
-                          builder: (context, currentPanOffsetValue, child){
+                          builder: (context, currentPanOffsetValue, child) {
                             return ClipRect(
                                 child: Transform.translate(
                                     offset: Offset(currentPanOffsetValue, 0),
@@ -1575,29 +2423,20 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                       height: 24,
                                       child: RepaintBoundary(
                                         child: CustomPaint(
-                                          foregroundPainter: VerticalGridLinesPainter(
+                                          foregroundPainter:
+                                          VerticalGridLinesPainter(
                                             start: _timelineStart!,
                                             end: _timelineEnd!,
                                             pps: _basePps * _scale,
                                             viewHeight: 24,
                                             isDarkMode: isDark,
                                           ),
-                                          child: Container(
-                                            color: a.isHidden!
-                                                ? activityHiddenOverlayColor
-                                                : (isDark
-                                                ? Colors.grey.shade700.withOpacity(0.2)
-                                                : Colors.grey.shade300.withOpacity(0.2)
-                                            ),
-                                          ),
+                                          child: const SizedBox
+                                              .shrink(), // MODIFICATION: Removed the child container that had its own color. This area is now transparent, allowing the parent's color to show through.
                                         ),
                                       ),
-                                    )
-                                )
-                            );
-                          }
-                      )
-                  ),
+                                    )));
+                          })),
                 ]),
               ),
               ...activityContentChildren,
@@ -1608,58 +2447,126 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     );
   }
 
-  Widget _buildUserRow(ActivityModel activity, ActivityUserInfoModel userInfo, List<ActivityAssignmentModel> assignments, double timelineWidth) {
-    if (assignments.isEmpty) return const SizedBox.shrink();
-    final isDark = isDarkMode(context);
-
-    final isHostingPreview = assignments.any((u) => u.data?['isDragPreview'] == true);
-    final color = darkUserColors[userInfo.hashCode % darkUserColors.length];
+  Widget _buildUserRow(ActivityModel activity, ActivityUserInfoModel userInfo,
+      List<ActivityAssignmentModel> assignments, double timelineWidth) {
+    if (assignments.isEmpty &&
+        (_copyDragPreview == null ||
+            _copyDragPreview?.userInfo != userInfo.id ||
+            _copyDragSource?.activityId != activity.id)) {
+      return const SizedBox.shrink();
+    }
+    final isDark = ActivityConstants.isDarkMode(context);
+    final isHostingPreview =
+    assignments.any((u) => u.data?['isDragPreview'] == true);
+    final color = ActivityConstants.darkUserColors[
+    userInfo.hashCode % ActivityConstants.darkUserColors.length];
     final avatarTextColor = Colors.white;
-
+    final List<ActivityAssignmentModel> assignmentsToRender =
+    assignments.toList();
+    if (_copyDragPreview != null &&
+        _copyDragPreview?.userInfo == userInfo.id &&
+        _copyDragSource?.activityId == activity.id) {
+      assignmentsToRender.add(_copyDragPreview!);
+    }
     return Container(
-      height: 26,
-      decoration: BoxDecoration(
-          color: isHostingPreview && !activity.isHidden! ? color.withOpacity(0.1) : Colors.transparent,
-          border: Border(bottom: BorderSide(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200, width: 0.5))
-      ),
-      child: Row(children: [
-        SizedBox(width: kTimelineLabelWidth, child: Row(children: [
-          const SizedBox(width: 4),
-          Container(width: 18, height: 18, decoration: BoxDecoration(shape: BoxShape.circle, color: color, border: Border.all(color: color.withOpacity(0.7), width: 1.0)), child: Center(child: Text(userInfo.getInitials(), style: TextStyle(fontSize: 9, color: avatarTextColor, fontWeight: FontWeight.bold)))),
-          const SizedBox(width: 3),
-          Expanded(child: Text(userInfo.toFullNameString(), style: TextStyle(fontSize: 11, color: isDark? Colors.white70 : Colors.black87), overflow: TextOverflow.ellipsis)),
-          PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, size: 11, color: isDark ? Colors.white54 : Colors.black45),
-            tooltip: ActivitiesComponentStrings.tooltipUserAssignmentOptions,
-            color: isDark ? Colors.grey[800] : Colors.white,
-            splashRadius: 9,
-            padding: EdgeInsets.zero,
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                  value: 'delete_user_from_activity',
-                  height: 28,
-                  child: Text(ActivitiesComponentStrings.menuRemoveUserFromActivity, style: TextStyle(fontSize: 11, color: isDark ? Colors.white : Colors.black))
-              ),
-            ],
-            onSelected: (v) {
-              _hideAssignmentOverlay();
-              if (v == 'delete_user_from_activity') {
-                setState(() {
-                  _activityAssignments[activity]?.removeWhere((assign) => assign.userInfo == userInfo.id && assign.data?['isDragPreview'] != true);
-                  _updateFilteredActivities();
-                  _recalculateUserAssignedHours();
-                });
-              }
-            },
-          ),
-        ])),
-        ValueListenableBuilder<double>(
-            valueListenable: _currentPanOffsetNotifier,
-            builder: (context, currentPanOffsetValue, child){
-              return ClipRect(
-                  child: Transform.translate(
-                      offset: Offset(currentPanOffsetValue, 0),
-                      child: SizedBox(
+        height: 26,
+        decoration: BoxDecoration(
+            color: isHostingPreview && !activity.isHidden!
+                ? color.withOpacity(0.1)
+                : Colors.transparent,
+            border: Border(
+                bottom: BorderSide(
+                    color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                    width: 0.5))),
+        child: Row(children: [
+          SizedBox(
+              width: ActivityConstants.kTimelineLabelWidth,
+              child: Row(children: [
+                const SizedBox(width: 4),
+                Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: color,
+                        border: Border.all(
+                            color: color.withOpacity(0.7), width: 1.0)),
+                    child: Center(
+                        child: Text(userInfo.getInitials(),
+                            style: TextStyle(
+                                fontSize: 9,
+                                color: avatarTextColor,
+                                fontWeight: FontWeight.bold)))),
+                const SizedBox(width: 3),
+                Expanded(
+                    child: Text(userInfo.toFullNameString(),
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? Colors.white70 : Colors.black87),
+                        overflow: TextOverflow.ellipsis)),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert,
+                      size: 11,
+                      color: isDark ? Colors.white54 : Colors.black45),
+                  tooltip:
+                  ActivitiesComponentStrings.tooltipUserAssignmentOptions,
+                  color: isDark ? Colors.grey[800] : Colors.white,
+                  splashRadius: 9,
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                        value: 'delete_user_from_activity',
+                        height: 28,
+                        child: Text(
+                            ActivitiesComponentStrings
+                                .menuRemoveUserFromActivity,
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: isDark ? Colors.white : Colors.black))),
+                  ],
+                  onSelected: (v) {
+                    _hideAssignmentDetailOverlay();
+                    if (v == 'delete_user_from_activity') {
+                      setState(() {
+                        _activityAssignments[activity]?.removeWhere((assign) =>
+                        assign.userInfo == userInfo.id &&
+                            assign.data?['isDragPreview'] != true);
+                        _recalculateUserAssignedHours();
+                        _recordStateChange();
+                      });
+                    }
+                  },
+                ),
+              ])),
+          ValueListenableBuilder<double>(
+              valueListenable: _currentPanOffsetNotifier,
+              builder: (context, currentPanOffsetValue, child) {
+                final pps = _basePps * _scale;
+                if (pps <= 0) return const SizedBox.shrink();
+                final visibleWidth = _currentViewportWidth -
+                    ActivityConstants.kTimelineLabelWidth;
+                final bufferPixels = 100.0;
+                final double startVisiblePixels =
+                    -currentPanOffsetValue - bufferPixels;
+                final double endVisiblePixels =
+                    startVisiblePixels + visibleWidth + (bufferPixels * 2);
+                final Duration startVisibleDuration =
+                Duration(seconds: (startVisiblePixels / pps).floor());
+                final Duration endVisibleDuration =
+                Duration(seconds: (endVisiblePixels / pps).ceil());
+                final DateTime visibleStartTime =
+                _timelineStart!.add(startVisibleDuration);
+                final DateTime visibleEndTime =
+                _timelineStart!.add(endVisibleDuration);
+                final List<ActivityAssignmentModel> culledAssignments =
+                assignmentsToRender.where((assign) {
+                  return assign.startTime!.isBefore(visibleEndTime) &&
+                      assign.endTime!.isAfter(visibleStartTime);
+                }).toList();
+                return ClipRect(
+                    child: Transform.translate(
+                        offset: Offset(currentPanOffsetValue, 0),
+                        child: SizedBox(
                           width: timelineWidth,
                           height: 26,
                           child: RepaintBoundary(
@@ -1669,63 +2576,232 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                   end: _timelineEnd!,
                                   pps: _basePps * _scale,
                                   viewHeight: 26,
-                                  isDarkMode: isDark
-                              ),
+                                  isDarkMode: isDark),
                               child: Stack(
-                                children: assignments.map((u) {
-                                  final bool isPreview = u.data?['isDragPreview'] == true;
-                                  final itemLayerLink = LayerLink();
-                                  Color itemBarColor = isPreview ? color.withOpacity(0.6) : color;
+                                children: culledAssignments.map((u) {
+                                  final bool isPreview =
+                                      u.data?['isDragPreview'] == true;
+                                  // REMOVED: final itemLayerLink = LayerLink();
+                                  Color itemBarColor = isPreview
+                                      ? color.withOpacity(0.6)
+                                      : color;
                                   if (activity.isHidden!) {
-                                    itemBarColor = (isDark ? Colors.grey.shade600 : Colors.grey.shade500).withOpacity(isPreview ? 0.5 : 0.7);
+                                    itemBarColor = (isDark
+                                        ? Colors.grey.shade600
+                                        : Colors.grey.shade500)
+                                        .withOpacity(isPreview ? 0.5 : 0.7);
                                   }
-
-                                  return TimelineRow(
-                                    key: ValueKey("assign_${u.userInfo}_${u.startTime?.millisecondsSinceEpoch}_${u.endTime?.millisecondsSinceEpoch}_${u.places.length}_${u.events.length}_${isPreview}_${activity.isHidden!}"),
-                                    layerLink: itemLayerLink,
-                                    start: _timelineStart!, end: _timelineEnd!,
-                                    itemStart: u.startTime!, itemEnd: u.endTime!,
+                                  final bool isDraggable =
+                                      !isPreview && !activity.isHidden!;
+                                  Widget timelineRowWidget = TimelineRow(
+                                    key: ValueKey(
+                                        "assign_${u.id}_${u.startTime?.millisecondsSinceEpoch}_${u.endTime?.millisecondsSinceEpoch}_${u.places.length}_${u.events.length}_${isPreview}_${activity.isHidden!}"),
+                                    // REMOVED: layerLink: itemLayerLink,
+                                    start: _timelineStart!,
+                                    end: _timelineEnd!,
+                                    itemStart: u.startTime!,
+                                    itemEnd: u.endTime!,
                                     barColor: itemBarColor,
-                                    onTapBar: isPreview || activity.isHidden! ? null : () => _showAssignmentDetailOverlay(u, itemLayerLink),
+                                    // MODIFIED: The ENTIRE onTapBar property is the main change here
+                                    onTapBar: isPreview || activity.isHidden!
+                                        ? null
+                                        : (details) => _showAssignmentDetailOverlay(
+                                        u, details.globalPosition),
                                     onDragStart: _hideAssignmentDetailOverlay,
-                                    onDragEnd: isPreview || activity.isHidden! ? (ns, ne) {} : (finalStart, finalEnd) {
-                                      if (_timelineStart == null || _timelineEnd == null) return;
-                                      final DateTimeRange finalClampedRange = TimeClampingService.clampDateTimeRange(
-                                          initialStartTime: finalStart, itemDuration: finalEnd.difference(finalStart),
-                                          timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
-                                      if (u.startTime != finalClampedRange.start || u.endTime != finalClampedRange.end) {
+                                    onDragEnd: isPreview || activity.isHidden!
+                                        ? (ns, ne) {}
+                                        : (finalStart, finalEnd) {
+                                      if (_timelineStart == null ||
+                                          _timelineEnd == null) {
+                                        return;
+                                      }
+                                      final DateTimeRange finalClampedRange =
+                                      TimeClampingService
+                                          .clampDateTimeRange(
+                                          initialStartTime:
+                                          finalStart,
+                                          itemDuration:
+                                          finalEnd.difference(
+                                              finalStart),
+                                          timelineStart:
+                                          _timelineStart!,
+                                          timelineEnd:
+                                          _timelineEnd!,
+                                          minAllowedDuration:
+                                          ActivityConstants
+                                              .kMinTimeLength);
+                                      if (u.startTime !=
+                                          finalClampedRange.start ||
+                                          u.endTime !=
+                                              finalClampedRange.end) {
                                         setState(() {
-                                          u.startTime = finalClampedRange.start;
-                                          u.endTime = finalClampedRange.end;
-                                          _updateFilteredActivities();
+                                          u.startTime =
+                                              finalClampedRange.start;
+                                          u.endTime =
+                                              finalClampedRange.end;
                                           _recalculateUserAssignedHours();
+                                          _recordStateChange();
                                         });
                                       }
                                     },
-                                    draggable: !isPreview && !activity.isHidden!,
+                                    draggable: isDraggable &&
+                                        !_isModifierKeyPressedForScroll &&
+                                        _copyDragSource == null,
                                     zoomScale: _scale,
-                                    onPlaceOrEventDropped: isPreview || activity.isHidden!
+                                    onPlaceOrEventDropped:
+                                    isPreview || activity.isHidden!
                                         ? null
                                         : (droppedItemData) {
-                                      _handlePlaceOrEventDropOnAssignment(u, droppedItemData);
+                                      _handlePlaceOrEventDropOnAssignment(
+                                          u, droppedItemData);
                                     },
                                     assignment: u,
                                     isDarkMode: isDark,
                                   );
+                                  if (isDraggable) {
+                                    return GestureDetector(
+                                      onHorizontalDragStart: (details) {
+                                        if (!_isModifierKeyPressedForScroll) {
+                                          return;
+                                        }
+                                        _hideAssignmentDetailOverlay();
+                                        _gestureDragStartX =
+                                            details.globalPosition.dx;
+                                        setState(() {
+                                          _copyDragSource = u;
+                                          _copyDragPreview =
+                                              ActivityAssignmentModel(
+                                                activityId: u.activityId,
+                                                userInfo: u.userInfo,
+                                                user: u.user,
+                                                startTime: u.startTime,
+                                                endTime: u.endTime,
+                                                places: List.from(u.places),
+                                                events: List.from(u.events),
+                                                data: {'isDragPreview': true},
+                                              );
+                                        });
+                                      },
+                                      onHorizontalDragUpdate: (details) {
+                                        if (_copyDragSource != u) return;
+                                        if (!_isModifierKeyPressedForScroll) {
+                                          setState(() {
+                                            _copyDragSource = null;
+                                            _copyDragPreview = null;
+                                          });
+                                          return;
+                                        }
+                                        final pps = _basePps * _scale;
+                                        if (pps == 0) return;
+                                        final double dragDeltaX =
+                                            details.globalPosition.dx -
+                                                _gestureDragStartX;
+                                        final Duration timeDelta = Duration(
+                                            seconds:
+                                            (dragDeltaX / pps).round());
+                                        final DateTime previewStartTime =
+                                        _copyDragSource!.startTime!
+                                            .add(timeDelta);
+                                        final Duration originalDuration =
+                                        _copyDragSource!.endTime!
+                                            .difference(_copyDragSource!
+                                            .startTime!);
+                                        final Duration snapStep = _scale < 0.5
+                                            ? ActivityConstants.kSnapStepCoarse
+                                            : ActivityConstants.kSnapStepFine;
+                                        DateTime snappedStartTime =
+                                            previewStartTime;
+                                        if (snapStep.inSeconds > 0) {
+                                          final int numSnapSteps =
+                                          (previewStartTime
+                                              .difference(
+                                              _timelineStart!)
+                                              .inSeconds /
+                                              snapStep.inSeconds)
+                                              .round();
+                                          snappedStartTime = _timelineStart!
+                                              .add(Duration(
+                                              seconds: numSnapSteps *
+                                                  snapStep.inSeconds));
+                                        }
+                                        final clampedRange = TimeClampingService
+                                            .clampDateTimeRange(
+                                            initialStartTime:
+                                            snappedStartTime,
+                                            itemDuration: originalDuration,
+                                            timelineStart: _timelineStart!,
+                                            timelineEnd: _timelineEnd!,
+                                            minAllowedDuration:
+                                            ActivityConstants
+                                                .kMinTimeLength);
+                                        if (_copyDragPreview?.startTime !=
+                                            clampedRange.start ||
+                                            _copyDragPreview?.endTime !=
+                                                clampedRange.end) {
+                                          setState(() {
+                                            _copyDragPreview =
+                                                ActivityAssignmentModel(
+                                                    activityId:
+                                                    _copyDragPreview!
+                                                        .activityId,
+                                                    userInfo: _copyDragPreview!
+                                                        .userInfo,
+                                                    user:
+                                                    _copyDragPreview!.user,
+                                                    startTime:
+                                                    clampedRange.start,
+                                                    endTime: clampedRange.end,
+                                                    places: _copyDragPreview!
+                                                        .places,
+                                                    events: _copyDragPreview!
+                                                        .events,
+                                                    data:
+                                                    _copyDragPreview!.data);
+                                          });
+                                        }
+                                      },
+                                      onHorizontalDragEnd: (details) {
+                                        if (_copyDragSource != u || _copyDragPreview == null) return;
+
+                                        // 1. Create the new assignment object
+                                        final newAssignment = ActivityAssignmentModel(
+                                          activityId: _copyDragSource!.activityId,
+                                          userInfo: _copyDragSource!.userInfo,
+                                          user: _copyDragSource!.user,
+                                          startTime: _copyDragPreview!.startTime,
+                                          endTime: _copyDragPreview!.endTime,
+                                          places: List.from(_copyDragSource!.places),
+                                          events: List.from(_copyDragSource!.events),
+                                          data: null,
+                                        );
+
+                                        // 2. Mutate all necessary state variables
+                                        _activityAssignments.putIfAbsent(activity, () => []).add(newAssignment);
+                                        _copyDragSource = null;
+                                        _copyDragPreview = null;
+                                        _recalculateUserAssignedHours();
+
+                                        // 3. Finally, call the method that saves history and triggers the rebuild
+                                        _recordStateChange();
+                                      },
+                                      onHorizontalDragCancel: () {
+                                        if (_copyDragSource == u) {
+                                          setState(() {
+                                            _copyDragSource = null;
+                                            _copyDragPreview = null;
+                                          });
+                                        }
+                                      },
+                                      child: timelineRowWidget,
+                                    );
+                                  }
+                                  return timelineRowWidget;
                                 }).toList(),
                               ),
                             ),
-                          )
-                      )
-                  )
-              );
-            }
-        ),
-      ]),
-    );
-  }
-
-  void _hideAssignmentOverlay() {
-    _hideAssignmentDetailOverlay();
+                          ),
+                        )));
+              }),
+        ]));
   }
 }
