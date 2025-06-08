@@ -7,8 +7,15 @@ class ActivityHistoryHelper {
   /// Creates a deep copy of the bundle by serializing and deserializing it.
   /// This ensures that history states are independent.
   EditDataBundle _deepCopy(EditDataBundle bundle) {
-    final json = bundle.toJson();
-    return EditDataBundle.fromJson(json);
+    final json = bundle.toJsonHistory();
+    return EditDataBundle.fromJsonHistory(json);
+  }
+
+  /// Creates a deep copy of the bundle by serializing and deserializing it.
+  /// This ensures that history states are independent.
+  EditDataBundle _deepCopyToHistory(EditDataBundle bundle) {
+    final json = bundle.toJsonEditor();
+    return EditDataBundle.fromJsonHistory(json);
   }
 
   /// Clears the history and sets a new initial state.
@@ -23,7 +30,7 @@ class ActivityHistoryHelper {
   /// the redo stack is cleared.
   void record(EditDataBundle newState) {
     _redoStack.clear();
-    _undoStack.add(_deepCopy(newState));
+    _undoStack.add(_deepCopyToHistory(newState));
   }
 
   /// Reverts to the previous state in the history.
