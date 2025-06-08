@@ -1,6 +1,7 @@
 // places_panel.dart
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'activities_component_strings.dart';
 import 'activity_timeline_controller.dart';
 
@@ -14,8 +15,9 @@ class PlacesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final normalizedFilter = Utilities.removeDiacritics(controller.placeFilter.toLowerCase());
     final filtered = controller.allPlaces
-        .where((p) => (p.title ?? "").toLowerCase().contains(controller.placeFilter.toLowerCase()))
+        .where((p) => Utilities.removeDiacritics((p.title ?? "").toLowerCase()).contains(normalizedFilter))
         .toList();
     final hintColor = controller.hintColor;
     final textColor = controller.textColor;
