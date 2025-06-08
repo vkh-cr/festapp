@@ -640,7 +640,6 @@ class DbEvents {
     final data = response['data'] as Map<String, dynamic>;
 
     // ---- EVENT PROCESSING (Main events) ----
-    // This part uses GetEventsHelper and should be fine if GetEventsHelper is correct
     List<EventModel> events = GetEventsHelper.parseEvents(data);
     final List<PlaceModel> placesListForEvents = GetEventsHelper.parsePlaces(data);
     final List<EventUserCount> usersCountList = GetEventsHelper.parseEventUsers(data);
@@ -652,7 +651,7 @@ class DbEvents {
     final groupsByParent = <int, List<EventGroupModel>>{};
     final parentsByChild = <int, List<EventGroupModel>>{};
     for (var g in groupsList) {
-        groupsByParent.putIfAbsent(g.eventParent, () => []).add(g);
+      groupsByParent.putIfAbsent(g.eventParent, () => []).add(g);
       parentsByChild.putIfAbsent(g.eventChild,    () => []).add(g);
     }
 
@@ -660,7 +659,6 @@ class DbEvents {
     final savedByEvent     = { for (var s in usersSavedList)     s.eventId: s.count };
 
     for (var ev in events) {
-      // override place with full model if available
       if (ev.place?.id != null) {
         ev.place = placeById[ev.place!.id];
       }
@@ -680,19 +678,13 @@ class DbEvents {
     events = events.sortEvents();
 
     // ---- ACTIVITY PROCESSING ----
-    // Note: ActivityEventModel and ActivityPlaceModel are specific to activities context
-    // SQL 'events' (for ActivityEventModel) and 'places' (for ActivityPlaceModel) are the main lists.
-    final List<ActivityEventModel> activityRelatedEvents = ActivityDataHelper.parseEvents(data); // Parsed from main 'events'
-    final List<ActivityPlaceModel> activityRelatedPlaces = ActivityDataHelper.parsePlaces(data); // Parsed from main 'places'
-
-    final List<ActivityModel> activitiesList = ActivityDataHelper.parseActivities(data); // From 'activities'
-    final List<ActivityAssignmentModel> assignmentsList = ActivityDataHelper.parseActivityAssignments(data); // From 'activity_assignments'
-
-    // User info for assignments (should now be populated from 'user_info' key)
+    final List<ActivityEventModel> activityRelatedEvents = ActivityDataHelper.parseEvents(data);
+    final List<ActivityPlaceModel> activityRelatedPlaces = ActivityDataHelper.parsePlaces(data);
+    final List<ActivityModel> activitiesList = ActivityDataHelper.parseActivities(data);
+    final List<ActivityAssignmentModel> assignmentsList = ActivityDataHelper.parseActivityAssignments(data);
     final List<ActivityUserInfoModel> usersList = ActivityDataHelper.parseUsers(data);
     final userMapById = { for (var u in usersList) if (u.id != null) u.id!: u };
 
-    // Links for assignments
     final linkEventList = (data['assignment_events'] as List<dynamic>?)
         ?.map((item) => AssignmentEventLinkModel.fromJson(item as Map<String, dynamic>))
         .toList() ?? [];
@@ -700,7 +692,6 @@ class DbEvents {
         ?.map((item) => AssignmentPlaceLinkModel.fromJson(item as Map<String, dynamic>))
         .toList() ?? [];
 
-    // Create lookup maps for activity-related events and places
     final activityEventByIdMap = { for (var e in activityRelatedEvents) if (e.id != null) e.id!: e };
     final activityPlaceByIdMap = { for (var p in activityRelatedPlaces) if (p.id != null) p.id!: p };
 
@@ -717,7 +708,6 @@ class DbEvents {
       }
     }
 
-    // Link assignments with their related events, places, and user object
     for (var assignment in assignmentsList) {
       final eventIdsForCurrentAssignment = eventsByAssignmentId[assignment.id] ?? [];
       assignment.events = eventIdsForCurrentAssignment
@@ -731,15 +721,13 @@ class DbEvents {
           .whereType<ActivityPlaceModel>()
           .toList();
 
-      // Link user object to assignment
-      // `assignment.userInfo` should be the user's ID string from ActivityAssignmentModel.fromJson
       if (assignment.userInfo != null && userMapById.containsKey(assignment.userInfo)) {
         assignment.user = userMapById[assignment.userInfo!];
       }
     }
 
-    // Link assignments back to their parent activities
-    final assignmentsByActivityId = <int, List<ActivityAssignmentModel>>{};
+    // MODIFIED: The key of this map is changed from int to String to support UUIDs.
+    final assignmentsByActivityId = <String, List<ActivityAssignmentModel>>{};
     for (var asg in assignmentsList) {
       final activityId = asg.activityId;
       if (activityId != null) {
