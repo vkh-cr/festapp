@@ -65,7 +65,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
       if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
     }
     for (var e in _data!.activities) {
-      if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
+      if (e.id != null) _eventAndActivitiesDescriptions[e.id!.hashCode] = e.description;
     }
     _fullEventsLoaded = true;
   }
@@ -134,7 +134,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
       if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
     }
     for (var e in activities) {
-      if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
+      if (e.id != null) _eventAndActivitiesDescriptions[e.id!.hashCode] = e.description;
     }
 
     var actDots = ActivityDataHelper.activitiesToTimeBlocks(activities, offlineEvents);

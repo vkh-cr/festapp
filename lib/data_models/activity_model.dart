@@ -18,7 +18,6 @@ class ActivityPlaceModel {
   Map<String, dynamic> toJson() {
     return {
       Tb.places.id: id,
-      Tb.places.title: title,
     };
   }
 }
@@ -28,29 +27,28 @@ class ActivityEventModel {
   final String? title;
   final DateTime startTime;
   final DateTime endTime;
+  final ActivityPlaceModel? place;
 
   ActivityEventModel(
-      {this.id, this.title, required this.startTime, required this.endTime});
+      {this.id, this.title, required this.startTime, required this.endTime, this.place});
 
   factory ActivityEventModel.fromJson(Map<String, dynamic> json) {
     return ActivityEventModel(
-      id: json[Tb.events.id] as int?,
-      title: json[Tb.events.title] as String?,
-      startTime: (json[Tb.events.start_time] != null
-          ? DateTime.parse(json[Tb.events.start_time] as String).toOccasionTime()
-          : DateTime.fromMicrosecondsSinceEpoch(0)),
-      endTime: (json[Tb.events.end_time] != null
-          ? DateTime.parse(json[Tb.events.end_time] as String).toOccasionTime()
-          : DateTime.fromMicrosecondsSinceEpoch(0)),
+        id: json[Tb.events.id] as int?,
+        title: json[Tb.events.title] as String?,
+        startTime: (json[Tb.events.start_time] != null
+            ? DateTime.parse(json[Tb.events.start_time] as String).toOccasionTime()
+            : DateTime.fromMicrosecondsSinceEpoch(0)),
+        endTime: (json[Tb.events.end_time] != null
+            ? DateTime.parse(json[Tb.events.end_time] as String).toOccasionTime()
+            : DateTime.fromMicrosecondsSinceEpoch(0)),
+        place: json[Tb.places.table] != null ? ActivityPlaceModel.fromJson(json[Tb.places.table]) : null
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       Tb.events.id: id,
-      Tb.events.title: title,
-      Tb.events.start_time: startTime.toIso8601String(),
-      Tb.events.end_time: endTime.toIso8601String(),
     };
   }
 }
@@ -73,8 +71,6 @@ class ActivityUserInfoModel {
   Map<String, dynamic> toJson() {
     return {
       Tb.user_info.id: id,
-      Tb.user_info.name: name,
-      Tb.user_info.surname: surname,
     };
   }
 
@@ -106,7 +102,7 @@ class ActivityUserInfoModel {
 var _uuid = Uuid();
 
 class ActivityModel {
-  int? id;
+  final String id;
   DateTime? createdAt;
   DateTime? updatedAt;
   String? title;
@@ -120,7 +116,7 @@ class ActivityModel {
   List<ActivityAssignmentModel>? assignments;
 
   ActivityModel({
-    this.id,
+    String? id,
     this.createdAt,
     this.updatedAt,
     this.title,
@@ -132,11 +128,11 @@ class ActivityModel {
     this.order,
     this.data,
     this.assignments,
-  });
+  }) : id = id ?? _uuid.v4();
 
   factory ActivityModel.fromJson(Map<String, dynamic> j) {
     return ActivityModel(
-      id: j[Tb.activities.id] as int?,
+      id: j[Tb.activities.id] as String,
       createdAt: j[Tb.activities.created_at] != null
           ? DateTime.parse(j[Tb.activities.created_at] as String)
           : null,
@@ -173,6 +169,22 @@ class ActivityModel {
       Tb.activities.order: order,
       Tb.activities.data: data,
       Tb.activity_assignments.table: assignments?.map((e) => e.toJson()).toList(),
+    };
+  }
+
+  Map<String, dynamic> toJsonEditor() {
+    return {
+      Tb.activities.id: id,
+      Tb.activities.created_at: createdAt?.toIso8601String(),
+      Tb.activities.updated_at: updatedAt?.toIso8601String(),
+      Tb.activities.title: title,
+      Tb.activities.description: description,
+      Tb.activities.type: type,
+      Tb.activities.occasion: occasion,
+      Tb.activities.unit: unit,
+      Tb.activities.is_hidden: isHidden,
+      Tb.activities.order: order,
+      Tb.activities.data: data,
     };
   }
 }
@@ -221,7 +233,7 @@ class AssignmentEventLinkModel {
 
 class ActivityAssignmentModel {
   final String id;
-  int? activityId;
+  String? activityId;
   ActivityUserInfoModel? user;
   String? userInfo;
   DateTime? startTime;
@@ -252,7 +264,7 @@ class ActivityAssignmentModel {
     String? parsedId = j[Tb.activity_assignments.id] as String?;
     return ActivityAssignmentModel(
       id: parsedId ?? _uuid.v4(),
-      activityId: j[Tb.activity_assignments.activity_id] as int?,
+      activityId: j[Tb.activity_assignments.activity_id] as String?,
       userInfo: j[Tb.activity_assignments.user] as String?,
       startTime: j[Tb.activity_assignments.start_time] != null
           ? DateTime.parse(j[Tb.activity_assignments.start_time] as String)
@@ -296,6 +308,20 @@ class ActivityAssignmentModel {
     };
   }
 
+  Map<String, dynamic> toJsonEditor() {
+    return {
+      Tb.activity_assignments.id: id,
+      Tb.activity_assignments.activity_id: activityId,
+      Tb.activity_assignments.user: userInfo,
+      Tb.activity_assignments.start_time: startTime?.toIso8601String(),
+      Tb.activity_assignments.end_time: endTime?.toIso8601String(),
+      Tb.activity_assignments.title: title,
+      Tb.activity_assignments.description: description,
+      Tb.activity_assignments.data: data,
+      Tb.user_info.table: user?.toJson(),
+    };
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -308,6 +334,9 @@ class ActivityAssignmentModel {
 }
 
 class EditDataBundle {
+  int? id;
+  int? parentHistoryId;
+
   List<ActivityEventModel>? events;
   List<ActivityPlaceModel>? places;
   List<ActivityModel>? activities;
@@ -324,10 +353,14 @@ class EditDataBundle {
     this.assignmentPlaceLinks,
     this.assignmentEventLinks,
     this.activityAssignments,
+    this.id,
+    this.parentHistoryId,
   });
 
   factory EditDataBundle.fromJson(Map<String, dynamic> j) {
     return EditDataBundle(
+      id: j['id'] as int?,
+      parentHistoryId: j['parent_history_id'] as int?,
       events: (j['events'] as List<dynamic>?)
           ?.map((e) => ActivityEventModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -352,15 +385,73 @@ class EditDataBundle {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  factory EditDataBundle.fromJsonHistory(Map<String, dynamic> j) {
+    return EditDataBundle(
+      id: j['id'] as int?,
+      parentHistoryId: j['parent_history_id'] as int?,
+      activities: (j[Tb.activities.table] as List<dynamic>?)
+          ?.map((a) => ActivityModel.fromJson(a as Map<String, dynamic>))
+          .toList(),
+
+      activityAssignments: (j[Tb.activity_assignments.table] as List<dynamic>?)
+          ?.map((a) => ActivityAssignmentModel.fromJson(a as Map<String, dynamic>))
+          .toList(),
+
+      assignmentPlaceLinks: (j['assignmentPlaceLinks'] as List<dynamic>?)
+          ?.map((l) => AssignmentPlaceLinkModel.fromJson(l as Map<String, dynamic>))
+          .toList(),
+
+      assignmentEventLinks: (j['assignmentEventLinks'] as List<dynamic>?)
+          ?.map((l) => AssignmentEventLinkModel.fromJson(l as Map<String, dynamic>))
+          .toList(),
+
+    );
+  }
+
+  Map<String, dynamic> toJsonHistory() {
     return {
-      'events': events?.map((e) => e.toJson()).toList(),
-      'places': places?.map((p) => p.toJson()).toList(),
-      Tb.activities.table: activities?.map((a) => a.toJson()).toList(),
-      Tb.user_info.table: users?.map((u) => u.toJson()).toList(),
+      'id': id,
+      'parent_history_id': parentHistoryId,
+      Tb.activities.table: activities?.map((a) => a.toJsonEditor()).toList(),
+      Tb.activity_assignments.table: activityAssignments?.map((a) => a.toJson()).toList(),
       'assignmentPlaceLinks': assignmentPlaceLinks?.map((l) => l.toJson()).toList(),
       'assignmentEventLinks': assignmentEventLinks?.map((l) => l.toJson()).toList(),
-      Tb.activity_assignments.table: activityAssignments?.map((a) => a.toJson()).toList(),
+    };
+  }
+
+  Map<String, dynamic> toJsonEditor() {
+    // First, get a flat list of all assignments from within all activities.
+    final allAssignments = activities?.expand((activity) => activity.assignments ?? []).toList() ?? [];
+
+    // Create the list of place-to-assignment links.
+    final placeLinks = allAssignments
+        .expand((assignment) =>
+    // For each assignment, create a link model for each of its places.
+    assignment.places.map((place) => AssignmentPlaceLinkModel(
+      assignmentId: assignment.id,
+      placeId: place.id,
+    )))
+        .toList();
+
+    // Create the list of event-to-assignment links.
+    final eventLinks = allAssignments
+        .expand((assignment) =>
+    // For each assignment, create a link model for each of its events.
+    assignment.events.map((event) => AssignmentEventLinkModel(
+      assignmentId: assignment.id,
+      eventId: event.id,
+    )))
+        .toList();
+
+    return {
+      // Metadata
+      'id': id,
+      'parent_history_id': parentHistoryId,
+
+      Tb.activities.table: activities?.map((a) => a.toJson()).toList(),
+      Tb.activity_assignments.table: allAssignments.map((a) => a.toJson()).toList(),
+      'assignmentPlaceLinks': placeLinks.map((l) => l.toJson()).toList(),
+      'assignmentEventLinks': eventLinks.map((l) => l.toJson()).toList(),
     };
   }
 }

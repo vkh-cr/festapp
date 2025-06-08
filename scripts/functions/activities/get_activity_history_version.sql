@@ -18,7 +18,8 @@ BEGIN
     SELECT jsonb_build_object(
         'id', id,
         'created_at', created_at,
-        'activities_data', activities_data
+        'activities_data', activities_data,
+        'parent_history_id', parent_history_id
     )
     INTO history_data
     FROM public.activity_history
