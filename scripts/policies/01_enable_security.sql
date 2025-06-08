@@ -40,6 +40,7 @@ ALTER TABLE public.activities    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_assignment_places  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_assignment_events  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_assignments   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_history ENABLE ROW LEVEL SECURITY;
 
 --eshop
 ALTER TABLE eshop.orders_history ENABLE ROW LEVEL SECURITY;
