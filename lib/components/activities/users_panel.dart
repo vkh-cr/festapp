@@ -1,6 +1,7 @@
 // users_panel.dart
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'activities_component_strings.dart';
 import 'constants.dart'; // For darkUserColors
 import 'activity_timeline_controller.dart';
@@ -15,8 +16,9 @@ class UsersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final normalizedFilter = Utilities.removeDiacritics(controller.userFilter.toLowerCase());
     final filtered = controller.allUsers
-        .where((u) => u.toFullNameString().toLowerCase().contains(controller.userFilter.toLowerCase()))
+        .where((u) => Utilities.removeDiacritics(u.toFullNameString().toLowerCase()).contains(normalizedFilter))
         .toList();
     final hintColor = controller.hintColor; // Using controller's getter
     final textColor = controller.textColor; // Using controller's getter
@@ -63,7 +65,7 @@ class UsersPanel extends StatelessWidget {
               itemBuilder: (context, index) {
                 final u = filtered[index];
                 final initials = u.getInitials();
-                final color = darkUserColors[u.hashCode % darkUserColors.length];
+                final color = ActivityConstants.darkUserColors[u.hashCode % ActivityConstants.darkUserColors.length];
                 final avatarTextColor = Colors.white;
                 final assignedHours = controller.userAssignedHours[u.id] ?? Duration.zero;
                 final bool hasAssignments = assignedHours.inMinutes > 0;
