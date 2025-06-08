@@ -18,6 +18,7 @@ import 'package:fstapp/services/utilities_all.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
 import 'activities_component_strings.dart';
+import 'activity_data_helper.dart';
 import 'activity_history_helper.dart';
 import 'activity_timeline_controller.dart';
 import 'constants.dart';
@@ -45,7 +46,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   DateTime? _timelineStart, _timelineEnd;
   late final ActivityHistoryHelper _historyHelper;
   Timer? _autosaveDebounce;
-  bool _isAutosaving = false;
   bool _isPublishing = false;
   double _scale = ActivityConstants.kInitialScale;
   double _panOffset = ActivityConstants.kInitialPanOffset;
@@ -184,51 +184,142 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     }
   }
 
-  Future<void> _autosave() async {
-    if (!mounted || _bundle == null) return;
+  bool _isShowingConflictDialog = false;
 
-    // This state change no longer shows a loading indicator in the UI,
-    // but it's kept for internal state management.
+  Future<void> _autosave() async {
+    if (!mounted || _bundle == null || _isShowingConflictDialog) return;
+
     setState(() {
-      _isAutosaving = true;
       _justAutosaved = false;
     });
 
     bool didSaveSuccessfully = false;
     try {
-      await DbActivities.autosaveActivities(widget.occasionId, _bundle!);
-      didSaveSuccessfully = true;
+      final response = await DbActivities.autosaveActivities(widget.occasionId, _bundle!);
+
+      if (response != null && response['code'] == 409) {
+        final conflictData = response['data'] as Map<String, dynamic>?;
+        final latestPublishId = conflictData?['latest_publish_id'] as int?;
+        final publishedAtStr = conflictData?['published_at'] as String?;
+
+        String conflictMessage = ActivitiesComponentStrings.conflictMessageDefault;
+        if (publishedAtStr != null) {
+          final publishedAt = DateTime.parse(publishedAtStr).toLocal();
+          final formattedTime = DateFormat.jm(context.locale.toString()).format(publishedAt);
+          final formattedDate = DateFormat.yMMMd(context.locale.toString()).format(publishedAt);
+          conflictMessage = ActivitiesComponentStrings.conflictMessageWithTime(formattedTime, formattedDate);
+        }
+
+        final choice = await _showConflictDialog(conflictMessage);
+
+        if (mounted) {
+          if (choice == 'reload') {
+            await _loadData(forcePublished: true);
+            return;
+          } else if (choice == 'continue') {
+            setState(() {
+              _bundle!.parentHistoryId = latestPublishId;
+            });
+            _autosave();
+            return;
+          }
+        }
+      } else if (response != null && response['code'] == 200) {
+        didSaveSuccessfully = true;
+      } else {
+        print("Autosave failed: ${response?['message']}");
+      }
     } catch (e) {
-      // Error is logged to the console for debugging but not shown to the user.
-      print("Autosave failed silently: $e");
-      // didSaveSuccessfully remains false
+      print("Autosave failed with exception: $e");
     }
 
     if (!mounted) return;
 
     setState(() {
-      _isAutosaving = false;
-      // The "Autosaved" checkmark will only appear if the save was successful.
       _justAutosaved = didSaveSuccessfully;
     });
   }
 
+
+  Future<String?> _showConflictDialog(String message) async {
+    if (_isShowingConflictDialog) return null;
+    setState(() => _isShowingConflictDialog = true);
+
+    final String? choice = await showDialog<String>(
+      context: context,
+      barrierDismissible: true, // Allow dismissing by tapping the background
+      builder: (ctx) => AlertDialog(
+        title: Text(ActivitiesComponentStrings.dialogTitleUpdateConflict),
+        content: Text(message),
+        actions: <Widget>[
+          // Both buttons are now TextButton for a neutral choice
+          TextButton(
+            child: Text(ActivitiesComponentStrings.buttonContinueWithDraft),
+            onPressed: () {
+              Navigator.of(ctx).pop('continue');
+            },
+          ),
+          TextButton(
+            child: Text(ActivitiesComponentStrings.buttonLoadNewestVersion),
+            onPressed: () {
+              Navigator.of(ctx).pop('reload');
+            },
+          ),
+        ],
+      ),
+    );
+
+    if(mounted) {
+      setState(() => _isShowingConflictDialog = false);
+    }
+
+    return choice;
+  }
+
   void _processBundle(EditDataBundle bundle,
       {bool preservePanAndScale = false}) {
-    final localBundle = EditDataBundle.fromJson(bundle.toJson());
-    localBundle.activities!
-        .sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+    // Create a new, complete bundle for the new state.
+    // If the incoming bundle from history is missing static data (users, places, events),
+    // this merge operation populates it from the current state's master lists (_bundle).
+    // If the incoming bundle is from the initial _loadData, it will be complete already.
+    final newCompleteBundle = EditDataBundle(
+      users: bundle.users ?? _bundle?.users,
+      places: bundle.places ?? _bundle?.places,
+      events: bundle.events ?? _bundle?.events,
+
+      // Copy the dynamic, historical data from the incoming bundle
+      activities: bundle.activities,
+      activityAssignments: bundle.activityAssignments,
+      assignmentPlaceLinks: bundle.assignmentPlaceLinks,
+      assignmentEventLinks: bundle.assignmentEventLinks,
+
+      // Copy the metadata
+      id: bundle.id,
+      parentHistoryId: bundle.parentHistoryId,
+    );
+
+    // The new bundle is now logically complete, but object references might be
+    // broken if they came from a deserialized object. Re-link everything.
+    ActivityDataHelper.linkAssignmentsToActivities(newCompleteBundle);
+
+    // Sort activities by their specified order.
+    newCompleteBundle.activities?.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+
     setState(() {
-      _bundle = localBundle;
-      _allPlaces = localBundle.places ?? [];
-      _allEvents = localBundle.events ?? [];
-      _allUsers = localBundle.users ?? [];
+      // Set the main state bundle to our newly constructed complete bundle.
+      _bundle = newCompleteBundle;
+
+      // Ensure the top-level master lists are also updated.
+      _allUsers = _bundle!.users ?? [];
+      _allPlaces = _bundle!.places ?? [];
+      _allEvents = _bundle!.events ?? [];
+
+      // Re-calculate all derived data and update UI.
       _computeTimelineBounds();
       _activityAssignments.clear();
       if (_bundle!.activities != null) {
         for (final activity in _bundle!.activities!) {
-          _activityAssignments[activity] =
-              List.from(activity.assignments ?? []);
+          _activityAssignments[activity] = List.from(activity.assignments ?? []);
         }
       }
       _recalculateUserAssignedHours();
@@ -241,42 +332,83 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
   }
 
-  Future<void> _loadData(
-      {double? initialPanOffset,
-      double? initialScale,
-      bool forcePublished = false}) async {
-    final publishedData = await DbActivities.getForEdit(widget.occasionId);
-    if (publishedData == null) return;
+  Future<void> _loadData({ bool forcePublished = false, double? initialPanOffset, double? initialScale }) async {
+    // Prevent multiple load operations from running concurrently
+    if (_isShowingConflictDialog) return;
 
-    EditDataBundle? dataToLoad = publishedData;
+    // Step 1: Always fetch the complete data bundle first. This provides the master lists
+    // of all users, places, and events for the entire session.
+    final baseBundle = await DbActivities.getForEdit(widget.occasionId);
+    if (baseBundle == null) {
+      if (mounted) {
+        // Handle the critical failure to load essential data
+        ToastHelper.Show(context, ActivitiesComponentStrings.toastFailedToLoad, severity: ToastSeverity.NotOk);
+      }
+      return;
+    }
+
+    // Step 2: Now, check for autosaves and the latest published version ID.
+    final autosaveInfo = await DbActivities.getAutosaveAndPublishInfo(widget.occasionId);
+    final latestPublishId = autosaveInfo.latestPublishId;
+    // If forcePublished is true, we ignore the returned autosave bundle.
+    final autosavedBundle = forcePublished ? null : autosaveInfo.autosavedBundle;
+
+    EditDataBundle? dataToLoad;
     bool loadedFromAutosave = false;
 
-    if (!forcePublished) {
-      final historyItems =
-          await DbActivities.listActivityHistory(widget.occasionId);
-      final lastPublished =
-          historyItems.firstWhereOrNull((h) => h.historyType == 'PUBLISH');
-      final latestAutosaveInfo =
-          historyItems.firstWhereOrNull((h) => h.historyType == 'AUTOSAVE');
+    if (autosavedBundle != null) {
+      // An autosave exists. It only contains activity-specific data.
+      final isStale = latestPublishId != null && autosavedBundle.parentHistoryId != latestPublishId;
+      if (isStale) {
+        // The user's autosave is based on an older published version.
+        final choice = await _showConflictDialog(
+            ActivitiesComponentStrings.staleAutosaveConflictMessage
+        );
 
-      if (latestAutosaveInfo != null &&
-          (lastPublished == null ||
-              latestAutosaveInfo.createdAt.isAfter(lastPublished.createdAt))) {
-        final autosavedBundle = await DbActivities.getActivityHistoryVersion(
-            widget.occasionId, latestAutosaveInfo.id);
-        if (autosavedBundle != null) {
-          dataToLoad = autosavedBundle;
+        if (choice == 'reload') {
+          await DbActivities.deleteAutosave(widget.occasionId);
+          // Use the fresh baseBundle we already fetched.
+          dataToLoad = baseBundle;
+        } else if (choice == 'continue') {
+          // User wants to keep their draft. MERGE it with the base data.
+          baseBundle.activities = autosavedBundle.activities;
+          baseBundle.activityAssignments = autosavedBundle.activityAssignments;
+          baseBundle.assignmentEventLinks = autosavedBundle.assignmentEventLinks;
+          baseBundle.assignmentPlaceLinks = autosavedBundle.assignmentPlaceLinks;
+          // Re-base the merged bundle on the new published version.
+          baseBundle.parentHistoryId = latestPublishId;
+          dataToLoad = baseBundle;
           loadedFromAutosave = true;
+        } else {
+          // User dismissed the dialog. Default to loading the fresh data without the autosave.
+          dataToLoad = baseBundle;
         }
+
+      } else {
+        // Autosave is not stale. MERGE its data into the base bundle.
+        baseBundle.activities = autosavedBundle.activities;
+        baseBundle.activityAssignments = autosavedBundle.activityAssignments;
+        baseBundle.assignmentEventLinks = autosavedBundle.assignmentEventLinks;
+        baseBundle.assignmentPlaceLinks = autosavedBundle.assignmentPlaceLinks;
+        baseBundle.parentHistoryId = autosavedBundle.parentHistoryId;
+        dataToLoad = baseBundle;
+        loadedFromAutosave = true;
       }
+    }
+
+    // If dataToLoad is still null, it means no autosave existed. Use the base bundle.
+    if (dataToLoad == null) {
+      dataToLoad = baseBundle;
+      dataToLoad.parentHistoryId = latestPublishId; // Base this session on the latest publish
+      loadedFromAutosave = false;
     }
 
     setState(() {
       _isAutosaveLoaded = loadedFromAutosave;
-      _justAutosaved =
-          loadedFromAutosave; // Show "Autosaved" text if loaded from autosave
+      _justAutosaved = loadedFromAutosave;
     });
 
+    // _processBundle will now always receive a complete bundle for initial processing.
     _processBundle(dataToLoad, preservePanAndScale: initialPanOffset != null);
     _historyHelper.clear(dataToLoad);
 
@@ -401,12 +533,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   void _onAddNewActivity() {
     _hideAssignmentDetailOverlay();
     final newOrder = _bundle?.activities?.length ?? 0;
+
+    // The ActivityModel constructor now automatically generates a client-side UUID.
     final newAct = ActivityModel(
-      id: null,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       title:
-          '${ActivitiesComponentStrings.textUntitledActivity} ${newOrder + 1}',
+      '${ActivitiesComponentStrings.textUntitledActivity} ${newOrder + 1}',
       description: '',
       type: null,
       occasion: widget.occasionId,
@@ -416,6 +549,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       data: {},
       assignments: [],
     );
+
     setState(() {
       _bundle?.activities?.add(newAct);
       _activityAssignments[newAct] = [];
@@ -687,8 +821,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   Future<void> _showHistoryDialog() async {
+    // Fetch the latest publish ID *before* showing the dialog,
+    // so we have it ready for the restore operation.
+    final autosaveInfo = await DbActivities.getAutosaveAndPublishInfo(widget.occasionId);
+    final latestPublishId = autosaveInfo.latestPublishId;
+
     final historyItems =
-        await DbActivities.listActivityHistory(widget.occasionId);
+    await DbActivities.listActivityHistory(widget.occasionId);
     if (!mounted) return;
 
     showDialog(
@@ -696,10 +835,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       builder: (ctx) {
         final isDark = ActivityConstants.isDarkMode(ctx);
         return AlertDialog(
-          title: Text("Version History"),
+          title: Text(ActivitiesComponentStrings.dialogTitleVersionHistory),
           backgroundColor: isDark ? Colors.grey[800] : Colors.white,
           titleTextStyle:
-              TextStyle(color: isDark ? Colors.white : Colors.black),
+          TextStyle(color: isDark ? Colors.white : Colors.black),
           content: Container(
             width: double.maxFinite,
             child: ListView.builder(
@@ -707,20 +846,37 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               itemBuilder: (context, index) {
                 final item = historyItems[index];
                 final isAutosave = item.historyType == 'AUTOSAVE';
-                // Using a more readable, localized date format
                 final formattedDate =
-                    DateFormat.yMMMd(context.locale.toString())
-                        .add_jms()
-                        .format(item.createdAt.toLocal());
+                DateFormat.yMMMd(context.locale.toString())
+                    .add_jms()
+                    .format(item.createdAt.toLocal());
+
+                final typeString = isAutosave
+                    ? ActivitiesComponentStrings.textAutosavedDraft
+                    : ActivitiesComponentStrings.textPublishedVersion;
+
+                // Define a unique icon and color based on the history type for clear visual differentiation.
+                final IconData versionIcon;
+                final Color versionColor;
+                if (isAutosave) {
+                  versionIcon = Icons.history_toggle_off; // Icon for an in-progress draft
+                  versionColor = isDark ? Colors.orange.shade300 : Colors.orange.shade700;
+                } else { // Published
+                  versionIcon = Icons.publish_outlined; // Icon for a finalized, published version
+                  versionColor = isDark ? Colors.green.shade300 : Colors.green.shade600;
+                }
+
                 return ListTile(
+                  // Add the leading icon to the list tile.
+                  leading: Icon(versionIcon, color: versionColor),
                   title: Text(
-                    "${isAutosave ? 'Autosaved Draft' : 'Published Version'} by ${item.userFullName}",
+                    ActivitiesComponentStrings.historyLabel(typeString, item.userFullName),
                     style: TextStyle(
                         fontSize: 14,
                         color: isDark ? Colors.white : Colors.black),
                   ),
                   subtitle: Text(
-                    formattedDate, // Changed here
+                    formattedDate,
                     style: TextStyle(
                         fontSize: 12,
                         color: isDark ? Colors.white70 : Colors.black54),
@@ -730,9 +886,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     onPressed: () async {
                       Navigator.of(ctx).pop(); // Close dialog
                       final bundleToRestore =
-                          await DbActivities.getActivityHistoryVersion(
-                              widget.occasionId, item.id);
+                      await DbActivities.getActivityHistoryVersion(
+                          widget.occasionId, item.id);
+
                       if (bundleToRestore != null) {
+                        // Re-base the restored version on the CURRENT latest publish ID.
+                        bundleToRestore.parentHistoryId = latestPublishId;
+
                         _processBundle(bundleToRestore,
                             preservePanAndScale: true);
                         _recordStateChange();
@@ -1355,6 +1515,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                             minimumSize: Size(60, 30)),
                         onPressed: canPublish
                             ? () async {
+                          // Cancel any pending autosave operation to prevent race conditions.
+                          _autosaveDebounce?.cancel();
+
                           setState(() => _isPublishing = true);
                           _bundle!.activities ??= [];
                           for (var activityInBundle
@@ -1479,7 +1642,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 ),
                 IconButton(
                     icon: const Icon(Icons.history),
-                    tooltip: "Version History",
+                    tooltip: ActivitiesComponentStrings.tooltipVersionHistory,
                     splashRadius: 20,
                     iconSize: 20,
                     padding: EdgeInsets.zero,
@@ -2302,7 +2465,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     assignments.toList();
     if (_copyDragPreview != null &&
         _copyDragPreview?.userInfo == userInfo.id &&
-        activity.id != null &&
         _copyDragSource?.activityId == activity.id) {
       assignmentsToRender.add(_copyDragPreview!);
     }

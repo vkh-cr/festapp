@@ -20,8 +20,8 @@ class ActivitiesComponentStrings {
   static String get tooltipZoomOut => 'ActivitiesComponentStrings.tooltipZoomOut'.tr();
 
   // Autosave status
-  static String get textSaving => 'ActivitiesComponentStrings.textSaving'.tr();
   static String get textAutosaved => 'ActivitiesComponentStrings.textAutosaved'.tr();
+  static String get publishedSuccessfully => 'ActivitiesComponentStrings.publishedSuccessfully'.tr();
 
   // Publish Button Tooltips
   static String get textPublishing => 'ActivitiesComponentStrings.textPublishing'.tr();
@@ -71,37 +71,44 @@ class ActivitiesComponentStrings {
   static String get activity => 'ActivitiesComponentStrings.activity'.tr();
   static String publishWithCount(int count) => 'ActivitiesComponentStrings.publishWithCount'.tr(namedArgs: {"count": count.toString()});
 
+  // Conflict Dialog
+  static String get dialogTitleUpdateConflict => 'ActivitiesComponentStrings.dialogTitleUpdateConflict'.tr();
+  static String get buttonLoadNewestVersion => 'ActivitiesComponentStrings.buttonLoadNewestVersion'.tr();
+  static String get buttonContinueWithDraft => 'ActivitiesComponentStrings.buttonContinueWithDraft'.tr();
 
-  // Timeline Painter (Date/Time)
-  // Using intl package for true localization.
-  // Ensure you have added the intl package to your pubspec.yaml.
+  // Version History Dialog
+  static String get dialogTitleVersionHistory => 'ActivitiesComponentStrings.dialogTitleVersionHistory'.tr();
+  static String get tooltipVersionHistory => 'ActivitiesComponentStrings.tooltipVersionHistory'.tr();
+  static String get textAutosavedDraft => 'ActivitiesComponentStrings.textAutosavedDraft'.tr();
+  static String get textPublishedVersion => 'ActivitiesComponentStrings.textPublishedVersion'.tr();
+  static String historyLabel(String type, String user) => 'ActivitiesComponentStrings.historyLabel'.tr(namedArgs: {'type': type, 'user': user});
+
+  // Conflict Dialog Messages
+  static String get conflictMessageDefault => 'ActivitiesComponentStrings.conflictMessageDefault'.tr();
+  static String conflictMessageWithTime(String time, String date) => 'ActivitiesComponentStrings.conflictMessageWithTime'.tr(namedArgs: {'time': time, 'date': date});
+  static String get staleAutosaveConflictMessage => 'ActivitiesComponentStrings.staleAutosaveConflictMessage'.tr();
+
+  // Toast Messages
+  static String get toastFailedToLoad => 'ActivitiesComponentStrings.toastFailedToLoad'.tr();
 
   /// Returns a list of localized weekday abbreviations for the given locale.
-  /// Requires the intl package.
   static List<String> getWeekdayAbbreviations(String locale) {
-    // Use a date format that gives the abbreviated weekday name (e.g., 'E' or 'EEEEEE' depending on desired length)
-    // We iterate through days to get all 7 abbreviations starting from Monday.
     final List<String> abbreviations = [];
     final now = DateTime.now();
-    // Find the first Monday before or on today's date
     DateTime monday = now.subtract(Duration(days: now.weekday - 1));
 
     for (int i = 0; i < 7; i++) {
       final date = monday.add(Duration(days: i));
-      // 'E' gives a short abbreviation like Mon, Tue
-      // 'EEEEEE' gives a very short abbreviation like M, T
       abbreviations.add(DateFormat('E', locale).format(date));
     }
     return abbreviations;
   }
 
   /// Returns a list of localized month abbreviations for the given locale.
-  /// Requires the intl package.
   static List<String> getMonthAbbreviations(String locale) {
-    // Use a date format that gives the abbreviated month name ('MMM')
     final List<String> abbreviations = [];
     for (int i = 1; i <= 12; i++) {
-      final date = DateTime(2000, i, 1); // Use any year, day 1 for month formatting
+      final date = DateTime(2000, i, 1);
       abbreviations.add(DateFormat('MMM', locale).format(date));
     }
     return abbreviations;

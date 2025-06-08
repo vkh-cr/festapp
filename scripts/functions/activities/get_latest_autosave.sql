@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_latest_autosave(p_occasion_id BIGINT)
 RETURNS JSONB
 LANGUAGE plpgsql
 STABLE
-SECURITY INVOKER
+SECURITY DEFINER
 AS $$
 DECLARE
     autosave_data JSONB;
@@ -11,7 +11,8 @@ BEGIN
     SELECT jsonb_build_object(
         'id', id,
         'created_at', created_at,
-        'activities_data', activities_data
+        'activities_data', activities_data,
+        'parent_history_id', parent_history_id
     )
     INTO autosave_data
     FROM public.activity_history
