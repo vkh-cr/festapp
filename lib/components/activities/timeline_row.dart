@@ -12,15 +12,16 @@ class TimelineRow extends StatefulWidget {
   final DateTime start, end;
   final DateTime itemStart, itemEnd;
   final void Function(DateTime finalStart, DateTime finalEnd) onDragEnd;
-  final VoidCallback? onTapBar;
+  // MODIFIED: Changed back to accept TapUpDetails
+  final void Function(TapUpDetails details)? onTapBar;
   final VoidCallback? onDragStart;
   final Color? barColor;
   final bool draggable;
   final double zoomScale;
   final void Function(dynamic droppedItemData)? onPlaceOrEventDropped;
   final ActivityAssignmentModel? assignment;
-  final LayerLink layerLink;
   final bool isDarkMode;
+  // REMOVED: final LayerLink layerLink;
 
   const TimelineRow({
     Key? key, required this.start, required this.end,
@@ -29,7 +30,7 @@ class TimelineRow extends StatefulWidget {
     this.onTapBar, this.onDragStart, this.barColor, this.draggable = true, this.zoomScale = 1.0,
     this.onPlaceOrEventDropped,
     this.assignment,
-    required this.layerLink,
+    // REMOVED: required this.layerLink,
     required this.isDarkMode,
   }) : super(key: key);
 
@@ -75,11 +76,12 @@ class _TimelineRowState extends State<TimelineRow> {
       _dragItemEndInternal = widget.itemEnd;
       needsRecompute = true;
     }
+    // MODIFIED: Removed layerLink from this comparison
     if (oldWidget.start != widget.start || oldWidget.end != widget.end ||
         oldWidget.zoomScale != widget.zoomScale ||
         !DeepCollectionEquality().equals(oldWidget.assignment?.places, widget.assignment?.places) ||
         !DeepCollectionEquality().equals(oldWidget.assignment?.events, widget.assignment?.events) ||
-        oldWidget.layerLink != widget.layerLink || oldWidget.barColor != widget.barColor ||
+        oldWidget.barColor != widget.barColor ||
         oldWidget.draggable != widget.draggable || oldWidget.isDarkMode != widget.isDarkMode
     ) {
       needsRecompute = true;
@@ -118,7 +120,7 @@ class _TimelineRowState extends State<TimelineRow> {
 
   double _snapPctValue(double pctValue, double totalMinutesInTimeline) {
     if (totalMinutesInTimeline <= 0) return pctValue;
-    final Duration stepDuration = widget.zoomScale < 0.5 ? kSnapStepCoarse : kSnapStepFine;
+    final Duration stepDuration = widget.zoomScale < 0.5 ? ActivityConstants.kSnapStepCoarse : ActivityConstants.kSnapStepFine;
     if (stepDuration.inMinutes <= 0) return pctValue;
     final double stepAsPct = stepDuration.inMinutes / totalMinutesInTimeline;
     return stepAsPct <= 0 ? pctValue : (pctValue / stepAsPct).round() * stepAsPct;
@@ -166,7 +168,7 @@ class _TimelineRowState extends State<TimelineRow> {
     final dx = d.globalPosition.dx - _resizeGlobalStartX;
     final dPct = bc.maxWidth > 0 ? (dx / bc.maxWidth) : 0.0;
     final totalTimelineSeconds = widget.end.difference(widget.start).inSeconds.toDouble();
-    final minWidthPct = totalTimelineSeconds > 0 ? (kMinTimeLength.inSeconds / totalTimelineSeconds) : 0.0;
+    final minWidthPct = totalTimelineSeconds > 0 ? (ActivityConstants.kMinTimeLength.inSeconds / totalTimelineSeconds) : 0.0;
     final totalMinutes = totalTimelineSeconds / 60.0;
 
     setState(() {
@@ -209,10 +211,10 @@ class _TimelineRowState extends State<TimelineRow> {
     int newStartOffsetSeconds = (totalSeconds * _leftPct).round();
     int newDurationSeconds = (totalSeconds * _widthPct).round();
 
-    if (newDurationSeconds < kMinTimeLength.inSeconds && totalSeconds >= kMinTimeLength.inSeconds) {
-      newDurationSeconds = kMinTimeLength.inSeconds;
+    if (newDurationSeconds < ActivityConstants.kMinTimeLength.inSeconds && totalSeconds >= ActivityConstants.kMinTimeLength.inSeconds) {
+      newDurationSeconds = ActivityConstants.kMinTimeLength.inSeconds;
     } else if (newDurationSeconds <= 0 && totalSeconds > 0) {
-      newDurationSeconds = kMinTimeLength.inSeconds.clamp(1, totalSeconds);
+      newDurationSeconds = ActivityConstants.kMinTimeLength.inSeconds.clamp(1, totalSeconds);
     }
 
     _widthPct = (newDurationSeconds / totalSeconds).clamp(0.0, 1.0);
@@ -279,7 +281,7 @@ class _TimelineRowState extends State<TimelineRow> {
       var userInfo = widget.assignment?.user;
       if (userInfo != null) {
         final initials = userInfo.toFullNameString().split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join().toUpperCase();
-        Color userAvatarBgColor = darkUserColors[userInfo.hashCode % darkUserColors.length];
+        Color userAvatarBgColor = ActivityConstants.darkUserColors[userInfo.hashCode % ActivityConstants.darkUserColors.length];
         final double avatarWidgetWidth = _avatarSize + _avatarMarginRight;
         if (availableWidthForContent >= avatarWidgetWidth) {
           barChildren.add(
@@ -477,15 +479,17 @@ class _TimelineRowState extends State<TimelineRow> {
         ]),
       );
 
+      // MODIFICATION POINT: This widget is now much simpler.
       Widget interactiveItemBar = GestureDetector(
-        onTap: widget.draggable && !isPreviewItem ? widget.onTapBar : null,
+        onTapUp: widget.draggable && !isPreviewItem
+            ? (details) {
+          if (widget.onTapBar != null) widget.onTapBar!(details);
+        }
+            : null,
         onHorizontalDragStart: widget.draggable && !isPreviewItem ? _onItemDragStart : null,
         onHorizontalDragUpdate: widget.draggable && !isPreviewItem ? (d) => _onItemDragUpdate(d, bc) : null,
         onHorizontalDragEnd: widget.draggable && !isPreviewItem ? _onItemDragEnd : null,
-        child: CompositedTransformTarget(
-          link: widget.layerLink,
-          child: itemBar,
-        ),
+        child: itemBar,
       );
 
       return Stack(children: [
