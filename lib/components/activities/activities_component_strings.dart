@@ -1,4 +1,3 @@
-import 'package:intl/intl.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class ActivitiesComponentStrings {
@@ -65,8 +64,8 @@ class ActivitiesComponentStrings {
   static String get tooltipUserAssignmentOptions => 'ActivitiesComponentStrings.tooltipUserAssignmentOptions'.tr();
 
   // Default/Unnamed Items
-  static String textUnnamedPlace = 'Unnamed Place';
-  static String textUnnamedEvent = 'Unnamed Event';
+  static String get textUnnamedPlace => 'ActivitiesComponentStrings.textUnnamedPlace'.tr();
+  static String get textUnnamedEvent => 'ActivitiesComponentStrings.textUnnamedEvent'.tr();
 
   static String get activity => 'ActivitiesComponentStrings.activity'.tr();
   static String publishWithCount(int count) => 'ActivitiesComponentStrings.publishWithCount'.tr(namedArgs: {"count": count.toString()});
@@ -88,6 +87,21 @@ class ActivitiesComponentStrings {
   static String conflictMessageWithTime(String time, String date) => 'ActivitiesComponentStrings.conflictMessageWithTime'.tr(namedArgs: {'time': time, 'date': date});
   static String get staleAutosaveConflictMessage => 'ActivitiesComponentStrings.staleAutosaveConflictMessage'.tr();
 
+  // User Assignments Dialog
+  static String get dialogTitleSelectTargetUser => 'ActivitiesComponentStrings.dialogTitleSelectTargetUser'.tr();
+  static String dialogTitleAssignmentsFor(String user) => 'ActivitiesComponentStrings.dialogTitleAssignmentsFor'.tr(namedArgs: {'user': user});
+  static String get labelTotalTime => 'ActivitiesComponentStrings.labelTotalTime'.tr();
+  static String get textNoAssignmentsForUser => 'ActivitiesComponentStrings.textNoAssignmentsForUser'.tr();
+  static String get buttonCopyToUser => 'ActivitiesComponentStrings.buttonCopyToUser'.tr();
+  static String toastAssignmentsCopied(int count, String user) => 'ActivitiesComponentStrings.toastAssignmentsCopied'.tr(namedArgs: {'count': count.toString(), 'user': user});
+  static String get textSelectAll => 'ActivitiesComponentStrings.textSelectAll'.tr();
+  static String get tooltipCloseDialog => 'ActivitiesComponentStrings.tooltipCloseDialog'.tr();
+  static String toastAssignmentsDeletedInDialog(int count) => 'ActivitiesComponentStrings.toastAssignmentsDeletedInDialog'.tr(namedArgs: {'count': count.toString()});
+  static String toastAssignmentsCopiedInDialog(int count, String user) => 'ActivitiesComponentStrings.toastAssignmentsCopiedInDialog'.tr(namedArgs: {'count': count.toString(), 'user': user});
+
+  // NEW: Date format string
+  static String get dateFormatDayMonth => 'EEEE, d. MMMM';
+
   // Toast Messages
   static String get toastFailedToLoad => 'ActivitiesComponentStrings.toastFailedToLoad'.tr();
 
@@ -95,6 +109,7 @@ class ActivitiesComponentStrings {
   static List<String> getWeekdayAbbreviations(String locale) {
     final List<String> abbreviations = [];
     final now = DateTime.now();
+    // Ensure we start from Monday
     DateTime monday = now.subtract(Duration(days: now.weekday - 1));
 
     for (int i = 0; i < 7; i++) {
@@ -108,6 +123,7 @@ class ActivitiesComponentStrings {
   static List<String> getMonthAbbreviations(String locale) {
     final List<String> abbreviations = [];
     for (int i = 1; i <= 12; i++) {
+      // Use a fixed year to avoid leap year issues
       final date = DateTime(2000, i, 1);
       abbreviations.add(DateFormat('MMM', locale).format(date));
     }
