@@ -10,9 +10,10 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i31;
-import 'package:flutter/foundation.dart' as _i33;
+import 'package:collection/collection.dart' as _i33;
+import 'package:flutter/foundation.dart' as _i34;
 import 'package:flutter/material.dart' as _i32;
-import 'package:fstapp/data_models/place_model.dart' as _i34;
+import 'package:fstapp/data_models/place_model.dart' as _i35;
 import 'package:fstapp/pages/form/pages/form_edit_page.dart' deferred as _i6;
 import 'package:fstapp/pages/form/pages/form_page.dart' deferred as _i7;
 import 'package:fstapp/pages/occasion/check_page.dart' deferred as _i2;
@@ -51,7 +52,7 @@ import 'package:fstapp/pages/utility/instance_install_page.dart'
 /// [_i1.AdminPage]
 class AdminRoute extends _i31.PageRouteInfo<void> {
   const AdminRoute({List<_i31.PageRouteInfo>? children})
-    : super(AdminRoute.name, initialChildren: children);
+      : super(AdminRoute.name, initialChildren: children);
 
   static const String name = 'AdminRoute';
 
@@ -71,11 +72,11 @@ class CheckRoute extends _i31.PageRouteInfo<CheckRouteArgs> {
     _i32.Key? key,
     List<_i31.PageRouteInfo>? children,
   }) : super(
-         CheckRoute.name,
-         args: CheckRouteArgs(id: id, key: key),
-         rawPathParams: {'id': id},
-         initialChildren: children,
-       );
+          CheckRoute.name,
+          args: CheckRouteArgs(id: id, key: key),
+          rawPathParams: {'id': id},
+          initialChildren: children,
+        );
 
   static const String name = 'CheckRoute';
 
@@ -105,18 +106,28 @@ class CheckRouteArgs {
   String toString() {
     return 'CheckRouteArgs{id: $id, key: $key}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! CheckRouteArgs) return false;
+    return id == other.id && key == other.key;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ key.hashCode;
 }
 
 /// generated route for
 /// [_i3.EventEditPage]
 class EventEditRoute extends _i31.PageRouteInfo<EventEditRouteArgs> {
   EventEditRoute({_i32.Key? key, int? id, List<_i31.PageRouteInfo>? children})
-    : super(
-        EventEditRoute.name,
-        args: EventEditRouteArgs(key: key, id: id),
-        rawPathParams: {'id': id},
-        initialChildren: children,
-      );
+      : super(
+          EventEditRoute.name,
+          args: EventEditRouteArgs(key: key, id: id),
+          rawPathParams: {'id': id},
+          initialChildren: children,
+        );
 
   static const String name = 'EventEditRoute';
 
@@ -146,18 +157,28 @@ class EventEditRouteArgs {
   String toString() {
     return 'EventEditRouteArgs{key: $key, id: $id}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! EventEditRouteArgs) return false;
+    return key == other.key && id == other.id;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ id.hashCode;
 }
 
 /// generated route for
 /// [_i4.EventPage]
 class EventRoute extends _i31.PageRouteInfo<EventRouteArgs> {
   EventRoute({int? id, _i32.Key? key, List<_i31.PageRouteInfo>? children})
-    : super(
-        EventRoute.name,
-        args: EventRouteArgs(id: id, key: key),
-        rawPathParams: {'id': id},
-        initialChildren: children,
-      );
+      : super(
+          EventRoute.name,
+          args: EventRouteArgs(id: id, key: key),
+          rawPathParams: {'id': id},
+          initialChildren: children,
+        );
 
   static const String name = 'EventRoute';
 
@@ -187,13 +208,23 @@ class EventRouteArgs {
   String toString() {
     return 'EventRouteArgs{id: $id, key: $key}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! EventRouteArgs) return false;
+    return id == other.id && key == other.key;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ key.hashCode;
 }
 
 /// generated route for
 /// [_i5.ForgotPasswordPage]
 class ForgotPasswordRoute extends _i31.PageRouteInfo<void> {
   const ForgotPasswordRoute({List<_i31.PageRouteInfo>? children})
-    : super(ForgotPasswordRoute.name, initialChildren: children);
+      : super(ForgotPasswordRoute.name, initialChildren: children);
 
   static const String name = 'ForgotPasswordRoute';
 
@@ -216,11 +247,11 @@ class FormEditRoute extends _i31.PageRouteInfo<FormEditRouteArgs> {
     String? formLink,
     List<_i31.PageRouteInfo>? children,
   }) : super(
-         FormEditRoute.name,
-         args: FormEditRouteArgs(key: key, formLink: formLink),
-         rawPathParams: {'formLink': formLink},
-         initialChildren: children,
-       );
+          FormEditRoute.name,
+          args: FormEditRouteArgs(key: key, formLink: formLink),
+          rawPathParams: {'formLink': formLink},
+          initialChildren: children,
+        );
 
   static const String name = 'FormEditRoute';
 
@@ -229,8 +260,8 @@ class FormEditRoute extends _i31.PageRouteInfo<FormEditRouteArgs> {
     builder: (data) {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<FormEditRouteArgs>(
-        orElse:
-            () => FormEditRouteArgs(formLink: pathParams.optString('formLink')),
+        orElse: () =>
+            FormEditRouteArgs(formLink: pathParams.optString('formLink')),
       );
       return _i31.DeferredWidget(
         _i6.loadLibrary,
@@ -251,6 +282,16 @@ class FormEditRouteArgs {
   String toString() {
     return 'FormEditRouteArgs{key: $key, formLink: $formLink}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! FormEditRouteArgs) return false;
+    return key == other.key && formLink == other.formLink;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ formLink.hashCode;
 }
 
 /// generated route for
@@ -261,11 +302,11 @@ class FormRoute extends _i31.PageRouteInfo<FormRouteArgs> {
     String? formLink,
     List<_i31.PageRouteInfo>? children,
   }) : super(
-         FormRoute.name,
-         args: FormRouteArgs(key: key, formLink: formLink),
-         rawPathParams: {'formLink': formLink},
-         initialChildren: children,
-       );
+          FormRoute.name,
+          args: FormRouteArgs(key: key, formLink: formLink),
+          rawPathParams: {'formLink': formLink},
+          initialChildren: children,
+        );
 
   static const String name = 'FormRoute';
 
@@ -295,13 +336,23 @@ class FormRouteArgs {
   String toString() {
     return 'FormRouteArgs{key: $key, formLink: $formLink}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! FormRouteArgs) return false;
+    return key == other.key && formLink == other.formLink;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ formLink.hashCode;
 }
 
 /// generated route for
 /// [_i8.GamePage]
 class GameRoute extends _i31.PageRouteInfo<void> {
   const GameRoute({List<_i31.PageRouteInfo>? children})
-    : super(GameRoute.name, initialChildren: children);
+      : super(GameRoute.name, initialChildren: children);
 
   static const String name = 'GameRoute';
 
@@ -322,14 +373,14 @@ class HtmlEditorRoute extends _i31.PageRouteInfo<HtmlEditorRouteArgs> {
     _i32.Key? key,
     List<_i31.PageRouteInfo>? children,
   }) : super(
-         HtmlEditorRoute.name,
-         args: HtmlEditorRouteArgs(
-           content: content,
-           occasionId: occasionId,
-           key: key,
-         ),
-         initialChildren: children,
-       );
+          HtmlEditorRoute.name,
+          args: HtmlEditorRouteArgs(
+            content: content,
+            occasionId: occasionId,
+            key: key,
+          ),
+          initialChildren: children,
+        );
 
   static const String name = 'HtmlEditorRoute';
 
@@ -364,18 +415,33 @@ class HtmlEditorRouteArgs {
   String toString() {
     return 'HtmlEditorRouteArgs{content: $content, occasionId: $occasionId, key: $key}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! HtmlEditorRouteArgs) return false;
+    return const _i33.MapEquality().equals(content, other.content) &&
+        occasionId == other.occasionId &&
+        key == other.key;
+  }
+
+  @override
+  int get hashCode =>
+      const _i33.MapEquality().hash(content) ^
+      occasionId.hashCode ^
+      key.hashCode;
 }
 
 /// generated route for
 /// [_i10.InfoPage]
 class InfoRoute extends _i31.PageRouteInfo<InfoRouteArgs> {
-  InfoRoute({int? id, _i33.Key? key, List<_i31.PageRouteInfo>? children})
-    : super(
-        InfoRoute.name,
-        args: InfoRouteArgs(id: id, key: key),
-        rawPathParams: {'id': id},
-        initialChildren: children,
-      );
+  InfoRoute({int? id, _i34.Key? key, List<_i31.PageRouteInfo>? children})
+      : super(
+          InfoRoute.name,
+          args: InfoRouteArgs(id: id, key: key),
+          rawPathParams: {'id': id},
+          initialChildren: children,
+        );
 
   static const String name = 'InfoRoute';
 
@@ -399,19 +465,29 @@ class InfoRouteArgs {
 
   final int? id;
 
-  final _i33.Key? key;
+  final _i34.Key? key;
 
   @override
   String toString() {
     return 'InfoRouteArgs{id: $id, key: $key}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! InfoRouteArgs) return false;
+    return id == other.id && key == other.key;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ key.hashCode;
 }
 
 /// generated route for
 /// [_i11.InstallPage]
 class InstallRoute extends _i31.PageRouteInfo<void> {
   const InstallRoute({List<_i31.PageRouteInfo>? children})
-    : super(InstallRoute.name, initialChildren: children);
+      : super(InstallRoute.name, initialChildren: children);
 
   static const String name = 'InstallRoute';
 
@@ -427,7 +503,7 @@ class InstallRoute extends _i31.PageRouteInfo<void> {
 /// [_i12.InstanceInstallPage]
 class InstanceInstallRoute extends _i31.PageRouteInfo<void> {
   const InstanceInstallRoute({List<_i31.PageRouteInfo>? children})
-    : super(InstanceInstallRoute.name, initialChildren: children);
+      : super(InstanceInstallRoute.name, initialChildren: children);
 
   static const String name = 'InstanceInstallRoute';
 
@@ -446,7 +522,7 @@ class InstanceInstallRoute extends _i31.PageRouteInfo<void> {
 /// [_i13.LoginPage]
 class LoginRoute extends _i31.PageRouteInfo<void> {
   const LoginRoute({List<_i31.PageRouteInfo>? children})
-    : super(LoginRoute.name, initialChildren: children);
+      : super(LoginRoute.name, initialChildren: children);
 
   static const String name = 'LoginRoute';
 
@@ -463,15 +539,15 @@ class LoginRoute extends _i31.PageRouteInfo<void> {
 class MapRoute extends _i31.PageRouteInfo<MapRouteArgs> {
   MapRoute({
     int? id,
-    _i34.PlaceModel? place,
-    _i33.Key? key,
+    _i35.PlaceModel? place,
+    _i34.Key? key,
     List<_i31.PageRouteInfo>? children,
   }) : super(
-         MapRoute.name,
-         args: MapRouteArgs(id: id, place: place, key: key),
-         rawPathParams: {'id': id},
-         initialChildren: children,
-       );
+          MapRoute.name,
+          args: MapRouteArgs(id: id, place: place, key: key),
+          rawPathParams: {'id': id},
+          initialChildren: children,
+        );
 
   static const String name = 'MapRoute';
 
@@ -495,21 +571,31 @@ class MapRouteArgs {
 
   final int? id;
 
-  final _i34.PlaceModel? place;
+  final _i35.PlaceModel? place;
 
-  final _i33.Key? key;
+  final _i34.Key? key;
 
   @override
   String toString() {
     return 'MapRouteArgs{id: $id, place: $place, key: $key}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! MapRouteArgs) return false;
+    return id == other.id && place == other.place && key == other.key;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ place.hashCode ^ key.hashCode;
 }
 
 /// generated route for
 /// [_i15.MySchedulePage]
 class MyScheduleRoute extends _i31.PageRouteInfo<void> {
   const MyScheduleRoute({List<_i31.PageRouteInfo>? children})
-    : super(MyScheduleRoute.name, initialChildren: children);
+      : super(MyScheduleRoute.name, initialChildren: children);
 
   static const String name = 'MyScheduleRoute';
 
@@ -525,7 +611,7 @@ class MyScheduleRoute extends _i31.PageRouteInfo<void> {
 /// [_i16.NewsFormPage]
 class NewsFormRoute extends _i31.PageRouteInfo<void> {
   const NewsFormRoute({List<_i31.PageRouteInfo>? children})
-    : super(NewsFormRoute.name, initialChildren: children);
+      : super(NewsFormRoute.name, initialChildren: children);
 
   static const String name = 'NewsFormRoute';
 
@@ -545,10 +631,10 @@ class NewsRoute extends _i31.PageRouteInfo<NewsRouteArgs> {
     _i32.VoidCallback? onSetAsRead,
     List<_i31.PageRouteInfo>? children,
   }) : super(
-         NewsRoute.name,
-         args: NewsRouteArgs(key: key, onSetAsRead: onSetAsRead),
-         initialChildren: children,
-       );
+          NewsRoute.name,
+          args: NewsRouteArgs(key: key, onSetAsRead: onSetAsRead),
+          initialChildren: children,
+        );
 
   static const String name = 'NewsRoute';
 
@@ -577,13 +663,23 @@ class NewsRouteArgs {
   String toString() {
     return 'NewsRouteArgs{key: $key, onSetAsRead: $onSetAsRead}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! NewsRouteArgs) return false;
+    return key == other.key && onSetAsRead == other.onSetAsRead;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ onSetAsRead.hashCode;
 }
 
 /// generated route for
 /// [_i18.OccasionHomePage]
 class OccasionHomeRoute extends _i31.PageRouteInfo<void> {
   const OccasionHomeRoute({List<_i31.PageRouteInfo>? children})
-    : super(OccasionHomeRoute.name, initialChildren: children);
+      : super(OccasionHomeRoute.name, initialChildren: children);
 
   static const String name = 'OccasionHomeRoute';
 
@@ -602,7 +698,7 @@ class OccasionHomeRoute extends _i31.PageRouteInfo<void> {
 /// [_i19.ResetPasswordPage]
 class ResetPasswordRoute extends _i31.PageRouteInfo<void> {
   const ResetPasswordRoute({List<_i31.PageRouteInfo>? children})
-    : super(ResetPasswordRoute.name, initialChildren: children);
+      : super(ResetPasswordRoute.name, initialChildren: children);
 
   static const String name = 'ResetPasswordRoute';
 
@@ -622,14 +718,14 @@ class ResetPasswordRoute extends _i31.PageRouteInfo<void> {
 class ScanRoute extends _i31.PageRouteInfo<ScanRouteArgs> {
   ScanRoute({
     String? scanCode,
-    _i33.Key? key,
+    _i34.Key? key,
     List<_i31.PageRouteInfo>? children,
   }) : super(
-         ScanRoute.name,
-         args: ScanRouteArgs(scanCode: scanCode, key: key),
-         rawPathParams: {'scanCode': scanCode},
-         initialChildren: children,
-       );
+          ScanRoute.name,
+          args: ScanRouteArgs(scanCode: scanCode, key: key),
+          rawPathParams: {'scanCode': scanCode},
+          initialChildren: children,
+        );
 
   static const String name = 'ScanRoute';
 
@@ -653,19 +749,29 @@ class ScanRouteArgs {
 
   final String? scanCode;
 
-  final _i33.Key? key;
+  final _i34.Key? key;
 
   @override
   String toString() {
     return 'ScanRouteArgs{scanCode: $scanCode, key: $key}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ScanRouteArgs) return false;
+    return scanCode == other.scanCode && key == other.key;
+  }
+
+  @override
+  int get hashCode => scanCode.hashCode ^ key.hashCode;
 }
 
 /// generated route for
 /// [_i21.ScheduleBasicPage]
 class ScheduleBasicRoute extends _i31.PageRouteInfo<void> {
   const ScheduleBasicRoute({List<_i31.PageRouteInfo>? children})
-    : super(ScheduleBasicRoute.name, initialChildren: children);
+      : super(ScheduleBasicRoute.name, initialChildren: children);
 
   static const String name = 'ScheduleBasicRoute';
 
@@ -684,7 +790,7 @@ class ScheduleBasicRoute extends _i31.PageRouteInfo<void> {
 /// [_i22.ScheduleNavigationPage]
 class ScheduleNavigationRoute extends _i31.PageRouteInfo<void> {
   const ScheduleNavigationRoute({List<_i31.PageRouteInfo>? children})
-    : super(ScheduleNavigationRoute.name, initialChildren: children);
+      : super(ScheduleNavigationRoute.name, initialChildren: children);
 
   static const String name = 'ScheduleNavigationRoute';
 
@@ -703,7 +809,7 @@ class ScheduleNavigationRoute extends _i31.PageRouteInfo<void> {
 /// [_i23.SchedulePage]
 class ScheduleRoute extends _i31.PageRouteInfo<void> {
   const ScheduleRoute({List<_i31.PageRouteInfo>? children})
-    : super(ScheduleRoute.name, initialChildren: children);
+      : super(ScheduleRoute.name, initialChildren: children);
 
   static const String name = 'ScheduleRoute';
 
@@ -719,7 +825,7 @@ class ScheduleRoute extends _i31.PageRouteInfo<void> {
 /// [_i24.SettingsPage]
 class SettingsRoute extends _i31.PageRouteInfo<void> {
   const SettingsRoute({List<_i31.PageRouteInfo>? children})
-    : super(SettingsRoute.name, initialChildren: children);
+      : super(SettingsRoute.name, initialChildren: children);
 
   static const String name = 'SettingsRoute';
 
@@ -735,7 +841,7 @@ class SettingsRoute extends _i31.PageRouteInfo<void> {
 /// [_i25.SignupPage]
 class SignupRoute extends _i31.PageRouteInfo<void> {
   const SignupRoute({List<_i31.PageRouteInfo>? children})
-    : super(SignupRoute.name, initialChildren: children);
+      : super(SignupRoute.name, initialChildren: children);
 
   static const String name = 'SignupRoute';
 
@@ -751,7 +857,7 @@ class SignupRoute extends _i31.PageRouteInfo<void> {
 /// [_i26.SongbookPage]
 class SongbookRoute extends _i31.PageRouteInfo<void> {
   const SongbookRoute({List<_i31.PageRouteInfo>? children})
-    : super(SongbookRoute.name, initialChildren: children);
+      : super(SongbookRoute.name, initialChildren: children);
 
   static const String name = 'SongbookRoute';
 
@@ -767,7 +873,7 @@ class SongbookRoute extends _i31.PageRouteInfo<void> {
 /// [_i27.TimetablePage]
 class TimetableRoute extends _i31.PageRouteInfo<void> {
   const TimetableRoute({List<_i31.PageRouteInfo>? children})
-    : super(TimetableRoute.name, initialChildren: children);
+      : super(TimetableRoute.name, initialChildren: children);
 
   static const String name = 'TimetableRoute';
 
@@ -787,11 +893,11 @@ class UnitAdminRoute extends _i31.PageRouteInfo<UnitAdminRouteArgs> {
     _i32.Key? key,
     List<_i31.PageRouteInfo>? children,
   }) : super(
-         UnitAdminRoute.name,
-         args: UnitAdminRouteArgs(id: id, key: key),
-         rawPathParams: {'id': id},
-         initialChildren: children,
-       );
+          UnitAdminRoute.name,
+          args: UnitAdminRouteArgs(id: id, key: key),
+          rawPathParams: {'id': id},
+          initialChildren: children,
+        );
 
   static const String name = 'UnitAdminRoute';
 
@@ -821,18 +927,28 @@ class UnitAdminRouteArgs {
   String toString() {
     return 'UnitAdminRouteArgs{id: $id, key: $key}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! UnitAdminRouteArgs) return false;
+    return id == other.id && key == other.key;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ key.hashCode;
 }
 
 /// generated route for
 /// [_i29.UnitPage]
 class UnitRoute extends _i31.PageRouteInfo<UnitRouteArgs> {
   UnitRoute({int? id, _i32.Key? key, List<_i31.PageRouteInfo>? children})
-    : super(
-        UnitRoute.name,
-        args: UnitRouteArgs(id: id, key: key),
-        rawPathParams: {'id': id},
-        initialChildren: children,
-      );
+      : super(
+          UnitRoute.name,
+          args: UnitRouteArgs(id: id, key: key),
+          rawPathParams: {'id': id},
+          initialChildren: children,
+        );
 
   static const String name = 'UnitRoute';
 
@@ -862,13 +978,23 @@ class UnitRouteArgs {
   String toString() {
     return 'UnitRouteArgs{id: $id, key: $key}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! UnitRouteArgs) return false;
+    return id == other.id && key == other.key;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ key.hashCode;
 }
 
 /// generated route for
 /// [_i30.UserPage]
 class UserRoute extends _i31.PageRouteInfo<void> {
   const UserRoute({List<_i31.PageRouteInfo>? children})
-    : super(UserRoute.name, initialChildren: children);
+      : super(UserRoute.name, initialChildren: children);
 
   static const String name = 'UserRoute';
 

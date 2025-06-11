@@ -69,7 +69,7 @@ class OfflineDataService {
   static Future<void> updateEventsWithMySchedule(Iterable<EventModel> events) async {
     var myScheduleIds = await getMyScheduleData();
     for (var e in events) {
-      e.isEventInMySchedule = myScheduleIds.contains(e.id!);
+      e.isInMySchedule = myScheduleIds.contains(e.id!);
     }
   }
 
