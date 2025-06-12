@@ -243,7 +243,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
               showAddNewEventButton: () {return ((widget.showAddNewEventButton?.call() ?? false) && !event.isActivity);},
               onAddNewEvent: widget.onAddNewEvent,
               parentEvent: event,
-              nodePosition: 0.35,
+              nodePosition: StylesConfig.scheduleTimelineNodePosition,
               isGroupTitleShown: false,
             ),
           ),

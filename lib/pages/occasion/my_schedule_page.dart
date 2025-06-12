@@ -52,7 +52,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
       _isAdvancedTimeline = true;
     }
     await loadDataOffline();
-    loadData();
+    await loadData();
   }
 
   MyEventsBundle? _data;
@@ -65,7 +65,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
       if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
     }
     for (var e in _data!.activities) {
-      if (e.id != null) _eventAndActivitiesDescriptions[e.id!.hashCode] = e.description;
+      _eventAndActivitiesDescriptions[e.id.hashCode] = e.description;
     }
     _fullEventsLoaded = true;
   }
@@ -104,12 +104,12 @@ class _MySchedulePageState extends State<MySchedulePage> {
     _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
     setState(() {});
 
-    await DbEvents.synchronizeMySchedule(currentIds: events.where((e)=>e.isEventInMySchedule == true).map((e)=>e.id!).toList());
+    await DbEvents.synchronizeMySchedule(currentIds: events.where((e)=>e.isInMySchedule == true).map((e)=>e.id!).toList());
   }
   
   bool canBeShownInMySchedule(UserInfoModel? userInfo, EventModel e) {
     return
-    e.isEventInMySchedule == true ||
+    e.isInMySchedule == true ||
         ((e.isGroupEvent ?? false) && (userInfo?.hasGroup() ?? false)) ||
         (e.isSignedIn ?? false);
   }
