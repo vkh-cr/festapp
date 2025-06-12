@@ -43,7 +43,7 @@ class EventModel extends ITrinaRowModel {
   bool? isGroupEvent = false;
   bool? isMyGroupEvent = false;
 
-  bool? isEventInMySchedule;
+  bool? isInMySchedule;
   int? occasionId;
   bool isCancelled;
 
@@ -54,7 +54,7 @@ class EventModel extends ITrinaRowModel {
     if(!canSave){
       return null;
     }
-    return isEventInMySchedule == false;
+    return isInMySchedule == false;
   }
 
   bool canSignIn() {
@@ -84,7 +84,7 @@ class EventModel extends ITrinaRowModel {
     this.currentUsersSaved,
     this.isSignedIn = false,
     this.isGroupEvent = false,
-    this.isEventInMySchedule,
+    this.isInMySchedule,
     this.occasionId,
     this.isCancelled = false,
   });
@@ -146,7 +146,7 @@ class EventModel extends ITrinaRowModel {
       splitForMenWomen: json.containsKey(splitForMenWomenColumn) ? json[splitForMenWomenColumn] : false,
       isSignedIn: json.containsKey(isSignedInColumn) ? json[isSignedInColumn] : false,
       isGroupEvent: json.containsKey(isGroupEventColumn) ? json[isGroupEventColumn] : false,
-      isEventInMySchedule: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
+      isInMySchedule: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
       childEventIds: childEventsIds,
       parentEventIds: parentEventsIds,
       eventRolesIds: eventRoles,
@@ -339,7 +339,7 @@ class EventModel extends ITrinaRowModel {
       maxParticipantsColumn: maxParticipants,
       currentParticipantsColumn: currentParticipants,
       isSignedInColumn: isSignedIn,
-      isEventInMyProgramColumn: isEventInMySchedule,
+      isEventInMyProgramColumn: isInMySchedule,
       isGroupEventColumn: isGroupEvent,
       placesTable: place,
       Tb.events.type: type,
