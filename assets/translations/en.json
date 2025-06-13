@@ -501,7 +501,7 @@
   "Additional Settings": "Additional Settings",
   "Options": "Options",
   "Has description": "Has description",
-  "Validation Mode:": "Validation Mode:",
+  "Validation Mode": "Validation Mode",
   "Strict": "Strict",
   "Lenient": "Lenient",
   "Message": "Message",
@@ -662,5 +662,6 @@
   "FeaturesStrings.labelCustomColorHex": "Custom Color (Hex e.g., #RRGGBB)",
   "FeaturesStrings.tooltipRemoveEventType": "Remove Event Type",
   "FeaturesStrings.noType": "No Type",
+  "Constraints": "Constraints",
   "_":"_"
 }
