@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_services/db_users.dart';
+import 'package:fstapp/pages/occasionAdmin/user_columns.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models/tb.dart';
@@ -52,16 +53,15 @@ class UnitUserModel extends ITrinaRowModel {
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     final Map<String, TrinaCell> cells = {
-      "id": TrinaCell(value: user),
-      Tb.unit_users.user: TrinaCell(value: user),
-      Tb.unit_users.unit: TrinaCell(value: unit),
-      Tb.occasion_users.data_name: TrinaCell(value: name ?? ""),
-      Tb.occasion_users.data_surname: TrinaCell(value: surname ?? ""),
-      Tb.occasion_users.data_sex: TrinaCell(value: sex ?? ""),
-      Tb.occasion_users.data_email: TrinaCell(value: emailReadonly ?? ""),
-      Tb.occasion_users.is_manager: TrinaCell(value: isManager.toString()),
-      Tb.occasion_users.is_editor: TrinaCell(value: isEditor.toString()),
-      Tb.occasion_users.is_editor_view: TrinaCell(value: isEditorView.toString()),
+      UserColumns.ID: TrinaCell(value: user),
+      UserColumns.UNIT: TrinaCell(value: unit),
+      UserColumns.NAME: TrinaCell(value: name ?? ""),
+      UserColumns.SURNAME: TrinaCell(value: surname ?? ""),
+      UserColumns.SEX: TrinaCell(value: sex ?? ""),
+      UserColumns.EMAIL: TrinaCell(value: emailReadonly ?? ""),
+      UserColumns.UNIT_MANAGER: TrinaCell(value: isManager.toString()),
+      UserColumns.UNIT_EDITOR: TrinaCell(value: isEditor.toString()),
+      UserColumns.UNIT_EDITOR_VIEW: TrinaCell(value: isEditorView.toString()),
     };
 
     return TrinaRow(cells: cells);
@@ -73,15 +73,17 @@ class UnitUserModel extends ITrinaRowModel {
 
   static UnitUserModel fromPlutoJson(Map<String, dynamic> json) {
     return UnitUserModel(
-        unit: json[Tb.unit_users.unit],
-        user: json["id"],
-        name: json[Tb.occasion_users.data_name],
-        surname: json[Tb.occasion_users.data_surname],
-        sex: json[Tb.occasion_users.data_sex],
-        emailReadonly: json[Tb.occasion_users.data_email],
-        isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
-        isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
-        isEditorView: json[Tb.occasion_users.is_editor_view] == "true" ? true : false,
+        unit: json[UserColumns.UNIT],
+        user: json[UserColumns.ID],
+        name: json[UserColumns.NAME],
+        surname: json[UserColumns.SURNAME],
+        sex: json[UserColumns.SEX],
+        emailReadonly: json[UserColumns.EMAIL],
+        isManager: json[UserColumns.UNIT_MANAGER] == "true" ? true : false,
+        isEditor: json[UserColumns.UNIT_EDITOR] == "true" ? true : false,
+        isEditorView: json[UserColumns.UNIT_EDITOR_VIEW] == "true" ? true : false,
+        // The 'data' field is not represented in UserColumns or created in toTrinaRow.
+        // It is omitted here as it cannot be mapped from the grid data.
         data: json[Tb.occasion_users.data]
     );
   }

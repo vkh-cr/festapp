@@ -51,7 +51,7 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
       context: context,
       loadData: DbPlaces.getAllPathGroups,
       fromPlutoJson: PathGroupsModel.fromPlutoJson,
-      firstColumnType: DataGridFirstColumn.delete,
+      firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
       idColumn: Tb.path_groups.id,
       columns: [
         TrinaColumn(

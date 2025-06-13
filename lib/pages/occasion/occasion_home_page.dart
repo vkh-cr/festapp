@@ -194,6 +194,7 @@ class OccasionTab {
   static const String map = "map";
   static const String more = "more";
   static const String user = "user";
+  static const String timetable = "timetable";
 
   static Map<String, OccasionTab> getAvailableTabs([VoidCallback? onSetAsRead]) => {
     unit: OccasionTab(
@@ -209,6 +210,13 @@ class OccasionTab {
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
       route: ScheduleNavigationRoute(),
+    ),
+    timetable: OccasionTab(
+      key: home,
+      label: "Schedule".tr(),
+      icon: Icons.calendar_month_outlined,
+      activeIcon: Icons.calendar_month,
+      route: TimetableRoute(),
     ),
     news: OccasionTab(
       key: news,

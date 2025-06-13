@@ -65,6 +65,10 @@ class FeatureMetadata {
       'title': 'Volunteers',
       'description': 'Allows management of activities for volunteers.',
     },
+    FeatureConstants.import: {
+      'title': 'Import',
+      'description': 'Enables importing users from various sources like CSV files or from tickets.',
+    },
   };
 
   /// Returns the translated title for the given feature code.

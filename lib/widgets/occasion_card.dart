@@ -214,7 +214,7 @@ class _OccasionCardState extends State<OccasionCard> {
                               features: widget.occasion.features)) {
                             try {
                               await RightsService.updateOccasionData(
-                                  widget.occasion.link!);
+                                  link: widget.occasion.link, force: true);
                             } catch (e) {
                               // ignore
                             }

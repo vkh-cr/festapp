@@ -1,8 +1,10 @@
 // feature.dart
+import 'package:flutter/material.dart';
 import 'companion_feature.dart';
 import 'feature_constants.dart';
 import 'feature_metadata.dart';
 import 'form_feature.dart';
+import 'import_feature.dart';
 import 'map_feature.dart';
 import 'schedule_feature.dart';
 import 'ticket_feature.dart';
@@ -39,6 +41,8 @@ abstract class Feature {
         return ScheduleFeature.fromJson(json);
       case FeatureConstants.workshops:
         return WorkshopsFeature.fromJson(json);
+      case FeatureConstants.import:
+        return ImportFeature.fromJson(json);
       default:
         return SimpleFeature.fromJson(json);
     }
@@ -46,9 +50,13 @@ abstract class Feature {
 
   /// Converts the feature to JSON.
   Map<String, dynamic> toJson();
+
+  /// Builds the form field widget for this feature.
+  /// This should be implemented by features that have configurable settings.
+  Widget buildFormField(BuildContext context);
 }
 
-/// A simple feature without extra properties.
+/// A simple feature without extra properties and no settings form.
 class SimpleFeature extends Feature {
   SimpleFeature({
     required super.code,
@@ -70,5 +78,10 @@ class SimpleFeature extends Feature {
       FeatureConstants.metaCode: code,
       FeatureConstants.metaIsEnabled: isEnabled,
     };
+  }
+
+  @override
+  Widget buildFormField(BuildContext context) {
+    return Container();
   }
 }

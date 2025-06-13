@@ -60,6 +60,7 @@ BEGIN
     -- (b) places for this occasion (unchanged)
     SELECT jsonb_agg(jsonb_build_object(
         'id',           p.id,
+        'order',        p."order",
         'title',        p.title,
         'description',  p.description,
         'type',         p.type,

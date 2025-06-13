@@ -99,7 +99,7 @@ class _EventPageState extends State<EventPage> {
               ),
             ),
             if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule) &&
-                (!(isEventCancelled && !(_event?.isEventInMySchedule ?? false)) &&
+                (!(isEventCancelled && !(_event?.isInMySchedule ?? false)) &&
                     (_event?.childEvents.isEmpty ?? false) &&
                     ((_event?.maxParticipants ?? 0) == 0)))
               ...ButtonsHelper.getAddToMyProgramButton(
@@ -180,7 +180,7 @@ class _EventPageState extends State<EventPage> {
                                         child: ElevatedButton(
                                             onPressed: () => signInCompanion(),
                                             child:
-                                            const Text("Sign in companion")
+                                            const Text("Companions")
                                                 .tr()),
                                       )),
                                   Visibility(
@@ -440,7 +440,7 @@ class _EventPageState extends State<EventPage> {
     }
     if (mounted) {
       setState(() {
-        _event!.isEventInMySchedule = true;
+        _event!.isInMySchedule = true;
       });
     }
   }
@@ -449,7 +449,7 @@ class _EventPageState extends State<EventPage> {
     await DbEvents.removeFromMySchedule(context, _event!.id!);
     if (mounted) {
       setState(() {
-        _event!.isEventInMySchedule = false;
+        _event!.isInMySchedule = false;
       });
     }
   }
@@ -497,7 +497,7 @@ class _EventPageState extends State<EventPage> {
         } else {
           event.place = null;
         }
-        event.isEventInMySchedule = await OfflineDataService.isEventSaved(id);
+        event.isInMySchedule = await OfflineDataService.isEventSaved(id);
       }
 
       var childEvents = allEvents
@@ -569,16 +569,24 @@ class _EventPageState extends State<EventPage> {
   Future<void> signInCompanion() async {
     _companions = await DbCompanions.getAllCompanions();
     if (!mounted) return;
-    showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return CompanionDialog(
-          eventId: _event!.id!,
-          isEventCancelled: _event?.isCancelled ?? false, // Pass cancellation status
-          maxCompanions: FeatureService.getMaxCompanions()??0,
-          companions: _companions,
-          refreshData: () async {
-            await loadData(widget.id!);
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return CompanionDialog(
+              eventId: _event!.id!,
+              canSignIn: () => _event!.canSignIn(),
+              maxCompanions: FeatureService.getMaxCompanions() ?? 0,
+              companions: _companions,
+              refreshData: () async {
+                await loadData(widget.id!);
+                _companions = await DbCompanions.getAllCompanions();
+                if (mounted) {
+                  setState(() {});
+                }
+              },
+            );
           },
         );
       },
