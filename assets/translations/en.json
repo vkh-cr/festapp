@@ -662,6 +662,18 @@
   "FeaturesStrings.labelCustomColorHex": "Custom Color (Hex e.g., #RRGGBB)",
   "FeaturesStrings.tooltipRemoveEventType": "Remove Event Type",
   "FeaturesStrings.noType": "No Type",
+  "FeaturesStrings.labelImportFromCsv": "Import from CSV",
+  "FeaturesStrings.labelImportFromTickets": "Import from Tickets",
+  "FeaturesStrings.importFromTicketsSuccess": "Import from tickets was successful.",
+  "FeaturesStrings.importFromTicketsConfirm": "Are you sure you want to import users from tickets? This might create new users or update existing ones.",
+  "FeaturesStrings.importFromTicketsError": "An error occurred during ticket import.",
+  "FeaturesStrings.importFromTicketsTitle": "Import from tickets",
+  "FeaturesStrings.importFromTicketsCompleted": "Import from tickets completed.",
+  "FeaturesStrings.importResultsTitle": "Import Results",
+  "FeaturesStrings.createdUsers": "Created users",
+  "FeaturesStrings.updatedUsers": "Updated users",
+  "FeaturesStrings.none": "None",
+  "FeaturesStrings.ok": "OK",
   "Constraints": "Constraints",
   "_":"_"
 }

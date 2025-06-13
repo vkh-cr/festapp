@@ -59,6 +59,7 @@ class TicketFeature extends Feature {
   }
 
   /// Builds the ticket UI block.
+  @override
   Widget buildFormField(BuildContext context) {
     return StatefulBuilder(builder: (ctx, setLocal) {
       final lightCtrl = TextEditingController(text: ticketLightColor ?? 'FFFFFF');

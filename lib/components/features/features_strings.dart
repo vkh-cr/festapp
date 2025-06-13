@@ -26,4 +26,18 @@ class FeaturesStrings {
   static String get tooltipRemoveEventType => 'FeaturesStrings.tooltipRemoveEventType'.tr();
   static String get emptyEventTypes => 'FeaturesStrings.emptyEventTypes'.tr();
   static String get noType => 'FeaturesStrings.noType'.tr();
+
+  // Import Feature
+  static String get labelImportFromCsv => 'FeaturesStrings.labelImportFromCsv'.tr();
+  static String get labelImportFromTickets => 'FeaturesStrings.labelImportFromTickets'.tr();
+  static String get importFromTicketsSuccess => 'FeaturesStrings.importFromTicketsSuccess'.tr();
+  static String get importFromTicketsConfirm => 'FeaturesStrings.importFromTicketsConfirm'.tr();
+  static String get importFromTicketsError => 'FeaturesStrings.importFromTicketsError'.tr();
+  static String get importFromTicketsTitle => 'FeaturesStrings.importFromTicketsTitle'.tr();
+  static String get importFromTicketsCompleted => 'FeaturesStrings.importFromTicketsCompleted'.tr();
+  static String get importResultsTitle => 'FeaturesStrings.importResultsTitle'.tr();
+  static String get createdUsers => 'FeaturesStrings.createdUsers'.tr();
+  static String get updatedUsers => 'FeaturesStrings.updatedUsers'.tr();
+  static String get none => 'FeaturesStrings.none'.tr();
+  static String get ok => 'FeaturesStrings.ok'.tr();
 }

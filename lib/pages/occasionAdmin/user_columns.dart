@@ -37,13 +37,15 @@ class UserColumns {
   static const String APPROVED = "approved";
   static const String INVITED = "invited";
   static const String FOOD = "food";
+  static const String FORM = "form";
+  static const String ORDERED_AT = "ordered_at";
 
   static Map<String, dynamic> get columnBuilders => {
     ID: [
       TrinaColumn(
         hide: true,
         title: "Id".tr(),
-        field: Tb.occasion_users.user,
+        field: ID,
         type: TrinaColumnType.text(),
         readOnly: true,
         width: 50,
@@ -53,7 +55,7 @@ class UserColumns {
       TrinaColumn(
         hide: true,
         title: "Unit".tr(),
-        field: Tb.unit_users.unit,
+        field: UNIT,
         type: TrinaColumnType.number(),
         readOnly: true,
         width: 50,
@@ -62,9 +64,9 @@ class UserColumns {
     EMAIL: [
       TrinaColumn(
         title: "E-mail".tr(),
-        field: Tb.occasion_users.data_email,
+        field: EMAIL,
         type: TrinaColumnType.text(),
-        checkReadOnly: (row, cell) => row.cells[Tb.occasion_users.user]?.value != null,
+        checkReadOnly: (row, cell) => row.cells[ID]?.value != null,
         width: 200,
       ),
     ],
@@ -72,7 +74,7 @@ class UserColumns {
       TrinaColumn(
         title: "Name".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.user_info_public.name,
+        field: NAME,
         type: TrinaColumnType.text(),
         width: 120,
       ),
@@ -81,7 +83,7 @@ class UserColumns {
       TrinaColumn(
         title: "Surname".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.user_info_public.surname,
+        field: SURNAME,
         type: TrinaColumnType.text(),
         width: 120,
       ),
@@ -90,7 +92,7 @@ class UserColumns {
       TrinaColumn(
         title: "Sex".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.user_info_public.sex,
+        field: SEX,
         type: TrinaColumnType.select(UserInfoModel.sexes, defaultValue: UserInfoModel.sexes.first),
         formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
         applyFormatterInEditing: true,
@@ -101,7 +103,7 @@ class UserColumns {
       TrinaColumn(
         title: "Phone".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_phone,
+        field: PHONE,
         type: TrinaColumnType.text(),
         width: 100,
       ),
@@ -110,7 +112,7 @@ class UserColumns {
       TrinaColumn(
         title: "Birthday".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_birthDate,
+        field: BIRTHDAY,
         type: TrinaColumnType.date(defaultValue: DateTime.now()),
         width: 140,
       ),
@@ -119,7 +121,7 @@ class UserColumns {
       TrinaColumn(
         title: "Role".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.user_info.role,
+        field: ROLE,
         type: TrinaColumnType.text(),
         width: 100,
       ),
@@ -128,7 +130,7 @@ class UserColumns {
       TrinaColumn(
         title: "Text1".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_text1,
+        field: TEXT1,
         type: TrinaColumnType.text(),
         width: 100,
       ),
@@ -137,7 +139,7 @@ class UserColumns {
       TrinaColumn(
         title: "Text2".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_text2,
+        field: TEXT2,
         type: TrinaColumnType.text(),
         width: 100,
       ),
@@ -146,7 +148,7 @@ class UserColumns {
       TrinaColumn(
         title: "Číslo týmu (hra)",
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_text3,
+        field: TEXT3,
         type: TrinaColumnType.text(),
         width: 100,
       ),
@@ -155,7 +157,7 @@ class UserColumns {
       TrinaColumn(
         title: "Note".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_note,
+        field: NOTE,
         type: TrinaColumnType.text(),
         width: 200,
       ),
@@ -164,9 +166,27 @@ class UserColumns {
       TrinaColumn(
         title: "Diet".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_diet,
+        field: DIET,
         type: TrinaColumnType.text(),
         width: 200,
+      ),
+    ],
+    FORM: [
+      TrinaColumn(
+        title: "Form".tr(),
+        field: FORM,
+        type: TrinaColumnType.text(),
+        readOnly: true,
+        width: 200,
+      ),
+    ],
+    ORDERED_AT: [
+      TrinaColumn(
+        title: "Created".tr(),
+        field: ORDERED_AT,
+        type: TrinaColumnType.date(),
+        readOnly: true,
+        width: 140,
       ),
     ],
     FOOD: (Map<String, dynamic> data) {
@@ -187,25 +207,25 @@ class UserColumns {
       return [
         TrinaColumn(
             title: "Accommodation".tr(),
-            field: DbOccasions.serviceTypeAccommodation,
+            field: ACCOMMODATION,
             type: TrinaColumnType.select(select),
             applyFormatterInEditing: true,
             enableEditingMode: RightsService.canUpdateUsers(),
             width: 100
         )];
     },
-    IS_VOLUNTEER: [_statusColumn("Volunteer".tr(), Tb.occasion_users.data_is_volunteer)],
-    MANAGER: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager)],
-    EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor)],
-    EDITOR_VIEW: [_statusColumn("Read only".tr(), Tb.occasion_users.is_editor_view)],
-    EDITOR_ORDER: [_statusColumn("Edit Orders".tr(), Tb.occasion_users.is_editor_order)],
-    EDITOR_ORDER_VIEW: [_statusColumn("Read Orders".tr(), Tb.occasion_users.is_editor_order_view)],
-    UNIT_MANAGER: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager, canUpdateUser: RightsService.canUpdateUnitUsers)],
-    UNIT_EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor, canUpdateUser: RightsService.canUpdateUnitUsers)],
-    UNIT_EDITOR_VIEW: [_statusColumn("Read only".tr(), Tb.occasion_users.is_editor_view, canUpdateUser: RightsService.canUpdateUnitUsers)],
-    APPROVER: [_statusColumn("Approver".tr(), Tb.occasion_users.is_approver)],
-    APPROVED: [_statusColumn("Approved".tr(), Tb.occasion_users.is_approved)],
-    INVITED: [_statusColumn("Invited".tr(), Tb.occasion_users.data_isInvited)],
+    IS_VOLUNTEER: [_statusColumn("Volunteer".tr(), IS_VOLUNTEER)],
+    MANAGER: [_statusColumn("Administrator".tr(), MANAGER)],
+    EDITOR: [_statusColumn("Editor".tr(), EDITOR)],
+    EDITOR_VIEW: [_statusColumn("Read only".tr(), EDITOR_VIEW)],
+    EDITOR_ORDER: [_statusColumn("Edit Orders".tr(), EDITOR_ORDER)],
+    EDITOR_ORDER_VIEW: [_statusColumn("Read Orders".tr(), EDITOR_ORDER_VIEW)],
+    UNIT_MANAGER: [_statusColumn("Administrator".tr(), UNIT_MANAGER, canUpdateUser: RightsService.canUpdateUnitUsers)],
+    UNIT_EDITOR: [_statusColumn("Editor".tr(), UNIT_EDITOR, canUpdateUser: RightsService.canUpdateUnitUsers)],
+    UNIT_EDITOR_VIEW: [_statusColumn("Read only".tr(), UNIT_EDITOR_VIEW, canUpdateUser: RightsService.canUpdateUnitUsers)],
+    APPROVER: [_statusColumn("Approver".tr(), APPROVER)],
+    APPROVED: [_statusColumn("Approved".tr(), APPROVED)],
+    INVITED: [_statusColumn("Invited".tr(), INVITED)],
   };
 
   static List<TrinaColumn> generateColumns(List<String> identifiers, {Map<String, dynamic>? data}) {
