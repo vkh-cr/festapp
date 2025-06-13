@@ -662,6 +662,18 @@
   "FeaturesStrings.labelCustomColorHex": "Vlastní barva (Hex např. #RRGGBB)",
   "FeaturesStrings.tooltipRemoveEventType": "Odebrat typ události",
   "FeaturesStrings.noType": "Bez typu",
+  "FeaturesStrings.labelImportFromCsv": "Importovat z CSV",
+  "FeaturesStrings.labelImportFromTickets": "Importovat z vstupenek",
+  "FeaturesStrings.importFromTicketsSuccess": "Import z vstupenek byl úspěšný.",
+  "FeaturesStrings.importFromTicketsConfirm": "Opravdu chcete importovat uživatele ze vstupenek? Tato akce může vytvořit nové nebo aktualizovat stávající uživatele.",
+  "FeaturesStrings.importFromTicketsError": "Při importu ze vstupenek došlo k chybě.",
+  "FeaturesStrings.importFromTicketsTitle": "Import z vstupenek",
+  "FeaturesStrings.importFromTicketsCompleted": "Import z vstupenek dokončen.",
+  "FeaturesStrings.importResultsTitle": "Výsledky importu",
+  "FeaturesStrings.createdUsers": "Vytvoření uživatelé",
+  "FeaturesStrings.updatedUsers": "Aktualizovaní uživatelé",
+  "FeaturesStrings.none": "Žádní",
+  "FeaturesStrings.ok": "OK",
   "Constraints": "Omezení",
   "_": "_"
 }
