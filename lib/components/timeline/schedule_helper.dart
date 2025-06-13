@@ -61,6 +61,7 @@ class TimeBlockItem {
   final String? imageUrl;
   final bool isCancelled;
   final bool isActivity;
+  final bool isInMySchedule;
   /// Nested child time blocks
   List<TimeBlockItem>? children;
 
@@ -80,7 +81,8 @@ class TimeBlockItem {
     this.children,
     this.imageUrl,
     this.isCancelled = false,
-    this.isActivity = false
+    this.isActivity = false,
+    this.isInMySchedule = false
   });
 
   /// Duration of the block.
@@ -94,7 +96,6 @@ class TimeBlockItem {
   }
 
   bool isSignedIn() => timeBlockType == TimeBlockType.signedIn;
-  bool isInMySchedule() => timeBlockType == TimeBlockType.saved;
   bool haveChildren() => children?.isNotEmpty ?? false;
   bool isSupportingSignIn() => !isCancelled && maxParticipants > 0;
   bool canSignIn() => isSupportingSignIn() && maxParticipants > participants;
@@ -147,7 +148,8 @@ class TimeBlockItem {
       children: model.childEvents.map((c) => TimeBlockItem.fromEventModelAsChild(c))
           .toList(),
       imageUrl:  model.data?[Tb.events.dataHeaderImage],
-      isCancelled: model.isCancelled, // Added
+      isCancelled: model.isCancelled,
+      isInMySchedule: model.isInMySchedule ?? false, // Added
     );
   }
 
@@ -190,7 +192,7 @@ class TimeBlockHelper {
   static TimeBlockType getTimeBlockTypeFromModel(EventModel model) {
     if (model.isSignedIn!) {
       return TimeBlockType.signedIn;
-    } else if (model.isEventInMySchedule == true && !EventModel.isEventSupportingSignIn(model)) {
+    } else if (model.isInMySchedule == true && !EventModel.isEventSupportingSignIn(model)) {
       return TimeBlockType.saved;
     } else if (model.isGroupEvent!) {
       if (model.isMyGroupEvent!) {

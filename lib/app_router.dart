@@ -83,6 +83,7 @@ class AppRouter extends RootStackRouter {
           page: InfoRoute.page,
         ),
       ]),
+      AutoRoute(page: TimetableRoute.page, path: TimetablePage.ROUTE),
     ]),
 
     RedirectRoute(path: '*', redirectTo: getDefaultLink()),
