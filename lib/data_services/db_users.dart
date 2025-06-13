@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/tb.dart';
@@ -11,12 +12,78 @@ import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+class OccasionEditorData {
+  final List<OccasionUserModel> users;
+  final List<FormModel> forms;
+  OccasionEditorData({required this.users, required this.forms});
+}
+
 class DbUsers {
   static final _supabase = Supabase.instance.client;
+
+  static const String formIdKey = 'form_id';
+  static const String orderCreatedAtKey = 'order_created_at';
 
   static Future<UserInfoModel> getUser(String id) async {
     var data = await _supabase.from(Tb.user_info.table).select().eq(Tb.user_info.id, id).single();
     return UserInfoModel.fromJson(data);
+  }
+
+  static Future<List<OccasionUserModel>> getOccasionEditorData() async {
+    var result = await _supabase.rpc(
+        'get_occasion_users_for_editor',
+        params: {'p_occasion_id': RightsService.currentOccasionId()!}
+    );
+
+    if (result != null && result["code"] == 200) {
+      var data = result["data"];
+      var users = List<OccasionUserModel>.from(
+          data["occasion_users"].map((x) => OccasionUserModel.fromJson(x))
+      );
+      var forms = List<FormModel>.from(
+          data["forms"].map((x) => FormModel.fromJson(x))
+      );
+
+      // Create a lookup map for forms using their UUID key.
+      final formMap = { for (var form in forms) form.formKey : form };
+
+      // Link each user to their corresponding form object.
+      for (final user in users) {
+        if (user.formId != null && formMap.containsKey(user.formId)) {
+          user.form = formMap[user.formId];
+        }
+      }
+
+      // Sort the list of users
+      users.sort((a, b) {
+        // Determine if a user has special privileges.
+        bool isAPrivileged = a.isPrivileged();
+        bool isBPrivileged = b.isPrivileged();
+
+        // Primary sort: privileged users come first.
+        if (isAPrivileged && !isBPrivileged) return -1;
+        if (!isAPrivileged && isBPrivileged) return 1;
+
+        // Secondary sort: by date, if privilege status is the same.
+        // Use orderCreatedAt if available, otherwise fall back to createdAt.
+        final dateA = a.orderCreatedAt ?? a.createdAt;
+        final dateB = b.orderCreatedAt ?? b.createdAt;
+
+        // Handle cases where one or both dates might be null, sorting nulls to the end.
+        if (dateA == null && dateB == null) return 0;
+        if (dateA == null) return 1;
+        if (dateB == null) return -1;
+
+        // Compare the effective dates in ascending order (oldest first).
+        return dateA.compareTo(dateB);
+      });
+
+      return users;
+    }
+    if (result != null && result["code"] == 403) {
+      print("Authorization error: ${result['message']}");
+    }
+    return [];
   }
 
   static Future<List<UserInfoModel>> getUsersInfo(List<String> userIds) async {
@@ -118,7 +185,7 @@ class DbUsers {
         });
   }
 
-  static updateOccasionUser(OccasionUserModel oum) async {
+  static Future<void> updateOccasionUser(OccasionUserModel oum) async {
     await AuthService.ensureCanUpdateUsers(oum);
     if (oum.user == null) {
       oum.user = await unsafeCreateUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email], "", oum.data);
@@ -153,7 +220,7 @@ class DbUsers {
         });
   }
 
-  static updateExistingImportedOccasionUser(OccasionUserModel oum) async {
+  static Future<void> updateExistingImportedOccasionUser(OccasionUserModel oum) async {
     await AuthService.ensureCanUpdateUsers(oum);
     await _supabase.from(Tb.occasion_users.table).upsert(
         oum.toImportedUpdateJson()
@@ -245,5 +312,11 @@ class DbUsers {
       return await AuthService.loadCurrentUserData();
     }
     return AuthService.currentUser!;
+  }
+
+  static Future<dynamic> importUsersFromTickets(int occasionId) async {
+    return await _supabase.rpc(
+        'import_users_from_tickets_ws',
+        params: {'p_occasion_id': occasionId});
   }
 }

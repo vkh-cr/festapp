@@ -94,6 +94,14 @@ class _SchedulePageState extends State<SchedulePage>
           .toList();
     }
 
+    if (!AuthService.isLoggedIn() && AppConfig.isOwnProgramSupportedWithoutSignIn) {
+      await OfflineDataService.updateEventsWithMySchedule(_events);
+      _dots = _events
+          .filterRootEvents()
+          .map((e) => TimeBlockItem.fromEventModel(e))
+          .toList();
+    }
+
     if(mounted) {
       setState(() {});
     }
@@ -113,7 +121,7 @@ class _SchedulePageState extends State<SchedulePage>
     if (!AuthService.isLoggedIn()) {
       final saved = await OfflineDataService.getMyScheduleData();
       for (var e in _events) {
-        e.isEventInMySchedule = e.id != null && saved.contains(e.id);
+        e.isInMySchedule = e.id != null && saved.contains(e.id);
       }
     }
     _dots = _events
@@ -135,12 +143,11 @@ class _SchedulePageState extends State<SchedulePage>
       if (e.id != null) _eventDescriptions[e.id!] = e.description;
     }
     _events = full;
-    if (!AuthService.isLoggedIn()) {
-      final saved = await OfflineDataService.getMyScheduleData();
-      for (var e in _events) {
-        e.isEventInMySchedule = e.id != null && saved.contains(e.id);
-      }
+
+    if (!AuthService.isLoggedIn() && AppConfig.isOwnProgramSupportedWithoutSignIn) {
+      await OfflineDataService.updateEventsWithMySchedule(_events);
     }
+
     _dots = _events
         .filterRootEvents()
         .map((e) => TimeBlockItem.fromEventModel(e))
@@ -192,19 +199,31 @@ class _SchedulePageState extends State<SchedulePage>
     RouterService.navigatePageInfo(context, CheckRoute(id: eventId));
   }
 
-  Future<void> _handleCompanionButtonPressed(BuildContext context, int eventId) async {
+  Future<void> _handleCompanionButtonPressed(BuildContext context, TimeBlockItem timeBlockItem) async {
     List<CompanionModel> companions = await DbCompanions.getAllCompanions();
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return CompanionDialog(
-          eventId: eventId,
-          maxCompanions: FeatureService.getMaxCompanions() ?? 0,
-          companions: companions,
-          refreshData: () async {
-            await loadData();
-          },
-        );
+        return StatefulBuilder(builder: (bCtx, setDialogState) {
+          return CompanionDialog(
+            eventId: timeBlockItem.id,
+            maxCompanions: FeatureService.getMaxCompanions() ?? 0,
+            companions: companions,
+            refreshData: () async {
+              await loadData();
+              var refreshedCompanions = await DbCompanions.getAllCompanions();
+              if (mounted) {
+                setDialogState(() {
+                  companions = refreshedCompanions;
+                });
+              }
+            },
+            canSignIn: () {
+              final currentItem = _dots.firstWhereOrNull((element) => element.id == timeBlockItem.id);
+              return currentItem?.canSignIn() ?? false;
+            },
+          );
+        });
       },
     );
   }
@@ -320,7 +339,10 @@ class _SchedulePageState extends State<SchedulePage>
                               setState(() {});
                             }
                           },
-                          child: LogoWidget(width: 120, forceDark: true),
+                          child: Padding(
+                            padding: const EdgeInsets.all(0.0),
+                            child: LogoWidget(width: 120, forceDark: true),
+                          ),
                         ),
                         const Spacer(),
                         if (FeatureService.isFeatureEnabled(

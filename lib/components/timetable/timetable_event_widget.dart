@@ -23,9 +23,8 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
   @override
   Widget build(BuildContext context) {
     final bool isCancelled = widget.item.isCancelled;
-    final bool isUserSpecific = !isCancelled && (widget.item.timeBlockType == TimeBlockType.saved ||
-        widget.item.timeBlockType == TimeBlockType.signedIn);
-    final bool isActivity = widget.item.timeBlockType == TimeBlockType.activity;
+    final bool isUserSpecific = !isCancelled && (widget.item.isInMySchedule || widget.item.isSignedIn());
+    final bool isActivity = widget.item.isActivity;
 
     // --- Strip Style ---
     final double stripWidth = 6.0;
