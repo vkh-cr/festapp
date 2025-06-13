@@ -23,6 +23,7 @@ class FeatureConstants {
   static const String workshops = "workshops";
   static const String volunteers = "volunteers";
   static const String schedule = "schedule";
+  static const String import = "import"; // New feature
 
   // Extra fields for ticket feature
   static const String ticketLightColor = "lightColor";
