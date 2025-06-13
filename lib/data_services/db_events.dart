@@ -48,7 +48,7 @@ class DbEvents {
     var remoteEvents = List<EventModel>.from(
         dataEventUsersSaved.map((x) => EventModel.fromJson(x)));
     for (var element in remoteEvents) {
-      element.isEventInMySchedule = true;
+      element.isInMySchedule = true;
     }
     var toReturn = EventModel.CreateEventModelSet();
     toReturn.addAll(remoteEvents);
@@ -74,7 +74,7 @@ class DbEvents {
     var localEvents = List<EventModel>.from(
         localData.map((x) => EventModel.fromJson(x)));
     for (var element in localEvents) {
-      element.isEventInMySchedule = true;
+      element.isInMySchedule = true;
     }
     var toReturn = EventModel.CreateEventModelSet();
     toReturn.addAll(localEvents);
@@ -134,10 +134,10 @@ class DbEvents {
     var event = EventModel.fromJson(data);
 
     if(AuthService.isLoggedIn()) {
-      event.isEventInMySchedule = await isEventSaved(event.id!);
+      event.isInMySchedule = await isEventSaved(event.id!);
       event.isSignedIn = await DbEvents.isCurrentUserSignedToEvent(event.id!);
     } else {
-      event.isEventInMySchedule = await OfflineDataService.isEventSaved(event.id!);
+      event.isInMySchedule = await OfflineDataService.isEventSaved(event.id!);
     }
 
     if(event.childEventIds!=null)

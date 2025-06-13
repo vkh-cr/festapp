@@ -94,6 +94,14 @@ class _SchedulePageState extends State<SchedulePage>
           .toList();
     }
 
+    if (!AuthService.isLoggedIn() && AppConfig.isOwnProgramSupportedWithoutSignIn) {
+      await OfflineDataService.updateEventsWithMySchedule(_events);
+      _dots = _events
+          .filterRootEvents()
+          .map((e) => TimeBlockItem.fromEventModel(e))
+          .toList();
+    }
+
     if(mounted) {
       setState(() {});
     }
@@ -113,7 +121,7 @@ class _SchedulePageState extends State<SchedulePage>
     if (!AuthService.isLoggedIn()) {
       final saved = await OfflineDataService.getMyScheduleData();
       for (var e in _events) {
-        e.isEventInMySchedule = e.id != null && saved.contains(e.id);
+        e.isInMySchedule = e.id != null && saved.contains(e.id);
       }
     }
     _dots = _events
@@ -135,12 +143,11 @@ class _SchedulePageState extends State<SchedulePage>
       if (e.id != null) _eventDescriptions[e.id!] = e.description;
     }
     _events = full;
-    if (!AuthService.isLoggedIn()) {
-      final saved = await OfflineDataService.getMyScheduleData();
-      for (var e in _events) {
-        e.isEventInMySchedule = e.id != null && saved.contains(e.id);
-      }
+
+    if (!AuthService.isLoggedIn() && AppConfig.isOwnProgramSupportedWithoutSignIn) {
+      await OfflineDataService.updateEventsWithMySchedule(_events);
     }
+
     _dots = _events
         .filterRootEvents()
         .map((e) => TimeBlockItem.fromEventModel(e))

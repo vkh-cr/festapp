@@ -501,7 +501,7 @@
   "Additional Settings": "Další nastavení",
   "Options": "Možnosti",
   "Has description": "Má popis",
-  "Validation Mode:": "Režim validace:",
+  "Validation Mode": "Režim validace",
   "Strict": "Přísný",
   "Lenient": "Mírný",
   "Message": "Zpráva",
@@ -662,5 +662,6 @@
   "FeaturesStrings.labelCustomColorHex": "Vlastní barva (Hex např. #RRGGBB)",
   "FeaturesStrings.tooltipRemoveEventType": "Odebrat typ události",
   "FeaturesStrings.noType": "Bez typu",
+  "Constraints": "Omezení",
   "_": "_"
 }
