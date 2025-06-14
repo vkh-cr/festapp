@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/activities/activities_content.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/pages/eshop/products_tab.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -243,7 +244,7 @@ class AdminTabDefinition {
         icon: Icons.grid_on,
         widget: BlueprintTab()),
     tickets: AdminTabDefinition(
-        label: "Tickets".tr(),
+        label: FeaturesStrings.itemsPlural,
         icon: Icons.local_activity,
         widget: TicketsTab()),
     orders: AdminTabDefinition(

@@ -93,6 +93,10 @@ class RightsService{
     return currentOccasionUser()?.isEditor??false;
   }
 
+  static bool isOrderEditor() {
+    return currentOccasionUser()?.isEditorOrder??false;
+  }
+
   static bool isUnitEditor() {
     return currentUnitUser()?.isEditor??false;
   }
