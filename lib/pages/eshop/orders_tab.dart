@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
@@ -44,19 +45,19 @@ class _OrdersTabState extends State<OrdersTab> {
         ),
         headerChildren: [
           DataGridAction(
-            name: "Cancel".tr(),
+            name: FeaturesStrings.cancel,
             action: (SingleDataGridController singleDataGrid, [_]) => cancelOrders(singleDataGrid),
-            isEnabled: RightsService.isEditor,
+            isEnabled: RightsService.isOrderEditor,
           ),
           DataGridAction(
-            name: "Synchronize payments".tr(),
+            name: FeaturesStrings.synchronizePayments,
             action: (SingleDataGridController singleDataGrid, [_]) => synchronizePayments(),
-            isEnabled: RightsService.isEditor,
+            isEnabled: RightsService.isOrderEditor,
           ),
           DataGridAction(
-            name: "Send tickets".tr(),
-            action: (SingleDataGridController singleDataGrid, [_]) => sendTickets(singleDataGrid),
-            isEnabled: RightsService.isEditor,
+            name: FeaturesStrings.sendActionText,
+            action: (SingleDataGridController singleDataGrid, [_]) => sendTicketsOrConfirmations(singleDataGrid),
+            isEnabled: RightsService.isOrderEditor,
           ),
         ],
         columns: EshopColumns.generateColumns(context, columnIdentifiers, data: { EshopColumns.ORDER_TRANSACTIONS: refreshData },),
@@ -87,8 +88,8 @@ class _OrdersTabState extends State<OrdersTab> {
     if (selected.isNotEmpty) {
       var confirm = await DialogHelper.showConfirmationDialogAsync(
           context,
-          "Cancel".tr(),
-          "${"Do you want to cancel orders and all included tickets? The customer will receive an email about this cancellation.".tr()} (${selected.length})"
+          FeaturesStrings.cancel,
+          "${FeaturesStrings.cancelOrdersConfirmationText} (${selected.length})"
       );
 
       if (confirm && mounted) {
@@ -100,7 +101,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
         await DialogHelper.showProgressDialogAsync(
             context,
-            "Processing...".tr(),
+            FeaturesStrings.processing,
             futures.length,
             futures: futures
         );
@@ -109,7 +110,7 @@ class _OrdersTabState extends State<OrdersTab> {
     }
   }
 
-  Future<void> sendTickets(SingleDataGridController singleDataGrid) async {
+  Future<void> sendTicketsOrConfirmations(SingleDataGridController singleDataGrid) async {
     var selected = _getChecked(singleDataGrid);
     if (selected.isEmpty) {
       return;
@@ -126,8 +127,8 @@ class _OrdersTabState extends State<OrdersTab> {
     if (stateChange.isNotEmpty) {
       var confirm = await DialogHelper.showConfirmationDialogAsync(
           context,
-          "Change state to paid".tr(),
-          "${"Do you want to change orders to paid?".tr()} (${stateChange.length})"
+          FeaturesStrings.changeStateToPaid,
+          "${FeaturesStrings.changeStateToPaidConfirmation} (${stateChange.length})"
       );
 
       if (confirm) {
@@ -139,7 +140,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
         await DialogHelper.showProgressDialogAsync(
             context,
-            "Processing...".tr(),
+            FeaturesStrings.processing,
             futures.length,
             futures: futures,
             isBasic: true
@@ -150,8 +151,8 @@ class _OrdersTabState extends State<OrdersTab> {
 
     var confirm = await DialogHelper.showConfirmationDialogAsync(
         context,
-        "Send tickets".tr(),
-        "${"Do you want to send the tickets to orders?".tr()} (${selected.length})"
+        FeaturesStrings.sendActionText,
+        "${FeaturesStrings.sendActionConfirmationText} (${selected.length})"
     );
 
     if (confirm) {
@@ -163,7 +164,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
       await DialogHelper.showProgressDialogAsync(
           context,
-          "Processing...".tr(),
+          FeaturesStrings.processing,
           futures.length,
           futures: futures
       );
@@ -192,7 +193,7 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_DATA,
     EshopColumns.ORDER_EMAIL,
     if(!FeatureService.isFeatureEnabled(FeatureConstants.ticket))
-    EshopColumns.TICKET_PRODUCTS,
+      EshopColumns.TICKET_PRODUCTS,
     EshopColumns.ORDER_CREATED_AT,
     EshopColumns.ORDER_STATE,
     EshopColumns.ORDER_PRICE,

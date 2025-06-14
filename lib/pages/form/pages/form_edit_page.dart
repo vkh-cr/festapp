@@ -24,7 +24,6 @@ class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderSt
   // List of active tabs by name
   final List<String> activeTabNames = [
     AdminTabDefinition.orders,
-    if(FeatureService.isFeatureEnabled(FeatureConstants.ticket))
     AdminTabDefinition.tickets,
     if(FeatureService.isFeatureEnabled(FeatureConstants.blueprint))
     AdminTabDefinition.blueprint,
