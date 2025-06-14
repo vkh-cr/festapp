@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
@@ -79,7 +80,7 @@ class FormHelper {
   static String femaleLabel() => "Female".tr();
   static String notSpecifiedLabel() => "Not specified".tr();
 
-  static String ticketLabel() => "Ticket".tr();
+  static String ticketLabel() => FeaturesStrings.ticket;
   static String textLabel() => "Text".tr();
   static String selectOneLabel() => "Single Choice".tr();
   static String selectManyLabel() => "Multiple Choice".tr();

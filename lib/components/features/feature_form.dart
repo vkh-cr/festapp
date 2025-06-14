@@ -26,9 +26,10 @@ class _FeatureFormState extends State<FeatureForm> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: ThemeConfig.whiteColor(context),
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0.0),
+      elevation: 0, // Set elevation to 0 to rely on color for separation
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
