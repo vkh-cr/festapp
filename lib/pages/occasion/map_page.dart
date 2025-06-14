@@ -808,7 +808,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   }
 
   bool _shouldShowMarkerTitle(
-      int placeId,
+      int? placeId,
       int? currentFocusedMarkerId,
       int? editingMarkerId,
       Set<int> placeIdsInCurrentGroup
@@ -850,7 +850,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
           : null;
 
       bool displayTitle = _shouldShowMarkerTitle(
-          mapPlace.id!,
+          mapPlace.id,
           currentFocusedId,
           editingMarkerId,
           placeIdsInSelectedGroup
@@ -1021,7 +1021,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
           Container(
             color: Colors.white,
             child: const Text(
-                "You can change location by tapping on the map.")
+                "You can change location by tapping on the map.",
+              style: TextStyle(color: Colors.black),
+            )
                 .tr(),
           ),
           Expanded(child: Container()),
