@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/services/html_helper.dart';
@@ -213,7 +214,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
               Icon(FormHelper.fieldTypeIcons[FormHelper.fieldTypeTicket],
                   size: 24, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 8),
-              Text("Ticket",
+              Text(FeaturesStrings.itemSingular,
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium
