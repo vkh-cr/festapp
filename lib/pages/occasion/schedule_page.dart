@@ -29,10 +29,10 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/logo_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:fstapp/app_router.gr.dart'; // Added for CheckRoute
-import 'package:fstapp/dialogs/companion_dialog.dart'; // Added for CompanionDialog
-import 'package:fstapp/data_services/db_companions.dart'; // Added for DbCompanions
-import 'package:fstapp/data_models/companion_model.dart'; // Added for CompanionModel
+import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/dialogs/companion_dialog.dart';
+import 'package:fstapp/data_services/db_companions.dart';
+import 'package:fstapp/data_models/companion_model.dart';
 
 @RoutePage()
 class SchedulePage extends StatefulWidget {
@@ -45,11 +45,15 @@ class SchedulePage extends StatefulWidget {
 
 class _SchedulePageState extends State<SchedulePage>
     with WidgetsBindingObserver {
+
+  static bool _isLoading = false;
+  static bool _fullDataGloballyLoaded = false;
+
+
   final ScrollController _scrollController = ScrollController();
   List<TimeBlockItem> _dots = [];
   List<EventModel> _events = [];
-  final Map<int, String?> _eventDescriptions = {};
-  bool _fullEventsLoaded = false;
+  static final Map<int, String?> _eventDescriptions = {};
 
   // for timeline-expand state
   int? _openId;
@@ -63,7 +67,9 @@ class _SchedulePageState extends State<SchedulePage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) loadData();
+    if (state == AppLifecycleState.resumed) {
+      loadData();
+    }
   }
 
   @override
@@ -74,10 +80,24 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   Future<void> loadData() async {
-    await _loadOfflineDataThenFast();
-    if (!_fullEventsLoaded) {
-      await _loadFullData();
-      _fullEventsLoaded = true;
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _loadOfflineDataThenFast();
+      if (!_fullDataGloballyLoaded) {
+        await _loadFullData();
+        _fullDataGloballyLoaded = true;
+      }
+    } finally {
+      if(mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
