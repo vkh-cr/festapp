@@ -13,7 +13,8 @@ import 'package:flutter/material.dart';
 
 class UserHeaderWidget extends StatefulWidget {
   final Color? appBarIconColor;
-  const UserHeaderWidget({super.key, this.appBarIconColor});
+  final VoidCallback? onSignInOut;
+  const UserHeaderWidget({super.key, this.appBarIconColor, this.onSignInOut});
 
   @override
   _UserHeaderWidgetState createState() => _UserHeaderWidgetState();
@@ -84,61 +85,61 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
           const SizedBox(height: 16),
         ],
         if(ThemeConfig.isDarkModeEnabled)
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Appearance",
-                style: TextStyle(
-                    fontSize: 16, color: ThemeConfig.blackColor(context)))
-                .tr(),
-            const SizedBox(height: 8),
-            ToggleButtons(
-              isSelected: [
-                _currentThemeMode == AdaptiveThemeMode.dark,
-                _currentThemeMode == AdaptiveThemeMode.system,
-                _currentThemeMode == AdaptiveThemeMode.light,
-              ],
-              onPressed: (int index) {
-                AdaptiveThemeMode mode;
-                if (index == 0) {
-                  mode = AdaptiveThemeMode.dark;
-                } else if (index == 1) {
-                  mode = AdaptiveThemeMode.system;
-                } else {
-                  mode = AdaptiveThemeMode.light;
-                }
-                AdaptiveTheme.of(context).setThemeMode(mode);
-                setState(() {
-                  _currentThemeMode = mode;
-                });
-              },
-              borderRadius: BorderRadius.circular(8.0),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text("Dark",
-                      style: TextStyle(
-                          color: ThemeConfig.blackColor(context)))
-                      .tr(),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text("Auto",
-                      style: TextStyle(
-                          color: ThemeConfig.blackColor(context)))
-                      .tr(),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text("Light",
-                      style: TextStyle(
-                          color: ThemeConfig.blackColor(context)))
-                      .tr(),
-                ),
-              ],
-            ),
-          ],
-        ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Appearance",
+                  style: TextStyle(
+                      fontSize: 16, color: ThemeConfig.blackColor(context)))
+                  .tr(),
+              const SizedBox(height: 8),
+              ToggleButtons(
+                isSelected: [
+                  _currentThemeMode == AdaptiveThemeMode.dark,
+                  _currentThemeMode == AdaptiveThemeMode.system,
+                  _currentThemeMode == AdaptiveThemeMode.light,
+                ],
+                onPressed: (int index) {
+                  AdaptiveThemeMode mode;
+                  if (index == 0) {
+                    mode = AdaptiveThemeMode.dark;
+                  } else if (index == 1) {
+                    mode = AdaptiveThemeMode.system;
+                  } else {
+                    mode = AdaptiveThemeMode.light;
+                  }
+                  AdaptiveTheme.of(context).setThemeMode(mode);
+                  setState(() {
+                    _currentThemeMode = mode;
+                  });
+                },
+                borderRadius: BorderRadius.circular(8.0),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Text("Dark",
+                        style: TextStyle(
+                            color: ThemeConfig.blackColor(context)))
+                        .tr(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Text("Auto",
+                        style: TextStyle(
+                            color: ThemeConfig.blackColor(context)))
+                        .tr(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Text("Light",
+                        style: TextStyle(
+                            color: ThemeConfig.blackColor(context)))
+                        .tr(),
+                  ),
+                ],
+              ),
+            ],
+          ),
       ],
     );
   }
@@ -310,7 +311,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                         var unit = RightsService.currentUnitUser()?.unit;
                         await AuthService.logout();
                         await RouterService.goToUnit(context, unit);
-
+                        widget.onSignInOut?.call();
                         if (mounted) setState(() {});
                       },
                     ),
@@ -418,7 +419,8 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               tooltip: "Sign In".tr(),
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
-                setState(() {});
+                widget.onSignInOut?.call();
+                if(mounted) setState(() {});
               },
             ),
             const SizedBox(width: 8),
@@ -445,7 +447,8 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
             OutlinedButton.icon(
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
-                setState(() {}); // refresh after sign in
+                widget.onSignInOut?.call();
+                if(mounted) setState(() {}); // refresh after sign in
               },
               icon: Icon(
                 Icons.person,

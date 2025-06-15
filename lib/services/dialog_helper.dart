@@ -1,24 +1,109 @@
 import 'dart:async' as dialog_helper;
 
+import 'package:cross_file/cross_file.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/data_models/language_model.dart';
 import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/services/responsive_service.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/app_config.dart';
-
-import 'package:flutter/material.dart';
-import 'package:cross_file/cross_file.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/drop_file.dart';
 import 'package:fstapp/widgets/password_field.dart';
 import 'package:search_page/search_page.dart';
 import 'package:select_dialog/select_dialog.dart';
 
-import '../widgets/drop_file.dart';
+class ImportDialogChoice {
+  final bool fromTickets;
+  final XFile? fromFile;
+  ImportDialogChoice({this.fromTickets = false, this.fromFile});
+}
 
 class DialogHelper{
+
+  static Future<ImportDialogChoice?> showImportDialog(
+      BuildContext context,
+      String titleMessage,
+      {
+        required bool showCsvImport,
+        required bool showTicketImport,
+        String confirmButtonMessage = "Ok",
+        String cancelButtonMessage = "Storno",
+      }) async {
+    XFile? filePath;
+    ImportDialogChoice? result;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // Using a stateful builder to handle button state
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final dropFileWidget = DropFile(
+              onFilePathChanged: (file) {
+                setState(() {
+                  filePath = file;
+                });
+              },
+            );
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              title: Text(titleMessage),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showCsvImport) dropFileWidget,
+                    if (showCsvImport && showTicketImport) ...[
+                      const SizedBox(height: 32),
+                    ],
+                    if (showTicketImport)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            result = ImportDialogChoice(fromTickets: true);
+                            Navigator.pop(context);
+                          },
+                          child: Text(FeaturesStrings.importFromTicketsTitle),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    result = null;
+                    Navigator.pop(context);
+                  },
+                  child: Text(cancelButtonMessage),
+                ),
+                if (showCsvImport)
+                  ElevatedButton(
+                    onPressed: filePath != null
+                        ? () {
+                      result = ImportDialogChoice(fromFile: filePath);
+                      Navigator.pop(context);
+                    }
+                        : null, // Disable if no file is selected
+                    child: Text(FeaturesStrings.labelImportFromCsv),
+                  ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    return result;
+  }
 
   static void chooseUser(BuildContext context, void onPressedAction(UserInfoModel), List<UserInfoModel> allUsers, String setText) {
     showSearch(

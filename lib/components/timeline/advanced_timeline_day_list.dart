@@ -405,7 +405,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     }
 
     Widget inlineActionSection = const SizedBox.shrink();
-    if (event.isCancelled && !event.isInMySchedule() && !event.isSignedIn()) {
+    if (event.isCancelled && !event.isInMySchedule && !event.isSignedIn()) {
       inlineActionSection = Padding(
         padding: const EdgeInsets.only(right: 8.0),
         child: Text(
@@ -495,7 +495,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     } else if (event.canSaveToMySchedule()){
       inlineActionSection = Row(
         children: ButtonsHelper.getAddToMyProgramButton(
-          !event.isInMySchedule(),
+          !event.isInMySchedule,
               () async => await controller.onAddToProgramEvent!(event.id),
               () async => await _handleRemoveEvent(event.id),
           selectedColor,

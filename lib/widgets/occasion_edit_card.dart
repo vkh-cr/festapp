@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/services/time_helper.dart';
@@ -112,17 +113,18 @@ class OccasionEditCard extends StatelessWidget {
                                               color: Colors.white),
                                         ),
                                       ),
-                                    TextButton.icon(
-                                      onPressed: onApp,
-                                      icon: const Icon(
-                                          Icons.admin_panel_settings,
-                                          color: Colors.white),
-                                      label: Text(
-                                        'App'.tr(),
-                                        style: const TextStyle(
+                                    if(AppConfig.isAppSupported)
+                                      TextButton.icon(
+                                        onPressed: onApp,
+                                        icon: const Icon(
+                                            Icons.admin_panel_settings,
                                             color: Colors.white),
+                                        label: Text(
+                                          'App'.tr(),
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                        ),
                                       ),
-                                    ),
                                     TextButton.icon(
                                       onPressed: onSettings,
                                       icon: const Icon(Icons.settings,
