@@ -1,9 +1,7 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/timeline/schedule_tab_view.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/event_model.dart';
@@ -11,7 +9,6 @@ import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_events.dart';
-import 'package:fstapp/data_services/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/dialogs/add_new_event_dialog.dart';
@@ -40,9 +37,12 @@ class ScheduleBasicPage extends StatefulWidget {
 
 class _ScheduleBasicPageState extends State<ScheduleBasicPage>
     with WidgetsBindingObserver {
+  static bool _isLoading = false;
+  static bool _fullDataGloballyLoaded = false;
+
   List<TimeBlockItem> _dots = [];
   List<EventModel> _events = [];
-  final Map<int, String?> _eventDescriptions = {};
+  static final Map<int, String?> _eventDescriptions = {};
   String? userName;
 
   @override
@@ -66,7 +66,25 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
   }
 
   Future<void> loadData() async {
-    await _loadOfflineDataThenFast();
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _loadOfflineDataThenFast();
+      if (!_fullDataGloballyLoaded) {
+        await _loadFullData();
+        _fullDataGloballyLoaded = true;
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadOfflineDataThenFast() async {
@@ -90,7 +108,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
           .toList();
     }
 
-    if(mounted) {
+    if (mounted) {
       setState(() {});
     }
 
@@ -112,10 +130,31 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
         .map((e) => TimeBlockItem.fromEventModelBasicTimeline(e))
         .toList();
 
-    if(mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
+
+  Future<void> _loadFullData() async {
+    final full = await DbEvents.getAllEvents(
+      RightsService.currentOccasionId()!,
+      true,
+    );
+    for (var e in full) {
+      if (e.id != null) _eventDescriptions[e.id!] = e.description;
+    }
+    _events = full;
+
+    _dots = _events
+        .filterRootEvents()
+        .map((e) => TimeBlockItem.fromEventModelBasicTimeline(e))
+        .toList();
+    await OfflineDataService.saveAllEvents(_events);
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
 
   Future<void> loadPlacesForEvents(List<EventModel> events,
       Future<List<PlaceModel>> Function(List<int>) fetchPlaces) async {
@@ -125,6 +164,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
         .cast<int>()
         .toSet()
         .toList();
+    if(placeIds.isEmpty) return;
     var places = await fetchPlaces(placeIds);
     var placesById = {for (var place in places) place.id: place};
 
@@ -174,9 +214,8 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                       ToastHelper.Show(context,
                           "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                       if (RightsService.isEditor()) {
-                        setState(() {
-                          TimeHelper.toggleTimeTravel?.call();
-                        });
+                        TimeHelper.toggleTimeTravel?.call();
+                        setState(() {});
                       }
                     },
                     child: LogoWidget(width: 60,),
@@ -206,7 +245,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
           ),
           Expanded(
             child: ScheduleTabView(
-              key: _dots.isEmpty ? UniqueKey() : null,
+              key: _dots.isEmpty ? UniqueKey() : ValueKey(_dots.length),
               events: _dots,
               onEventPressed: _eventPressed,
               showAddNewEventButton: RightsService.isEditor,
