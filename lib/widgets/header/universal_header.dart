@@ -8,8 +8,9 @@ const double kHorizontalPadding = 16.0;
 
 class UniversalHeader extends StatelessWidget {
   final ScrollController scrollController;
+  final VoidCallback? onSignInOut;
 
-  const UniversalHeader({super.key, required this.scrollController});
+  const UniversalHeader({super.key, required this.scrollController, this.onSignInOut});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,7 @@ class UniversalHeader extends StatelessWidget {
               },
               child: LogoWidget(height: 60),
             ),
-            const UserHeaderWidget(), // New widget on the right side
+            UserHeaderWidget(onSignInOut: onSignInOut), // Pass callback here
           ],
         ),
       ),

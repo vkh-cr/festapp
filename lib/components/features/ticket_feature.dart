@@ -50,15 +50,8 @@ class TicketFeature extends Feature {
     return data;
   }
 
-  static String getTicketOrRegistrationLabel() {
-    if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
-      return "Ticket".tr();
-    } else {
-      return "Registration".tr();
-    }
-  }
-
   /// Builds the ticket UI block.
+  @override
   Widget buildFormField(BuildContext context) {
     return StatefulBuilder(builder: (ctx, setLocal) {
       final lightCtrl = TextEditingController(text: ticketLightColor ?? 'FFFFFF');

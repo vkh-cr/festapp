@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -139,7 +140,7 @@ class FormFieldBuilders {
                               child: Align(
                                 alignment: Alignment.center,
                                 child: buildTitleWidget(
-                                  "${"Ticket".tr()} ${i + 1}",
+                                  "${FeaturesStrings.itemSingular} ${i + 1}",
                                   false,
                                   context,
                                 ),

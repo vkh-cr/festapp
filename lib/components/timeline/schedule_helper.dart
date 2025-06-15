@@ -61,6 +61,7 @@ class TimeBlockItem {
   final String? imageUrl;
   final bool isCancelled;
   final bool isActivity;
+  final bool isInMySchedule;
   /// Nested child time blocks
   List<TimeBlockItem>? children;
 
@@ -80,7 +81,8 @@ class TimeBlockItem {
     this.children,
     this.imageUrl,
     this.isCancelled = false,
-    this.isActivity = false
+    this.isActivity = false,
+    this.isInMySchedule = false
   });
 
   /// Duration of the block.
@@ -94,7 +96,6 @@ class TimeBlockItem {
   }
 
   bool isSignedIn() => timeBlockType == TimeBlockType.signedIn;
-  bool isInMySchedule() => timeBlockType == TimeBlockType.saved;
   bool haveChildren() => children?.isNotEmpty ?? false;
   bool isSupportingSignIn() => !isCancelled && maxParticipants > 0;
   bool canSignIn() => isSupportingSignIn() && maxParticipants > participants;
@@ -147,7 +148,8 @@ class TimeBlockItem {
       children: model.childEvents.map((c) => TimeBlockItem.fromEventModelAsChild(c))
           .toList(),
       imageUrl:  model.data?[Tb.events.dataHeaderImage],
-      isCancelled: model.isCancelled, // Added
+      isCancelled: model.isCancelled,
+      isInMySchedule: model.isInMySchedule ?? false, // Added
     );
   }
 
@@ -190,7 +192,7 @@ class TimeBlockHelper {
   static TimeBlockType getTimeBlockTypeFromModel(EventModel model) {
     if (model.isSignedIn!) {
       return TimeBlockType.signedIn;
-    } else if (model.isEventInMySchedule == true && !EventModel.isEventSupportingSignIn(model)) {
+    } else if (model.isInMySchedule == true && !EventModel.isEventSupportingSignIn(model)) {
       return TimeBlockType.saved;
     } else if (model.isGroupEvent!) {
       if (model.isMyGroupEvent!) {
@@ -310,23 +312,53 @@ class TimeBlockHelper {
         TimeOfDay afternoonStartTime = const TimeOfDay(hour: 12, minute: 0),
         TimeOfDay eveningStartTime = const TimeOfDay(hour: 18, minute: 0),
       }) {
-    List<TimeBlockItem> morning = events.where((e) => e.startTime.hour < afternoonStartTime.hour).toList();
-    List<TimeBlockItem> afternoon = events
-        .where((e) => e.startTime.hour >= afternoonStartTime.hour && e.startTime.hour < eveningStartTime.hour)
+    int timeOfDayToMinutes(TimeOfDay time) {
+      return time.hour * 60 + time.minute;
+    }
+
+    // Calculate the minute-based thresholds for each time period.
+    final int afternoonStartMinutes = timeOfDayToMinutes(afternoonStartTime);
+    final int eveningStartMinutes = timeOfDayToMinutes(eveningStartTime);
+
+    // Helper function to get the total minutes from midnight for an event's start time.
+    int eventTimeToMinutes(TimeBlockItem event) {
+      return event.startTime.hour * 60 + event.startTime.minute;
+    }
+
+    // Filter events into their respective time-of-day lists based on minute comparison.
+    final List<TimeBlockItem> morningEvents = events
+        .where((e) => eventTimeToMinutes(e) < afternoonStartMinutes)
         .toList();
-    List<TimeBlockItem> evening = events.where((e) => e.startTime.hour >= eveningStartTime.hour).toList();
 
-    bool multi = [morning, afternoon, evening]
-        .where((g) => g.isNotEmpty)
-        .length >
-        1;
-    TimeBlockGroup make(String t, List<TimeBlockItem> ev) =>
-        TimeBlockGroup(title: multi ? t.tr() : '', events: ev);
+    final List<TimeBlockItem> afternoonEvents = events
+        .where((e) =>
+    eventTimeToMinutes(e) >= afternoonStartMinutes &&
+        eventTimeToMinutes(e) < eveningStartMinutes)
+        .toList();
 
+    final List<TimeBlockItem> eveningEvents = events
+        .where((e) => eventTimeToMinutes(e) >= eveningStartMinutes)
+        .toList();
+
+    // Determine if there are events in more than one time block.
+    // If events exist in only one block (e.g., only in the morning), titles are hidden.
+    final bool hasMultipleGroups = [morningEvents, afternoonEvents, eveningEvents]
+        .where((group) => group.isNotEmpty)
+        .length > 1;
+
+    // Helper to create a TimeBlockGroup. A title is only applied if there are multiple groups.
+    TimeBlockGroup createGroup(String title, List<TimeBlockItem> eventList) {
+      return TimeBlockGroup(
+        title: hasMultipleGroups ? title.tr() : '',
+        events: eventList,
+      );
+    }
+
+    // Construct the final list of groups, only including those that contain events.
     return [
-      if (morning.isNotEmpty) make('', morning),
-      if (afternoon.isNotEmpty) make('Afternoon', afternoon),
-      if (evening.isNotEmpty) make('Evening', evening),
+      if (morningEvents.isNotEmpty) createGroup('Morning', morningEvents),
+      if (afternoonEvents.isNotEmpty) createGroup('Afternoon', afternoonEvents),
+      if (eveningEvents.isNotEmpty) createGroup('Evening', eveningEvents),
     ];
   }
 

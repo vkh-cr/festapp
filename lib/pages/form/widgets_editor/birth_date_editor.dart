@@ -12,32 +12,105 @@ import 'form_message_widget.dart';
 class BirthDateEditor {
   static Widget buildBirthDateReadOnly(BuildContext context, FormFieldModel field) {
     final data = field.data ?? {};
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Configuration Data
     final int? minAgeInt = data[BirthDateFieldHolder.metaMinYear] is int
         ? data[BirthDateFieldHolder.metaMinYear] as int
         : int.tryParse(data[BirthDateFieldHolder.metaMinYear]?.toString() ?? "");
     final int? maxAgeInt = data[BirthDateFieldHolder.metaMaxYear] is int
         ? data[BirthDateFieldHolder.metaMaxYear] as int
         : int.tryParse(data[BirthDateFieldHolder.metaMaxYear]?.toString() ?? "");
-    if (minAgeInt == 0 || maxAgeInt == 0) {
-      return Container();
-    }
-    final String minAge = minAgeInt?.toString() ?? "N/A";
-    final String maxAge = maxAgeInt?.toString() ?? "N/A";
-    final String message = data[BirthDateFieldHolder.metaMessage]?.toString() ?? "";
-    final String defaultWarning = "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
-        .tr(namedArgs: {"minAge": minAge, "maxAge": maxAge});
+    final bool showAgeLimits = (minAgeInt ?? 0) > 0 || (maxAgeInt ?? 0) > 0;
+    final bool isStrict = data[BirthDateFieldHolder.metaIsHard] as bool? ?? false;
+    final String customMessage = data[BirthDateFieldHolder.metaMessage]?.toString() ?? "";
+    final bool hasCustomMessage = customMessage.trim().isNotEmpty;
+
+    // Custom adaptive colors for a subtle look that works in both light and dark themes.
+    final Color fillColor = isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.035);
+    final Color borderColor = isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.08);
+    final Color contentColor = theme.colorScheme.onSurface.withOpacity(0.7);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("${'Min Age'.tr()}: $minAge"),
-        Text("${'Max Age'.tr()}: $maxAge"),
-        Text("${'Validation Mode:'.tr()} ${data[BirthDateFieldHolder.metaIsHard] == true ? 'Strict'.tr() : 'Lenient'.tr()}"),
-        if (data[BirthDateFieldHolder.metaIsHard] != true)
-          FormMessageWidget(
-            message: message,
-            defaultMessage: defaultWarning,
+        // 1. Read-only preview of the input field
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+          decoration: BoxDecoration(
+              color: fillColor,
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: borderColor, width: 1.0)
           ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Birth Date".tr(),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: contentColor,
+                ),
+              ),
+              Icon(
+                Icons.calendar_today,
+                size: 18,
+                color: contentColor,
+              ),
+            ],
+          ),
+        ),
+
+        // 2. Display for constraints and validation settings.
+        if (showAgeLimits) ...[
+          const SizedBox(height: 12.0),
+          Text(
+            "Constraints".tr().toUpperCase(),
+            style: theme.textTheme.labelSmall,
+          ),
+          const Divider(height: 6, thickness: 0.5),
+          Wrap(
+            spacing: 16.0,
+            runSpacing: 2.0,
+            children: [
+              Text("${'Min Age'.tr()}: $minAgeInt", style: theme.textTheme.bodySmall),
+              Text("${'Max Age'.tr()}: $maxAgeInt", style: theme.textTheme.bodySmall),
+            ],
+          ),
+          const SizedBox(height: 10.0),
+
+          // 3. Clear indicator for Strict Validation status.
+          if (isStrict)
+            SizedBox(
+              height: 24,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.lock_outline, size: 15, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(children: [
+                        TextSpan(text: "${'Validation Mode'.tr()}: "),
+                        TextSpan(
+                          text: "Strict".tr(),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                        ),
+                      ]),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          // 4. Display for the custom message when validation is lenient.
+          if (!isStrict && hasCustomMessage)
+            FormMessageWidget(
+              message: customMessage,
+              defaultMessage: "", // Default is not needed as we only show if a custom one exists.
+            ),
+        ],
       ],
     );
   }
@@ -88,7 +161,7 @@ class BirthDateEditor {
                 field.data![BirthDateFieldHolder.metaMinYear] = int.tryParse(value) ?? value;
                 final currentMax = int.tryParse(maxAgeController.text) ?? 0;
                 final currentMin = int.tryParse(value) ?? 0;
-                if (currentMax < currentMin) {
+                if (currentMax > 0 && currentMax < currentMin) {
                   maxAgeError = "Max age cannot be lower than min age.".tr();
                 } else {
                   maxAgeError = null;
@@ -110,7 +183,7 @@ class BirthDateEditor {
                 field.data ??= {};
                 final newMax = int.tryParse(value) ?? 0;
                 final currentMin = int.tryParse(minAgeController.text) ?? 0;
-                if (newMax < currentMin) {
+                if (newMax > 0 && newMax < currentMin) {
                   maxAgeError = "Max age cannot be lower than min age.".tr();
                 } else {
                   maxAgeError = null;

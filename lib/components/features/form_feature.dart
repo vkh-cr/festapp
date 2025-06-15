@@ -47,6 +47,7 @@ class FormFeature extends Feature {
   }
 
   /// Builds the form UI block.
+  @override
   Widget buildFormField(BuildContext context) {
     return StatefulBuilder(builder: (ctx, setLocal) {
       return Column(

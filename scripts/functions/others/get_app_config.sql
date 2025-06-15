@@ -166,7 +166,8 @@ BEGIN
         -- If the occasion is not open, enforce access restrictions
         IF is_open_bool = FALSE THEN
             IF (SELECT get_is_editor_view_on_occasion(occasionId)) <> TRUE
-               AND (SELECT get_is_editor_order_view_on_occasion(occasionId)) <> TRUE THEN
+               AND (SELECT get_is_editor_order_view_on_occasion(occasionId)) <> TRUE
+               AND (SELECT get_is_editor_on_unit(occasion_unit)) <> TRUE THEN
                 RETURN json_build_object(
                     'code', 403,
                     'message', 'Access forbidden',

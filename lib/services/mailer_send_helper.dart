@@ -1,5 +1,4 @@
 import 'package:fstapp/data_models/user_info_model.dart' as mailer_send_helper;
-import 'package:fstapp/data_services/data_service.dart';
 
 class MailerSendHelper{
   static Future<void> sendPassword(mailer_send_helper.UserInfoModel recipient, String password) async {
@@ -10,7 +9,7 @@ class MailerSendHelper{
     ];
 
     allVars.addAll(_getSalutationPresalutation(recipient));
-    await ImportService.emailMailerSend(recipient.email!, "templateid", allVars);
+    // await ImportService.emailMailerSend(recipient.email!, "templateid", allVars);
     //ToastHelper.Show("E-mail with credentials was sent to: {email}.".tr(namedArgs: {"email":recipient.email!}));
     await Future.delayed(const Duration(milliseconds: 6000));
   }
