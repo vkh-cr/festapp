@@ -356,7 +356,7 @@ class TimeBlockHelper {
 
     // Construct the final list of groups, only including those that contain events.
     return [
-      if (morningEvents.isNotEmpty) createGroup('Morning', morningEvents),
+      if (morningEvents.isNotEmpty) createGroup('', morningEvents),
       if (afternoonEvents.isNotEmpty) createGroup('Afternoon', afternoonEvents),
       if (eveningEvents.isNotEmpty) createGroup('Evening', eveningEvents),
     ];

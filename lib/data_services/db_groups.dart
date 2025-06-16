@@ -19,30 +19,33 @@ class DbGroups {
   }
 
   static Future<List<UserGroupInfoModel>> getAllUserGroupInfo([String? type]) async {
-    var data = await _supabase
-        .from(Tb.user_group_info.table)
-        .select(
-        "${Tb.user_group_info.id},"
-            "${Tb.user_group_info.title},"
-            "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}),"
-            "${Tb.places.table}(*),"
-            "${Tb.user_group_info.description},"
-            "${Tb.user_group_info.type},"
-            "${Tb.user_group_info.data},"
-            "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}))")
-    .eq(Tb.user_group_info.occasion, RightsService.currentOccasionId()!)
-    .filter(Tb.user_group_info.type, type == null ? "is" : "eq", type);
+    final response = await _supabase.rpc(
+      'get_all_user_group_info',
+      params: {
+        'p_occasion_id': RightsService.currentOccasionId()!,
+        'p_type': type,
+      },
+    );
+
+    // Check the response code. If not successful, return an empty list.
+    if (response['code'] != 200) {
+      // You can add logging here for debugging
+      // print("Error fetching all user groups: ${response['message']}");
+      return []; // Return an empty list on authorization failure or other errors.
+    }
+
+    // On success, the actual payload is inside the 'data' field.
+    final data = response['data'];
+    final List<dynamic> groupData = data['groups'];
+    final Map<String, dynamic>? gameDefsData = data['game_definitions'];
 
     var toReturn = List<UserGroupInfoModel>.from(
-        data.map((x) => UserGroupInfoModel.fromJson(x)));
+        groupData.map((x) => UserGroupInfoModel.fromJson(x)));
 
-    if(type == InformationModel.gameType) {
-      var gameDef = await DbInformation.getAllInformationForDataGrid(InformationModel.gameType);
-      Map<int, String> dict = Map.fromIterable(
-        gameDef,
-        key: (item) => item.id!,       // Set the key as the "id"
-        value: (item) => item.title!,   // Set the value as the "title"
-      );
+    if (type == InformationModel.gameType && gameDefsData != null) {
+      Map<int, String> dict = gameDefsData.map((key, value) =>
+          MapEntry(int.parse(key), value as String));
+
       for(var u in toReturn){
         u.checkpointTitlesDict = dict;
       }
@@ -51,29 +54,35 @@ class DbGroups {
     toReturn.sort((a, b) {
       return Utilities.naturalCompare(a.title, b.title);
     });
+
     return toReturn;
   }
 
   static Future<UserGroupInfoModel?> getUserGroupInfo(int id) async {
-    var data = await _supabase
-        .from(Tb.user_group_info.table)
-        .select(
-        "${Tb.user_group_info.id},"
-            "${Tb.user_group_info.title},"
-            "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info_public.id}, ${Tb.user_info_public.name}, ${Tb.user_info_public.surname}),"
-            "${Tb.places.table}(*),"
-            "${Tb.user_group_info.description},"
-            "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info_public.id}, ${Tb.user_info_public.name}, ${Tb.user_info_public.surname}))")
-        .eq(Tb.user_group_info.id, id)
-        .maybeSingle();
-    if(data==null)
-    {
+    final response = await _supabase.rpc(
+      'get_user_group_info',
+      params: {
+        'p_group_id': id,
+      },
+    );
+
+    // Check the response code before proceeding.
+    if (response['code'] != 200) {
+      // You can add logging here to see the error from the database
+      // print("Error fetching user group info: ${response['message']}");
+      return null; // Return null on any error (e.g., Not Found, Not Authorized).
+    }
+
+    // If the code is 200, the 'data' field will contain the user group object.
+    final data = response['data'];
+    if (data == null) {
       return null;
     }
+
     return UserGroupInfoModel.fromJson(data);
   }
 
-  static updateUserGroupInfo(UserGroupInfoModel model) async {
+  static Future<void> updateUserGroupInfo(UserGroupInfoModel model) async {
     if(!(RightsService.isEditor() || model.leader!.id == AuthService.currentUserId())) {
       throw Exception("Must be leader or admin to change the group.");
     }
@@ -106,7 +115,7 @@ class DbGroups {
     await updateUserGroupParticipants(updated, model.participants!);
   }
 
-  static updateUserGroupParticipants(UserGroupInfoModel group, Set<UserInfoModel> participants) async {
+  static Future<void> updateUserGroupParticipants(UserGroupInfoModel group, Set<UserInfoModel> participants) async {
     await _supabase
         .from(Tb.user_groups.table)
         .delete()
