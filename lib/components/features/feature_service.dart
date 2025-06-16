@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 
 import 'companion_feature.dart';
@@ -12,6 +13,23 @@ import 'ticket_feature.dart';
 import 'workshop_feature.dart';
 
 class FeatureService {
+  /// A static list of feature codes that are only available when [AppConfig.isAppSupported] is true.
+  static final List<String> appSupportedFeatures = [
+    FeatureConstants.workshops,
+    FeatureConstants.map,
+    FeatureConstants.songbook,
+    FeatureConstants.game,
+    FeatureConstants.mySchedule,
+    FeatureConstants.services,
+    FeatureConstants.userGroups,
+    FeatureConstants.entryCode,
+    FeatureConstants.timetable,
+    FeatureConstants.volunteers,
+    FeatureConstants.companions,
+    ScheduleFeature.metaSchedule,
+    FeatureConstants.import,
+  ];
+
   /// Checks whether the feature with [featureCode] is enabled.
   /// Expects [features] to be a list of Feature objects.
   static bool isFeatureEnabled(String featureCode, {List<Feature>? features}) {
@@ -23,7 +41,12 @@ class FeatureService {
   /// Returns a default list of features.
   static List<Feature> getDefaultFeatures() {
     return [
-      FormFeature(code: FeatureConstants.form, isEnabled: false),
+      // This feature is enabled only when the main app features are NOT supported.
+      // It's intended as a fallback.
+      FormFeature(code: FeatureConstants.form, isEnabled: !AppConfig.isAppSupported),
+
+      // These features are always part of the default configuration,
+      // though they may be disabled initially.
       TicketFeature(
         code: FeatureConstants.ticket,
         isEnabled: false,
@@ -32,19 +55,23 @@ class FeatureService {
         ticketBackground: '',
       ),
       SimpleFeature(code: FeatureConstants.blueprint, isEnabled: false),
-      WorkshopsFeature(code: FeatureConstants.workshops, isEnabled: true),
-      MapFeature(code: FeatureConstants.map, isEnabled: true),
-      SimpleFeature(code: FeatureConstants.songbook, isEnabled: false),
-      SimpleFeature(code: FeatureConstants.game, isEnabled: false),
-      SimpleFeature(code: FeatureConstants.mySchedule, isEnabled: false),
-      SimpleFeature(code: FeatureConstants.services, isEnabled: false),
-      SimpleFeature(code: FeatureConstants.userGroups, isEnabled: false),
-      SimpleFeature(code: FeatureConstants.entryCode, isEnabled: false),
-      SimpleFeature(code: FeatureConstants.timetable, isEnabled: false),
-      SimpleFeature(code: FeatureConstants.volunteers, isEnabled: false),
-      CompanionsFeature(code: FeatureConstants.companions, isEnabled: false, companionsMax: 1),
-      ScheduleFeature(code: ScheduleFeature.metaSchedule, isEnabled: true, scheduleType: 'basic'),
-      ImportFeature(code: FeatureConstants.import, isEnabled: true),
+
+      // These features are only added to the list if the app is supported.
+      if (AppConfig.isAppSupported) ...[
+        WorkshopsFeature(code: FeatureConstants.workshops, isEnabled: true),
+        MapFeature(code: FeatureConstants.map, isEnabled: true),
+        SimpleFeature(code: FeatureConstants.songbook, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.game, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.mySchedule, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.services, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.userGroups, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.entryCode, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.timetable, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.volunteers, isEnabled: false),
+        CompanionsFeature(code: FeatureConstants.companions, isEnabled: false, companionsMax: 1),
+        ScheduleFeature(code: ScheduleFeature.metaSchedule, isEnabled: true, scheduleType: 'basic'),
+        ImportFeature(code: FeatureConstants.import, isEnabled: true),
+      ],
     ];
   }
 

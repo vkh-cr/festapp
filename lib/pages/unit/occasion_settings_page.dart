@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/features/feature_metadata.dart';
@@ -180,15 +181,23 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   Widget build(BuildContext context) {
     final imageUrl = widget.occasion.data?[Tb.occasions.data_image];
 
-    final filteredFeatures = widget.occasion.features.where((feature) {
+    // Filter features based on the search query
+    final filteredFeaturesBySearch = widget.occasion.features.where((feature) {
       final title = FeatureMetadata.getTitle(feature.code).toLowerCase();
       final description = FeatureMetadata.getDescription(feature.code).toLowerCase();
       final query = _featureSearchQuery.toLowerCase();
       return query.isEmpty || title.contains(query) || description.contains(query);
     }).toList();
 
-    final enabledFeatures = filteredFeatures.where((f) => f.isEnabled).toList();
-    final disabledFeatures = filteredFeatures.where((f) => !f.isEnabled).toList();
+    // Conditionally filter out app-supported features if the app is not supported
+    final featuresToShow = AppConfig.isAppSupported
+        ? filteredFeaturesBySearch
+        : filteredFeaturesBySearch
+        .where((f) => !FeatureService.appSupportedFeatures.contains(f.code))
+        .toList();
+
+    final enabledFeatures = featuresToShow.where((f) => f.isEnabled).toList();
+    final disabledFeatures = featuresToShow.where((f) => !f.isEnabled).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -310,21 +319,22 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  SwitchListTile(
-                    title: Row(
-                      children: [
-                        Expanded(child: Text("Public".tr())),
-                        HelpWidget(
-                            title: "Public".tr(),
-                            content: "Determines whether event details (schedule, info, etc.) are available to the public.".tr()
-                        )
-                      ],
+                  if (AppConfig.isAppSupported)
+                    SwitchListTile(
+                      title: Row(
+                        children: [
+                          Expanded(child: Text("Public".tr())),
+                          HelpWidget(
+                              title: "Public".tr(),
+                              content: "Determines whether event details (schedule, info, etc.) are available to the public.".tr()
+                          )
+                        ],
+                      ),
+                      value: _isOpen,
+                      onChanged: (value) {
+                        setState(() { _isOpen = value; });
+                      },
                     ),
-                    value: _isOpen,
-                    onChanged: (value) {
-                      setState(() { _isOpen = value; });
-                    },
-                  ),
                   const SizedBox(height: 16),
                   SwitchListTile(
                     title: Row(
@@ -503,10 +513,6 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
 
                   Container( // Features Section
                     padding: const EdgeInsets.all(12.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Theme.of(context).dividerColor),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -552,7 +558,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                               FeatureForm(feature: feature, occasion: widget.occasion.id!)
                           ),
                         ],
-                        if (filteredFeatures.isEmpty && _featureSearchQuery.isNotEmpty)
+                        if (featuresToShow.isEmpty && _featureSearchQuery.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text("No features match your search.".tr()),

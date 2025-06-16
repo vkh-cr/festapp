@@ -47,11 +47,13 @@ class _UnitPageState extends State<UnitPage> {
 
   Future<void> _loadUnitAndOccasions() async {
     _occasions = await OfflineDataService.getAllOccasions();
-    setState(() {});
+    if (mounted) setState(() {});
 
     _initialId= widget.id ?? RightsService.currentUnit()!.id!;
 
     final unit = await DbUnits.getUnit(_initialId!);
+
+    if (unit == null) return;
 
     final occasions = unit.occasions!;
     OfflineDataService.saveAllOccasions(occasions);
@@ -60,10 +62,12 @@ class _UnitPageState extends State<UnitPage> {
         features: unit.features)) {
       _quote = await DbInformation.getCurrentQuote(_initialId!);
     }
-    setState(() {
-      _unit = unit;
-      _occasions = occasions;
-    });
+    if (mounted) {
+      setState(() {
+        _unit = unit;
+        _occasions = occasions;
+      });
+    }
   }
 
   @override
@@ -98,7 +102,10 @@ class _UnitPageState extends State<UnitPage> {
         controller: _scrollController,
         cacheExtent: 500,
         slivers: [
-          UniversalHeader(scrollController: _scrollController),
+          UniversalHeader(
+            scrollController: _scrollController,
+            onSignInOut: _loadUnitAndOccasions,
+          ),
           // Quote section rendered as HTML in a paper-like container.
           if (_unit != null && _quote != null)
             SliverToBoxAdapter(

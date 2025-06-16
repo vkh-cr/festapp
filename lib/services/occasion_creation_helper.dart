@@ -189,6 +189,8 @@ class OccasionCreationHelper {
                             data: { Tb.occasions.data_timezone: TimeHelper.getSystemTimezoneName() },
                           );
 
+
+
                           await DbOccasions.updateOccasion(newOccasion);
                           onEventCreated();
                           Navigator.of(context).pop();
