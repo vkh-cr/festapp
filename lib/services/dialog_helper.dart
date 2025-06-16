@@ -105,7 +105,7 @@ class DialogHelper{
     return result;
   }
 
-  static void chooseUser(BuildContext context, void onPressedAction(UserInfoModel), List<UserInfoModel> allUsers, String setText) {
+  static Future<void> chooseUser(BuildContext context, void onPressedAction(UserInfoModel), List<UserInfoModel> allUsers, String setText) async {
     showSearch(
         context: context,
         delegate: SearchPage<UserInfoModel>(

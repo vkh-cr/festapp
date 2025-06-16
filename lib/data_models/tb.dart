@@ -3,7 +3,6 @@ class Tb {
   static OccasionUsersTb occasion_users = const OccasionUsersTb();
   static NewsTb news = const NewsTb();
   static UserInfoTb user_info = const UserInfoTb();
-  static UserInfoPublicTb user_info_public = const UserInfoPublicTb();
   static UserNewsTb user_news = const UserNewsTb();
   static InformationTb information = const InformationTb();
   static InformationHidden information_hidden = const InformationHidden();
@@ -146,14 +145,6 @@ class UserInfoTb{
   String get is_editor_readonly => "is_editor_readonly";
   String get is_admin_readonly => "is_admin_readonly";
   String get data => "data";
-}
-class UserInfoPublicTb{
-  const UserInfoPublicTb();
-  String get table => "user_info_public";
-  String get id => "id";
-  String get name => "name";
-  String get surname => "surname";
-  String get sex => "sex";
 }
 
 class RoleInfoTb{
