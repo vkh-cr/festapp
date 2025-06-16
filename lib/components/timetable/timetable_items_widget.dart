@@ -1,41 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timetable/timetable_event_widget.dart';
 import 'package:fstapp/theme_config.dart';
+
+import 'timetable_controller.dart';
 
 class TimetableItemsWidget extends StatefulWidget {
   final List<TimeBlockItem> usedItems;
   final List<TimeBlockPlace> usedPlaces;
-  final double pixelsInHour;
-  final double minimalPadding;
-  final double placeTitleHeight;
-  final double itemHeight;
-  final double timelineHeight;
   final double height;
-  final Function(int)? onItemTap;
+  final double width;
+  final TimetableController controller;
   final Future<void> Function(TimeBlockItem)? addToMyProgram;
   final Future<void> Function(TimeBlockItem)? removeFromMyProgram;
-  final double Function(double, DateTime, DateTime) timeRangeLength;
   final DateTime startTime;
   final DateTime endTime;
-  final int hourCount;
+  final int xyHelpingColumnsCount;
 
   const TimetableItemsWidget({super.key,
     required this.usedItems,
     required this.usedPlaces,
-    required this.pixelsInHour,
-    required this.minimalPadding,
-    required this.placeTitleHeight,
-    required this.itemHeight,
-    required this.timelineHeight,
     required this.height,
-    this.onItemTap,
+    required this.width,
+    required this.controller,
     this.addToMyProgram,
     this.removeFromMyProgram,
-    required this.timeRangeLength,
     required this.startTime,
     required this.endTime,
-    required this.hourCount,
+    required this.xyHelpingColumnsCount,
   });
 
   @override
@@ -50,30 +42,47 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
 
   List<Widget> buildTimeline() {
     List<Widget> allItems = [];
-
-    allItems.add(Row(
-      children: List<Widget>.generate(
-        widget.hourCount,
-            (i) => Container(
-          width: widget.pixelsInHour,
-          height: widget.height,
-          decoration: BoxDecoration(
-            border: const Border(
-              left: BorderSide(width: 0.25, color: Colors.grey),
-              right: BorderSide(width: 0.25, color: Colors.grey),
+    if(widget.controller.isTimeHorizontal){
+      allItems.add(Row(
+        children: List<Widget>.generate(
+          widget.xyHelpingColumnsCount,
+              (i) => Container(
+            width: widget.controller.pixelsInHour(),
+            height: widget.height,
+            decoration: BoxDecoration(
+              border: const Border(
+                left: BorderSide(width: 0.25, color: Colors.grey),
+                right: BorderSide(width: 0.25, color: Colors.grey),
+              ),
+              color: i % 2 == 0 ? ThemeConfig.timetableBackground1(context) : ThemeConfig.timetableBackground2(context),
             ),
-            color: i % 2 == 0 ? ThemeConfig.timetableBackground1(context) : ThemeConfig.timetableBackground2(context),
-            // boxShadow: i % 2 == 0 ? [] : [
-            //   BoxShadow(
-            //     color: Colors.black26,
-            //     blurRadius: 10,
-            //     offset: Offset(0, 4),
-            //   ),
-            // ],
           ),
         ),
-      ),
-    ));
+      ));
+    } else {
+      allItems.add(Column(
+        children: [
+          Container(
+            width: widget.width,
+            height: widget.controller.horizontalAxisSpaceHeight(),
+            color: Colors.transparent,
+          ),
+          ...List<Widget>.generate(
+            widget.xyHelpingColumnsCount,
+                (i) => Container(
+              width: widget.width,
+              height: widget.controller.pixelsInHour(),
+              decoration: BoxDecoration(
+                color: i % 2 == 0
+                    ? ThemeConfig.timetableBackground1(context)
+                    : ThemeConfig.timetableBackground2(context),
+              ),
+            ),
+          ),
+        ],
+      ));
+    }
+
 
     for (var p = 0; p < widget.usedPlaces.length; p++) {
       var pItems = widget.usedItems
@@ -81,18 +90,16 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
           .toList();
       for (var i = 0; i < pItems.length; i++) {
         var item = pItems[i];
+        var left = widget.controller.timeRangeLength(widget.startTime, item.startTime) + widget.controller.minimalPadding();
+        var top = (widget.controller.verticalAxisTitleHeight() + widget.controller.itemStaticDimension()) * p + widget.controller.verticalAxisTitleHeight() + widget.controller.horizontalAxisSpaceHeight();
+        var verticalLeft = widget.controller.verticalAxisSpace() + (widget.controller.itemStaticDimension() * p) + widget.controller.minimalPadding();
+        var verticalTop = widget.controller.horizontalAxisSpaceHeight() + widget.controller.timeRangeLength(widget.startTime, item.startTime) + widget.controller.minimalPadding();
         var timeBlock = Positioned(
-          left: widget.timeRangeLength(widget.pixelsInHour, widget.startTime, item.startTime) + widget.minimalPadding,
-          top: (widget.placeTitleHeight + widget.itemHeight) * p + widget.placeTitleHeight + widget.timelineHeight,
+          left: widget.controller.isTimeHorizontal ? left : verticalLeft,
+          top: widget.controller.isTimeHorizontal ? top : verticalTop,
           child: TimetableEventWidget(
             item: item,
-            pixelsInHour: widget.pixelsInHour,
-            minimalPadding: widget.minimalPadding,
-            itemHeight: widget.itemHeight,
-            onItemTap: widget.onItemTap,
-            addToMyProgram: widget.addToMyProgram,
-            removeFromMyProgram: widget.removeFromMyProgram,
-            timeRangeLength: widget.timeRangeLength,
+            controller: widget.controller,
           ),
         );
         allItems.add(timeBlock);

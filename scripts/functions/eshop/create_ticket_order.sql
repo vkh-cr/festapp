@@ -19,6 +19,7 @@ DECLARE
     occasion_id BIGINT;
     organization_id BIGINT;
     occasion_title TEXT;
+    occasion_features JSONB;
     account_number TEXT;
     account_number_human_readable TEXT;
     ticket_details JSONB := '[]'::JSONB;
@@ -63,8 +64,8 @@ BEGIN
         END IF;
 
         -- Fetch organization and occasion title from the occasion
-        SELECT organization, title
-        INTO organization_id, occasion_title
+        SELECT organization, title, features
+        INTO organization_id, occasion_title, occasion_features
         FROM public.occasions
         WHERE id = occasion_id;
         IF organization_id IS NULL THEN
@@ -89,32 +90,44 @@ BEGIN
         END IF;
 
         IF input_data ? 'fields' THEN
-            FOR key_val IN
-                SELECT kv.key, kv.value
-                FROM jsonb_array_elements(input_data->'fields') AS elem,
-                     LATERAL jsonb_each_text(elem) AS kv(key, value)
-            LOOP
-                PERFORM 1 FROM public.form_fields ff
-                WHERE ff.id = key_val.key::BIGINT AND ff.form = form_id AND ff.is_hidden = false;
-                IF NOT FOUND THEN
-                    RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1016, 'message', 'Invalid form field: ' || key_val.key)::TEXT;
-                END IF;
-                SELECT ff.type INTO field_type FROM public.form_fields ff WHERE ff.id = key_val.key::BIGINT;
-                IF field_type IN ('email', 'name', 'surname', 'phone') THEN
-                    IF field_type = 'email' THEN
-                        input_data := jsonb_set(input_data, '{email}', to_jsonb(key_val.value), true);
-                    ELSIF field_type = 'name' THEN
-                        input_data := jsonb_set(input_data, '{name}', to_jsonb(key_val.value), true);
-                    ELSIF field_type = 'surname' THEN
-                        input_data := jsonb_set(input_data, '{surname}', to_jsonb(key_val.value), true);
-                    ELSIF field_type = 'phone' THEN
-                        input_data := jsonb_set(input_data, '{phone}', to_jsonb(key_val.value), true);
+            DECLARE
+                valid_fields JSONB := '[]'::JSONB;
+                elem JSONB;
+                field_key TEXT;
+            BEGIN
+                FOR elem IN SELECT * FROM jsonb_array_elements(input_data->'fields')
+                LOOP
+                    -- Correctly extract the key from the single-key/value object.
+                    -- The column returned by jsonb_object_keys is named "jsonb_object_keys".
+                    field_key := (SELECT key FROM jsonb_object_keys(elem) AS key);
+
+                    -- If the object is empty for some reason, skip it.
+                    IF field_key IS NULL THEN
+                        CONTINUE;
                     END IF;
-                ELSIF field_type = 'note' THEN
-                    -- This is the order note
-                    input_data := jsonb_set(input_data, '{note}', to_jsonb(key_val.value), true);
-                END IF;
-            END LOOP;
+
+                    -- Validate the field against the form_fields table
+                    SELECT ff.type INTO field_type
+                    FROM public.form_fields ff
+                    WHERE ff.id = field_key::BIGINT AND ff.form = form_id AND ff.is_hidden = false;
+
+                    -- If the field is valid, process it
+                    IF FOUND THEN
+                        -- Add the original valid field to the sanitized array
+                        valid_fields := valid_fields || elem;
+
+                        -- Promote specific field types to top-level keys
+                        IF field_type IN ('email', 'name', 'surname', 'phone', 'note') THEN
+                            -- Use the -> operator to get the value as JSONB directly
+                            -- and use jsonb_set to add it to the input_data.
+                            input_data := jsonb_set(input_data, ARRAY[field_type], elem->field_key, true);
+                        END IF;
+                    END IF;
+                END LOOP;
+
+                -- Replace the original 'fields' array with the sanitized one
+                input_data := jsonb_set(input_data, '{fields}', valid_fields);
+            END;
         END IF;
 
         IF input_data->>'email' IS NULL THEN
@@ -355,14 +368,24 @@ BEGIN
         VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now, deadline)
         RETURNING id INTO payment_info_id;
 
-        -- Update the order record with the calculated price, payment info, and modified input data (with tickets details)
+        -- persist all of the non‐state fields
         UPDATE eshop.orders
-        SET price = calculated_price,
-            currency_code = first_currency_code,
-            state = 'ordered',
-            payment_info = payment_info_id,
-            data = order_data
+        SET
+          price         = calculated_price,
+          currency_code = first_currency_code,
+          payment_info  = payment_info_id,
+          data          = order_data,
+          updated_at    = now()
         WHERE id = order_id;
+
+        -- either flag as 'ordered' or, if free, mark paid via your function
+        IF calculated_price = 0 THEN
+          PERFORM update_order_and_tickets_to_paid(order_id);
+        ELSE
+          UPDATE eshop.orders
+          SET state      = 'ordered'
+          WHERE id = order_id;
+        END IF;
 
         -- Log the order to orders_history with details
         INSERT INTO eshop.orders_history (created_at, data, "order", state, price, currency_code)
@@ -392,7 +415,9 @@ BEGIN
                 ),
                 'occasion', JSONB_BUILD_OBJECT(
                     'id', occasion_id,
-                    'occasion_title', occasion_title
+                    'organization', organization_id,
+                    'occasion_title', occasion_title,
+                    'features', occasion_features
                 )
             )
         );

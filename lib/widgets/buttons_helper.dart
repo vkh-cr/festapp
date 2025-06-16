@@ -13,28 +13,22 @@ class ButtonsHelper {
       Visibility(
           visible:
               AppConfig.isOwnProgramSupported && canSaveToMyProgram == true,
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: IconButton(
-                onPressed: () async {
-                  await addToMyProgram();
-                },
-                icon: Icon(Icons.add_circle_outline, color: colorOut)),
-          )),
+          child: IconButton(
+              onPressed: () async {
+                await addToMyProgram();
+              },
+              icon: Icon(Icons.add_circle_outline, color: colorOut))),
       Visibility(
           visible:
               AppConfig.isOwnProgramSupported && canSaveToMyProgram == false,
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: IconButton(
-                onPressed: () async {
-                  await removeFromMyProgram();
-                },
-                icon: Icon(
-                  Icons.check_circle,
-                  color: colorIn,
-                )),
-          )),
+          child: IconButton(
+              onPressed: () async {
+                await removeFromMyProgram();
+              },
+              icon: Icon(
+                Icons.check_circle,
+                color: colorIn,
+              ))),
     ];
   }
 

@@ -1,10 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
+import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/pages/occasionAdmin/user_columns.dart';
 import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
 
@@ -12,10 +15,13 @@ class OccasionUserModel extends ITrinaRowModel {
   static const String birthDateJsonFormat = "yyyy-MM-dd";
 
   DateTime? createdAt;
+  DateTime? orderCreatedAt;
   int? occasion;
   String? user;
   int? role;
   int? unit;
+  String? formId;
+  FormModel? form;
 
   bool? isEditor = false;
   bool? isEditorView = false;
@@ -25,17 +31,21 @@ class OccasionUserModel extends ITrinaRowModel {
   bool? isApprover = false;
   bool? isApproved = false;
 
+  bool isPrivileged() => (isEditor ?? false) || (isManager ?? false) || (isEditorView ?? false) || (isEditorOrder ?? false) || (isEditorOrderView ?? false);
+
   Map<String, dynamic>? data;
   Map<String, dynamic>? services;
-  OccasionUserModel({this.createdAt, this.occasion, this.user, this.data, this.role,
-    this.isEditor, this.isEditorView, this.isEditorOrder, this.isEditorOrderView, this.isManager, this.isApprover, this.isApproved, this.services, this.unit});
+  OccasionUserModel({this.createdAt, this.orderCreatedAt, this.occasion, this.user, this.data, this.role,
+    this.isEditor, this.isEditorView, this.isEditorOrder, this.isEditorOrderView, this.isManager, this.isApprover, this.isApproved, this.services, this.unit, this.formId, this.form});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
         createdAt: json[Tb.occasion_users.created_at] != null ? DateTime.parse(json[Tb.occasion_users.created_at]) : null,
+        orderCreatedAt: json[DbUsers.orderCreatedAtKey] != null ? DateTime.parse(json[DbUsers.orderCreatedAtKey]) : null,
         occasion: json[Tb.occasion_users.occasion],
         user: json[Tb.occasion_users.user],
         unit: json[Tb.unit_users.unit],
+        formId: json[DbUsers.formIdKey],
         isEditor: json[Tb.occasion_users.is_editor],
         isEditorView: json[Tb.occasion_users.is_editor_view],
         isEditorOrder: json[Tb.occasion_users.is_editor_order],
@@ -49,40 +59,44 @@ class OccasionUserModel extends ITrinaRowModel {
     );
   }
 
-  dynamic toUpdateJson() => {
-    Tb.occasion_users.occasion: RightsService.currentOccasionId,
-    Tb.occasion_users.user: user,
-    Tb.occasion_users.is_editor: isEditor ?? false,
-    Tb.occasion_users.is_editor_view: isEditorView ?? false,
-    Tb.occasion_users.is_editor_order: isEditorOrder ?? false,
-    Tb.occasion_users.is_editor_order_view: isEditorOrderView ?? false,
-    Tb.occasion_users.is_approver: isApprover ?? false,
-    Tb.occasion_users.is_approved: isApproved ?? false,
-    Tb.occasion_users.is_manager: isManager ?? false,
-    Tb.occasion_users.role: role,
-    Tb.occasion_users.data: data,
-    Tb.occasion_users.services: services,
-  };
+  dynamic toUpdateJson() {
+    if (AppConfig.areAllVolunteersApprovers && data![Tb.occasion_users.data_is_volunteer] == true) {
+      isApprover = true;
+    }
+
+    return {
+      Tb.occasion_users.occasion: RightsService.currentOccasionId(),
+      Tb.occasion_users.user: user,
+      Tb.occasion_users.is_editor: isEditor ?? false,
+      Tb.occasion_users.is_editor_view: isEditorView ?? false,
+      Tb.occasion_users.is_editor_order: isEditorOrder ?? false,
+      Tb.occasion_users.is_editor_order_view: isEditorOrderView ?? false,
+      Tb.occasion_users.is_approver: isApprover ?? false,
+      Tb.occasion_users.is_approved: isApproved ?? false,
+      Tb.occasion_users.is_manager: isManager ?? false,
+      Tb.occasion_users.role: role,
+      Tb.occasion_users.data: data,
+      Tb.occasion_users.services: services,
+    };
+  }
 
   factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json, [OccasionUserModel? original]) {
     return OccasionUserModel(
-        occasion: RightsService.currentOccasionId!,
-        user: original?.user ?? json[Tb.occasion_users.user],
-        role: json[Tb.occasion_users.role],
+        occasion: RightsService.currentOccasionId()!,
+        user: original?.user ?? json[UserColumns.ID],
+        role: json[UserColumns.ROLE],
         data: {
-          Tb.occasion_users.data_email: json[Tb.occasion_users.data_email],
-          Tb.occasion_users.data_name: json[Tb.occasion_users.data_name],
-          Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname],
-          Tb.occasion_users.data_sex: json[Tb.occasion_users.data_sex],
-          Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone],
-          Tb.occasion_users.data_text1: json[Tb.occasion_users.data_text1],
-          Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2],
-          Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2],
-          Tb.occasion_users.data_text3: json[Tb.occasion_users.data_text3],
-          Tb.occasion_users.data_text4: json[Tb.occasion_users.data_text4],
-          Tb.occasion_users.data_birthDate: json[Tb.occasion_users.data_birthDate],
-          Tb.occasion_users.data_note: json[Tb.occasion_users.data_note],
-          Tb.occasion_users.data_diet: json[Tb.occasion_users.data_diet],
+          Tb.occasion_users.data_email: json[UserColumns.EMAIL],
+          Tb.occasion_users.data_name: json[UserColumns.NAME],
+          Tb.occasion_users.data_surname: json[UserColumns.SURNAME],
+          Tb.occasion_users.data_sex: json[UserColumns.SEX],
+          Tb.occasion_users.data_phone: json[UserColumns.PHONE],
+          Tb.occasion_users.data_text1: json[UserColumns.TEXT1],
+          Tb.occasion_users.data_text2: json[UserColumns.TEXT2],
+          Tb.occasion_users.data_text3: json[UserColumns.TEXT3],
+          Tb.occasion_users.data_birthDate: json[UserColumns.BIRTHDAY],
+          Tb.occasion_users.data_note: json[UserColumns.NOTE],
+          Tb.occasion_users.data_diet: json[UserColumns.DIET],
           Tb.occasion_users.data_isInvited: original?.data?[Tb.occasion_users.data_isInvited],
         },
         services: json[Tb.occasion_users.services]
@@ -157,28 +171,30 @@ class OccasionUserModel extends ITrinaRowModel {
     json.addAll(foodServices);
     json.addAll(servicesToOneColumnTrinaRow(services, DbOccasions.serviceTypeAccommodation));
     json.addAll({
-      Tb.occasion_users.user: TrinaCell(value: user),
-      Tb.occasion_users.is_editor: TrinaCell(value: isEditor.toString()),
-      Tb.occasion_users.is_editor_view: TrinaCell(value: isEditorView.toString()),
-      Tb.occasion_users.is_editor_order: TrinaCell(value: isEditorOrder.toString()),
-      Tb.occasion_users.is_editor_order_view: TrinaCell(value: isEditorOrderView.toString()),
-      Tb.occasion_users.is_manager: TrinaCell(value: isManager.toString()),
-      Tb.occasion_users.is_approved: TrinaCell(value: isApproved.toString()),
-      Tb.occasion_users.is_approver: TrinaCell(value: isApprover.toString()),
-      Tb.occasion_users.role: TrinaCell(value: role?.toString() ?? ""),
-      Tb.occasion_users.data_email: TrinaCell(value: data?[Tb.occasion_users.data_email] ?? ""),
-      Tb.occasion_users.data_name: TrinaCell(value: data?[Tb.occasion_users.data_name] ?? ""),
-      Tb.occasion_users.data_surname: TrinaCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
-      Tb.occasion_users.data_sex: TrinaCell(value: data?[Tb.occasion_users.data_sex]),
-      Tb.occasion_users.data_phone: TrinaCell(value: data?[Tb.occasion_users.data_phone] ?? ""),
-      Tb.occasion_users.data_birthDate: TrinaCell(value: DateTime.tryParse(data?[Tb.occasion_users.data_birthDate] ?? "") ?? DateTime.fromMicrosecondsSinceEpoch(0)),
-      Tb.occasion_users.data_isInvited: TrinaCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
-      Tb.occasion_users.data_note: TrinaCell(value: data?[Tb.occasion_users.data_note] ?? ""),
-      Tb.occasion_users.data_diet: TrinaCell(value: data?[Tb.occasion_users.data_diet] ?? ""),
-      Tb.occasion_users.data_text1: TrinaCell(value: data?[Tb.occasion_users.data_text1] ?? ""),
-      Tb.occasion_users.data_text2: TrinaCell(value: data?[Tb.occasion_users.data_text2] ?? ""),
-      Tb.occasion_users.data_text3: TrinaCell(value: data?[Tb.occasion_users.data_text3] ?? ""),
-      Tb.occasion_users.data_text4: TrinaCell(value: data?[Tb.occasion_users.data_text4] ?? ""),
+      UserColumns.ID: TrinaCell(value: user),
+      UserColumns.EDITOR: TrinaCell(value: isEditor.toString()),
+      UserColumns.EDITOR_VIEW: TrinaCell(value: isEditorView.toString()),
+      UserColumns.EDITOR_ORDER: TrinaCell(value: isEditorOrder.toString()),
+      UserColumns.EDITOR_ORDER_VIEW: TrinaCell(value: isEditorOrderView.toString()),
+      UserColumns.MANAGER: TrinaCell(value: isManager.toString()),
+      UserColumns.APPROVED: TrinaCell(value: isApproved.toString()),
+      UserColumns.APPROVER: TrinaCell(value: isApprover.toString()),
+      UserColumns.ROLE: TrinaCell(value: role?.toString() ?? ""),
+      UserColumns.EMAIL: TrinaCell(value: data?[Tb.occasion_users.data_email] ?? ""),
+      UserColumns.NAME: TrinaCell(value: data?[Tb.occasion_users.data_name] ?? ""),
+      UserColumns.SURNAME: TrinaCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
+      UserColumns.SEX: TrinaCell(value: data?[Tb.occasion_users.data_sex]),
+      UserColumns.PHONE: TrinaCell(value: data?[Tb.occasion_users.data_phone] ?? ""),
+      UserColumns.BIRTHDAY: TrinaCell(value: DateTime.tryParse(data?[Tb.occasion_users.data_birthDate] ?? "") ?? DateTime.fromMicrosecondsSinceEpoch(0)),
+      UserColumns.INVITED: TrinaCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
+      UserColumns.IS_VOLUNTEER: TrinaCell(value: data?[Tb.occasion_users.data_is_volunteer].toString()),
+      UserColumns.NOTE: TrinaCell(value: data?[Tb.occasion_users.data_note] ?? ""),
+      UserColumns.DIET: TrinaCell(value: data?[Tb.occasion_users.data_diet] ?? ""),
+      UserColumns.TEXT1: TrinaCell(value: data?[Tb.occasion_users.data_text1] ?? ""),
+      UserColumns.TEXT2: TrinaCell(value: data?[Tb.occasion_users.data_text2] ?? ""),
+      UserColumns.TEXT3: TrinaCell(value: data?[Tb.occasion_users.data_text3] ?? ""),
+      UserColumns.FORM: TrinaCell(value: form?.link?.toString() ?? ""),
+      UserColumns.ORDERED_AT: TrinaCell(value: orderCreatedAt ?? ""),
     });
     return TrinaRow(cells: json);
   }
@@ -205,9 +221,9 @@ class OccasionUserModel extends ITrinaRowModel {
 
   static OccasionUserModel fromPlutoJson(Map<String, dynamic> json) {
     DateTime? bd;
-    var jsonTime = json[Tb.occasion_users.data_birthDate];
+    var jsonTime = json[UserColumns.BIRTHDAY];
     if (jsonTime != null && jsonTime is String) {
-      var birthDateString = json[Tb.occasion_users.data_birthDate];
+      var birthDateString = json[UserColumns.BIRTHDAY];
       var dateFormat = DateFormat(birthDateJsonFormat);
       bd = dateFormat.parse(birthDateString);
     } else {
@@ -215,34 +231,34 @@ class OccasionUserModel extends ITrinaRowModel {
     }
     Map<String, dynamic> services = {};
     mapJsonToServices(json, services, DbOccasions.serviceTypeFood);
-    var value = json[DbOccasions.serviceTypeAccommodation]?.isEmpty ?? true ? DbOccasions.serviceNone : DbOccasions.servicePaid;
-    mapOneToServices(services, DbOccasions.serviceTypeAccommodation, json[DbOccasions.serviceTypeAccommodation], value);
+    var value = json[UserColumns.ACCOMMODATION]?.isEmpty ?? true ? DbOccasions.serviceNone : DbOccasions.servicePaid;
+    mapOneToServices(services, DbOccasions.serviceTypeAccommodation, json[UserColumns.ACCOMMODATION], value);
     return OccasionUserModel(
-      occasion: RightsService.currentOccasionId,
-      user: json[Tb.occasion_users.user]?.isEmpty == true ? null : json[Tb.occasion_users.user],
-      isApprover: json[Tb.occasion_users.is_approver] == "true" ? true : false,
-      isApproved: json[Tb.occasion_users.is_approved] == "true" ? true : false,
-      isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
-      isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
-      isEditorView: json[Tb.occasion_users.is_editor_view] == "true" ? true : false,
-      isEditorOrder: json[Tb.occasion_users.is_editor_order] == "true" ? true : false,
-      isEditorOrderView: json[Tb.occasion_users.is_editor_order_view] == "true" ? true : false,
-      role: int.tryParse(json[Tb.occasion_users.role] ?? ""),
+      occasion: RightsService.currentOccasionId(),
+      user: json[UserColumns.ID]?.isEmpty == true ? null : json[UserColumns.ID],
+      isApprover: json[UserColumns.APPROVER] == "true" ? true : false,
+      isApproved: json[UserColumns.APPROVED] == "true" ? true : false,
+      isManager: json[UserColumns.MANAGER] == "true" ? true : false,
+      isEditor: json[UserColumns.EDITOR] == "true" ? true : false,
+      isEditorView: json[UserColumns.EDITOR_VIEW] == "true" ? true : false,
+      isEditorOrder: json[UserColumns.EDITOR_ORDER] == "true" ? true : false,
+      isEditorOrderView: json[UserColumns.EDITOR_ORDER_VIEW] == "true" ? true : false,
+      role: int.tryParse(json[UserColumns.ROLE] ?? ""),
       services: services,
       data: {
-        Tb.occasion_users.data_name: json[Tb.occasion_users.data_name]?.trim(),
-        Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname]?.trim(),
-        Tb.occasion_users.data_sex: json[Tb.occasion_users.data_sex]?.trim(),
-        Tb.occasion_users.data_email: json[Tb.occasion_users.data_email]?.trim(),
-        Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone]?.trim(),
+        Tb.occasion_users.data_name: json[UserColumns.NAME]?.trim(),
+        Tb.occasion_users.data_surname: json[UserColumns.SURNAME]?.trim(),
+        Tb.occasion_users.data_sex: json[UserColumns.SEX]?.trim(),
+        Tb.occasion_users.data_email: json[UserColumns.EMAIL]?.trim(),
+        Tb.occasion_users.data_phone: json[UserColumns.PHONE]?.trim(),
         Tb.occasion_users.data_birthDate: bd?.toIso8601String(),
-        Tb.occasion_users.data_isInvited: json[Tb.occasion_users.data_isInvited] == "true" ? true : false,
-        Tb.occasion_users.data_note: json[Tb.occasion_users.data_note]?.trim(),
-        Tb.occasion_users.data_diet: json[Tb.occasion_users.data_diet]?.trim(),
-        Tb.occasion_users.data_text1: json[Tb.occasion_users.data_text1]?.trim(),
-        Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2]?.trim(),
-        Tb.occasion_users.data_text3: json[Tb.occasion_users.data_text3]?.trim(),
-        Tb.occasion_users.data_text4: json[Tb.occasion_users.data_text4]?.trim(),
+        Tb.occasion_users.data_isInvited: json[UserColumns.INVITED] == "true" ? true : false,
+        Tb.occasion_users.data_is_volunteer: json[UserColumns.IS_VOLUNTEER] == "true" ? true : false,
+        Tb.occasion_users.data_note: json[UserColumns.NOTE]?.trim(),
+        Tb.occasion_users.data_diet: json[UserColumns.DIET]?.trim(),
+        Tb.occasion_users.data_text1: json[UserColumns.TEXT1]?.trim(),
+        Tb.occasion_users.data_text2: json[UserColumns.TEXT2]?.trim(),
+        Tb.occasion_users.data_text3: json[UserColumns.TEXT3]?.trim(),
       },
     );
   }

@@ -155,7 +155,15 @@ BEGIN
 
 
   -- ***********************************************************
-  -- 8. Finally, delete the occasion itself.
+  -- 8. Null out referencing images
+  -- ***********************************************************
+
+  UPDATE public.images
+    SET occasion = NULL
+    WHERE occasion = oc;
+
+  -- ***********************************************************
+  -- 9. Finally, delete the occasion itself.
   -- ***********************************************************
 
   DELETE FROM public.occasions

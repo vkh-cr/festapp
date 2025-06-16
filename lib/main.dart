@@ -4,6 +4,8 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/data_models/occasion_link_model.dart';
+import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/router_service.dart';
@@ -20,6 +22,7 @@ import 'package:fstapp/widgets/time_travel_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 Future<void> main() async {
   debugProfileBuildsEnabled = true;
@@ -78,9 +81,17 @@ Future<void> initializeEverything() async {
   }
 
   try {
+    await TimeHelper.initializeTimeZone().timeout(const Duration(seconds: 2));
+    print('Tz setup completed');
+  } catch (e) {
+    print('Tz setup failed: $e');
+  }
+
+  try {
     var settings = await OfflineDataService.getGlobalSettings();
     if (settings != null) {
       SynchroService.globalSettingsModel = settings;
+      RightsService.occasionLinkModel = OccasionLinkModel(occasion: OccasionModel(features: settings.features, isOpen: true, isHidden: false));
       print('Global settings loaded');
     }
   } catch (e) {

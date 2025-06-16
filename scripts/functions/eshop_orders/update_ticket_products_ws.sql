@@ -18,9 +18,13 @@ DECLARE
   v_sum_new          numeric := 0;
   v_diff             numeric;
   v_products_json    jsonb;
+  v_old_ids          bigint[];
+  v_new_ids          bigint[];
 
-  v_old_ids  bigint[];
-  v_new_ids  bigint[];
+  -- for state logic
+  v_paid             numeric;
+  v_price            numeric;
+  v_new_state        text;
 BEGIN
   /* 0) Lookup & permission */
   SELECT opt."order", o.occasion, o.payment_info, o.currency_code, o.data, o.state
@@ -29,7 +33,6 @@ BEGIN
   JOIN eshop.orders              AS o   ON o.id = opt."order"
   WHERE opt.ticket = p_ticket_id
   LIMIT 1;
-
   IF NOT FOUND THEN
     RETURN jsonb_build_object('code',404,'message','Ticket not linked to any order');
   END IF;
@@ -43,11 +46,9 @@ BEGIN
   FROM jsonb_array_elements(v_old_data->'tickets') AS ticket(ticket_obj)
   CROSS JOIN LATERAL jsonb_array_elements(ticket_obj->'products') AS prod(product_obj)
   WHERE (ticket.ticket_obj->>'id')::bigint = p_ticket_id;
-
   SELECT array_agg(pid ORDER BY pid)
     INTO v_new_ids
   FROM unnest(p_product_ids) AS pid;
-
   IF v_old_ids IS NOT NULL AND v_old_ids = v_new_ids THEN
     RETURN jsonb_build_object('code',200,'data',v_old_data);
   END IF;
@@ -72,7 +73,7 @@ BEGIN
     COALESCE(SUM(p.price),0)
   INTO v_products_json, v_sum_new
   FROM unnest(p_product_ids) AS pid
-  JOIN eshop.products         AS p  ON p.id = pid
+  JOIN eshop.products           AS p  ON p.id = pid
   LEFT JOIN eshop.product_types AS pt ON pt.id = p.product_type
   WHERE p.occasion = v_occasion_id;
 
@@ -90,14 +91,12 @@ BEGIN
       FROM jsonb_array_elements(v_old_data->'tickets') AS tckt
     )
   ) INTO v_new_data;
-
   UPDATE eshop.orders
      SET data = v_new_data
    WHERE id = v_order_id;
 
   /* 4) replace the link‐table rows, but keep one with product=NULL if empty */
   DELETE FROM eshop.order_product_ticket WHERE ticket = p_ticket_id;
-
   IF cardinality(p_product_ids) = 0 THEN
     INSERT INTO eshop.order_product_ticket("order", ticket, product)
     VALUES (v_order_id, p_ticket_id, NULL);
@@ -113,12 +112,59 @@ BEGIN
      SET amount = amount + v_diff
    WHERE id = v_payment_info_id;
   UPDATE eshop.orders
-     SET price  = COALESCE(price,0) + v_diff
+     SET price      = COALESCE(price,0) + v_diff,
+         updated_at = now()
    WHERE id = v_order_id;
+
+  /* 5a) decide new state based on money received */
+  SELECT COALESCE(paid,0) INTO v_paid
+    FROM eshop.payment_info
+   WHERE id = v_payment_info_id;
+  SELECT price INTO v_price
+    FROM eshop.orders
+   WHERE id = v_order_id;
+
+  v_new_state := CASE
+                   WHEN v_paid >= v_price THEN 'paid'
+                   ELSE 'ordered'
+                 END;
+
+  -- if setting to paid but every ticket is already in 'sent', downgrade to 'sent'
+  IF v_new_state = 'paid' THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM eshop.tickets t
+      JOIN eshop.order_product_ticket opt ON opt.ticket = t.id
+      WHERE opt."order" = v_order_id AND t.state <> 'sent'
+    ) THEN
+      v_new_state := 'sent';
+    END IF;
+  END IF;
+
+  -- apply the new state
+  UPDATE eshop.orders
+     SET state      = v_new_state,
+         updated_at = now()
+   WHERE id = v_order_id;
+
+  -- if we just rolled a formerly‐paid/sent order back into 'ordered' because price increased,
+  -- push the payment deadline out by 7 days
+  IF v_new_state = 'ordered'
+     AND v_diff    > 0
+  THEN
+    UPDATE eshop.payment_info
+       SET deadline   = now() + INTERVAL '7 days'
+     WHERE id = v_payment_info_id;
+  END IF;
 
   /* 6) append history */
   INSERT INTO eshop.orders_history("order", data, state, price, currency_code)
-  VALUES (v_order_id, v_new_data, v_state, v_sum_new, v_currency_code);
+  VALUES (
+    v_order_id,
+    v_new_data,
+    (SELECT state FROM eshop.orders WHERE id = v_order_id),
+    v_price,
+    v_currency_code
+  );
 
   RETURN jsonb_build_object('code',200,'data',v_new_data);
 

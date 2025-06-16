@@ -11,6 +11,8 @@ import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 
+import '../pages/form/models/id_document_data.dart';
+
 class FormResponseModel extends ITrinaRowModel {
   @override
   int? id;
@@ -54,6 +56,15 @@ class FormResponseModel extends ITrinaRowModel {
       if (f.type == FormHelper.fieldTypeSex) {
         cells[f.id.toString()] = TrinaCell(
             value: UserInfoModel.sexToLocale(fields![f.id.toString()]));
+        continue;
+      }
+      if (f.type == FormHelper.fieldTypeIdDocument) {
+        var val = fields![f.id.toString()];
+        if(val != null){
+          val = IdDocumentData.fromJson(val);
+        }
+        cells[f.id.toString()] = TrinaCell(
+            value: val?.toString() ?? "");
         continue;
       }
       if (f.type == FormHelper.fieldTypeBirthDate) {

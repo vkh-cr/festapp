@@ -1,6 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
@@ -56,17 +59,18 @@ class _TicketsTabState extends State<TicketsTab> {
         ),
         headerChildren: [
           DataGridAction(
-            name: "Cancel".tr(),
+            name: FeaturesStrings.cancel,
             action: (SingleDataGridController singleDataGrid, [_]) =>
                 _stornoTickets(singleDataGrid),
-            isEnabled: RightsService.isEditor,
+            isEnabled: RightsService.isOrderEditor,
           ),
-          DataGridAction(
-            name: "Scan tickets".tr(),
-            action: (SingleDataGridController singleDataGrid, [_]) =>
-                _scanTickets(singleDataGrid),
-            isEnabled: RightsService.isEditor,
-          ),
+          if(FeatureService.isFeatureEnabled(FeatureConstants.ticket))
+            DataGridAction(
+              name: FeaturesStrings.scanActionText,
+              action: (SingleDataGridController singleDataGrid, [_]) =>
+                  _scanTickets(singleDataGrid),
+              isEnabled: RightsService.isOrderEditor,
+            ),
         ],
         columns: EshopColumns.generateColumns(context, columnIdentifiers,
           data: {
@@ -89,7 +93,7 @@ class _TicketsTabState extends State<TicketsTab> {
   Future<void> _scanTickets(SingleDataGridController singleDataGrid) async {
     await TicketCodeHelper.showScanTicketCode(
       context,
-      "Scan tickets".tr(),
+      FeaturesStrings.scanActionText,
       formLink!,
     );
   }
@@ -103,8 +107,8 @@ class _TicketsTabState extends State<TicketsTab> {
 
     var confirm = await DialogHelper.showConfirmationDialogAsync(
       context,
-      "Cancel".tr(),
-      "${"Do you want to cancel the selected tickets?".tr()} (${selectedTickets.length})",
+      FeaturesStrings.cancel,
+      "${FeaturesStrings.cancelItemsConfirmationText} (${selectedTickets.length})",
     );
 
     if (confirm) {
@@ -113,21 +117,21 @@ class _TicketsTabState extends State<TicketsTab> {
           if (await DbTickets.stornoTicket(ticket.id!)) {
             ToastHelper.Show(
               context,
-              "Storno completed for {ticket}.".tr(
+              FeaturesStrings.stornoCompletedText.tr(
                 namedArgs: {
-                  "ticket": ticket.ticketSymbol ?? ticket.id.toString()
+                  "item": ticket.ticketSymbol ?? ticket.id.toString(),
                 },
               ),
             );
           } else {
-            throw Exception("Ticket cancel has failed.");
+            throw Exception(FeaturesStrings.stornoFailed);
           }
         };
       }).toList();
 
       await DialogHelper.showProgressDialogAsync(
         context,
-        "Processing...".tr(),
+        FeaturesStrings.processing,
         stornoFutures.length,
         futures: stornoFutures,
       );

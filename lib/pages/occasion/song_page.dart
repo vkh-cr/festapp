@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_information.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_models/information_model.dart';
@@ -157,7 +157,6 @@ class _SongbookPageState extends State<SongbookPage> {
     _informationList = allInfo.filterByType(widget.type);
     OfflineDataService.saveAllInfo(allInfo);
     setState(() {});
-    DbInformation.updateInfoDescription();
   }
 
   Future<void> loadItemDescription(int index) async {

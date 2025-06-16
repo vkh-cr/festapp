@@ -1,5 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/activities/activities_content.dart';
+import 'package:fstapp/components/features/features_strings.dart';
+import 'package:fstapp/pages/eshop/products_tab.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/eshop/blueprint_editor_tab.dart';
@@ -30,12 +33,12 @@ class AdminPageHelper {
     final screenWidth = MediaQuery.of(context).size.width;
     if (screenWidth < 600) {
       // For mobile, we show only the occasion title.
-      var title = RightsService.currentOccasion!.title!;
+      var title = RightsService.currentOccasion()!.title!;
       return buildMobileAdminAppBar(context, title, activeTabs, tabController!);
     } else {
       // For larger screens, we show a more detailed title.
       var title =
-          "${RightsService.currentUnit!.title!} - ${RightsService.currentOccasion!.title!}";
+          "${RightsService.currentUnit()!.title!} - ${RightsService.currentOccasion()!.title!}";
       return buildDesktopAdminAppBar(context, activeTabs, tabController!, title);
     }
   }
@@ -61,7 +64,7 @@ class AdminPageHelper {
             if (RightsService.canUserSeeUnitWorkspace()) {
               RouterService.navigate(
                 context,
-                "unit/${RightsService.currentUnitUser?.unit}/edit",
+                "unit/${RightsService.currentUnitUser()?.unit}/edit",
               );
             }
           },
@@ -124,7 +127,7 @@ class AdminPageHelper {
                 if (RightsService.canUserSeeUnitWorkspace()) {
                   RouterService.navigate(
                     context,
-                    "unit/${RightsService.currentUnitUser?.unit}/edit",
+                    "unit/${RightsService.currentUnitUser()?.unit}/edit",
                   );
                 }
               },
@@ -197,8 +200,10 @@ class AdminTabDefinition {
   static const String blueprint = "Blueprint";
   static const String tickets = "Tickets";
   static const String orders = "Orders";
+  static const String products = "Products";
   static const String report = "Report";
   static const String emailTemplates = "Email Templates";
+  static const String volunteers = "volunteers";
 
   // Available tabs defined in a dictionary.
   static Map<String, AdminTabDefinition> get availableTabs => {
@@ -220,6 +225,10 @@ class AdminTabDefinition {
         label: "Service".tr(),
         icon: Icons.food_bank,
         widget: ServiceTab()),
+    volunteers: AdminTabDefinition(
+        label: "Volunteers".tr(),
+        icon: Icons.view_timeline,
+        widget: ActivitiesContent(occasionId: RightsService.currentOccasionId()!)),
     users: AdminTabDefinition(
         label: "Users".tr(),
         icon: Icons.people,
@@ -235,13 +244,17 @@ class AdminTabDefinition {
         icon: Icons.grid_on,
         widget: BlueprintTab()),
     tickets: AdminTabDefinition(
-        label: "Tickets".tr(),
+        label: FeaturesStrings.itemsPlural,
         icon: Icons.local_activity,
         widget: TicketsTab()),
     orders: AdminTabDefinition(
         label: "Orders".tr(),
         icon: Icons.shopping_cart,
         widget: OrdersTab()),
+    products: AdminTabDefinition(
+        label: "Products".tr(),
+        icon: Icons.category,
+        widget: ProductsTab()),
     report: AdminTabDefinition(
         label: "Report".tr(),
         icon: Icons.stacked_bar_chart,
