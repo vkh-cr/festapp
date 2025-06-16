@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/unit_model.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/html_view.dart';
@@ -184,7 +186,10 @@ class OccasionCreationHelper {
                             isHidden: false,
                             unit: unit.id,
                             organization: unit.organization,
+                            data: { Tb.occasions.data_timezone: TimeHelper.getSystemTimezoneName() },
                           );
+
+
 
                           await DbOccasions.updateOccasion(newOccasion);
                           onEventCreated();

@@ -1,19 +1,24 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/pages/form/models/id_document_field_holder.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
+import 'package:flutter/services.dart';
+
 
 import '../models/field_holder.dart';
 import '../models/form_holder.dart';
 import '../models/form_ticket_model.dart';
 import '../models/ticket_holder.dart';
 
+import 'id_document_field_builder.dart';
 import 'text_field_builder.dart';
 
 class FormFieldBuilders {
@@ -135,7 +140,7 @@ class FormFieldBuilders {
                               child: Align(
                                 alignment: Alignment.center,
                                 child: buildTitleWidget(
-                                  "${"Ticket".tr()} ${i + 1}",
+                                  "${FeaturesStrings.itemSingular} ${i + 1}",
                                   false,
                                   context,
                                 ),
@@ -233,6 +238,41 @@ class FormFieldBuilders {
       fieldHolder: fieldHolder,
       autofillHints: [AutofillHints.telephoneNumber],
       isPhone: true,
+    );
+  }
+
+  static Widget buildAddressField(BuildContext context, FieldHolder fieldHolder) {
+    return TextFieldBuilder(
+      fieldHolder: fieldHolder,
+      autofillHints: [
+        AutofillHints.fullStreetAddress,
+        AutofillHints.streetAddressLevel1,
+        AutofillHints.postalCode,
+        AutofillHints.addressCity,
+        AutofillHints.countryName,
+      ],
+      isAddress: true,
+    );
+  }
+
+  static Widget buildNationalityField(BuildContext context, FieldHolder fieldHolder) {
+    return TextFieldBuilder(
+      fieldHolder: fieldHolder,
+      autofillHints: [AutofillHints.countryName],
+      isNationality: true,
+    );
+  }
+
+  static Widget buildIdDocumentField(
+      BuildContext context,
+      GlobalKey<FormBuilderState> formKey,
+      FormHolder formHolder,
+      IdDocumentFieldHolder fieldHolder) {
+    return IdDocumentFieldBuilder.buildIdDocumentField(
+      context: context,
+      fieldHolder: fieldHolder,
+      formKey: formKey,
+      formHolder: formHolder,
     );
   }
 

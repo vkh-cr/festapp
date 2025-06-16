@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/features_strings.dart';
+import 'package:fstapp/components/features/ticket_feature.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
 import 'package:fstapp/data_models/form_option_product_model.dart';
+import 'package:fstapp/pages/form/models/id_document_data.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/pages/form/widgets_view/option_field_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -166,11 +169,15 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
     final List<Widget> infoRows = [];
     for (var field in dataFields) {
       var value = field.getValue(widget.formHolder.controller!.globalKey);
+      String? valueString = value.toString();
+      if(value is IPreviewable){
+        valueString = value.toPreviewString(context: context);
+      }
       if (value != null) {
         infoRows.add(_buildInfoRow(
           context,
           field.title!,
-          value.toString(),
+          valueString,
           field.fieldType,
         ));
       }
@@ -192,8 +199,8 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
 
         ticketInfoRows.add(Text(
           ticketHolder.tickets.length > 1
-              ? "${"Ticket".tr()} $ticketIndex"
-              : "Ticket".tr(),
+              ? "${FeaturesStrings.itemSingular} $ticketIndex"
+              : FeaturesStrings.itemSingular,
           style: StylesConfig.textStyleBig.copyWith(
             fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
             fontWeight: FontWeight.bold,

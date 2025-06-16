@@ -1,10 +1,12 @@
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/form_option_product_model.dart';
 import 'field_holder.dart';
+import 'id_document_field_holder.dart';
 import 'ticket_holder.dart';
 import 'birth_date_field_holder.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
@@ -134,7 +136,7 @@ class FormHolder {
             description: p.description,
           ))
               .toList(),
-          title: ffm.productType!.title ?? "",
+          title: ffm.title ?? ffm.productType!.title ?? "",
           description: ffm.productType!.description
       );
     } else if (fieldType == FormHelper.fieldTypeBirthDate) {
@@ -150,6 +152,16 @@ class FormHolder {
         minYear: ffm.data?[BirthDateFieldHolder.metaMinYear],
         isHard: ffm.data?[BirthDateFieldHolder.metaIsHard] ?? false,
         message: ffm.data?[BirthDateFieldHolder.metaMessage] ?? '',
+      );
+    } else if (fieldType == FormHelper.fieldTypeIdDocument) {
+      return IdDocumentFieldHolder(
+        id: ffm.id!,
+        fieldType: ffm.type!,
+        isRequired: ffm.isRequired ?? false,
+        title: ffm.title,
+        description: ffm.description,
+        showExpiryDate: ffm.data?[IdDocumentFieldHolder.metaShowExpiryDate] ?? false,
+        expiryDateLabel: ffm.data?[IdDocumentFieldHolder.metaExpiryDateLabel]?.toString() ?? "Expiry Date".tr(),
       );
     } else {
       return FieldHolder(

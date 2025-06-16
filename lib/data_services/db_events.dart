@@ -1,156 +1,31 @@
 import 'dart:collection';
 
-import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/activities/activity_data_helper.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/workshop_feature.dart';
+import 'package:fstapp/data_models/activity_model.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/exclusive_group_model.dart';
+import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'get_events_helper.dart';
+
 class DbEvents {
   static final _supabase = Supabase.instance.client;
-
-  static Future<void> loadEventsParticipantsAndStatus(List<EventModel> events)
-  async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id}, ${Tb.event_users.table}(count)")
-        .inFilter(Tb.events.id, events.map((e)=>e.id).toList());
-
-    var eventList = List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-
-    if(AuthService.isLoggedIn())
-    {
-      await DbEvents.loadIsCurrentUserSignedIn(eventList);
-    }
-
-    for(var e in events)
-    {
-      var eq = eventList.firstWhere((element) => element.id == e.id);
-      e.currentParticipants = eq.currentParticipants;
-      e.isSignedIn = eq.isSignedIn;
-    }
-
-    if(AppConfig.isOwnProgramSupported)
-    {
-      await loadIsInMySchedule(events);
-    }
-  }
-
-  static Future<void> loadIsInMySchedule(List<EventModel> events) async {
-    var set = EventModel.CreateEventModelSet();
-    var local = await loadAllMyScheduleOffline();
-    set.addAll(local);
-    if(AuthService.isLoggedIn())
-    {
-      var remote = await loadAllMySchedule();
-      set.addAll(remote);
-    }
-
-    for(var e in set)
-    {
-      var eq = events.firstWhereOrNull((element) => element.id == e.id);
-      if(eq == null) {
-        continue;
-      }
-      eq.isEventInMySchedule = e.isEventInMySchedule;
-    }
-  }
-
-  static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
-    if(onlyForSignedIn)
-    {
-      List<EventModel> data = [];
-      if(AppConfig.isOwnProgramSupported)
-      {
-        data = (await loadAllMyScheduleOffline()).toList();
-
-        if(!AuthService.isLoggedIn()) {
-          return data.toList();
-        }
-
-        var remote = await loadAllMySchedule();
-        data.addAll(remote);
-      } else if(!AuthService.isLoggedIn()) {
-        return data;
-      }
-
-      var dataSignedIn = await _supabase
-          .from(Tb.events.table)
-          .select("${Tb.events.id},"
-          "${Tb.events.title},"
-          "${Tb.events.start_time},"
-          "${Tb.events.end_time},"
-          "${Tb.events.place},"
-          "${Tb.events.type},"
-          "${Tb.events.max_participants},"
-          "${Tb.events.is_group_event},"
-          "${Tb.event_users.table}!inner(*)")
-          .eq("${Tb.event_users.table}.${Tb.event_users.user}", AuthService.currentUserId())
-          .eq(Tb.events.is_hidden, false)
-          .eq(Tb.events.occasion, RightsService.currentOccasionId!)
-          .order(Tb.events.start_time, ascending: true)
-          .order(Tb.events.max_participants, ascending: false);
-
-      data.addAll(List<EventModel>.from(
-          dataSignedIn.map((x) => EventModel.fromJson(x))));
-
-      //join group events
-      if(AuthService.hasGroup())
-      {
-        var groupData = await _supabase
-            .from(Tb.events.table)
-            .select(
-            "${Tb.events.id},"
-                "${Tb.events.title},"
-                "${Tb.events.start_time},"
-                "${Tb.events.end_time},"
-                "${Tb.events.place},"
-                "${Tb.events.type},"
-                "${Tb.events.max_participants},"
-                "${Tb.events.is_group_event}")
-            .eq(EventModel.isGroupEventColumn, true)
-            .eq(Tb.events.is_hidden, false)
-            .eq(Tb.events.occasion, RightsService.currentOccasionId!)
-            .order(Tb.events.start_time, ascending: true);
-        data.addAll(List<EventModel>.from(
-            groupData.map((x) => EventModel.fromJson(x))));
-      }
-
-      return data.toList();
-    }
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select(
-        "${Tb.events.id},"
-            "${Tb.events.title},"
-            "${Tb.events.start_time},"
-            "${Tb.events.end_time},"
-            "${Tb.events.place},"
-            "${Tb.events.type},"
-            "${Tb.events.max_participants},"
-            "${Tb.events.is_group_event}, "
-            "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})")
-        .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasionId!)
-        .order(Tb.events.start_time, ascending: true)
-        .order(Tb.events.max_participants, ascending: false);
-
-    var events = List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-
-    return events;
-  }
 
   static Future<HashSet<EventModel>> loadAllMySchedule() async {
     var dataEventUsersSaved = await _supabase
@@ -159,21 +34,21 @@ class DbEvents {
         "${Tb.events.title},"
         "${Tb.events.start_time},"
         "${Tb.events.end_time},"
-        "${Tb.events.place},"
+        "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
         "${Tb.events.type},"
         "${Tb.events.max_participants},"
         "${Tb.events.is_group_event},"
         "${Tb.event_users_saved.table}!inner(*)")
         .eq("${Tb.event_users_saved.table}.${Tb.event_users_saved.user}", AuthService.currentUserId())
         .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasionId!)
+        .eq(Tb.events.occasion, RightsService.currentOccasionId()!)
         .order(Tb.events.start_time, ascending: true)
         .order(Tb.events.max_participants, ascending: false);
 
     var remoteEvents = List<EventModel>.from(
         dataEventUsersSaved.map((x) => EventModel.fromJson(x)));
     for (var element in remoteEvents) {
-      element.isEventInMySchedule = true;
+      element.isInMySchedule = true;
     }
     var toReturn = EventModel.CreateEventModelSet();
     toReturn.addAll(remoteEvents);
@@ -187,19 +62,19 @@ class DbEvents {
         "${Tb.events.title},"
         "${Tb.events.start_time},"
         "${Tb.events.end_time},"
-        "${Tb.events.place},"
+        "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
         "${Tb.events.type},"
         "${Tb.events.max_participants},"
         "${Tb.events.is_group_event}")
         .inFilter(Tb.events.id, events)
         .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasionId!)
+        .eq(Tb.events.occasion, RightsService.currentOccasionId()!)
         .order(Tb.events.start_time, ascending: true)
         .order(Tb.events.max_participants, ascending: false);
     var localEvents = List<EventModel>.from(
         localData.map((x) => EventModel.fromJson(x)));
     for (var element in localEvents) {
-      element.isEventInMySchedule = true;
+      element.isInMySchedule = true;
     }
     var toReturn = EventModel.CreateEventModelSet();
     toReturn.addAll(localEvents);
@@ -218,35 +93,14 @@ class DbEvents {
         "${Tb.events.split_for_men_women},"
         "${Tb.events.is_group_event},"
         "${Tb.events.type},"
+        "${Tb.events.data},"
         "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
         "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent}),"
         "${Tb.event_roles.table}!${Tb.event_roles.event}(${Tb.event_roles.role}),"
         "${Tb.event_users_saved.table}(count),"
         "${Tb.event_users.table}(count)")
-        .eq(Tb.events.occasion, RightsService.currentOccasionId!)
+        .eq(Tb.events.occasion, RightsService.currentOccasionId()!)
         .order(Tb.events.start_time, ascending: true);
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-  }
-
-  static Future<List<EventModel>> getEventsDescription(List<int> ids) async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id}, ${Tb.events.updated_at}, ${Tb.events.description}")
-        .inFilter(Tb.events.id, ids);
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-  }
-
-  static Future<List<EventModel>> getAllEventsMeta() async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select(
-        "${Tb.events.id},"
-        "${Tb.events.updated_at}")
-        .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasionId!);
-
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
   }
@@ -263,6 +117,7 @@ class DbEvents {
             "${Tb.events.updated_at},"
             "${Tb.events.occasion},"
             "${Tb.events.title},"
+            "${Tb.events.description},"
             "${Tb.events.start_time},"
             "${Tb.events.end_time},"
             "${Tb.events.max_participants},"
@@ -270,6 +125,7 @@ class DbEvents {
             "${Tb.events.is_group_event},"
             "${Tb.events.is_hidden},"
             "${Tb.events.type},"
+            "${Tb.events.data},"
             "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
             + withParentSelect
         )
@@ -277,19 +133,11 @@ class DbEvents {
         .single();
     var event = EventModel.fromJson(data);
 
-    var cachedEvent = await OfflineDataService.getEventDescription(eventId.toString());
-    if(cachedEvent?.updatedAt!.isBefore(event.updatedAt!)??true) {
-      var descrEvent = await getEventsDescription([event.id!]);
-      event.description = descrEvent[0].description;
-    } else {
-      event.description = cachedEvent?.description;
-    }
-
     if(AuthService.isLoggedIn()) {
-      event.isEventInMySchedule = await isEventSaved(event.id!);
+      event.isInMySchedule = await isEventSaved(event.id!);
       event.isSignedIn = await DbEvents.isCurrentUserSignedToEvent(event.id!);
     } else {
-      event.isEventInMySchedule = await OfflineDataService.isEventSaved(event.id!);
+      event.isInMySchedule = await OfflineDataService.isEventSaved(event.id!);
     }
 
     if(event.childEventIds!=null)
@@ -301,6 +149,7 @@ class DbEvents {
           "${Tb.events.start_time},"
           "${Tb.events.end_time},"
           "${Tb.events.max_participants},"
+          "${Tb.events.data},"
           "${Tb.event_users.table}(count)")
           .inFilter(Tb.events.id, event.childEventIds!)
           .eq(Tb.events.is_hidden, false);
@@ -313,7 +162,7 @@ class DbEvents {
         await loadIsCurrentUserSignedIn(event.childEvents);
       }
     }
-    if(event.isGroupEvent && AuthService.hasGroup())
+    if((event.isGroupEvent ?? false) && AuthService.hasGroup())
     {
       event.isMyGroupEvent = true;
     }
@@ -364,7 +213,7 @@ class DbEvents {
     return result.count > 0;
   }
 
-  static signInToEvent(BuildContext context, int eventId, [UserInfoModel? participant]) async {
+  static Future<void> signInToEvent(BuildContext context, int eventId, [UserInfoModel? participant]) async {
     var userId = participant?.id ?? AuthService.currentUserId();
 
     var result = await _supabase.rpc("sign_user_to_event",
@@ -427,11 +276,19 @@ class DbEvents {
         String answerWhy = "It's too soon!".tr();
         if(result["events_registration_start"]!=null)
         {
-          var start = DateTime.parse(result["events_registration_start"]).toLocal();
+          var start = DateTime.parse(result["events_registration_start"]).toOccasionTime();
           var datePart = DateFormat.MMMMEEEEd(context.locale.languageCode).format(start);
           var timePart = DateFormat.Hm(context.locale.languageCode).format(start);
           String startString = "$datePart $timePart";
           answerWhy = "You can sign in from {time}.".tr(namedArgs: {"time":startString});
+        }
+
+        var workshopsFeature = FeatureService.getFeatureDetails(FeatureConstants.workshops) as WorkshopsFeature;
+        var message = workshopsFeature.registrationNotOpenMessage;
+        if(message != null && message.isNotEmpty){
+          answerWhy = workshopsFeature.registrationNotOpenMessage!;
+          ToastHelper.Show(context, answerWhy,
+              severity: ToastSeverity.NotOk); return;
         }
 
         ToastHelper.Show(context, "${"Cannot sign in!".tr()} $answerWhy",
@@ -444,49 +301,6 @@ class DbEvents {
         ToastHelper.Show(context, "Cannot sign in!".tr(), severity: ToastSeverity.NotOk);
         return;
     }
-  }
-
-  //avoid loosing participant count by updating each event individually
-  static Future<void> updateEvents(List<EventModel> events, [bool onlyForSignedIn = false]) async {
-    var updatedEvents = await getEventsForTimeline(onlyForSignedIn);
-    for (var e in updatedEvents) {
-      var eventToChange =
-      events.firstWhereOrNull((eve) => eve.id == e.id);
-      if (eventToChange != null) {
-        eventToChange.copyFromEvent(e);
-      } else {
-        events.add(e);
-      }
-    }
-    var remove = events.where((d) => !updatedEvents.any((e)=>d.id == e.id)).toList();
-    for(var r in remove)
-    {
-      events.remove(r);
-    }
-
-    //rewrite group names for group events
-    for(var e in events)
-    {
-      if(e.isGroupEvent && AuthService.hasGroup())
-      {
-        e.title = AuthService.currentUserGroup()!.title;
-        e.isMyGroupEvent = true;
-      }
-    }
-
-    events.sort((a, b)
-    {
-      var cmp = a.startTime.compareTo(b.startTime);
-      if (cmp == 0)
-      {
-        cmp = b.maxParticipantsNumber().compareTo(a.maxParticipantsNumber());
-      }
-      if (cmp == 0)
-      {
-        cmp = a.title!.compareTo(b.title!);
-      }
-      return cmp;
-    });
   }
 
   static Future<bool> isEventSaved(int id) async {
@@ -526,55 +340,46 @@ class DbEvents {
     return true;
   }
 
-  static Future<void> synchronizeMySchedule([bool join = false])
+  static Future<void> synchronizeMySchedule({bool join = false, List<int>? currentIds})
   async {
     if(!AuthService.isLoggedIn() || !AppConfig.isOwnProgramSupported){
       return;
     }
-    HashSet<EventModel> data = EventModel.CreateEventModelSet();
+    List<int> eventIdsToSynchronize = [];
 
-    var remote = await loadAllMySchedule();
-    var local = await loadAllMyScheduleOffline();
+    if(currentIds != null){
+      eventIdsToSynchronize = currentIds;
+    } else {
+      // If currentIds are not provided, load remote events
+      var remoteEvents = await loadAllMySchedule();
+      eventIdsToSynchronize = remoteEvents.map((x) => x.id!).toList();
+    }
 
     if (join) {
-      data.addAll(remote);
-      data.addAll(local);
-    }
-    else {
-      data = remote;
+      var localEventsIds = await OfflineDataService.getMyScheduleData();
+      eventIdsToSynchronize.addAll(localEventsIds);
+      eventIdsToSynchronize = eventIdsToSynchronize.toSet().toList();
     }
 
-    var currentUserEventIds = List<int>.from(data.map((x) => x.id));
-    await OfflineDataService.saveMyScheduleData(currentUserEventIds);
+    await OfflineDataService.saveMyScheduleData(eventIdsToSynchronize);
 
-    var values = [];
-    for(var v in currentUserEventIds)
-    {
-      values.add({
-        EventModel.eventUsersSavedUserColumn: AuthService.currentUserId(),
-        Tb.event_users_saved.event: v
-      });
+    if(!join){
+      return;
     }
-    if(join)
-    {
-      await _supabase.from(Tb.event_users_saved.table)
-          .upsert(values);
-    }
+
+    await _supabase.rpc(
+      'synchronize_my_schedule',
+      params: {
+        'p_event_ids': eventIdsToSynchronize,
+        'p_join_mode': join,
+      }
+    );
   }
 
   static Future<EventModel> updateEvent(EventModel event) async
   {
-    var upsertObj = {
-      Tb.events.start_time: event.startTime.toIso8601String(),
-      Tb.events.end_time: event.endTime.toIso8601String(),
-      Tb.events.title: event.title,
-      Tb.events.max_participants: event.maxParticipants,
-      Tb.events.place: event.place?.id,
-      Tb.events.split_for_men_women: event.splitForMenWomen,
-      Tb.events.is_group_event: event.isGroupEvent,
-      Tb.events.is_hidden: event.isHidden,
-      Tb.events.type: event.type,
-    };
+    var upsertObj = event.toUpsertMap();
+
     if(event.description!=null) {
       upsertObj.addAll({Tb.events.description: event.description});
     }
@@ -585,7 +390,7 @@ class DbEvents {
     }
     else
     {
-      upsertObj.addAll({Tb.events.occasion: RightsService.currentOccasionId!});
+      upsertObj.addAll({Tb.events.occasion: RightsService.currentOccasionId()!});
       eventData = await _supabase.from(Tb.events.table).insert(upsertObj).select().single();
     }
     var updatedEvent = EventModel.fromJson(eventData);
@@ -651,7 +456,7 @@ class DbEvents {
         "${Tb.exclusive_groups.id}, "
         "${Tb.exclusive_groups.title}, "
         "${Tb.exclusive_events.table}(${Tb.exclusive_events.event})")
-        .eq(Tb.exclusive_groups.occasion, RightsService.currentOccasionId!);
+        .eq(Tb.exclusive_groups.occasion, RightsService.currentOccasionId()!);
     return List<ExclusiveGroupModel>.from(
         data.map((x) => ExclusiveGroupModel.fromJson(x)));
   }
@@ -668,7 +473,7 @@ class DbEvents {
     }
     else
     {
-      upsertObj.addAll({Tb.exclusive_groups.occasion: RightsService.currentOccasionId!});
+      upsertObj.addAll({Tb.exclusive_groups.occasion: RightsService.currentOccasionId()!});
       eventData = await _supabase.from(Tb.exclusive_groups.table).insert(upsertObj).select().single();
     }
     var updated = ExclusiveGroupModel.fromJson(eventData);
@@ -736,26 +541,216 @@ class DbEvents {
     }
   }
 
-  static Future<void> updateEventDescriptions() async {
-    var needsUpdate = <int>[];
-    var allEventsMeta = await DbEvents.getAllEventsMeta();
-
-    for(var e in allEventsMeta) {
-      var oe = await OfflineDataService.getEventDescription(e.id.toString());
-      if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
-        needsUpdate.add(e.id!);
-      }
-    }
-
-    var fullEvents = await DbEvents.getEventsDescription(needsUpdate);
-    for(var e in fullEvents) {
-      await OfflineDataService.saveEventDescription(e);
-    }
-  }
-
   static Future<bool> hasEventAllowedRole(int eventId) async {
     var data = await _supabase.rpc("get_is_event_allowed",
         params: {"ev": eventId});
     return data;
   }
+
+  static Future<List<EventModel>> getAllEvents(int occasionId, bool includeDescription) async {
+    final response = await _supabase.rpc(
+      'get_events',
+      params: {
+        'p_occasion': occasionId,
+        'p_include_description': includeDescription,
+      },
+    );
+
+    if (response['code'] != 200) return [];
+
+    final json = response['data'] as Map<String, dynamic>;
+
+    // root‐level arrays
+    final eventsJson        = (json['events']           as List).cast<Map<String, dynamic>>();
+    final placesList        = GetEventsHelper.parsePlaces(json);
+    final groupsList        = GetEventsHelper.parseEventGroups(json);
+    final rolesList         = GetEventsHelper.parseEventRoles(json);
+    final usersCountList    = GetEventsHelper.parseEventUsers(json);
+    final usersSavedList    = GetEventsHelper.parseEventUsersSaved(json);
+
+    // build lookup maps
+    final placeById    = { for (var p in placesList) p.id!: p };
+    final groupsByParent = <int, List<EventGroupModel>>{};
+    final parentsByChild = <int, List<EventGroupModel>>{};
+    for (var g in groupsList) {
+      groupsByParent.putIfAbsent(g.eventParent, () => []).add(g);
+      parentsByChild.putIfAbsent(g.eventChild,    () => []).add(g);
+    }
+    final rolesByEvent = <int, List<int>>{};
+    for (var r in rolesList) {
+      rolesByEvent.putIfAbsent(r.eventId, () => []).add(r.roleId);
+    }
+    final usersByEvent     = { for (var u in usersCountList)     u.eventId: u.count };
+    final savedByEvent     = { for (var s in usersSavedList)     s.eventId: s.count };
+
+    // instantiate and populate each EventModel
+    final events = <EventModel>[];
+    for (var eJson in eventsJson) {
+      final ev = EventModel.fromJson(eJson);
+      // override place with full model if available
+      if (ev.place?.id != null) {
+        ev.place = placeById[ev.place!.id];
+      }
+      // assign child/parent IDs
+      ev.childEventIds  = groupsByParent[ev.id!]?.map((g) => g.eventChild).toList();
+      ev.parentEventIds = parentsByChild[ev.id!]?.map((g) => g.eventParent).toList();
+      // assign roles and counts
+      ev.eventRolesIds      = rolesByEvent[ev.id!];
+      ev.currentParticipants = usersByEvent[ev.id!];
+      ev.currentUsersSaved   = savedByEvent[ev.id!];
+      events.add(ev);
+    }
+    
+    for (var e in events){
+      var children = events.where((ev) => ev.parentEventIds?.contains(e.id)??false).toList();
+      e.childEvents = children;
+    }
+
+    // sort by start time, for example
+    events.sort((a, b) => a.startTime.compareTo(b.startTime));
+    return events;
+  }
+
+  // In YourServiceClass or relevant class containing getMyEventsAndActivities
+
+  static Future<MyEventsBundle?> getMyEventsAndActivities(
+      int occasionId,
+      bool includeDescription
+      ) async {
+    final response = await _supabase.rpc(
+      'get_my_events_and_activities', // Calling the updated SQL function
+      params: {
+        'p_occasion': occasionId,
+        'p_include_description': includeDescription,
+      },
+    );
+
+    if (response == null) {
+      print('Failed to load my events bundle. Response was null.');
+      return null;
+    }
+
+    if (response is! Map || response['code'] != 200) {
+      final code = response is Map ? response['code'] : 'N/A';
+      final message = response is Map ? response['message'] : response.toString();
+      print('Failed to load my events bundle. Code: $code, Message: $message');
+      return null;
+    }
+
+    final data = response['data'] as Map<String, dynamic>;
+
+    // ---- EVENT PROCESSING (Main events) ----
+    List<EventModel> events = GetEventsHelper.parseEvents(data);
+    final List<PlaceModel> placesListForEvents = GetEventsHelper.parsePlaces(data);
+    final List<EventUserCount> usersCountList = GetEventsHelper.parseEventUsers(data);
+    final List<EventUserSavedCount> usersSavedList = GetEventsHelper.parseEventUsersSaved(data);
+    final List<EventGroupModel> groupsList = GetEventsHelper.parseEventGroups(data);
+
+    // build lookup maps
+    final placeById    = { for (var p in placesListForEvents) p.id!: p };
+    final groupsByParent = <int, List<EventGroupModel>>{};
+    final parentsByChild = <int, List<EventGroupModel>>{};
+    for (var g in groupsList) {
+      groupsByParent.putIfAbsent(g.eventParent, () => []).add(g);
+      parentsByChild.putIfAbsent(g.eventChild,    () => []).add(g);
+    }
+
+    final usersByEvent     = { for (var u in usersCountList)     u.eventId: u.count };
+    final savedByEvent     = { for (var s in usersSavedList)     s.eventId: s.count };
+
+    for (var ev in events) {
+      if (ev.place?.id != null) {
+        ev.place = placeById[ev.place!.id];
+      }
+
+      ev.childEventIds  = groupsByParent[ev.id!]?.map((g) => g.eventChild).toList();
+      ev.parentEventIds = parentsByChild[ev.id!]?.map((g) => g.eventParent).toList();
+
+      for (var e in events){
+        var children = events.where((ev) => ev.parentEventIds?.contains(e.id)??false).toList();
+        e.childEvents = children;
+      }
+
+      ev.currentParticipants = usersByEvent[ev.id!];
+      ev.currentUsersSaved   = savedByEvent[ev.id!];
+    }
+
+    events = events.sortEvents();
+
+    // ---- ACTIVITY PROCESSING ----
+    final List<ActivityEventModel> activityRelatedEvents = ActivityDataHelper.parseEvents(data);
+    final List<ActivityPlaceModel> activityRelatedPlaces = ActivityDataHelper.parsePlaces(data);
+    final List<ActivityModel> activitiesList = ActivityDataHelper.parseActivities(data);
+    final List<ActivityAssignmentModel> assignmentsList = ActivityDataHelper.parseActivityAssignments(data);
+    final List<ActivityUserInfoModel> usersList = ActivityDataHelper.parseUsers(data);
+    final userMapById = { for (var u in usersList) if (u.id != null) u.id!: u };
+
+    final linkEventList = (data['assignment_events'] as List<dynamic>?)
+        ?.map((item) => AssignmentEventLinkModel.fromJson(item as Map<String, dynamic>))
+        .toList() ?? [];
+    final linkPlaceList = (data['assignment_places'] as List<dynamic>?)
+        ?.map((item) => AssignmentPlaceLinkModel.fromJson(item as Map<String, dynamic>))
+        .toList() ?? [];
+
+    final activityEventByIdMap = { for (var e in activityRelatedEvents) if (e.id != null) e.id!: e };
+    final activityPlaceByIdMap = { for (var p in activityRelatedPlaces) if (p.id != null) p.id!: p };
+
+    final eventsByAssignmentId = <String, List<int>>{};
+    for (var link in linkEventList) {
+      if (link.assignmentId != null && link.eventId != null) {
+        eventsByAssignmentId.putIfAbsent(link.assignmentId!, () => []).add(link.eventId!);
+      }
+    }
+    final placesByAssignmentId = <String, List<int>>{};
+    for (var link in linkPlaceList) {
+      if (link.assignmentId != null && link.placeId != null) {
+        placesByAssignmentId.putIfAbsent(link.assignmentId!, () => []).add(link.placeId!);
+      }
+    }
+
+    for (var assignment in assignmentsList) {
+      final eventIdsForCurrentAssignment = eventsByAssignmentId[assignment.id] ?? [];
+      assignment.events = eventIdsForCurrentAssignment
+          .map((id) => activityEventByIdMap[id])
+          .whereType<ActivityEventModel>()
+          .toList();
+
+      final placeIdsForCurrentAssignment = placesByAssignmentId[assignment.id] ?? [];
+      assignment.places = placeIdsForCurrentAssignment
+          .map((id) => activityPlaceByIdMap[id])
+          .whereType<ActivityPlaceModel>()
+          .toList();
+
+      if (assignment.userInfo != null && userMapById.containsKey(assignment.userInfo)) {
+        assignment.user = userMapById[assignment.userInfo!];
+      }
+    }
+
+    // MODIFIED: The key of this map is changed from int to String to support UUIDs.
+    final assignmentsByActivityId = <String, List<ActivityAssignmentModel>>{};
+    for (var asg in assignmentsList) {
+      final activityId = asg.activityId;
+      if (activityId != null) {
+        assignmentsByActivityId.putIfAbsent(activityId, () => []).add(asg);
+      }
+    }
+    for (var activity in activitiesList) {
+      activity.assignments = assignmentsByActivityId[activity.id] ?? [];
+    }
+
+    return MyEventsBundle(
+      events: events,
+      activities: activitiesList,
+    );
+  }
+}
+
+class MyEventsBundle {
+  final List<EventModel> events;
+  final List<ActivityModel> activities;
+
+  MyEventsBundle({
+    required this.events,
+    required this.activities,
+  });
 }

@@ -20,6 +20,7 @@ class AppConfig {
   static const String? forceOccasionLink = null;
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
+  static const bool isAppSupported = true;
 
   static const String webLink = "https://biscup.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/cz/app/biscup/id6472435824";
@@ -30,13 +31,9 @@ class AppConfig {
   static const int imagesMaxWidth = 780;
   static const int imagesMaxBytes = 800000;
 
-  static const bool isEventTimeUtc = true;
-
   static const int daySplitHour = 4;
 
-  static const bool isSplitByPlace = false;
-
-  static const int offsetHours = -1;
+  static const bool areAllVolunteersApprovers = false;
 
   static bool isNotificationsCurrentlySupported() {
     if(kIsWeb) {

@@ -24,6 +24,11 @@ class RouterService {
     return context.router.pushPath(getCurrentLink() + path);
   }
 
+  static Future<T?> navigateOccasionNoContext<T extends Object?>(
+      String path) {
+    return router.pushPath(getCurrentLink() + path);
+  }
+
   static Future<T?> changeOnOccasion<T extends Object?>(
       BuildContext context, String path, {Object? extra}) {
     return context.router.push(
@@ -63,10 +68,10 @@ class RouterService {
   }
 
   static void scheduleBack(BuildContext context) {
-    if(context.router.canNavigateBack){
+    //if(context.router.canPop()){
       context.router.replace(ScheduleRoute());
       context.router.maybePopTop();
-    }
+    //}
   }
 
   static bool canPop(BuildContext context) => context.router.canPop();
@@ -112,15 +117,8 @@ class RouterService {
   static Future<bool> updateOccasionFromLink(LinkModel link) async {
     bool canContinue = true;
     var checkedObject = await SynchroService.getAppConfig(occasionLink: link.occasionLink, formLink: link.formLink);
-    RightsService.currentUser = checkedObject.userInfo;
-    RightsService.currentOccasionUser = checkedObject.occasionUser;
-    RightsService.currentUnitUser = checkedObject.unitUser;
-    RightsService.currentOccasion = checkedObject.occasion;
-    RightsService.currentUnit = checkedObject.unit;
-    RightsService.currentOccasionId = checkedObject.occasion?.id;
+    RightsService.occasionLinkModel = checkedObject;
     RightsService.currentLink = checkedObject.occasion?.link;
-    RightsService.isAdminField = checkedObject.isAdmin;
-    RightsService.bankAccountAdmin = checkedObject.bankAccountsAdmin;
     AppConfigService.versionRecommended = checkedObject.versionRecommended;
 
     if (checkedObject.occasion?.link != RouterService.currentOccasionLink &&

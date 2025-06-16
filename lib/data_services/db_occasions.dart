@@ -1,4 +1,5 @@
 import 'package:fstapp/components/features/feature.dart';
+import 'package:fstapp/components/features/ticket_feature.dart';
 import 'package:fstapp/data_models/game_settings_model.dart';
 import 'package:fstapp/data_models/image_model.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
@@ -21,7 +22,7 @@ class DbOccasions {
 
   static Future<List<ServiceItemModel>> getAllServices(String type) async {
     var data = await _supabase.rpc("get_all_service_items", params: {
-      'oc': RightsService.currentOccasionId,
+      'oc': RightsService.currentOccasionId(),
       'type': type,
     });
     var items = List<ServiceItemModel>.from(
@@ -31,7 +32,7 @@ class DbOccasions {
 
   static Future<bool> createService(String type, ServiceItemModel item) async {
     var result = await _supabase.rpc("create_service_item", params: {
-      'oc': RightsService.currentOccasionId,
+      'oc': RightsService.currentOccasionId(),
       'type': type,
       'code': item.code,
       'title': item.title,
@@ -42,7 +43,7 @@ class DbOccasions {
 
   static Future<bool> updateService(String type, ServiceItemModel item) async {
     var result = await _supabase.rpc("update_service_item", params: {
-      'oc': RightsService.currentOccasionId,
+      'oc': RightsService.currentOccasionId(),
       'type': type,
       'code': item.code,
       'new_title': item.title,
@@ -53,7 +54,7 @@ class DbOccasions {
 
   static Future<bool> deleteService(String type, ServiceItemModel item, [bool force = false]) async {
     var result = await _supabase.rpc("delete_service_item", params: {
-      'oc': RightsService.currentOccasionId,
+      'oc': RightsService.currentOccasionId(),
       'code': item.code,
       'type': type,
       'force': force
@@ -65,7 +66,7 @@ class DbOccasions {
     final response = await _supabase
         .from(Tb.occasions.table)
         .select(Tb.occasions.data)
-        .eq(Tb.occasions.id, RightsService.currentOccasionId!)
+        .eq(Tb.occasions.id, RightsService.currentOccasionId()!)
         .maybeSingle();
 
     if (response != null) {
@@ -79,7 +80,7 @@ class DbOccasions {
 
   static Future<bool> updateGameSettings(GameSettingsModel settings) async {
     final response = await _supabase.rpc('game_update_settings', params: {
-      'oc': RightsService.currentOccasionId,
+      'oc': RightsService.currentOccasionId(),
       'new_start_time': settings.start?.toIso8601String(),
       'new_end_time': settings.end?.toIso8601String(),
     });
@@ -149,12 +150,24 @@ class DbOccasions {
   }
 
   static Future<void> deleteOccasion(int oc) async {
-    var data = await _supabase.from(Tb.images.table).select().eq(Tb.images.occasion, oc);
-    var occasionImages = List<ImageModel>.from(data.map((x) => ImageModel.fromJson(x)));
-    for(var oc in occasionImages){
-      await DbImages.removeImage(oc.link!);
+    await _supabase.rpc('delete_occasion', params: {'oc': oc});
+
+    final data = await _supabase
+        .from(Tb.images.table)
+        .select()
+        .isFilter(Tb.images.occasion, null)
+        .isFilter(Tb.images.unit, null);
+    final orphanImages = List<ImageModel>.from(data.map((x) => ImageModel.fromJson(x)));
+
+    for (var img in orphanImages) {
+      await DbImages.removeImage(img.link!);
     }
-    await _supabase.from(Tb.images.table).delete().eq(Tb.images.occasion, oc);
-    await _supabase.rpc("delete_occasion", params: {"oc": oc});
+
+    await _supabase
+        .from(Tb.images.table)
+        .delete()
+        .isFilter(Tb.images.occasion, null)
+        .isFilter(Tb.images.unit, null);
   }
+
 }

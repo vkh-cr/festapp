@@ -4,6 +4,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/components/features/feature_service.dart'; // Added for FeatureService
+import 'package:fstapp/components/features/features_strings.dart';
+import 'package:fstapp/components/features/schedule_feature.dart'; // Added for ScheduleFeature & EventType
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
@@ -35,6 +38,7 @@ class _EventEditPageState extends State<EventEditPage> {
   final _formKey = GlobalKey<FormState>();
   EventModel? originalEvent;
   List<PlaceModel>? places;
+  List<EventType> _definedEventTypes = []; // For storing defined event types
 
   // Editable fields
   bool? isHidden;
@@ -42,6 +46,7 @@ class _EventEditPageState extends State<EventEditPage> {
   DateTime? startDate, endDate;
   int? maxParticipants, placeId;
   bool? splitForMenWomen, isGroupEvent;
+  bool? isCancelled;
   bool isFormValid = true;
 
   DateTime? minDate;
@@ -66,6 +71,12 @@ class _EventEditPageState extends State<EventEditPage> {
 
     places = await DbPlaces.getAllPlaces();
 
+    // Fetch ScheduleFeature and its event types
+    final scheduleFeatureInstance = FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule) as ScheduleFeature?;
+    if (scheduleFeatureInstance != null) {
+      _definedEventTypes = scheduleFeatureInstance.eventTypes;
+    }
+
     if (originalEvent != null) {
       isHidden = originalEvent!.isHidden;
       title = originalEvent!.title;
@@ -75,12 +86,15 @@ class _EventEditPageState extends State<EventEditPage> {
       splitForMenWomen = originalEvent!.splitForMenWomen;
       isGroupEvent = originalEvent!.isGroupEvent;
       placeId = originalEvent!.place?.id;
-      type = originalEvent!.type;
+      type = originalEvent!.type; // This will be the code or null
       content = originalEvent!.description;
       showInsideEvent = originalEvent!.parentEventIds?.map((e) => e.toString()).join(",") ?? "";
+      isCancelled = originalEvent!.isCancelled; // Load isCancelled status
     }
     validateForm();
-    setState(() {});
+    if(mounted) {
+      setState(() {});
+    }
   }
 
   void validateForm() {
@@ -108,7 +122,7 @@ class _EventEditPageState extends State<EventEditPage> {
 
   Future<void> saveChanges() async {
     if (isFormValid && _formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+      _formKey.currentState!.save(); // This will call onSaved for all fields, including the new dropdown if it has one
 
       if (originalEvent != null) {
         originalEvent!
@@ -120,8 +134,9 @@ class _EventEditPageState extends State<EventEditPage> {
           ..splitForMenWomen = splitForMenWomen!
           ..isGroupEvent = isGroupEvent!
           ..place = places!.firstWhereOrNull((p) => p.id == placeId)
-          ..type = type
+          ..type = type // 'type' state variable is already updated by Dropdown's onChanged
           ..description = content
+          ..isCancelled = isCancelled!
           ..parentEventIds = showInsideEvent != null && showInsideEvent!.isNotEmpty
               ? showInsideEvent!.split(",").map((e) => int.parse(e.trim())).toList()
               : [];
@@ -153,7 +168,7 @@ class _EventEditPageState extends State<EventEditPage> {
                 ),
             ],
           ),
-          body: originalEvent == null
+          body: (originalEvent == null && widget.id != null) || places == null // Updated loading condition
               ? const Center(child: CircularProgressIndicator())
               : Align(
             alignment: Alignment.topCenter,
@@ -169,6 +184,12 @@ class _EventEditPageState extends State<EventEditPage> {
                         title: Text("Hide").tr(),
                         value: isHidden ?? false,
                         onChanged: (value) => setState(() => isHidden = value),
+                      ),
+                      SwitchListTile(
+                        title: Text("Cancelled".tr()),
+                        value: isCancelled ?? false,
+                        onChanged: (value) => setState(() => isCancelled = value),
+                        activeColor: ThemeConfig.redColor(context),
                       ),
                       TextFormField(
                         initialValue: title,
@@ -285,7 +306,7 @@ class _EventEditPageState extends State<EventEditPage> {
                               context,
                               HtmlEditorRoute(
                                   content: {HtmlEditorPage.parContent: content},
-                                  occasionId: originalEvent!.occasionId
+                                  occasionId: originalEvent!.occasionId // Assuming originalEvent is not null here, or handle new event case
                               ),
                             ).then((value) {
                               if (value != null) {
@@ -339,10 +360,34 @@ class _EventEditPageState extends State<EventEditPage> {
                             value: splitForMenWomen ?? false,
                             onChanged: (value) => setState(() => splitForMenWomen = value),
                           ),
-                          TextFormField(
-                            initialValue: type,
-                            decoration: InputDecoration(labelText: "Type".tr()),
-                            onSaved: (value) => type = value,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Add padding to align with TextFormFields
+                            child: DropdownButtonFormField<String?>(
+                              value: type, // Handles null for "No Type" or new event
+                              decoration: InputDecoration(
+                                labelText: "Type".tr(),
+                                border: const OutlineInputBorder(), // Consistent styling
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0), // Adjust padding
+                              ),
+                              items: [
+                                DropdownMenuItem<String?>(
+                                  value: "",
+                                  child: Text(FeaturesStrings.noType),
+                                ),
+                                ..._definedEventTypes.map((eventType) {
+                                  return DropdownMenuItem<String?>(
+                                    value: eventType.code,
+                                    child: Text(eventType.title),
+                                  );
+                                }),
+                              ],
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  type = newValue;
+                                });
+                              },
+                              // onSaved: (value) => type = value, // Not strictly needed as onChanged updates the state variable
+                            ),
                           ),
                           TextFormField(
                             initialValue: showInsideEvent,
@@ -374,15 +419,14 @@ class _EventEditPageState extends State<EventEditPage> {
                 ElevatedButton(
                   onPressed: isFormValid ? saveChanges : null,
                   style: ElevatedButton.styleFrom(
-                    // Use the default colors for the enabled state
                     backgroundColor: isFormValid
-                        ? null // Default background for enabled state
-                        : ThemeConfig.appBarColor().withOpacity(0.5), // Semi-transparent appBarColor for disabled state
+                        ? null
+                        : ThemeConfig.appBarColor().withOpacity(0.5),
                     foregroundColor: isFormValid
-                        ? null // Default text color for enabled state
-                        : ThemeConfig.grey600(context), // Subtle gray text for disabled state
-                    disabledBackgroundColor: ThemeConfig.appBarColor().withOpacity(0.5), // Ensure visible disabled background
-                    disabledForegroundColor: ThemeConfig.grey600(context), // Ensure visible disabled text
+                        ? null
+                        : ThemeConfig.grey600(context),
+                    disabledBackgroundColor: ThemeConfig.appBarColor().withOpacity(0.5),
+                    disabledForegroundColor: ThemeConfig.grey600(context),
                   ),
                   child: Text("Save").tr(),
                 ),

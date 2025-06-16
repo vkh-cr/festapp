@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/html_view.dart';
-import '../pages/form_editor_content.dart';
+import '../pages/form_editor_content.dart'; // Assuming this path or similar for kHiddenOpacity
 import '../widgets_view/form_helper.dart';
 import 'birth_date_editor.dart';
 import 'description_with_edit.dart';
@@ -13,6 +14,11 @@ import 'sex_editor.dart';
 import 'ticket_editor_widgets.dart';
 import 'select_one_editor.dart';
 import 'select_many_editor.dart';
+import 'id_document_editor.dart'; // Added import for the new editor
+
+// Define kHiddenOpacity if it's not globally available from form_editor_content.dart
+const double kHiddenOpacity = 0.5;
+
 
 class FormFieldsGenerator extends StatefulWidget {
   final FormModel form;
@@ -208,7 +214,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
               Icon(FormHelper.fieldTypeIcons[FormHelper.fieldTypeTicket],
                   size: 24, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 8),
-              Text("Ticket",
+              Text(FeaturesStrings.itemSingular,
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium
@@ -382,6 +388,9 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   Widget _buildAnswerWidget(
       BuildContext context, FormFieldModel field, bool isEditable) {
+    // Ensure FormFieldModel.typeIdDocument is the correct constant you're using for this field type.
+    // It should match the one used in FormHolder.createFieldHolder.
+    // Example: static const String typeIdDocument = "ID_DOCUMENT"; // in FormFieldModel
     switch (field.type) {
       case FormHelper.fieldTypeTicket:
         return isEditable
@@ -405,6 +414,10 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
         return isEditable
             ? BirthDateEditor.buildBirthDateEditor(context, field, widget.form.occasion)
             : BirthDateEditor.buildBirthDateReadOnly(context, field);
+      case FormHelper.fieldTypeIdDocument:
+        return isEditable
+            ? IdDocumentEditor.buildIdDocumentEditor(context, field, widget.form.occasion)
+            : IdDocumentEditor.buildIdDocumentReadOnly(context, field);
       default:
         if (isEditable) {
           return Padding(

@@ -1,9 +1,11 @@
 import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/services/time_helper.dart';
 
 class OccasionModel {
   static const String occasionsOffline = "occasionsOffline";
+  static const String registrationEnabled = "occasionsOffline";
 
   int? id;
   DateTime? createdAt;
@@ -40,6 +42,7 @@ class OccasionModel {
   }) : features = features ?? [];
 
   factory OccasionModel.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> data = json[Tb.occasions.data] ?? {};
     return OccasionModel(
       id: json[Tb.occasions.id],
       createdAt: json[Tb.occasions.created_at] != null
@@ -49,17 +52,17 @@ class OccasionModel {
           ? DateTime.parse(json[Tb.occasions.updated_at])
           : null,
       startTime: json[Tb.occasions.start_time] != null
-          ? DateTime.parse(json[Tb.occasions.start_time])
+          ? DateTime.parse(json[Tb.occasions.start_time]).toOccasionTime(data[Tb.occasions.data_timezone])
           : null,
       endTime: json[Tb.occasions.end_time] != null
-          ? DateTime.parse(json[Tb.occasions.end_time])
+          ? DateTime.parse(json[Tb.occasions.end_time]).toOccasionTime(data[Tb.occasions.data_timezone])
           : null,
       isOpen: json[Tb.occasions.is_open] ?? false,
       isHidden: json[Tb.occasions.is_hidden] ?? false,
       link: json[Tb.occasions.link],
       title: json[Tb.occasions.title],
       description: json[Tb.occasions.description],
-      data: json[Tb.occasions.data] ?? {},
+      data: data,
       organization: json[Tb.occasions.organization],
       unit: json[Tb.occasions.unit],
       form: json["form"] != null ? FormModel.fromJson(json["form"]) : null,
@@ -74,8 +77,8 @@ class OccasionModel {
   Map<String, dynamic> toJson() {
     return {
       Tb.occasions.id: id,
-      Tb.occasions.start_time: startTime?.toIso8601String(),
-      Tb.occasions.end_time: endTime?.toIso8601String(),
+      Tb.occasions.start_time: startTime?.toUtcFromOccasionTime(data?[Tb.occasions.data_timezone]).toIso8601String(),
+      Tb.occasions.end_time: endTime?.toUtcFromOccasionTime(data?[Tb.occasions.data_timezone]).toIso8601String(),
       Tb.occasions.is_open: isOpen,
       Tb.occasions.is_hidden: isHidden,
       Tb.occasions.link: link,

@@ -1,4 +1,4 @@
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -29,7 +29,7 @@ class MapPlaceModel {
       type: place.type,
       latLng: LatLng(place.getLat(), place.getLng()),
       icon: place.icon,
-      events: place.events != null ? List<TimeBlockItem>.from(place.events.map((e)=>TimeBlockItem.fromEventModel(e))) : null
+      events: List<TimeBlockItem>.from(place.events.map((e) => TimeBlockItem.fromEventModelAsChild(e)))
     );
   }
 }

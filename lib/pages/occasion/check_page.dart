@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -140,13 +140,14 @@ class _CheckPageState extends State<CheckPage> {
             Text(UserInfoModel.sexToLocale(_scannedUser!.sex,), style: TextStyle(color: Colors.black)),
             if (_scannedUser!.companions != null) ...[
               const SizedBox(height: 16),
-              Text("${'Signed in companions'.tr()}:"),
+              Text("${'Signed in companions'.tr()}:", style: TextStyle(color: Colors.black)),
               ..._scannedUser!.companions!.map((companion) => Row(
                     children: [
                       Text(companion.name,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: Colors.black
                           )),
                       const SizedBox(width: 5),
                       const Icon(Icons.check_circle, color: Colors.black),
@@ -194,7 +195,7 @@ class _CheckPageState extends State<CheckPage> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: ThemeConfig.seed1,
+                            color: Colors.black,
                           ),
                           textAlign: TextAlign.center,
                         ),

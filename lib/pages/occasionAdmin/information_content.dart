@@ -62,19 +62,12 @@ class _InformationContentState extends State<InformationContent> {
             renderer: (rendererContext) {
               return DataGridHelper.buildHtmlEditorButton(
                 context: context,
-                occasionId: RightsService.currentOccasionId,
+                occasionId: RightsService.currentOccasionId(),
                 field: Tb.information.description,
                 rendererContext: rendererContext,
+                title: rendererContext.row.cells[Tb.information.title]!.value,
                 loadContent: () async {
-                  var id = rendererContext.row.cells[Tb.information.id]!.value;
-                  if (id != null) {
-                    var infoDescription =
-                    await DbInformation.getInfosDescription([id]);
-                    if (infoDescription.isNotEmpty) {
-                      return infoDescription[0].description;
-                    }
-                  }
-                  return null;
+                  return rendererContext.row.cells[Tb.information.description]!.value;
                 },
               );
             },

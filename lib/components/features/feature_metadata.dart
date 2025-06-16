@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'feature_constants.dart';
+import 'schedule_feature.dart';
 
 class FeatureMetadata {
   // Store the raw translation keys without immediately invoking .tr()
@@ -55,6 +56,18 @@ class FeatureMetadata {
     FeatureConstants.workshops: {
       'title': 'Workshops',
       'description': 'Indicates the start time from when people can sign in for workshops.',
+    },
+    ScheduleFeature.metaSchedule: {
+      'title': 'Schedule',
+      'description': 'Allows customizing event schedule display settings.',
+    },
+    FeatureConstants.volunteers: {
+      'title': 'Volunteers',
+      'description': 'Allows management of activities for volunteers.',
+    },
+    FeatureConstants.import: {
+      'title': 'Import',
+      'description': 'Enables importing users from various sources like CSV files or from tickets.',
     },
   };
 

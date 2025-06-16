@@ -1,11 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/timetable/timetable_controller.dart';
+import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/pages/occasion/occasion_home_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/event_model.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
@@ -29,8 +32,14 @@ class TimetablePage extends StatefulWidget {
 class _TimetablePageState extends State<TimetablePage>
     with TickerProviderStateMixin {
   TabController? _tabController;
-
   late TimetableController timetableController;
+  late final VoidCallback _tabsRouterListener;
+
+  List<EventModel> _events = [];
+  List<TimeBlockItem> _items = [];
+  List<TimeBlockGroup> _days = [];
+  int? _currentIndex;
+  List<TimeBlockPlace> _timetablePlaces = [];
 
   @override
   void initState() {
@@ -39,18 +48,41 @@ class _TimetablePageState extends State<TimetablePage>
       RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
           .then((value) => loadData());
     });
-  }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+    _tabsRouterListener = () async {
+      if (mounted && context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.timetable)) {
+        await loadData();
+      }
+    };
+
+    final tabsRouter = context.findAncestorStateOfType<AutoTabsRouterState>();
+    if(tabsRouter != null) {
+      context.tabsRouter.addListener(_tabsRouterListener);
+    }
+
     loadData();
   }
 
+  @override
+  void dispose() {
+    final tabsRouter = context.findAncestorStateOfType<AutoTabsRouterState>();
+    if(tabsRouter != null) {
+      context.tabsRouter.removeListener(_tabsRouterListener);
+    }
+    _tabController?.dispose();
+    super.dispose();
+  }
+
   Future<void> loadData() async {
+    // Ensure the method can handle being called multiple times without issues.
+    if (!mounted) return;
+
     await loadDataOffline();
 
-    await DbEvents.updateEvents(_events);
+    _events = await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
+    if(!AuthService.isLoggedIn()){
+      await OfflineDataService.updateEventsWithMySchedule(_events);
+    }
 
     var placeIds = _events
         .map((e) => e.place?.id)
@@ -64,31 +96,34 @@ class _TimetablePageState extends State<TimetablePage>
     var timetablePlaces = List<TimeBlockPlace>.from(places
         .where((element) => !element.isHidden)
         .map((x) => TimeBlockPlace.fromPlaceModel(x)));
-    _timetablePlaces.clear();
-    _timetablePlaces.addAll(timetablePlaces);
 
-    _items.clear();
-    _items.addAll(_events
-        .timetableEventsFilter(Timetable.minimalDurationMinutes)
-        .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)));
+    if(mounted) {
+      setState(() {
+        _timetablePlaces = timetablePlaces;
 
-    timetableController.rebuild?.call();
+        _items = _events
+            .map((e) => TimeBlockItem.fromEventModel(e)).toList();
 
-    _days.clear();
-    _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour));
-    setupTabController(_days);
-    await loadEventParticipants();
-    await DbEvents.synchronizeMySchedule();
+        timetableController.rebuild?.call();
+
+        _days = TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour);
+        setupTabController(_days);
+
+      });
+    }
   }
 
   String TimetableDateFormat(DateTime e) =>
       DateFormat("EEEE", context.locale.languageCode).format(e);
 
   void setupTabController(List<TimeBlockGroup> days) {
-    _currentIndex ??= TimeHelper.getIndexFromDays(days.map((d)=>d.dateTime!.weekday));
+    _currentIndex ??= TimeHelper.getTimeNowIndexFromDays(days.map((d)=>d.dateTime!.weekday));
 
     if (_tabController?.length != days.length) {
-      _tabController = TabController(vsync: this, length: days.length, initialIndex: _currentIndex!);
+      _tabController?.removeListener(reactionOnIndexChanged); // Clean up old listener
+      _tabController = TabController(vsync: this, length: days.length, initialIndex: _currentIndex ?? 0);
+    } else {
+      _tabController?.index = _currentIndex ?? 0;
     }
     _tabController!.animation?.removeListener(reactionOnIndexChanged);
     _tabController!.animation?.addListener(reactionOnIndexChanged);
@@ -109,37 +144,22 @@ class _TimetablePageState extends State<TimetablePage>
     var timetablePlaces = List<TimeBlockPlace>.from(places
         .where((element) => !element.isHidden)
         .map((x) => TimeBlockPlace.fromPlaceModel(x)));
-    _timetablePlaces.clear();
-    _timetablePlaces.addAll(timetablePlaces);
+    _timetablePlaces = timetablePlaces;
 
     if (_events.isEmpty) {
-      var offlineEvents = await OfflineDataService.getAllEvents();
-      _events.addAll(offlineEvents);
+      _events = await OfflineDataService.getAllEvents();
     }
 
     await OfflineDataService.updateEventsWithMySchedule(_events);
     await OfflineDataService.updateEventsWithGroupName(_events);
 
-    _items.clear();
     var items = _events
-        .timetableEventsFilter(Timetable.minimalDurationMinutes)
-        .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)).toList();
+        .map((e) => TimeBlockItem.fromEventModel(e)).toList();
 
-    _days.clear();
-    _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(items, context, AppConfig.daySplitHour));
+
+    _days = TimeBlockHelper.splitTimeBlocksByDate(items, context, AppConfig.daySplitHour);
     setupTabController(_days);
     setState(() {});
-  }
-
-  Future<void> loadEventParticipants() async {
-    await DbEvents.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events.timetableEventsFilter(Timetable.minimalDurationMinutes)) {
-      var item = _items.singleWhere((element) => element.id == e.id!);
-      setState(() {
-        item.data = e.toString();
-        item.timeBlockType = TimeBlockHelper.getTimeBlockTypeFromModel(e);
-      });
-    }
   }
 
   @override
@@ -175,13 +195,6 @@ class _TimetablePageState extends State<TimetablePage>
             controller: timetableController,
             items: _days[_currentIndex??0].events,
             timetablePlaces: _timetablePlaces,
-            occasionEnd: RightsService.currentOccasion!.endTime,));
+            occasionEnd: RightsService.currentOccasion()!.endTime,));
   }
-
-  final List<EventModel> _events = [];
-  final List<TimeBlockItem> _items = [];
-  final List<TimeBlockGroup> _days = [];
-
-  int? _currentIndex;
-  final List<TimeBlockPlace> _timetablePlaces = [];
 }

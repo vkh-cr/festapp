@@ -1,8 +1,12 @@
+// schedule_timeline.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
+import 'package:fstapp/dialogs/detail_dialog.dart';
+import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/html_view.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
 class ScheduleTimeline extends StatefulWidget {
@@ -13,6 +17,7 @@ class ScheduleTimeline extends StatefulWidget {
   final Function(BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEventId)? onAddNewEvent;
   final bool Function()? showAddNewEventButton;
   final TimeBlockItem? parentEvent;
+  final bool isGroupTitleShown;
 
   const ScheduleTimeline({
     super.key,
@@ -22,7 +27,8 @@ class ScheduleTimeline extends StatefulWidget {
     this.emptyContent,
     this.onAddNewEvent,
     this.showAddNewEventButton,
-    this.parentEvent
+    this.parentEvent,
+    this.isGroupTitleShown = true
   });
 
   @override
@@ -37,18 +43,59 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
     }
 
     List<Widget> children = [];
+    bool firstVisibleGroupTitleRendered = false; // Flag to track the first visible title
+
     for (var group in widget.eventGroups) {
       var timeLineItems = group.events.toList();
+      EdgeInsets titlePadding;
+
+      bool isCurrentTitleVisible = widget.isGroupTitleShown;
+
+      if (isCurrentTitleVisible && !firstVisibleGroupTitleRendered) {
+        // Special padding for the first visible group title
+        titlePadding = const EdgeInsets.only(top: 0, bottom: 18);
+        firstVisibleGroupTitleRendered = true; // Mark as rendered
+      } else {
+        // Normal padding for subsequent or non-visible (though Visibility handles actual hide)
+        titlePadding = const EdgeInsets.only(top: 32, bottom: 18);
+      }
+
       children.add(
         Visibility(
-          visible: group.title.isNotEmpty,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(36, 18, 0, 12),
-            child: Text(
-              StylesConfig.formatTimelineSplit(group.title),
-              style: StylesConfig.timeLineSplitTextStyle(context),
-            ),
-          ),
+          visible: isCurrentTitleVisible, // Use the pre-calculated visibility
+          child: LayoutBuilder(builder: (context, constraints) {
+            double shift = 94.0; // Default to original value as a fallback.
+
+            String longestLeftText = group.events
+                .map((e) => e.data['leftText'] as String? ?? '')
+                .fold('', (prev, element) => element.length > prev.length ? element : prev);
+
+            if (longestLeftText.isNotEmpty) {
+              final style = StylesConfig.timeLineSmallTextStyle.copyWith(
+                color: ThemeConfig.timelineTextColor(context),
+              );
+              final textPainter = TextPainter(
+                text: TextSpan(text: longestLeftText, style: style),
+                maxLines: 1,
+                textDirection: Directionality.of(context),
+              )..layout(minWidth: 0, maxWidth: double.infinity);
+
+              const double rightPadding = 8.0; // from EdgeInsets.all(8.0) in oppositeContentsBuilder
+              shift = textPainter.width + rightPadding;
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: constraints.maxWidth * (widget.nodePosition ?? 0.24) - shift,
+                top: titlePadding.top,
+                bottom: titlePadding.bottom,
+              ),
+              child: Text(
+                StylesConfig.formatTimelineSplit(group.title),
+                style: StylesConfig.timeLineSplitTextStyle(context),
+              ),
+            );
+          }),
         ),
       );
       children.add(createTimeline(timeLineItems));
@@ -117,15 +164,40 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
         },
         contentsBuilder: (_, index) {
           final event = events[index];
+          TextStyle eventTitleStyle = StylesConfig.timeLineSmallTextStyle;
+          if (event.isCancelled == true) {
+            eventTitleStyle = eventTitleStyle.copyWith(
+              decoration: TextDecoration.lineThrough,
+              color: ThemeConfig.grey600(context),
+            );
+          }
           return TextButton(
-            onPressed: () => widget.onEventPressed?.call(event.id),
+            onPressed: widget.onEventPressed == null && !event.isActivity ? null : () {
+              if (event.isActivity) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return DetailDialog(
+                      title: "${event.title} ${event.durationTimeString()}",
+                      customContentWidget: activityContent(event),
+                    );
+                  },
+                );
+              } else {
+                widget.onEventPressed?.call(event.id);
+              }
+            },
             style: TextButton.styleFrom(
+              disabledForegroundColor: ThemeConfig.blackColor(context),
               foregroundColor: ThemeConfig.timelineTextColor(context),
               alignment: Alignment.centerLeft,
             ),
-            child: Text(
-              StylesConfig.formatTimelineRightText(event.data["rightText"]),
-              style: StylesConfig.timeLineSmallTextStyle,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 6),
+              child: Text(
+                StylesConfig.formatTimelineRightText(event.data["rightText"]),
+                style: eventTitleStyle,
+              ),
             ),
           );
         },
@@ -155,6 +227,31 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           return const SolidLineConnector();
         },
       ),
+    );
+  }
+
+  Widget activityContent(TimeBlockItem event) {
+    return Column(
+      children: [
+        if (event.haveChildren())
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: ScheduleTimeline(
+              eventGroups: TimeBlockHelper.splitTimeBlockByPlace(event.children!),
+              onEventPressed: widget.onEventPressed,
+              showAddNewEventButton: () {return ((widget.showAddNewEventButton?.call() ?? false) && !event.isActivity);},
+              onAddNewEvent: widget.onAddNewEvent,
+              parentEvent: event,
+              nodePosition: StylesConfig.scheduleTimelineNodePosition,
+              isGroupTitleShown: false,
+            ),
+          ),
+        if (!HtmlHelper.isHtmlEmptyOrNull(event.description))
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: HtmlView(html: event.description ?? "", isSelectable: true),
+          ),
+      ],
     );
   }
 }

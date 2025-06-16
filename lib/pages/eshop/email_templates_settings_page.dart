@@ -78,7 +78,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
 
     try {
       await DbEmailTemplates.sendCustomEmail(widget.template, subsMap,
-          RightsService.currentUser!.email!);
+          RightsService.currentUser()!.email!);
       ToastHelper.Show(context, "Test email sent successfully.".tr());
     } catch (e) {
       ToastHelper.Show(context, "Failed to send test email.".tr());
@@ -103,7 +103,6 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
             return SelectableText(
               "{{${sub.code}}}: ${sub.description}",
               style: const TextStyle(fontSize: 14),
-              maxLines: 1,
             );
           }
           return const SizedBox();
