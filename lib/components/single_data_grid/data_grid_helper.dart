@@ -432,7 +432,7 @@ class DataGridHelper
     return const TrinaGridLocaleText();
   }
 
-  static textTransform(String? value, List<String> allValues, String Function(String?) transform) {
+  static String textTransform(String? value, List<String> allValues, String Function(String?) transform) {
     if(!allValues.contains(value))
     {
       return "???";
