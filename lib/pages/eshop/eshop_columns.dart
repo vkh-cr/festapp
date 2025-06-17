@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/tb.dart';
@@ -212,7 +213,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Ticket Symbol".tr(),
+        title: FeaturesStrings.itemSymbol,
         field: TbEshop.tickets.ticket_symbol,
         type: TrinaColumnType.text(),
         width: 120,

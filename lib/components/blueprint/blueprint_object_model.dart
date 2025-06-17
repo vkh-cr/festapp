@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
@@ -39,7 +40,7 @@ class BlueprintObjectModel {
     return "Stůl ${group?.title}, Sedadlo $title";
   }
 
-  toShortString() {
+  String toShortString() {
     return "${group?.title ?? ""}${title ?? ""}";
   }
 
@@ -134,7 +135,7 @@ class BlueprintObjectModel {
         // Add ticket note if available
         var ticketNoteString = ticket.note != null && ticket.note!.isNotEmpty ? "\n${ticket.note}" : "";
 
-        return "${product?.title} ${title ?? ""}\n${"Ticket".tr()} ${ticket.ticketSymbol}$ticketNoteString\n$productsString$orderString";
+        return "${product?.title} ${title ?? ""}\n${FeaturesStrings.itemSingular} ${ticket.ticketSymbol}$ticketNoteString\n$productsString$orderString";
       }
     }
 

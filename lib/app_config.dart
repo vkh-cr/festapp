@@ -20,6 +20,7 @@ class AppConfig {
   static const String? forceOccasionLink = null;
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
+  static const bool isAppSupported = true;
 
   static const String webLink = "https://app.absolventskyvelehrad.cz";
   static const String appStoreLink = "";
