@@ -53,15 +53,15 @@ class UserGroupInfoModel extends ITrinaRowModel {
               ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
               : null,
       description: json[Tb.user_group_info.description],
-      leader: json[Tb.user_info_public.table] != null
-              ? UserInfoModel.fromJson(json[Tb.user_info_public.table])
+      leader: json[Tb.user_info.table] != null
+              ? UserInfoModel.fromJson(json[Tb.user_info.table])
               : json[Tb.user_group_info.leader] != null && json[Tb.user_group_info.leader] is Map
                   ? UserInfoModel.fromJson(json[Tb.user_group_info.leader])
                   : null,
       participants: json.containsKey(Tb.user_groups.table)
           ? Set<UserInfoModel>.from(json[Tb.user_groups.table].map((e) =>
               UserInfoModel.fromJson(e[Tb.user_info.table] ??
-                  (e[Tb.user_info_public.table] ?? {}))))
+                  (e[Tb.user_info.table] ?? {}))))
           : json[participantsColumn] != null
               ? Set<UserInfoModel>.from(json[participantsColumn]
                   .map((p) => UserInfoModel.fromJson(p)))

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/features/ticket_feature.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
 import 'package:fstapp/data_models/form_option_product_model.dart';
@@ -189,8 +190,6 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
           (field) => field.fieldType == FormHelper.fieldTypeTicket,
     ) as TicketHolder;
 
-    String ticketOrRegistrationLabel = TicketFeature.getTicketOrRegistrationLabel();
-
     return Column(
       children: ticketHolder.tickets.asMap().entries.map((entry) {
         final ticketIndex = entry.key + 1;
@@ -200,8 +199,8 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
 
         ticketInfoRows.add(Text(
           ticketHolder.tickets.length > 1
-              ? "$ticketOrRegistrationLabel $ticketIndex"
-              : ticketOrRegistrationLabel,
+              ? "${FeaturesStrings.itemSingular} $ticketIndex"
+              : FeaturesStrings.itemSingular,
           style: StylesConfig.textStyleBig.copyWith(
             fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
             fontWeight: FontWeight.bold,

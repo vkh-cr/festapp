@@ -10,7 +10,7 @@ DECLARE
     forms_data JSONB;
 BEGIN
     -- Authorization check: Ensure the user has editor rights for the occasion.
-    IF (SELECT get_is_editor_view_on_occasion(p_occasion_id)) <> TRUE THEN
+    IF (SELECT get_is_editor_view_on_occasion(p_occasion_id)) <> TRUE AND (SELECT get_is_editor_order_view_on_occasion(p_occasion_id)) <> TRUE THEN
         RETURN jsonb_build_object('code', 403, 'message', 'User is not authorized to view this occasion''s data');
     END IF;
 
@@ -39,8 +39,15 @@ BEGIN
     ) AS order_info ON true
     WHERE ou.occasion = p_occasion_id;
 
-    -- 2. Get all forms associated with the occasion.
-    SELECT jsonb_agg(f.*)
+    -- 2. Get all forms associated with the occasion, selecting only the specified fields.
+    SELECT jsonb_agg(
+        jsonb_build_object(
+            'key', f.key,
+            'type', f.type,
+            'id', f.id,
+            'link', f.link
+        )
+    )
     INTO forms_data
     FROM public.forms f
     WHERE f.occasion = p_occasion_id;
