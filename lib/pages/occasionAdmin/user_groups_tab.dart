@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.gr.dart';
@@ -140,19 +142,21 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                       if (_allUsers.isEmpty) {
                         _allUsers = await DbUsers.getAllUsersBasics();
                       }
-                      DialogHelper.chooseUser(
+                      await DialogHelper.chooseUser(
                         context,
-                            (person) => setState(() {
-                          rendererContext.row
-                              .cells[UserGroupInfoModel.participantsColumn]
-                              ?.value
-                              .add(person);
-                          var cell = rendererContext.row
-                              .cells[UserGroupInfoModel.participantsColumn]!;
-                          rendererContext.stateManager.changeCellValue(
-                              cell, cell.value,
-                              force: true);
-                        }),
+                            (person) {
+                              var cell = rendererContext.row
+                                  .cells[UserGroupInfoModel.participantsColumn]!;
+                              var all = (rendererContext.row
+                                  .cells[UserGroupInfoModel.participantsColumn]
+                                  ?.value as Set<UserInfoModel>?);
+                              all?.add(person);
+
+                              rendererContext.stateManager.changeCellValue(
+                                      cell, all,
+                                      force: true);
+                              rendererContext.stateManager.notifyListeners();
+                        },
                         _allUsers,
                         "Add".tr(),
                       );
@@ -163,8 +167,10 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                     onPressed: () async {
                       var cell = rendererContext.row
                           .cells[UserGroupInfoModel.participantsColumn]!;
-                      rendererContext.stateManager
-                          .changeCellValue(cell, <UserInfoModel>{}, force: true);
+                      cell.value?.clear();
+
+                      rendererContext.row.setState(TrinaRowState.updated);
+                      rendererContext.stateManager.notifyListeners();
                     },
                     icon: const Icon(Icons.remove_circle),
                   ),
