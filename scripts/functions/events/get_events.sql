@@ -28,7 +28,9 @@ BEGIN
         'updated_at',           e.updated_at,
         'description',          CASE WHEN p_include_description THEN e.description ELSE NULL END,
         'type',                 e.type,
-        'data',                 e.data,
+        'data',                 (SELECT COALESCE(jsonb_object_agg(key, value), '{}'::jsonb)
+                                   FROM jsonb_each(e.data)
+                                  WHERE value <> 'false'::jsonb),
         'place',                e.place,
         'split_for_men_women',  NULLIF(e.split_for_men_women, FALSE),
         'is_group_event',       NULLIF(e.is_group_event, FALSE),
