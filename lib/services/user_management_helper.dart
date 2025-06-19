@@ -72,7 +72,7 @@ class UserManagementHelper{
             return;
           }
 
-          final Map<String, dynamic> resultMap = result as Map<String, dynamic>;
+          final Map<String, dynamic> resultMap = result['data'] as Map<String, dynamic>;
           final List<dynamic> insertedUsersRaw = resultMap['inserted'] ?? [];
           final List<dynamic> updatedUsersRaw = resultMap['updated'] ?? [];
 
