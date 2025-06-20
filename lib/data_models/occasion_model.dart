@@ -52,10 +52,10 @@ class OccasionModel {
           ? DateTime.parse(json[Tb.occasions.updated_at])
           : null,
       startTime: json[Tb.occasions.start_time] != null
-          ? DateTime.parse(json[Tb.occasions.start_time]).toOccasionTime(data?[Tb.occasions.data_timezone])
+          ? DateTime.parse(json[Tb.occasions.start_time]).toOccasionTime(data[Tb.occasions.data_timezone])
           : null,
       endTime: json[Tb.occasions.end_time] != null
-          ? DateTime.parse(json[Tb.occasions.end_time]).toOccasionTime(data?[Tb.occasions.data_timezone])
+          ? DateTime.parse(json[Tb.occasions.end_time]).toOccasionTime(data[Tb.occasions.data_timezone])
           : null,
       isOpen: json[Tb.occasions.is_open] ?? false,
       isHidden: json[Tb.occasions.is_hidden] ?? false,

@@ -21,6 +21,7 @@ class AppConfig {
   static const String? forceOccasionLink = null;
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
+  static const bool isAppSupported = true;
 
   static const String webLink = "https://clovekavira.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/cz/app/%C4%8Dlov%C4%9Bk-a-v%C3%ADra/id6471667352";
@@ -33,7 +34,7 @@ class AppConfig {
 
   static const int daySplitHour = 4;
 
-  static const bool isSplitByPlace = false;
+  static const bool areAllVolunteersApprovers = false;
 
   static bool isNotificationsCurrentlySupported() {
     if(kIsWeb) {

@@ -35,6 +35,7 @@ class CompanionsFeature extends Feature {
   }
 
   /// Builds the companions UI block.
+  @override
   Widget buildFormField(BuildContext context) {
     return TextFormField(
       initialValue: companionsMax?.toString(),

@@ -43,7 +43,7 @@ class EventModel extends ITrinaRowModel {
   bool? isGroupEvent = false;
   bool? isMyGroupEvent = false;
 
-  bool? isEventInMySchedule;
+  bool? isInMySchedule;
   int? occasionId;
   bool isCancelled;
 
@@ -54,7 +54,11 @@ class EventModel extends ITrinaRowModel {
     if(!canSave){
       return null;
     }
-    return isEventInMySchedule == false;
+    return isInMySchedule == false;
+  }
+
+  bool canSignIn() {
+    return isEventSupportingSignIn(this) && currentParticipants! < maxParticipants!;
   }
 
   DateTime startTime;
@@ -80,7 +84,7 @@ class EventModel extends ITrinaRowModel {
     this.currentUsersSaved,
     this.isSignedIn = false,
     this.isGroupEvent = false,
-    this.isEventInMySchedule,
+    this.isInMySchedule,
     this.occasionId,
     this.isCancelled = false,
   });
@@ -142,7 +146,7 @@ class EventModel extends ITrinaRowModel {
       splitForMenWomen: json.containsKey(splitForMenWomenColumn) ? json[splitForMenWomenColumn] : false,
       isSignedIn: json.containsKey(isSignedInColumn) ? json[isSignedInColumn] : false,
       isGroupEvent: json.containsKey(isGroupEventColumn) ? json[isGroupEventColumn] : false,
-      isEventInMySchedule: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
+      isInMySchedule: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
       childEventIds: childEventsIds,
       parentEventIds: parentEventsIds,
       eventRolesIds: eventRoles,
@@ -162,23 +166,7 @@ class EventModel extends ITrinaRowModel {
     if (isCancelled) {
       titleStr += " (${"Cancelled".tr()})";
     }
-    return (maxParticipants==null ? titleStr : "$titleStr (${currentParticipants??"-"}/$maxParticipants)");
-  }
-
-  void copyFromEvent(EventModel event)
-  {
-    startTime = event.startTime;
-    endTime = event.endTime;
-    title = event.title;
-    description = event.description;
-    maxParticipants = event.maxParticipants;
-    isGroupEvent = event.isGroupEvent;
-    childEventIds = event.childEventIds;
-    place = PlaceModel(id: event.place?.id, title: event.place?.title, description: null, type: null);
-    type = event.type;
-    occasionId = event.occasionId;
-    data = event.data;
-    isCancelled = event.isCancelled;
+    return (maxParticipants==null ? titleStr : "$titleStr (${currentParticipants??0}/$maxParticipants)");
   }
 
   static const String startDateColumn = "startDate";
@@ -351,7 +339,7 @@ class EventModel extends ITrinaRowModel {
       maxParticipantsColumn: maxParticipants,
       currentParticipantsColumn: currentParticipants,
       isSignedInColumn: isSignedIn,
-      isEventInMyProgramColumn: isEventInMySchedule,
+      isEventInMyProgramColumn: isInMySchedule,
       isGroupEventColumn: isGroupEvent,
       placesTable: place,
       Tb.events.type: type,

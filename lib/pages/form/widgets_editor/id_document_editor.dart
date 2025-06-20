@@ -8,14 +8,74 @@ class IdDocumentEditor {
 
   static Widget buildIdDocumentReadOnly(BuildContext context, FormFieldModel field) {
     final data = field.data ?? {};
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Configuration Data
     final bool showExpiry = data[IdDocumentFieldHolder.metaShowExpiryDate] as bool? ?? false;
-    final String expiryDateLabel = data[IdDocumentFieldHolder.metaExpiryDateLabel]?.toString() ?? _defaultExpiryDateLabelText;
+    final bool hasCustomLabel = data[IdDocumentFieldHolder.metaExpiryDateLabel]?.toString().trim().isNotEmpty == true;
+    final String expiryDateLabel = hasCustomLabel
+        ? data[IdDocumentFieldHolder.metaExpiryDateLabel]
+        : _defaultExpiryDateLabelText;
+
+    // Custom adaptive colors for a subtle look in both light and dark themes.
+    final Color fillColor = isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.035);
+    final Color borderColor = isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.08);
+    final Color contentColor = theme.colorScheme.onSurface.withOpacity(0.7);
+
+    // A helper widget to build the styled read-only text fields, avoiding code repetition.
+    Widget buildReadOnlyTextField(String label, IconData icon) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+        decoration: BoxDecoration(
+          color: fillColor,
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(color: borderColor, width: 1.0),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(color: contentColor),
+              overflow: TextOverflow.ellipsis,
+            ),
+            Icon(icon, size: 18, color: contentColor),
+          ],
+        ),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("${"Show Expiry Date".tr()}: ${showExpiry ? 'Yes'.tr() : 'No'.tr()}"),
-        if (showExpiry) Text("${"Expiry Date Label".tr()}: $expiryDateLabel"),
+        // --- VISUAL PREVIEW ---
+        buildReadOnlyTextField("ID Card / Passport Number".tr(), Icons.badge_outlined),
+        if (showExpiry) ...[
+          const SizedBox(height: 8),
+          buildReadOnlyTextField("Expiry Date".tr(), Icons.calendar_today),
+        ],
+
+        // --- CUSTOM LABEL DISPLAY ---
+        // The "Configuration" block is removed.
+        // We now only show the custom label itself, if it has been set.
+        if (showExpiry && hasCustomLabel)
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Text.rich(
+              TextSpan(
+                  children: [
+                    // Using the string from the editor part as requested for the label.
+                    TextSpan(text: "${"Expiry Date Label".tr()}: "),
+                    TextSpan(
+                      text: '"$expiryDateLabel"',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ]
+              ),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
       ],
     );
   }

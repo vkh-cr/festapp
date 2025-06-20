@@ -27,8 +27,8 @@ class RightsService{
 
   static List<int>? bankAccountAdmin() => occasionLinkModel?.bankAccountsAdmin;
 
-  static Future<bool> updateOccasionData([String? link]) async {
-    if (currentOccasionId() == null || link != currentLink) {
+  static Future<bool> updateOccasionData({String? link, bool force = false}) async {
+    if (currentOccasionId() == null || link != currentLink || force) {
       LinkModel model = LinkModel(occasionLink: link);
       var occasionLink = link ?? RouterService.currentOccasionLink;
       if (occasionLink.isEmpty) {
@@ -91,6 +91,10 @@ class RightsService{
 
   static bool isEditor() {
     return currentOccasionUser()?.isEditor??false;
+  }
+
+  static bool isOrderEditor() {
+    return currentOccasionUser()?.isEditorOrder??false;
   }
 
   static bool isUnitEditor() {

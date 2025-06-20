@@ -2,7 +2,7 @@ import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { formatCurrency } from "../_shared/utilities.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { qrcode } from "https://deno.land/x/qrcode/mod.ts";
-import { encode } "https://deno.land/std/encoding/base64.ts";
+import { encode } from "https://deno.land/std/encoding/base64.ts";
 import { createCanvas, loadImage } from "https://deno.land/x/canvas/mod.ts";
 import {
   getEmailTemplateAndWrapper,
@@ -86,7 +86,7 @@ function formatDatetime(datetime: string): string {
   }).format(new Date(datetime));
 }
 
-function generateFullOrder(orderData: any, tickets: any[]): string {
+function generateFullOrder(orderData: any, tickets: any[], occasionFeatures: any[]): string {
   const { name, surname, email, phone, note } = orderData;
 
   // Build personal info section
@@ -125,6 +125,9 @@ function generateFullOrder(orderData: any, tickets: any[]): string {
             </tr>`;
 
   let overallTotal = 0;
+  const ticketFeature = occasionFeatures?.find(f => f.code === "ticket");
+  const itemLabel = ticketFeature?.is_enabled ? "Vstupenka" : "Přihláška";
+
   const ticketsDetails = tickets.map((ticket) => {
     const ticketSymbol = ticket.ticket_symbol;
 
@@ -165,7 +168,7 @@ function generateFullOrder(orderData: any, tickets: any[]): string {
                 <table cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse;">
                   <tr>
                     <td style="padding-left:12px; padding-bottom:8px;">
-                      <strong>Vstupenka ${ticketSymbol}</strong>
+                      <strong>${itemLabel} ${ticketSymbol}</strong>
                     </td>
                   </tr>
                   ${productsRows}
@@ -242,7 +245,7 @@ async function handleSupabaseFunctionService(
               bytes[i] = binaryString.charCodeAt(i);
             }
             attachments.push({
-              filename: `agreement-${ticketOrder.order.id}.pdf`,
+              filename: `smlouva-${ticketOrder.order.payment_info.variable_symbol}.pdf`,
               content: bytes,
               contentType: attachmentData.contentType,
               encoding: "binary",
@@ -262,6 +265,26 @@ async function handleSupabaseFunctionService(
       }
     }
   }
+}
+
+// Formats an IBAN string by inserting spaces for readability, e.g., "CZ59 2010 0000 0020 0280 8176"
+function formatIBAN(iban: string | undefined | null): string {
+  if (!iban || typeof iban !== 'string' || iban.length < 4) {
+    // Return original value or empty string if it's not a valid string or too short
+    return iban || "";
+  }
+  // Takes the first 4 characters (e.g., "CZ59")
+  const firstPart = iban.substring(0, 4);
+  // Takes the rest of the IBAN string
+  const rest = iban.substring(4);
+
+  const chunks = [firstPart]; // Start with the first part
+  // Loop through the rest of the IBAN string and split it into 4-character chunks
+  for (let i = 0; i < rest.length; i += 4) {
+    chunks.push(rest.substring(i, i + 4));
+  }
+  // Join all chunks with a space
+  return chunks.join(" ");
 }
 
 Deno.serve(async (req) => {
@@ -312,19 +335,24 @@ Deno.serve(async (req) => {
         attachments,
       );
     } else {
+      // Check if the payment amount is greater than zero before generating the QR code
       const occasion = ticketOrder.order.occasion;
       const paymentInfo = ticketOrder.order.payment_info;
-      const qr = await generateQrCode(
-        paymentInfo,
-        ticketOrder.order.data,
-        occasion.occasion_title,
-      );
-      attachments.push({
-        filename: `qr-payment.${occasion.occasion_title}.png`,
-        content: qr,
-        contentType: "image/png",
-        encoding: "binary",
-      });
+      if (paymentInfo.amount > 0) {
+        const qr = await generateQrCode(
+          paymentInfo,
+          ticketOrder.order.data,
+          occasion.occasion_title,
+        );
+        attachments.push({
+          filename: `qr-payment.${occasion.occasion_title}.png`,
+          content: qr,
+          contentType: "image/png",
+          encoding: "binary",
+        });
+      } else {
+        console.log("Payment amount is zero or less, skipping QR code generation.");
+      }
     }
 
     const supabaseFunctionSvc = extServices?.find((s: any) => s.type === "SUPABASE_FUNCTION");
@@ -332,13 +360,8 @@ Deno.serve(async (req) => {
 
     const occasion = ticketOrder.order.occasion;
     const paymentInfo = ticketOrder.order.payment_info;
-    const { data: occasionData } = await supabaseAdmin
-      .from("occasions")
-      .select("organization,link")
-      .eq("id", occasion.id)
-      .single();
     const context = {
-      organization: occasionData.organization,
+      organization: occasion.organization,
       occasion: occasion.id,
     };
     const { template, wrapper } = await getEmailTemplateAndWrapper(
@@ -352,11 +375,13 @@ Deno.serve(async (req) => {
       currencyCode: paymentInfo.currency_code,
       amount: formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
       accountNumber: paymentInfo.account_number_human_readable,
+      iban: formatIBAN(paymentInfo.account_number),
       variableSymbol: paymentInfo.variable_symbol,
       deadline: formatDatetime(paymentInfo.deadline),
       fullOrder: generateFullOrder(
         ticketOrder.order.data,
         ticketOrder.order.data.tickets,
+        occasion.features,
       ),
     };
 
@@ -374,7 +399,7 @@ Deno.serve(async (req) => {
       from: _DEFAULT_EMAIL,
       to: ticketOrder.order.data.email,
       template: template.id,
-      organization: occasionData.organization,
+      organization: occasion.organization,
       occasion: occasion.id,
     });
 

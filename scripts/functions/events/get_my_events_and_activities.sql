@@ -8,6 +8,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
     current_user_id        UUID := auth.uid();
+    event_ids_to_use       BIGINT[];
     eventsData             JSONB;
     eventUsersData         JSONB;
     eventUsersSavedData    JSONB;
@@ -18,7 +19,49 @@ DECLARE
     assignmentEventsData   JSONB;
     assignmentPlacesData   JSONB;
 BEGIN
-    -- (a) Events related to the current user: signed up, saved, or via activity assignments
+    -- Select IDs of all events relevant to the user first
+    SELECT array_agg(e.id)
+    INTO event_ids_to_use
+    FROM public.events e
+    WHERE e.occasion   = p_occasion
+      AND e.is_hidden  = FALSE
+      AND (
+        EXISTS (
+          SELECT 1
+          FROM public.event_users eu
+          WHERE eu.event = e.id
+            AND eu."user" = current_user_id
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM public.event_users_saved eus
+          WHERE eus.event = e.id
+            AND eus."user" = current_user_id
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM public.activity_assignment_events aae
+          JOIN public.activity_assignments aa
+            ON aa.id = aae.assignment_id
+          JOIN public.activities a
+            ON a.id = aa.activity_id
+          WHERE aae.event_id = e.id
+            AND aa."user"    = current_user_id
+            AND a.occasion   = p_occasion
+        )
+        OR EXISTS (
+          SELECT 1
+            FROM public.activity_assignments aa
+            JOIN public.activity_assignment_places aap ON aa.id = aap.assignment_id
+            JOIN public.activities a ON a.id = aa.activity_id
+           WHERE aa."user" = current_user_id
+             AND a.occasion = p_occasion
+             AND aap.place_id = e.place
+             AND ( (aa.start_time <= e.start_time AND e.start_time < aa.end_time) OR (e.start_time <= aa.start_time AND aa.start_time < e.end_time) )
+        )
+      );
+
+    -- (a) Events related to the current user, using the pre-selected IDs
     SELECT jsonb_agg(jsonb_build_object(
         'id',                   e.id,
         'created_at',           e.created_at,
@@ -54,33 +97,7 @@ BEGIN
     ))
     INTO eventsData
     FROM public.events e
-    WHERE e.occasion   = p_occasion
-      AND e.is_hidden  = FALSE
-      AND (
-        EXISTS (
-          SELECT 1
-          FROM public.event_users eu
-          WHERE eu.event = e.id
-            AND eu."user" = current_user_id
-        )
-        OR EXISTS (
-          SELECT 1
-          FROM public.event_users_saved eus
-          WHERE eus.event = e.id
-            AND eus."user" = current_user_id
-        )
-        OR EXISTS (
-          SELECT 1
-          FROM public.activity_assignment_events aae
-          JOIN public.activity_assignments aa
-            ON aa.id = aae.assignment_id
-          JOIN public.activities a
-            ON a.id = aa.activity_id
-          WHERE aae.event_id = e.id
-            AND aa."user"    = current_user_id
-            AND a.occasion   = p_occasion
-        )
-      );
+    WHERE e.id = ANY(COALESCE(event_ids_to_use, '{}'));
 
     -- (b) Counts of users signed in for these events
     WITH user_counts AS (
@@ -112,28 +129,7 @@ BEGIN
     WITH place_ids AS (
       SELECT e.place AS place_id
       FROM public.events e
-      WHERE
-        e.occasion = p_occasion
-        AND e.is_hidden = FALSE
-        AND (
-          EXISTS (
-            SELECT 1 FROM public.event_users eu
-             WHERE eu.event = e.id AND eu."user" = current_user_id
-          )
-          OR EXISTS (
-            SELECT 1 FROM public.event_users_saved eus
-             WHERE eus.event = e.id AND eus."user" = current_user_id
-          )
-          OR EXISTS (
-            SELECT 1
-            FROM public.activity_assignment_events aae
-            JOIN public.activity_assignments aa ON aa.id = aae.assignment_id
-            JOIN public.activities a          ON a.id = aa.activity_id
-            WHERE aae.event_id = e.id
-              AND aa."user"    = current_user_id
-              AND a.occasion   = p_occasion
-          )
-        )
+      WHERE e.id = ANY(COALESCE(event_ids_to_use, '{}')) AND e.place IS NOT NULL
       UNION
       SELECT ap.place_id
       FROM public.activity_assignment_places ap
@@ -164,38 +160,13 @@ BEGIN
     ))
     INTO eventGroupsData
     FROM public.event_groups eg
-    JOIN public.events e1 ON eg.event_parent = e1.id -- Parent event
-    JOIN public.events e2 ON eg.event_child  = e2.id -- Child event
+    JOIN public.events e1 ON eg.event_parent = e1.id
+    JOIN public.events e2 ON eg.event_child  = e2.id
     WHERE e1.occasion   = p_occasion
       AND e1.is_hidden  = FALSE
       AND e2.occasion   = p_occasion
       AND e2.is_hidden  = FALSE
-      AND (
-        -- Condition for e1 to be a "user event"
-        (
-          EXISTS (SELECT 1 FROM public.event_users eu_pg WHERE eu_pg.event = e1.id AND eu_pg."user" = current_user_id)
-          OR EXISTS (SELECT 1 FROM public.event_users_saved eus_pg WHERE eus_pg.event = e1.id AND eus_pg."user" = current_user_id)
-          OR EXISTS (
-            SELECT 1
-            FROM public.activity_assignment_events aae_pg
-            JOIN public.activity_assignments aa_pg ON aa_pg.id = aae_pg.assignment_id
-            JOIN public.activities act_pg1 ON act_pg1.id = aa_pg.activity_id
-            WHERE aae_pg.event_id = e1.id AND aa_pg."user" = current_user_id AND act_pg1.occasion = p_occasion
-          )
-        )
-        OR
-        (
-          EXISTS (SELECT 1 FROM public.event_users eu_cg WHERE eu_cg.event = e2.id AND eu_cg."user" = current_user_id)
-          OR EXISTS (SELECT 1 FROM public.event_users_saved eus_cg WHERE eus_cg.event = e2.id AND eus_cg."user" = current_user_id)
-          OR EXISTS (
-            SELECT 1
-            FROM public.activity_assignment_events aae_cg
-            JOIN public.activity_assignments aa_cg ON aa_cg.id = aae_cg.assignment_id
-            JOIN public.activities act_pg2 ON act_pg2.id = aa_cg.activity_id
-            WHERE aae_cg.event_id = e2.id AND aa_cg."user" = current_user_id AND act_pg2.occasion = p_occasion
-          )
-        )
-      );
+      AND (e1.id = ANY(COALESCE(event_ids_to_use, '{}')) OR e2.id = ANY(COALESCE(event_ids_to_use, '{}')));
 
     -- (e) Activities the user is assigned to
     SELECT jsonb_agg(jsonb_build_object(

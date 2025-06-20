@@ -53,6 +53,7 @@ class WorkshopsFeature extends Feature {
   }
 
   /// Builds the form field for this feature in FeatureForm.
+  @override
   Widget buildFormField(BuildContext context) {
     return StatefulBuilder(
       builder: (ctx, setLocalState) {
