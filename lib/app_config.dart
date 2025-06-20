@@ -29,7 +29,7 @@ class AppConfig {
   static const String playStoreLaunchLink = "";
   static const String desktopAppLink = "";
   static bool isProLicense = false;
-  static const int imagesMaxWidth = 780;
+  static const int imagesMaxWidth = 980;
   static const int imagesMaxBytes = 800000;
 
   static const int daySplitHour = 4;
