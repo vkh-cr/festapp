@@ -646,6 +646,8 @@
     "labelScheduleType": "Schedule Type",
     "optionBasic": "basic",
     "optionAdvanced": "advanced",
+    "labelEnableChildren": "Enable Sub Schedule",
+    "subtitleEnableChildren": "Allows events to be added as part of a parent event.",
     "labelBreakDefinition": "Break Definition",
     "optionTime": "time",
     "optionPlace": "place",
