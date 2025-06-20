@@ -1,47 +1,19 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_3",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={
-la(d,e,f){return B.doz(d,e,f,f.i("C<0>"))},
-doz(d,e,f,g){var x=0,w=A.l(g),v,u=2,t=[],s,r,q,p,o,n
-var $async$la=A.h(function(h,i){if(h===1){t.push(i)
-x=u}while(true)switch(x){case 0:o=A.a([],f.i("u<0>"))
-u=4
-x=7
-return A.d(A.FO(d,null),$async$la)
-case 7:s=i
-if(s==null){v=o
-x=1
-break}r=y.i.a(C.aH.dd(0,s))
-J.alX(o,A.aU(J.bf(r,new B.bBd(e,f),y.b),!0,f))
-u=2
-x=6
-break
-case 4:u=3
-n=t.pop()
-q=A.ai(n)
-A.cN("Error in getAllOffline for table "+d+": "+A.n(q))
-x=6
-break
-case 3:x=2
-break
-case 6:v=o
-x=1
-break
-case 1:return A.j(v,w)
-case 2:return A.i(t.at(-1),w)}})
-return A.k($async$la,w)},
-bBd:function bBd(d,e){this.a=d
-this.b=e}}
-J=c[1]
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
+y6(d,e){return d.hA(y.b)}}
 A=c[0]
-C=c[2]
-B=a.updateHolder(c[146],B)
+B=a.updateHolder(c[114],B)
 var z=a.updateTypes([])
-B.bBd.prototype={
-$1(d){return this.a.$1(y.p.a(d))},
-$S(){return this.b.i("0(@)")}};(function inheritance(){var x=a.inherit
-x(B.bBd,A.ce)})()
-var y={i:A.E("C<@>"),p:A.E("A<f,@>"),b:A.E("@")}};
+A.ca(b.typeUniverse,JSON.parse('{"V3":{"by":[],"bq":[],"e":[]}}'))
+var y={b:A.E("V3")};(function lazyInitializers(){var x=a.lazyFinal
+x($,"dP2","Ox",()=>{var w=A.a([],A.E("u<h>"))
+w.push("home")
+w.push("news")
+w.push("map")
+w.push("more")
+w.push("user")
+return w})})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_3",e:"endPart",h:b})})($__dart_deferred_initializers__,"YIYarZx06TEp8zwwj5hIojR+L1I=");
+a.eventLog.push({p:"main.dart.js_3",e:"endPart",h:b})})($__dart_deferred_initializers__,"npnG8daiwbNP85kSWCJlh+Z08z4=");
