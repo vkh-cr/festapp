@@ -91,8 +91,10 @@ class ScheduleFeature extends Feature {
   static const String breakDefinitionPlace = "place";
 
   static const String metaEventTypes = "event_types";
+  static const String metaEnableChildren = "enable_children"; // New constant
 
   String? scheduleType;
+  bool enableChildren; // New property
   String breakDefinition;
   TimeOfDay afternoonBreakTime;
   TimeOfDay eveningBreakTime;
@@ -104,13 +106,14 @@ class ScheduleFeature extends Feature {
     super.title,
     super.description,
     this.scheduleType,
+    this.enableChildren = true,
     this.breakDefinition = breakDefinitionTime,
     TimeOfDay? afternoonBreakTime,
     TimeOfDay? eveningBreakTime,
-    List<EventType>? eventTypes, // Added to constructor
+    List<EventType>? eventTypes,
   })  : afternoonBreakTime = afternoonBreakTime ?? const TimeOfDay(hour: 12, minute: 0),
         eveningBreakTime = eveningBreakTime ?? const TimeOfDay(hour: 18, minute: 0),
-        eventTypes = eventTypes ?? []; // Initialize if null
+        eventTypes = eventTypes ?? [];
 
   factory ScheduleFeature.fromJson(Map<String, dynamic> json) {
     TimeOfDay timeFromString(String? timeString, TimeOfDay defaultTime) {
@@ -135,6 +138,7 @@ class ScheduleFeature extends Feature {
       title: json[FeatureConstants.metaTitle],
       description: json[FeatureConstants.metaDescription],
       scheduleType: json[metaScheduleType] ?? scheduleTypeAdvanced,
+      enableChildren: json[metaEnableChildren] ?? true,
       breakDefinition: json[metaBreakDefinition] ?? breakDefinitionTime,
       afternoonBreakTime: timeFromString(json[metaAfternoonBreak], const TimeOfDay(hour: 12, minute: 0)),
       eveningBreakTime: timeFromString(json[metaEveningBreak], const TimeOfDay(hour: 18, minute: 0)),
@@ -153,6 +157,7 @@ class ScheduleFeature extends Feature {
     final data = {
       FeatureConstants.metaCode: code,
       FeatureConstants.metaIsEnabled: isEnabled,
+      metaEnableChildren: enableChildren, // Serializing new property
       metaBreakDefinition: breakDefinition,
       metaEventTypes: eventTypes.map((type) => type.toJson()).toList(),
     };
@@ -185,12 +190,12 @@ class _ScheduleFeatureForm extends StatefulWidget {
 
 class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
   late String _scheduleType;
+  late bool _enableChildren;
   late String _breakDefinition;
   late TimeOfDay _afternoonBreakTime;
   late TimeOfDay _eveningBreakTime;
-  late List<EventType> _eventTypes; // State for managing event types
+  late List<EventType> _eventTypes;
 
-  // Available seed colors for dropdown
   final List<String> _seedColorOptions = ["seed1", "seed2", "seed3", "seed4", "custom"];
 
 
@@ -198,10 +203,10 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
   void initState() {
     super.initState();
     _scheduleType = widget.feature.scheduleType ?? ScheduleFeature.scheduleTypeBasic;
+    _enableChildren = widget.feature.enableChildren;
     _breakDefinition = widget.feature.breakDefinition;
     _afternoonBreakTime = widget.feature.afternoonBreakTime;
     _eveningBreakTime = widget.feature.eveningBreakTime;
-    // Deep copy event types for local editing
     _eventTypes = widget.feature.eventTypes.map((et) =>
         EventType(code: et.code, title: et.title, colorDefinition: et.colorDefinition)
     ).toList();
@@ -251,7 +256,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
     setState(() {
       _eventTypes.add(EventType(
           code: 'new_type_${_eventTypes.length + 1}',
-          title: FeaturesStrings.eventTypeDefaultTitle.tr(), // Use a default translated title
+          title: FeaturesStrings.eventTypeDefaultTitle.tr(),
           colorDefinition: 'seed1'));
     });
   }
@@ -262,7 +267,6 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
     });
   }
 
-  // This method updates the specific event type in the _eventTypes list
   void _updateEventType(int index, EventType updatedType) {
     if (index >= 0 && index < _eventTypes.length) {
       setState(() {
@@ -294,8 +298,22 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
             },
             onSaved: (val) {
               widget.feature.scheduleType = val;
-              _saveEventTypesToFeature(); // Save event types
+              _saveEventTypesToFeature();
             }
+        ),
+        const SizedBox(height: 8),
+        // New Switch for enabling children
+        SwitchListTile(
+          title: Text(FeaturesStrings.labelEnableChildren.tr()),
+          subtitle: Text(FeaturesStrings.subtitleEnableChildren.tr()),
+          value: _enableChildren,
+          onChanged: (bool value) {
+            setState(() {
+              _enableChildren = value;
+              widget.feature.enableChildren = value; // Directly update the feature object
+            });
+          },
+          contentPadding: EdgeInsets.zero, // Align with form fields
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
@@ -314,7 +332,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
             },
             onSaved: (val) {
               widget.feature.breakDefinition = val ?? ScheduleFeature.breakDefinitionTime;
-              _saveEventTypesToFeature(); // Save event types
+              _saveEventTypesToFeature();
             }
         ),
         if (_breakDefinition == ScheduleFeature.breakDefinitionTime) ...[
@@ -342,12 +360,11 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
           ),
         ],
         const SizedBox(height: 24),
-        // Event Types Management UI - Now Collapsible
         ExpansionTile(
           title: Text(FeaturesStrings.titleEventTypes.tr(), style: Theme.of(context).textTheme.titleLarge),
-          initiallyExpanded: false, // Collapsed on load
-          tilePadding: const EdgeInsets.symmetric(horizontal: 0.0), // Adjust padding if needed for alignment with other fields
-          childrenPadding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0), // Padding for the content inside
+          initiallyExpanded: false,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 0.0),
+          childrenPadding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
           children: <Widget>[
             if (_eventTypes.isEmpty)
               Padding(
@@ -362,9 +379,9 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
                 return _buildEventTypeFormItem(_eventTypes[index], index);
               },
             ),
-            const SizedBox(height: 8), // Spacing before the button
-            Align( // Align button if needed, e.g., to the right or center
-              alignment: Alignment.centerLeft, // Or Alignment.center, Alignment.centerRight
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.add_circle_outline),
                 onPressed: _addEventType,
@@ -390,7 +407,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
           labelText: label,
         ),
         child: Text(
-          time.format(context), // This automatically localizes time format.
+          time.format(context),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(height: 1.5),
         ),
       ),
@@ -398,17 +415,13 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
   }
 
   Widget _buildEventTypeFormItem(EventType eventType, int index) {
-    // Determine if the current color definition is a custom hex or one of the seeds
     bool isCustom = !_seedColorOptions.contains(eventType.colorDefinition) || eventType.colorDefinition.toLowerCase() == "custom";
     String currentDropdownValue = isCustom ? "custom" : eventType.colorDefinition;
 
-    // Controller for custom hex color input
     TextEditingController hexColorController = TextEditingController(
         text: isCustom && eventType.colorDefinition.toLowerCase() != "custom" ? eventType.colorDefinition : ""
     );
-    // Ensure cursor is at the end for better UX
     hexColorController.selection = TextSelection.fromPosition(TextPosition(offset: hexColorController.text.length));
-
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6.0),
@@ -451,11 +464,9 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
                       if (newValue != null) {
                         String newColorDef = newValue;
                         if (newValue == "custom") {
-                          // If switching to custom, use current hex field value or default to a visible color
                           newColorDef = hexColorController.text.isNotEmpty && hexColorController.text.startsWith("#")
                               ? hexColorController.text
-                              : "#A0A0A0"; // A default visible custom color
-                          // Update controller if it was empty
+                              : "#A0A0A0";
                           if(hexColorController.text.isEmpty || !hexColorController.text.startsWith("#")) {
                             hexColorController.text = newColorDef;
                           }
@@ -489,17 +500,13 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
                       filled: true
                   ),
                   onChanged: (value) {
-                    // No need to call _updateEventType on every char change for performance,
-                    // but ensure valid hex for preview.
-                    // Actual update can happen on field submission or focus loss for robustness.
-                    // For live preview, this is okay.
                     _updateEventType(index, EventType(code: eventType.code, title: eventType.title, colorDefinition: value.startsWith("#") ? value : "#$value"));
                   },
-                  onEditingComplete: () { // Update when user finishes editing
+                  onEditingComplete: () {
                     String finalHex = hexColorController.text;
                     if (!finalHex.startsWith("#")) finalHex = "#$finalHex";
                     _updateEventType(index, EventType(code: eventType.code, title: eventType.title, colorDefinition: finalHex));
-                    FocusScope.of(context).unfocus(); // Dismiss keyboard
+                    FocusScope.of(context).unfocus();
                   },
                 ),
               ),

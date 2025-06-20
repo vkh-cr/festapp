@@ -174,6 +174,15 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       }
     }
 
+    usedItems.sort((a, b) {
+      if (a.isCancelled && !b.isCancelled) {
+        return -1; // a comes first
+      } else if (!a.isCancelled && b.isCancelled) {
+        return 1; // b comes first
+      }
+      return 0; // Keep original order otherwise
+    });
+
     usedPlaces = <TimeBlockPlace>[];
     for(var item in widget.timetablePlaces) {
       if(usedItems.map((e) => e.timeBlockPlace?.id).contains(item.id)) {
