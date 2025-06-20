@@ -241,10 +241,10 @@ class UserManagementHelper{
     {
       throw Exception("Password has not been set.");
     }
-    var newId = await AuthService.unsafeChangeUserPassword(user, pw);
-    if(newId==null)
-    {
-      throw Exception("Changing of the password has failed.");
+    try{
+      await AuthService.unsafeChangeUserPassword(user, pw);
+    } catch (e){
+      ToastHelper.Show(context, e.toString());
     }
     return true;
   }
