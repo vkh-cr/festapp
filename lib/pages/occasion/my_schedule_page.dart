@@ -134,7 +134,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
       if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
     }
     for (var e in activities) {
-      if (e.id != null) _eventAndActivitiesDescriptions[e.id!.hashCode] = e.description;
+      _eventAndActivitiesDescriptions[e.id.hashCode] = e.description;
     }
 
     var actDots = ActivityDataHelper.activitiesToTimeBlocks(activities, offlineEvents);
@@ -271,14 +271,16 @@ class _MySchedulePageState extends State<MySchedulePage> {
             onPressed: () => RouterService.popOrHome(context),
           ),
         ),
-        body: Align(
-            alignment: Alignment.topCenter,
-            child:
-            _dots == null ?
-            const Center(child: CircularProgressIndicator()) :
-            ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-                child: body)));
+        body: SafeArea(
+          child: Align(
+              alignment: Alignment.topCenter,
+              child:
+              _dots == null ?
+              const Center(child: CircularProgressIndicator()) :
+              ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                  child: body)),
+        ));
   }
 
   final List<EventModel> _events = [];
