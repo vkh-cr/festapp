@@ -4,6 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/activities/activities_component_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/dialogs/detail_dialog.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
@@ -224,7 +226,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     final showInlineButtons = screenWidth >= _kMinWidthForInlineButtons;
     final hasDescription = !HtmlHelper.isHtmlEmptyOrNull(event.description);
     final hasPlace = event.timeBlockPlace?.title != null;
-    final isEditor = controller.showAddNewEventButton?.call() ?? false; // This might mean 'user can edit/manage ANY event' in this context
+    final isEditor = RightsService.isEditor();
     final haveChildren = event.haveChildren();
 
     final hasDetails = hasDescription || hasPlace || haveChildren;
@@ -273,7 +275,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
         : unselectedColor;
 
     Widget buildSharedContent() {
-      var eventGroups = TimeBlockHelper.splitTimeBlockByPlace(event.children!);
+      final eventGroups = haveChildren ? TimeBlockHelper.splitTimeBlockByPlace(event.children!) : <TimeBlockGroup>[];
 
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -382,13 +384,13 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
             ),
             const SizedBox(height: 8),
           ],
-          if (haveChildren)
+          if (haveChildren || (controller.showAddNewEventButton?.call() ?? false) && !isActivity)
             Padding(
               padding: const EdgeInsets.fromLTRB(0,0,0,24),
               child: ScheduleTimeline(
                 eventGroups: eventGroups,
                 onEventPressed: controller.onEventPressed,
-                showAddNewEventButton: () {return ((controller.showAddNewEventButton?.call() ?? false) && !isActivity);},
+                showAddNewEventButton: () => ((controller.showAddNewEventButton?.call() ?? false) && !isActivity),
                 onAddNewEvent: controller.onAddNewEvent,
                 parentEvent: event,
                 nodePosition: 0.35,

@@ -8,6 +8,10 @@ class FeaturesStrings {
   static String get optionBasic => 'FeatureSchedule.optionBasic'.tr();
   static String get optionAdvanced => 'FeatureSchedule.optionAdvanced'.tr();
 
+  // New strings for Enable Children
+  static String get labelEnableChildren => 'FeatureSchedule.labelEnableChildren'.tr();
+  static String get subtitleEnableChildren => 'FeatureSchedule.subtitleEnableChildren'.tr();
+
   static String get labelBreakDefinition => 'FeatureSchedule.labelBreakDefinition'.tr();
   static String get optionTime => 'FeatureSchedule.optionTime'.tr();
   static String get optionPlace => 'FeatureSchedule.optionPlace'.tr();

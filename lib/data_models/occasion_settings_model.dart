@@ -7,6 +7,7 @@ class OccasionSettingsModel {
   DateTime? eventStartTime;
   DateTime? eventEndTime;
   Map<String, dynamic>? services;
+  Map<String, dynamic>? data;
 
   // Game fields
   DateTime? gameStartTime;
@@ -14,6 +15,7 @@ class OccasionSettingsModel {
 
   // Features
   List<Feature>? features;
+
 
   // Visibility switch
   bool? isHidden;
@@ -27,6 +29,7 @@ class OccasionSettingsModel {
     this.gameStartTime,
     this.gameEndTime,
     this.features,
+    this.data
   });
 
   static OccasionSettingsModel fromJson(Map<String, dynamic> json) {
@@ -59,6 +62,7 @@ class OccasionSettingsModel {
           : null,
       services: servicesPart,
       features: featuresPart?.map((f) => Feature.fromJson(f)).toList(),
+      data: dataPart
     );
   }
 
