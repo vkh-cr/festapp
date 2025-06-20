@@ -138,11 +138,13 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
                 await RouterService.navigate(context, LoginPage.ROUTE);
                 await loadData();
               } else {
-                DbNews.countNewMessages().then((count) {
-                  if (mounted) {
-                    setState(() => _messageCount = count);
-                  }
-                });
+                if(AuthService.isLoggedIn()){
+                  DbNews.countNewMessages().then((count) {
+                    if (mounted) {
+                      setState(() => _messageCount = count);
+                    }
+                  });
+                }
                 tabsRouter.setActiveIndex(index);
               }
             },
