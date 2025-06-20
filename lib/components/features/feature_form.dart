@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart';
 
-import 'companion_feature.dart';
 import 'feature.dart';
 import 'feature_metadata.dart';
-import 'form_feature.dart';
-import 'map_feature.dart';
-import 'schedule_feature.dart';
-import 'ticket_feature.dart';
-import 'workshop_feature.dart';
 
 class FeatureForm extends StatefulWidget {
   final Feature feature;
@@ -32,9 +26,10 @@ class _FeatureFormState extends State<FeatureForm> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: ThemeConfig.whiteColor(context),
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0.0),
+      elevation: 0, // Set elevation to 0 to rely on color for separation
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -80,31 +75,8 @@ class _FeatureFormState extends State<FeatureForm> {
 
   /// Builds additional fields based on the feature type.
   List<Widget> _buildFeatureFields(BuildContext context) {
-    List<Widget> fields = [];
-
-    if (widget.feature is TicketFeature) {
-      fields.add((widget.feature as TicketFeature).buildFormField(context));
-    } else if (widget.feature is CompanionsFeature) {
-      fields.add((widget.feature as CompanionsFeature).buildFormField(context));
-    } else if (widget.feature is FormFeature) {
-      fields.add((widget.feature as FormFeature).buildFormField(context));
-    } else if (widget.feature is MapFeature) {
-      final mapFeature = widget.feature as MapFeature;
-      fields.add(
-        mapFeature.buildFormField(context),
-      );
-    } else if (widget.feature is WorkshopsFeature) {
-      final workshopsFeature = widget.feature as WorkshopsFeature;
-      fields.add(
-        workshopsFeature.buildFormField(context),
-      );
-    } else if (widget.feature is ScheduleFeature) {
-      final sched = widget.feature as ScheduleFeature;
-      fields.add(
-        sched.buildFormField(context),
-      );
-    }
-
-    return fields;
+    return [
+      widget.feature.buildFormField(context),
+    ];
   }
 }

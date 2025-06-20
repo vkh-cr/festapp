@@ -1,5 +1,4 @@
 // ticket_feature.dart
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/data_services/db_images.dart';
@@ -7,6 +6,7 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/widgets/image_area.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
+import 'feature_service.dart';
 
 /// Feature for tickets with extra UI color fields.
 class TicketFeature extends Feature {
@@ -51,6 +51,7 @@ class TicketFeature extends Feature {
   }
 
   /// Builds the ticket UI block.
+  @override
   Widget buildFormField(BuildContext context) {
     return StatefulBuilder(builder: (ctx, setLocal) {
       final lightCtrl = TextEditingController(text: ticketLightColor ?? 'FFFFFF');

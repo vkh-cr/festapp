@@ -1,7 +1,9 @@
 // schedule_helper.dart
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/tb.dart';
@@ -15,7 +17,6 @@ enum TimeBlockType {
   signedIn,    // user is signed in
   isFull,      // event full
   canSignIn,   // can sign in
-  activity,   // can sign in
 }
 
 /// Represents an optional place or "track" for splitting.
@@ -59,6 +60,8 @@ class TimeBlockItem {
   final int maxParticipants;
   final String? imageUrl;
   final bool isCancelled;
+  final bool isActivity;
+  final bool isInMySchedule;
   /// Nested child time blocks
   List<TimeBlockItem>? children;
 
@@ -77,7 +80,9 @@ class TimeBlockItem {
     this.maxParticipants = 0,
     this.children,
     this.imageUrl,
-    this.isCancelled = false, // Added default
+    this.isCancelled = false,
+    this.isActivity = false,
+    this.isInMySchedule = false
   });
 
   /// Duration of the block.
@@ -91,16 +96,16 @@ class TimeBlockItem {
   }
 
   bool isSignedIn() => timeBlockType == TimeBlockType.signedIn;
-  bool isInMySchedule() => timeBlockType == TimeBlockType.saved;
   bool haveChildren() => children?.isNotEmpty ?? false;
   bool isSupportingSignIn() => !isCancelled && maxParticipants > 0;
+  bool canSignIn() => isSupportingSignIn() && maxParticipants > participants;
   bool canSaveToMySchedule () => (!isSupportingSignIn()) && (!haveChildren());
 
   String durationTimeString() => "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
 
   @override
   String toString() {
-    String titleStr = title ?? "";
+    String titleStr = title;
     if (isCancelled) {
       titleStr += " (${"Cancelled".tr()})";
     }
@@ -108,7 +113,7 @@ class TimeBlockItem {
   }
 
   /// Factory from EventModel for schedule timeline (new usage).
-  factory TimeBlockItem.fromEventModelTimeline(EventModel model) {
+  factory TimeBlockItem.fromEventModelBasicTimeline(EventModel model) {
     return TimeBlockItem(
       id: model.id!,
       startTime: model.startTime,
@@ -143,7 +148,8 @@ class TimeBlockItem {
       children: model.childEvents.map((c) => TimeBlockItem.fromEventModelAsChild(c))
           .toList(),
       imageUrl:  model.data?[Tb.events.dataHeaderImage],
-      isCancelled: model.isCancelled, // Added
+      isCancelled: model.isCancelled,
+      isInMySchedule: model.isInMySchedule ?? false, // Added
     );
   }
 
@@ -158,7 +164,9 @@ class TimeBlockItem {
         "leftText": model.durationTimeString(),
         "rightText": model.toString()
       },
-      timeBlockPlace: null,
+      timeBlockPlace: model.place != null && model.place!.id != null
+          ? TimeBlockPlace.fromPlaceModel(model.place!)
+          : null,
       isCancelled: model.isCancelled, // Added
     );
   }
@@ -184,7 +192,7 @@ class TimeBlockHelper {
   static TimeBlockType getTimeBlockTypeFromModel(EventModel model) {
     if (model.isSignedIn!) {
       return TimeBlockType.signedIn;
-    } else if (model.isEventInMySchedule == true && !EventModel.isEventSupportingSignIn(model)) {
+    } else if (model.isInMySchedule == true && !EventModel.isEventSupportingSignIn(model)) {
       return TimeBlockType.saved;
     } else if (model.isGroupEvent!) {
       if (model.isMyGroupEvent!) {
@@ -202,25 +210,63 @@ class TimeBlockHelper {
     return TimeBlockType.noAction;
   }
 
+  static List<TimeBlockGroup> groupEventsByFeatureSettings(Iterable<TimeBlockItem> events) {
+    final feature = FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
+    if (feature is ScheduleFeature) {
+      if (feature.breakDefinition == ScheduleFeature.breakDefinitionPlace) {
+        return TimeBlockHelper.splitTimeBlockByPlace(events);
+      }
+      // Default to time-based
+      return TimeBlockHelper.splitTimeBlocksByTimeOfDay(
+        events,
+        afternoonStartTime: feature.afternoonBreakTime,
+        eveningStartTime: feature.eveningBreakTime,
+      );
+    }
+    // Fallback to original hardcoded behavior
+    return TimeBlockHelper.splitTimeBlocksByTimeOfDay(events);
+  }
+
   static List<TimeBlockGroup> splitTimeBlockByPlace(
       Iterable<TimeBlockItem> events) {
-    Map<int?, List<TimeBlockItem>> grouped = {};
+    Map<int?, List<TimeBlockItem>> groupedByPlaceId = {};
     for (var event in events) {
-      grouped.putIfAbsent(event.timeBlockPlace?.id, () => []).add(event);
+      groupedByPlaceId.putIfAbsent(event.timeBlockPlace?.id, () => []).add(event);
     }
-    var groups = grouped.entries.map((entry) {
+
+    List<TimeBlockGroup> allGroups = groupedByPlaceId.entries.map((entry) {
+      // For entries where key is null (no place), place will be null.
+      // For other entries, place will be derived from the first event in that group.
       var place = entry.value.first.timeBlockPlace;
       return TimeBlockGroup(
-        title: place?.title ?? '',
+        title: place?.title ?? "---",
         events: entry.value,
       );
     }).toList();
-    groups.sort((a, b) {
-      var oa = a.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
-      var ob = b.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
+
+    // Separate the group with no specific place
+    final noPlaceGroup = allGroups.firstWhereOrNull(
+            (group) => group.events.isNotEmpty && group.events.first.timeBlockPlace == null
+    );
+
+    // Get groups that have a specific place and sort them
+    List<TimeBlockGroup> placedGroups = allGroups.where(
+            (group) => group.events.isNotEmpty && group.events.first.timeBlockPlace != null
+    ).toList();
+
+    placedGroups.sort((a, b) {
+      // Since these are placedGroups, timeBlockPlace is guaranteed to be non-null.
+      var oa = a.events.first.timeBlockPlace!.order ?? double.maxFinite.toInt();
+      var ob = b.events.first.timeBlockPlace!.order ?? double.maxFinite.toInt();
       return oa.compareTo(ob);
     });
-    return groups;
+
+    // Add the no-place group at the end, if it exists
+    if (noPlaceGroup != null) {
+      placedGroups.add(noPlaceGroup);
+    }
+
+    return placedGroups;
   }
 
   static List<TimeBlockGroup> splitTimeBlocksByDay(
@@ -235,16 +281,6 @@ class TimeBlockHelper {
     return map.entries.map((en) {
       return TimeBlockGroup(title: en.key, events: en.value);
     }).toList();
-  }
-
-  static List<TimeBlockGroup> splitTimeBlocks(
-      Iterable<TimeBlockItem> events) {
-    if (AppConfig.isSplitByPlace) {
-      return splitTimeBlockByPlace(
-          events.where((e) => e.timeBlockPlace != null));
-    } else {
-      return splitTimeBlocksByTimeOfDay(events);
-    }
   }
 
   static List<TimeBlockGroup> splitTimeBlocksByDate(
@@ -272,26 +308,57 @@ class TimeBlockHelper {
   }
 
   static List<TimeBlockGroup> splitTimeBlocksByTimeOfDay(
-      Iterable<TimeBlockItem> events) {
-    List<TimeBlockItem> morning =
-    events.where((e) => e.startTime.hour <= 12).toList();
-    List<TimeBlockItem> afternoon = events
-        .where((e) => e.startTime.hour > 12 && e.startTime.hour < 18)
+      Iterable<TimeBlockItem> events, {
+        TimeOfDay afternoonStartTime = const TimeOfDay(hour: 12, minute: 0),
+        TimeOfDay eveningStartTime = const TimeOfDay(hour: 18, minute: 0),
+      }) {
+    int timeOfDayToMinutes(TimeOfDay time) {
+      return time.hour * 60 + time.minute;
+    }
+
+    // Calculate the minute-based thresholds for each time period.
+    final int afternoonStartMinutes = timeOfDayToMinutes(afternoonStartTime);
+    final int eveningStartMinutes = timeOfDayToMinutes(eveningStartTime);
+
+    // Helper function to get the total minutes from midnight for an event's start time.
+    int eventTimeToMinutes(TimeBlockItem event) {
+      return event.startTime.hour * 60 + event.startTime.minute;
+    }
+
+    // Filter events into their respective time-of-day lists based on minute comparison.
+    final List<TimeBlockItem> morningEvents = events
+        .where((e) => eventTimeToMinutes(e) < afternoonStartMinutes)
         .toList();
-    List<TimeBlockItem> evening =
-    events.where((e) => e.startTime.hour >= 18).toList();
 
-    bool multi = [morning, afternoon, evening]
-        .where((g) => g.isNotEmpty)
-        .length >
-        1;
-    TimeBlockGroup make(String t, List<TimeBlockItem> ev) =>
-        TimeBlockGroup(title: multi ? t.tr() : '', events: ev);
+    final List<TimeBlockItem> afternoonEvents = events
+        .where((e) =>
+    eventTimeToMinutes(e) >= afternoonStartMinutes &&
+        eventTimeToMinutes(e) < eveningStartMinutes)
+        .toList();
 
+    final List<TimeBlockItem> eveningEvents = events
+        .where((e) => eventTimeToMinutes(e) >= eveningStartMinutes)
+        .toList();
+
+    // Determine if there are events in more than one time block.
+    // If events exist in only one block (e.g., only in the morning), titles are hidden.
+    final bool hasMultipleGroups = [morningEvents, afternoonEvents, eveningEvents]
+        .where((group) => group.isNotEmpty)
+        .length > 1;
+
+    // Helper to create a TimeBlockGroup. A title is only applied if there are multiple groups.
+    TimeBlockGroup createGroup(String title, List<TimeBlockItem> eventList) {
+      return TimeBlockGroup(
+        title: hasMultipleGroups ? title.tr() : '',
+        events: eventList,
+      );
+    }
+
+    // Construct the final list of groups, only including those that contain events.
     return [
-      make('', morning),
-      if (afternoon.isNotEmpty) make('Afternoon', afternoon),
-      if (evening.isNotEmpty) make('Evening', evening),
+      if (morningEvents.isNotEmpty) createGroup('', morningEvents),
+      if (afternoonEvents.isNotEmpty) createGroup('Afternoon', afternoonEvents),
+      if (eveningEvents.isNotEmpty) createGroup('Evening', eveningEvents),
     ];
   }
 

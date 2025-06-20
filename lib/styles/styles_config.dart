@@ -41,6 +41,8 @@ class StylesConfig {
 
   static TextStyle textStyleBig = TextStyle(fontWeight: FontWeight.w900, fontSize: 16);
 
+  static const double scheduleTimelineNodePosition = 0.35;
+
   // Button styles
   static ButtonStyle mainPageButtonStyle(BuildContext context) =>
       OutlinedButton.styleFrom(
