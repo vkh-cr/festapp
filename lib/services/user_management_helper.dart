@@ -1,40 +1,107 @@
+import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/features_strings.dart';
+import 'package:fstapp/components/features/import_feature.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_users.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/import_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 
 class UserManagementHelper{
   static Future<void> import(BuildContext context) async {
-    var file = await DialogHelper.dropFilesHere(context, "Import of users from CSV".tr(), "Ok".tr(), "Storno".tr());
-    if (file == null) return;
 
-    var users = await ImportHelper.getUsersFromFile(file);
-    var addOrUpdateUsers = users.where((element) => element[Tb.occasion_users.data_text4]?.toLowerCase() != "storno");
-    var deleteUsers = users.where((element) => element[Tb.occasion_users.data_text4]?.toLowerCase() == "storno");
+    final importFeature = FeatureService.getFeatureDetails(FeatureConstants.import) as ImportFeature?;
+    if (importFeature == null || !importFeature.isEnabled) return;
 
-    var proceed = await DialogHelper.showConfirmationDialogAsync(
-      context,
-      "Importing users".tr(),
-      "${"Users".tr()} (${users.length}):\n${users.map((value) => value[Tb.occasion_users.data_email]).toList().join(",\n")}",
-      confirmButtonMessage: "Proceed".tr(),
+
+    var choice = await DialogHelper.showImportDialog(
+        context,
+        "Import".tr(),
+        showCsvImport: importFeature.importFromCsv,
+        showTicketImport: importFeature.importFromTickets
     );
 
-    if (!proceed) return;
+    if (choice == null) return;
 
-    var existingUsers = await DbUsers.getOccasionUsers();
-    var toBeCreated = _getUsersToBeCreated(users, existingUsers);
-    var toBeUpdated = _getUsersToBeUpdated(users, existingUsers);
-    var toBeDeleted = _getUsersToBeDeleted(deleteUsers, addOrUpdateUsers, existingUsers);
+    if (choice.fromFile != null)
+    {
+      var file = choice.fromFile!;
+      var users = await ImportHelper.getUsersFromFile(file);
+      var addOrUpdateUsers = users.where((element) => element[Tb.occasion_users.data_text4]?.toLowerCase() != "storno");
+      var deleteUsers = users.where((element) => element[Tb.occasion_users.data_text4]?.toLowerCase() == "storno");
 
-    await _handleCreateUsers(context, toBeCreated);
-    await _handleUpdateUsers(context, toBeUpdated, existingUsers);
-    await _handleDeleteUsers(context, toBeDeleted);
+      var proceed = await DialogHelper.showConfirmationDialogAsync(
+        context,
+        "Import users from CSV".tr(),
+        "${"Users".tr()} (${users.length}):\n${users.map((value) => value[Tb.occasion_users.data_email]).toList().join(",\n")}",
+        confirmButtonMessage: "Proceed".tr(),
+      );
+
+      if (!proceed) return;
+
+      var existingUsers = await DbUsers.getOccasionUsers();
+      var toBeCreated = _getUsersToBeCreated(users, existingUsers);
+      var toBeUpdated = _getUsersToBeUpdated(users, existingUsers);
+      var toBeDeleted = _getUsersToBeDeleted(deleteUsers, addOrUpdateUsers, existingUsers);
+
+      await _handleCreateUsers(context, toBeCreated);
+      await _handleUpdateUsers(context, toBeUpdated, existingUsers);
+      await _handleDeleteUsers(context, toBeDeleted);
+    }
+    else if(choice.fromTickets)
+    {
+      var confirm = await DialogHelper.showConfirmationDialogAsync(
+          context,
+          FeaturesStrings.importFromTicketsTitle,
+          FeaturesStrings.importFromTicketsConfirm
+      );
+
+      if(confirm) {
+        try {
+          var result = await DbUsers.importUsersFromTickets(RightsService.currentOccasionId()!);
+
+          if (result == null) {
+            ToastHelper.Show(context, "${FeaturesStrings.importFromTicketsError}: No response from server.");
+            return;
+          }
+
+          final Map<String, dynamic> resultMap = result['data'] as Map<String, dynamic>;
+          final List<dynamic> insertedUsersRaw = resultMap['inserted'] ?? [];
+          final List<dynamic> updatedUsersRaw = resultMap['updated'] ?? [];
+
+          final List<Map<String, dynamic>> insertedUsers = insertedUsersRaw.map((e) => e as Map<String, dynamic>).toList();
+          final List<Map<String, dynamic>> updatedUsers = updatedUsersRaw.map((e) => e as Map<String, dynamic>).toList();
+
+          final int insertedCount = insertedUsers.length;
+          final int updatedCount = updatedUsers.length;
+
+          final insertedEmails = insertedUsers.map((u) => "- ${u['email']}").join("\n");
+          final updatedEmails = updatedUsers.map((u) => "- ${u['email']}").join("\n");
+
+          String message = "${FeaturesStrings.importFromTicketsCompleted}\n\n"
+              "${FeaturesStrings.createdUsers} ($insertedCount):\n"
+              "${insertedUsers.isEmpty ? FeaturesStrings.none : insertedEmails}\n\n"
+              "${FeaturesStrings.updatedUsers} ($updatedCount):\n"
+              "${updatedUsers.isEmpty ? FeaturesStrings.none : updatedEmails}";
+
+          await DialogHelper.showConfirmationDialogAsync(
+            context,
+            FeaturesStrings.importResultsTitle,
+            message,
+            confirmButtonMessage: FeaturesStrings.ok,
+          );
+        } catch (e) {
+          ToastHelper.Show(context, "${FeaturesStrings.importFromTicketsError}: $e");
+        }
+      }
+    }
   }
 
 // Helper to get users to be created
@@ -181,5 +248,4 @@ class UserManagementHelper{
     }
     return true;
   }
-
 }

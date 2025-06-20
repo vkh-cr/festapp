@@ -20,6 +20,7 @@ class AppConfig {
   static const String? forceOccasionLink = null;
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = true;
+  static const bool isAppSupported = true;
 
   static const String webLink = "https://hvezdamorska.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/us/app/id6739646827";
