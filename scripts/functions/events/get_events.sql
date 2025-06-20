@@ -18,40 +18,39 @@ BEGIN
     -- grab current_user_id user after entering PL/pgSQL execution
     current_user_id := auth.uid();
 
-    -- (a) all non-hidden events, with per-user flags
-    SELECT jsonb_agg(jsonb_build_object(
+    -- (a) all non-hidden events, with per-user flags and conditional fields
+    SELECT jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
         'id',                   e.id,
-        'created_at',           e.created_at,
         'title',                e.title,
         'start_time',           e.start_time,
         'end_time',             e.end_time,
         'max_participants',     e.max_participants,
-        'type',                 e.type,
-        'data',                 e.data,
-        'description',          CASE WHEN p_include_description THEN e.description ELSE NULL END,
-        'place',                e.place,
-        'split_for_men_women',  e.split_for_men_women,
-        'is_group_event',       e.is_group_event,
         'updated_at',           e.updated_at,
-        'is_hidden',            e.is_hidden,
-        'occasion',             e.occasion,
-        'isSignedIn',           (current_user_id IS NOT NULL
+        'description',          CASE WHEN p_include_description THEN e.description ELSE NULL END,
+        'type',                 e.type,
+        'data',                 (SELECT COALESCE(jsonb_object_agg(key, value), '{}'::jsonb)
+                                   FROM jsonb_each(e.data)
+                                  WHERE value <> 'false'::jsonb),
+        'place',                e.place,
+        'split_for_men_women',  NULLIF(e.split_for_men_women, FALSE),
+        'is_group_event',       NULLIF(e.is_group_event, FALSE),
+        'isSignedIn',           NULLIF((current_user_id IS NOT NULL
                                    AND EXISTS (
                                      SELECT 1
                                        FROM public.event_users eu
                                       WHERE eu.event = e.id
                                         AND eu."user" = current_user_id
                                    )
-                                ),
-        'isEventInMyProgram',   (current_user_id IS NOT NULL
+                                ), FALSE),
+        'isEventInMyProgram',   NULLIF((current_user_id IS NOT NULL
                                    AND EXISTS (
                                      SELECT 1
                                        FROM public.event_users_saved eus
                                       WHERE eus.event = e.id
                                         AND eus."user" = current_user_id
                                    )
-                                )
-    ))
+                                ), FALSE)
+    )))
     INTO eventsData
     FROM public.events e
     WHERE e.occasion   = p_occasion
@@ -61,20 +60,13 @@ BEGIN
     SELECT jsonb_agg(jsonb_build_object(
         'id',           p.id,
         'order',        p."order",
-        'title',        p.title,
-        'description',  p.description,
-        'type',         p.type,
-        'created_at',   p.created_at,
-        'coordinates',  p.coordinates,
-        'is_hidden',    p.is_hidden,
-        'updated_at',   p.updated_at,
-        'occasion',     p.occasion
+        'title',        p.title
     ))
     INTO placesData
     FROM public.places p
     WHERE p.occasion = p_occasion;
 
-    -- (c) event_groups only for non-hidden events
+    -- (c) event_groups only for non-hidden events (unchanged)
     SELECT jsonb_agg(jsonb_build_object(
         'event_parent', eg.event_parent,
         'event_child',  eg.event_child
@@ -86,7 +78,7 @@ BEGIN
     WHERE e1.occasion   = p_occasion AND e1.is_hidden = FALSE
       AND e2.occasion   = p_occasion AND e2.is_hidden = FALSE;
 
-    -- (d) event_roles only on non-hidden events
+    -- (d) event_roles only on non-hidden events (unchanged)
     SELECT jsonb_agg(jsonb_build_object(
         'event', er.event,
         'role',  er.role
@@ -97,7 +89,7 @@ BEGIN
     WHERE e.occasion   = p_occasion
       AND e.is_hidden = FALSE;
 
-    -- (e) signed-in counts for non-hidden events
+    -- (e) signed-in counts for non-hidden events (unchanged)
     WITH user_counts AS (
       SELECT eu.event AS event, COUNT(*) AS cnt
       FROM public.event_users eu
@@ -113,7 +105,7 @@ BEGIN
     INTO eventUsersData
     FROM user_counts uc;
 
-    -- (f) saved-for-later counts for non-hidden events
+    -- (f) saved-for-later counts for non-hidden events (unchanged)
     WITH saved_counts AS (
       SELECT eus.event AS event, COUNT(*) AS cnt
       FROM public.event_users_saved eus
@@ -129,7 +121,7 @@ BEGIN
     INTO eventUsersSavedData
     FROM saved_counts sc;
 
-    -- (g) final assembly
+    -- (g) final assembly (unchanged)
     RETURN jsonb_build_object(
       'code', 200,
       'data', jsonb_build_object(

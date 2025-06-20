@@ -13,7 +13,7 @@ class TimeHelper {
     if (currentTime != null) {
       return currentTime!.toOccasionTime();
     }
-    return tz.TZDateTime.now(tz.local).native;
+    return tz.TZDateTime.now(tz.local);
   }
 
   static void setTimeZoneLocation([String? location]) {
