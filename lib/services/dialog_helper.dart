@@ -25,6 +25,13 @@ class ImportDialogChoice {
 
 class DialogHelper{
 
+  static Widget createDialogAction(String text, void Function() onPressed) {
+    return TextButton(
+      onPressed: onPressed,
+      child: Text(text),
+    );
+  }
+
   static Future<ImportDialogChoice?> showImportDialog(
       BuildContext context,
       String titleMessage,
