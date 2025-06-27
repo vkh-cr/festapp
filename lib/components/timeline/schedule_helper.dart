@@ -40,7 +40,7 @@ class TimeBlockPlace {
 class TimeBlockGroup {
   final String title;
   final DateTime? dateTime;
-  final List<TimeBlockItem> events;
+  List<TimeBlockItem> events;
 
   TimeBlockGroup({required this.title, required this.events, this.dateTime});
 }
@@ -264,6 +264,11 @@ class TimeBlockHelper {
     // Add the no-place group at the end, if it exists
     if (noPlaceGroup != null) {
       placedGroups.add(noPlaceGroup);
+    }
+
+    for (var g in placedGroups) {
+      g.events = g.events.sortedBy((element) => element.title)
+        .sortedBy((element) => element.startTime);
     }
 
     return placedGroups;
