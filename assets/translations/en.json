@@ -675,6 +675,7 @@
     "importFromTicketsTitle": "Import from tickets",
     "importFromTicketsCompleted": "Import from tickets completed.",
     "importResultsTitle": "Import Results",
+    "chooseSourcePrompt": "Please choose the import source.",
     "createdUsers": "Created users",
     "updatedUsers": "Updated users",
     "none": "None",
