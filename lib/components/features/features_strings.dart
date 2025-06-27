@@ -42,6 +42,7 @@ class FeaturesStrings {
   static String get importFromTicketsTitle => 'FeatureImport.importFromTicketsTitle'.tr();
   static String get importFromTicketsCompleted => 'FeatureImport.importFromTicketsCompleted'.tr();
   static String get importResultsTitle => 'FeatureImport.importResultsTitle'.tr();
+  static String get chooseSourcePrompt => 'FeatureImport.chooseSourcePrompt'.tr();
   static String get createdUsers => 'FeatureImport.createdUsers'.tr();
   static String get updatedUsers => 'FeatureImport.updatedUsers'.tr();
   static String get none => 'FeatureImport.none'.tr();
