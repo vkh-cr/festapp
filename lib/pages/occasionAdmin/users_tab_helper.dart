@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/import/import_dialog_helper.dart';
 import 'package:fstapp/components/single_data_grid/i_has_id.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -18,7 +19,7 @@ class UsersTabHelper {
   /// Calls the import routine and then reloads users via the provided callback.
   static Future<void> importUsers(
       BuildContext context, Future<void> Function() reloadUsers) async {
-    await UserManagementHelper.import(context);
+    await ImportDialogHelper.import(context);
     await reloadUsers();
   }
 
