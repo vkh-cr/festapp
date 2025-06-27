@@ -308,9 +308,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                       ).tr(),
                       onTap: () async {
                         Navigator.pop(context);
-                        var unit = RightsService.currentUnitUser()?.unit;
                         await AuthService.logout();
-                        await RouterService.goToUnit(context, unit);
                         widget.onSignInOut?.call();
                         if (mounted) setState(() {});
                       },

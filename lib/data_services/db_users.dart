@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
@@ -10,6 +11,7 @@ import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OccasionEditorData {
@@ -187,13 +189,17 @@ class DbUsers {
 
   static Future<void> updateOccasionUser(OccasionUserModel oum) async {
     await AuthService.ensureCanUpdateUsers(oum);
-    if (oum.user == null) {
-      oum.user = await unsafeCreateUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email], "", oum.data);
-    } else {
-      await _supabase.rpc("update_user",
-          params: {"oc": oum.occasion!, "usr": oum.user!, "data": oum.data!});
-      await addUserToOccasion(oum.user!, oum.occasion!);
+
+    final response = await _supabase.rpc("update_user",
+        params: {"input_data":{"occasion": oum.occasion!, "user": oum.user, "data": oum.data}});
+
+    var code = response['code'];
+    if(code != 200 && code != 201){
+      throw Exception(response['message']);
     }
+
+    oum.user ??= response['user'];
+    await addUserToOccasion(oum.user!, oum.occasion!);
 
     if(oum.user!=null){
       await _supabase.from(Tb.occasion_users.table).upsert(
