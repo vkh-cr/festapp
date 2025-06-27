@@ -675,6 +675,7 @@
     "importFromTicketsTitle": "Import ze vstupenek",
     "importFromTicketsCompleted": "Import ze vstupenek dokončen.",
     "importResultsTitle": "Výsledky importu",
+    "chooseSourcePrompt": "Vyberte prosím zdroj dat.",
     "createdUsers": "Vytvoření uživatelé",
     "updatedUsers": "Aktualizovaní uživatelé",
     "none": "Žádní",
