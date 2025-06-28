@@ -112,22 +112,20 @@ Deno.serve(async (req) => {
 
     // Fetch tickets only if the ticket feature is enabled.
     let tickets: any[] = [];
-    if (isTicketEnabled) {
-      const { data: fetchedTickets, error: ticketsError } = await supabaseAdmin.rpc("get_tickets_with_details", { order_id: orderId });
-      if (ticketsError || !fetchedTickets) {
-        console.error("Error fetching tickets:", ticketsError);
-        return new Response(JSON.stringify({ error: "Error fetching tickets" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 500,
-        });
-      }
-      tickets = fetchedTickets.filter((t: any) => t.state !== "storno");
-      if (!tickets.length) {
-        return new Response(JSON.stringify({ error: "No valid tickets" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        });
-      }
+    const { data: fetchedTickets, error: ticketsError } = await supabaseAdmin.rpc("get_tickets_with_details", { order_id: orderId });
+    if (ticketsError || !fetchedTickets) {
+            console.error("Error fetching tickets:", ticketsError);
+            return new Response(JSON.stringify({ error: "Error fetching tickets" }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 500,
+            });
+        }
+        tickets = fetchedTickets.filter((t: any) => t.state !== "storno");
+        if (!tickets.length) {
+            return new Response(JSON.stringify({ error: "No valid tickets" }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 400,
+            });
     }
 
     // Get email template and wrapper via RPC.
