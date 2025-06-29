@@ -61,8 +61,15 @@ class DbOrders {
     return true;
   }
 
-  static Future<ReservationsBundle> getAllOrdersBundle(String formLink) async {
-    final response = await _supabase.rpc('get_reservations', params: {'occasion_link': formLink});
+  static Future<ReservationsBundle> getAllOrdersBundle({String? occasionLink, String? formLink}) async {
+    assert(occasionLink != null || formLink != null, 'Either occasionLink or formLink must be provided.');
+
+    final params = {
+      'p_occasion_link': occasionLink,
+      'p_form_link': formLink,
+    };
+
+    final response = await _supabase.rpc('get_reservations', params: params);
 
     if (response["code"] != 200) {
       throw Exception("${response['code']}: ${response['message']}");
@@ -70,23 +77,20 @@ class DbOrders {
 
     final json = response["data"];
 
-    // Parse the individual pieces from JSON.
     final spots = GetOrdersHelper.parseSpots(json);
     final products = GetOrdersHelper.parseProducts(json);
-    final productTypes = GetOrdersHelper.parseProductTypes(json); // New parsing for product types.
+    final productTypes = GetOrdersHelper.parseProductTypes(json);
     final tickets = GetOrdersHelper.parseTickets(json);
     final orders = GetOrdersHelper.parseOrders(json)!;
     final payments = GetOrdersHelper.parsePaymentInfo(json);
     final forms = GetOrdersHelper.parseForms(json);
     final orderProductTickets = GetOrdersHelper.parseOrderProductTickets(json);
 
-    // Precompute maps for lookup.
     final ticketMap = { for (var t in tickets!) t.id: t };
     final productMap = { for (var p in products!) p.id: p };
     final paymentMap = { for (var p in payments!) p.id: p };
     final spotByOptId = { for (var s in spots!) s.orderProductTicket: s };
 
-    // Build maps to link orders, tickets and order-product-ticket entries.
     final Map<int, List<OrderProductTicketModel>> orderToOpt = {};
     final Map<int, List<OrderProductTicketModel>> ticketToOpt = {};
     for (var opt in orderProductTickets!) {
@@ -94,7 +98,6 @@ class DbOrders {
       ticketToOpt.putIfAbsent(opt.ticketId!, () => []).add(opt);
     }
 
-    // Process orders.
     for (var order in orders) {
       final orderOpts = orderToOpt[order.id] ?? [];
       final ticketIds = orderOpts.map((opt) => opt.ticketId).toSet();
@@ -102,7 +105,6 @@ class DbOrders {
       order.relatedTickets = relatedTickets;
       order.form = forms?.firstWhereOrNull((f) => f.key == order.formKey);
 
-      // Process tickets attached to the order.
       for (var ticket in relatedTickets) {
         final ticketOpts = ticketToOpt[ticket.id] ?? [];
         for (var opt in ticketOpts) {
@@ -112,14 +114,12 @@ class DbOrders {
           }
         }
         final productIds = ticketOpts.map((opt) => opt.productId).toSet();
-        ticket.relatedProducts =
-            productIds.map((pid) => productMap[pid]).whereType<ProductModel>().toList();
+        ticket.relatedProducts = productIds.map((pid) => productMap[pid]).whereType<ProductModel>().toList();
         ticket.relatedOrder = order;
       }
 
       final ticketIdsForOrder = relatedTickets.map((t) => t.id).toSet();
-      order.relatedSpots =
-          spots.where((s) => ticketIdsForOrder.contains(s.orderProductTicket)).toList();
+      order.relatedSpots = spots.where((s) => ticketIdsForOrder.contains(s.orderProductTicket)).toList();
 
       final orderProductIds = <int>{};
       for (var ticket in relatedTickets) {
@@ -127,9 +127,7 @@ class DbOrders {
           orderProductIds.addAll(ticket.relatedProducts!.map((p) => p.id!));
         }
       }
-      order.relatedProducts =
-          products.where((p) => orderProductIds.contains(p.id)).toList();
-
+      order.relatedProducts = products.where((p) => orderProductIds.contains(p.id)).toList();
       order.paymentInfoModel = paymentMap[order.paymentInfo];
 
       if (order.isExpired()) {
@@ -142,7 +140,6 @@ class DbOrders {
 
     orders.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
 
-    // Return the bundled data
     return ReservationsBundle(orders: orders, forms: forms ?? []);
   }
 

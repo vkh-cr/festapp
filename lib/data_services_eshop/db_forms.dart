@@ -161,9 +161,15 @@ class DbForms {
 
     // Find and assign the selected bank account model to the form.
     if (form.bankAccount != null) {
-      form.bankAccount = availableBankAccounts.firstWhereOrNull(
-              (ba) => ba.id == form.bankAccount!.id
-      );
+      if(form.bankAccountId != null) {
+        form.bankAccount = availableBankAccounts.firstWhereOrNull(
+                (ba) => ba.id == form.bankAccountId
+        );
+      } else {
+        form.bankAccount = availableBankAccounts.firstWhereOrNull(
+                (ba) => ba.id == form.bankAccount!.id
+        );
+      }
     }
 
     // 3. Create and return the final bundle.
@@ -229,7 +235,7 @@ class DbForms {
 
   static Future<List<FormResponseModel>> getAllResponses(String formLink) async {
     var allFields = await getAllFormFields(formLink);
-    var ordersBundle = await DbOrders.getAllOrdersBundle(formLink);
+    var ordersBundle = await DbOrders.getAllOrdersBundle(formLink: formLink);
     var onlyFormOrders = ordersBundle.orders.where((o) => o.form?.link == formLink);
     return List<FormResponseModel>.from(
       onlyFormOrders.map((x) => FormResponseModel.fromOrder(x, allFields)),
