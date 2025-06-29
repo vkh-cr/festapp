@@ -3,10 +3,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/html_view.dart';
-import '../pages/form_editor_content.dart'; // Assuming this path or similar for kHiddenOpacity
+import '../pages/form_editor_content.dart';
 import '../widgets_view/form_helper.dart';
 import 'birth_date_editor.dart';
 import 'description_with_edit.dart';
@@ -14,15 +15,15 @@ import 'sex_editor.dart';
 import 'ticket_editor_widgets.dart';
 import 'select_one_editor.dart';
 import 'select_many_editor.dart';
-import 'id_document_editor.dart'; // Added import for the new editor
+import 'id_document_editor.dart';
 
 // Define kHiddenOpacity if it's not globally available from form_editor_content.dart
 const double kHiddenOpacity = 0.5;
 
 
 class FormFieldsGenerator extends StatefulWidget {
-  final FormModel form;
-  const FormFieldsGenerator({super.key, required this.form});
+  final FormEditBundle bundle;
+  const FormFieldsGenerator({super.key, required this.bundle});
 
   @override
   _FormFieldsGeneratorState createState() => _FormFieldsGeneratorState();
@@ -34,7 +35,8 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
   @override
   void initState() {
     super.initState();
-    final topLevelFields = widget.form.relatedFields
+    // Use the form from the bundle
+    final topLevelFields = widget.bundle.form.relatedFields
         ?.where((f) => f.isTicketField != true)
         .toList() ??
         [];
@@ -49,7 +51,8 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
   }
 
   Widget _buildFieldsList() {
-    final topLevelFields = widget.form.relatedFields!
+    // Use the form from the bundle
+    final topLevelFields = widget.bundle.form.relatedFields!
         .where((f) => f.isTicketField != true)
         .toList();
 
@@ -68,14 +71,16 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
           final item = topLevelFields.removeAt(oldIndex);
           topLevelFields.insert(newIndex, item);
 
+          // Use the form from the bundle
+          final form = widget.bundle.form;
           final updatedList = <FormFieldModel>[];
           updatedList.addAll(topLevelFields);
-          updatedList.addAll(widget.form.relatedFields!
+          updatedList.addAll(form.relatedFields!
               .where((f) => f.isTicketField == true));
-          widget.form.relatedFields = updatedList;
+          form.relatedFields = updatedList;
 
-          for (int i = 0; i < widget.form.relatedFields!.length; i++) {
-            widget.form.relatedFields![i].order = i;
+          for (int i = 0; i < form.relatedFields!.length; i++) {
+            form.relatedFields![i].order = i;
           }
 
           if (selectedIndex == oldIndex) {
@@ -96,7 +101,6 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
     final effectiveOpacity = (field.isHidden ?? false) ? kHiddenOpacity : 1.0;
 
     return GestureDetector(
-      // use ObjectKey for new fields (id==null) so each gets a unique key
       key: field.id != null ? ValueKey(field.id) : ObjectKey(field),
       onTap: () {
         if (!isSelected) {
@@ -194,8 +198,9 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   Widget _buildFieldItemSelected(
       FormFieldModel field, List<FormFieldModel> displayList, int index) {
-    final bool isTicket = field.type == FormHelper.fieldTypeTicket;
+    final isTicket = field.type == FormHelper.fieldTypeTicket;
     final String defaultDescription = "Description".tr();
+    final form = widget.bundle.form;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,7 +256,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                       field.description = newDescription;
                     });
                   },
-                  occasionId: widget.form.occasion!,
+                  occasionId: form.occasion!,
                 ),
                 const SizedBox(height: 16),
               ],
@@ -315,7 +320,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
               Text("Note".tr(),
                   style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(width: 4),
-              TicketEditorWidgets.buildTicketNoteCheckbox(context, widget.form,
+              TicketEditorWidgets.buildTicketNoteCheckbox(context, form,
                       () {
                     setState(() {});
                   }),
@@ -373,7 +378,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                 onPressed: () {
                   setState(() {
                     displayList.remove(field);
-                    widget.form.relatedFields!.remove(field);
+                    widget.bundle.form.relatedFields!.remove(field);
                     if (selectedIndex == index) {
                       selectedIndex = null;
                     }
@@ -388,35 +393,35 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   Widget _buildAnswerWidget(
       BuildContext context, FormFieldModel field, bool isEditable) {
-    // Ensure FormFieldModel.typeIdDocument is the correct constant you're using for this field type.
-    // It should match the one used in FormHolder.createFieldHolder.
-    // Example: static const String typeIdDocument = "ID_DOCUMENT"; // in FormFieldModel
+    final form = widget.bundle.form;
     switch (field.type) {
       case FormHelper.fieldTypeTicket:
         return isEditable
             ? TicketEditorWidgets.buildTicketEditor(
-            context, widget.form, field, () {
-          setState(() {});
-        })
+            context,
+            form,
+            // UPDATED: Pass the list of all product types from the bundle
+            widget.bundle.productTypes,
+                () { setState(() {}); })
             : TicketEditorWidgets.buildTicketEditorReadOnly(
-            context, widget.form, field);
+            context, form, field);
       case FormHelper.fieldTypeSelectOne:
         return isEditable
-            ? SelectOneEditor.buildSelectOneEditor(context, field, widget.form.occasion)
+            ? SelectOneEditor.buildSelectOneEditor(context, field, form.occasion)
             : SelectOneEditor.buildSelectOneReadOnly(context, field);
       case FormHelper.fieldTypeSelectMany:
         return isEditable
-            ? SelectManyEditor.buildSelectManyEditor(context, field, widget.form.occasion)
+            ? SelectManyEditor.buildSelectManyEditor(context, field, form.occasion)
             : SelectManyEditor.buildSelectManyReadOnly(context, field);
       case FormHelper.fieldTypeSex:
         return SexEditor.buildSexFieldReadOnly(context, field);
       case FormHelper.fieldTypeBirthDate:
         return isEditable
-            ? BirthDateEditor.buildBirthDateEditor(context, field, widget.form.occasion)
+            ? BirthDateEditor.buildBirthDateEditor(context, field, form.occasion)
             : BirthDateEditor.buildBirthDateReadOnly(context, field);
       case FormHelper.fieldTypeIdDocument:
         return isEditable
-            ? IdDocumentEditor.buildIdDocumentEditor(context, field, widget.form.occasion)
+            ? IdDocumentEditor.buildIdDocumentEditor(context, field, form.occasion)
             : IdDocumentEditor.buildIdDocumentReadOnly(context, field);
       default:
         if (isEditable) {
@@ -446,7 +451,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   List<String> get _availableFieldTypes {
     final existingTypes =
-        widget.form.relatedFields?.map((f) => f.type).toList() ?? [];
+        widget.bundle.form.relatedFields?.map((f) => f.type).toList() ?? [];
     return FormHelper.fieldTypeIcons.keys.where((type) {
       if ([
         FormHelper.fieldTypeText,

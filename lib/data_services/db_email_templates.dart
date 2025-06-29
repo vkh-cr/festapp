@@ -13,14 +13,6 @@ class DbEmailTemplates {
     );
   }
 
-  static Future<EmailTemplatesResponse> getAllEmailTemplatesViaFormLink(String link) async {
-    final response = await _supabase.rpc(
-        "get_all_email_templates_via_form_link",
-        params: {"form_link": link}
-    );
-    return EmailTemplatesResponse.fromJson(response);
-  }
-
   static Future<EmailTemplatesResponse> getAllEmailTemplatesViaOccasionLink(String link) async {
     final response = await _supabase.rpc(
         "get_all_email_templates_via_occasion_link",
