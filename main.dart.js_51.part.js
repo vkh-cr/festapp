@@ -15,11 +15,11 @@ A=a.updateHolder(c[108],A)
 E=c[137]
 A.axp.prototype={
 B(d){var y,x=null,w=B.C(d).ax.a===C.q||this.f===!0?"assets/icons/fstapplogo.dark.svg":"assets/icons/fstapplogo.svg",v=this.d,u=this.e
-if(C.d.lh(w.toLowerCase(),".svg"))y=new D.Mn(u,v,C.hs,new D.V_(w,x,x,x,x),x,!1,"Festapp logo",!1,x,x)
+if(C.d.lh(w.toLowerCase(),".svg"))y=new D.Mo(u,v,C.hs,new D.V_(w,x,x,x,x),x,!1,"Festapp logo",!1,x,x)
 else y=E.a3a(w,x,v,x,u)
-return B.hP(!1,x,!0,y,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x)}}
+return B.hQ(!1,x,!0,y,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x)}}
 var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
 y(A.axp,B.ad)})()
 B.ce(b.typeUniverse,JSON.parse('{"axp":{"ad":[],"e":[]}}'))};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_51",e:"endPart",h:b})})($__dart_deferred_initializers__,"fMcEYT997l4e3ll5CVD3GEjjik4=");
+a.eventLog.push({p:"main.dart.js_51",e:"endPart",h:b})})($__dart_deferred_initializers__,"XEGUdWQS1umiJPwjWl7J/gQbCb4=");
