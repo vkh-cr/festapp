@@ -40,7 +40,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
   Future<void> _initializeController() async {
     // Fetch the bundle once to determine which columns to show
-    final bundle = await DbOrders.getAllOrdersBundle(occasionLink!);
+    final bundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink!);
     if (!mounted) return;
 
     // Start with the base list of columns
@@ -74,7 +74,7 @@ class _OrdersTabState extends State<OrdersTab> {
     final newController = SingleDataGridController<OrderModel>(
       context: context,
       loadData: () async {
-        final newBundle = await DbOrders.getAllOrdersBundle(occasionLink!);
+        final newBundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink!);
         return newBundle.orders;
       },
       fromPlutoJson: OrderModel.fromPlutoJson,
@@ -169,7 +169,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
     List<OrderModel> selectedFull = [];
 
-    var ordersBundle = await DbOrders.getAllOrdersBundle(occasionLink!);
+    var ordersBundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink!);
     for (var s in selected) {
       var o = ordersBundle.orders.firstWhere((o) => o.id == s.id);
       selectedFull.add(o);
