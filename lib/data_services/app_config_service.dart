@@ -8,6 +8,7 @@ import 'package:fstapp/services/dialog_helper.dart';
 
 class AppConfigService {
   static String? versionRecommended;
+  static String? versionLink;
   static bool alreadyChecked = false;
   static bool isVersionChecking = false;
 
@@ -57,12 +58,6 @@ class AppConfigService {
   }
 
   static void _redirectToUpdate() {
-    if (PlatformHelper.isWeb) {
-      LaunchUrlService.launchURL(AppConfig.webLink, true);
-    } else if (PlatformHelper.isAndroid) {
-      LaunchUrlService.launchURL(AppConfig.playStoreLaunchLink, true);
-    } else if (PlatformHelper.isIOS) {
-      LaunchUrlService.launchURL(AppConfig.appStoreLink, true);
-    }
+    LaunchUrlService.launchURL(versionLink!, true);
   }
 }
