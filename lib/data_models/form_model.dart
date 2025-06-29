@@ -5,14 +5,14 @@ import 'package:fstapp/data_models_eshop/bank_account_model.dart';
 class FormModel {
   int? id;
   DateTime? createdAt;
+  String? title; // New field for the form's title.
   Map<String, dynamic>? data;
-  String? formKey;
+  String? key; // Renamed from formKey for consistency with DB schema.
   int? occasion;
   int? blueprint;
   String? type;
-  // Changed from int? to BankAccountModel? to support full JSON conversion.
   BankAccountModel? bankAccount;
-  int? deadlineDuration;
+  int? deadlineDurationSeconds; // Renamed from deadlineDuration for clarity.
   bool? isOpen;
   String? accountNumber;
   String? secret;
@@ -21,19 +21,21 @@ class FormModel {
   String? link;
   List<FormFieldModel>? relatedFields;
   List<BankAccountModel>? availableBankAccounts;
+  int? responseCount; // New field for the number of responses.
 
   static const String metaIsCardDesign = "is_card_design";
 
   FormModel({
     this.id,
     this.createdAt,
+    this.title,
     this.data,
-    this.formKey,
+    this.key,
     this.occasion,
     this.blueprint,
     this.type,
     this.bankAccount,
-    this.deadlineDuration,
+    this.deadlineDurationSeconds,
     this.isOpen,
     this.accountNumber,
     this.secret,
@@ -42,6 +44,7 @@ class FormModel {
     this.link,
     this.relatedFields,
     this.availableBankAccounts,
+    this.responseCount, // Added to constructor.
   });
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
@@ -50,16 +53,16 @@ class FormModel {
       createdAt: json[Tb.forms.created_at] != null
           ? DateTime.parse(json[Tb.forms.created_at])
           : null,
+      title: json[Tb.forms.title], // Added title parsing.
       data: json[Tb.forms.data],
-      formKey: json[Tb.forms.key],
+      key: json[Tb.forms.key], // Updated to use 'key'.
       occasion: json[Tb.forms.occasion],
       blueprint: json[Tb.forms.blueprint],
       type: json[Tb.forms.type],
-      // Use the BankAccountModel conversion if the JSON value is not null.
       bankAccount: json[Tb.forms.bank_account] != null
           ? BankAccountModel.fromJson(json[Tb.forms.bank_account])
           : null,
-      deadlineDuration: json[Tb.forms.deadline_duration_seconds],
+      deadlineDurationSeconds: json[Tb.forms.deadline_duration_seconds], // Updated property name.
       isOpen: json[Tb.forms.is_open],
       accountNumber: json['account_number'],
       secret: json['secret'],
@@ -76,19 +79,22 @@ class FormModel {
           .map((account) => BankAccountModel.fromJson(account))
           .toList()
           : null,
+      responseCount: json['response_count'], // Added response count parsing from JSON.
     );
   }
 
   Map<String, dynamic> toJson() => {
     Tb.forms.id: id,
     Tb.forms.created_at: createdAt?.toIso8601String(),
+    Tb.forms.title: title, // Added title.
     Tb.forms.data: data,
-    Tb.forms.key: formKey,
+    Tb.forms.key: key, // Updated to use 'key'.
     Tb.forms.occasion: occasion,
     Tb.forms.blueprint: blueprint,
     Tb.forms.type: type,
     Tb.forms.bank_account: bankAccount?.id,
-    Tb.forms.deadline_duration_seconds: deadlineDuration,
+    Tb.forms.deadline_duration_seconds:
+    deadlineDurationSeconds, // Updated property name.
     Tb.forms.is_open: isOpen,
     'account_number': accountNumber,
     'secret': secret,
@@ -96,18 +102,21 @@ class FormModel {
     Tb.forms.header_off: headerOff,
     Tb.forms.link: link,
     'fields': relatedFields,
+    // responseCount is a calculated field, so it's typically not included in toJson for updates/inserts.
   };
 
   Map<String, dynamic> toEditedJson() => {
     Tb.forms.id: id,
     Tb.forms.created_at: createdAt?.toIso8601String(),
+    Tb.forms.title: title, // Added title.
     Tb.forms.data: data,
-    Tb.forms.key: formKey,
+    Tb.forms.key: key, // Updated to use 'key'.
     Tb.forms.occasion: occasion,
     Tb.forms.blueprint: blueprint,
     Tb.forms.type: type,
     Tb.forms.bank_account: bankAccount?.id,
-    Tb.forms.deadline_duration_seconds: deadlineDuration,
+    Tb.forms.deadline_duration_seconds:
+    deadlineDurationSeconds, // Updated property name.
     Tb.forms.is_open: isOpen,
     Tb.forms.header: header,
     Tb.forms.header_off: headerOff,
@@ -116,17 +125,12 @@ class FormModel {
   };
 
   /// Returns a list of available supported currencies.
-  ///
-  /// If [bankAccount] is not null and contains supported currencies, its list is returned.
-  /// Otherwise, the method aggregates supported currencies from all [availableBankAccounts] (unique values only).
   List<String> getSupportedCurrencies() {
-    // Return supported currencies from the main bankAccount if available.
     if (bankAccount != null &&
         bankAccount!.supportedCurrencies != null &&
         bankAccount!.supportedCurrencies!.isNotEmpty) {
       return bankAccount!.supportedCurrencies!;
     } else if (availableBankAccounts != null) {
-      // Use a Set to accumulate unique currencies from available bank accounts.
       final currencySet = <String>{};
       for (var account in availableBankAccounts!) {
         if (account.supportedCurrencies != null) {
@@ -137,5 +141,10 @@ class FormModel {
     } else {
       return [];
     }
+  }
+
+  @override
+  String toString() {
+    return title ?? link ?? "---";
   }
 }

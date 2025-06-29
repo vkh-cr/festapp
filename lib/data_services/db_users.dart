@@ -47,7 +47,7 @@ class DbUsers {
       );
 
       // Create a lookup map for forms using their UUID key.
-      final formMap = { for (var form in forms) form.formKey : form };
+      final formMap = { for (var form in forms) form.key : form };
 
       // Link each user to their corresponding form object.
       for (final user in users) {

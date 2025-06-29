@@ -10,8 +10,6 @@ DECLARE
     updated_occ JSONB;
     v_feature_form_enabled BOOLEAN;
     v_unit BIGINT;
-    new_form_id BIGINT;
-    new_product_type_id BIGINT;
     old_unit BIGINT;
     final_unit BIGINT;
     new_blueprint_id BIGINT;
@@ -46,13 +44,6 @@ BEGIN
 
             PERFORM check_is_editor_on_unit(final_unit);
 
-            IF input_data->>'form_link' IS NOT NULL THEN
-                UPDATE public.forms
-                   SET link = input_data->>'form_link',
-                       updated_at = now
-                 WHERE occasion = occ_id;
-            END IF;
-
             UPDATE public.occasions
                SET updated_at = now,
                    title      = COALESCE(input_data->>'title', title),
@@ -75,24 +66,12 @@ BEGIN
             PERFORM check_is_editor_on_unit(final_unit);
 
             INSERT INTO public.occasions(
-                created_at,
-                updated_at,
-                title,
-                description,
-                link,
-                data,
-                is_hidden,
-                is_open,
-                start_time,
-                end_time,
-                organization,
-                services,
-                unit,
-                features
+                created_at, updated_at, title, description, link, data,
+                is_hidden, is_open, start_time, end_time, organization,
+                services, unit, features
             )
             VALUES(
-                now,
-                now,
+                now, now,
                 COALESCE(input_data->>'title', ''),
                 COALESCE(input_data->>'description', ''),
                 COALESCE(input_data->>'link', NULL),
@@ -121,127 +100,19 @@ BEGIN
               FROM jsonb_array_elements(input_data->'features') AS elem;
         END IF;
 
+        -- REFACTORED PART
         IF v_feature_form_enabled THEN
-            IF NOT EXISTS (
-                SELECT 1
-                  FROM public.forms
-                 WHERE occasion = occ_id
-            ) THEN
-                v_unit := (updated_occ->>'unit')::BIGINT;
-
-                INSERT INTO public.forms(
-                    link,
-                    occasion,
-                    created_at,
-                    updated_at,
-                    deadline_duration_seconds
-                )
-                VALUES (
-                    COALESCE(input_data->>'form_link', updated_occ->>'link'),
-                    occ_id,
-                    now,
-                    now,
-                    604800
-                )
-                RETURNING id INTO new_form_id;
-
-                INSERT INTO public.form_fields(
-                    title,
-                    description,
-                    data,
-                    type,
-                    is_required,
-                    form,
-                    is_hidden,
-                    "order"
-                )
-                VALUES (
-                    '',
-                    '',
-                    '{}'::jsonb,
-                    'email',
-                    true,
-                    new_form_id,
-                    false,
-                    0
-                );
-
-                INSERT INTO public.form_fields(
-                    title,
-                    description,
-                    data,
-                    type,
-                    is_required,
-                    form,
-                    is_hidden,
-                    "order"
-                )
-                VALUES (
-                    '',
-                    '',
-                    '{}'::jsonb,
-                    'ticket',
-                    true,
-                    new_form_id,
-                    false,
-                    1
-                );
-
-                IF NOT EXISTS (
-                    SELECT 1 FROM eshop.product_types
-                    WHERE occasion = occ_id AND type = 'spot'
-                ) THEN
-                    INSERT INTO eshop.product_types(
-                        title,
-                        description,
-                        type,
-                        data,
-                        occasion
-                    )
-                    VALUES (
-                        '',
-                        '',
-                        'spot',
-                        '{}'::jsonb,
-                        occ_id
-                    )
-                    RETURNING id INTO new_product_type_id;
-                ELSE
-                    SELECT id
-                      INTO new_product_type_id
-                      FROM eshop.product_types
-                     WHERE occasion = occ_id AND type = 'spot'
-                     LIMIT 1;
-                END IF;
-
-                INSERT INTO public.form_fields(
-                    title,
-                    description,
-                    data,
-                    type,
-                    is_required,
-                    form,
-                    is_hidden,
-                    "order",
-                    product_type,
-                    is_ticket_field
-                )
-                VALUES (
-                    'Spot',
-                    '',
-                    '{}'::jsonb,
-                    'product_type',
-                    false,
-                    new_form_id,
-                    false,
-                    2,
-                    new_product_type_id,
-                    true
-                );
+            IF NOT EXISTS (SELECT 1 FROM public.forms WHERE occasion = occ_id) THEN
+                -- Call the new create_form function instead of in-lining the logic
+                PERFORM create_form(JSONB_BUILD_OBJECT(
+                    'occasion_id', occ_id,
+                    'link', COALESCE(input_data->>'form_link', updated_occ->>'link'),
+                    'title', 'Registration'
+                ));
             END IF;
         END IF;
 
-        -- Blueprint feature check and creation
+        -- Blueprint feature check and creation (remains the same)
         v_feature_blueprint_enabled := false;
         IF input_data ? 'features' THEN
             SELECT bool_or(
@@ -260,20 +131,8 @@ BEGIN
              LIMIT 1;
             IF FOUND THEN
                 IF v_form_blueprint IS NULL THEN
-                    INSERT INTO eshop.blueprints(
-                        configuration,
-                        occasion,
-                        organization,
-                        created_at,
-                        updated_at
-                    )
-                    VALUES (
-                        '{"dimensions": {"width": 28, "height": 52}}'::jsonb,
-                        occ_id,
-                        COALESCE((updated_occ->>'organization')::BIGINT, 1),
-                        now,
-                        now
-                    )
+                    INSERT INTO eshop.blueprints(configuration, occasion, organization, created_at, updated_at)
+                    VALUES ('{"dimensions": {"width": 28, "height": 52}}'::jsonb, occ_id, COALESCE((updated_occ->>'organization')::BIGINT, 1), now, now)
                     RETURNING id INTO new_blueprint_id;
 
                     UPDATE public.forms
@@ -282,64 +141,6 @@ BEGIN
                      WHERE id = v_form_id;
                 END IF;
             END IF;
-        END IF;
-
-        -- Ensure product_type of type "spot" exists and has at least one product
-        IF NOT EXISTS (
-            SELECT 1 FROM eshop.product_types
-             WHERE occasion = occ_id AND type = 'spot'
-        ) THEN
-            INSERT INTO eshop.product_types(
-                title,
-                description,
-                type,
-                data,
-                occasion
-            )
-            VALUES (
-                '',
-                '',
-                'spot',
-                '{}'::jsonb,
-                occ_id
-            )
-            RETURNING id INTO new_product_type_id;
-        ELSE
-            SELECT id
-              INTO new_product_type_id
-              FROM eshop.product_types
-             WHERE occasion = occ_id AND type = 'spot'
-             LIMIT 1;
-        END IF;
-
-        IF NOT EXISTS (
-            SELECT 1 FROM eshop.products
-             WHERE occasion = occ_id AND product_type = new_product_type_id
-        ) THEN
-            INSERT INTO eshop.products(
-                title,
-                description,
-                price,
-                data,
-                product_type,
-                occasion,
-                is_hidden,
-                currency_code,
-                title_short,
-                "order"
-            )
-            VALUES (
-                'Variant 1',
-                '',
-                100,
-                '{}'::jsonb,
-                new_product_type_id,
-                occ_id,
-                false,
-                'CZK',
-                '',
-                0
-            );
         END IF;
 
         result := JSONB_BUILD_OBJECT(
