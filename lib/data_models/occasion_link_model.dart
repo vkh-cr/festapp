@@ -14,6 +14,7 @@ class OccasionLinkModel {
   List<int>? bankAccountsAdmin;
   bool? isAdmin = false;
   String? versionRecommended;
+  String? versionLink;
   OrganizationModel? organization;
 
   bool isAvailable() => code == 200;
@@ -35,6 +36,7 @@ class OccasionLinkModel {
       unit: json["unit"] != null ? UnitModel.fromJson(json["unit"]) : null,
       isAdmin: json["is_admin"],
       versionRecommended: json["version_recommended"],
+      versionLink: json["version_link"],
       organization: organization, // ← mapped
     );
   }
@@ -49,6 +51,7 @@ class OccasionLinkModel {
     this.unit,
     this.isAdmin,
     this.versionRecommended,
+    this.versionLink,
     this.organization,
   });
 }

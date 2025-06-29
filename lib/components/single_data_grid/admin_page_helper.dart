@@ -7,7 +7,7 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/eshop/blueprint_editor_tab.dart';
 import 'package:fstapp/pages/eshop/email_templates_tab.dart';
-import 'package:fstapp/pages/form/pages/form_tab.dart';
+import 'package:fstapp/pages/form/pages/forms_tab.dart';
 import 'package:fstapp/pages/eshop/orders_tab.dart';
 import 'package:fstapp/pages/eshop/report_tab.dart';
 import 'package:fstapp/pages/eshop/tickets_tab.dart';
@@ -238,7 +238,7 @@ class AdminTabDefinition {
         icon: Icons.gamepad,
         widget: GameTab()),
     form: AdminTabDefinition(
-        label: "Form".tr(), icon: Icons.list, widget: FormTab()),
+        label: FeaturesStrings.formsTitle, icon: Icons.list, widget: FormsTab()),
     blueprint: AdminTabDefinition(
         label: "Blueprint".tr(),
         icon: Icons.grid_on,

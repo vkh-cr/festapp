@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_router.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:auto_route/auto_route.dart';
@@ -12,19 +13,19 @@ class ReportTab extends StatefulWidget {
 
 class _ReportTabState extends State<ReportTab> {
   String? textReport;
-  String? formLink;
+  String? occasionLink;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.params.isNotEmpty) {
-      formLink = context.routeData.params.getString("formLink");
+    if (occasionLink == null && context.routeData.params.isNotEmpty) {
+      occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
     }
     loadData();
   }
 
   Future<void> loadData() async {
-    textReport = await DbEshop.getReportForOccasion(formLink!);
+    textReport = await DbEshop.getReportForOccasion(occasionLink!);
     setState(() {});
   }
 

@@ -154,7 +154,7 @@ class OccasionEditCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: ThemeConfig.greenColor(),
+                          color: ThemeConfig.greenColor(context),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Text(
