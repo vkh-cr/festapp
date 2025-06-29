@@ -10,6 +10,7 @@ class SeatWidgetHelper {
   /// Static method to create a seat widget with a given seat state and size.
   /// This allows external calls to render a seat without relying on the `SeatModel`.
   static Widget buildSeat({
+    required BuildContext context,
     required SeatState state,
     double size = 40.0,
   }) {
@@ -20,13 +21,13 @@ class SeatWidgetHelper {
         state == SeatState.available;
 
     return Container(
-      color: hasPadding ? Colors.black.withOpacity(0) : getSeatColor(SeatState.empty),
+      color: hasPadding ? Colors.black.withOpacity(0) : getSeatColor(context, SeatState.empty),
       height: size,
       width: size,
       child: Container(
         margin: EdgeInsets.all(state == SeatState.selected_by_me ? focusedPadding : (hasPadding ? padding : 0.0)),
         decoration: BoxDecoration(
-          color: getSeatColor(state),
+          color: getSeatColor(context, state),
           borderRadius: BorderRadius.circular(hasPadding ? padding : 0.0),
         ),
         child: state == SeatState.selected_by_me
@@ -43,12 +44,12 @@ class SeatWidgetHelper {
   }
 
   /// Helper method to get seat color based on its state.
-  static Color getSeatColor(SeatState state) {
+  static Color getSeatColor(BuildContext context, SeatState state) {
     switch (state) {
       case SeatState.available:
-        return ThemeConfig.greenColor();
+        return ThemeConfig.greenColor(context);
       case SeatState.selected_by_me:
-        return ThemeConfig.greenColor();
+        return ThemeConfig.greenColor(context);
       case SeatState.selected:
         return Colors.black26;
       case SeatState.black:

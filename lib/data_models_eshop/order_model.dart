@@ -201,7 +201,7 @@ class OrderModel extends ITrinaRowModel {
       TbEshop.orders.note_hidden: TrinaCell(value: noteHidden ?? ""),
       TbEshop.orders_history.table: TrinaCell(value: ""),
       TbEshop.transactions.table: TrinaCell(value: ""),
-      Tb.forms.table: TrinaCell(value: form?.link ?? ""),
+      Tb.forms.table: TrinaCell(value: form?.toString() ?? ""),
     });
   }
 

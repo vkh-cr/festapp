@@ -23,10 +23,6 @@ class AppConfig {
   static const bool isAppSupported = true;
 
   static const String webLink = "https://app.absolventskyvelehrad.cz";
-  static const String appStoreLink = "";
-  static const String playStoreLink = "";
-  static const String playStoreLaunchLink = "";
-  static const String desktopAppLink = "";
   static bool isProLicense = true;
   static const int imagesMaxWidth = 1100;
   static const int imagesMaxBytes = 800000;

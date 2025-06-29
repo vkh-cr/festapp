@@ -12,12 +12,12 @@ class DbEshop {
 
   /// Fetches transactions based on a form link using a Supabase Function.
   static Future<FunctionResponse> fetchTransactions(String formLink) async {
-    return await _supabase.functions.invoke("fetch-transactions", body: {"formLink": formLink});
+    return await _supabase.functions.invoke("fetch-transactions", body: {"occasionLink": formLink});
   }
 
   static Future<String> getReportForOccasion(String link) async {
     final response = await _supabase
-        .rpc('get_report_for_occasion_ws', params: {'form_link': link});
+        .rpc('get_report_ws', params: {'occasion_link': link});
 
     if(response["code"] == 200){
       return response["data"];
@@ -124,10 +124,10 @@ class DbEshop {
     return false;
   }
 
-  static Future<List<ProductModel>> getProductsAndTypesForOccasion(String formLink) async {
+  static Future<List<ProductModel>> getProductsAndTypesForOccasion(String occasionLink) async {
     final response = await _supabase.rpc(
-      'get_products_and_types_for_occasion',
-      params: {'form_link': formLink},
+      'get_products_and_types_for_edit',
+      params: {'occasion_link': occasionLink},
     );
     if (response != null) {
       final typesJson = (response['product_types'] as List<dynamic>?) ?? [];

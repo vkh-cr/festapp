@@ -50,6 +50,8 @@ import 'package:mbtiles/mbtiles.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart' as vmt;
 import 'package:vector_map_tiles_mbtiles/vector_map_tiles_mbtiles.dart' as vmtm;
 
+import 'event_page.dart';
+
 @RoutePage()
 class MapPage extends StatefulWidget {
   static const ROUTE = "map";
@@ -1165,7 +1167,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
             padding: const EdgeInsets.fromLTRB(0,0,0,24),
             child: ScheduleTimeline(
               eventGroups: TimeBlockHelper.splitTimeBlocksByDay(events, context),
-              onEventPressed: null,
+              onEventPressed: (int id) {
+                RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
+                    .then((_) => loadData());
+               },
               showAddNewEventButton: () => false,
               onAddNewEvent: null,
               nodePosition: 0.35,
