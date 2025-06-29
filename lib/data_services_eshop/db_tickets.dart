@@ -25,9 +25,9 @@ class DbTickets {
   }
 
   static Future<List<TicketModel>> getAllTickets(String formLink) async {
-    var orders = await DbOrders.getAllOrders(formLink);
+    var ordersBundle = await DbOrders.getAllOrdersBundle(formLink);
     List<TicketModel> toReturn = [];
-    for(var o in orders){
+    for(var o in ordersBundle.orders){
 
       for(TicketModel t in o.relatedTickets??[]){
         var tckst = o.data?[TbEshop.tickets.table];
@@ -129,9 +129,9 @@ class DbTickets {
     return ticket;
   }
 
-  static Future<void> updateScanCode(String formLink, String scannedCode) async {
+  static Future<void> updateScanCode(String occasionLink, String scannedCode) async {
     final response = await _supabase.rpc('update_scan_code', params: {
-      'form_link': formLink,
+      'occasion_link': occasionLink,
       'new_scan_code': scannedCode,
     });
 
@@ -149,9 +149,9 @@ class DbTickets {
     return response["code"] == 200;
   }
 
-  static Future<String?> getScanCode(String formLink) async {
+  static Future<String?> getScanCode(String occasionLink) async {
     final response = await _supabase.rpc('get_scan_code', params: {
-      'form_link': formLink,
+      'occasion_link': occasionLink,
     });
 
     if (response["code"] != 200) {

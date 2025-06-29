@@ -333,6 +333,7 @@ class FormsTb {
   String get created_at => "created_at";
   String get data => "data";
   String get key => "key";
+  String get title => "title";
   String get occasion => "occasion";
   String get blueprint => "blueprint";
   String get type => "type";
