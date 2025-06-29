@@ -245,7 +245,7 @@ class DbUsers {
   }
 
   static Future<void> deleteOccasionUser(String user, int occasion) async {
-    await _supabase.rpc("delete_occasion_user",
+    await _supabase.rpc("delete_occasion_user_ws",
         params:
         {
           "usr": user,

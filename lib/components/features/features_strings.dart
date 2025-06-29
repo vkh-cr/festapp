@@ -99,6 +99,8 @@ class FeaturesStrings {
   static String get chooseSourcePrompt => 'FeatureImport.chooseSourcePrompt'.tr();
   static String get createdUsers => 'FeatureImport.createdUsers'.tr();
   static String get updatedUsers => 'FeatureImport.updatedUsers'.tr();
+  static String get deletedUsers => 'FeatureImport.deletedUsers'.tr();
+
   static String get none => 'FeatureImport.none'.tr();
   static String get ok => 'FeatureImport.ok'.tr();
 

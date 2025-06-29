@@ -257,6 +257,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                             labelText: FeaturesStrings.labelDeadlineDays,
                             border: const OutlineInputBorder(),
                             helperText: FeaturesStrings.helperDeadlineDays,
+                            helperMaxLines: 5,
                           ),
                           keyboardType: TextInputType.number,
                           inputFormatters: [
