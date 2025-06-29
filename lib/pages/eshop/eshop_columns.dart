@@ -543,7 +543,7 @@ class EshopColumns {
         title: "Form".tr(),
         field: Tb.forms.table,
         type: TrinaColumnType.text(),
-        textAlign: TrinaColumnTextAlign.end,
+        textAlign: TrinaColumnTextAlign.start,
         width: 120,
       ),
     ],

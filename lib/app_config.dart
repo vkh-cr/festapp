@@ -24,10 +24,6 @@ class AppConfig {
   static const bool isAppSupported = false;
 
   static const String webLink = "https://vstupenka.online";
-  static const String appStoreLink = "";
-  static const String playStoreLink = "";
-  static const String playStoreLaunchLink = "";
-  static const String desktopAppLink = "";
   static bool isProLicense = false;
   static const int imagesMaxWidth = 980;
   static const int imagesMaxBytes = 800000;

@@ -1,4 +1,4 @@
-DROP FUNCTION delete_occasion_user(uuid,bigint)
+DROP FUNCTION delete_occasion_user(uuid,bigint);
 
 CREATE OR REPLACE FUNCTION public.delete_occasion_user(usr uuid, oc bigint)
 RETURNS void
