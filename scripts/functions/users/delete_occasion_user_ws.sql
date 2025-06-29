@@ -4,38 +4,47 @@ LANGUAGE plpgsql
 SECURITY INVOKER
 AS $$
 DECLARE
-    is_companion boolean;
+    has_permission boolean := false;
     is_manager boolean;
     is_admin boolean;
     target_user_exists boolean;
+    caller_uid uuid := auth.uid();
 BEGIN
-    -- Allow deletion if the caller is a companion of the user being deleted.
+    -- First, check for permission based on companionship.
     SELECT EXISTS (
         SELECT 1 FROM public.user_companions
-        WHERE "user" = auth.uid() AND companion = usr_to_delete
-    ) INTO is_companion;
+        WHERE "user" = caller_uid AND companion = usr_to_delete
+    ) INTO has_permission;
 
-    IF is_companion THEN
-        RETURN; -- Permission granted
-    END IF;
+    -- If the caller is not a companion, check for manager or admin permissions on the occasion.
+    IF NOT has_permission THEN
+        SELECT get_is_manager_on_occasion(occasion_id), get_is_admin_on_occasion(occasion_id)
+        INTO is_manager, is_admin;
 
-    -- Allow deletion if the caller is an admin or manager of the occasion.
-    SELECT get_is_manager_on_occasion(occasion_id), get_is_admin_on_occasion(occasion_id)
-    INTO is_manager, is_admin;
+        IF is_manager OR is_admin THEN
+            -- For a manager or admin, verify the user they are trying to delete
+            -- is actually a member of the occasion. This is an important security and sanity check.
+            SELECT get_exists_on_occasion_user(usr_to_delete, occasion_id)
+            INTO target_user_exists;
 
-    IF is_manager OR is_admin THEN
-        -- A manager/admin can only delete a user who is actually part of the occasion.
-        SELECT get_exists_on_occasion_user(usr_to_delete, occasion_id)
-        INTO target_user_exists;
+            IF NOT target_user_exists THEN
+                -- This is a specific failure case, so we raise the error immediately.
+                RAISE EXCEPTION 'Forbidden: The target user is not a member of this occasion.';
+            END IF;
 
-        IF NOT target_user_exists THEN
-            RAISE EXCEPTION 'Forbidden: The target user is not a member of this occasion.';
+            -- If the target user is a member, then permission is granted.
+            has_permission := true;
         END IF;
-
-        RETURN; -- Permission granted
     END IF;
 
-    -- If no checks passed, the user is not authorized.
-    RAISE EXCEPTION 'Forbidden: You do not have permission to delete this user from the occasion.';
+    -- After all checks, perform the action if permission was granted.
+    IF has_permission THEN
+        -- If any of the permission checks passed, call the actual deletion function.
+        -- We use PERFORM because we are not interested in the return value of the function.
+        PERFORM public.delete_occasion_user(usr_to_delete, occasion_id);
+    ELSE
+        -- If no permission checks passed, raise a general authorization error.
+        RAISE EXCEPTION 'Forbidden: You do not have permission to delete this user from the occasion.';
+    END IF;
 END;
 $$;

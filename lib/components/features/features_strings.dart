@@ -88,6 +88,7 @@ class FeaturesStrings {
   static String get noType => 'FeatureSchedule.noType'.tr();
 
   // Import Feature
+  static String get importFeatureDescription => 'FeatureImport.importFeatureDescription'.tr();
   static String get labelImportFromCsv => 'FeatureImport.labelImportFromCsv'.tr();
   static String get labelImportFromTickets => 'FeatureImport.labelImportFromTickets'.tr();
   static String get importFromTicketsSuccess => 'FeatureImport.importFromTicketsSuccess'.tr();
@@ -100,9 +101,7 @@ class FeaturesStrings {
   static String get createdUsers => 'FeatureImport.createdUsers'.tr();
   static String get updatedUsers => 'FeatureImport.updatedUsers'.tr();
   static String get deletedUsers => 'FeatureImport.deletedUsers'.tr();
-
   static String get none => 'FeatureImport.none'.tr();
-  static String get ok => 'FeatureImport.ok'.tr();
 
   // Orders Tab
   static String get cancel => 'FeatureOrders.cancel'.tr();
