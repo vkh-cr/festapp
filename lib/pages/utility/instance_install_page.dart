@@ -333,7 +333,7 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
   Widget _buildStatusIndicator() {
     if (_wasSuccess == null) return const SizedBox();
     return _wasSuccess == true
-        ? Icon(Icons.check_circle, color: ThemeConfig.greenColor())
+        ? Icon(Icons.check_circle, color: ThemeConfig.greenColor(context))
         : Icon(Icons.error, color: ThemeConfig.redColor(context));
   }
 

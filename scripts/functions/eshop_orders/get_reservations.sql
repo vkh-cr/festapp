@@ -1,5 +1,5 @@
-CREATE OR REPLACE FUNCTION get_orders(
-    form_link TEXT
+CREATE OR REPLACE FUNCTION get_reservations(
+    occasion_link TEXT
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -16,13 +16,13 @@ DECLARE
     paymentInfoData JSONB;
     formsData JSONB;
 BEGIN
-    -- Get the occasion_id based on the provided form_link
-    SELECT occasion
+    -- Get the occasion_id based on the provided occasion_link
+    SELECT id
     INTO occasion_id
-    FROM public.forms
-    WHERE link = form_link;
+    FROM public.occasions
+    WHERE link = occasion_link;
 
-    -- Check if form_link is valid
+    -- Check if occasion_link is valid
     IF occasion_id IS NULL THEN
         RETURN jsonb_build_object('code', 404, 'message', 'Form key does not exist or is not linked to an occasion');
     END IF;

@@ -1,11 +1,22 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/blueprint/get_orders_helper.dart';
+import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/order_product_ticket_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+class ReservationsBundle {
+  final List<OrderModel> orders;
+  final List<FormModel> forms;
+
+  ReservationsBundle({
+    required this.orders,
+    required this.forms,
+  });
+}
 
 class DbOrders {
   static final _supabase = Supabase.instance.client;
@@ -50,9 +61,13 @@ class DbOrders {
     return true;
   }
 
-  static Future<List<OrderModel>> getAllOrders(String formLink) async {
-    final response = await _supabase.rpc('get_orders', params: {'form_link': formLink});
-    if (response["code"] != 200) return [];
+  static Future<ReservationsBundle> getAllOrdersBundle(String formLink) async {
+    final response = await _supabase.rpc('get_reservations', params: {'occasion_link': formLink});
+
+    if (response["code"] != 200) {
+      throw Exception("${response['code']}: ${response['message']}");
+    }
+
     final json = response["data"];
 
     // Parse the individual pieces from JSON.
@@ -85,7 +100,7 @@ class DbOrders {
       final ticketIds = orderOpts.map((opt) => opt.ticketId).toSet();
       final relatedTickets = ticketIds.map((id) => ticketMap[id]).whereType<TicketModel>().toList();
       order.relatedTickets = relatedTickets;
-      order.form = forms?.firstWhereOrNull((f) => f.formKey == order.formKey);
+      order.form = forms?.firstWhereOrNull((f) => f.key == order.formKey);
 
       // Process tickets attached to the order.
       for (var ticket in relatedTickets) {
@@ -126,7 +141,9 @@ class DbOrders {
     }
 
     orders.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
-    return orders;
+
+    // Return the bundled data
+    return ReservationsBundle(orders: orders, forms: forms ?? []);
   }
 
 
@@ -167,7 +184,6 @@ class DbOrders {
     if (response["code"] != 200) {
       throw Exception("Failed to update order and tickets to 'paid'. Error: ${response['message']}");
     }
-
   }
 
   static Future<List<Map<String, dynamic>>> getOrderHistory(int orderId) async {

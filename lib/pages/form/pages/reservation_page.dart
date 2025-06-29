@@ -8,17 +8,17 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/user/login_page.dart';
 
 @RoutePage()
-class FormEditPage extends StatefulWidget {
-  static const ROUTE = "formEdit";
+class ReservationsPage extends StatefulWidget {
+  static const ROUTE = "reservations";
   String? formLink;
 
-  FormEditPage({super.key, @pathParam this.formLink});
+  ReservationsPage({super.key, @pathParam this.formLink});
 
   @override
-  _FormEditPageState createState() => _FormEditPageState();
+  _ReservationsPageState createState() => _ReservationsPageState();
 }
 
-class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderStateMixin {
+class _ReservationsPageState extends State<ReservationsPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   // List of active tabs by name

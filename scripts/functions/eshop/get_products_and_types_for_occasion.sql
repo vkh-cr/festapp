@@ -1,17 +1,22 @@
-CREATE OR REPLACE FUNCTION public.get_products_and_types_for_occasion(form_link text)
+CREATE OR REPLACE FUNCTION public.get_products_and_types_for_edit(occasion_link text)
 RETURNS json LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
   product_types json;
   products json;
   occ_id bigint;
 BEGIN
-  PERFORM check_is_editor_order_view_via_form_link(form_link);
-
-  SELECT f.occasion
+  -- Resolve occasion_id from the provided occasion_link
+  SELECT id
     INTO occ_id
-  FROM public.forms f
-  WHERE f.link = form_link;
+  FROM public.occasions
+  WHERE link = occasion_link;
 
+  -- If the occasion link is invalid, raise an exception.
+  IF occ_id IS NULL THEN
+    RAISE EXCEPTION 'Occasion not found for link: %', occasion_link;
+  END IF;
+
+-- Fetch all product types for the given occasion
   SELECT json_agg(
            json_build_object(
              'id', pt.id,
