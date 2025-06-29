@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/seat_reservation/widgets/seat_widget.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
@@ -32,7 +33,7 @@ class BlueprintTab extends StatefulWidget {
 class _BlueprintTabState extends State<BlueprintTab> {
   BlueprintModel? blueprint;
   BlueprintGroupModel? currentGroup;
-  String? formLink;
+  String? occasionLink;
 
   List<SeatModel> allBoxes = [];
   selectionMode currentSelectionMode = selectionMode.none;
@@ -42,28 +43,26 @@ class _BlueprintTabState extends State<BlueprintTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.params.isNotEmpty) {
-      formLink = context.routeData.params.getString("formLink");
+    if (occasionLink == null && context.routeData.params.isNotEmpty) {
+      occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
     }
     loadData();
   }
 
+  // ... (build methods and other logic remain the same)
   Widget _buildDesktopLayout() {
     return Row(
       children: [
-        // Left panel
         Container(
           width: 250,
           padding: const EdgeInsets.all(16.0),
           child: _buildLeftPanel(),
         ),
         const SizedBox(width: 16),
-        // Main content
         Expanded(
           child: _buildMainContent(),
         ),
         const SizedBox(width: 16),
-        // Right panel
         Container(
           width: 250,
           padding: const EdgeInsets.all(16.0),
@@ -79,18 +78,15 @@ class _BlueprintTabState extends State<BlueprintTab> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left panel
           Container(
             width: 250,
             padding: const EdgeInsets.all(16.0),
             child: _buildLeftPanel(),
           ),
-          // Main content
           SizedBox(
             width: 400,
             child: _buildMainContent(),
           ),
-          // Right panel
           Container(
             width: 250,
             padding: const EdgeInsets.all(16.0),
@@ -430,6 +426,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SeatWidgetHelper.buildSeat(
+                  context: context,
                   state: state,
                   size: SeatReservationWidget.boxSize.toDouble(),
                 ),
@@ -596,31 +593,25 @@ class _BlueprintTabState extends State<BlueprintTab> {
         _handleEmptyArea(model);
         break;
       default:
-      // Do nothing for other cases
         break;
     }
     setState(() {});
   }
 
-  /// Handle adding a black (table area) seat.
   void _handleAddBlack(SeatModel model) {
     model.seatState = SeatState.black;
 
     if (model.objectModel != null && model.objectModel!.type == BlueprintModel.metaTableAreaType) {
       return;
     }
-    // Remove existing object if it's not a table area
     if (model.objectModel != null && model.objectModel!.type != BlueprintModel.metaTableAreaType) {
       blueprint!.objects!.remove(model.objectModel!);
     }
-
-    // Create or update the object model
     model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
     model.objectModel!.type = BlueprintModel.metaTableAreaType;
     blueprint!.objects!.add(model.objectModel!);
   }
 
-  /// Handle adding an available (spot) seat.
   void _handleAddAvailable(SeatModel model) {
     if(currentGroup == null){
       ToastHelper.Show(context, "First, select or create a group to add a spot (on the right).".tr(), severity: ToastSeverity.NotOk);
@@ -637,53 +628,45 @@ class _BlueprintTabState extends State<BlueprintTab> {
       blueprint!.objects!.remove(model.objectModel!);
     }
 
-    // Create or update the object model
     model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
     model.objectModel!.type = BlueprintModel.metaSpotType;
     model.objectModel!.product = blueprint!.products?.firstWhereOrNull((p)=>p.productTypeString == ProductModel.spotType);
     model.objectModel!.group = currentGroup;
     model.objectModel!.title = currentGroup?.getNextBoxName();
-
-    // Add the object to the current group and blueprint
     currentGroup?.objects.add(model.objectModel!);
     blueprint!.objects!.add(model.objectModel!);
-
-    // Notify the user
     ToastHelper.Show(context, "${"Spot added:".tr()} ${model.objectModel!.title}");
   }
 
-  /// Handle clearing an area (emptying a seat).
   void _handleEmptyArea(SeatModel model) {
     if (model.objectModel != null) {
-      // Determine the type of area being removed and notify the user
       if (model.seatState == SeatState.black) {
         ToastHelper.Show(context, "Area removed.".tr());
       } else {
         ToastHelper.Show(context, "Spot removed.".tr());
       }
-
-      // Remove the object from blueprint and all groups
       blueprint!.objects!.remove(model.objectModel);
       for (var group in blueprint!.groups!) {
         group.objects.remove(model.objectModel);
       }
-
-      // Clear the object model and reset the seat state
       model.objectModel = null;
       model.seatState = SeatState.empty;
     }
   }
 
   void saveChanges() async {
-    var success = await DbForms.updateBlueprint(context, blueprint!);
-    if(success){
-      ToastHelper.Show(context, "Saved".tr());
+    if (blueprint == null) return;
+    try {
+      await DbForms.updateBlueprint(blueprint!);
+      ToastHelper.Show(context, "Saved".tr(), severity: ToastSeverity.Ok);
       await loadData();
+    } catch (e) {
+      ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""), severity: ToastSeverity.NotOk);
     }
   }
 
   Future<void> loadData() async {
-    blueprint = await DbForms.getBlueprintForEdit(formLink!);
+    blueprint = await DbForms.getBlueprintForEdit(occasionLink!);
     setState(() {});
   }
 }

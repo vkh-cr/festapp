@@ -19,24 +19,19 @@ class EmailTemplatesTab extends StatefulWidget {
 class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
   EmailTemplatesResponse? emailTemplatesResponse;
   List<EmailTemplateModel> _templates = [];
-  String? formLink;
   String? occasionLink;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.params.isNotEmpty) {
-      formLink = context.routeData.params.get("formLink", null);
+    if (occasionLink == null && context.routeData.params.isNotEmpty) {
       occasionLink = context.routeData.params.get(AppRouter.linkFormatted, null);
     }
     loadData();
   }
 
   Future<void> loadData() async {
-    if(formLink != null){
-      emailTemplatesResponse =
-      await DbEmailTemplates.getAllEmailTemplatesViaFormLink(formLink!);
-    } else if(occasionLink != null) {
+    if(occasionLink != null) {
       emailTemplatesResponse =
       await DbEmailTemplates.getAllEmailTemplatesViaOccasionLink(occasionLink!);
     }
