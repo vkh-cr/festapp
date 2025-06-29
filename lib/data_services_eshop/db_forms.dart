@@ -1,16 +1,105 @@
-import 'package:flutter/cupertino.dart';
+import 'package:collection/collection.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/form_response_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
+import 'package:fstapp/data_models_eshop/bank_account_model.dart';
+import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
-import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fstapp/data_models/form_model.dart';
+
+// Bundle class to hold all related data for editing a form
+class FormEditBundle {
+  final FormModel form;
+  final List<FormFieldModel> formFields;
+  final List<ProductTypeModel> productTypes;
+  final List<ProductModel> products;
+  final List<BankAccountModel> availableBankAccounts;
+
+  FormEditBundle({
+    required this.form,
+    required this.formFields,
+    required this.productTypes,
+    required this.products,
+    required this.availableBankAccounts,
+  });
+}
+
 
 class DbForms {
   static final _supabase = Supabase.instance.client;
+
+  static Future<List<FormModel>> getAllFormsViaOccasionLink(String occasionLink) async {
+    final response = await _supabase.rpc(
+        'get_all_forms',
+        params: {'occasion_link': occasionLink}
+    );
+
+    if (response["code"] == 200) {
+      return List<FormModel>.from(
+          response["data"].map((f) => FormModel.fromJson(f)));
+    }
+    return [];
+  }
+
+  static Future<void> createNewForm({
+    required String title,
+    required String link,
+    required String occasionLink,
+  }) async {
+    final response = await _supabase.rpc(
+      'create_form_ws',
+      params: {
+        'input_data': {
+          'title': title,
+          'link': link,
+          'occasion_link': occasionLink
+        },
+      },
+    );
+
+    if (response["code"] != 201) { // 201 Created
+      throw Exception(response["message"]);
+    }
+  }
+
+  static Future<void> updateForm(FormModel form) async {
+    final response = await _supabase.rpc(
+      'update_form',
+      params: {
+        'input_data': form.toEditedJson(),
+      },
+    );
+
+    if (response["code"] != 200) {
+      throw Exception(response["message"]);
+    }
+  }
+
+  static Future<void> duplicateForm(int formId) async {
+    final response = await _supabase.rpc(
+      'duplicate_form_ws',
+      params: {'p_form_id': formId},
+    );
+
+    if (response["code"] != 201) { // 201 Created
+      throw Exception(response["message"]);
+    }
+  }
+
+  static Future<void> deleteForm(int formId) async {
+    final response = await _supabase.rpc(
+      'delete_form_ws',
+      params: {'p_form_id': formId},
+    );
+
+    if (response["code"] != 200) {
+      throw Exception(response["message"]);
+    }
+  }
 
   static Future<FormModel?> getFormFromLink(String link) async {
     final response = await _supabase
@@ -23,30 +112,70 @@ class DbForms {
     return null;
   }
 
-  static Future<FormModel?> getFormForEdit(String link) async {
+  static Future<FormEditBundle?> getFormForEdit(String link) async {
     final response = await _supabase
-        .rpc('get_form_from_link_for_edit', params: {'form_link': link});
-
-    if(response["code"] == 200){
-      var form = FormModel.fromJson(response["data"]);
-      return form;
-    }
-    return null;
-  }
-
-  static Future<void> updateForm(BuildContext context, FormModel form) async {
-    final response = await _supabase.rpc(
-      'update_form',
-      params: {
-        'input_data': form.toEditedJson(),
-      },
-    );
+        .rpc('get_form_for_edit', params: {'form_link': link});
 
     if (response["code"] != 200) {
-      ToastHelper.Show(context, response["message"], severity: ToastSeverity.NotOk);
-      throw Exception(response);
+      // You can add more robust error handling here, e.g., logging or showing a toast.
+      print("Failed to get form for edit: ${response['message']}");
+      return null;
     }
+
+    final data = response["data"];
+
+    // 1. Parse all individual JSON lists into Dart models.
+    final form = FormModel.fromJson(data['form']);
+    final formFields = (data['form_fields'] as List)
+        .map((e) => FormFieldModel.fromJson(e))
+        .toList();
+    final productTypes = (data['product_types'] as List)
+        .map((e) => ProductTypeModel.fromJson(e))
+        .toList();
+    final products = (data['products'] as List)
+        .map((e) => ProductModel.fromJson(e))
+        .toList();
+    final availableBankAccounts = (data['available_bank_accounts'] as List)
+        .map((e) => BankAccountModel.fromJson(e))
+        .toList();
+
+    // 2. Interconnect the parsed models.
+    // Create maps for efficient lookups.
+    final productTypeMap = { for (var pt in productTypes) pt.id: pt };
+    final productMap = groupBy(products, (ProductModel p) => p.productTypeId);
+
+    // Link products to their parent product types.
+    for (var pt in productTypes) {
+      pt.products = productMap[pt.id] ?? [];
+    }
+
+    // Link product type data to the relevant form fields.
+    for (var field in formFields) {
+      if (field.productTypeId != null) {
+        field.productType = productTypeMap[field.productTypeId];
+      }
+    }
+
+    // Assign the fully populated fields list to the form.
+    form.relatedFields = formFields;
+
+    // Find and assign the selected bank account model to the form.
+    if (form.bankAccount != null) {
+      form.bankAccount = availableBankAccounts.firstWhereOrNull(
+              (ba) => ba.id == form.bankAccount!.id
+      );
+    }
+
+    // 3. Create and return the final bundle.
+    return FormEditBundle(
+      form: form,
+      formFields: formFields,
+      productTypes: productTypes,
+      products: products,
+      availableBankAccounts: availableBankAccounts,
+    );
   }
+
 
   static Future<BlueprintModel?> getBlueprint(String mySecret, String formKey, int blueprintId) async {
     final response = await _supabase.rpc(
@@ -67,12 +196,12 @@ class DbForms {
     return b;
   }
 
-  static Future<BlueprintModel?> getBlueprintForEdit(String formKey) async {
+  static Future<BlueprintModel?> getBlueprintForEdit(String occasionLink) async {
 
     final response = await _supabase.rpc(
-      'get_blueprint_editor',
+      'get_blueprint_for_edit',
       params: {
-        'form_link': formKey,
+        'occasion_link': occasionLink,
       },
     );
 
@@ -85,7 +214,7 @@ class DbForms {
     return b;
   }
 
-  static Future<bool> updateBlueprint(context, BlueprintModel blueprint) async {
+  static Future<void> updateBlueprint(BlueprintModel blueprint) async {
     final response = await _supabase.rpc(
       'update_blueprint',
       params: {
@@ -93,19 +222,15 @@ class DbForms {
       },
     );
 
-    var code = response["code"];
-    if (code != 200) {
-      ToastHelper.Show(context, code.toString(), severity: ToastSeverity.NotOk);
-      return false;
+    if (response["code"] != 200) {
+      throw Exception(response["message"]);
     }
-
-    return true;
   }
 
   static Future<List<FormResponseModel>> getAllResponses(String formLink) async {
     var allFields = await getAllFormFields(formLink);
-    var orders = await DbOrders.getAllOrders(formLink);
-    var onlyFormOrders = orders.where((o) => o.form?.link == formLink);
+    var ordersBundle = await DbOrders.getAllOrdersBundle(formLink);
+    var onlyFormOrders = ordersBundle.orders.where((o) => o.form?.link == formLink);
     return List<FormResponseModel>.from(
       onlyFormOrders.map((x) => FormResponseModel.fromOrder(x, allFields)),
     );
@@ -141,12 +266,10 @@ class DbForms {
         .neq(Tb.form_fields.type, FormHelper.fieldTypeTicket)
         .order(Tb.form_fields.order, ascending: true);
 
-    // Step 3: Map the retrieved data to a list of FormFieldModel instances
     List<FormFieldModel> formFields = [];
     formFields = List<FormFieldModel>.from(
       fieldsData.map((x) => FormFieldModel.fromJson(x)),
     );
     return formFields;
   }
-
 }

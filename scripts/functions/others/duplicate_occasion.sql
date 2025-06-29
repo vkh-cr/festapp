@@ -276,7 +276,7 @@ BEGIN
 
   -- 7a. Forms – adjust the blueprint foreign key via mapping and update the link to be unique.
   FOR rec IN
-    SELECT id, data, key, type, bank_account, deadline_duration_seconds, is_open, link, blueprint, header, header_off
+    SELECT id, data, key, type, bank_account, deadline_duration_seconds, is_open, link, blueprint, header, header_off, title
     FROM public.forms
     WHERE occasion = oc
   LOOP
@@ -285,10 +285,10 @@ BEGIN
       WHERE t.old_id = rec.blueprint;
 
     INSERT INTO public.forms
-      (created_at, data, key, occasion, type, bank_account, deadline_duration_seconds, is_open, link, blueprint, header, header_off, updated_at)
+      (created_at, data, key, occasion, type, bank_account, deadline_duration_seconds, is_open, link, blueprint, header, header_off, updated_at, title)
     VALUES (now(), rec.data, uuid_generate_v4(), new_occ, rec.type, rec.bank_account, rec.deadline_duration_seconds, rec.is_open,
             replace(uuid_generate_v4()::text, '-', ''),
-            COALESCE(new_bp_id, rec.blueprint), rec.header, rec.header_off, now())
+            COALESCE(new_bp_id, rec.blueprint), rec.header, rec.header_off, now(), rec.title)
     RETURNING id INTO v_new_id;
 
     INSERT INTO tmp_forms (old_id, new_id)

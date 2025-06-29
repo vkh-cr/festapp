@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/features_strings.dart';
@@ -24,7 +25,7 @@ class TicketsTab extends StatefulWidget {
 }
 
 class _TicketsTabState extends State<TicketsTab> {
-  String? formLink;
+  String? occasionLink;
   late SingleDataGridController<TicketModel> _controller;
 
   static const List<String> columnIdentifiers = [
@@ -45,11 +46,11 @@ class _TicketsTabState extends State<TicketsTab> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.params.isNotEmpty) {
-      formLink = context.routeData.params.getString("formLink");
+    if (occasionLink == null && context.routeData.params.isNotEmpty) {
+      occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
       _controller = SingleDataGridController<TicketModel>(
         context: context,
-        loadData: () => DbTickets.getAllTickets(formLink!),
+        loadData: () => DbTickets.getAllTickets(occasionLink!),
         fromPlutoJson: TicketModel.fromPlutoJson,
         firstColumnType: DataGridFirstColumn.check,
         idColumn: TbEshop.tickets.id,
@@ -94,7 +95,7 @@ class _TicketsTabState extends State<TicketsTab> {
     await TicketCodeHelper.showScanTicketCode(
       context,
       FeaturesStrings.scanActionText,
-      formLink!,
+      occasionLink!,
     );
   }
 

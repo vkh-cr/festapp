@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:fstapp/pages/form/pages/reservation_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
@@ -254,7 +255,7 @@ class _FormPageState extends State<FormPage> {
     var data = FormHelper.getDataFromForm(formHolder!);
     data = FormHelper.replaceSpotWithId(data);
     data[FormHelper.metaSecret] = form!.secret;
-    data[FormHelper.metaForm] = form!.formKey;
+    data[FormHelper.metaForm] = form!.key;
     formResult = data;
 
     showGeneralDialog(
@@ -359,8 +360,8 @@ class _FormPageState extends State<FormPage> {
           visible: RightsService.isEditor(),
           child: FloatingActionButton(
             onPressed: () {
-              RouterService.navigate(
-                  context, "${FormPage.ROUTE}/${widget.formLink}/edit")
+              RouterService.navigateOccasion(
+                  context, ReservationsPage.ROUTE)
                   .then((value) => loadData());
             },
             child: const Icon(Icons.edit),
@@ -467,7 +468,7 @@ class _FormPageState extends State<FormPage> {
           secret: form!.secret,
           blueprintId: form!.blueprint,
           globalKey: _formKey,
-          formKey: form!.formKey!,
+          formKey: form!.key!,
           updateTotalPrice: _updateTotalPrice,
           showSeatReservation: _showSeatReservation,
           onCloseSeatReservation: _hideSeatReservation);
