@@ -1,5 +1,5 @@
-CREATE OR REPLACE FUNCTION get_blueprint_editor(
-    form_link TEXT
+CREATE OR REPLACE FUNCTION get_blueprint_for_edit(
+    occasion_link TEXT
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -16,26 +16,33 @@ DECLARE
     valid_spots JSONB;
     occasion_id BIGINT;
 BEGIN
-    -- Resolve blueprint_id using form_link
-    SELECT blueprint
-    INTO blueprint_id
-    FROM public.forms
-    WHERE link = form_link;
-
-    -- Check if form_link is valid
-    IF blueprint_id IS NULL THEN
-        RETURN jsonb_build_object('code', 404, 'message', 'Form key does not exist or is not linked to a blueprint');
-    END IF;
-
-    -- Fetch occasion_id for the blueprint
-    SELECT occasion
+    -- Resolve occasion_id using occasion_link
+    SELECT id
     INTO occasion_id
-    FROM eshop.blueprints
-    WHERE id = blueprint_id;
+    FROM public.occasions
+    WHERE link = occasion_link;
+
+    -- Check if occasion_link is valid
+    IF occasion_id IS NULL THEN
+        RETURN jsonb_build_object('code', 404, 'message', 'Occasion link does not exist');
+    END IF;
 
     -- Authorization check
     IF (SELECT get_is_editor_order_view_on_occasion(occasion_id)) <> TRUE THEN
         RETURN jsonb_build_object('code', 403, 'message', 'User is not authorized to edit this occasion');
+    END IF;
+
+    -- Fetch the first blueprint_id for the occasion
+    SELECT id
+    INTO blueprint_id
+    FROM eshop.blueprints
+    WHERE occasion = occasion_id
+    ORDER BY id
+    LIMIT 1;
+
+    -- Check if a blueprint exists for the occasion
+    IF blueprint_id IS NULL THEN
+        RETURN jsonb_build_object('code', 404, 'message', 'No blueprint found for this occasion');
     END IF;
 
     -- Fetch blueprint details

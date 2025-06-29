@@ -499,6 +499,7 @@ BEGIN
         ----------------------------------------------------------------------------
         UPDATE public.forms
            SET
+               title = input_data->>'title',
                data = input_data->'data',
                header = input_data->>'header',
                header_off = input_data->>'header_off',
