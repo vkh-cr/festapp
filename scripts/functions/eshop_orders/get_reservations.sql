@@ -114,6 +114,7 @@ BEGIN
         'is_open', f.is_open,
         'link', f.link,
         'blueprint', f.blueprint,
+        'title', f.title,
         'header', f.header,
         'header_off', f.header_off,
         'updated_at', f.updated_at
