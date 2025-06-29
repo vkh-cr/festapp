@@ -45,6 +45,7 @@ BEGIN
             'key', f.key,
             'type', f.type,
             'id', f.id,
+            'title', f.title
             'link', f.link
         )
     )

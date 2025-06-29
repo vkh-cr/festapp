@@ -38,10 +38,18 @@ class UsersTabHelper {
       BuildContext context, SingleDataGridController singleDataGrid) async {
     var users = getCheckedUsers(singleDataGrid);
     if (users.isEmpty) return;
+
+    List<String> errorMessages = [];
     for (var u in users) {
-      await UserManagementHelper.unsafeChangeUserPassword(context, u);
+      try {
+        await UserManagementHelper.unsafeChangeUserPassword(context, u);
+        ToastHelper.Show(context, "Password has been changed.".tr());
+      } catch (e) {
+        String errorMessage = "Failed for user ${u.data?[Tb.occasion_users.data_email] ?? '[no email]'}: ${e.toString()}".tr();
+        ToastHelper.Show(context, errorMessage, severity: ToastSeverity.NotOk);
+        errorMessages.add(errorMessage);
+      }
     }
-    ToastHelper.Show(context, "Password has been changed.".tr());
   }
 
   /// Opens the add-to-group dialog and updates the group with checked users.
