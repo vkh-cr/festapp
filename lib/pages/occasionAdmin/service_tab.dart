@@ -10,7 +10,7 @@ import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/pages/occasionAdmin/user_columns.dart';
+import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/dialogs/service_dialog.dart';
 
 class ServiceTab extends StatefulWidget {
