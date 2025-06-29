@@ -1,52 +1,61 @@
-CREATE OR REPLACE FUNCTION get_form_from_link_for_edit(form_link TEXT)
+CREATE OR REPLACE FUNCTION get_form_from_link(form_link TEXT)
 RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
     allData JSON;
+    generated_secret UUID := gen_random_uuid();
+    form_exists BOOLEAN;
 BEGIN
+    -- Check if the form exists
+    SELECT EXISTS (
+        SELECT 1
+        FROM public.forms
+        WHERE link = form_link
+    ) INTO form_exists;
 
-    PERFORM check_is_editor_order_view_via_form_link(form_link);
+    IF NOT form_exists THEN
+        RETURN jsonb_build_object(
+            'code', 404,
+            'message', 'Form does not exist.'
+        );
+    END IF;
 
+    -- Check if the form is open
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.forms
+        WHERE link = form_link AND is_open = true
+    ) THEN
+        -- Retrieve only the header_off when the form is not open
+        SELECT jsonb_build_object(
+            'code', 400,
+            'data', jsonb_build_object(
+                'header_off', f.header_off
+            )
+        )
+        INTO allData
+        FROM public.forms f
+        WHERE f.link = form_link;
+
+        RETURN allData;
+    END IF;
+
+    -- Retrieve full form data when the form is open
     SELECT jsonb_build_object(
         'code', 200,
         'data', jsonb_build_object(
             'id', f.id,
             'key', f.key,
-            'is_open', f.is_open,
             'created_at', f.created_at,
             'data', f.data,
             'type', f.type,
+            'title', f.title,
             'header', f.header,
             'header_off', f.header_off,
             'occasion', f.occasion,
             'blueprint', f.blueprint,
-            'link', f.link,
-            -- Return full bank_account details as JSON instead of just the id:
-            'bank_account', jsonb_build_object(
-                                'account_number', ba.account_number,
-                                'account_number_human_readable', ba.account_number_human_readable,
-                                'title', ba.title,
-                                'supported_currencies', ba.supported_currencies
-                            ),
             'deadline_duration_seconds', f.deadline_duration_seconds,
-            -- Optionally, if you want to keep the account_number separately, you can leave it:
             'account_number', ba.account_number,
-            'available_bank_accounts', (
-                SELECT jsonb_agg(
-                    jsonb_build_object(
-                        'account_number', ba_inner.account_number,
-                        'account_number_human_readable', ba_inner.account_number_human_readable,
-                        'title', ba_inner.title,
-                        'supported_currencies', ba_inner.supported_currencies
-                    )
-                )
-                FROM eshop.unit_bank_accounts uba
-                JOIN eshop.bank_accounts ba_inner ON uba.bank_account = ba_inner.id
-                WHERE uba.unit = (
-                    SELECT o.unit
-                    FROM public.occasions o
-                    WHERE o.id = f.occasion
-                )
-            ),
+            'secret', generated_secret,
             'fields', (
                 SELECT jsonb_agg(
                     jsonb_build_object(
@@ -73,12 +82,10 @@ BEGIN
                                             SELECT jsonb_agg(
                                                 jsonb_build_object(
                                                     'id', p.id,
-                                                    'occasion', p.occasion,
                                                     'title', p.title,
                                                     'description', p.description,
                                                     'price', p.price,
                                                     'currency_code', p.currency_code,
-                                                    'is_hidden', p.is_hidden,
                                                     'order', p."order",
                                                     'ordered_count', (
                                                         SELECT count(*)
@@ -90,6 +97,7 @@ BEGIN
                                             )
                                             FROM eshop.products p
                                             WHERE p.product_type = pt.id
+                                              AND NOT p.is_hidden
                                         )
                                     )
                                 ELSE NULL
@@ -99,7 +107,7 @@ BEGIN
                 )
                 FROM public.form_fields ff
                 LEFT JOIN eshop.product_types pt ON ff.product_type = pt.id
-                WHERE ff.form = f.id
+                WHERE ff.form = f.id AND ff.is_hidden = false
             )
         )
     )
