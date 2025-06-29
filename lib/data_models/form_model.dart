@@ -12,6 +12,7 @@ class FormModel {
   int? blueprint;
   String? type;
   BankAccountModel? bankAccount;
+  int? bankAccountId;
   int? deadlineDurationSeconds; // Renamed from deadlineDuration for clarity.
   bool? isOpen;
   String? accountNumber;
@@ -35,6 +36,7 @@ class FormModel {
     this.blueprint,
     this.type,
     this.bankAccount,
+    this.bankAccountId,
     this.deadlineDurationSeconds,
     this.isOpen,
     this.accountNumber,
@@ -59,10 +61,8 @@ class FormModel {
       occasion: json[Tb.forms.occasion],
       blueprint: json[Tb.forms.blueprint],
       type: json[Tb.forms.type],
-      bankAccount: json[Tb.forms.bank_account] != null
-          ? BankAccountModel.fromJson(json[Tb.forms.bank_account])
-          : null,
-      deadlineDurationSeconds: json[Tb.forms.deadline_duration_seconds], // Updated property name.
+      bankAccountId: json[Tb.forms.bank_account],
+      deadlineDurationSeconds: json[Tb.forms.deadline_duration_seconds],
       isOpen: json[Tb.forms.is_open],
       accountNumber: json['account_number'],
       secret: json['secret'],
