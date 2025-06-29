@@ -678,6 +678,7 @@
     "chooseSourcePrompt": "Vyberte prosím zdroj dat.",
     "createdUsers": "Vytvoření uživatelé",
     "updatedUsers": "Aktualizovaní uživatelé",
+    "deletedUsers": "Odebraní uživatelé",
     "none": "Žádní",
     "ok": "OK"
   },

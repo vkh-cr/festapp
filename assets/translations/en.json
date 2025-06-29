@@ -678,6 +678,7 @@
     "chooseSourcePrompt": "Please choose the import source.",
     "createdUsers": "Created users",
     "updatedUsers": "Updated users",
+    "deletedUsers": "Deleted users",
     "none": "None",
     "ok": "OK"
   },
