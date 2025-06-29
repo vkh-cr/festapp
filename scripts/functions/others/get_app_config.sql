@@ -17,6 +17,7 @@ DECLARE
     is_admin_bool BOOLEAN;
     occasion_link text;
     version_recommended text;
+    version_link text;
     occasion_unit bigint;
     bank_account_ids bigint[];
     occasion_json jsonb;
@@ -121,15 +122,19 @@ BEGIN
         END IF;
     END IF;
 
-    -- Retrieve version_recommended for the specific platform, or leave as NULL if not found
-    SELECT (
-             SELECT item->>'prompt'
-             FROM jsonb_array_elements(data->'PLATFORMS') AS item
-             WHERE item->>'platform' = platform_name
-           )
-      INTO version_recommended
-    FROM organizations
-    WHERE id = org_id;
+    -- Retrieve version_recommended and version_link for the specific platform, or leave as NULL if not found
+    SELECT
+        item->>'prompt',
+        item->>'link'
+    INTO
+        version_recommended,
+        version_link
+    FROM
+        public.organizations,
+        jsonb_array_elements(data->'PLATFORMS') AS item
+    WHERE
+        id = org_id AND item->>'platform' = platform_name
+    LIMIT 1;
 
     IF occasionId IS NOT NULL THEN
         -- Process occasion-related queries only if an occasion was determined
@@ -173,6 +178,7 @@ BEGIN
                     'message', 'Access forbidden',
                     'link', occasion_link,
                     'version_recommended', version_recommended,
+                    'version_link', version_link,
                     'unit_user', COALESCE(row_to_json(unit_user)::jsonb, NULL)
                 );
             END IF;
@@ -266,6 +272,7 @@ BEGIN
         'occasion', COALESCE(occasion_json, '{}'::jsonb),
         'unit', COALESCE(unit_json, '{}'::jsonb),
         'version_recommended', version_recommended,
+        'version_link', version_link,
         'bank_accounts_admin', COALESCE(bank_account_ids, '{}'),
         'user_info', COALESCE(user_info_json, '{}'::jsonb),
         'organization', COALESCE(org_json::jsonb, '{}'::jsonb)
