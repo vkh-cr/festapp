@@ -88,7 +88,7 @@ dependencies:
   vector_map_tiles: ^8.0.0
   mbtiles: ^0.4.0
   sqlite3_flutter_libs: ^0.5.32
-  file_saver: ^0.2.14
+  file_saver: ^0.3.0
   youtube_player_flutter: ^9.1.1
 #    git:
 #      url: https://github.com/MusabBoltX/youtube_player_flutter_patch_fix.git

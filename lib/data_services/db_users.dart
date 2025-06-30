@@ -182,11 +182,15 @@ class DbUsers {
   }
 
   static Future<void> updateUnitUser(UnitUserModel uum) async {
-    await _supabase.rpc("update_unit_user",
+    var response = await _supabase.rpc("update_unit_user",
         params:
         {
           "input_data": uum,
         });
+    var code = response['code'];
+    if(code != 200 && code != 201){
+      throw Exception(response['message']);
+    }
   }
 
   static Future<void> updateOccasionUser(OccasionUserModel oum) async {
