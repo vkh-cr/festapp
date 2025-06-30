@@ -34,10 +34,9 @@ Deno.serve(async (req) => {
     // Generate a 6-digit sign in code.
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const { data: answer, error: passwordSetError } = await supabaseUser.rpc("set_user_password", {
-      usr: userId,
-      oc: occasionId,
-      password: code
+    const { data: answer, error: passwordSetError } = await supabaseUser.rpc("reset_user_password", {
+      p_user_id: userId,
+      p_password: code
     });
 
     if (passwordSetError || !answer) {
