@@ -13,7 +13,7 @@ import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/services/user_management_helper.dart';
+import 'package:fstapp/components/users/user_management_helper.dart';
 
 class UsersTabHelper {
   /// Calls the import routine and then reloads users via the provided callback.
