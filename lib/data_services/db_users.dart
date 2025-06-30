@@ -137,14 +137,14 @@ class DbUsers {
     return [];
   }
 
-  static Future<void> updateUserInfo(OccasionUserModel data) async {
-    await _supabase.rpc("update_user",
-        params:
-        {
-          "usr": data.user,
-          "oc": data.occasion,
-          "data": data.data
-        });
+  static Future<void> updateUserInfo(OccasionUserModel oum) async {
+      final response = await _supabase.rpc("update_user",
+          params: {"input_data":{"occasion": oum.occasion!, "user": oum.user, "data": oum.data}});
+
+      var code = response['code'];
+      if(code != 200 && code != 201){
+        throw Exception(response['message']);
+      }
   }
 
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw, dynamic data) async {
@@ -250,8 +250,8 @@ class DbUsers {
     await _supabase.rpc("delete_occasion_user_ws",
         params:
         {
-          "usr": user,
-          "oc": occasion
+          "usr_to_delete": user,
+          "occasion_id": occasion
         });
   }
 
