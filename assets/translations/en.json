@@ -668,6 +668,7 @@
     "noType": "No Type"
   },
   "FeatureImport": {
+    "importFeatureDescription": "Enables importing users from various sources like CSV files or from tickets.",
     "labelImportFromCsv": "Import from CSV",
     "labelImportFromTickets": "Import from Tickets",
     "importFromTicketsSuccess": "Import from tickets was successful.",
@@ -680,8 +681,7 @@
     "createdUsers": "Created users",
     "updatedUsers": "Updated users",
     "deletedUsers": "Deleted users",
-    "none": "None",
-    "ok": "OK"
+    "none": "None"
   },
   "FeatureFormSettings": {
     "title": "Form Settings",
