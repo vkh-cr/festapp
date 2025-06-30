@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_occasion_users_for_editor(
+CREATE OR REPLACE FUNCTION public.get_occasion_users_for_edit(
     p_occasion_id BIGINT
 )
 RETURNS JSONB
@@ -15,18 +15,19 @@ BEGIN
     END IF;
 
     -- 1. Get all users associated with the occasion.
-    -- This query merges the full user_info and occasion_users rows into a single JSON object
-    -- for each user, and then adds the form_id and order_created_at from the corresponding order.
+    -- This query merges user_info, occasion_users, order details, and auth info into a single JSON object.
     SELECT jsonb_agg(
         to_jsonb(ui) || to_jsonb(ou) ||
         jsonb_build_object(
             'form_id', order_info.form_id,
-            'order_created_at', order_info.created_at -- Added order creation date
+            'order_created_at', order_info.created_at,
+            'last_sign_in_at', au.last_sign_in_at
         )
     )
     INTO users_data
     FROM public.occasion_users ou
     JOIN public.user_info ui ON ou."user" = ui.id
+    LEFT JOIN auth.users au ON au.id = ui.id
     LEFT JOIN eshop.tickets t ON ou.ticket = t.id
     LEFT JOIN LATERAL (
         SELECT
@@ -45,7 +46,7 @@ BEGIN
             'key', f.key,
             'type', f.type,
             'id', f.id,
-            'title', f.title
+            'title', f.title,
             'link', f.link
         )
     )
