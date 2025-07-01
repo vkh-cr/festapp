@@ -4,6 +4,7 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/pages/form/pages/reservation_page.dart';
 import 'package:fstapp/pages/occasion/check_page.dart';
 import 'package:fstapp/pages/occasion/event_edit_page.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
@@ -54,7 +55,7 @@ class AppRouter extends RootStackRouter {
       AutoRoute(path: ':scanCode', page: ScanRoute.page,),
     ]),
     AutoRoute(page: FormRoute.page, path: "/${FormPage.ROUTE}/:formLink"),
-    AutoRoute(page: FormEditRoute.page, path: "/${FormPage.ROUTE}/:formLink/edit"),
+    AutoRoute(page: ReservationsRoute.page, path: "/:$linkFormatted/${ReservationsPage.ROUTE}"),
     AutoRoute(page: CheckRoute.page, path: "/:$linkFormatted/${CheckPage.ROUTE}/:id"),
     AutoRoute(page: NewsFormRoute.page, path: "/:$linkFormatted/${NewsFormPage.ROUTE}"),
     AutoRoute(page: HtmlEditorRoute.page, path: "/:$linkFormatted/${HtmlEditorPage.ROUTE}"),

@@ -1,36 +1,41 @@
-CREATE OR REPLACE FUNCTION delete_occasion_user(usr uuid, oc bigint)
-RETURNS jsonb
+DROP FUNCTION delete_occasion_user(uuid,bigint);
+
+CREATE OR REPLACE FUNCTION public.delete_occasion_user(usr uuid, oc bigint)
+RETURNS void
 LANGUAGE plpgsql
-SECURITY DEFINER
 AS $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM user_companions WHERE "user" = auth.uid() AND companion = usr) THEN
-        IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE AND (SELECT get_is_admin_on_occasion(oc)) <> TRUE THEN
-            RETURN jsonb_build_object('code', 403);
-        END IF;
-        IF (SELECT get_exists_on_occasion_user(usr, oc)) <> TRUE THEN
-            RETURN jsonb_build_object('code', 403);
-        END IF;
-    END IF;
+    -- Set created_by to null for news created by the user on this occasion
     UPDATE public.news
     SET created_by = null
     WHERE created_by = usr AND occasion = oc;
-    UPDATE user_group_info
+
+    -- Set leader to null for groups led by the user on this occasion
+    UPDATE public.user_group_info
     SET leader = null
     WHERE leader = usr AND occasion = oc;
-    DELETE FROM user_groups
+
+    -- Delete user from groups on this occasion
+    DELETE FROM public.user_groups
     WHERE "user" = usr
-      AND "group" IN (SELECT id FROM user_group_info WHERE occasion = oc);
-    DELETE FROM event_users
+      AND "group" IN (SELECT id FROM public.user_group_info WHERE occasion = oc);
+
+    -- Delete user from events on this occasion
+    DELETE FROM public.event_users
     WHERE "user" = usr
-      AND event IN (SELECT id FROM events WHERE occasion = oc);
-    DELETE FROM user_news
+      AND event IN (SELECT id FROM public.events WHERE occasion = oc);
+
+    -- Delete user's news association for this occasion
+    DELETE FROM public.user_news
     WHERE "user" = usr AND occasion = oc;
-    DELETE FROM event_users_saved
+
+    -- Delete user's saved events for this occasion
+    DELETE FROM public.event_users_saved
     WHERE "user" = usr
-      AND event IN (SELECT id FROM events WHERE occasion = oc);
-    DELETE FROM occasion_users
+      AND event IN (SELECT id FROM public.events WHERE occasion = oc);
+
+    -- Finally, delete the user from the occasion itself
+    DELETE FROM public.occasion_users
     WHERE "user" = usr AND occasion = oc;
-    RETURN jsonb_build_object('code', 200);
 END;
 $$;

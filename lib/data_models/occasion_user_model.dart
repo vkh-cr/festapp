@@ -7,7 +7,7 @@ import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/pages/occasionAdmin/user_columns.dart';
+import 'package:fstapp/components/users/user_columns.dart';
 import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
 
@@ -15,6 +15,7 @@ class OccasionUserModel extends ITrinaRowModel {
   static const String birthDateJsonFormat = "yyyy-MM-dd";
 
   DateTime? createdAt;
+  DateTime? lastSignInAt;
   DateTime? orderCreatedAt;
   int? occasion;
   String? user;
@@ -35,12 +36,13 @@ class OccasionUserModel extends ITrinaRowModel {
 
   Map<String, dynamic>? data;
   Map<String, dynamic>? services;
-  OccasionUserModel({this.createdAt, this.orderCreatedAt, this.occasion, this.user, this.data, this.role,
+  OccasionUserModel({this.createdAt, this.lastSignInAt, this.orderCreatedAt, this.occasion, this.user, this.data, this.role,
     this.isEditor, this.isEditorView, this.isEditorOrder, this.isEditorOrderView, this.isManager, this.isApprover, this.isApproved, this.services, this.unit, this.formId, this.form});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
         createdAt: json[Tb.occasion_users.created_at] != null ? DateTime.parse(json[Tb.occasion_users.created_at]) : null,
+        lastSignInAt: json[DbUsers.lastSignInAtKey] != null ? DateTime.parse(json[DbUsers.lastSignInAtKey]) : null,
         orderCreatedAt: json[DbUsers.orderCreatedAtKey] != null ? DateTime.parse(json[DbUsers.orderCreatedAtKey]) : null,
         occasion: json[Tb.occasion_users.occasion],
         user: json[Tb.occasion_users.user],
@@ -193,8 +195,10 @@ class OccasionUserModel extends ITrinaRowModel {
       UserColumns.TEXT1: TrinaCell(value: data?[Tb.occasion_users.data_text1] ?? ""),
       UserColumns.TEXT2: TrinaCell(value: data?[Tb.occasion_users.data_text2] ?? ""),
       UserColumns.TEXT3: TrinaCell(value: data?[Tb.occasion_users.data_text3] ?? ""),
-      UserColumns.FORM: TrinaCell(value: form?.link?.toString() ?? ""),
-      UserColumns.ORDERED_AT: TrinaCell(value: orderCreatedAt ?? ""),
+      UserColumns.FORM: TrinaCell(value: form?.toString() ?? ""),
+      UserColumns.ORDERED_AT: TrinaCell(value: orderCreatedAt),
+      UserColumns.CREATED_AT: TrinaCell(value: createdAt),
+      UserColumns.LAST_SIGN_IN_AT: TrinaCell(value: lastSignInAt),
     });
     return TrinaRow(cells: json);
   }
