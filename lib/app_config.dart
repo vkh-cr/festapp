@@ -23,10 +23,6 @@ class AppConfig {
   static const bool isAppSupported = true;
 
   static const String webLink = "https://hvezdamorska.netlify.app";
-  static const String appStoreLink = "https://apps.apple.com/us/app/id6739646827";
-  static const String playStoreLink = "https://play.google.com/store/apps/details?id=fstapp.hvezdamorska";
-  static const String playStoreLaunchLink = "https://play.google.com/store/apps/details?id=fstapp.hvezdamorska";
-  static const String desktopAppLink = "";
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;
   static const int imagesMaxBytes = 800000;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
@@ -17,7 +18,7 @@ class ProductsTab extends StatefulWidget {
 }
 
 class _ProductsTabState extends State<ProductsTab> {
-  String? formLink;
+  String? occasionLink;
   late SingleDataGridController<ProductModel> controller;
 
   static const List<String> columnIdentifiers = [
@@ -37,11 +38,11 @@ class _ProductsTabState extends State<ProductsTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.params.isNotEmpty) {
-      formLink = context.routeData.params.getString("formLink");
+    if (occasionLink == null && context.routeData.params.isNotEmpty) {
+      occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
       controller = SingleDataGridController<ProductModel>(
         context: context,
-        loadData: () => DbEshop.getProductsAndTypesForOccasion(formLink!),
+        loadData: () => DbEshop.getProductsAndTypesForOccasion(occasionLink!),
         fromPlutoJson: ProductModel.fromPlutoJson,
         firstColumnType: DataGridFirstColumn.delete,
         idColumn: TbEshop.products.id,

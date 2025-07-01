@@ -135,7 +135,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: _isSuccess
-                  ? ThemeConfig.greenColor()
+                  ? ThemeConfig.greenColor(context)
                   : ThemeConfig.redColor(context),
             ),
             child: Icon(
@@ -152,7 +152,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: _isSuccess
-                ? ThemeConfig.greenColor()
+                ? ThemeConfig.greenColor(context)
                 : ThemeConfig.redColor(context),
           ),
           textAlign: TextAlign.center,

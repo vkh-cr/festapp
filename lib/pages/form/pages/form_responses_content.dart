@@ -11,7 +11,8 @@ import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:auto_route/auto_route.dart';
 
 class FormResponsesContent extends StatefulWidget {
-  const FormResponsesContent({super.key});
+  final String formLink;
+  const FormResponsesContent({super.key, required this.formLink});
 
   @override
   _FormResponsesContentState createState() => _FormResponsesContentState();
@@ -19,46 +20,49 @@ class FormResponsesContent extends StatefulWidget {
 
 class _FormResponsesContentState extends State<FormResponsesContent> {
   List<FormFieldModel>? formFieldModels;
-  String? formLink;
+  String? _formLink; // Renamed to avoid confusion
   SingleDataGridController<FormResponseModel>? controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.params.isNotEmpty) {
-      formLink = context.routeData.params.getString("formLink");
+    final newFormLink = widget.formLink;
+    if (newFormLink != _formLink) {
+      _formLink = newFormLink;
       loadData();
     }
   }
 
   Future<void> loadData() async {
-    var ff = await DbForms.getAllFormFields(formLink!);
-    setState(() {
-      formFieldModels = ff;
-      controller = SingleDataGridController<FormResponseModel>(
-        context: context,
-        loadData: () => DbForms.getAllResponses(formLink!),
-        fromPlutoJson: FormResponseModel.fromPlutoJson,
-        firstColumnType: DataGridFirstColumn.none,
-        idColumn: TbEshop.orders.id,
-        actionsExtended: DataGridActionsController(
-          areAllActionsEnabled: RightsService.canUpdateUsers,
-          isAddActionPossible: () => false,
-        ),
-        headerChildren: [],
-        columns: EshopColumns.generateColumns(
-          context,
-          columnIdentifiers,
-          data: {
-            EshopColumns.RESPONSES: formFieldModels,
-            EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
-          },
-        ),
-        exportOptions: ExportOptions(fileName: "${formLink ?? ""}-responses"),
-      );
-    });
+    if (_formLink == null) return;
+    var ff = await DbForms.getAllFormFields(_formLink!);
+    if(mounted) {
+      setState(() {
+        formFieldModels = ff;
+        controller = SingleDataGridController<FormResponseModel>(
+          context: context,
+          loadData: () => DbForms.getAllResponses(_formLink!),
+          fromPlutoJson: FormResponseModel.fromPlutoJson,
+          firstColumnType: DataGridFirstColumn.none,
+          idColumn: TbEshop.orders.id,
+          actionsExtended: DataGridActionsController(
+            areAllActionsEnabled: RightsService.canUpdateUsers,
+            isAddActionPossible: () => false,
+          ),
+          headerChildren: [],
+          columns: EshopColumns.generateColumns(
+            context,
+            columnIdentifiers,
+            data: {
+              EshopColumns.RESPONSES: formFieldModels,
+              EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
+            },
+          ),
+          exportOptions: ExportOptions(fileName: "${_formLink ?? ""}-responses"),
+        );
+      });
+    }
   }
-
 
   Future<void> refreshData() async {
     await controller?.reloadData();

@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
@@ -10,6 +11,7 @@ import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OccasionEditorData {
@@ -23,6 +25,8 @@ class DbUsers {
 
   static const String formIdKey = 'form_id';
   static const String orderCreatedAtKey = 'order_created_at';
+  static const String lastSignInAtKey = 'last_sign_in_at';
+
 
   static Future<UserInfoModel> getUser(String id) async {
     var data = await _supabase.from(Tb.user_info.table).select().eq(Tb.user_info.id, id).single();
@@ -31,7 +35,7 @@ class DbUsers {
 
   static Future<List<OccasionUserModel>> getOccasionEditorData() async {
     var result = await _supabase.rpc(
-        'get_occasion_users_for_editor',
+        'get_occasion_users_for_edit',
         params: {'p_occasion_id': RightsService.currentOccasionId()!}
     );
 
@@ -45,7 +49,7 @@ class DbUsers {
       );
 
       // Create a lookup map for forms using their UUID key.
-      final formMap = { for (var form in forms) form.formKey : form };
+      final formMap = { for (var form in forms) form.key : form };
 
       // Link each user to their corresponding form object.
       for (final user in users) {
@@ -133,14 +137,14 @@ class DbUsers {
     return [];
   }
 
-  static Future<void> updateUserInfo(OccasionUserModel data) async {
-    await _supabase.rpc("update_user",
-        params:
-        {
-          "usr": data.user,
-          "oc": data.occasion,
-          "data": data.data
-        });
+  static Future<void> updateUserInfo(OccasionUserModel oum) async {
+      final response = await _supabase.rpc("update_user",
+          params: {"input_data":{"occasion": oum.occasion!, "user": oum.user, "data": oum.data}});
+
+      var code = response['code'];
+      if(code != 200 && code != 201){
+        throw Exception(response['message']);
+      }
   }
 
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw, dynamic data) async {
@@ -178,22 +182,30 @@ class DbUsers {
   }
 
   static Future<void> updateUnitUser(UnitUserModel uum) async {
-    await _supabase.rpc("update_unit_user",
+    var response = await _supabase.rpc("update_unit_user",
         params:
         {
           "input_data": uum,
         });
+    var code = response['code'];
+    if(code != 200 && code != 201){
+      throw Exception(response['message']);
+    }
   }
 
   static Future<void> updateOccasionUser(OccasionUserModel oum) async {
     await AuthService.ensureCanUpdateUsers(oum);
-    if (oum.user == null) {
-      oum.user = await unsafeCreateUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email], "", oum.data);
-    } else {
-      await _supabase.rpc("update_user",
-          params: {"oc": oum.occasion!, "usr": oum.user!, "data": oum.data!});
-      await addUserToOccasion(oum.user!, oum.occasion!);
+
+    final response = await _supabase.rpc("update_user",
+        params: {"input_data":{"occasion": oum.occasion!, "user": oum.user, "data": oum.data}});
+
+    var code = response['code'];
+    if(code != 200 && code != 201){
+      throw Exception(response['message']);
     }
+
+    oum.user ??= response['user'];
+    await addUserToOccasion(oum.user!, oum.occasion!);
 
     if(oum.user!=null){
       await _supabase.from(Tb.occasion_users.table).upsert(
@@ -239,11 +251,11 @@ class DbUsers {
   }
 
   static Future<void> deleteOccasionUser(String user, int occasion) async {
-    await _supabase.rpc("delete_occasion_user",
+    await _supabase.rpc("delete_occasion_user_ws",
         params:
         {
-          "usr": user,
-          "oc": occasion
+          "usr_to_delete": user,
+          "occasion_id": occasion
         });
   }
 

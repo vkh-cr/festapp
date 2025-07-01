@@ -78,7 +78,7 @@ class FormResponseModel extends ITrinaRowModel {
         continue;
       }
       var rValue =
-      Utilities.removeTabsAndNewLines(fields![f.id.toString()] ?? "");
+      Utilities.removeTabsAndNewLines((fields![f.id.toString()] ?? "").toString());
       cells[f.id.toString()] = TrinaCell(value: rValue);
     }
 

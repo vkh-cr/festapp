@@ -14,66 +14,78 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/html_view.dart';
 import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 
 import '../widgets_editor/form_fields_generator.dart';
 
-/// Global constant for hidden item opacity
 const double kHiddenOpacity = 0.5;
 
 class FormEditorContent extends StatefulWidget {
-  const FormEditorContent({super.key});
+  final String formLink;
+  final VoidCallback? onDataUpdated;
+  const FormEditorContent({super.key, required this.formLink, this.onDataUpdated});
 
   @override
   _FormEditorContentState createState() => _FormEditorContentState();
 }
 
 class _FormEditorContentState extends State<FormEditorContent> {
-  FormModel? form;
-  String? formLink;
+  FormEditBundle? _bundle;
+  String? _formLink;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.params.isNotEmpty) {
-      formLink = context.routeData.params.getString("formLink");
+    final newFormLink = widget.formLink;
+    if (newFormLink != _formLink) {
+      _formLink = newFormLink;
+      loadData();
     }
-    loadData();
   }
 
   Future<void> loadData() async {
-    form = await DbForms.getFormForEdit(formLink!);
+    if (_formLink == null) return;
+    final bundle = await DbForms.getFormForEdit(_formLink!);
     if (mounted) {
-      setState(() {});
+      setState(() {
+        _bundle = bundle;
+      });
     }
   }
 
   Future<void> saveChanges() async {
-    if (form == null || form!.relatedFields == null) return;
-    // Update order for form fields
-    form!.relatedFields!
-        .sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
-    for (int i = 0; i < form!.relatedFields!.length; i++) {
-      form!.relatedFields![i].order = i;
+    // UPDATED: Check for bundle and use bundle.form
+    if (_bundle == null || _bundle!.form.relatedFields == null) return;
+    final form = _bundle!.form;
+
+    form.relatedFields!.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+    for (int i = 0; i < form.relatedFields!.length; i++) {
+      form.relatedFields![i].order = i;
     }
 
-    // Update order for products within each product type field
-    for (final field in form!.relatedFields!) {
+    for (final field in form.relatedFields!) {
       if (field.isTicketField == true &&
           field.type == FormHelper.fieldTypeProductType &&
           field.productType != null &&
           field.productType!.products != null) {
-        field.productType!.products!
-            .sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+        field.productType!.products!.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
         for (int i = 0; i < field.productType!.products!.length; i++) {
           field.productType!.products![i].order = i;
         }
       }
     }
 
-    await DbForms.updateForm(context, form!);
-    ToastHelper.Show(context, "${"Saved".tr()}: ${form?.link}");
-    loadData();
+    try {
+      await DbForms.updateForm(form);
+      if (!mounted) return;
+      ToastHelper.Show(context, "${"Saved".tr()}: ${form.link}", severity: ToastSeverity.Ok);
+      await loadData();
+      widget.onDataUpdated?.call();
+    } catch (e) {
+      if (!mounted) return;
+      ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""), severity: ToastSeverity.NotOk);
+    }
   }
 
   void cancelEdit() {
@@ -81,7 +93,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   List<String> get _availableFieldTypes {
-    final existingTypes = form?.relatedFields?.map((f) => f.type).toList() ?? [];
+    final existingTypes = _bundle?.form.relatedFields?.map((f) => f.type).toList() ?? [];
     return FormHelper.fieldTypeIcons.keys.where((type) {
       if ([
         FormHelper.fieldTypeText,
@@ -95,7 +107,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   Widget _buildFormOpenToggleAndOffTextEditor() {
-    if (form == null) return const SizedBox.shrink();
+    if (_bundle == null) return const SizedBox.shrink();
+    final form = _bundle!.form;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Column(
@@ -104,14 +117,14 @@ class _FormEditorContentState extends State<FormEditorContent> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Form is open".tr()),
+              Text(FeaturesStrings.statusOpen),
               Switch(
-                value: form!.isOpen ?? true,
+                value: form.isOpen ?? true,
                 onChanged: RightsService.canEditOccasion()
                     ? (value) {
                   if (mounted) {
                     setState(() {
-                      form!.isOpen = value;
+                      form.isOpen = value;
                     });
                   }
                 }
@@ -119,10 +132,10 @@ class _FormEditorContentState extends State<FormEditorContent> {
               ),
             ],
           ),
-          if (!(form!.isOpen ?? true)) ...[
+          if (!(form.isOpen ?? true)) ...[
             const SizedBox(height: 12),
             Text(
-              "This form is currently turned off".tr(),
+              FeaturesStrings.formTurnedOff,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: ThemeConfig.redColor(context),
@@ -134,10 +147,10 @@ class _FormEditorContentState extends State<FormEditorContent> {
               thickness: 1,
               color: Colors.grey,
             ),
-            if (form!.headerOff?.isNotEmpty ?? false)
+            if (form.headerOff?.isNotEmpty ?? false)
               IntrinsicWidth(
                 child: HtmlView(
-                  html: form!.headerOff!,
+                  html: form.headerOff!,
                   isSelectable: true,
                 ),
               ),
@@ -145,16 +158,16 @@ class _FormEditorContentState extends State<FormEditorContent> {
             Center(
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.edit),
-                label: Text("Edit off text".tr()),
+                label: Text(FeaturesStrings.editOffText),
                 onPressed: () async {
                   final result = await RouterService.navigatePageInfo(
                     context,
                     HtmlEditorRoute(
-                        content: {HtmlEditorPage.parContent: form!.headerOff ?? ''},
-                        occasionId: form!.occasion),
+                        content: {HtmlEditorPage.parContent: form.headerOff ?? ''},
+                        occasionId: form.occasion),
                   );
                   if (result != null && mounted) {
-                    setState(() => form!.headerOff = result as String);
+                    setState(() => form.headerOff = result as String);
                   }
                 },
               ),
@@ -166,7 +179,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   void _addNewField() async {
-    if (form == null) return;
+    if (_bundle == null) return;
 
     final availableTypes = _availableFieldTypes;
     final personalInfoTypes = FormHelper.personalInfoFields
@@ -186,8 +199,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
         if (personalInfoTypes.isNotEmpty) {
           resolvedItemsForDialog.add(
               PopupMenuButton<String>(
-                tooltip: "Personal Info".tr(),
-                offset: isWideScreen ? const Offset(230, 0) : Offset.zero, // Modified Offset
+                tooltip: FeaturesStrings.personalInfo,
+                offset: isWideScreen ? const Offset(160, 0) : const Offset(20, 0),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
                 onSelected: (String type) {
                   Navigator.of(dialogContext).pop(type);
@@ -208,7 +221,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 },
                 child: ListTile(
                   leading: Icon(Icons.person_search_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
-                  title: Text("Personal Info".tr()),
+                  title: Text(FeaturesStrings.personalInfo),
                   trailing: Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodyLarge?.color),
                   dense: true,
                 ),
@@ -233,19 +246,18 @@ class _FormEditorContentState extends State<FormEditorContent> {
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text("No fields available to add.".tr()),
+                  child: Text(FeaturesStrings.noFieldsAvailable),
                 ),
               )
           );
         }
 
-
         return AlertDialog(
-          title: Text("Add Field".tr()),
+          title: Text(FeaturesStrings.addFieldTitle),
           contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
           content: SizedBox(
-            width: 280, // You might want to make this responsive or remove fixed width
+            width: 280,
             child: ListView(
               shrinkWrap: true,
               children: resolvedItemsForDialog,
@@ -255,26 +267,24 @@ class _FormEditorContentState extends State<FormEditorContent> {
       },
     );
 
-
     if (finalSelectedType != null) {
       _addFieldOfType(finalSelectedType);
     }
   }
 
   void _addFieldOfType(String type) {
-    if (!mounted || form == null || form!.relatedFields == null) return;
-
+    if (!mounted || _bundle == null || _bundle!.form.relatedFields == null) return;
+    final form = _bundle!.form;
     final newField = FormFieldModel(
       type: type,
-      order: form!.relatedFields!.length,
+      order: form.relatedFields!.length,
       isRequired: FormHelper.isAlwaysRequired(type),
       isHidden: false,
       isTicketField: false,
     );
 
     setState(() {
-      // Create a new list instance to ensure Flutter detects the change.
-      form!.relatedFields = List.from(form!.relatedFields!)..add(newField);
+      form.relatedFields = List.from(form.relatedFields!)..add(newField);
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -298,7 +308,9 @@ class _FormEditorContentState extends State<FormEditorContent> {
           FloatingActionButton(
             heroTag: "viewFormFab",
             onPressed: () {
-              RouterService.navigate(context, "${FormPage.ROUTE}/$formLink");
+              if(_formLink != null) {
+                RouterService.navigate(context, "${FormPage.ROUTE}/$_formLink");
+              }
             },
             child: const Icon(Icons.remove_red_eye_rounded),
           ),
@@ -307,13 +319,14 @@ class _FormEditorContentState extends State<FormEditorContent> {
             FloatingActionButton(
               heroTag: "addFieldFab",
               onPressed: _addNewField,
-              tooltip: 'Add Field'.tr(),
+              tooltip: FeaturesStrings.addFieldTitle,
               child: const Icon(Icons.add),
             ),
           const SizedBox.square(dimension: 64),
         ],
       ),
-      body: form == null
+      // UPDATED: Check for bundle
+      body: _bundle == null
           ? const Center(child: CircularProgressIndicator())
           : Align(
         alignment: Alignment.topCenter,
@@ -333,22 +346,23 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (form!.header?.isNotEmpty ?? false)
-                        HtmlView(html: form!.header!, isSelectable: true),
+                      // UPDATED: Use bundle.form
+                      if (_bundle!.form.header?.isNotEmpty ?? false)
+                        HtmlView(html: _bundle!.form.header!, isSelectable: true),
                       const SizedBox(height: 16),
                       Center(
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.edit),
-                          label: Text("Edit content".tr()),
+                          label: Text(FeaturesStrings.editContent),
                           onPressed: () async {
                             final result = await RouterService.navigatePageInfo(
                               context,
                               HtmlEditorRoute(
-                                  content: {HtmlEditorPage.parContent: form!.header ?? ""},
-                                  occasionId: form!.occasion),
+                                  content: {HtmlEditorPage.parContent: _bundle!.form.header ?? ""},
+                                  occasionId: _bundle!.form.occasion),
                             );
                             if (result != null && mounted) {
-                              setState(() => form!.header = result as String);
+                              setState(() => _bundle!.form.header = result as String);
                             }
                           },
                         ),
@@ -361,14 +375,13 @@ class _FormEditorContentState extends State<FormEditorContent> {
                     children: [
                       const SizedBox(height: 8),
                       Text(
-                        "Drag to reorder fields".tr(),
+                        FeaturesStrings.dragToReorder,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Delegate the field‐generation UI to the separate widget.
-                  FormFieldsGenerator(form: form!),
+                  FormFieldsGenerator(bundle: _bundle!),
                   const SizedBox(height: 102),
                 ],
               ),

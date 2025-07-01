@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/import/import_dialog_helper.dart';
 import 'package:fstapp/components/single_data_grid/i_has_id.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -12,13 +13,13 @@ import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/services/user_management_helper.dart';
+import 'package:fstapp/components/users/user_management_helper.dart';
 
 class UsersTabHelper {
   /// Calls the import routine and then reloads users via the provided callback.
   static Future<void> importUsers(
       BuildContext context, Future<void> Function() reloadUsers) async {
-    await UserManagementHelper.import(context);
+    await ImportDialogHelper.import(context);
     await reloadUsers();
   }
 
@@ -37,10 +38,18 @@ class UsersTabHelper {
       BuildContext context, SingleDataGridController singleDataGrid) async {
     var users = getCheckedUsers(singleDataGrid);
     if (users.isEmpty) return;
+
+    List<String> errorMessages = [];
     for (var u in users) {
-      await UserManagementHelper.unsafeChangeUserPassword(context, u);
+      try {
+        await UserManagementHelper.unsafeChangeUserPassword(context, u);
+        ToastHelper.Show(context, "Password has been changed.".tr());
+      } catch (e) {
+        String errorMessage = "Failed for user ${u.data?[Tb.occasion_users.data_email] ?? '[no email]'}: ${e.toString()}".tr();
+        ToastHelper.Show(context, errorMessage, severity: ToastSeverity.NotOk);
+        errorMessages.add(errorMessage);
+      }
     }
-    ToastHelper.Show(context, "Password has been changed.".tr());
   }
 
   /// Opens the add-to-group dialog and updates the group with checked users.

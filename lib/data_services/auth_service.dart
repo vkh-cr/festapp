@@ -194,14 +194,16 @@ class AuthService {
     return resp.data;
   }
 
-  static Future<String?> unsafeChangeUserPassword(OccasionUserModel occasionUserModel, String pwd) async {
-    return await _supabase.rpc("set_user_password",
+  static Future<void> unsafeChangeUserPassword(OccasionUserModel occasionUserModel, String pwd) async {
+    var data = await _supabase.rpc("reset_user_password",
         params:
         {
-          "usr": occasionUserModel.user,
-          "oc": occasionUserModel.occasion??RightsService.currentOccasionId(),
-          "password": pwd
+          "p_user_id": occasionUserModel.user,
+          "p_password": pwd
         });
+    if(data["code"] != 200){
+      throw Exception(data["message"]);
+    }
   }
 
   static Future<void> changeMyPassword(String pw) async {

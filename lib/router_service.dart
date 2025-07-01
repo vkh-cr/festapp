@@ -120,6 +120,7 @@ class RouterService {
     RightsService.occasionLinkModel = checkedObject;
     RightsService.currentLink = checkedObject.occasion?.link;
     AppConfigService.versionRecommended = checkedObject.versionRecommended;
+    AppConfigService.versionLink = checkedObject.versionLink;
 
     if (checkedObject.occasion?.link != RouterService.currentOccasionLink &&
         checkedObject.isAvailable()) {
