@@ -668,6 +668,7 @@
     "noType": "Bez typu"
   },
   "FeatureImport": {
+    "importFeatureDescription": "Umožňuje import uživatelů z různých zdrojů, jako jsou soubory CSV nebo vstupenky.",
     "labelImportFromCsv": "Importovat z CSV",
     "labelImportFromTickets": "Importovat ze vstupenek",
     "importFromTicketsSuccess": "Import ze vstupenek byl úspěšný.",
