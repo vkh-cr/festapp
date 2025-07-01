@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/data_services/db_users.dart';
@@ -94,7 +95,7 @@ class TicketsImportHelper {
         context,
         FeaturesStrings.importResultsTitle,
         message,
-        confirmButtonMessage: FeaturesStrings.ok,
+        confirmButtonMessage: "Ok".tr(),
       );
     } catch (e) {
       // Show an error toast if any part of the process fails.
