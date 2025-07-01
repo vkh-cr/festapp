@@ -12,7 +12,7 @@ import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/pages/occasionAdmin/user_columns.dart';
+import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/pages/occasionAdmin/users_tab_helper.dart';
 
 class UsersTab extends StatefulWidget {
@@ -46,6 +46,8 @@ class _UsersTabState extends State<UsersTab> {
       if (FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
         UserColumns.APPROVED,
       UserColumns.INVITED,
+      UserColumns.CREATED_AT,
+      UserColumns.LAST_SIGN_IN_AT,
     ];
 
     final importFeature =

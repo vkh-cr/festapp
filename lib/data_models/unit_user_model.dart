@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_services/db_users.dart';
-import 'package:fstapp/pages/occasionAdmin/user_columns.dart';
+import 'package:fstapp/components/users/user_columns.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models/tb.dart';
