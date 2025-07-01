@@ -642,6 +642,7 @@
   "Enter message for users trying to register too early": "Zadejte zprávu pro uživatele, kteří se pokoušejí registrovat příliš brzy",
   "Nationality": "Státní příslušnost",
   "Registration": "Přihláška",
+  "Constraints": "Omezení",
   "FeatureSchedule": {
     "labelScheduleType": "Typ programu",
     "optionBasic": "základní",
@@ -667,6 +668,7 @@
     "noType": "Bez typu"
   },
   "FeatureImport": {
+    "importFeatureDescription": "Umožňuje import uživatelů z různých zdrojů, jako jsou soubory CSV nebo vstupenky.",
     "labelImportFromCsv": "Importovat z CSV",
     "labelImportFromTickets": "Importovat ze vstupenek",
     "importFromTicketsSuccess": "Import ze vstupenek byl úspěšný.",
@@ -750,6 +752,35 @@
     "applications": "Přihlášky",
     "application": "Přihláška"
   },
-  "Constraints": "Omezení",
+  "UserColumns": {
+    "id": "Id",
+    "unit": "Jednotka",
+    "email": "E-mail",
+    "name": "Jméno",
+    "surname": "Příjmení",
+    "sex": "Pohlaví",
+    "accommodation": "Ubytování",
+    "phone": "Telefon",
+    "birthday": "Datum narození",
+    "role": "Role",
+    "text1": "Text1",
+    "text2": "Text2",
+    "text3": "Číslo týmu (hra)",
+    "note": "Poznámka",
+    "diet": "Dieta",
+    "form": "Formulář",
+    "orderedAt": "Objednávka vytvořena",
+    "createdAt": "Vytvořen",
+    "lastSignInAt": "Poslední přihlášení",
+    "volunteer": "Dobrovolník",
+    "administrator": "Správce",
+    "editor": "Editor",
+    "readOnly": "Pouze čtení",
+    "editOrders": "Úprava objednávky",
+    "readOrders": "Čtení objednávky",
+    "approver": "Schvalovatel",
+    "approved": "Schváleno",
+    "invited": "Pozván"
+  },
   "_": "_"
 }
