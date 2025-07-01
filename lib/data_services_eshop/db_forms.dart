@@ -160,15 +160,13 @@ class DbForms {
     form.relatedFields = formFields;
 
     // Find and assign the selected bank account model to the form.
-    if (form.bankAccount != null) {
+    if (availableBankAccounts.isNotEmpty) {
       if(form.bankAccountId != null) {
         form.bankAccount = availableBankAccounts.firstWhereOrNull(
                 (ba) => ba.id == form.bankAccountId
         );
       } else {
-        form.bankAccount = availableBankAccounts.firstWhereOrNull(
-                (ba) => ba.id == form.bankAccount!.id
-        );
+        form.availableBankAccounts = availableBankAccounts;
       }
     }
 
