@@ -22,7 +22,7 @@ class AppConfigService {
       String currentVersion = packageInfo.version;
 
       if (_isVersionOutdated(currentVersion, versionRecommended!)) {
-        bool updateConfirmed = await DialogHelper.showConfirmationDialogAsync(
+        bool updateConfirmed = await DialogHelper.showConfirmationDialog(
             context,
             "New Version Available".tr(),
             "Update the app to the latest version to access all features.".tr(),

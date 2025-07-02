@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { authorizeRequest, AuthError } from "../_shared/auth.ts";
 
 const _PROJECT_URL = Deno.env.get("PROJECT_URL")!;
 
@@ -18,36 +19,10 @@ Deno.serve(async (req) => {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // Parse request body and check for the request secret.
+    // Parse request body and authorize using the request secret.
     const requestData = await req.json();
     const { requestSecret } = requestData;
-    if (!requestSecret) {
-      return new Response(
-        JSON.stringify({ error: "Missing request secret" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        }
-      );
-    }
-
-    // Validate the request secret using the "check_request_secret" RPC.
-    const { data: secretValid, error: secretError } = await supabaseAdmin.rpc(
-      "check_request_secret",
-      { p_secret: requestSecret }
-    );
-    if (secretError || !secretValid) {
-      console.error("Invalid request secret", secretError);
-      return new Response(
-        JSON.stringify({ error: "Invalid request secret" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 403,
-        }
-      );
-    }
-
-    // --- PART 1: Process Bank Accounts Transactions ---
+    await authorizeRequest({ requestSecret });
 
     // Retrieve all fetchable bank accounts (returns bank_account_id, bank_secret, and account_type).
     const { data: bankAccounts, error: bankAccountsError } = await supabaseAdmin.rpc("get_fetchable_bank_accounts");
@@ -178,10 +153,16 @@ Deno.serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
-    return new Response(JSON.stringify({ error: "Unexpected error occurred" }), {
+    // Handle both custom AuthError and any other unexpected errors.
+    const isAuthError = error instanceof AuthError;
+    const status = isAuthError ? error.status : 500;
+    const message = error.message || "Unexpected error occurred";
+
+    console.error(`Error [${status}]: ${message}`, isAuthError ? '' : error);
+
+    return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: status,
     });
   }
 });

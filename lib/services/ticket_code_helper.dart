@@ -45,7 +45,7 @@ class TicketCodeHelper {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             Future<void> handleGenerateCode() async {
-              bool confirm = await DialogHelper.showConfirmationDialogAsync(
+              bool confirm = await DialogHelper.showConfirmationDialog(
                   context,
                   titleMessage,
                   "By generating a new code, the old one will be replaced and will no longer work.".tr()

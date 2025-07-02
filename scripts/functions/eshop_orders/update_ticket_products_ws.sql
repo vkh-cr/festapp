@@ -41,23 +41,43 @@ BEGIN
   END IF;
 
   /* compute old/new ID arrays and bail early if identical */
-  SELECT array_agg((prod->>'id')::bigint ORDER BY (prod->>'id')::bigint)
+  -- CORRECTED: Guard against non-array jsonb values for 'tickets' and 'products'
+  SELECT array_agg((product_obj->>'id')::bigint ORDER BY (product_obj->>'id')::bigint)
     INTO v_old_ids
-  FROM jsonb_array_elements(v_old_data->'tickets') AS ticket(ticket_obj)
-  CROSS JOIN LATERAL jsonb_array_elements(ticket_obj->'products') AS prod(product_obj)
+  FROM jsonb_array_elements(
+         CASE WHEN jsonb_typeof(v_old_data->'tickets') = 'array'
+              THEN v_old_data->'tickets'
+              ELSE '[]'::jsonb END
+       ) AS ticket(ticket_obj)
+  CROSS JOIN LATERAL jsonb_array_elements(
+         CASE WHEN jsonb_typeof(ticket.ticket_obj->'products') = 'array'
+              THEN ticket.ticket_obj->'products'
+              ELSE '[]'::jsonb END
+       ) AS prod(product_obj)
   WHERE (ticket.ticket_obj->>'id')::bigint = p_ticket_id;
+
   SELECT array_agg(pid ORDER BY pid)
     INTO v_new_ids
   FROM unnest(p_product_ids) AS pid;
-  IF v_old_ids IS NOT NULL AND v_old_ids = v_new_ids THEN
+
+  IF v_old_ids IS NOT DISTINCT FROM v_new_ids THEN
     RETURN jsonb_build_object('code',200,'data',v_old_data);
   END IF;
 
   /* 1) old subtotal */
-  SELECT COALESCE(SUM((prod->>'price')::numeric),0)
+  -- CORRECTED: Guard against non-array jsonb values to prevent "scalar" error.
+  SELECT COALESCE(SUM((product_obj->>'price')::numeric),0)
     INTO v_sum_old
-  FROM jsonb_array_elements(v_old_data->'tickets') AS ticket(ticket_obj)
-  CROSS JOIN LATERAL jsonb_array_elements(ticket_obj->'products') AS prod(product_obj)
+  FROM jsonb_array_elements(
+         CASE WHEN jsonb_typeof(v_old_data->'tickets') = 'array'
+              THEN v_old_data->'tickets'
+              ELSE '[]'::jsonb END
+       ) AS ticket(ticket_obj)
+  CROSS JOIN LATERAL jsonb_array_elements(
+         CASE WHEN jsonb_typeof(ticket.ticket_obj->'products') = 'array'
+              THEN ticket.ticket_obj->'products'
+              ELSE '[]'::jsonb END
+       ) AS prod(product_obj)
   WHERE (ticket.ticket_obj->>'id')::bigint = p_ticket_id;
 
   /* 2) new products JSON + subtotal */
@@ -78,32 +98,76 @@ BEGIN
   WHERE p.occasion = v_occasion_id;
 
   /* 3) rewrite just that ticket’s products array in orders.data */
+  -- CORRECTED: Guard 'tickets' array and ensure new products list is '[]', not null.
   SELECT jsonb_set(
     v_old_data,
     '{tickets}',
-    (
-      SELECT jsonb_agg(
-        CASE WHEN (tckt->>'id')::bigint = p_ticket_id
-             THEN tckt || jsonb_build_object('products', v_products_json)
-             ELSE tckt
-        END
-      )
-      FROM jsonb_array_elements(v_old_data->'tickets') AS tckt
+    COALESCE(
+      (
+        SELECT jsonb_agg(
+          CASE WHEN (tckt->>'id')::bigint = p_ticket_id
+               THEN tckt || jsonb_build_object('products', COALESCE(v_products_json, '[]'::jsonb))
+               ELSE tckt
+          END
+        )
+        FROM jsonb_array_elements(
+               CASE WHEN jsonb_typeof(v_old_data->'tickets') = 'array'
+                    THEN v_old_data->'tickets'
+                    ELSE '[]'::jsonb END
+             ) AS tckt
+      ),
+      '[]'::jsonb
     )
   ) INTO v_new_data;
+
   UPDATE eshop.orders
      SET data = v_new_data
    WHERE id = v_order_id;
 
-  /* 4) replace the link‐table rows, but keep one with product=NULL if empty */
-  DELETE FROM eshop.order_product_ticket WHERE ticket = p_ticket_id;
+  /* 4) granularly update the link‐table rows */
+  -- Unlink spots from products that will be *removed*.
+  UPDATE eshop.spots
+     SET order_product_ticket = NULL
+   WHERE order_product_ticket IN (
+      SELECT opt.id
+      FROM eshop.order_product_ticket opt
+      WHERE opt.ticket = p_ticket_id
+        AND opt.product IN (
+          SELECT unnest FROM unnest(v_old_ids)
+          EXCEPT
+          SELECT unnest FROM unnest(p_product_ids)
+        )
+   );
+
+  -- Delete rows for products that were removed from the ticket.
+  DELETE FROM eshop.order_product_ticket
+   WHERE ticket = p_ticket_id
+     AND product IN (
+        SELECT unnest FROM unnest(v_old_ids)
+        EXCEPT
+        SELECT unnest FROM unnest(p_product_ids)
+     );
+
+  -- If we are adding products, we must also remove the NULL placeholder if it exists.
+  IF cardinality(p_product_ids) > 0 THEN
+    DELETE FROM eshop.order_product_ticket
+    WHERE ticket = p_ticket_id AND product IS NULL;
+  END IF;
+
+  -- Insert rows for products that were added to the ticket.
+  INSERT INTO eshop.order_product_ticket ("order", ticket, product)
+  SELECT v_order_id, p_ticket_id, new_pid
+    FROM (
+      SELECT unnest FROM unnest(p_product_ids)
+      EXCEPT
+      SELECT unnest FROM unnest(v_old_ids)
+    ) AS t(new_pid);
+
+  -- If the final state should be empty, ensure the NULL placeholder exists.
   IF cardinality(p_product_ids) = 0 THEN
     INSERT INTO eshop.order_product_ticket("order", ticket, product)
-    VALUES (v_order_id, p_ticket_id, NULL);
-  ELSE
-    INSERT INTO eshop.order_product_ticket("order", ticket, product)
-      SELECT v_order_id, p_ticket_id, pid
-        FROM unnest(p_product_ids) AS pid;
+      SELECT v_order_id, p_ticket_id, NULL
+      WHERE NOT EXISTS (SELECT 1 FROM eshop.order_product_ticket WHERE ticket = p_ticket_id);
   END IF;
 
   /* 5) adjust payment_info.amount and order.price by the delta */
