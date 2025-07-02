@@ -124,15 +124,50 @@ BEGIN
      SET data = v_new_data
    WHERE id = v_order_id;
 
-  /* 4) replace the link‐table rows, but keep one with product=NULL if empty */
-  DELETE FROM eshop.order_product_ticket WHERE ticket = p_ticket_id;
+  /* 4) granularly update the link‐table rows */
+  -- Unlink spots from products that will be *removed*.
+  UPDATE eshop.spots
+     SET order_product_ticket = NULL
+   WHERE order_product_ticket IN (
+      SELECT opt.id
+      FROM eshop.order_product_ticket opt
+      WHERE opt.ticket = p_ticket_id
+        AND opt.product IN (
+          SELECT unnest FROM unnest(v_old_ids)
+          EXCEPT
+          SELECT unnest FROM unnest(p_product_ids)
+        )
+   );
+
+  -- Delete rows for products that were removed from the ticket.
+  DELETE FROM eshop.order_product_ticket
+   WHERE ticket = p_ticket_id
+     AND product IN (
+        SELECT unnest FROM unnest(v_old_ids)
+        EXCEPT
+        SELECT unnest FROM unnest(p_product_ids)
+     );
+
+  -- If we are adding products, we must also remove the NULL placeholder if it exists.
+  IF cardinality(p_product_ids) > 0 THEN
+    DELETE FROM eshop.order_product_ticket
+    WHERE ticket = p_ticket_id AND product IS NULL;
+  END IF;
+
+  -- Insert rows for products that were added to the ticket.
+  INSERT INTO eshop.order_product_ticket ("order", ticket, product)
+  SELECT v_order_id, p_ticket_id, new_pid
+    FROM (
+      SELECT unnest FROM unnest(p_product_ids)
+      EXCEPT
+      SELECT unnest FROM unnest(v_old_ids)
+    ) AS t(new_pid);
+
+  -- If the final state should be empty, ensure the NULL placeholder exists.
   IF cardinality(p_product_ids) = 0 THEN
     INSERT INTO eshop.order_product_ticket("order", ticket, product)
-    VALUES (v_order_id, p_ticket_id, NULL);
-  ELSE
-    INSERT INTO eshop.order_product_ticket("order", ticket, product)
-      SELECT v_order_id, p_ticket_id, pid
-        FROM unnest(p_product_ids) AS pid;
+      SELECT v_order_id, p_ticket_id, NULL
+      WHERE NOT EXISTS (SELECT 1 FROM eshop.order_product_ticket WHERE ticket = p_ticket_id);
   END IF;
 
   /* 5) adjust payment_info.amount and order.price by the delta */
