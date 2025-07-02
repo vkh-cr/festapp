@@ -201,7 +201,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     );
 
     if (deleteList.isNotEmpty) {
-      var result = await DialogHelper.showConfirmationDialogAsync(
+      var result = await DialogHelper.showConfirmationDialog(
         context,
         "Confirm removal".tr(),
         "${"Items".tr()}:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",
@@ -265,7 +265,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
   }
 
   Future<void> _cancelChanges() async {
-    var result = await DialogHelper.showConfirmationDialogAsync(
+    var result = await DialogHelper.showConfirmationDialog(
       context,
       "Discard changes".tr(),
       "Really discard all changes?".tr(),
