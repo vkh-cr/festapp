@@ -106,7 +106,7 @@ class _TicketsTabState extends State<TicketsTab> {
       return;
     }
 
-    var confirm = await DialogHelper.showConfirmationDialogAsync(
+    var confirm = await DialogHelper.showConfirmationDialog(
       context,
       FeaturesStrings.cancel,
       "${FeaturesStrings.cancelItemsConfirmationText} (${selectedTickets.length})",

@@ -1,4 +1,4 @@
-import { Client } from "https://deno.land/x/postgres/mod.ts";
+import { Client } from "jsr:@db/postgres";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
