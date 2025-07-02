@@ -171,12 +171,15 @@ class _ProductsDialogState extends State<ProductsDialog> {
         ? "${_bundle!.order.data!["name"] ?? ""} ${_bundle!.order.data!["surname"] ?? ""}"
         : FeaturesStrings.dialogTitleFallback;
 
+    // Combine order symbol and customer name for the title
+    final dialogTitle = "${_bundle?.order.toBasicString() ?? ""} $customerName".trim();
+
     return AlertDialog(
       insetPadding: const EdgeInsets.all(16),
       titlePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       title: Row(
         children: [
-          Expanded(child: SelectableText(customerName)),
+          Expanded(child: SelectableText(dialogTitle)),
           IconButton(
             icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop(false),
