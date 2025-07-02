@@ -114,6 +114,35 @@ class FeaturesStrings {
   static String get applications => 'FeatureOrders.applications'.tr();
   static String get application => 'FeatureOrders.application'.tr();
 
+  // --- Products Dialog ---
+  static String get productsUpdateSuccess => 'ProductsDialog.productsUpdateSuccess'.tr();
+  static String get productsUpdateFailed => 'ProductsDialog.productsUpdateFailed'.tr();
+  static String get sendUpdateTitle => 'ProductsDialog.sendUpdateTitle'.tr();
+  static String sendUpdateContent(String email) => 'ProductsDialog.sendUpdateContent'.tr(namedArgs: {'email': email});
+  static String get sendUpdateItemSummary => 'ProductsDialog.sendUpdateItemSummary'.tr();
+  static String get sendUpdateItemStatus => 'ProductsDialog.sendUpdateItemStatus'.tr();
+  static String get sendUpdateItemQr => 'ProductsDialog.sendUpdateItemQr'.tr();
+  static String get sendUpdateItemRefund => 'ProductsDialog.sendUpdateItemRefund'.tr();
+  static String get sendEmailButton => 'ProductsDialog.sendEmailButton'.tr();
+  static String get sendEmailFailed => 'ProductsDialog.sendEmailFailed'.tr();
+  static String get sendEmailSuccess => 'ProductsDialog.sendEmailSuccess'.tr();
+  static String get dialogTitleFallback => 'ProductsDialog.dialogTitleFallback'.tr();
+  static String get originalPrice => 'ProductsDialog.originalPrice'.tr();
+  static String get currentPrice => 'ProductsDialog.currentPrice'.tr();
+  static String get priceChange => 'ProductsDialog.priceChange'.tr();
+  static String get noProducts => 'ProductsDialog.noProducts'.tr();
+  static String get addBackTooltip => 'ProductsDialog.addBackTooltip'.tr();
+  static String get removeTooltip => 'ProductsDialog.removeTooltip'.tr();
+  static String get addProductsButton => 'ProductsDialog.addProductsButton'.tr();
+  static String get infoTicketSymbol => 'ProductsDialog.infoTicketSymbol'.tr();
+  static String get infoEmail => 'ProductsDialog.infoEmail'.tr();
+  static String get infoOrderStatus => 'ProductsDialog.infoOrderStatus'.tr();
+  static String get infoPayment => 'ProductsDialog.infoPayment'.tr();
+  static String get outdatedTitle => 'ProductsDialog.outdatedTitle'.tr();
+  static String get outdatedSubtitle => 'ProductsDialog.outdatedSubtitle'.tr();
+  static String get sendUpdateButton => 'ProductsDialog.sendUpdateButton'.tr();
+
+
   /// Returns "Tickets" or "Applications" based on whether the ticket feature is enabled.
   static String get itemsPlural {
     if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
