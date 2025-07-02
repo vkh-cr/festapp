@@ -121,7 +121,7 @@ class UsersTabHelper {
         .toList();
 
     if (alreadyInvitedUsers.isNotEmpty) {
-      var reinviteConfirm = await DialogHelper.showConfirmationDialogAsync(
+      var reinviteConfirm = await DialogHelper.showConfirmationDialog(
         context,
         "Invite".tr(),
         "Some users have already been invited. Do you want to invite them again and send a new sign-in code?"
@@ -141,7 +141,7 @@ class UsersTabHelper {
   static Future<void> processInvites(
       BuildContext context, List<OccasionUserModel> users,
       {int retryLimit = 3}) async {
-    var confirm = await DialogHelper.showConfirmationDialogAsync(
+    var confirm = await DialogHelper.showConfirmationDialog(
       context,
       "Invite".tr(),
       "${"Users will get a sign-in code via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}",
