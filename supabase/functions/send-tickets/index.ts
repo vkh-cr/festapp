@@ -1,7 +1,8 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { generateTicketImage, fetchTicketResources } from "../_shared/generateTicket.ts";
 import { generateNamedTicketImage, fetchNamedTicketResources } from "../_shared/generateNamedTicket.ts";
-import { getEmailTemplateAndWrapper, supabaseAdmin, isUserEditorOrder, getSupabaseUser } from "../_shared/supabaseUtil.ts";
+import { getEmailTemplateAndWrapper, supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { authorizeRequest, AuthError } from "../_shared/auth.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -25,55 +26,32 @@ Deno.serve(async (req) => {
     const reqData = await req.json();
     const { requestSecret, orderId, email } = reqData;
 
-    // If a request secret is provided, validate it and skip user authentication/editor check.
-    let skipEditorCheck = false;
-    if (requestSecret) {
-      const { data: secretValid, error: secretError } = await supabaseAdmin.rpc("check_request_secret", { p_secret: requestSecret });
-      if (secretError || !secretValid) {
-        console.error("Invalid request secret", secretError);
-        return new Response(JSON.stringify({ error: "Invalid request secret" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 403,
-        });
-      }
-      skipEditorCheck = true;
-    }
-
-    // If no valid secret is provided, require user authentication and check editor status.
-    if (!skipEditorCheck) {
-      const user = await getSupabaseUser(req.headers.get("Authorization")!);
-      if (!user) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 });
-      }
-      const userId = user.user.id;
-
-      // Fetch the order to get the occasion id.
-      const { data: orderForCheck, error: orderCheckError } = await supabaseAdmin.rpc("get_order", { order_id: orderId });
-      if (orderCheckError || !orderForCheck) {
-        console.error("Order not found", orderCheckError);
-        return new Response(JSON.stringify({ error: "Order not found" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 404,
-        });
-      }
-      const occasionId = orderForCheck.occasion;
-      const userIsEditor = await isUserEditorOrder(userId, occasionId);
-      if (!userIsEditor) {
-        console.error(`User ${userId} is not an editor for occasion ${occasionId}`);
-        return new Response(JSON.stringify({ error: "Forbidden: Not an editor" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 403,
-        });
-      }
-    }
-
-    // Validate input parameters.
+    // Validate input parameters first.
     if (typeof orderId !== "number" || typeof email !== "string") {
       return new Response(JSON.stringify({ error: "Invalid input parameters" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
     }
+
+    // Fetch the order to get the occasion id for authorization.
+    const { data: orderForCheck, error: orderCheckError } = await supabaseAdmin.rpc("get_order", { order_id: orderId });
+    if (orderCheckError || !orderForCheck) {
+      console.error("Order not found", orderCheckError);
+      return new Response(JSON.stringify({ error: "Order not found" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 404,
+      });
+    }
+    const occasionIdForAuth = orderForCheck.occasion;
+
+    // Perform authorization. This will throw an AuthError on failure.
+    await authorizeRequest({
+        requestSecret,
+        authorizationHeader: req.headers.get("Authorization"),
+        occasionId: occasionIdForAuth
+    });
+
 
     // Fetch the full order details (including occasion and order data).
     const { data: order, error: orderError } = await supabaseAdmin.rpc("get_order", { order_id: orderId });
@@ -211,10 +189,16 @@ Deno.serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
-    return new Response(JSON.stringify({ error: "Unexpected error occurred" }), {
+    // Handle both custom AuthError and any other unexpected errors.
+    const isAuthError = error instanceof AuthError;
+    const status = isAuthError ? error.status : 500;
+    const message = error.message || "Unexpected error occurred";
+
+    console.error(`Error [${status}]: ${message}`, isAuthError ? '' : error);
+
+    return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: status,
     });
   }
 });
