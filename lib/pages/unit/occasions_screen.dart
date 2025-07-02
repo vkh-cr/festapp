@@ -86,7 +86,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
 
   /// Handles creating a copy of the occasion after confirmation.
   Future<void> _handleCreateCopy(OccasionModel occasion) async {
-    final confirmation = await DialogHelper.showConfirmationDialogAsync(
+    final confirmation = await DialogHelper.showConfirmationDialog(
       context,
       "Create Copy".tr(),
       "Do you want to create copy of this event?".tr(),
