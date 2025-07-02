@@ -1,4 +1,5 @@
-import { getSupabaseUser, isUserEditorOrder, supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { authorizeRequest, AuthError } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,24 +41,11 @@ Deno.serve(async (req) => {
     const occasionId = occasionData.id;
     const unitId = occasionData.unit;
 
-    // 2. Authenticate the user and authorize as an editor for the occasion
-    const user = await getSupabaseUser(req.headers.get("Authorization")!);
-    if (!user) {
-        return new Response(JSON.stringify({ error: "Authentication failed" }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 401,
-        });
-    }
-    const userId = user.user.id;
-
-    const isEditor = await isUserEditorOrder(userId, occasionId);
-    if (!isEditor) {
-      console.error(`User ${userId} is not an editor for occasion ${occasionId}`);
-      return new Response(JSON.stringify({ error: "Forbidden: Not an editor" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 403,
-      });
-    }
+    // 2. Authorize the user as an editor for the occasion
+    await authorizeRequest({
+      authorizationHeader: req.headers.get("Authorization"),
+      occasionId: occasionId,
+    });
 
     // 3. Fetch all fetchable bank accounts for the unit using the new RPC function
     const { data: bankAccounts, error: accountsError } = await supabaseAdmin.rpc(
@@ -142,10 +130,16 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error("Unexpected error:", error);
-    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
+    // Handle both custom AuthError and any other unexpected errors.
+    const isAuthError = error instanceof AuthError;
+    const status = isAuthError ? error.status : 500;
+    const message = error.message || "An unexpected error occurred";
+
+    console.error(`Error [${status}]: ${message}`, isAuthError ? '' : error);
+
+    return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: status,
     });
   }
 });

@@ -137,7 +137,7 @@ class _OrdersTabState extends State<OrdersTab> {
     }
 
     if (selected.isNotEmpty) {
-      var confirm = await DialogHelper.showConfirmationDialogAsync(
+      var confirm = await DialogHelper.showConfirmationDialog(
           context,
           FeaturesStrings.cancel,
           "${FeaturesStrings.cancelOrdersConfirmationText} (${selected.length})"
@@ -176,7 +176,7 @@ class _OrdersTabState extends State<OrdersTab> {
     }
     var stateChange = selectedFull.where((s) => s.state == OrderModel.orderedState);
     if (stateChange.isNotEmpty) {
-      var confirm = await DialogHelper.showConfirmationDialogAsync(
+      var confirm = await DialogHelper.showConfirmationDialog(
           context,
           FeaturesStrings.changeStateToPaid,
           "${FeaturesStrings.changeStateToPaidConfirmation} (${stateChange.length})"
@@ -200,7 +200,7 @@ class _OrdersTabState extends State<OrdersTab> {
       }
     }
 
-    var confirm = await DialogHelper.showConfirmationDialogAsync(
+    var confirm = await DialogHelper.showConfirmationDialog(
         context,
         FeaturesStrings.sendActionText,
         "${FeaturesStrings.sendActionConfirmationText} (${selected.length})"
