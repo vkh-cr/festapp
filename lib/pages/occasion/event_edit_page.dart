@@ -108,7 +108,7 @@ class _EventEditPageState extends State<EventEditPage> {
   }
 
   Future<void> deleteEvent() async {
-    final confirmation = await DialogHelper.showConfirmationDialogAsync(
+    final confirmation = await DialogHelper.showConfirmationDialog(
       context,
       "Confirm removal".tr(),
       "Are you sure you want to delete this event?".tr(),
