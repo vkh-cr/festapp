@@ -48,7 +48,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
   }
 
   Future<void> _deleteCompanion(CompanionModel companion) async {
-    var answer = await DialogHelper.showConfirmationDialogAsync(
+    var answer = await DialogHelper.showConfirmationDialog(
         context,
         "Delete companion".tr(),
         "By deleting your companion you will also sign him/her out of all signed in sessions."

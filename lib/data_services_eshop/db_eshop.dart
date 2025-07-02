@@ -1,8 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/payment_info_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/data_models_eshop/product_type_model.dart';
+import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/data_models_eshop/transaction_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,6 +15,20 @@ class DbEshop {
   /// Fetches transactions based on a form link using a Supabase Function.
   static Future<FunctionResponse> fetchTransactions(String formLink) async {
     return await _supabase.functions.invoke("fetch-transactions", body: {"occasionLink": formLink});
+  }
+
+  static Future<FunctionResponse> sendTicketOrderUpdateEmail(int orderId) async {
+    final body = {
+      "templateCode": "TICKET_ORDER_UPDATE",
+      "data": { "orderId": orderId },
+    };
+
+    final response = await _supabase.functions.invoke(
+      "send-email",
+      body: body,
+    );
+
+    return response;
   }
 
   static Future<String> getReportForOccasion(String link) async {
@@ -52,14 +68,13 @@ class DbEshop {
     }
 
     return null;
-
   }
 
   /// Adds a transaction to payment_info with security checks using RPC.
   static Future<void> addTransactionToPaymentInfoWithSecurity(BuildContext context,
       int transactionId, int paymentInfoId) async {
     try{
-      final response = await _supabase.rpc(
+      await _supabase.rpc(
         'add_transaction_to_payment_info_ws',
         params: {
           'p_transaction_id': transactionId,
@@ -76,7 +91,7 @@ class DbEshop {
   static Future<void> removeTransactionFromPaymentInfoWithSecurity(
       BuildContext context, int transactionId, int paymentInfoId) async {
     try {
-      final response = await _supabase.rpc(
+      await _supabase.rpc(
         'remove_transaction_from_payment_info_ws',
         params: {
           'p_transaction_id': transactionId,
@@ -101,16 +116,16 @@ class DbEshop {
     }
   }
 
-  static Future<List<ProductModel>?> getProductsForTicket(int ticketId) async {
-    final result = await _supabase
+  // UPDATED METHOD
+  static Future<TicketDetailsBundle?> getProductsForTicket(int ticketId) async {
+    final response = await _supabase
         .rpc('get_products_for_ticket', params: {'ticket_id': ticketId});
-    if (result != null && result['code'] == 200) {
-      return (result['data'] as List? ?? [])
-          .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } else {
-      return [];
+
+    if (response != null && response['code'] == 200) {
+      final data = response['data'];
+      return TicketDetailsBundle.fromJson(data);
     }
+    return null;
   }
 
   static Future<bool> updateProductsForOrder(int ticketId, List<int> list) async {
@@ -175,8 +190,9 @@ class DbEshop {
       params: {'p_product_id': productId},
     );
   }
-
 }
+
+// DATA MODELS
 
 class GetTransactionsForOrderResponse {
   final PaymentInfoModel? paymentInfo;
@@ -197,5 +213,53 @@ class GetTransactionsForOrderResponse {
           json['transactions'].map((x) => TransactionModel.fromJson(x)))
           : [],
     );
+  }
+}
+
+class OrderHistoryInfo {
+  final DateTime? latestSentAt;
+  final bool isNewerVersionAvailable;
+
+  OrderHistoryInfo({
+    this.latestSentAt,
+    required this.isNewerVersionAvailable,
+  });
+
+  factory OrderHistoryInfo.fromJson(Map<String, dynamic> json) {
+    return OrderHistoryInfo(
+      latestSentAt: json['latest_sent_at'] != null ? DateTime.parse(json['latest_sent_at']) : null,
+      isNewerVersionAvailable: json['is_newer_version_available'],
+    );
+  }
+}
+
+class TicketDetailsBundle {
+  final TicketModel ticket;
+  final OrderModel order;
+  final PaymentInfoModel? paymentInfo;
+  final OrderHistoryInfo orderHistory;
+
+  TicketDetailsBundle({
+    required this.ticket,
+    required this.order,
+    this.paymentInfo,
+    required this.orderHistory,
+  });
+
+  factory TicketDetailsBundle.fromJson(Map<String, dynamic> json) {
+
+    var bundle = TicketDetailsBundle(
+      ticket: TicketModel.fromJson(json['ticket']),
+      order: OrderModel.fromJson(json['order']),
+      paymentInfo: json['payment_info'] != null
+          ? PaymentInfoModel.fromJson(json['payment_info'])
+          : null,
+      orderHistory: OrderHistoryInfo.fromJson(json['order_history']),
+    );
+    var products = (json['ticket']['products'] as List? ?? [])
+        .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+    bundle.ticket.relatedProducts = products;
+    return bundle;
   }
 }
