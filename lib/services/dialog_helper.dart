@@ -203,7 +203,7 @@ class DialogHelper{
     return result;
   }
 
-  static dialog_helper.Future<bool> showConfirmationDialogAsync(
+  static dialog_helper.Future<bool> showConfirmationDialog(
       BuildContext context,
       String titleMessage,
       String textMessage, {
@@ -237,6 +237,43 @@ class DialogHelper{
       },
     );
     return result;
+  }
+
+  static Future<bool> showConfirmationDialogRich({
+    required BuildContext context,
+    required String title,
+    required Widget content,
+    String confirmButtonText = "Ok",
+    String cancelButtonText = "Storno",
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: content, // Directly use the provided widget
+          actions: [
+            TextButton(
+              child: Text(cancelButtonText),
+              onPressed: () {
+                // Pass the result back when popping the dialog
+                Navigator.of(context).pop(false);
+              },
+            ),
+            ElevatedButton(
+              child: Text(confirmButtonText),
+              onPressed: () {
+                // Pass the result back when popping the dialog
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    // Handle the case where the dialog is dismissed (e.g., by tapping outside)
+    return result ?? false;
   }
 
   static dialog_helper.Future<UserGroupInfoModel?> showAddToGroupDialogAsync(
