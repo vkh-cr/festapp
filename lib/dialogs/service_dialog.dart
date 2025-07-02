@@ -73,7 +73,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
 
   Future<void> _deleteService(ServiceItemModel companion) async {
     if (!await DbOccasions.deleteService(widget.type, companion)) {
-      var answer = await DialogHelper.showConfirmationDialogAsync(
+      var answer = await DialogHelper.showConfirmationDialog(
         context,
         "Really delete service?".tr(),
         "At least one user has this service. You can find them in the grid. Are you sure you want to delete it? Deletion cannot be undone.".tr(),

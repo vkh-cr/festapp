@@ -1,8 +1,9 @@
 import { getSupabaseUser, isUserEditorOrder, supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import { formatCurrency } from "../_shared/utilities.ts";
+import { authorizeRequest } from "../_shared/auth.ts";
 
 export async function getTicketOrderStornoTemplate(reqData: any, authorizationHeader: string) {
-  const { orderId } = reqData.data;
+  const { orderId, requestSecret } = reqData.data;
 
   console.log("Order ID:", orderId);
 
@@ -13,24 +14,17 @@ export async function getTicketOrderStornoTemplate(reqData: any, authorizationHe
 
   if (orderError || !orderData) {
     console.error("Order not found or error occurred:", orderError);
-    return new Response(JSON.stringify({ error: "Order not found" }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 404,
-    });
+    throw new Error("Order not found");
   }
 
   const occasionId = orderData.occasion;
 
-  // Get the authenticated user
-  const user = await getSupabaseUser(authorizationHeader);
-  const userId = user.user.id;
-
-  // Check if the user is an editor for the occasion
-  const isEditor = await isUserEditorOrder(userId, occasionId);
-  if (!isEditor) {
-    console.error(`User ${userId} is not an editor for occasion ${occasionId}`);
-    throw new Error("Forbidden: Not an editor");
-  }
+  // Perform authorization. This will throw an AuthError on failure.
+  await authorizeRequest({
+    requestSecret,
+    authorizationHeader,
+    occasionId,
+  });
 
   // Fetch occasion data
   const { data: occasionData, error: occasionError } = await supabaseAdmin
