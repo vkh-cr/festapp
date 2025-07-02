@@ -77,7 +77,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
 
   /// Removes a transaction after user confirmation.
   void _removeTransaction(TransactionModel transaction) async {
-    final confirm = await DialogHelper.showConfirmationDialogAsync(
+    final confirm = await DialogHelper.showConfirmationDialog(
       context,
       "Confirm removal".tr(),
       "Are you sure you want to unlink this transaction?".tr(),

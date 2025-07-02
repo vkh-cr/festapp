@@ -285,7 +285,7 @@ class _UserPageState extends State<UserPage> {
                                         TextButton(
                                           onPressed: () async {
                                             var answer =
-                                            await DialogHelper.showConfirmationDialogAsync(
+                                            await DialogHelper.showConfirmationDialog(
                                                 context,
                                                 "Delete companion".tr(),
                                                 "By deleting your companion you will also sign him/her out of all signed in sessions."
@@ -381,7 +381,7 @@ class _UserPageState extends State<UserPage> {
                   alignment: Alignment.topCenter,
                   child: TextButton(
                     onPressed: () async {
-                      var answer = await DialogHelper.showConfirmationDialogAsync(
+                      var answer = await DialogHelper.showConfirmationDialog(
                         context,
                         "Change Password Instructions".tr(),
                         "You'll receive an email with a link to reset your password. Do you want to proceed?"

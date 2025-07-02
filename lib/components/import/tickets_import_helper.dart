@@ -39,7 +39,7 @@ class TicketsImportHelper {
 
   static Future<void> importFromTickets(BuildContext context) async {
     // Show a confirmation dialog to the user before proceeding.
-    var confirm = await DialogHelper.showConfirmationDialogAsync(
+    var confirm = await DialogHelper.showConfirmationDialog(
         context,
         FeaturesStrings.importFromTicketsTitle,
         FeaturesStrings.importFromTicketsConfirm
@@ -91,7 +91,7 @@ class TicketsImportHelper {
           "${deletedUsers.isEmpty ? FeaturesStrings.none : deletedEmails}";
 
       // Display the final summary dialog to the user.
-      await DialogHelper.showConfirmationDialogAsync(
+      await DialogHelper.showConfirmationDialog(
         context,
         FeaturesStrings.importResultsTitle,
         message,
