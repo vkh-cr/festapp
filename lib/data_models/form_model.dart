@@ -23,8 +23,11 @@ class FormModel {
   List<FormFieldModel>? relatedFields;
   List<BankAccountModel>? availableBankAccounts;
   int? responseCount; // New field for the number of responses.
+  bool? isReminderEnabled;
 
   static const String metaIsCardDesign = "is_card_design";
+  static const String metaIsReminderEnabled = "is_reminder_enabled";
+  static const String metaFields = "fields";
 
   FormModel({
     this.id,
@@ -46,7 +49,8 @@ class FormModel {
     this.link,
     this.relatedFields,
     this.availableBankAccounts,
-    this.responseCount, // Added to constructor.
+    this.responseCount,
+    this.isReminderEnabled,
   });
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
@@ -80,6 +84,7 @@ class FormModel {
           .toList()
           : null,
       responseCount: json['response_count'], // Added response count parsing from JSON.
+      isReminderEnabled: json['is_reminder_feature_enabled'],
     );
   }
 
