@@ -79,6 +79,9 @@ BEGIN
   DELETE FROM public.log_notifications
     WHERE occasion = oc;
 
+  DELETE FROM public.queue_emails
+    WHERE occasion = oc;
+
   DELETE FROM public.log_emails
     WHERE occasion = oc;
 

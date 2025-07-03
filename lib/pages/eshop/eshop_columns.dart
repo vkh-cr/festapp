@@ -54,6 +54,7 @@ class EshopColumns {
   static const String PAYMENT_INFO_RETURNED = "paymentInfoReturned";
   static const String PAYMENT_INFO_VARIABLE_SYMBOL = "paymentInfoVariableSymbol";
   static const String PAYMENT_INFO_DEADLINE = "orderDataDeadline";
+  static const String PAYMENT_INFO_REMINDER_SENT = "isReminderSent";
 
   static const String ORDER_SYMBOL = "orderSymbol";
   static const String ORDER_DATA = "orderData";
@@ -75,8 +76,8 @@ class EshopColumns {
         hide: true,
         readOnly: true,
         enableEditingMode: false,
-        title: "Id".tr(),
-        field: TbEshop.products.id,
+        title: FeaturesStrings.gridId,
+        field: PRODUCT_ID,
         type: TrinaColumnType.number(defaultValue: -1),
         width: 50,
         renderer: (r) => DataGridHelper.idRenderer(r),
@@ -84,21 +85,21 @@ class EshopColumns {
     ],
     PRODUCT_IS_HIDDEN: [
       TrinaColumn(
-        title: "Hide".tr(),
-        field: TbEshop.products.is_hidden,
+        title: FeaturesStrings.gridHide,
+        field: PRODUCT_IS_HIDDEN,
         type: TrinaColumnType.text(),
         applyFormatterInEditing: true,
         enableEditingMode: false,
         width: 100,
         renderer: (ctx) =>
-            DataGridHelper.checkBoxRenderer(ctx, TbEshop.products.is_hidden),
+            DataGridHelper.checkBoxRenderer(ctx, PRODUCT_IS_HIDDEN),
       ),
     ],
     PRODUCT_TITLE: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: "Title".tr(),
-        field: TbEshop.products.title,
+        title: FeaturesStrings.gridTitle,
+        field: PRODUCT_TITLE,
         type: TrinaColumnType.text(),
         width: 200,
       ),
@@ -106,8 +107,8 @@ class EshopColumns {
     PRODUCT_PRICE: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: "Price".tr(),
-        field: TbEshop.products.price,
+        title: FeaturesStrings.gridPrice,
+        field: PRODUCT_PRICE,
         type: TrinaColumnType.number(negative: false, format: "#.##", locale: context.locale.languageCode),
         textAlign: TrinaColumnTextAlign.end,
         width: 80,
@@ -117,8 +118,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Product Type".tr(),
-        field: TbEshop.product_types.type,
+        title: FeaturesStrings.gridProductType,
+        field: PRODUCT_TYPE,
         type: TrinaColumnType.text(),
         width: 250,
       ),
@@ -126,8 +127,8 @@ class EshopColumns {
     PRODUCT_ORDER: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: "Order".tr(),
-        field: TbEshop.products.order,
+        title: FeaturesStrings.gridOrder,
+        field: PRODUCT_ORDER,
         type: TrinaColumnType.number(defaultValue: 0),
         textAlign: TrinaColumnTextAlign.end,
         width: 80,
@@ -136,8 +137,8 @@ class EshopColumns {
     PRODUCT_MAXIMUM: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: "Max".tr(),
-        field: TbEshop.products.maximum,
+        title: FeaturesStrings.gridMax,
+        field: PRODUCT_MAXIMUM,
         formatter: (s) => s == 0 ? "" : s.toString(),
         applyFormatterInEditing: true,
         type: TrinaColumnType.number(defaultValue: 0, negative: false),
@@ -149,8 +150,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Ordered".tr(),
-        field: ProductModel.metaOrderedCount,
+        title: FeaturesStrings.gridOrdered,
+        field: PRODUCT_ORDERED_COUNT,
         type: TrinaColumnType.number(defaultValue: 0),
         textAlign: TrinaColumnTextAlign.end,
         width: 100,
@@ -160,8 +161,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Paid".tr(),
-        field: ProductModel.metaPaidCount,
+        title: FeaturesStrings.gridPaid,
+        field: PRODUCT_PAID_COUNT,
         type: TrinaColumnType.number(defaultValue: 0),
         textAlign: TrinaColumnTextAlign.end,
         width: 100,
@@ -171,8 +172,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Currency".tr(),
-        field: TbEshop.products.currency_code,
+        title: FeaturesStrings.gridCurrency,
+        field: PRODUCT_CURRENCY_CODE,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.center,
         width: 80,
@@ -180,19 +181,19 @@ class EshopColumns {
     ],
     PRODUCT_DESCRIPTION: (Map<String, dynamic> data) => [
       TrinaColumn(
-        title: "Description".tr(),
-        field:  TbEshop.products.description,
+        title: FeaturesStrings.gridDescription,
+        field:  PRODUCT_DESCRIPTION,
         type: TrinaColumnType.text(),
         width: 150,
         renderer: (ctx) {
           return DataGridHelper.buildHtmlEditorButton(
             context: context,
             occasionId: data[PRODUCT_DESCRIPTION],
-            field:  TbEshop.products.description,
-            title: ctx.row.cells[Tb.places.title]!.value,
+            field:  PRODUCT_DESCRIPTION,
+            title: ctx.row.cells[PRODUCT_TITLE]!.value,
             rendererContext: ctx,
             loadContent: () async =>
-            ctx.row.cells[Tb.places.description]!.value,
+            ctx.row.cells[PRODUCT_DESCRIPTION]!.value,
           );
         },
       ),
@@ -202,8 +203,8 @@ class EshopColumns {
         hide: true,
         readOnly: true,
         enableEditingMode: false,
-        title: "Id".tr(),
-        field: TbEshop.tickets.id,
+        title: FeaturesStrings.gridId,
+        field: TICKET_ID,
         type: TrinaColumnType.number(defaultValue: -1),
         width: 50,
         renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
@@ -214,7 +215,7 @@ class EshopColumns {
         readOnly: true,
         enableEditingMode: true,
         title: FeaturesStrings.itemSymbol,
-        field: TbEshop.tickets.ticket_symbol,
+        field: TICKET_SYMBOL,
         type: TrinaColumnType.text(),
         width: 120,
       ),
@@ -224,8 +225,8 @@ class EshopColumns {
         cellPadding: EdgeInsets.zero,
         readOnly: true,
         enableEditingMode: false,
-        title: "State".tr(),
-        field: TbEshop.tickets.state,
+        title: FeaturesStrings.gridState,
+        field: TICKET_STATE,
         type: TrinaColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
@@ -238,8 +239,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Price".tr(),
-        field: TicketModel.metaPrice,
+        title: FeaturesStrings.gridPrice,
+        field: TICKET_TOTAL_PRICE,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 100,
@@ -249,8 +250,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: false,
-        title: "Created".tr(),
-        field: TbEshop.tickets.created_at,
+        title: FeaturesStrings.gridCreated,
+        field: TICKET_CREATED_AT,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 100,
@@ -260,8 +261,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Products".tr(),
-        field: TicketModel.metaTicketsProducts,
+        title: FeaturesStrings.gridProducts,
+        field: TICKET_PRODUCTS,
         type: TrinaColumnType.text(),
         width: 300,
       ),
@@ -270,8 +271,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Note".tr(),
-        field: TbEshop.tickets.note,
+        title: FeaturesStrings.gridNote,
+        field: TICKET_NOTE,
         type: TrinaColumnType.text(),
         width: 200,
       ),
@@ -279,8 +280,8 @@ class EshopColumns {
     TICKET_NOTE_HIDDEN: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: "Hidden note".tr(),
-        field: TbEshop.tickets.note_hidden,
+        title: FeaturesStrings.gridHiddenNote,
+        field: TICKET_NOTE_HIDDEN,
         type: TrinaColumnType.text(),
         width: 200,
       ),
@@ -289,7 +290,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Spot".tr(),
+        title: FeaturesStrings.gridSpot,
         field: TICKET_SPOT,
         type: TrinaColumnType.text(),
         width: 60,
@@ -298,8 +299,8 @@ class EshopColumns {
     ORDER_ID: [
       TrinaColumn(
         hide: true,
-        title: "Id".tr(),
-        field: TbEshop.orders.id,
+        title: FeaturesStrings.gridId,
+        field: ORDER_ID,
         type: TrinaColumnType.number(defaultValue: -1),
         readOnly: true,
         enableEditingMode: false,
@@ -311,8 +312,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Order Symbol".tr(),
-        field: TbEshop.orders.order_symbol,
+        title: FeaturesStrings.gridOrderSymbol,
+        field: ORDER_SYMBOL,
         type: TrinaColumnType.text(),
         width: 120,
       ),
@@ -321,8 +322,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Price".tr(),
-        field: TbEshop.orders.price,
+        title: FeaturesStrings.gridPrice,
+        field: ORDER_PRICE,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 100,
@@ -333,8 +334,8 @@ class EshopColumns {
         cellPadding: EdgeInsets.zero,
         readOnly: true,
         enableEditingMode: false,
-        title: "State".tr(),
-        field: TbEshop.orders.state,
+        title: FeaturesStrings.gridState,
+        field: ORDER_STATE,
         type: TrinaColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
@@ -347,8 +348,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Customer".tr(),
-        field: TbEshop.orders.data,
+        title: FeaturesStrings.gridCustomer,
+        field: ORDER_DATA,
         type: TrinaColumnType.text(),
         width: 150,
       ),
@@ -357,8 +358,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "E-mail".tr(),
-        field: TbEshop.orders.data_email,
+        title: FeaturesStrings.gridEmail,
+        field: ORDER_EMAIL,
         type: TrinaColumnType.text(),
         width: 140,
       ),
@@ -367,8 +368,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: false,
-        title: "Created".tr(),
-        field: TbEshop.orders.created_at,
+        title: FeaturesStrings.gridCreated,
+        field: ORDER_CREATED_AT,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 100,
@@ -378,8 +379,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Note".tr(),
-        field: TbEshop.orders.data_note,
+        title: FeaturesStrings.gridNote,
+        field: ORDER_DATA_NOTE,
         type: TrinaColumnType.text(),
         width: 200,
       ),
@@ -387,8 +388,8 @@ class EshopColumns {
     ORDER_NOTE_HIDDEN: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: "Hidden note".tr(),
-        field: TbEshop.orders.note_hidden,
+        title: FeaturesStrings.gridHiddenNote,
+        field: ORDER_NOTE_HIDDEN,
         type: TrinaColumnType.text(),
         width: 200,
       ),
@@ -396,14 +397,14 @@ class EshopColumns {
     ORDER_HISTORY: [
       TrinaColumn(
         enableAutoEditing: false,
-        title: "History".tr(),
-        field: TbEshop.orders_history.table,
+        title: FeaturesStrings.gridHistory,
+        field: ORDER_HISTORY,
         type: TrinaColumnType.text(),
         width: 150,
         renderer: (rendererContext) {
           return ElevatedButton(
             onPressed: () async {
-              var id = rendererContext.row.cells[TbEshop.orders.id]!.value;
+              var id = rendererContext.row.cells[ORDER_ID]!.value;
               await _showOrderHistory(context, id);
             },
             child: Row(
@@ -411,7 +412,7 @@ class EshopColumns {
                 const Icon(Icons.history),
                 Padding(
                   padding: const EdgeInsets.all(6),
-                  child: Text("History".tr()),
+                  child: Text(FeaturesStrings.gridHistory),
                 ),
               ],
             ),
@@ -422,14 +423,14 @@ class EshopColumns {
     ORDER_TRANSACTIONS: (Map<String, dynamic> data) => [
       TrinaColumn(
         enableAutoEditing: false,
-        title: "Transactions".tr(),
-        field: TbEshop.transactions.table,
+        title: FeaturesStrings.gridTransactions,
+        field: ORDER_TRANSACTIONS,
         type: TrinaColumnType.text(),
         width: 150,
         renderer: (rendererContext) {
           return ElevatedButton(
             onPressed: () async {
-              var id = rendererContext.row.cells[TbEshop.orders.id]!.value;
+              var id = rendererContext.row.cells[ORDER_ID]!.value;
               await _showOrderTransactions(context, id);
               var transactionsAfterFunction = data[ORDER_TRANSACTIONS];
               if(transactionsAfterFunction is Future<void> Function()?) {
@@ -441,7 +442,7 @@ class EshopColumns {
                 const Icon(Icons.payment),
                 Padding(
                   padding: const EdgeInsets.all(6),
-                  child: Text("Transactions".tr()),
+                  child: Text(FeaturesStrings.gridTransactions),
                 ),
               ],
             ),
@@ -452,14 +453,14 @@ class EshopColumns {
     TICKET_PRODUCTS_EDIT: (Map<String, dynamic> data) => [
       TrinaColumn(
         enableAutoEditing: false,
-        title: "Products".tr(),
+        title: FeaturesStrings.gridProducts,
         field: TICKET_PRODUCTS_EDIT,
         type: TrinaColumnType.text(),
         width: 150,
         renderer: (rendererContext) {
           return ElevatedButton(
             onPressed: () async {
-              final ticketId = rendererContext.row.cells[TbEshop.tickets.id]!.value as int;
+              final ticketId = rendererContext.row.cells[TICKET_ID]!.value as int;
               final changed = await _showTicketProducts(context, ticketId);
               if (changed == true) {
                 var afterFunction = data[TICKET_PRODUCTS_EDIT];
@@ -473,7 +474,7 @@ class EshopColumns {
                 Icon(Icons.category),
                 Padding(
                   padding: const EdgeInsets.all(6),
-                  child: Text("Products".tr()),
+                  child: Text(FeaturesStrings.gridProducts),
                 ),
               ],
             ),
@@ -485,8 +486,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Amount".tr(),
-        field: TbEshop.payment_info.amount,
+        title: FeaturesStrings.gridAmount,
+        field: PAYMENT_INFO_AMOUNT,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 80,
@@ -496,8 +497,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Paid".tr(),
-        field: TbEshop.payment_info.paid,
+        title: FeaturesStrings.gridPaid,
+        field: PAYMENT_INFO_PAID,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 80,
@@ -507,8 +508,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Returned".tr(),
-        field: TbEshop.payment_info.returned,
+        title: FeaturesStrings.gridReturned,
+        field: PAYMENT_INFO_RETURNED,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 80,
@@ -518,8 +519,8 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Variable symbol".tr(),
-        field: TbEshop.payment_info.variable_symbol,
+        title: FeaturesStrings.gridVariableSymbol,
+        field: PAYMENT_INFO_VARIABLE_SYMBOL,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 80,
@@ -529,19 +530,33 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: false,
-        title: "Deadline".tr(),
-        field: TbEshop.payment_info.deadline,
+        title: FeaturesStrings.gridDeadline,
+        field: PAYMENT_INFO_DEADLINE,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 100,
+      ),
+    ],
+    PAYMENT_INFO_REMINDER_SENT: [
+      TrinaColumn(
+        title: FeaturesStrings.gridReminderSent,
+        field: PAYMENT_INFO_REMINDER_SENT,
+        type: TrinaColumnType.text(),
+        enableEditingMode: false,
+        width: 120,
+        renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+          rendererContext,
+          PAYMENT_INFO_REMINDER_SENT,
+              () => false, // This makes the checkbox always read-only
+        ),
       ),
     ],
     ORDER_FORM: [
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Form".tr(),
-        field: Tb.forms.table,
+        title: FeaturesStrings.gridForm,
+        field: ORDER_FORM,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.start,
         width: 120,
@@ -625,7 +640,7 @@ class EshopColumns {
       // Add a separator line between items to make them more distinct
       prettyFormattedHistory += '-' * 50 + "\n";
     }
-    await DialogHelper.showInformationDialog(context, "History".tr(), prettyFormattedHistory);
+    await DialogHelper.showInformationDialog(context, FeaturesStrings.gridHistory, prettyFormattedHistory);
   }
 
   /// Shows the order transactions in a dialog.
