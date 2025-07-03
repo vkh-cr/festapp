@@ -58,7 +58,7 @@ djr(d){var x=0,w=A.k(y.a),v,u,t
 var $async$bcQ=A.f(function(e,f){if(e===1)return A.h(f,w)
 while(true)switch(x){case 0:u=y.z
 x=3
-return A.d($.wT().cJ("get_current_quote",A.w(["unit_id",d],y.N,u),u),$async$bcQ)
+return A.d($.wT().cI("get_current_quote",A.w(["unit_id",d],y.N,u),u),$async$bcQ)
 case 3:t=f
 u=J.a1(t)
 if(J.q(u.h(t,"code"),200)){v=A.awj(u.h(t,"data"))
@@ -75,7 +75,7 @@ while(true)switch(x){case 0:u=y.z
 t=A
 s=J
 x=3
-return A.d($.d94().cJ("get_unit",A.w(["unit_id",d],y.N,u),u),$async$bdF)
+return A.d($.d94().cI("get_unit",A.w(["unit_id",d],y.N,u),u),$async$bdF)
 case 3:v=t.abt(s.v(f,"data"))
 x=1
 break
@@ -399,4 +399,4 @@ D.aHR=A.a(x([D.ajO]),y.V)
 D.bD6=new A.W(1/0,50)})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"dOL","d94",()=>$.hK().gmo(0))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_226",e:"endPart",h:b})})($__dart_deferred_initializers__,"C5XhFhOknDR3b5xLPNz/ETEQlHI=");
+a.eventLog.push({p:"main.dart.js_226",e:"endPart",h:b})})($__dart_deferred_initializers__,"eGfJw5ae1HLkguD5Nv0/bEh21ng=");

@@ -6,7 +6,7 @@ arN(){var x=0,w=A.k(y.x),v,u,t,s
 var $async$arN=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:u=y.b
 x=3
-return A.d($.Cp().cJ("game_get_correctly_guessed_checkpoints",A.w(["oc",A.d6()],y.w,u),u),$async$arN)
+return A.d($.Cp().cI("game_get_correctly_guessed_checkpoints",A.w(["oc",A.d6()],y.w,u),u),$async$arN)
 case 3:t=e
 x=4
 return A.d(y.i.b(t)?t:A.cb(t,u),$async$arN)
@@ -76,7 +76,7 @@ var $async$bcR=A.f(function(g,h){if(g===1)return A.h(h,w)
 while(true)switch(x){case 0:u=y.b
 case 3:t=J
 x=13
-return A.d($.wT().cJ("game_guess",A.w(["check_point_id",e,"guess",f],y.w,u),u),$async$bcR)
+return A.d($.wT().cI("game_guess",A.w(["check_point_id",e,"guess",f],y.w,u),u),$async$bcR)
 case 13:switch(t.v(h,"code")){case 200:x=5
 break
 case 4031:x=6
@@ -338,4 +338,4 @@ D.bDw=new K.ua(4,8,8,0.75)
 D.bGT=new A.a6(!0,C.m,null,null,null,null,16,C.T,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJU=new A.cx("Guess!",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.cWi=null})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_289",e:"endPart",h:b})})($__dart_deferred_initializers__,"k9O2OgrFq5kEiUlSXlDVCJAM8fU=");
+a.eventLog.push({p:"main.dart.js_289",e:"endPart",h:b})})($__dart_deferred_initializers__,"qyavR1RdcV8bS40R0keXM3rFn/w=");

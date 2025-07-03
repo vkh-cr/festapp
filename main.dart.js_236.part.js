@@ -7,7 +7,7 @@ djZ(d,e){var x=0,w=A.k(y.C),v,u,t,s,r
 var $async$bdz=A.f(function(f,g){if(f===1)return A.h(g,w)
 while(true)switch(x){case 0:s=y.z
 x=3
-return A.d($.OE().cJ("scan_ticket",A.w(["scanned_id",d,"scanned_code",e],y.N,s),s),$async$bdz)
+return A.d($.OE().cI("scan_ticket",A.w(["scanned_id",d,"scanned_code",e],y.N,s),s),$async$bdz)
 case 3:r=g
 s=J.a1(r)
 if(!J.q(s.h(r,"code"),200)){v=null
@@ -29,7 +29,7 @@ while(true)switch(x){case 0:u=y.z
 t=J
 s=J
 x=3
-return A.d($.OE().cJ("update_ticket_to_used",A.w(["ticket_id",d,"scan_code",e],y.N,u),u),$async$bdE)
+return A.d($.OE().cI("update_ticket_to_used",A.w(["ticket_id",d,"scan_code",e],y.N,u),u),$async$bdE)
 case 3:v=t.q(s.v(g,"code"),200)
 x=1
 break
@@ -250,4 +250,4 @@ D.ac0=new B.Ue(3,"nothing")
 D.bJT=new A.cx("Confirm Ticket",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bKd=new A.cx("Point the camera at the attendee's code for an entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_236",e:"endPart",h:b})})($__dart_deferred_initializers__,"Ueunvx8+IIw+4skHTNCoo5IYRIQ=");
+a.eventLog.push({p:"main.dart.js_236",e:"endPart",h:b})})($__dart_deferred_initializers__,"1n6qvNc+3HeN+FEp5uCGrxlmuD8=");

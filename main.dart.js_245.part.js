@@ -74,14 +74,14 @@ for(w=0;w<3;++w){s=D.mZ[w]
 if(p.h(0,s).length!==0){q=p.h(0,s)
 q.toString
 r=new A.J(q,new B.bjl(),A.S(q).i("J<1,l>")).bv(0," | ")}else r=""
-t.m(0,s,new A.hd(new A.ht(),r))}return t},
+t.m(0,s,new A.hc(new A.ht(),r))}return t},
 bjl:function bjl(){},
 bd1(d){return B.djI(d)},
 djI(d){var x=0,w=A.k(y.v),v,u
 var $async$bd1=A.f(function(e,f){if(e===1)return A.h(f,w)
 while(true)switch(x){case 0:v=y.b
 x=2
-return A.d($.Cr().cJ("delete_order",A.w(["order_id",d.a],y.w,v),v),$async$bd1)
+return A.d($.Cr().cI("delete_order",A.w(["order_id",d.a],y.w,v),v),$async$bd1)
 case 2:u=f
 v=J.a1(u)
 if(!J.q(v.h(u,"code"),200))throw A.p(A.cy("Deleting order failed: "+A.o(v.h(u,"code"))+": "+A.o(v.h(u,"message"))))
@@ -94,7 +94,7 @@ while(true)switch(x){case 0:v=y.b
 u=J
 t=J
 x=2
-return A.d($.Cr().cJ("update_order_note_hidden",A.w(["order_id",d,"new_note_hidden",e],y.w,v),v),$async$bdj)
+return A.d($.Cr().cI("update_order_note_hidden",A.w(["order_id",d,"new_note_hidden",e],y.w,v),v),$async$bdj)
 case 2:if(!u.q(t.v(g,"code"),200))throw A.p(A.cy("Saving of note has failed."))
 return A.i(null,w)}})
 return A.j($async$bdj,w)},
@@ -105,7 +105,7 @@ while(true)switch(x){case 0:v=y.b
 u=J
 t=J
 x=2
-return A.d($.OE().cJ("update_ticket_note_hidden",A.w(["ticket_id",d,"new_note_hidden",e],y.w,v),v),$async$bdD)
+return A.d($.OE().cI("update_ticket_note_hidden",A.w(["ticket_id",d,"new_note_hidden",e],y.w,v),v),$async$bdD)
 case 2:if(!u.q(t.v(g,"code"),200))throw A.p(A.cy("Saving of note has failed."))
 return A.i(null,w)}})
 return A.j($async$bdD,w)}},D,F
@@ -216,14 +216,14 @@ t=i.ay
 s=t==null
 r=s?h:t.d
 r=A.aC(r==null?0:r)
-if((s?h:t.w)!=null){t=A.h7(g,h)
+if((s?h:t.w)!=null){t=A.hi(g,h)
 s=i.ay.w
 s.toString
-s=t.cF(s)
+s=t.cR(s)
 t=s}else t=""
 t=A.aC(t)
 s=i.b
-s=A.aC(s!=null?A.h7(g,h).cF(s):"")
+s=A.aC(s!=null?A.hi(g,h).cR(s):"")
 q=A.aC(i.a3f())
 p=i.f
 p=A.aC(p==null?h:J.v(p,"email"))
@@ -265,7 +265,7 @@ b7(){return A.w(["state",this.e,"note_hidden",this.w],y.w,y.b)},
 pe(d){var x,w,v,u,t,s,r,q,p,o,n,m=this,l=null,k=m.a
 k=A.aC(k==null?0:k)
 x=m.b
-x=A.aC(x!=null?A.h7("yyyy-MM-dd",l).cF(x):"")
+x=A.aC(x!=null?A.hi("yyyy-MM-dd",l).cR(x):"")
 w=m.d
 w=A.aC(w==null?"":w)
 v=m.e
@@ -357,8 +357,8 @@ x(B.jh,A.K)
 w(A.ci,[B.b5q,B.b5r,B.b5s,B.b5t,B.b5u,B.b5v,B.b5p,B.b5w,B.b5x,B.bCr,B.bSA,B.bjl])
 w(A.ii,[B.hD,B.hF])})()
 A.ce(b.typeUniverse,JSON.parse('{"hD":{"ii":[]},"hF":{"ii":[]}}'))
-var y={E:A.E("u<eS>"),q:A.E("D<eS>"),w:A.E("l"),d:A.E("hd"),b:A.E("@"),v:A.E("~")};(function constants(){var x=a.makeConstList
+var y={E:A.E("u<eS>"),q:A.E("D<eS>"),w:A.E("l"),d:A.E("hc"),b:A.E("@"),v:A.E("~")};(function constants(){var x=a.makeConstList
 D.mZ=A.a(x(["spot","food","others"]),A.E("u<l>"))})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"dOK","OE",()=>$.hK().gmo(0))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_245",e:"endPart",h:b})})($__dart_deferred_initializers__,"u9FSOd+HHoqPBw53sobEhftWlHo=");
+a.eventLog.push({p:"main.dart.js_245",e:"endPart",h:b})})($__dart_deferred_initializers__,"hJbqY57KxFFBJu3ckEyGFGeqQ6M=");
