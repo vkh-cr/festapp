@@ -126,6 +126,7 @@ class PaymentInfoTb {
   String get returned => "returned";
   String get deadline => "deadline";
   String get currency_code => "currency_code";
+  String get data => "data";
 }
 
 class OrdersHistoryTb {
