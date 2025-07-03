@@ -681,8 +681,7 @@
     "createdUsers": "Vytvoření uživatelé",
     "updatedUsers": "Aktualizovaní uživatelé",
     "deletedUsers": "Odebraní uživatelé",
-    "none": "Žádní",
-    "ok": "OK"
+    "none": "Žádní"
   },
   "FeatureFormSettings": {
     "title": "Nastavení formuláře",
@@ -693,6 +692,8 @@
     "validationLinkRequired": "Odkaz je povinný.",
     "validationLinkInvalidChars": "Neplatné znaky. Používejte pouze písmena, číslice a pomlčky.",
     "validationLinkInUse": "Odkaz se již používá.",
+    "labelDeadlineDays": "Splatnost platby (ve dnech)",
+    "helperDeadlineDays": "Nastavte, kolik dní má uživatel na zaplacení objednávky. Pro neomezenou dobu ponechte prázdné.",
     "labelCardDesign": "Použít design karet",
     "subtitleCardDesign": "Přepíná mezi moderním karetním rozložením a minimalistickým, jednodušším designem.",
     "errorFixBeforeSave": "Před uložením prosím opravte chyby.",
@@ -706,10 +707,13 @@
     "labelDeadlineDuration": "Termín platby (ve dnech)",
     "helperDeadlineDuration": "Nastavte, kolik dní má uživatel na zaplacení objednávky. Ponechte prázdné pro žádný termín.",
     "labelReminderEnabled": "Povolit upomínky k platbě",
-    "helperReminderEnabled": "Automaticky odeslat e-mailovou upomínku před termínem platby.",
+    "helperReminderEnabled": "Automaticky odeslat e-mailovou upomínku o platbě.",
     "labelReminderInterval": "Interval upomínky (dny před termínem)",
     "helperReminderInterval": "Kolik dní před termínem má být upomínka odeslána.",
-    "validationReminderInterval": "Interval upomínky musí být kratší než termín platby."
+    "validationReminderInterval": "Interval upomínky musí být kratší než termín platby.",
+    "labelEnableReminders": "Povolit upomínky",
+    "subtitleEnableReminders": "Pokud je povoleno, automatická e-mailová upomínka o platbě bude zaslána zákazníkům.",
+    "subtitleRemindersDisabled": "Upomínky jsou zakázány. Nejprve povolte funkci upomínek v nastavení příležitosti."
   },
   "OrderGridColumns": {
     "id": "Id",

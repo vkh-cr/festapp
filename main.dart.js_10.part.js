@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_10",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={
-cN_(d){var x=A.w(["id",d],y.w,y.b)
+cN1(d){var x=A.w(["id",d],y.w,y.b)
 return new B.aor("CheckRoute",new A.zj(d,null),x,C.bW,null,"",null)},
 aor:function aor(d,e,f,g,h,i,j){var _=this
 _.a=d
@@ -36,31 +36,31 @@ this.b=e},
 c6e:function c6e(d,e){this.a=d
 this.b=e},
 c6g:function c6g(d){this.a=d},
-cVP(d,e,f,g,h){var x=null,w=A.jx(A.bN(x,x,x,x,x,x,A.aK(C.DL,h,x,x),x,x,x,new B.b69(e),x,x,x,x,x),d)
+cVR(d,e,f,g,h){var x=null,w=A.jx(A.bN(x,x,x,x,x,x,A.aK(C.DL,h,x,x),x,x,x,new B.b69(e),x,x,x,x,x),d)
 return A.a([w,A.jx(A.bN(x,x,x,x,x,x,A.aK(L.ip,g,x,x),x,x,x,new B.b6a(f),x,x,x,x,x),!d)],y.p)},
 b69:function b69(d){this.a=d},
 b6a:function b6a(d){this.a=d},
-bjZ(){var x=A.lN("companions",null)
+bjZ(){var x=A.lb("companions",null)
 if(x instanceof A.a_I)return x.e
 return null},
-bbj(d,e,f){return B.dip(d,e,f)},
-dip(d,e,f){var x=0,w=A.k(y.v)
+bbj(d,e,f){return B.dir(d,e,f)},
+dir(d,e,f){var x=0,w=A.k(y.v)
 var $async$bbj=A.f(function(g,h){if(g===1)return A.h(h,w)
 while(true)switch(x){case 0:x=2
 return A.d(B.Ql(d,e,A.bXM(null,null,null,null,null,null,null,f.a,f.b,null,null,null,null,null)),$async$bbj)
 case 2:return A.i(null,w)}})
 return A.j($async$bbj,w)},
-bbk(d,e,f){return B.diq(d,e,f)},
-diq(d,e,f){var x=0,w=A.k(y.v)
+bbk(d,e,f){return B.dis(d,e,f)},
+dis(d,e,f){var x=0,w=A.k(y.v)
 var $async$bbk=A.f(function(g,h){if(g===1)return A.h(h,w)
 while(true)switch(x){case 0:x=2
 return A.d(A.Dj(d,e,A.bXM(null,null,null,null,null,null,null,f.a,f.b,null,null,null,null,null)),$async$bbk)
 case 2:return A.i(null,w)}})
 return A.j($async$bbk,w)},
-bbh(d){return B.din(d)},
-din(d){var x=0,w=A.k(y.v),v,u,t,s
+bbh(d){return B.dip(d)},
+dip(d){var x=0,w=A.k(y.v),v,u,t,s
 var $async$bbh=A.f(function(e,f){if(e===1)return A.h(f,w)
-while(true)switch(x){case 0:u=$.cTk()
+while(true)switch(x){case 0:u=$.cTm()
 t=A.d6()
 s=$.fT
 s=(s==null?null:s.e).e
@@ -70,8 +70,8 @@ x=2
 return A.d(u.cI("create_companion_in_organization",A.w(["org",1,"oc",t,"usr",s,"c_name",d],y.w,v),v),$async$bbh)
 case 2:return A.i(null,w)}})
 return A.j($async$bbh,w)},
-Ql(d,e,f){return B.diV(d,e,f)},
-diV(d,e,f){var x=0,w=A.k(y.v),v,u,t,s,r,q,p,o,n,m,l
+Ql(d,e,f){return B.diX(d,e,f)},
+diX(d,e,f){var x=0,w=A.k(y.v),v,u,t,s,r,q,p,o,n,m,l
 var $async$Ql=A.f(function(g,h){if(g===1)return A.h(h,w)
 while(true)$async$outer:switch(x){case 0:m=f==null
 l=m?null:f.a
@@ -111,10 +111,10 @@ if(t.h(s,"events_registration_start")!=null){o=A.l8(A.e9(t.h(s,"events_registrat
 m=y.r
 t=d.ac(m).r.a
 t===$&&A.b()
-n=B.di0(t.geW(0)).cR(o)
+n=B.di2(t.geW(0)).cR(o)
 m=d.ac(m).r.a
 m===$&&A.b()
-p=A.n("You can sign in from {time}.",A.w(["time",n+" "+A.vb(m.geW(0)).cR(o)],u,u))}q=y.q.a(A.lN("workshops",null)).f
+p=A.n("You can sign in from {time}.",A.w(["time",n+" "+A.vb(m.geW(0)).cR(o)],u,u))}q=y.q.a(A.lb("workshops",null)).f
 if(q!=null&&q.length!==0){A.bi(d,q,C.aM)
 x=1
 break $async$outer}A.bi(d,A.n("Cannot sign in!",null)+" "+p,C.aM)
@@ -130,9 +130,9 @@ default:A.bi(d,A.n("Cannot sign in!",null),C.aM)
 x=1
 break $async$outer}case 1:return A.i(v,w)}})
 return A.j($async$Ql,w)},
-di0(d){var x=A.mI(d,A.oj(),null)
+di2(d){var x=A.mI(d,A.oj(),null)
 x.toString
-x=new A.iN(new A.lJ(),x)
+x=new A.iN(new A.lK(),x)
 x.lB("MMMMEEEEd")
 return x}},D,E,G,H,I,F,K,L,M,N,O
 J=c[1]
@@ -154,7 +154,7 @@ B.aor.prototype={}
 B.qN.prototype={
 M(){return new B.ad7(new A.c7(C.ar,$.a8()))}}
 B.ad7.prototype={
-T(){this.ag()
+T(){this.ae()
 this.e=this.a.f},
 Mz(){var x=0,w=A.k(y.v),v=this,u
 var $async$Mz=A.f(function(d,e){if(d===1)return A.h(e,w)
@@ -257,7 +257,7 @@ x=J.v(t,e)
 t=A.a([],y.u)
 if(x.ag6(u.a.c))t.push(K.OK)
 t.push(M.eK)
-t.push(A.bc(A.H(x.b,v,v,v,v,v,v,v,v,v,v,v,v,v),1,v))
+t.push(A.bc(A.G(x.b,v,v,v,v,v,v,v,v,v,v,v,v,v),1,v))
 if(!x.ag6(u.a.c)){w=this.b?new B.c6c(u,x):v
 t.push(A.ds(!1,E.bC(D.bJF,v),v,v,v,v,v,v,w,v,v))}if(x.ag6(u.a.c))t.push(A.ds(!1,E.bC(D.aek,v),v,v,v,v,v,v,new B.c6d(u,x),v,v))
 t.push(A.bN(v,v,v,v,v,v,N.j8,v,v,v,new B.c6e(u,x),v,v,v,v,v))
@@ -306,4 +306,4 @@ D.aek=new A.cx("Sign out someone",null,null,null,null,null,null,null,null,null,n
 D.bKi=new A.cx("Create Companion",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.aen=new A.cx("Companions",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_10",e:"endPart",h:b})})($__dart_deferred_initializers__,"myV+6exvZLB4VMCerbqFcWrgins=");
+a.eventLog.push({p:"main.dart.js_10",e:"endPart",h:b})})($__dart_deferred_initializers__,"aDvtJyMpaOcLcmQRdc5+X4ZVxE8=");

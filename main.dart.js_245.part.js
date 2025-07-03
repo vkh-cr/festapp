@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_245",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,E,C,B={
-cML(d){var x=J.a1(d)
+cMN(d){var x=J.a1(d)
 return new B.jh(x.h(d,"x"),x.h(d,"y"),x.h(d,"id"),x.h(d,"group"),x.h(d,"order_product_ticket"),x.h(d,"type"),x.h(d,"state"),x.h(d,"title"),null,x.h(d,"product"),null)},
 jh:function jh(d,e,f,g,h,i,j,k,l,m,n){var _=this
 _.a=d
@@ -34,10 +34,10 @@ case"sent":return A.n("Sent",x)
 case"used":return A.n("Used",x)
 case"storno":return A.n("Storno",x)
 default:return"???"}},
-dr8(d){return d+";"+B.aAK(d)},
-d_J(d,e,f,g,h,i,j,k,l,m,n){return new B.hD(h,d,n,l,m,f,j,k,g,e,i)},
-cP2(d){var x=null,w="created_at",v="updated_at",u="data",t=J.a1(d),s=t.h(d,"id"),r=t.h(d,w)!=null?A.e9(t.h(d,w)):x,q=t.h(d,v)!=null?A.e9(t.h(d,v)):x,p=t.h(d,"price")!=null?A.lj(J.ap(t.h(d,"price"))):x,o=t.h(d,"currency_code"),n=t.h(d,"state"),m=t.h(d,u)!=null?J.v(t.h(d,u),"form"):x,l=t.h(d,u),k=t.h(d,"occasion"),j=t.h(d,"payment_info")
-return B.d_J(r,o,l,m,s,t.h(d,"note_hidden"),k,j,p,n,q)},
+dra(d){return d+";"+B.aAK(d)},
+d_L(d,e,f,g,h,i,j,k,l,m,n){return new B.hD(h,d,n,l,m,f,j,k,g,e,i)},
+cP4(d){var x=null,w="created_at",v="updated_at",u="data",t=J.a1(d),s=t.h(d,"id"),r=t.h(d,w)!=null?A.e9(t.h(d,w)):x,q=t.h(d,v)!=null?A.e9(t.h(d,v)):x,p=t.h(d,"price")!=null?A.lk(J.ap(t.h(d,"price"))):x,o=t.h(d,"currency_code"),n=t.h(d,"state"),m=t.h(d,u)!=null?J.v(t.h(d,u),"form"):x,l=t.h(d,u),k=t.h(d,"occasion"),j=t.h(d,"payment_info")
+return B.d_L(r,o,l,m,s,t.h(d,"note_hidden"),k,j,p,n,q)},
 hD:function hD(d,e,f,g,h,i,j,k,l,m,n){var _=this
 _.a=d
 _.b=e
@@ -52,9 +52,9 @@ _.y=m
 _.z=n
 _.ay=_.ax=_.as=_.Q=null},
 bCr:function bCr(){},
-d2j(d,e,f,g,h,i,j,k){return new B.hF(e,d,j,i,f,g)},
-cQp(d){var x="created_at",w="updated_at",v=J.a1(d),u=v.h(d,"id"),t=v.h(d,x)!=null?A.e9(v.h(d,x)):null,s=v.h(d,w)!=null?A.e9(v.h(d,w)):null,r=v.h(d,"ticket_symbol"),q=v.h(d,"state"),p=v.h(d,"occasion")
-return B.d2j(t,u,v.h(d,"note"),v.h(d,"note_hidden"),p,q,r,s)},
+d2l(d,e,f,g,h,i,j,k){return new B.hF(e,d,j,i,f,g)},
+cQr(d){var x="created_at",w="updated_at",v=J.a1(d),u=v.h(d,"id"),t=v.h(d,x)!=null?A.e9(v.h(d,x)):null,s=v.h(d,w)!=null?A.e9(v.h(d,w)):null,r=v.h(d,"ticket_symbol"),q=v.h(d,"state"),p=v.h(d,"occasion")
+return B.d2l(t,u,v.h(d,"note"),v.h(d,"note_hidden"),p,q,r,s)},
 hF:function hF(d,e,f,g,h,i){var _=this
 _.a=d
 _.b=e
@@ -64,7 +64,7 @@ _.r=h
 _.w=i
 _.Q=_.z=_.y=_.x=null},
 bSA:function bSA(){},
-cXy(d){var x,w,v,u,t,s,r,q=y.w,p=A.I(q,y.q)
+cXA(d){var x,w,v,u,t,s,r,q=y.w,p=A.I(q,y.q)
 for(x=y.E,w=0;w<3;++w)p.m(0,D.mZ[w],A.a([],x))
 for(x=d.length,w=0;w<d.length;d.length===x||(0,A.M)(d),++w){v=d[w]
 u=v.Q
@@ -76,8 +76,8 @@ q.toString
 r=new A.J(q,new B.bjl(),A.S(q).i("J<1,l>")).bv(0," | ")}else r=""
 t.m(0,s,new A.hc(new A.ht(),r))}return t},
 bjl:function bjl(){},
-bd1(d){return B.djI(d)},
-djI(d){var x=0,w=A.k(y.v),v,u
+bd1(d){return B.djK(d)},
+djK(d){var x=0,w=A.k(y.v),v,u
 var $async$bd1=A.f(function(e,f){if(e===1)return A.h(f,w)
 while(true)switch(x){case 0:v=y.b
 x=2
@@ -87,8 +87,8 @@ v=J.a1(u)
 if(!J.q(v.h(u,"code"),200))throw A.p(A.cy("Deleting order failed: "+A.o(v.h(u,"code"))+": "+A.o(v.h(u,"message"))))
 return A.i(null,w)}})
 return A.j($async$bd1,w)},
-bdj(d,e){return B.djP(d,e)},
-djP(d,e){var x=0,w=A.k(y.v),v,u,t
+bdj(d,e){return B.djR(d,e)},
+djR(d,e){var x=0,w=A.k(y.v),v,u,t
 var $async$bdj=A.f(function(f,g){if(f===1)return A.h(g,w)
 while(true)switch(x){case 0:v=y.b
 u=J
@@ -98,8 +98,8 @@ return A.d($.Cr().cI("update_order_note_hidden",A.w(["order_id",d,"new_note_hidd
 case 2:if(!u.q(t.v(g,"code"),200))throw A.p(A.cy("Saving of note has failed."))
 return A.i(null,w)}})
 return A.j($async$bdj,w)},
-bdD(d,e){return B.dk2(d,e)},
-dk2(d,e){var x=0,w=A.k(y.v),v,u,t
+bdD(d,e){return B.dk4(d,e)},
+dk4(d,e){var x=0,w=A.k(y.v),v,u,t
 var $async$bdD=A.f(function(f,g){if(f===1)return A.h(g,w)
 while(true)switch(x){case 0:v=y.b
 u=J
@@ -181,7 +181,7 @@ bNU(){var x,w
 if(this.e==="ordered"){x=this.ay
 x=x==null||x.w==null}else x=!0
 if(x)return!1
-w=A.co(F.rJ().a.gdt(),F.rJ().a.gdj(),F.rJ().a.gec(),0,0,0,0,0)
+w=A.co(F.rK().a.gdt(),F.rK().a.gdj(),F.rK().a.gec(),0,0,0,0,0)
 x=this.ay.w
 x.toString
 return w.fj(A.co(A.dH(x),A.eC(x),A.iV(x),0,0,0,0,0))},
@@ -236,7 +236,7 @@ l=A.aC("")
 k=A.aC("")
 j=i.Q
 j=j==null?h:j.j(0)
-return A.ls(A.w(["orderId",d,"orderSymbol",f,"orderPrice",e,"orderState",x,"paymentInfoAmount",w,"paymentInfoPaid",v,"paymentInfoReturned",u,"paymentInfoVariableSymbol",r,"orderDataDeadline",t,"orderCreatedAt",s,"orderData",q,"orderEmail",p,"ticketProducts",o,"orderDataNote",n,"orderDataNoteHidden",m,"orderHistory",l,"orderTransactions",k,"orderForm",A.aC(j==null?"":j),"isReminderSent",A.aC(String(i.ay.z))],y.w,y.d),!1,y.b)},
+return A.lt(A.w(["orderId",d,"orderSymbol",f,"orderPrice",e,"orderState",x,"paymentInfoAmount",w,"paymentInfoPaid",v,"paymentInfoReturned",u,"paymentInfoVariableSymbol",r,"orderDataDeadline",t,"orderCreatedAt",s,"orderData",q,"orderEmail",p,"ticketProducts",o,"orderDataNote",n,"orderDataNoteHidden",m,"orderHistory",l,"orderTransactions",k,"orderForm",A.aC(j==null?"":j),"isReminderSent",A.aC(String(i.ay.z))],y.w,y.d),!1,y.b)},
 ew(){var x=0,w=A.k(y.v),v=this
 var $async$ew=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:x=2
@@ -291,8 +291,8 @@ p=A.aC(p)
 o=m.x
 n=A.w(["ticketId",k,"ticketCreatedAt",x,"ticketSymbol",w,"ticketState",v,"ticketNote",u,"ticketNoteHidden",t,"orderSymbol",q,"orderData",s,"ticketProducts",r,"ticketSpot",p,"ticketTotalPrice",A.aC(o!=null?C.iY(d,o,l,0):""),"ticketProductsEdit",A.aC("")],y.w,y.d)
 k=m.Q.ax
-n.H(0,B.cXy(k==null?A.a([],y.E):k))
-return A.ls(n,!1,y.b)},
+n.H(0,B.cXA(k==null?A.a([],y.E):k))
+return A.lt(n,!1,y.b)},
 ew(){var x=0,w=A.k(y.v)
 var $async$ew=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:return A.i(null,w)}})
@@ -352,13 +352,13 @@ $S:173}
 B.bjl.prototype={
 $1(d){return d.kH()},
 $S:173};(function installTearOffs(){var x=a._static_1
-x(B,"d7S","dr8",4)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B,"d7U","dra",4)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.jh,A.K)
 w(A.ci,[B.b5q,B.b5r,B.b5s,B.b5t,B.b5u,B.b5v,B.b5p,B.b5w,B.b5x,B.bCr,B.bSA,B.bjl])
 w(A.ii,[B.hD,B.hF])})()
 A.ce(b.typeUniverse,JSON.parse('{"hD":{"ii":[]},"hF":{"ii":[]}}'))
 var y={E:A.E("u<eS>"),q:A.E("D<eS>"),w:A.E("l"),d:A.E("hc"),b:A.E("@"),v:A.E("~")};(function constants(){var x=a.makeConstList
 D.mZ=A.a(x(["spot","food","others"]),A.E("u<l>"))})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"dOK","OE",()=>$.hK().gmo(0))})()};
+x($,"dOM","OE",()=>$.hK().gmo(0))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_245",e:"endPart",h:b})})($__dart_deferred_initializers__,"hJbqY57KxFFBJu3ckEyGFGeqQ6M=");
+a.eventLog.push({p:"main.dart.js_245",e:"endPart",h:b})})($__dart_deferred_initializers__,"aohcamMndD7R8EKhtfqUX8lsjQc=");
