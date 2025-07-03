@@ -19,7 +19,7 @@ class DbEshop {
 
   static Future<FunctionResponse> sendTicketOrderUpdateEmail(int orderId) async {
     final body = {
-      "templateCode": "TICKET_ORDER_UPDATE",
+      "code": "TICKET_ORDER_UPDATE",
       "data": { "orderId": orderId },
     };
 

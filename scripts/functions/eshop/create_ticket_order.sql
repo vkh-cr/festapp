@@ -82,13 +82,6 @@ BEGIN
         END IF;
         */
 
-        -- Calculate deadline if deadline duration is provided
-        IF form_deadline_duration IS NOT NULL THEN
-            deadline := now + make_interval(secs => form_deadline_duration);
-        ELSE
-            deadline := NULL;
-        END IF;
-
         IF input_data ? 'fields' THEN
             DECLARE
                 valid_fields JSONB := '[]'::JSONB;
@@ -364,8 +357,8 @@ BEGIN
 
         -- Generate a variable symbol and create the payment info record
         generated_variable_symbol := generate_variable_symbol(bank_account_id);
-        INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, currency_code, created_at, deadline)
-        VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now, deadline)
+        INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, currency_code, created_at)
+        VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now)
         RETURNING id INTO payment_info_id;
 
         -- persist all of the non‐state fields
@@ -385,6 +378,14 @@ BEGIN
           UPDATE eshop.orders
           SET state      = 'ordered'
           WHERE id = order_id;
+
+          -- Calculate deadline if deadline duration is provided and then call the function
+          IF form_deadline_duration IS NOT NULL THEN
+              deadline := now + make_interval(secs => form_deadline_duration);
+              PERFORM public.set_payment_deadline(payment_info_id, deadline);
+          ELSE
+              deadline := NULL;
+          END IF;
         END IF;
 
         -- Log the order to orders_history with details

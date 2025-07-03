@@ -17,6 +17,20 @@ class FeaturesStrings {
   static String get labelCardDesign => 'FeatureFormSettings.labelCardDesign'.tr();
   static String get subtitleCardDesign => 'FeatureFormSettings.subtitleCardDesign'.tr();
   static String get errorFixBeforeSave => 'FeatureFormSettings.errorFixBeforeSave'.tr();
+  static String get labelUseExternalForm => 'FeatureFormSettings.labelUseExternalForm'.tr();
+  static String get labelReservationLink => 'FeatureFormSettings.labelReservationLink'.tr();
+  static String get helperReservationLink => 'FeatureFormSettings.helperReservationLink'.tr();
+  static String get labelPrice => 'FeatureFormSettings.labelPrice'.tr();
+  static String get helperPrice => 'FeatureFormSettings.helperPrice'.tr();
+  static String get labelAdvancedSettings => 'FeatureFormSettings.labelAdvancedSettings'.tr();
+  static String get labelReserveButtonTitle => 'FeatureFormSettings.labelReserveButtonTitle'.tr();
+  static String get labelDeadlineDuration => 'FeatureFormSettings.labelDeadlineDuration'.tr();
+  static String get helperDeadlineDuration => 'FeatureFormSettings.helperDeadlineDuration'.tr();
+  static String get labelReminderEnabled => 'FeatureFormSettings.labelReminderEnabled'.tr();
+  static String get helperReminderEnabled => 'FeatureFormSettings.helperReminderEnabled'.tr();
+  static String get labelReminderInterval => 'FeatureFormSettings.labelReminderInterval'.tr();
+  static String get helperReminderInterval => 'FeatureFormSettings.helperReminderInterval'.tr();
+  static String get validationReminderInterval => 'FeatureFormSettings.validationReminderInterval'.tr();
 
 // --- FormsTab (Main Grid View) ---
   static String get formsTitle => 'FormsFeature.formsTitle'.tr(); // "Forms"
@@ -141,6 +155,36 @@ class FeaturesStrings {
   static String get outdatedTitle => 'ProductsDialog.outdatedTitle'.tr();
   static String get outdatedSubtitle => 'ProductsDialog.outdatedSubtitle'.tr();
   static String get sendUpdateButton => 'ProductsDialog.sendUpdateButton'.tr();
+
+  // --- Order Grid Columns ---
+  static String get gridId => 'OrderGridColumns.id'.tr();
+  static String get gridHide => 'OrderGridColumns.hide'.tr();
+  static String get gridTitle => 'OrderGridColumns.title'.tr();
+  static String get gridPrice => 'OrderGridColumns.price'.tr();
+  static String get gridProductType => 'OrderGridColumns.productType'.tr();
+  static String get gridOrder => 'OrderGridColumns.order'.tr();
+  static String get gridMax => 'OrderGridColumns.max'.tr();
+  static String get gridOrdered => 'OrderGridColumns.ordered'.tr();
+  static String get gridPaid => 'OrderGridColumns.paid'.tr();
+  static String get gridCurrency => 'OrderGridColumns.currency'.tr();
+  static String get gridDescription => 'OrderGridColumns.description'.tr();
+  static String get gridState => 'OrderGridColumns.state'.tr();
+  static String get gridCreated => 'OrderGridColumns.created'.tr();
+  static String get gridProducts => 'OrderGridColumns.products'.tr();
+  static String get gridNote => 'OrderGridColumns.note'.tr();
+  static String get gridHiddenNote => 'OrderGridColumns.hiddenNote'.tr();
+  static String get gridSpot => 'OrderGridColumns.spot'.tr();
+  static String get gridOrderSymbol => 'OrderGridColumns.orderSymbol'.tr();
+  static String get gridCustomer => 'OrderGridColumns.customer'.tr();
+  static String get gridEmail => 'OrderGridColumns.email'.tr();
+  static String get gridHistory => 'OrderGridColumns.history'.tr();
+  static String get gridTransactions => 'OrderGridColumns.transactions'.tr();
+  static String get gridAmount => 'OrderGridColumns.amount'.tr();
+  static String get gridReturned => 'OrderGridColumns.returned'.tr();
+  static String get gridVariableSymbol => 'OrderGridColumns.variableSymbol'.tr();
+  static String get gridDeadline => 'OrderGridColumns.deadline'.tr();
+  static String get gridForm => 'OrderGridColumns.form'.tr();
+  static String get gridReminderSent => 'OrderGridColumns.reminderSent'.tr();
 
 
   /// Returns "Tickets" or "Applications" based on whether the ticket feature is enabled.
