@@ -20,17 +20,20 @@ DECLARE
   v_products_json    jsonb;
   v_old_ids          bigint[];
   v_new_ids          bigint[];
-
-  -- for state logic
   v_paid             numeric;
   v_price            numeric;
   v_new_state        text;
+  v_occasion_features jsonb;
+  v_form_settings     jsonb;
+  v_deadline_duration_seconds bigint;
+  v_new_deadline      timestamptz;
 BEGIN
   /* 0) Lookup & permission */
-  SELECT opt."order", o.occasion, o.payment_info, o.currency_code, o.data, o.state
-    INTO v_order_id, v_occasion_id, v_payment_info_id, v_currency_code, v_old_data, v_state
+  SELECT opt."order", o.occasion, o.payment_info, o.currency_code, o.data, o.state, occ.features
+    INTO v_order_id, v_occasion_id, v_payment_info_id, v_currency_code, v_old_data, v_state, v_occasion_features
   FROM eshop.order_product_ticket AS opt
   JOIN eshop.orders              AS o   ON o.id = opt."order"
+  JOIN public.occasions          AS occ ON occ.id = o.occasion
   WHERE opt.ticket = p_ticket_id
   LIMIT 1;
   IF NOT FOUND THEN
@@ -41,7 +44,6 @@ BEGIN
   END IF;
 
   /* compute old/new ID arrays and bail early if identical */
-  -- CORRECTED: Guard against non-array jsonb values for 'tickets' and 'products'
   SELECT array_agg((product_obj->>'id')::bigint ORDER BY (product_obj->>'id')::bigint)
     INTO v_old_ids
   FROM jsonb_array_elements(
@@ -65,7 +67,6 @@ BEGIN
   END IF;
 
   /* 1) old subtotal */
-  -- CORRECTED: Guard against non-array jsonb values to prevent "scalar" error.
   SELECT COALESCE(SUM((product_obj->>'price')::numeric),0)
     INTO v_sum_old
   FROM jsonb_array_elements(
@@ -98,7 +99,6 @@ BEGIN
   WHERE p.occasion = v_occasion_id;
 
   /* 3) rewrite just that ticket’s products array in orders.data */
-  -- CORRECTED: Guard 'tickets' array and ensure new products list is '[]', not null.
   SELECT jsonb_set(
     v_old_data,
     '{tickets}',
@@ -125,7 +125,6 @@ BEGIN
    WHERE id = v_order_id;
 
   /* 4) granularly update the link‐table rows */
-  -- Unlink spots from products that will be *removed*.
   UPDATE eshop.spots
      SET order_product_ticket = NULL
    WHERE order_product_ticket IN (
@@ -139,7 +138,6 @@ BEGIN
         )
    );
 
-  -- Delete rows for products that were removed from the ticket.
   DELETE FROM eshop.order_product_ticket
    WHERE ticket = p_ticket_id
      AND product IN (
@@ -148,13 +146,11 @@ BEGIN
         SELECT unnest FROM unnest(p_product_ids)
      );
 
-  -- If we are adding products, we must also remove the NULL placeholder if it exists.
   IF cardinality(p_product_ids) > 0 THEN
     DELETE FROM eshop.order_product_ticket
     WHERE ticket = p_ticket_id AND product IS NULL;
   END IF;
 
-  -- Insert rows for products that were added to the ticket.
   INSERT INTO eshop.order_product_ticket ("order", ticket, product)
   SELECT v_order_id, p_ticket_id, new_pid
     FROM (
@@ -163,7 +159,6 @@ BEGIN
       SELECT unnest FROM unnest(v_old_ids)
     ) AS t(new_pid);
 
-  -- If the final state should be empty, ensure the NULL placeholder exists.
   IF cardinality(p_product_ids) = 0 THEN
     INSERT INTO eshop.order_product_ticket("order", ticket, product)
       SELECT v_order_id, p_ticket_id, NULL
@@ -193,7 +188,6 @@ BEGIN
                    ELSE 'ordered'
                  END;
 
-  -- if setting to paid but every ticket is already in 'sent', downgrade to 'sent'
   IF v_new_state = 'paid' THEN
     IF NOT EXISTS (
       SELECT 1 FROM eshop.tickets t
@@ -204,20 +198,29 @@ BEGIN
     END IF;
   END IF;
 
-  -- apply the new state
   UPDATE eshop.orders
      SET state      = v_new_state,
          updated_at = now()
    WHERE id = v_order_id;
 
   -- if we just rolled a formerly‐paid/sent order back into 'ordered' because price increased,
-  -- push the payment deadline out by 7 days
-  IF v_new_state = 'ordered'
-     AND v_diff    > 0
-  THEN
-    UPDATE eshop.payment_info
-       SET deadline   = now() + INTERVAL '7 days'
-     WHERE id = v_payment_info_id;
+  -- call the dedicated function to set a new deadline and requeue the reminder.
+  IF v_new_state = 'ordered' THEN
+    -- Find the 'form' feature settings to get the deadline duration
+    SELECT elem INTO v_form_settings
+    FROM jsonb_array_elements(v_occasion_features) AS elem
+    WHERE elem->>'code' = 'form';
+
+    -- Extract duration, with a default of 7 days (604800 seconds) if not specified
+    v_deadline_duration_seconds := COALESCE(
+        (v_form_settings->>'deadline_duration_seconds')::bigint,
+        604800
+    );
+
+    v_new_deadline := now() + make_interval(secs => v_deadline_duration_seconds);
+
+    -- Call the dedicated function to set the deadline and requeue the reminder
+    PERFORM public.set_payment_deadline(v_payment_info_id, v_new_deadline);
   END IF;
 
   /* 6) append history */
