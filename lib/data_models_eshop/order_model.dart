@@ -9,6 +9,7 @@ import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/data_models_eshop/payment_info_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -154,8 +155,8 @@ class OrderModel extends ITrinaRowModel {
 
   static OrderModel fromPlutoJson(Map<String, dynamic> json) {
     return OrderModel(
-        id: json[TbEshop.orders.id] == -1 ? null : json[TbEshop.orders.id],
-        noteHidden: json[TbEshop.orders.note_hidden]);
+        id: json[EshopColumns.ORDER_ID] == -1 ? null : json[EshopColumns.ORDER_ID],
+        noteHidden: json[EshopColumns.ORDER_NOTE_HIDDEN]);
   }
 
   Map<String, dynamic> toJson() => {
@@ -174,34 +175,35 @@ class OrderModel extends ITrinaRowModel {
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
-      TbEshop.orders.id: TrinaCell(value: id ?? 0),
-      TbEshop.orders.order_symbol: TrinaCell(value: id ?? 0),
-      TbEshop.orders.price: TrinaCell(value: price != null ? Utilities.formatPrice(context, price!, currencyCode: currencyCode) : ""),
-      TbEshop.orders.state: TrinaCell(value: OrderModel.formatState(state ?? orderedState)),
-      TbEshop.payment_info.amount: TrinaCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!, currencyCode: paymentInfoModel!.currencyCode) : ""),
-      TbEshop.payment_info.paid: TrinaCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!, currencyCode: paymentInfoModel!.currencyCode) : ""),
-      TbEshop.payment_info.returned: TrinaCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!, currencyCode: paymentInfoModel!.currencyCode) : ""),
-      TbEshop.payment_info.variable_symbol: TrinaCell(value: paymentInfoModel?.variableSymbol ?? 0),
-      TbEshop.payment_info.deadline: TrinaCell(
+      EshopColumns.ORDER_ID: TrinaCell(value: id ?? 0),
+      EshopColumns.ORDER_SYMBOL: TrinaCell(value: id ?? 0),
+      EshopColumns.ORDER_PRICE: TrinaCell(value: price != null ? Utilities.formatPrice(context, price!, currencyCode: currencyCode) : ""),
+      EshopColumns.ORDER_STATE: TrinaCell(value: OrderModel.formatState(state ?? orderedState)),
+      EshopColumns.PAYMENT_INFO_AMOUNT: TrinaCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!, currencyCode: paymentInfoModel!.currencyCode) : ""),
+      EshopColumns.PAYMENT_INFO_PAID: TrinaCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!, currencyCode: paymentInfoModel!.currencyCode) : ""),
+      EshopColumns.PAYMENT_INFO_RETURNED: TrinaCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!, currencyCode: paymentInfoModel!.currencyCode) : ""),
+      EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL: TrinaCell(value: paymentInfoModel?.variableSymbol ?? 0),
+      EshopColumns.PAYMENT_INFO_DEADLINE: TrinaCell(
         value: paymentInfoModel?.deadline != null
             ? DateFormat('yyyy-MM-dd').format(paymentInfoModel!.deadline!)
             : "",
       ),
-      TbEshop.orders.created_at: TrinaCell(
+      EshopColumns.ORDER_CREATED_AT: TrinaCell(
           value: createdAt != null
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
-      TbEshop.orders.data: TrinaCell(value: toCustomerData()),
-      TbEshop.orders.data_email: TrinaCell(value: data?[TbEshop.orders.data_email]),
-      TicketModel.metaTicketsProducts: TrinaCell(
+      EshopColumns.ORDER_DATA: TrinaCell(value: toCustomerData()),
+      EshopColumns.ORDER_EMAIL: TrinaCell(value: data?[TbEshop.orders.data_email]),
+      EshopColumns.TICKET_PRODUCTS: TrinaCell(
           value: relatedProducts != null
               ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
               : ""),
-      TbEshop.orders.data_note: TrinaCell(value: toCustomerNote()),
-      TbEshop.orders.note_hidden: TrinaCell(value: noteHidden ?? ""),
-      TbEshop.orders_history.table: TrinaCell(value: ""),
-      TbEshop.transactions.table: TrinaCell(value: ""),
-      Tb.forms.table: TrinaCell(value: form?.toString() ?? ""),
+      EshopColumns.ORDER_DATA_NOTE: TrinaCell(value: toCustomerNote()),
+      EshopColumns.ORDER_NOTE_HIDDEN: TrinaCell(value: noteHidden ?? ""),
+      EshopColumns.ORDER_HISTORY: TrinaCell(value: ""),
+      EshopColumns.ORDER_TRANSACTIONS: TrinaCell(value: ""),
+      EshopColumns.ORDER_FORM: TrinaCell(value: form?.toString() ?? ""),
+      EshopColumns.PAYMENT_INFO_REMINDER_SENT: TrinaCell(value: paymentInfoModel!.isReminderSent.toString()),
     });
   }
 
