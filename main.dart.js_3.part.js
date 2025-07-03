@@ -8,7 +8,7 @@ B=a.updateHolder(c[114],B)
 var z=a.updateTypes([])
 A.ce(b.typeUniverse,JSON.parse('{"Vd":{"bz":[],"bq":[],"e":[]}}'))
 var y={b:A.E("Vd")};(function lazyInitializers(){var x=a.lazyFinal
-x($,"dRi","OH",()=>{var w=A.a([],A.E("u<l>"))
+x($,"dRk","OH",()=>{var w=A.a([],A.E("u<l>"))
 w.push("home")
 w.push("news")
 w.push("map")
@@ -16,4 +16,4 @@ w.push("more")
 w.push("user")
 return w})})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_3",e:"endPart",h:b})})($__dart_deferred_initializers__,"OuLn7XqSEGkmbpGZogcx+kJhV9Q=");
+a.eventLog.push({p:"main.dart.js_3",e:"endPart",h:b})})($__dart_deferred_initializers__,"d9qS+DMFN82gjQTY806eqqd2G9Q=");
