@@ -10,8 +10,11 @@ class PaymentInfoModel {
   double? returned;
   DateTime? deadline;
   String? currencyCode;
+  Map<String, dynamic>? data;
+  bool? isReminderSent;
 
   factory PaymentInfoModel.fromJson(Map<String, dynamic> json) {
+    final data = json[TbEshop.payment_info.data] as Map<String, dynamic>?;
     return PaymentInfoModel(
       id: json[TbEshop.payment_info.id],
       createdAt: json[TbEshop.payment_info.created_at] != null
@@ -32,20 +35,10 @@ class PaymentInfoModel {
           ? DateTime.parse(json[TbEshop.payment_info.deadline])
           : null,
       currencyCode: json[TbEshop.payment_info.currency_code],
+      data: data,
+      isReminderSent: data?['current_version_reminded'] == true,
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    TbEshop.payment_info.id: id,
-    TbEshop.payment_info.created_at: createdAt?.toIso8601String(),
-    TbEshop.payment_info.bank_account: bankAccount,
-    TbEshop.payment_info.variable_symbol: variableSymbol,
-    TbEshop.payment_info.amount: amount,
-    TbEshop.payment_info.paid: paid,
-    TbEshop.payment_info.returned: returned,
-    TbEshop.payment_info.deadline: deadline?.toIso8601String(),
-    TbEshop.payment_info.currency_code: currencyCode,
-  };
 
   String toBasicString() => id != null ? "Payment Info #$id" : "Payment Info";
 
@@ -59,5 +52,7 @@ class PaymentInfoModel {
     this.returned,
     this.deadline,
     this.currencyCode,
+    this.data,
+    this.isReminderSent = false,
   });
 }

@@ -29,16 +29,16 @@ class FormResponseModel extends ITrinaRowModel {
 
   static FormResponseModel fromPlutoJson(Map<String, dynamic> json) {
     return FormResponseModel(
-        order: json[TbEshop.orders.order_symbol]);
+        order: json[EshopColumns.ORDER_SYMBOL]);
   }
 
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     Map<String, TrinaCell> cells = {
-      TbEshop.orders.id: TrinaCell(value: id),
-      TbEshop.orders.order_symbol: TrinaCell(value: order!.id),
-      TbEshop.orders.state: TrinaCell(value: order!.state),
-      TicketModel.metaTicketsProducts: TrinaCell(
+      EshopColumns.ORDER_ID: TrinaCell(value: id),
+      EshopColumns.ORDER_SYMBOL: TrinaCell(value: order!.toBasicString()),
+      EshopColumns.ORDER_STATE: TrinaCell(value: order!.state),
+      EshopColumns.TICKET_PRODUCTS: TrinaCell(
           value: order!.relatedProducts != null
               ? order!.relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
               : ""),
@@ -106,10 +106,10 @@ class FormResponseModel extends ITrinaRowModel {
     }
 
     return FormResponseModel(
-      id: order.id,
-      order: order,
-      fields: extractedFields,
-      allFields: allFields
+        id: order.id,
+        order: order,
+        fields: extractedFields,
+        allFields: allFields
     );
   }
 

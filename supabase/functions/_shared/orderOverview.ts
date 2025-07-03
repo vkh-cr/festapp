@@ -1,122 +1,81 @@
 import { formatCurrency } from "./utilities.ts";
 
 export function generateFullOrder(orderData: any, tickets: any[], occasionFeatures: any[]): string {
-  const { name, surname, email, phone, note } = orderData;
+    const { name, surname, email, phone, note } = orderData;
 
-  // Build personal info section
-  let personalInfo = "";
-  if (name) {
-    personalInfo += `<div style="margin-bottom:4px; margin-left:12px;">Jméno: ${name}</div>`;
-  }
-  if (surname) {
-    personalInfo += `<div style="margin-bottom:4px; margin-left:12px;">Příjmení: ${surname}</div>`;
-  }
-  if (email) {
-    personalInfo += `<div style="margin-bottom:4px; margin-left:12px;">E-mail: ${email}</div>`;
-  }
-  if (phone) {
-    personalInfo += `<div style="margin-bottom:4px; margin-left:12px;">Telefon: ${phone}</div>`;
-  }
-  if (note) {
-    personalInfo += `<div style="margin-bottom:4px; margin-left:12px;">Poznámka: ${note}</div>`;
-  }
+    // --- 1. Personal Info ---
+    let personalInfoHtml = '';
+    const fullName = [name, surname].filter(Boolean).join(' ');
 
-  // Start the order container - using table-based layout for better email compatibility
-  const orderHeader =
-    `<table cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:600px; margin:20px auto; border-collapse: separate; border-spacing: 0;">
-      <tr>
-        <td style="padding:20px; border:2px solid #122640; border-radius:10px;">
-          <table cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse;">
-            <tr>
-              <td align="center" style="padding-bottom:15px;">
-                <strong>Rekapitulace Vaší objednávky:</strong>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                ${personalInfo}
-              </td>
-            </tr>`;
+    if (fullName) {
+        personalInfoHtml += `<div style="margin-bottom:4px;">Jméno: <strong>${fullName}</strong></div>`;
+    }
+    if (email) {
+        personalInfoHtml += `<div style="margin-bottom:4px;">E-mail: <strong>${email}</strong></div>`;
+    }
+    if (phone) {
+        personalInfoHtml += `<div style="margin-bottom:4px;">Telefon: <strong>${phone}</strong></div>`;
+    }
+    if (note) {
+        personalInfoHtml += `<div style="margin-top:8px;">Poznámka k objednávce: <div><em>${note}</em></div></div>`;
+    }
+    if (personalInfoHtml) {
+        personalInfoHtml = `<div style="margin-bottom: 24px;">${personalInfoHtml}</div>`;
+    }
 
-  let overallTotal = 0;
-  const ticketFeature = occasionFeatures?.find(f => f.code === "ticket");
-  const itemLabel = ticketFeature?.is_enabled ? "Vstupenka" : "Přihláška";
+    // --- 2. Tickets / Applications ---
+    let overallTotal = 0;
+    const ticketFeature = occasionFeatures?.find(f => f.code === "ticket");
+    const itemLabel = ticketFeature?.is_enabled ? "Vstupenka" : "Přihláška";
 
-  const ticketsDetails = tickets.map((ticket) => {
-    const ticketSymbol = ticket.ticket_symbol;
-
-    const productsRows = ticket.products
-      .map((product: any) => {
-        const price = Number(product.price || 0);
-        overallTotal += price;
-        const formattedPrice = formatCurrency(
-          price,
-          product.currency_code || ticket.products[0].currency_code
-        );
-
-        // Product entry using table for better alignment
-        return `<tr>
-                  <td valign="top" colspan="3" style="padding-top:8px;">
-                    <table cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse;">
-                      <tr>
-                        <td style="padding-left:12px; padding-right:8px; vertical-align:top;">
-                          ${product.type_title}: ${product.title}
-                        </td>
-                        <td width="80" style="text-align:right; white-space:nowrap; vertical-align:bottom; padding-right:12px;">
-                          ${formattedPrice}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colspan="2" style="padding:0 12px;">
-                          <div style="border-bottom:1px dotted #ccc; margin:2px 0 4px 0;"></div>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
+    const ticketsDetails = tickets.map((ticket) => {
+        const productsRows = ticket.products.map((product: any) => {
+            const price = Number(product.price || 0);
+            overallTotal += price;
+            const formattedPrice = formatCurrency(price, product.currency_code || ticket.products[0].currency_code);
+            // Added vertical-align: top to keep text aligned properly on line breaks
+            return `
+                <tr>
+                    <td style="padding: 12px 0; border-top: 1px solid #f1f5f9; vertical-align: top;">${product.type_title}: ${product.title}</td>
+                    <td style="padding: 12px 0; text-align: right; white-space: nowrap; vertical-align: top; padding-left: 16px; border-top: 1px solid #f1f5f9;"><strong>${formattedPrice}</strong></td>
                 </tr>`;
-      })
-      .join("");
+        }).join("").replace('border-top: 1px solid #f1f5f9;', 'border-top: none;'); // Removes the line from the very first item
 
-    return `<tr>
-              <td style="padding-top:20px;">
-                <table cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse;">
-                  <tr>
-                    <td style="padding-left:12px; padding-bottom:8px;">
-                      <strong>${itemLabel} ${ticketSymbol}</strong>
-                    </td>
-                  </tr>
-                  ${productsRows}
-                  ${ticket.note ?
-                    `<tr>
-                      <td style="padding:5px 12px 0;">Poznámka: ${ticket.note}</td>
-                    </tr>` :
-                    ""}
+        const ticketNote = ticket.note ? `
+            <tr>
+                <td colspan="2" style="padding: 8px 0 4px 0; color: #555; font-size: 13px;">
+                    <em>Poznámka: ${ticket.note}</em>
+                </td>
+            </tr>` : '';
+
+        return `
+            <div style="margin-bottom: 24px;">
+                <p style="margin:0 0 12px 0;"><strong>${itemLabel} ${ticket.ticket_symbol}</strong></p>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tbody>
+                        ${productsRows}
+                        ${ticketNote}
+                    </tbody>
                 </table>
-              </td>
-            </tr>`;
-  }).join("");
+            </div>`;
+    }).join("");
 
-  const currencyCode =
-    tickets &&
-    tickets.length > 0 &&
-    tickets[0].products &&
-    tickets[0].products.length > 0
-      ? tickets[0].products[0].currency_code
-      : "";
-  const formattedOverallTotal = formatCurrency(overallTotal, currencyCode);
+    // --- 3. Total Price ---
+    const currencyCode = tickets?.[0]?.products?.[0]?.currency_code || "";
+    const formattedOverallTotal = formatCurrency(overallTotal, currencyCode);
 
-  const totalSection =
-    `<tr>
-      <td style="padding-top:20px; padding-right:12px; text-align:right;">
-        <strong>Celková cena: ${formattedOverallTotal}</strong>
-      </td>
-    </tr>`;
+    const totalSection = `
+        <div style="text-align: right; padding-top: 16px; margin-top: 8px; border-top: 2px solid #333;">
+            <span style="font-size: 18px;">Celková cena: <strong>${formattedOverallTotal}</strong></span>
+        </div>`;
 
-  const orderFooter =
-    `      </table>
-        </td>
-      </tr>
-    </table>`;
-
-  return `${orderHeader}${ticketsDetails}${totalSection}${orderFooter}`;
+    // --- 4. Final Assembly ---
+    // The whole component is wrapped in a single, clean "card"
+    return `
+        <div style="max-width: 600px; margin: 20px auto; padding: 24px; font-family: sans-serif; color: #333; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <p style="font-size: 20px; font-weight: bold; margin: 0 0 16px 0; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">Přehled objednávky</p>
+            ${personalInfoHtml}
+            ${ticketsDetails}
+            ${totalSection}
+        </div>`;
 }
