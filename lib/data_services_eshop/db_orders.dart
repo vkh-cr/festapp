@@ -202,7 +202,7 @@ class DbOrders {
     required int orderId,
   }) async {
     final body = {
-      "templateCode": "TICKET_ORDER_STORNO",
+      "code": "TICKET_ORDER_STORNO",
       "data": { "orderId": orderId },
     };
 
