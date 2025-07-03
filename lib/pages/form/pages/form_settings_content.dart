@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/features_strings.dart';
+import 'package:fstapp/components/features/form_feature.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
@@ -34,8 +37,16 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
   final ValueNotifier<String> _htmlNotifier = ValueNotifier<String>("");
 
   bool _isCardDesign = false;
+  bool _isReminderEnabled = false;
+  late FormFeature _formFeature;
   String? _linkError;
   bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _formFeature = FeatureService.getFeatureDetails(FeatureConstants.form) as FormFeature;
+  }
 
   @override
   void didChangeDependencies() {
@@ -86,6 +97,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
       _linkController.removeListener(_updateHtml);
       _linkController.addListener(_updateHtml);
       _isCardDesign = _form!.data?[FormModel.metaIsCardDesign] as bool? ?? false;
+      _isReminderEnabled = _form!.data?[FormModel.metaIsReminderEnabled] as bool? ?? false;
       if (_form!.deadlineDurationSeconds != null && _form!.deadlineDurationSeconds! > 0) {
         final days = (_form!.deadlineDurationSeconds! / (24 * 3600)).round();
         _deadlineDaysController.text = days.toString();
@@ -124,6 +136,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
     _form!.link = _linkController.text.trim();
     _form!.data ??= {};
     _form!.data![FormModel.metaIsCardDesign] = _isCardDesign;
+    _form!.data![FormModel.metaIsReminderEnabled] = _isReminderEnabled;
     final days = int.tryParse(_deadlineDaysController.text);
     if (days != null && days > 0) {
       _form!.deadlineDurationSeconds = days * 24 * 60 * 60;
@@ -197,6 +210,8 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isReminderFeatureEnabled = _formFeature.isEnabled && (_formFeature.reminderIsEnabled ?? false);
+
     return Scaffold(
       body: Builder(
         builder: (innerContext) {
@@ -217,6 +232,22 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(FeaturesStrings.formSettingsTitle, style: Theme.of(innerContext).textTheme.headlineSmall),
+                        const SizedBox(height: 24),
+                        SwitchListTile(
+                          title: Text(FeaturesStrings.labelEnableReminders),
+                          subtitle: Text(!isReminderFeatureEnabled
+                              ? FeaturesStrings.subtitleRemindersDisabled
+                              : FeaturesStrings.subtitleEnableReminders),
+                          value: _isReminderEnabled,
+                          onChanged: isReminderFeatureEnabled
+                              ? (value) {
+                            setState(() {
+                              _isReminderEnabled = value;
+                            });
+                          }
+                              : null,
+                          contentPadding: EdgeInsets.zero,
+                        ),
                         const SizedBox(height: 24),
                         TextFormField(
                           controller: _titleController,
