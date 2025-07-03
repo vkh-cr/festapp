@@ -23,6 +23,8 @@ DECLARE
     bank_account_val     BIGINT;       -- Bank account from input_data
     bank_account_unit    BIGINT;       -- Unit of the bank account, must match occasion_unit
 
+    v_seconds_before_deadline BIGINT; -- For calling the reminder queue function
+
     ----------------------------------------------------------------------------
     -- Since product_type data is now inside form_fields, we no longer read from
     -- a top-level product_types array. Instead, we will parse product_type objects
@@ -509,6 +511,23 @@ BEGIN
                deadline_duration_seconds = deadline_val,
                is_open = COALESCE((input_data->>'is_open')::BOOLEAN, true)
          WHERE id = form_id;
+
+        ----------------------------------------------------------------------------
+        -- After updating the form, requeue payment reminders for the whole occasion
+        -- as the form's settings (e.g., is_reminder_enabled) might have changed.
+        ----------------------------------------------------------------------------
+        -- First, find the 'seconds_before_deadline' setting from the occasion's 'form' feature.
+        SELECT (elem->>'reminder_interval_seconds')::BIGINT
+          INTO v_seconds_before_deadline
+          FROM public.occasions, jsonb_array_elements(features) AS elem
+         WHERE id = occasion_id
+           AND elem->>'code' = 'form'
+         LIMIT 1;
+
+        -- If the setting is found, call the function to rebuild the reminder queue.
+        IF v_seconds_before_deadline IS NOT NULL THEN
+            PERFORM public.queue_payment_reminders(occasion_id, v_seconds_before_deadline);
+        END IF;
 
         ----------------------------------------------------------------------------
         -- Prepare a success response

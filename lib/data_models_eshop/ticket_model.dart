@@ -29,10 +29,6 @@ class TicketModel extends ITrinaRowModel {
   // Relating order directly to the ticket
   OrderModel? relatedOrder;
 
-  static const String metaRelatedOrder = "related_order";
-  static const String metaTicketsProducts = "ticket_products";
-  static const String metaPrice = "price";
-
   TicketModel({
     this.id,
     this.createdAt,
@@ -73,24 +69,24 @@ class TicketModel extends ITrinaRowModel {
   TrinaRow toTrinaRow(BuildContext context) {
 
     Map<String, TrinaCell> cells = {
-      TbEshop.tickets.id: TrinaCell(value: id ?? 0),
-      TbEshop.tickets.created_at: TrinaCell(
+      EshopColumns.TICKET_ID: TrinaCell(value: id ?? 0),
+      EshopColumns.TICKET_CREATED_AT: TrinaCell(
           value: createdAt != null
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
-      TbEshop.tickets.ticket_symbol: TrinaCell(value: ticketSymbol ?? ""),
-      TbEshop.tickets.state: TrinaCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
-      TbEshop.tickets.note: TrinaCell(value: note ?? ""),
-      TbEshop.tickets.note_hidden: TrinaCell(value: noteHidden ?? ""),
-      TbEshop.orders.order_symbol: TrinaCell(
+      EshopColumns.TICKET_SYMBOL: TrinaCell(value: ticketSymbol ?? ""),
+      EshopColumns.TICKET_STATE: TrinaCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
+      EshopColumns.TICKET_NOTE: TrinaCell(value: note ?? ""),
+      EshopColumns.TICKET_NOTE_HIDDEN: TrinaCell(value: noteHidden ?? ""),
+      EshopColumns.ORDER_SYMBOL: TrinaCell(
           value: relatedOrder != null
               ? relatedOrder!.toBasicString()
               : ""),
-      TbEshop.orders.data: TrinaCell(
+      EshopColumns.ORDER_DATA: TrinaCell(
           value: relatedOrder != null
               ? relatedOrder!.toCustomerData()
               : ""),
-      metaTicketsProducts: TrinaCell(
+      EshopColumns.TICKET_PRODUCTS: TrinaCell(
           value: relatedProducts != null
               ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
               : ""),
@@ -98,7 +94,7 @@ class TicketModel extends ITrinaRowModel {
           value: relatedSpot != null
               ? relatedSpot?.toShortString()
               : ""),
-      metaPrice: TrinaCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
+      EshopColumns.TICKET_TOTAL_PRICE: TrinaCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
       EshopColumns.TICKET_PRODUCTS_EDIT: TrinaCell(value: ""),
     };
 
@@ -109,8 +105,8 @@ class TicketModel extends ITrinaRowModel {
 
   static TicketModel fromPlutoJson(Map<String, dynamic> json) {
     return TicketModel(
-        id: json[TbEshop.tickets.id] == -1 ? null : json[TbEshop.tickets.id],
-        noteHidden: json[TbEshop.tickets.note_hidden]
+        id: json[EshopColumns.TICKET_ID] == -1 ? null : json[EshopColumns.TICKET_ID],
+        noteHidden: json[EshopColumns.TICKET_NOTE_HIDDEN]
     );
   }
 
