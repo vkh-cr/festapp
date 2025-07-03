@@ -8,7 +8,7 @@ var $async$bdk=A.f(function(e,f){if(e===1){t.push(f)
 x=u}while(true)switch(x){case 0:u=4
 o=y.m
 x=7
-return A.d($.d93().cJ("get_available_platforms",A.w(["organization_id",d],y.w,o),o),$async$bdk)
+return A.d($.d93().cI("get_available_platforms",A.w(["organization_id",d],y.w,o),o),$async$bdk)
 case 7:s=f
 if(s==null||!y.i.b(s)){o=A.a([],y.B)
 v=o
@@ -247,4 +247,4 @@ D.bK8=new A.cx("Install App",null,null,null,null,null,null,null,null,null,null,n
 x($,"dOI","d93",()=>$.hK().gmo(0))
 x($,"dQ1","cTz",()=>new A.S5())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_168",e:"endPart",h:b})})($__dart_deferred_initializers__,"oky0/q2PeFUiDEVU/arkxooEi8g=");
+a.eventLog.push({p:"main.dart.js_168",e:"endPart",h:b})})($__dart_deferred_initializers__,"RnHhWgUs1yZnns2WOSP/bUhhxUo=");

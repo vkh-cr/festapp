@@ -19,7 +19,7 @@ dfW(d,e){var x=0,w=A.k(y.b),v,u
 var $async$b4a=A.f(function(f,g){if(f===1)return A.h(g,w)
 while(true)switch(x){case 0:u=y.b
 x=3
-return A.d($.dB().cJ("set_user_password_token",A.w(["token",d,"password",e],y.w,u),u),$async$b4a)
+return A.d($.dB().cI("set_user_password_token",A.w(["token",d,"password",e],y.w,u),u),$async$b4a)
 case 3:v=g
 x=1
 break
@@ -118,4 +118,4 @@ w(A.d_,[B.cti,B.ctj])})()
 A.ce(b.typeUniverse,JSON.parse('{"Ft":{"L":[],"e":[]},"aUx":{"N":["Ft"]}}'))
 var y={g:A.E("bg"),u:A.E("u<e>"),o:A.E("aU<pE>"),F:A.E("aE"),E:A.E("K"),w:A.E("l"),b:A.E("@"),v:A.E("~")};(function constants(){D.bJR=new A.cx("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_120",e:"endPart",h:b})})($__dart_deferred_initializers__,"MLh7TLlRTS4gBLJl9PWsNpfB6nk=");
+a.eventLog.push({p:"main.dart.js_120",e:"endPart",h:b})})($__dart_deferred_initializers__,"fPudRDC12m7bZCVLzSlG5ZzqxVw=");

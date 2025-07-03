@@ -67,7 +67,7 @@ s=(s==null?null:s.e).e
 s.toString
 v=y.b
 x=2
-return A.d(u.cJ("create_companion_in_organization",A.w(["org",1,"oc",t,"usr",s,"c_name",d],y.w,v),v),$async$bbh)
+return A.d(u.cI("create_companion_in_organization",A.w(["org",1,"oc",t,"usr",s,"c_name",d],y.w,v),v),$async$bbh)
 case 2:return A.i(null,w)}})
 return A.j($async$bbh,w)},
 Ql(d,e,f){return B.diV(d,e,f)},
@@ -79,7 +79,7 @@ if(l==null){u=$.dB().gdn().c
 l=(u==null?null:u.r).a}u=y.w
 t=y.b
 x=3
-return A.d($.j_().cJ("sign_user_to_event",A.w(["ev",e,"usr",l],u,t),t),$async$Ql)
+return A.d($.j_().cI("sign_user_to_event",A.w(["ev",e,"usr",l],u,t),t),$async$Ql)
 case 3:s=h
 t=J.a1(s)
 switch(t.h(s,"code")){case 200:if(m)A.bi(d,A.n(($.os.e==="female"?"F":"M")+"You have been signed in.",null),C.a3)
@@ -111,10 +111,10 @@ if(t.h(s,"events_registration_start")!=null){o=A.l8(A.e9(t.h(s,"events_registrat
 m=y.r
 t=d.ac(m).r.a
 t===$&&A.b()
-n=B.di0(t.geW(0)).cF(o)
+n=B.di0(t.geW(0)).cR(o)
 m=d.ac(m).r.a
 m===$&&A.b()
-p=A.n("You can sign in from {time}.",A.w(["time",n+" "+A.vb(m.geW(0)).cF(o)],u,u))}q=y.q.a(A.lN("workshops",null)).f
+p=A.n("You can sign in from {time}.",A.w(["time",n+" "+A.vb(m.geW(0)).cR(o)],u,u))}q=y.q.a(A.lN("workshops",null)).f
 if(q!=null&&q.length!==0){A.bi(d,q,C.aM)
 x=1
 break $async$outer}A.bi(d,A.n("Cannot sign in!",null)+" "+p,C.aM)
@@ -306,4 +306,4 @@ D.aek=new A.cx("Sign out someone",null,null,null,null,null,null,null,null,null,n
 D.bKi=new A.cx("Create Companion",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.aen=new A.cx("Companions",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_10",e:"endPart",h:b})})($__dart_deferred_initializers__,"aO+KpAQkGlRki6MLC+gAyLn+dI8=");
+a.eventLog.push({p:"main.dart.js_10",e:"endPart",h:b})})($__dart_deferred_initializers__,"myV+6exvZLB4VMCerbqFcWrgins=");
