@@ -178,12 +178,73 @@ class ProductTypeEditorWidgets {
 
   /// Builds the editor for a product type group.
   static Widget buildProductTypeEditor(BuildContext context, FormModel form, FormFieldModel ptField, VoidCallback refresh) {
-    // Initialize data models safely
-    ptField.productType ??= ProductTypeModel(title: ptField.title, products: []);
+    // This static method now delegates to the new StatefulWidget.
+    // A key is used to ensure Flutter correctly identifies the widget.
+    return ProductTypeEditor(
+      key: ValueKey(ptField.id ?? ptField.hashCode),
+      form: form,
+      ptField: ptField,
+      refresh: refresh,
+    );
+  }
+
+  // Helper for building compact controls
+  static Widget _buildControl(BuildContext context, String label, Widget control) {
+    return Column(
+      children: [
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        control,
+      ],
+    );
+  }
+}
+
+/// A stateful widget to manage the editor state for a product type.
+class ProductTypeEditor extends StatefulWidget {
+  final FormModel form;
+  final FormFieldModel ptField;
+  final VoidCallback refresh;
+
+  const ProductTypeEditor({
+    super.key,
+    required this.form,
+    required this.ptField,
+    required this.refresh,
+  });
+
+  @override
+  State<ProductTypeEditor> createState() => _ProductTypeEditorState();
+}
+
+class _ProductTypeEditorState extends State<ProductTypeEditor> {
+  // The controller is now a state variable, initialized once.
+  late final TextEditingController groupTitleController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the controller in initState to prevent re-creation on build.
+    widget.ptField.productType ??= ProductTypeModel(title: widget.ptField.title, products: []);
+    groupTitleController = TextEditingController(text: widget.ptField.title ?? widget.ptField.productType!.title);
+  }
+
+  @override
+  void dispose() {
+    // Dispose the controller when the widget is removed from the tree.
+    groupTitleController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Logic from the original static method is now here.
+    final form = widget.form;
+    final ptField = widget.ptField;
+    final refresh = widget.refresh;
+
     final group = ptField.productType!;
     group.products ??= [];
 
-    final groupTitleController = TextEditingController(text: ptField.title ?? group.title);
     final defaultDescription = "Description".tr();
     final groupIsRequired = ptField.isRequired ?? false;
     final groupIsHidden = ptField.isHidden ?? false;
@@ -203,22 +264,23 @@ class ProductTypeEditorWidgets {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: groupTitleController,
+                      controller: groupTitleController, // Use the stateful controller
                       decoration: InputDecoration(labelText: "Product Type Title".tr(), border: const UnderlineInputBorder()),
                       onChanged: (val) {
+                        // Update the model, but DO NOT call refresh().
+                        // The controller handles the UI update.
                         ptField.title = val;
                         group.title = val;
-                        refresh();
                       },
                     ),
                   ),
                   const SizedBox(width: 12),
-                  _buildControl(context, "Required".tr(), Checkbox(value: groupIsRequired, onChanged: (val) {
+                  ProductTypeEditorWidgets._buildControl(context, "Required".tr(), Checkbox(value: groupIsRequired, onChanged: (val) {
                     ptField.isRequired = val;
                     refresh();
                   })),
                   const SizedBox(width: 12),
-                  _buildControl(context, "Multiple Choice".tr(), Switch(value: canSelectMany, onChanged: (val) {
+                  ProductTypeEditorWidgets._buildControl(context, "Multiple Choice".tr(), Switch(value: canSelectMany, onChanged: (val) {
                     ptField.data ??= {};
                     if (val) {
                       ptField.data![FormHelper.metaSelectionType] = FormHelper.metaSelectionTypeMany;
@@ -228,7 +290,7 @@ class ProductTypeEditorWidgets {
                     refresh();
                   })),
                   const SizedBox(width: 12),
-                  _buildControl(context, "Show".tr(), Switch(value: !groupIsHidden, onChanged: (val) {
+                  ProductTypeEditorWidgets._buildControl(context, "Show".tr(), Switch(value: !groupIsHidden, onChanged: (val) {
                     ptField.isHidden = !val;
                     refresh();
                   })),
@@ -301,16 +363,6 @@ class ProductTypeEditorWidgets {
           ),
         ),
       ),
-    );
-  }
-
-  // Helper for building compact controls
-  static Widget _buildControl(BuildContext context, String label, Widget control) {
-    return Column(
-      children: [
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
-        control,
-      ],
     );
   }
 }
