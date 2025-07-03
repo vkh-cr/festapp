@@ -692,6 +692,8 @@
     "validationLinkRequired": "Link is required.",
     "validationLinkInvalidChars": "Invalid characters. Use only letters, numbers, and hyphens.",
     "validationLinkInUse": "Link already in use.",
+    "labelDeadlineDays": "Payment Deadline (in days)",
+    "helperDeadlineDays": "Set how many days a user has to pay for an order. Leave empty for no deadline.",
     "labelCardDesign": "Use Card Design",
     "subtitleCardDesign": "Toggles between a modern card-based layout and a minimalistic, simpler design.",
     "errorFixBeforeSave": "Please fix the errors before saving.",
@@ -705,10 +707,13 @@
     "labelDeadlineDuration": "Payment Deadline (in days)",
     "helperDeadlineDuration": "Set how many days a user has to pay for an order. Leave empty for no deadline.",
     "labelReminderEnabled": "Enable Payment Reminders",
-    "helperReminderEnabled": "Automatically send an email reminder before the payment deadline.",
+    "helperReminderEnabled": "Automatically send an email reminder about payment.",
     "labelReminderInterval": "Reminder Interval (days before deadline)",
     "helperReminderInterval": "How many days before the deadline should the reminder be sent.",
-    "validationReminderInterval": "Reminder interval must be less than the payment deadline."
+    "validationReminderInterval": "Reminder interval must be less than the payment deadline.",
+    "labelEnableReminders": "Enable Reminders",
+    "subtitleEnableReminders": "If enabled, an automatic email reminder about payment will be sent to customers.",
+    "subtitleRemindersDisabled": "Reminders are disabled. Please enable the reminder feature in the occasion settings first."
   },
   "OrderGridColumns": {
     "id": "Id",
