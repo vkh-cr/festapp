@@ -186,7 +186,8 @@ BEGIN
         'paid', pi.paid,
         'returned', pi.returned,
         'deadline', pi.deadline,
-        'currency_code', pi.currency_code
+        'currency_code', pi.currency_code,
+        'data', pi.data
     ))
     INTO paymentInfoData
     FROM eshop.payment_info pi
