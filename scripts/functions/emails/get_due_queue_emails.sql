@@ -18,7 +18,7 @@ BEGIN
     SELECT
       de.id,
       CASE
-        -- For ticket reminders, re-check the original conditions plus feature flags.
+        -- For ticket reminders, re-check the original conditions plus feature flags and the form-specific setting.
         WHEN de.code = 'TICKET_ORDER_REMINDER' THEN
           (
             o.state = 'ordered'
@@ -26,6 +26,7 @@ BEGIN
             AND COALESCE((pi.data->>'current_version_reminded')::boolean, false) IS FALSE
             AND (form_settings.feature->>'is_enabled')::boolean IS TRUE
             AND (form_settings.feature->>'reminder_is_enabled')::boolean IS TRUE
+            AND (f.id IS NULL OR COALESCE((f.data->>'is_reminder_enabled')::boolean, false) IS TRUE) -- Check form-level reminder setting, default to TRUE if form not found
           )
         -- All other email types are considered valid by default.
         ELSE
@@ -37,12 +38,14 @@ BEGIN
     LEFT JOIN eshop.orders o ON de.code = 'TICKET_ORDER_REMINDER' AND o.id = (de.data->>'order_id')::bigint
     LEFT JOIN eshop.payment_info pi ON de.code = 'TICKET_ORDER_REMINDER' AND pi.id = o.payment_info
     LEFT JOIN public.occasions occ ON de.code = 'TICKET_ORDER_REMINDER' AND occ.id = o.occasion
-    -- This lateral join efficiently finds the 'form' feature object from the JSON array.
+    -- This lateral join efficiently finds the 'form' feature object from the JSON array in the occasion.
     LEFT JOIN LATERAL (
         SELECT elem AS feature
         FROM jsonb_array_elements(occ.features) elem
         WHERE elem->>'code' = 'form'
     ) form_settings ON TRUE
+    -- Join the forms table based on the key stored in the order's data.
+    LEFT JOIN public.forms f ON de.code = 'TICKET_ORDER_REMINDER' AND f.key = (o.data->>'form')
   ),
   deleted_emails AS (
     -- 3. Delete all emails that failed the validation check.
