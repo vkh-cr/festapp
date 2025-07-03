@@ -9,6 +9,7 @@ import {
   supabaseAdmin,
 } from "../_shared/supabaseUtil.ts";
 import { useFakturoid } from "./fakturoid.ts";
+import { translations } from "../_shared/translations.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -127,7 +128,6 @@ Deno.serve(async (req) => {
         attachments,
       );
     } else {
-      // Check if the payment amount is greater than zero before generating the QR code
       const occasion = ticketOrder.order.occasion;
       const paymentInfo = ticketOrder.order.payment_info;
       if (paymentInfo.amount > 0) {
@@ -161,8 +161,25 @@ Deno.serve(async (req) => {
       context,
     );
 
+    const lang = orderDetails.lang || 'cs';
+    const tr = translations[lang];
+    let balanceReasoning = '';
+
+    if (paymentInfo.amount > 0) {
+        balanceReasoning = tr.unpaid(
+            formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
+            paymentInfo.account_number_human_readable,
+            formatIBAN(paymentInfo.account_number),
+            paymentInfo.variable_symbol,
+            formatDatetime(paymentInfo.deadline, lang)
+        );
+    } else {
+        balanceReasoning = tr.zeroOrder(paymentInfo.currency_code);
+    }
+
     const subs = {
       occasionTitle: occasion.occasion_title,
+      balanceReasoning: balanceReasoning,
       price: paymentInfo.amount,
       currencyCode: paymentInfo.currency_code,
       amount: formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
