@@ -70,13 +70,13 @@ export const translations = {
       paid: string, remaining: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string
     ) =>
       `<p>Děkujeme za Tvou platbu ve výši ${bold(paid)}. Pro úplné dokončení objednávky, prosím, uhraď zbývající částku do ${bold(deadline)}. Jakmile platbu obdržíme, pošleme Ti potvrzení.</p>
-       <p>Pro zjednodušení přikládáme i QR kód.</p>
+       <p>Pro zjednodušení platby přikládáme QR kód.</p>
        ${generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'cs' })}`,
     unpaid: (
       total: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string
     ) =>
       `<p>Zbývá uhradit celkovou částku ${bold(total)}. Pro dokončení objednávky ji, prosím, uhraď do ${bold(deadline)}. Jakmile platbu obdržíme, pošleme Ti potvrzení.</p>
-       <p>Pro zjednodušení přikládáme i QR kód.</p>
+       <p>Pro zjednodušení platby přikládáme QR kód.</p>
        ${generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: total, lang: 'cs' })}`,
     fullyPaid: () => "<p>Je kompletně zaplacená. Děkujeme!</p>",
     zeroOrder: (currency: string) =>

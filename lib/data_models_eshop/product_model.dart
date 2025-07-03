@@ -4,6 +4,7 @@ import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
+import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
 
@@ -36,6 +37,8 @@ class ProductModel extends ITrinaRowModel {
   static const String metaProductTypeTitleStringField = "type_title";
   static const String metaOrderedCount = "ordered_count";
   static const String metaPaidCount = "paid_count";
+  static const String metaSentCount = "sent_count";
+
 
   ProductModel({
     this.id,
@@ -82,23 +85,23 @@ class ProductModel extends ITrinaRowModel {
       order: json[TbEshop.products.order],
       maximum: json[TbEshop.products.maximum],
       orderedCount: json[metaOrderedCount],
-      paidCount: json['paid_count'],
-      sentCount: json['sent_count'],
+      paidCount: json[metaPaidCount],
+      sentCount: json[metaSentCount],
     );
   }
 
   static ProductModel fromPlutoJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: json[TbEshop.products.id] == -1 ? null : json[TbEshop.products.id],
-      title: json[TbEshop.products.title],
-      isHidden: json[TbEshop.products.is_hidden] == 'true',
-      description: json[TbEshop.products.description],
-      price: json[TbEshop.products.price] != null
-          ? double.tryParse(json[TbEshop.products.price].toString())
+      id: json[EshopColumns.PRODUCT_ID] == -1 ? null : json[EshopColumns.PRODUCT_ID],
+      title: json[EshopColumns.PRODUCT_TITLE],
+      isHidden: json[EshopColumns.PRODUCT_IS_HIDDEN] == 'true',
+      description: json[EshopColumns.PRODUCT_DESCRIPTION],
+      price: json[EshopColumns.PRODUCT_PRICE] != null
+          ? double.tryParse(json[EshopColumns.PRODUCT_PRICE].toString())
           : null,
-      currencyCode: json[TbEshop.products.currency_code],
-      order: json[TbEshop.products.order],
-      maximum: json[TbEshop.products.maximum],
+      currencyCode: json[EshopColumns.PRODUCT_CURRENCY_CODE],
+      order: json[EshopColumns.PRODUCT_ORDER],
+      maximum: json[EshopColumns.PRODUCT_MAXIMUM],
     );
   }
 
@@ -134,24 +137,19 @@ class ProductModel extends ITrinaRowModel {
   TrinaRow toTrinaRow(BuildContext context) {
     final total = (paidCount ?? 0) + (sentCount ?? 0);
     return TrinaRow(cells: {
-      TbEshop.products.id: TrinaCell(value: id ?? 0),
-      TbEshop.products.is_hidden: TrinaCell(value: isHidden.toString()),
-      TbEshop.products.title: TrinaCell(value: title ?? ''),
-      TbEshop.products.description: TrinaCell(value: description ?? ''),
-      TbEshop.products.created_at: TrinaCell(
-        value: createdAt != null
-            ? DateFormat('yyyy-MM-dd').format(createdAt!)
-            : '',
-      ),
-      TbEshop.products.price: TrinaCell(
+      EshopColumns.PRODUCT_ID: TrinaCell(value: id ?? 0),
+      EshopColumns.PRODUCT_IS_HIDDEN: TrinaCell(value: isHidden.toString()),
+      EshopColumns.PRODUCT_TITLE: TrinaCell(value: title ?? ''),
+      EshopColumns.PRODUCT_DESCRIPTION: TrinaCell(value: description ?? ''),
+      EshopColumns.PRODUCT_PRICE: TrinaCell(
         value: price != null ? price?.toStringAsFixed(2) : '',
       ),
-      TbEshop.products.currency_code: TrinaCell(value: currencyCode ?? ''),
-      metaTypeField: TrinaCell(value: productType?.title ?? ''),
-      TbEshop.products.order: TrinaCell(value: order ?? 0),
-      TbEshop.products.maximum: TrinaCell(value: maximum ?? 0),
-      metaOrderedCount: TrinaCell(value: orderedCount),
-      metaPaidCount: TrinaCell(value: total),
+      EshopColumns.PRODUCT_CURRENCY_CODE: TrinaCell(value: currencyCode ?? ''),
+      EshopColumns.PRODUCT_TYPE: TrinaCell(value: productType?.title ?? ''),
+      EshopColumns.PRODUCT_ORDER: TrinaCell(value: order ?? 0),
+      EshopColumns.PRODUCT_MAXIMUM: TrinaCell(value: maximum ?? 0),
+      EshopColumns.PRODUCT_ORDERED_COUNT: TrinaCell(value: orderedCount),
+      EshopColumns.PRODUCT_PAID_COUNT: TrinaCell(value: total),
     });
   }
 
