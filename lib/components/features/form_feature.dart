@@ -37,9 +37,9 @@ class FormFeature extends Feature {
       formExternalLink:   json[FeatureConstants.formExternalLink],
       formExternalPrice:  json[FeatureConstants.formExternalPrice],
       reserveButtonTitle: json[FeatureConstants.reserveButtonTitle],
-      reminderIsEnabled: json[FeatureConstants.reminderIsEnabled] ?? true, // Default to true
-      reminderIntervalSeconds: json[FeatureConstants.reminderIntervalSeconds] ?? 86400, // Default to 1 day
-      deadlineDurationSeconds: json[FeatureConstants.deadlineDurationSeconds] ?? 604800, // Default to 7 days
+      reminderIsEnabled: json[FeatureConstants.reminderIsEnabled],
+      reminderIntervalSeconds: json[FeatureConstants.reminderIntervalSeconds] ?? 86400,
+      deadlineDurationSeconds: json[FeatureConstants.deadlineDurationSeconds] ?? 604800,
     );
   }
 
