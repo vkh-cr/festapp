@@ -25,7 +25,8 @@ BEGIN
         occasion,
         created_at,
         updated_at,
-        deadline_duration_seconds
+        deadline_duration_seconds,
+        data
     )
     VALUES (
         p_title,
@@ -33,7 +34,8 @@ BEGIN
         p_occasion_id,
         now,
         now,
-        604800 -- Default to 7 days
+        604800, -- Default to 7 days
+        '{"is_reminder_enabled": true}'::jsonb -- Default reminder setting
     )
     RETURNING to_jsonb(public.forms.*) INTO new_form;
 

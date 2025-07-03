@@ -31,6 +31,10 @@ class FeaturesStrings {
   static String get labelReminderInterval => 'FeatureFormSettings.labelReminderInterval'.tr();
   static String get helperReminderInterval => 'FeatureFormSettings.helperReminderInterval'.tr();
   static String get validationReminderInterval => 'FeatureFormSettings.validationReminderInterval'.tr();
+  static String get labelEnableReminders => 'FeatureFormSettings.labelEnableReminders'.tr();
+  static String get subtitleEnableReminders => 'FeatureFormSettings.subtitleEnableReminders'.tr();
+  static String get subtitleRemindersDisabled => 'FeatureFormSettings.subtitleRemindersDisabled'.tr();
+
 
 // --- FormsTab (Main Grid View) ---
   static String get formsTitle => 'FormsFeature.formsTitle'.tr(); // "Forms"
