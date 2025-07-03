@@ -162,6 +162,7 @@ class EmailTemplateModel {
       ibanSub,
       variableSymbolSub,
       deadlineSub,
+      balanceReasoningSub,
       fullOrderSub,
     ],
     'TICKET_ORDER_UPDATE': [
@@ -172,8 +173,10 @@ class EmailTemplateModel {
     'TICKET_ORDER_PAYMENT_DONE': [
       occasionTitleSub,
     ],
-    'TICKET_ORDER_PAYMENT_REMINDER': [
+    'TICKET_ORDER_REMINDER': [
       occasionTitleSub,
+      balanceReasoningSub,
+      fullOrderSub,
     ],
     'TICKET_ORDER_STORNO': [
       occasionTitleSub,
@@ -218,11 +221,11 @@ class EmailTemplateModel {
           'description': EmailTemplatesStrings.usageTicketOrderPaymentDoneDescription,
           'subs': substitutionDefinitions['TICKET_ORDER_PAYMENT_DONE'] ?? [],
         };
-      case 'TICKET_ORDER_PAYMENT_REMINDER':
+      case 'TICKET_ORDER_REMINDER':
         return {
           'title': EmailTemplatesStrings.usageTicketOrderPaymentReminderTitle,
           'description': EmailTemplatesStrings.usageTicketOrderPaymentReminderDescription,
-          'subs': substitutionDefinitions['TICKET_ORDER_PAYMENT_REMINDER'] ?? [],
+          'subs': substitutionDefinitions['TICKET_ORDER_REMINDER'] ?? [],
         };
       case 'TICKET_ORDER_STORNO':
         return {
