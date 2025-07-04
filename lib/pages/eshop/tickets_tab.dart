@@ -53,7 +53,7 @@ class _TicketsTabState extends State<TicketsTab> {
         loadData: () => DbTickets.getAllTickets(occasionLink!),
         fromPlutoJson: TicketModel.fromPlutoJson,
         firstColumnType: DataGridFirstColumn.check,
-        idColumn: TbEshop.tickets.id,
+        idColumn: EshopColumns.TICKET_ID,
         actionsExtended: DataGridActionsController(
           areAllActionsEnabled: RightsService.canUpdateUsers,
           isAddActionPossible: () => false,
