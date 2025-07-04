@@ -83,32 +83,45 @@ class _ProductsDialogState extends State<ProductsDialog> {
   Future<void> _editPrice(ProductModel product) async {
     final priceController = TextEditingController(text: (product.price ?? 0).toStringAsFixed(2));
     final formKey = GlobalKey<FormState>();
+    // 1. Create a FocusNode to control the focus manually.
+    final focusNode = FocusNode();
+
+    // 2. After a short delay, request focus. This gives the dialog time to build and settle
+    //    before the keyboard appears, avoiding the layout glitch.
+    Future.delayed(const Duration(milliseconds: 200), () {
+      focusNode.requestFocus();
+    });
 
     final newPrice = await showDialog<double>(
       context: context,
       builder: (context) {
         return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
           title: Text(FeaturesStrings.editPriceTitle),
-          content: Form(
-            key: formKey,
-            child: TextFormField(
-              controller: priceController,
-              autofocus: true,
-              decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return FeaturesStrings.priceValidationRequired;
-                }
-                final price = double.tryParse(value.replaceAll(",", "."));
-                if (price == null) {
-                  return FeaturesStrings.priceValidationInvalid;
-                }
-                if (price < 0) {
-                  return FeaturesStrings.priceValidationNegative;
-                }
-                return null;
-              },
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: TextFormField(
+                // 3. Assign the FocusNode and ensure autofocus is off.
+                focusNode: focusNode,
+                autofocus: false,
+                controller: priceController,
+                decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return FeaturesStrings.priceValidationRequired;
+                  }
+                  final price = double.tryParse(value.replaceAll(",", "."));
+                  if (price == null) {
+                    return FeaturesStrings.priceValidationInvalid;
+                  }
+                  if (price < 0) {
+                    return FeaturesStrings.priceValidationNegative;
+                  }
+                  return null;
+                },
+              ),
             ),
           ),
           actions: [
@@ -135,6 +148,9 @@ class _ProductsDialogState extends State<ProductsDialog> {
         );
       },
     );
+
+    // 4. IMPORTANT: Dispose of the FocusNode after the dialog is closed to prevent memory leaks.
+    focusNode.dispose();
 
     if (newPrice != null) {
       setState(() {
