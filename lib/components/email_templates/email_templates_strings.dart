@@ -15,6 +15,7 @@ class EmailTemplatesStrings {
   static String get subVariableSymbol => 'EmailTemplates.subs.variableSymbol'.tr();
   static String get subDeadline => 'EmailTemplates.subs.deadline'.tr();
   static String get subFullOrder => 'EmailTemplates.subs.fullOrder'.tr();
+  static String get subChangesOverview => 'EmailTemplates.subs.changesOverview'.tr();
   static String get subBalanceReasoning => 'EmailTemplates.subs.balanceReasoning'.tr();
 
   // --- Template Usage Details ---

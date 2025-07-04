@@ -854,7 +854,21 @@
     "infoPayment": "Platba",
     "outdatedTitle": "Zastaralé potvrzení",
     "outdatedSubtitle": "Objednávka se změnila od posledního odeslání e-mailu.",
-    "sendUpdateButton": "Poslat aktualizaci zákazníkovi"
+    "sendUpdateButton": "Poslat aktualizaci zákazníkovi",
+    "editPriceTooltip": "Upravit cenu",
+    "editPriceTitle": "Upravit cenu",
+    "newPriceLabel": "Nová cena",
+    "priceValidationRequired": "Cena je povinná.",
+    "priceValidationInvalid": "Zadejte prosím platnou cenu.",
+    "noProductChangesDetected": "Nebyly zjištěny žádné změny k odeslání.",
+    "addedProductsTitle": "Přidané položky:",
+    "removedProductsTitle": "Odebrané položky:",
+    "changedPricesTitle": "Změněné ceny:",
+    "emailContentIntro": "E-mail bude obsahovat následující:",
+    "setToZeroButton": "Nastavit na nulu",
+    "sendUpdateItemChanges": "Přehled změn v produktech",
+    "priceValidationNegative": "Cena nemůže být záporná.",
+    "totalPriceChange": "Změna celkové ceny"
   },
   "EmailTemplates": {
     "subs": {
@@ -869,7 +883,8 @@
       "iban": "IBAN",
       "variableSymbol": "Variabilní symbol",
       "deadline": "Termín platby",
-      "fullOrder": "Úplné podrobnosti objednávky",
+      "fullOrder": "Podrobnosti celé objednávky",
+      "changesOverview": "Přehled změn v objednávce, jako jsou přidané/odebrané položky nebo změny cen.",
       "balanceReasoning": "Podrobné vysvětlení zůstatku objednávky, včetně stavu platby, dlužné částky nebo přeplatku a případných platebních pokynů."
     },
     "usage": {
