@@ -204,36 +204,6 @@ class FeaturesStrings {
   static String get gridForm => 'OrderGridColumns.form'.tr();
   static String get gridReminderSent => 'OrderGridColumns.reminderSent'.tr();
 
-  // --- Order Grid Columns ---
-  static String get gridId => 'OrderGridColumns.id'.tr();
-  static String get gridHide => 'OrderGridColumns.hide'.tr();
-  static String get gridTitle => 'OrderGridColumns.title'.tr();
-  static String get gridPrice => 'OrderGridColumns.price'.tr();
-  static String get gridProductType => 'OrderGridColumns.productType'.tr();
-  static String get gridOrder => 'OrderGridColumns.order'.tr();
-  static String get gridMax => 'OrderGridColumns.max'.tr();
-  static String get gridOrdered => 'OrderGridColumns.ordered'.tr();
-  static String get gridPaid => 'OrderGridColumns.paid'.tr();
-  static String get gridCurrency => 'OrderGridColumns.currency'.tr();
-  static String get gridDescription => 'OrderGridColumns.description'.tr();
-  static String get gridState => 'OrderGridColumns.state'.tr();
-  static String get gridCreated => 'OrderGridColumns.created'.tr();
-  static String get gridProducts => 'OrderGridColumns.products'.tr();
-  static String get gridNote => 'OrderGridColumns.note'.tr();
-  static String get gridHiddenNote => 'OrderGridColumns.hiddenNote'.tr();
-  static String get gridSpot => 'OrderGridColumns.spot'.tr();
-  static String get gridOrderSymbol => 'OrderGridColumns.orderSymbol'.tr();
-  static String get gridCustomer => 'OrderGridColumns.customer'.tr();
-  static String get gridEmail => 'OrderGridColumns.email'.tr();
-  static String get gridHistory => 'OrderGridColumns.history'.tr();
-  static String get gridTransactions => 'OrderGridColumns.transactions'.tr();
-  static String get gridAmount => 'OrderGridColumns.amount'.tr();
-  static String get gridReturned => 'OrderGridColumns.returned'.tr();
-  static String get gridVariableSymbol => 'OrderGridColumns.variableSymbol'.tr();
-  static String get gridDeadline => 'OrderGridColumns.deadline'.tr();
-  static String get gridForm => 'OrderGridColumns.form'.tr();
-  static String get gridReminderSent => 'OrderGridColumns.reminderSent'.tr();
-
 
   /// Returns "Tickets" or "Applications" based on whether the ticket feature is enabled.
   static String get itemsPlural {
