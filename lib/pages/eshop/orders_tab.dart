@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/features/features_strings.dart';
+import 'package:fstapp/components/features/form_feature.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
@@ -43,6 +44,8 @@ class _OrdersTabState extends State<OrdersTab> {
     final bundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink!);
     if (!mounted) return;
 
+    var formFeat = FeatureService.getFeatureDetails(FeatureConstants.form) as FormFeature;
+
     // Start with the base list of columns
     List<String> columnIdentifiers = [
       EshopColumns.ORDER_ID,
@@ -59,6 +62,8 @@ class _OrdersTabState extends State<OrdersTab> {
       EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL,
       EshopColumns.ORDER_DATA_NOTE,
       EshopColumns.ORDER_NOTE_HIDDEN,
+      if (formFeat.isEnabled && (formFeat.reminderIsEnabled ?? false))
+        EshopColumns.PAYMENT_INFO_REMINDER_SENT,
       EshopColumns.PAYMENT_INFO_DEADLINE,
       EshopColumns.ORDER_TRANSACTIONS,
       EshopColumns.ORDER_HISTORY,
@@ -137,7 +142,7 @@ class _OrdersTabState extends State<OrdersTab> {
     }
 
     if (selected.isNotEmpty) {
-      var confirm = await DialogHelper.showConfirmationDialogAsync(
+      var confirm = await DialogHelper.showConfirmationDialog(
           context,
           FeaturesStrings.cancel,
           "${FeaturesStrings.cancelOrdersConfirmationText} (${selected.length})"
@@ -176,7 +181,7 @@ class _OrdersTabState extends State<OrdersTab> {
     }
     var stateChange = selectedFull.where((s) => s.state == OrderModel.orderedState);
     if (stateChange.isNotEmpty) {
-      var confirm = await DialogHelper.showConfirmationDialogAsync(
+      var confirm = await DialogHelper.showConfirmationDialog(
           context,
           FeaturesStrings.changeStateToPaid,
           "${FeaturesStrings.changeStateToPaidConfirmation} (${stateChange.length})"
@@ -200,7 +205,7 @@ class _OrdersTabState extends State<OrdersTab> {
       }
     }
 
-    var confirm = await DialogHelper.showConfirmationDialogAsync(
+    var confirm = await DialogHelper.showConfirmationDialog(
         context,
         FeaturesStrings.sendActionText,
         "${FeaturesStrings.sendActionConfirmationText} (${selected.length})"

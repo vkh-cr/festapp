@@ -1,3 +1,16 @@
+CREATE OR REPLACE FUNCTION extract_history_product_ids(history_data jsonb)
+RETURNS int[] LANGUAGE sql IMMUTABLE AS $$
+  SELECT COALESCE(
+    -- Aggregate distinct product IDs into an array, sorting them for consistency
+    ARRAY_AGG(DISTINCT (p->>'id')::int ORDER BY (p->>'id')::int),
+    -- If aggregation results in NULL (i.e., no products found), return an empty integer array
+    '{}'::int[]
+  )
+  FROM jsonb_array_elements(history_data->'tickets') AS t,
+       jsonb_array_elements(t->'products') AS p;
+$$;
+
+
 CREATE OR REPLACE FUNCTION public.get_products_for_ticket(
   ticket_id bigint
 )
@@ -6,27 +19,43 @@ LANGUAGE plpgsql
 SECURITY DEFINER AS $$
 DECLARE
   v_occasion_id bigint;
-  v_order_data jsonb;
-  v_products   jsonb;
+  v_order_json jsonb;
+  v_payment_info_json jsonb;
+  v_ticket jsonb;
+  v_latest_sent_at timestamptz;
+  v_is_newer_available boolean := FALSE;
+  v_order_id bigint;
+  latest_history_data jsonb;
+  reference_history_data jsonb;
 BEGIN
-  -- find the order whose JSON 'tickets' array contains this ticket
-  SELECT o.occasion, o.data
-  INTO   v_occasion_id, v_order_data
-  FROM   eshop.orders o
-  WHERE  EXISTS (
+  -- Find the order containing the ticket and LEFT JOIN its associated payment_info.
+  SELECT
+    o.id,
+    o.occasion,
+    to_jsonb(o),
+    to_jsonb(pi)
+  INTO
+    v_order_id,
+    v_occasion_id,
+    v_order_json,
+    v_payment_info_json
+  FROM eshop.orders AS o
+  LEFT JOIN eshop.payment_info AS pi ON o.payment_info = pi.id
+  WHERE EXISTS (
     SELECT 1
     FROM   jsonb_array_elements(o.data->'tickets') AS t
     WHERE  (t->>'id')::bigint = ticket_id
   );
 
-  IF NOT FOUND OR v_occasion_id IS NULL THEN
+  -- Check if the order was found.
+  IF NOT FOUND THEN
     RETURN jsonb_build_object(
       'code',    404,
       'message', 'Ticket not found'
     );
   END IF;
 
-  -- permission check (same pattern as get_order_history)
+  -- Permission check.
   IF NOT get_is_editor_order_view_on_occasion(v_occasion_id) THEN
     RETURN jsonb_build_object(
       'code',    403,
@@ -34,15 +63,51 @@ BEGIN
     );
   END IF;
 
-  -- extract that ticket’s “products” array
-  SELECT (t->'products')
-  INTO   v_products
-  FROM   jsonb_array_elements(v_order_data->'tickets') AS t
+  -- Extract the full JSON object for the specified ticket from the order's data.
+  SELECT t
+  INTO   v_ticket
+  FROM   jsonb_array_elements(v_order_json->'data'->'tickets') AS t
   WHERE  (t->>'id')::bigint = ticket_id;
 
+  -- Get the data of the latest history entry
+  SELECT data INTO latest_history_data
+  FROM eshop.orders_history
+  WHERE "order" = v_order_id
+  ORDER BY created_at DESC LIMIT 1;
+
+  -- Get the data and timestamp of the latest SENT history entry
+  SELECT data, created_at INTO reference_history_data, v_latest_sent_at
+  FROM eshop.orders_history
+  WHERE "order" = v_order_id AND (data->>'is_sent_to_customer')::boolean IS TRUE
+  ORDER BY created_at DESC LIMIT 1;
+
+  -- If no sent record was found, get the oldest record as the reference
+  IF NOT FOUND THEN
+      SELECT data INTO reference_history_data
+      FROM eshop.orders_history
+      WHERE "order" = v_order_id
+      ORDER BY created_at ASC LIMIT 1;
+  END IF;
+
+  -- Compare product IDs between the latest and reference history entries
+  IF latest_history_data IS NOT NULL AND reference_history_data IS NOT NULL THEN
+      v_is_newer_available :=
+          extract_history_product_ids(latest_history_data) <> extract_history_product_ids(reference_history_data);
+  END IF;
+
+
+  -- Build the simplified and comprehensive JSONB response object.
   RETURN jsonb_build_object(
     'code', 200,
-    'data', COALESCE(v_products, '[]'::jsonb)
+    'data', jsonb_build_object(
+      'ticket', v_ticket,
+      'order', v_order_json,
+      'payment_info', v_payment_info_json,
+      'order_history', jsonb_build_object(
+          'latest_sent_at', v_latest_sent_at,
+          'is_newer_version_available', v_is_newer_available
+      )
+    )
   );
 EXCEPTION WHEN OTHERS THEN
   RETURN jsonb_build_object(

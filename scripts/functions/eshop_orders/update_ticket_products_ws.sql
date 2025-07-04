@@ -20,17 +20,20 @@ DECLARE
   v_products_json    jsonb;
   v_old_ids          bigint[];
   v_new_ids          bigint[];
-
-  -- for state logic
   v_paid             numeric;
   v_price            numeric;
   v_new_state        text;
+  v_occasion_features jsonb;
+  v_form_settings     jsonb;
+  v_deadline_duration_seconds bigint;
+  v_new_deadline      timestamptz;
 BEGIN
   /* 0) Lookup & permission */
-  SELECT opt."order", o.occasion, o.payment_info, o.currency_code, o.data, o.state
-    INTO v_order_id, v_occasion_id, v_payment_info_id, v_currency_code, v_old_data, v_state
+  SELECT opt."order", o.occasion, o.payment_info, o.currency_code, o.data, o.state, occ.features
+    INTO v_order_id, v_occasion_id, v_payment_info_id, v_currency_code, v_old_data, v_state, v_occasion_features
   FROM eshop.order_product_ticket AS opt
   JOIN eshop.orders              AS o   ON o.id = opt."order"
+  JOIN public.occasions          AS occ ON occ.id = o.occasion
   WHERE opt.ticket = p_ticket_id
   LIMIT 1;
   IF NOT FOUND THEN
@@ -41,23 +44,41 @@ BEGIN
   END IF;
 
   /* compute old/new ID arrays and bail early if identical */
-  SELECT array_agg((prod->>'id')::bigint ORDER BY (prod->>'id')::bigint)
+  SELECT array_agg((product_obj->>'id')::bigint ORDER BY (product_obj->>'id')::bigint)
     INTO v_old_ids
-  FROM jsonb_array_elements(v_old_data->'tickets') AS ticket(ticket_obj)
-  CROSS JOIN LATERAL jsonb_array_elements(ticket_obj->'products') AS prod(product_obj)
+  FROM jsonb_array_elements(
+         CASE WHEN jsonb_typeof(v_old_data->'tickets') = 'array'
+              THEN v_old_data->'tickets'
+              ELSE '[]'::jsonb END
+       ) AS ticket(ticket_obj)
+  CROSS JOIN LATERAL jsonb_array_elements(
+         CASE WHEN jsonb_typeof(ticket.ticket_obj->'products') = 'array'
+              THEN ticket.ticket_obj->'products'
+              ELSE '[]'::jsonb END
+       ) AS prod(product_obj)
   WHERE (ticket.ticket_obj->>'id')::bigint = p_ticket_id;
+
   SELECT array_agg(pid ORDER BY pid)
     INTO v_new_ids
   FROM unnest(p_product_ids) AS pid;
-  IF v_old_ids IS NOT NULL AND v_old_ids = v_new_ids THEN
+
+  IF v_old_ids IS NOT DISTINCT FROM v_new_ids THEN
     RETURN jsonb_build_object('code',200,'data',v_old_data);
   END IF;
 
   /* 1) old subtotal */
-  SELECT COALESCE(SUM((prod->>'price')::numeric),0)
+  SELECT COALESCE(SUM((product_obj->>'price')::numeric),0)
     INTO v_sum_old
-  FROM jsonb_array_elements(v_old_data->'tickets') AS ticket(ticket_obj)
-  CROSS JOIN LATERAL jsonb_array_elements(ticket_obj->'products') AS prod(product_obj)
+  FROM jsonb_array_elements(
+         CASE WHEN jsonb_typeof(v_old_data->'tickets') = 'array'
+              THEN v_old_data->'tickets'
+              ELSE '[]'::jsonb END
+       ) AS ticket(ticket_obj)
+  CROSS JOIN LATERAL jsonb_array_elements(
+         CASE WHEN jsonb_typeof(ticket.ticket_obj->'products') = 'array'
+              THEN ticket.ticket_obj->'products'
+              ELSE '[]'::jsonb END
+       ) AS prod(product_obj)
   WHERE (ticket.ticket_obj->>'id')::bigint = p_ticket_id;
 
   /* 2) new products JSON + subtotal */
@@ -81,29 +102,67 @@ BEGIN
   SELECT jsonb_set(
     v_old_data,
     '{tickets}',
-    (
-      SELECT jsonb_agg(
-        CASE WHEN (tckt->>'id')::bigint = p_ticket_id
-             THEN tckt || jsonb_build_object('products', v_products_json)
-             ELSE tckt
-        END
-      )
-      FROM jsonb_array_elements(v_old_data->'tickets') AS tckt
+    COALESCE(
+      (
+        SELECT jsonb_agg(
+          CASE WHEN (tckt->>'id')::bigint = p_ticket_id
+               THEN tckt || jsonb_build_object('products', COALESCE(v_products_json, '[]'::jsonb))
+               ELSE tckt
+          END
+        )
+        FROM jsonb_array_elements(
+               CASE WHEN jsonb_typeof(v_old_data->'tickets') = 'array'
+                    THEN v_old_data->'tickets'
+                    ELSE '[]'::jsonb END
+             ) AS tckt
+      ),
+      '[]'::jsonb
     )
   ) INTO v_new_data;
+
   UPDATE eshop.orders
      SET data = v_new_data
    WHERE id = v_order_id;
 
-  /* 4) replace the link‐table rows, but keep one with product=NULL if empty */
-  DELETE FROM eshop.order_product_ticket WHERE ticket = p_ticket_id;
+  /* 4) granularly update the link‐table rows */
+  UPDATE eshop.spots
+     SET order_product_ticket = NULL
+   WHERE order_product_ticket IN (
+      SELECT opt.id
+      FROM eshop.order_product_ticket opt
+      WHERE opt.ticket = p_ticket_id
+        AND opt.product IN (
+          SELECT unnest FROM unnest(v_old_ids)
+          EXCEPT
+          SELECT unnest FROM unnest(p_product_ids)
+        )
+   );
+
+  DELETE FROM eshop.order_product_ticket
+   WHERE ticket = p_ticket_id
+     AND product IN (
+        SELECT unnest FROM unnest(v_old_ids)
+        EXCEPT
+        SELECT unnest FROM unnest(p_product_ids)
+     );
+
+  IF cardinality(p_product_ids) > 0 THEN
+    DELETE FROM eshop.order_product_ticket
+    WHERE ticket = p_ticket_id AND product IS NULL;
+  END IF;
+
+  INSERT INTO eshop.order_product_ticket ("order", ticket, product)
+  SELECT v_order_id, p_ticket_id, new_pid
+    FROM (
+      SELECT unnest FROM unnest(p_product_ids)
+      EXCEPT
+      SELECT unnest FROM unnest(v_old_ids)
+    ) AS t(new_pid);
+
   IF cardinality(p_product_ids) = 0 THEN
     INSERT INTO eshop.order_product_ticket("order", ticket, product)
-    VALUES (v_order_id, p_ticket_id, NULL);
-  ELSE
-    INSERT INTO eshop.order_product_ticket("order", ticket, product)
-      SELECT v_order_id, p_ticket_id, pid
-        FROM unnest(p_product_ids) AS pid;
+      SELECT v_order_id, p_ticket_id, NULL
+      WHERE NOT EXISTS (SELECT 1 FROM eshop.order_product_ticket WHERE ticket = p_ticket_id);
   END IF;
 
   /* 5) adjust payment_info.amount and order.price by the delta */
@@ -129,7 +188,6 @@ BEGIN
                    ELSE 'ordered'
                  END;
 
-  -- if setting to paid but every ticket is already in 'sent', downgrade to 'sent'
   IF v_new_state = 'paid' THEN
     IF NOT EXISTS (
       SELECT 1 FROM eshop.tickets t
@@ -140,20 +198,29 @@ BEGIN
     END IF;
   END IF;
 
-  -- apply the new state
   UPDATE eshop.orders
      SET state      = v_new_state,
          updated_at = now()
    WHERE id = v_order_id;
 
   -- if we just rolled a formerly‐paid/sent order back into 'ordered' because price increased,
-  -- push the payment deadline out by 7 days
-  IF v_new_state = 'ordered'
-     AND v_diff    > 0
-  THEN
-    UPDATE eshop.payment_info
-       SET deadline   = now() + INTERVAL '7 days'
-     WHERE id = v_payment_info_id;
+  -- call the dedicated function to set a new deadline and requeue the reminder.
+  IF v_new_state = 'ordered' THEN
+    -- Find the 'form' feature settings to get the deadline duration
+    SELECT elem INTO v_form_settings
+    FROM jsonb_array_elements(v_occasion_features) AS elem
+    WHERE elem->>'code' = 'form';
+
+    -- Extract duration, with a default of 7 days (604800 seconds) if not specified
+    v_deadline_duration_seconds := COALESCE(
+        (v_form_settings->>'deadline_duration_seconds')::bigint,
+        604800
+    );
+
+    v_new_deadline := now() + make_interval(secs => v_deadline_duration_seconds);
+
+    -- Call the dedicated function to set the deadline and requeue the reminder
+    PERFORM public.set_payment_deadline(v_payment_info_id, v_new_deadline);
   END IF;
 
   /* 6) append history */

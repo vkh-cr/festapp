@@ -36,6 +36,10 @@ class FeatureConstants {
   static const String formExternalLink = "external_form_link";
   static const String formExternalPrice = "external_price";
   static const String reserveButtonTitle = "reserve_button_title";
+  static const String reminderIsEnabled = "reminder_is_enabled";
+  static const String reminderIntervalSeconds = "reminder_interval_seconds";
+  static const String deadlineDurationSeconds = "deadline_duration_seconds";
+
 
   // Extra field for companions feature
   static const String companionsMax = "max_companions";

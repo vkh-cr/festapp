@@ -157,7 +157,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   Future<void> _removeImage() async {
     final imageUrl = widget.occasion.data?[Tb.occasions.data_image];
     if (imageUrl != null) {
-      final confirmation = await DialogHelper.showConfirmationDialogAsync(
+      final confirmation = await DialogHelper.showConfirmationDialog(
         context,
         "Confirm removal".tr(),
         "Are you sure you want to delete this image?".tr(),
