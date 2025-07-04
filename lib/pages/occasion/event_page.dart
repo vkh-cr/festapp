@@ -207,7 +207,7 @@ class _EventPageState extends State<EventPage> {
                                             // ignore: use_build_context_synchronously
                                             DialogHelper.chooseUser(context,
                                                     (person) async {
-                                                  await signIn(person);
+                                                  await signIn(context, person);
                                                   await loadData(_event!.id!);
                                                 }, _queriedParticipants,
                                                 "Sign in someone".tr());
