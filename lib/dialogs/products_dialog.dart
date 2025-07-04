@@ -88,9 +88,9 @@ class _ProductsDialogState extends State<ProductsDialog> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
           title: Text(FeaturesStrings.editPriceTitle),
-          content: SizedBox(
-            width: StylesConfig.formMaxWidth,
+          content: SingleChildScrollView(
             child: Form(
               key: formKey,
               child: TextFormField(
