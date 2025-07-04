@@ -88,27 +88,30 @@ class _ProductsDialogState extends State<ProductsDialog> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
           title: Text(FeaturesStrings.editPriceTitle),
-          content: Form(
-            key: formKey,
-            child: TextFormField(
-              controller: priceController,
-              autofocus: true,
-              decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return FeaturesStrings.priceValidationRequired;
-                }
-                final price = double.tryParse(value.replaceAll(",", "."));
-                if (price == null) {
-                  return FeaturesStrings.priceValidationInvalid;
-                }
-                if (price < 0) {
-                  return FeaturesStrings.priceValidationNegative;
-                }
-                return null;
-              },
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: TextFormField(
+                autofocus: true,
+                controller: priceController,
+                decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return FeaturesStrings.priceValidationRequired;
+                  }
+                  final price = double.tryParse(value.replaceAll(",", "."));
+                  if (price == null) {
+                    return FeaturesStrings.priceValidationInvalid;
+                  }
+                  if (price < 0) {
+                    return FeaturesStrings.priceValidationNegative;
+                  }
+                  return null;
+                },
+              ),
             ),
           ),
           actions: [
