@@ -50,6 +50,7 @@ class ProductModel extends ITrinaRowModel {
     this.price,
     this.data,
     this.productTypeId,
+    this.productType,
     this.occasion,
     this.productTypeString,
     this.productTypeTitleString,
@@ -118,6 +119,52 @@ class ProductModel extends ITrinaRowModel {
     TbEshop.products.order: order,
     TbEshop.products.maximum: maximum,
   };
+
+  /// Creates a new `ProductModel` instance with updated values.
+  /// This is the recommended way to create a deep copy.
+  ProductModel copyWith({
+    int? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? title,
+    bool? isHidden,
+    String? description,
+    double? price,
+    Map<String, dynamic>? data,
+    int? productTypeId,
+    ProductTypeModel? productType,
+    int? occasion,
+    String? productTypeString,
+    String? productTypeTitleString,
+    int? order,
+    int? maximum,
+    int? orderedCount,
+    int? paidCount,
+    int? sentCount,
+    String? currencyCode,
+  }) {
+    return ProductModel(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      title: title ?? this.title,
+      isHidden: isHidden ?? this.isHidden,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      data: data ?? (this.data != null ? Map<String, dynamic>.from(this.data!) : null),
+      productTypeId: productTypeId ?? this.productTypeId,
+      productType: productType ?? this.productType,
+      occasion: occasion ?? this.occasion,
+      productTypeString: productTypeString ?? this.productTypeString,
+      productTypeTitleString: productTypeTitleString ?? this.productTypeTitleString,
+      order: order ?? this.order,
+      maximum: maximum ?? this.maximum,
+      orderedCount: orderedCount ?? this.orderedCount,
+      paidCount: paidCount ?? this.paidCount,
+      sentCount: sentCount ?? this.sentCount,
+      currencyCode: currencyCode ?? this.currencyCode,
+    );
+  }
 
   @override
   String toBasicString() => title ?? id.toString();
