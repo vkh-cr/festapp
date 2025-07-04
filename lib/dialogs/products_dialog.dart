@@ -305,7 +305,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                           Text(FeaturesStrings.removedProductsTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ...removed.map((p) => Padding(
                             padding: const EdgeInsets.only(left: 8.0, top: 4.0),
-                            child: Text("- ${p.title} (${Utilities.formatPrice(context, p.price!)})", style: const TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough)),
+                            child: Text("- ${p.title} (${Utilities.formatPrice(context, p.price!)})", style: const TextStyle(color: Colors.red)),
                           )),
                           const SizedBox(height: 12),
                         ],

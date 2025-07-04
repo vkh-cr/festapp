@@ -74,35 +74,54 @@ export function generateChangeOverview(currentOrderData: any, referenceOrderData
 
     // Now, build the HTML string
     const tr = {
-        cs: { title: "Změny v objednávce", added: "Přidané položky", removed: "Odebrané položky", changed: "Změna ceny", totalPriceChange: "Celková cena" },
+        cs: { title: "Změny v objednávce", added: "Přidané položky", removed: "Odebrané položky", changed: "Změna ceny položek", totalPriceChange: "Celková cena" },
         en: { title: "Changes in Your Order", added: "Added Items", removed: "Removed Items", changed: "Price Changes", totalPriceChange: "Total Price" }
     }[lang];
 
-    let html = `<div style="margin: 20px auto; padding: 16px; font-family: sans-serif; color: #333; background-color: #fefce8; border: 1px solid #fde047; border-radius: 8px;">`;
-    html += `<p style="font-size: 18px; font-weight: bold; margin: 0 0 16px 0;">${tr.title}</p>`;
-
-    const renderList = (title: string, items: string[]) => {
-        if (items.length === 0) return '';
-        return `<p style="margin: 12px 0 4px 0; font-weight: 600;">${title}:</p><ul style="margin: 0; padding-left: 20px;">${items.map(item => `<li style="margin-bottom: 4px;">${item}</li>`).join('')}</ul>`;
+    const renderSection = (title: string, content: string) => {
+        if (!content) return '';
+        return `<div style="margin-bottom: 16px;">
+                    <p style="margin: 0 0 8px 0; font-weight: 600; font-size: 14px; color: #4b5563;">${title}</p>
+                    ${content}
+                </div>`;
     }
 
-    const addedItems = added.map(p => `${p.title} (${formatCurrency(p.price, p.currency_code)})`);
-    html += renderList(tr.added, addedItems);
+    const addedHtml = added.map(p =>
+        `<div style="padding-left: 8px; color: #166534;">+ ${p.title} (${formatCurrency(p.price, p.currency_code)})</div>`
+    ).join('');
 
-    const removedItems = removed.map(p => `<s style="color:#777">${p.title} (${formatCurrency(p.price, p.currency_code)})</s>`);
-    html += renderList(tr.removed, removedItems);
+    const removedHtml = removed.map(p =>
+        `<div style="padding-left: 8px; color: #991b1b;">- ${p.title} (${formatCurrency(p.price, p.currency_code)})</div>`
+    ).join('');
 
-    const changedItems = changed.map(c => `${c.to.title}: <s style="color:#777">${formatCurrency(c.from.price, c.from.currency_code)}</s> → <strong>${formatCurrency(c.to.price, c.to.currency_code)}</strong>`);
-    html += renderList(tr.changed, changedItems);
+    const changedHtml = changed.map(c => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-left: 8px;">
+            <span>${c.to.title}</span>
+            <span style="white-space: nowrap; padding-left: 16px;">
+                <s style="color:#6b7280; font-size: 90%;">${formatCurrency(c.from.price, c.from.currency_code)}</s>
+                <span style="color: #d97706; font-weight: bold; margin: 0 4px;">→</span>
+                <strong>${formatCurrency(c.to.price, c.to.currency_code)}</strong>
+            </span>
+        </div>`
+    ).join('');
 
-    // --- Add Total Price Change Overview ---
-    if (referenceTotal !== currentTotal) {
-        html += `<p style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #facc15; font-weight: bold;">
-                    ${tr.totalPriceChange}:
-                    <s style="color:#777">${formatCurrency(referenceTotal, currency)}</s> →
-                    <strong>${formatCurrency(currentTotal, currency)}</strong>
-                 </p>`;
-    }
+    const totalChangeHtml = referenceTotal !== currentTotal ? `
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #fde68a; font-weight: bold;">
+            <span>${tr.totalPriceChange}:&nbsp;</span>
+            <span style="white-space: nowrap;">
+                <s style="color:#6b7280; font-weight: normal; font-size: 90%;">${formatCurrency(referenceTotal, currency)}</s>
+                <span style="color: #d97706; margin: 0 4px;">→</span>
+                <span>${formatCurrency(currentTotal, currency)}</span>
+            </span>
+        </div>` : '';
+
+    let html = `<div style="margin: 20px auto; padding: 24px; font-family: sans-serif; color: #1f2937; background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">`;
+    html += `<p style="font-size: 20px; font-weight: bold; margin: 0 0 20px 0;">${tr.title}</p>`;
+
+    html += renderSection(tr.added, addedHtml);
+    html += renderSection(tr.removed, removedHtml);
+    html += renderSection(tr.changed, changedHtml);
+    html += totalChangeHtml;
 
     html += `</div>`;
 
