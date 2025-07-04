@@ -116,7 +116,6 @@ class DbEshop {
     }
   }
 
-  // UPDATED METHOD
   static Future<TicketDetailsBundle?> getProductsForTicket(int ticketId) async {
     final response = await _supabase
         .rpc('get_products_for_ticket', params: {'ticket_id': ticketId});
@@ -128,10 +127,14 @@ class DbEshop {
     return null;
   }
 
-  static Future<bool> updateProductsForOrder(int ticketId, List<int> list) async {
+  static Future<bool> updateProductsForOrder(int ticketId, List<ProductModel> products) async {
+    final productsJson = products.map((p) => {'id': p.id, 'price': p.price}).toList();
     final result = await _supabase.rpc(
-      'update_ticket_products_ws',
-      params: {'p_ticket_id': ticketId, 'p_product_ids': list},
+      'update_ticket_products_wsv2',
+      params: {
+        'p_ticket_id': ticketId,
+        'p_products': productsJson,
+      },
     );
     if (result != null && result['code'] == 200) {
       return true;
@@ -238,16 +241,17 @@ class TicketDetailsBundle {
   final OrderModel order;
   final PaymentInfoModel? paymentInfo;
   final OrderHistoryInfo orderHistory;
+  final OrderModel? referenceOrder;
 
   TicketDetailsBundle({
     required this.ticket,
     required this.order,
     this.paymentInfo,
     required this.orderHistory,
+    this.referenceOrder,
   });
 
   factory TicketDetailsBundle.fromJson(Map<String, dynamic> json) {
-
     var bundle = TicketDetailsBundle(
       ticket: TicketModel.fromJson(json['ticket']),
       order: OrderModel.fromJson(json['order']),
@@ -255,6 +259,9 @@ class TicketDetailsBundle {
           ? PaymentInfoModel.fromJson(json['payment_info'])
           : null,
       orderHistory: OrderHistoryInfo.fromJson(json['order_history']),
+      referenceOrder: json['reference_order_data'] != null
+          ? OrderModel.fromJson(json['reference_order_data'])
+          : null,
     );
     var products = (json['ticket']['products'] as List? ?? [])
         .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
