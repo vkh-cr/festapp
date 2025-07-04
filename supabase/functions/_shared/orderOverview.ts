@@ -72,7 +72,7 @@ export function generateFullOrder(orderData: any, tickets: any[], occasionFeatur
     // --- 4. Final Assembly ---
     // The whole component is wrapped in a single, clean "card"
     return `
-        <div style="max-width: 600px; margin: 20px auto; padding: 24px; font-family: sans-serif; color: #333; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <div style="margin: 20px auto; padding: 24px; font-family: sans-serif; color: #333; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
             <p style="font-size: 20px; font-weight: bold; margin: 0 0 16px 0; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">Přehled objednávky</p>
             ${personalInfoHtml}
             ${ticketsDetails}
