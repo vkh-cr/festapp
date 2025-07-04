@@ -135,9 +135,9 @@ class EmailTemplateModel {
     defaultValue: 'Order details here',
   );
 
-  static EmailTemplateSub changesOverviewSub = EmailTemplateSub(
-    code: 'changesOverview',
-    description: EmailTemplatesStrings.subChangesOverview,
+  static EmailTemplateSub changeOverviewSub = EmailTemplateSub(
+    code: 'changeOverview',
+    description: EmailTemplatesStrings.subChangeOverview,
     defaultValue: 'Here is an overview of the changes in your order.',
   );
 
@@ -174,7 +174,7 @@ class EmailTemplateModel {
     'TICKET_ORDER_UPDATE': [
       occasionTitleSub,
       fullOrderSub,
-      changesOverviewSub,
+      changeOverviewSub,
       balanceReasoningSub,
     ],
     'TICKET_ORDER_PAYMENT_DONE': [
