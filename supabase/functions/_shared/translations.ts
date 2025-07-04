@@ -1,5 +1,5 @@
-// Helper function to wrap text in HTML strong tags for bolding.
-export const bold = (text: string | number) => `<strong>${text}</strong>`;
+// Helper function to wrap text in HTML strong tags for bolding, preventing line breaks.
+export const bold = (text: string | number) => `<strong style="white-space: nowrap;">${text}</strong>`;
 
 /**
  * Defines the options for the payment details component.
@@ -52,7 +52,7 @@ export const generatePaymentDetails = (options: PaymentDetailsOptions) => {
     )
     .join("");
 
-  return `<div style="margin-top: 16px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background-color: #f9fafb;">
+  return `<div style="margin-top: 32px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background-color: #f9fafb;">
             <p style="margin-top:0; margin-bottom: 8px; font-weight: bold; color: #333;">${title}</p>
             <table style="width: 100%; border-collapse: collapse;">
               <tbody>${rows}</tbody>
