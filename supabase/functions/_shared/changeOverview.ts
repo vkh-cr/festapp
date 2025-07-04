@@ -98,7 +98,7 @@ export function generateChangeOverview(currentOrderData: any, referenceOrderData
         <div style="display: flex; justify-content: space-between; align-items: center; padding-left: 8px;">
             <span>${c.to.title}</span>
             <span style="white-space: nowrap; padding-left: 16px;">
-                <s style="color:#6b7280; font-size: 90%;">${formatCurrency(c.from.price, c.from.currency_code)}</s>
+                <span style="color:#6b7280; font-size: 90%;">${formatCurrency(c.from.price, c.from.currency_code)}</span>
                 <span style="color: #d97706; font-weight: bold; margin: 0 4px;">→</span>
                 <strong>${formatCurrency(c.to.price, c.to.currency_code)}</strong>
             </span>
@@ -109,7 +109,7 @@ export function generateChangeOverview(currentOrderData: any, referenceOrderData
         <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #fde68a; font-weight: bold;">
             <span>${tr.totalPriceChange}:&nbsp;</span>
             <span style="white-space: nowrap;">
-                <s style="color:#6b7280; font-weight: normal; font-size: 90%;">${formatCurrency(referenceTotal, currency)}</s>
+                <span style="color:#6b7280; font-weight: normal; font-size: 90%;">${formatCurrency(referenceTotal, currency)}</span>
                 <span style="color: #d97706; margin: 0 4px;">→</span>
                 <span>${formatCurrency(currentTotal, currency)}</span>
             </span>
