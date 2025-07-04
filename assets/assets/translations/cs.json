@@ -705,7 +705,7 @@
     "labelAdvancedSettings": "Pokročilá nastavení",
     "labelReserveButtonTitle": "Název rezervačního tlačítka",
     "labelDeadlineDuration": "Termín platby (ve dnech)",
-    "helperDeadlineDuration": "Nastavte, kolik dní má uživatel na zaplacení objednávky. Ponechte prázdné pro žádný termín.",
+    "helperDeadlineDuration": "Nastavte, kolik dní má uživatel na zaplacení objednávky. Ponechte prázdné pro nastavení bez termínu.",
     "labelReminderEnabled": "Povolit upomínky k platbě",
     "helperReminderEnabled": "Automaticky odeslat e-mailovou upomínku o platbě.",
     "labelReminderInterval": "Interval upomínky (dny před termínem)",
@@ -713,7 +713,7 @@
     "validationReminderInterval": "Interval upomínky musí být kratší než termín platby.",
     "labelEnableReminders": "Povolit upomínky",
     "subtitleEnableReminders": "Pokud je povoleno, automatická e-mailová upomínka o platbě bude zaslána zákazníkům.",
-    "subtitleRemindersDisabled": "Upomínky jsou zakázány. Nejprve povolte funkci upomínek v nastavení příležitosti."
+    "subtitleRemindersDisabled": "Upomínky jsou zakázány. Nejprve povolte funkci upomínek v nastavení akce."
   },
   "OrderGridColumns": {
     "id": "Id",
@@ -854,7 +854,21 @@
     "infoPayment": "Platba",
     "outdatedTitle": "Zastaralé potvrzení",
     "outdatedSubtitle": "Objednávka se změnila od posledního odeslání e-mailu.",
-    "sendUpdateButton": "Poslat aktualizaci zákazníkovi"
+    "sendUpdateButton": "Poslat aktualizaci zákazníkovi",
+    "editPriceTooltip": "Upravit cenu",
+    "editPriceTitle": "Upravit cenu",
+    "newPriceLabel": "Nová cena",
+    "priceValidationRequired": "Cena je povinná.",
+    "priceValidationInvalid": "Zadejte prosím platnou cenu.",
+    "noProductChangesDetected": "Nebyly zjištěny žádné změny k odeslání.",
+    "addedProductsTitle": "Přidané položky:",
+    "removedProductsTitle": "Odebrané položky:",
+    "changedPricesTitle": "Změněné ceny:",
+    "emailContentIntro": "E-mail bude obsahovat následující:",
+    "setToZeroButton": "Nastavit na nulu",
+    "sendUpdateItemChanges": "Přehled změn v produktech",
+    "priceValidationNegative": "Cena nemůže být záporná.",
+    "totalPriceChange": "Změna celkové ceny"
   },
   "EmailTemplates": {
     "subs": {
@@ -869,7 +883,8 @@
       "iban": "IBAN",
       "variableSymbol": "Variabilní symbol",
       "deadline": "Termín platby",
-      "fullOrder": "Úplné podrobnosti objednávky",
+      "fullOrder": "Podrobnosti celé objednávky",
+      "changeOverview": "Přehled změn v objednávce, jako jsou přidané/odebrané položky nebo změny cen.",
       "balanceReasoning": "Podrobné vysvětlení zůstatku objednávky, včetně stavu platby, dlužné částky nebo přeplatku a případných platebních pokynů."
     },
     "usage": {
