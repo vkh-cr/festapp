@@ -884,7 +884,7 @@
       "variableSymbol": "Variabilní symbol",
       "deadline": "Termín platby",
       "fullOrder": "Podrobnosti celé objednávky",
-      "changesOverview": "Přehled změn v objednávce, jako jsou přidané/odebrané položky nebo změny cen.",
+      "changeOverview": "Přehled změn v objednávce, jako jsou přidané/odebrané položky nebo změny cen.",
       "balanceReasoning": "Podrobné vysvětlení zůstatku objednávky, včetně stavu platby, dlužné částky nebo přeplatku a případných platebních pokynů."
     },
     "usage": {
