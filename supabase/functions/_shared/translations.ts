@@ -69,7 +69,7 @@ export const translations = {
     underpaid: (
       paid: string, remaining: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string
     ) =>
-      `<p>Děkujeme za Tvou platbu ve výši ${bold(paid)}. Pro úplné dokončení objednávky, prosím, uhraď zbývající částku do ${bold(deadline)}. Jakmile platbu obdržíme, pošleme Ti potvrzení.</p>
+      `<p>Děkujeme za Tvou platbu ve výši ${bold(paid)}. Pro úplné dokončení objednávky, prosím, uhraď zbývající částku ${bold(remaining)} do ${bold(deadline)}. Jakmile platbu obdržíme, pošleme Ti potvrzení.</p>
        <p>Pro zjednodušení platby přikládáme QR kód.</p>
        ${generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'cs' })}`,
     unpaid: (
@@ -91,6 +91,7 @@ export const translations = {
       if (paidAmount > 0) {
         preamble += `<p>Již jsi uhradil/a částku ${bold(paid)}.</p>`;
       }
+      preamble += `<p>Zbývá uhradit částku ${bold(remaining)}.</p>`;
       return `${preamble}
        <p>Pro zjednodušení platby přikládáme QR kód. Jakmile ji obdržíme, pošleme Ti potvrzení.</p>
        ${generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'cs' })}`;
@@ -103,6 +104,7 @@ export const translations = {
       if (paidAmount > 0) {
         preamble += `<p>Již jsi uhradil/a částku ${bold(paid)}.</p>`;
       }
+      preamble += `<p>Zbývá uhradit částku ${bold(remaining)}.</p>`;
       return `${preamble}
        <p>Prosíme o její co nejrychlejší uhrazení. Pro zjednodušení platby přikládáme QR kód a jakmile ji obdržíme, pošleme Ti potvrzení.</p>
        ${generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'cs' })}`;
@@ -138,6 +140,7 @@ export const translations = {
       if (paidAmount > 0) {
         preamble += `<p>You have already paid ${bold(paid)}.</p>`;
       }
+      preamble += `<p>The remaining amount to be paid is ${bold(remaining)}.</p>`;
       return `${preamble}
        <p>A QR code is attached to simplify the payment. We will send a confirmation once it's received.</p>
        ${generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'en' })}`;
@@ -150,6 +153,7 @@ export const translations = {
       if (paidAmount > 0) {
         preamble += `<p>You have already paid ${bold(paid)}.</p>`;
       }
+      preamble += `<p>The remaining amount to be paid is ${bold(remaining)}.</p>`;
       return `${preamble}
        <p>Please settle the payment as soon as possible. A QR code is attached to simplify the payment, and we will send a confirmation once it's received.</p>
        ${generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'en' })}`;
