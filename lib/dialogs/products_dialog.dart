@@ -36,8 +36,8 @@ class _ProductsDialogState extends State<ProductsDialog> {
     setState(() => _loading = true);
     _bundle = await DbEshop.getProductsForTicket(widget.ticketId);
     if (_bundle != null) {
-      _orig = _bundle!.ticket.relatedProducts?.map((p) => ProductModel.fromJson(p.toJson())).toList() ?? [];
-      _current = _bundle!.ticket.relatedProducts?.map((p) => ProductModel.fromJson(p.toJson())).toList() ?? [];
+      _orig = _bundle!.ticket.relatedProducts?.map((p) => p.copyWith()).toList() ?? [];
+      _current = _bundle!.ticket.relatedProducts?.map((p) => p.copyWith()).toList() ?? [];
       _recalc();
     }
     if(!mounted) return;
@@ -87,51 +87,82 @@ class _ProductsDialogState extends State<ProductsDialog> {
     final newPrice = await showDialog<double>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(FeaturesStrings.editPriceTitle),
-          content: Form(
-            key: formKey,
-            child: TextFormField(
-              controller: priceController,
-              autofocus: true,
-              decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return FeaturesStrings.priceValidationRequired;
-                }
-                final price = double.tryParse(value.replaceAll(",", "."));
-                if (price == null) {
-                  return FeaturesStrings.priceValidationInvalid;
-                }
-                if (price < 0) {
-                  return FeaturesStrings.priceValidationNegative;
-                }
-                return null;
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text(FeaturesStrings.setToZeroButton),
-              onPressed: () {
-                priceController.text = "0.00";
-              },
-            ),
-            const Spacer(),
-            TextButton(
-              child: Text("Storno".tr()),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            ElevatedButton(
-              child: Text("OK".tr()),
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  Navigator.of(context).pop(double.parse(priceController.text.replaceAll(",", ".")));
-                }
-              },
-            ),
-          ],
+        // Use a stateful helper widget to create and manage the focus node
+        // correctly within the dialog's lifecycle.
+        return _StatefulDialogWrapper(
+          builder: (context, focusNode) {
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 450),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        FeaturesStrings.editPriceTitle,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 20),
+                      SingleChildScrollView(
+                        child: Form(
+                          key: formKey,
+                          child: TextFormField(
+                            focusNode: focusNode,
+                            autofocus: true,
+                            controller: priceController,
+                            decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return FeaturesStrings.priceValidationRequired;
+                              }
+                              final price = double.tryParse(value.replaceAll(",", "."));
+                              if (price == null) {
+                                return FeaturesStrings.priceValidationInvalid;
+                              }
+                              if (price < 0) {
+                                return FeaturesStrings.priceValidationNegative;
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            child: Text(FeaturesStrings.setToZeroButton),
+                            onPressed: () {
+                              priceController.text = "0.00";
+                            },
+                          ),
+                          const Spacer(),
+                          TextButton(
+                            child: Text("Storno".tr()),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            child: Text("OK".tr()),
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                Navigator.of(context).pop(double.parse(priceController.text.replaceAll(",", ".")));
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -681,5 +712,35 @@ extension on List<ProductModel> {
       }
     }
     return true;
+  }
+}
+
+/// A helper widget to correctly manage the lifecycle of a FocusNode inside a dialog.
+class _StatefulDialogWrapper extends StatefulWidget {
+  const _StatefulDialogWrapper({required this.builder});
+  final Widget Function(BuildContext context, FocusNode focusNode) builder;
+
+  @override
+  __StatefulDialogWrapperState createState() => __StatefulDialogWrapperState();
+}
+
+class __StatefulDialogWrapperState extends State<_StatefulDialogWrapper> {
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, _focusNode);
   }
 }
