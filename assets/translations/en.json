@@ -854,7 +854,21 @@
     "infoPayment": "Payment",
     "outdatedTitle": "Outdated Confirmation",
     "outdatedSubtitle": "The order has changed since the last email was sent.",
-    "sendUpdateButton": "Send Update to Customer"
+    "sendUpdateButton": "Send Update to Customer",
+    "editPriceTooltip": "Edit price",
+    "editPriceTitle": "Edit Price",
+    "newPriceLabel": "New price",
+    "priceValidationRequired": "Price is required.",
+    "priceValidationInvalid": "Please enter a valid price.",
+    "noProductChangesDetected": "No changes detected to be sent.",
+    "addedProductsTitle": "Added Products:",
+    "removedProductsTitle": "Removed Products:",
+    "changedPricesTitle": "Changed Prices:",
+    "emailContentIntro": "The email will include the following:",
+    "setToZeroButton": "Set to Zero",
+    "sendUpdateItemChanges": "Overview of product changes",
+    "priceValidationNegative": "Price cannot be negative.",
+    "totalPriceChange": "Total Price Change"
   },
   "EmailTemplates": {
     "subs": {

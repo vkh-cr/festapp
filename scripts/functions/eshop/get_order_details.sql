@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION get_order_details(orderId bigint)
 RETURNS jsonb AS $$
 DECLARE
     result_data jsonb;
+    reference_history_data jsonb;
     form_fields_data jsonb;
     form_key uuid;
     latest_history_id bigint;
@@ -35,6 +36,25 @@ BEGIN
 
     IF latest_history_id IS NOT NULL THEN
         result_data := result_data || jsonb_build_object('latest_history_id', latest_history_id);
+    END IF;
+
+    -- Get the data of the latest SENT history entry
+    SELECT data INTO reference_history_data
+    FROM eshop.orders_history
+    WHERE "order" = orderId AND (data->>'is_sent_to_customer')::boolean IS TRUE
+    ORDER BY created_at DESC LIMIT 1;
+
+    -- If no sent record was found, get the oldest record as the reference
+    IF NOT FOUND THEN
+        SELECT data INTO reference_history_data
+        FROM eshop.orders_history
+        WHERE "order" = orderId
+        ORDER BY created_at ASC LIMIT 1;
+    END IF;
+
+    -- Add the reference data to the result
+    IF reference_history_data IS NOT NULL THEN
+        result_data := result_data || jsonb_build_object('reference_history', reference_history_data);
     END IF;
 
     -- Extract the form's unique key from the order's data
