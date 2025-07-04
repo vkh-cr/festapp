@@ -83,6 +83,14 @@ class _ProductsDialogState extends State<ProductsDialog> {
   Future<void> _editPrice(ProductModel product) async {
     final priceController = TextEditingController(text: (product.price ?? 0).toStringAsFixed(2));
     final formKey = GlobalKey<FormState>();
+    // 1. Create a FocusNode to control the focus manually.
+    final focusNode = FocusNode();
+
+    // 2. After a short delay, request focus. This gives the dialog time to build and settle
+    //    before the keyboard appears, avoiding the layout glitch.
+    Future.delayed(const Duration(milliseconds: 200), () {
+      focusNode.requestFocus();
+    });
 
     final newPrice = await showDialog<double>(
       context: context,
@@ -94,7 +102,9 @@ class _ProductsDialogState extends State<ProductsDialog> {
             child: Form(
               key: formKey,
               child: TextFormField(
-                autofocus: true,
+                // 3. Assign the FocusNode and ensure autofocus is off.
+                focusNode: focusNode,
+                autofocus: false,
                 controller: priceController,
                 decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
@@ -138,6 +148,9 @@ class _ProductsDialogState extends State<ProductsDialog> {
         );
       },
     );
+
+    // 4. IMPORTANT: Dispose of the FocusNode after the dialog is closed to prevent memory leaks.
+    focusNode.dispose();
 
     if (newPrice != null) {
       setState(() {
