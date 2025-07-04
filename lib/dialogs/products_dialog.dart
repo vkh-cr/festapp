@@ -83,73 +83,99 @@ class _ProductsDialogState extends State<ProductsDialog> {
   Future<void> _editPrice(ProductModel product) async {
     final priceController = TextEditingController(text: (product.price ?? 0).toStringAsFixed(2));
     final formKey = GlobalKey<FormState>();
-    // 1. Create a FocusNode to control the focus manually.
     final focusNode = FocusNode();
 
-    // 2. After a short delay, request focus. This gives the dialog time to build and settle
-    //    before the keyboard appears, avoiding the layout glitch.
     Future.delayed(const Duration(milliseconds: 200), () {
-      focusNode.requestFocus();
+      if (focusNode.context != null) {
+        focusNode.requestFocus();
+      }
     });
 
     final newPrice = await showDialog<double>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-          title: Text(FeaturesStrings.editPriceTitle),
-          content: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: TextFormField(
-                // 3. Assign the FocusNode and ensure autofocus is off.
-                focusNode: focusNode,
-                autofocus: false,
-                controller: priceController,
-                decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return FeaturesStrings.priceValidationRequired;
-                  }
-                  final price = double.tryParse(value.replaceAll(",", "."));
-                  if (price == null) {
-                    return FeaturesStrings.priceValidationInvalid;
-                  }
-                  if (price < 0) {
-                    return FeaturesStrings.priceValidationNegative;
-                  }
-                  return null;
-                },
+        // We are now using the generic `Dialog` widget to gain full control.
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ConstrainedBox(
+            // This enforces a hard maximum width on our dialog.
+            constraints: const BoxConstraints(maxWidth: 450),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              // This Column will only be as tall as its content.
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Manually created Title
+                  Text(
+                    FeaturesStrings.editPriceTitle,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 2. Manually created Content (still scrollable for keyboard)
+                  SingleChildScrollView(
+                    child: Form(
+                      key: formKey,
+                      child: TextFormField(
+                        focusNode: focusNode,
+                        autofocus: false,
+                        controller: priceController,
+                        decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return FeaturesStrings.priceValidationRequired;
+                          }
+                          final price = double.tryParse(value.replaceAll(",", "."));
+                          if (price == null) {
+                            return FeaturesStrings.priceValidationInvalid;
+                          }
+                          if (price < 0) {
+                            return FeaturesStrings.priceValidationNegative;
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 3. Manually created Actions
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        child: Text(FeaturesStrings.setToZeroButton),
+                        onPressed: () {
+                          priceController.text = "0.00";
+                        },
+                      ),
+                      const Spacer(),
+                      TextButton(
+                        child: Text("Storno".tr()),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        child: Text("OK".tr()),
+                        onPressed: () {
+                          if (formKey.currentState!.validate()) {
+                            Navigator.of(context).pop(double.parse(priceController.text.replaceAll(",", ".")));
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-          actions: [
-            TextButton(
-              child: Text(FeaturesStrings.setToZeroButton),
-              onPressed: () {
-                priceController.text = "0.00";
-              },
-            ),
-            const Spacer(),
-            TextButton(
-              child: Text("Storno".tr()),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            ElevatedButton(
-              child: Text("OK".tr()),
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  Navigator.of(context).pop(double.parse(priceController.text.replaceAll(",", ".")));
-                }
-              },
-            ),
-          ],
         );
       },
     );
 
-    // 4. IMPORTANT: Dispose of the FocusNode after the dialog is closed to prevent memory leaks.
     focusNode.dispose();
 
     if (newPrice != null) {
