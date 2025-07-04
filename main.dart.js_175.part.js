@@ -2,22 +2,22 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_175",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,B,A,F,I,K,L,M,C={
-dp6(){return new C.Ea(null)},
-d03(d,e,f,g,h,i,j){return new C.a5W(j,f,d,g,e,i,h,null)},
+dp8(){return new C.Ea(null)},
+d05(d,e,f,g,h,i,j){return new C.a5X(j,f,d,g,e,i,h,null)},
 Ea:function Ea(d){this.a=d},
-aQD:function aQD(d,e){var _=this
+aQE:function aQE(d,e){var _=this
 _.e=_.d=$
 _.f=d
 _.r=e
 _.c=_.a=null},
-ciD:function ciD(d){this.a=d},
-ciC:function ciC(){},
-ciE:function ciE(d,e){this.a=d
+ciG:function ciG(d){this.a=d},
+ciF:function ciF(){},
+ciH:function ciH(d,e){this.a=d
 this.b=e},
-ciF:function ciF(d){this.a=d},
+ciI:function ciI(d){this.a=d},
 Az:function Az(d,e){this.a=d
 this.b=e},
-a5W:function a5W(d,e,f,g,h,i,j,k){var _=this
+a5X:function a5X(d,e,f,g,h,i,j,k){var _=this
 _.c=d
 _.d=e
 _.e=f
@@ -26,17 +26,17 @@ _.r=h
 _.w=i
 _.x=j
 _.a=k},
-ag1:function ag1(d,e){var _=this
+ag2:function ag2(d,e){var _=this
 _.d=d
 _.e=e
 _.f=!1
 _.r=""
 _.c=_.a=_.y=_.x=_.w=null},
-coP:function coP(d){this.a=d},
-coQ:function coQ(d,e){this.a=d
+coS:function coS(d){this.a=d},
+coT:function coT(d,e){this.a=d
 this.b=e},
-coR:function coR(d){this.a=d},
-coS:function coS(d,e){this.a=d
+coU:function coU(d){this.a=d},
+coV:function coV(d,e){this.a=d
 this.b=e}},D,N,O,P,Q,G,R,S,E,T,U,V,W,H,X
 J=c[1]
 B=c[0]
@@ -63,8 +63,8 @@ W=c[173]
 H=c[145]
 X=c[170]
 C.Ea.prototype={
-M(){return new C.aQD(new B.c6(new B.c7("vkh-cr/festapp",A.al,A.aa),$.a9()),B.a([new C.Az("1. Tables","scripts/tables"),new C.Az("2. Functions","scripts/functions"),new C.Az("3. Policies","scripts/policies"),new C.Az("4. Seed","scripts/seed")],y.D))}}
-C.aQD.prototype={
+M(){return new C.aQE(new B.c6(new B.c7("vkh-cr/festapp",A.al,A.aa),$.a9()),B.a([new C.Az("1. Tables","scripts/tables"),new C.Az("2. Functions","scripts/functions"),new C.Az("3. Policies","scripts/policies"),new C.Az("4. Seed","scripts/seed")],y.D))}}
+C.aQE.prototype={
 T(){var x,w,v,u,t,s,r=this
 r.ae()
 u=new B.c7("https://kjdpmixlnhntmxjedpxh.supabase.co",A.al,A.aa)
@@ -74,7 +74,7 @@ r.d=new B.c6(u,t)
 x=u.a
 w=null
 try{v=B.dw(x,0,null)
-w="db."+J.cMK(v)}catch(s){w="invalid-supabase-host"}u=B.o(w)
+w="db."+J.cMN(v)}catch(s){w="invalid-supabase-host"}u=B.o(w)
 t=$.a9()
 r.e!==$&&B.b8()
 r.e=new B.c6(new B.c7("postgresql://postgres:YOUR_PASSWORD@"+u+":5432/postgres",A.al,A.aa),t)},
@@ -94,32 +94,32 @@ gbrt(){var x,w,v,u=this.d
 u===$&&B.b()
 x=A.d.bg(u.a.a)
 try{w=B.dw(x,0,null)
-if(A.d.lh(J.cMK(w),".supabase.co")){u=A.b.gW(J.cMK(w).split("."))
+if(A.d.lh(J.cMN(w),".supabase.co")){u=A.b.gW(J.cMN(w).split("."))
 return u}}catch(v){}return x},
 gapM(){var x=this.gbrt()
 return"supabase functions deploy notify --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy register --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-custom-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-sign-in-code --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-reset-password-link --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-ticket-order --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-tickets --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy fetch-transactions --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy instance-install --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy synchronize-orders --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy fetch-http-data --no-verify-jwt --project-ref "+x+"\n"},
-B(d){var x,w,v,u,t,s,r,q,p,o=this,n=null,m=V.iv(n,n,n,!0,n,n,1,n,n,n,!1,n,!1,n,n,n,n,!0,n,n,n,n,n,D.bK4,n,n,n,1,n,!0),l=o.d
+B(d){var x,w,v,u,t,s,r,q,p,o=this,n=null,m=V.iw(n,n,n,!0,n,n,1,n,n,n,!1,n,!1,n,n,n,n,!0,n,n,n,n,n,D.bK4,n,n,n,1,n,!0),l=o.d
 l===$&&B.b()
-x=B.fC(!0,A.aT,!1,n,!0,A.v,n,B.fW(),l,n,n,n,n,n,2,D.aBz,A.q,!0,n,!0,n,!1,n,A.aN,n,n,n,n,n,n,n,1,n,n,!1,"\u2022",n,new C.ciD(o),n,n,n,!1,n,n,!1,n,!0,n,A.b0,n,n,A.aP,A.aO,n,n,n,n,n,n,n,!0,A.F,n,A.b3,n,n,n,n)
+x=B.fC(!0,A.aT,!1,n,!0,A.v,n,B.fX(),l,n,n,n,n,n,2,D.aBz,A.q,!0,n,!0,n,!1,n,A.aN,n,n,n,n,n,n,n,1,n,n,!1,"\u2022",n,new C.ciG(o),n,n,n,!1,n,n,!1,n,!0,n,A.b0,n,n,A.aP,A.aO,n,n,n,n,n,n,n,!0,A.F,n,A.b3,n,n,n,n)
 w=o.e
 w===$&&B.b()
-v=B.fC(!0,A.aT,!1,n,!0,A.v,n,B.fW(),w,n,n,n,n,n,2,D.aBB,A.q,!0,n,!0,n,!1,n,A.aN,n,n,n,n,n,n,n,1,n,n,!1,"\u2022",n,n,n,n,n,!1,n,n,!1,n,!0,n,A.b0,n,n,A.aP,A.aO,n,n,n,n,n,n,n,!0,A.F,n,A.b3,n,n,n,n)
+v=B.fC(!0,A.aT,!1,n,!0,A.v,n,B.fX(),w,n,n,n,n,n,2,D.aBB,A.q,!0,n,!0,n,!1,n,A.aN,n,n,n,n,n,n,n,1,n,n,!1,"\u2022",n,n,n,n,n,!1,n,n,!1,n,!0,n,A.b0,n,n,A.aP,A.aO,n,n,n,n,n,n,n,!0,A.F,n,A.b3,n,n,n,n)
 u=o.f
-t=B.fC(!0,A.aT,!1,n,!0,A.v,n,B.fW(),u,n,n,n,n,n,2,D.aBw,A.q,!0,n,!0,n,!1,n,A.aN,n,n,n,n,n,n,n,1,n,n,!1,"\u2022",n,n,n,n,n,!1,n,n,!1,n,!0,n,A.b0,n,n,A.aP,A.aO,n,n,n,n,n,n,n,!0,A.F,n,A.b3,n,n,n,n)
+t=B.fC(!0,A.aT,!1,n,!0,A.v,n,B.fX(),u,n,n,n,n,n,2,D.aBw,A.q,!0,n,!0,n,!1,n,A.aN,n,n,n,n,n,n,n,1,n,n,!1,"\u2022",n,n,n,n,n,!1,n,n,!1,n,!0,n,A.b0,n,n,A.aP,A.aO,n,n,n,n,n,n,n,!0,A.F,n,A.b3,n,n,n,n)
 s=y.u
-r=B.l3(new B.Z(A.ba,B.ac(B.a([B.ao(B.a([D.bKq,B.bN(n,n,n,n,n,n,M.E9,n,n,n,new C.ciE(o,d),n,n,n,n,n)],s),A.j,A.br,A.h,0,n),A.af,H.f4(o.gapM(),n,D.bHx)],s),A.G,A.f,A.h,0,n,A.l),n),n,n,2,n,n)
+r=B.l3(new B.Z(A.ba,B.ac(B.a([B.ao(B.a([D.bKq,B.bN(n,n,n,n,n,n,M.E9,n,n,n,new C.ciH(o,d),n,n,n,n,n)],s),A.j,A.br,A.h,0,n),A.af,H.f4(o.gapM(),n,D.bHx)],s),A.G,A.f,A.h,0,n,A.l),n),n,n,2,n,n)
 q=o.r
 p=B.R(q).i("I<1,Z>")
-q=B.B(new B.I(q,new C.ciF(o),p),p.i("a2.E"))
-return U.eZ(m,n,B.dr(B.ac(B.a([x,A.af,v,A.af,t,E.dX,r,E.dX,D.bKf,A.fp,B.ac(q,A.j,A.f,A.h,0,n,A.l),E.dX,D.bJQ,A.fp,C.d03(!0,w,n,"migrations",l,u,"Migrations")],s),A.G,A.f,A.h,0,n,A.l),n,A.q,X.aR,n,n,A.H),n,n,n,n,n)}}
+q=B.B(new B.I(q,new C.ciI(o),p),p.i("a2.E"))
+return U.eZ(m,n,B.dr(B.ac(B.a([x,A.af,v,A.af,t,E.dX,r,E.dX,D.bKf,A.fp,B.ac(q,A.j,A.f,A.h,0,n,A.l),E.dX,D.bJQ,A.fp,C.d05(!0,w,n,"migrations",l,u,"Migrations")],s),A.G,A.f,A.h,0,n,A.l),n,A.q,X.aR,n,n,A.H),n,n,n,n,n)}}
 C.Az.prototype={
 gc_(d){return this.a}}
-C.a5W.prototype={
+C.a5X.prototype={
 M(){var x=$.hL().b
 x===$&&B.b()
-return new C.ag1(x,new B.c6(A.ar,$.a9()))},
+return new C.ag2(x,new B.c6(A.ar,$.a9()))},
 gc_(d){return this.c}}
-C.ag1.prototype={
+C.ag2.prototype={
 T(){var x,w=this
 w.ae()
 x=w.a
@@ -149,22 +149,22 @@ n=t.a
 if(n.d==="scripts/seed"){m=A.d.bg(t.x.a.a)
 l=A.d.bg(t.y.a.a)
 J.bW(s,"project_url",A.d.bg(n.x.a.a))
-if(m.length!==0&&l.length!==0)J.ami(s,B.w(["admin_email",m,"admin_password",l],j,o))}t.u(new C.coP(t))
+if(m.length!==0&&l.length!==0)J.amj(s,B.w(["admin_email",m,"admin_password",l],j,o))}t.u(new C.coS(t))
 v=3
 j=t.d.Q
 j===$&&B.b()
 x=6
 return B.d(j.my("instance-install",s.a!==0?A.aH.xB(s,null):null),$async$YK)
 case 6:r=e
-if(r.b!==200)t.u(new C.coQ(t,r))
-else t.u(new C.coR(t))
+if(r.b!==200)t.u(new C.coT(t,r))
+else t.u(new C.coU(t))
 v=1
 x=5
 break
 case 3:v=2
 g=u.pop()
 q=B.ag(g)
-t.u(new C.coS(t,q))
+t.u(new C.coV(t,q))
 x=5
 break
 case 2:x=1
@@ -176,11 +176,11 @@ b2X(){var x,w=null,v=this.w
 if(v==null)return A.cR
 x=this.c
 if(v){x.toString
-v=B.aK(T.ir,P.MC(x),w,w)}else{x.toString
+v=B.aK(T.ir,P.MD(x),w,w)}else{x.toString
 v=B.aK(W.to,B.C(x).ax.a===A.r?B.aZ(4294922834):B.aZ(4292030255),w,w)}return v},
 B(d){var x=this,w=null,v=y.u,u=B.ao(B.a([B.F(x.a.c,w,w,w,w,w,w,w,Q.aep,w,w,w,w,w),I.bF,x.b2X()],v),A.j,A.f,A.h,0,w),t=x.a
-u=B.a([u,A.fN,t.e?B.fC(!0,A.aT,!1,w,!0,A.v,w,B.fW(),x.e,w,w,w,w,w,2,D.aBA,A.q,!0,w,!0,w,!1,w,A.aN,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,A.b0,w,w,A.aP,A.aO,w,w,w,w,w,w,w,!0,A.F,w,A.b3,w,w,w,w):new B.Z(A.e6,B.F("Directory: "+B.o(t.d),w,w,w,w,w,w,w,w,w,w,w,w,w),w)],v)
-if(x.a.d==="scripts/seed")A.b.H(u,B.a([A.fp,D.bJJ,A.af,D.bK8,A.af,B.fC(!0,A.aT,!1,w,!0,A.v,w,B.fW(),x.x,w,w,w,w,w,2,D.aBy,A.q,!0,w,!0,w,!1,w,A.aN,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,A.b0,w,w,A.aP,A.aO,w,w,w,w,w,w,w,!0,A.F,w,A.b3,w,w,w,w),B.fC(!0,A.aT,!1,w,!0,A.v,w,B.fW(),x.y,w,w,w,w,w,2,D.aBu,A.q,!0,w,!0,w,!1,w,A.aN,w,w,w,w,w,w,w,1,w,w,!0,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,A.b0,w,w,A.aP,A.aO,w,w,w,w,w,w,w,!0,A.F,w,A.b3,w,w,w,w),new B.Z(A.e6,B.F("Supabase Project URL: "+x.a.x.a.a,w,w,w,w,w,w,w,G.aen,w,w,w,w,w),w)],v))
+u=B.a([u,A.fN,t.e?B.fC(!0,A.aT,!1,w,!0,A.v,w,B.fX(),x.e,w,w,w,w,w,2,D.aBA,A.q,!0,w,!0,w,!1,w,A.aN,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,A.b0,w,w,A.aP,A.aO,w,w,w,w,w,w,w,!0,A.F,w,A.b3,w,w,w,w):new B.Z(A.e6,B.F("Directory: "+B.o(t.d),w,w,w,w,w,w,w,w,w,w,w,w,w),w)],v)
+if(x.a.d==="scripts/seed")A.b.H(u,B.a([A.fp,D.bJJ,A.af,D.bK8,A.af,B.fC(!0,A.aT,!1,w,!0,A.v,w,B.fX(),x.x,w,w,w,w,w,2,D.aBy,A.q,!0,w,!0,w,!1,w,A.aN,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,A.b0,w,w,A.aP,A.aO,w,w,w,w,w,w,w,!0,A.F,w,A.b3,w,w,w,w),B.fC(!0,A.aT,!1,w,!0,A.v,w,B.fX(),x.y,w,w,w,w,w,2,D.aBu,A.q,!0,w,!0,w,!1,w,A.aN,w,w,w,w,w,w,w,1,w,w,!0,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,A.b0,w,w,A.aP,A.aO,w,w,w,w,w,w,w,!0,A.F,w,A.b3,w,w,w,w),new B.Z(A.e6,B.F("Supabase Project URL: "+x.a.x.a.a,w,w,w,w,w,w,w,G.aen,w,w,w,w,w),w)],v))
 u.push(A.af)
 u.push(B.du(!1,D.bKc,w,w,w,w,w,w,x.f?w:x.gbyE(),w,w))
 u.push(A.af)
@@ -189,52 +189,52 @@ else{v=x.r
 v=v.length!==0?H.f4(v,w,K.A0):A.cR}u.push(v)
 return B.l3(new B.Z(A.ba,B.ac(u,A.G,A.f,A.h,0,w,A.l),w),w,w,3,w,w)}}
 var z=a.updateTypes(["Z(Az)","X<~>()"])
-C.ciD.prototype={
-$1(d){this.a.u(new C.ciC())},
+C.ciG.prototype={
+$1(d){this.a.u(new C.ciF())},
 $S:6}
-C.ciC.prototype={
+C.ciF.prototype={
 $0(){},
 $S:0}
-C.ciE.prototype={
+C.ciH.prototype={
 $0(){B.v3(new B.oz(this.a.gapM()))
 this.b.ab(y.v).f.al7(D.bDO)},
 $S:0}
-C.ciF.prototype={
+C.ciI.prototype={
 $1(d){var x,w=this.a,v=w.e
 v===$&&B.b()
 x=w.d
 x===$&&B.b()
-return new B.Z(S.CU,C.d03(!1,v,d.b,null,x,w.f,d.a),null)},
+return new B.Z(S.CU,C.d05(!1,v,d.b,null,x,w.f,d.a),null)},
 $S:z+0}
-C.coP.prototype={
+C.coS.prototype={
 $0(){var x=this.a
 x.f=!0
 x.r=x.a.c+" operation is running..."
 x.w=null},
 $S:0}
-C.coQ.prototype={
+C.coT.prototype={
 $0(){var x=this.a
 x.r="Error: "+B.o(this.b.a)
 x.f=x.w=!1},
 $S:0}
-C.coR.prototype={
+C.coU.prototype={
 $0(){var x=this.a
 x.r=x.a.c+" operation completed successfully."
 x.w=!0
 x.f=!1},
 $S:0}
-C.coS.prototype={
+C.coV.prototype={
 $0(){var x=this.a
 x.r="Unexpected error: "+B.o(this.b)
 x.f=x.w=!1},
 $S:0};(function installTearOffs(){var x=a._instance_0u
-x(C.ag1.prototype,"gbyE","YK",1)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
-x(B.L,[C.Ea,C.a5W])
-x(B.N,[C.aQD,C.ag1])
-x(B.cj,[C.ciD,C.ciF])
-x(B.d0,[C.ciC,C.ciE,C.coP,C.coQ,C.coR,C.coS])
+x(C.ag2.prototype,"gbyE","YK",1)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
+x(B.L,[C.Ea,C.a5X])
+x(B.N,[C.aQE,C.ag2])
+x(B.cj,[C.ciG,C.ciI])
+x(B.d0,[C.ciF,C.ciH,C.coS,C.coT,C.coU,C.coV])
 w(C.Az,B.K)})()
-B.cf(b.typeUniverse,JSON.parse('{"a5W":{"L":[],"e":[]},"Ea":{"L":[],"e":[]},"aQD":{"N":["Ea"]},"ag1":{"N":["a5W"]}}'))
+B.cf(b.typeUniverse,JSON.parse('{"a5X":{"L":[],"e":[]},"Ea":{"L":[],"e":[]},"aQE":{"N":["Ea"]},"ag2":{"N":["a5X"]}}'))
 var y={D:B.E("v<Az>"),u:B.E("v<e>"),w:B.E("l"),v:B.E("Hc"),b:B.E("@"),q:B.E("~")};(function constants(){D.aBu=new B.pO(null,null,null,"Admin Password",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.aBw=new B.pO(null,null,null,"GitHub Repository with scripts",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.aBy=new B.pO(null,null,null,"Admin Email",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
@@ -252,4 +252,4 @@ D.bKc=new B.cx("Run Scripts",null,null,null,null,null,null,null,null,null,null,n
 D.bKf=new B.cx("Initial",null,F.IF,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bKq=new B.cx("Supabase Function Deploy Commands:",null,R.IB,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_175",e:"endPart",h:b})})($__dart_deferred_initializers__,"xwOyj5DcbhV1Sg3dZS5wanwhZ/4=");
+a.eventLog.push({p:"main.dart.js_175",e:"endPart",h:b})})($__dart_deferred_initializers__,"+zDptiPnEgeN+2KsVRGtK+IUq4g=");
