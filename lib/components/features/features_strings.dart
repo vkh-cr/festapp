@@ -159,6 +159,20 @@ class FeaturesStrings {
   static String get outdatedTitle => 'ProductsDialog.outdatedTitle'.tr();
   static String get outdatedSubtitle => 'ProductsDialog.outdatedSubtitle'.tr();
   static String get sendUpdateButton => 'ProductsDialog.sendUpdateButton'.tr();
+  static String get editPriceTooltip => 'ProductsDialog.editPriceTooltip'.tr();
+  static String get editPriceTitle => 'ProductsDialog.editPriceTitle'.tr();
+  static String get newPriceLabel => 'ProductsDialog.newPriceLabel'.tr();
+  static String get priceValidationRequired => 'ProductsDialog.priceValidationRequired'.tr();
+  static String get priceValidationInvalid => 'ProductsDialog.priceValidationInvalid'.tr();
+  static String get noProductChangesDetected => 'ProductsDialog.noProductChangesDetected'.tr();
+  static String get addedProductsTitle => 'ProductsDialog.addedProductsTitle'.tr();
+  static String get removedProductsTitle => 'ProductsDialog.removedProductsTitle'.tr();
+  static String get changedPricesTitle => 'ProductsDialog.changedPricesTitle'.tr();
+  static String get emailContentIntro => 'ProductsDialog.emailContentIntro'.tr();
+  static String get setToZeroButton => 'ProductsDialog.setToZeroButton'.tr(); // e.g., "Set to Zero"
+  static String get sendUpdateItemChanges => 'ProductsDialog.sendUpdateItemChanges'.tr(); // e.g., "Overview of product changes"
+  static String get priceValidationNegative => 'ProductsDialog.priceValidationNegative'.tr(); // e.g., "Price cannot be negative."
+  static String get totalPriceChange => 'ProductsDialog.totalPriceChange'.tr();
 
   // --- Order Grid Columns ---
   static String get gridId => 'OrderGridColumns.id'.tr();
