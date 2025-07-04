@@ -883,7 +883,8 @@
       "iban": "IBAN",
       "variableSymbol": "Variabilní symbol",
       "deadline": "Termín platby",
-      "fullOrder": "Úplné podrobnosti objednávky",
+      "fullOrder": "Podrobnosti celé objednávky",
+      "changesOverview": "Přehled změn v objednávce, jako jsou přidané/odebrané položky nebo změny cen.",
       "balanceReasoning": "Podrobné vysvětlení zůstatku objednávky, včetně stavu platby, dlužné částky nebo přeplatku a případných platebních pokynů."
     },
     "usage": {

@@ -884,6 +884,7 @@
       "variableSymbol": "Variable symbol",
       "deadline": "The payment deadline",
       "fullOrder": "Full order details",
+      "changesOverview": "An overview of changes in the order, such as added/removed items or price changes.",
       "balanceReasoning": "A detailed explanation of the order balance, including payment status, amount due or overpaid, and payment instructions if applicable."
     },
     "usage": {
