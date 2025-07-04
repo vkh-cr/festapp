@@ -98,7 +98,7 @@ class TicketModel extends ITrinaRowModel {
       EshopColumns.TICKET_PRODUCTS_EDIT: TrinaCell(value: ""),
     };
 
-    final productCells = EshopColumns.generateProductTypeCells(relatedOrder!.relatedProducts ?? []);
+    final productCells = EshopColumns.generateProductTypeCells(relatedProducts ?? []);
     cells.addAll(productCells);
     return TrinaRow(cells: cells);
   }
