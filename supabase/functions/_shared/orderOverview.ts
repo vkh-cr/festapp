@@ -59,13 +59,13 @@ export function generateFullOrder(orderData: any, tickets: any[], occasionFeatur
             const price = Number(product.price || 0);
             overallTotal += price;
             const formattedPrice = formatCurrency(price, product.currency_code || currencyCode);
-            // Added vertical-align: top to keep text aligned properly on line breaks
+            // Changed border color to #e2e8f0 for better visibility
             return `
                 <tr>
-                    <td style="padding: 12px 0; border-top: 1px solid #f1f5f9; vertical-align: top;">${product.type_title}: ${product.title}</td>
-                    <td style="padding: 12px 0; text-align: right; white-space: nowrap; vertical-align: top; padding-left: 16px; border-top: 1px solid #f1f5f9;"><strong>${formattedPrice}</strong></td>
+                    <td style="padding: 12px 0; border-top: 1px solid #e2e8f0; vertical-align: top;">${product.type_title}: ${product.title}</td>
+                    <td style="padding: 12px 0; text-align: right; white-space: nowrap; vertical-align: top; padding-left: 16px; border-top: 1px solid #e2e8f0;"><strong>${formattedPrice}</strong></td>
                 </tr>`;
-        }).join("").replace('border-top: 1px solid #f1f5f9;', 'border-top: none;'); // Removes the line from the very first item
+        }).join("").replace('border-top: 1px solid #e2e8f0;', 'border-top: none;'); // Removes the line from the very first item
 
         const ticketNote = ticket.note ? `
             <tr>
