@@ -75,7 +75,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
 
   void _addBack(ProductModel p) {
     setState(() {
-      _current.add(p);
+      _current.add(p.copyWith());
       _recalc();
     });
   }
