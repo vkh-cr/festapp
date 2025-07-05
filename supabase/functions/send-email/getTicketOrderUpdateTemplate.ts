@@ -3,6 +3,7 @@ import { generateFullOrder } from "../_shared/orderOverview.ts";
 import { generateQrCode } from "../_shared/qrCodePayment.ts";
 import { getBaseOrderData } from "./shared.ts";
 import { translations } from "../_shared/translations.ts";
+import { generateChangeOverview } from "../_shared/changeOverview.ts";
 
 /**
  * Prepares the data required for the TICKET_ORDER_UPDATE email template.
@@ -13,7 +14,7 @@ export async function getTicketOrderUpdateTemplate(reqData: any, authorizationHe
   const attachments: any[] = [];
 
   // 1. Fetch and authorize base order data using the shared function
-  const { order, occasion, payment_info, bank_account, latest_history_id } = await getBaseOrderData(orderId, requestSecret, authorizationHeader);
+  const { order, occasion, payment_info, bank_account, latest_history_id, reference_history } = await getBaseOrderData(orderId, requestSecret, authorizationHeader);
 
   // 2. Calculate balance and generate a single, consolidated reasoning string
   const orderPrice = Number(order.price) || 0;
@@ -46,8 +47,16 @@ export async function getTicketOrderUpdateTemplate(reqData: any, authorizationHe
     balanceReasoning = tr.fullyPaid();
   }
 
-  // 4. Prepare final data for the email client
-  const subs = { occasionTitle: occasion.title, fullOrder: generateFullOrder(order.data, order.data.tickets, occasion.features, lang), balanceReasoning: balanceReasoning };
+  // 4. Generate Change Overview
+  const changeOverviewHtml = generateChangeOverview(order.data, reference_history, lang);
+
+  // 5. Prepare final data for the email client
+  const subs = {
+    occasionTitle: occasion.title,
+    changeOverview: changeOverviewHtml,
+    fullOrder: generateFullOrder(order.data, order.data.tickets, occasion.features, lang),
+    balanceReasoning: balanceReasoning
+  };
   const sender = occasion.title;
   const receiver = order.data.email;
   const context = { occasion: occasion.id, organization: occasion.organization, orderHistoryId: latest_history_id };

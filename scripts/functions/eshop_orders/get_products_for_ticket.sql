@@ -1,16 +1,3 @@
-CREATE OR REPLACE FUNCTION extract_history_product_ids(history_data jsonb)
-RETURNS int[] LANGUAGE sql IMMUTABLE AS $$
-  SELECT COALESCE(
-    -- Aggregate distinct product IDs into an array, sorting them for consistency
-    ARRAY_AGG(DISTINCT (p->>'id')::int ORDER BY (p->>'id')::int),
-    -- If aggregation results in NULL (i.e., no products found), return an empty integer array
-    '{}'::int[]
-  )
-  FROM jsonb_array_elements(history_data->'tickets') AS t,
-       jsonb_array_elements(t->'products') AS p;
-$$;
-
-
 CREATE OR REPLACE FUNCTION public.get_products_for_ticket(
   ticket_id bigint
 )
@@ -76,23 +63,39 @@ BEGIN
   ORDER BY created_at DESC LIMIT 1;
 
   -- Get the data and timestamp of the latest SENT history entry
-  SELECT data, created_at INTO reference_history_data, v_latest_sent_at
-  FROM eshop.orders_history
-  WHERE "order" = v_order_id AND (data->>'is_sent_to_customer')::boolean IS TRUE
-  ORDER BY created_at DESC LIMIT 1;
+  SELECT
+    jsonb_build_object(
+        'data', oh.data,
+        'state', oh.state,
+        'price', oh.price,
+        'currency_code', oh.currency_code
+    ),
+    oh.created_at
+  INTO reference_history_data, v_latest_sent_at
+  FROM eshop.orders_history AS oh
+  WHERE oh.order = v_order_id AND (oh.data->>'is_sent_to_customer')::boolean IS TRUE
+  ORDER BY oh.created_at DESC LIMIT 1;
 
   -- If no sent record was found, get the oldest record as the reference
   IF NOT FOUND THEN
-      SELECT data INTO reference_history_data
-      FROM eshop.orders_history
-      WHERE "order" = v_order_id
-      ORDER BY created_at ASC LIMIT 1;
+      SELECT jsonb_build_object(
+        'data', oh.data,
+        'state', oh.state,
+        'price', oh.price,
+        'currency_code', oh.currency_code
+      )
+      INTO reference_history_data
+      FROM eshop.orders_history AS oh
+      WHERE oh.order = v_order_id
+      ORDER BY oh.created_at ASC LIMIT 1;
   END IF;
 
-  -- Compare product IDs between the latest and reference history entries
+  -- Compare product IDs and prices between the latest and reference history entries
   IF latest_history_data IS NOT NULL AND reference_history_data IS NOT NULL THEN
       v_is_newer_available :=
-          extract_history_product_ids(latest_history_data) <> extract_history_product_ids(reference_history_data);
+          -- Use the new function to compare product sets including prices.
+          -- This will return true if either the products or their prices have changed.
+          extract_history_products_with_price(latest_history_data) <> extract_history_products_with_price(reference_history_data->'data');
   END IF;
 
 
@@ -106,7 +109,8 @@ BEGIN
       'order_history', jsonb_build_object(
           'latest_sent_at', v_latest_sent_at,
           'is_newer_version_available', v_is_newer_available
-      )
+      ),
+      'reference_order_data', reference_history_data
     )
   );
 EXCEPTION WHEN OTHERS THEN
