@@ -123,14 +123,28 @@ BEGIN
   v_old_ids := COALESCE(v_old_ids, ARRAY[]::bigint[]);
   v_new_ids := COALESCE(v_new_ids, ARRAY[]::bigint[]);
 
+  -- MODIFIED BLOCK START
+  -- Before deleting order_product_ticket rows, nullify the reference in eshop.spots to de-allocate the spot.
+  UPDATE eshop.spots s
+     SET order_product_ticket = NULL
+  WHERE s.order_product_ticket IN (
+      SELECT opt.id
+      FROM eshop.order_product_ticket opt
+      WHERE opt.ticket = p_ticket_id
+        AND opt.product IN (SELECT unnest FROM unnest(v_old_ids) EXCEPT SELECT unnest FROM unnest(v_new_ids))
+  );
+
+  -- Delete link-table rows for products that were removed.
   DELETE FROM eshop.order_product_ticket
   WHERE ticket = p_ticket_id
     AND product IN (SELECT unnest FROM unnest(v_old_ids) EXCEPT SELECT unnest FROM unnest(v_new_ids));
 
+  -- Insert new link-table rows for products that were added.
   INSERT INTO eshop.order_product_ticket ("order", ticket, product)
   SELECT v_order_id, p_ticket_id, new_pid
     FROM (SELECT unnest FROM unnest(v_new_ids) EXCEPT SELECT unnest FROM unnest(v_old_ids)) AS t(new_pid)
   ON CONFLICT DO NOTHING;
+  -- MODIFIED BLOCK END
 
   /* 5) adjust payment_info.amount and order.price by the delta */
   v_diff := v_sum_new - v_sum_old;
