@@ -193,13 +193,13 @@ class TransactionModel extends ITrinaRowModel {
 
   /// Deletes the transaction using the DbEshop service.
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
     throw Exception("Not implemented.");
   }
 
   /// Updates the transaction using the DbEshop service.
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
     throw Exception("Not implemented.");
   }
 
