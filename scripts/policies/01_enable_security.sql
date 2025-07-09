@@ -43,6 +43,11 @@ ALTER TABLE public.activity_assignment_events  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_assignments   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_history ENABLE ROW LEVEL SECURITY;
 
+ALTER TABLE public.inventory_pools ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.resources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.resource_slots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.inventory_contexts ENABLE ROW LEVEL SECURITY;
+
 --eshop
 ALTER TABLE eshop.orders_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE eshop.bank_account_requests ENABLE ROW LEVEL SECURITY;
@@ -61,3 +66,4 @@ ALTER TABLE eshop.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE eshop.product_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE eshop.bank_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE eshop.external_services ENABLE ROW LEVEL SECURITY;
+ALTER TABLE eshop.product_inventory_contexts ENABLE ROW LEVEL SECURITY;

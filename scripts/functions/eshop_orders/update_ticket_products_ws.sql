@@ -39,10 +39,10 @@ BEGIN
   WHERE opt.ticket = p_ticket_id
   LIMIT 1;
   IF NOT FOUND THEN
-    RETURN jsonb_build_object('code',404,'message','Ticket not linked to any order');
+    RAISE EXCEPTION '%', jsonb_build_object('code', 404, 'message', 'Ticket not linked to any order')::text;
   END IF;
   IF NOT get_is_editor_order_on_occasion(v_occasion_id) THEN
-    RETURN jsonb_build_object('code',403,'message','Not authorized');
+    RAISE EXCEPTION '%', jsonb_build_object('code', 403, 'message', 'Not authorized')::text;
   END IF;
 
   /* NEW: Check for negative prices in the input */
@@ -51,7 +51,7 @@ BEGIN
     FROM jsonb_array_elements(p_products) AS p
     WHERE (p.value->>'price')::numeric < 0
   ) THEN
-    RETURN jsonb_build_object('code', 400, 'message', 'Product prices cannot be negative.');
+    RAISE EXCEPTION '%', jsonb_build_object('code', 400, 'message', 'Product prices cannot be negative.')::text;
   END IF;
 
   /* get old products for the ticket */
@@ -200,6 +200,8 @@ BEGIN
     PERFORM public.set_payment_deadline(v_payment_info_id, v_new_deadline);
   END IF;
 
+  PERFORM apply_allocations(v_order_id);
+
   /* 6) append history */
   INSERT INTO eshop.orders_history("order", data, state, price, currency_code)
   VALUES (
@@ -211,8 +213,5 @@ BEGIN
   );
 
   RETURN jsonb_build_object('code',200,'data',v_new_data);
-
-EXCEPTION WHEN OTHERS THEN
-  RETURN jsonb_build_object('code',500,'message',SQLERRM);
 END;
 $$;
