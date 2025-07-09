@@ -257,7 +257,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text("Cancel".tr()),
+              child: Text("Storno".tr()),
             ),
             ElevatedButton(
               onPressed: () {
@@ -457,7 +457,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
               children: [
                 TextButton(
                   onPressed: _isSaving ? null : _cancelEdit,
-                  child: Text("Cancel".tr()),
+                  child: Text("Storno".tr()),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton.icon(
