@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/activities/activities_content.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/pages/eshop/products_tab.dart';
+import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart';
+import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/eshop/blueprint_editor_tab.dart';
@@ -76,7 +78,7 @@ class AdminPageHelper {
       ),
       actions: [
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+            padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
             child: UserHeaderWidget(appBarIconColor: ThemeConfig.lllBackground,))
       ],
       bottom: PreferredSize(
@@ -195,6 +197,7 @@ class AdminTabDefinition {
   static const String service = "Service";
   static const String users = "Users";
   static const String game = "Game";
+  static const String inventoryPools = "Inventory pools";
 
   static const String form = "Form";
   static const String blueprint = "Blueprint";
@@ -225,6 +228,11 @@ class AdminTabDefinition {
         label: "Service".tr(),
         icon: Icons.food_bank,
         widget: ServiceTab()),
+    // Added new tab for Inclusion Types
+    inventoryPools: AdminTabDefinition(
+        label: InventoryStrings.tabTitle,
+        icon: Icons.view_module_outlined,
+        widget: InventoryPoolsTab()),
     volunteers: AdminTabDefinition(
         label: "Volunteers".tr(),
         icon: Icons.view_timeline,

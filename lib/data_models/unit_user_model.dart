@@ -102,12 +102,12 @@ class UnitUserModel extends ITrinaRowModel {
   };
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
     await DbUsers.deleteUnitUser(user!, unit!);
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
     await DbUsers.updateUnitUser(this);
   }
 
