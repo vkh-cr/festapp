@@ -32,6 +32,7 @@ class SingleDataGridController<T extends ITrinaRowModel> {
   final String idColumn;
   final T Function(Map<String, dynamic>) fromPlutoJson;
   final T Function()? getNewObject;
+  final T Function(T)? copyObject;
   final BuildContext context;
   final DataGridActionsController? actionsExtended;
   final List<DataGridAction>? headerChildren;
@@ -49,6 +50,7 @@ class SingleDataGridController<T extends ITrinaRowModel> {
     this.headerChildren,
     this.actionsExtended,
     this.getNewObject,
+    this.copyObject,
     this.exportOptions,
   });
 
@@ -85,7 +87,7 @@ class SingleDataGridController<T extends ITrinaRowModel> {
   Future<void> loadDataOnly() async {
     var defaultRow = {firstColumnTypeId: TrinaCell(value: "delete")};
     final dataList = await loadData();
-    var rowList = dataList.map((i) => i.toTrinaRow(context)!).toList();
+    var rowList = dataList.map((i) => i.toTrinaRow(context)).toList();
     for (var element in rowList) {
       element.cells.addAll(defaultRow);
     }
@@ -149,14 +151,21 @@ class SingleDataGridController<T extends ITrinaRowModel> {
                 onPressed: () async {
                   var originRow = rendererContext.row;
                   var newRow = rendererContext.stateManager.getNewRows()[0];
-                  var readOnlyColumns = rendererContext.stateManager.columns
-                      .where((element) => element.readOnly)
-                      .map((e) => e.field)
-                      .toList();
-                  for (var c in originRow.cells.entries) {
-                    if (readOnlyColumns.contains(c.key)) continue;
-                    newRow.cells[c.key]?.value = originRow.cells[c.key]?.value;
+                  if(this.copyObject != null) {
+                    newRow = copyObject!(fromPlutoJson(originRow.toJson())).toTrinaRow(context);
+                    var defaultRow = {firstColumnTypeId: TrinaCell(value: "delete")};
+                    newRow.cells.addAll(defaultRow);
+                  } else {
+                    var readOnlyColumns = rendererContext.stateManager.columns
+                        .where((element) => element.readOnly)
+                        .map((e) => e.field)
+                        .toList();
+                    for (var c in originRow.cells.entries) {
+                      if (readOnlyColumns.contains(c.key)) continue;
+                      newRow.cells[c.key]?.value = originRow.cells[c.key]?.value;
+                    }
                   }
+
                   var currentIndex =
                   rendererContext.stateManager.rows.indexOf(originRow);
                   rendererContext.stateManager.insertRows(currentIndex + 1, [newRow]);

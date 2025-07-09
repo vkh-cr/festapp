@@ -5,6 +5,7 @@ import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
@@ -179,15 +180,29 @@ class _ProductsDialogState extends State<ProductsDialog> {
   }
 
   Future<void> _save() async {
-    final success = await DbEshop.updateProductsForOrder(
-      widget.ticketId,
-      _current,
-    );
-    if(success && mounted){
-      ToastHelper.Show(context, FeaturesStrings.productsUpdateSuccess);
-      _fetch();
-    } else if (mounted) {
-      ToastHelper.Show(context, FeaturesStrings.productsUpdateFailed, severity: ToastSeverity.NotOk);
+    try {
+      // The rpc call now either returns the success data or throws an exception.
+      await DbEshop.updateProductsForOrder(
+        widget.ticketId,
+        _current,
+      );
+
+      // If we reach here, the call was successful.
+      if (mounted) {
+        ToastHelper.Show(context, FeaturesStrings.productsUpdateSuccess);
+        _fetch(); // Refresh data
+      }
+    } catch (e) {
+      // If the call fails, a PostgrestException will be caught here.
+      if (mounted) {
+        // Pass the error to our new handler to display a detailed dialog.
+        ExceptionHandler.handle(
+          context,
+          error: e,
+          defaultMessage: FeaturesStrings.productsUpdateFailed,
+          showAsDialog: true, // Show the detailed dialog with JSON
+        );
+      }
     }
   }
 

@@ -38,7 +38,6 @@ export function generateChangeOverview(currentOrderData: any, referenceOrderData
     const allCurrentProducts = getProductsFromOrder(currentOrderData);
     const allReferenceProducts = getProductsFromOrder(referenceOrderData);
 
-    // --- MODIFICATION START: New matching logic to handle duplicate IDs ---
 
     const added: Product[] = [];
     const removed: Product[] = [];
@@ -77,7 +76,6 @@ export function generateChangeOverview(currentOrderData: any, referenceOrderData
     added.push(...currentProdsMutable);
     removed.push(...referenceProdsMutable);
 
-    // --- MODIFICATION END ---
 
 
     if (added.length === 0 && removed.length === 0 && changed.length === 0) {
@@ -134,7 +132,7 @@ export function generateChangeOverview(currentOrderData: any, referenceOrderData
     ).join('');
 
     const totalChangeHtml = referenceTotal !== currentTotal ? `
-        <div style="text-align: right; padding-top: 16px; margin-top: 8px; border-top: 2px solid #333; font-weight: bold;">
+        <div style="text-align: right; padding-top: 16px; margin-top: 8px; border-top: 1px solid #e2e8f0; font-weight: bold;">
             <span style="font-size: 18px;">${tr.totalPriceChange}:&nbsp;</span>
             <span style="white-space: nowrap;">
                 <span style="color:#6b7280; font-weight: normal; font-size: 90%;">${formatCurrency(referenceTotal, currency)}</span>

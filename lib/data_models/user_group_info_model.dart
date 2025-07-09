@@ -128,12 +128,12 @@ class UserGroupInfoModel extends ITrinaRowModel {
       };
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
     await DbGroups.deleteUserGroupInfo(this);
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
     await DbGroups.updateUserGroupInfo(this);
   }
 

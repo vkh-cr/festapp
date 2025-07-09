@@ -226,7 +226,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     for (var element in deleteList) {
       actions.add(() async {
         try {
-          await element.deleteMethod();
+          await element.deleteMethod(context);
           ToastHelper.Show(
               context, "${"Deleted".tr()}: ${element.toBasicString()}");
         } catch (e) {
@@ -240,7 +240,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     for (var element in updatedSet) {
       actions.add(() async {
         try {
-          await element.updateMethod();
+          await element.updateMethod(context);
           ToastHelper.Show(
               context, "${"Saved".tr()}: ${element.toBasicString()}");
         } catch (e) {
