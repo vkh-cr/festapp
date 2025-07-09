@@ -165,26 +165,30 @@ class _ContextChip extends StatelessWidget {
     final contextTitle = contextModel.getContextTitle(context);
 
     // --- Define adaptive styles ---
-    // Change 2: Increased height for normal (uncompressed) chips
     final double height = useCompressedStyle ? 42 : 56;
 
     final TextStyle titleStyle = useCompressedStyle
         ? theme.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.bold)
         : theme.textTheme.labelMedium!.copyWith(fontWeight: FontWeight.bold);
 
-    // Change 1: Fixed overflow by using a smaller font for the compressed number
     final TextStyle detailStyle = useCompressedStyle
-        ? theme.textTheme.bodySmall!.copyWith(fontSize: 10, fontWeight: FontWeight.bold) // Was bodyMedium, causing overflow
+        ? theme.textTheme.bodySmall!.copyWith(fontSize: 10, fontWeight: FontWeight.bold)
         : theme.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.bold);
 
-    final Color progressTrackColor = isDarkMode ? Colors.grey[800]! : Colors.grey[200]!;
+    final Color chipBackgroundColor = isDarkMode
+        ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.4) // Original dark mode color
+        : theme.colorScheme.onSurface.withOpacity(0.08); // Slightly lighter grey for light mode
+
+    final Color progressTrackColor = isDarkMode
+        ? Colors.grey[800]!
+        : theme.colorScheme.surfaceContainer;
 
     return Container(
       width: width,
       height: height,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(isDarkMode ? 0.4 : 1.0),
+        color: chipBackgroundColor, // <<< Use the fine-tuned background color
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(

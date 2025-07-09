@@ -40,16 +40,20 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
         thickness: 12.0,
       ),
       localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
+      selectingMode: TrinaGridSelectingMode.cell,
       style: ThemeConfig.isDarkMode(context)
           ? TrinaGridStyleConfig.dark(
         rowHeight: 36,
-        cellColorInReadOnlyState: Colors.white24,
+        cellReadonlyColor: const Color(0xFF111111),
+        cellColorInReadOnlyState: const Color(0xFF111111),
         cellTextStyle: TextStyle(color: ThemeConfig.blackColor(context)),
         columnTextStyle:
         TextStyle(color: ThemeConfig.blackColor(context)),
       )
           : TrinaGridStyleConfig(
-          rowHeight: 36, cellColorInReadOnlyState: Colors.white70),
+          cellReadonlyColor:  Colors.white,
+          cellColorInReadOnlyState: Colors.white,
+          rowHeight: 36),
     );
   }
 }
