@@ -1,5 +1,3 @@
-// In lib/components/inventory/views/inventory_pool_settings_view.dart
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
