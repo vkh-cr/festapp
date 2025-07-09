@@ -132,6 +132,7 @@ class FormHolder {
             currencyCode: p.currencyCode,
             maximum: p.maximum,
             orderedCount: p.orderedCount,
+            isDynamicallyAvailable: p.isDynamicallyAvailable,
             type: ffm.type!,
             description: p.description,
           ))

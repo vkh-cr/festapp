@@ -1,13 +1,20 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
+import 'package:fstapp/components/inventory/models/inventory_pool_bundle.dart';
+import 'package:fstapp/components/inventory/models/inventory_pool_model.dart';
+import 'package:fstapp/components/inventory/models/resource_model.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/payment_info_model.dart';
+import 'package:fstapp/data_models_eshop/product_edit_bundle.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/data_models_eshop/transaction_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../components/inventory/models/product_inventory_context_model.dart';
 
 class DbEshop {
   static final _supabase = Supabase.instance.client;
@@ -127,64 +134,105 @@ class DbEshop {
     return null;
   }
 
-  static Future<bool> updateProductsForOrder(int ticketId, List<ProductModel> products) async {
+  static Future<dynamic> updateProductsForOrder(int ticketId, List<ProductModel> products) {
     final productsJson = products.map((p) => {'id': p.id, 'price': p.price}).toList();
-    final result = await _supabase.rpc(
+
+    // Directly return the Future. The calling code will handle success or exceptions.
+    return _supabase.rpc(
       'update_ticket_products_wsv2',
       params: {
         'p_ticket_id': ticketId,
         'p_products': productsJson,
       },
     );
-    if (result != null && result['code'] == 200) {
-      return true;
-    }
-    return false;
   }
 
-  static Future<List<ProductModel>> getProductsAndTypesForOccasion(String occasionLink) async {
+  static Future<void> updateProductInventoryContexts(int productId, List<ProductInventoryContextModel> contexts) async {
+    final contextsJson = contexts.map((c) => {
+      'inventory_context_id': c.inventoryContextId,
+      'quantity': c.quantity
+    }).toList();
+
+    await _supabase.rpc(
+      'update_product_inventory_contexts',
+      params: {
+        'p_product_id': productId,
+        'p_contexts': contextsJson,
+      },
+    );
+  }
+
+  static Future<ProductsEditBundle> getProductsAndTypesForOccasion(String occasionLink) async {
     final response = await _supabase.rpc(
       'get_products_and_types_for_edit',
       params: {'occasion_link': occasionLink},
     );
-    if (response != null) {
-      final typesJson = (response['product_types'] as List<dynamic>?) ?? [];
-      final productsJson = (response['products'] as List<dynamic>?) ?? [];
 
-      final types = typesJson
-          .map((t) => ProductTypeModel.fromJson(t as Map<String, dynamic>))
-          .toList();
-      final products = productsJson
-          .map((p) => ProductModel.fromJson(p as Map<String, dynamic>))
-          .toList();
+    // Parse all data lists from the response
+    final types = (response['product_types'] as List)
+        .map((t) => ProductTypeModel.fromJson(t))
+        .toList();
+    final products = (response['products'] as List)
+        .map((p) => ProductModel.fromJson(p))
+        .toList();
+    final pools = (response['inventory_pools'] as List)
+        .map((p) => InventoryPoolModel.fromJson(p))
+        .toList();
+    final contexts = (response['inventory_contexts'] as List)
+        .map((c) => InventoryContextModel.fromJson(c))
+        .toList();
+    final productContextLinks = (response['product_inventory_contexts'] as List)
+        .map((pc) => ProductInventoryContextModel.fromJson(pc))
+        .toList();
 
-      for (var product in products) {
-        product.productType = types.firstWhereOrNull(
-              (t) => t.id == product.productTypeId,
-        );
-      }
+    // Create maps for efficient lookups
+    final typesMap = {for (var t in types) t.id: t};
+    final poolsMap = {for (var p in pools) p.id: p};
+    final contextsMap = {for (var c in contexts) c.id: c};
 
-      products.sort((a, b) {
-        final aType = a.productTypeId ?? 0;
-        final bType = b.productTypeId ?? 0;
-        if (aType != bType) return aType.compareTo(bType);
-        final aOrder = a.order ?? 0;
-        final bOrder = b.order ?? 0;
-        return aOrder.compareTo(bOrder);
-      });
-
-      return products;
+    // Join inventory pools to inventory contexts
+    for (var context in contexts) {
+      context.inventoryPool = poolsMap[context.inventoryPoolId];
     }
-    return [];
+
+    // Join inventory contexts to the link table models
+    for (var link in productContextLinks) {
+      link.inventoryContext = contextsMap[link.inventoryContextId];
+    }
+
+    // Group links by product ID
+    final productLinksMap = groupBy(productContextLinks, (link) => link.productId);
+
+    // Join everything to the final product models
+    for (var product in products) {
+      product.productType = typesMap[product.productTypeId];
+      product.includedInventories = (productLinksMap[product.id] ?? [])
+          .where((link) => link.inventoryContext != null)
+          .toList();
+    }
+
+    products.sort((a, b) {
+      final aType = a.productTypeId ?? 0;
+      final bType = b.productTypeId ?? 0;
+      if (aType != bType) return aType.compareTo(bType);
+      final aOrder = a.order ?? 0;
+      final bOrder = b.order ?? 0;
+      return aOrder.compareTo(bOrder);
+    });
+
+    return ProductsEditBundle(
+      products: products,
+      productTypes: types,
+      inventoryPools: pools,
+      inventoryContexts: contexts,
+    );
   }
 
-  /// Updates a product via RPC.
-  static Future<bool> updateProduct(ProductModel product) async {
-    final response = await _supabase.rpc(
+  static Future<int> updateProduct(ProductModel product) async {
+    return await _supabase.rpc(
       'update_product',
-      params: {'p_input': product},
+      params: {'p_input': product },
     );
-    return response != null && response['code'] == 200;
   }
 
   static Future<void> deleteProduct(int productId) async {
@@ -192,6 +240,29 @@ class DbEshop {
       'delete_product',
       params: {'p_product_id': productId},
     );
+  }
+
+  /// Fetches all resources associated with a specific inventory pool ID.
+  static Future<List<ResourceModel>> getResourcesForInventoryPool(int inventoryPoolId) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_resources_for_inventory_pool',
+        params: {'p_inventory_pool_id': inventoryPoolId},
+      );
+
+      // The RPC function returns a list of resource objects.
+      // We cast the response and map each item to our ResourceModel.
+      if (response != null) {
+        return (response as List)
+            .map((data) => ResourceModel.fromJson(data as Map<String, dynamic>))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('Error fetching resources for pool $inventoryPoolId: $e');
+      // Depending on your error handling strategy, you might want to show a toast.
+      // For now, we return an empty list to prevent crashes.
+    }
+    return [];
   }
 }
 

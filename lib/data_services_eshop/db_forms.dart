@@ -103,7 +103,7 @@ class DbForms {
 
   static Future<FormModel?> getFormFromLink(String link) async {
     final response = await _supabase
-        .rpc('get_form_from_link', params: {'form_link': link});
+        .rpc('get_form_by_link', params: {'form_link': link});
 
     if(response["code"] == 200 || response["code"] == 400){
       var form = FormModel.fromJson(response["data"]);
