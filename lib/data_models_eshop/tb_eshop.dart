@@ -10,6 +10,7 @@ class TbEshop {
   static PaymentInfoTb payment_info = const PaymentInfoTb();
   static TransactionsTb transactions = const TransactionsTb();
   static BankAccountsTb bank_accounts = const BankAccountsTb();
+  static ProductInventoryContextsTb product_inventory_contexts = const ProductInventoryContextsTb();
 }
 
 class ProductTypesTb {
@@ -112,6 +113,11 @@ class SpotsTb {
   String get secret_expiration_time => "secret_expiration_time";
   String get title => "title";
   String get order_product_ticket => "order_product_ticket";
+  String get blueprint => "blueprint";
+  String get inventory_context => "inventory_context";
+  String get resource => "resource";
+  String get resource_slot => "resource_slot";
+  String get state => "state";
 }
 
 class PaymentInfoTb {
@@ -182,4 +188,12 @@ class BankAccountsTb {
   String get last_fetch_time => "last_fetch_time";
   String get is_fetch_enabled => "is_fetch_enabled";
   String get supported_currencies => "supported_currencies";
+}
+
+class ProductInventoryContextsTb {
+  const ProductInventoryContextsTb();
+  String get table => "product_inventory_contexts";
+  String get product => "product";
+  String get inventory_context => "inventory_context";
+  String get quantity => "quantity";
 }

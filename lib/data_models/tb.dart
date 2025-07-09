@@ -33,7 +33,15 @@ class Tb {
   static ActivityAssignmentsTb activity_assignments = const ActivityAssignmentsTb();
   static ActivityAssignmentPlacesTb activity_assignment_places = const ActivityAssignmentPlacesTb();
   static ActivityAssignmentEventsTb activity_assignment_events = const ActivityAssignmentEventsTb();
+
+  // New tables based on the updated schema
+  static InventoryPoolsTb inventory_pools = const InventoryPoolsTb();
+  static ResourcesTb resources = const ResourcesTb();
+  static ResourceSlotsTb resource_slots = const ResourceSlotsTb();
+  static InventoryContextsTb inventory_contexts = const InventoryContextsTb();
+  static ProductsTb products = const ProductsTb(); // Assuming a products class is needed
 }
+
 class OccasionsTb {
   const OccasionsTb();
   String get table => "occasions";
@@ -463,4 +471,63 @@ class ActivityAssignmentEventsTb {
   String get table         => 'activity_assignment_events';
   String get assignment_id => 'assignment_id';
   String get event_id      => 'event_id';
+}
+
+class InventoryPoolsTb {
+  const InventoryPoolsTb();
+  String get table => "inventory_pools";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get data => "data";
+  String get title => "title";
+  String get sellable_capacity => "sellable_capacity";
+  String get occasion => "occasion";
+  String get data_is_auto_resource_assignment => "is_auto_resource_assignment";
+}
+
+class ResourcesTb {
+  const ResourcesTb();
+  String get table => "resources";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get title => "title";
+  String get description => "description";
+  String get capacity => "capacity";
+  String get booking_rules => "booking_rules";
+  String get inventory_pool => "inventory_pool";
+  String get place => "place";
+  String get occasion => "occasion";
+  String get unit => "unit";
+  String get data => "data";
+}
+
+class ResourceSlotsTb {
+  const ResourceSlotsTb();
+  String get table => "resource_slots";
+  String get id => "id";
+  String get resource => "resource";
+  String get title => "title";
+  String get data => "data";
+}
+
+class InventoryContextsTb {
+  const InventoryContextsTb();
+  String get table => "inventory_contexts";
+  String get id => "id";
+  String get inventory_pool => "inventory_pool";
+  String get block_date => "block_date";
+  String get title => "title";
+  String get order => "order";
+}
+
+class ProductsTb {
+  const ProductsTb();
+  String get table => "products";
+  String get id => "id";
+  String get title => "title";
+  String get price => "price";
+  String get data => "data";
+  String get occasion => "occasion";
 }

@@ -59,13 +59,16 @@ export function generateFullOrder(orderData: any, tickets: any[], occasionFeatur
             const price = Number(product.price || 0);
             overallTotal += price;
             const formattedPrice = formatCurrency(price, product.currency_code || currencyCode);
-            // Changed border color to #e2e8f0 for better visibility
+
+            const rowStyle = 'style="border-bottom: 1px solid #e2e8f0;"';
+
+            // --- MODIFICATION: Changed vertical-align for the price cell to "bottom" ---
             return `
-                <tr>
-                    <td style="padding: 12px 0; border-top: 1px solid #e2e8f0; vertical-align: top;">${product.type_title}: ${product.title}</td>
-                    <td style="padding: 12px 0; text-align: right; white-space: nowrap; vertical-align: top; padding-left: 16px; border-top: 1px solid #e2e8f0;"><strong>${formattedPrice}</strong></td>
+                <tr ${rowStyle}>
+                    <td style="padding: 12px 0; vertical-align: top;">${product.type_title}: ${product.title}</td>
+                    <td style="padding: 12px 0; text-align: right; white-space: nowrap; vertical-align: bottom; padding-left: 16px;"><strong>${formattedPrice}</strong></td>
                 </tr>`;
-        }).join("").replace('border-top: 1px solid #e2e8f0;', 'border-top: none;'); // Removes the line from the very first item
+        }).join("");
 
         const ticketNote = ticket.note ? `
             <tr>
@@ -90,12 +93,11 @@ export function generateFullOrder(orderData: any, tickets: any[], occasionFeatur
     const formattedOverallTotal = formatCurrency(overallTotal, currencyCode);
 
     const totalSection = `
-        <div style="text-align: right; padding-top: 16px; margin-top: 8px; border-top: 2px solid #333;">
-            <span style="font-size: 18px;">${tr.totalPrice}: <strong>${formattedOverallTotal}</strong></span>
+        <div style="text-align: right; padding-top: 16px; margin-top: 8px;">
+            <span style="font-size: 18px; font-weight: bold;">${tr.totalPrice}: ${formattedOverallTotal}</span>
         </div>`;
 
     // --- 4. Final Assembly ---
-    // The whole component is wrapped in a single, clean "card"
     return `
         <div style="margin: 20px auto; padding: 24px; font-family: sans-serif; color: #333; background-color: #f9fafb; border: 1px solid #e2e8f0; border-radius: 8px;">
             <p style="font-size: 20px; font-weight: bold; margin: 0 0 16px 0; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">${tr.overviewTitle}</p>
