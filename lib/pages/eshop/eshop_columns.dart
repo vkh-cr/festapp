@@ -3,20 +3,27 @@ import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/features_strings.dart';
+import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
+import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
+import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
+import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/dialogs/products_dialog.dart';
 import 'package:fstapp/dialogs/transactions_dialog.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/time_helper.dart';
+import 'package:fstapp/services/toast_helper.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+
+import 'inventory_inclusion_renderer.dart';
 
 class EshopColumns {
   // Column identifier constants
@@ -48,6 +55,8 @@ class EshopColumns {
   static const String PRODUCT_PAID_COUNT = "productPaidCount";
   static const String PRODUCT_CURRENCY_CODE = "productCurrencyCode";
   static const String PRODUCT_DESCRIPTION = "productDescription";
+  static const String PRODUCT_INCLUDED_INVENTORY = "productIncludedInventory";
+  static const String PRODUCT_MODEL_REFERENCE = "productModelReference";
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
@@ -194,6 +203,26 @@ class EshopColumns {
             rendererContext: ctx,
             loadContent: () async =>
             ctx.row.cells[PRODUCT_DESCRIPTION]!.value,
+          );
+        },
+      ),
+    ],
+    PRODUCT_INCLUDED_INVENTORY: (Map<String, dynamic> data) => [
+      TrinaColumn(
+        title: InventoryStrings.included,
+        field: PRODUCT_INCLUDED_INVENTORY,
+        type: TrinaColumnType.text(),
+        width: 350,
+        enableEditingMode: false,
+        renderer: (ctx) {
+          // UPDATED: Read from the stable reference cell to avoid the TypeError
+          final product = ctx.row.cells[PRODUCT_MODEL_REFERENCE]?.value as ProductModel;
+          final allContexts = data[PRODUCT_INCLUDED_INVENTORY] as List<InventoryContextModel>;
+
+          return InventoryInclusionRenderer(
+            rendererContext: ctx,
+            product: product,
+            availableContexts: allContexts,
           );
         },
       ),
