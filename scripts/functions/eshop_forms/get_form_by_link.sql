@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_form_from_link(form_link TEXT)
+CREATE OR REPLACE FUNCTION get_form_by_link(form_link TEXT)
 RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
     allData JSON;
@@ -19,13 +19,13 @@ BEGIN
         );
     END IF;
 
-    -- Check if the form is open
+    -- Check if the form is open for submissions
     IF NOT EXISTS (
         SELECT 1
         FROM public.forms
         WHERE link = form_link AND is_open = true
     ) THEN
-        -- Retrieve only the header_off when the form is not open
+        -- If the form is closed, retrieve only the 'header_off' message
         SELECT jsonb_build_object(
             'code', 400,
             'data', jsonb_build_object(
@@ -39,7 +39,7 @@ BEGIN
         RETURN allData;
     END IF;
 
-    -- Retrieve full form data when the form is open
+    -- If the form is open, retrieve the full form data including dynamic product availability
     SELECT jsonb_build_object(
         'code', 200,
         'data', jsonb_build_object(
@@ -92,7 +92,8 @@ BEGIN
                                                         FROM eshop.order_product_ticket opt
                                                         WHERE opt.product = p.id
                                                     ),
-                                                    'maximum', p.maximum
+                                                    'maximum', p.maximum,
+                                                    'is_dynamically_available', is_product_dynamically_available(p.id)
                                                 ) ORDER BY COALESCE(p."order", 0)
                                             )
                                             FROM eshop.products p
