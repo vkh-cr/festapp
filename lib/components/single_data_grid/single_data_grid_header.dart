@@ -44,15 +44,15 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
       style: ThemeConfig.isDarkMode(context)
           ? TrinaGridStyleConfig.dark(
         rowHeight: 36,
-        cellReadonlyColor: const Color(0xFF111111),
-        cellColorInReadOnlyState: const Color(0xFF111111),
+        cellReadonlyColor: Colors.transparent,
+        cellColorInReadOnlyState: Colors.transparent,
         cellTextStyle: TextStyle(color: ThemeConfig.blackColor(context)),
         columnTextStyle:
         TextStyle(color: ThemeConfig.blackColor(context)),
       )
           : TrinaGridStyleConfig(
-          cellReadonlyColor:  Colors.white,
-          cellColorInReadOnlyState: Colors.white,
+          cellReadonlyColor:  Colors.transparent,
+          cellColorInReadOnlyState: Colors.transparent,
           rowHeight: 36),
     );
   }
