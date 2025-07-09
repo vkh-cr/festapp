@@ -163,24 +163,38 @@ class _ContextChip extends StatelessWidget {
     final orderedCapacity = spots.where((s) => s.inventoryContextId == contextModel.id && s.orderProductTicketId != null).length;
     final double fillPercentage = totalCapacity > 0 ? orderedCapacity / totalCapacity : 0.0;
     final contextTitle = contextModel.getContextTitle(context);
-
-    // --- Define adaptive styles ---
     final double height = useCompressedStyle ? 42 : 56;
 
+    // <<< Subtle dark mode text colors >>>
+    // Using semi-transparent white creates a more subtle text hierarchy in dark mode.
     final TextStyle titleStyle = useCompressedStyle
-        ? theme.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.bold)
-        : theme.textTheme.labelMedium!.copyWith(fontWeight: FontWeight.bold);
+        ? theme.textTheme.bodySmall!.copyWith(
+      fontWeight: FontWeight.bold,
+      color: isDarkMode ? Colors.white70 : theme.colorScheme.onSurfaceVariant,
+    )
+        : theme.textTheme.labelMedium!.copyWith(
+      fontWeight: FontWeight.bold,
+      color: isDarkMode ? Colors.white70 : theme.colorScheme.onSurface,
+    );
 
     final TextStyle detailStyle = useCompressedStyle
-        ? theme.textTheme.bodySmall!.copyWith(fontSize: 10, fontWeight: FontWeight.bold)
-        : theme.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.bold);
+        ? theme.textTheme.bodySmall!.copyWith(
+      fontSize: 10,
+      fontWeight: FontWeight.normal,
+      color: isDarkMode ? Colors.white60 : theme.colorScheme.onSurfaceVariant,
+    )
+        : theme.textTheme.bodySmall!.copyWith(
+      fontWeight: FontWeight.normal,
+      color: isDarkMode ? Colors.white60 : theme.colorScheme.onSurfaceVariant,
+    );
 
+    // Manual colors for consistent appearance
     final Color chipBackgroundColor = isDarkMode
-        ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.4) // Original dark mode color
-        : theme.colorScheme.onSurface.withOpacity(0.08); // Slightly lighter grey for light mode
+        ? Colors.grey[800]!
+        : theme.colorScheme.onSurface.withOpacity(0.08);
 
     final Color progressTrackColor = isDarkMode
-        ? Colors.grey[800]!
+        ? Colors.black.withOpacity(0.2)
         : theme.colorScheme.surfaceContainer;
 
     return Container(
@@ -188,7 +202,7 @@ class _ContextChip extends StatelessWidget {
       height: height,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: chipBackgroundColor, // <<< Use the fine-tuned background color
+        color: chipBackgroundColor,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -206,8 +220,9 @@ class _ContextChip extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
+          // <<< Displays "current / total" capacity
           Text(
-            orderedCapacity.toString(),
+            '$orderedCapacity / $totalCapacity',
             style: detailStyle,
           ),
         ],
