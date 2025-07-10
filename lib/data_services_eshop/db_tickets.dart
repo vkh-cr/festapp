@@ -25,7 +25,7 @@ class DbTickets {
   }
 
   static Future<List<TicketModel>> getAllTickets(String occasionLink) async {
-    var ordersBundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink);
+    var ordersBundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink, includeOrderDetails: true, includeSpots: true);
     List<TicketModel> toReturn = [];
     for(var o in ordersBundle.orders){
 

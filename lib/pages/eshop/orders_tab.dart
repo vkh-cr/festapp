@@ -11,6 +11,7 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
 import 'package:fstapp/pages/eshop/eshop_columns.dart';
@@ -41,7 +42,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
   Future<void> _initializeController() async {
     // Fetch the bundle once to determine which columns to show
-    final bundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink!);
+    final forms = await DbForms.getAllFormsViaOccasionLink(occasionLink!);
     if (!mounted) return;
 
     var formFeat = FeatureService.getFeatureDetails(FeatureConstants.form) as FormFeature;
@@ -70,7 +71,7 @@ class _OrdersTabState extends State<OrdersTab> {
     ];
 
     // Conditionally add the form column if there are multiple forms
-    if (bundle.forms.length > 1) {
+    if (forms.length > 1) {
       final symbolIndex = columnIdentifiers.indexOf(EshopColumns.ORDER_SYMBOL);
       columnIdentifiers.insert(symbolIndex + 1, EshopColumns.ORDER_FORM);
     }

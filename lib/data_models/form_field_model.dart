@@ -133,11 +133,11 @@ class FormFieldModel extends ITrinaRowModel {
   }
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
   }
 
   @override
