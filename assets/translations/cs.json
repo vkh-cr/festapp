@@ -917,7 +917,7 @@
     "tabCreateNewGroup": "Vytvořit novou kapacitní skupinu",
     "tabErrorRefresh": "Chyba při obnovování dat. Zkuste to prosím znovu.",
     "tabUnnamedGroup": "Nepojmenovaná skupina",
-    "tabNoData": "Pro tuto příležitost nebyla nalezena žádná data.",
+    "tabNoData": "Pro tuto akci nebyla nalezena žádná data.",
     "cardUnnamedPool": "Nepojmenovaná kapacitní skupina",
     "cardStatSellable": "Prodejné",
     "cardStatDynamic": "Automaticky",
@@ -968,7 +968,9 @@
     "inclusionManageTitle": "Spravovat inventář: {productTitle}",
     "inclusionManageTooltip": "Spravovat inventář",
     "inclusionSearchHint": "Hledat čas...",
-    "included": "Zahrnuto"
+    "included": "Zahrnuto",
+    "featureTitle": "Pobyt (kapacitní skupiny)",
+    "featureDescription": "Tato funkce umožňuje správu kapacit ubytování, stravy a denních programových bloků. Podporuje přiřazení účastníků do konkrétních pokojů a zobrazuje tyto informace v jejich profilu v aplikaci."
   },
   "_": "_"
 }

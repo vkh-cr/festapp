@@ -968,7 +968,9 @@
     "inclusionManageTitle": "Manage Inventory: {productTitle}",
     "inclusionManageTooltip": "Manage Inventory",
     "inclusionSearchHint": "Search slot...",
-    "included": "Included"
+    "included": "Included",
+    "featureTitle": "Stay (Capacity groups)",
+    "featureDescription": "This feature allows for managing capacities for accommodation, meals, and daily program slots. It supports the assignment of participants to specific rooms and displays this information on their profile within the application."
   },
   "_":"_"
 }

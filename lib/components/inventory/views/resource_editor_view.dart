@@ -47,7 +47,8 @@ class _ResourceEditorViewState extends State<ResourceEditorView> {
       columns: _buildResourceColumns(),
       // When creating a new row, provide all required IDs
       getNewObject: () => ResourceModel(
-          inventoryPoolId: widget.inventoryPoolId
+          inventoryPoolId: widget.inventoryPoolId,
+          title: ""
       ),
       copyObject: (ResourceModel r) => r.copyWith(id: -1),
     );
