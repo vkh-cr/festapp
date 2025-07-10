@@ -111,12 +111,12 @@ class TicketModel extends ITrinaRowModel {
   }
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
     // Implement your delete logic here
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
     await DbTickets.updateTicketNoteHidden(id!, noteHidden!);
   }
 
