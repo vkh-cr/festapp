@@ -1,11 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/pages/eshop/eshop_columns.dart';
-import 'package:intl/intl.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class ProductModel extends ITrinaRowModel {
@@ -29,6 +30,8 @@ class ProductModel extends ITrinaRowModel {
   int? paidCount;
   int? sentCount;
   String? currencyCode;
+  List<ProductInventoryContextModel> includedInventories = [];
+  bool? isDynamicallyAvailable;
 
   static const String foodType = "food";
   static const String taxiType = "taxi";
@@ -36,6 +39,7 @@ class ProductModel extends ITrinaRowModel {
   static const String metaTypeField = "type";
   static const String metaProductTypeTitleStringField = "type_title";
   static const String metaOrderedCount = "ordered_count";
+  static const String metaIsDynamicallyAvailable = "is_dynamically_available";
   static const String metaPaidCount = "paid_count";
   static const String metaSentCount = "sent_count";
 
@@ -60,7 +64,9 @@ class ProductModel extends ITrinaRowModel {
     this.paidCount,
     this.sentCount,
     this.currencyCode,
-  });
+    List<ProductInventoryContextModel>? includedInventories,
+    this.isDynamicallyAvailable,
+  }) : includedInventories = includedInventories ?? [];
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
@@ -88,10 +94,13 @@ class ProductModel extends ITrinaRowModel {
       orderedCount: json[metaOrderedCount],
       paidCount: json[metaPaidCount],
       sentCount: json[metaSentCount],
+      isDynamicallyAvailable: json[metaIsDynamicallyAvailable],
     );
   }
 
   static ProductModel fromPlutoJson(Map<String, dynamic> json) {
+    var model = json[EshopColumns.PRODUCT_MODEL_REFERENCE] as ProductModel?;
+
     return ProductModel(
       id: json[EshopColumns.PRODUCT_ID] == -1 ? null : json[EshopColumns.PRODUCT_ID],
       title: json[EshopColumns.PRODUCT_TITLE],
@@ -103,6 +112,7 @@ class ProductModel extends ITrinaRowModel {
       currencyCode: json[EshopColumns.PRODUCT_CURRENCY_CODE],
       order: json[EshopColumns.PRODUCT_ORDER],
       maximum: json[EshopColumns.PRODUCT_MAXIMUM],
+      includedInventories: model?.includedInventories ?? [],
     );
   }
 
@@ -120,8 +130,6 @@ class ProductModel extends ITrinaRowModel {
     TbEshop.products.maximum: maximum,
   };
 
-  /// Creates a new `ProductModel` instance with updated values.
-  /// This is the recommended way to create a deep copy.
   ProductModel copyWith({
     int? id,
     DateTime? createdAt,
@@ -142,6 +150,8 @@ class ProductModel extends ITrinaRowModel {
     int? paidCount,
     int? sentCount,
     String? currencyCode,
+    List<ProductInventoryContextModel>? includedInventories,
+    bool? isDynamicallyAvailable,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -163,6 +173,8 @@ class ProductModel extends ITrinaRowModel {
       paidCount: paidCount ?? this.paidCount,
       sentCount: sentCount ?? this.sentCount,
       currencyCode: currencyCode ?? this.currencyCode,
+      includedInventories: includedInventories ?? this.includedInventories,
+      isDynamicallyAvailable: isDynamicallyAvailable ?? this.isDynamicallyAvailable,
     );
   }
 
@@ -197,16 +209,35 @@ class ProductModel extends ITrinaRowModel {
       EshopColumns.PRODUCT_MAXIMUM: TrinaCell(value: maximum ?? 0),
       EshopColumns.PRODUCT_ORDERED_COUNT: TrinaCell(value: orderedCount),
       EshopColumns.PRODUCT_PAID_COUNT: TrinaCell(value: total),
+
+      EshopColumns.PRODUCT_INCLUDED_INVENTORY: TrinaCell(value: this),
+      EshopColumns.PRODUCT_MODEL_REFERENCE: TrinaCell(value: this),
     });
   }
 
   @override
-  Future<void> deleteMethod() async {
-    await DbEshop.deleteProduct(id!);
+  Future<void> updateMethod(BuildContext context) async {
+    await ExceptionHandler.guardVoid(
+      context,
+      futureFunction: () async {
+        var productId = await DbEshop.updateProduct(this);
+        await DbEshop.updateProductInventoryContexts(productId, includedInventories);
+      },
+      defaultErrorMessage: "Failed to save product.".tr(),
+      rethrowError: true,
+    );
   }
 
   @override
-  Future<void> updateMethod() async {
-    await DbEshop.updateProduct(this);
+  Future<void> deleteMethod(BuildContext context) async {
+    if (id == null) return;
+    await ExceptionHandler.guardVoid(
+      context,
+      futureFunction: () async {
+        await DbEshop.deleteProduct(id!);
+      },
+      defaultErrorMessage: "Failed to delete product.".tr(),
+      rethrowError: true,
+    );
   }
 }

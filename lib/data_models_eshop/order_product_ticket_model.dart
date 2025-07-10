@@ -1,3 +1,4 @@
+import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 
 class OrderProductTicketModel {
@@ -7,27 +8,7 @@ class OrderProductTicketModel {
   int? productId;
   int? ticketId;
 
-  factory OrderProductTicketModel.fromJson(Map<String, dynamic> json) {
-    return OrderProductTicketModel(
-      id: json[TbEshop.order_product_ticket.id],
-      createdAt: json[TbEshop.order_product_ticket.created_at] != null
-          ? DateTime.parse(json[TbEshop.order_product_ticket.created_at])
-          : null,
-      orderId: json[TbEshop.order_product_ticket.order],
-      productId: json[TbEshop.order_product_ticket.product],
-      ticketId: json[TbEshop.order_product_ticket.ticket],
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    TbEshop.order_product_ticket.id: id,
-    TbEshop.order_product_ticket.created_at: createdAt?.toIso8601String(),
-    TbEshop.order_product_ticket.order: orderId,
-    TbEshop.order_product_ticket.product: productId,
-    TbEshop.order_product_ticket.ticket: ticketId,
-  };
-
-  String toBasicString() => "OrderProductTicket #${id ?? ''}";
+  OrderModel? order;
 
   OrderProductTicketModel({
     this.id,
@@ -35,5 +16,32 @@ class OrderProductTicketModel {
     this.orderId,
     this.productId,
     this.ticketId,
+    this.order,
   });
+
+  factory OrderProductTicketModel.fromJson(Map<String, dynamic> json) {
+    final t = TbEshop.order_product_ticket;
+    return OrderProductTicketModel(
+      id: json[t.id],
+      createdAt: json[t.created_at] != null
+          ? DateTime.parse(json[t.created_at])
+          : null,
+      orderId: json[t.order],
+      productId: json[t.product],
+      ticketId: json[t.ticket],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final t = TbEshop.order_product_ticket;
+    return {
+      t.id: id,
+      t.created_at: createdAt?.toIso8601String(),
+      t.order: orderId,
+      t.product: productId,
+      t.ticket: ticketId,
+    };
+  }
+
+  String toBasicString() => "OrderProductTicket #${id ?? ''}";
 }

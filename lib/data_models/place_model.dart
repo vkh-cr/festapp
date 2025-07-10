@@ -77,7 +77,7 @@ class PlaceModel extends ITrinaRowModel {
   String toPlutoSelectString() => "$id:$title";
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
     await DbPlaces.deletePlace(this);
   }
 
@@ -101,7 +101,7 @@ class PlaceModel extends ITrinaRowModel {
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
     await DbPlaces.updatePlace(this);
   }
 }

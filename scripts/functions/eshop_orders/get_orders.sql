@@ -1,6 +1,7 @@
-CREATE OR REPLACE FUNCTION get_reservations(
+CREATE OR REPLACE FUNCTION get_orders(
     p_occasion_link TEXT,
-    p_form_link TEXT DEFAULT NULL
+    p_form_link TEXT DEFAULT NULL,
+    p_options JSONB DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -18,6 +19,16 @@ DECLARE
     paymentInfoData JSONB;
     formsData JSONB;
 BEGIN
+    -- This function retrieves order and reservation details for a given occasion.
+    -- The p_options parameter can be used to control the output.
+    -- Example for p_options: '{"include_full_order_data": true, "include_spots": true}'
+    --
+    -- 'include_full_order_data': If true, the full 'data' JSONB object for each order is included.
+    --                            Otherwise, only 'name', 'surname', 'email', and 'form' are extracted.
+    --
+    -- 'include_spots': If true, spot information is fetched and included in the response.
+    --                  Otherwise, this query is skipped for optimization.
+
     -- 1. Input Validation: Ensure at least one link is provided.
     IF p_occasion_link IS NULL AND p_form_link IS NULL THEN
         RETURN jsonb_build_object('code', 400, 'message', 'Either occasion_link or form_link must be provided');
@@ -47,22 +58,25 @@ BEGIN
         RETURN jsonb_build_object('code', 403, 'message', 'User is not authorized to access this occasion');
     END IF;
 
-    -- Fetch spots where order_product_ticket is not NULL
-    SELECT jsonb_agg(jsonb_build_object(
-        'id', s.id,
-        'title', s.title,
-        'product', s.product,
-        'order_product_ticket', s.order_product_ticket,
-        'state', CASE
-            WHEN s.order_product_ticket IS NOT NULL THEN 'ordered'
-            WHEN s.secret IS NOT NULL AND s.secret_expiration_time > now() THEN 'selected'
-            ELSE 'available'
-        END
-    ))
-    INTO spotsData
-    FROM eshop.spots s
-    WHERE s.occasion = v_occasion_id
-      AND s.order_product_ticket IS NOT NULL;
+    -- Conditionally fetch spots based on p_options for optimization
+    IF (p_options->>'include_spots')::BOOLEAN = TRUE THEN
+        -- Fetch spots where order_product_ticket is not NULL
+        SELECT jsonb_agg(jsonb_build_object(
+            'id', s.id,
+            'title', s.title,
+            'product', s.product,
+            'order_product_ticket', s.order_product_ticket,
+            'state', CASE
+                WHEN s.order_product_ticket IS NOT NULL THEN 'ordered'
+                WHEN s.secret IS NOT NULL AND s.secret_expiration_time > now() THEN 'selected'
+                ELSE 'available'
+            END
+        ))
+        INTO spotsData
+        FROM eshop.spots s
+        WHERE s.occasion = v_occasion_id
+          AND s.order_product_ticket IS NOT NULL;
+    END IF;
 
     -- Fetch all products linked to the occasion
     SELECT jsonb_agg(jsonb_build_object(
@@ -70,8 +84,7 @@ BEGIN
         'title', p.title,
         'price', p.price,
         'currency_code', p.currency_code,
-        'type', pt.type,
-        'description', pt.description
+        'type', pt.type
     ))
     INTO productsData
     FROM eshop.products p
@@ -105,7 +118,6 @@ BEGIN
     -- Fetch forms linked to the occasion
     SELECT jsonb_agg(jsonb_build_object(
         'id', f.id,
-        'created_at', f.created_at,
         'data', f.data,
         'key', f.key,
         'occasion', f.occasion,
@@ -114,10 +126,7 @@ BEGIN
         'is_open', f.is_open,
         'link', f.link,
         'blueprint', f.blueprint,
-        'title', f.title,
-        'header', f.header,
-        'header_off', f.header_off,
-        'updated_at', f.updated_at
+        'title', f.title
     ))
     INTO formsData
     FROM public.forms f
@@ -133,7 +142,17 @@ BEGIN
             'price', o.price,
             'state', o.state,
             'currency_code', o.currency_code,
-            'data', o.data,
+            'data', CASE
+                        -- If the option to include full data is true, return the whole data object.
+                        WHEN (p_options->>'include_full_order_data')::BOOLEAN = TRUE THEN o.data
+                        -- Otherwise, build a new JSON object with only the specified fields.
+                        ELSE jsonb_build_object(
+                            'name', o.data->>'name',
+                            'surname', o.data->>'surname',
+                            'email', o.data->>'email',
+                            'form', o.data->>'form'
+                        )
+                    END,
             'payment_info', o.payment_info,
             'note_hidden', o.note_hidden
         ))
@@ -150,7 +169,17 @@ BEGIN
             'price', o.price,
             'state', o.state,
             'currency_code', o.currency_code,
-            'data', o.data,
+            'data', CASE
+                        -- If the option to include full data is true, return the whole data object.
+                        WHEN (p_options->>'include_full_order_data')::BOOLEAN = TRUE THEN o.data
+                        -- Otherwise, build a new JSON object with only the specified fields.
+                        ELSE jsonb_build_object(
+                            'name', o.data->>'name',
+                            'surname', o.data->>'surname',
+                            'email', o.data->>'email',
+                            'form', o.data->>'form'
+                        )
+                    END,
             'payment_info', o.payment_info,
             'note_hidden', o.note_hidden
         ))
@@ -169,8 +198,7 @@ BEGIN
         'id', opt.id,
         'order', opt."order",
         'product', opt.product,
-        'ticket', opt.ticket,
-        'created_at', opt.created_at
+        'ticket', opt.ticket
     ))
     INTO orderProductTicketsData
     FROM eshop.order_product_ticket opt
@@ -179,7 +207,6 @@ BEGIN
     -- Fetch payment information linked to the orders
     SELECT jsonb_agg(jsonb_build_object(
         'id', pi.id,
-        'created_at', pi.created_at,
         'bank_account', pi.bank_account,
         'variable_symbol', pi.variable_symbol,
         'amount', pi.amount,
