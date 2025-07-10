@@ -238,7 +238,6 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                   final DateTime firstDate = (_occasion?.startTime ?? DateTime(2020)).subtract(datePadding);
                   final DateTime lastDate = (_occasion?.endTime ?? DateTime(2030)).add(datePadding);
 
-                  // **FIX:** Pass the current context's locale to the date picker.
                   final newDate = await showDatePicker(
                     context: dialogContext,
                     locale: dialogContext.locale,
@@ -301,7 +300,6 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
       return Scaffold(body: Center(child: Text(InventoryStrings.settingsErrorCouldNotLoad)));
     }
 
-    // **FIX:** Separate active and deleted contexts for proper rendering and reordering.
     final activeContexts = _bundle!.contexts!;
     activeContexts.sort((a,b) => (a.order ?? 999).compareTo((b.order ?? 999)));
 
@@ -384,7 +382,6 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                         child: Center(child: Text(InventoryStrings.settingsNoContexts)),
                       ),
 
-                    // **FIX:** ReorderableListView now only contains active items.
                     ReorderableListView(
                       buildDefaultDragHandles: false,
                       shrinkWrap: true,
@@ -401,8 +398,6 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                           if (newIndex > oldIndex) {
                             newIndex -= 1;
                           }
-                          // This logic now works correctly because the list of children
-                          // matches the list being modified (_bundle.contexts).
                           final item = _bundle!.contexts!.removeAt(oldIndex);
                           _bundle!.contexts!.insert(newIndex, item);
                           _updateContextsOrder();
@@ -414,7 +409,6 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                       ],
                     ),
 
-                    // **FIX:** Display deleted items in a separate, non-reorderable list.
                     if (deletedContexts.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       Text(InventoryStrings.settingsMarkedForDeletion, style: Theme.of(context).textTheme.titleMedium),
@@ -492,18 +486,42 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
           : null,
       child: Row(
         children: <Widget>[
+          // **MODIFIED:** Added a dedicated drag handle wrapped in the listener.
+          ReorderableDragStartListener(
+            index: index,
+            enabled: !isDeleted,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Center(
+                child: isDeleted
+                    ? const SizedBox(width: 12) // Maintain spacing for alignment
+                    : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(4, (_) => Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(2, (_) => Container(
+                      width: 3.5,
+                      height: 3.5,
+                      margin: const EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).disabledColor,
+                        shape: BoxShape.circle,
+                      ),
+                    )),
+                  )),
+                ),
+              ),
+            ),
+          ),
+          // **MODIFIED:** The ListTile itself is no longer the drag target.
           Expanded(
-            child: ReorderableDragStartListener(
-              index: index,
-              // Disable dragging for deleted items.
-              enabled: !isDeleted,
-              child: ListTile(
-                title: Text(
-                  contextModel.getFullTitle(context),
-                  style: TextStyle(
-                    decoration: isDeleted ? TextDecoration.lineThrough : null,
-                    color: isDeleted ? Theme.of(context).disabledColor : null,
-                  ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.only(right: 16),
+              title: Text(
+                contextModel.getFullTitle(context),
+                style: TextStyle(
+                  decoration: isDeleted ? TextDecoration.lineThrough : null,
+                  color: isDeleted ? Theme.of(context).disabledColor : null,
                 ),
               ),
             ),

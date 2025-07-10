@@ -233,7 +233,7 @@ class DbForms {
 
   static Future<List<FormResponseModel>> getAllResponses(String formLink) async {
     var allFields = await getAllFormFields(formLink);
-    var ordersBundle = await DbOrders.getAllOrdersBundle(formLink: formLink);
+    var ordersBundle = await DbOrders.getAllOrdersBundle(formLink: formLink, includeOrderDetails: true);
     var onlyFormOrders = ordersBundle.orders.where((o) => o.form?.link == formLink);
     return List<FormResponseModel>.from(
       onlyFormOrders.map((x) => FormResponseModel.fromOrder(x, allFields)),
