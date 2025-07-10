@@ -80,6 +80,8 @@ class InventoryStrings {
 
   // SpotManagementView (Matrix)
   static String get spotManagementNoData => 'Inventory.spotManagementNoData'.tr(); // "No data available for this capacity group."
+  static String get spotManagementClearAllTitle => 'Inventory.spotManagementClearAllTitle'.tr(); // "Clear All Assignments"
+  static String get spotManagementClearAllConfirmation => 'Inventory.spotManagementClearAllConfirmation'.tr(); // "Are you sure you want to unassign all spots in this view? This change only affects the user interface and will not be saved automatically."
 
   // SpotManagementColumns
   static String get spotManagementAssign => 'Inventory.spotManagementAssign'.tr(); // "Assign"

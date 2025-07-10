@@ -211,13 +211,20 @@ class EshopColumns {
       TrinaColumn(
         title: InventoryStrings.included,
         field: PRODUCT_INCLUDED_INVENTORY,
+        // The cell value for this field should be pre-populated with the searchable string
+        // using the `getInventoryDisplayValue` helper method.
         type: TrinaColumnType.text(),
         width: 350,
         enableEditingMode: false,
         renderer: (ctx) {
-          // UPDATED: Read from the stable reference cell to avoid the TypeError
-          final product = ctx.row.cells[PRODUCT_MODEL_REFERENCE]?.value as ProductModel;
+          // The renderer correctly uses the reference column to get the full product model,
+          // which allows it to function independently of this cell's direct value.
+          final product = ctx.row.cells[PRODUCT_MODEL_REFERENCE]?.value as ProductModel?;
           final allContexts = data[PRODUCT_INCLUDED_INVENTORY] as List<InventoryContextModel>;
+
+          if (product == null) {
+            return const SizedBox.shrink();
+          }
 
           return InventoryInclusionRenderer(
             rendererContext: ctx,
