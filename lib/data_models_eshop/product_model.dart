@@ -209,8 +209,7 @@ class ProductModel extends ITrinaRowModel {
       EshopColumns.PRODUCT_MAXIMUM: TrinaCell(value: maximum ?? 0),
       EshopColumns.PRODUCT_ORDERED_COUNT: TrinaCell(value: orderedCount),
       EshopColumns.PRODUCT_PAID_COUNT: TrinaCell(value: total),
-
-      EshopColumns.PRODUCT_INCLUDED_INVENTORY: TrinaCell(value: this),
+      EshopColumns.PRODUCT_INCLUDED_INVENTORY: TrinaCell(value: getInventoryDisplayValue(this, context)),
       EshopColumns.PRODUCT_MODEL_REFERENCE: TrinaCell(value: this),
     });
   }
@@ -239,5 +238,16 @@ class ProductModel extends ITrinaRowModel {
       defaultErrorMessage: "Failed to delete product.".tr(),
       rethrowError: true,
     );
+  }
+
+  static String getInventoryDisplayValue(ProductModel product, BuildContext context) {
+    if (product.includedInventories.isEmpty) {
+      return "";
+    }
+    return product.includedInventories.map((link) {
+      final quantityText = link.quantity > 1 ? " (x${link.quantity})" : "";
+      final labelText = "${link.inventoryContextId}${link.inventoryContext?.getFullTitle(context)}$quantityText";
+      return labelText;
+    }).join(" | ");
   }
 }

@@ -31,11 +31,7 @@ class _InventoryInclusionRendererState
   String? _initialInclusionsString;
 
   void _triggerGridUpdate() {
-    // Generate the new value string from the current product inclusions
-    final newValue = widget.product.includedInventories
-        .map((e) => "${e.inventoryContextId}:${e.quantity}")
-        .join(',');
-
+    var newValue = ProductModel.getInventoryDisplayValue(widget.product, context);
     // Only trigger a change if the new value is different from the initial value
     if (newValue != _initialInclusionsString) {
       widget.rendererContext.stateManager.changeCellValue(
@@ -50,9 +46,7 @@ class _InventoryInclusionRendererState
 
   Future<void> _showInventoryDialog(BuildContext context) async {
     // Capture the current state as a string before the dialog opens
-    _initialInclusionsString = widget.product.includedInventories
-        .map((e) => "${e.inventoryContextId}:${e.quantity}")
-        .join(',');
+    _initialInclusionsString = ProductModel.getInventoryDisplayValue(widget.product, context);
 
     await showDialog<bool>(
       context: context,
@@ -80,7 +74,6 @@ class _InventoryInclusionRendererState
     );
 
     // After the dialog is closed, trigger a single update to the grid.
-    // This will now compare against _initialInclusionsString to check for actual changes.
     _triggerGridUpdate();
   }
 
