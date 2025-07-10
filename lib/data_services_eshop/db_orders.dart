@@ -67,15 +67,31 @@ class DbOrders {
     return true;
   }
 
-  static Future<ReservationsBundle> getAllOrdersBundle({String? occasionLink, String? formLink}) async {
+  static Future<ReservationsBundle> getAllOrdersBundle({
+    String? occasionLink,
+    String? formLink,
+    bool includeOrderDetails = false,
+    bool includeSpots = false,
+  }) async {
     assert(occasionLink != null || formLink != null, 'Either occasionLink or formLink must be provided.');
 
-    final params = {
+    // Build a map of options based on the function parameters.
+    final options = <String, bool>{};
+    if (includeOrderDetails == true) {
+      options['include_full_order_data'] = true;
+    }
+    if (includeSpots == true) {
+      options['include_spots'] = true;
+    }
+
+    // Conditionally build the final parameters map for the RPC call.
+    final params = <String, dynamic>{
       'p_occasion_link': occasionLink,
       'p_form_link': formLink,
+      if (options.isNotEmpty) 'p_options': options,
     };
 
-    final response = await _supabase.rpc('get_reservations', params: params);
+    final response = await _supabase.rpc('get_orders', params: params);
 
     if (response["code"] != 200) {
       throw Exception("${response['code']}: ${response['message']}");
