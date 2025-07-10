@@ -1,130 +1,129 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_138",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,G,K,L,M,N,O,P,B={
-dpT(){return new B.Es(null)},
-Es:function Es(d){this.a=d},
-afj:function afj(d,e,f){var _=this
-_.d=!1
-_.e=d
-_.f=e
-_.r=f
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,F,G,H,I,B={
+dyd(){return new B.G4(null)},
+G4:function G4(d){this.a=d},
+aWq:function aWq(d,e){var _=this
+_.e=_.d=!1
+_.r=_.f=null
+_.w=d
+_.x=e
 _.c=_.a=null},
-cjk:function cjk(d){this.a=d},
-cjl:function cjl(d){this.a=d},
-cjm:function cjm(d){this.a=d},
-cjn:function cjn(d){this.a=d},
-cji:function cji(d){this.a=d},
-cjj:function cjj(d){this.a=d},
-cjo:function cjo(d){this.a=d}},D,H,Q,E,F,R,S,T,I,U
+cBb:function cBb(d){this.a=d},
+cBc:function cBc(d,e){this.a=d
+this.b=e},
+cB8:function cB8(d){this.a=d},
+cB9:function cB9(d){this.a=d},
+cBa:function cBa(d){this.a=d},
+b5_(d){return B.djL(d)},
+djL(d){var x=0,w=A.k(y.y),v,u
+var $async$b5_=A.f(function(e,f){if(e===1)return A.h(f,w)
+while(true)switch(x){case 0:d.m(0,"organization",1)
+u=$.dE().Q
+u===$&&A.b()
+x=3
+return A.d(u.mD("register",d),$async$b5_)
+case 3:v=f.a
+x=1
+break
+case 1:return A.i(v,w)}})
+return A.j($async$b5_,w)}},D,K,E,L,M,N,O,P
+J=c[1]
 A=c[0]
 C=c[2]
-G=c[102]
-K=c[52]
-L=c[130]
-M=c[149]
-N=c[110]
-O=c[278]
-P=c[51]
-B=a.updateHolder(c[14],B)
+F=c[101]
+G=c[130]
+H=c[147]
+I=c[146]
+B=a.updateHolder(c[27],B)
 D=c[279]
-H=c[148]
-Q=c[203]
-E=c[166]
-F=c[157]
-R=c[198]
-S=c[168]
-T=c[164]
-I=c[199]
-U=c[258]
-B.Es.prototype={
-M(){var x=$.a9()
-return new B.afj(new A.c6(C.ar,x),new A.c6(C.ar,x),new A.aT(null,y.o))}}
-B.afj.prototype={
-l(){var x=this.e,w=$.a9()
-x.a3$=w
-x.U$=0
-x=this.f
-x.a3$=w
-x.U$=0
-this.ai()},
-B(d){var x,w,v=this,u=null,t=y.e,s=A.a([A.bN(u,u,u,u,u,u,A.aK(U.ja,u,u,u),u,u,u,new B.cjk(d),u,u,u,u,u)],t),r=E.bC(Q.IH,u)
-r=T.iw(s,u,u,!0,u,u,1,!0,u,u,!1,u,!1,u,u,M.uV(u,new B.cjl(d)),u,!0,u,u,u,u,u,r,u,u,u,1,u,!0)
-x=A.a([D.bDt],t)
-w=$.fU
-if(w==null)w=u
-else{w=w.z
-w=w==null?u:w.d}if(w===!0)x.push(A.ar(u,A.ao(A.a([A.F(A.n("First time?",u),u,u,u,u,u,u,u,A.af(u,u,u,u,u,u,u,u,u,u,u,18,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),C.dW,A.cG(!1,E.bC(A.F("Sign up",u,u,u,u,u,u,u,I.i7,u,u,u,u,u),u),u,u,u,u,u,u,new B.cjm(d),u,u)],t),C.j,C.bm,C.h,0,u),C.k,u,u,u,u,u,u,u,C.ba,u,u,u))
-x.push(new A.Z(O.D0,P.cZF(v.e),u))
-x.push(new A.Z(D.avU,new N.KM(A.n("Password or code",u),v.f,"password",u),u))
-x.push(C.a_)
-t=A.n("Sign in",u)
-x.push(L.HZ(C.dK,d,50,!v.d,t,new B.cjn(v),C.m,250))
-x.push(C.af)
-x.push(A.ar(R.iY,A.cG(!1,E.bC(A.F("Forgot your password?",u,u,u,u,u,u,u,I.i7,u,u,u,u,u),u),u,u,u,u,u,u,new B.cjo(d),u,u),C.k,u,u,u,u,u,u,u,C.aq,u,u,u))
-return S.eZ(r,u,new A.ci(C.aU,u,u,new A.cE(new A.aa(0,680,0,1/0),A.dr(A.pD(u,u,new G.z7(A.ac(x,C.j,C.f,C.h,0,u,C.l),u),v.r,u),u,C.q,u,u,u,C.H),u),u),u,u,u,u,u)},
-O5(d){var x=0,w=A.k(y.f),v=this,u
-var $async$O5=A.f(function(e,f){if(e===1)return A.h(f,w)
-while(true)switch(x){case 0:x=4
-return A.d(A.CG(),$async$O5)
-case 4:x=f?2:3
-break
-case 2:x=5
-return A.d(A.aDX(new A.a4f(null,$.Uc)),$async$O5)
-case 5:u=v.c
-u.toString
-H.y8(u)
-case 3:return A.i(null,w)}})
-return A.j($async$O5,w)},
-bwf(d){var x=this.c
-x.toString
-A.bi(x,A.n("Successful sign in!",null),C.a3)},
-bkS(d){var x=this.c
-x.toString
-A.bi(x,A.n("Invalid credentials!",null),C.aM)}}
-var z=a.updateTypes(["~(@)","X<~>(@)"])
-B.cjk.prototype={
-$0(){return F.nb(this.a,"settings",y.a)},
+K=c[55]
+E=c[33]
+L=c[162]
+M=c[280]
+N=c[164]
+O=c[188]
+P=c[160]
+B.G4.prototype={
+L(){var x=null
+return new B.aWq(A.a([A.vB(x,x,x,x,1,x,!0,x,x,x,x,x,x,"name"),A.vB(x,x,x,x,2,x,!0,x,x,x,x,x,x,"surname"),A.vB(x,x,x,x,3,x,x,x,x,x,x,x,x,"sex"),A.vB(x,x,x,x,4,x,!0,x,x,x,x,x,x,"email"),A.vB(x,x,x,x,5,x,!0,x,x,x,x,x,x,"city"),A.vB(x,x,x,x,6,x,x,x,x,x,x,x,x,"birth_year")],y.a),new A.aS(x,y.c))}}
+B.aWq.prototype={
+l(){this.ai()},
+B(d){var x,w,v,u,t,s=this,r=null,q=A.d0Q(r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r)
+q.CW=s.w
+x=E.d0O(q)
+s.r=x
+w=s.x
+x.a=new E.avd(r,r,w,r,r,r,r)
+x=L.bC(D.bJY,r)
+x=P.ih(r,r,r,!0,r,r,1,!0,r,r,!1,r,!1,r,r,H.v5(r,new B.cBb(d)),r,!0,r,r,r,r,r,x,r,r,r,1,r,!0)
+if(s.e){w=A.ad(r,r,A.C(d).ax.a===C.r?$.dv():C.n,r,r,r,r,r,r,r,r,18,r,r,r,r,r,!0,r,r,r,r,r,r,r,r)
+v=s.f
+v=v==null?r:v.h(0,"email")
+u=y.w
+u=new A.Z(D.aw8,A.B7(r,r,r,C.ca,r,r,!0,r,A.cB(A.a([A.cB(r,r,r,w,A.n("Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.",A.w(["email",v],u,u))),D.bP3],y.F),r,r,r,r),C.b1,r,r,C.a0,C.aB),r)
+w=u}else{v=s.r
+v=A.B(E.d0L(d,v.a.c,v),y.u)
+v.push(C.Y)
+u=s.d?r:new B.cBc(s,d)
+t=A.n("Sign up",r)
+v.push(G.I9(C.dO,d,50,!s.d,t,u,C.m,250))
+w=K.bmM(new F.zg(A.aa(v,C.j,C.f,C.h,0,r,C.l),r),w,r)}return N.eK(x,r,new A.ci(C.aT,r,r,new A.cH(new A.ab(0,720,0,1/0),A.da(new A.Z(C.b8,w,r),r,C.p,r,r,r,C.H),r),r),r,r,r,r,r)}}
+var z=a.updateTypes([])
+B.cBb.prototype={
+$0(){return I.yi(this.a)},
 $S:0}
-B.cjl.prototype={
-$0(){return H.y8(this.a)},
-$S:0}
-B.cjm.prototype={
-$0(){return F.nb(this.a,"signup",y.a)},
-$S:0}
-B.cjn.prototype={
-$0(){var x=0,w=A.k(y.f),v=this,u,t
+B.cBc.prototype={
+$0(){var x=0,w=A.k(y.q),v=this,u,t,s,r,q,p
 var $async$$0=A.f(function(d,e){if(d===1)return A.h(e,w)
-while(true)switch(x){case 0:t=v.a
-x=t.r.ga_().jt()?2:3
+while(true)switch(x){case 0:F.aax(!0)
+u=v.a
+t=u.x.ga_()
+t=t==null?null:t.akc()
+x=t===!0?2:3
 break
-case 2:G.aa8(!0)
-t.u(new B.cji(t))
-u=y.f
+case 2:u.t(new B.cB8(u))
+t=u.r
+t.toString
+s=y.w
+t=A.io(E.d0M(t,!0).h(0,"fields"),s,y.b)
+u.f=t
+r=v.b
+q=r.a8(y.v)
+if(q==null)q=null
+else{q=q.r.a
+q===$&&A.b()
+q=q.kk("_")}t.m(0,"lang",q)
+q=u.f
+q.toString
 x=4
-return A.d(K.P7("1+"+t.e.a.a,t.f.a.a).aJ(t.gbwe(),u).aJ(t.gbss(),u).kU(t.gbkR()),$async$$0)
-case 4:t.u(new B.cjj(t))
+return A.d(B.b5_(q),$async$$0)
+case 4:p=e
+t=J.a_(p)
+if(J.q(t.h(p,"code"),200)){A.bf(r,A.n("Registration is almost complete!",null),C.a1)
+u.t(new B.cB9(u))}else if(J.q(t.h(p,"code"),409))A.bf(r,A.n("Registration failed: Email {email} is already in use.",A.w(["email",t.h(p,"email")],s,s)),C.aM)
+else A.bf(r,A.n("Registration has failed.",null),C.aM)
+u.t(new B.cBa(u))
 case 3:return A.i(null,w)}})
 return A.j($async$$0,w)},
 $S:2}
-B.cji.prototype={
+B.cB8.prototype={
 $0(){this.a.d=!0},
 $S:0}
-B.cjj.prototype={
-$0(){this.a.d=!1},
+B.cB9.prototype={
+$0(){this.a.e=!0},
 $S:0}
-B.cjo.prototype={
-$0(){return F.nb(this.a,"forgotPassword",y.a)},
-$S:0};(function installTearOffs(){var x=a._instance_1u
-var w
-x(w=B.afj.prototype,"gbss","O5",1)
-x(w,"gbwe","bwf",0)
-x(w,"gbkR","bkS",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(B.Es,A.L)
-x(B.afj,A.N)
-w(A.d0,[B.cjk,B.cjl,B.cjm,B.cjn,B.cji,B.cjj,B.cjo])})()
-A.cf(b.typeUniverse,JSON.parse('{"Es":{"L":[],"e":[]},"afj":{"N":["Es"]}}'))
-var y={e:A.E("v<e>"),o:A.E("aT<pF>"),a:A.E("K?"),f:A.E("~")};(function constants(){D.avU=new A.ai(15,15,15,0)
-D.bDt=new A.ap(null,200,null,null)})()};
+B.cBa.prototype={
+$0(){this.a.d=!1},
+$S:0};(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B.G4,A.K)
+x(B.aWq,A.N)
+w(A.d3,[B.cBb,B.cBc,B.cB8,B.cB9,B.cBa])})()
+A.cl(b.typeUniverse,JSON.parse('{"G4":{"K":[],"e":[]},"aWq":{"N":["G4"]}}'))
+var y={a:A.F("v<iT>"),F:A.F("v<k_>"),c:A.F("aS<xJ>"),y:A.F("z<l,@>"),w:A.F("l"),u:A.F("e"),v:A.F("kC"),b:A.F("@"),q:A.F("~")};(function constants(){D.aw8=new A.ah(12,88,12,12)
+D.bJY=new A.cA("Sign up",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bx5=new A.Z(O.ND,M.P9,null)
+D.bP3=new A.lA(D.bx5,C.eO,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_138",e:"endPart",h:b})})($__dart_deferred_initializers__,"EeiqPgjyYzCEk4wQ+9ajmPPZa4c=");
+a.eventLog.push({p:"main.dart.js_138",e:"endPart",h:b})})($__dart_deferred_initializers__,"yJMwkLpb6sRFOYqJ3ESw7EhFwdI=");
