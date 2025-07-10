@@ -184,6 +184,7 @@ class _ContextChip extends StatelessWidget {
       color: isDarkMode ? Colors.white60 : theme.colorScheme.onSurfaceVariant,
     )
         : theme.textTheme.bodySmall!.copyWith(
+      fontSize: 10,
       fontWeight: FontWeight.normal,
       color: isDarkMode ? Colors.white60 : theme.colorScheme.onSurfaceVariant,
     );
