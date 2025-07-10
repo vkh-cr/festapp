@@ -45,7 +45,7 @@ class _InventoryPoolDetailViewState extends State<InventoryPoolDetailView>
   /// in the parent (InventoryPoolsTab) and the matrix view.
   void _handleDataUpdate() {
     // Access the state via the key and call its public loadData method.
-    _spotManagementKey.currentState?.loadData();
+    _spotManagementKey.currentState?.fetchGridData();
     // Also notify the parent widget that data has been updated.
     widget.onDataUpdated?.call();
   }

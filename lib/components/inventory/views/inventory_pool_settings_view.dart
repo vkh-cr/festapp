@@ -192,7 +192,10 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
 
   void _addContextBack(InventoryContextModel context) {
     setState(() {
+      context.order = context.order! - 1;
       _bundle!.contexts!.add(context);
+      // **MODIFIED:** Sort by the original order to restore the item to its previous position.
+      _bundle!.contexts!.sort((a, b) => (a.order ?? 999).compareTo(b.order ?? 999));
       _updateContextsOrder();
     });
   }
@@ -317,82 +320,79 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
               constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
               child: Form(
                 key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.all(24.0),
-                  children: [
-                    Text(
-                      InventoryStrings.settingsConfigureTitle(_bundle!.pool.title ?? 'Pool'),
-                      style: Theme.of(innerContext).textTheme.headlineSmall,
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            InventoryStrings.settingsConfigureTitle(_bundle!.pool.title ?? 'Pool'),
+                            style: Theme.of(innerContext).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(InventoryStrings.settingsPoolSettingsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _poolTitleController,
+                            decoration: InputDecoration(
+                              labelText: InventoryStrings.poolTitleLabel,
+                              border: const OutlineInputBorder(),
+                            ),
+                            validator: (value) => (value == null || value.trim().isEmpty)
+                                ? InventoryStrings.validationTitleEmpty
+                                : null,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _sellableCapacityController,
+                            decoration: InputDecoration(
+                              labelText: InventoryStrings.settingsSellableCapacityLabel,
+                              hintText: InventoryStrings.settingsSellableCapacityHint,
+                              border: const OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          ),
+                          const SizedBox(height: 16),
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(InventoryStrings.settingsAutoAssignmentLabel),
+                            subtitle: Text(InventoryStrings.settingsAutoAssignmentSubtitle),
+                            value: _bundle!.pool.isAutoResourceAssignment,
+                            onChanged: (bool value) {
+                              setState(() {
+                                _bundle!.pool.isAutoResourceAssignment = value;
+                              });
+                            },
+                          ),
+                          const Divider(height: 40),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(InventoryStrings.settingsContextsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle_outline),
+                                tooltip: InventoryStrings.settingsAddContextTooltip,
+                                onPressed: () => _showEditContextDialog(),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          if (activeContexts.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16.0),
+                              child: Center(child: Text(InventoryStrings.settingsNoContexts)),
+                            ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 24),
 
-                    Text(InventoryStrings.settingsPoolSettingsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _poolTitleController,
-                      decoration: InputDecoration(
-                        labelText: InventoryStrings.poolTitleLabel,
-                        border: const OutlineInputBorder(),
-                      ),
-                      validator: (value) => (value == null || value.trim().isEmpty)
-                          ? InventoryStrings.validationTitleEmpty
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _sellableCapacityController,
-                      decoration: InputDecoration(
-                        labelText: InventoryStrings.settingsSellableCapacityLabel,
-                        hintText: InventoryStrings.settingsSellableCapacityHint,
-                        border: const OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                    const SizedBox(height: 16),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(InventoryStrings.settingsAutoAssignmentLabel),
-                      subtitle: Text(InventoryStrings.settingsAutoAssignmentSubtitle),
-                      value: _bundle!.pool.isAutoResourceAssignment,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _bundle!.pool.isAutoResourceAssignment = value;
-                        });
+                    SliverReorderableList(
+                      itemBuilder: (context, index) {
+                        return _buildContextEditor(activeContexts[index], index, isDeleted: false);
                       },
-                    ),
-
-                    const Divider(height: 40),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(InventoryStrings.settingsContextsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline),
-                          tooltip: InventoryStrings.settingsAddContextTooltip,
-                          onPressed: () => _showEditContextDialog(),
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    if (activeContexts.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Center(child: Text(InventoryStrings.settingsNoContexts)),
-                      ),
-
-                    ReorderableListView(
-                      buildDefaultDragHandles: false,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      proxyDecorator: (Widget child, int index, Animation<double> animation) {
-                        return Material(
-                          elevation: 4.0,
-                          color: Colors.transparent,
-                          child: child,
-                        );
-                      },
+                      itemCount: activeContexts.length,
                       onReorder: (oldIndex, newIndex) {
                         setState(() {
                           if (newIndex > oldIndex) {
@@ -403,37 +403,45 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                           _updateContextsOrder();
                         });
                       },
-                      children: [
-                        for (int i = 0; i < activeContexts.length; i++)
-                          _buildContextEditor(activeContexts[i], i, isDeleted: false)
-                      ],
                     ),
 
-                    if (deletedContexts.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Text(InventoryStrings.settingsMarkedForDeletion, style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 8),
-                      ListView(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: [
-                          for (final deletedItem in deletedContexts)
-                            _buildContextEditor(deletedItem, -1, isDeleted: true)
-                        ],
-                      )
-                    ],
-
-                    const SizedBox(height: 48),
-                    Center(
-                      child: TextButton(
-                        onPressed: () => _confirmDelete(innerContext),
-                        child: Text(
-                          InventoryStrings.settingsDeletePoolButton,
-                          style: TextStyle(color: ThemeConfig.redColor(innerContext)),
-                        ),
+                    if (deletedContexts.isNotEmpty)
+                      SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 16),
+                              Text(InventoryStrings.settingsMarkedForDeletion, style: Theme.of(context).textTheme.titleMedium),
+                              const SizedBox(height: 8),
+                              ListView(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: [
+                                  for (final deletedItem in deletedContexts)
+                                    _buildContextEditor(deletedItem, -1, isDeleted: true)
+                                ],
+                              )
+                            ],
+                          )
                       ),
-                    ),
-                    const SizedBox(height: 48),
+
+                    SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 48),
+                          Center(
+                            child: TextButton(
+                              onPressed: () => _confirmDelete(innerContext),
+                              child: Text(
+                                InventoryStrings.settingsDeletePoolButton,
+                                style: TextStyle(color: ThemeConfig.redColor(innerContext)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 48),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -486,12 +494,14 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
           : null,
       child: Row(
         children: <Widget>[
-          // **MODIFIED:** Added a dedicated drag handle wrapped in the listener.
+          // **MODIFIED:** The ReorderableDragStartListener now wraps a larger, padded container.
           ReorderableDragStartListener(
             index: index,
             enabled: !isDeleted,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              // Increased padding for a larger, more user-friendly touch area.
+              padding: const EdgeInsets.all(16),
+              color: Colors.transparent, // Ensures the entire padded area is hittable.
               child: Center(
                 child: isDeleted
                     ? const SizedBox(width: 12) // Maintain spacing for alignment
@@ -513,7 +523,6 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
               ),
             ),
           ),
-          // **MODIFIED:** The ListTile itself is no longer the drag target.
           Expanded(
             child: ListTile(
               contentPadding: const EdgeInsets.only(right: 16),

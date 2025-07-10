@@ -14,9 +14,6 @@ class SpotMatrixRow extends ITrinaRowModel {
   // A single, unified object containing all the row's metadata.
   final SpotManagementRowReference rowReference;
 
-  // Temporary storage for changed cell data, as required by ITrinaRowModel.
-  Map<String, dynamic> updatedCells = {};
-
   /// A unique identifier for the row, e.g., 'resource_12_slot_34' or 'resource_12_index_1'.
   String get rowIdentifier => rowReference.slot != null
       ? 'resource_${rowReference.resource.id}_slot_${rowReference.slot!.id}'
@@ -47,63 +44,49 @@ class SpotMatrixRow extends ITrinaRowModel {
     cells[SpotManagementConstants.resourceTitle] = TrinaCell(value: displayTitle);
 
     // --- The SINGLE Hidden Reference Column ---
-    // Pass the entire reference object in one go. This replaces all the individual reference columns.
+    // Pass the entire reference object. This object will be updated in memory and persisted back to the grid state.
     cells[SpotManagementConstants.rowReference] = TrinaCell(value: rowReference);
 
     // --- Dynamic Context Columns ---
-    // Populate cells for each context based on the initial state from the reference object.
-    rowReference.initialSpotsInRow.forEach((contextId, spot) {
+    // Populate cells for each context based on the CURRENT state from the reference object.
+    rowReference.currentSpotsInRow.forEach((contextId, spot) {
       final fieldName = '${SpotManagementConstants.contextColumnPrefix}$contextId';
-      if (spot != null && spot.order != null) {
-        final cellValue = '${spot.id}${SpotManagementConstants.cellValueSeparator}${spot.order!.toCustomerData()}';
-        cells[fieldName] = TrinaCell(value: cellValue);
-      } else {
-        cells[fieldName] = TrinaCell(value: ''); // Use empty string for unassigned
-      }
+      // The cell value is now ONLY the display string, with no ID.
+      final cellValue = spot?.order?.toCustomerData() ?? '';
+      cells[fieldName] = TrinaCell(value: cellValue);
     });
 
     return TrinaRow(cells: cells);
   }
 
-  /// Reconstructs the model from grid data for the update mechanism.
+  /// Reconstructs the model from grid data.
   static SpotMatrixRow fromPlutoJson(Map<String, dynamic> json) {
     // Reconstruct the object by simply extracting our unified reference object.
+    // This object will contain the latest state as updated by the cell renderers.
     final rowRef = json[SpotManagementConstants.rowReference] as SpotManagementRowReference;
-
-    final updatedRow = SpotMatrixRow(rowReference: rowRef);
-
-    // Preserve the map of updated cells for the updateMethod.
-    updatedRow.updatedCells = json;
-    return updatedRow;
+    return SpotMatrixRow(rowReference: rowRef);
   }
 
   /// Called by the grid to save changes.
   @override
   Future<void> updateMethod(BuildContext context) async {
     final List<Map<String, dynamic>> changes = [];
+    final initialAssignments = rowReference.initialSpotsInRow;
+    final currentAssignments = rowReference.currentSpotsInRow;
 
-    for (var entry in updatedCells.entries) {
-      if (!entry.key.startsWith(SpotManagementConstants.contextColumnPrefix)) continue;
-
-      final contextId = int.tryParse(entry.key.replaceAll(SpotManagementConstants.contextColumnPrefix, ''));
-      if (contextId == null) continue;
-
-      final cellValue = entry.value as String? ?? '';
-      final newSpotId = cellValue.isEmpty
-          ? null
-          : int.tryParse(cellValue.split(SpotManagementConstants.cellValueSeparator)[0]);
-
-      final oldSpotId = rowReference.initialSpotsInRow[contextId]?.id;
+    // Compare the initial state with the current state to detect changes.
+    for (final contextId in initialAssignments.keys) {
+      final oldSpot = initialAssignments[contextId];
+      final newSpot = currentAssignments[contextId];
 
       // If the assignment hasn't actually changed, skip it.
-      if (newSpotId == oldSpotId) continue;
+      if (oldSpot?.id == newSpot?.id) continue;
 
       changes.add({
-        'old_spot_id': oldSpotId,
-        'new_spot_id': newSpotId,
+        'old_spot_id': oldSpot?.id,
+        'new_spot_id': newSpot?.id,
         'resource_id': rowReference.resource.id,
         'resource_slot_id': rowReference.slot?.id,
-        // The backend will need the context_id to correctly handle the assignment
         'inventory_context_id': contextId,
       });
     }
