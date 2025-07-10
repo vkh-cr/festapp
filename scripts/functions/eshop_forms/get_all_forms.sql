@@ -25,7 +25,7 @@ BEGIN
 
     -- Step 3: Verify if the user has editor rights for this occasion.
     -- This assumes a function `get_is_editor_on_occasion` exists.
-    IF NOT get_is_editor_on_occasion(v_occasion_id) THEN
+    IF NOT get_is_editor_view_on_occasion(v_occasion_id) THEN
         RETURN jsonb_build_object(
             'code', 403,
             'message', 'User is not authorized to view forms for this occasion.'

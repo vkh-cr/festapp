@@ -1,9 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/blueprint/get_orders_helper.dart';
+import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
+import 'package:fstapp/components/inventory/models/inventory_pool_bundle.dart';
+import 'package:fstapp/components/inventory/models/inventory_pool_model.dart';
+import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/order_product_ticket_model.dart';
+import 'package:fstapp/data_models_eshop/product_edit_bundle.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -61,15 +67,31 @@ class DbOrders {
     return true;
   }
 
-  static Future<ReservationsBundle> getAllOrdersBundle({String? occasionLink, String? formLink}) async {
+  static Future<ReservationsBundle> getAllOrdersBundle({
+    String? occasionLink,
+    String? formLink,
+    bool includeOrderDetails = false,
+    bool includeSpots = false,
+  }) async {
     assert(occasionLink != null || formLink != null, 'Either occasionLink or formLink must be provided.');
 
-    final params = {
+    // Build a map of options based on the function parameters.
+    final options = <String, bool>{};
+    if (includeOrderDetails == true) {
+      options['include_full_order_data'] = true;
+    }
+    if (includeSpots == true) {
+      options['include_spots'] = true;
+    }
+
+    // Conditionally build the final parameters map for the RPC call.
+    final params = <String, dynamic>{
       'p_occasion_link': occasionLink,
       'p_form_link': formLink,
+      if (options.isNotEmpty) 'p_options': options,
     };
 
-    final response = await _supabase.rpc('get_reservations', params: params);
+    final response = await _supabase.rpc('get_orders', params: params);
 
     if (response["code"] != 200) {
       throw Exception("${response['code']}: ${response['message']}");
@@ -141,6 +163,73 @@ class DbOrders {
     orders.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
 
     return ReservationsBundle(orders: orders, forms: forms ?? []);
+  }
+
+  // MODIFIED: Fetches the bundle and performs client-side joins
+  static Future<ProductsEditBundle> getProductsAndTypesForOccasion(String occasionLink) async {
+    final response = await _supabase.rpc(
+      'get_products_and_types_for_edit',
+      params: {'occasion_link': occasionLink},
+    );
+
+    // Parse all data lists from the response
+    final types = (response['product_types'] as List)
+        .map((t) => ProductTypeModel.fromJson(t))
+        .toList();
+    final products = (response['products'] as List)
+        .map((p) => ProductModel.fromJson(p))
+        .toList();
+    final pools = (response['inventory_pools'] as List)
+        .map((p) => InventoryPoolModel.fromJson(p))
+        .toList();
+    final contexts = (response['inventory_contexts'] as List)
+        .map((c) => InventoryContextModel.fromJson(c))
+        .toList();
+    final productContextLinks = (response['product_inventory_contexts'] as List)
+        .map((pc) => ProductInventoryContextModel.fromJson(pc))
+        .toList();
+
+    // Create maps for efficient lookups
+    final typesMap = {for (var t in types) t.id: t};
+    final poolsMap = {for (var p in pools) p.id: p};
+    final contextsMap = {for (var c in contexts) c.id: c};
+
+    // Join inventory pools to inventory contexts
+    for (var context in contexts) {
+      context.inventoryPool = poolsMap[context.inventoryPoolId];
+    }
+
+    // Join inventory contexts to the link table models
+    for (var link in productContextLinks) {
+      link.inventoryContext = contextsMap[link.inventoryContextId];
+    }
+
+    // Group links by product ID
+    final productLinksMap = groupBy(productContextLinks, (link) => link.productId);
+
+    // Join everything to the final product models
+    for (var product in products) {
+      product.productType = typesMap[product.productTypeId];
+      product.includedInventories = (productLinksMap[product.id] ?? [])
+          .where((link) => link.inventoryContext != null)
+          .toList();
+    }
+
+    products.sort((a, b) {
+      final aType = a.productTypeId ?? 0;
+      final bType = b.productTypeId ?? 0;
+      if (aType != bType) return aType.compareTo(bType);
+      final aOrder = a.order ?? 0;
+      final bOrder = b.order ?? 0;
+      return aOrder.compareTo(bOrder);
+    });
+
+    return ProductsEditBundle(
+      products: products,
+      productTypes: types,
+      inventoryPools: pools,
+      inventoryContexts: contexts,
+    );
   }
 
 

@@ -1,10 +1,11 @@
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
-import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
@@ -36,8 +37,8 @@ class _ProductsDialogState extends State<ProductsDialog> {
     setState(() => _loading = true);
     _bundle = await DbEshop.getProductsForTicket(widget.ticketId);
     if (_bundle != null) {
-      _orig = _bundle!.ticket.relatedProducts ?? [];
-      _current = List.from(_orig);
+      _orig = _bundle!.ticket.relatedProducts?.map((p) => p.copyWith()).toList() ?? [];
+      _current = _bundle!.ticket.relatedProducts?.map((p) => p.copyWith()).toList() ?? [];
       _recalc();
     }
     if(!mounted) return;
@@ -75,21 +76,133 @@ class _ProductsDialogState extends State<ProductsDialog> {
 
   void _addBack(ProductModel p) {
     setState(() {
-      _current.add(p);
+      _current.add(p.copyWith());
       _recalc();
     });
   }
 
-  Future<void> _save() async {
-    final success = await DbEshop.updateProductsForOrder(
-      widget.ticketId,
-      _current.map((p) => p.id!).toList(),
+  Future<void> _editPrice(ProductModel product) async {
+    final priceController = TextEditingController(text: (product.price ?? 0).toStringAsFixed(2));
+    final formKey = GlobalKey<FormState>();
+
+    final newPrice = await showDialog<double>(
+      context: context,
+      builder: (context) {
+        // Use a stateful helper widget to create and manage the focus node
+        // correctly within the dialog's lifecycle.
+        return _StatefulDialogWrapper(
+          builder: (context, focusNode) {
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 450),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        FeaturesStrings.editPriceTitle,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 20),
+                      SingleChildScrollView(
+                        child: Form(
+                          key: formKey,
+                          child: TextFormField(
+                            focusNode: focusNode,
+                            autofocus: true,
+                            controller: priceController,
+                            decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return FeaturesStrings.priceValidationRequired;
+                              }
+                              final price = double.tryParse(value.replaceAll(",", "."));
+                              if (price == null) {
+                                return FeaturesStrings.priceValidationInvalid;
+                              }
+                              if (price < 0) {
+                                return FeaturesStrings.priceValidationNegative;
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            child: Text(FeaturesStrings.setToZeroButton),
+                            onPressed: () {
+                              priceController.text = "0.00";
+                            },
+                          ),
+                          const Spacer(),
+                          TextButton(
+                            child: Text("Storno".tr()),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            child: Text("OK".tr()),
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                Navigator.of(context).pop(double.parse(priceController.text.replaceAll(",", ".")));
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
-    if(success && mounted){
-      ToastHelper.Show(context, FeaturesStrings.productsUpdateSuccess);
-      _fetch();
-    } else if (mounted) {
-      ToastHelper.Show(context, FeaturesStrings.productsUpdateFailed, severity: ToastSeverity.NotOk);
+
+    if (newPrice != null) {
+      setState(() {
+        final pIndex = _current.indexWhere((p) => p.id == product.id);
+        if (pIndex != -1) {
+          _current[pIndex].price = newPrice;
+          _recalc();
+        }
+      });
+    }
+  }
+
+  Future<void> _save() async {
+    try {
+      // The rpc call now either returns the success data or throws an exception.
+      await DbEshop.updateProductsForOrder(
+        widget.ticketId,
+        _current,
+      );
+
+      // If we reach here, the call was successful.
+      if (mounted) {
+        ToastHelper.Show(context, FeaturesStrings.productsUpdateSuccess);
+        _fetch(); // Refresh data
+      }
+    } catch (e) {
+      // If the call fails, a PostgrestException will be caught here.
+      if (mounted) {
+        // Pass the error to our new handler to display a detailed dialog.
+        ExceptionHandler.handle(
+          context,
+          error: e,
+          defaultMessage: FeaturesStrings.productsUpdateFailed,
+          showAsDialog: true, // Show the detailed dialog with JSON
+        );
+      }
     }
   }
 
@@ -98,32 +211,75 @@ class _ProductsDialogState extends State<ProductsDialog> {
     final payment = _bundle?.paymentInfo;
     if (order == null || payment == null) return;
 
-    // Calculate balance. A negative value means an overpayment (refund is due).
+    final referenceOrderData = _bundle?.referenceOrder?.data;
+    List<ProductModel> referenceProducts = [];
+    if(referenceOrderData != null) {
+      final ticketInHistory = (referenceOrderData["tickets"] as List?)
+          ?.firstWhereOrNull((t) => (t["id"] as int?) == widget.ticketId);
+      if (ticketInHistory != null && ticketInHistory["products"] != null) {
+        referenceProducts = (ticketInHistory["products"] as List)
+            .map((p) => ProductModel.fromJson(p as Map<String, dynamic>))
+            .toList();
+      }
+    }
+
+    final currentProducts = _current;
+    final added = currentProducts.where((p) => !referenceProducts.any((o) => o.id == p.id)).toList();
+    final removed = referenceProducts.where((p) => !currentProducts.any((c) => c.id == p.id)).toList();
+    final changed = <Map<String, ProductModel>>[];
+    for (var currentP in currentProducts) {
+      final refP = referenceProducts.firstWhereOrNull((p) => p.id == currentP.id);
+      if (refP != null && currentP.price != refP.price) {
+        changed.add({'from': refP, 'to': currentP});
+      }
+    }
+
+    final referenceTotal = referenceProducts.fold<double>(0.0, (sum, item) => sum + (item.price ?? 0));
+    final currentTotal = _sumCur;
+
     final totalPaid = payment.paid ?? 0;
     final orderPrice = order.price ?? 0;
     final balance = orderPrice - totalPaid;
 
-    final confirmed = await DialogHelper.showConfirmationDialogRich(
-      context: context,
-      title: FeaturesStrings.sendUpdateTitle,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(FeaturesStrings.sendUpdateContent(order.data?["email"] ?? "N/A")),
-          const SizedBox(height: 12),
-          _buildConfirmationListItem(Icons.credit_card, FeaturesStrings.sendUpdateItemStatus),
-          // Conditionally show item for balance due
-          if (balance > 0)
-            _buildConfirmationListItem(Icons.qr_code_2, FeaturesStrings.sendUpdateItemQr),
-          // Conditionally show item for overpayment / refund
-          if (balance < 0)
-            _buildConfirmationListItem(Icons.undo_outlined, FeaturesStrings.sendUpdateItemRefund),
-          _buildConfirmationListItem(Icons.receipt_long_outlined, FeaturesStrings.sendUpdateItemSummary),
-        ],
-      ),
-      confirmButtonText: FeaturesStrings.sendEmailButton,
-    );
+    final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(FeaturesStrings.sendUpdateTitle),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(FeaturesStrings.sendUpdateContent(order.data?["email"] ?? "N/A")),
+                  const Divider(height: 24),
+
+                  Text(FeaturesStrings.emailContentIntro, style: const TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+                  const SizedBox(height: 12),
+                  _buildChangesListItem(
+                    context: context,
+                    added: added,
+                    removed: removed,
+                    changed: changed,
+                    referenceTotal: referenceTotal,
+                    currentTotal: currentTotal,
+                  ),
+                  _buildConfirmationListItem(Icons.credit_card, FeaturesStrings.sendUpdateItemStatus),
+                  if (balance < 0)
+                    _buildConfirmationListItem(Icons.undo_outlined, FeaturesStrings.sendUpdateItemRefund),
+                  _buildConfirmationListItem(Icons.receipt_long_outlined, FeaturesStrings.sendUpdateItemSummary),
+                  if (balance > 0)
+                    _buildConfirmationListItem(Icons.qr_code_2, FeaturesStrings.sendUpdateItemQr),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: ()=> Navigator.of(context).pop(false), child: Text("Storno".tr())),
+              ElevatedButton(onPressed: ()=> Navigator.of(context).pop(true), child: Text(FeaturesStrings.sendEmailButton)),
+            ],
+          );
+        }
+    ) ?? false;
 
     if (confirmed && mounted) {
       setState(() => _loading = true);
@@ -142,6 +298,150 @@ class _ProductsDialogState extends State<ProductsDialog> {
         await _fetch();
       }
     }
+  }
+
+  Widget _buildChangesListItem({
+    required BuildContext context,
+    required List<ProductModel> added,
+    required List<ProductModel> removed,
+    required List<Map<String, ProductModel>> changed,
+    required double referenceTotal,
+    required double currentTotal,
+  }) {
+    final theme = Theme.of(context);
+    final hasChanges = added.isNotEmpty || removed.isNotEmpty || changed.isNotEmpty;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2.0),
+            child: Icon(Icons.list_alt_outlined, size: 18, color: theme.textTheme.bodySmall?.color),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(FeaturesStrings.sendUpdateItemChanges),
+                if (hasChanges) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber.shade200),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (added.isNotEmpty) ...[
+                          Text(FeaturesStrings.addedProductsTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ...added.map((p) => Padding(
+                            padding: const EdgeInsets.only(left: 8.0, top: 4.0),
+                            child: Text("+ ${p.title} (${Utilities.formatPrice(context, p.price!)})", style: const TextStyle(color: Colors.green)),
+                          )),
+                          const SizedBox(height: 12),
+                        ],
+                        if (removed.isNotEmpty) ...[
+                          Text(FeaturesStrings.removedProductsTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ...removed.map((p) => Padding(
+                            padding: const EdgeInsets.only(left: 8.0, top: 4.0),
+                            child: Text("- ${p.title} (${Utilities.formatPrice(context, p.price!)})", style: const TextStyle(color: Colors.red)),
+                          )),
+                          const SizedBox(height: 12),
+                        ],
+                        if (changed.isNotEmpty) ...[
+                          Text(FeaturesStrings.changedPricesTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ...changed.map((c) {
+                            final from = c['from']!;
+                            final to = c['to']!;
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 8.0, top: 4.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(child: Text("• ${to.title}: ")),
+                                  Text.rich(
+                                    TextSpan(
+                                      style: DefaultTextStyle.of(context).style,
+                                      children: [
+                                        TextSpan(
+                                          text: Utilities.formatPrice(context, from.price!),
+                                          style: TextStyle(decoration: TextDecoration.lineThrough, color: theme.textTheme.bodySmall?.color),
+                                        ),
+                                        WidgetSpan(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                            child: Icon(Icons.arrow_forward, size: 16, color: theme.colorScheme.primary),
+                                          ),
+                                          alignment: PlaceholderAlignment.middle,
+                                        ),
+                                        TextSpan(
+                                          text: Utilities.formatPrice(context, to.price!),
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            );
+                          }),
+                          const SizedBox(height: 12),
+                        ],
+                        if (referenceTotal != currentTotal) ...[
+                          const Divider(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(FeaturesStrings.totalPriceChange, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                Text.rich(
+                                  TextSpan(
+                                    style: DefaultTextStyle.of(context).style,
+                                    children: [
+                                      TextSpan(
+                                        text: Utilities.formatPrice(context, referenceTotal),
+                                        style: TextStyle(decoration: TextDecoration.lineThrough, color: theme.textTheme.bodySmall?.color),
+                                      ),
+                                      WidgetSpan(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                          child: Icon(Icons.arrow_forward, size: 16, color: theme.colorScheme.primary),
+                                        ),
+                                        alignment: PlaceholderAlignment.middle,
+                                      ),
+                                      TextSpan(
+                                        text: Utilities.formatPrice(context, currentTotal),
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        ]
+                      ],
+                    ),
+                  ),
+                ] else
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0, top: 4.0),
+                    child: Text(FeaturesStrings.noProductChangesDetected, style: TextStyle(fontStyle: FontStyle.italic, color: theme.textTheme.bodySmall?.color)),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildConfirmationListItem(IconData icon, String text) {
@@ -220,22 +520,30 @@ class _ProductsDialogState extends State<ProductsDialog> {
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (_, i) {
                     final p = allItems[i];
+                    final pCurrent = _current.firstWhereOrNull((c) => c.id == p.id);
+                    final pOrig = _orig.firstWhereOrNull((o) => o.id == p.id);
+
                     final isAdded = added.any((x) => x.id == p.id);
                     final isRemoved = removed.any((x) => x.id == p.id);
+                    final isPriceChanged = !isAdded && !isRemoved && pCurrent != null && pOrig != null && pCurrent.price != pOrig.price;
 
                     final priceText = isAdded
                         ? "+${Utilities.formatPrice(context, p.price ?? 0, decimalDigits: 2)}"
                         : isRemoved
                         ? "-${Utilities.formatPrice(context, p.price ?? 0, decimalDigits: 2)}"
+                        : isPriceChanged
+                        ? "${Utilities.formatPrice(context, pCurrent!.price ?? 0, decimalDigits: 2)} (${Utilities.formatPrice(context, pOrig!.price ?? 0, decimalDigits: 2)})"
                         : Utilities.formatPrice(context, p.price ?? 0, decimalDigits: 2);
 
-                    final priceColor = isAdded ? Colors.green : isRemoved ? Colors.red : null;
+                    final priceColor = isAdded ? Colors.green : isRemoved ? Colors.red : isPriceChanged ? Colors.orange.shade700 : null;
 
                     return Card(
                       color: isAdded
                           ? Colors.green.withOpacityUniversal(context, 0.05)
                           : isRemoved
                           ? Colors.red.withOpacityUniversal(context, 0.05)
+                          : isPriceChanged
+                          ? Colors.orange.withOpacityUniversal(context, 0.05)
                           : null,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       elevation: 1,
@@ -250,6 +558,12 @@ class _ProductsDialogState extends State<ProductsDialog> {
                               style: TextStyle(fontWeight: FontWeight.bold, color: priceColor),
                             ),
                             const SizedBox(width: 8),
+                            if (!isRemoved)
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined),
+                                tooltip: FeaturesStrings.editPriceTooltip,
+                                onPressed: pCurrent == null ? null : () => _editPrice(pCurrent),
+                              ),
                             IconButton(
                               icon: Icon(isRemoved ? Icons.add : Icons.delete_outline),
                               tooltip: isRemoved ? FeaturesStrings.addBackTooltip : FeaturesStrings.removeTooltip,
@@ -398,10 +712,50 @@ class _ProductsDialogState extends State<ProductsDialog> {
 }
 
 extension on List<ProductModel> {
-  bool equals(List<ProductModel> o) {
-    if (length != o.length) return false;
-    final a = map((e) => e.id).toSet();
-    final b = o.map((e) => e.id).toSet();
-    return a.containsAll(b);
+  bool equals(List<ProductModel> other) {
+    if (length != other.length) return false;
+
+    final thisMap = {for (var p in this) p.id: p.price};
+    final otherMap = {for (var p in other) p.id: p.price};
+
+    if (thisMap.keys.length != otherMap.keys.length) return false;
+    if (!thisMap.keys.every((key) => otherMap.containsKey(key))) return false;
+
+    for (final id in thisMap.keys) {
+      if (thisMap[id] != otherMap[id]) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
+/// A helper widget to correctly manage the lifecycle of a FocusNode inside a dialog.
+class _StatefulDialogWrapper extends StatefulWidget {
+  const _StatefulDialogWrapper({required this.builder});
+  final Widget Function(BuildContext context, FocusNode focusNode) builder;
+
+  @override
+  __StatefulDialogWrapperState createState() => __StatefulDialogWrapperState();
+}
+
+class __StatefulDialogWrapperState extends State<_StatefulDialogWrapper> {
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, _focusNode);
   }
 }

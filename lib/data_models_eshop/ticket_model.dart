@@ -98,7 +98,7 @@ class TicketModel extends ITrinaRowModel {
       EshopColumns.TICKET_PRODUCTS_EDIT: TrinaCell(value: ""),
     };
 
-    final productCells = EshopColumns.generateProductTypeCells(relatedOrder!.relatedProducts ?? []);
+    final productCells = EshopColumns.generateProductTypeCells(relatedProducts ?? []);
     cells.addAll(productCells);
     return TrinaRow(cells: cells);
   }
@@ -111,12 +111,12 @@ class TicketModel extends ITrinaRowModel {
   }
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
     // Implement your delete logic here
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
     await DbTickets.updateTicketNoteHidden(id!, noteHidden!);
   }
 
