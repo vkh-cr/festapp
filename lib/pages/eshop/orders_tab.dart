@@ -16,6 +16,7 @@ import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
 import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 
 class OrdersTab extends StatefulWidget {
@@ -41,9 +42,17 @@ class _OrdersTabState extends State<OrdersTab> {
   }
 
   Future<void> _initializeController() async {
-    // Fetch the bundle once to determine which columns to show
-    final forms = await DbForms.getAllFormsViaOccasionLink(occasionLink!);
+    if (occasionLink == null) return;
+    // Fetch forms with their fields to determine which columns to show.
+    final forms = await DbForms.getAllFormsWithFieldsViaOccasionLink(occasionLink!);
     if (!mounted) return;
+
+    // Check if any field across all forms is a non-ticket 'note' field.
+    final hasOrderNoteField = forms.any((form) =>
+        (form.relatedFields ?? []).any((field) =>
+        field.type == FormHelper.fieldTypeNote && (field.isTicketField ?? false) == false
+        )
+    );
 
     var formFeat = FeatureService.getFeatureDetails(FeatureConstants.form) as FormFeature;
 
@@ -61,7 +70,8 @@ class _OrdersTabState extends State<OrdersTab> {
       EshopColumns.PAYMENT_INFO_PAID,
       EshopColumns.PAYMENT_INFO_RETURNED,
       EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL,
-      EshopColumns.ORDER_DATA_NOTE,
+      if (hasOrderNoteField)
+        EshopColumns.ORDER_DATA_NOTE,
       EshopColumns.ORDER_NOTE_HIDDEN,
       if (formFeat.isEnabled && (formFeat.reminderIsEnabled ?? false))
         EshopColumns.PAYMENT_INFO_REMINDER_SENT,
@@ -132,6 +142,7 @@ class _OrdersTabState extends State<OrdersTab> {
   }
 
   Future<void> synchronizePayments() async {
+    if(occasionLink == null) return;
     await DbEshop.fetchTransactions(occasionLink!);
     refreshData();
   }
@@ -168,6 +179,7 @@ class _OrdersTabState extends State<OrdersTab> {
   }
 
   Future<void> sendTicketsOrConfirmations(SingleDataGridController singleDataGrid) async {
+    if (occasionLink == null) return;
     var selected = _getChecked(singleDataGrid);
     if (selected.isEmpty) {
       return;
