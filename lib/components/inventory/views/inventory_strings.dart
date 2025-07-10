@@ -1,6 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 
 class InventoryStrings {
+  // --- Feature Description ---
+  // ADDED: New description for the 'Stay' (Pobyt) feature.
+  static String get featureDescription => 'Inventory.featureDescription'.tr(); // "This feature allows for managing capacities for accommodation, meals, and daily program slots. It supports the assignment of participants to specific rooms and displays this information on their profile within the application."
+  static String get featureTitle => 'Inventory.featureTitle'.tr(); // "Stay"
+
   // General / Shared
   static String get edit => 'Inventory.edit'.tr(); // "Edit"
   static String get remove => 'Inventory.remove'.tr(); // "Remove"
