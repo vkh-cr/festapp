@@ -20,7 +20,6 @@ class FeatureService {
     FeatureConstants.songbook,
     FeatureConstants.game,
     FeatureConstants.mySchedule,
-    FeatureConstants.services,
     FeatureConstants.userGroups,
     FeatureConstants.entryCode,
     FeatureConstants.timetable,
