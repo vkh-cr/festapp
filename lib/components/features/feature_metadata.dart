@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/features/features_strings.dart';
+import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'feature_constants.dart';
 import 'schedule_feature.dart';
 
@@ -34,8 +35,8 @@ class FeatureMetadata {
       'description': 'Enables adding program items to favorites.'.tr(),
     },
     FeatureConstants.services: {
-      'title': 'Services'.tr(),
-      'description': 'Allows assigning accommodations to a user and displaying them on the user profile.'.tr(),
+      'title': InventoryStrings.featureTitle,
+      'description': InventoryStrings.featureDescription,
     },
     FeatureConstants.entryCode: {
       'title': 'Entry Code'.tr(),

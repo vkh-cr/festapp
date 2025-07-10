@@ -45,6 +45,21 @@ class DbForms {
     return [];
   }
 
+  /// Fetches all forms for a given occasion, including their nested form fields.
+  static Future<List<FormModel>> getAllFormsWithFieldsViaOccasionLink(String occasionLink) async {
+    final response = await _supabase.rpc(
+        'get_all_forms_with_fields', // Calling the new function
+        params: {'occasion_link': occasionLink}
+    );
+
+    if (response["code"] == 200) {
+      // The FormModel.fromJson factory is expected to handle the 'fields' array
+      return List<FormModel>.from(
+          response["data"].map((f) => FormModel.fromJson(f)));
+    }
+    return [];
+  }
+
   static Future<void> createNewForm({
     required String title,
     required String link,
@@ -103,7 +118,7 @@ class DbForms {
 
   static Future<FormModel?> getFormFromLink(String link) async {
     final response = await _supabase
-        .rpc('get_form_from_link', params: {'form_link': link});
+        .rpc('get_form_by_link', params: {'form_link': link});
 
     if(response["code"] == 200 || response["code"] == 400){
       var form = FormModel.fromJson(response["data"]);
@@ -233,7 +248,7 @@ class DbForms {
 
   static Future<List<FormResponseModel>> getAllResponses(String formLink) async {
     var allFields = await getAllFormFields(formLink);
-    var ordersBundle = await DbOrders.getAllOrdersBundle(formLink: formLink);
+    var ordersBundle = await DbOrders.getAllOrdersBundle(formLink: formLink, includeOrderDetails: true);
     var onlyFormOrders = ordersBundle.orders.where((o) => o.form?.link == formLink);
     return List<FormResponseModel>.from(
       onlyFormOrders.map((x) => FormResponseModel.fromOrder(x, allFields)),

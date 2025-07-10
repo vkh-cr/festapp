@@ -371,6 +371,9 @@ BEGIN
           updated_at    = now()
         WHERE id = order_id;
 
+        -- Apply inventory allocations. This will raise an overbooking error if spots are unavailable.
+        PERFORM apply_allocations(order_id);
+
         -- either flag as 'ordered' or, if free, mark paid via your function
         IF calculated_price = 0 THEN
           PERFORM update_order_and_tickets_to_paid(order_id);
