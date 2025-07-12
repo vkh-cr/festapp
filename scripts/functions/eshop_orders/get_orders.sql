@@ -15,19 +15,17 @@ DECLARE
     productTypesData JSONB;
     ticketsData JSONB;
     ordersData JSONB;
+    ordersHistoryData JSONB;
     orderProductTicketsData JSONB;
     paymentInfoData JSONB;
     formsData JSONB;
+    usersData JSONB; -- ADDED: Variable for user info data
 BEGIN
     -- This function retrieves order and reservation details for a given occasion.
-    -- The p_options parameter can be used to control the output.
-    -- Example for p_options: '{"include_full_order_data": true, "include_spots": true}'
+    -- It can conditionally include related data like spots, history, and users.
     --
-    -- 'include_full_order_data': If true, the full 'data' JSONB object for each order is included.
-    --                            Otherwise, only 'name', 'surname', 'email', and 'form' are extracted.
-    --
-    -- 'include_spots': If true, spot information is fetched and included in the response.
-    --                  Otherwise, this query is skipped for optimization.
+    -- 'include_orders_history': If true, it fetches 'orders_history' and the
+    --                           associated 'users' who created those history records.
 
     -- 1. Input Validation: Ensure at least one link is provided.
     IF p_occasion_link IS NULL AND p_form_link IS NULL THEN
@@ -35,13 +33,12 @@ BEGIN
     END IF;
 
     -- 2. Determine occasion_id based on the provided link.
-    -- occasion_link has priority.
     IF p_occasion_link IS NOT NULL THEN
         SELECT id
         INTO v_occasion_id
         FROM public.occasions
         WHERE link = p_occasion_link;
-    ELSE -- If occasion_link is NULL, use form_link
+    ELSE
         SELECT occasion, key
         INTO v_occasion_id, v_form_key
         FROM public.forms
@@ -60,7 +57,6 @@ BEGIN
 
     -- Conditionally fetch spots based on p_options for optimization
     IF (p_options->>'include_spots')::BOOLEAN = TRUE THEN
-        -- Fetch spots where order_product_ticket is not NULL
         SELECT jsonb_agg(jsonb_build_object(
             'id', s.id,
             'title', s.title,
@@ -132,56 +128,27 @@ BEGIN
     FROM public.forms f
     WHERE f.occasion = v_occasion_id;
 
-    -- Fetch orders - this is the conditional part.
-    -- If v_form_key is not NULL, it means we are filtering by form.
+    -- Fetch orders, conditionally filtering by form link
     IF v_form_key IS NOT NULL THEN
         SELECT jsonb_agg(jsonb_build_object(
-            'id', o.id,
-            'created_at', o.created_at,
-            'updated_at', o.updated_at,
-            'price', o.price,
-            'state', o.state,
-            'currency_code', o.currency_code,
+            'id', o.id, 'created_at', o.created_at, 'updated_at', o.updated_at, 'price', o.price, 'state', o.state, 'currency_code', o.currency_code,
             'data', CASE
-                        -- If the option to include full data is true, return the whole data object.
-                        WHEN (p_options->>'include_full_order_data')::BOOLEAN = TRUE THEN o.data
-                        -- Otherwise, build a new JSON object with only the specified fields.
-                        ELSE jsonb_build_object(
-                            'name', o.data->>'name',
-                            'surname', o.data->>'surname',
-                            'email', o.data->>'email',
-                            'form', o.data->>'form'
-                        )
-                    END,
-            'payment_info', o.payment_info,
-            'note_hidden', o.note_hidden
+                WHEN (p_options->>'include_full_order_data')::BOOLEAN = TRUE THEN o.data
+                ELSE jsonb_build_object('name', o.data->>'name', 'surname', o.data->>'surname', 'email', o.data->>'email', 'form', o.data->>'form')
+            END,
+            'payment_info', o.payment_info, 'note_hidden', o.note_hidden
         ))
         INTO ordersData
         FROM eshop.orders o
-        WHERE o.occasion = v_occasion_id
-          AND o.data->>'form' = v_form_key::TEXT; -- Filter by the form's key
+        WHERE o.occasion = v_occasion_id AND o.data->>'form' = v_form_key::TEXT;
     ELSE
-        -- Original query if not filtering by form
         SELECT jsonb_agg(jsonb_build_object(
-            'id', o.id,
-            'created_at', o.created_at,
-            'updated_at', o.updated_at,
-            'price', o.price,
-            'state', o.state,
-            'currency_code', o.currency_code,
+            'id', o.id, 'created_at', o.created_at, 'updated_at', o.updated_at, 'price', o.price, 'state', o.state, 'currency_code', o.currency_code,
             'data', CASE
-                        -- If the option to include full data is true, return the whole data object.
-                        WHEN (p_options->>'include_full_order_data')::BOOLEAN = TRUE THEN o.data
-                        -- Otherwise, build a new JSON object with only the specified fields.
-                        ELSE jsonb_build_object(
-                            'name', o.data->>'name',
-                            'surname', o.data->>'surname',
-                            'email', o.data->>'email',
-                            'form', o.data->>'form'
-                        )
-                    END,
-            'payment_info', o.payment_info,
-            'note_hidden', o.note_hidden
+                WHEN (p_options->>'include_full_order_data')::BOOLEAN = TRUE THEN o.data
+                ELSE jsonb_build_object('name', o.data->>'name', 'surname', o.data->>'surname', 'email', o.data->>'email', 'form', o.data->>'form')
+            END,
+            'payment_info', o.payment_info, 'note_hidden', o.note_hidden
         ))
         INTO ordersData
         FROM eshop.orders o
@@ -194,27 +161,15 @@ BEGIN
         FROM jsonb_array_elements(COALESCE(ordersData, '[]'::jsonb)) order_obj
     )
     -- Fetch relevant order-product-ticket data based on extracted order IDs
-    SELECT jsonb_agg(jsonb_build_object(
-        'id', opt.id,
-        'order', opt."order",
-        'product', opt.product,
-        'ticket', opt.ticket
-    ))
+    SELECT jsonb_agg(jsonb_build_object('id', opt.id, 'order', opt."order", 'product', opt.product, 'ticket', opt.ticket))
     INTO orderProductTicketsData
     FROM eshop.order_product_ticket opt
     WHERE opt."order" IN (SELECT id FROM order_ids);
 
     -- Fetch payment information linked to the orders
     SELECT jsonb_agg(jsonb_build_object(
-        'id', pi.id,
-        'bank_account', pi.bank_account,
-        'variable_symbol', pi.variable_symbol,
-        'amount', pi.amount,
-        'paid', pi.paid,
-        'returned', pi.returned,
-        'deadline', pi.deadline,
-        'currency_code', pi.currency_code,
-        'data', pi.data
+        'id', pi.id, 'bank_account', pi.bank_account, 'variable_symbol', pi.variable_symbol, 'amount', pi.amount,
+        'paid', pi.paid, 'returned', pi.returned, 'deadline', pi.deadline, 'currency_code', pi.currency_code, 'data', pi.data
     ))
     INTO paymentInfoData
     FROM eshop.payment_info pi
@@ -223,6 +178,39 @@ BEGIN
         FROM jsonb_array_elements(COALESCE(ordersData, '[]'::jsonb)) order_obj
         WHERE order_obj->>'payment_info' IS NOT NULL
     );
+
+    -- Conditionally fetch orders history and related users based on p_options
+    IF (p_options->>'include_orders_history')::BOOLEAN = TRUE THEN
+        -- First, fetch the history records
+        WITH order_ids AS (
+            SELECT (order_obj->>'id')::BIGINT AS id
+            FROM jsonb_array_elements(COALESCE(ordersData, '[]'::jsonb)) order_obj
+        )
+        SELECT jsonb_agg(jsonb_build_object(
+            'id', oh.id, 'created_at', oh.created_at, 'created_by', oh.created_by, 'data', oh.data,
+            'order', oh."order", 'state', oh.state, 'price', oh.price, 'currency_code', oh.currency_code
+        ))
+        INTO ordersHistoryData
+        FROM eshop.orders_history oh
+        WHERE oh."order" IN (SELECT id FROM order_ids);
+
+        -- Second, fetch the unique users who created those history records
+        WITH user_ids AS (
+            SELECT DISTINCT (history_obj->>'created_by')::UUID AS id
+            FROM jsonb_array_elements(COALESCE(ordersHistoryData, '[]'::jsonb)) history_obj
+            WHERE history_obj->>'created_by' IS NOT NULL
+        )
+        SELECT jsonb_agg(jsonb_build_object(
+            'id', ui.id,
+            'name', ui.name,
+            'surname', ui.surname,
+            'email_readonly', ui.email_readonly
+        ))
+        INTO usersData
+        FROM public.user_info ui
+        WHERE ui.id IN (SELECT id FROM user_ids);
+    END IF;
+
 
     -- Return combined data
     RETURN jsonb_build_object(
@@ -235,7 +223,9 @@ BEGIN
             'orders', COALESCE(ordersData, '[]'::jsonb),
             'order_product_ticket', COALESCE(orderProductTicketsData, '[]'::jsonb),
             'payment_info', COALESCE(paymentInfoData, '[]'::jsonb),
-            'forms', COALESCE(formsData, '[]'::jsonb)
+            'forms', COALESCE(formsData, '[]'::jsonb),
+            'orders_history', COALESCE(ordersHistoryData, '[]'::jsonb),
+            'users', COALESCE(usersData, '[]'::jsonb)
         )
     );
 END;

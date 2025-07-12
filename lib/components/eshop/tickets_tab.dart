@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
-import 'package:fstapp/data_models_eshop/ticket_model.dart';
+import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
-import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/ticket_code_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
+
+import 'eshop_columns.dart';
+import 'orders_strings.dart';
 
 class TicketsTab extends StatefulWidget {
   const TicketsTab({super.key});
@@ -60,14 +60,14 @@ class _TicketsTabState extends State<TicketsTab> {
         ),
         headerChildren: [
           DataGridAction(
-            name: FeaturesStrings.cancel,
+            name: OrdersStrings.cancel,
             action: (SingleDataGridController singleDataGrid, [_]) =>
                 _stornoTickets(singleDataGrid),
             isEnabled: RightsService.isOrderEditor,
           ),
           if(FeatureService.isFeatureEnabled(FeatureConstants.ticket))
             DataGridAction(
-              name: FeaturesStrings.scanActionText,
+              name: OrdersStrings.scanActionText,
               action: (SingleDataGridController singleDataGrid, [_]) =>
                   _scanTickets(singleDataGrid),
               isEnabled: RightsService.isOrderEditor,
@@ -94,7 +94,7 @@ class _TicketsTabState extends State<TicketsTab> {
   Future<void> _scanTickets(SingleDataGridController singleDataGrid) async {
     await TicketCodeHelper.showScanTicketCode(
       context,
-      FeaturesStrings.scanActionText,
+      OrdersStrings.scanActionText,
       occasionLink!,
     );
   }
@@ -108,8 +108,8 @@ class _TicketsTabState extends State<TicketsTab> {
 
     var confirm = await DialogHelper.showConfirmationDialog(
       context,
-      FeaturesStrings.cancel,
-      "${FeaturesStrings.cancelItemsConfirmationText} (${selectedTickets.length})",
+      OrdersStrings.cancel,
+      "${OrdersStrings.cancelItemsConfirmationText} (${selectedTickets.length})",
     );
 
     if (confirm) {
@@ -118,21 +118,21 @@ class _TicketsTabState extends State<TicketsTab> {
           if (await DbTickets.stornoTicket(ticket.id!)) {
             ToastHelper.Show(
               context,
-              FeaturesStrings.stornoCompletedText.tr(
+              OrdersStrings.stornoCompletedText.tr(
                 namedArgs: {
                   "item": ticket.ticketSymbol ?? ticket.id.toString(),
                 },
               ),
             );
           } else {
-            throw Exception(FeaturesStrings.stornoFailed);
+            throw Exception(OrdersStrings.stornoFailed);
           }
         };
       }).toList();
 
       await DialogHelper.showProgressDialogAsync(
         context,
-        FeaturesStrings.processing,
+        OrdersStrings.processing,
         stornoFutures.length,
         futures: stornoFutures,
       );

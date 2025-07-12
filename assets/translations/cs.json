@@ -743,7 +743,10 @@
     "variableSymbol": "Variabilní symbol",
     "deadline": "Termín do",
     "form": "Formulář",
-    "reminderSent": "Připomínka odeslána"
+    "reminderSent": "Připomínka odeslána",
+    "changedAt": "Datum změny",
+    "changedBy": "Změnil(a)",
+    "changes": "Změny"
   },
   "FormsFeature": {
     "formsTitle": "Formuláře",
@@ -796,7 +799,9 @@
     "tickets": "Vstupenky",
     "ticket": "Vstupenka",
     "applications": "Přihlášky",
-    "application": "Přihláška"
+    "application": "Přihláška",
+    "ordersTab": "Objednávky",
+    "ordersHistoryTab": "Historie objednávek"
   },
   "UserColumns": {
     "id": "Id",
@@ -827,6 +832,16 @@
     "approver": "Schvalovatel",
     "approved": "Schváleno",
     "invited": "Pozván"
+  },
+  "OrderHistory": {
+    "noHistoryFound": "Nebyla nalezena žádná historie.",
+    "currentState": "Aktuální stav",
+    "systemUser": "SYSTÉM",
+    "changes": "Změny",
+    "totalPrice": "Celková cena",
+    "noProductChanges": "Žádné změny v produktech.",
+    "expiredOrderTooltip": "Expirovaná objednávka",
+    "toBasicString": "Historie č. {id} pro objednávku č. {orderId}"
   },
   "ProductsDialog": {
     "productsUpdateSuccess": "Produkty úspěšně změněny.",

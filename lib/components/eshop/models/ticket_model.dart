@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
-import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
+import '../eshop_columns.dart';
 import 'order_model.dart';
-import '../components/blueprint/blueprint_object_model.dart';
+import '../../blueprint/blueprint_object_model.dart';
 import 'product_model.dart';
 import 'package:intl/intl.dart';
 

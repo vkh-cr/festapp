@@ -1,6 +1,6 @@
 import 'package:fstapp/components/inventory/models/resource_model.dart';
 import 'package:fstapp/components/inventory/models/resource_slot_model.dart';
-import 'package:fstapp/data_models_eshop/spot_model.dart';
+import 'package:fstapp/components/eshop/models/spot_model.dart';
 
 /// A unified object to hold all reference data for a single row in the spot management grid.
 /// This is passed in a single hidden column to simplify data access in renderers and dialogs.
