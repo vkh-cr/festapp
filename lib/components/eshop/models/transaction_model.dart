@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';

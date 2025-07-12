@@ -1,9 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/features/features_strings.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -11,6 +10,8 @@ import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/search_products_screen.dart';
+
+import '../orders_strings.dart';
 
 class ProductsDialog extends StatefulWidget {
   final int ticketId;
@@ -103,7 +104,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        FeaturesStrings.editPriceTitle,
+                        OrdersStrings.editPriceTitle,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 20),
@@ -114,18 +115,18 @@ class _ProductsDialogState extends State<ProductsDialog> {
                             focusNode: focusNode,
                             autofocus: true,
                             controller: priceController,
-                            decoration: InputDecoration(labelText: FeaturesStrings.newPriceLabel),
+                            decoration: InputDecoration(labelText: OrdersStrings.newPriceLabel),
                             keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return FeaturesStrings.priceValidationRequired;
+                                return OrdersStrings.priceValidationRequired;
                               }
                               final price = double.tryParse(value.replaceAll(",", "."));
                               if (price == null) {
-                                return FeaturesStrings.priceValidationInvalid;
+                                return OrdersStrings.priceValidationInvalid;
                               }
                               if (price < 0) {
-                                return FeaturesStrings.priceValidationNegative;
+                                return OrdersStrings.priceValidationNegative;
                               }
                               return null;
                             },
@@ -137,7 +138,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton(
-                            child: Text(FeaturesStrings.setToZeroButton),
+                            child: Text(OrdersStrings.setToZeroButton),
                             onPressed: () {
                               priceController.text = "0.00";
                             },
@@ -189,7 +190,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
 
       // If we reach here, the call was successful.
       if (mounted) {
-        ToastHelper.Show(context, FeaturesStrings.productsUpdateSuccess);
+        ToastHelper.Show(context, OrdersStrings.productsUpdateSuccess);
         _fetch(); // Refresh data
       }
     } catch (e) {
@@ -199,7 +200,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
         ExceptionHandler.handle(
           context,
           error: e,
-          defaultMessage: FeaturesStrings.productsUpdateFailed,
+          defaultMessage: OrdersStrings.productsUpdateFailed,
           showAsDialog: true, // Show the detailed dialog with JSON
         );
       }
@@ -245,16 +246,16 @@ class _ProductsDialogState extends State<ProductsDialog> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text(FeaturesStrings.sendUpdateTitle),
+            title: Text(OrdersStrings.sendUpdateTitle),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(FeaturesStrings.sendUpdateContent(order.data?["email"] ?? "N/A")),
+                  Text(OrdersStrings.sendUpdateContent(order.data?["email"] ?? "N/A")),
                   const Divider(height: 24),
 
-                  Text(FeaturesStrings.emailContentIntro, style: const TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+                  Text(OrdersStrings.emailContentIntro, style: const TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
                   const SizedBox(height: 12),
                   _buildChangesListItem(
                     context: context,
@@ -264,18 +265,18 @@ class _ProductsDialogState extends State<ProductsDialog> {
                     referenceTotal: referenceTotal,
                     currentTotal: currentTotal,
                   ),
-                  _buildConfirmationListItem(Icons.credit_card, FeaturesStrings.sendUpdateItemStatus),
+                  _buildConfirmationListItem(Icons.credit_card, OrdersStrings.sendUpdateItemStatus),
                   if (balance < 0)
-                    _buildConfirmationListItem(Icons.undo_outlined, FeaturesStrings.sendUpdateItemRefund),
-                  _buildConfirmationListItem(Icons.receipt_long_outlined, FeaturesStrings.sendUpdateItemSummary),
+                    _buildConfirmationListItem(Icons.undo_outlined, OrdersStrings.sendUpdateItemRefund),
+                  _buildConfirmationListItem(Icons.receipt_long_outlined, OrdersStrings.sendUpdateItemSummary),
                   if (balance > 0)
-                    _buildConfirmationListItem(Icons.qr_code_2, FeaturesStrings.sendUpdateItemQr),
+                    _buildConfirmationListItem(Icons.qr_code_2, OrdersStrings.sendUpdateItemQr),
                 ],
               ),
             ),
             actions: [
               TextButton(onPressed: ()=> Navigator.of(context).pop(false), child: Text("Storno".tr())),
-              ElevatedButton(onPressed: ()=> Navigator.of(context).pop(true), child: Text(FeaturesStrings.sendEmailButton)),
+              ElevatedButton(onPressed: ()=> Navigator.of(context).pop(true), child: Text(OrdersStrings.sendEmailButton)),
             ],
           );
         }
@@ -287,14 +288,14 @@ class _ProductsDialogState extends State<ProductsDialog> {
         await DbEshop.sendTicketOrderUpdateEmail(_bundle!.order.id!);
       }catch(e){
         if (mounted) {
-          ToastHelper.Show(context, FeaturesStrings.sendEmailFailed, severity: ToastSeverity.NotOk);
+          ToastHelper.Show(context, OrdersStrings.sendEmailFailed, severity: ToastSeverity.NotOk);
           setState(() => _loading = false);
           await _fetch();
           return;
         }
       }
       if (mounted) {
-        ToastHelper.Show(context, FeaturesStrings.sendEmailSuccess);
+        ToastHelper.Show(context, OrdersStrings.sendEmailSuccess);
         await _fetch();
       }
     }
@@ -325,7 +326,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(FeaturesStrings.sendUpdateItemChanges),
+                Text(OrdersStrings.sendUpdateItemChanges),
                 if (hasChanges) ...[
                   const SizedBox(height: 8),
                   Container(
@@ -340,7 +341,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (added.isNotEmpty) ...[
-                          Text(FeaturesStrings.addedProductsTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(OrdersStrings.addedProductsTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ...added.map((p) => Padding(
                             padding: const EdgeInsets.only(left: 8.0, top: 4.0),
                             child: Text("+ ${p.title} (${Utilities.formatPrice(context, p.price!)})", style: const TextStyle(color: Colors.green)),
@@ -348,7 +349,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                           const SizedBox(height: 12),
                         ],
                         if (removed.isNotEmpty) ...[
-                          Text(FeaturesStrings.removedProductsTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(OrdersStrings.removedProductsTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ...removed.map((p) => Padding(
                             padding: const EdgeInsets.only(left: 8.0, top: 4.0),
                             child: Text("- ${p.title} (${Utilities.formatPrice(context, p.price!)})", style: const TextStyle(color: Colors.red)),
@@ -356,7 +357,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                           const SizedBox(height: 12),
                         ],
                         if (changed.isNotEmpty) ...[
-                          Text(FeaturesStrings.changedPricesTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(OrdersStrings.changedPricesTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ...changed.map((c) {
                             final from = c['from']!;
                             final to = c['to']!;
@@ -401,7 +402,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(FeaturesStrings.totalPriceChange, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                Text(OrdersStrings.totalPriceChange, style: const TextStyle(fontWeight: FontWeight.bold)),
                                 Text.rich(
                                   TextSpan(
                                     style: DefaultTextStyle.of(context).style,
@@ -434,7 +435,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                 ] else
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0, top: 4.0),
-                    child: Text(FeaturesStrings.noProductChangesDetected, style: TextStyle(fontStyle: FontStyle.italic, color: theme.textTheme.bodySmall?.color)),
+                    child: Text(OrdersStrings.noProductChangesDetected, style: TextStyle(fontStyle: FontStyle.italic, color: theme.textTheme.bodySmall?.color)),
                   ),
               ],
             ),
@@ -469,7 +470,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
 
     final customerName = _bundle?.order.data != null
         ? "${_bundle!.order.data!["name"] ?? ""} ${_bundle!.order.data!["surname"] ?? ""}"
-        : FeaturesStrings.dialogTitleFallback;
+        : OrdersStrings.dialogTitleFallback;
 
     // Combine order symbol and customer name for the title
     final dialogTitle = "${_bundle?.order.toBasicString() ?? ""} $customerName".trim();
@@ -501,8 +502,8 @@ class _ProductsDialogState extends State<ProductsDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildTotalColumn(FeaturesStrings.originalPrice, _sumOrig),
-                  _buildTotalColumn(FeaturesStrings.currentPrice, _sumCur),
+                  _buildTotalColumn(OrdersStrings.originalPrice, _sumOrig),
+                  _buildTotalColumn(OrdersStrings.currentPrice, _sumCur),
                   _buildChangeColumn(),
                 ],
               ),
@@ -510,7 +511,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
               if (allItems.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24.0),
-                  child: SelectableText(FeaturesStrings.noProducts),
+                  child: SelectableText(OrdersStrings.noProducts),
                 )
               else
                 ListView.separated(
@@ -561,12 +562,12 @@ class _ProductsDialogState extends State<ProductsDialog> {
                             if (!isRemoved)
                               IconButton(
                                 icon: const Icon(Icons.edit_outlined),
-                                tooltip: FeaturesStrings.editPriceTooltip,
+                                tooltip: OrdersStrings.editPriceTooltip,
                                 onPressed: pCurrent == null ? null : () => _editPrice(pCurrent),
                               ),
                             IconButton(
                               icon: Icon(isRemoved ? Icons.add : Icons.delete_outline),
-                              tooltip: isRemoved ? FeaturesStrings.addBackTooltip : FeaturesStrings.removeTooltip,
+                              tooltip: isRemoved ? OrdersStrings.addBackTooltip : OrdersStrings.removeTooltip,
                               onPressed: () => isRemoved ? _addBack(p) : _remove(p),
                             ),
                           ],
@@ -581,7 +582,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                 child: ElevatedButton.icon(
                   onPressed: _add,
                   icon: const Icon(Icons.add_shopping_cart),
-                  label: Text(FeaturesStrings.addProductsButton),
+                  label: Text(OrdersStrings.addProductsButton),
                 ),
               ),
             ],
@@ -615,11 +616,11 @@ class _ProductsDialogState extends State<ProductsDialog> {
 
     return Column(
       children: [
-        _buildInfoRow(FeaturesStrings.infoTicketSymbol, ticket.ticketSymbol ?? "N/A"),
-        _buildInfoRow(FeaturesStrings.infoEmail, order.data?["email"] ?? "N/A"),
-        _buildInfoRow(FeaturesStrings.infoOrderStatus, OrderModel.stateToLocale(order.state!)),
+        _buildInfoRow(OrdersStrings.infoTicketSymbol, ticket.ticketSymbol ?? "N/A"),
+        _buildInfoRow(OrdersStrings.infoEmail, order.data?["email"] ?? "N/A"),
+        _buildInfoRow(OrdersStrings.infoOrderStatus, OrderModel.stateToLocale(order.state!)),
         _buildInfoRow(
-            FeaturesStrings.infoPayment,
+            OrdersStrings.infoPayment,
             "${Utilities.formatPrice(context, totalPaid)} / ${Utilities.formatPrice(context, orderPrice)}",
             valueColor: isFullyPaid ? Colors.green : Colors.orange.shade700),
         if (history.isNewerVersionAvailable)
@@ -634,14 +635,14 @@ class _ProductsDialogState extends State<ProductsDialog> {
                   children: [
                     ListTile(
                       leading: Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800),
-                      title: Text(FeaturesStrings.outdatedTitle, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade900)),
-                      subtitle: Text(FeaturesStrings.outdatedSubtitle),
+                      title: Text(OrdersStrings.outdatedTitle, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade900)),
+                      subtitle: Text(OrdersStrings.outdatedSubtitle),
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton.icon(
                       onPressed: _showSendUpdateConfirmDialog,
                       icon: const Icon(Icons.email_outlined),
-                      label: Text(FeaturesStrings.sendUpdateButton),
+                      label: Text(OrdersStrings.sendUpdateButton),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.amber.shade700,
                         foregroundColor: Colors.white,
@@ -698,7 +699,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
 
     return Column(
       children: [
-        SelectableText(FeaturesStrings.priceChange, style: const TextStyle(fontWeight: FontWeight.bold)),
+        SelectableText(OrdersStrings.priceChange, style: const TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
         SelectableText(
           text,

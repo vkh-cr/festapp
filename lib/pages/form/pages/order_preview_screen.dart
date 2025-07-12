@@ -12,8 +12,9 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 
-import '../form/models/form_holder.dart';
-import '../form/models/ticket_holder.dart';
+import '../models/form_holder.dart';
+import '../models/ticket_holder.dart';
+import '../../../components/eshop/orders_strings.dart';
 
 class OrderPreviewScreen extends StatefulWidget {
   final FormHolder formHolder;
@@ -199,8 +200,8 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
 
         ticketInfoRows.add(Text(
           ticketHolder.tickets.length > 1
-              ? "${FeaturesStrings.itemSingular} $ticketIndex"
-              : FeaturesStrings.itemSingular,
+              ? "${OrdersStrings.itemSingular} $ticketIndex"
+              : OrdersStrings.itemSingular,
           style: StylesConfig.textStyleBig.copyWith(
             fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
             fontWeight: FontWeight.bold,

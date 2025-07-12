@@ -194,7 +194,6 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
     setState(() {
       context.order = context.order! - 1;
       _bundle!.contexts!.add(context);
-      // **MODIFIED:** Sort by the original order to restore the item to its previous position.
       _bundle!.contexts!.sort((a, b) => (a.order ?? 999).compareTo(b.order ?? 999));
       _updateContextsOrder();
     });

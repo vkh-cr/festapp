@@ -9,21 +9,26 @@ import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/data_models_eshop/ticket_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
-import 'package:fstapp/dialogs/products_dialog.dart';
-import 'package:fstapp/dialogs/transactions_dialog.dart';
+import 'package:fstapp/components/eshop/views/products_dialog.dart';
+import 'package:fstapp/components/eshop/views/transactions_dialog.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/theme_config.dart';
 import 'package:trina_grid/trina_grid.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 
 import 'inventory_inclusion_renderer.dart';
+import 'models/orders_history_model.dart';
+import 'orders_strings.dart';
+import 'views/order_history_dialog.dart';
+import 'views/order_state_display.dart';
 
 class EshopColumns {
   // Column identifier constants
@@ -78,6 +83,15 @@ class EshopColumns {
 
   static const String RESPONSES = "responses";
 
+  static const String HISTORY_ID = "historyId";
+  static const String HISTORY_ORDER_SYMBOL = "historyOrderSymbol";
+  static const String HISTORY_CHANGED_AT = "historyChangedAt";
+  static const String HISTORY_CHANGED_BY = "historyChangedBy";
+  static const String HISTORY_STATE = "historyState";
+  static const String HISTORY_PRICE = "historyPrice";
+  static const String HISTORY_CHANGES_SUMMARY = "historyChangesSummary";
+  static const String HISTORY_MODEL_REFERENCE = "historyModelReference";
+
   // Define columns
   static Map<String, dynamic> columnBuilders(BuildContext context) => {
     PRODUCT_ID: [
@@ -85,7 +99,7 @@ class EshopColumns {
         hide: true,
         readOnly: true,
         enableEditingMode: false,
-        title: FeaturesStrings.gridId,
+        title: OrdersStrings.gridId,
         field: PRODUCT_ID,
         type: TrinaColumnType.number(defaultValue: -1),
         width: 50,
@@ -94,7 +108,7 @@ class EshopColumns {
     ],
     PRODUCT_IS_HIDDEN: [
       TrinaColumn(
-        title: FeaturesStrings.gridHide,
+        title: OrdersStrings.gridHide,
         field: PRODUCT_IS_HIDDEN,
         type: TrinaColumnType.text(),
         applyFormatterInEditing: true,
@@ -107,7 +121,7 @@ class EshopColumns {
     PRODUCT_TITLE: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: FeaturesStrings.gridTitle,
+        title: OrdersStrings.gridTitle,
         field: PRODUCT_TITLE,
         type: TrinaColumnType.text(),
         width: 200,
@@ -116,7 +130,7 @@ class EshopColumns {
     PRODUCT_PRICE: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: FeaturesStrings.gridPrice,
+        title: OrdersStrings.gridPrice,
         field: PRODUCT_PRICE,
         type: TrinaColumnType.number(negative: false, format: "#.##", locale: context.locale.languageCode),
         textAlign: TrinaColumnTextAlign.end,
@@ -127,7 +141,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridProductType,
+        title: OrdersStrings.gridProductType,
         field: PRODUCT_TYPE,
         type: TrinaColumnType.text(),
         width: 250,
@@ -136,7 +150,7 @@ class EshopColumns {
     PRODUCT_ORDER: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: FeaturesStrings.gridOrder,
+        title: OrdersStrings.gridOrder,
         field: PRODUCT_ORDER,
         type: TrinaColumnType.number(defaultValue: 0),
         textAlign: TrinaColumnTextAlign.end,
@@ -146,7 +160,7 @@ class EshopColumns {
     PRODUCT_MAXIMUM: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: FeaturesStrings.gridMax,
+        title: OrdersStrings.gridMax,
         field: PRODUCT_MAXIMUM,
         formatter: (s) => s == 0 ? "" : s.toString(),
         applyFormatterInEditing: true,
@@ -159,7 +173,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridOrdered,
+        title: OrdersStrings.gridOrdered,
         field: PRODUCT_ORDERED_COUNT,
         type: TrinaColumnType.number(defaultValue: 0),
         textAlign: TrinaColumnTextAlign.end,
@@ -170,7 +184,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridPaid,
+        title: OrdersStrings.gridPaid,
         field: PRODUCT_PAID_COUNT,
         type: TrinaColumnType.number(defaultValue: 0),
         textAlign: TrinaColumnTextAlign.end,
@@ -181,7 +195,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridCurrency,
+        title: OrdersStrings.gridCurrency,
         field: PRODUCT_CURRENCY_CODE,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.center,
@@ -190,7 +204,7 @@ class EshopColumns {
     ],
     PRODUCT_DESCRIPTION: (Map<String, dynamic> data) => [
       TrinaColumn(
-        title: FeaturesStrings.gridDescription,
+        title: OrdersStrings.gridDescription,
         field:  PRODUCT_DESCRIPTION,
         type: TrinaColumnType.text(),
         width: 150,
@@ -239,7 +253,7 @@ class EshopColumns {
         hide: true,
         readOnly: true,
         enableEditingMode: false,
-        title: FeaturesStrings.gridId,
+        title: OrdersStrings.gridId,
         field: TICKET_ID,
         type: TrinaColumnType.number(defaultValue: -1),
         width: 50,
@@ -250,7 +264,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.itemSymbol,
+        title: OrdersStrings.itemSymbol,
         field: TICKET_SYMBOL,
         type: TrinaColumnType.text(),
         width: 120,
@@ -261,12 +275,12 @@ class EshopColumns {
         cellPadding: EdgeInsets.zero,
         readOnly: true,
         enableEditingMode: false,
-        title: FeaturesStrings.gridState,
+        title: OrdersStrings.gridState,
         field: TICKET_STATE,
         type: TrinaColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.orderState(context, renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
+        renderer: (rendererContext) => _originalOrderStateRenderer(context, rendererContext, OrderModel.singleDataGridStateToColor),
         width: 140,
         textAlign: TrinaColumnTextAlign.center,
       ),
@@ -275,7 +289,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridPrice,
+        title: OrdersStrings.gridPrice,
         field: TICKET_TOTAL_PRICE,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
@@ -286,7 +300,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: false,
-        title: FeaturesStrings.gridCreated,
+        title: OrdersStrings.gridCreated,
         field: TICKET_CREATED_AT,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
@@ -297,7 +311,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridProducts,
+        title: OrdersStrings.gridProducts,
         field: TICKET_PRODUCTS,
         type: TrinaColumnType.text(),
         width: 300,
@@ -307,7 +321,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridNote,
+        title: OrdersStrings.gridNote,
         field: TICKET_NOTE,
         type: TrinaColumnType.text(),
         width: 200,
@@ -316,7 +330,7 @@ class EshopColumns {
     TICKET_NOTE_HIDDEN: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: FeaturesStrings.gridHiddenNote,
+        title: OrdersStrings.gridHiddenNote,
         field: TICKET_NOTE_HIDDEN,
         type: TrinaColumnType.text(),
         width: 200,
@@ -326,7 +340,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridSpot,
+        title: OrdersStrings.gridSpot,
         field: TICKET_SPOT,
         type: TrinaColumnType.text(),
         width: 60,
@@ -335,7 +349,7 @@ class EshopColumns {
     ORDER_ID: [
       TrinaColumn(
         hide: true,
-        title: FeaturesStrings.gridId,
+        title: OrdersStrings.gridId,
         field: ORDER_ID,
         type: TrinaColumnType.number(defaultValue: -1),
         readOnly: true,
@@ -348,7 +362,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridOrderSymbol,
+        title: OrdersStrings.gridOrderSymbol,
         field: ORDER_SYMBOL,
         type: TrinaColumnType.text(),
         width: 120,
@@ -358,7 +372,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridPrice,
+        title: OrdersStrings.gridPrice,
         field: ORDER_PRICE,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
@@ -370,12 +384,12 @@ class EshopColumns {
         cellPadding: EdgeInsets.zero,
         readOnly: true,
         enableEditingMode: false,
-        title: FeaturesStrings.gridState,
+        title: OrdersStrings.gridState,
         field: ORDER_STATE,
         type: TrinaColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.orderState(context, renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
+        renderer: (rendererContext) => _originalOrderStateRenderer(context, rendererContext, OrderModel.singleDataGridStateToColor),
         textAlign: TrinaColumnTextAlign.center,
         width: 140,
       ),
@@ -384,7 +398,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridCustomer,
+        title: OrdersStrings.gridCustomer,
         field: ORDER_DATA,
         type: TrinaColumnType.text(),
         width: 150,
@@ -394,7 +408,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridEmail,
+        title: OrdersStrings.gridEmail,
         field: ORDER_EMAIL,
         type: TrinaColumnType.text(),
         width: 140,
@@ -404,7 +418,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: false,
-        title: FeaturesStrings.gridCreated,
+        title: OrdersStrings.gridCreated,
         field: ORDER_CREATED_AT,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
@@ -415,7 +429,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridNote,
+        title: OrdersStrings.gridNote,
         field: ORDER_DATA_NOTE,
         type: TrinaColumnType.text(),
         width: 200,
@@ -424,7 +438,7 @@ class EshopColumns {
     ORDER_NOTE_HIDDEN: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: FeaturesStrings.gridHiddenNote,
+        title: OrdersStrings.gridHiddenNote,
         field: ORDER_NOTE_HIDDEN,
         type: TrinaColumnType.text(),
         width: 200,
@@ -433,7 +447,7 @@ class EshopColumns {
     ORDER_HISTORY: [
       TrinaColumn(
         enableAutoEditing: false,
-        title: FeaturesStrings.gridHistory,
+        title: OrdersStrings.gridHistory,
         field: ORDER_HISTORY,
         type: TrinaColumnType.text(),
         width: 150,
@@ -448,7 +462,7 @@ class EshopColumns {
                 const Icon(Icons.history),
                 Padding(
                   padding: const EdgeInsets.all(6),
-                  child: Text(FeaturesStrings.gridHistory),
+                  child: Text(OrdersStrings.gridHistory),
                 ),
               ],
             ),
@@ -459,7 +473,7 @@ class EshopColumns {
     ORDER_TRANSACTIONS: (Map<String, dynamic> data) => [
       TrinaColumn(
         enableAutoEditing: false,
-        title: FeaturesStrings.gridTransactions,
+        title: OrdersStrings.gridTransactions,
         field: ORDER_TRANSACTIONS,
         type: TrinaColumnType.text(),
         width: 150,
@@ -478,7 +492,7 @@ class EshopColumns {
                 const Icon(Icons.payment),
                 Padding(
                   padding: const EdgeInsets.all(6),
-                  child: Text(FeaturesStrings.gridTransactions),
+                  child: Text(OrdersStrings.gridTransactions),
                 ),
               ],
             ),
@@ -489,7 +503,7 @@ class EshopColumns {
     TICKET_PRODUCTS_EDIT: (Map<String, dynamic> data) => [
       TrinaColumn(
         enableAutoEditing: false,
-        title: FeaturesStrings.gridProducts,
+        title: OrdersStrings.gridProducts,
         field: TICKET_PRODUCTS_EDIT,
         type: TrinaColumnType.text(),
         width: 150,
@@ -510,7 +524,7 @@ class EshopColumns {
                 Icon(Icons.category),
                 Padding(
                   padding: const EdgeInsets.all(6),
-                  child: Text(FeaturesStrings.gridProducts),
+                  child: Text(OrdersStrings.gridProducts),
                 ),
               ],
             ),
@@ -522,7 +536,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridAmount,
+        title: OrdersStrings.gridAmount,
         field: PAYMENT_INFO_AMOUNT,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
@@ -533,7 +547,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridPaid,
+        title: OrdersStrings.gridPaid,
         field: PAYMENT_INFO_PAID,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
@@ -544,7 +558,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridReturned,
+        title: OrdersStrings.gridReturned,
         field: PAYMENT_INFO_RETURNED,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
@@ -555,7 +569,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridVariableSymbol,
+        title: OrdersStrings.gridVariableSymbol,
         field: PAYMENT_INFO_VARIABLE_SYMBOL,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
@@ -566,7 +580,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: false,
-        title: FeaturesStrings.gridDeadline,
+        title: OrdersStrings.gridDeadline,
         field: PAYMENT_INFO_DEADLINE,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
@@ -575,7 +589,7 @@ class EshopColumns {
     ],
     PAYMENT_INFO_REMINDER_SENT: [
       TrinaColumn(
-        title: FeaturesStrings.gridReminderSent,
+        title: OrdersStrings.gridReminderSent,
         field: PAYMENT_INFO_REMINDER_SENT,
         type: TrinaColumnType.text(),
         enableEditingMode: false,
@@ -591,7 +605,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: FeaturesStrings.gridForm,
+        title: OrdersStrings.gridForm,
         field: ORDER_FORM,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.start,
@@ -621,7 +635,105 @@ class EshopColumns {
       }
       return columns;
     },
+    HISTORY_ID: [
+      TrinaColumn(
+        title: OrdersStrings.gridId, hide: true, readOnly: true, field: HISTORY_ID, type: TrinaColumnType.number(),
+      ),
+    ],
+    HISTORY_MODEL_REFERENCE: [
+      TrinaColumn(
+        hide: true, field: HISTORY_MODEL_REFERENCE, type: TrinaColumnType.text(), title: '',
+      ),
+    ],
+    HISTORY_ORDER_SYMBOL: [
+      TrinaColumn(
+        title: OrdersStrings.gridOrderSymbol, field: HISTORY_ORDER_SYMBOL, type: TrinaColumnType.text(), readOnly: true, width: 120,
+      ),
+    ],
+    HISTORY_CHANGED_AT: [
+      TrinaColumn(
+        title: OrdersStrings.gridChangedAt, field: HISTORY_CHANGED_AT, type: TrinaColumnType.text(), readOnly: true, width: 140,
+      ),
+    ],
+    HISTORY_CHANGED_BY: [
+      TrinaColumn(
+        title: OrdersStrings.gridChangedBy, field: HISTORY_CHANGED_BY, type: TrinaColumnType.text(), readOnly: true, width: 100,
+      ),
+    ],
+    HISTORY_STATE: [
+      TrinaColumn(
+        cellPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        readOnly: true, title: OrdersStrings.gridState, field: HISTORY_STATE, type: TrinaColumnType.text(),
+        renderer: (rendererContext) => buildOrderStateRenderer(rendererContext.cell.value, OrderModel.singleDataGridStateToColor),
+        textAlign: TrinaColumnTextAlign.center, width: 280,
+      ),
+    ],
+    HISTORY_PRICE: [
+      TrinaColumn(
+        readOnly: true, title: OrdersStrings.gridPrice, field: HISTORY_PRICE, type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end, width: 160,
+      ),
+    ],
+    HISTORY_CHANGES_SUMMARY: [
+      TrinaColumn(
+        title: OrdersStrings.gridChanges,
+        field: HISTORY_CHANGES_SUMMARY,
+        type: TrinaColumnType.text(),
+        readOnly: true,
+        width: 600,
+        renderer: (rendererContext) {
+          final historyModel = rendererContext.row.cells[HISTORY_MODEL_REFERENCE]?.value as OrderHistoryModel?;
+          if (historyModel == null) return const SizedBox.shrink();
+          // Use the single-line version for the grid
+          return historyModel.generateSingleLineSummaryWidget(context);
+        },
+      ),
+    ],
   };
+
+  static Widget buildOrderStateRenderer(String formattedState, Color Function(String) getBackground) {
+    return OrderStateDisplay(
+      formattedState: formattedState,
+      getBackground: getBackground,
+      stateTagWidth: 100,
+    );
+  }
+
+  static Widget _originalOrderStateRenderer(BuildContext context, TrinaColumnRendererContext rendererContext, Color Function(String) getBackground) {
+    String value = rendererContext.cell.value;
+    String firstPart = value.split(";")[0];
+    String textValue = OrderModel.statesDataGridToUpper(value.split(";").last);
+
+    return Container(
+      color: getBackground(firstPart),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              textValue,
+            ),
+            if (firstPart == OrderModel.expiredState)
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Tooltip(
+                  message: OrdersStrings.expiredOrderTooltip,
+                  child: CircleAvatar(
+                    radius: 12,
+                    backgroundColor: ThemeConfig.redColor(context),
+                    child: const Icon(
+                      Icons.error_outline,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   static TrinaColumn genericTextColumn(String title, String field, [bool alignToEnd = true]) {
     return TrinaColumn(
@@ -654,29 +766,12 @@ class EshopColumns {
 
   /// Shows the order history in a dialog.
   static Future<void> _showOrderHistory(BuildContext context, int orderId) async {
-    var history = await DbOrders.getOrderHistory(orderId);
-    String prettyFormattedHistory = "";
-
-    // Create a DateFormat object to format the datetime
-    DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
-
-    for (var item in history) {
-      // Format the 'created_at' datetime to a more readable format
-      String createdAt = item['created_at'];
-      DateTime parsedDate = DateTime.parse(createdAt).toOccasionTime(); // Parse the string into a DateTime object
-      String formattedDate = dateFormat.format(parsedDate); // Format the DateTime object
-
-      prettyFormattedHistory += "$formattedDate\n";
-      prettyFormattedHistory += '-' * 50 + "\n"; // Separator line
-
-      // Pretty print each history item with indentation for better readability
-      String formattedItem = const JsonEncoder.withIndent('  ').convert(item);
-      prettyFormattedHistory += "$formattedItem\n";
-
-      // Add a separator line between items to make them more distinct
-      prettyFormattedHistory += '-' * 50 + "\n";
-    }
-    await DialogHelper.showInformationDialog(context, FeaturesStrings.gridHistory, prettyFormattedHistory);
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return OrderHistoryDialog(orderId: orderId);
+      },
+    );
   }
 
   /// Shows the order transactions in a dialog.
