@@ -746,7 +746,9 @@
     "reminderSent": "Připomínka odeslána",
     "changedAt": "Datum změny",
     "changedBy": "Změnil(a)",
-    "changes": "Změny"
+    "changes": "Změny",
+    "paidOrSent": "Zaplaceno nebo odesláno",
+    "cancelled": "Stornováno"
   },
   "FormsFeature": {
     "formsTitle": "Formuláře",

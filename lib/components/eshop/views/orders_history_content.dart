@@ -104,7 +104,7 @@ class _OrdersHistoryContentState extends State<OrdersHistoryContent> {
           EshopColumns.HISTORY_CHANGES_SUMMARY,
         ]),
         firstColumnType: RightsService.isUnitManager()
-          ? DataGridFirstColumn.deleteAndCheck
+          ? DataGridFirstColumn.delete
           : DataGridFirstColumn.check,);
 
     if (mounted) {
