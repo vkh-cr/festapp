@@ -77,7 +77,7 @@ class _UserPageState extends State<UserPage> {
                     await FileSaver.instance.saveFile(
                       name: name,                            // your desired file name
                       bytes: captured,                       // the PNG bytes
-                      ext: 'png',                            // extension
+                      fileExtension: 'png',                            // extension
                       mimeType: MimeType.png,                // PNG mime type
                     );
                   },
