@@ -17,43 +17,23 @@ class OrderStateDisplay extends StatelessWidget {
   /// An optional fixed width for the state tags when in a transition view.
   ///
   /// Providing this value ensures both 'from' and 'to' tags have the same
-  /// width for a clean, stable UI. Use the `calculateOptimalWidth` helper
-  /// method to determine this value based on all your possible state labels.
+  /// width for a clean, stable UI.
   final double? stateTagWidth;
+
+  // NEW: A flag to control the responsive wrapping behavior.
+  /// If true, the widget will wrap to a `Column` on smaller screens.
+  /// Defaults to `false`.
+  final bool enableWrapping;
 
   const OrderStateDisplay({
     super.key,
     required this.formattedState,
     required this.getBackground,
     this.stateTagWidth,
+    this.enableWrapping = false, // NEW: Defaulted to false
   });
 
   /// A helper method to calculate the optimal width for the state tags.
-  ///
-  /// Call this once in your parent widget and pass the result to `stateTagWidth`.
-  /// This ensures all tags are wide enough to fit the longest state label.
-  ///
-  /// ### Example Usage in Parent Widget:
-  /// ```dart
-  /// double? _optimalTagWidth;
-  ///
-  /// @override
-  /// void didChangeDependencies() {
-  ///   super.didChangeDependencies();
-  ///   // Your list of all possible state labels.
-  ///   final allStateLabels = ["NEW", "CONFIRMED", "PROCESSING", "AWAITING_SHIPMENT"];
-  ///   _optimalTagWidth = OrderStateDisplay.calculateOptimalWidth(
-  ///     context: context,
-  ///     stateLabels: allStateLabels.map((s) => OrderModel.statesDataGridToUpper(s)).toList(),
-  ///   );
-  /// }
-  ///
-  /// // ... then in your build method:
-  /// OrderStateDisplay(
-  ///   stateTagWidth: _optimalTagWidth,
-  ///   // ... other properties
-  /// )
-  /// ```
   static double calculateOptimalWidth({
     required BuildContext context,
     required List<String> stateLabels,
@@ -79,79 +59,92 @@ class OrderStateDisplay extends StatelessWidget {
     return maxWidth;
   }
 
+  Widget _buildStateTag(String formattedStateValue, {double? fixedWidth}) {
+    if (!formattedStateValue.contains(';')) return const SizedBox.shrink();
+    final parts = formattedStateValue.split(';');
+    if (parts.length != 2) return const SizedBox.shrink();
 
-  @override
-  Widget build(BuildContext context) {
-    // Inner function to create the core tag widget. It only handles the
-    // appearance (decoration and text), not the layout or sizing.
-    Widget buildStateTag(String formattedStateValue) {
-      if (!formattedStateValue.contains(';')) return const SizedBox.shrink();
-      final parts = formattedStateValue.split(';');
-      if (parts.length != 2) return const SizedBox.shrink();
+    final key = parts[0];
+    final text = OrderModel.statesDataGridToUpper(parts[1]);
 
-      final key = parts[0];
-      final text = OrderModel.statesDataGridToUpper(parts[1]);
-
-      return Container(
+    return SizedBox(
+      width: fixedWidth,
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: getBackground(key),
           borderRadius: BorderRadius.circular(4),
         ),
-        // Center the text within the tag, crucial for when the container is wide.
         child: Center(
           child: Text(text, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis),
         ),
-      );
-    }
+      ),
+    );
+  }
 
+  @override
+  Widget build(BuildContext context) {
     final bool isTransition = formattedState.contains("→");
 
     if (isTransition) {
-      // --- TRANSITION VIEW ---
-      // Displays two tags of a fixed width with a centered arrow.
       final parts = formattedState.split("→");
       final fromState = parts[0].trim();
       final toState = parts[1].trim();
 
-      return Row(
-        children: [
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          const double arrowAndPaddingWidth = 40;
+          final double requiredWidth = (stateTagWidth ?? 80.0) * 2 + arrowAndPaddingWidth;
+
+          // MODIFIED: The condition now also checks the `enableWrapping` flag.
+          // The widget will only wrap if wrapping is enabled AND there isn't enough space.
+          if (enableWrapping && constraints.maxWidth < requiredWidth) {
+            // --- NARROW VIEW (WRAPPED) ---
+            return Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // This Container enforces the fixed width for UI stability.
-                SizedBox(
-                  width: stateTagWidth,
-                  child: buildStateTag(fromState),
+                _buildStateTag(fromState),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Icon(Icons.arrow_downward, size: 18),
+                ),
+                _buildStateTag(toState),
+              ],
+            );
+          } else {
+            // --- WIDE VIEW (OR NON-WRAPPING) ---
+            return Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _buildStateTag(fromState, fixedWidth: stateTagWidth),
+                    ],
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Icon(Icons.arrow_forward, size: 18),
+                ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      _buildStateTag(toState, fixedWidth: stateTagWidth),
+                    ],
+                  ),
                 ),
               ],
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: Icon(Icons.arrow_forward, size: 18),
-          ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // This Container also enforces the fixed width.
-                SizedBox(
-                  width: stateTagWidth,
-                  child: buildStateTag(toState),
-                ),
-              ],
-            ),
-          ),
-        ],
+            );
+          }
+        },
       );
     } else {
       // --- SINGLE STATE VIEW ---
-      // Displays one tag that expands to fill the entire available width.
       return SizedBox(
         width: double.infinity,
-        child: buildStateTag(formattedState),
+        child: _buildStateTag(formattedState),
       );
     }
   }

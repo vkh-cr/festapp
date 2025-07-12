@@ -746,7 +746,9 @@
     "reminderSent": "Reminder Sent",
     "changedAt": "Changed At",
     "changedBy": "Changed By",
-    "changes": "Changes"
+    "changes": "Changes",
+    "paidOrSent": "Paid or Sent",
+    "cancelled": "Cancelled"
   },
   "FormsFeature": {
     "formsTitle": "Forms",
