@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/features/form_feature.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
@@ -14,19 +13,23 @@ import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
-import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 
-class OrdersTab extends StatefulWidget {
-  const OrdersTab({super.key});
+import 'eshop_columns.dart';
+import 'orders_strings.dart';
+
+// The class has been renamed from OrdersTab to OrdersContent
+class OrdersContent extends StatefulWidget {
+  const OrdersContent({super.key});
 
   @override
-  _OrdersTabState createState() => _OrdersTabState();
+  _OrdersContentState createState() => _OrdersContentState();
 }
 
-class _OrdersTabState extends State<OrdersTab> {
+// The state class has been renamed accordingly
+class _OrdersContentState extends State<OrdersContent> {
   String? occasionLink;
   SingleDataGridController<OrderModel>? controller;
 
@@ -104,17 +107,17 @@ class _OrdersTabState extends State<OrdersTab> {
       ),
       headerChildren: [
         DataGridAction(
-          name: FeaturesStrings.cancel,
+          name: OrdersStrings.cancel,
           action: (SingleDataGridController singleDataGrid, [_]) => cancelOrders(singleDataGrid),
           isEnabled: RightsService.isOrderEditor,
         ),
         DataGridAction(
-          name: FeaturesStrings.synchronizePayments,
+          name: OrdersStrings.synchronizePayments,
           action: (SingleDataGridController singleDataGrid, [_]) => synchronizePayments(),
           isEnabled: RightsService.isOrderEditor,
         ),
         DataGridAction(
-          name: FeaturesStrings.sendActionText,
+          name: OrdersStrings.sendActionText,
           action: (SingleDataGridController singleDataGrid, [_]) => sendTicketsOrConfirmations(singleDataGrid),
           isEnabled: RightsService.isOrderEditor,
         ),
@@ -156,8 +159,8 @@ class _OrdersTabState extends State<OrdersTab> {
     if (selected.isNotEmpty) {
       var confirm = await DialogHelper.showConfirmationDialog(
           context,
-          FeaturesStrings.cancel,
-          "${FeaturesStrings.cancelOrdersConfirmationText} (${selected.length})"
+          OrdersStrings.cancel,
+          "${OrdersStrings.cancelOrdersConfirmationText} (${selected.length})"
       );
 
       if (confirm && mounted) {
@@ -169,7 +172,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
         await DialogHelper.showProgressDialogAsync(
             context,
-            FeaturesStrings.processing,
+            OrdersStrings.processing,
             futures.length,
             futures: futures
         );
@@ -196,8 +199,8 @@ class _OrdersTabState extends State<OrdersTab> {
     if (stateChange.isNotEmpty) {
       var confirm = await DialogHelper.showConfirmationDialog(
           context,
-          FeaturesStrings.changeStateToPaid,
-          "${FeaturesStrings.changeStateToPaidConfirmation} (${stateChange.length})"
+          OrdersStrings.changeStateToPaid,
+          "${OrdersStrings.changeStateToPaidConfirmation} (${stateChange.length})"
       );
 
       if (confirm) {
@@ -209,7 +212,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
         await DialogHelper.showProgressDialogAsync(
             context,
-            FeaturesStrings.processing,
+            OrdersStrings.processing,
             futures.length,
             futures: futures,
             isBasic: true
@@ -220,8 +223,8 @@ class _OrdersTabState extends State<OrdersTab> {
 
     var confirm = await DialogHelper.showConfirmationDialog(
         context,
-        FeaturesStrings.sendActionText,
-        "${FeaturesStrings.sendActionConfirmationText} (${selected.length})"
+        OrdersStrings.sendActionText,
+        "${OrdersStrings.sendActionConfirmationText} (${selected.length})"
     );
 
     if (confirm) {
@@ -233,7 +236,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
       await DialogHelper.showProgressDialogAsync(
           context,
-          FeaturesStrings.processing,
+          OrdersStrings.processing,
           futures.length,
           futures: futures
       );

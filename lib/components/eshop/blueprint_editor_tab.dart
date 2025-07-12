@@ -6,7 +6,7 @@ import 'package:fstapp/components/seat_reservation/widgets/seat_widget.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -17,10 +17,10 @@ import 'package:fstapp/widgets/auto_resize_interactive_viewer_controller.dart';
 import 'package:fstapp/components/seat_reservation/widgets/seat_reservation_widget.dart';
 import 'package:collection/collection.dart';
 
-import '../../components/seat_reservation/model/seat_layout_state_model.dart';
-import '../../components/seat_reservation/model/seat_model.dart';
-import '../../components/seat_reservation/utils/seat_state.dart';
-import '../../components/seat_reservation/widgets/seat_layout_widget.dart';
+import '../seat_reservation/model/seat_layout_state_model.dart';
+import '../seat_reservation/model/seat_model.dart';
+import '../seat_reservation/utils/seat_state.dart';
+import '../seat_reservation/widgets/seat_layout_widget.dart';
 
 class BlueprintTab extends StatefulWidget {
 

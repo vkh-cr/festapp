@@ -7,7 +7,7 @@ import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:fstapp/services/html_helper.dart';
@@ -239,7 +239,7 @@ class DataGridHelper
       child: Center(child: Text(textValue)));
   }
 
-  static Widget orderState(BuildContext context, rendererContext, Color Function(String) getBackground, [Function(String)? processText]) {
+  static Widget orderState(BuildContext context, TrinaColumnRendererContext rendererContext, Color Function(String) getBackground, [Function(String)? processText]) {
     String value = rendererContext.cell.value;
     String firstPart = value.split(";")[0];
     String textValue = processText?.call(value) ?? value;
@@ -273,6 +273,54 @@ class DataGridHelper
         ),
       ),
     );
+  }
+
+  static Widget orderStateRenderer(BuildContext context, TrinaColumnRendererContext rendererContext, Color Function(String) getBackground) {
+    String value = rendererContext.cell.value;
+
+    // A helper to create a single colored state tag
+    Widget buildStateTag(String formattedState) {
+      final key = formattedState.split(";").first;
+      final text = formattedState.split(";").last;
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: getBackground(key),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          OrderModel.statesDataGridToUpper(text),
+        ),
+      );
+    }
+
+    // Check if this is a state transition
+    if (value.contains("→")) {
+      final parts = value.split("→");
+      final fromState = parts[0].trim();
+      final toState = parts[1].trim();
+      return Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            buildStateTag(fromState),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: Icon(Icons.arrow_forward, size: 18),
+            ),
+            buildStateTag(toState),
+          ],
+        ),
+      );
+    }
+    // Otherwise, render a single state
+    else {
+      return Container(
+        color: getBackground(value.split(";").first),
+        child: Center(child: Text(OrderModel.statesDataGridToUpper(value.split(";").last))),
+      );
+    }
   }
 
   static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {

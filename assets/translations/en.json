@@ -743,7 +743,10 @@
     "variableSymbol": "Variable symbol",
     "deadline": "Deadline",
     "form": "Form",
-    "reminderSent": "Reminder Sent"
+    "reminderSent": "Reminder Sent",
+    "changedAt": "Changed At",
+    "changedBy": "Changed By",
+    "changes": "Changes"
   },
   "FormsFeature": {
     "formsTitle": "Forms",
@@ -796,7 +799,9 @@
     "tickets": "Tickets",
     "ticket": "Ticket",
     "applications": "Applications",
-    "application": "Application"
+    "application": "Application",
+    "ordersTab": "Orders",
+    "ordersHistoryTab": "Orders History"
   },
   "UserColumns": {
     "id": "Id",
