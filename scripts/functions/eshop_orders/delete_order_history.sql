@@ -4,8 +4,9 @@ SECURITY DEFINER
 LANGUAGE plpgsql AS $$
 DECLARE
     v_occasion_id bigint;
+    v_unit_id bigint;
 BEGIN
-    -- Determine the occasion linked to the history entry for permission validation
+    -- Determine the occasion linked to the history entry
     SELECT o.occasion INTO v_occasion_id
     FROM eshop.orders_history oh
     JOIN eshop.orders o ON oh."order" = o.id
@@ -16,12 +17,21 @@ BEGIN
         RAISE EXCEPTION 'History record not found.';
     END IF;
 
-    -- Verify the user has the necessary permissions to delete
-    IF NOT get_is_editor_order_on_occasion(v_occasion_id) THEN
-        RAISE EXCEPTION 'Permission denied to delete order history.';
+    -- Find the unit associated with the occasion
+    SELECT unit INTO v_unit_id
+    FROM public.occasions
+    WHERE id = v_occasion_id;
+
+    -- If the occasion is not linked to a unit, raise an exception
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Could not find the unit associated with the order.';
     END IF;
 
-    -- Proceed with the deletion if checks pass
+    -- Verify the user is a manager on the unit.
+    -- This function will raise an exception if the user does not have manager permissions.
+    PERFORM check_is_manager_on_unit(v_unit_id);
+
+    -- Proceed with the deletion if permission check passes
     DELETE FROM eshop.orders_history WHERE id = p_history_id;
 END;
 $$;
