@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/data_models/email_template_model.dart';
 import 'package:fstapp/data_services/db_email_templates.dart';
-import 'package:fstapp/pages/eshop/email_templates_settings_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/widgets/email_template_card.dart';
+
+import 'email_templates_settings_page.dart';
 
 class EmailTemplatesTab extends StatefulWidget {
   const EmailTemplatesTab({super.key});

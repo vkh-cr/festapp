@@ -4,7 +4,7 @@ import 'package:fstapp/components/inventory/models/resource_slot_model.dart';
 import 'package:fstapp/components/inventory/models/spot_management_constants.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
-import 'package:fstapp/data_models_eshop/spot_model.dart';
+import 'package:fstapp/components/eshop/models/spot_model.dart';
 import 'package:fstapp/data_services_eshop/db_spots.dart';
 import 'package:trina_grid/trina_grid.dart';
 
