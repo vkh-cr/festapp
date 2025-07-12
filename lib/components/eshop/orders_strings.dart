@@ -115,6 +115,8 @@ class OrdersStrings {
   static String get gridChangedAt => 'OrderGridColumns.changedAt'.tr();
   static String get gridChangedBy => 'OrderGridColumns.changedBy'.tr();
   static String get gridChanges => 'OrderGridColumns.changes'.tr();
+  static String get gridPaidOrSent => 'OrderGridColumns.paidOrSent'.tr();
+  static String get gridCancelled => 'OrderGridColumns.cancelled'.tr();
 
 
   // --- Products Dialog ---
