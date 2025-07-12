@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
 import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/services/utilities_all.dart';

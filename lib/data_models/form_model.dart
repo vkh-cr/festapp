@@ -1,6 +1,6 @@
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_models_eshop/bank_account_model.dart';
+import 'package:fstapp/components/eshop/models/bank_account_model.dart';
 
 class FormModel {
   int? id;
