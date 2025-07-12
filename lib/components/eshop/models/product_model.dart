@@ -2,12 +2,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
-import 'package:fstapp/data_models_eshop/product_type_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/product_type_model.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
-import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:trina_grid/trina_grid.dart';
+
+import '../eshop_columns.dart';
 
 class ProductModel extends ITrinaRowModel {
   @override

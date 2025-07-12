@@ -1,5 +1,5 @@
-import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 
 class ProductTypeModel {
   final int? id;

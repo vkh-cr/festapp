@@ -5,14 +5,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
-import 'package:fstapp/data_models_eshop/product_type_model.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
-import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
-import 'package:fstapp/theme_config.dart';
 import 'product_type_editor.dart';
 
 class TicketEditorWidgets {

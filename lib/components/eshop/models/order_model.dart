@@ -1,18 +1,20 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
+import 'package:fstapp/components/eshop/eshop_columns.dart';
+import 'package:fstapp/components/eshop/models/payment_info_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models/form_model.dart';
-import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
-import 'package:fstapp/data_models_eshop/ticket_model.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/data_models_eshop/payment_info_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
-import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
+
+import 'order_data_ticket_model.dart';
+import 'orders_history_model.dart';
 
 class OrderModel extends ITrinaRowModel {
   @override
@@ -28,12 +30,15 @@ class OrderModel extends ITrinaRowModel {
   String? currencyCode;
   String? noteHidden;
 
-  // Relating tickets, spots, products, and payment info to the order
+  // Relating to top-level DB tables
   FormModel? form;
   List<TicketModel>? relatedTickets;
   List<BlueprintObjectModel>? relatedSpots;
   List<ProductModel>? relatedProducts;
   PaymentInfoModel? paymentInfoModel;
+  List<OrderHistoryModel>? relatedHistory;
+  // Parsed from the 'data' JSON field
+  List<OrderDataTicketModel>? dataTickets;
 
   static const String expiredState = "expired";
   static const String orderedState = "ordered";
@@ -43,7 +48,8 @@ class OrderModel extends ITrinaRowModel {
   static const String stornoState = "storno";
   static const orderStates = [expiredState, orderedState, paidState, sentState, usedState, stornoState];
 
-  static String stateToLocale(String state) {
+  static String stateToLocale(String? state) {
+    if (state == null || state.isEmpty) return "Not Set".tr();
     switch (state) {
       case orderedState:
       case expiredState:
@@ -57,7 +63,7 @@ class OrderModel extends ITrinaRowModel {
       case stornoState:
         return 'Storno'.tr();
       default:
-        return '???';
+        return state; // Return the key itself if not found
     }
   }
 
@@ -83,6 +89,7 @@ class OrderModel extends ITrinaRowModel {
     final deadlineDate = DateTime(paymentInfoModel!.deadline!.year, paymentInfoModel!.deadline!.month, paymentInfoModel!.deadline!.day);
     return nowDate.isAfter(deadlineDate);
   }
+
   static Color singleDataGridStateToColor(String state) {
     Color color;
     String firstPart = state.split(";")[0];
@@ -122,14 +129,26 @@ class OrderModel extends ITrinaRowModel {
     this.paymentInfo,
     this.formKey,
     this.currencyCode,
+    this.noteHidden,
+    this.form,
     this.relatedTickets,
     this.relatedSpots,
     this.relatedProducts,
     this.paymentInfoModel,
-    this.noteHidden,
+    this.relatedHistory,
+    this.dataTickets,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
+    // Logic to parse the nested tickets from the 'data' field
+    List<OrderDataTicketModel>? parsedDataTickets;
+    final orderData = json[TbEshop.orders.data];
+    if (orderData is Map<String, dynamic> && orderData['tickets'] is List) {
+      parsedDataTickets = (orderData['tickets'] as List)
+          .map((t) => OrderDataTicketModel.fromJson(t as Map<String, dynamic>))
+          .toList();
+    }
+
     return OrderModel(
       id: json[TbEshop.orders.id],
       createdAt: json[TbEshop.orders.created_at] != null
@@ -143,13 +162,12 @@ class OrderModel extends ITrinaRowModel {
           : null,
       currencyCode: json[TbEshop.orders.currency_code],
       state: json[TbEshop.orders.state],
-      formKey: json[TbEshop.orders.data] != null
-          ? json[TbEshop.orders.data][TbEshop.orders.data_form]
-          : null,
-      data: json[TbEshop.orders.data],
+      formKey: orderData is Map<String, dynamic> ? orderData[TbEshop.orders.data_form] : null,
+      data: orderData,
       occasion: json[TbEshop.orders.occasion],
       paymentInfo: json[TbEshop.orders.payment_info],
       noteHidden: json[TbEshop.orders.note_hidden],
+      dataTickets: parsedDataTickets,
     );
   }
 

@@ -1,4 +1,4 @@
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 
 class BankAccountModel {
   final int? id;

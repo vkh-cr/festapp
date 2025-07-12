@@ -140,6 +140,7 @@ class OrdersHistoryTb {
   String get table => "orders_history";
   String get id => "id";
   String get created_at => "created_at";
+  String get created_by => "created_by";
   String get data => "data";
   String get order => "order";
   String get state => "state";
