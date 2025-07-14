@@ -8,6 +8,7 @@ import 'package:fstapp/pages/form/pages/reservation_page.dart';
 import 'package:fstapp/pages/occasion/check_page.dart';
 import 'package:fstapp/pages/occasion/event_edit_page.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
+import 'package:fstapp/pages/occasion/user_stay_page.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 import 'package:fstapp/pages/unit/unit_page.dart';
 import 'package:fstapp/pages/user/login_page.dart';
@@ -64,6 +65,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: TimetableRoute.page, path: "/:$linkFormatted/${TimetablePage.ROUTE}"),
     AutoRoute(page: GameRoute.page, path: "/:$linkFormatted/${GamePage.ROUTE}"),
     AutoRoute(page: SongbookRoute.page, path: "/:$linkFormatted/${SongbookPage.ROUTE}"),
+    AutoRoute(page: UserStayRoute.page, path: "/:$linkFormatted/${UserStayPage.ROUTE}"),
     AutoRoute(page: EventEditRoute.page, path: "/:$linkFormatted/${EventEditPage.ROUTE}", children: [
       AutoRoute(path: ':id', page: EventEditRoute.page,),
     ]),

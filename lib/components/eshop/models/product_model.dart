@@ -179,6 +179,12 @@ class ProductModel extends ITrinaRowModel {
     );
   }
 
+  /// Returns true if the product has capacity and is dynamically available.
+  /// It checks static limits (`maximum` vs `orderedCount`) and the dynamic availability flag from the backend.
+  /// If `isDynamicallyAvailable` is null, it's treated as true to ensure backward compatibility.
+  bool get isAvailable =>
+      ((maximum == null || maximum == 0) || ((orderedCount ?? 0) < (maximum ?? 0))) && (isDynamicallyAvailable ?? true);
+
   @override
   String toBasicString() => title ?? id.toString();
 
@@ -247,8 +253,17 @@ class ProductModel extends ITrinaRowModel {
     }
     return product.includedInventories.map((link) {
       final quantityText = link.quantity > 1 ? " (x${link.quantity})" : "";
-      final labelText = "${link.inventoryContextId}${link.inventoryContext?.getFullTitle(context)}$quantityText";
-      return labelText;
+      // Use the populated object for its title, with a fallback to the ID.
+      final title = link.inventoryContext?.getFullTitle(context) ?? link.inventoryContextId.toString();
+      return "$title$quantityText";
     }).join(" | ");
+  }
+
+  String getFormattedProductTitle() {
+    if (price != null) {
+      final priceString = "${price!.toStringAsFixed(2)} ${currencyCode ?? ''}".trim();
+      return "$title ($priceString)";
+    }
+    return title??"";
   }
 }

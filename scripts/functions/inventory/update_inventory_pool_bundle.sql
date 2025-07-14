@@ -30,11 +30,13 @@ BEGIN
 
     IF v_pool_id IS NULL THEN
         -- Create a new pool if ID is not provided
-        INSERT INTO public.inventory_pools (title, occasion, sellable_capacity, data, created_at, updated_at)
+        INSERT INTO public.inventory_pools (title, occasion, sellable_capacity, description, type, data, created_at, updated_at)
         VALUES (
             v_pool_data->>'title',
             v_occasion_id,
             (v_pool_data->>'sellable_capacity')::bigint,
+            v_pool_data->>'description',
+            v_pool_data->>'type',
             v_pool_data->'data',
             now(),
             now()
@@ -45,6 +47,8 @@ BEGIN
         SET
             title = v_pool_data->>'title',
             sellable_capacity = (v_pool_data->>'sellable_capacity')::bigint,
+            description = v_pool_data->>'description',
+            type = v_pool_data->>'type',
             data = v_pool_data->'data',
             updated_at = now()
         WHERE id = v_pool_id;
@@ -58,15 +62,18 @@ BEGIN
         LOOP
             v_context_id := (v_context_data->>'id')::bigint;
             IF v_context_id IS NULL THEN
-                INSERT INTO public.inventory_contexts (inventory_pool, block_date, title, "order")
-                VALUES (v_pool_id, (v_context_data->>'block_date')::date, v_context_data->>'title', (v_context_data->>'order')::int)
+                -- Create new context, now including the 'data' field
+                INSERT INTO public.inventory_contexts (inventory_pool, block_date, title, "order", data)
+                VALUES (v_pool_id, (v_context_data->>'block_date')::date, v_context_data->>'title', (v_context_data->>'order')::bigint, v_context_data->'data')
                 RETURNING id INTO v_context_id;
             ELSE
+                -- Update existing context, now including the 'data' field
                 UPDATE public.inventory_contexts
                 SET
                     block_date = (v_context_data->>'block_date')::date,
                     title = v_context_data->>'title',
-                    "order" = (v_context_data->>'order')::int
+                    "order" = (v_context_data->>'order')::bigint,
+                    data = v_context_data->'data' -- Added this line
                 WHERE id = v_context_id;
             END IF;
             v_context_ids_from_input := array_append(v_context_ids_from_input, v_context_id);
