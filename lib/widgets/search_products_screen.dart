@@ -48,15 +48,14 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
   void _search(String q) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
-      final low = q.toLowerCase();
+      final normalizedQuery = Utilities.removeDiacritics(q.toLowerCase());
       setState(() {
         _filt = _all.where((p) {
-          final inTitle = p.title?.toLowerCase().contains(low) ?? false;
-          final inType  = p.productTypeTitleString
-              ?.toLowerCase()
-              .contains(low) ?? false;
-          final inPrice = p.price?.toString().contains(low) ?? false;
-          return inTitle || inType || inPrice;
+          final normalizedTitle = Utilities.removeDiacritics(p.title?.toLowerCase() ?? "");
+          final normalizedType  = Utilities.removeDiacritics(p.productTypeTitleString?.toLowerCase() ?? "");
+          final inPrice = p.price?.toString().contains(normalizedQuery) ?? false; // Price conversion is tricky for diacritics, keeping original logic here.
+
+          return normalizedTitle.contains(normalizedQuery) || normalizedType.contains(normalizedQuery) || inPrice;
         }).toList();
       });
     });

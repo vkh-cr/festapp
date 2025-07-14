@@ -47,9 +47,9 @@ class SeatWidgetHelper {
   static Color getSeatColor(BuildContext context, SeatState state) {
     switch (state) {
       case SeatState.available:
-        return ThemeConfig.greenColor(context);
+        return ThemeConfig.darkGreen;
       case SeatState.selected_by_me:
-        return ThemeConfig.greenColor(context);
+        return ThemeConfig.darkGreen;
       case SeatState.selected:
         return Colors.black26;
       case SeatState.black:

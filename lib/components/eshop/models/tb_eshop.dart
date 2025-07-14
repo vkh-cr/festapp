@@ -193,6 +193,7 @@ class BankAccountsTb {
 
 class ProductInventoryContextsTb {
   const ProductInventoryContextsTb();
+  String get id => "id";
   String get table => "product_inventory_contexts";
   String get product => "product";
   String get inventory_context => "inventory_context";
