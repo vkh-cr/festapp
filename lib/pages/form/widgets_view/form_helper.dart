@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/dialogs/standard_dialog.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/pages/form/models/id_document_field_holder.dart';
 import 'package:fstapp/pages/form/widgets_view/check_box_field_builder.dart';
 import 'package:fstapp/pages/form/widgets_view/radio_field_builder.dart';
@@ -80,7 +81,7 @@ class FormHelper {
   static String femaleLabel() => "Female".tr();
   static String notSpecifiedLabel() => "Not specified".tr();
 
-  static String ticketLabel() => FeaturesStrings.ticket;
+  static String ticketLabel() => OrdersStrings.itemSingular;
   static String textLabel() => "Text".tr();
   static String selectOneLabel() => "Single Choice".tr();
   static String selectManyLabel() => "Multiple Choice".tr();

@@ -463,8 +463,8 @@
   "This template is used to confirm ticket orders.": "Tato šablona se používá pro potvrzení objednávek vstupenek.",
   "Order Payment Done": "Platba objednávky provedena",
   "This template is used to confirm successful ticket order payments.": "Tato šablona se používá pro potvrzení úspěšné platby objednávek vstupenek.",
-  "Order Payment Reminder": "Upomínka platby objednávky",
-  "This template is used to remind customers about pending ticket order payments.": "Tato šablona se používá pro upomínání zákazníků na neuhrazené objednávky vstupenek.",
+  "Order Payment Reminder": "Připomínka platby objednávky",
+  "This template is used to remind customers about pending ticket order payments.": "Tato šablona se používá pro přípomínání zákazníků na neuhrazené objednávky vstupenek.",
   "Order Cancellation": "Zrušení objednávky",
   "This template is used to notify users about ticket order cancellations.": "Tato šablona se používá pro informování uživatelů o zrušení objednávek vstupenek.",
   "default": "výchozí",
@@ -706,14 +706,14 @@
     "labelReserveButtonTitle": "Název rezervačního tlačítka",
     "labelDeadlineDuration": "Termín platby (ve dnech)",
     "helperDeadlineDuration": "Nastavte, kolik dní má uživatel na zaplacení objednávky. Ponechte prázdné pro nastavení bez termínu.",
-    "labelReminderEnabled": "Povolit upomínky k platbě",
-    "helperReminderEnabled": "Automaticky odeslat e-mailovou upomínku o platbě.",
-    "labelReminderInterval": "Interval upomínky (dny před termínem)",
-    "helperReminderInterval": "Kolik dní před termínem má být upomínka odeslána.",
-    "validationReminderInterval": "Interval upomínky musí být kratší než termín platby.",
-    "labelEnableReminders": "Povolit upomínky",
-    "subtitleEnableReminders": "Pokud je povoleno, automatická e-mailová upomínka o platbě bude zaslána zákazníkům.",
-    "subtitleRemindersDisabled": "Upomínky jsou zakázány. Nejprve povolte funkci upomínek v nastavení akce."
+    "labelReminderEnabled": "Povolit přípomínky k platbě",
+    "helperReminderEnabled": "Automaticky odeslat e-mailovou připomínku o platbě.",
+    "labelReminderInterval": "Interval připomínky (dny před termínem)",
+    "helperReminderInterval": "Kolik dní před termínem má být připomínka odeslána.",
+    "validationReminderInterval": "Interval připomínky musí být kratší než termín platby.",
+    "labelEnableReminders": "Povolit připomínky",
+    "subtitleEnableReminders": "Pokud je povoleno, automatická e-mailová připomínka o platbě bude zaslána zákazníkům.",
+    "subtitleRemindersDisabled": "Připomínky jsou zakázány. Nejprve povolte funkci připomínek v nastavení akce."
   },
   "OrderGridColumns": {
     "id": "Id",
@@ -743,7 +743,12 @@
     "variableSymbol": "Variabilní symbol",
     "deadline": "Termín do",
     "form": "Formulář",
-    "reminderSent": "Upomínka odeslána"
+    "reminderSent": "Připomínka odeslána",
+    "changedAt": "Datum změny",
+    "changedBy": "Změnil(a)",
+    "changes": "Změny",
+    "paidOrSent": "Zaplaceno nebo odesláno",
+    "cancelled": "Stornováno"
   },
   "FormsFeature": {
     "formsTitle": "Formuláře",
@@ -796,7 +801,9 @@
     "tickets": "Vstupenky",
     "ticket": "Vstupenka",
     "applications": "Přihlášky",
-    "application": "Přihláška"
+    "application": "Přihláška",
+    "ordersTab": "Objednávky",
+    "ordersHistoryTab": "Historie objednávek"
   },
   "UserColumns": {
     "id": "Id",
@@ -828,9 +835,19 @@
     "approved": "Schváleno",
     "invited": "Pozván"
   },
+  "OrderHistory": {
+    "noHistoryFound": "Nebyla nalezena žádná historie.",
+    "currentState": "Aktuální stav",
+    "systemUser": "SYSTÉM",
+    "changes": "Změny",
+    "totalPrice": "Celková cena",
+    "noProductChanges": "Žádné změny v produktech.",
+    "expiredOrderTooltip": "Expirovaná objednávka",
+    "toBasicString": "Historie č. {id} pro objednávku č. {orderId}"
+  },
   "ProductsDialog": {
-    "productsUpdateSuccess": "Produkty úspěšně aktualizovány.",
-    "productsUpdateFailed": "Aktualizace produktů se nezdařila.",
+    "productsUpdateSuccess": "Produkty úspěšně změněny.",
+    "productsUpdateFailed": "Změna produktů se nezdařila.",
     "sendUpdateTitle": "Poslat zákazníkovi aktualizaci?",
     "sendUpdateContent": "Tímto odešlete e-mail na adresu {email} s následujícím obsahem:",
     "sendUpdateItemSummary": "Aktualizovaný souhrn objednávky",
@@ -838,7 +855,7 @@
     "sendUpdateItemQr": "QR kód pro platbu zbývající částky",
     "sendUpdateItemRefund": "Informace o tom, že přeplatek bude vrácen",
     "sendEmailButton": "Poslat e-mail",
-    "sendEmailFailed": "Odeslání aktualizačního e-mailu se nezdařilo.",
+    "sendEmailFailed": "Odeslání e-mailu o změně se nezdařilo.",
     "sendEmailSuccess": "Aktualizační e-mail byl úspěšně odeslán.",
     "dialogTitleFallback": "Produkty na vstupence",
     "originalPrice": "Původní",
@@ -894,7 +911,7 @@
       "signInCode_description": "Tato šablona se používá k zasílání přihlašovacích kódů.",
       "ticketOrderConfirmation_title": "Potvrzení objednávky",
       "ticketOrderConfirmation_description": "Tato šablona se používá k potvrzení objednávek vstupenek.",
-      "ticketOrderUpdate_title": "Aktualizace objednávky",
+      "ticketOrderUpdate_title": "Změna objednávky",
       "ticketOrderUpdate_description": "Tato šablona se používá k zaslání aktualizovaného stavu objednávky zákazníkovi, například po změně produktů. V případě potřeby obsahuje aktuální zůstatek a platební pokyny.",
       "ticketOrderPaymentDone_title": "Platba objednávky dokončena",
       "ticketOrderPaymentDone_description": "Tato šablona se používá k potvrzení úspěšných plateb objednávek vstupenek.",
@@ -970,7 +987,27 @@
     "inclusionSearchHint": "Hledat čas...",
     "included": "Zahrnuto",
     "featureTitle": "Pobyt (kapacitní skupiny)",
-    "featureDescription": "Tato funkce umožňuje správu kapacit ubytování, stravy a denních programových bloků. Podporuje přiřazení účastníků do konkrétních pokojů a zobrazuje tyto informace v jejich profilu v aplikaci."
+    "featureDescription": "Tato funkce umožňuje správu kapacit ubytování, stravy a denních programových bloků. Podporuje přiřazení účastníků do konkrétních pokojů a zobrazuje tyto informace v jejich profilu v aplikaci.",
+    "spotManagementClearAllTitle": "Zrušit všechna přiřazení",
+    "spotManagementClearAllConfirmation": "Opravdu si přejete zrušit všechna přiřazení v tomto zobrazení? Tato změna ovlivní pouze uživatelské rozhraní a neuloží se automaticky.",
+    "settingsDescriptionLabel": "Popis",
+    "settingsDescriptionHint": "Poskytněte volitelný popis pro kapacitní skupinu...",
+    "settingsTypeLabel": "Typ kapacitní skupiny",
+    "typeAccommodation": "Ubytování",
+    "typeFood": "Jídlo",
+    "typeOther": "Ostatní",
+    "settingsPlaceLabel": "Místo",
+    "settingsNoPlaceAssigned": "Není přiřazeno žádné místo",
+    "searchDialogTitlePlace": "Vybrat místo",
+    "searchDialogTitleProduct": "Vybrat produkt",
+    "settingsNoProductAssigned": "Není přiřazen žádný produkt",
+    "settingsProductTooltip": "Přiřadit produkt",
+    "userStayTitle": "Můj pobyt",
+    "userStayErrorLoad": "Nepodařilo se načíst podrobnosti o ubytování.",
+    "userStayUnassignedRoom": "Nepřiřazená místnost",
+    "userStayEmptyStateMessage": "Nemáte k dispozici žádné informace o ubytování.",
+    "userStayLinkTitle": "Podrobnosti o mém ubytování",
+    "userStayLinkSubtitle": "Zobrazit ubytování, stravování a program"
   },
   "_": "_"
 }

@@ -483,7 +483,10 @@ class InventoryPoolsTb {
   String get title => "title";
   String get sellable_capacity => "sellable_capacity";
   String get occasion => "occasion";
+  String get type => "type";
+  String get description => "description";
   String get data_is_auto_resource_assignment => "is_auto_resource_assignment";
+  String get data_place_id => "place_id";
 }
 
 class ResourcesTb {
@@ -520,6 +523,8 @@ class InventoryContextsTb {
   String get block_date => "block_date";
   String get title => "title";
   String get order => "order";
+  String get data => "data";
+  String get data_product_id => "product_id";
 }
 
 class ProductsTb {

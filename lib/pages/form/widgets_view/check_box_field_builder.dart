@@ -85,7 +85,7 @@ class CheckboxFieldBuilder {
       FormHolder formHolder,
       ) {
     // Determine if this option is a priced product and disabled.
-    final bool isDisabled = o is FormOptionProductModel && !o.isEnabled;
+    final bool isDisabled = o is FormOptionProductModel && !o.isAvailable;
     final originalTitle = OptionFieldHelper.buildOptionTitle(context, o);
     final effectiveTitle =
     isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
@@ -165,7 +165,7 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
   Widget build(BuildContext context) {
     // Create options with disabled support.
     final options = widget.optionsIn.map((o) {
-      final bool isDisabled = o is FormOptionProductModel && !o.isEnabled;
+      final bool isDisabled = o is FormOptionProductModel && !o.isAvailable;
       final originalTitle = OptionFieldHelper.buildOptionTitle(context, o);
       final effectiveTitle =
       isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
@@ -203,7 +203,7 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
               final selectedList = val;
               final filteredList = selectedList.where((option) {
                 if (option is FormOptionProductModel) {
-                  return option.isEnabled;
+                  return option.isAvailable;
                 }
                 return true;
               }).toList();

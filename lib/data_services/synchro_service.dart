@@ -5,6 +5,7 @@ import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/db_information.dart';
+import 'package:fstapp/data_services/db_inventory_pools.dart';
 import 'package:fstapp/data_services/db_news.dart';
 import 'package:fstapp/data_services/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
@@ -41,6 +42,8 @@ class SynchroService {
       await OfflineDataService.saveUserInfo(userInfo);
       var bundle = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, true);
       await OfflineDataService.saveAllActivities(bundle!.activities);
+      var userInventoryBundle = await DbInventoryPools.getUserInventory();
+      await OfflineDataService.saveUserInventoryBundle(userInventoryBundle);
     }
     else {
       await OfflineDataService.deleteUserInfo();
