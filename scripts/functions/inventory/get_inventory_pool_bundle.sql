@@ -1,4 +1,3 @@
--- Fetches the entire configuration bundle for a single inventory pool.
 CREATE OR REPLACE FUNCTION get_inventory_pool_bundle(p_inventory_pool_id bigint)
 RETURNS jsonb
 SECURITY DEFINER
@@ -9,6 +8,9 @@ DECLARE
     v_occasion_data jsonb;
     v_resources_data jsonb;
     v_contexts_data jsonb;
+    v_places_data jsonb;
+    v_products_data jsonb;
+    v_product_inventory_contexts_data jsonb; -- New variable for the join table data
     result jsonb;
 BEGIN
     -- Get occasion for permission check from the inventory pool
@@ -69,19 +71,48 @@ BEGIN
         ORDER BY r.title
     ) AS subquery;
 
-    -- Aggregate all inventory contexts for the pool, sorted by the new 'order' field
+    -- Aggregate all inventory contexts for the pool, sorted by the 'order' field
     SELECT COALESCE(jsonb_agg(to_jsonb(ic) ORDER BY ic.order), '[]'::jsonb)
     INTO v_contexts_data
     FROM public.inventory_contexts ic
     WHERE ic.inventory_pool = p_inventory_pool_id;
 
-    -- Construct the final bundle object, now including the occasion data
+    -- Aggregate all places for the occasion
+    SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY p.order), '[]'::jsonb)
+    INTO v_places_data
+    FROM public.places p
+    WHERE p.occasion = v_occasion_id;
+
+    -- MODIFICATION START
+    -- Aggregate products that are linked to the inventory contexts of this specific pool.
+    SELECT COALESCE(jsonb_agg(to_jsonb(pr)), '[]'::jsonb)
+    INTO v_products_data
+    FROM (
+        SELECT DISTINCT pr.*
+        FROM eshop.products pr
+        JOIN eshop.product_inventory_contexts pic ON pr.id = pic.product
+        JOIN public.inventory_contexts ic ON pic.inventory_context = ic.id
+        WHERE ic.inventory_pool = p_inventory_pool_id
+    ) pr;
+
+    -- Aggregate the product <-> inventory_context join table entries for this pool's contexts.
+    SELECT COALESCE(jsonb_agg(to_jsonb(pic)), '[]'::jsonb)
+    INTO v_product_inventory_contexts_data
+    FROM eshop.product_inventory_contexts pic
+    JOIN public.inventory_contexts ic ON pic.inventory_context = ic.id
+    WHERE ic.inventory_pool = p_inventory_pool_id;
+
+    -- Construct the final bundle object, now including context-specific products and the join table data.
     result := jsonb_build_object(
         'pool', v_pool_data,
         'occasion', v_occasion_data,
         'resources', v_resources_data,
-        'contexts', v_contexts_data
+        'contexts', v_contexts_data,
+        'places', v_places_data,
+        'products', v_products_data,
+        'product_inventory_contexts', v_product_inventory_contexts_data
     );
+    -- MODIFICATION END
 
     RETURN result;
 EXCEPTION
