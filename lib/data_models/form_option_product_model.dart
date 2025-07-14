@@ -27,6 +27,6 @@ class FormOptionProductModel extends FormOptionModel {
   /// Returns true if the product has capacity and is dynamically available.
   /// It checks static limits (`maximum` vs `orderedCount`) and the dynamic availability flag from the backend.
   /// If `isDynamicallyAvailable` is null, it's treated as true to ensure backward compatibility.
-  bool get isEnabled =>
+  bool get isAvailable =>
       ((maximum == null || maximum == 0) || ((orderedCount ?? 0) < (maximum ?? 0))) && (isDynamicallyAvailable ?? true);
 }

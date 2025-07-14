@@ -5,6 +5,7 @@ import 'package:fstapp/components/inventory/models/resource_slot_model.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/order_product_ticket_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:trina_grid/trina_grid.dart';
 
@@ -33,6 +34,7 @@ class SpotModel extends ITrinaRowModel {
   ResourceSlotModel? resourceSlot;
   OrderProductTicketModel? orderProductTicket;
   OrderModel? order;
+  ProductModel? product; // New navigation property
 
   SpotModel({
     this.id,
@@ -54,6 +56,7 @@ class SpotModel extends ITrinaRowModel {
     this.resourceSlot,
     this.orderProductTicket,
     this.order,
+    this.product, // Added to constructor
   });
 
   /// Creates a SpotModel instance from a JSON map from the database.
@@ -120,6 +123,8 @@ class SpotModel extends ITrinaRowModel {
       t.id: TrinaCell(value: id ?? 0),
       t.title: TrinaCell(value: title ?? ""),
       t.state: TrinaCell(value: state ?? ""),
+      // Added product display to the grid row
+      t.product: TrinaCell(value: product?.toBasicString() ?? productId),
       t.inventory_context: TrinaCell(value: inventoryContext?.title ?? inventoryContextId),
       t.resource: TrinaCell(value: resource?.title ?? resourceId),
       t.resource_slot: TrinaCell(value: resourceSlot?.title ?? resourceSlotId),

@@ -989,7 +989,25 @@
     "featureTitle": "Pobyt (kapacitní skupiny)",
     "featureDescription": "Tato funkce umožňuje správu kapacit ubytování, stravy a denních programových bloků. Podporuje přiřazení účastníků do konkrétních pokojů a zobrazuje tyto informace v jejich profilu v aplikaci.",
     "spotManagementClearAllTitle": "Zrušit všechna přiřazení",
-    "spotManagementClearAllConfirmation": "Opravdu si přejete zrušit všechna přiřazení v tomto zobrazení? Tato změna ovlivní pouze uživatelské rozhraní a neuloží se automaticky."
+    "spotManagementClearAllConfirmation": "Opravdu si přejete zrušit všechna přiřazení v tomto zobrazení? Tato změna ovlivní pouze uživatelské rozhraní a neuloží se automaticky.",
+    "settingsDescriptionLabel": "Popis",
+    "settingsDescriptionHint": "Poskytněte volitelný popis pro kapacitní skupinu...",
+    "settingsTypeLabel": "Typ kapacitní skupiny",
+    "typeAccommodation": "Ubytování",
+    "typeFood": "Jídlo",
+    "typeOther": "Ostatní",
+    "settingsPlaceLabel": "Místo",
+    "settingsNoPlaceAssigned": "Není přiřazeno žádné místo",
+    "searchDialogTitlePlace": "Vybrat místo",
+    "searchDialogTitleProduct": "Vybrat produkt",
+    "settingsNoProductAssigned": "Není přiřazen žádný produkt",
+    "settingsProductTooltip": "Přiřadit produkt",
+    "userStayTitle": "Můj pobyt",
+    "userStayErrorLoad": "Nepodařilo se načíst podrobnosti o ubytování.",
+    "userStayUnassignedRoom": "Nepřiřazená místnost",
+    "userStayEmptyStateMessage": "Nemáte k dispozici žádné informace o ubytování.",
+    "userStayLinkTitle": "Podrobnosti o mém ubytování",
+    "userStayLinkSubtitle": "Zobrazit ubytování, stravování a program"
   },
   "_": "_"
 }
