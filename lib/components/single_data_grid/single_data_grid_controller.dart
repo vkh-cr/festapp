@@ -78,7 +78,7 @@ class SingleDataGridController<T extends ITrinaRowModel> {
     await FileSaver.instance.saveFile(
       name: exportOptions?.fileName ?? 'grid-export',
       bytes: Uint8List.fromList(dataBytes),
-      ext: 'csv',
+      fileExtension: 'csv',
       mimeType: MimeType.csv,
     );
   }

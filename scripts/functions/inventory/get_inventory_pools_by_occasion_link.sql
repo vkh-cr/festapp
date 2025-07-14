@@ -37,7 +37,14 @@ BEGIN
     WHERE ic.inventory_pool IN (SELECT id FROM public.inventory_pools WHERE occasion = v_occasion_id);
 
     -- Aggregate all spots that belong to any context within the occasion's pools
-    SELECT COALESCE(jsonb_agg(to_jsonb(s) ORDER BY s.id), '[]'::jsonb)
+    SELECT COALESCE(jsonb_agg(jsonb_build_object(
+        'secret', s.secret,
+        'secret_expiration_time', s.secret_expiration_time,
+        'order_product_ticket', s.order_product_ticket,
+        'inventory_context', s.inventory_context,
+        'resource', s.resource,
+        'state', s.state
+    ) ORDER BY s.id), '[]'::jsonb)
     INTO v_spots_data
     FROM eshop.spots s
     WHERE s.inventory_context IN (
