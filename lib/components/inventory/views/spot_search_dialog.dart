@@ -1,18 +1,19 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/spot_management_models_and_constants.dart';
-import 'package:fstapp/data_models_eshop/spot_model.dart';
+import 'package:fstapp/components/eshop/models/spot_model.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import '../models/spot_management_constants.dart';
 import 'inventory_strings.dart';
+import 'spot_management_columns.dart';
 
 /// A stateful dialog that allows searching and selecting a spot for a single cell.
 class SpotSearchDialog extends StatefulWidget {
   final TrinaColumnRendererContext rendererContext;
   final SpotManagementRowReference rowReference;
-  final int? currentSpotId;
+  final SpotModel? currentSpot;
   final int contextId;
   final ValueNotifier<String> searchNotifier;
 
@@ -20,7 +21,7 @@ class SpotSearchDialog extends StatefulWidget {
     super.key,
     required this.rendererContext,
     required this.rowReference,
-    required this.currentSpotId,
+    required this.currentSpot,
     required this.contextId,
     required this.searchNotifier,
   });
@@ -38,11 +39,8 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
   void initState() {
     super.initState();
     _prepareInitialSpotList();
-    // Initialize the controller with the shared value
     _searchController.text = widget.searchNotifier.value;
-    // Add a listener that updates both the shared value and the local UI
     _searchController.addListener(_onSearchChanged);
-    // Perform an initial filter based on the restored search text
     _filterSpots();
   }
 
@@ -53,32 +51,29 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
     super.dispose();
   }
 
-  /// Listener for the search field.
   void _onSearchChanged() {
-    // Update the shared notifier so the next dialog instance gets the text
     widget.searchNotifier.value = _searchController.text;
-    // Filter the list and trigger a local rebuild to show/hide the clear button
     _filterSpots();
   }
 
   void _prepareInitialSpotList() {
     // --- AVAILABILITY LOGIC ---
+    // Find all spots already assigned in the current context column by inspecting the reference objects of all rows.
     final assignedSpotIdsInContext = <int>{};
-    final currentColumnField = widget.rendererContext.column.field;
     for (final row in widget.rendererContext.stateManager.rows) {
-      final cellValue = row.cells[currentColumnField]?.value as String? ?? '';
-      if (cellValue.isNotEmpty) {
-        final spotIdInCell = int.tryParse(cellValue.split(SpotManagementConstants.cellValueSeparator)[0]);
-        if (spotIdInCell != null) {
-          assignedSpotIdsInContext.add(spotIdInCell);
-        }
+      final rowRef = row.cells[SpotManagementConstants.rowReference]?.value as SpotManagementRowReference?;
+      final spotInCell = rowRef?.currentSpotsInRow[widget.contextId];
+      if (spotInCell != null) {
+        assignedSpotIdsInContext.add(spotInCell.id!);
       }
     }
 
     final availableSpotsForDialog = <SpotModel>[];
     widget.rowReference.allSpotsMap.values.forEach((spot) {
       if (spot.inventoryContextId == widget.contextId && spot.order != null) {
-        if (!assignedSpotIdsInContext.contains(spot.id) || spot.id == widget.currentSpotId) {
+        // A spot is available if it's not assigned elsewhere in this column, OR if it's the one currently in this cell.
+        if (!assignedSpotIdsInContext.contains(spot.id) ||
+            spot.id == widget.currentSpot?.id) {
           availableSpotsForDialog.add(spot);
         }
       }
@@ -91,15 +86,9 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
     for (final row in widget.rendererContext.stateManager.rows) {
       final rowRef = row.cells[SpotManagementConstants.rowReference]?.value as SpotManagementRowReference?;
       if (rowRef?.resource.id == currentResourceId) {
-        for (final cellEntry in row.cells.entries) {
-          if (cellEntry.key.startsWith(SpotManagementConstants.contextColumnPrefix)) {
-            final cellValue = cellEntry.value.value as String? ?? '';
-            if (cellValue.isNotEmpty) {
-              final spotIdInCell = int.tryParse(cellValue.split(SpotManagementConstants.cellValueSeparator)[0]);
-              if (spotIdInCell != null) {
-                assignedSpotIdsToThisResource.add(spotIdInCell);
-              }
-            }
+        for (final spot in rowRef!.currentSpotsInRow.values) {
+          if (spot != null) {
+            assignedSpotIdsToThisResource.add(spot.id!);
           }
         }
       }
@@ -110,7 +99,8 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
       final isBOnThisResource = assignedSpotIdsToThisResource.contains(b.id);
       if (isAOnThisResource && !isBOnThisResource) return -1;
       if (!isAOnThisResource && isBOnThisResource) return 1;
-      return (a.order!.toCustomerData()).compareTo(b.order!.toCustomerData());
+      return (a.order!.toCustomerData())
+          .compareTo(b.order!.toCustomerData());
     });
 
     setState(() {
@@ -122,30 +112,32 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
   void _filterSpots() {
     final query = _searchController.text;
     if (query.isEmpty) {
-      setState(() { _filteredSpots = List.from(_availableSpots); });
+      setState(() {
+        _filteredSpots = List.from(_availableSpots);
+      });
     } else {
       final normalizedQuery = Utilities.removeDiacritics(query.toLowerCase());
       setState(() {
         _filteredSpots = _availableSpots.where((spot) {
           final customerData = spot.order!.toCustomerData();
-          final normalizedName = Utilities.removeDiacritics(customerData.toLowerCase());
+          final normalizedName =
+          Utilities.removeDiacritics(customerData.toLowerCase());
           return normalizedName.contains(normalizedQuery);
         }).toList();
       });
     }
   }
 
-  void _selectAndPop(String value) {
-    Navigator.pop(context, {
-      'value': value,
-      'applyToAll': 'false' // This feature was removed, but we keep the structure
-    });
+  /// Pops the dialog and returns the selected spot, or an action object.
+  void _selectAndPop(Object? result) {
+    Navigator.of(context).pop(result);
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(InventoryStrings.searchDialogTitle(widget.rendererContext.column.title)),
+      title: Text(
+          InventoryStrings.searchDialogTitle(widget.rendererContext.column.title)),
       contentPadding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 0),
       content: SizedBox(
         width: 350,
@@ -166,7 +158,8 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
                     onPressed: () => _searchController.clear(),
                   )
                       : null,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
                   isDense: true,
                 ),
               ),
@@ -178,7 +171,8 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
                   // Option to unassign the spot
                   ListTile(
                     title: Text(InventoryStrings.searchDialogUnassign),
-                    onTap: () => _selectAndPop(''), // Pass empty string for unassign
+                    onTap: () =>
+                        _selectAndPop(UnassignSpotAction()), // Pop the sentinel object
                   ),
                   const Divider(height: 1),
                   // List of available spots
@@ -187,8 +181,7 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
                     return ListTile(
                       title: Text(spotTitle),
                       onTap: () {
-                        final value = '${spot.id}${SpotManagementConstants.cellValueSeparator}$spotTitle';
-                        _selectAndPop(value);
+                        _selectAndPop(spot); // Pop the spot object
                       },
                     );
                   }),
@@ -201,7 +194,7 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
       actions: <Widget>[
         // Action: Storno (Cancel)
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop(), // Pops with null
           child: Text('Storno'.tr()),
         ),
       ],

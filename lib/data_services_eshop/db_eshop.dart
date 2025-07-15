@@ -4,13 +4,13 @@ import 'package:fstapp/components/inventory/models/inventory_context_model.dart'
 import 'package:fstapp/components/inventory/models/inventory_pool_bundle.dart';
 import 'package:fstapp/components/inventory/models/inventory_pool_model.dart';
 import 'package:fstapp/components/inventory/models/resource_model.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/payment_info_model.dart';
-import 'package:fstapp/data_models_eshop/product_edit_bundle.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/data_models_eshop/product_type_model.dart';
-import 'package:fstapp/data_models_eshop/ticket_model.dart';
-import 'package:fstapp/data_models_eshop/transaction_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/payment_info_model.dart';
+import 'package:fstapp/components/eshop/models/product_edit_bundle.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/models/product_type_model.dart';
+import 'package:fstapp/components/eshop/models/ticket_model.dart';
+import 'package:fstapp/components/eshop/models/transaction_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

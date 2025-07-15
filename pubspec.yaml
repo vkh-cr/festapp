@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.16.2+176
+version: 0.16.7+181
 
 environment:
   sdk: '>=2.19.5 <3.22.1'
@@ -52,7 +52,7 @@ dependencies:
   collection: ^1.18.0
   flutter_map_location_marker: ^9.1.1
   geolocator: ^13.0.4
-  flutter_widget_from_html: ^0.16.0
+  flutter_widget_from_html: ^0.17.0
   quill_html_editor:
     git:
       url: https://github.com/the-airbender/quill_html_editor.git
@@ -88,19 +88,19 @@ dependencies:
   vector_map_tiles: ^8.0.0
   mbtiles: ^0.4.0
   sqlite3_flutter_libs: ^0.5.32
-  file_saver: ^0.3.0
+  file_saver: ^0.3.1
   youtube_player_flutter: ^9.1.1
 #    git:
 #      url: https://github.com/MusabBoltX/youtube_player_flutter_patch_fix.git
 #      ref: 97b3618b9891eb2b05a1b71ee75c432a2dce6d1a
-  flutter_widget_from_html_core: ^0.16.0
-  fwfh_cached_network_image: ^0.16.0
+  flutter_widget_from_html_core: ^0.17.0
+  fwfh_cached_network_image: ^0.16.1
   multi_split_view: ^3.6.0
   timezone: ^0.10.1
 
 dev_dependencies:
-  auto_route_generator: ^10.1.0
-  build_runner: ^2.4.15
+  auto_route_generator: ^10.2.3
+  build_runner: ^2.5.4
   flutter_launcher_icons: ^0.14.3
   flutter_test:
     sdk: flutter

@@ -743,7 +743,12 @@
     "variableSymbol": "Variable symbol",
     "deadline": "Deadline",
     "form": "Form",
-    "reminderSent": "Reminder Sent"
+    "reminderSent": "Reminder Sent",
+    "changedAt": "Changed At",
+    "changedBy": "Changed By",
+    "changes": "Changes",
+    "paidOrSent": "Paid or Sent",
+    "cancelled": "Cancelled"
   },
   "FormsFeature": {
     "formsTitle": "Forms",
@@ -796,7 +801,9 @@
     "tickets": "Tickets",
     "ticket": "Ticket",
     "applications": "Applications",
-    "application": "Application"
+    "application": "Application",
+    "ordersTab": "Orders",
+    "ordersHistoryTab": "Orders History"
   },
   "UserColumns": {
     "id": "Id",
@@ -970,7 +977,28 @@
     "inclusionSearchHint": "Search slot...",
     "included": "Included",
     "featureTitle": "Stay (Capacity groups)",
-    "featureDescription": "This feature allows for managing capacities for accommodation, meals, and daily program slots. It supports the assignment of participants to specific rooms and displays this information on their profile within the application."
+    "featureDescription": "This feature allows for managing capacities for accommodation, meals, and daily program slots. It supports the assignment of participants to specific rooms and displays this information on their profile within the application.",
+    "spotManagementClearAllTitle": "Clear All Assignments",
+    "spotManagementClearAllConfirmation": "Are you sure you want to unassign all spots in this view? This change only affects the user interface and will not be saved automatically.",
+    "settingsDescriptionLabel": "Description",
+    "settingsDescriptionHint": "Provide an optional description for the Capacity Group...",
+    "settingsTypeLabel": "Capacity Group Type",
+    "typeAccommodation": "Accommodation",
+    "typeFood": "Food",
+    "typeOther": "Other",
+    "settingsPlaceLabel": "Place",
+    "settingsNoPlaceAssigned": "No place assigned",
+    "searchDialogTitlePlace": "Select Place",
+    "searchDialogTitleProduct": "Select Product",
+    "settingsNoProductAssigned": "No product assigned",
+    "settingsProductTooltip": "Assign Product",
+    "userStayTitle": "My Stay",
+    "userStayErrorLoad": "Failed to load accommodation details.",
+    "userStayUnassignedRoom": "Unassigned Room",
+    "userStayEmptyStateMessage": "You have no accommodation information available.",
+    "userStayLinkTitle": "My accommodation details",
+    "userStayLinkSubtitle": "View your accommodation and services",
+    "cardTooltipUnassigned": "{count} unassigned spot(s)"
   },
   "_":"_"
 }

@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.get_products_and_types_for_edit(occasion_link text)
-RETURNS json LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS json LANGUAGE plpgsql
+SECURITY DEFINER AS $$
 DECLARE
   product_types json;
   products json;
@@ -17,6 +18,11 @@ BEGIN
   -- If the occasion link is invalid, raise an exception.
   IF occ_id IS NULL THEN
     RAISE EXCEPTION 'Occasion not found for link: %', occasion_link;
+  END IF;
+
+  -- Verify if the current user is an editor for the order's occasion
+  IF NOT get_is_editor_order_view_on_occasion(occ_id) THEN
+      RETURN jsonb_build_object('code', 403, 'message', 'User is not authorized to view this.');
   END IF;
 
 -- Fetch all product types for the given occasion

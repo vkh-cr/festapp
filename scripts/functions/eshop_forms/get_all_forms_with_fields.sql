@@ -39,7 +39,6 @@ BEGIN
     SELECT jsonb_agg(
         jsonb_build_object(
             'id', f.id,
-            'created_at', f.created_at,
             'title', f.title,
             'data', f.data,
             'key', f.key,
@@ -48,7 +47,6 @@ BEGIN
             'is_open', f.is_open,
             'link', f.link,
             'blueprint', f.blueprint,
-            'updated_at', f.updated_at,
             'response_count', (
                 -- Subquery to count the number of responses (orders) for each form.
                 SELECT COUNT(*)
@@ -60,14 +58,8 @@ BEGIN
                 SELECT jsonb_agg(
                     jsonb_build_object(
                         'id', ff.id,
-                        'title', ff.title,
-                        'description', ff.description,
-                        'data', ff.data,
                         'type', ff.type,
-                        'is_required', ff.is_required,
-                        'is_hidden', ff.is_hidden,
-                        'is_ticket_field', ff.is_ticket_field,
-                        'order', ff."order"
+                        'is_ticket_field', ff.is_ticket_field
                     ) ORDER BY COALESCE(ff."order", 0)
                 )
                 FROM public.form_fields ff

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/pages/form/models/id_document_field_holder.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/theme_config.dart';
@@ -140,7 +141,7 @@ class FormFieldBuilders {
                               child: Align(
                                 alignment: Alignment.center,
                                 child: buildTitleWidget(
-                                  "${FeaturesStrings.itemSingular} ${i + 1}",
+                                  "${OrdersStrings.itemSingular} ${i + 1}",
                                   false,
                                   context,
                                 ),
