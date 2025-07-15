@@ -123,7 +123,6 @@ BEGIN
   v_old_ids := COALESCE(v_old_ids, ARRAY[]::bigint[]);
   v_new_ids := COALESCE(v_new_ids, ARRAY[]::bigint[]);
 
-  -- MODIFIED BLOCK START
   -- Before deleting order_product_ticket rows, nullify the reference in eshop.spots to de-allocate the spot.
   UPDATE eshop.spots s
      SET order_product_ticket = NULL
@@ -144,7 +143,6 @@ BEGIN
   SELECT v_order_id, p_ticket_id, new_pid
     FROM (SELECT unnest FROM unnest(v_new_ids) EXCEPT SELECT unnest FROM unnest(v_old_ids)) AS t(new_pid)
   ON CONFLICT DO NOTHING;
-  -- MODIFIED BLOCK END
 
   /* 5) adjust payment_info.amount and order.price by the delta */
   v_diff := v_sum_new - v_sum_old;
@@ -186,18 +184,22 @@ BEGIN
          updated_at = now()
    WHERE id = v_order_id;
 
-  IF v_new_state = 'ordered' AND v_state <> 'ordered' THEN
+  IF v_price > 0 THEN
+    -- If there's a balance due, set/update the payment deadline.
     SELECT elem INTO v_form_settings
     FROM jsonb_array_elements(v_occasion_features) AS elem
     WHERE elem->>'code' = 'form';
 
     v_deadline_duration_seconds := COALESCE(
         (v_form_settings->>'deadline_duration_seconds')::bigint,
-        604800
+        604800 -- Default to 7 days (604800 seconds) if not specified
     );
 
     v_new_deadline := now() + make_interval(secs => v_deadline_duration_seconds);
     PERFORM public.set_payment_deadline(v_payment_info_id, v_new_deadline);
+  ELSE
+    -- If the order is free or paid off, clear the payment deadline.
+    PERFORM public.set_payment_deadline(v_payment_info_id, NULL);
   END IF;
 
   PERFORM apply_allocations(v_order_id);

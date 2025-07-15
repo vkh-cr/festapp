@@ -2,6 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
@@ -25,12 +27,13 @@ class _ProductsTabState extends State<ProductsTab> {
   bool _isLoading = true;
 
   // REORDERED column list
-  static const List<String> columnIdentifiers = [
+  static List<String> columnIdentifiers = [
     EshopColumns.PRODUCT_ID,
     EshopColumns.PRODUCT_IS_HIDDEN,
     EshopColumns.PRODUCT_TYPE,
     EshopColumns.PRODUCT_TITLE,
-    EshopColumns.PRODUCT_INCLUDED_INVENTORY,
+    if(FeatureService.isFeatureEnabled(FeatureConstants.services))
+      EshopColumns.PRODUCT_INCLUDED_INVENTORY,
     EshopColumns.PRODUCT_DESCRIPTION,
     EshopColumns.PRODUCT_PRICE,
     EshopColumns.PRODUCT_CURRENCY_CODE,
