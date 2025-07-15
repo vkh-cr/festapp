@@ -2,17 +2,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/activities/activities_content.dart';
 import 'package:fstapp/components/features/features_strings.dart';
-import 'package:fstapp/pages/eshop/products_tab.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/pages/eshop/blueprint_editor_tab.dart';
-import 'package:fstapp/pages/eshop/email_templates_tab.dart';
+import 'package:fstapp/components/eshop/blueprint_editor_tab.dart';
+import 'package:fstapp/components/email_templates/views/email_templates_tab.dart';
 import 'package:fstapp/pages/form/pages/forms_tab.dart';
-import 'package:fstapp/pages/eshop/orders_tab.dart';
-import 'package:fstapp/pages/eshop/report_tab.dart';
-import 'package:fstapp/pages/eshop/tickets_tab.dart';
+import 'package:fstapp/components/eshop/orders_tab.dart';
+import 'package:fstapp/components/eshop/report_tab.dart';
+import 'package:fstapp/components/eshop/tickets_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/game_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/information_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/places_tab.dart';
@@ -23,6 +23,8 @@ import 'package:fstapp/pages/occasionAdmin/users_tab.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/logo_widget.dart';
 import 'package:fstapp/widgets/header/user_header_widget.dart';
+
+import '../eshop/products_tab.dart';
 
 class AdminPageHelper {
   /// This method returns an adaptive AppBar based on the screen width.
@@ -252,7 +254,7 @@ class AdminTabDefinition {
         icon: Icons.grid_on,
         widget: BlueprintTab()),
     tickets: AdminTabDefinition(
-        label: FeaturesStrings.itemsPlural,
+        label: OrdersStrings.itemsPlural,
         icon: Icons.local_activity,
         widget: TicketsTab()),
     orders: AdminTabDefinition(

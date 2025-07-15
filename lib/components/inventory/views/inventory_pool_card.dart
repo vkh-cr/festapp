@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
-import 'package:fstapp/data_models_eshop/spot_model.dart';
+import 'package:fstapp/components/eshop/models/spot_model.dart';
 import 'package:fstapp/styles/styles_config.dart';
 
 import 'inventory_strings.dart';

@@ -19,6 +19,17 @@ BEGIN
         -- Return a failure message if no orders were updated
         RETURN jsonb_build_object('code', 404, 'message', 'Order not found');
     ELSE
+        -- Add a record to the order history
+        INSERT INTO eshop.orders_history("order", data, state, price, currency_code)
+        SELECT
+            o.id,
+            o.data,
+            o.state,
+            o.price,
+            o.currency_code
+        FROM eshop.orders o
+        WHERE o.id = order_id;
+
         -- Return a success message with a status code 200
         RETURN jsonb_build_object('code', 200, 'message', 'Order and tickets updated to sent successfully');
     END IF;

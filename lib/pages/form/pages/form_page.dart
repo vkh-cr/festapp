@@ -10,12 +10,11 @@ import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
 import 'package:fstapp/data_models/form_option_product_model.dart';
-import 'package:fstapp/data_models_eshop/product_type_model.dart';
+import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
-import 'package:fstapp/pages/eshop/order_finish_screen.dart';
-import 'package:fstapp/pages/eshop/order_preview_screen.dart';
+import 'package:fstapp/pages/form/pages/order_preview_screen.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
@@ -28,6 +27,7 @@ import 'package:fstapp/components/seat_reservation/widgets/seat_reservation_widg
 
 import '../models/form_holder.dart';
 import '../models/ticket_holder.dart';
+import 'order_finish_screen.dart';
 
 @RoutePage()
 class FormPage extends StatefulWidget {

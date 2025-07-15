@@ -3,9 +3,9 @@ import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_response_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
-import 'package:fstapp/data_models_eshop/bank_account_model.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/data_models_eshop/product_type_model.dart';
+import 'package:fstapp/components/eshop/models/bank_account_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -34,11 +34,23 @@ class DbForms {
 
   static Future<List<FormModel>> getAllFormsViaOccasionLink(String occasionLink) async {
     final response = await _supabase.rpc(
-        'get_all_forms',
+        'get_forms_by_link',
+        params: {'occasion_link': occasionLink}
+    );
+
+    return List<FormModel>.from(
+        response.map((f) => FormModel.fromJson(f)));
+  }
+
+  /// Fetches all forms for a given occasion, including their nested form fields.
+  static Future<List<FormModel>> getAllFormsWithFieldsViaOccasionLink(String occasionLink) async {
+    final response = await _supabase.rpc(
+        'get_all_forms_with_fields', // Calling the new function
         params: {'occasion_link': occasionLink}
     );
 
     if (response["code"] == 200) {
+      // The FormModel.fromJson factory is expected to handle the 'fields' array
       return List<FormModel>.from(
           response["data"].map((f) => FormModel.fromJson(f)));
     }

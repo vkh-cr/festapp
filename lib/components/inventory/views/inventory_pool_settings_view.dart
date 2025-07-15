@@ -1,12 +1,16 @@
-// In lib/components/inventory/views/inventory_pool_settings_view.dart
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
 import 'package:fstapp/components/inventory/models/inventory_pool_bundle.dart';
+import 'package:fstapp/components/inventory/models/inventory_pool_model.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
+import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_services/db_users.dart';
+import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -14,9 +18,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/data_services/db_inventory_pools.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/html_view.dart';
 import 'package:intl/intl.dart';
 
+import 'inventory_contexts_editor.dart';
 import 'inventory_strings.dart';
+import 'place_search_dialog.dart';
+import 'product_search_dialog.dart';
+import 'quick_search_dialog.dart';
 
 class InventoryPoolSettingsView extends StatefulWidget {
   final int poolId;
@@ -46,12 +55,17 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
   final _formKey = GlobalKey<FormState>();
   InventoryPoolBundle? _bundle;
   List<InventoryContextModel> _originalContexts = [];
+  String? _originalDescription;
+  bool _originalIsAutoResourceAssignment = true;
+  bool _originalIsEditableByUser = false;
+  PlaceModel? _originalPlace;
   OccasionModel? _occasion;
   bool _isLoading = true;
   bool _isSaving = false;
 
   late TextEditingController _poolTitleController;
   late TextEditingController _sellableCapacityController;
+  InventoryPoolType _selectedType = InventoryPoolType.other;
 
   @override
   void initState() {
@@ -87,6 +101,15 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
 
     if (mounted) {
       if (result != null) {
+        // Link products to contexts BEFORE creating the original backup
+        if (result.bundle.contexts != null && result.bundle.products != null) {
+          for (var context in result.bundle.contexts!) {
+            if (context.productId != null) {
+              context.product = result.bundle.products!.firstWhereOrNull((p) => p.id == context.productId);
+            }
+          }
+        }
+
         setState(() {
           _bundle = result.bundle;
           _occasion = result.occasion;
@@ -94,6 +117,14 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
           _poolTitleController.text = result.bundle.pool.title ?? '';
           _sellableCapacityController.text =
               result.bundle.pool.sellableCapacity?.toString() ?? '';
+          _selectedType = result.bundle.pool.type;
+
+          _originalDescription = result.bundle.pool.description;
+          _originalIsAutoResourceAssignment = result.bundle.pool.isAutoResourceAssignment;
+          _originalIsEditableByUser = result.bundle.pool.isEditableByUser;
+
+          _originalPlace = result.bundle.places?.firstWhereOrNull((p) => p.id == result.bundle.pool.placeId);
+          _bundle!.pool.place = _originalPlace;
         });
       }
       setState(() => _isLoading = false);
@@ -129,6 +160,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
 
     _bundle!.pool.title = _poolTitleController.text.trim();
     _bundle!.pool.sellableCapacity = int.tryParse(_sellableCapacityController.text);
+    _bundle!.pool.type = _selectedType;
     _updateContextsOrder();
 
     final updatedBundle = await ExceptionHandler.guard(
@@ -139,12 +171,26 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
 
     if (mounted) {
       if (updatedBundle != null) {
+        // Link products to contexts BEFORE creating the original backup
+        if (updatedBundle.contexts != null && updatedBundle.products != null) {
+          for (var context in updatedBundle.contexts!) {
+            if (context.productId != null) {
+              context.product = updatedBundle.products!.firstWhereOrNull((p) => p.id == context.productId);
+            }
+          }
+        }
         setState(() {
           _bundle = updatedBundle;
           _originalContexts = updatedBundle.contexts?.map((c) => c.copyWith()).toList() ?? [];
           _poolTitleController.text = updatedBundle.pool.title ?? '';
           _sellableCapacityController.text =
               updatedBundle.pool.sellableCapacity?.toString() ?? '';
+          _selectedType = updatedBundle.pool.type;
+          _originalDescription = updatedBundle.pool.description;
+          _originalIsAutoResourceAssignment = updatedBundle.pool.isAutoResourceAssignment;
+          _originalIsEditableByUser = updatedBundle.pool.isEditableByUser;
+          _originalPlace = updatedBundle.places?.firstWhereOrNull((p) => p.id == updatedBundle.pool.placeId);
+          _bundle!.pool.place = _originalPlace;
         });
         await ToastHelper.Show(currentContext, InventoryStrings.settingsSuccessSave, severity: ToastSeverity.Ok);
         widget.onPoolUpdated?.call();
@@ -176,6 +222,16 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
   void _cancelEdit() {
     setState(() {
       _bundle?.contexts = _originalContexts.map((c) => c.copyWith()).toList();
+      _poolTitleController.text = _bundle?.pool.title ?? '';
+      _sellableCapacityController.text = _bundle?.pool.sellableCapacity?.toString() ?? '';
+      _selectedType = _bundle?.pool.type ?? InventoryPoolType.other;
+      if (_bundle != null) {
+        _bundle!.pool.description = _originalDescription;
+        _bundle!.pool.isAutoResourceAssignment = _originalIsAutoResourceAssignment;
+        _bundle!.pool.isEditableByUser = _originalIsEditableByUser;
+        _bundle!.pool.place = _originalPlace;
+        _bundle!.pool.placeId = _originalPlace?.id;
+      }
     });
   }
 
@@ -192,7 +248,20 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
 
   void _addContextBack(InventoryContextModel context) {
     setState(() {
+      context.order = context.order! - 1;
       _bundle!.contexts!.add(context);
+      _bundle!.contexts!.sort((a, b) => (a.order ?? 999).compareTo(b.order ?? 999));
+      _updateContextsOrder();
+    });
+  }
+
+  void _reorderContext(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final item = _bundle!.contexts!.removeAt(oldIndex);
+      _bundle!.contexts!.insert(newIndex, item);
       _updateContextsOrder();
     });
   }
@@ -290,6 +359,55 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
     }
   }
 
+  Future<void> _showSelectPlaceDialog() async {
+    if (_bundle?.places == null) return;
+
+    final result = await showDialog<Object>(
+      context: context,
+      builder: (dialogContext) => PlaceSearchDialog(
+        allPlaces: _bundle!.places!,
+        currentPlace: _bundle!.pool.place,
+      ),
+    );
+
+    if (result == null || !mounted) return;
+
+    setState(() {
+      if (result is PlaceModel) {
+        _bundle!.pool.place = result;
+        _bundle!.pool.placeId = result.id;
+      } else if (result is UnassignAction) {
+        _bundle!.pool.place = null;
+        _bundle!.pool.placeId = null;
+      }
+    });
+  }
+
+  // MODIFICATION: Signature updated to accept the filtered list.
+  Future<void> _showSelectProductDialog(InventoryContextModel contextModel, List<ProductModel> assignableProducts) async {
+    final result = await showDialog<Object>(
+      context: context,
+      builder: (dialogContext) => ProductSearchDialog(
+        allProducts: assignableProducts,
+        currentProduct: contextModel.product,
+      ),
+    );
+
+    if (result == null || !mounted) return;
+
+    setState(() {
+      final contextIndex = _bundle!.contexts!.indexWhere((c) => c.id == contextModel.id || c == contextModel);
+      if (contextIndex == -1) return;
+
+      if (result is ProductModel) {
+        _bundle!.contexts![contextIndex].product = result;
+        _bundle!.contexts![contextIndex].productId = result.id;
+      } else if (result is UnassignAction) {
+        _bundle!.contexts![contextIndex].product = null;
+        _bundle!.contexts![contextIndex].productId = null;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -317,123 +435,198 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
               constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
               child: Form(
                 key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.all(24.0),
-                  children: [
-                    Text(
-                      InventoryStrings.settingsConfigureTitle(_bundle!.pool.title ?? 'Pool'),
-                      style: Theme.of(innerContext).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 24),
-
-                    Text(InventoryStrings.settingsPoolSettingsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _poolTitleController,
-                      decoration: InputDecoration(
-                        labelText: InventoryStrings.poolTitleLabel,
-                        border: const OutlineInputBorder(),
-                      ),
-                      validator: (value) => (value == null || value.trim().isEmpty)
-                          ? InventoryStrings.validationTitleEmpty
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _sellableCapacityController,
-                      decoration: InputDecoration(
-                        labelText: InventoryStrings.settingsSellableCapacityLabel,
-                        hintText: InventoryStrings.settingsSellableCapacityHint,
-                        border: const OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                    const SizedBox(height: 16),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(InventoryStrings.settingsAutoAssignmentLabel),
-                      subtitle: Text(InventoryStrings.settingsAutoAssignmentSubtitle),
-                      value: _bundle!.pool.isAutoResourceAssignment,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _bundle!.pool.isAutoResourceAssignment = value;
-                        });
-                      },
-                    ),
-
-                    const Divider(height: 40),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(InventoryStrings.settingsContextsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline),
-                          tooltip: InventoryStrings.settingsAddContextTooltip,
-                          onPressed: () => _showEditContextDialog(),
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    if (activeContexts.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Center(child: Text(InventoryStrings.settingsNoContexts)),
-                      ),
-
-                    ReorderableListView(
-                      buildDefaultDragHandles: false,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      proxyDecorator: (Widget child, int index, Animation<double> animation) {
-                        return Material(
-                          elevation: 4.0,
-                          color: Colors.transparent,
-                          child: child,
-                        );
-                      },
-                      onReorder: (oldIndex, newIndex) {
-                        setState(() {
-                          if (newIndex > oldIndex) {
-                            newIndex -= 1;
-                          }
-                          final item = _bundle!.contexts!.removeAt(oldIndex);
-                          _bundle!.contexts!.insert(newIndex, item);
-                          _updateContextsOrder();
-                        });
-                      },
-                      children: [
-                        for (int i = 0; i < activeContexts.length; i++)
-                          _buildContextEditor(activeContexts[i], i, isDeleted: false)
-                      ],
-                    ),
-
-                    if (deletedContexts.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Text(InventoryStrings.settingsMarkedForDeletion, style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 8),
-                      ListView(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          for (final deletedItem in deletedContexts)
-                            _buildContextEditor(deletedItem, -1, isDeleted: true)
+                          Text(
+                            InventoryStrings.settingsConfigureTitle(_bundle!.pool.title ?? 'Pool'),
+                            style: Theme.of(innerContext).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(InventoryStrings.settingsPoolSettingsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _poolTitleController,
+                            decoration: InputDecoration(
+                              labelText: InventoryStrings.poolTitleLabel,
+                              border: const OutlineInputBorder(),
+                            ),
+                            validator: (value) => (value == null || value.trim().isEmpty)
+                                ? InventoryStrings.validationTitleEmpty
+                                : null,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _sellableCapacityController,
+                            decoration: InputDecoration(
+                              labelText: InventoryStrings.settingsSellableCapacityLabel,
+                              hintText: InventoryStrings.settingsSellableCapacityHint,
+                              border: const OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          ),
+                          const SizedBox(height: 24),
+                          Text(InventoryStrings.settingsDescriptionLabel, style: Theme.of(context).textTheme.labelLarge),
+                          const SizedBox(height: 8),
+                          if(_bundle!.pool.description?.isNotEmpty ?? false)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: InputDecorator(
+                                decoration: InputDecoration(
+                                  border: const OutlineInputBorder(),
+                                  contentPadding: const EdgeInsets.all(12),
+                                ),
+                                child: HtmlView(html: _bundle!.pool.description!, isSelectable: true),
+                              ),
+                            ),
+                          Center(
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.edit),
+                              label: Text("Edit content".tr()),
+                              onPressed: () async {
+                                final result = await RouterService.navigatePageInfo(
+                                  context,
+                                  HtmlEditorRoute(
+                                      content: {HtmlEditorPage.parContent: _bundle!.pool.description ?? ""},
+                                      occasionId: _bundle!.pool.occasionId),
+                                );
+                                if (result != null && mounted) {
+                                  setState(() => _bundle!.pool.description = result as String);
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                InventoryStrings.settingsTypeLabel,
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              const SizedBox(height: 8),
+                              Center(
+                                child: ToggleButtons(
+                                  isSelected: [
+                                    _selectedType == InventoryPoolType.accommodation,
+                                    _selectedType == InventoryPoolType.food,
+                                    _selectedType == InventoryPoolType.other,
+                                  ],
+                                  onPressed: (int index) {
+                                    setState(() {
+                                      if (index == 0) {
+                                        _selectedType = InventoryPoolType.accommodation;
+                                      } else if (index == 1) {
+                                        _selectedType = InventoryPoolType.food;
+                                      } else if (index == 2) {
+                                        _selectedType = InventoryPoolType.other;
+                                      }
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  children: InventoryPoolType.values.map((type) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(type.icon, size: 18),
+                                          const SizedBox(width: 8),
+                                          Text(type.displayName),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          Text(InventoryStrings.settingsPlaceLabel, style: Theme.of(context).textTheme.labelLarge),
+                          const SizedBox(height: 8),
+                          InputDecorator(
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            ),
+                            child: ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(_bundle!.pool.place?.title ?? InventoryStrings.settingsNoPlaceAssigned),
+                              trailing: ElevatedButton(
+                                child: Text("Edit".tr()),
+                                onPressed: _showSelectPlaceDialog,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(InventoryStrings.settingsAutoAssignmentLabel),
+                            subtitle: Text(InventoryStrings.settingsAutoAssignmentSubtitle),
+                            value: _bundle!.pool.isAutoResourceAssignment,
+                            onChanged: (bool value) {
+                              setState(() {
+                                _bundle!.pool.isAutoResourceAssignment = value;
+                              });
+                            },
+                          ),
+                          const Divider(height: 40),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(InventoryStrings.settingsContextsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle_outline),
+                                tooltip: InventoryStrings.settingsAddContextTooltip,
+                                onPressed: () => _showEditContextDialog(),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          if (activeContexts.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16.0),
+                              child: Center(child: Text(InventoryStrings.settingsNoContexts)),
+                            ),
                         ],
-                      )
-                    ],
-
-                    const SizedBox(height: 48),
-                    Center(
-                      child: TextButton(
-                        onPressed: () => _confirmDelete(innerContext),
-                        child: Text(
-                          InventoryStrings.settingsDeletePoolButton,
-                          style: TextStyle(color: ThemeConfig.redColor(innerContext)),
-                        ),
                       ),
                     ),
-                    const SizedBox(height: 48),
+
+                    InventoryContextsEditor(
+                      activeContexts: activeContexts,
+                      deletedContexts: deletedContexts,
+                      originalContexts: _originalContexts,
+                      pool: _bundle?.pool,
+                      allProducts: _bundle?.products ?? [],
+                      onReorder: _reorderContext,
+                      onEdit: (context) => _showEditContextDialog(contextModel: context),
+                      // MODIFICATION: Pass the updated method reference.
+                      onEditProduct: _showSelectProductDialog,
+                      onRemove: _removeContext,
+                      onRestore: _addContextBack,
+                    ),
+
+                    SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 48),
+                          Center(
+                            child: TextButton(
+                              onPressed: () => _confirmDelete(innerContext),
+                              child: Text(
+                                InventoryStrings.settingsDeletePoolButton,
+                                style: TextStyle(color: ThemeConfig.redColor(innerContext)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 48),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -466,87 +659,6 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
           ),
         );
       }),
-    );
-  }
-
-  Widget _buildContextEditor(InventoryContextModel contextModel, int index, {required bool isDeleted}) {
-    contextModel.inventoryPool = _bundle?.pool;
-
-    final isNew = _originalContexts.firstWhereOrNull((c) =>
-    (c.id != null && c.id == contextModel.id) ||
-        (c.id == null && c == contextModel)) == null;
-
-    return Card(
-      key: ValueKey(contextModel.id ?? contextModel.hashCode),
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      color: isDeleted
-          ? Colors.red.withOpacity(0.05)
-          : isNew
-          ? Colors.green.withOpacity(0.05)
-          : null,
-      child: Row(
-        children: <Widget>[
-          // **MODIFIED:** Added a dedicated drag handle wrapped in the listener.
-          ReorderableDragStartListener(
-            index: index,
-            enabled: !isDeleted,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Center(
-                child: isDeleted
-                    ? const SizedBox(width: 12) // Maintain spacing for alignment
-                    : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(4, (_) => Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(2, (_) => Container(
-                      width: 3.5,
-                      height: 3.5,
-                      margin: const EdgeInsets.all(1),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).disabledColor,
-                        shape: BoxShape.circle,
-                      ),
-                    )),
-                  )),
-                ),
-              ),
-            ),
-          ),
-          // **MODIFIED:** The ListTile itself is no longer the drag target.
-          Expanded(
-            child: ListTile(
-              contentPadding: const EdgeInsets.only(right: 16),
-              title: Text(
-                contextModel.getFullTitle(context),
-                style: TextStyle(
-                  decoration: isDeleted ? TextDecoration.lineThrough : null,
-                  color: isDeleted ? Theme.of(context).disabledColor : null,
-                ),
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            tooltip: InventoryStrings.edit,
-            onPressed: isDeleted ? null : () => _showEditContextDialog(contextModel: contextModel),
-          ),
-          IconButton(
-            icon: isDeleted
-                ? const Icon(Icons.add_circle_outline, color: Colors.green)
-                : Icon(Icons.delete_outline, color: ThemeConfig.redColor(context)),
-            tooltip: isDeleted ? InventoryStrings.restore : InventoryStrings.remove,
-            onPressed: () {
-              if (isDeleted) {
-                _addContextBack(contextModel);
-              } else {
-                _removeContext(contextModel);
-              }
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
     );
   }
 }

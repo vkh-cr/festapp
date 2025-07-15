@@ -121,7 +121,7 @@ class RadioFieldBuilder {
       FormHolder formHolder,
       ) {
     // If the option is a product option and is disabled, mark it accordingly.
-    final bool isDisabled = o is FormOptionProductModel && !o.isEnabled;
+    final bool isDisabled = o is FormOptionProductModel && !o.isAvailable;
     final title = OptionFieldHelper.buildOptionTitle(context, o);
     // If disabled, update text style to use the disabled color and append "Unavailable".
     final effectiveTitle = isDisabled
@@ -181,7 +181,7 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
   Widget build(BuildContext context) {
     final options = widget.optionsIn.map((o) {
       // If the option is a product option, check if it's disabled.
-      final bool isDisabled = o is FormOptionProductModel && !o.isEnabled;
+      final bool isDisabled = o is FormOptionProductModel && !o.isAvailable;
       final style = OptionFieldHelper.optionTitleTextStyle().copyWith(
         color: isDisabled ? Theme.of(context).disabledColor : null,
       );
@@ -218,7 +218,7 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
           wrapDirection: Axis.vertical,
           onChanged: (val) {
             // Prevent selection change if the option is disabled.
-            if (val is FormOptionProductModel && !val.isEnabled) {
+            if (val is FormOptionProductModel && !val.isAvailable) {
               return;
             }
             setState(() {
