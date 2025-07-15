@@ -997,7 +997,8 @@
     "userStayUnassignedRoom": "Unassigned Room",
     "userStayEmptyStateMessage": "You have no accommodation information available.",
     "userStayLinkTitle": "My accommodation details",
-    "userStayLinkSubtitle": "View your accommodation and services"
+    "userStayLinkSubtitle": "View your accommodation and services",
+    "cardTooltipUnassigned": "{count} unassigned spot(s)"
   },
   "_":"_"
 }

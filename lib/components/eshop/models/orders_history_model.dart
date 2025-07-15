@@ -47,6 +47,9 @@ class OrderHistoryModel extends ITrinaRowModel {
   OrderHistoryModel? previousHistoryRecord;
   List<OrderDataTicketModel>? dataTickets;
 
+  // A consistent placeholder for when a price value is not available.
+  static const String _noPricePlaceholder = '---';
+
   OrderHistoryModel({
     this.id,
     this.createdAt,
@@ -137,7 +140,8 @@ class OrderHistoryModel extends ITrinaRowModel {
     final currentProdsMutable = [...allCurrentProducts];
     final referenceProdsMutable = [...allReferenceProducts];
 
-    // First pass: Find and remove identical products (same id and price)
+    // First pass: Find and remove identical products (same id and price).
+    // `null == null` evaluates to true, so this correctly handles products without a price.
     for (int i = currentProdsMutable.length - 1; i >= 0; i--) {
       final currentP = currentProdsMutable[i];
       final matchIndex = referenceProdsMutable.indexWhere((refP) => refP.product.id == currentP.product.id && refP.product.price == currentP.product.price);
@@ -165,32 +169,44 @@ class OrderHistoryModel extends ITrinaRowModel {
     return _OrderChanges(added: added, removed: removed, changed: changed);
   }
 
-  /// **NEW METHOD**
+  /// **MODIFIED METHOD**
   /// Generates a single-line string summary of all changes for the data grid.
+  /// Handles products with null prices.
   String _generateChangesSummaryString(BuildContext context) {
     final changes = _calculateChanges();
     final changeStrings = <String>[];
 
+    // Helper to format an optional price into a display string.
+    String formatOptionalPrice(double? price, String? currencyCode) {
+      if (price == null) return ''; // Return empty string if price is null
+      final priceString = Utilities.formatPrice(context, price, currencyCode: currencyCode);
+      return ' ($priceString)';
+    }
+
     // Format added products
     for (var p in changes.added) {
       final product = p.product;
-      final priceString = Utilities.formatPrice(context, product.price!, currencyCode: product.currencyCode);
-      changeStrings.add("+ ${product.title} ($priceString)");
+      final priceDisplay = formatOptionalPrice(product.price, product.currencyCode);
+      changeStrings.add("+ ${product.title}$priceDisplay");
     }
 
     // Format removed products
     for (var p in changes.removed) {
       final product = p.product;
-      final priceString = Utilities.formatPrice(context, product.price!, currencyCode: product.currencyCode);
-      changeStrings.add("− ${product.title} ($priceString)");
+      final priceDisplay = formatOptionalPrice(product.price, product.currencyCode);
+      changeStrings.add("− ${product.title}$priceDisplay");
     }
 
     // Format changed products
     for (var c in changes.changed) {
       final fromP = c['from']!.product;
       final toP = c['to']!.product;
-      final oldPrice = Utilities.formatPrice(context, fromP.price!, currencyCode: fromP.currencyCode);
-      final newPrice = Utilities.formatPrice(context, toP.price!, currencyCode: toP.currencyCode);
+      final oldPrice = fromP.price != null
+          ? Utilities.formatPrice(context, fromP.price!, currencyCode: fromP.currencyCode)
+          : _noPricePlaceholder;
+      final newPrice = toP.price != null
+          ? Utilities.formatPrice(context, toP.price!, currencyCode: toP.currencyCode)
+          : _noPricePlaceholder;
       changeStrings.add("~ ${toP.title}: $oldPrice → $newPrice");
     }
 
@@ -198,29 +214,39 @@ class OrderHistoryModel extends ITrinaRowModel {
       return OrdersStrings.noProductChanges;
     }
 
-    // Join all changes with a separator
     return changeStrings.join(' | ');
   }
 
+  /// **MODIFIED METHOD**
   /// Generates a single-line, horizontally scrollable widget for the data grid column.
+  /// Handles products with null prices.
   Widget generateSingleLineSummaryWidget(BuildContext context) {
     final changes = _calculateChanges();
     final defaultStyle = DefaultTextStyle.of(context).style;
     final changeSpans = <TextSpan>[];
 
+    // Helper to format an optional price into a display string.
+    String formatOptionalPrice(double? price, String? currencyCode) {
+      if (price == null) return ''; // Return empty string if price is null
+      final priceString = Utilities.formatPrice(context, price, currencyCode: currencyCode);
+      return ' ($priceString)';
+    }
+
     for (var p in changes.added) {
       final product = p.product;
-      changeSpans.add(TextSpan(text: "+ ${product.title} (${Utilities.formatPrice(context, product.price!, currencyCode: product.currencyCode)})", style: TextStyle(color: ThemeConfig.greenColor(context), fontWeight: FontWeight.bold)));
+      final priceDisplay = formatOptionalPrice(product.price, product.currencyCode);
+      changeSpans.add(TextSpan(text: "+ ${product.title}$priceDisplay", style: TextStyle(color: ThemeConfig.greenColor(context), fontWeight: FontWeight.bold)));
     }
     for (var p in changes.removed) {
       final product = p.product;
-      changeSpans.add(TextSpan(text: "− ${product.title} (${Utilities.formatPrice(context, product.price!, currencyCode: product.currencyCode)})", style: TextStyle(color: ThemeConfig.redColor(context), fontWeight: FontWeight.bold)));
+      final priceDisplay = formatOptionalPrice(product.price, product.currencyCode);
+      changeSpans.add(TextSpan(text: "− ${product.title}$priceDisplay", style: TextStyle(color: ThemeConfig.redColor(context), fontWeight: FontWeight.bold)));
     }
     for (var c in changes.changed) {
       final fromP = c['from']!.product;
       final toP = c['to']!.product;
-      final oldPrice = Utilities.formatPrice(context, fromP.price!, currencyCode: fromP.currencyCode);
-      final newPrice = Utilities.formatPrice(context, toP.price!, currencyCode: toP.currencyCode);
+      final oldPrice = fromP.price != null ? Utilities.formatPrice(context, fromP.price!, currencyCode: fromP.currencyCode) : _noPricePlaceholder;
+      final newPrice = toP.price != null ? Utilities.formatPrice(context, toP.price!, currencyCode: toP.currencyCode) : _noPricePlaceholder;
       changeSpans.add(TextSpan(text: "~ ${toP.title}: $oldPrice → $newPrice", style: TextStyle(color: Colors.orange.shade700, fontWeight: FontWeight.bold)));
     }
 
@@ -242,7 +268,9 @@ class OrderHistoryModel extends ITrinaRowModel {
     );
   }
 
+  /// **MODIFIED METHOD**
   /// Generates a multi-line, sectioned widget for the history dialog.
+  /// Handles products with null prices.
   Widget generateMultiLineSummaryWidget(BuildContext context) {
     final changes = _calculateChanges();
     final theme = Theme.of(context);
@@ -265,17 +293,18 @@ class OrderHistoryModel extends ITrinaRowModel {
       final removedItems = removedByTicket[ticketSymbol] ?? [];
       final changedItems = changedByTicket[ticketSymbol] ?? [];
 
-      // Find the note for this ticket from the current state's tickets
       final ticketNote = dataTickets?.firstWhereOrNull((t) => t.ticketSymbol == ticketSymbol)?.note;
 
       final List<Widget> changeRows = [];
       for (var p in addedItems) {
         final product = p.product;
-        changeRows.add(_buildProductRow("+ ${product.title}", Utilities.formatPrice(context, product.price!, currencyCode: product.currencyCode), ThemeConfig.greenColor(context)));
+        final priceString = product.price != null ? Utilities.formatPrice(context, product.price!, currencyCode: product.currencyCode) : null;
+        changeRows.add(_buildProductRow("+ ${product.title}", priceString, ThemeConfig.greenColor(context)));
       }
       for (var p in removedItems) {
         final product = p.product;
-        changeRows.add(_buildProductRow("− ${product.title}", Utilities.formatPrice(context, product.price!, currencyCode: product.currencyCode), ThemeConfig.redColor(context)));
+        final priceString = product.price != null ? Utilities.formatPrice(context, product.price!, currencyCode: product.currencyCode) : null;
+        changeRows.add(_buildProductRow("− ${product.title}", priceString, ThemeConfig.redColor(context)));
       }
       for (var c in changedItems) {
         final toProduct = c['to']!.product;
@@ -290,6 +319,7 @@ class OrderHistoryModel extends ITrinaRowModel {
   }
 
   // Private helpers for generateMultiLineSummaryWidget
+
   Widget _buildTicketChangeSection(BuildContext context, String ticketSymbol, String? note, List<Widget> rows) {
     final theme = Theme.of(context);
     return Padding(
@@ -320,25 +350,50 @@ class OrderHistoryModel extends ITrinaRowModel {
     );
   }
 
-  Widget _buildProductRow(String title, String price, Color color) {
+  /// **MODIFIED HELPER**
+  /// Builds a row for a product, now accepting a nullable price.
+  Widget _buildProductRow(String title, String? price, Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
       child: Row(children: [
         Expanded(child: Text(title, style: TextStyle(color: color))),
-        Text(price, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
+        if (price != null) // Only display the price Text widget if price is not null
+          Text(price, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
       ]),
     );
   }
 
+  /// **MODIFIED HELPER**
+  /// Builds a row for a product whose price has changed. Handles null prices.
   Widget _buildPriceChangeRow(BuildContext context, String title, OrderDataProductModel from, OrderDataProductModel to) {
+    final oldPriceText = from.price != null
+        ? Utilities.formatPrice(context, from.price!, currencyCode: from.currencyCode)
+        : _noPricePlaceholder;
+    final newPriceText = to.price != null
+        ? Utilities.formatPrice(context, to.price!, currencyCode: to.currencyCode)
+        : _noPricePlaceholder;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
       child: Row(children: [
         Expanded(child: Text("~ $title")),
         Row(children: [
-          Text(Utilities.formatPrice(context, from.price!, currencyCode: from.currencyCode), style: TextStyle(decoration: TextDecoration.lineThrough, color: Theme.of(context).textTheme.bodySmall?.color)),
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 4.0), child: Icon(Icons.arrow_forward, size: 16, color: Colors.orange.shade700)),
-          Text(Utilities.formatPrice(context, to.price!, currencyCode: to.currencyCode), style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade700)),
+          Text(
+            oldPriceText,
+            style: TextStyle(
+              // Only apply line-through if there was an actual price before.
+              decoration: from.price != null ? TextDecoration.lineThrough : TextDecoration.none,
+              color: Theme.of(context).textTheme.bodySmall?.color,
+            ),
+          ),
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Icon(Icons.arrow_forward, size: 16, color: Colors.orange.shade700)),
+          Text(
+            newPriceText,
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.orange.shade700),
+          ),
         ]),
       ]),
     );
@@ -347,20 +402,13 @@ class OrderHistoryModel extends ITrinaRowModel {
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     String priceText;
-    // START of updated logic for total price
-    // Check if there is a previous history record and if the total price has changed.
     if (previousHistoryRecord != null && price != previousHistoryRecord!.price) {
-      // If the price changed, display it in "old → new" format.
-      // Fallback to 0 if a price is null to prevent errors.
       final oldPrice = Utilities.formatPrice(context, previousHistoryRecord!.price ?? 0, currencyCode: previousHistoryRecord!.currencyCode);
       final newPrice = Utilities.formatPrice(context, price ?? 0, currencyCode: currencyCode);
       priceText = "$oldPrice → $newPrice";
     } else {
-      // Otherwise, just display the current price.
-      // If the price is null, show an empty string.
       priceText = price != null ? Utilities.formatPrice(context, price!, currencyCode: currencyCode) : "";
     }
-    // END of updated logic for total price
 
     String stateCellFormat;
     if (previousHistoryRecord != null && state != previousHistoryRecord!.state) {
