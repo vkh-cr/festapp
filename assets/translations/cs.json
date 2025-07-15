@@ -1003,11 +1003,12 @@
     "settingsNoProductAssigned": "Není přiřazen žádný produkt",
     "settingsProductTooltip": "Přiřadit produkt",
     "userStayTitle": "Můj pobyt",
-    "userStayErrorLoad": "Nepodařilo se načíst podrobnosti o ubytování.",
+    "userStayErrorLoad": "Nepodařilo se načíst podrobnosti o pobytu.",
     "userStayUnassignedRoom": "Nepřiřazená místnost",
-    "userStayEmptyStateMessage": "Nemáte k dispozici žádné informace o ubytování.",
-    "userStayLinkTitle": "Podrobnosti o mém ubytování",
-    "userStayLinkSubtitle": "Zobrazit ubytování, stravování a program"
+    "userStayEmptyStateMessage": "Nemáte k dispozici žádné informace o pobytu.",
+    "userStayLinkTitle": "Podrobnosti o mém pobytu",
+    "userStayLinkSubtitle": "Zobrazit ubytování, stravování a program",
+    "cardTooltipUnassigned": "Počet nepřiřazených míst: {count}"
   },
   "_": "_"
 }
