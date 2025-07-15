@@ -206,8 +206,9 @@ class _UserStayPageState extends State<UserStayPage> {
                   ),
                   // The description is added conditionally to the same Column.
                   if (description != null) ...[
-                    const SizedBox(height: 12.0), // Adds space between title and description.
-                    HtmlView(html: description),
+                    const SizedBox(height: 12.0),
+                    HtmlView(html: description, isSelectable: true,),
+                    const SizedBox(height: 12.0),
                   ]
                 ],
               ),
