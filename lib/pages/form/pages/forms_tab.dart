@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -198,7 +199,7 @@ class _FormsTabState extends State<FormsTab> {
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 380,
-                mainAxisExtent: 100,
+                mainAxisExtent: 110, // Increased height
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
               ),
@@ -274,6 +275,25 @@ class FormCard extends StatelessWidget {
     required this.onCreateCopy,
   });
 
+  Widget _buildStat(BuildContext context, {required IconData icon, required String value, required String tooltip, Color? color}) {
+    final theme = Theme.of(context);
+    final defaultColor = theme.colorScheme.onSurface.withOpacity(0.7);
+    final iconColor = color ?? defaultColor;
+    final statsTextStyle = theme.textTheme.bodySmall?.copyWith(color: defaultColor);
+
+    return Tooltip(
+      message: tooltip,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15.0, color: iconColor),
+          const SizedBox(width: 4.0),
+          Text(value, style: statsTextStyle),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -317,7 +337,7 @@ class FormCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,31 +351,36 @@ class FormCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "${FeaturesStrings.responses}: ${form.responseCount ?? 0}",
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: onSurfaceColor.withOpacity(0.7),
-                          ),
-                        ),
+                        if (form.stats != null) ...[
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 12.0,
+                            runSpacing: 4.0,
+                            children: [
+                              _buildStat(context, icon: Icons.people_alt_outlined, value: form.stats!.total.toString(), tooltip: FeaturesStrings.responses),
+                              _buildStat(context, icon: Icons.check_circle_outline, value: form.stats!.paidOrSent.toString(), tooltip: OrdersStrings.gridPaidOrSent),
+                              _buildStat(context, icon: Icons.shopping_cart_outlined, value: form.stats!.ordered.toString(), tooltip: OrdersStrings.gridOrdered),
+                              _buildStat(context, icon: Icons.cancel_outlined, value: form.stats!.storno.toString(), tooltip: OrdersStrings.gridCancelled),
+                            ],
+                          )
+                        ],
                       ],
                     ),
-                    const SizedBox(height: 8),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          form.isOpen! ? Icons.check_circle : Icons.cancel,
-                          color: form.isOpen!
+                          form.isOpen == true ? Icons.check_circle : Icons.cancel,
+                          color: form.isOpen == true
                               ? ThemeConfig.greenColor(context)
                               : ThemeConfig.redColor(context),
                           size: 16,
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          form.isOpen! ? FeaturesStrings.statusOpen : FeaturesStrings.statusClosed,
+                          form.isOpen == true ? FeaturesStrings.statusOpen : FeaturesStrings.statusClosed,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: form.isOpen!
+                            color: form.isOpen == true
                                 ? ThemeConfig.greenColor(context)
                                 : ThemeConfig.redColor(context),
                             fontWeight: FontWeight.bold,
