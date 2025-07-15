@@ -1,9 +1,9 @@
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
 import 'package:fstapp/components/inventory/models/resource_model.dart';
 import 'package:fstapp/components/inventory/models/resource_slot_model.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/order_product_ticket_model.dart';
-import 'package:fstapp/data_models_eshop/spot_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/order_product_ticket_model.dart';
+import 'package:fstapp/components/eshop/models/spot_model.dart';
 
 class SpotManagementBundle {
   final List<SpotModel> spots;

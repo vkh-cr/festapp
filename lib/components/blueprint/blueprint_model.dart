@@ -1,10 +1,10 @@
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/get_orders_helper.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/order_product_ticket_model.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
-import 'package:fstapp/data_models_eshop/ticket_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/order_product_ticket_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'blueprint_configuration.dart';
 import 'blueprint_object_model.dart';
 

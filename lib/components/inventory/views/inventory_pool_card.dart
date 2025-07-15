@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
-import 'package:fstapp/data_models_eshop/spot_model.dart';
+import 'package:fstapp/components/eshop/models/spot_model.dart';
 import 'package:fstapp/styles/styles_config.dart';
 
 import 'inventory_strings.dart';
@@ -28,6 +28,11 @@ class InventoryPoolCard extends StatelessWidget {
     final borderColor = isDarkMode ? Colors.grey[700]! : theme.dividerColor;
     final hasContexts = contexts.isNotEmpty;
 
+    // --- REMOVED ---
+    // The unassigned count logic is no longer needed at this level.
+    // final int unassignedCount = spots...
+    // final int totalOrdered = spots...
+
     int capacityPerContext = 0;
     if (hasContexts) {
       capacityPerContext = spots.where((s) => s.inventoryContextId == contexts.first.id).length;
@@ -54,10 +59,21 @@ class InventoryPoolCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Section
-              Text(
-                pool.title ?? InventoryStrings.cardUnnamedPool,
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Text(
+                      pool.title ?? InventoryStrings.cardUnnamedPool,
+                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  // --- REMOVED ---
+                  // The unassigned indicator widget call is gone from here.
+                  // const SizedBox(width: 8),
+                  // _buildUnassignedIndicator(context, unassignedCount, totalOrdered),
+                ],
               ),
               const SizedBox(height: 8),
               Row(
@@ -69,7 +85,6 @@ class InventoryPoolCard extends StatelessWidget {
                   ]
                 ],
               ),
-              // Content Section
               if (hasContexts) ...[
                 const Divider(height: 28),
                 LayoutBuilder(
@@ -108,6 +123,9 @@ class InventoryPoolCard extends StatelessWidget {
     );
   }
 
+  // --- REMOVED ---
+  // The entire helper widget for the unassigned indicator is removed from InventoryPoolCard.
+
   Widget _buildStatItem(BuildContext context, {required IconData icon, required String label, required String value}) {
     final theme = Theme.of(context);
     return Row(
@@ -126,7 +144,6 @@ class InventoryPoolCard extends StatelessWidget {
 
   Widget _buildEllipsisIndicator(BuildContext context, {required bool useCompressedStyle, required double width}) {
     final theme = Theme.of(context);
-    // --- Change 2: Adjust height to match the bigger normal chips ---
     final double height = useCompressedStyle ? 40 : 56;
     return Container(
       width: width,
@@ -155,18 +172,56 @@ class _ContextChip extends StatelessWidget {
     required this.width,
   });
 
+  // --- NEW: Helper widget for the unassigned indicator badge ---
+  Widget _buildUnassignedIndicator(BuildContext context, int count, String contextTitle) {
+    final theme = Theme.of(context);
+    return Tooltip(
+      // Using a new, more specific string from InventoryStrings
+      message: InventoryStrings.cardTooltipUnassigned(count),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.errorContainer,
+          shape: BoxShape.circle,
+          border: Border.all(color: theme.colorScheme.onErrorContainer.withOpacity(0.5), width: 1),
+        ),
+        constraints: const BoxConstraints(
+          minWidth: 20,
+          minHeight: 20,
+        ),
+        child: Center(
+          child: Text(
+            count.toString(),
+            style: TextStyle(
+              color: theme.colorScheme.onErrorContainer,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
     final orderedCapacity = spots.where((s) => s.inventoryContextId == contextModel.id && s.orderProductTicketId != null).length;
+
+    // --- NEW: Calculate unassigned spots for this specific context ---
+    final int unassignedInContext = spots.where((s) =>
+    s.inventoryContextId == contextModel.id &&
+        s.orderProductTicketId != null &&
+        s.resourceId == null
+    ).length;
+
     final double fillPercentage = totalCapacity > 0 ? orderedCapacity / totalCapacity : 0.0;
     final contextTitle = contextModel.getContextTitle(context);
     final double height = useCompressedStyle ? 42 : 56;
 
-    // <<< Subtle dark mode text colors >>>
-    // Using semi-transparent white creates a more subtle text hierarchy in dark mode.
     final TextStyle titleStyle = useCompressedStyle
         ? theme.textTheme.bodySmall!.copyWith(
       fontWeight: FontWeight.bold,
@@ -189,7 +244,6 @@ class _ContextChip extends StatelessWidget {
       color: isDarkMode ? Colors.white60 : theme.colorScheme.onSurfaceVariant,
     );
 
-    // Manual colors for consistent appearance
     final Color chipBackgroundColor = isDarkMode
         ? Colors.grey[800]!
         : theme.colorScheme.onSurface.withOpacity(0.08);
@@ -198,36 +252,47 @@ class _ContextChip extends StatelessWidget {
         ? Colors.black.withOpacity(0.2)
         : theme.colorScheme.surfaceContainer;
 
-    return Container(
-      width: width,
-      height: height,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: chipBackgroundColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(contextTitle, style: titleStyle, maxLines: 1, overflow: TextOverflow.ellipsis),
-          const Spacer(),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: fillPercentage,
-              minHeight: useCompressedStyle ? 4 : 5,
-              color: theme.colorScheme.primary,
-              backgroundColor: progressTrackColor,
-            ),
+    // --- MODIFIED: Wrap in a Stack to position the indicator ---
+    return Stack(
+      clipBehavior: Clip.none, // Allow the badge to overflow slightly if needed
+      children: [
+        Container(
+          width: width,
+          height: height,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: chipBackgroundColor,
+            borderRadius: BorderRadius.circular(8),
           ),
-          const SizedBox(height: 2),
-          // <<< Displays "current / total" capacity
-          Text(
-            '$orderedCapacity / $totalCapacity',
-            style: detailStyle,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(contextTitle, style: titleStyle, maxLines: 1, overflow: TextOverflow.ellipsis),
+              const Spacer(),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: fillPercentage,
+                  minHeight: useCompressedStyle ? 4 : 5,
+                  color: theme.colorScheme.primary,
+                  backgroundColor: progressTrackColor,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '$orderedCapacity / $totalCapacity',
+                style: detailStyle,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        if (unassignedInContext > 0)
+          Positioned(
+            top: -5,
+            right: -5,
+            child: _buildUnassignedIndicator(context, unassignedInContext, contextTitle),
+          ),
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart'; // Added for UserInventoryBundle
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/icon_model.dart';
 import 'package:fstapp/data_models/information_model.dart';
@@ -11,9 +12,8 @@ import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/services/storage_helper.dart';
 
-// Assuming ActivityModel is in a file that can be imported like this.
 // You might need to adjust the path based on your project structure.
-import 'package:fstapp/data_models/activity_model.dart'; // Added import for ActivityModel
+import 'package:fstapp/data_models/activity_model.dart';
 
 import '../data_models/occasion_model.dart';
 
@@ -22,6 +22,7 @@ class OfflineDataService {
   static const String eventsOfflineStorage = "events";
   static const String informationOfflineStorage = "information";
   static const String activitiesOfflineStorage = "activities";
+  static const String userInventoryBundleOffline = "userInventoryBundle"; // Added key for inventory
 
   static Future<void> saveMyScheduleData(List<int> offlineData) async {
     var encoded = jsonEncode(offlineData);
@@ -154,10 +155,24 @@ class OfflineDataService {
   static Future<List<ActivityModel>> getAllActivities() =>
       getAllOffline(activitiesOfflineStorage, ActivityModel.fromJson);
 
+  /// **Saves the entire `UserInventoryBundle` to offline storage.**
+  static Future<void> saveUserInventoryBundle(UserInventoryBundle toSave) =>
+      saveOffline(userInventoryBundleOffline, toSave);
+
+  /// **Retrieves the `UserInventoryBundle` from offline storage.**
+  static Future<UserInventoryBundle?> getUserInventoryBundle() =>
+      getOffline(userInventoryBundleOffline, UserInventoryBundle.fromJson);
+
+  /// **Deletes the `UserInventoryBundle` from offline storage.**
+  static Future<void> deleteUserInventoryBundle() =>
+      deleteOffline(userInventoryBundleOffline);
+
+  /// **Clears all user-specific data from offline storage.**
   static Future<void> clearUserData() async {
     await deleteOffline(UserInfoModel.userInfoOffline);
     await deleteOffline(myScheduleOffline);
     await deleteOffline(activitiesOfflineStorage);
+    await deleteOffline(userInventoryBundleOffline);
   }
 
   static Future<void> saveAllOffline<T>(String offlineTable, List<T> toSave) async {
