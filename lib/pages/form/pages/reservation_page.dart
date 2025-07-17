@@ -26,9 +26,11 @@ class _ReservationsPageState extends State<ReservationsPage> with SingleTickerPr
     AdminTabDefinition.orders,
     AdminTabDefinition.tickets,
     if(FeatureService.isFeatureEnabled(FeatureConstants.blueprint))
-    AdminTabDefinition.blueprint,
+      AdminTabDefinition.blueprint,
     AdminTabDefinition.form,
     AdminTabDefinition.products,
+    if(FeatureService.isFeatureEnabled(FeatureConstants.services))
+      AdminTabDefinition.inventoryPools,
     AdminTabDefinition.report,
     AdminTabDefinition.emailTemplates,
     AdminTabDefinition.users,

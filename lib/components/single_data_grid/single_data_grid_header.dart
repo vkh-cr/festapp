@@ -40,16 +40,20 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
         thickness: 12.0,
       ),
       localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
+      selectingMode: TrinaGridSelectingMode.cell,
       style: ThemeConfig.isDarkMode(context)
           ? TrinaGridStyleConfig.dark(
         rowHeight: 36,
-        cellColorInReadOnlyState: Colors.white24,
+        cellReadonlyColor: Colors.transparent,
+        cellColorInReadOnlyState: Colors.transparent,
         cellTextStyle: TextStyle(color: ThemeConfig.blackColor(context)),
         columnTextStyle:
         TextStyle(color: ThemeConfig.blackColor(context)),
       )
           : TrinaGridStyleConfig(
-          rowHeight: 36, cellColorInReadOnlyState: Colors.white70),
+          cellReadonlyColor:  Colors.transparent,
+          cellColorInReadOnlyState: Colors.transparent,
+          rowHeight: 36),
     );
   }
 }
@@ -226,7 +230,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     for (var element in deleteList) {
       actions.add(() async {
         try {
-          await element.deleteMethod();
+          await element.deleteMethod(context);
           ToastHelper.Show(
               context, "${"Deleted".tr()}: ${element.toBasicString()}");
         } catch (e) {
@@ -240,7 +244,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     for (var element in updatedSet) {
       actions.add(() async {
         try {
-          await element.updateMethod();
+          await element.updateMethod(context);
           ToastHelper.Show(
               context, "${"Saved".tr()}: ${element.toBasicString()}");
         } catch (e) {
