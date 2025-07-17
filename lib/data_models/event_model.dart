@@ -305,7 +305,7 @@ class EventModel extends ITrinaRowModel {
   }
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
     var participants = await DbEvents.getParticipantsPerEvent(id!);
     for(var p in participants)
     {
@@ -317,7 +317,7 @@ class EventModel extends ITrinaRowModel {
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
     await DbEvents.updateEventFromDataGrid(this);
   }
 

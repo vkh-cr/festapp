@@ -2,15 +2,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/activities/activities_content.dart';
 import 'package:fstapp/components/features/features_strings.dart';
-import 'package:fstapp/pages/eshop/products_tab.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart';
+import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/pages/eshop/blueprint_editor_tab.dart';
-import 'package:fstapp/pages/eshop/email_templates_tab.dart';
+import 'package:fstapp/components/eshop/blueprint_editor_tab.dart';
+import 'package:fstapp/components/email_templates/views/email_templates_tab.dart';
 import 'package:fstapp/pages/form/pages/forms_tab.dart';
-import 'package:fstapp/pages/eshop/orders_tab.dart';
-import 'package:fstapp/pages/eshop/report_tab.dart';
-import 'package:fstapp/pages/eshop/tickets_tab.dart';
+import 'package:fstapp/components/eshop/orders_tab.dart';
+import 'package:fstapp/components/eshop/report_tab.dart';
+import 'package:fstapp/components/eshop/tickets_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/game_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/information_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/places_tab.dart';
@@ -21,6 +23,8 @@ import 'package:fstapp/pages/occasionAdmin/users_tab.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/logo_widget.dart';
 import 'package:fstapp/widgets/header/user_header_widget.dart';
+
+import '../eshop/products_tab.dart';
 
 class AdminPageHelper {
   /// This method returns an adaptive AppBar based on the screen width.
@@ -76,7 +80,7 @@ class AdminPageHelper {
       ),
       actions: [
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+            padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
             child: UserHeaderWidget(appBarIconColor: ThemeConfig.lllBackground,))
       ],
       bottom: PreferredSize(
@@ -195,6 +199,7 @@ class AdminTabDefinition {
   static const String service = "Service";
   static const String users = "Users";
   static const String game = "Game";
+  static const String inventoryPools = "Inventory pools";
 
   static const String form = "Form";
   static const String blueprint = "Blueprint";
@@ -225,6 +230,11 @@ class AdminTabDefinition {
         label: "Service".tr(),
         icon: Icons.food_bank,
         widget: ServiceTab()),
+    // Added new tab for Inclusion Types
+    inventoryPools: AdminTabDefinition(
+        label: InventoryStrings.tabTitle,
+        icon: Icons.view_module_outlined,
+        widget: InventoryPoolsTab()),
     volunteers: AdminTabDefinition(
         label: "Volunteers".tr(),
         icon: Icons.view_timeline,
@@ -244,7 +254,7 @@ class AdminTabDefinition {
         icon: Icons.grid_on,
         widget: BlueprintTab()),
     tickets: AdminTabDefinition(
-        label: FeaturesStrings.itemsPlural,
+        label: OrdersStrings.itemsPlural,
         icon: Icons.local_activity,
         widget: TicketsTab()),
     orders: AdminTabDefinition(

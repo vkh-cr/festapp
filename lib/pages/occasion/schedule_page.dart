@@ -93,10 +93,31 @@ class _SchedulePageState extends State<SchedulePage>
     super.dispose();
   }
 
+  bool _isRoutePresent(String routeName) {
+    final childControllers = context.tabsRouter.childControllers;
+
+    for (final controller in childControllers) {
+      final key = controller.key;
+
+      if (key is ValueKey<String>) {
+        if (key.value == routeName) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   Future<void> _onTabSwitch() async {
-    if (context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.home)) {
+
+    final String targetRouteName = ScheduleNavigationRoute.name;
+    if (context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.home) &&
+        _isRoutePresent(targetRouteName)) {
       final now = DateTime.now();
       if (_lastQuickLoadTime == null || now.difference(_lastQuickLoadTime!) > _quickLoadRateLimit) {
+        // Set the time before calling loadData to prevent multiple rapid calls.
+        _lastQuickLoadTime = now;
         await loadData();
       }
     }

@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
-import 'package:fstapp/data_models_eshop/ticket_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -25,7 +25,7 @@ class DbTickets {
   }
 
   static Future<List<TicketModel>> getAllTickets(String occasionLink) async {
-    var ordersBundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink);
+    var ordersBundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink, includeOrderDetails: true, includeSpots: true);
     List<TicketModel> toReturn = [];
     for(var o in ordersBundle.orders){
 

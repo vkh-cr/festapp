@@ -39,10 +39,10 @@ BEGIN
   WHERE opt.ticket = p_ticket_id
   LIMIT 1;
   IF NOT FOUND THEN
-    RETURN jsonb_build_object('code',404,'message','Ticket not linked to any order');
+    RAISE EXCEPTION '%', jsonb_build_object('code', 404, 'message', 'Ticket not linked to any order')::text;
   END IF;
   IF NOT get_is_editor_order_on_occasion(v_occasion_id) THEN
-    RETURN jsonb_build_object('code',403,'message','Not authorized');
+    RAISE EXCEPTION '%', jsonb_build_object('code', 403, 'message', 'Not authorized')::text;
   END IF;
 
   /* NEW: Check for negative prices in the input */
@@ -51,7 +51,7 @@ BEGIN
     FROM jsonb_array_elements(p_products) AS p
     WHERE (p.value->>'price')::numeric < 0
   ) THEN
-    RETURN jsonb_build_object('code', 400, 'message', 'Product prices cannot be negative.');
+    RAISE EXCEPTION '%', jsonb_build_object('code', 400, 'message', 'Product prices cannot be negative.')::text;
   END IF;
 
   /* get old products for the ticket */
@@ -123,7 +123,6 @@ BEGIN
   v_old_ids := COALESCE(v_old_ids, ARRAY[]::bigint[]);
   v_new_ids := COALESCE(v_new_ids, ARRAY[]::bigint[]);
 
-  -- MODIFIED BLOCK START
   -- Before deleting order_product_ticket rows, nullify the reference in eshop.spots to de-allocate the spot.
   UPDATE eshop.spots s
      SET order_product_ticket = NULL
@@ -144,7 +143,6 @@ BEGIN
   SELECT v_order_id, p_ticket_id, new_pid
     FROM (SELECT unnest FROM unnest(v_new_ids) EXCEPT SELECT unnest FROM unnest(v_old_ids)) AS t(new_pid)
   ON CONFLICT DO NOTHING;
-  -- MODIFIED BLOCK END
 
   /* 5) adjust payment_info.amount and order.price by the delta */
   v_diff := v_sum_new - v_sum_old;
@@ -186,19 +184,25 @@ BEGIN
          updated_at = now()
    WHERE id = v_order_id;
 
-  IF v_new_state = 'ordered' AND v_state <> 'ordered' THEN
+  IF v_price > 0 THEN
+    -- If there's a balance due, set/update the payment deadline.
     SELECT elem INTO v_form_settings
     FROM jsonb_array_elements(v_occasion_features) AS elem
     WHERE elem->>'code' = 'form';
 
     v_deadline_duration_seconds := COALESCE(
         (v_form_settings->>'deadline_duration_seconds')::bigint,
-        604800
+        604800 -- Default to 7 days (604800 seconds) if not specified
     );
 
     v_new_deadline := now() + make_interval(secs => v_deadline_duration_seconds);
     PERFORM public.set_payment_deadline(v_payment_info_id, v_new_deadline);
+  ELSE
+    -- If the order is free or paid off, clear the payment deadline.
+    PERFORM public.set_payment_deadline(v_payment_info_id, NULL);
   END IF;
+
+  PERFORM apply_allocations(v_order_id);
 
   /* 6) append history */
   INSERT INTO eshop.orders_history("order", data, state, price, currency_code)
@@ -211,8 +215,5 @@ BEGIN
   );
 
   RETURN jsonb_build_object('code',200,'data',v_new_data);
-
-EXCEPTION WHEN OTHERS THEN
-  RETURN jsonb_build_object('code',500,'message',SQLERRM);
 END;
 $$;
