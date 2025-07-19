@@ -53,8 +53,6 @@ class _UnitPageState extends State<UnitPage> {
 
     final unit = await DbUnits.getUnit(_initialId!);
 
-    if (unit == null) return;
-
     final occasions = unit.occasions!;
     OfflineDataService.saveAllOccasions(occasions);
 

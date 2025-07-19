@@ -100,7 +100,7 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    await RightsService.updateOccasionData();
+    await RightsService.updateAppData();
     print('Occasion loaded');
   } catch (e) {
     print('Occasion loading failed: $e');
