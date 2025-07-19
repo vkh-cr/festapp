@@ -1,4 +1,7 @@
+import 'package:collection/collection.dart';
 import 'package:fstapp/data_models/occasion_link_model.dart';
+import 'package:fstapp/data_models/occasion_settings_model.dart';
+import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
@@ -27,30 +30,36 @@ class RightsService{
 
   static List<int>? bankAccountAdmin() => occasionLinkModel?.bankAccountsAdmin;
 
-  static Future<bool> updateOccasionData({String? link, bool force = false}) async {
+  static Future<bool> updateAppData({int? unitId, String? link, bool force = false, bool refreshOffline = true}) async {
     if (currentOccasionId() == null || link != currentLink || force) {
-      LinkModel model = LinkModel(occasionLink: link);
-      var occasionLink = link ?? RouterService.currentOccasionLink;
-      if (occasionLink.isEmpty) {
-        model = LinkModel.extractOccasionLink(Uri.base.toString());
-        print(Uri.base.toString());
+      LinkModel model = LinkModel(occasionLink: link, unitId: unitId);
+      if(unitId == null){
+        var occasionLink = link ?? RouterService.currentOccasionLink;
+        if (occasionLink.isEmpty) {
+          model = LinkModel.extractOccasionLink(Uri.base.toString());
+          print(Uri.base.toString());
+        }
       }
 
       if(AppConfig.forceOccasionLink != null) {
         model.occasionLink = AppConfig.forceOccasionLink;
       }
 
-      if (!await RouterService.updateOccasionFromLink(model)) {
+      if (!await RouterService.updateAppData(model)) {
         throw Exception("Cannot continue.");
       }
       TimeHelper.setTimeZoneLocation(RightsService.currentOccasion()?.data?["timezone"]);
 
       RouterService.currentOccasionLink = currentLink??"";
-      var globalSettings = await SynchroService.loadOrInitOccasionSettings();
-      await OfflineDataService.saveGlobalSettings(globalSettings);
-
-      if(RightsService.currentOccasion()?.id != null){
-        SynchroService.refreshOfflineData();
+      if(occasionLinkModel?.occasion != null){
+        var globalSettings = OccasionSettingsModel.fromOccasion(occasionLinkModel!.occasion!);
+        SynchroService.globalSettingsModel = globalSettings;
+        await OfflineDataService.saveGlobalSettings(globalSettings);
+        if(refreshOffline){
+          SynchroService.refreshOfflineData();
+        }
+      } else {
+        SynchroService.globalSettingsModel = OccasionSettingsModel.defaultSettings;
       }
     }
     return true;
@@ -127,5 +136,17 @@ class RightsService{
 
   static bool isApprover() {
     return currentOccasionUser()?.isApprover??false;
+  }
+
+  static bool hasGroup() {
+    return (currentUser()?.userGroups?.length ?? 0) > 0;
+  }
+
+  static bool isGroupAdmin() {
+    return currentUser()?.userGroups?.any((g) => g.isAdmin ?? false) ?? false;
+  }
+
+  static UserGroupInfoModel? currentUserGroup() {
+    return currentUser()?.userGroups?.firstWhereOrNull((g) => g.type == null);
   }
 }

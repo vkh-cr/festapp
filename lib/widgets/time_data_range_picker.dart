@@ -9,6 +9,7 @@ class TimeDateRangePicker extends StatelessWidget {
   final DateTime? end;
   final void Function(DateTime?) onStartChanged;
   final void Function(DateTime?) onEndChanged;
+  final bool enabled;
   DateTime? minDate;
   DateTime? maxDate;
 
@@ -18,6 +19,7 @@ class TimeDateRangePicker extends StatelessWidget {
     required this.end,
     required this.onStartChanged,
     required this.onEndChanged,
+    this.enabled = true,
     this.minDate,
     this.maxDate,
   });
@@ -25,7 +27,7 @@ class TimeDateRangePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     minDate ??= DateTime.fromMicrosecondsSinceEpoch(0);
-    maxDate ??= DateTime.now().add(Duration(days: 365*20));
+    maxDate ??= DateTime.now().add(const Duration(days: 365 * 20));
 
     final isStartValid = start != null;
     final isEndValid = end != null && start != null && !end!.isBefore(start!);
@@ -43,6 +45,7 @@ class TimeDateRangePicker extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextFormField(
+                    enabled: enabled, // Use isEnabled property here
                     readOnly: true,
                     decoration: InputDecoration(
                       labelText: "Start".tr(),
@@ -86,6 +89,7 @@ class TimeDateRangePicker extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: TextFormField(
+                    enabled: enabled, // Use isEnabled property here
                     readOnly: true,
                     decoration: InputDecoration(
                       labelText: "Start date".tr(),
@@ -133,6 +137,7 @@ class TimeDateRangePicker extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextFormField(
+                    enabled: enabled, // Use isEnabled property here
                     readOnly: true,
                     decoration: InputDecoration(
                       labelText: "End".tr(),
@@ -176,6 +181,7 @@ class TimeDateRangePicker extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: TextFormField(
+                    enabled: enabled, // Use isEnabled property here
                     readOnly: true,
                     decoration: InputDecoration(
                       labelText: "End date".tr(),

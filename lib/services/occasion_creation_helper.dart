@@ -168,7 +168,7 @@ class OccasionCreationHelper {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Cancel').tr(),
+                      child: Text('Storno').tr(),
                     ),
                     ElevatedButton(
                       onPressed: isFormValid

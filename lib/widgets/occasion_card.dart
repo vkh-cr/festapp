@@ -213,7 +213,7 @@ class _OccasionCardState extends State<OccasionCard> {
                               FeatureConstants.form,
                               features: widget.occasion.features)) {
                             try {
-                              await RightsService.updateOccasionData(
+                              await RightsService.updateAppData(
                                   link: widget.occasion.link, force: true);
                             } catch (e) {
                               // ignore
