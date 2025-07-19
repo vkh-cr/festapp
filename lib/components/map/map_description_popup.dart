@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/map/map_marker_with_text.dart';
 import 'package:fstapp/widgets/html_view.dart';
@@ -50,8 +49,8 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             Visibility(
                 visible: RightsService.isEditor() ||
-                    (AuthService.isGroupLeader() &&
-                        AuthService.currentUserGroup()!.place!.id ==
+                    (RightsService.isGroupAdmin() &&
+                        RightsService.currentUserGroup()!.place!.id ==
                             widget.marker.place.id),
                 child: TextButton.icon(
                     icon: const Icon(Icons.edit),

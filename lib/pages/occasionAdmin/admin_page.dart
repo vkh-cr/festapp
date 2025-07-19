@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/_shared/app_panel_helper.dart';
 import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -33,6 +34,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
       AdminTabDefinition.volunteers,
     AdminTabDefinition.emailTemplates,
     AdminTabDefinition.users,
+    AdminTabDefinition.settings,
   ];
 
   @override
@@ -48,7 +50,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     return DefaultTabController(
       length: _tabController.length,
       child: Scaffold(
-        appBar: AdminPageHelper.buildAdaptiveAdminAppBar(context, activeTabs, _tabController),
+        appBar: AppPanelHelper.buildAdaptiveAdminAppBar(context, activeTabs: activeTabs, tabController: _tabController),
         body: TabBarView(
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),

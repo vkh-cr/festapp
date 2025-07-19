@@ -1,4 +1,4 @@
-import 'dart:async' as dialog_helper;
+import 'dart:async';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -112,7 +112,7 @@ class DialogHelper{
     return result;
   }
 
-  static Future<void> chooseUser(BuildContext context, void onPressedAction(UserInfoModel), List<UserInfoModel> allUsers, String setText) async {
+  static Future<void> chooseUser(BuildContext context, void Function(UserInfoModel) onPressedAction, List<UserInfoModel> allUsers, String setText) async {
     showSearch(
         context: context,
         delegate: SearchPage<UserInfoModel>(
@@ -149,7 +149,7 @@ class DialogHelper{
         ));
   }
 
-  static dialog_helper.Future<void> showInformationDialog(
+  static Future<void> showInformationDialog(
       BuildContext context,
       String titleMessage,
       String textMessage,
@@ -172,7 +172,7 @@ class DialogHelper{
         });
   }
 
-  static dialog_helper.Future<bool> showScanTicketCode(
+  static Future<bool> showScanTicketCode(
       BuildContext context,
       String titleMessage,
       String textMessage, {
@@ -203,7 +203,7 @@ class DialogHelper{
     return result;
   }
 
-  static dialog_helper.Future<bool> showConfirmationDialog(
+  static Future<bool> showConfirmationDialog(
       BuildContext context,
       String titleMessage,
       String textMessage, {
@@ -276,7 +276,7 @@ class DialogHelper{
     return result ?? false;
   }
 
-  static dialog_helper.Future<UserGroupInfoModel?> showAddToGroupDialogAsync(
+  static Future<UserGroupInfoModel?> showAddToGroupDialogAsync(
       BuildContext context,
       List<UserGroupInfoModel> userGroups,
       ) async {
@@ -309,7 +309,7 @@ class DialogHelper{
     return selectedGroup;
   }
 
-  static dialog_helper.Future<LanguageModel?> chooseLanguage(
+  static Future<LanguageModel?> chooseLanguage(
       BuildContext context,
       ) async {
     var locales = AppConfig.availableLanguages();
@@ -347,7 +347,7 @@ class DialogHelper{
     return selectedLocale;
   }
 
-  static dialog_helper.Future<String?> showPasswordInputDialog(
+  static Future<String?> showPasswordInputDialog(
       BuildContext context,
       String titleMessage,
       String hint, [
@@ -393,7 +393,7 @@ class DialogHelper{
     return result;
   }
 
-  static dialog_helper.Future<XFile?> dropFilesHere(
+  static Future<XFile?> dropFilesHere(
       BuildContext context,
       String titleMessage,
       String confirmButtonMessage,
@@ -438,7 +438,7 @@ class DialogHelper{
     return filePath;
   }
 
-  static dialog_helper.Future<bool> showNotificationPermissionDialog(BuildContext context) async {
+  static Future<bool> showNotificationPermissionDialog(BuildContext context) async {
     bool result = false;
     await showDialog(
       context: context,
@@ -475,15 +475,15 @@ class DialogHelper{
     return result;
   }
 
-  static dialog_helper.Future<bool> showProgressDialogAsync(
+  static Future<bool> showProgressDialogAsync(
       BuildContext context,
       String title,
       int total, {
-        List<dialog_helper.Future<void> Function()>? futures,
+        List<Future<void> Function()>? futures,
         Duration? delay,
         bool isBasic = false, // New isBasic option
       }) async {
-    final completer = dialog_helper.Completer<bool>();
+    final completer = Completer<bool>();
     final progressNotifier = ValueNotifier<int>(0);
     final isCancelled = ValueNotifier<bool>(false); // Track cancellation state
     final statusMessage = ValueNotifier<String>(""); // Track status message
@@ -596,7 +596,7 @@ class DialogHelper{
           await future.call(); // Wait for each future to finish
           progressNotifier.value++;
           if (delay != null) {
-            await dialog_helper.Future.delayed(delay);
+            await Future.delayed(delay);
           }
         } catch (e) {
           // On error: Stop further execution and display the error
@@ -633,7 +633,7 @@ class DialogHelper{
     return completer.future;
   }
 
-  static dialog_helper.Future<String?> showInputDialog({
+  static Future<String?> showInputDialog({
     required BuildContext context,
     String? initialValue,
     required String dialogTitle,
@@ -667,7 +667,7 @@ class DialogHelper{
     );
   }
 
-  static dialog_helper.Future<T?> showCustomDialog<T>({
+  static Future<T?> showCustomDialog<T>({
     required BuildContext context,
     required Widget child,
     bool barrierDismissible = true,

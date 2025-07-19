@@ -1,11 +1,9 @@
+import 'package:fstapp/data_models/group_participant_model.dart';
 import 'package:fstapp/data_models/information_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/user_group_info_model.dart';
-import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/data_services/db_information.dart';
 import 'package:fstapp/data_services/db_places.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -20,24 +18,15 @@ class DbGroups {
 
   static Future<List<UserGroupInfoModel>> getAllUserGroupInfo([String? type]) async {
     final response = await _supabase.rpc(
-      'get_all_user_group_info',
+      'get_all_user_groups',
       params: {
         'p_occasion_id': RightsService.currentOccasionId()!,
         'p_type': type,
       },
     );
 
-    // Check the response code. If not successful, return an empty list.
-    if (response['code'] != 200) {
-      // You can add logging here for debugging
-      // print("Error fetching all user groups: ${response['message']}");
-      return []; // Return an empty list on authorization failure or other errors.
-    }
-
-    // On success, the actual payload is inside the 'data' field.
-    final data = response['data'];
-    final List<dynamic> groupData = data['groups'];
-    final Map<String, dynamic>? gameDefsData = data['game_definitions'];
+    final List<dynamic> groupData = response['groups'];
+    final Map<String, dynamic>? gameDefsData = response['game_definitions'];
 
     var toReturn = List<UserGroupInfoModel>.from(
         groupData.map((x) => UserGroupInfoModel.fromJson(x)));
@@ -60,36 +49,22 @@ class DbGroups {
 
   static Future<UserGroupInfoModel?> getUserGroupInfo(int id) async {
     final response = await _supabase.rpc(
-      'get_user_group_info',
+      'get_user_group_info_with_users',
       params: {
         'p_group_id': id,
       },
     );
 
-    // Check the response code before proceeding.
-    if (response['code'] != 200) {
-      // You can add logging here to see the error from the database
-      // print("Error fetching user group info: ${response['message']}");
-      return null; // Return null on any error (e.g., Not Found, Not Authorized).
-    }
-
-    // If the code is 200, the 'data' field will contain the user group object.
-    final data = response['data'];
-    if (data == null) {
-      return null;
-    }
-
-    return UserGroupInfoModel.fromJson(data);
+    return UserGroupInfoModel.fromJson(response);
   }
 
   static Future<void> updateUserGroupInfo(UserGroupInfoModel model) async {
-    if(!(RightsService.isEditor() || model.leader!.id == AuthService.currentUserId())) {
+    if(!(RightsService.isEditor() || (model.isAdmin ?? false))) {
       throw Exception("Must be leader or admin to change the group.");
     }
 
     Map<String, dynamic> upsertObj = {
       Tb.user_group_info.title: model.title,
-      Tb.user_group_info.leader: model.leader?.id,
     };
 
     if(model.type != null) {
@@ -115,7 +90,7 @@ class DbGroups {
     await updateUserGroupParticipants(updated, model.participants!);
   }
 
-  static Future<void> updateUserGroupParticipants(UserGroupInfoModel group, Set<UserInfoModel> participants) async {
+  static Future<void> updateUserGroupParticipants(UserGroupInfoModel group, Set<GroupParticipantModel> participants) async {
     await _supabase
         .from(Tb.user_groups.table)
         .delete()
@@ -126,12 +101,13 @@ class DbGroups {
           .from(Tb.user_groups.table)
           .insert({
         Tb.user_groups.group:group.id,
-        Tb.user_groups.user:p.id
+        Tb.user_groups.user:p.userInfo!.id,
+        Tb.user_groups.is_admin: p.isAdmin ?? false
       });
     }
   }
 
-  static deleteUserGroupInfo(UserGroupInfoModel model) async {
+  static Future<void> deleteUserGroupInfo(UserGroupInfoModel model) async {
     await _supabase
         .from(Tb.user_groups.table)
         .delete()
@@ -161,14 +137,9 @@ class DbGroups {
     return checkPoints;
   }
 
-  static Future<List<UserGroupInfoModel>> getUserGroups() async {
-    List<UserGroupInfoModel> userGroups = [];
-    final response = await _supabase.rpc('groups_get_user_groups');
-    if (response != null) {
-      for (var groupJson in response['data']) {
-        userGroups.add(UserGroupInfoModel.fromJson(groupJson));
-      }
-    }
-    return userGroups;
+  static Future<Set<UserGroupInfoModel>> getUserGroups() async {
+    final response = await _supabase.rpc('get_user_groups', params: {'p_occasion_id': RightsService.currentOccasionId()!});
+    return Set.from(response.values
+        .map((groupJson) => UserGroupInfoModel.fromJson(groupJson as Map<String, dynamic>)));
   }
 }
