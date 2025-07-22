@@ -105,7 +105,11 @@ class AppPanelHelper {
         }),
         onTitleTap: () async {
           if (currentOccasion.link != null) {
-            await RouterService.navigateToOccasionByLink(context, currentOccasion.link!);
+            if(AppConfig.isAppSupported) {
+              await RouterService.navigateToOccasionByLink(context, currentOccasion.link!);
+            } else{
+              await RouterService.navigateToOccasionReservationsByLink(context, currentOccasion.link!);
+            }
           }
         },
         searchHintText: AdministrationStrings.findOccasionHint,
