@@ -6,13 +6,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/app_config_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_news.dart';
-import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/pages/occasion/news_page.dart';
 import 'package:fstapp/pages/user/login_page.dart';
@@ -89,11 +89,8 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
     await AppConfigService.versionCheck(context);
 
     if (AuthService.isLoggedIn()) {
-      DbUsers.getCurrentUserInfo().then((user) {
-        if (mounted) {
-          setState(() => userName = user.name!);
-        }
-      });
+      setState(() => userName = RightsService.currentUser()?.name??"---");
+
       DbNews.countNewMessages().then((count) {
         if (mounted) {
           setState(() => _messageCount = count);

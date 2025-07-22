@@ -1,4 +1,3 @@
-import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/components/features/ticket_feature.dart';
 import 'package:fstapp/data_models/game_settings_model.dart';
 import 'package:fstapp/data_models/image_model.dart';
@@ -97,13 +96,18 @@ class DbOccasions {
     return OccasionModel.fromJson(data);
   }
 
+  static Future<OccasionModel> getOccasionByLink(String link) async {
+    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.link, link).single();
+    return OccasionModel.fromJson(data);
+  }
+
   static Future<List<OccasionModel>> getAllOccasionsForEdit(int unitId) async {
-    var data = await _supabase.rpc("get_all_occasions_for_edit",
+    var data = await _supabase.rpc("get_all_occasions_for_edit_v182",
         params:
         {
           "unit_id": unitId,
         });
-    return List<OccasionModel>.from(data["data"].map((x) => OccasionModel.fromJson(x)));
+    return List<OccasionModel>.from(data.map((x) => OccasionModel.fromJson(x)));
   }
 
   static Future<List<OccasionModel>> getAllOccasions(int unit) async {
@@ -113,14 +117,11 @@ class DbOccasions {
   }
 
   static Future<void> updateOccasion(OccasionModel occasionModel) async {
-    var data = await _supabase.rpc("update_occasion",
-        params:
-        {
-          "input_data": occasionModel,
-        });
-    if(data["code"] != 200){
-      throw Exception(data["message"]);
-    }
+    await _supabase.rpc("update_occasion_182",
+    params:
+    {
+      "input_data": occasionModel,
+    });
   }
 
   static Future<void> duplicateOccasion(int oc, int? unit) async {
