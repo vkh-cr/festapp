@@ -32,7 +32,7 @@ class FormEditBundle {
 class DbForms {
   static final _supabase = Supabase.instance.client;
 
-  static Future<List<FormModel>> getAllFormsViaOccasionLink(String occasionLink) async {
+  static Future<List<FormModel>> getAllFormsByOccasionLink(String occasionLink) async {
     final response = await _supabase.rpc(
         'get_forms_by_link',
         params: {'occasion_link': occasionLink}
