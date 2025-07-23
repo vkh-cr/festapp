@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -145,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _refreshSignedInStatus(value) async {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
-      await RouterService.updateOccasionFromLink(LinkModel(occasionLink: RouterService.currentOccasionLink));
+      await RouterService.updateAppData(LinkModel(occasionLink: RouterService.currentOccasionLink));
       RouterService.popOrHome(context);
     }
   }

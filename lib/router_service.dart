@@ -2,9 +2,12 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/data_models/unit_model.dart';
 import 'package:fstapp/data_services/app_config_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
+import 'package:fstapp/pages/form/pages/reservation_page.dart';
+import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 import 'package:fstapp/services/link_model.dart';
 
 class RouterService {
@@ -114,9 +117,9 @@ class RouterService {
 
   static final router = AppRouter();
 
-  static Future<bool> updateOccasionFromLink(LinkModel link) async {
+  static Future<bool> updateAppData(LinkModel link) async {
     bool canContinue = true;
-    var checkedObject = await SynchroService.getAppConfig(occasionLink: link.occasionLink, formLink: link.formLink);
+    var checkedObject = await SynchroService.getAppConfig(link);
     RightsService.occasionLinkModel = checkedObject;
     RightsService.currentLink = checkedObject.occasion?.link;
     AppConfigService.versionRecommended = checkedObject.versionRecommended;
@@ -136,5 +139,26 @@ class RouterService {
 
   static void popTwo(BuildContext context) {
     Navigator.of(context)..pop()..pop();
+  }
+
+  /// Navigates to a specific unit's edit page after updating app data.
+  static Future<void> navigateToUnit(BuildContext context, UnitModel unit) async {
+    RightsService.updateAppData(
+        unitId: unit.id, force: true, refreshOffline: false);
+    RouterService.navigate(context, "unit/${unit.id}/edit");
+  }
+
+  /// Navigates to a specific occasion's admin page after updating app data.
+  static Future<void> navigateToOccasionByLink(BuildContext context, String link) async {
+    await RightsService.updateAppData(
+        link: link, force: true, refreshOffline: false);
+    await RouterService.navigate(context, "/$link/${AdminPage.ROUTE}");
+  }
+
+  /// Navigates to a specific occasion's reservation page after updating app data.
+  static Future<void> navigateToOccasionReservationsByLink(BuildContext context, String link) async {
+    await RightsService.updateAppData(
+        link: link, force: true, refreshOffline: false);
+    await RouterService.navigate(context, "/$link/${ReservationsPage.ROUTE}");
   }
 }
