@@ -45,7 +45,7 @@ class _FormsTabState extends State<FormsTab> {
       setState(() => _isLoading = true);
     }
     if (occasionLink != null) {
-      _forms = await DbForms.getAllFormsViaOccasionLink(occasionLink!);
+      _forms = await DbForms.getAllFormsByOccasionLink(occasionLink!);
       if (_forms.length == 1) {
         _selectedForm = _forms.first;
       }

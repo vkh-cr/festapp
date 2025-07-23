@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
@@ -11,7 +10,6 @@ import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OccasionEditorData {
@@ -26,12 +24,6 @@ class DbUsers {
   static const String formIdKey = 'form_id';
   static const String orderCreatedAtKey = 'order_created_at';
   static const String lastSignInAtKey = 'last_sign_in_at';
-
-
-  static Future<UserInfoModel> getUser(String id) async {
-    var data = await _supabase.from(Tb.user_info.table).select().eq(Tb.user_info.id, id).single();
-    return UserInfoModel.fromJson(data);
-  }
 
   static Future<List<OccasionUserModel>> getOccasionEditorData() async {
     var result = await _supabase.rpc(
@@ -317,13 +309,6 @@ class DbUsers {
   static Future<OccasionModel> getOccasion(int id) async {
     var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.id, id).single();
     return OccasionModel.fromJson(data);
-  }
-
-  static Future<UserInfoModel> getCurrentUserInfo() async {
-    if(AuthService.currentUser == null){
-      return await AuthService.loadCurrentUserData();
-    }
-    return AuthService.currentUser!;
   }
 
   static Future<dynamic> importUsersFromTickets(int occasionId) async {
