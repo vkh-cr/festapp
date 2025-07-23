@@ -91,11 +91,13 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   }
 
   Future<void> _handleView(OccasionModel occasion) async {
-    if(AppConfig.isAppSupported){
-      await RouterService.navigateToOccasionByLink(context, occasion.link!);
-    } else {
-      await RouterService.navigateToOccasionReservationsByLink(context, occasion.link!);
-    }
+    await RouterService.navigateToOccasionReservationsByLink(context, occasion.link!);
+
+    // if(AppConfig.isAppSupported){
+    //   await RouterService.navigateToOccasionByLink(context, occasion.link!);
+    // } else {
+    //   await RouterService.navigateToOccasionReservationsByLink(context, occasion.link!);
+    // }
   }
 
   Future<void> _handleCreateCopy(OccasionModel occasion) async {
