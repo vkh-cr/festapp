@@ -131,7 +131,7 @@ class AppPanelHelper {
         );
 
         final reservationsAction = _ActionMenuItem(
-          label: 'Reservations'.tr(),
+          label: AdministrationStrings.reservations,
           icon: Icons.shopping_cart,
           onSelect: () async => await RouterService.navigateOccasion(context, ReservationsPage.ROUTE),
         );
