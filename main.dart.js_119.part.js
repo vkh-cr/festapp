@@ -1,100 +1,121 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_119",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var B,C,A={aNe:function aNe(d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u){var _=this
-_.CW=d
-_.a=e
-_.b=f
-_.c=g
-_.d=h
-_.e=i
-_.f=j
-_.r=k
-_.w=l
-_.x=m
-_.y=n
-_.z=o
-_.Q=p
-_.as=q
-_.at=r
-_.ax=s
-_.ay=t
-_.ch=u},c6x:function c6x(){},b5M:function b5M(){},b5N:function b5N(){},b5J:function b5J(d,e){this.a=d
-this.b=e},zs:function zs(d,e){this.c=d
-this.a=e},aow:function aow(d){var _=this
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={
+dBs(){return new B.G2(null)},
+G2:function G2(d){this.a=d},
+aWh:function aWh(d,e){var _=this
 _.d=d
-_.e=!1
-_.c=_.a=null},b5K:function b5K(){},b5L:function b5L(d){this.a=d},WU:function WU(d,e,f){this.f=d
-this.b=e
-this.a=f},aNd:function aNd(){},
-aaT(d){var x,w,v,u,t
-for(x=$.fF(),w=x.b,w=B.eh(w,w.r,B.t(w).c),v=y.f,u=w.$ti.c;w.q();){t=w.d
-if(t==null)u.a(t)
-t=x.c
-t===$&&B.b()
-t.hm("TextInput.finishAutofillContext",d,v)}}},D
-B=c[0]
+_.e=e
+_.c=_.a=_.f=null},
+cAw:function cAw(d,e){this.a=d
+this.b=e},
+cAx:function cAx(d){this.a=d},
+cAy:function cAy(d){this.a=d},
+cAz:function cAz(d,e){this.a=d
+this.b=e},
+b73(d,e){return B.do8(d,e)},
+do8(d,e){var x=0,w=A.k(y.b),v,u
+var $async$b73=A.f(function(f,g){if(f===1)return A.h(g,w)
+while(true)switch(x){case 0:u=y.b
+x=3
+return A.d($.e2().c8("set_user_password_token",A.w(["token",d,"password",e],y.w,u),u),$async$b73)
+case 3:v=g
+x=1
+break
+case 1:return A.i(v,w)}})
+return A.j($async$b73,w)}},D,E,G,F,H,I,K,L,M,N,O,P,Q,R
+J=c[1]
+A=c[0]
 C=c[2]
-A=a.updateHolder(c[100],A)
-D=c[315]
-A.aNe.prototype={
-b_(){var x=this.aXe(),w=this.CW
-w=B.lp(w,new A.c6x(),w.$ti.i("x.E"),y.i)
-w=B.A(w,B.t(w).i("x.E"))
-w.$flags=1
-x.m(0,"fields",w)
-return x}}
-A.b5M.prototype={
-a_5(d,e){var x=this.gbEy(),w=B.cWd(d)
-$.fF().Vj(w,new A.aNe(new B.da(x,new A.b5N(),x.$ti.i("da<1,uy>")),e.a,e.b,!1,e.d,!0,e.f,e.r,e.w,!0,!0,e.z,e.Q,e.as,e.at,!0,C.aN,!1))
-return w}}
-A.b5J.prototype={
-I(){return"AutofillContextAction."+this.b}}
-A.zs.prototype={
-L(){return new A.aow(B.H(y.h,y.g))}}
-A.aow.prototype={
-aP_(d){return this.d.h(0,d)},
-gbEy(){var x=this.d,w=B.t(x).i("aH<2>")
-return new B.a7(new B.aH(x,w),new A.b5K(),w.i("a7<x.E>"))},
-dz(d,e){this.d.cl(0,e.gaCV(),new A.b5L(e))},
-aiX(d,e){this.d.J(0,e)},
-aY(){this.c2()
-var x=this.c
-x.toString
-this.e=B.d0s(x)==null},
-B(d){return new A.WU(this,this.a.c,null)},
-l(){this.ag()
-if(!this.e)return
-this.a.toString
-switch(0){case 0:A.aaT(!0)
-break}}}
-A.WU.prototype={
-ei(d){return this.f!==d.f}}
-A.aNd.prototype={}
+B=a.updateHolder(c[21],B)
+D=c[277]
+E=c[102]
+G=c[53]
+F=c[96]
+H=c[129]
+I=c[147]
+K=c[111]
+L=c[278]
+M=c[279]
+N=c[275]
+O=c[162]
+P=c[164]
+Q=c[159]
+R=c[196]
+B.G2.prototype={
+K(){return new B.aWh(new A.aV(null,y.o),new A.bS(C.ah,$.a8()))}}
+B.aWh.prototype={
+l(){this.af()},
+b_(){var x=0,w=A.k(y.v),v=this,u,t,s,r,q
+var $async$b_=A.f(function(d,e){if(d===1)return A.h(e,w)
+while(true)switch(x){case 0:v.c2()
+s=A.uU()
+u=A.bF("token=(?<token>[^&]+)",!0,!1,!1).qS(s.j(0))
+if(u!=null)try{r=u.ahz("token")
+r.toString
+v.f=r}catch(p){r=A.ag(p)
+if(y.g.b(r)){t=r
+r=v.c
+r.toString
+A.bh(r,J.ap(t),C.a3)}else throw p}return A.i(null,w)}})
+return A.j($async$b_,w)},
+VD(d){return this.b5i(d)},
+b5i(d){var x=0,w=A.k(y.v),v=this,u,t
+var $async$VD=A.f(function(e,f){if(e===1)return A.h(f,w)
+while(true)switch(x){case 0:x=v.d.ga1().iS()?2:3
+break
+case 2:E.abk(!0)
+u=v.f
+u.toString
+t=y.F
+x=4
+return A.d(A.awi(B.b73(u,v.e.a.a).aJ(new B.cAw(v,d),t),new B.cAx(d),t,y.E),$async$VD)
+case 4:case 3:return A.i(null,w)}})
+return A.j($async$VD,w)},
+B(d){var x=null,w=O.bM(D.bKO,x),v=y.w
+return P.eL(Q.iz(x,x,x,!0,x,x,1,!0,x,x,!1,x,!1,x,x,I.tC(x,new B.cAy(d)),x,!0,x,x,x,x,x,w,x,x,x,1,x,!0),x,new A.cm(C.Q,x,x,new A.cC(new A.ab(0,720,0,1/0),A.d7(A.o8(x,x,new E.zH(A.aa(A.a([A.E(A.n("Welcome in {name}!",A.w(["name","Festapp"],v,v)),x,x,x,x,x,x,x,L.Ja,x,x,x,x,x),C.X,A.E(A.n("Create a new password to continue.",x),x,x,x,x,x,x,x,R.i8,x,x,x,x,x),M.aec,new A.X(N.Dp,new K.Ly(A.n("New Password",x),this.e,"newPassword",x),x),C.X,H.IA(C.dR,d,50,!0,A.n("Change Password",x),new B.cAz(this,d),C.m,250)],y.u),C.i,C.f,C.h,0,x,C.l),x),this.d,x),x,C.p,x,x,x,C.G),x),x),x,x,x,x)}}
 var z=a.updateTypes([])
-A.c6x.prototype={
-$1(d){return d.b_()},
-$S:1284}
-A.b5N.prototype={
-$1(d){return d.gpm()},
-$S:1285}
-A.b5K.prototype={
-$1(d){return d.gpm().f.a},
-$S:1286}
-A.b5L.prototype={
-$0(){return this.a},
-$S:1287};(function inheritance(){var x=a.mixin,w=a.inherit,v=a.inheritMany
-w(A.aNe,B.uy)
-v(B.cj,[A.c6x,A.b5N,A.b5K])
-w(A.b5M,B.M)
-w(A.b5J,B.fc)
-w(A.zs,B.L)
-w(A.aNd,B.N)
-w(A.aow,A.aNd)
-w(A.b5L,B.d0)
-w(A.WU,B.bA)
-x(A.aNd,A.b5M)})()
-B.cm(b.typeUniverse,JSON.parse('{"aNe":{"uy":[]},"zs":{"L":[],"e":[]},"aow":{"N":["zs"]},"WU":{"bA":[],"bu":[],"e":[]}}'))
-var y={g:B.F("zr"),i:B.F("z<h,@>"),h:B.F("h"),f:B.F("~")};(function constants(){D.bTZ=new A.b5J(0,"commit")})()};
+B.cAw.prototype={
+$1(d){var x=0,w=A.k(y.F),v=this,u
+var $async$$1=A.f(function(e,f){if(e===1)return A.h(f,w)
+while(true)switch(x){case 0:u=J.a_(d)
+x=J.q(u.h(d,"code"),403)||J.q(u.h(d,"code"),404)?2:4
+break
+case 2:A.bh(v.b,A.n("Token is not valid.",null),C.aO)
+x=3
+break
+case 4:x=J.q(u.h(d,"code"),200)?5:6
+break
+case 5:x=7
+return A.d(G.PZ("1+"+u.h(d,"email"),v.a.e.a.a),$async$$1)
+case 7:u=v.b
+A.bh(u,A.n("Password has been changed.",null),C.a3)
+F.aFr(u)
+case 6:case 3:return A.i(null,w)}})
+return A.j($async$$1,w)},
+$S:77}
+B.cAx.prototype={
+$2(d,e){A.bh(this.a,J.ap(d),C.a3)},
+$S:392}
+B.cAy.prototype={
+$0(){return F.aFr(this.a)},
+$S:0}
+B.cAz.prototype={
+$0(){var x=0,w=A.k(y.v),v,u=this
+var $async$$0=A.f(function(d,e){if(d===1)return A.h(e,w)
+while(true)switch(x){case 0:v=u.a.VD(u.b)
+x=1
+break
+case 1:return A.i(v,w)}})
+return A.j($async$$0,w)},
+$S:1};(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B.G2,A.M)
+x(B.aWh,A.N)
+x(B.cAw,A.cl)
+x(B.cAx,A.et)
+w(A.cV,[B.cAy,B.cAz])})()
+A.cf(b.typeUniverse,JSON.parse('{"G2":{"M":[],"e":[]},"aWh":{"N":["G2"]}}'))
+var y={g:A.F("bj"),u:A.F("u<e>"),o:A.F("aV<q9>"),F:A.F("aE"),E:A.F("H"),w:A.F("l"),b:A.F("@"),v:A.F("~")};(function constants(){D.bKO=new A.cw("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_119",e:"endPart",h:b})})($__dart_deferred_initializers__,"sje53XnPFAthOJoeftgI3xLw9G8=");
+a.eventLog.push({p:"main.dart.js_119",e:"endPart",h:b})})($__dart_deferred_initializers__,"cfB77zl3CD4EsVcRGnKKqVwD74U=");
