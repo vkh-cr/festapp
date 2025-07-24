@@ -32,7 +32,7 @@ class FeatureService {
   /// Checks whether the feature with [featureCode] is enabled.
   /// Expects [features] to be a list of Feature objects.
   static bool isFeatureEnabled(String featureCode, {List<Feature>? features}) {
-    if (RightsService.currentOccasion() == null) return false;
+    if (RightsService.currentOccasion() == null && features == null) return false;
     final featureList = features ?? RightsService.currentOccasion()!.features;
     return featureList.any((feature) => feature.code == featureCode && feature.isEnabled);
   }

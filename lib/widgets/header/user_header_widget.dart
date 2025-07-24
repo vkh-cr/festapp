@@ -262,34 +262,6 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    Builder(
-                      builder: (context) {
-                        final units = RightsService.currentUser()?.getUnitsWithEditorAccess();
-                        if (units == null || units.isEmpty) return SizedBox.shrink();
-                        return Column(
-                          children: units
-                              .map<Widget>(
-                                (unit) => ListTile(
-                              title: Text(
-                                unit.title ?? "---",
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: ThemeConfig.blackColor(context)),
-                              ),
-                              trailing: Icon(
-                                Icons.chevron_right,
-                                color: ThemeConfig.blackColor(context),
-                              ),
-                              onTap: () {
-                                Navigator.pop(context);
-                                RouterService.navigate(context, "unit/${unit.id}/edit");
-                              },
-                            ),
-                          )
-                              .toList(),
-                        );
-                      },
-                    ),
                     const Divider(),
                     const SizedBox(height: 16),
                     _buildSettingsContentInner(localSetState),
