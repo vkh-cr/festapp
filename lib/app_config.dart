@@ -14,7 +14,6 @@ class AppConfig {
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
-  static const bool isUsersImportSupported = true;
   static const String oneSignalAppId = '';
   static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
