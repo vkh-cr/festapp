@@ -4,6 +4,7 @@ import 'package:fstapp/components/import/import_dialog_helper.dart';
 import 'package:fstapp/components/single_data_grid/i_has_id.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
+import 'package:fstapp/data_models/group_participant_model.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
@@ -60,7 +61,7 @@ class UsersTabHelper {
         context, await DbGroups.getAllUserGroupInfo());
     if (chosenGroup != null) {
       chosenGroup.participants!
-          .addAll(users.map((u) => UserInfoModel(id: u.user)));
+          .addAll(users.map((u) => GroupParticipantModel(userInfo: UserInfoModel(id: u.id))));
       await DbGroups.updateUserGroupParticipants(
           chosenGroup, chosenGroup.participants!);
       ToastHelper.Show(context, "Updated {item}.".tr(
@@ -78,14 +79,12 @@ class UsersTabHelper {
     var nonAdded =
     existing.where((u) => !currentUsers.any((cu) => cu.id == u.id)).toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
-      if (chosenUser != null) {
-        await DbUsers.addUserToOccasion(
-            chosenUser.id, RightsService.currentOccasionId()!);
-        ToastHelper.Show(context, "Updated {item}.".tr(
-            namedArgs: {"item": chosenUser.toString()}));
-        await reloadUsers();
-      }
-    }, nonAdded, "Add".tr());
+      await DbUsers.addUserToOccasion(
+          chosenUser.id!, RightsService.currentOccasionId()!);
+      ToastHelper.Show(context, "Updated {item}.".tr(
+          namedArgs: {"item": chosenUser.toString()}));
+      await reloadUsers();
+        }, nonAdded, "Add".tr());
   }
 
   static Future<void> addExistingToUnit(BuildContext context,
@@ -95,14 +94,12 @@ class UsersTabHelper {
     var nonAdded =
     existing.where((u) => !currentUsers.any((cu) => cu.id == u.id)).toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
-      if (chosenUser != null) {
-        await DbUsers.addUserToUnit(
-            chosenUser.id, unit);
-        ToastHelper.Show(context, "Updated {item}.".tr(
-            namedArgs: {"item": chosenUser.toString()}));
-        await reloadUsers();
-      }
-    }, nonAdded, "Add".tr());
+      await DbUsers.addUserToUnit(
+          chosenUser.id!, unit);
+      ToastHelper.Show(context, "Updated {item}.".tr(
+          namedArgs: {"item": chosenUser.toString()}));
+      await reloadUsers();
+        }, nonAdded, "Add".tr());
   }
 
   /// Invites the checked users.

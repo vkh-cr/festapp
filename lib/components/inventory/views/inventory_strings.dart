@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 
 class InventoryStrings {
   // --- Feature Description ---
-  // ADDED: New description for the 'Stay' (Pobyt) feature.
   static String get featureDescription => 'Inventory.featureDescription'.tr(); // "This feature allows for managing capacities for accommodation, meals, and daily program slots. It supports the assignment of participants to specific rooms and displays this information on their profile within the application."
   static String get featureTitle => 'Inventory.featureTitle'.tr(); // "Stay (Capacity groups)"
 
@@ -30,6 +29,7 @@ class InventoryStrings {
   static String get cardStatSellable => 'Inventory.cardStatSellable'.tr(); // "Sellable"
   static String get cardStatDynamic => 'Inventory.cardStatDynamic'.tr(); // "Automatic"
   static String get cardStatSlotSize => 'Inventory.cardStatSlotSize'.tr(); // "Capacity"
+  static String cardTooltipUnassigned(int count) => 'Inventory.cardTooltipUnassigned'.tr(namedArgs: {'count': count.toString()}); // "{count} unassigned spot(s)"
 
   // InventoryPoolDetailView (Tabs)
   static String get detailTabOccupancy => 'Inventory.detailTabMatrix'.tr(); // "Occupancy"
@@ -108,7 +108,6 @@ class InventoryStrings {
   static String get settingsPlaceLabel => 'Inventory.settingsPlaceLabel'.tr(); // "Place"
   static String get settingsNoPlaceAssigned => 'Inventory.settingsNoPlaceAssigned'.tr(); // "No place assigned"
 
-  // ADDED for PlaceSearchDialog
   static String get searchDialogTitlePlace => 'Inventory.searchDialogTitlePlace'.tr(); // "Select Place"
   static String get searchDialogTitleProduct => 'Inventory.searchDialogTitleProduct'.tr(); // "Select Product"
   static String get settingsNoProductAssigned => 'Inventory.settingsNoProductAssigned'.tr(); // "No product assigned"
