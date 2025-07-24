@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_all_user_group_info(p_occasion_id bigint, p_type text DEFAULT NULL)
+CREATE OR REPLACE FUNCTION public.get_all_user_groups(p_occasion_id bigint, p_type text DEFAULT NULL)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER AS $$
@@ -7,14 +7,12 @@ DECLARE
     game_defs_json jsonb;
     result_data jsonb;
 BEGIN
-    -- Authorization Check:
-    -- The user must have editor view permissions for the requested occasion.
-    -- This function call is the security gate for this entire operation.
+    -- Authorization Check: User must have editor view permissions for the occasion.
     IF NOT get_is_editor_view_on_occasion(p_occasion_id) THEN
-        RETURN jsonb_build_object('code', 403, 'message', 'Not authorized to view user groups for this occasion');
+        RAISE EXCEPTION 'NOT_AUTHORIZED';
     END IF;
 
-    -- If authorized, proceed to fetch the data.
+    -- If authorized, fetch all matching groups for the occasion.
     SELECT
         COALESCE(jsonb_agg(
             jsonb_build_object(
@@ -23,35 +21,22 @@ BEGIN
                 'description', ugi.description,
                 'type', ugi.type,
                 'data', ugi.data,
-                'leader', ugi.leader,
                 'place', ugi.place,
-                'user_info', ( -- Nested leader object
-                    SELECT jsonb_build_object('id', ui_leader.id, 'name', ui_leader.name, 'surname', ui_leader.surname)
-                    FROM public.user_info ui_leader
-                    WHERE ui_leader.id = ugi.leader
-                ),
                 'places', ( -- Nested place object
-                    SELECT jsonb_strip_nulls(jsonb_build_object(
-                        'id', p.id,
-                        'title', p.title,
-                        'description', p.description,
-                        'type', p.type,
-                        'created_at', p.created_at,
-                        'coordinates', p.coordinates,
-                        'is_hidden', p.is_hidden,
-                        'updated_at', p.updated_at,
-                        'occasion', p.occasion,
-                        'order', p."order",
-                        'icon', p.icon,
-                        'unit', p.unit
-                    ))
+                    SELECT row_to_json(p)::jsonb
                     FROM public.places p
                     WHERE p.id = ugi.place
                 ),
-                'user_groups', ( -- Nested array of participants
+                'user_groups', ( -- Nested array of participants with admin status
                     SELECT COALESCE(jsonb_agg(
                         jsonb_build_object(
-                            'user_info', jsonb_build_object('id', p_ui.id, 'name', p_ui.name, 'surname', p_ui.surname)
+                            'is_admin', ug.is_admin,
+                            -- The user_info object now only contains id, name, and surname.
+                            'user_info', jsonb_build_object(
+                                'id', p_ui.id,
+                                'name', p_ui.name,
+                                'surname', p_ui.surname
+                            )
                         )
                     ), '[]'::jsonb)
                     FROM public.user_groups ug
@@ -79,11 +64,7 @@ BEGIN
         'game_definitions', game_defs_json
     );
 
-    -- Return the data in a structured response on success.
-    RETURN jsonb_build_object('code', 200, 'data', result_data);
-
-EXCEPTION WHEN OTHERS THEN
-    -- Catch any unexpected errors during execution.
-    RETURN jsonb_build_object('code', 500, 'message', SQLERRM);
+    -- Return the data directly on success.
+    RETURN result_data;
 END;
 $$;

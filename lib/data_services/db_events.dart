@@ -162,7 +162,7 @@ class DbEvents {
         await loadIsCurrentUserSignedIn(event.childEvents);
       }
     }
-    if((event.isGroupEvent ?? false) && AuthService.hasGroup())
+    if((event.isGroupEvent ?? false) && RightsService.hasGroup())
     {
       event.isMyGroupEvent = true;
     }
@@ -223,7 +223,7 @@ class DbEvents {
     {
       case 200: {
         if(participant == null) {
-          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           ToastHelper.Show(context, "${trPrefix}You have been signed in.".tr());
         }
         else{
@@ -236,7 +236,7 @@ class DbEvents {
       case 101: ToastHelper.Show(context, "${"Cannot sign in!".tr()} ${"Event is full.".tr()}", severity: ToastSeverity.NotOk); return;
       case 102: {
         if(participant == null) {
-          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           var message = "${trPrefix}You are already signed in at an event of this type.".tr();
           ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
@@ -249,7 +249,7 @@ class DbEvents {
       }
       case 103: {
         if(participant == null) {
-          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           var message = "${trPrefix}You are already signed in.".tr();
           ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
@@ -262,7 +262,7 @@ class DbEvents {
       }
       case 107: {
         if(participant == null) {
-          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           var message = "${trPrefix}You are already signed in at another event at the same time.".tr();
           ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
@@ -516,7 +516,7 @@ class DbEvents {
     switch(result["code"]) {
       case 200:
         if(participant == null) {
-          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           if(context!=null){
             ToastHelper.Show(context, "${trPrefix}You have been signed out.".tr());
           }

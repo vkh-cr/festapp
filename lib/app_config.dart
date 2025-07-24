@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/language_model.dart';
+import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
@@ -14,6 +15,7 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
   static const String oneSignalAppId = '7837e2c3-6e5e-463c-9672-4db6c55888da';
+  static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
   static const int organization = 5;
   //setup occasion id to force occasion

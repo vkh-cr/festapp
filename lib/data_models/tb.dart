@@ -274,7 +274,6 @@ class UserGroupInfoTb{
   String get id => "id";
   String get occasion => "occasion";
   String get title => "title";
-  String get leader => "leader";
   String get place => "place";
   String get description => "description";
   String get type => "type";

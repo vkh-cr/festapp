@@ -1000,5 +1000,13 @@
     "userStayLinkSubtitle": "View your accommodation and services",
     "cardTooltipUnassigned": "{count} unassigned spot(s)"
   },
+  "Administration": {
+    "findUnitHint": "Find organization...",
+    "newUnitButton": "New organization",
+    "findOccasionHint": "Find event...",
+    "newOccasionButton": "New event",
+    "viewApp": "View App",
+    "reservations": "Reservations"
+  },
   "_":"_"
 }
