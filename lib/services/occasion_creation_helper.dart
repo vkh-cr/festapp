@@ -14,7 +14,7 @@ import 'package:fstapp/widgets/time_data_range_picker.dart';
 
 class OccasionCreationHelper {
   static Future<void> createNewOccasion(
-      BuildContext context, UnitModel unit, List<OccasionModel> existingOccasions, Function onEventCreated) async {
+      BuildContext context, UnitModel unit, List<OccasionModel> existingOccasions, Function Function(OccasionModel occasion) onEventCreated) async {
     final formKey = GlobalKey<FormState>();
     String? title = "myfestival".tr();
     String? link = "myfestival${DateTime.now().add(Duration(days: 33)).year}";
@@ -168,7 +168,7 @@ class OccasionCreationHelper {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Cancel').tr(),
+                      child: Text('Storno').tr(),
                     ),
                     ElevatedButton(
                       onPressed: isFormValid
@@ -192,7 +192,7 @@ class OccasionCreationHelper {
 
 
                           await DbOccasions.updateOccasion(newOccasion);
-                          onEventCreated();
+                          onEventCreated(newOccasion);
                           Navigator.of(context).pop();
                         }
                       }

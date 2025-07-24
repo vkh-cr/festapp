@@ -3,11 +3,11 @@ import 'package:fstapp/data_models/companion_model.dart';
 import 'package:fstapp/data_models/information_model.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/unit_model.dart';
 import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:collection/collection.dart';
+import 'occasion_model.dart';
 
 class UserInfoModel extends IHasId {
   @override
@@ -22,8 +22,9 @@ class UserInfoModel extends IHasId {
   bool? isAdmin = false;
   bool? isEditor = false;
   PlaceModel? accommodationPlace;
-  List<UserGroupInfoModel>? userGroups;
+  Set<UserGroupInfoModel>? userGroups;
   List<UnitModel>? units;
+  List<OccasionModel>? occasions;
 
   UserGroupInfoModel? eventUserGroup;
   OccasionUserModel? occasionUser;
@@ -47,6 +48,7 @@ class UserInfoModel extends IHasId {
   static const String userCompanionsColumn = "userCompanions";
   static const String companionParentColumn = "companion_parent";
   static const String unitsField = "units";
+  static const String occasionsField = "occasions";
 
   static const String scheduleColumn = "schedule";
 
@@ -57,32 +59,32 @@ class UserInfoModel extends IHasId {
   static const sexes = ["male", "female", ""];
 
   UserInfoModel({
-     this.id,
-     this.email,
-     this.name,
-     this.surname,
-     this.sex,
-     this.birthDate,
-     this.role,
-     this.isAdmin,
-     this.isEditor,
-     this.phone,
-     this.accommodationPlace,
-     this.eventUserGroup,
-     this.occasionUser,
-     this.roleString,
-     this.companions,
-     this.companionParent,
-     this.units,
-     this.eventIds,
-     this.userGroups,
-  });  
+    this.id,
+    this.email,
+    this.name,
+    this.surname,
+    this.sex,
+    this.birthDate,
+    this.role,
+    this.isAdmin,
+    this.isEditor,
+    this.phone,
+    this.accommodationPlace,
+    this.eventUserGroup,
+    this.occasionUser,
+    this.roleString,
+    this.companions,
+    this.companionParent,
+    this.units,
+    this.occasions,
+    this.eventIds,
+    this.userGroups,
+  });
 
   static UserInfoModel fromJson(Map<String, dynamic> json) {
     return UserInfoModel(
       id: json[idColumn],
-      //todo remove backward compatibility
-      email: json[emailReadonlyColumn]??json[Tb.user_info.data]?[Tb.occasion_users.data_email]??json["email"],
+      email: json[emailReadonlyColumn]??json["email"],
       name: json[nameColumn],
       surname: json[surnameColumn],
       accommodationPlace: json[placeColumn]!=null?PlaceModel.fromJson(json[placeColumn]):null,
@@ -92,6 +94,7 @@ class UserInfoModel extends IHasId {
       companions: json[userCompanionsColumn] != null ? List<CompanionModel>.from(json[userCompanionsColumn]!.map((c)=>CompanionModel.fromJson(c))) : null,
       companionParent: json[companionParentColumn] != null ? UserInfoModel.fromJson(json[companionParentColumn]):null,
       units: json[unitsField] != null ? List<UnitModel>.from(json[unitsField].map((u)=>UnitModel.fromJson(u))) : null,
+      occasions: json[occasionsField] != null ? List<OccasionModel>.from(json[occasionsField].map((o)=>OccasionModel.fromJson(o))) : null,
       eventIds: json[scheduleColumn] != null ? List<String>.from(json[scheduleColumn]!.map((s)=>s)) : null,
       sex: json[sexColumn],
       //todo remove
@@ -100,21 +103,21 @@ class UserInfoModel extends IHasId {
   }
 
   Map<String, dynamic> toJson() =>
-  {
-    idColumn: id,
-    emailReadonlyColumn: email,
-    nameColumn: name,
-    surnameColumn: surname,
-    phoneColumn: phone,
-    roleColumn: role,
-    placeColumn: accommodationPlace?.toJson(),
-    userGroupColumn: eventUserGroup?.toJson(),
-    occasionUserColumn: occasionUser?.toUpdateJson(),
-    roleStringColumn: roleString,
-    sexColumn: sex,
-    birthDateColumn: DateFormat(birthDateJsonFormat).format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0)),
-    userCompanionsColumn: companions != null ? List<dynamic>.from(companions!.map((c)=>c.toJson())) : null,
-  };
+      {
+        idColumn: id,
+        emailReadonlyColumn: email,
+        nameColumn: name,
+        surnameColumn: surname,
+        phoneColumn: phone,
+        roleColumn: role,
+        placeColumn: accommodationPlace?.toJson(),
+        userGroupColumn: eventUserGroup?.toJson(),
+        occasionUserColumn: occasionUser?.toUpdateJson(),
+        roleStringColumn: roleString,
+        sexColumn: sex,
+        birthDateColumn: DateFormat(birthDateJsonFormat).format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0)),
+        userCompanionsColumn: companions != null ? List<dynamic>.from(companions!.map((c)=>c.toJson())) : null,
+      };
 
   @override
   String toString() => toFullNameString();

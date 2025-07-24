@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/components/_shared/app_panel_helper.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -34,6 +35,7 @@ class _ReservationsPageState extends State<ReservationsPage> with SingleTickerPr
     AdminTabDefinition.report,
     AdminTabDefinition.emailTemplates,
     AdminTabDefinition.users,
+    AdminTabDefinition.settings,
   ];
 
   @override
@@ -58,7 +60,7 @@ class _ReservationsPageState extends State<ReservationsPage> with SingleTickerPr
     return DefaultTabController(
       length: _tabController.length,
       child: Scaffold(
-        appBar: AdminPageHelper.buildAdaptiveAdminAppBar(context, activeTabs, _tabController),
+        appBar: AppPanelHelper.buildAdaptiveAdminAppBar(context, activeTabs: activeTabs, tabController: _tabController),
         body: TabBarView(
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),
