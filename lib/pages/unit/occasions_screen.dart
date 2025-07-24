@@ -87,17 +87,11 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
 
   void _addNewEvent() {
     OccasionCreationHelper.createNewOccasion(
-        context, widget.unit, _allOccasions, _loadOccasions);
+        context, widget.unit, _allOccasions, (_) => _loadOccasions);
   }
 
   Future<void> _handleView(OccasionModel occasion) async {
-    await RouterService.navigateToOccasionReservationsByLink(context, occasion.link!);
-
-    // if(AppConfig.isAppSupported){
-    //   await RouterService.navigateToOccasionByLink(context, occasion.link!);
-    // } else {
-    //   await RouterService.navigateToOccasionReservationsByLink(context, occasion.link!);
-    // }
+    await RouterService.navigateToOccasionAdministration(context, occasionLink: occasion.link!);
   }
 
   Future<void> _handleCreateCopy(OccasionModel occasion) async {
