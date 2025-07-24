@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/language_model.dart';
+import 'package:fstapp/pages/form/pages/reservation_page.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 
 class AppConfig {
@@ -15,7 +16,7 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
   static const String oneSignalAppId = 'b346485b-bfd0-4c06-a87c-861aaa00aa48';
-  static const String defaultAdministrationRoute = AdminPage.ROUTE;
+  static const String defaultAdministrationRoute = ReservationsPage.ROUTE;
 
   static const int organization = 4;
   //setup occasion id to force occasion
