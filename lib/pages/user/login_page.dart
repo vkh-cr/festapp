@@ -1,11 +1,11 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/pages/user/forgot_password_page.dart';
 import 'package:fstapp/pages/occasion/settings_page.dart';
 import 'package:fstapp/pages/user/signup_page.dart';
-import 'package:fstapp/services/link_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -141,10 +141,10 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> _refreshSignedInStatus(value) async {
+  Future<void> _refreshSignedInStatus(dynamic value) async {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
-      await RouterService.updateAppData(LinkModel(occasionLink: RouterService.currentOccasionLink));
+      RightsService.updateAppData(link: RouterService.currentOccasionLink, force: true);
       RouterService.popOrHome(context);
     }
   }

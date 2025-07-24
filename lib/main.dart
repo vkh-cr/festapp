@@ -91,7 +91,7 @@ Future<void> initializeEverything() async {
     var settings = await OfflineDataService.getGlobalSettings();
     if (settings != null) {
       SynchroService.globalSettingsModel = settings;
-      RightsService.occasionLinkModel = OccasionLinkModel(occasion: OccasionModel(features: settings.features, isOpen: true, isHidden: false, data: settings.data));
+      RightsService.occasionLinkModelNotifier.value = OccasionLinkModel(occasion: OccasionModel(features: settings.features, isOpen: true, isHidden: false, data: settings.data));
       TimeHelper.setTimeZoneLocation(RightsService.currentOccasion()?.data?["timezone"]);
       print('Global settings loaded');
     }

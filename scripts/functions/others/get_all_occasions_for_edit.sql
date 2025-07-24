@@ -28,7 +28,6 @@ BEGIN
       'created_at', o.created_at,
       'updated_at', o.updated_at,
       'data', o.data,
-      'description', o.description,
       'is_hidden', o.is_hidden,
       'is_open', o.is_open,
       'start_time', o.start_time,
