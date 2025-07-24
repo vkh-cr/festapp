@@ -167,6 +167,11 @@ class RouterService {
       return;
     }
 
+    if(!AppConfig.isAppSupported){
+      await navigateToOccasionReservationsByLink(context, resolvedLink);
+      return;
+    }
+
     // 1. Decide destination based on the current widget type.
     if(context.widget is AdminPage) {
       await navigateToOccasionByLink(context, resolvedLink);
