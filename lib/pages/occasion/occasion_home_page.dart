@@ -6,15 +6,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/data_models/occasion_link_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/app_config_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_news.dart';
-import 'package:fstapp/data_services/offline_data_service.dart';
-import 'package:fstapp/pages/occasion/news_page.dart';
 import 'package:fstapp/pages/user/login_page.dart';
 import 'package:fstapp/services/notification_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
@@ -43,7 +41,6 @@ class OccasionHomePage extends StatefulWidget {
 }
 
 class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBindingObserver {
-  String? userName;
   int _messageCount = 0;
   late final Map<String, OccasionTab> _availableTabs;
 
@@ -62,7 +59,6 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: ThemeConfig.seed1,
       systemNavigationBarColor: ThemeConfig.appBarColor(),
@@ -85,35 +81,19 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
   }
 
   Future<void> loadData() async {
-    await loadOfflineData();
     await AppConfigService.versionCheck(context);
-
     if (AuthService.isLoggedIn()) {
-      setState(() => userName = RightsService.currentUser()?.name??"---");
-
       DbNews.countNewMessages().then((count) {
         if (mounted) {
           setState(() => _messageCount = count);
         }
       });
     }
-
     await NotificationHelper.checkForNotificationPermission(context);
   }
 
-  Future<void> loadOfflineData() async {
-    if (AuthService.isLoggedIn()) {
-      var userInfo = await OfflineDataService.getUserInfo();
-      if (mounted) {
-        setState(() {
-          userName = userInfo?.occasionUser?.data?[Tb.occasion_users.data_name];
-        });
-      }
-    }
-  }
-
   String messageCountString() => _messageCount < 100 ? _messageCount.toString() : "99+";
-  NewsPage? np;
+
   @override
   Widget build(BuildContext context) {
     return AutoTabsRouter(
@@ -121,49 +101,47 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
-          bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: ThemeConfig.bottomNavBackgroundColor(context),
-            selectedItemColor: ThemeConfig.bottomNavSelectedItemColor(context),
-            unselectedItemColor: ThemeConfig.bottomNavUnselectedItemColor(context),
-            currentIndex: tabsRouter.activeIndex,
-            type: BottomNavigationBarType.fixed,
-            onTap: (int index) async {
-              final key = OccasionHomePage.visibleTabKeys[index];
-              final tab = _availableTabs[key]!;
+          bottomNavigationBar: ValueListenableBuilder<OccasionLinkModel?>(
+            valueListenable: RightsService.occasionLinkModelNotifier,
+            builder: (context, occasionLinkModel, __) {
+              return BottomNavigationBar(
+                backgroundColor: ThemeConfig.bottomNavBackgroundColor(context),
+                selectedItemColor: ThemeConfig.bottomNavSelectedItemColor(context),
+                unselectedItemColor: ThemeConfig.bottomNavUnselectedItemColor(context),
+                currentIndex: tabsRouter.activeIndex,
+                type: BottomNavigationBarType.fixed,
+                onTap: (int index) async {
+                  final key = OccasionHomePage.visibleTabKeys[index];
+                  final tab = _availableTabs[key]!;
 
-              if (tab.requiresLogin && !AuthService.isLoggedIn()) {
-                await RouterService.navigate(context, LoginPage.ROUTE);
-                await loadData();
-              } else {
-                if(AuthService.isLoggedIn()){
-                  DbNews.countNewMessages().then((count) {
-                    if (mounted) {
-                      setState(() => _messageCount = count);
+                  if (tab.requiresLogin && !AuthService.isLoggedIn()) {
+                    await RouterService.navigate(context, LoginPage.ROUTE);
+                    await loadData();
+                  } else {
+                    if (AuthService.isLoggedIn()) {
+                      DbNews.countNewMessages().then((count) {
+                        if (mounted) {
+                          setState(() => _messageCount = count);
+                        }
+                      });
                     }
-                  });
-                }
-                tabsRouter.setActiveIndex(index);
-              }
-            },
-            items: OccasionHomePage.visibleTabKeys.map((key) {
-              final tab = _availableTabs[key]!;
-              return BottomNavigationBarItem(
-                icon: tab.buildIcon(context, _messageCount, messageCountString),
-                activeIcon: tab.buildActiveIcon(context, _messageCount, messageCountString),
-                label: key == OccasionTab.user
-                    ? (userName ?? "Sign in".tr())
-                    : tab.label,
+                    tabsRouter.setActiveIndex(index);
+                  }
+                },
+                items: OccasionHomePage.visibleTabKeys.map((key) {
+                  final tab = _availableTabs[key]!;
+                  return BottomNavigationBarItem(
+                    icon: tab.buildIcon(context, _messageCount, messageCountString),
+                    activeIcon: tab.buildActiveIcon(context, _messageCount, messageCountString),
+                    label: key == OccasionTab.user
+                        ? (occasionLinkModel?.userInfo?.name ?? "Sign in".tr())
+                        : tab.label,
+                  );
+                }).toList(),
               );
-            }).toList(),
-          ),
-          body: Builder(
-            builder: (context) {
-              // if (OccasionHomePage.visibleTabKeys[tabsRouter.activeIndex] == OccasionTab.news) {
-              //   return child;
-              // }
-              return child;
             },
           ),
+          body: child,
         );
       },
     );
@@ -249,8 +227,6 @@ class OccasionTab {
   };
 
   static List<PageRouteInfo<dynamic>> getTabRoutes(List<String> tabKeys) {
-    // This method still exists but is no longer directly used by OccasionHomePage's build method
-    // for generating routes for its AutoTabsRouter, as OccasionHomePage now uses its local _availableTabs instance.
     return tabKeys.map((key) => getAvailableTabs()[key]!.route).toList();
   }
 
