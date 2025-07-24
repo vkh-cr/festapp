@@ -98,16 +98,16 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
   Widget build(BuildContext context) {
     return AutoTabsRouter(
       routes: OccasionHomePage.visibleTabKeys.map((key) => _availableTabs[key]!.route).toList(),
-      builder: (context, child) {
-        final tabsRouter = AutoTabsRouter.of(context);
+      builder: (tabsContext, child) {
+        final tabsRouter = AutoTabsRouter.of(tabsContext);
         return Scaffold(
           bottomNavigationBar: ValueListenableBuilder<OccasionLinkModel?>(
             valueListenable: RightsService.occasionLinkModelNotifier,
-            builder: (context, occasionLinkModel, __) {
+            builder: (listenableContext, occasionLinkModel, __) {
               return BottomNavigationBar(
-                backgroundColor: ThemeConfig.bottomNavBackgroundColor(context),
-                selectedItemColor: ThemeConfig.bottomNavSelectedItemColor(context),
-                unselectedItemColor: ThemeConfig.bottomNavUnselectedItemColor(context),
+                backgroundColor: ThemeConfig.bottomNavBackgroundColor(listenableContext),
+                selectedItemColor: ThemeConfig.bottomNavSelectedItemColor(listenableContext),
+                unselectedItemColor: ThemeConfig.bottomNavUnselectedItemColor(listenableContext),
                 currentIndex: tabsRouter.activeIndex,
                 type: BottomNavigationBarType.fixed,
                 onTap: (int index) async {
@@ -115,10 +115,10 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
                   final tab = _availableTabs[key]!;
 
                   if (tab.requiresLogin && !AuthService.isLoggedIn()) {
-                    await RouterService.navigate(context, LoginPage.ROUTE);
+                    await RouterService.navigate(listenableContext, LoginPage.ROUTE);
                     await loadData();
                   } else {
-                    if (AuthService.isLoggedIn()) {
+                    if (AuthService.isLoggedIn() && context.widget is OccasionHomePage) {
                       DbNews.countNewMessages().then((count) {
                         if (mounted) {
                           setState(() => _messageCount = count);
@@ -131,8 +131,8 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
                 items: OccasionHomePage.visibleTabKeys.map((key) {
                   final tab = _availableTabs[key]!;
                   return BottomNavigationBarItem(
-                    icon: tab.buildIcon(context, _messageCount, messageCountString),
-                    activeIcon: tab.buildActiveIcon(context, _messageCount, messageCountString),
+                    icon: tab.buildIcon(listenableContext, _messageCount, messageCountString),
+                    activeIcon: tab.buildActiveIcon(listenableContext, _messageCount, messageCountString),
                     label: key == OccasionTab.user
                         ? (occasionLinkModel?.userInfo?.name ?? "Sign in".tr())
                         : tab.label,
