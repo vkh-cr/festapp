@@ -7,6 +7,7 @@ import 'package:fstapp/components/_shared/project_picker_widget.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
+import 'package:fstapp/data_models/occasion_link_model.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_models/unit_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -46,13 +47,12 @@ class _ActionMenuItem {
 
 class AppPanelHelper {
   /// This method returns a breadcrumb widget for navigating units and occasions.
-  static Widget _buildBreadcrumbs(BuildContext context, {bool isMobile = false}) {
+  /// This is now primarily used for the desktop layout.
+  static Widget _buildBreadcrumbs(BuildContext originalContext, BuildContext context) {
     final allUnits = RightsService.currentUser()?.units ?? [];
     final currentUnit = RightsService.currentUnit();
     final occasionsInCurrentUnit = RightsService.currentUser()?.occasions ?? [];
     final currentOccasion = RightsService.currentOccasion();
-
-    final ScrollController? scrollController = isMobile ? ScrollController() : null;
 
     List<Widget> breadcrumbItems = [];
 
@@ -65,11 +65,12 @@ class AppPanelHelper {
         items: allUnits,
         selectedItem: currentUnit,
         itemTitleBuilder: (item) => item.title ?? '---',
+        itemIdBuilder: (item) => item.id,
         onItemSelected: (item) async {
-          await RouterService.navigateToUnit(context, item);
+          await RouterService.navigateToUnit(originalContext, item);
         },
         onCreateNew: null,
-        onTitleTap: () async => await RouterService.navigateToUnit(context, currentUnit),
+        onTitleTap: () async => await RouterService.navigateToUnit(originalContext, currentUnit),
         searchHintText: AdministrationStrings.findUnitHint,
         createNewText: AdministrationStrings.newUnitButton,
       ));
@@ -92,24 +93,22 @@ class AppPanelHelper {
         items: occasionsInCurrentUnit,
         selectedItem: currentOccasion,
         itemTitleBuilder: (item) => item.title ?? '---',
+        itemIdBuilder: (item) => item.id,
+        itemDateBuilder: (item) => item.startTime,
         onItemSelected: (item) async {
           if (item.link != null) {
-            await RouterService.navigateToOccasionByLink(context, item.link!);
+            await RouterService.navigateToOccasionAdministration(originalContext, occasionLink: item.link!);
           }
         },
         onCreateNew: !RightsService.isUnitEditor() ? null :
-            () => OccasionCreationHelper.createNewOccasion(context, currentUnit, occasionsInCurrentUnit, () async {
-          if (currentOccasion.link != null) {
-            await RouterService.navigateToOccasionByLink(context, currentOccasion.link!);
+            () => OccasionCreationHelper.createNewOccasion(originalContext, currentUnit, occasionsInCurrentUnit, (newOccasion) => () async {
+          if (newOccasion.link != null) {
+            await RouterService.navigateToOccasionAdministration(originalContext, occasionLink: newOccasion.link!);
           }
         }),
         onTitleTap: () async {
           if (currentOccasion.link != null) {
-            if(AppConfig.isAppSupported) {
-              await RouterService.navigateToOccasionByLink(context, currentOccasion.link!);
-            } else{
-              await RouterService.navigateToOccasionReservationsByLink(context, currentOccasion.link!);
-            }
+            await RouterService.navigateToOccasionAdministration(originalContext, occasionLink: currentOccasion.link!);
           }
         },
         searchHintText: AdministrationStrings.findOccasionHint,
@@ -131,7 +130,7 @@ class AppPanelHelper {
         );
 
         final reservationsAction = _ActionMenuItem(
-          label: 'Reservations'.tr(),
+          label: AdministrationStrings.reservations,
           icon: Icons.shopping_cart,
           onSelect: () async => await RouterService.navigateOccasion(context, ReservationsPage.ROUTE),
         );
@@ -163,27 +162,14 @@ class AppPanelHelper {
             context: context,
             currentAction: currentAction,
             availableActions: availableActions,
-            iconOnly: isMobile,
           ));
         }
       }
     }
 
-    if (isMobile && scrollController != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients) {
-          scrollController.jumpTo(scrollController.position.maxScrollExtent);
-        }
-      });
-    }
-
-    return SingleChildScrollView(
-      controller: scrollController,
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: breadcrumbItems,
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: breadcrumbItems,
     );
   }
 
@@ -295,7 +281,6 @@ class AppPanelHelper {
               left: offset.dx,
               child: Material(
                 elevation: 4.0,
-                // MODIFICATION: Use exact color logic from _showPicker
                 color: theme.brightness == Brightness.dark
                     ? const Color(0xFF2D2D2D)
                     : Colors.white,
@@ -344,11 +329,13 @@ class AppPanelHelper {
     required List<T> items,
     required T selectedItem,
     required String Function(T) itemTitleBuilder,
+    required Object? Function(T) itemIdBuilder,
     required Function(T) onItemSelected,
     required VoidCallback? onCreateNew,
     required VoidCallback onTitleTap,
     required String searchHintText,
     required String createNewText,
+    DateTime? Function(T item)? itemDateBuilder,
     bool isBold = false,
   }) {
     final theme = Theme.of(context);
@@ -382,7 +369,7 @@ class AppPanelHelper {
             hoverColor: hoverColor,
             child: Padding(
               padding: const EdgeInsets.only(left: 8, right: 6, top: 6, bottom: 6),
-              child: Text(title, style: textStyle),
+              child: Text(title, style: textStyle, overflow: TextOverflow.ellipsis,),
             ),
           ),
           Builder(
@@ -394,10 +381,15 @@ class AppPanelHelper {
                     items: items,
                     selectedItem: selectedItem,
                     itemTitleBuilder: itemTitleBuilder,
+                    itemIdBuilder: itemIdBuilder,
+                    itemDateBuilder: itemDateBuilder,
                     onItemSelected: onItemSelected,
                     onCreateNew: onCreateNew,
                     searchHintText: searchHintText,
                     createNewText: createNewText,
+                    happeningNowText: itemDateBuilder != null ? "Happening Now".tr() : null,
+                    upcomingText: itemDateBuilder != null ? "Upcoming Events".tr() : null,
+                    pastText: itemDateBuilder != null ? "Past Events".tr() : null,
                   );
                 },
                 hoverColor: hoverColor,
@@ -422,10 +414,15 @@ class AppPanelHelper {
     required List<T> items,
     required T selectedItem,
     required String Function(T) itemTitleBuilder,
+    required Object? Function(T) itemIdBuilder,
     required Function(T) onItemSelected,
     required VoidCallback? onCreateNew,
     required String searchHintText,
     required String createNewText,
+    DateTime? Function(T item)? itemDateBuilder,
+    String? happeningNowText,
+    String? upcomingText,
+    String? pastText,
   }) {
     final overlay = Overlay.of(context);
     late OverlayEntry overlayEntry;
@@ -491,10 +488,15 @@ class AppPanelHelper {
                         items: items,
                         selectedItem: selectedItem,
                         itemTitleBuilder: itemTitleBuilder,
+                        itemIdBuilder: itemIdBuilder,
+                        itemDateBuilder: itemDateBuilder,
                         onItemSelected: onItemSelected,
                         onCreateNew: onCreateNew,
                         hintText: searchHintText,
                         createNewText: createNewText,
+                        happeningNowText: happeningNowText,
+                        upcomingText: upcomingText,
+                        pastText: pastText,
                       ),
                     ),
                   ),
@@ -516,8 +518,9 @@ class AppPanelHelper {
         TabController? tabController}
       ) {
     final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth < 600) {
-      return buildMobileAdminAppBar(context, activeTabs, tabController);
+    // Use a more standard breakpoint for mobile vs. desktop layouts.
+    if (screenWidth < 720) {
+      return buildProfessionalMobileAdminAppBar(context, activeTabs, tabController);
     } else {
       return buildDesktopAdminAppBar(context, activeTabs, tabController);
     }
@@ -533,9 +536,14 @@ class AppPanelHelper {
       toolbarHeight: 60,
       leadingWidth: 140,
       titleSpacing: 16.0,
-      title: Align(
-        alignment: Alignment.centerLeft,
-        child: _buildBreadcrumbs(context),
+      title: ValueListenableBuilder<OccasionLinkModel?>(
+        valueListenable: RightsService.occasionLinkModelNotifier,
+        builder: (listenableContext, occasionLinkModel, child) {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: _buildBreadcrumbs(context, listenableContext),
+          );
+        },
       ),
       leading: Align(
         alignment: Alignment.centerLeft,
@@ -583,62 +591,195 @@ class AppPanelHelper {
     );
   }
 
-  /// Mobile version of the AppBar.
-  static PreferredSizeWidget buildMobileAdminAppBar(
+  /// A professionally redesigned mobile version of the AppBar with Unit switcher on the left.
+  static PreferredSizeWidget buildProfessionalMobileAdminAppBar(
       BuildContext context,
       List<AdminTabDefinition>? activeTabs,
       TabController? tabController,
       ) {
+    final onAppBarColor = Theme.of(context).appBarTheme.foregroundColor ?? Colors.white;
+    final iconColor = onAppBarColor.withOpacity(0.9);
+    final separatorColor = onAppBarColor.withOpacity(0.5);
+
     return AppBar(
       automaticallyImplyLeading: false,
-      leading: null,
-      leadingWidth: 0,
-      titleSpacing: 0,
-      toolbarHeight: kToolbarHeight,
-      title: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: GestureDetector(
-              onTap: () async {
-                final currentUnit = RightsService.currentUnit();
-                if (currentUnit != null && RightsService.canUserSeeUnitWorkspace()) {
-                  await RouterService.navigateToUnit(context, currentUnit);
-                }
-              },
-              child: LogoWidget(height: 40, forceDark: true),
-            ),
-          ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: _buildBreadcrumbs(context, isMobile: true),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: UserHeaderWidget(appBarIconColor: ThemeConfig.lllBackground),
-          ),
-        ],
+      leadingWidth: 56,
+      titleSpacing: 4.0,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: GestureDetector(
+          onTap: () async {
+            final currentUnit = RightsService.currentUnit();
+            if (currentUnit != null && RightsService.canUserSeeUnitWorkspace()) {
+              await RouterService.navigateToUnit(context, currentUnit);
+            }
+          },
+          child: LogoWidget(height: 40, forceDark: true),
+        ),
       ),
-      bottom:
-      (activeTabs == null) ? null :
-      PreferredSize(
+      title: ValueListenableBuilder<OccasionLinkModel?>(
+        valueListenable: RightsService.occasionLinkModelNotifier,
+        builder: (context, _, __) {
+          final allUnits = RightsService.currentUser()?.units ?? [];
+          final currentUnit = RightsService.currentUnit();
+          final occasionsInUnit = RightsService.currentUser()?.occasions ?? [];
+          final currentOccasion = RightsService.currentOccasion();
+
+          if (currentUnit == null) return const SizedBox.shrink();
+
+          return Row(
+            children: [
+              // Unit Switcher gets a smaller flex factor, so it shrinks first.
+              Flexible(
+                flex: 1,
+                child: Builder(builder: (buttonContext) {
+                  return TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: onAppBarColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      textStyle: const TextStyle(fontWeight: FontWeight.normal),
+                    ),
+                    onPressed: () => _showPicker<UnitModel>(
+                      context: buttonContext,
+                      items: allUnits,
+                      selectedItem: currentUnit,
+                      itemTitleBuilder: (i) => i.title ?? '---',
+                      itemIdBuilder: (i) => i.id,
+                      onItemSelected: (item) async => await RouterService.navigateToUnit(context, item),
+                      onCreateNew: null,
+                      searchHintText: AdministrationStrings.findUnitHint,
+                      createNewText: AdministrationStrings.newUnitButton,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(child: Text(currentUnit.title ?? '---', overflow: TextOverflow.ellipsis)),
+                        Icon(Icons.unfold_more_rounded, size: 20, color: iconColor),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+              if (currentOccasion != null) ...[
+                // Separator
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: Text("/", style: TextStyle(fontSize: 16, color: separatorColor)),
+                ),
+                // Occasion Switcher gets a larger flex factor to prioritize its visibility.
+                Flexible(
+                  flex: 3,
+                  child: Builder(builder: (buttonContext) {
+                    return TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: onAppBarColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () => _showPicker<OccasionModel>(
+                        context: buttonContext,
+                        items: occasionsInUnit,
+                        selectedItem: currentOccasion,
+                        itemTitleBuilder: (i) => i.title ?? '---',
+                        itemIdBuilder: (i) => i.id,
+                        itemDateBuilder: (i) => i.startTime,
+                        onItemSelected: (item) async {
+                          if (item.link != null) {
+                            await RouterService.navigateToOccasionAdministration(context, occasionLink: item.link!);
+                          }
+                        },
+                        onCreateNew: null,
+                        searchHintText: AdministrationStrings.findOccasionHint,
+                        createNewText: AdministrationStrings.newOccasionButton,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(child: Text(currentOccasion.title ?? '---', overflow: TextOverflow.ellipsis)),
+                          Icon(Icons.unfold_more_rounded, size: 20, color: iconColor),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+      actions: [
+        ValueListenableBuilder<OccasionLinkModel?>(
+          valueListenable: RightsService.occasionLinkModelNotifier,
+          builder: (context, _, __) {
+            final currentOccasion = RightsService.currentOccasion();
+            if (currentOccasion == null || !AppConfig.isAppSupported) {
+              return const SizedBox.shrink();
+            }
+
+            final actions = <_ActionMenuItem>[];
+            if (FeatureService.isFeatureEnabled(FeatureConstants.form, features: currentOccasion.features)) {
+              actions.add(_ActionMenuItem(
+                  label: AdministrationStrings.reservations,
+                  icon: Icons.shopping_cart,
+                  onSelect: () async => await RouterService.navigateOccasion(context, ReservationsPage.ROUTE)));
+            }
+            actions.add(_ActionMenuItem(
+                label: 'Event management'.tr(),
+                icon: Icons.admin_panel_settings,
+                onSelect: () async => await RouterService.navigateOccasion(context, AdminPage.ROUTE)));
+            actions.add(_ActionMenuItem(
+                label: AdministrationStrings.viewApp,
+                icon: Icons.visibility,
+                onSelect: () async => await RouterService.navigateOccasion(context, "")));
+
+            if (actions.length <= 1) return const SizedBox.shrink();
+
+            // Action menu
+            return PopupMenuButton<_ActionMenuItem>(
+              icon: Icon(Icons.more_vert, color: iconColor),
+              tooltip: "More Options".tr(),
+              onSelected: (action) => action.onSelect(),
+              itemBuilder: (BuildContext context) {
+                return actions.map((_ActionMenuItem action) {
+                  return PopupMenuItem<_ActionMenuItem>(
+                    value: action,
+                    child: Row(
+                      children: [
+                        if (action.icon != null) ...[
+                          Icon(action.icon, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
+                          const SizedBox(width: 12),
+                        ],
+                        Text(action.label),
+                      ],
+                    ),
+                  );
+                }).toList();
+              },
+            );
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 4.0),
+          child: UserHeaderWidget(appBarIconColor: ThemeConfig.lllBackground),
+        ),
+      ],
+      bottom: (activeTabs == null)
+          ? null
+          : PreferredSize(
         preferredSize: const Size.fromHeight(40),
         child: TabBar(
           controller: tabController,
           isScrollable: true,
           tabs: activeTabs.map((tab) {
-            return Row(children: [
-              Icon(tab.icon),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Text(tab.label),
+            return Tab(
+              child: Row(
+                children: [
+                  Icon(tab.icon),
+                  const SizedBox(width: 8),
+                  Text(tab.label),
+                ],
               ),
-            ]);
+            );
           }).toList(),
         ),
       ),
