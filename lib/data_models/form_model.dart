@@ -47,7 +47,7 @@ class FormModel {
   String? link;
   List<FormFieldModel>? relatedFields;
   List<BankAccountModel>? availableBankAccounts;
-  FormStatsModel? stats; // Replaced responseCount with the new stats model.
+  FormStatsModel? stats;
   bool? isReminderEnabled;
 
   static const String metaIsCardDesign = "is_card_design";

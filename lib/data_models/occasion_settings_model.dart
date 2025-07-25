@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/features/feature.dart';
+import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_models/service_item_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 
@@ -16,7 +17,6 @@ class OccasionSettingsModel {
   // Features
   List<Feature>? features;
 
-
   // Visibility switch
   bool? isHidden;
 
@@ -29,8 +29,33 @@ class OccasionSettingsModel {
     this.gameStartTime,
     this.gameEndTime,
     this.features,
-    this.data
+    this.data,
+    this.isHidden,
   });
+
+  /// Creates an [OccasionSettingsModel] from an [OccasionModel].
+  ///
+  /// This factory constructor maps the properties from an existing [OccasionModel]
+  /// instance to a new [OccasionSettingsModel] instance.
+  factory OccasionSettingsModel.fromOccasion(OccasionModel occasion) {
+    final dataPart = occasion.data ?? <String, dynamic>{};
+    final servicesPart = dataPart[Tb.occasions.services] as Map<String, dynamic>?;
+    final gameSettings = dataPart[Tb.occasions.data_game] as Map<String, dynamic>? ?? <String, dynamic>{};
+
+    final gameStartString = gameSettings[Tb.occasions.data_game_start] as String?;
+    final gameEndString = gameSettings[Tb.occasions.data_game_end] as String?;
+
+    return OccasionSettingsModel(
+      eventStartTime: occasion.startTime,
+      eventEndTime: occasion.endTime,
+      services: servicesPart,
+      gameStartTime: gameStartString != null ? DateTime.tryParse(gameStartString) : null,
+      gameEndTime: gameEndString != null ? DateTime.tryParse(gameEndString) : null,
+      features: occasion.features,
+      data: occasion.data,
+      isHidden: occasion.isHidden,
+    );
+  }
 
   static OccasionSettingsModel fromJson(Map<String, dynamic> json) {
     // Initialize to default settings if required data is missing
@@ -62,7 +87,8 @@ class OccasionSettingsModel {
           : null,
       services: servicesPart,
       features: featuresPart?.map((f) => Feature.fromJson(f)).toList(),
-      data: dataPart
+      data: dataPart,
+      isHidden: hiddenFlag,
     );
   }
 

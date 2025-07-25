@@ -1,8 +1,7 @@
-import 'dart:collection';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/data_models/group_participant_model.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -70,18 +69,18 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
           ),
           TrinaColumn(
             title: "Moderator".tr(),
-            field: Tb.user_group_info.leader,
+            field: UserGroupInfoModel.leaderColumn,
             type: TrinaColumnType.text(),
             enableEditingMode: false,
             width: 200,
             renderer: (rendererContext) {
               String? userName;
               var currentValue =
-                  rendererContext.row.cells[Tb.user_group_info.leader]?.value;
+                  rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value;
               if (currentValue != null &&
                   currentValue.toString().isNotEmpty) {
-                var user = (rendererContext.row.cells[Tb.user_group_info.leader]
-                    ?.value as UserInfoModel);
+                var user = (rendererContext.row.cells[UserGroupInfoModel.leaderColumn]
+                    ?.value as GroupParticipantModel);
                 userName = user.toString();
               }
               return Row(
@@ -95,10 +94,10 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                       DialogHelper.chooseUser(
                         context,
                             (person) => setState(() {
-                          rendererContext.row.cells[Tb.user_group_info.leader]
-                              ?.value = person;
+                          rendererContext.row.cells[UserGroupInfoModel.leaderColumn]
+                              ?.value = GroupParticipantModel(userInfo: person, isAdmin: true);
                           var cell = rendererContext.row
-                              .cells[Tb.user_group_info.leader]!;
+                              .cells[UserGroupInfoModel.leaderColumn]!;
                           rendererContext.stateManager
                               .changeCellValue(cell, cell.value, force: true);
                           RouterService.goBack(context);
@@ -118,20 +117,20 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
             title: "Participants".tr(),
             field: UserGroupInfoModel.participantsColumn,
             type: TrinaColumnType.text(
-              defaultValue: <UserInfoModel>{},
+              defaultValue: <GroupParticipantModel>{},
             ),
             enableEditingMode: false,
             width: 600,
             renderer: (rendererContext) {
               String? userNames;
-              Set<UserInfoModel> participants = {};
+              Set<GroupParticipantModel> participants = {};
               var currentValue = rendererContext.row
                   .cells[UserGroupInfoModel.participantsColumn]?.value;
               if (currentValue != null &&
                   currentValue.toString().isNotEmpty) {
                 participants = (rendererContext.row
                     .cells[UserGroupInfoModel.participantsColumn]
-                    ?.value as Set<UserInfoModel>);
+                    ?.value as Set<GroupParticipantModel>);
                 userNames = participants.join(", ");
               }
               return Row(
@@ -149,8 +148,8 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                                   .cells[UserGroupInfoModel.participantsColumn]!;
                               var all = (rendererContext.row
                                   .cells[UserGroupInfoModel.participantsColumn]
-                                  ?.value as Set<UserInfoModel>?);
-                              all?.add(person);
+                                  ?.value as Set<GroupParticipantModel>?);
+                              all?.add(GroupParticipantModel(userInfo: person));
 
                               rendererContext.stateManager.changeCellValue(
                                       cell, all,
