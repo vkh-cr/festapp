@@ -1,19 +1,9 @@
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_services/db_users.dart';
-import 'package:fstapp/data_services/synchro_service.dart';
 
 class DataServiceTests {
-  static Future<void> test_check_occasion_link()
-  async {
-    await AuthService.login("michael.bujnovsky@festapp.net", "");
-    var tstData = await SynchroService.getAppConfig(occasionLink: "conference2024");
-  }
-  static Future<void> test_has_event_allowed_role()
-  async {
-    //await DataService.login("michael.bujnovsky@festapp.net", "");
-    //var tstData = await DataService.hasEventAllowedRole(48);
-  }
+
   static Future<void> test_update_user()
   async {
     await AuthService.login("michael.bujnovsky@festapp.net", "");

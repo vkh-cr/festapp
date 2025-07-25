@@ -4,8 +4,9 @@ import 'package:fstapp/pages/form/pages/form_page.dart';
 class LinkModel {
   String? formLink;
   String? occasionLink;
+  int? unitId;
 
-  LinkModel({this.occasionLink, this.formLink});
+  LinkModel({this.occasionLink, this.formLink, this.unitId});
 
   factory LinkModel.extractOccasionLink(String url) {
     String? firstPart;

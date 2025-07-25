@@ -474,7 +474,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> _logout() async {
-    var trPrefix = (await DbUsers.getCurrentUserInfo()).getGenderPrefix();
+    var trPrefix = RightsService.currentUser()?.getGenderPrefix();
     await AuthService.logout();
     ToastHelper.Show(context, "${trPrefix}You have been signed out.".tr());
     RouterService.popOrHome(context);
