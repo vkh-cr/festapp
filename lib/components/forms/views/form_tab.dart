@@ -7,6 +7,8 @@ import 'package:fstapp/components/forms/views/form_settings_content.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 
+import '../form_strings.dart';
+
 class FormTab extends StatefulWidget {
   final String formLink;
   final VoidCallback? onActionCompleted;
@@ -48,9 +50,9 @@ class _FormTabState extends State<FormTab> with SingleTickerProviderStateMixin {
             controller: _tabController,
             isScrollable: true,
             tabs: [
-              DataGridHelper.buildTab(context, Icons.data_object, FeaturesStrings.tabForm),
+              DataGridHelper.buildTab(context, Icons.data_object, FormStrings.tabForm),
               DataGridHelper.buildTab(context, Icons.settings, "Settings".tr()),
-              DataGridHelper.buildTab(context, Icons.list, FeaturesStrings.tabResponses),
+              DataGridHelper.buildTab(context, Icons.list, FormStrings.tabResponses),
             ],
           ),
         ),

@@ -752,7 +752,7 @@
   },
   "FormsFeature": {
     "formsTitle": "Formuláře",
-    "createNewForm": "Vytvořit nový formulář",
+    "createNewForm": "Vytvořit/Zkopírovat formulář",
     "createCopy": "Vytvořit kopii",
     "statusOpen": "Formulář přijímá odpovědi",
     "statusClosed": "Vypnutý",
@@ -776,7 +776,15 @@
     "createNewProductTypeOption": "Vytvořit nový typ produktu",
     "untitledProductType": "Bez názvu",
     "noProductTypesToAdd": "Žádné další typy produktů k přidání.",
-    "newProductTypeDefaultName": "Nový typ produktu"
+    "newProductTypeDefaultName": "Nový typ produktu",
+    "createFormTitle": "Vytvořit formulář",
+    "createNewBlankForm": "Vytvořit nový prázdný formulář",
+    "orCreateFromCopy": "Nebo vytvořit kopii z existujícího formuláře:",
+    "searchFormsToCopy": "Hledat formuláře ke zkopírování...",
+    "groupHappeningNow": "Právě probíhá",
+    "groupUpcoming": "Nadcházející",
+    "groupOther": "Ostatní",
+    "numberOfResponsesTooltip": "Počet odpovědí: {0}"
   },
   "FeatureOrders": {
     "cancel": "Stornovat",

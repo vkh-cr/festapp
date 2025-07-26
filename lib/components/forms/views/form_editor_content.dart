@@ -14,6 +14,7 @@ import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 
+import '../form_strings.dart';
 import '../widgets_editor/form_fields_generator.dart';
 
 const double kHiddenOpacity = 0.5;
@@ -115,7 +116,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(FeaturesStrings.statusOpen),
+              Text(FormStrings.statusOpen),
               Switch(
                 value: form.isOpen ?? true,
                 onChanged: RightsService.canEditOccasion()
@@ -133,7 +134,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
           if (!(form.isOpen ?? true)) ...[
             const SizedBox(height: 12),
             Text(
-              FeaturesStrings.formTurnedOff,
+              FormStrings.formTurnedOff,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: ThemeConfig.redColor(context),
@@ -156,7 +157,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
             Center(
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.edit),
-                label: Text(FeaturesStrings.editOffText),
+                label: Text(FormStrings.editOffText),
                 onPressed: () async {
                   final result = await RouterService.navigatePageInfo(
                     context,
@@ -197,7 +198,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
         if (personalInfoTypes.isNotEmpty) {
           resolvedItemsForDialog.add(
               PopupMenuButton<String>(
-                tooltip: FeaturesStrings.personalInfo,
+                tooltip: FormStrings.personalInfo,
                 offset: isWideScreen ? const Offset(160, 0) : const Offset(20, 0),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
                 onSelected: (String type) {
@@ -219,7 +220,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 },
                 child: ListTile(
                   leading: Icon(Icons.person_search_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
-                  title: Text(FeaturesStrings.personalInfo),
+                  title: Text(FormStrings.personalInfo),
                   trailing: Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodyLarge?.color),
                   dense: true,
                 ),
@@ -244,14 +245,14 @@ class _FormEditorContentState extends State<FormEditorContent> {
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text(FeaturesStrings.noFieldsAvailable),
+                  child: Text(FormStrings.noFieldsAvailable),
                 ),
               )
           );
         }
 
         return AlertDialog(
-          title: Text(FeaturesStrings.addFieldTitle),
+          title: Text(FormStrings.addFieldTitle),
           contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
           content: SizedBox(
@@ -317,7 +318,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
             FloatingActionButton(
               heroTag: "addFieldFab",
               onPressed: _addNewField,
-              tooltip: FeaturesStrings.addFieldTitle,
+              tooltip: FormStrings.addFieldTitle,
               child: const Icon(Icons.add),
             ),
           const SizedBox.square(dimension: 64),
@@ -351,7 +352,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                       Center(
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.edit),
-                          label: Text(FeaturesStrings.editContent),
+                          label: Text(FormStrings.editContent),
                           onPressed: () async {
                             final result = await RouterService.navigatePageInfo(
                               context,
@@ -373,7 +374,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                     children: [
                       const SizedBox(height: 8),
                       Text(
-                        FeaturesStrings.dragToReorder,
+                        FormStrings.dragToReorder,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],

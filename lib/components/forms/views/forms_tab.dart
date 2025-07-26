@@ -1,18 +1,18 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/data_models/form_model.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:intl/intl.dart';
+import '../form_strings.dart';
 import 'form_creation_helper.dart';
 import 'form_tab.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 
 @RoutePage()
 class FormsTab extends StatefulWidget {
@@ -64,66 +64,20 @@ class _FormsTabState extends State<FormsTab> {
     });
   }
 
+  // This method now calls the new DB function to populate the "Add/Copy" dialog.
   Future<void> _handleCreateNew() async {
     if (occasionLink == null) return;
 
-    // --- FAKE DATA GENERATION FOR DEMONSTRATION ---
-    // Create fake OccasionModels to be linked to the forms.
-    final occasionSummer = OccasionModel(id: 101, title: "Summer Camp 2025", isOpen: true, isHidden: false);
-    final occasionWinter = OccasionModel(id: 102, title: "Winter Retreat 2024", isOpen: true, isHidden: false);
-    final occasionConference = OccasionModel(id: 103, title: "Annual Conference 2025", isOpen: true, isHidden: false);
-
-    // Create a list of fake FormModels with rich data.
-    final List<FormModel> fakeFormsForDialog = [
-      FormModel(
-        id: 1,
-        title: "Summer Camp Registration",
-        link: "reg-summer-25",
-        createdAt: DateTime.now().subtract(const Duration(days: 3)), // Recent
-        occasionModel: occasionSummer,
-        occasionId: occasionSummer.id,
-      ),
-      FormModel(
-        id: 2,
-        title: "Conference Attendee Info",
-        link: "conf-info-25",
-        createdAt: DateTime.now().subtract(const Duration(days: 20)), // Last month
-        occasionModel: occasionConference,
-        occasionId: occasionConference.id,
-      ),
-      FormModel(
-        id: 4,
-        title: "Winter Retreat Signup",
-        link: "signup-winter-24",
-        createdAt: DateTime.now().subtract(const Duration(days: 90)), // Older
-        occasionModel: occasionWinter,
-        occasionId: occasionWinter.id,
-      ),
-      FormModel(
-        id: 5,
-        title: "Archived Form (No Date)",
-        link: "archived-form",
-        createdAt: null, // To test the "Other" group
-        occasionModel: occasionWinter,
-        occasionId: occasionWinter.id,
-      ),
-      FormModel(
-        id: 3,
-        title: "Feedback Form - Summer",
-        link: "feedback-summer-25",
-        createdAt: DateTime.now().subtract(const Duration(days: 6)), // Recent
-        occasionModel: occasionSummer,
-        occasionId: occasionSummer.id,
-      ),
-    ];
-    // --- END OF FAKE DATA ---
+    // Call the NEW function here to get all forms for the dialog.
+    final List<FormModel> formsForDialog =
+    await DbForms.getAllFormsForOccasionOrUnit();
 
     final result = await showDialog<dynamic>(
       context: context,
       builder: (BuildContext dialogContext) {
         return _CreateOrCopyFormDialog(
-          // Use the generated fake data instead of the live `_forms` list.
-          existingForms: fakeFormsForDialog,
+          // Pass the comprehensive list to the dialog.
+          existingForms: formsForDialog,
         );
       },
     );
@@ -131,10 +85,8 @@ class _FormsTabState extends State<FormsTab> {
     if (result == null) return; // Dialog dismissed
 
     if (result is FormModel) {
-      // A real implementation would proceed to copy the selected form.
       await _handleCreateCopy(result);
     } else if (result == 'CREATE_NEW') {
-      // The user chose to create a new blank form.
       if (!mounted) return;
       await FormCreationHelper.showCreateFormDialog(
         context,
@@ -147,12 +99,19 @@ class _FormsTabState extends State<FormsTab> {
     }
   }
 
-  Future<void> _handleCreateCopy(FormModel form) async {
+  Future<void> _handleCreateCopy(FormModel formToCopy) async {
+    if (occasionLink == null) return;
     try {
-      await DbForms.duplicateForm(form.id!);
+      // Call the new, more powerful duplication function
+      await DbForms.duplicateFormToOccasion(
+        sourceFormId: formToCopy.id!,
+        targetOccasionLink: occasionLink!,
+      );
+
       if (!mounted) return;
-      ToastHelper.Show(context, FeaturesStrings.duplicateSuccess, severity: ToastSeverity.Ok);
-      await loadData();
+      ToastHelper.Show(context, FormStrings.duplicateSuccess, severity: ToastSeverity.Ok);
+      _navigateToFormsHome();
+      await loadData(); // Refresh the list to show the new copy
     } catch (e) {
       if (!mounted) return;
       ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""), severity: ToastSeverity.NotOk);
@@ -188,7 +147,7 @@ class _FormsTabState extends State<FormsTab> {
                 Icon(Icons.article_outlined, size: 20, color: onAppBarColor),
                 const SizedBox(width: 6),
                 Text(
-                  FeaturesStrings.formsTitle,
+                  FormStrings.formsTitle,
                   style: TextStyle(fontSize: 16, color: onAppBarColor, fontWeight: FontWeight.normal),
                 ),
               ],
@@ -272,7 +231,7 @@ class _FormsTabState extends State<FormsTab> {
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 380,
-                mainAxisExtent: 110,
+                mainAxisExtent: 125,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
               ),
@@ -308,7 +267,7 @@ class _FormsTabState extends State<FormsTab> {
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
             child: ElevatedButton.icon(
               icon: const Icon(Icons.add, size: 18),
-              label: Text(FeaturesStrings.createNewForm),
+              label: Text(FormStrings.createNewForm),
               onPressed: _handleCreateNew,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
@@ -402,7 +361,7 @@ class FormCard extends StatelessWidget {
                 itemBuilder: (BuildContext context) => [
                   PopupMenuItem(
                     value: "create_copy",
-                    child: Text(FeaturesStrings.createCopy),
+                    child: Text(FormStrings.createCopy),
                   ),
                 ],
               ),
@@ -430,7 +389,7 @@ class FormCard extends StatelessWidget {
                             spacing: 12.0,
                             runSpacing: 4.0,
                             children: [
-                              _buildStat(context, icon: Icons.people_alt_outlined, value: form.stats!.total.toString(), tooltip: FeaturesStrings.responses),
+                              _buildStat(context, icon: Icons.chat_bubble, value: form.stats!.total.toString(), tooltip: FormStrings.responses),
                               _buildStat(context, icon: Icons.check_circle_outline, value: form.stats!.paidOrSent.toString(), tooltip: OrdersStrings.gridPaidOrSent),
                               _buildStat(context, icon: Icons.shopping_cart_outlined, value: form.stats!.ordered.toString(), tooltip: OrdersStrings.gridOrdered),
                               _buildStat(context, icon: Icons.cancel_outlined, value: form.stats!.storno.toString(), tooltip: OrdersStrings.gridCancelled),
@@ -451,7 +410,7 @@ class FormCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          form.isOpen == true ? FeaturesStrings.statusOpen : FeaturesStrings.statusClosed,
+                          form.isOpen == true ? FormStrings.statusOpen : FormStrings.statusClosed,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: form.isOpen == true
                                 ? ThemeConfig.greenColor(context)
@@ -512,49 +471,69 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
       final normalizedQuery = Utilities.removeDiacritics(query.toLowerCase());
       tempFilteredForms = widget.existingForms.where((form) {
         final normalizedTitle = Utilities.removeDiacritics((form.title ?? "").toLowerCase());
-        return normalizedTitle.contains(normalizedQuery);
+        final normalizedOccasionTitle = Utilities.removeDiacritics((form.occasionModel?.title ?? "").toLowerCase());
+        return normalizedTitle.contains(normalizedQuery) || normalizedOccasionTitle.contains(normalizedQuery);
       }).toList();
     }
 
-    tempFilteredForms.sort((a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+    // Sort by occasion start time descending (newest first)
+    tempFilteredForms.sort((a, b) {
+      final dateA = a.occasionModel?.startTime ?? DateTime(0);
+      final dateB = b.occasionModel?.startTime ?? DateTime(0);
+      return dateB.compareTo(dateA);
+    });
 
     final List<dynamic> newGroupedList = [];
     final now = DateTime.now();
-    final List<FormModel> recent = [];
-    final List<FormModel> lastMonth = [];
-    final List<FormModel> older = [];
-    final List<FormModel> dateless = [];
+    final List<FormModel> currentOccasions = [];
+    final List<FormModel> upcomingOccasions = [];
+    final List<FormModel> pastOccasions = [];
+    final List<FormModel> datelessOccasions = [];
 
     for (var form in tempFilteredForms) {
-      if (form.createdAt == null) {
-        dateless.add(form);
+      final occasion = form.occasionModel;
+      if (occasion?.startTime == null || occasion?.endTime == null) {
+        datelessOccasions.add(form);
         continue;
       }
-      final difference = now.difference(form.createdAt!);
-      if (difference.inDays <= 7) {
-        recent.add(form);
-      } else if (difference.inDays <= 30) {
-        lastMonth.add(form);
+
+      if (occasion!.startTime!.isBefore(now) && occasion.endTime!.isAfter(now)) {
+        currentOccasions.add(form);
+      } else if (occasion.startTime!.isAfter(now)) {
+        upcomingOccasions.add(form);
       } else {
-        older.add(form);
+        pastOccasions.add(form);
       }
     }
 
-    if (recent.isNotEmpty) {
-      newGroupedList.add("Recent");
-      newGroupedList.addAll(recent);
+    if (currentOccasions.isNotEmpty) {
+      newGroupedList.add(FormStrings.groupHappeningNow);
+      newGroupedList.addAll(currentOccasions);
     }
-    if (lastMonth.isNotEmpty) {
-      newGroupedList.add("Last 30 days");
-      newGroupedList.addAll(lastMonth);
+    if (upcomingOccasions.isNotEmpty) {
+      newGroupedList.add(FormStrings.groupUpcoming);
+      newGroupedList.addAll(upcomingOccasions);
     }
-    if (older.isNotEmpty) {
-      newGroupedList.add("Older");
-      newGroupedList.addAll(older);
+
+    // Group past occasions by year
+    if (pastOccasions.isNotEmpty) {
+      final Map<int, List<FormModel>> pastByYear = {};
+      for (final form in pastOccasions) {
+        final year = form.occasionModel!.startTime!.year;
+        (pastByYear[year] ??= []).add(form);
+      }
+
+      final sortedYears = pastByYear.keys.toList()..sort((a, b) => b.compareTo(a));
+
+      for (final year in sortedYears) {
+        newGroupedList.add(year.toString());
+        newGroupedList.addAll(pastByYear[year]!);
+      }
     }
-    if (dateless.isNotEmpty) {
-      newGroupedList.add("Other");
-      newGroupedList.addAll(dateless);
+
+    if (datelessOccasions.isNotEmpty) {
+      newGroupedList.add(FormStrings.groupOther);
+      newGroupedList.addAll(datelessOccasions);
     }
 
     setState(() {
@@ -563,45 +542,58 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Add a Form"),
+      title: Text(FormStrings.createFormTitle),
       contentPadding: EdgeInsets.zero,
       content: SizedBox(
         width: 450,
         height: 500,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // --- Part 1: Create New ---
+            ListTile(
+              contentPadding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+              leading: const Icon(Icons.add_circle_outline),
+              title: Text(FormStrings.createNewBlankForm),
+              onTap: () => Navigator.of(context).pop('CREATE_NEW'),
+            ),
+            const Divider(height: 1),
+
+            // --- Part 2: Copy Existing ---
+            // Header for the copy action
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+              child: Text(
+                FormStrings.orCreateFromCopy,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            // Search Box now in the second part
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
               child: TextField(
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: "Search existing forms to copy...",
+                  hintText: FormStrings.searchFormsToCopy,
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
                   isDense: true,
                 ),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.add_circle_outline),
-              title: const Text("Create a new blank form"),
-              onTap: () => Navigator.of(context).pop('CREATE_NEW'),
-            ),
-            const Divider(height: 1),
             Expanded(
               child: ListView.builder(
+                padding: const EdgeInsets.only(top: 0),
                 shrinkWrap: true,
                 itemCount: _groupedAndFilteredForms.length,
                 itemBuilder: (context, index) {
                   final item = _groupedAndFilteredForms[index];
                   if (item is String) {
-                    // Renders group headers like "Recent", "Older", etc.
                     return Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0),
                       child: Text(
                         item,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -611,39 +603,48 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
                       ),
                     );
                   } else if (item is FormModel) {
-                    // Renders the enhanced list item for a form.
                     final form = item;
-                    final occasionTitle = form.occasionModel?.title;
-                    final dateText = form.createdAt != null
-                        ? 'Created: ${DateFormat('d. M. yyyy').format(form.createdAt!)}'
-                        : 'No creation date';
+                    final occasion = form.occasionModel;
+                    final stats = form.stats;
+                    final totalResponses = stats?.total ?? 0;
+                    final theme = Theme.of(context);
+                    final hintColor = theme.hintColor;
+
+                    final currentLocale = context.savedLocale.toString();
+
+                    String subtitleText = occasion?.title ?? '---';
+                    if (occasion?.startTime != null) {
+                      final formattedDate = DateFormat.yMd(currentLocale).format(occasion!.startTime!);
+                      subtitleText = '$subtitleText ($formattedDate)';
+                    }
 
                     return ListTile(
-                      leading: const Icon(Icons.article_outlined),
-                      title: Text(form.toString()),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (occasionTitle != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
-                              child: Text(
-                                'Occasion: $occasionTitle',
-                                style: Theme.of(context).textTheme.bodySmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          Text(
-                            dateText,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).hintColor,
-                            ),
-                          ),
-                        ],
+                      leading: const Icon(Icons.article_outlined, size: 24),
+                      title: Text(
+                        form.toString(),
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      isThreeLine: occasionTitle != null,
+                      subtitle: Text(
+                        subtitleText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: Tooltip(
+                        message: FormStrings.numberOfResponsesTooltip(totalResponses),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.chat_bubble, size: 16, color: hintColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              totalResponses.toString(),
+                              style: theme.textTheme.bodyMedium?.copyWith(color: hintColor),
+                            ),
+                          ],
+                        ),
+                      ),
                       onTap: () => Navigator.of(context).pop(form),
                     );
                   }
@@ -657,7 +658,7 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text("Cancel"),
+          child: Text("Storno"),
         ),
       ],
     );

@@ -16,6 +16,8 @@ import 'package:fstapp/theme_config.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/widgets/html_view.dart';
 
+import '../form_strings.dart';
+
 class FormSettingsContent extends StatefulWidget {
   final String? formLink;
   final VoidCallback? onActionCompleted;
@@ -72,7 +74,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
     if (link == null || link.isEmpty) return "";
     final fullUrl = "${AppConfig.webLink}/#/form/$link";
     return '''
-       <p>${FeaturesStrings.formAvailableAt}:<br>
+       <p>${FormStrings.formAvailableAt}:<br>
        <a href="$fullUrl">$fullUrl</a></p>
      ''';
   }
@@ -114,9 +116,9 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
   void _validateLink(String? value) {
     setState(() {
       if (value == null || value.isEmpty) {
-        _linkError = FeaturesStrings.validationLinkRequired;
+        _linkError = FormStrings.validationLinkRequired;
       } else if (!Utilities.isValidUrl(value)) {
-        _linkError = FeaturesStrings.validationLinkInvalidChars;
+        _linkError = FormStrings.validationLinkInvalidChars;
       } else {
         _linkError = null;
       }
@@ -126,7 +128,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
   Future<void> _saveChanges(BuildContext currentContext) async {
     _validateLink(_linkController.text);
     if (!_formKey.currentState!.validate() || _linkError != null) {
-      ToastHelper.Show(currentContext, FeaturesStrings.errorFixBeforeSave, severity: ToastSeverity.NotOk);
+      ToastHelper.Show(currentContext, FormStrings.errorFixBeforeSave, severity: ToastSeverity.NotOk);
       return;
     }
     if (_form == null) return;
@@ -189,8 +191,8 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
       builder: (context) => AlertDialog(
         insetPadding: const EdgeInsets.all(16.0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        title: Text(FeaturesStrings.deleteFormTitle),
-        content: Text(FeaturesStrings.deleteFormContent),
+        title: Text(FormStrings.deleteFormTitle),
+        content: Text(FormStrings.deleteFormContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -218,7 +220,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
           return _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _form == null
-              ? Center(child: Text(FeaturesStrings.formNotFound))
+              ? Center(child: Text(FormStrings.formNotFound))
               : Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
@@ -231,13 +233,13 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(FeaturesStrings.formSettingsTitle, style: Theme.of(innerContext).textTheme.headlineSmall),
+                        Text(FormStrings.formSettingsTitle, style: Theme.of(innerContext).textTheme.headlineSmall),
                         const SizedBox(height: 24),
                         SwitchListTile(
-                          title: Text(FeaturesStrings.labelEnableReminders),
+                          title: Text(FormStrings.labelEnableReminders),
                           subtitle: Text(!isReminderFeatureEnabled
-                              ? FeaturesStrings.subtitleRemindersDisabled
-                              : FeaturesStrings.subtitleEnableReminders),
+                              ? FormStrings.subtitleRemindersDisabled
+                              : FormStrings.subtitleEnableReminders),
                           value: _isReminderEnabled,
                           onChanged: isReminderFeatureEnabled
                               ? (value) {
@@ -252,7 +254,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                         TextFormField(
                           controller: _titleController,
                           decoration: InputDecoration(
-                            labelText: FeaturesStrings.labelFormTitle,
+                            labelText: FormStrings.labelFormTitle,
                             border: const OutlineInputBorder(),
                           ),
                         ),
@@ -260,7 +262,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                         TextFormField(
                           controller: _linkController,
                           decoration: InputDecoration(
-                            labelText: FeaturesStrings.labelFormLink,
+                            labelText: FormStrings.labelFormLink,
                             border: const OutlineInputBorder(),
                             errorText: _linkError,
                           ),
@@ -285,9 +287,9 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                         TextFormField(
                           controller: _deadlineDaysController,
                           decoration: InputDecoration(
-                            labelText: FeaturesStrings.labelDeadlineDays,
+                            labelText: FormStrings.labelDeadlineDays,
                             border: const OutlineInputBorder(),
-                            helperText: FeaturesStrings.helperDeadlineDays,
+                            helperText: FormStrings.helperDeadlineDays,
                             helperMaxLines: 5,
                           ),
                           keyboardType: TextInputType.number,
@@ -297,8 +299,8 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                         ),
                         const SizedBox(height: 24),
                         SwitchListTile(
-                          title: Text(FeaturesStrings.labelCardDesign),
-                          subtitle: Text(FeaturesStrings.subtitleCardDesign),
+                          title: Text(FormStrings.labelCardDesign),
+                          subtitle: Text(FormStrings.subtitleCardDesign),
                           value: _isCardDesign,
                           onChanged: RightsService.canEditOccasion()
                               ? (value) {
@@ -315,7 +317,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                             child: TextButton(
                               onPressed: () => _confirmDelete(innerContext),
                               child: Text(
-                                FeaturesStrings.deleteFormTitle,
+                                FormStrings.deleteFormTitle,
                                 style: TextStyle(color: ThemeConfig.redColor(innerContext)),
                               ),
                             ),
