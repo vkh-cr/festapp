@@ -127,7 +127,6 @@ flutter:
       fonts:
         - asset: fonts/Cerebri-Sans-Regular.ttf
         - asset: fonts/Cerebri-Sans-Bold.ttf
-        - asset: fonts/Cerebri-Sans-Heavy.ttf
   assets:
     - assets/icons/
     - assets/translations/
