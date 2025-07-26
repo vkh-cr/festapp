@@ -32,9 +32,11 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
   void initState() {
     super.initState();
     AdaptiveTheme.getThemeMode().then((mode) {
-      setState(() {
-        _currentThemeMode = mode;
-      });
+      if (mounted) {
+        setState(() {
+          _currentThemeMode = mode;
+        });
+      }
     });
   }
 
@@ -211,6 +213,12 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               final String fullName = user?.name ?? "User".tr();
               final String surname = user?.surname ?? "";
               final String email = user?.email ?? "";
+
+              // Determine if the settings section has any content to show
+              final bool hasLanguageSettings = AppConfig.availableLanguages().length > 1;
+              final bool hasThemeSettings = ThemeConfig.isDarkModeEnabled;
+              final bool showSettingsSection = hasLanguageSettings || hasThemeSettings;
+
               return _buildPopoverWrapper(
                 Column(
                   mainAxisSize: MainAxisSize.min,
@@ -262,10 +270,16 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    const Divider(),
-                    const SizedBox(height: 16),
-                    _buildSettingsContentInner(localSetState),
-                    const SizedBox(height: 16),
+
+                    // Conditionally render the settings block including its top divider
+                    if (showSettingsSection) ...[
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      _buildSettingsContentInner(localSetState),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // This divider separates the content above from the sign out button
                     const Divider(),
                     ListTile(
                       leading: Icon(

@@ -1,11 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
-import 'package:fstapp/pages/form/pages/form_editor_content.dart';
-import 'package:fstapp/pages/form/pages/form_responses_content.dart';
-import 'package:fstapp/pages/form/pages/form_settings_content.dart';
+import 'package:fstapp/components/forms/views/form_editor_content.dart';
+import 'package:fstapp/components/forms/views/form_responses_content.dart';
+import 'package:fstapp/components/forms/views/form_settings_content.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/features/features_strings.dart';
+
+import '../form_strings.dart';
 
 class FormTab extends StatefulWidget {
   final String formLink;
@@ -48,9 +50,9 @@ class _FormTabState extends State<FormTab> with SingleTickerProviderStateMixin {
             controller: _tabController,
             isScrollable: true,
             tabs: [
-              DataGridHelper.buildTab(context, Icons.data_object, FeaturesStrings.tabForm),
+              DataGridHelper.buildTab(context, Icons.data_object, FormStrings.tabForm),
               DataGridHelper.buildTab(context, Icons.settings, "Settings".tr()),
-              DataGridHelper.buildTab(context, Icons.list, FeaturesStrings.tabResponses),
+              DataGridHelper.buildTab(context, Icons.list, FormStrings.tabResponses),
             ],
           ),
         ),

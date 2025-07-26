@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/resource_model.dart';
-import 'package:fstapp/components/inventory/models/resource_slot_model.dart';
 import 'package:fstapp/components/inventory/models/spot_management_bundle.dart';
 import 'package:fstapp/components/inventory/models/spot_management_models_and_constants.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
@@ -25,6 +24,22 @@ class SpotManagementView extends StatefulWidget {
   @override
   SpotManagementViewState createState() => SpotManagementViewState();
 }
+
+class _SpotIdentifier {
+  final int id;
+  _SpotIdentifier(this.id);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is _SpotIdentifier &&
+              runtimeType == other.runtimeType &&
+              id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
 
 class SpotManagementViewState extends State<SpotManagementView> {
   SingleDataGridController<SpotMatrixRow>? _controller;
@@ -128,69 +143,141 @@ class SpotManagementViewState extends State<SpotManagementView> {
     }
   }
 
-  /// Generates the list of [SpotMatrixRow] models for the data grid.
-  /// This function remains unchanged.
-  List<SpotMatrixRow> _generateMatrixRows(SpotManagementBundle bundle) {
-    final allSpotsMap = { for (var spot in bundle.spots) spot.id!: spot };
-    final assignedSpotsBySlotLookup = <String, SpotModel>{};
-    final assignedSpotsByResourceLookup = <int, Map<int, List<SpotModel>>>{};
-    for (final spot in bundle.spots) {
-      if (spot.resourceId != null && spot.inventoryContextId != null) {
-        if (spot.resourceSlotId != null) {
-          final key = 'slot_${spot.resourceSlotId}_context_${spot.inventoryContextId}';
-          assignedSpotsBySlotLookup[key] = spot;
-        } else {
-          assignedSpotsByResourceLookup.putIfAbsent(spot.resourceId!, () => {});
-          assignedSpotsByResourceLookup[spot.resourceId!]!.putIfAbsent(spot.inventoryContextId!, () => []);
-          assignedSpotsByResourceLookup[spot.resourceId!]![spot.inventoryContextId!]!.add(spot);
-        }
+  // UPDATED: Now groups by the more reliable order.id
+  Map<Object, List<SpotModel>> _groupSpotsByCustomer(List<SpotModel> spots) {
+    final map = <Object, List<SpotModel>>{};
+    for (final spot in spots) {
+      final Object customerId = spot.order?.id ?? _SpotIdentifier(spot.id!);
+      map.putIfAbsent(customerId, () => []).add(spot);
+    }
+    return map;
+  }
+
+  Map<int, List<SpotModel>> _groupSpotsByContext(List<SpotModel> spots) {
+    final map = <int, List<SpotModel>>{};
+    for (final spot in spots) {
+      if (spot.inventoryContextId != null) {
+        map.putIfAbsent(spot.inventoryContextId!, () => []).add(spot);
       }
     }
+    return map;
+  }
 
+  /// Generates the list of [SpotMatrixRow] models for the data grid using a
+  /// single, unified "best fit" algorithm.
+  List<SpotMatrixRow> _generateMatrixRows(SpotManagementBundle bundle) {
+    final allSpotsMap = { for (var spot in bundle.spots) spot.id!: spot };
     bundle.resources.sort((a, b) => Utilities.naturalCompare(a.title ?? '', b.title ?? ''));
 
     final List<SpotMatrixRow> generatedRows = [];
+    final int numContexts = bundle.inventoryContexts.length;
+
     for (final ResourceModel resource in bundle.resources) {
+      // 1. SETUP (Unchanged)
+      final availableSpots = bundle.spots.where((s) => s.resourceId == resource.id).toList();
       final slotsForResource = bundle.resourceSlots.where((s) => s.resourceId == resource.id).toList();
+      final int rowCount = slotsForResource.isNotEmpty ? slotsForResource.length : ((resource.capacity ?? 1) > 0 ? resource.capacity! : 1);
+      final List<SpotMatrixRow> rowsForThisResource = [];
 
-      if (slotsForResource.isNotEmpty) {
-        for (final ResourceSlotModel slot in slotsForResource) {
-          final initialSpotsInRow = <int, SpotModel?>{};
-          for (final context in bundle.inventoryContexts) {
-            final key = 'slot_${slot.id}_context_${context.id}';
-            initialSpotsInRow[context.id!] = assignedSpotsBySlotLookup[key];
+      // 2. BUILD ALL ROWS WITH SPOTS (Now using typed IDs)
+      for (int level = numContexts; level >= 1; level--) {
+        if (rowsForThisResource.length >= rowCount) break;
+
+        bool wasRowBuiltInPass;
+        do {
+          wasRowBuiltInPass = false;
+          if (rowsForThisResource.length >= rowCount || availableSpots.isEmpty) break;
+
+          final spotsByCustomer = _groupSpotsByCustomer(availableSpots);
+          Object? candidateCustomer; // Key is now Object?
+
+          for (final customerId in spotsByCustomer.keys) {
+            final contextsCovered = spotsByCustomer[customerId]!.map((s) => s.inventoryContextId).toSet();
+            if (contextsCovered.length >= level) {
+              candidateCustomer = customerId;
+              break;
+            }
           }
 
-          generatedRows.add(SpotMatrixRow(
-            rowReference: SpotManagementRowReference(
-              resource: resource,
-              slot: slot,
-              initialSpotsInRow: initialSpotsInRow,
-              allSpotsMap: allSpotsMap,
-            ),
-          ));
-        }
-      } else {
-        final int capacity = (resource.capacity ?? 1) > 0 ? resource.capacity! : 1;
-        final spotsForThisResource = assignedSpotsByResourceLookup[resource.id] ?? {};
+          if (candidateCustomer != null) {
+            final spotsForCandidate = _groupSpotsByCustomer(availableSpots)[candidateCustomer]!;
+            final candidateSpotsByContext = _groupSpotsByContext(spotsForCandidate);
 
-        for (int i = 0; i < capacity; i++) {
-          final initialSpotsInRow = <int, SpotModel?>{};
-          for (final context in bundle.inventoryContexts) {
-            final spotsInCell = spotsForThisResource[context.id] ?? [];
-            initialSpotsInRow[context.id!] = (spotsInCell.length > i) ? spotsInCell[i] : null;
+            int numRowsPossible = -1;
+            candidateSpotsByContext.forEach((_, spotsInContext) {
+              if (numRowsPossible == -1 || spotsInContext.length < numRowsPossible) {
+                numRowsPossible = spotsInContext.length;
+              }
+            });
+
+            if (numRowsPossible > 0) {
+              for (int i = 0; i < numRowsPossible; i++) {
+                if (rowsForThisResource.length >= rowCount) break;
+
+                final initialSpotsInRow = <int, SpotModel?>{};
+                for (final contextId in candidateSpotsByContext.keys) {
+                  // Find the spot using the typed Object key
+                  final spotToUse = availableSpots.firstWhere((s) {
+                    final sId = s.order?.id ?? _SpotIdentifier(s.id!);
+                    return s.inventoryContextId == contextId && sId == candidateCustomer;
+                  });
+                  initialSpotsInRow[contextId] = spotToUse;
+                  availableSpots.remove(spotToUse);
+                }
+
+                bundle.inventoryContexts.forEach((context) {
+                  initialSpotsInRow.putIfAbsent(context.id!, () => null);
+                });
+
+                rowsForThisResource.add(SpotMatrixRow(
+                  rowReference: SpotManagementRowReference(
+                      resource: resource, initialSpotsInRow: initialSpotsInRow, allSpotsMap: allSpotsMap),
+                ));
+              }
+              wasRowBuiltInPass = true;
+            }
           }
+        } while (wasRowBuiltInPass);
+      }
 
-          generatedRows.add(SpotMatrixRow(
-            rowReference: SpotManagementRowReference(
-              resource: resource,
-              implicitSlotIndex: i + 1,
-              initialSpotsInRow: initialSpotsInRow,
-              allSpotsMap: allSpotsMap,
-            ),
-          ));
+      // The rest of the logic (steps 3, 4, 5) remains unchanged as it doesn't
+      // depend on the customer ID type.
+
+      // 3. BACK-FILL
+      if (availableSpots.isNotEmpty) {
+        final remainingByContext = _groupSpotsByContext(availableSpots);
+        for (final row in rowsForThisResource) {
+          final rowRef = row.rowReference;
+          final contextIds = rowRef.currentSpotsInRow.keys.toList();
+          for (final contextId in contextIds) {
+            if (rowRef.currentSpotsInRow[contextId] == null) {
+              if (remainingByContext[contextId]?.isNotEmpty ?? false) {
+                rowRef.currentSpotsInRow[contextId] = remainingByContext[contextId]!.removeAt(0);
+              }
+            }
+          }
         }
       }
+
+      // 4. ADD EMPTY ROWS
+      while (rowsForThisResource.length < rowCount) {
+        rowsForThisResource.add(SpotMatrixRow(
+          rowReference: SpotManagementRowReference(
+              resource: resource, initialSpotsInRow: { for (var c in bundle.inventoryContexts) c.id!: null }, allSpotsMap: allSpotsMap),
+        ));
+      }
+
+      // 5. RE-NUMBER
+      for (int i = 0; i < rowsForThisResource.length; i++) {
+        final rowRef = rowsForThisResource[i].rowReference;
+        if (slotsForResource.isNotEmpty) {
+          if (i < slotsForResource.length) rowRef.slot = slotsForResource[i];
+        } else {
+          rowRef.implicitSlotIndex = i + 1;
+        }
+      }
+
+      generatedRows.addAll(rowsForThisResource);
     }
     return generatedRows;
   }
