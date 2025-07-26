@@ -8,6 +8,6 @@ A=a.updateHolder(c[157],A)
 A.JS.prototype={
 J(){return"FontStyle."+this.b}}
 var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
-y(A.JS,B.fu)})()};
+y(A.JS,B.fv)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_79",e:"endPart",h:b})})($__dart_deferred_initializers__,"aTyc7o3hsGRrXwk1dk4hHThodqk=");
+a.eventLog.push({p:"main.dart.js_79",e:"endPart",h:b})})($__dart_deferred_initializers__,"dGooRYhzWbehHivOw/Tf51xGdFQ=");
