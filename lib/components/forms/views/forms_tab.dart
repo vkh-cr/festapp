@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/data_models/form_model.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -14,7 +13,6 @@ import 'package:intl/intl.dart';
 import '../form_strings.dart';
 import 'form_creation_helper.dart';
 import 'form_tab.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 
 @RoutePage()
 class FormsTab extends StatefulWidget {
@@ -233,7 +231,7 @@ class _FormsTabState extends State<FormsTab> {
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 380,
-                mainAxisExtent: 125, // Increased height to accommodate occasion title
+                mainAxisExtent: 125,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
               ),
@@ -252,21 +250,6 @@ class _FormsTabState extends State<FormsTab> {
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Text(
-          FormStrings.noFormsForEventPrompt(FormStrings.createNewForm),
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).hintColor
-          ),
-        ),
       ),
     );
   }
@@ -300,16 +283,14 @@ class _FormsTabState extends State<FormsTab> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _selectedForm != null
-          ? FormTab(
+          : _selectedForm == null
+          ? _buildFormsGrid()
+          : FormTab(
         key: ValueKey(_selectedForm!.id),
         formLink: _selectedForm!.link!,
         onActionCompleted: _handleActionAndRefresh,
         onDataUpdated: loadData,
-      )
-          : _forms.isEmpty
-          ? _buildEmptyState()
-          : _buildFormsGrid(),
+      ),
     );
   }
 }
