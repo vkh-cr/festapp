@@ -5,10 +5,11 @@ export interface FakturoidConfig {
   client_secret: string;
   slug: string;
   subject_id: number;
+  note?: string;
 }
 
 export async function useFakturoid(
-  { client_id, client_secret, slug, subject_id }: FakturoidConfig,
+  { client_id, client_secret, slug, subject_id, note }: FakturoidConfig,
   order: any,
   unitName: string,
   attachments: Array<{
@@ -46,7 +47,7 @@ export async function useFakturoid(
   const today = new Date().toISOString().slice(0, 10);
   const total = Number(order.payment_info.amount).toFixed(2);
 
-  const createBody = {
+  const createBody: any = {
     document_type: "proforma",
     subject_id,
     issued_on: today,
@@ -58,12 +59,18 @@ export async function useFakturoid(
       {
         name: unitName,
         quantity: 1,
-        unit_name: unitName,
+        // Enforce a maximum of 10 characters for unit_name
+        unit_name: unitName.slice(0, 10),
         unit_price: total,
         vat_rate: 0,
       },
     ],
   };
+
+  // Add the note from the config to the payload if it exists
+  if (note) {
+    createBody.note = note;
+  }
 
   const invRes = await fetch(
     `https://app.fakturoid.cz/api/v3/accounts/${slug}/invoices.json`,

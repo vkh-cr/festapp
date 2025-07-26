@@ -122,9 +122,10 @@ Deno.serve(async (req) => {
           client_secret: fakturoidSvc.data.client_secret,
           slug: fakturoidSvc.data.slug,
           subject_id: fakturoidSvc.data.subject_id,
+          note: fakturoidSvc.data.note,
         },
         ticketOrder.order,
-        ticketOrder.order.occasion.occasion_title,
+        ticketOrder.order.occasion.title,
         attachments,
       );
     } else {
@@ -134,10 +135,10 @@ Deno.serve(async (req) => {
         const qr = await generateQrCode(
           paymentInfo,
           ticketOrder.order.data,
-          occasion.occasion_title,
+          occasion.title,
         );
         attachments.push({
-          filename: `qr-payment.${occasion.occasion_title}.png`,
+          filename: `qr-payment.${occasion.title}.png`,
           content: qr,
           contentType: "image/png",
           encoding: "binary",
@@ -154,6 +155,7 @@ Deno.serve(async (req) => {
     const paymentInfo = ticketOrder.order.payment_info;
     const context = {
       organization: occasion.organization,
+      unit: occasion.unit,
       occasion: occasion.id,
     };
     const { template, wrapper } = await getEmailTemplateAndWrapper(
@@ -178,7 +180,7 @@ Deno.serve(async (req) => {
     }
 
     const subs = {
-      occasionTitle: occasion.occasion_title,
+      occasionTitle: occasion.title,
       balanceReasoning: balanceReasoning,
       price: paymentInfo.amount,
       currencyCode: paymentInfo.currency_code,
@@ -199,7 +201,7 @@ Deno.serve(async (req) => {
       subject: template.subject,
       content: template.html,
       subs,
-      from: `${occasion.occasion_title} | Festapp <${_DEFAULT_EMAIL}>`,
+      from: `${occasion.title} | Festapp <${_DEFAULT_EMAIL}>`,
       attachments,
       wrapper: wrapper?.html ?? null,
     });
