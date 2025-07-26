@@ -4,7 +4,7 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/pages/form/pages/reservation_page.dart';
+import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/pages/occasion/check_page.dart';
 import 'package:fstapp/pages/occasion/event_edit_page.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
@@ -27,7 +27,7 @@ import 'package:fstapp/pages/user/signup_page.dart';
 import 'package:fstapp/pages/occasion/song_page.dart';
 import 'package:fstapp/pages/occasion/timetable_page.dart';
 import 'package:fstapp/pages/occasion/user_page.dart';
-import 'package:fstapp/pages/form/pages/form_page.dart';
+import 'package:fstapp/components/forms/views/form_page.dart';
 import 'package:fstapp/pages/utility/instance_install_page.dart';
 
 import 'app_router.gr.dart';

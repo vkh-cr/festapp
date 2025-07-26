@@ -1,7 +1,5 @@
-// form_feature.dart
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/features/features_strings.dart';
+import '../forms/form_strings.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
 
@@ -59,18 +57,12 @@ class FormFeature extends Feature {
     return data;
   }
 
-  /// Builds the form UI block.
   @override
   Widget buildFormField(BuildContext context) {
-    // We now return a dedicated StatefulWidget to properly manage the complex state
-    // of the form fields, especially the TextEditingControllers.
     return _FormFeatureEditor(formFeature: this);
   }
 }
 
-/// A dedicated StatefulWidget to manage the editing UI for the FormFeature.
-/// This correctly handles the lifecycle of TextEditingControllers to prevent
-/// UI state issues.
 class _FormFeatureEditor extends StatefulWidget {
   final FormFeature formFeature;
   const _FormFeatureEditor({required this.formFeature});
@@ -124,7 +116,7 @@ class _FormFeatureEditorState extends State<_FormFeatureEditor> {
       children: [
         const Divider(),
         SwitchListTile(
-          title: Text(FeaturesStrings.labelUseExternalForm),
+          title: Text(FormStrings.labelUseExternalForm),
           value: widget.formFeature.formUseExternal ?? false,
           onChanged: (v) {
             setState(() {
@@ -150,8 +142,8 @@ class _FormFeatureEditorState extends State<_FormFeatureEditor> {
                 child: TextFormField(
                   controller: _externalLinkController,
                   decoration: InputDecoration(
-                    labelText: FeaturesStrings.labelReservationLink,
-                    helperText: FeaturesStrings.helperReservationLink,
+                    labelText: FormStrings.labelReservationLink,
+                    helperText: FormStrings.helperReservationLink,
                   ),
                   onSaved: (val) => widget.formFeature.formExternalLink = val,
                 ),
@@ -161,8 +153,8 @@ class _FormFeatureEditorState extends State<_FormFeatureEditor> {
                 child: TextFormField(
                   controller: _externalPriceController,
                   decoration: InputDecoration(
-                    labelText: FeaturesStrings.labelPrice,
-                    helperText: FeaturesStrings.helperPrice,
+                    labelText: FormStrings.labelPrice,
+                    helperText: FormStrings.helperPrice,
                   ),
                   onSaved: (val) => widget.formFeature.formExternalPrice = val,
                 ),
@@ -177,8 +169,8 @@ class _FormFeatureEditorState extends State<_FormFeatureEditor> {
                 child: TextFormField(
                   controller: _deadlineController,
                   decoration: InputDecoration(
-                    labelText: FeaturesStrings.labelDeadlineDuration,
-                    helperText: FeaturesStrings.helperDeadlineDuration,
+                    labelText: FormStrings.labelDeadlineDuration,
+                    helperText: FormStrings.helperDeadlineDuration,
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (_) => setState(() {}), // Rebuild for live validation
@@ -189,8 +181,8 @@ class _FormFeatureEditorState extends State<_FormFeatureEditor> {
                 ),
               ),
               SwitchListTile(
-                title: Text(FeaturesStrings.labelReminderEnabled),
-                subtitle: Text(FeaturesStrings.helperReminderEnabled),
+                title: Text(FormStrings.labelReminderEnabled),
+                subtitle: Text(FormStrings.helperReminderEnabled),
                 value: widget.formFeature.reminderIsEnabled ?? true,
                 onChanged: (v) => setState(() => widget.formFeature.reminderIsEnabled = v),
               ),
@@ -200,10 +192,10 @@ class _FormFeatureEditorState extends State<_FormFeatureEditor> {
                   child: TextFormField(
                     controller: _reminderController,
                     decoration: InputDecoration(
-                      labelText: FeaturesStrings.labelReminderInterval,
-                      helperText: FeaturesStrings.helperReminderInterval,
+                      labelText: FormStrings.labelReminderInterval,
+                      helperText: FormStrings.helperReminderInterval,
                       errorText: (int.tryParse(_reminderController.text) ?? 1) >= (int.tryParse(_deadlineController.text) ?? 7)
-                          ? FeaturesStrings.validationReminderInterval
+                          ? FormStrings.validationReminderInterval
                           : null,
                     ),
                     keyboardType: TextInputType.number,
@@ -218,13 +210,13 @@ class _FormFeatureEditorState extends State<_FormFeatureEditor> {
           ),
         const SizedBox(height: 16),
         ExpansionTile(
-          title: Text(FeaturesStrings.labelAdvancedSettings),
+          title: Text(FormStrings.labelAdvancedSettings),
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: TextFormField(
                 controller: _reserveButtonController,
-                decoration: InputDecoration(labelText: FeaturesStrings.labelReserveButtonTitle),
+                decoration: InputDecoration(labelText: FormStrings.labelReserveButtonTitle),
                 onSaved: (val) => widget.formFeature.reserveButtonTitle = val,
               ),
             ),
