@@ -555,139 +555,123 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
       newGroupedList.addAll(datelessOccasions);
     }
 
-    if (mounted) {
-      setState(() {
-        _groupedAndFilteredForms = newGroupedList;
-      });
-    }
+    setState(() {
+      _groupedAndFilteredForms = newGroupedList;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(FormStrings.createFormTitle),
-      // Set padding for the dialog.
-      contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+      contentPadding: EdgeInsets.zero,
       content: SizedBox(
         width: 450,
-        // The entire content is now a single ListView, which is robust.
-        child: ListView.builder(
-          // We have 4 static widgets before the dynamic list starts.
-          itemCount: 4 + _groupedAndFilteredForms.length,
-          itemBuilder: (context, index) {
+        height: 500,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- Part 1: Create New ---
+            ListTile(
+              contentPadding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+              leading: const Icon(Icons.add_circle_outline),
+              title: Text(FormStrings.createNewBlankForm),
+              onTap: () => Navigator.of(context).pop('CREATE_NEW'),
+            ),
+            const Divider(height: 1),
 
-            // --- Static Header Widgets ---
-            if (index == 0) {
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.add_circle_outline),
-                title: Text(FormStrings.createNewBlankForm),
-                onTap: () => Navigator.of(context).pop('CREATE_NEW'),
-              );
-            }
-            if (index == 1) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Divider(height: 1),
-              );
-            }
-            if (index == 2) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: Text(
-                  FormStrings.orCreateFromCopy,
-                  style: Theme.of(context).textTheme.titleSmall,
+            // --- Part 2: Copy Existing ---
+            // Header for the copy action
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+              child: Text(
+                FormStrings.orCreateFromCopy,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            // Search Box now in the second part
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: FormStrings.searchFormsToCopy,
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                  isDense: true,
                 ),
-              );
-            }
-            if (index == 3) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: FormStrings.searchFormsToCopy,
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0)),
-                    isDense: true,
-                  ),
-                ),
-              );
-            }
-
-            // --- Dynamic List of Forms and Headers ---
-            final dynamicItem = _groupedAndFilteredForms[index - 4];
-
-            // Handle group headers (e.g., "2025", "Upcoming")
-            if (dynamicItem is String) {
-              return Padding(
-                padding: const EdgeInsets.only(top: 12.0, bottom: 4.0),
-                child: Text(
-                  dynamicItem,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              );
-            }
-
-            // Handle the actual form items
-            if (dynamicItem is FormModel) {
-              final form = dynamicItem;
-              final occasion = form.occasionModel;
-              final stats = form.stats;
-              final totalResponses = stats?.total ?? 0;
-              final theme = Theme.of(context);
-              final hintColor = theme.hintColor;
-              final currentLocale = context.savedLocale.toString();
-
-              String subtitleText = occasion?.title ?? '---';
-              if (occasion?.startTime != null) {
-                final formattedDate =
-                DateFormat.yMd(currentLocale).format(occasion!.startTime!);
-                subtitleText = '$subtitleText ($formattedDate)';
-              }
-
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.article_outlined, size: 24),
-                title: Text(
-                  form.toString(),
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(
-                  subtitleText,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: Tooltip(
-                  message:
-                  FormStrings.numberOfResponsesTooltip(totalResponses),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.chat_bubble, size: 16, color: hintColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        totalResponses.toString(),
-                        style: theme.textTheme.bodyMedium
-                            ?.copyWith(color: hintColor),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.only(top: 0),
+                shrinkWrap: true,
+                itemCount: _groupedAndFilteredForms.length,
+                itemBuilder: (context, index) {
+                  final item = _groupedAndFilteredForms[index];
+                  if (item is String) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0),
+                      child: Text(
+                        item,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-                onTap: () => Navigator.of(context).pop(form),
-              );
-            }
+                    );
+                  } else if (item is FormModel) {
+                    final form = item;
+                    final occasion = form.occasionModel;
+                    final stats = form.stats;
+                    final totalResponses = stats?.total ?? 0;
+                    final theme = Theme.of(context);
+                    final hintColor = theme.hintColor;
 
-            return const SizedBox.shrink(); // Failsafe
-          },
+                    final currentLocale = context.savedLocale.toString();
+
+                    String subtitleText = occasion?.title ?? '---';
+                    if (occasion?.startTime != null) {
+                      final formattedDate = DateFormat.yMd(currentLocale).format(occasion!.startTime!);
+                      subtitleText = '$subtitleText ($formattedDate)';
+                    }
+
+                    return ListTile(
+                      leading: const Icon(Icons.article_outlined, size: 24),
+                      title: Text(
+                        form.toString(),
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        subtitleText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: Tooltip(
+                        message: FormStrings.numberOfResponsesTooltip(totalResponses),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.chat_bubble, size: 16, color: hintColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              totalResponses.toString(),
+                              style: theme.textTheme.bodyMedium?.copyWith(color: hintColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                      onTap: () => Navigator.of(context).pop(form),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
         ),
       ),
       actions: [
