@@ -7,7 +7,7 @@ import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/pages/form/pages/form_page.dart';
+import 'package:fstapp/components/forms/views/form_page.dart';
 import 'package:fstapp/services/launch_url_service.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';

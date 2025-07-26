@@ -5,11 +5,11 @@ import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
-import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 
-import '../pages/form/models/id_document_data.dart';
+import '../components/forms/models/id_document_data.dart';
 
 class FormResponseModel extends ITrinaRowModel {
   @override

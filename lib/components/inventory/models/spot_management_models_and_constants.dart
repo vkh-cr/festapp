@@ -6,8 +6,8 @@ import 'package:fstapp/components/eshop/models/spot_model.dart';
 /// This is passed in a single hidden column to simplify data access in renderers and dialogs.
 class SpotManagementRowReference {
   final ResourceModel resource;
-  final ResourceSlotModel? slot;
-  final int? implicitSlotIndex;
+  ResourceSlotModel? slot;
+  int? implicitSlotIndex;
   /// The original state of spots in the row when the data was loaded. Used for comparison during updates.
   final Map<int, SpotModel?> initialSpotsInRow;
   /// The complete map of all available spots, used for lookups in dialogs.
