@@ -256,6 +256,21 @@ class _FormsTabState extends State<FormsTab> {
     );
   }
 
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Text(
+          FormStrings.noFormsForEventPrompt(FormStrings.createNewForm),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).hintColor
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -285,14 +300,16 @@ class _FormsTabState extends State<FormsTab> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _selectedForm == null
-          ? _buildFormsGrid()
-          : FormTab(
+          : _selectedForm != null
+          ? FormTab(
         key: ValueKey(_selectedForm!.id),
         formLink: _selectedForm!.link!,
         onActionCompleted: _handleActionAndRefresh,
         onDataUpdated: loadData,
-      ),
+      )
+          : _forms.isEmpty
+          ? _buildEmptyState()
+          : _buildFormsGrid(),
     );
   }
 }
