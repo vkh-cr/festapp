@@ -38,9 +38,7 @@ class FormStrings {
 
 // --- FormsTab (Main Grid View) ---
   static String get formsTitle => 'FormsFeature.formsTitle'.tr(); // "Forms"
-  static String get createNewForm => 'FormsFeature.createNewForm'.tr(); // "Create/Copy Form"
-  // --- There are no forms for this event. Click '{createNew}' to add one.
-  static String noFormsForEventPrompt(String createNew) => 'FormsFeature.noFormsForEventPrompt'.tr(namedArgs: {'createNew': createNew});
+  static String get createNewForm => 'FormsFeature.createNewForm'.tr(); // "Create New Form"
   static String get createCopy => 'FormsFeature.createCopy'.tr(); // "Create Copy"
   static String get statusOpen => 'FormsFeature.statusOpen'.tr(); // "Form is Open"
   static String get statusClosed => 'FormsFeature.statusClosed'.tr(); // "Closed"
