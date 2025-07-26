@@ -565,23 +565,29 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
     return AlertDialog(
       title: Text(FormStrings.createFormTitle),
       contentPadding: EdgeInsets.zero,
+      // The AlertDialog itself provides the scrolling and size constraints.
       content: SizedBox(
+        // Constrain the width, but let the height be flexible.
         width: 450,
-        height: 500,
         child: Column(
+          // Let the Column be as tall as its children, up to the limit set by AlertDialog.
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // --- Part 1: Create New ---
-            ListTile(
-              contentPadding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-              leading: const Icon(Icons.add_circle_outline),
-              title: Text(FormStrings.createNewBlankForm),
-              onTap: () => Navigator.of(context).pop('CREATE_NEW'),
+            // Use padding to control spacing inside the flexible column
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.add_circle_outline),
+                title: Text(FormStrings.createNewBlankForm),
+                onTap: () => Navigator.of(context).pop('CREATE_NEW'),
+              ),
             ),
             const Divider(height: 1),
 
             // --- Part 2: Copy Existing ---
-            // Header for the copy action
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
               child: Text(
@@ -589,7 +595,6 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
-            // Search Box now in the second part
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
               child: TextField(
@@ -603,15 +608,18 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
                 ),
               ),
             ),
+            // Expanded allows the ListView to fill the remaining flexible space.
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.only(top: 0),
+                // This is needed in this flexible column structure inside an AlertDialog.
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 itemCount: _groupedAndFilteredForms.length,
                 itemBuilder: (context, index) {
                   final item = _groupedAndFilteredForms[index];
                   if (item is String) {
                     return Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0),
+                      padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
                       child: Text(
                         item,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -637,6 +645,7 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
                     }
 
                     return ListTile(
+                      // Use default list tile padding by not setting contentPadding
                       leading: const Icon(Icons.article_outlined, size: 24),
                       title: Text(
                         form.toString(),
