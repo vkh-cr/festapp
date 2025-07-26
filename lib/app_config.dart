@@ -2,8 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/language_model.dart';
-import 'package:fstapp/pages/form/pages/reservation_page.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
+
+import 'components/forms/views/reservation_page.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
