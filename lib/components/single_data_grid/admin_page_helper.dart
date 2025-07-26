@@ -2,8 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/occasion_settings_tab.dart';
 import 'package:fstapp/components/activities/activities_content.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -97,7 +97,7 @@ class AdminTabDefinition {
         icon: Icons.gamepad,
         widget: GameTab()),
     form: AdminTabDefinition(
-        label: FeaturesStrings.formsTitle, icon: Icons.list, widget: FormsTab()),
+        label: FormStrings.formsTitle, icon: Icons.list, widget: FormsTab()),
     blueprint: AdminTabDefinition(
         label: "Blueprint".tr(),
         icon: Icons.grid_on,

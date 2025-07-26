@@ -156,12 +156,20 @@ class AppPanelHelper {
         );
 
         final List<_ActionMenuItem> availableActions = [];
+
         if (FeatureService.isFeatureEnabled(
-            FeatureConstants.form, features: currentOccasion.features)) {
+            FeatureConstants.form, features: currentOccasion.features) && RightsService.canSeeReservations()) {
           availableActions.add(reservationsAction);
         }
-        availableActions.add(adminAction);
+
+        // Condition for Event Management: User has editor view rights
+        if (RightsService.canSeeAdministration()) {
+          availableActions.add(adminAction);
+        }
+
+        // View App is always available if the app is supported
         availableActions.add(viewAppAction);
+
 
         final currentPath = context.routeData.path;
         _ActionMenuItem currentAction;
@@ -804,8 +812,10 @@ class AppPanelHelper {
             }
 
             final actions = <_ActionMenuItem>[];
+
+            // Condition for Reservations: Feature enabled AND user has order view rights
             if (FeatureService.isFeatureEnabled(
-                FeatureConstants.form, features: currentOccasion.features)) {
+                FeatureConstants.form, features: currentOccasion.features) && RightsService.canSeeReservations()) {
               actions.add(_ActionMenuItem(
                   label: AdministrationStrings.reservations,
                   icon: Icons.shopping_cart,
@@ -813,12 +823,18 @@ class AppPanelHelper {
                   await RouterService.navigateOccasion(
                       context, ReservationsPage.ROUTE)));
             }
-            actions.add(_ActionMenuItem(
-                label: 'Event management'.tr(),
-                icon: Icons.admin_panel_settings,
-                onSelect: () async =>
-                await RouterService.navigateOccasion(
-                    context, AdminPage.ROUTE)));
+
+            // Condition for Event Management: User has editor view rights
+            if(RightsService.canSeeAdministration()) {
+              actions.add(_ActionMenuItem(
+                  label: 'Event management'.tr(),
+                  icon: Icons.admin_panel_settings,
+                  onSelect: () async =>
+                  await RouterService.navigateOccasion(
+                      context, AdminPage.ROUTE)));
+            }
+
+            // View App is always available if the app is supported
             actions.add(_ActionMenuItem(
                 label: AdministrationStrings.viewApp,
                 icon: Icons.visibility,
