@@ -16,9 +16,9 @@ import 'package:flutter/material.dart' as _i35;
 import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart'
     deferred as _i13;
 import 'package:fstapp/data_models/place_model.dart' as _i38;
-import 'package:fstapp/pages/form/pages/form_page.dart' deferred as _i6;
-import 'package:fstapp/pages/form/pages/forms_tab.dart' deferred as _i7;
-import 'package:fstapp/pages/form/pages/reservation_page.dart' deferred as _i20;
+import 'package:fstapp/components/forms/views/form_page.dart' deferred as _i6;
+import 'package:fstapp/components/forms/views/forms_tab.dart' deferred as _i7;
+import 'package:fstapp/components/forms/views/reservation_page.dart' deferred as _i20;
 import 'package:fstapp/pages/occasion/check_page.dart' deferred as _i2;
 import 'package:fstapp/pages/occasion/event_edit_page.dart' deferred as _i3;
 import 'package:fstapp/pages/occasion/event_page.dart' deferred as _i4;

@@ -1,5 +1,4 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
@@ -8,9 +7,9 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/dialogs/standard_dialog.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
-import 'package:fstapp/pages/form/models/id_document_field_holder.dart';
-import 'package:fstapp/pages/form/widgets_view/check_box_field_builder.dart';
-import 'package:fstapp/pages/form/widgets_view/radio_field_builder.dart';
+import 'package:fstapp/components/forms/models/id_document_field_holder.dart';
+import 'package:fstapp/components/forms/widgets_view/check_box_field_builder.dart';
+import 'package:fstapp/components/forms/widgets_view/radio_field_builder.dart';
 import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';

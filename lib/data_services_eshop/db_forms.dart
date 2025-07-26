@@ -7,7 +7,7 @@ import 'package:fstapp/components/eshop/models/bank_account_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
-import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/data_models/form_model.dart';
 
@@ -31,6 +31,26 @@ class FormEditBundle {
 
 class DbForms {
   static final _supabase = Supabase.instance.client;
+
+  static Future<List<FormModel>> getAllFormsForOccasionOrUnit() async {
+    final response = await _supabase.rpc('get_all_viewable_forms_for_copying');
+
+    return List<FormModel>.from(
+        response.map((f) => FormModel.fromJson(f)));
+  }
+
+  static Future<void> duplicateFormToOccasion({
+    required int sourceFormId,
+    required String targetOccasionLink,
+  }) async {
+    await _supabase.rpc(
+      'duplicate_form_to_occasion',
+      params: {
+        'source_form_id': sourceFormId,
+        'target_occasion_link': targetOccasionLink,
+      },
+    );
+  }
 
   static Future<List<FormModel>> getAllFormsByOccasionLink(String occasionLink) async {
     final response = await _supabase.rpc(
@@ -87,17 +107,6 @@ class DbForms {
     );
 
     if (response["code"] != 200) {
-      throw Exception(response["message"]);
-    }
-  }
-
-  static Future<void> duplicateForm(int formId) async {
-    final response = await _supabase.rpc(
-      'duplicate_form_ws',
-      params: {'p_form_id': formId},
-    );
-
-    if (response["code"] != 201) { // 201 Created
       throw Exception(response["message"]);
     }
   }
