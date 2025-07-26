@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/pages/form/models/field_holder.dart';
-import 'package:fstapp/pages/form/widgets_view/form_field_builders.dart';
-import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/components/forms/models/field_holder.dart';
+import 'package:fstapp/components/forms/widgets_view/form_field_builders.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 
 class TextFieldBuilder extends StatelessWidget {
   final FieldHolder fieldHolder;
