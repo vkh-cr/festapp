@@ -564,40 +564,32 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(FormStrings.createFormTitle),
-      contentPadding: EdgeInsets.zero,
-      // The AlertDialog itself provides the scrolling and size constraints.
-      content: SizedBox(
-        // Constrain the width, but let the height be flexible.
-        width: 450,
-        child: Column(
-          // Let the Column be as tall as its children, up to the limit set by AlertDialog.
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // --- Part 1: Create New ---
-            // Use padding to control spacing inside the flexible column
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
-              child: ListTile(
+      // Let AlertDialog handle its padding, but make the content scrollable
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: 450, // Constrain the width of the dialog content
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // The column should be as tall as its children
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- Part 1: Create New ---
+              ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.add_circle_outline),
                 title: Text(FormStrings.createNewBlankForm),
                 onTap: () => Navigator.of(context).pop('CREATE_NEW'),
               ),
-            ),
-            const Divider(height: 1),
+              const Divider(height: 1),
 
-            // --- Part 2: Copy Existing ---
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
-              child: Text(
-                FormStrings.orCreateFromCopy,
-                style: Theme.of(context).textTheme.titleSmall,
+              // --- Part 2: Copy Existing ---
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0, bottom: 12.0),
+                child: Text(
+                  FormStrings.orCreateFromCopy,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
-              child: TextField(
+              TextField(
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
@@ -607,19 +599,19 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
                   isDense: true,
                 ),
               ),
-            ),
-            // Expanded allows the ListView to fill the remaining flexible space.
-            Expanded(
-              child: ListView.builder(
-                // This is needed in this flexible column structure inside an AlertDialog.
+              const SizedBox(height: 8),
+
+              // This ListView is now rendered correctly within the scrollable column
+              ListView.builder(
+                // Correct use: disable list's own scrolling and let it determine its full height
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 itemCount: _groupedAndFilteredForms.length,
                 itemBuilder: (context, index) {
                   final item = _groupedAndFilteredForms[index];
                   if (item is String) {
                     return Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+                      padding: const EdgeInsets.only(top: 12.0, bottom: 4.0),
                       child: Text(
                         item,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -645,11 +637,12 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
                     }
 
                     return ListTile(
-                      // Use default list tile padding by not setting contentPadding
+                      contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.article_outlined, size: 24),
                       title: Text(
                         form.toString(),
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                        style: theme.textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w500),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -659,15 +652,18 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       trailing: Tooltip(
-                        message: FormStrings.numberOfResponsesTooltip(totalResponses),
+                        message:
+                        FormStrings.numberOfResponsesTooltip(totalResponses),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.chat_bubble, size: 16, color: hintColor),
+                            Icon(Icons.chat_bubble,
+                                size: 16, color: hintColor),
                             const SizedBox(width: 4),
                             Text(
                               totalResponses.toString(),
-                              style: theme.textTheme.bodyMedium?.copyWith(color: hintColor),
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(color: hintColor),
                             ),
                           ],
                         ),
@@ -678,8 +674,8 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
                   return const SizedBox.shrink();
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       actions: [
