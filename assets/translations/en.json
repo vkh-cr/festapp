@@ -752,7 +752,7 @@
   },
   "FormsFeature": {
     "formsTitle": "Forms",
-    "createNewForm": "Create New Form",
+    "createNewForm": "Create/Copy Form",
     "createCopy": "Create Copy",
     "statusOpen": "Form is Open",
     "statusClosed": "Closed",
@@ -776,7 +776,16 @@
     "createNewProductTypeOption": "Create New Product Type",
     "untitledProductType": "Untitled",
     "noProductTypesToAdd": "No other product types available to add.",
-    "newProductTypeDefaultName": "New Product Type"
+    "newProductTypeDefaultName": "New Product Type",
+    "createFormTitle": "Create a Form",
+    "createNewBlankForm": "Create a new blank form",
+    "orCreateFromCopy": "Or create a copy from an existing form:",
+    "searchFormsToCopy": "Search forms to copy...",
+    "groupHappeningNow": "Happening Now",
+    "groupUpcoming": "Upcoming",
+    "groupOther": "Other",
+    "numberOfResponsesTooltip": "Number of responses: {0}",
+    "noFormsForEventPrompt": "There are no forms for this event. Click '{createNew}' to add one."
   },
   "FeatureOrders": {
     "cancel": "Cancel",
