@@ -606,7 +606,6 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.only(top: 0),
-                shrinkWrap: true,
                 itemCount: _groupedAndFilteredForms.length,
                 itemBuilder: (context, index) {
                   final item = _groupedAndFilteredForms[index];
