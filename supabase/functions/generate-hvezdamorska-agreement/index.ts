@@ -472,11 +472,41 @@ Deno.serve(async (req: Request) => {
         nights: nights,
     };
 
-    const calculationItems = (rpcOrder?.data?.tickets?.[0]?.products || []).map((p: any) => ({
-        description: `${p.title || ''} (${p.type_title || ''})`,
-        pricePerPerson: p.price ?? 0,
-        currency: p.currency_code || 'Kč'
-    }));
+    const calculationItems = (rpcOrder?.data?.tickets?.[0]?.products || []).map((p: any) => {
+        const title = p.title || '';
+        const typeTitle = p.type_title || '';
+        // Define the absolute maximum character length for the entire description field.
+        const MAX_LENGTH = 30;
+
+        // 1. Construct the ideal, full description string.
+        const fullDescription = typeTitle ? `${title} (${typeTitle})` : title;
+
+        let finalDescription = fullDescription;
+
+        // 2. Check if the full description exceeds the maximum length.
+        if (fullDescription.length > MAX_LENGTH) {
+            const suffix = typeTitle ? ` (${typeTitle})` : '';
+            const maxTitleLength = MAX_LENGTH - suffix.length;
+
+            // 3. Decide on the truncation strategy.
+            // If the suffix is too long and leaves no meaningful space for the title (e.g., < 5 chars),
+            // then we just truncate the entire combined string. This is our fallback.
+            if (maxTitleLength < 5) {
+                finalDescription = fullDescription.substring(0, MAX_LENGTH - 3) + '...';
+            } else {
+                // Otherwise, the "smart" approach: truncate the main title and append the full suffix.
+                // This preserves the (type_title) information completely.
+                const truncatedTitle = title.substring(0, maxTitleLength - 3) + '...';
+                finalDescription = `${truncatedTitle}${suffix}`;
+            }
+        }
+
+        return {
+            description: finalDescription,
+            pricePerPerson: p.price ?? 0,
+            currency: p.currency_code || 'Kč'
+        };
+    });
 
     const totalFromFeatures = occasion?.features?.find((f:any) => f.code === 'form')?.external_price;
     const fallbackTotal = rpcOrder?.price != null ? `${rpcOrder.price.toLocaleString('cs-CZ')} ${rpcOrder.currency_code || 'Kč'}` : 'N/A';
