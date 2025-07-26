@@ -564,63 +564,72 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(FormStrings.createFormTitle),
-      // Let AlertDialog handle its padding, but make the content scrollable
-      content: SingleChildScrollView(
-        child: SizedBox(
-          width: 450, // Constrain the width of the dialog content
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // The column should be as tall as its children
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- Part 1: Create New ---
-              ListTile(
+      // Adjust padding for the new layout
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      // Use a SizedBox to constrain the width, height will be handled by the slivers.
+      content: SizedBox(
+        width: 450,
+        child: CustomScrollView( // Use the robust sliver-based scrolling
+          slivers: [
+            // Part 1: Create New (as a sliver)
+            SliverToBoxAdapter(
+              child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.add_circle_outline),
                 title: Text(FormStrings.createNewBlankForm),
                 onTap: () => Navigator.of(context).pop('CREATE_NEW'),
               ),
-              const Divider(height: 1),
+            ),
+            const SliverToBoxAdapter(child: Divider(height: 1)),
 
-              // --- Part 2: Copy Existing ---
-              Padding(
+            // Part 2: Copy Existing (as individual slivers)
+            SliverToBoxAdapter(
+              child: Padding(
                 padding: const EdgeInsets.only(top: 16.0, bottom: 12.0),
                 child: Text(
                   FormStrings.orCreateFromCopy,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              TextField(
+            ),
+            SliverToBoxAdapter(
+              child: TextField(
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
                   hintText: FormStrings.searchFormsToCopy,
                   prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
                   isDense: true,
                 ),
               ),
-              const SizedBox(height: 8),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
-              // This ListView is now rendered correctly within the scrollable column
-              ListView.builder(
-                // Correct use: disable list's own scrolling and let it determine its full height
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: _groupedAndFilteredForms.length,
-                itemBuilder: (context, index) {
+            // The list itself, now as a SliverList, which is highly efficient.
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                    (context, index) {
                   final item = _groupedAndFilteredForms[index];
                   if (item is String) {
+                    // Header (e.g., "2025")
                     return Padding(
-                      padding: const EdgeInsets.only(top: 12.0, bottom: 4.0),
+                      padding:
+                      const EdgeInsets.only(top: 12.0, bottom: 4.0),
                       child: Text(
                         item,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     );
                   } else if (item is FormModel) {
+                    // The actual list item
                     final form = item;
                     final occasion = form.occasionModel;
                     final stats = form.stats;
@@ -632,7 +641,8 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
 
                     String subtitleText = occasion?.title ?? '---';
                     if (occasion?.startTime != null) {
-                      final formattedDate = DateFormat.yMd(currentLocale).format(occasion!.startTime!);
+                      final formattedDate = DateFormat.yMd(currentLocale)
+                          .format(occasion!.startTime!);
                       subtitleText = '$subtitleText ($formattedDate)';
                     }
 
@@ -652,8 +662,8 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       trailing: Tooltip(
-                        message:
-                        FormStrings.numberOfResponsesTooltip(totalResponses),
+                        message: FormStrings.numberOfResponsesTooltip(
+                            totalResponses),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -673,9 +683,10 @@ class _CreateOrCopyFormDialogState extends State<_CreateOrCopyFormDialog> {
                   }
                   return const SizedBox.shrink();
                 },
+                childCount: _groupedAndFilteredForms.length,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       actions: [
