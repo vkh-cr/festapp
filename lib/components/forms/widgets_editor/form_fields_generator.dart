@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/html_view.dart';
-import '../pages/form_editor_content.dart';
 import '../widgets_view/form_helper.dart';
 import 'birth_date_editor.dart';
 import 'description_with_edit.dart';
@@ -257,7 +254,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                       field.description = newDescription;
                     });
                   },
-                  occasionId: form.occasion!,
+                  occasionId: form.occasionId!,
                 ),
                 const SizedBox(height: 16),
               ],
@@ -408,21 +405,21 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
             context, form, field);
       case FormHelper.fieldTypeSelectOne:
         return isEditable
-            ? SelectOneEditor.buildSelectOneEditor(context, field, form.occasion)
+            ? SelectOneEditor.buildSelectOneEditor(context, field, form.occasionId)
             : SelectOneEditor.buildSelectOneReadOnly(context, field);
       case FormHelper.fieldTypeSelectMany:
         return isEditable
-            ? SelectManyEditor.buildSelectManyEditor(context, field, form.occasion)
+            ? SelectManyEditor.buildSelectManyEditor(context, field, form.occasionId)
             : SelectManyEditor.buildSelectManyReadOnly(context, field);
       case FormHelper.fieldTypeSex:
         return SexEditor.buildSexFieldReadOnly(context, field);
       case FormHelper.fieldTypeBirthDate:
         return isEditable
-            ? BirthDateEditor.buildBirthDateEditor(context, field, form.occasion)
+            ? BirthDateEditor.buildBirthDateEditor(context, field, form.occasionId)
             : BirthDateEditor.buildBirthDateReadOnly(context, field);
       case FormHelper.fieldTypeIdDocument:
         return isEditable
-            ? IdDocumentEditor.buildIdDocumentEditor(context, field, form.occasion)
+            ? IdDocumentEditor.buildIdDocumentEditor(context, field, form.occasionId)
             : IdDocumentEditor.buildIdDocumentReadOnly(context, field);
       default:
         if (isEditable) {

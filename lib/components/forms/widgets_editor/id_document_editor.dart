@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/pages/form/models/id_document_field_holder.dart';
+import 'package:fstapp/components/forms/models/id_document_field_holder.dart';
 
 class IdDocumentEditor {
   static String get _defaultExpiryDateLabelText => "Expiry Date".tr();

@@ -1,4 +1,4 @@
-import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 
 class FormOptionModel {
   static const String metaValue = "value";
@@ -39,9 +39,5 @@ class FormOptionModel {
       return title;
     }
     return id;
-    return {
-      metaOptionsName: title,
-      metaOptionsId: id,
-    };
   }
 }

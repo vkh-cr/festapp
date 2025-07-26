@@ -5,7 +5,7 @@ import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/data_models/unit_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/pages/form/pages/reservation_page.dart';
+import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 
 class RouterService {
