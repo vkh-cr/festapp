@@ -2,14 +2,14 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
+import '../form_strings.dart';
 import 'product_type_editor.dart';
 
 class TicketEditorWidgets {
@@ -73,7 +73,7 @@ class TicketEditorWidgets {
         const Spacer(),
         ElevatedButton.icon(
           icon: const Icon(Icons.add),
-          label: Text(FeaturesStrings.addProductTypeTitle),
+          label: Text(FormStrings.addProductTypeTitle),
           onPressed: () async {
             final existingPtIds = form.relatedFields!
                 .where((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeProductType && f.productType != null)
@@ -111,11 +111,11 @@ class TicketEditorWidgets {
 
   static void _createNewProductType(FormModel form) {
     final newProductTypeField = FormFieldModel(
-      title: FeaturesStrings.newProductTypeDefaultName,
+      title: FormStrings.newProductTypeDefaultName,
       type: FormHelper.fieldTypeProductType,
       isTicketField: true,
       productType: ProductTypeModel(
-        title: FeaturesStrings.newProductTypeDefaultName,
+        title: FormStrings.newProductTypeDefaultName,
         products: [],
       ),
       order: (form.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
@@ -149,7 +149,7 @@ class TicketEditorWidgets {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    FeaturesStrings.addProductTypeTitle,
+                    FormStrings.addProductTypeTitle,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
@@ -159,14 +159,14 @@ class TicketEditorWidgets {
                       children: [
                         ListTile(
                           leading: const Icon(Icons.add_circle_outline),
-                          title: Text(FeaturesStrings.createNewProductTypeOption),
+                          title: Text(FormStrings.createNewProductTypeOption),
                           onTap: () => Navigator.of(dialogContext).pop('__CREATE_NEW__'),
                         ),
                         const Divider(),
                         ...availableProductTypes.map((pt) {
                           return ListTile(
                             leading: const Icon(Icons.category_outlined),
-                            title: Text(pt.title ?? FeaturesStrings.untitledProductType),
+                            title: Text(pt.title ?? FormStrings.untitledProductType),
                             onTap: () => Navigator.of(dialogContext).pop(pt),
                           );
                         }).toList()

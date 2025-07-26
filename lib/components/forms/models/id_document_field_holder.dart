@@ -1,7 +1,7 @@
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/pages/form/models/field_holder.dart';
+import 'package:fstapp/components/forms/models/field_holder.dart';
 import 'package:flutter/material.dart';
-import './id_document_data.dart';
+import 'id_document_data.dart';
 
 class IdDocumentFieldHolder extends FieldHolder {
   // Metadata keys, defined within this model class

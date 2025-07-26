@@ -6,13 +6,14 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/widgets/html_view.dart';
+import '../form_strings.dart';
 
 class FormCreationHelper {
   static String _generateFormHtml(String? link) {
     if (link == null || link.isEmpty) return "";
     final fullUrl = "${AppConfig.webLink}/#/form/$link";
     return '''
-       <p>${FeaturesStrings.formAvailableAt}:<br>
+       <p>${FormStrings.formAvailableAt}:<br>
        <a href="$fullUrl">$fullUrl</a></p>
      ''';
   }
@@ -24,8 +25,8 @@ class FormCreationHelper {
       }) async {
     final formKey = GlobalKey<FormState>();
 
-    String title = FeaturesStrings.defaultFormTitle;
-    String link = "${FeaturesStrings.defaultFormTitle}${DateTime.now().year}";
+    String title = FormStrings.defaultFormTitle;
+    String link = "${FormStrings.defaultFormTitle}${DateTime.now().year}";
 
     final titleController = TextEditingController(text: title);
     final linkController = TextEditingController(text: link);
@@ -37,9 +38,9 @@ class FormCreationHelper {
 
     void validateLink(String? value) {
       if (value == null || value.isEmpty) {
-        linkError = FeaturesStrings.validationLinkRequired;
+        linkError = FormStrings.validationLinkRequired;
       } else if (!Utilities.isValidUrl(value)) {
-        linkError = FeaturesStrings.validationLinkInvalidChars;
+        linkError = FormStrings.validationLinkInvalidChars;
       } else {
         linkError = null;
       }
@@ -74,7 +75,7 @@ class FormCreationHelper {
             }
 
             return AlertDialog(
-              title: Text(FeaturesStrings.createNewForm),
+              title: Text(FormStrings.createNewForm),
               content: Form(
                 key: formKey,
                 child: SingleChildScrollView(
@@ -84,7 +85,7 @@ class FormCreationHelper {
                       TextFormField(
                         controller: titleController,
                         decoration: InputDecoration(
-                          labelText: FeaturesStrings.labelFormTitle,
+                          labelText: FormStrings.labelFormTitle,
                           border: const OutlineInputBorder(),
                         ),
                         onChanged: (value) {
@@ -96,7 +97,7 @@ class FormCreationHelper {
                       TextFormField(
                         controller: linkController,
                         decoration: InputDecoration(
-                          labelText: FeaturesStrings.labelFormLink,
+                          labelText: FormStrings.labelFormLink,
                           border: const OutlineInputBorder(),
                           errorText: linkError,
                         ),
@@ -151,13 +152,13 @@ class FormCreationHelper {
                         occasionLink: occasionLink,
                       );
 
-                      if (!context.mounted) return; // ADDED: Safety check
-                      ToastHelper.Show(context, FeaturesStrings.formCreatedSuccess, severity: ToastSeverity.Ok);
+                      if (!context.mounted) return;
+                      ToastHelper.Show(context, FormStrings.formCreatedSuccess, severity: ToastSeverity.Ok);
                       onFormCreated();
                       Navigator.of(context).pop();
 
                     } catch (e) {
-                      if (!context.mounted) return; // ADDED: Safety check
+                      if (!context.mounted) return;
                       setState(() {
                         linkError = e.toString().replaceFirst("Exception: ", "");
                       });

@@ -117,12 +117,24 @@ class RightsService{
     return currentOccasionUser()?.isEditor??false;
   }
 
+  static bool canSeeReservations() {
+    return isUnitEditorView() || isEditorOrderView();
+  }
+
+  static bool canSeeAdministration() {
+    return isUnitEditorView() || isEditorView();
+  }
+
   static bool isAdmin() {
     return occasionLinkModelNotifier.value?.isAdmin??false;
   }
 
   static bool isEditor() {
     return occasionLinkModelNotifier.value?.occasionUser?.isEditor??false;
+  }
+
+  static bool isEditorView() {
+    return occasionLinkModelNotifier.value?.occasionUser?.isEditorView??false;
   }
 
   static bool isOrderEditor() {
