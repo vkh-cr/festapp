@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
-import 'package:fstapp/pages/form/pages/form_page.dart';
-import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/components/forms/views/form_page.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -164,7 +162,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                     context,
                     HtmlEditorRoute(
                         content: {HtmlEditorPage.parContent: form.headerOff ?? ''},
-                        occasionId: form.occasion),
+                        occasionId: form.occasionId),
                   );
                   if (result != null && mounted) {
                     setState(() => form.headerOff = result as String);
@@ -359,7 +357,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                               context,
                               HtmlEditorRoute(
                                   content: {HtmlEditorPage.parContent: _bundle!.form.header ?? ""},
-                                  occasionId: _bundle!.form.occasion),
+                                  occasionId: _bundle!.form.occasionId),
                             );
                             if (result != null && mounted) {
                               setState(() => _bundle!.form.header = result as String);
