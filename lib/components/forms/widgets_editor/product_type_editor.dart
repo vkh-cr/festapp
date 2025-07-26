@@ -4,7 +4,7 @@ import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
-import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
@@ -327,7 +327,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                     ptField.productType!.description = newDescription;
                     refresh();
                   },
-                  occasionId: form.occasion!,
+                  occasionId: form.occasionId!,
                 ),
               const SizedBox(height: 16),
               // List of Product Rows

@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/pages/form/models/birth_date_field_holder.dart';
+import 'package:fstapp/components/forms/models/birth_date_field_holder.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/pages/utility/html_editor_page.dart';
 

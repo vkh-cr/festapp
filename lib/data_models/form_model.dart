@@ -1,4 +1,5 @@
 import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/components/eshop/models/bank_account_model.dart';
 
@@ -33,7 +34,8 @@ class FormModel {
   String? title;
   Map<String, dynamic>? data;
   String? key;
-  int? occasion;
+  int? occasionId;
+  OccasionModel? occasionModel;
   int? blueprint;
   String? type;
   BankAccountModel? bankAccount;
@@ -60,7 +62,8 @@ class FormModel {
     this.title,
     this.data,
     this.key,
-    this.occasion,
+    this.occasionId,
+    this.occasionModel,
     this.blueprint,
     this.type,
     this.bankAccount,
@@ -79,6 +82,17 @@ class FormModel {
   });
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
+    OccasionModel? parsedOccasionModel;
+    int? parsedOccasionId;
+
+    final occasionData = json[Tb.forms.occasion];
+    if (occasionData is Map<String, dynamic>) {
+      parsedOccasionModel = OccasionModel.fromJson(occasionData);
+      parsedOccasionId = parsedOccasionModel.id;
+    } else if (occasionData is int) {
+      parsedOccasionId = occasionData;
+    }
+
     return FormModel(
       id: json[Tb.forms.id],
       createdAt: json[Tb.forms.created_at] != null
@@ -87,7 +101,8 @@ class FormModel {
       title: json[Tb.forms.title],
       data: json[Tb.forms.data],
       key: json[Tb.forms.key],
-      occasion: json[Tb.forms.occasion],
+      occasionId: parsedOccasionId,
+      occasionModel: parsedOccasionModel,
       blueprint: json[Tb.forms.blueprint],
       type: json[Tb.forms.type],
       bankAccountId: json[Tb.forms.bank_account],
@@ -121,7 +136,7 @@ class FormModel {
     Tb.forms.title: title,
     Tb.forms.data: data,
     Tb.forms.key: key,
-    Tb.forms.occasion: occasion,
+    Tb.forms.occasion: occasionId,
     Tb.forms.blueprint: blueprint,
     Tb.forms.type: type,
     Tb.forms.bank_account: bankAccount?.id,
@@ -133,7 +148,7 @@ class FormModel {
     Tb.forms.header_off: headerOff,
     Tb.forms.link: link,
     'fields': relatedFields,
-    // The 'stats' object is a calculated field from the backend, so it's not included in toJson.
+    // The 'stats' and 'occasionModel' objects are calculated/retrieved fields, so they're not included in toJson.
   };
 
   Map<String, dynamic> toEditedJson() => {
@@ -142,7 +157,7 @@ class FormModel {
     Tb.forms.title: title,
     Tb.forms.data: data,
     Tb.forms.key: key,
-    Tb.forms.occasion: occasion,
+    Tb.forms.occasion: occasionId,
     Tb.forms.blueprint: blueprint,
     Tb.forms.type: type,
     Tb.forms.bank_account: bankAccount?.id,
