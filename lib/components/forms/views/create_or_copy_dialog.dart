@@ -113,6 +113,8 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
       }
     }
 
+
+
     if (datelessOccasions.isNotEmpty) {
       newGroupedList.add(FormStrings.groupOther);
       newGroupedList.addAll(datelessOccasions);
@@ -128,11 +130,18 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
     return AlertDialog(
       title: Text(FormStrings.createFormTitle),
       contentPadding: EdgeInsets.zero,
-      content: SizedBox(
-        width: 450,
-        height: 500,
+      // We wrap the content in a Container with BoxConstraints to make it responsive.
+      content: Container(
+        width: 450, // You can adjust this width as needed
+        constraints: BoxConstraints(
+          // Set a max height relative to the screen to avoid overflow.
+          // 70% of the screen height is a reasonable maximum.
+          maxHeight: MediaQuery.of(context).size.height * 0.7,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          // The Column will now fill the height of the Container.
+          // This gives the Expanded widget a bounded height to fill.
           children: [
             // --- Part 1: Create New ---
             ListTile(
@@ -166,6 +175,7 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
                 ),
               ),
             ),
+            // Expanded will now correctly fill the remaining space within the constrained Container.
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.only(top: 0),
@@ -191,7 +201,7 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
                     final theme = Theme.of(context);
                     final hintColor = theme.hintColor;
 
-                    final currentLocale = context.savedLocale.toString();
+                    final currentLocale = context.locale.toString();
 
                     String subtitleText = occasion?.title ?? '---';
                     if (occasion?.startTime != null) {
