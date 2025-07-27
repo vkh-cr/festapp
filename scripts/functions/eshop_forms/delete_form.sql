@@ -1,4 +1,3 @@
--- Internal function: Contains business logic, no permission checks.
 CREATE OR REPLACE FUNCTION delete_form(p_form_id bigint)
 RETURNS void
 LANGUAGE plpgsql
@@ -23,15 +22,15 @@ BEGIN
         END IF;
     END IF;
 
-    -- Step 2: Check if any of the form's associated product types still contain products.
-    -- Collect all product_type IDs associated with this form's fields.
+    -- Step 2: Collect all product_type IDs associated with this form's fields.
+    -- This is needed for checks and for the subsequent deletion.
     SELECT ARRAY_AGG(DISTINCT product_type)
     INTO v_product_type_ids
     FROM public.form_fields
     WHERE form = p_form_id AND product_type IS NOT NULL;
 
-    IF v_product_type_ids IS NOT NULL THEN
-        -- Check if any products exist for these product types.
+    -- Step 3: Check if any of the form's associated product types still contain products.
+    IF v_product_type_ids IS NOT NULL AND array_length(v_product_type_ids, 1) > 0 THEN
         SELECT COUNT(*)
         INTO v_product_count
         FROM eshop.products
@@ -42,16 +41,18 @@ BEGIN
         END IF;
     END IF;
 
-    -- Step 3: Proceed with deletion if all checks pass.
+    -- Step 4: Proceed with deletion if all checks pass.
+    -- The order of operations here is critical to avoid foreign key violations.
 
-    -- Delete the product types (which are now confirmed to be empty).
-    IF v_product_type_ids IS NOT NULL THEN
+    -- First, delete the form fields. This removes the foreign key reference
+    -- from `public.form_fields` to `eshop.product_types`.
+    DELETE FROM public.form_fields WHERE form = p_form_id;
+
+    -- Second, now that the referencing form_fields are gone (and we've confirmed
+    -- no products exist), we can safely delete the product types.
+    IF v_product_type_ids IS NOT NULL AND array_length(v_product_type_ids, 1) > 0 THEN
         DELETE FROM eshop.product_types WHERE id = ANY(v_product_type_ids);
     END IF;
-
-    -- Delete the form fields. This is often handled by ON DELETE CASCADE,
-    -- but being explicit is safer against schema changes.
-    DELETE FROM public.form_fields WHERE form = p_form_id;
 
     -- Finally, delete the form itself.
     DELETE FROM public.forms WHERE id = p_form_id;

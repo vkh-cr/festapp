@@ -18,6 +18,7 @@ DECLARE
     used_spots JSONB := '[]'::JSONB;
     occasion_id BIGINT;
     organization_id BIGINT;
+    unit_id BIGINT;
     occasion_title TEXT;
     occasion_features JSONB;
     account_number TEXT;
@@ -63,11 +64,12 @@ BEGIN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1003, 'message', 'Form is not linked to any occasion')::TEXT;
         END IF;
 
-        -- Fetch organization and occasion title from the occasion
-        SELECT organization, title, features
-        INTO organization_id, occasion_title, occasion_features
+        -- Fetch organization, unit, and occasion title from the occasion
+        SELECT organization, unit, title, features
+        INTO organization_id, unit_id, occasion_title, occasion_features
         FROM public.occasions
         WHERE id = occasion_id;
+
         IF organization_id IS NULL THEN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1005, 'message', 'No organization found for the occasion')::TEXT;
         END IF;
@@ -420,7 +422,8 @@ BEGIN
                 'occasion', JSONB_BUILD_OBJECT(
                     'id', occasion_id,
                     'organization', organization_id,
-                    'occasion_title', occasion_title,
+                    'unit', unit_id,
+                    'title', occasion_title,
                     'features', occasion_features
                 )
             )
