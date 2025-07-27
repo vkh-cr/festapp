@@ -12,6 +12,7 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/search_products_screen.dart';
 
 import '../orders_strings.dart';
+import 'edit_price_dialog.dart';
 
 class ProductsDialog extends StatefulWidget {
   final int ticketId;
@@ -83,89 +84,10 @@ class _ProductsDialogState extends State<ProductsDialog> {
   }
 
   Future<void> _editPrice(ProductModel product) async {
-    final priceController = TextEditingController(text: (product.price ?? 0).toStringAsFixed(2));
-    final formKey = GlobalKey<FormState>();
-
     final newPrice = await showDialog<double>(
       context: context,
       builder: (context) {
-        // Use a stateful helper widget to create and manage the focus node
-        // correctly within the dialog's lifecycle.
-        return _StatefulDialogWrapper(
-          builder: (context, focusNode) {
-            return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 450),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        OrdersStrings.editPriceTitle,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 20),
-                      SingleChildScrollView(
-                        child: Form(
-                          key: formKey,
-                          child: TextFormField(
-                            focusNode: focusNode,
-                            autofocus: true,
-                            controller: priceController,
-                            decoration: InputDecoration(labelText: OrdersStrings.newPriceLabel),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return OrdersStrings.priceValidationRequired;
-                              }
-                              final price = double.tryParse(value.replaceAll(",", "."));
-                              if (price == null) {
-                                return OrdersStrings.priceValidationInvalid;
-                              }
-                              if (price < 0) {
-                                return OrdersStrings.priceValidationNegative;
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            child: Text(OrdersStrings.setToZeroButton),
-                            onPressed: () {
-                              priceController.text = "0.00";
-                            },
-                          ),
-                          const Spacer(),
-                          TextButton(
-                            child: Text("Storno".tr()),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            child: Text("OK".tr()),
-                            onPressed: () {
-                              if (formKey.currentState!.validate()) {
-                                Navigator.of(context).pop(double.parse(priceController.text.replaceAll(",", ".")));
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
+        return EditPriceDialog(initialPrice: product.price ?? 0);
       },
     );
 
@@ -728,35 +650,5 @@ extension on List<ProductModel> {
       }
     }
     return true;
-  }
-}
-
-/// A helper widget to correctly manage the lifecycle of a FocusNode inside a dialog.
-class _StatefulDialogWrapper extends StatefulWidget {
-  const _StatefulDialogWrapper({required this.builder});
-  final Widget Function(BuildContext context, FocusNode focusNode) builder;
-
-  @override
-  __StatefulDialogWrapperState createState() => __StatefulDialogWrapperState();
-}
-
-class __StatefulDialogWrapperState extends State<_StatefulDialogWrapper> {
-  late final FocusNode _focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode();
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.builder(context, _focusNode);
   }
 }
