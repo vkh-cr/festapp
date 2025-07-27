@@ -33,6 +33,8 @@ class ProductModel extends ITrinaRowModel {
   String? currencyCode;
   List<ProductInventoryContextModel> includedInventories = [];
   bool? isDynamicallyAvailable;
+  List<int> formIds;
+  String? formTitles;
 
   static const String foodType = "food";
   static const String taxiType = "taxi";
@@ -67,7 +69,10 @@ class ProductModel extends ITrinaRowModel {
     this.currencyCode,
     List<ProductInventoryContextModel>? includedInventories,
     this.isDynamicallyAvailable,
-  }) : includedInventories = includedInventories ?? [];
+    List<int>? formIds,
+    this.formTitles,
+  }) : includedInventories = includedInventories ?? [],
+        formIds = formIds ?? [];
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
@@ -96,6 +101,7 @@ class ProductModel extends ITrinaRowModel {
       paidCount: json[metaPaidCount],
       sentCount: json[metaSentCount],
       isDynamicallyAvailable: json[metaIsDynamicallyAvailable],
+      formIds: List<int>.from(json['form_ids'] ?? []),
     );
   }
 
@@ -114,6 +120,8 @@ class ProductModel extends ITrinaRowModel {
       order: json[EshopColumns.PRODUCT_ORDER],
       maximum: json[EshopColumns.PRODUCT_MAXIMUM],
       includedInventories: model?.includedInventories ?? [],
+      formIds: model?.formIds ?? [],
+      formTitles: model?.formTitles,
     );
   }
 
@@ -153,6 +161,8 @@ class ProductModel extends ITrinaRowModel {
     String? currencyCode,
     List<ProductInventoryContextModel>? includedInventories,
     bool? isDynamicallyAvailable,
+    List<int>? formIds,
+    String? formTitles,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -176,6 +186,8 @@ class ProductModel extends ITrinaRowModel {
       currencyCode: currencyCode ?? this.currencyCode,
       includedInventories: includedInventories ?? this.includedInventories,
       isDynamicallyAvailable: isDynamicallyAvailable ?? this.isDynamicallyAvailable,
+      formIds: formIds ?? this.formIds,
+      formTitles: formTitles ?? this.formTitles,
     );
   }
 
@@ -217,6 +229,7 @@ class ProductModel extends ITrinaRowModel {
       EshopColumns.PRODUCT_ORDERED_COUNT: TrinaCell(value: orderedCount),
       EshopColumns.PRODUCT_PAID_COUNT: TrinaCell(value: total),
       EshopColumns.PRODUCT_INCLUDED_INVENTORY: TrinaCell(value: getInventoryDisplayValue(this, context)),
+      EshopColumns.PRODUCT_USED_IN_FORMS: TrinaCell(value: formTitles ?? ''),
       EshopColumns.PRODUCT_MODEL_REFERENCE: TrinaCell(value: this),
     });
   }

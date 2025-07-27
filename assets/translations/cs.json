@@ -748,7 +748,8 @@
     "changedBy": "Změnil(a)",
     "changes": "Změny",
     "paidOrSent": "Zaplaceno nebo odesláno",
-    "cancelled": "Stornováno"
+    "cancelled": "Stornováno",
+    "usedInForms": "Použito ve formulářích"
   },
   "FormsFeature": {
     "formsTitle": "Formuláře",
@@ -1025,7 +1026,17 @@
     "findOccasionHint": "Najít událost...",
     "newOccasionButton": "Nová událost",
     "viewApp": "Zobrazit aplikaci",
-    "reservations": "Rezervace"
+    "reservations": "Rezervace",
+    "myFestival": "mojeakce",
+    "addNewEventTitle": "Přidat novou událost",
+    "titleLabel": "Název",
+    "linkLabel": "Odkaz",
+    "eventAvailableAt": "Tato událost bude dostupná na",
+    "cancelButton": "Zrušit",
+    "createButton": "Vytvořit",
+    "linkIsRequiredError": "Odkaz je povinný",
+    "invalidCharactersError": "Neplatné znaky",
+    "linkInUseError": "Odkaz je již používán"
   },
   "_": "_"
 }
