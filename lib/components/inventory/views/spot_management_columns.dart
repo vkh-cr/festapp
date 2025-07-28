@@ -85,7 +85,7 @@ class SpotManagementColumns {
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
           child: cellContent,
         ),
       );

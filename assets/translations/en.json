@@ -1028,5 +1028,26 @@
     "invalidCharactersError": "Invalid characters",
     "linkInUseError": "Link already in use"
   },
+  "GroupStrings": {
+    "newGroup": "New Group",
+    "columnId": "Id",
+    "columnName": "Name",
+    "columnParticipants": "Participants",
+    "columnContent": "Content",
+    "columnPlace": "Place",
+    "manageParticipantsTooltip": "Manage Participants",
+    "buttonEdit": "Edit",
+    "buttonLocation": "Location",
+    "dialogTitle": "Manage Participants: {groupTitle} ({count})",
+    "sectionLeader": "Leader",
+    "noLeaderSelected": "No leader selected.",
+    "sectionMembers": "Members",
+    "searchHint": "Search by name or other info...",
+    "buttonAdd": "Add",
+    "buttonClose": "Close",
+    "demoteLeaderTooltip": "Demote leader",
+    "assignLeaderTooltip": "Assign as leader",
+    "removeParticipantTooltip": "Remove participant"
+  },
   "_":"_"
 }
