@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -37,6 +39,13 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
           }
       ),
       scrollbar: const TrinaGridScrollbarConfig(
+        dragDevices: {
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.touch,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.invertedStylus,
+          PointerDeviceKind.unknown},
         thickness: 12.0,
       ),
       localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
