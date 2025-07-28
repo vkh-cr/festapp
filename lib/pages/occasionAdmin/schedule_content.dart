@@ -351,7 +351,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
               return Padding(
                 // Add padding around the chip to prevent touching cell borders
                 padding:
-                    const EdgeInsets.symmetric(vertical: 3.0, horizontal: 2.0),
+                    const EdgeInsets.symmetric(vertical: 2.0, horizontal: 2.0),
                 child: Chip(
                   label: Text(
                     displayTitle,
