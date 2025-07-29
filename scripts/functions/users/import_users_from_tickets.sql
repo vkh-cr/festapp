@@ -75,8 +75,8 @@ BEGIN
         JOIN eshop.orders o ON opt."order" = o.id
         LEFT JOIN public.occasion_users ou ON t.id = ou.ticket
         WHERE t.occasion = p_occasion_id
-          AND t.state IN ('sent', 'used', 'paid') -- Only import users with valid tickets
-          AND ou.ticket IS NULL -- Only for tickets not yet linked
+          AND t.state IN ('ordered', 'sent', 'used', 'paid') -- Only import users with valid tickets
+          AND ou.ticket IS NULL
         ORDER BY t.id, o.id DESC
     LOOP
         order_data := ticket_record.order_data;
