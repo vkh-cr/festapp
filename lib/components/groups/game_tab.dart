@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
-import 'package:fstapp/pages/occasionAdmin/game_checkpoints_content.dart';
-import 'package:fstapp/pages/occasionAdmin/game_settings_content.dart';
-import 'package:fstapp/pages/occasionAdmin/game_user_groups_content.dart';
+import 'package:fstapp/components/groups/game_checkpoints_content.dart';
+import 'package:fstapp/components/groups/game_settings_content.dart';
+import 'package:fstapp/components/groups/game_user_groups_content.dart';
 import 'package:fstapp/theme_config.dart';
 
 class GameTab extends StatefulWidget {
