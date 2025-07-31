@@ -41,6 +41,7 @@ class FormHelper {
   static const String fieldTypeIdDocument = "id_document";
   static const String fieldTypeAddress = "address";
   static const String fieldTypeNationality = "nationality";
+  static const String isGroupFeatureField = "is_group_feature";
 
   static const String fieldTypeTicket = "ticket";
 
