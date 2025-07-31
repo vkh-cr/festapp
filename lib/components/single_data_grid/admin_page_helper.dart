@@ -13,12 +13,12 @@ import 'package:fstapp/components/forms/views/forms_tab.dart';
 import 'package:fstapp/components/eshop/orders_tab.dart';
 import 'package:fstapp/components/eshop/report_tab.dart';
 import 'package:fstapp/components/eshop/tickets_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/game_tab.dart';
+import 'package:fstapp/components/groups/game_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/information_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/places_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/schedule_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/service_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/user_groups_tab.dart';
+import 'package:fstapp/components/groups/user_groups_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/users_tab.dart';
 
 import '../eshop/products_tab.dart';

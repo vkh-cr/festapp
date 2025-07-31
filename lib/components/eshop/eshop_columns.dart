@@ -10,6 +10,7 @@ import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/views/products_dialog.dart';
 import 'package:fstapp/components/eshop/views/transactions_dialog.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
+import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:trina_grid/trina_grid.dart';
 
@@ -51,6 +52,7 @@ class EshopColumns {
   static const String PRODUCT_DESCRIPTION = "productDescription";
   static const String PRODUCT_INCLUDED_INVENTORY = "productIncludedInventory";
   static const String PRODUCT_MODEL_REFERENCE = "productModelReference";
+  static const String PRODUCT_USED_IN_FORMS = "productUsedInForms";
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
@@ -235,6 +237,16 @@ class EshopColumns {
             availableContexts: allContexts,
           );
         },
+      ),
+    ],
+    PRODUCT_USED_IN_FORMS: [
+      TrinaColumn(
+        title: OrdersStrings.gridUsedInForms,
+        textAlign: TrinaColumnTextAlign.end,
+        field: PRODUCT_USED_IN_FORMS,
+        type: TrinaColumnType.text(),
+        width: 250,
+        readOnly: true,
       ),
     ],
     TICKET_ID: [
