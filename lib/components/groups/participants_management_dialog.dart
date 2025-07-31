@@ -132,6 +132,14 @@ class _ParticipantsManagementDialogState
         widget.group.participants?.where((p) => p.isAdmin != true).toList() ?? [];
     members.sort((a,b) => a.userInfo!.toFullNameString().compareTo(b.userInfo!.toFullNameString()));
 
+    // Define a breakpoint and set flex factors based on screen width.
+    const double desktopBreakpoint = 800.0;
+    final bool isDesktop = MediaQuery.of(context).size.width > desktopBreakpoint;
+
+    final int topSectionFlex = 1;
+    final int bottomSectionFlex = isDesktop ? 2 : 1;
+
+
     return AlertDialog(
       title: Text(GroupsStrings.dialogTitle(widget.group.title!, count)),
       content: SizedBox(
@@ -140,35 +148,46 @@ class _ParticipantsManagementDialogState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle(GroupsStrings.sectionLeader),
-            leader != null
-                ? _buildParticipantChip(
-              context: context,
-              participant: leader,
-              isLeader: true,
-              onPromote: () {},
-              onDemote: _handleDemoteLeader,
-              onRemove: () => _removeParticipant(leader),
-            )
-                : Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Text(GroupsStrings.noLeaderSelected, style: const TextStyle(fontStyle: FontStyle.italic)),
-            ),
-            const SizedBox(height: 8),
-            _buildSectionTitle(GroupsStrings.sectionMembers),
-            Wrap(
-              spacing: 8.0,
-              runSpacing: 8.0,
-              children: members
-                  .map((p) => _buildParticipantChip(
-                context: context,
-                participant: p,
-                isLeader: false,
-                onPromote: () => _promoteToLeader(p),
-                onDemote: () {},
-                onRemove: () => _removeParticipant(p),
-              ))
-                  .toList(),
+            Expanded(
+              // Apply the top flex factor
+              flex: topSectionFlex,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle(GroupsStrings.sectionLeader),
+                    leader != null
+                        ? _buildParticipantChip(
+                      context: context,
+                      participant: leader,
+                      isLeader: true,
+                      onPromote: () {},
+                      onDemote: _handleDemoteLeader,
+                      onRemove: () => _removeParticipant(leader),
+                    )
+                        : Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Text(GroupsStrings.noLeaderSelected, style: const TextStyle(fontStyle: FontStyle.italic)),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildSectionTitle(GroupsStrings.sectionMembers),
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 8.0,
+                      children: members
+                          .map((p) => _buildParticipantChip(
+                        context: context,
+                        participant: p,
+                        isLeader: false,
+                        onPromote: () => _promoteToLeader(p),
+                        onDemote: () {},
+                        onRemove: () => _removeParticipant(p),
+                      ))
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const Divider(height: 24),
             TextField(
@@ -180,6 +199,8 @@ class _ParticipantsManagementDialogState
                   isDense: true),
             ),
             Expanded(
+              // Apply the bottom flex factor
+              flex: bottomSectionFlex,
               child: ListView.builder(
                 itemCount: _filteredAvailableUsers.length,
                 itemBuilder: (context, index) {
