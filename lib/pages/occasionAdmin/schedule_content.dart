@@ -108,7 +108,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           field: Tb.events.id,
           type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
-          width: 50,
+          width: 60,
           renderer: (rendererContext) =>
               DataGridHelper.idRenderer(rendererContext),
         ),
