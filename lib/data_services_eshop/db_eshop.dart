@@ -218,7 +218,7 @@ class DbEshop {
       // Populate the formTitles string for each product
       product.formTitles = product.formIds
           .map((id) => formsMap[id])
-          .where((title) => title != null && title.isNotEmpty)
+          .map((f) => f.toString())
           .join(', ');
     }
 
