@@ -11,6 +11,7 @@ import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/components/eshop/models/transaction_model.dart';
+import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -184,11 +185,15 @@ class DbEshop {
     final productContextLinks = (response['product_inventory_contexts'] as List)
         .map((pc) => ProductInventoryContextModel.fromJson(pc))
         .toList();
+    final forms = (response['forms'] as List)
+        .map((f) => FormModel.fromJson(f))
+        .toList();
 
-    // Create maps for efficient lookups
+    // Create lookup maps for efficient joins
     final typesMap = {for (var t in types) t.id: t};
     final poolsMap = {for (var p in pools) p.id: p};
     final contextsMap = {for (var c in contexts) c.id: c};
+    final formsMap = {for (var form in forms) form.id: form.title};
 
     // Join inventory pools to inventory contexts
     for (var context in contexts) {
@@ -200,15 +205,21 @@ class DbEshop {
       link.inventoryContext = contextsMap[link.inventoryContextId];
     }
 
-    // Group links by product ID
+    // Group inventory links by product ID
     final productLinksMap = groupBy(productContextLinks, (link) => link.productId);
 
-    // Join everything to the final product models
+    // Join all data to the final product models
     for (var product in products) {
       product.productType = typesMap[product.productTypeId];
       product.includedInventories = (productLinksMap[product.id] ?? [])
           .where((link) => link.inventoryContext != null)
           .toList();
+
+      // Populate the formTitles string for each product
+      product.formTitles = product.formIds
+          .map((id) => formsMap[id])
+          .where((title) => title != null && title.isNotEmpty)
+          .join(', ');
     }
 
     products.sort((a, b) {
@@ -225,9 +236,9 @@ class DbEshop {
       productTypes: types,
       inventoryPools: pools,
       inventoryContexts: contexts,
+      forms: forms,
     );
   }
-
   static Future<int> updateProduct(ProductModel product) async {
     return await _supabase.rpc(
       'update_product',

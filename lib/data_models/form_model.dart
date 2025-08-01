@@ -47,7 +47,8 @@ class FormModel {
   String? header;
   String? headerOff;
   String? link;
-  List<FormFieldModel>? relatedFields;
+  // UPDATED: Now non-nullable.
+  List<FormFieldModel> relatedFields;
   List<BankAccountModel>? availableBankAccounts;
   FormStatsModel? stats;
   bool? isReminderEnabled;
@@ -75,11 +76,11 @@ class FormModel {
     this.header,
     this.headerOff,
     this.link,
-    this.relatedFields,
+    List<FormFieldModel>? relatedFields,
     this.availableBankAccounts,
-    this.stats, // Updated constructor.
+    this.stats,
     this.isReminderEnabled,
-  });
+  }) : relatedFields = relatedFields ?? [];
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
     OccasionModel? parsedOccasionModel;
@@ -117,13 +118,13 @@ class FormModel {
           ? (json['fields'] as List)
           .map((field) => FormFieldModel.fromJson(field))
           .toList()
-          : null,
+          : [],
       availableBankAccounts: json['available_bank_accounts'] != null
           ? (json['available_bank_accounts'] as List)
           .map((account) => BankAccountModel.fromJson(account))
           .toList()
           : null,
-      stats: json['stats'] != null // Parse the nested stats object.
+      stats: json['stats'] != null
           ? FormStatsModel.fromJson(json['stats'])
           : null,
       isReminderEnabled: json['is_reminder_feature_enabled'],
