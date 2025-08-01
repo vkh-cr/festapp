@@ -437,194 +437,202 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                 key: _formKey,
                 child: CustomScrollView(
                   slivers: [
-                    SliverToBoxAdapter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            InventoryStrings.settingsConfigureTitle(_bundle!.pool.title ?? 'Pool'),
-                            style: Theme.of(innerContext).textTheme.headlineSmall,
-                          ),
-                          const SizedBox(height: 24),
-                          Text(InventoryStrings.settingsPoolSettingsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _poolTitleController,
-                            decoration: InputDecoration(
-                              labelText: InventoryStrings.poolTitleLabel,
-                              border: const OutlineInputBorder(),
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      sliver: SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              InventoryStrings.settingsConfigureTitle(_bundle!.pool.title ?? 'Pool'),
+                              style: Theme.of(innerContext).textTheme.headlineSmall,
                             ),
-                            validator: (value) => (value == null || value.trim().isEmpty)
-                                ? InventoryStrings.validationTitleEmpty
-                                : null,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _sellableCapacityController,
-                            decoration: InputDecoration(
-                              labelText: InventoryStrings.settingsSellableCapacityLabel,
-                              hintText: InventoryStrings.settingsSellableCapacityHint,
-                              border: const OutlineInputBorder(),
+                            const SizedBox(height: 24),
+                            Text(InventoryStrings.settingsPoolSettingsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _poolTitleController,
+                              decoration: InputDecoration(
+                                labelText: InventoryStrings.poolTitleLabel,
+                                border: const OutlineInputBorder(),
+                              ),
+                              validator: (value) => (value == null || value.trim().isEmpty)
+                                  ? InventoryStrings.validationTitleEmpty
+                                  : null,
                             ),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                          ),
-                          const SizedBox(height: 24),
-                          Text(InventoryStrings.settingsDescriptionLabel, style: Theme.of(context).textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          if(_bundle!.pool.description?.isNotEmpty ?? false)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: InputDecorator(
-                                decoration: InputDecoration(
-                                  border: const OutlineInputBorder(),
-                                  contentPadding: const EdgeInsets.all(12),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _sellableCapacityController,
+                              decoration: InputDecoration(
+                                labelText: InventoryStrings.settingsSellableCapacityLabel,
+                                hintText: InventoryStrings.settingsSellableCapacityHint,
+                                border: const OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            ),
+                            const SizedBox(height: 24),
+                            Text(InventoryStrings.settingsDescriptionLabel, style: Theme.of(context).textTheme.labelLarge),
+                            const SizedBox(height: 8),
+                            if(_bundle!.pool.description?.isNotEmpty ?? false)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: InputDecorator(
+                                  decoration: InputDecoration(
+                                    border: const OutlineInputBorder(),
+                                    contentPadding: const EdgeInsets.all(12),
+                                  ),
+                                  child: HtmlView(html: _bundle!.pool.description!, isSelectable: true),
                                 ),
-                                child: HtmlView(html: _bundle!.pool.description!, isSelectable: true),
+                              ),
+                            Center(
+                              child: ElevatedButton.icon(
+                                icon: const Icon(Icons.edit),
+                                label: Text("Edit content".tr()),
+                                onPressed: () async {
+                                  final result = await RouterService.navigatePageInfo(
+                                    context,
+                                    HtmlEditorRoute(
+                                        content: {HtmlEditorPage.parContent: _bundle!.pool.description ?? ""},
+                                        occasionId: _bundle!.pool.occasionId),
+                                  );
+                                  if (result != null && mounted) {
+                                    setState(() => _bundle!.pool.description = result as String);
+                                  }
+                                },
                               ),
                             ),
-                          Center(
-                            child: ElevatedButton.icon(
-                              icon: const Icon(Icons.edit),
-                              label: Text("Edit content".tr()),
-                              onPressed: () async {
-                                final result = await RouterService.navigatePageInfo(
-                                  context,
-                                  HtmlEditorRoute(
-                                      content: {HtmlEditorPage.parContent: _bundle!.pool.description ?? ""},
-                                      occasionId: _bundle!.pool.occasionId),
-                                );
-                                if (result != null && mounted) {
-                                  setState(() => _bundle!.pool.description = result as String);
-                                }
+                            const SizedBox(height: 24),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  InventoryStrings.settingsTypeLabel,
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                const SizedBox(height: 8),
+                                Center(
+                                  child: ToggleButtons(
+                                    isSelected: [
+                                      _selectedType == InventoryPoolType.accommodation,
+                                      _selectedType == InventoryPoolType.food,
+                                      _selectedType == InventoryPoolType.other,
+                                    ],
+                                    onPressed: (int index) {
+                                      setState(() {
+                                        if (index == 0) {
+                                          _selectedType = InventoryPoolType.accommodation;
+                                        } else if (index == 1) {
+                                          _selectedType = InventoryPoolType.food;
+                                        } else if (index == 2) {
+                                          _selectedType = InventoryPoolType.other;
+                                        }
+                                      });
+                                    },
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    children: InventoryPoolType.values.map((type) {
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(type.icon, size: 18),
+                                            const SizedBox(width: 8),
+                                            Text(type.displayName),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            Text(InventoryStrings.settingsPlaceLabel, style: Theme.of(context).textTheme.labelLarge),
+                            const SizedBox(height: 8),
+                            InputDecorator(
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              ),
+                              child: ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(_bundle!.pool.place?.title ?? InventoryStrings.settingsNoPlaceAssigned),
+                                trailing: ElevatedButton(
+                                  child: Text("Edit".tr()),
+                                  onPressed: _showSelectPlaceDialog,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(InventoryStrings.settingsAutoAssignmentLabel),
+                              subtitle: Text(InventoryStrings.settingsAutoAssignmentSubtitle),
+                              value: _bundle!.pool.isAutoResourceAssignment,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  _bundle!.pool.isAutoResourceAssignment = value;
+                                });
                               },
                             ),
-                          ),
-                          const SizedBox(height: 24),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                InventoryStrings.settingsTypeLabel,
-                                style: Theme.of(context).textTheme.labelLarge,
-                              ),
-                              const SizedBox(height: 8),
-                              Center(
-                                child: ToggleButtons(
-                                  isSelected: [
-                                    _selectedType == InventoryPoolType.accommodation,
-                                    _selectedType == InventoryPoolType.food,
-                                    _selectedType == InventoryPoolType.other,
-                                  ],
-                                  onPressed: (int index) {
-                                    setState(() {
-                                      if (index == 0) {
-                                        _selectedType = InventoryPoolType.accommodation;
-                                      } else if (index == 1) {
-                                        _selectedType = InventoryPoolType.food;
-                                      } else if (index == 2) {
-                                        _selectedType = InventoryPoolType.other;
-                                      }
-                                    });
-                                  },
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  children: InventoryPoolType.values.map((type) {
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(type.icon, size: 18),
-                                          const SizedBox(width: 8),
-                                          Text(type.displayName),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          Text(InventoryStrings.settingsPlaceLabel, style: Theme.of(context).textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          InputDecorator(
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            const Divider(height: 40),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(InventoryStrings.settingsContextsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
+                                IconButton(
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  tooltip: InventoryStrings.settingsAddContextTooltip,
+                                  onPressed: () => _showEditContextDialog(),
+                                )
+                              ],
                             ),
-                            child: ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: Text(_bundle!.pool.place?.title ?? InventoryStrings.settingsNoPlaceAssigned),
-                              trailing: ElevatedButton(
-                                child: Text("Edit".tr()),
-                                onPressed: _showSelectPlaceDialog,
+                            const SizedBox(height: 8),
+                            if (activeContexts.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                child: Center(child: Text(InventoryStrings.settingsNoContexts)),
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          SwitchListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(InventoryStrings.settingsAutoAssignmentLabel),
-                            subtitle: Text(InventoryStrings.settingsAutoAssignmentSubtitle),
-                            value: _bundle!.pool.isAutoResourceAssignment,
-                            onChanged: (bool value) {
-                              setState(() {
-                                _bundle!.pool.isAutoResourceAssignment = value;
-                              });
-                            },
-                          ),
-                          const Divider(height: 40),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(InventoryStrings.settingsContextsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
-                              IconButton(
-                                icon: const Icon(Icons.add_circle_outline),
-                                tooltip: InventoryStrings.settingsAddContextTooltip,
-                                onPressed: () => _showEditContextDialog(),
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          if (activeContexts.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16.0),
-                              child: Center(child: Text(InventoryStrings.settingsNoContexts)),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
 
-                    InventoryContextsEditor(
-                      activeContexts: activeContexts,
-                      deletedContexts: deletedContexts,
-                      originalContexts: _originalContexts,
-                      pool: _bundle?.pool,
-                      allProducts: _bundle?.products ?? [],
-                      onReorder: _reorderContext,
-                      onEdit: (context) => _showEditContextDialog(contextModel: context),
-                      // MODIFICATION: Pass the updated method reference.
-                      onEditProduct: _showSelectProductDialog,
-                      onRemove: _removeContext,
-                      onRestore: _addContextBack,
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: InventoryContextsEditor(
+                        activeContexts: activeContexts,
+                        deletedContexts: deletedContexts,
+                        originalContexts: _originalContexts,
+                        pool: _bundle?.pool,
+                        allProducts: _bundle?.products ?? [],
+                        onReorder: _reorderContext,
+                        onEdit: (context) => _showEditContextDialog(contextModel: context),
+                        onEditProduct: _showSelectProductDialog,
+                        onRemove: _removeContext,
+                        onRestore: _addContextBack,
+                      ),
                     ),
 
-                    SliverToBoxAdapter(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 48),
-                          Center(
-                            child: TextButton(
-                              onPressed: () => _confirmDelete(innerContext),
-                              child: Text(
-                                InventoryStrings.settingsDeletePoolButton,
-                                style: TextStyle(color: ThemeConfig.redColor(innerContext)),
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      sliver: SliverToBoxAdapter(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 48),
+                            Center(
+                              child: TextButton(
+                                onPressed: () => _confirmDelete(innerContext),
+                                child: Text(
+                                  InventoryStrings.settingsDeletePoolButton,
+                                  style: TextStyle(color: ThemeConfig.redColor(innerContext)),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 48),
-                        ],
+                            const SizedBox(height: 48),
+                          ],
+                        ),
                       ),
                     )
                   ],

@@ -3,8 +3,8 @@ import 'package:fstapp/data_models/user_info_model.dart';
 
 /// Represents a user's participation in a group, including their admin status.
 class GroupParticipantModel {
-  final UserInfoModel? userInfo;
-  final bool? isAdmin;
+  UserInfoModel? userInfo;
+  bool? isAdmin;
 
   GroupParticipantModel({
     this.userInfo,

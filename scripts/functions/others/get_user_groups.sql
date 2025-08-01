@@ -1,4 +1,4 @@
-DROP FUNCTION public.get_user_groups(BIGINT)
+DROP FUNCTION public.get_user_groups(BIGINT);
 
 CREATE OR REPLACE FUNCTION public.get_user_groups(p_occasion_id BIGINT)
 RETURNS JSONB AS $$
