@@ -748,11 +748,12 @@
     "changedBy": "Změnil(a)",
     "changes": "Změny",
     "paidOrSent": "Zaplaceno nebo odesláno",
-    "cancelled": "Stornováno"
+    "cancelled": "Stornováno",
+    "usedInForms": "Použito ve formulářích"
   },
   "FormsFeature": {
     "formsTitle": "Formuláře",
-    "createNewForm": "Vytvořit nový formulář",
+    "createNewForm": "Vytvořit/Zkopírovat formulář",
     "createCopy": "Vytvořit kopii",
     "statusOpen": "Formulář přijímá odpovědi",
     "statusClosed": "Vypnutý",
@@ -776,7 +777,16 @@
     "createNewProductTypeOption": "Vytvořit nový typ produktu",
     "untitledProductType": "Bez názvu",
     "noProductTypesToAdd": "Žádné další typy produktů k přidání.",
-    "newProductTypeDefaultName": "Nový typ produktu"
+    "newProductTypeDefaultName": "Nový typ produktu",
+    "createFormTitle": "Vytvořit formulář",
+    "createNewBlankForm": "Vytvořit nový prázdný formulář",
+    "orCreateFromCopy": "Nebo vytvořit kopii z existujícího formuláře:",
+    "searchFormsToCopy": "Hledat formuláře ke zkopírování...",
+    "groupHappeningNow": "Právě probíhá",
+    "groupUpcoming": "Nadcházející",
+    "groupOther": "Ostatní",
+    "numberOfResponsesTooltip": "Počet odpovědí: {0}",
+    "noFormsForEventPrompt": "Formuláře k této události nejsou k dispozici. Klikněte na '{createNew}' pro vytvoření."
   },
   "FeatureOrders": {
     "cancel": "Stornovat",
@@ -1016,7 +1026,38 @@
     "findOccasionHint": "Najít událost...",
     "newOccasionButton": "Nová událost",
     "viewApp": "Zobrazit aplikaci",
-    "reservations": "Rezervace"
+    "reservations": "Rezervace",
+    "myFestival": "mojeakce",
+    "addNewEventTitle": "Přidat novou událost",
+    "titleLabel": "Název",
+    "linkLabel": "Odkaz",
+    "eventAvailableAt": "Tato událost bude dostupná na",
+    "cancelButton": "Zrušit",
+    "createButton": "Vytvořit",
+    "linkIsRequiredError": "Odkaz je povinný",
+    "invalidCharactersError": "Neplatné znaky",
+    "linkInUseError": "Odkaz je již používán"
+  },
+  "GroupStrings": {
+    "newGroup": "Nová skupina",
+    "columnId": "Id",
+    "columnName": "Název",
+    "columnParticipants": "Účastníci",
+    "columnContent": "Obsah",
+    "columnPlace": "Místo",
+    "manageParticipantsTooltip": "Spravovat účastníky",
+    "buttonEdit": "Upravit",
+    "buttonLocation": "Místo",
+    "dialogTitle": "Správa účastníků: {groupTitle} ({count})",
+    "sectionLeader": "Vedoucí",
+    "noLeaderSelected": "Není vybrán žádný vedoucí.",
+    "sectionMembers": "Členové",
+    "searchHint": "Hledat podle jména či jiných informací...",
+    "buttonAdd": "Přidat",
+    "buttonClose": "Zavřít",
+    "demoteLeaderTooltip": "Zrušit vedoucího",
+    "assignLeaderTooltip": "Nastavit jako vedoucího",
+    "removeParticipantTooltip": "Odebrat účastníka"
   },
   "_": "_"
 }

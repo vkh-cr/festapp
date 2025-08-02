@@ -5,6 +5,7 @@ import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/features_strings.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
@@ -83,7 +84,7 @@ class OccasionEditCard extends StatelessWidget {
                 itemBuilder: (BuildContext context) => [
                   PopupMenuItem(
                     value: "create_copy",
-                    child: Text(FeaturesStrings.createCopy.tr()),
+                    child: Text(FormStrings.createCopy.tr()),
                   ),
                 ],
               ),
@@ -119,7 +120,7 @@ class OccasionEditCard extends StatelessWidget {
                           spacing: 12.0,
                           runSpacing: 4.0,
                           children: [
-                            _buildStat(context, icon: Icons.people_alt_outlined, value: occasion.stats!.total.toString(), tooltip: FeaturesStrings.responses.tr()),
+                            _buildStat(context, icon: Icons.chat_bubble, value: occasion.stats!.total.toString(), tooltip: FormStrings.responses.tr()),
                             _buildStat(context, icon: Icons.check_circle_outline, value: (occasion.stats!.paidOrSent + occasion.stats!.used).toString(), tooltip: OrdersStrings.gridPaidOrSent.tr()),
                             _buildStat(context, icon: Icons.shopping_cart_outlined, value: occasion.stats!.ordered.toString(), tooltip: OrdersStrings.gridOrdered.tr()),
                             _buildStat(context, icon: Icons.cancel_outlined, value: occasion.stats!.storno.toString(), tooltip: OrdersStrings.gridCancelled.tr()),

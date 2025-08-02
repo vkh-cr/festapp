@@ -748,11 +748,12 @@
     "changedBy": "Changed By",
     "changes": "Changes",
     "paidOrSent": "Paid or Sent",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "usedInForms": "Used in Forms"
   },
   "FormsFeature": {
     "formsTitle": "Forms",
-    "createNewForm": "Create New Form",
+    "createNewForm": "Create/Copy Form",
     "createCopy": "Create Copy",
     "statusOpen": "Form is Open",
     "statusClosed": "Closed",
@@ -776,7 +777,16 @@
     "createNewProductTypeOption": "Create New Product Type",
     "untitledProductType": "Untitled",
     "noProductTypesToAdd": "No other product types available to add.",
-    "newProductTypeDefaultName": "New Product Type"
+    "newProductTypeDefaultName": "New Product Type",
+    "createFormTitle": "Create a Form",
+    "createNewBlankForm": "Create a new blank form",
+    "orCreateFromCopy": "Or create a copy from an existing form:",
+    "searchFormsToCopy": "Search forms to copy...",
+    "groupHappeningNow": "Happening Now",
+    "groupUpcoming": "Upcoming",
+    "groupOther": "Other",
+    "numberOfResponsesTooltip": "Number of responses: {0}",
+    "noFormsForEventPrompt": "There are no forms for this event. Click '{createNew}' to add one."
   },
   "FeatureOrders": {
     "cancel": "Cancel",
@@ -1006,7 +1016,38 @@
     "findOccasionHint": "Find event...",
     "newOccasionButton": "New event",
     "viewApp": "View App",
-    "reservations": "Reservations"
+    "reservations": "Reservations",
+    "myFestival": "myfestival",
+    "addNewEventTitle": "Add New Event",
+    "titleLabel": "Title",
+    "linkLabel": "Link",
+    "eventAvailableAt": "This event will be available at",
+    "cancelButton": "Cancel",
+    "createButton": "Create",
+    "linkIsRequiredError": "Link is required",
+    "invalidCharactersError": "Invalid characters",
+    "linkInUseError": "Link already in use"
+  },
+  "GroupStrings": {
+    "newGroup": "New Group",
+    "columnId": "Id",
+    "columnName": "Name",
+    "columnParticipants": "Participants",
+    "columnContent": "Content",
+    "columnPlace": "Place",
+    "manageParticipantsTooltip": "Manage Participants",
+    "buttonEdit": "Edit",
+    "buttonLocation": "Location",
+    "dialogTitle": "Manage Participants: {groupTitle} ({count})",
+    "sectionLeader": "Leader",
+    "noLeaderSelected": "No leader selected.",
+    "sectionMembers": "Members",
+    "searchHint": "Search by name or other info...",
+    "buttonAdd": "Add",
+    "buttonClose": "Close",
+    "demoteLeaderTooltip": "Demote leader",
+    "assignLeaderTooltip": "Assign as leader",
+    "removeParticipantTooltip": "Remove participant"
   },
   "_":"_"
 }

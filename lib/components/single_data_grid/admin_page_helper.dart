@@ -2,23 +2,23 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/occasion_settings_tab.dart';
 import 'package:fstapp/components/activities/activities_content.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/eshop/blueprint_editor_tab.dart';
 import 'package:fstapp/components/email_templates/views/email_templates_tab.dart';
-import 'package:fstapp/pages/form/pages/forms_tab.dart';
+import 'package:fstapp/components/forms/views/forms_tab.dart';
 import 'package:fstapp/components/eshop/orders_tab.dart';
 import 'package:fstapp/components/eshop/report_tab.dart';
 import 'package:fstapp/components/eshop/tickets_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/game_tab.dart';
+import 'package:fstapp/components/groups/game_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/information_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/places_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/schedule_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/service_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/user_groups_tab.dart';
+import 'package:fstapp/components/groups/user_groups_tab.dart';
 import 'package:fstapp/pages/occasionAdmin/users_tab.dart';
 
 import '../eshop/products_tab.dart';
@@ -97,7 +97,7 @@ class AdminTabDefinition {
         icon: Icons.gamepad,
         widget: GameTab()),
     form: AdminTabDefinition(
-        label: FeaturesStrings.formsTitle, icon: Icons.list, widget: FormsTab()),
+        label: FormStrings.formsTitle, icon: Icons.list, widget: FormsTab()),
     blueprint: AdminTabDefinition(
         label: "Blueprint".tr(),
         icon: Icons.grid_on,
