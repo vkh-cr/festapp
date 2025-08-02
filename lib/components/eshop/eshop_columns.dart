@@ -1,28 +1,18 @@
-import 'dart:convert';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
-import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
-import 'package:fstapp/components/eshop/models/ticket_model.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
-import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/components/eshop/views/products_dialog.dart';
 import 'package:fstapp/components/eshop/views/transactions_dialog.dart';
-import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
-import 'package:fstapp/services/time_helper.dart';
-import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
+import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:trina_grid/trina_grid.dart';
-import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 
 import 'inventory_inclusion_renderer.dart';
 import 'models/orders_history_model.dart';
@@ -62,6 +52,7 @@ class EshopColumns {
   static const String PRODUCT_DESCRIPTION = "productDescription";
   static const String PRODUCT_INCLUDED_INVENTORY = "productIncludedInventory";
   static const String PRODUCT_MODEL_REFERENCE = "productModelReference";
+  static const String PRODUCT_USED_IN_FORMS = "productUsedInForms";
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
@@ -246,6 +237,16 @@ class EshopColumns {
             availableContexts: allContexts,
           );
         },
+      ),
+    ],
+    PRODUCT_USED_IN_FORMS: [
+      TrinaColumn(
+        title: OrdersStrings.gridUsedInForms,
+        textAlign: TrinaColumnTextAlign.end,
+        field: PRODUCT_USED_IN_FORMS,
+        type: TrinaColumnType.text(),
+        width: 250,
+        readOnly: true,
       ),
     ],
     TICKET_ID: [

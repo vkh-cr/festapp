@@ -1,5 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/order_product_ticket_model.dart';
+import 'package:fstapp/components/eshop/models/ticket_model.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
+import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
@@ -16,6 +21,24 @@ class OccasionEditorData {
   final List<OccasionUserModel> users;
   final List<FormModel> forms;
   OccasionEditorData({required this.users, required this.forms});
+}
+
+class OccasionUsersBundle {
+  final Map<String, UserInfoModel> users;
+  final Map<int, TicketModel> tickets;
+  final Map<int, OrderProductTicketModel> orderProductTickets;
+  final Map<int, OrderModel> orders;
+  final Map<int, FormModel> forms;
+  final Map<int, FormFieldModel> formFields;
+
+  OccasionUsersBundle({
+    required this.users,
+    required this.tickets,
+    required this.orderProductTickets,
+    required this.orders,
+    required this.forms,
+    required this.formFields,
+  });
 }
 
 class DbUsers {
@@ -40,37 +63,28 @@ class DbUsers {
           data["forms"].map((x) => FormModel.fromJson(x))
       );
 
-      // Create a lookup map for forms using their UUID key.
       final formMap = { for (var form in forms) form.key : form };
 
-      // Link each user to their corresponding form object.
       for (final user in users) {
         if (user.formId != null && formMap.containsKey(user.formId)) {
           user.form = formMap[user.formId];
         }
       }
 
-      // Sort the list of users
       users.sort((a, b) {
-        // Determine if a user has special privileges.
         bool isAPrivileged = a.isPrivileged();
         bool isBPrivileged = b.isPrivileged();
 
-        // Primary sort: privileged users come first.
         if (isAPrivileged && !isBPrivileged) return -1;
         if (!isAPrivileged && isBPrivileged) return 1;
 
-        // Secondary sort: by date, if privilege status is the same.
-        // Use orderCreatedAt if available, otherwise fall back to createdAt.
         final dateA = a.orderCreatedAt ?? a.createdAt;
         final dateB = b.orderCreatedAt ?? b.createdAt;
 
-        // Handle cases where one or both dates might be null, sorting nulls to the end.
         if (dateA == null && dateB == null) return 0;
         if (dateA == null) return 1;
         if (dateB == null) return -1;
 
-        // Compare the effective dates in ascending order (oldest first).
         return dateA.compareTo(dateB);
       });
 
@@ -80,6 +94,108 @@ class DbUsers {
       print("Authorization error: ${result['message']}");
     }
     return [];
+  }
+
+
+  static Future<OccasionUsersBundle> getOccasionUsersWithOrdersBundle() async {
+    final response = await _supabase.rpc(
+      'get_users_from_occasion_with_orders',
+      params: {'oc': RightsService.currentOccasionId()!},
+    );
+
+    final json = response;
+
+    // 1. Parse all data into dictionaries, keyed by ID
+    final users = (json['users'] as Map<String, dynamic>).map((key, value) => MapEntry(key, UserInfoModel.fromJson(value)));
+    final tickets = (json['tickets'] as Map<String, dynamic>).map((key, value) => MapEntry(int.parse(key), TicketModel.fromJson(value)));
+    final orderProductTickets = (json['order_product_ticket'] as Map<String, dynamic>).map((key, value) => MapEntry(int.parse(key), OrderProductTicketModel.fromJson(value)));
+    final orders = (json['orders'] as Map<String, dynamic>).map((key, value) => MapEntry(int.parse(key), OrderModel.fromJson(value)));
+    final forms = (json['forms'] as Map<String, dynamic>).map((key, value) => MapEntry(int.parse(key), FormModel.fromJson(value)));
+    final formFields = (json['form_fields'] as Map<String, dynamic>).map((key, value) => MapEntry(int.parse(key), FormFieldModel.fromJson(value)));
+
+    // 2. Link the parsed models together
+    final formMapByKey = { for (var f in forms.values) f.key : f };
+    final optsByTicketId = groupBy(orderProductTickets.values, (opt) => opt.ticketId);
+
+    for (final order in orders.values) {
+      if (order.formKey != null) {
+        order.form = formMapByKey[order.formKey];
+      }
+    }
+
+    for (final ticket in tickets.values) {
+      final ticketOpts = optsByTicketId[ticket.id];
+      if (ticketOpts != null && ticketOpts.isNotEmpty) {
+        final orderId = ticketOpts.first.orderId;
+        if(orderId != null) {
+          ticket.relatedOrder = orders[orderId];
+        }
+      }
+    }
+
+    for (final user in users.values) {
+      if (user.ticketId != null) {
+        user.ticket = tickets[user.ticketId];
+      }
+    }
+
+    for (final field in formFields.values) {
+      if (field.form != null && forms.containsKey(field.form)) {
+        forms[field.form]!.relatedFields.add(field);
+      }
+    }
+
+    // 3. **UPDATED**: Enhance user data with info from their order form in a single pass.
+    for (final user in users.values) {
+      final order = user.ticket?.relatedOrder;
+      final orderDataFields = order?.data?['fields'];
+
+      if (orderDataFields is! List) continue;
+
+      for (final fieldResponse in orderDataFields) {
+        if (fieldResponse is! Map || fieldResponse.isEmpty) continue;
+
+        final fieldIdStr = fieldResponse.keys.first as String;
+        final fieldValue = fieldResponse.values.first;
+        if (fieldValue == null) continue;
+
+        final fieldId = int.tryParse(fieldIdStr);
+        if (fieldId == null) continue;
+
+        final formFieldModel = formFields[fieldId];
+        if (formFieldModel == null) continue;
+
+        // Check for birth_date if not already present on the user model
+        if (user.birthDate == null) {
+          if (formFieldModel.type == FormHelper.fieldTypeBirthDate) {
+            final date = DateTime.tryParse(fieldValue as String);
+            if (date != null) user.birthDate = date;
+          } else if (formFieldModel.type == FormHelper.fieldTypeBirthYear) {
+            final year = int.tryParse(fieldValue.toString());
+            if (year != null) user.birthDate = DateTime(year);
+          }
+        }
+
+        // Check for the group feature field if not already present
+        if (user.groupFeatureAnswer == null && formFieldModel.data?[FormHelper.isGroupFeatureField] == true) {
+          user.groupFeatureAnswer = fieldValue.toString();
+        }
+
+        // Exit early if we've found both pieces of information we're looking for
+        if (user.birthDate != null && user.groupFeatureAnswer != null) {
+          break;
+        }
+      }
+    }
+
+    return OccasionUsersBundle(
+      users: users,
+      tickets: tickets,
+      orderProductTickets: orderProductTickets,
+      orders: orders,
+      forms: forms,
+      formFields: formFields,
+    );
   }
 
   static Future<List<UserInfoModel>> getUsersInfo(List<String> userIds) async {
@@ -130,13 +246,13 @@ class DbUsers {
   }
 
   static Future<void> updateUserInfo(OccasionUserModel oum) async {
-      final response = await _supabase.rpc("update_user",
-          params: {"input_data":{"occasion": oum.occasion!, "user": oum.user, "data": oum.data}});
+    final response = await _supabase.rpc("update_user",
+        params: {"input_data":{"occasion": oum.occasion!, "user": oum.user, "data": oum.data}});
 
-      var code = response['code'];
-      if(code != 200 && code != 201){
-        throw Exception(response['message']);
-      }
+    var code = response['code'];
+    if(code != 200 && code != 201){
+      throw Exception(response['message']);
+    }
   }
 
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw, dynamic data) async {
