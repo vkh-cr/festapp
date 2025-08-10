@@ -193,7 +193,7 @@ class DbEshop {
     final typesMap = {for (var t in types) t.id: t};
     final poolsMap = {for (var p in pools) p.id: p};
     final contextsMap = {for (var c in contexts) c.id: c};
-    final formsMap = {for (var form in forms) form.id: form.title};
+    final formsMap = {for (var form in forms) form.id: form.toString()};
 
     // Join inventory pools to inventory contexts
     for (var context in contexts) {
@@ -218,7 +218,7 @@ class DbEshop {
       // Populate the formTitles string for each product
       product.formTitles = product.formIds
           .map((id) => formsMap[id])
-          .where((title) => title != null && title.isNotEmpty)
+          .map((f) => f)
           .join(', ');
     }
 
