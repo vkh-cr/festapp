@@ -47,8 +47,8 @@ BEGIN
   ------------------------------------------------------------------
 
   -- 3a. Email Templates
-  INSERT INTO public.email_templates (html, occasion, subject, organization, code)
-  SELECT html, new_occ, subject, organization, code
+  INSERT INTO public.email_templates (html, occasion, unit, subject, organization, code)
+  SELECT html, new_occ, unit, subject, organization, code
   FROM public.email_templates
   WHERE occasion = oc;
 

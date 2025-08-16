@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.17.7+196
+version: 0.17.8+197
 
 environment:
   sdk: '>=2.19.5 <3.32.8'
@@ -75,13 +75,13 @@ dependencies:
     git:
       url: https://github.com/jtmuller5/pwa_install.git
       ref: 82320a219574c1b5ddf1d83e080cad5a84261c2d
-  flutter_form_builder: ^10.0.1
+  flutter_form_builder: ^10.2.0
   form_builder_validators: ^11.2.0
   qr_flutter: ^4.1.0
   screenshot: ^3.0.0
   mobile_scanner: ^7.0.1
   flutter_map_animations: ^0.8.0
-  auto_route: ^10.1.0
+  auto_route: ^10.1.2
   adaptive_theme: ^3.7.0
   connectivity_plus: ^6.1.5
   vector_map_tiles_mbtiles: ^1.2.0
@@ -95,12 +95,12 @@ dependencies:
 #      ref: 97b3618b9891eb2b05a1b71ee75c432a2dce6d1a
   flutter_widget_from_html_core: ^0.17.0
   fwfh_cached_network_image: ^0.16.1
-  multi_split_view: ^3.6.0
+  multi_split_view: ^3.6.1
   timezone: ^0.10.1
 
 dev_dependencies:
-  auto_route_generator: ^10.2.3
-  build_runner: ^2.5.4
+  auto_route_generator: ^10.2.4
+  build_runner: ^2.7.0
   flutter_launcher_icons: ^0.14.3
   flutter_test:
     sdk: flutter
