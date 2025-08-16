@@ -813,7 +813,8 @@
     "applications": "Přihlášky",
     "application": "Přihláška",
     "ordersTab": "Objednávky",
-    "ordersHistoryTab": "Historie objednávek"
+    "ordersHistoryTab": "Historie objednávek",
+    "setAsUsed": "Změnit na využito"
   },
   "UserColumns": {
     "id": "Id",
