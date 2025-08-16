@@ -102,7 +102,7 @@ class _OrdersContentState extends State<OrdersContent> {
           : DataGridFirstColumn.check,
       idColumn: TbEshop.orders.id,
       actionsExtended: DataGridActionsController(
-        areAllActionsEnabled: RightsService.canUpdateUsers,
+        areAllActionsEnabled: RightsService.isEditorOrder,
         isAddActionPossible: () => false,
       ),
       headerChildren: [
