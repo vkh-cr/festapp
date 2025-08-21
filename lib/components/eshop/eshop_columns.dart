@@ -1,4 +1,3 @@
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
@@ -11,6 +10,9 @@ import 'package:fstapp/components/eshop/views/products_dialog.dart';
 import 'package:fstapp/components/eshop/views/transactions_dialog.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/data_services_eshop/db_tickets.dart';
+import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:trina_grid/trina_grid.dart';
 
@@ -31,6 +33,7 @@ class EshopColumns {
   static const String TICKET_PRODUCTS = "ticketProducts";
   static const String TICKET_PRODUCTS_EXTENDED = "ticketProductsExtended";
   static const String TICKET_PRODUCTS_EDIT = "ticketProductsEdit";
+  static const String TICKET_CONFIRM = "confirmTicket";
 
   static const String TICKET_CREATED_AT = "ticketCreatedAt";
   static const String TICKET_SPOT = "ticketSpot";
@@ -522,10 +525,57 @@ class EshopColumns {
             },
             child: Row(
               children: [
-                Icon(Icons.category),
+                const Icon(Icons.category),
                 Padding(
                   padding: const EdgeInsets.all(6),
                   child: Text(OrdersStrings.gridProducts),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ],
+    TICKET_CONFIRM: (Map<String, dynamic> data) => [
+      TrinaColumn(
+        enableAutoEditing: false,
+        title: OrdersStrings.confirmTicket, // Re-used for button text
+        field: TICKET_CONFIRM,
+        type: TrinaColumnType.text(),
+        width: 200,
+        renderer: (rendererContext) {
+          return ElevatedButton(
+            onPressed: () async {
+              final ticketId = rendererContext.row.cells[TICKET_ID]!.value as int;
+              final ticketSymbol = rendererContext.row.cells[TICKET_SYMBOL]?.value as String? ?? ticketId.toString();
+
+              // Using the ticket symbol directly as the confirmation message body for simplicity.
+              var confirm = await DialogHelper.showConfirmationDialog(
+                context,
+                OrdersStrings.confirmTicket, // Re-used for dialog title
+                ticketSymbol, // Simple content for the dialog
+              );
+
+              if (confirm == true) {
+                await DbTickets.useTicket(ticketId);
+                // Using a generic success message structure
+                ToastHelper.Show(
+                  context,
+                  "${ticketSymbol}: ${"OK".tr()}",
+                );
+                var afterFunction = data[TICKET_CONFIRM];
+                if(afterFunction is Future<void> Function()?) {
+                  afterFunction?.call();
+                }
+              }
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.check),
+                Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Text(OrdersStrings.confirmTicket),
                 ),
               ],
             ),
