@@ -6,6 +6,8 @@ class EmailTemplatesStrings {
   static String get subPlatformLinks => 'EmailTemplates.subs.platformLinks'.tr();
   static String get subAppName => 'EmailTemplates.subs.appName'.tr();
   static String get subEmail => 'EmailTemplates.subs.email'.tr();
+  static String get subName => 'EmailTemplates.subs.name'.tr();
+  static String get subSurname => 'EmailTemplates.subs.surname'.tr();
   static String get subResetLink => 'EmailTemplates.subs.resetLink'.tr();
   static String get subSignInCode => 'EmailTemplates.subs.signInCode'.tr();
   static String get subOccasionTitle => 'EmailTemplates.subs.occasionTitle'.tr();

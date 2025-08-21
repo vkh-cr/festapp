@@ -51,7 +51,7 @@ class _UnitPageState extends State<UnitPage> {
 
     _initialId = widget.id ?? RightsService.currentUnit()!.id!;
 
-    await RightsService.updateAppData(unitId: _initialId);
+    await RightsService.updateAppData(unitId: _initialId, refreshOffline: false);
 
     final unit = await DbUnits.getUnit(_initialId!);
 
