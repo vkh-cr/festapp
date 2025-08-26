@@ -18,7 +18,7 @@ class OrdersStrings {
   static String get ordersTab => 'FeatureOrders.ordersTab'.tr();
   static String get ordersHistoryTab => 'FeatureOrders.ordersHistoryTab'.tr();
 
-  static String get confirmTicket => 'Nastavit využito'.tr();
+  static String get confirmTicket => 'FeatureOrders.setAsUsed'.tr();
 
   // --- Tickets/Items Tab ---
   static String get stornoCompletedText => 'FeatureOrders.stornoCompletedItem'.tr();

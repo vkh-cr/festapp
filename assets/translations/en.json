@@ -813,7 +813,8 @@
     "applications": "Applications",
     "application": "Application",
     "ordersTab": "Orders",
-    "ordersHistoryTab": "Orders History"
+    "ordersHistoryTab": "Orders History",
+    "setAsUsed": "Set as used"
   },
   "UserColumns": {
     "id": "Id",
