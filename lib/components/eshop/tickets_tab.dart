@@ -56,7 +56,7 @@ class _TicketsTabState extends State<TicketsTab> {
         firstColumnType: DataGridFirstColumn.check,
         idColumn: EshopColumns.TICKET_ID,
         actionsExtended: DataGridActionsController(
-          areAllActionsEnabled: RightsService.canUpdateUsers,
+          areAllActionsEnabled: RightsService.isEditorOrder,
           isAddActionPossible: () => false,
         ),
         headerChildren: [
