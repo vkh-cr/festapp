@@ -35,6 +35,7 @@ class _TicketsTabState extends State<TicketsTab> {
     EshopColumns.TICKET_SYMBOL,
     EshopColumns.TICKET_CREATED_AT,
     EshopColumns.TICKET_STATE,
+    EshopColumns.TICKET_CONFIRM,
     EshopColumns.TICKET_TOTAL_PRICE,
     EshopColumns.TICKET_SPOT,
     EshopColumns.TICKET_PRODUCTS_EXTENDED,
@@ -55,7 +56,7 @@ class _TicketsTabState extends State<TicketsTab> {
         firstColumnType: DataGridFirstColumn.check,
         idColumn: EshopColumns.TICKET_ID,
         actionsExtended: DataGridActionsController(
-          areAllActionsEnabled: RightsService.canUpdateUsers,
+          areAllActionsEnabled: RightsService.isEditorOrder,
           isAddActionPossible: () => false,
         ),
         headerChildren: [
@@ -76,7 +77,8 @@ class _TicketsTabState extends State<TicketsTab> {
         columns: EshopColumns.generateColumns(context, columnIdentifiers,
           data: {
             EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
-            EshopColumns.TICKET_PRODUCTS_EDIT: refreshData
+            EshopColumns.TICKET_PRODUCTS_EDIT: refreshData,
+            EshopColumns.TICKET_CONFIRM: refreshData
           },),
       );
     }

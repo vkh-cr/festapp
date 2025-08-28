@@ -78,7 +78,19 @@ class EmailTemplateModel {
   static EmailTemplateSub emailSub = EmailTemplateSub(
     code: 'email',
     description: EmailTemplatesStrings.subEmail,
-    defaultValue: 'Jan Novák',
+    defaultValue: 'jan.novak@festapp.net',
+  );
+
+  static EmailTemplateSub nameSub = EmailTemplateSub(
+    code: 'name',
+    description: EmailTemplatesStrings.subName,
+    defaultValue: 'Jan',
+  );
+
+  static EmailTemplateSub surnameSub = EmailTemplateSub(
+    code: 'surname',
+    description: EmailTemplatesStrings.subSurname,
+    defaultValue: 'Novák',
   );
 
   static EmailTemplateSub resetLinkSub = EmailTemplateSub(
@@ -159,6 +171,8 @@ class EmailTemplateModel {
       appNameSub,
       appPlatformLinksSub,
       emailSub,
+      nameSub,
+      surnameSub,
       signInCodeSub,
     ],
     'TICKET_ORDER_CONFIRMATION': [

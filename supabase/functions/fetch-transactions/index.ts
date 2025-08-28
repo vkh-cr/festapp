@@ -81,6 +81,14 @@ Deno.serve(async (req) => {
       }
 
       try {
+//        const startDate = new Date(2025, 7, 1)
+//                     .toISOString()
+//                     .split("T")[0];
+//        const endDate = new Date(2025, 8, 20)
+//                     .toISOString()
+//                     .split("T")[0];
+//         const apiUrl = `https://fioapi.fio.cz/v1/rest/periods/${secret}/${startDate}/${endDate}/transactions.json`;
+
         const apiUrl = `https://fioapi.fio.cz/v1/rest/last/${secret}/transactions.json`;
         const apiResponse = await fetch(apiUrl);
 

@@ -129,6 +129,15 @@ class DbTickets {
     return ticket;
   }
 
+  static Future<void> useTicket(int ticketId) async {
+    await _supabase.rpc(
+      'update_ticket_to_used_ws',
+      params: {
+        'ticket_id': ticketId,
+      },
+    );
+  }
+
   static Future<void> updateScanCode(String occasionLink, String scannedCode) async {
     final response = await _supabase.rpc('update_scan_code', params: {
       'occasion_link': occasionLink,
