@@ -96,6 +96,7 @@ class TicketModel extends ITrinaRowModel {
               : ""),
       EshopColumns.TICKET_TOTAL_PRICE: TrinaCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
       EshopColumns.TICKET_PRODUCTS_EDIT: TrinaCell(value: ""),
+      EshopColumns.TICKET_CONFIRM: TrinaCell(value: ""),
     };
 
     final productCells = EshopColumns.generateProductTypeCells(relatedProducts ?? []);
