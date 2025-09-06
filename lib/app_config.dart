@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/language_model.dart';
+import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
@@ -15,6 +16,7 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
   static const String oneSignalAppId = '009d3437-d794-459f-9e3d-4bd70b740f7d';
+  static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
   static const int organization = 3;
   //setup occasion id to force occasion
@@ -24,10 +26,7 @@ class AppConfig {
   static const bool isAppSupported = true;
 
   static const String webLink = "https://clovekavira.netlify.app";
-  static const String appStoreLink = "https://apps.apple.com/cz/app/%C4%8Dlov%C4%9Bk-a-v%C3%ADra/id6471667352";
-  static const String playStoreLink = "https://play.google.com/store/apps/details?id=fstapp.cav";
-  static const String playStoreLaunchLink = "https://play.google.com/store/apps/details?id=fstapp.cav";
-  static const String desktopAppLink = "";
+
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;
   static const int imagesMaxBytes = 800000;

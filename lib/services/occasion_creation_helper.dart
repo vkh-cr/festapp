@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/admin_strings.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/unit_model.dart';
@@ -14,9 +14,9 @@ import 'package:fstapp/widgets/time_data_range_picker.dart';
 
 class OccasionCreationHelper {
   static Future<void> createNewOccasion(
-      BuildContext context, UnitModel unit, List<OccasionModel> existingOccasions, Function onEventCreated) async {
+      BuildContext context, UnitModel unit, List<OccasionModel> existingOccasions, Function Function(OccasionModel occasion) onEventCreated) async {
     final formKey = GlobalKey<FormState>();
-    String? title = "myfestival".tr();
+    String? title = AdministrationStrings.myFestival;
     String? link = "myfestival${DateTime.now().add(Duration(days: 33)).year}";
     DateTime? startDate = DateTime.now()
         .add(Duration(days: 30))
@@ -81,7 +81,7 @@ class OccasionCreationHelper {
                 }
 
                 return AlertDialog(
-                  title: Text('Add New Event').tr(),
+                  title: Text(AdministrationStrings.addNewEventTitle),
                   content: Form(
                     key: formKey,
                     child: Column(
@@ -91,7 +91,7 @@ class OccasionCreationHelper {
                         TextFormField(
                           controller: titleController,
                           decoration: InputDecoration(
-                            labelText: 'Title'.tr(),
+                            labelText: AdministrationStrings.titleLabel,
                             labelStyle: TextStyle(
                               color: (title == null || title!.trim().isEmpty)
                                   ? ThemeConfig.redColor(context)
@@ -104,7 +104,7 @@ class OccasionCreationHelper {
                         TextFormField(
                           controller: linkController,
                           decoration: InputDecoration(
-                            labelText: 'Link'.tr(),
+                            labelText: AdministrationStrings.linkLabel,
                             labelStyle: TextStyle(
                               color: linkError != null ? ThemeConfig.redColor(context) : null,
                             ),
@@ -168,7 +168,7 @@ class OccasionCreationHelper {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Cancel').tr(),
+                      child: Text(AdministrationStrings.cancelButton),
                     ),
                     ElevatedButton(
                       onPressed: isFormValid
@@ -189,15 +189,13 @@ class OccasionCreationHelper {
                             data: { Tb.occasions.data_timezone: TimeHelper.getSystemTimezoneName() },
                           );
 
-
-
                           await DbOccasions.updateOccasion(newOccasion);
-                          onEventCreated();
+                          onEventCreated(newOccasion);
                           Navigator.of(context).pop();
                         }
                       }
                           : null,
-                      child: Text('Create').tr(),
+                      child: Text(AdministrationStrings.createButton),
                     ),
                   ],
                 );
@@ -211,22 +209,22 @@ class OccasionCreationHelper {
 
   static String _generateHtml(String? link) {
     return '''
-      <p>${'This event will be available at'.tr()}:<br>
+      <p>${AdministrationStrings.eventAvailableAt}<br>
       <a href="${AppConfig.webLink}/#/$link">${AppConfig.webLink}/#/$link</a></p>
     ''';
   }
 
   static String? _validateLink(String link, List<OccasionModel> existingOccasions) {
     if (link.isEmpty) {
-      return 'Link is required'.tr();
+      return AdministrationStrings.linkIsRequiredError;
     }
     final isValidFormat = Utilities.isValidUrl(link);
     if (!isValidFormat) {
-      return 'Invalid characters'.tr();
+      return AdministrationStrings.invalidCharactersError;
     }
     final isUnique = !existingOccasions.any((occasion) => occasion.link == link);
     if (!isUnique) {
-      return 'Link already in use'.tr();
+      return AdministrationStrings.linkInUseError;
     }
     return null;
   }

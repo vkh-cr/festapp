@@ -82,27 +82,19 @@ class DbEvents {
   }
 
   static Future<List<EventModel>> getAllEventsForDatagrid() async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id},"
-        "${Tb.events.is_hidden},"
-        "${Tb.events.title},"
-        "${Tb.events.start_time},"
-        "${Tb.events.end_time},"
-        "${Tb.events.max_participants},"
-        "${Tb.events.split_for_men_women},"
-        "${Tb.events.is_group_event},"
-        "${Tb.events.type},"
-        "${Tb.events.data},"
-        "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
-        "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent}),"
-        "${Tb.event_roles.table}!${Tb.event_roles.event}(${Tb.event_roles.role}),"
-        "${Tb.event_users_saved.table}(count),"
-        "${Tb.event_users.table}(count)")
-        .eq(Tb.events.occasion, RightsService.currentOccasionId()!)
-        .order(Tb.events.start_time, ascending: true);
+    final occasionId = RightsService.currentOccasionId();
+    if (occasionId == null) {
+      return [];
+    }
+
+    final data = await _supabase
+        .rpc(
+      'get_all_events_for_datagrid',
+      params: {'p_occasion_id': occasionId},
+    );
+
     return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
+        data.map((x) => EventModel.fromJson(x as Map<String, dynamic>)));
   }
 
   static Future<EventModel> getEvent(int eventId, [bool withParent = false]) async {
@@ -162,7 +154,7 @@ class DbEvents {
         await loadIsCurrentUserSignedIn(event.childEvents);
       }
     }
-    if((event.isGroupEvent ?? false) && AuthService.hasGroup())
+    if((event.isGroupEvent ?? false) && RightsService.hasGroup())
     {
       event.isMyGroupEvent = true;
     }
@@ -223,7 +215,7 @@ class DbEvents {
     {
       case 200: {
         if(participant == null) {
-          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           ToastHelper.Show(context, "${trPrefix}You have been signed in.".tr());
         }
         else{
@@ -236,7 +228,7 @@ class DbEvents {
       case 101: ToastHelper.Show(context, "${"Cannot sign in!".tr()} ${"Event is full.".tr()}", severity: ToastSeverity.NotOk); return;
       case 102: {
         if(participant == null) {
-          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           var message = "${trPrefix}You are already signed in at an event of this type.".tr();
           ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
@@ -249,7 +241,7 @@ class DbEvents {
       }
       case 103: {
         if(participant == null) {
-          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           var message = "${trPrefix}You are already signed in.".tr();
           ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
@@ -262,7 +254,7 @@ class DbEvents {
       }
       case 107: {
         if(participant == null) {
-          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           var message = "${trPrefix}You are already signed in at another event at the same time.".tr();
           ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
@@ -516,7 +508,7 @@ class DbEvents {
     switch(result["code"]) {
       case 200:
         if(participant == null) {
-          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           if(context!=null){
             ToastHelper.Show(context, "${trPrefix}You have been signed out.".tr());
           }

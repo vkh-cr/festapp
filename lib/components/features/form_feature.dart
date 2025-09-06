@@ -1,6 +1,5 @@
-// form_feature.dart
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import '../forms/form_strings.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
 
@@ -10,6 +9,9 @@ class FormFeature extends Feature {
   String? formExternalLink;
   String? formExternalPrice;
   String? reserveButtonTitle;
+  bool?   reminderIsEnabled;
+  int?    reminderIntervalSeconds;
+  int?    deadlineDurationSeconds;
 
   FormFeature({
     required super.code,
@@ -20,6 +22,9 @@ class FormFeature extends Feature {
     this.formExternalLink,
     this.formExternalPrice,
     this.reserveButtonTitle,
+    this.reminderIsEnabled,
+    this.reminderIntervalSeconds,
+    this.deadlineDurationSeconds,
   });
 
   factory FormFeature.fromJson(Map<String, dynamic> json) {
@@ -30,6 +35,9 @@ class FormFeature extends Feature {
       formExternalLink:   json[FeatureConstants.formExternalLink],
       formExternalPrice:  json[FeatureConstants.formExternalPrice],
       reserveButtonTitle: json[FeatureConstants.reserveButtonTitle],
+      reminderIsEnabled: json[FeatureConstants.reminderIsEnabled],
+      reminderIntervalSeconds: json[FeatureConstants.reminderIntervalSeconds] ?? 86400,
+      deadlineDurationSeconds: json[FeatureConstants.deadlineDurationSeconds] ?? 604800,
     );
   }
 
@@ -43,57 +51,178 @@ class FormFeature extends Feature {
     if (formExternalLink   != null) data[FeatureConstants.formExternalLink]   = formExternalLink!;
     if (formExternalPrice  != null) data[FeatureConstants.formExternalPrice]  = formExternalPrice!;
     if (reserveButtonTitle != null) data[FeatureConstants.reserveButtonTitle] = reserveButtonTitle!;
+    if (reminderIsEnabled != null) data[FeatureConstants.reminderIsEnabled] = reminderIsEnabled!;
+    if (reminderIntervalSeconds != null) data[FeatureConstants.reminderIntervalSeconds] = reminderIntervalSeconds!;
+    if (deadlineDurationSeconds != null) data[FeatureConstants.deadlineDurationSeconds] = deadlineDurationSeconds!;
     return data;
   }
 
-  /// Builds the form UI block.
   @override
   Widget buildFormField(BuildContext context) {
-    return StatefulBuilder(builder: (ctx, setLocal) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Divider(),
-          SwitchListTile(
-            title: Text('Use external form'.tr()),
-            value: formUseExternal ?? false,
-            onChanged: (v) => setLocal(() => formUseExternal = v),
-          ),
-          if (formUseExternal ?? false) ...[
-            TextFormField(
-              initialValue: formExternalLink,
-              decoration: InputDecoration(
-                labelText: 'Reservation Link'.tr(),
-                helperText: 'Reservation will be done via this external link.'.tr(),
-              ),
-              onSaved: (val) => formExternalLink = val,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              initialValue: formExternalPrice,
-              decoration: InputDecoration(
-                labelText: 'Price'.tr(),
-                helperText: 'The price will be displayed on the events page.'.tr(),
-              ),
-              onSaved: (val) => formExternalPrice = val,
-            ),
-          ],
-          const SizedBox(height: 16),
-          ExpansionTile(
-            title: Text('Advanced Settings'.tr()),
+    return _FormFeatureEditor(formFeature: this);
+  }
+}
+
+class _FormFeatureEditor extends StatefulWidget {
+  final FormFeature formFeature;
+  const _FormFeatureEditor({required this.formFeature});
+
+  @override
+  State<_FormFeatureEditor> createState() => _FormFeatureEditorState();
+}
+
+class _FormFeatureEditorState extends State<_FormFeatureEditor> {
+  late final TextEditingController _externalLinkController;
+  late final TextEditingController _externalPriceController;
+  late final TextEditingController _reserveButtonController;
+  late final TextEditingController _deadlineController;
+  late final TextEditingController _reminderController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with values from the model.
+    _externalLinkController = TextEditingController(text: widget.formFeature.formExternalLink);
+    _externalPriceController = TextEditingController(text: widget.formFeature.formExternalPrice);
+    _reserveButtonController = TextEditingController(text: widget.formFeature.reserveButtonTitle);
+
+    // For day-based fields, convert seconds from the model to days for the UI.
+    final deadlineDays = widget.formFeature.deadlineDurationSeconds;
+    _deadlineController = TextEditingController(
+        text: deadlineDays != null ? (deadlineDays / 86400).round().toString() : ""
+    );
+
+    final reminderDays = widget.formFeature.reminderIntervalSeconds;
+    _reminderController = TextEditingController(
+        text: reminderDays != null ? (reminderDays / 86400).round().toString() : ""
+    );
+  }
+
+  @override
+  void dispose() {
+    // Dispose all controllers to prevent memory leaks.
+    _externalLinkController.dispose();
+    _externalPriceController.dispose();
+    _reserveButtonController.dispose();
+    _deadlineController.dispose();
+    _reminderController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(),
+        SwitchListTile(
+          title: Text(FormStrings.labelUseExternalForm),
+          value: widget.formFeature.formUseExternal ?? false,
+          onChanged: (v) {
+            setState(() {
+              widget.formFeature.formUseExternal = v;
+              // When toggling, clear the fields of the other mode to prevent confusion.
+              if (v) {
+                // Switched to external: clear internal fields' controllers
+                _deadlineController.clear();
+                _reminderController.clear();
+              } else {
+                // Switched to internal: clear external fields' controllers
+                _externalLinkController.clear();
+                _externalPriceController.clear();
+              }
+            });
+          },
+        ),
+        if (widget.formFeature.formUseExternal ?? false)
+          Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: TextFormField(
-                  initialValue: reserveButtonTitle,
-                  decoration: InputDecoration(labelText: 'Reserve Button Title'.tr()),
-                  onSaved: (val) => reserveButtonTitle = val,
+                  controller: _externalLinkController,
+                  decoration: InputDecoration(
+                    labelText: FormStrings.labelReservationLink,
+                    helperText: FormStrings.helperReservationLink,
+                  ),
+                  onSaved: (val) => widget.formFeature.formExternalLink = val,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: TextFormField(
+                  controller: _externalPriceController,
+                  decoration: InputDecoration(
+                    labelText: FormStrings.labelPrice,
+                    helperText: FormStrings.helperPrice,
+                  ),
+                  onSaved: (val) => widget.formFeature.formExternalPrice = val,
                 ),
               ),
             ],
           ),
-        ],
-      );
-    });
+        if (!(widget.formFeature.formUseExternal ?? false))
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: TextFormField(
+                  controller: _deadlineController,
+                  decoration: InputDecoration(
+                    labelText: FormStrings.labelDeadlineDuration,
+                    helperText: FormStrings.helperDeadlineDuration,
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => setState(() {}), // Rebuild for live validation
+                  onSaved: (val) {
+                    final days = int.tryParse(val ?? '');
+                    widget.formFeature.deadlineDurationSeconds = days != null ? days * 86400 : 604800;
+                  },
+                ),
+              ),
+              SwitchListTile(
+                title: Text(FormStrings.labelReminderEnabled),
+                subtitle: Text(FormStrings.helperReminderEnabled),
+                value: widget.formFeature.reminderIsEnabled ?? true,
+                onChanged: (v) => setState(() => widget.formFeature.reminderIsEnabled = v),
+              ),
+              if (widget.formFeature.reminderIsEnabled ?? true)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: TextFormField(
+                    controller: _reminderController,
+                    decoration: InputDecoration(
+                      labelText: FormStrings.labelReminderInterval,
+                      helperText: FormStrings.helperReminderInterval,
+                      errorText: (int.tryParse(_reminderController.text) ?? 1) >= (int.tryParse(_deadlineController.text) ?? 7)
+                          ? FormStrings.validationReminderInterval
+                          : null,
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => setState(() {}), // Rebuild for live validation
+                    onSaved: (val) {
+                      final days = int.tryParse(val ?? '');
+                      widget.formFeature.reminderIntervalSeconds = days != null ? days * 86400 : 86400;
+                    },
+                  ),
+                ),
+            ],
+          ),
+        const SizedBox(height: 16),
+        ExpansionTile(
+          title: Text(FormStrings.labelAdvancedSettings),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: TextFormField(
+                controller: _reserveButtonController,
+                decoration: InputDecoration(labelText: FormStrings.labelReserveButtonTitle),
+                onSaved: (val) => widget.formFeature.reserveButtonTitle = val,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

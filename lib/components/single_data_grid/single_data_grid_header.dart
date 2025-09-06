@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -37,20 +39,36 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
           }
       ),
       scrollbar: const TrinaGridScrollbarConfig(
+        dragDevices: {
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.touch,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.invertedStylus,
+          PointerDeviceKind.unknown},
         thickness: 12.0,
       ),
       localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
+      selectingMode: TrinaGridSelectingMode.cell,
       style: ThemeConfig.isDarkMode(context)
-          ? TrinaGridStyleConfig.dark(
-        rowHeight: 36,
-        cellColorInReadOnlyState: Colors.white24,
+          ?
+      TrinaGridStyleConfig.dark(
+        rowHeight: 32,
+        cellDefaultColor: Colors.transparent,
+        cellReadonlyColor:  Colors.transparent,
+        cellColorInReadOnlyState: Colors.transparent,
         cellTextStyle: TextStyle(color: ThemeConfig.blackColor(context)),
         columnTextStyle:
         TextStyle(color: ThemeConfig.blackColor(context)),
       )
           : TrinaGridStyleConfig(
-          rowHeight: 36, cellColorInReadOnlyState: Colors.white70),
-    );
+          rowHeight: 32,
+          cellDefaultColor: Colors.transparent,
+          cellReadonlyColor:  Colors.transparent,
+          cellColorInReadOnlyState: Colors.transparent,
+          cellTextStyle: TextStyle(color: ThemeConfig.blackColor(context)),
+          columnTextStyle: TextStyle(color: ThemeConfig.blackColor(context))
+    ));
   }
 }
 
@@ -201,7 +219,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     );
 
     if (deleteList.isNotEmpty) {
-      var result = await DialogHelper.showConfirmationDialogAsync(
+      var result = await DialogHelper.showConfirmationDialog(
         context,
         "Confirm removal".tr(),
         "${"Items".tr()}:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",
@@ -226,7 +244,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     for (var element in deleteList) {
       actions.add(() async {
         try {
-          await element.deleteMethod();
+          await element.deleteMethod(context);
           ToastHelper.Show(
               context, "${"Deleted".tr()}: ${element.toBasicString()}");
         } catch (e) {
@@ -240,7 +258,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     for (var element in updatedSet) {
       actions.add(() async {
         try {
-          await element.updateMethod();
+          await element.updateMethod(context);
           ToastHelper.Show(
               context, "${"Saved".tr()}: ${element.toBasicString()}");
         } catch (e) {
@@ -265,7 +283,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
   }
 
   Future<void> _cancelChanges() async {
-    var result = await DialogHelper.showConfirmationDialogAsync(
+    var result = await DialogHelper.showConfirmationDialog(
       context,
       "Discard changes".tr(),
       "Really discard all changes?".tr(),

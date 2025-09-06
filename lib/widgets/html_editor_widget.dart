@@ -7,8 +7,9 @@ class HtmlEditorWidget extends StatefulWidget {
   final String initialContent;
   final QuillEditorController controller;
   final Function(String)? onTextChanged;
+  FocusNode? intermediateFocusNode = FocusNode();
 
-  const HtmlEditorWidget({
+  HtmlEditorWidget({
     required this.initialContent,
     required this.controller,
     this.onTextChanged,
@@ -64,7 +65,6 @@ class _HtmlEditorWidgetState extends State<HtmlEditorWidget> {
 
   @override
   void dispose() {
-    widget.controller.dispose();
     super.dispose();
   }
 
@@ -91,33 +91,37 @@ class _HtmlEditorWidgetState extends State<HtmlEditorWidget> {
         ),
         Flexible(
           fit: FlexFit.tight,
-          child: QuillHtmlEditor(
-            hintText: null,
-            controller: widget.controller,
-            isEnabled: true,
-            ensureVisible: false,
-            minHeight: 200,
-            textStyle: _editorTextStyle,
-            hintTextStyle: _hintTextStyle,
-            hintTextAlign: TextAlign.start,
-            padding: const EdgeInsets.only(left: 10, top: 10),
-            hintTextPadding: const EdgeInsets.only(left: 20),
-            backgroundColor: _backgroundColor,
-            loadingBuilder: (context) {
-              return isLoading ? const Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 0.4,
-                  )) : const SizedBox.shrink();
-            },
-            onFocusChanged: (focus) {
-              debugPrint('has focus $focus');
-              setState(() {});
-            },
-            onTextChanged: (text) => debugPrint('widget text change $text'),
-            onEditorCreated: () {},
-            onEditorResized: (height) => debugPrint('Editor resized $height'),
-            onSelectionChanged: (sel) =>
-                debugPrint('index ${sel.index}, range ${sel.length}'),
+          child: Focus(
+            focusNode: widget.intermediateFocusNode,
+            child: QuillHtmlEditor(
+              hintText: null,
+              controller: widget.controller,
+              isEnabled: true,
+              ensureVisible: false,
+              minHeight: 200,
+              textStyle: _editorTextStyle,
+              hintTextStyle: _hintTextStyle,
+              hintTextAlign: TextAlign.start,
+              padding: const EdgeInsets.only(left: 10, top: 10),
+              hintTextPadding: const EdgeInsets.only(left: 20),
+              backgroundColor: _backgroundColor,
+              loadingBuilder: (context) {
+                return isLoading ? const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 0.4,
+                    )) : const SizedBox.shrink();
+              },
+              onFocusChanged: (focus) async {
+                if(focus){
+                  widget.intermediateFocusNode?.requestFocus();
+                }
+              },
+              onTextChanged: (text) => debugPrint('widget text change $text'),
+              onEditorCreated: () {},
+              onEditorResized: (height) => debugPrint('Editor resized $height'),
+              onSelectionChanged: (sel) =>
+                  debugPrint('index ${sel.index}, range ${sel.length}'),
+            ),
           ),
         ),
       ],

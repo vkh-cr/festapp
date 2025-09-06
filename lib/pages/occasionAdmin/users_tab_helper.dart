@@ -4,6 +4,7 @@ import 'package:fstapp/components/import/import_dialog_helper.dart';
 import 'package:fstapp/components/single_data_grid/i_has_id.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
+import 'package:fstapp/data_models/group_participant_model.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
@@ -13,7 +14,7 @@ import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/services/user_management_helper.dart';
+import 'package:fstapp/components/users/user_management_helper.dart';
 
 class UsersTabHelper {
   /// Calls the import routine and then reloads users via the provided callback.
@@ -38,10 +39,18 @@ class UsersTabHelper {
       BuildContext context, SingleDataGridController singleDataGrid) async {
     var users = getCheckedUsers(singleDataGrid);
     if (users.isEmpty) return;
+
+    List<String> errorMessages = [];
     for (var u in users) {
-      await UserManagementHelper.unsafeChangeUserPassword(context, u);
+      try {
+        await UserManagementHelper.unsafeChangeUserPassword(context, u);
+        ToastHelper.Show(context, "Password has been changed.".tr());
+      } catch (e) {
+        String errorMessage = "Failed for user ${u.data?[Tb.occasion_users.data_email] ?? '[no email]'}: ${e.toString()}".tr();
+        ToastHelper.Show(context, errorMessage, severity: ToastSeverity.NotOk);
+        errorMessages.add(errorMessage);
+      }
     }
-    ToastHelper.Show(context, "Password has been changed.".tr());
   }
 
   /// Opens the add-to-group dialog and updates the group with checked users.
@@ -52,7 +61,7 @@ class UsersTabHelper {
         context, await DbGroups.getAllUserGroupInfo());
     if (chosenGroup != null) {
       chosenGroup.participants!
-          .addAll(users.map((u) => UserInfoModel(id: u.user)));
+          .addAll(users.map((u) => GroupParticipantModel(userInfo: UserInfoModel(id: u.id))));
       await DbGroups.updateUserGroupParticipants(
           chosenGroup, chosenGroup.participants!);
       ToastHelper.Show(context, "Updated {item}.".tr(
@@ -70,14 +79,12 @@ class UsersTabHelper {
     var nonAdded =
     existing.where((u) => !currentUsers.any((cu) => cu.id == u.id)).toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
-      if (chosenUser != null) {
-        await DbUsers.addUserToOccasion(
-            chosenUser.id, RightsService.currentOccasionId()!);
-        ToastHelper.Show(context, "Updated {item}.".tr(
-            namedArgs: {"item": chosenUser.toString()}));
-        await reloadUsers();
-      }
-    }, nonAdded, "Add".tr());
+      await DbUsers.addUserToOccasion(
+          chosenUser.id!, RightsService.currentOccasionId()!);
+      ToastHelper.Show(context, "Updated {item}.".tr(
+          namedArgs: {"item": chosenUser.toString()}));
+      await reloadUsers();
+        }, nonAdded, "Add".tr());
   }
 
   static Future<void> addExistingToUnit(BuildContext context,
@@ -87,14 +94,12 @@ class UsersTabHelper {
     var nonAdded =
     existing.where((u) => !currentUsers.any((cu) => cu.id == u.id)).toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
-      if (chosenUser != null) {
-        await DbUsers.addUserToUnit(
-            chosenUser.id, unit);
-        ToastHelper.Show(context, "Updated {item}.".tr(
-            namedArgs: {"item": chosenUser.toString()}));
-        await reloadUsers();
-      }
-    }, nonAdded, "Add".tr());
+      await DbUsers.addUserToUnit(
+          chosenUser.id!, unit);
+      ToastHelper.Show(context, "Updated {item}.".tr(
+          namedArgs: {"item": chosenUser.toString()}));
+      await reloadUsers();
+        }, nonAdded, "Add".tr());
   }
 
   /// Invites the checked users.
@@ -113,7 +118,7 @@ class UsersTabHelper {
         .toList();
 
     if (alreadyInvitedUsers.isNotEmpty) {
-      var reinviteConfirm = await DialogHelper.showConfirmationDialogAsync(
+      var reinviteConfirm = await DialogHelper.showConfirmationDialog(
         context,
         "Invite".tr(),
         "Some users have already been invited. Do you want to invite them again and send a new sign-in code?"
@@ -133,7 +138,7 @@ class UsersTabHelper {
   static Future<void> processInvites(
       BuildContext context, List<OccasionUserModel> users,
       {int retryLimit = 3}) async {
-    var confirm = await DialogHelper.showConfirmationDialogAsync(
+    var confirm = await DialogHelper.showConfirmationDialog(
       context,
       "Invite".tr(),
       "${"Users will get a sign-in code via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}",

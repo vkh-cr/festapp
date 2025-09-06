@@ -8,7 +8,7 @@ import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/services/import_helper.dart';
+import 'package:fstapp/components/users/import_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 
 class CsvImportHelper {
@@ -27,7 +27,7 @@ class CsvImportHelper {
     var addOrUpdateUsers = users.where((element) => element[Tb.occasion_users.data_text4]?.toLowerCase() != "storno").toList();
     var deleteUsers = users.where((element) => element[Tb.occasion_users.data_text4]?.toLowerCase() == "storno").toList();
 
-    var proceed = await DialogHelper.showConfirmationDialogAsync(
+    var proceed = await DialogHelper.showConfirmationDialog(
       context,
       FeaturesStrings.labelImportFromCsv,
       "${"Users".tr()} (${users.length}):\n${users.map((value) => value[Tb.occasion_users.data_email]).toList().join(",\n")}",
@@ -90,7 +90,7 @@ class CsvImportHelper {
   static Future<void> _handleCreateUsers(BuildContext context, List<Map<String, dynamic>> toBeCreated) async {
     if (toBeCreated.isEmpty) return;
 
-    var proceed = await DialogHelper.showConfirmationDialogAsync(
+    var proceed = await DialogHelper.showConfirmationDialog(
       context,
       "Creating users".tr(),
       "New users found. Do you want to create them?".tr() +
@@ -117,7 +117,7 @@ class CsvImportHelper {
       BuildContext context, List<Map<String, dynamic>> toBeUpdated, List<OccasionUserModel> existingUsers) async {
     if (toBeUpdated.isEmpty) return;
 
-    var proceed = await DialogHelper.showConfirmationDialogAsync(
+    var proceed = await DialogHelper.showConfirmationDialog(
       context,
       "Updating users".tr(),
       "These users have some changes. Do you want to update them?".tr() +
@@ -147,7 +147,7 @@ class CsvImportHelper {
   static Future<void> _handleDeleteUsers(BuildContext context, List<OccasionUserModel> toBeDeleted) async {
     if (toBeDeleted.isEmpty) return;
 
-    var proceed = await DialogHelper.showConfirmationDialogAsync(
+    var proceed = await DialogHelper.showConfirmationDialog(
       context,
       "Removing users".tr(),
       "These users have been removed, but they still exist in the application. Do you want to remove them?".tr() +
