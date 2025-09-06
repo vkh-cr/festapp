@@ -51,12 +51,12 @@ class ExclusiveGroupModel extends ITrinaRowModel {
   }
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
     await DbEvents.deleteExclusiveGroup(this);
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
     await DbEvents.updateExclusiveGroup(this);
   }
 

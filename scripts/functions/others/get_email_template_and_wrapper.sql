@@ -10,76 +10,66 @@ DECLARE
   v_unit bigint;
   v_org bigint;
 BEGIN
-  -- Extract context values from the JSON parameter
-  v_occ := CASE
-             WHEN p_context ? 'occasion' AND (p_context->>'occasion') IS NOT NULL
-             THEN (p_context->>'occasion')::bigint
-             ELSE NULL
-           END;
-  v_unit := CASE
-              WHEN p_context ? 'unit' AND (p_context->>'unit') IS NOT NULL
-              THEN (p_context->>'unit')::bigint
-              ELSE NULL
-            END;
-  v_org  := CASE
-              WHEN p_context ? 'organization' AND (p_context->>'organization') IS NOT NULL
-              THEN (p_context->>'organization')::bigint
-              ELSE NULL
-            END;
+  -- Extract context values. The ->> operator handles missing keys by returning SQL NULL.
+  v_occ := (p_context->>'occasion')::bigint;
+  v_unit := (p_context->>'unit')::bigint;
+  v_org  := (p_context->>'organization')::bigint;
 
-  -- Retrieve the email template based on the provided context
-  SELECT to_jsonb(t)
-    INTO email_template
-  FROM (
-    SELECT et.id,
-           et.html,
-           et.occasion,
-           et.subject,
-           et.organization,
-           et.code,
-           et.unit
+  -- Retrieve the most specific email template.
+  WITH candidates AS (
+    SELECT
+      et.id,
+      et.html,
+      et.occasion,
+      et.subject,
+      et.organization,
+      et.code,
+      et.unit
     FROM public.email_templates et
     WHERE et.code = p_code
-      AND (
-           (v_occ IS NOT NULL AND et.occasion = v_occ)
-        OR (v_unit IS NOT NULL AND et.unit = v_unit AND et.occasion IS NULL)
-        OR (v_org  IS NOT NULL AND et.organization = v_org AND et.unit IS NULL AND et.occasion IS NULL)
-        OR (et.organization IS NULL AND et.unit IS NULL AND et.occasion IS NULL)
-      )
+      -- This pattern finds all potential matches. A template is a valid candidate if,
+      -- for each parameter, its value either matches the context or is NULL (generic fallback).
+      -- If a context variable (e.g. v_unit) is NULL, it acts as a wildcard for that parameter.
+      AND (v_occ IS NULL OR et.occasion IS NOT DISTINCT FROM v_occ OR et.occasion IS NULL)
+      AND (v_unit IS NULL OR et.unit IS NOT DISTINCT FROM v_unit OR et.unit IS NULL)
+      AND (v_org IS NULL OR et.organization IS NOT DISTINCT FROM v_org OR et.organization IS NULL)
+  )
+  SELECT to_jsonb(t)
+  INTO email_template
+  FROM (
+    SELECT * FROM candidates
     ORDER BY
-         CASE
-           WHEN (v_occ IS NOT NULL AND et.occasion = v_occ) THEN 1
-           WHEN (v_unit IS NOT NULL AND et.unit = v_unit AND et.occasion IS NULL) THEN 2
-           WHEN (v_org  IS NOT NULL AND et.organization = v_org AND et.unit IS NULL AND et.occasion IS NULL) THEN 3
-           WHEN (et.organization IS NULL AND et.unit IS NULL AND et.occasion IS NULL) THEN 4
-           ELSE 5
-         END,
-         et.id
+      -- Ranks candidates by specificity. A direct match (value 0) is better than a generic fallback (value 1).
+      -- `IS NOT DISTINCT FROM` is used for NULL-safe equality comparison.
+      CASE WHEN occasion IS NOT DISTINCT FROM v_occ THEN 0 ELSE 1 END,
+      CASE WHEN unit IS NOT DISTINCT FROM v_unit THEN 0 ELSE 1 END,
+      CASE WHEN organization IS NOT DISTINCT FROM v_org THEN 0 ELSE 1 END,
+      id -- Stable tie-breaker
     LIMIT 1
   ) t;
 
-  -- Retrieve the email wrapper based on the provided context
+  -- Retrieve the most specific email wrapper using the same logic.
   SELECT to_jsonb(t)
-    INTO email_wrapper
+  INTO email_wrapper
   FROM (
-    SELECT ew.id,
-           ew.title,
-           ew.organization,
-           ew.unit,
-           ew.html,
-           ew.created_at
+    SELECT
+      ew.id,
+      ew.title,
+      ew.organization,
+      ew.unit,
+      ew.html,
+      ew.created_at
     FROM public.email_wrappers ew
+    WHERE (v_unit IS NULL OR ew.unit IS NOT DISTINCT FROM v_unit OR ew.unit IS NULL)
+      AND (v_org IS NULL OR ew.organization IS NOT DISTINCT FROM v_org OR ew.organization IS NULL)
     ORDER BY
-         CASE
-           WHEN (v_unit IS NOT NULL AND ew.unit = v_unit) THEN 1
-           WHEN (v_org IS NOT NULL AND ew.organization = v_org AND ew.unit IS NULL) THEN 2
-           WHEN (ew.organization IS NULL AND ew.unit IS NULL) THEN 3
-           ELSE 4
-         END,
+         CASE WHEN ew.unit IS NOT DISTINCT FROM v_unit THEN 0 ELSE 1 END,
+         CASE WHEN ew.organization IS NOT DISTINCT FROM v_org THEN 0 ELSE 1 END,
          ew.id
     LIMIT 1
   ) t;
 
+  -- Build the final result object, ensuring JSON nulls are used for missing records.
   result := jsonb_build_object(
               'template', COALESCE(email_template, 'null'::jsonb),
               'wrapper',  COALESCE(email_wrapper, 'null'::jsonb)

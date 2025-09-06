@@ -1,16 +1,19 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/router_service.dart';
+import 'package:flutter/services.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/data_models/organization_model.dart';
+import 'package:fstapp/data_services/db_organizations.dart';
+import 'package:fstapp/router_service.dart';
+import 'package:fstapp/services/js/js_interop.dart';
 import 'package:fstapp/services/platform_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
-import 'package:fstapp/styles/styles_config.dart';
 import 'package:pwa_install/pwa_install.dart';
-import 'package:flutter/services.dart';
-import '../../services/js/js_interop.dart';
 
 @RoutePage()
 class InstallPage extends StatefulWidget {
@@ -26,25 +29,51 @@ class _InstallPageState extends State<InstallPage> {
   bool _isAppInstalled = false;
   bool _isPromptEnabled = false;
   bool _installFailed = false;
+  bool _isLoading = true;
+  bool _didRunInitialLoad = false;
   String platform = "";
+  List<PlatformModel> _platforms = [];
   final TextEditingController _urlController = TextEditingController();
-  final List<ExpansionTileController> _controllers = [
-    ExpansionTileController(),
-    ExpansionTileController(),
-    ExpansionTileController(),
+  final List<ExpansibleController> _controllers = [
+    ExpansibleController(),
+    ExpansibleController(),
+    ExpansibleController(),
   ];
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    platform = InstallPage.jsInterop.getOSInsideWeb();
-    loadSettings();
-    setState(() {});
+    if (!_didRunInitialLoad) {
+      _didRunInitialLoad = true;
+      _loadInitialData();
+    }
   }
 
-  Future<void> loadSettings() async {
-    bool isAppInstalled = PlatformHelper.isPwaInstalledOrNative();
+  Future<void> _loadInitialData() async {
+    platform = InstallPage.jsInterop.getOSInsideWeb();
+    try {
+      final platforms = await DbOrganizations.getAvailablePlatforms(organizationId: AppConfig.organization);
+      if (mounted) {
+        setState(() {
+          _platforms = platforms;
+        });
+      }
+    } catch (e) {
+      print("Failed to load platforms: $e");
+      if (mounted) {
+        ToastHelper.Show(context, "Failed to load installation options.".tr(), severity: ToastSeverity.NotOk);
+      }
+    }
+    await _loadPwaSettings();
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
+  Future<void> _loadPwaSettings() async {
+    bool isAppInstalled = PlatformHelper.isPwaInstalledOrNative();
     setState(() {
       _isAppInstalled = isAppInstalled;
       _isPromptEnabled = true;
@@ -55,13 +84,14 @@ class _InstallPageState extends State<InstallPage> {
     try {
       PWAInstall().promptInstall_();
     } catch (e) {
+      final webLink = _platforms.firstWhereOrNull((p) => p.platform == 'web')?.link ?? RouterService.getCurrentUri().toString();
       setState(() {
         _installFailed = true;
-        _urlController.text = RouterService.getCurrentUri().toString();
+        _urlController.text = webLink;
         _urlController.selection = TextSelection(baseOffset: 0, extentOffset: _urlController.text.length);
       });
     }
-    await loadSettings();
+    await _loadPwaSettings();
   }
 
   bool get _canInstallPWA => !_isAppInstalled && !_installFailed && _isPromptEnabled;
@@ -80,6 +110,9 @@ class _InstallPageState extends State<InstallPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appleLink = _platforms.firstWhereOrNull((p) => p.platform == 'ios')?.link;
+    final androidLink = _platforms.firstWhereOrNull((p) => p.platform == 'droid')?.link;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Install App").tr(),
@@ -87,7 +120,9 @@ class _InstallPageState extends State<InstallPage> {
           onPressed: () => RouterService.goBackOrInitial(context),
         ),
       ),
-      body: Align(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Align(
         alignment: Alignment.topCenter,
         child: Padding(
           padding: const EdgeInsets.all(32.0),
@@ -107,7 +142,7 @@ class _InstallPageState extends State<InstallPage> {
                         height: 64,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12.0),
-                          image: DecorationImage(
+                          image: const DecorationImage(
                             image: AssetImage('assets/icons/fstappicon.png'),
                             fit: BoxFit.cover,
                           ),
@@ -116,7 +151,8 @@ class _InstallPageState extends State<InstallPage> {
                       const SizedBox(width: 22),
                       Expanded(
                         child: Text(
-                          "Install {title} to get notifications, offline functionality, and a quick launch icon.".tr(namedArgs: {"title":AppConfig.appName}),
+                          "Install {title} to get notifications, offline functionality, and a quick launch icon."
+                              .tr(namedArgs: {"title": AppConfig.appName}),
                           style: TextStyle(
                             fontSize: 16,
                             color: ThemeConfig.blackColor(context),
@@ -128,27 +164,30 @@ class _InstallPageState extends State<InstallPage> {
                 ),
                 const SizedBox(height: 48),
                 // Install Sections
-                buildInstallSection(
-                  context,
-                  "Install for Apple".tr(),
-                  Icons.apple,
-                  AppConfig.appStoreLink,
-                  0,
-                  isApple: true,
-                ),
+                if (appleLink != null && appleLink.isNotEmpty)
+                  buildInstallSection(
+                    context,
+                    "Install for Apple".tr(),
+                    Icons.apple,
+                    appleLink,
+                    0,
+                  ),
                 buildInstallSection(
                   context,
                   "Install for Android".tr(),
                   Icons.android,
-                  AppConfig.playStoreLink,
+                  androidLink,
                   1,
-                  notice: "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.".tr(),
+                  notice: androidLink == null || androidLink.isEmpty
+                      ? "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button."
+                      .tr()
+                      : null,
                 ),
                 buildInstallSection(
                   context,
                   "Install for PC/Mac".tr(),
                   Icons.desktop_windows,
-                  AppConfig.desktopAppLink,
+                  null,
                   2,
                 ),
               ],
@@ -163,14 +202,16 @@ class _InstallPageState extends State<InstallPage> {
       BuildContext context,
       String title,
       IconData icon,
-      String link,
+      String? link,
       int index, {
-        bool isApple = false,
         String? notice,
       }) {
+    final bool hasNativeLink = link != null && link.isNotEmpty;
     return ExpansionTile(
       controller: _controllers[index],
-      initiallyExpanded: platform == "ios" && index == 0 || platform == "android" && index == 1 || platform == "web" && index == 2,
+      initiallyExpanded: platform == "ios" && index == 0 ||
+          platform == "android" && index == 1 ||
+          platform == "web" && index == 2,
       title: Row(
         children: [
           Icon(icon, size: 24),
@@ -200,53 +241,59 @@ class _InstallPageState extends State<InstallPage> {
             children: [
               ButtonsHelper.bigButton(
                 context: context,
-                label: isApple ? "Download App".tr() : "Install Now".tr(),
-                onPressed: isApple ? () => InstallPage.jsInterop.openLinkInNewTab(link) : _canInstallPWA ? handleInstallButtonPress : null,
-                color: isApple || _canInstallPWA ? ThemeConfig.seed1 : Colors.grey,
+                label: hasNativeLink ? "Download App".tr() : "Install Now".tr(),
+                onPressed: hasNativeLink
+                    ? () => InstallPage.jsInterop.openLinkInNewTab(link)
+                    : _canInstallPWA
+                    ? handleInstallButtonPress
+                    : null,
+                color: (hasNativeLink || _canInstallPWA) ? ThemeConfig.seed1 : Colors.grey,
                 textColor: Colors.white,
               ),
-              if (_isAppInstalled)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    "The app is already installed.",
-                    style: TextStyle(fontSize: 16, color: ThemeConfig.seed1),
-                    textAlign: TextAlign.center,
-                  ).tr(),
-                ),
-              if (!isApple && _installFailed)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Column(
-                    children: [
-                      const Text(
-                        "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",
-                        style: TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ).tr(),
-                      const SizedBox(height: 8.0),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _urlController,
-                              readOnly: true,
-                            ),
-                          ),
-                          const SizedBox(width: 8.0),
-                          TextButton.icon(
-                            onPressed: () {
-                              Clipboard.setData(ClipboardData(text: _urlController.text));
-                              ToastHelper.Show(context, "Copied to clipboard".tr());
-                            },
-                            icon: Icon(Icons.copy),
-                            label: Text("Copy Link").tr(),
-                          ),
-                        ],
-                      ),
-                    ],
+              if (!hasNativeLink) ...[
+                if (_isAppInstalled)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      "The app is already installed.",
+                      style: TextStyle(fontSize: 16, color: ThemeConfig.seed1),
+                      textAlign: TextAlign.center,
+                    ).tr(),
                   ),
-                ),
+                if (_installFailed)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Column(
+                      children: [
+                        const Text(
+                          "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",
+                          style: TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ).tr(),
+                        const SizedBox(height: 8.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _urlController,
+                                readOnly: true,
+                              ),
+                            ),
+                            const SizedBox(width: 8.0),
+                            TextButton.icon(
+                              onPressed: () {
+                                Clipboard.setData(ClipboardData(text: _urlController.text));
+                                ToastHelper.Show(context, "Copied to clipboard".tr());
+                              },
+                              icon: const Icon(Icons.copy),
+                              label: const Text("Copy Link").tr(),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+              ]
             ],
           ),
         ),

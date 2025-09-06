@@ -1,17 +1,19 @@
-import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
+import 'package:collection/collection.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/order_product_ticket_model.dart';
+import 'package:fstapp/components/eshop/models/orders_history_model.dart';
+import 'package:fstapp/components/eshop/models/payment_info_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/models/product_type_model.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/ticket_model.dart';
+import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/order_product_ticket_model.dart';
-import 'package:fstapp/data_models_eshop/payment_info_model.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/data_models_eshop/product_type_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
-import 'package:fstapp/data_models_eshop/ticket_model.dart';
-import 'package:collection/collection.dart';
+import 'package:fstapp/data_models/user_info_model.dart';
 
 class GetOrdersHelper {
   static List<BlueprintGroupModel> parseGroups(Map<String, dynamic> json) {
@@ -82,6 +84,20 @@ class GetOrdersHelper {
         ? List<FormModel>.from(
         json[Tb.forms.table].map((g) => FormModel.fromJson(g)))
         : [];
+  }
+
+  static List<OrderHistoryModel>? parseOrdersHistory(Map<String, dynamic> json) {
+    return json[TbEshop.orders_history.table] != null
+        ? List<OrderHistoryModel>.from(
+        json[TbEshop.orders_history.table].map((o) => OrderHistoryModel.fromJson(o)))
+        : null;
+  }
+
+  static List<UserInfoModel>? parseUsers(Map<String, dynamic> json) {
+    return json["users"] != null
+        ? List<UserInfoModel>.from(
+        json["users"].map((u) => UserInfoModel.fromJson(u)))
+        : null;
   }
 
   static List<BlueprintObjectModel>? enrichObjects(

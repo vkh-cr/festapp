@@ -30,7 +30,7 @@ BEGIN
 
     -- Nullify the relevant spots' order_product_ticket and update product to NULL
     UPDATE eshop.spots
-    SET order_product_ticket = NULL, secret = NULL, secret_expiration_time = NULL, updated_at = NOW()
+    SET order_product_ticket = NULL, secret = NULL, secret_expiration_time = NULL, updated_at = NOW(), resource = NULL, state = NULL
     WHERE order_product_ticket = ANY(opt_ids);
 
     -- Nullify order_product_ticket entries for these tickets

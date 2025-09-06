@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION public.import_users_from_tickets(p_occasion_id bigint)
-RETURNS JSONB -- Changed return type from void to JSONB
+RETURNS JSONB
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -15,14 +15,18 @@ DECLARE
     field_element JSONB;
     field_key TEXT;
     is_sex_field BOOLEAN;
-    v_occasion_user_row public.occasion_users%ROWTYPE; -- Used to check for an existing occasion_users record.
+    v_occasion_user_row public.occasion_users%ROWTYPE;
     new_email TEXT;
     email_local_part TEXT;
     email_domain_part TEXT;
     email_suffix INT;
-    -- Arrays to hold the results
     inserted_users JSONB[] := ARRAY[]::JSONB[];
     updated_users JSONB[] := ARRAY[]::JSONB[];
+
+    storno_record RECORD;
+    deleted_user_info RECORD;
+    deleted_users JSONB[] := ARRAY[]::JSONB[];
+
 BEGIN
     -- Get the organization_id from the occasion
     SELECT organization INTO v_organization_id FROM public.occasions WHERE id = p_occasion_id;
@@ -31,6 +35,36 @@ BEGIN
         RAISE EXCEPTION 'Occasion with id % not found or has no organization.', p_occasion_id;
     END IF;
 
+    -- Find users in this occasion whose linked ticket has been canceled.
+    FOR storno_record IN
+        SELECT ou."user", ou.ticket
+        FROM public.occasion_users ou
+        JOIN eshop.tickets t ON ou.ticket = t.id
+        WHERE ou.occasion = p_occasion_id
+          AND ou.ticket IS NOT NULL
+          AND t.state = 'storno'
+    LOOP
+        -- For reporting, get user details before deleting their occasion association.
+        SELECT ui.email_readonly, ui.name, ui.surname
+        INTO deleted_user_info
+        FROM public.user_info ui
+        WHERE ui.id = storno_record."user";
+
+        -- Call the provided function to delete the user from the occasion and all related entities.
+        PERFORM public.delete_occasion_user(storno_record."user", p_occasion_id);
+
+        -- Add to the deleted list for the final JSONB report.
+        deleted_users := array_append(deleted_users,
+            jsonb_build_object(
+                'email', deleted_user_info.email_readonly,
+                'name', deleted_user_info.name,
+                'surname', deleted_user_info.surname,
+                'ticket_id', storno_record.ticket
+            )
+        );
+    END LOOP;
+
+    -- >> ORIGINAL IMPORT LOGIC STARTS HERE
     -- Query for tickets that have not yet been assigned to a user for this occasion.
     FOR ticket_record IN
         SELECT DISTINCT ON (t.id)
@@ -41,7 +75,7 @@ BEGIN
         JOIN eshop.orders o ON opt."order" = o.id
         LEFT JOIN public.occasion_users ou ON t.id = ou.ticket
         WHERE t.occasion = p_occasion_id
-          AND t.state IN ('sent', 'used', 'paid')
+          AND t.state IN ('ordered', 'sent', 'used', 'paid') -- Only import users with valid tickets
           AND ou.ticket IS NULL
         ORDER BY t.id, o.id DESC
     LOOP
@@ -71,13 +105,10 @@ BEGIN
 
         IF v_user_id IS NOT NULL THEN
             -- A user with this email already exists in the organization.
-            -- Check if they are already associated with the occasion and if they have a ticket.
             SELECT * INTO v_occasion_user_row FROM public.occasion_users WHERE "user" = v_user_id AND occasion = p_occasion_id;
 
             IF v_occasion_user_row."user" IS NOT NULL AND v_occasion_user_row.ticket IS NOT NULL THEN
                 -- SCENARIO 2: User exists and already has a ticket for this occasion.
-                -- This means the same person bought another ticket, so we create a new, distinct user
-                -- profile with an aliased email to hold the new ticket.
                 email_suffix := 1;
                 email_local_part := split_part(user_email, '@', 1);
                 email_domain_part := split_part(user_email, '@', 2);
@@ -92,47 +123,40 @@ BEGIN
                 user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', new_email, 'sex', user_sex);
                 v_user_id := create_user_in_organization_with_data(v_organization_id, new_email, gen_random_uuid()::text, user_data);
 
-                -- Since this is a brand new user record, we add them to the occasion.
                 PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
-                -- And then link the specific ticket.
                 UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
 
-                -- Add to inserted list
                 inserted_users := array_append(inserted_users, jsonb_build_object('email', new_email, 'name', user_name, 'surname', user_surname));
             ELSE
-                -- SCENARIO 1: User exists, but either isn't linked to the occasion yet,
-                -- or is linked but without a ticket. We'll update their info and link this ticket.
+                -- SCENARIO 1: User exists, but either isn't linked to the occasion yet, or is linked but without a ticket.
                 user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'sex', user_sex);
                 PERFORM update_user(v_user_id, p_occasion_id, user_data);
 
-                -- **MODIFIED LOGIC**: Only add the user to the occasion if they are not already in it.
                 IF v_occasion_user_row."user" IS NULL THEN
                     PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
                 END IF;
 
-                -- Now, link the ticket. The occasion_users record is guaranteed to exist at this point.
                 UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
 
-                -- Add to updated list
                 updated_users := array_append(updated_users, jsonb_build_object('email', user_email, 'name', user_name, 'surname', user_surname));
             END IF;
         ELSE
-            -- NEW USER: No user with this email exists in the organization, so create one.
+            -- NEW USER: No user with this email exists in the organization.
             user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', user_email, 'sex', user_sex);
             v_user_id := create_user_in_organization_with_data(v_organization_id, user_email, gen_random_uuid()::text, user_data);
 
             PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
             UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
 
-            -- Add to inserted list
             inserted_users := array_append(inserted_users, jsonb_build_object('email', user_email, 'name', user_name, 'surname', user_surname));
         END IF;
     END LOOP;
 
-    -- Return the results as a JSONB object
+    -- Return the results as a JSONB object, now including the deleted users.
     RETURN jsonb_build_object(
         'inserted', to_jsonb(inserted_users),
-        'updated', to_jsonb(updated_users)
+        'updated', to_jsonb(updated_users),
+        'deleted', to_jsonb(deleted_users)
     );
 END;
 $$;

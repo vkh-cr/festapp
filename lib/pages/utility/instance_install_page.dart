@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,18 +16,47 @@ class InstanceInstallPage extends StatefulWidget {
 }
 
 class _InstanceInstallPageState extends State<InstanceInstallPage> {
-  // Now using a URL instead of just the ref.
-  final TextEditingController _projectUrlController = TextEditingController(
-    text: "https://kjdpmixlnhntmxjedpxh.supabase.co",
-  );
-  final TextEditingController _dbController = TextEditingController(
-    text: 'postgresql://postgres:YOUR_PASSWORD@db.kjdpmixlnhntmxjedpxh.supabase.co:5432/postgres',
-  );
+  // Declare controllers as `late final` to initialize them in `initState`.
+  late final TextEditingController _projectUrlController;
+  late final TextEditingController _dbController;
+
   final TextEditingController _repoController =
   TextEditingController(text: 'vkh-cr/festapp');
 
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize the project URL controller from AppConfig.
+    _projectUrlController = TextEditingController(
+      text: AppConfig.supabaseUrl,
+    );
+
+    // Now, derive the database connection string from the first controller's text.
+    final projectUrl = _projectUrlController.text;
+    String dbHost;
+    try {
+      final uri = Uri.parse(projectUrl);
+      dbHost = 'db.${uri.host}';
+    } catch (_) {
+      // Provide a fallback in case the URL is somehow invalid.
+      dbHost = 'invalid-supabase-host';
+    }
+    _dbController = TextEditingController(
+      text: 'postgresql://postgres:YOUR_PASSWORD@$dbHost:5432/postgres',
+    );
+  }
+
+  @override
+  void dispose() {
+    // Dispose of the controllers when the state is disposed.
+    _projectUrlController.dispose();
+    _dbController.dispose();
+    _repoController.dispose();
+    super.dispose();
+  }
+
   // Define the list of operations for the Initial section.
-  // Note: Order is now Tables, Functions, Policies, Seed.
   final List<OperationSectionData> _initialOperations = [
     OperationSectionData(title: "1. Tables", fixedDirectory: "scripts/tables"),
     OperationSectionData(title: "2. Functions", fixedDirectory: "scripts/functions"),
@@ -333,7 +363,7 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
   Widget _buildStatusIndicator() {
     if (_wasSuccess == null) return const SizedBox();
     return _wasSuccess == true
-        ? Icon(Icons.check_circle, color: ThemeConfig.greenColor())
+        ? Icon(Icons.check_circle, color: ThemeConfig.greenColor(context))
         : Icon(Icons.error, color: ThemeConfig.redColor(context));
   }
 
