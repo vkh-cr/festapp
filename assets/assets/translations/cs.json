@@ -813,7 +813,8 @@
     "applications": "Přihlášky",
     "application": "Přihláška",
     "ordersTab": "Objednávky",
-    "ordersHistoryTab": "Historie objednávek"
+    "ordersHistoryTab": "Historie objednávek",
+    "setAsUsed": "Změnit na využito"
   },
   "UserColumns": {
     "id": "Id",
@@ -912,7 +913,9 @@
       "deadline": "Termín platby",
       "fullOrder": "Podrobnosti celé objednávky",
       "changeOverview": "Přehled změn v objednávce, jako jsou přidané/odebrané položky nebo změny cen.",
-      "balanceReasoning": "Podrobné vysvětlení zůstatku objednávky, včetně stavu platby, dlužné částky nebo přeplatku a případných platebních pokynů."
+      "balanceReasoning": "Podrobné vysvětlení zůstatku objednávky, včetně stavu platby, dlužné částky nebo přeplatku a případných platebních pokynů.",
+      "name": "Jméno",
+      "surname": "Příjmení"
     },
     "usage": {
       "resetPassword_title": "Obnovení hesla",
