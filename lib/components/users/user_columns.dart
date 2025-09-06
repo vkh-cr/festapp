@@ -129,7 +129,7 @@ class UserColumns {
     ],
     TEXT1: [
       TrinaColumn(
-        title: "Type".tr(),
+        title: "Type",
         enableEditingMode: RightsService.canUpdateUsers(),
         field: TEXT1,
         type: TrinaColumnType.text(),
@@ -138,7 +138,7 @@ class UserColumns {
     ],
     TEXT2: [
       TrinaColumn(
-        title: "Přípravný tým".tr(),
+        title: "Přípravný tým",
         enableEditingMode: RightsService.canUpdateUsers(),
         field: TEXT2,
         type: TrinaColumnType.text(),
