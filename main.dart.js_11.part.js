@@ -1,70 +1,63 @@
-((a,b,c)=>{a[b]=a[b]||{}
-a[b][c]=a[b][c]||[]
-a[b][c].push({p:"main.dart.js_11",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
+((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={
-Ri(d,e){return B.drW(d,e)},
-drW(d,e){var x=0,w=A.l(y.f),v,u
-var $async$Ri=A.h(function(f,g){if(f===1)return A.i(g,w)
-while(true)switch(x){case 0:u=$.e1()
-x=u.gdO().c!=null?2:3
+RJ(d,e){var x=0,w=A.l(y.f),v,u
+var $async$RJ=A.h(function(f,g){if(f===1)return A.i(g,w)
+while(true)switch(x){case 0:u=$.e0()
+x=u.gdU().c!=null?2:3
 break
-case 2:v=$.ji().cg("event_users_saved").j4(0).dE("event",e)
-u=u.gdO().c
+case 2:v=$.jj().co("event_users_saved").j9(0).dR("event",e)
+u=u.gdU().c
 x=4
-return A.d(v.dE("user",(u==null?null:u.r).a),$async$Ri)
+return A.d(v.dR("user",(u==null?null:u.r).a),$async$RJ)
 case 4:case 3:x=5
-return A.d(B.aCe(e),$async$Ri)
-case 5:A.bi(d,A.n("Removed from My schedule.",null,null),C.a4)
+return A.d(B.aDe(e),$async$RJ)
+case 5:A.bh(d,A.n("Removed from My schedule.",null,null),C.a2)
 return A.j(null,w)}})
-return A.k($async$Ri,w)},
-Rg(d,e){return B.drJ(d,e)},
-drJ(d,e){var x=0,w=A.l(y.e),v,u,t
-var $async$Rg=A.h(function(f,g){if(f===1)return A.i(g,w)
-while(true)switch(x){case 0:t=$.e1()
-x=t.gdO().c!=null?3:4
+return A.k($async$RJ,w)},
+RH(d,e){var x=0,w=A.l(y.e),v,u,t
+var $async$RH=A.h(function(f,g){if(f===1)return A.i(g,w)
+while(true)switch(x){case 0:t=$.e0()
+x=t.gdU().c!=null?3:4
 break
-case 3:u=$.ji().cg("event_users_saved")
-t=t.gdO().c
+case 3:u=$.jj().co("event_users_saved")
+t=t.gdU().c
 x=5
-return A.d(u.iN(0,A.w(["event",e,"user",(t==null?null:t.r).a],y.g,y.o)),$async$Rg)
+return A.d(u.jd(0,A.w(["event",e,"user",(t==null?null:t.r).a],y.g,y.o)),$async$RH)
 case 5:case 4:x=6
-return A.d(B.aCc(e),$async$Rg)
-case 6:A.bi(d,A.n("Added to My schedule.",null,null),C.a4)
+return A.d(B.aDc(e),$async$RH)
+case 6:A.bh(d,A.n("Added to My schedule.",null,null),C.a2)
 v=!0
 x=1
 break
 case 1:return A.j(v,w)}})
-return A.k($async$Rg,w)},
-aCc(d){return B.dAg(d)},
-dAg(d){var x=0,w=A.l(y.f),v,u
-var $async$aCc=A.h(function(e,f){if(e===1)return A.i(f,w)
+return A.k($async$RH,w)},
+aDc(d){var x=0,w=A.l(y.f),v,u
+var $async$aDc=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=2
-return A.d(A.Fo(),$async$aCc)
+return A.d(A.FL(),$async$aDc)
 case 2:v=f
-u=J.a0(v)
+u=J.a1(v)
 x=!u.p(v,d)?3:4
 break
 case 3:u.u(v,d)
 x=5
-return A.d(A.a70(v),$async$aCc)
+return A.d(A.a7o(v),$async$aDc)
 case 5:case 4:return A.j(null,w)}})
-return A.k($async$aCc,w)},
-aCe(d){return B.dAl(d)},
-dAl(d){var x=0,w=A.l(y.f),v
-var $async$aCe=A.h(function(e,f){if(e===1)return A.i(f,w)
+return A.k($async$aDc,w)},
+aDe(d){var x=0,w=A.l(y.f),v
+var $async$aDe=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=2
-return A.d(A.Fo(),$async$aCe)
+return A.d(A.FL(),$async$aDe)
 case 2:v=f
 J.oU(v,d)
 x=3
-return A.d(A.a70(v),$async$aCe)
+return A.d(A.a7o(v),$async$aDe)
 case 3:return A.j(null,w)}})
-return A.k($async$aCe,w)}}
+return A.k($async$aDe,w)}}
 J=c[1]
 A=c[0]
 C=c[2]
 B=a.updateHolder(c[92],B)
 var z=a.updateTypes([])
-var y={o:A.G("H"),g:A.G("f"),e:A.G("y"),f:A.G("~")}};
-((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_11",e:"endPart",h:b})})($__dart_deferred_initializers__,"FEeBNoYI7keKnGqF+GjLmqh3P/E=");
+var y={o:A.I("F"),g:A.I("f"),e:A.I("y"),f:A.I("~")}};
+(a=>{a["DNTGdEtGQ6S4sWpjv4X9XFsnY/Y="]=a.current})($__dart_deferred_initializers__);
