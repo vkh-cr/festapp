@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/import_feature.dart';
+import 'package:fstapp/components/import/import_dialog_helper.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/i_has_id.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -11,9 +12,8 @@ import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/pages/occasionAdmin/user_columns.dart';
+import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/pages/occasionAdmin/users_tab_helper.dart';
-import 'package:fstapp/services/user_management_helper.dart';
 
 class UsersTab extends StatefulWidget {
   const UsersTab({super.key});
@@ -50,6 +50,8 @@ class _UsersTabState extends State<UsersTab> {
       if (FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
         UserColumns.APPROVED,
       UserColumns.INVITED,
+      UserColumns.CREATED_AT,
+      UserColumns.LAST_SIGN_IN_AT,
     ];
 
     final importFeature =
@@ -106,7 +108,7 @@ class _UsersTabState extends State<UsersTab> {
           DataGridAction(
             name: "Import".tr(),
             action: (SingleDataGridController p0, [_]) async {
-              await UserManagementHelper.import(context);
+              await ImportDialogHelper.import(context);
               await refreshData();
             },
             isEnabled: RightsService.canUpdateUsers,

@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
@@ -70,6 +71,9 @@ class _EventPageState extends State<EventPage> {
   @override
   Widget build(BuildContext context) {
     final bool isEventCancelled = _event?.isCancelled ?? false;
+    final scheduleFeature = FeatureService.getFeatureDetails(FeatureConstants.schedule);
+    final bool childrenScheduleIsEnabled = scheduleFeature is ScheduleFeature && scheduleFeature.enableChildren;
+    final bool showSubScheduleArea = _event?.isGroupEvent == false && (_event?.childEvents.isNotEmpty == true || (RightsService.isEditor() && childrenScheduleIsEnabled));
 
     return Scaffold(
       appBar: AppBar(
@@ -203,7 +207,7 @@ class _EventPageState extends State<EventPage> {
                                             // ignore: use_build_context_synchronously
                                             DialogHelper.chooseUser(context,
                                                     (person) async {
-                                                  await signIn(person);
+                                                  await signIn(context, person);
                                                   await loadData(_event!.id!);
                                                 }, _queriedParticipants,
                                                 "Sign in someone".tr());
@@ -212,7 +216,7 @@ class _EventPageState extends State<EventPage> {
                                           const Text("Sign in other").tr()),
                                     ),
                                   ),
-                                  if (AuthService.isGroupLeader() &&
+                                  if (RightsService.isGroupAdmin() &&
                                       _event != null &&
                                       (_event!.isGroupEvent ?? false))
                                     ElevatedButton(
@@ -328,13 +332,13 @@ class _EventPageState extends State<EventPage> {
                     ),
                   ),
                 ),
-                if(_event?.isGroupEvent == false && (_event?.childEvents.isNotEmpty == true || RightsService.isEditor()))
+                if(showSubScheduleArea)
                   Padding(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: ScheduleTimeline(
                           eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
                           onEventPressed: _eventPressed,
-                          showAddNewEventButton: RightsService.isEditor,
+                          showAddNewEventButton: () => (RightsService.isEditor() && childrenScheduleIsEnabled),
                           onAddNewEvent: (context, p, parent) =>
                               AddNewEventDialog.showAddEventDialog(context, p, TimeBlockItem.fromEventModelAsChild(_event!))
                                   .then((_) => loadData(_event!.id!)),
@@ -393,12 +397,12 @@ class _EventPageState extends State<EventPage> {
                             padding: EdgeInsets.all(8.0),
                           ),
                           Visibility(
-                            visible: _groupInfoModel?.leader != null,
+                            visible: _groupInfoModel?.participants?.firstWhereOrNull((p) => p.isAdmin!) != null,
                             child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 8.0, horizontal: 16),
                                 child: Text(
-                                    "${"Moderator".tr()}: ${_groupInfoModel?.leader?.name ?? ""}",
+                                    "${"Moderator".tr()}: ${_groupInfoModel?.participants?.firstWhereOrNull((p) => p.isAdmin!)?.userInfo?.name ?? ""}",
                                     style: StylesConfig.normalTextStyle)),
                           ),
                           Padding(
@@ -417,7 +421,7 @@ class _EventPageState extends State<EventPage> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 16.0, vertical: 4.0),
                                   child: Text(
-                                      "${_groupInfoModel?.participants!.toList()[index].name}",
+                                      "${_groupInfoModel?.participants!.toList()[index].userInfo?.name}",
                                       style: StylesConfig.normalTextStyle),
                                 );
                               })
@@ -527,7 +531,7 @@ class _EventPageState extends State<EventPage> {
 
     if ((event.isGroupEvent ?? false) && (event.isMyGroupEvent ?? false)) {
       var group = await DbGroups.getUserGroupInfo(
-          AuthService.currentUserGroup()!.id!);
+          RightsService.currentUserGroup()!.id!);
       if (group == null) {
         if (mounted) RouterService.goBack(context);
         return;

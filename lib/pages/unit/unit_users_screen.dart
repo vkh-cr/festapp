@@ -8,7 +8,7 @@ import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/pages/occasionAdmin/user_columns.dart';
+import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/pages/occasionAdmin/users_tab_helper.dart';
 
 class UnitUsersScreen extends StatefulWidget {

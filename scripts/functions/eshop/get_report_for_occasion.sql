@@ -96,7 +96,7 @@ BEGIN
         GROUP BY o.currency_code;
 
         result_revenue    := paid_revenue - returned_revenue;
-        remaining_balance := total_revenue - paid_revenue;
+        remaining_balance := total_revenue - (paid_revenue - returned_revenue);
 
         revenue_section := E'===========\nPřehled tržeb:\n' ||
             E'    • Suma všech objednávek: '   || to_char(total_revenue,     'FM99999990.00') || ' ' || single_cc || E'\n' ||

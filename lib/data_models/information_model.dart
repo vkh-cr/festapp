@@ -125,12 +125,12 @@ class InformationModel extends ITrinaRowModel {
   }
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
     await DbInformation.deleteInformation(this);
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
     await DbInformation.updateInformation(this);
   }
 

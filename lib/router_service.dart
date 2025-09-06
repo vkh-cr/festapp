@@ -1,14 +1,16 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_router.gr.dart';
-import 'package:fstapp/data_services/app_config_service.dart';
+import 'package:fstapp/data_models/unit_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services/synchro_service.dart';
-import 'package:fstapp/services/link_model.dart';
+import 'package:fstapp/components/forms/views/reservation_page.dart';
+import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 
 class RouterService {
   static const link = "link";
+  static const subpage = "subpage";
   static const linkPath = "/:$link";
   static String currentOccasionLink = "";
 
@@ -69,8 +71,8 @@ class RouterService {
 
   static void scheduleBack(BuildContext context) {
     //if(context.router.canPop()){
-      context.router.replace(ScheduleRoute());
-      context.router.maybePopTop();
+    context.router.replace(ScheduleRoute());
+    context.router.maybePopTop();
     //}
   }
 
@@ -114,26 +116,77 @@ class RouterService {
 
   static final router = AppRouter();
 
-  static Future<bool> updateOccasionFromLink(LinkModel link) async {
-    bool canContinue = true;
-    var checkedObject = await SynchroService.getAppConfig(occasionLink: link.occasionLink, formLink: link.formLink);
-    RightsService.occasionLinkModel = checkedObject;
-    RightsService.currentLink = checkedObject.occasion?.link;
-    AppConfigService.versionRecommended = checkedObject.versionRecommended;
-
-    if (checkedObject.occasion?.link != RouterService.currentOccasionLink &&
-        checkedObject.isAvailable()) {
-      canContinue = true;
-    } else if (checkedObject.isAccessDenied()) {
-      canContinue = false;
-    } else if (checkedObject.isNotFound()) {
-      canContinue = false;
-    }
-
-    return canContinue;
-  }
-
   static void popTwo(BuildContext context) {
     Navigator.of(context)..pop()..pop();
+  }
+
+  /// Navigates to a specific unit's edit page after updating app data.
+  static Future<void> navigateToUnit(BuildContext context, UnitModel unit) async {
+    await RightsService.updateAppData(
+        unitId: unit.id, force: true, refreshOffline: false);
+    await RouterService.navigate(context, "unit/${unit.id}/edit");
+  }
+
+  /// Navigates to a specific occasion's admin page after updating app data.
+  static Future<void> navigateToOccasionByLink(BuildContext context, String link) async {
+    await RightsService.updateAppData(
+        link: link, force: true, refreshOffline: false);
+    await RouterService.navigate(context, "/$link/${AdminPage.ROUTE}");
+  }
+
+  /// Navigates to a specific occasion's reservation page after updating app data.
+  static Future<void> navigateToOccasionReservationsByLink(BuildContext context, String link) async {
+    await RightsService.updateAppData(
+        link: link, force: true, refreshOffline: false);
+    await RouterService.navigate(context, "/$link/${ReservationsPage.ROUTE}");
+  }
+
+  /// Navigates to an occasion's administration page based on context.
+  ///
+  /// This method determines the destination by first checking the type of the
+  /// current widget from the `BuildContext`. If the context is an `AdminPage` or
+  /// `ReservationsPage`, it navigates to the corresponding view.
+  ///
+  /// If the widget type isn't a recognized admin page, it uses the fallback route
+  /// defined in `AppConfig.defaultAdministrationRoute`.
+  ///
+  /// The [occasionLink] can be passed directly. If not, it's extracted from
+  /// the current route's parameters.
+  static Future<void> navigateToOccasionAdministration(
+      BuildContext context, {String? occasionLink}) async {
+    String? resolvedLink = occasionLink;
+
+    // Get the link from arguments or route parameters.
+    if (resolvedLink == null || resolvedLink.isEmpty) {
+      resolvedLink = context.routeData.params.getString(link);
+    }
+
+    // If no link could be resolved, we can't navigate.
+    if (resolvedLink.isEmpty) {
+      debugPrint("RouterService Error: Could not resolve occasion link for navigation.");
+      return;
+    }
+
+    if(!AppConfig.isAppSupported){
+      await navigateToOccasionReservationsByLink(context, resolvedLink);
+      return;
+    }
+
+    // 1. Decide destination based on the current widget type.
+    if(context.widget is AdminPage) {
+      await navigateToOccasionByLink(context, resolvedLink);
+      return;
+    } else if (context.widget is ReservationsPage) {
+      await navigateToOccasionReservationsByLink(context, resolvedLink);
+      return;
+    }
+
+    // 2. Fallback to the default route from AppConfig.
+    if (AppConfig.defaultAdministrationRoute == ReservationsPage.ROUTE) {
+      await navigateToOccasionReservationsByLink(context, resolvedLink);
+    } else {
+      // Default to the main admin page.
+      await navigateToOccasionByLink(context, resolvedLink);
+    }
   }
 }
