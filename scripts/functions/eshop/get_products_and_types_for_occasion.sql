@@ -7,6 +7,7 @@ DECLARE
   inventory_pools_data json;
   inventory_contexts_data json;
   product_inventory_contexts_data json;
+  forms_data json;
   occ_id bigint;
 BEGIN
   -- Resolve occasion_id from the provided occasion_link
@@ -37,7 +38,7 @@ BEGIN
   FROM eshop.product_types pt
   WHERE pt.occasion = occ_id;
 
-  -- Fetch all products for the given occasion
+  -- Fetch all products for the given occasion, including form IDs
   SELECT json_agg(
            json_build_object(
              'id', p.id,
@@ -51,6 +52,11 @@ BEGIN
              'is_hidden', p.is_hidden,
              'order', p."order",
              'maximum', p.maximum,
+             'form_ids', (
+               SELECT COALESCE(json_agg(DISTINCT ff.form), '[]'::json)
+               FROM public.form_fields ff
+               WHERE ff.product_type = p.product_type
+             ),
              'ordered_count', (
                SELECT count(*)
                FROM eshop.order_product_ticket opt
@@ -101,12 +107,25 @@ BEGIN
   JOIN eshop.product_types pt ON p.product_type = pt.id
   WHERE pt.occasion = occ_id;
 
+  -- Fetch only the id, title, and link for each form associated with the occasion
+  SELECT json_agg(
+           json_build_object(
+             'id', f.id,
+             'title', f.title,
+             'link', f.link
+           )
+         )
+    INTO forms_data
+  FROM public.forms f
+  WHERE f.occasion = occ_id;
+
   RETURN json_build_object(
     'product_types', COALESCE(product_types, '[]'::json),
     'products', COALESCE(products, '[]'::json),
     'inventory_pools', COALESCE(inventory_pools_data, '[]'::json),
     'inventory_contexts', COALESCE(inventory_contexts_data, '[]'::json),
-    'product_inventory_contexts', COALESCE(product_inventory_contexts_data, '[]'::json)
+    'product_inventory_contexts', COALESCE(product_inventory_contexts_data, '[]'::json),
+    'forms', COALESCE(forms_data, '[]'::json)
   );
 END;
 $$;

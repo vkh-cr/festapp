@@ -26,7 +26,6 @@ class _ProductsTabState extends State<ProductsTab> {
   ProductsEditBundle? _bundle;
   bool _isLoading = true;
 
-  // REORDERED column list
   static List<String> columnIdentifiers = [
     EshopColumns.PRODUCT_ID,
     EshopColumns.PRODUCT_IS_HIDDEN,
@@ -40,6 +39,7 @@ class _ProductsTabState extends State<ProductsTab> {
     EshopColumns.PRODUCT_PAID_COUNT,
     EshopColumns.PRODUCT_ORDERED_COUNT,
     EshopColumns.PRODUCT_MAXIMUM,
+    EshopColumns.PRODUCT_USED_IN_FORMS,
     EshopColumns.PRODUCT_ORDER,
   ];
 
@@ -88,6 +88,7 @@ class _ProductsTabState extends State<ProductsTab> {
         data: {
           EshopColumns.PRODUCT_DESCRIPTION: RightsService.currentOccasionId(),
           EshopColumns.PRODUCT_INCLUDED_INVENTORY: _bundle!.inventoryContexts,
+          EshopColumns.PRODUCT_USED_IN_FORMS: _bundle!.forms,
         },
       ),
     );

@@ -15,7 +15,7 @@ jobs:
       - name: Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.7'
+          flutter-version: '3.35.3'
           channel: 'stable'
 
       - run: flutter build web --release --base-href /
