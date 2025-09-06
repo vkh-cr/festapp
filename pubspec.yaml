@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.17.8+197
+version: 0.17.9+198
 
 environment:
   sdk: '>=2.19.5 <3.32.8'
@@ -32,7 +32,7 @@ dependencies:
     sdk: flutter
   flutter:
     sdk: flutter
-  flutter_svg: ^2.2.0
+  flutter_svg: ^2.2.1
   fluttertoast: 8.2.12
 
   # The following adds the Cupertino Icons font to your application.
@@ -43,7 +43,7 @@ dependencies:
   flutter_map_marker_popup: ^7.0.0
 #  flutter_map_marker_popup:
 #    path: ./pckgs/flutter_map_marker_popup-master
-  supabase_flutter: ^2.9.1
+  supabase_flutter: ^2.10.0
   flutter_secure_storage: ^10.0.0-beta.4
   timelines_plus: ^1.0.7
   intl: ^0.20.2
@@ -52,7 +52,7 @@ dependencies:
   collection: ^1.18.0
   flutter_map_location_marker: ^9.1.1
   geolocator: ^13.0.4
-  flutter_widget_from_html: ^0.17.0
+  flutter_widget_from_html: ^0.17.1
   quill_html_editor:
     git:
       url: https://github.com/the-airbender/quill_html_editor.git
