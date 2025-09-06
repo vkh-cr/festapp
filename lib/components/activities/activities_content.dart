@@ -11,7 +11,6 @@ import 'package:fstapp/data_services/db_activities.dart';
 import 'package:fstapp/dialogs/detail_dialog.dart';
 import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/services/responsive_service.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -1417,19 +1416,21 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         },
       );
     }
-    return Focus(
-      autofocus: true,
-      onKeyEvent: (_, KeyEvent event) => _handleKeyEvent(event),
-      child: MultiSplitViewTheme(
-        data: MultiSplitViewThemeData(
-            dividerThickness: _isTimelineFullscreen ? 0 : 8,
-            dividerPainter: _isTimelineFullscreen
-                ? null
-                : DividerPainters.background(
-                    color: isDarkTheme ? Colors.black54 : Colors.black12,
-                    highlightedColor:
-                        isDarkTheme ? Colors.black87 : Colors.black38)),
-        child: mainContent,
+    return SafeArea(
+      child: Focus(
+        autofocus: true,
+        onKeyEvent: (_, KeyEvent event) => _handleKeyEvent(event),
+        child: MultiSplitViewTheme(
+          data: MultiSplitViewThemeData(
+              dividerThickness: _isTimelineFullscreen ? 0 : 8,
+              dividerPainter: _isTimelineFullscreen
+                  ? null
+                  : DividerPainters.background(
+                      color: isDarkTheme ? Colors.black54 : Colors.black12,
+                      highlightedColor:
+                          isDarkTheme ? Colors.black87 : Colors.black38)),
+          child: mainContent,
+        ),
       ),
     );
   }

@@ -4,9 +4,11 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/pages/occasion/check_page.dart';
 import 'package:fstapp/pages/occasion/event_edit_page.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
+import 'package:fstapp/pages/occasion/user_stay_page.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 import 'package:fstapp/pages/unit/unit_page.dart';
 import 'package:fstapp/pages/user/login_page.dart';
@@ -25,7 +27,7 @@ import 'package:fstapp/pages/user/signup_page.dart';
 import 'package:fstapp/pages/occasion/song_page.dart';
 import 'package:fstapp/pages/occasion/timetable_page.dart';
 import 'package:fstapp/pages/occasion/user_page.dart';
-import 'package:fstapp/pages/form/pages/form_page.dart';
+import 'package:fstapp/components/forms/views/form_page.dart';
 import 'package:fstapp/pages/utility/instance_install_page.dart';
 
 import 'app_router.gr.dart';
@@ -48,21 +50,22 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
     AutoRoute(page: InstanceInstallRoute.page, path: sl(InstanceInstallPage.ROUTE)),
-    AutoRoute(page: UnitAdminRoute.page, path: "/${UnitPage.ROUTE}/:id/edit"),
+    CustomRoute(page: UnitAdminRoute.page, path: "/${UnitPage.ROUTE}/:id/edit", transitionsBuilder: TransitionsBuilders.noTransition),
     AutoRoute(page: UnitRoute.page, path: "/${UnitPage.ROUTE}/:id"),
     AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}", children: [
       AutoRoute(path: ':scanCode', page: ScanRoute.page,),
     ]),
     AutoRoute(page: FormRoute.page, path: "/${FormPage.ROUTE}/:formLink"),
-    AutoRoute(page: FormEditRoute.page, path: "/${FormPage.ROUTE}/:formLink/edit"),
+    CustomRoute(page: ReservationsRoute.page, path: "/:$linkFormatted/${ReservationsPage.ROUTE}", transitionsBuilder: TransitionsBuilders.noTransition),
     AutoRoute(page: CheckRoute.page, path: "/:$linkFormatted/${CheckPage.ROUTE}/:id"),
     AutoRoute(page: NewsFormRoute.page, path: "/:$linkFormatted/${NewsFormPage.ROUTE}"),
     AutoRoute(page: HtmlEditorRoute.page, path: "/:$linkFormatted/${HtmlEditorPage.ROUTE}"),
-    AutoRoute(page: AdminRoute.page, path: "/:$linkFormatted/${AdminPage.ROUTE}"),
+    CustomRoute(page: AdminRoute.page, path: "/:$linkFormatted/${AdminPage.ROUTE}", transitionsBuilder: TransitionsBuilders.noTransition),
     AutoRoute(page: MyScheduleRoute.page, path: "/:$linkFormatted/${MySchedulePage.ROUTE}"),
     AutoRoute(page: TimetableRoute.page, path: "/:$linkFormatted/${TimetablePage.ROUTE}"),
     AutoRoute(page: GameRoute.page, path: "/:$linkFormatted/${GamePage.ROUTE}"),
     AutoRoute(page: SongbookRoute.page, path: "/:$linkFormatted/${SongbookPage.ROUTE}"),
+    AutoRoute(page: UserStayRoute.page, path: "/:$linkFormatted/${UserStayPage.ROUTE}"),
     AutoRoute(page: EventEditRoute.page, path: "/:$linkFormatted/${EventEditPage.ROUTE}", children: [
       AutoRoute(path: ':id', page: EventEditRoute.page,),
     ]),

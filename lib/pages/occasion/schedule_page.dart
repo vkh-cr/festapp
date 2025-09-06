@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_constants.dart' show FeatureConstants;
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_controller.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_day_list.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_view.dart';
@@ -20,6 +21,7 @@ import 'package:fstapp/pages/occasion/event_page.dart';
 import 'package:fstapp/pages/occasion/map_page.dart';
 import 'package:fstapp/pages/occasion/my_schedule_page.dart';
 import 'package:fstapp/pages/occasion/timetable_page.dart';
+import 'package:fstapp/pages/occasion/occasion_home_page.dart';
 import 'package:fstapp/pages/unit/unit_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/time_helper.dart';
@@ -48,12 +50,15 @@ class _SchedulePageState extends State<SchedulePage>
 
   static bool _isLoading = false;
   static bool _fullDataGloballyLoaded = false;
-
+  static DateTime? _lastQuickLoadTime;
+  static const Duration _quickLoadRateLimit = Duration(seconds: 10);
 
   final ScrollController _scrollController = ScrollController();
   List<TimeBlockItem> _dots = [];
   List<EventModel> _events = [];
   static final Map<int, String?> _eventDescriptions = {};
+
+  TabsRouter? _tabsRouter;
 
   // for timeline-expand state
   int? _openId;
@@ -62,7 +67,15 @@ class _SchedulePageState extends State<SchedulePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    context.tabsRouter.addListener(_onTabSwitch);
     loadData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // This safely caches the router instance for use in dispose().
+    _tabsRouter = context.tabsRouter;
   }
 
   @override
@@ -75,8 +88,39 @@ class _SchedulePageState extends State<SchedulePage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _tabsRouter?.removeListener(_onTabSwitch);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  bool _isRoutePresent(String routeName) {
+    final childControllers = context.tabsRouter.childControllers;
+
+    for (final controller in childControllers) {
+      final key = controller.key;
+
+      if (key is ValueKey<String>) {
+        if (key.value == routeName) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> _onTabSwitch() async {
+
+    final String targetRouteName = ScheduleNavigationRoute.name;
+    if (context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.home) &&
+        _isRoutePresent(targetRouteName)) {
+      final now = DateTime.now();
+      if (_lastQuickLoadTime == null || now.difference(_lastQuickLoadTime!) > _quickLoadRateLimit) {
+        // Set the time before calling loadData to prevent multiple rapid calls.
+        _lastQuickLoadTime = now;
+        await loadData();
+      }
+    }
   }
 
   Future<void> loadData() async {
@@ -130,6 +174,9 @@ class _SchedulePageState extends State<SchedulePage>
       RightsService.currentOccasionId()!,
       false,
     );
+    print("loaded data fast");
+    _lastQuickLoadTime = DateTime.now();
+
 
     for (var e in fast) {
       if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
@@ -210,7 +257,7 @@ class _SchedulePageState extends State<SchedulePage>
 
   void _openAddDialog(
       BuildContext ctx, List<TimeBlockGroup> groups, TimeBlockItem? p) =>
-      AddNewEventDialog.showAddEventDialog(ctx, groups)
+      AddNewEventDialog.showAddEventDialog(ctx, groups, p)
           .then((_) => loadData());
 
   bool _isUserApprover() => RightsService.isApprover();
@@ -322,6 +369,9 @@ class _SchedulePageState extends State<SchedulePage>
 
     int currentTargetTabIndex = _calculateTargetTabIndex(datedEvents);
 
+    final scheduleFeature = FeatureService.getFeatureDetails(FeatureConstants.schedule);
+    final bool subScheduleIsEnabled = ((scheduleFeature is ScheduleFeature) && scheduleFeature.enableChildren);
+
     return Scaffold(
       backgroundColor: ThemeConfig.appBarColor(),
       body: SafeArea(
@@ -417,7 +467,7 @@ class _SchedulePageState extends State<SchedulePage>
                       controller: AdvancedTimelineController(
                         events: _dots,
                         onEventPressed: _eventPressed,
-                        showAddNewEventButton: RightsService.isEditor,
+                        showAddNewEventButton: () => (RightsService.isEditor() && subScheduleIsEnabled),
                         onAddNewEvent: _openAddDialog,
                         onSignInEvent: _handleSignIn,
                         onSignOutEvent: _handleSignOut,

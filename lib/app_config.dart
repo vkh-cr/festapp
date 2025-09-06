@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/language_model.dart';
+import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
@@ -14,6 +15,7 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
   static const String oneSignalAppId = '8ba73a49-1190-4b5a-a7e2-4edc344c4c5e';
+  static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
   static const int organization = 2;
   //setup occasion id to force occasion
@@ -23,10 +25,6 @@ class AppConfig {
   static const bool isAppSupported = true;
 
   static const String webLink = "https://biscup.netlify.app";
-  static const String appStoreLink = "https://apps.apple.com/cz/app/biscup/id6472435824";
-  static const String playStoreLink = "https://play.google.com/store/apps/details?id=fstapp.diecezkodoo";
-  static const String playStoreLaunchLink = "https://play.google.com/store/apps/details?id=fstapp.diecezkodoo";
-  static const String desktopAppLink = "";
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;
   static const int imagesMaxBytes = 800000;

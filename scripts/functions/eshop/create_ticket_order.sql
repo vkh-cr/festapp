@@ -18,6 +18,7 @@ DECLARE
     used_spots JSONB := '[]'::JSONB;
     occasion_id BIGINT;
     organization_id BIGINT;
+    unit_id BIGINT;
     occasion_title TEXT;
     occasion_features JSONB;
     account_number TEXT;
@@ -63,11 +64,12 @@ BEGIN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1003, 'message', 'Form is not linked to any occasion')::TEXT;
         END IF;
 
-        -- Fetch organization and occasion title from the occasion
-        SELECT organization, title, features
-        INTO organization_id, occasion_title, occasion_features
+        -- Fetch organization, unit, and occasion title from the occasion
+        SELECT organization, unit, title, features
+        INTO organization_id, unit_id, occasion_title, occasion_features
         FROM public.occasions
         WHERE id = occasion_id;
+
         IF organization_id IS NULL THEN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1005, 'message', 'No organization found for the occasion')::TEXT;
         END IF;
@@ -81,13 +83,6 @@ BEGIN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1006, 'message', 'No account number found for the bank account')::TEXT;
         END IF;
         */
-
-        -- Calculate deadline if deadline duration is provided
-        IF form_deadline_duration IS NOT NULL THEN
-            deadline := now + make_interval(secs => form_deadline_duration);
-        ELSE
-            deadline := NULL;
-        END IF;
 
         IF input_data ? 'fields' THEN
             DECLARE
@@ -364,8 +359,8 @@ BEGIN
 
         -- Generate a variable symbol and create the payment info record
         generated_variable_symbol := generate_variable_symbol(bank_account_id);
-        INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, currency_code, created_at, deadline)
-        VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now, deadline)
+        INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, currency_code, created_at)
+        VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now)
         RETURNING id INTO payment_info_id;
 
         -- persist all of the non‐state fields
@@ -378,6 +373,9 @@ BEGIN
           updated_at    = now()
         WHERE id = order_id;
 
+        -- Apply inventory allocations. This will raise an overbooking error if spots are unavailable.
+        PERFORM apply_allocations(order_id);
+
         -- either flag as 'ordered' or, if free, mark paid via your function
         IF calculated_price = 0 THEN
           PERFORM update_order_and_tickets_to_paid(order_id);
@@ -385,6 +383,14 @@ BEGIN
           UPDATE eshop.orders
           SET state      = 'ordered'
           WHERE id = order_id;
+
+          -- Calculate deadline if deadline duration is provided and then call the function
+          IF form_deadline_duration IS NOT NULL THEN
+              deadline := now + make_interval(secs => form_deadline_duration);
+              PERFORM public.set_payment_deadline(payment_info_id, deadline);
+          ELSE
+              deadline := NULL;
+          END IF;
         END IF;
 
         -- Log the order to orders_history with details
@@ -416,7 +422,8 @@ BEGIN
                 'occasion', JSONB_BUILD_OBJECT(
                     'id', occasion_id,
                     'organization', organization_id,
-                    'occasion_title', occasion_title,
+                    'unit', unit_id,
+                    'title', occasion_title,
                     'features', occasion_features
                 )
             )

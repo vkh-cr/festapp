@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
-import 'package:fstapp/data_models_eshop/ticket_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,10 +24,10 @@ class DbTickets {
     return true;
   }
 
-  static Future<List<TicketModel>> getAllTickets(String formLink) async {
-    var orders = await DbOrders.getAllOrders(formLink);
+  static Future<List<TicketModel>> getAllTickets(String occasionLink) async {
+    var ordersBundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink, includeOrderDetails: true, includeSpots: true);
     List<TicketModel> toReturn = [];
-    for(var o in orders){
+    for(var o in ordersBundle.orders){
 
       for(TicketModel t in o.relatedTickets??[]){
         var tckst = o.data?[TbEshop.tickets.table];
@@ -129,9 +129,18 @@ class DbTickets {
     return ticket;
   }
 
-  static Future<void> updateScanCode(String formLink, String scannedCode) async {
+  static Future<void> useTicket(int ticketId) async {
+    await _supabase.rpc(
+      'update_ticket_to_used_ws',
+      params: {
+        'ticket_id': ticketId,
+      },
+    );
+  }
+
+  static Future<void> updateScanCode(String occasionLink, String scannedCode) async {
     final response = await _supabase.rpc('update_scan_code', params: {
-      'form_link': formLink,
+      'occasion_link': occasionLink,
       'new_scan_code': scannedCode,
     });
 
@@ -149,9 +158,9 @@ class DbTickets {
     return response["code"] == 200;
   }
 
-  static Future<String?> getScanCode(String formLink) async {
+  static Future<String?> getScanCode(String occasionLink) async {
     final response = await _supabase.rpc('get_scan_code', params: {
-      'form_link': formLink,
+      'occasion_link': occasionLink,
     });
 
     if (response["code"] != 200) {
