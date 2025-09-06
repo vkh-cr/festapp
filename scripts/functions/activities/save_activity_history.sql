@@ -28,34 +28,34 @@ BEGIN
         ORDER BY created_at DESC
         LIMIT 1;
 
-        -- If a parent ID was provided and it doesn't match the latest publish ID, a new version was published.
         IF p_parent_history_id IS DISTINCT FROM v_latest_publish_id THEN
              RETURN jsonb_build_object(
                 'code', 409, -- Conflict
                 'message', 'A new version has been published. Please reload or rebase your changes.',
                 'data', jsonb_build_object(
                     'latest_publish_id', v_latest_publish_id,
-                    'published_at', v_latest_publish_created_at -- Return timestamp of the conflicting version
+                    'published_at', v_latest_publish_created_at
                 )
             );
         END IF;
 
-        -- Overwrite previous autosave for this user
         DELETE FROM public.activity_history
         WHERE occasion_id = p_occasion_id
           AND user_id = v_user_id
           AND history_type = 'AUTOSAVE';
     END IF;
 
-    -- Step 3: Cleanup Old History
+    -- Step 3: Cleanup Old History (with fix)
     DELETE FROM public.activity_history
     WHERE occasion_id = p_occasion_id
-      AND created_at < (now() - interval '30 days');
+      AND created_at < (now() - interval '30 days')
+      AND id IS DISTINCT FROM p_parent_history_id;
 
     -- Step 4: Insert the New History Record
     INSERT INTO public.activity_history (occasion_id, user_id, activities_data, history_type, note, parent_history_id)
     VALUES (p_occasion_id, v_user_id, p_activities_data, p_history_type, p_note, p_parent_history_id);
 
+    -- Step 5: Return success
     RETURN jsonb_build_object('code', 200, 'message', 'History saved successfully.');
 EXCEPTION
     WHEN others THEN

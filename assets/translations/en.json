@@ -748,7 +748,8 @@
     "changedBy": "Changed By",
     "changes": "Changes",
     "paidOrSent": "Paid or Sent",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "usedInForms": "Used in Forms"
   },
   "FormsFeature": {
     "formsTitle": "Forms",
@@ -812,7 +813,8 @@
     "applications": "Applications",
     "application": "Application",
     "ordersTab": "Orders",
-    "ordersHistoryTab": "Orders History"
+    "ordersHistoryTab": "Orders History",
+    "setAsUsed": "Set as used"
   },
   "UserColumns": {
     "id": "Id",
@@ -901,7 +903,9 @@
       "deadline": "The payment deadline",
       "fullOrder": "Full order details",
       "changeOverview": "An overview of changes in the order, such as added/removed items or price changes.",
-      "balanceReasoning": "A detailed explanation of the order balance, including payment status, amount due or overpaid, and payment instructions if applicable."
+      "balanceReasoning": "A detailed explanation of the order balance, including payment status, amount due or overpaid, and payment instructions if applicable.",
+      "name": "Name",
+      "surname": "Surname"
     },
     "usage": {
       "resetPassword_title": "Reset Password",
@@ -1015,7 +1019,38 @@
     "findOccasionHint": "Find event...",
     "newOccasionButton": "New event",
     "viewApp": "View App",
-    "reservations": "Reservations"
+    "reservations": "Reservations",
+    "myFestival": "myfestival",
+    "addNewEventTitle": "Add New Event",
+    "titleLabel": "Title",
+    "linkLabel": "Link",
+    "eventAvailableAt": "This event will be available at",
+    "cancelButton": "Cancel",
+    "createButton": "Create",
+    "linkIsRequiredError": "Link is required",
+    "invalidCharactersError": "Invalid characters",
+    "linkInUseError": "Link already in use"
+  },
+  "GroupStrings": {
+    "newGroup": "New Group",
+    "columnId": "Id",
+    "columnName": "Name",
+    "columnParticipants": "Participants",
+    "columnContent": "Content",
+    "columnPlace": "Place",
+    "manageParticipantsTooltip": "Manage Participants",
+    "buttonEdit": "Edit",
+    "buttonLocation": "Location",
+    "dialogTitle": "Manage Participants: {groupTitle} ({count})",
+    "sectionLeader": "Leader",
+    "noLeaderSelected": "No leader selected.",
+    "sectionMembers": "Members",
+    "searchHint": "Search by name or other info...",
+    "buttonAdd": "Add",
+    "buttonClose": "Close",
+    "demoteLeaderTooltip": "Demote leader",
+    "assignLeaderTooltip": "Assign as leader",
+    "removeParticipantTooltip": "Remove participant"
   },
   "_":"_"
 }
