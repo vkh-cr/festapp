@@ -76,6 +76,8 @@ class FormStrings {
   static String get noProductTypesToAdd => 'FormsFeature.noProductTypesToAdd'.tr();
   static String get newProductTypeDefaultName => 'FormsFeature.newProductTypeDefaultName'.tr();
 
+  static String get typeHere => 'FormsFeature.typeHere'.tr();
+
 // --- Create/Copy Dialog (_CreateOrCopyFormDialog) ---
   static String get createFormTitle => 'FormsFeature.createFormTitle'.tr(); // "Create a Form"
   static String get createNewBlankForm => 'FormsFeature.createNewBlankForm'.tr(); // "Create a new blank form"
