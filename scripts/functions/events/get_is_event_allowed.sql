@@ -1,4 +1,3 @@
---DROP FUNCTION get_is_event_allowed
 CREATE OR REPLACE FUNCTION get_is_event_allowed(ev bigint) RETURNS bool
     LANGUAGE "plpgsql" STABLE
     SECURITY DEFINER
