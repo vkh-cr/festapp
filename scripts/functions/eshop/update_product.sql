@@ -1,4 +1,4 @@
-DROP FUNCTION public.update_product(JSONB);
+DROP FUNCTION IF EXISTS public.update_product(JSONB);
 
 CREATE OR REPLACE FUNCTION public.update_product(p_input JSONB)
 RETURNS BIGINT LANGUAGE plpgsql SECURITY DEFINER AS $$
