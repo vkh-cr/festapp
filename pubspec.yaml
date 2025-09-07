@@ -16,10 +16,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.14.25+151
+version: 0.17.10+199
 
 environment:
-  sdk: '>=2.19.5 <3.22.1'
+  sdk: '>=2.19.5 <3.32.8'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -32,7 +32,7 @@ dependencies:
     sdk: flutter
   flutter:
     sdk: flutter
-  flutter_svg: ^2.2.0
+  flutter_svg: ^2.2.1
   fluttertoast: 8.2.12
 
   # The following adds the Cupertino Icons font to your application.
@@ -43,7 +43,7 @@ dependencies:
   flutter_map_marker_popup: ^7.0.0
 #  flutter_map_marker_popup:
 #    path: ./pckgs/flutter_map_marker_popup-master
-  supabase_flutter: ^2.9.1
+  supabase_flutter: ^2.10.0
   flutter_secure_storage: ^10.0.0-beta.4
   timelines_plus: ^1.0.7
   intl: ^0.20.2
@@ -52,55 +52,55 @@ dependencies:
   collection: ^1.18.0
   flutter_map_location_marker: ^9.1.1
   geolocator: ^13.0.4
-  flutter_widget_from_html: ^0.16.0
+  flutter_widget_from_html: ^0.17.1
   quill_html_editor:
     git:
       url: https://github.com/the-airbender/quill_html_editor.git
       ref: a2beeb5bfd436e86f2635c8db1154b4190eeedb5
-  trina_grid: ^1.6.9
+  trina_grid: ^1.6.12
   url_strategy: ^0.3.0
-  desktop_drop: ^0.6.0
+  desktop_drop: ^0.6.1
   csv: ^6.0.0
   sembast: ^3.8.5
   sembast_web: ^2.4.1
   path_provider: ^2.1.5
   select_dialog: ^2.0.1
-  onesignal_flutter: ^5.3.2
-  package_info_plus: ^8.3.0
+  onesignal_flutter: ^5.3.4
+  package_info_plus: ^8.3.1
   flutter_animate: ^4.5.2
-  easy_localization: ^3.0.7
+  easy_localization: ^3.0.8
   flutter_map_cancellable_tile_provider: ^3.0.2
   simple_shadow: ^0.3.1
   pwa_install:
     git:
       url: https://github.com/jtmuller5/pwa_install.git
       ref: 82320a219574c1b5ddf1d83e080cad5a84261c2d
-  flutter_form_builder: ^10.0.1
-  form_builder_validators: ^11.1.2
+  flutter_form_builder: ^10.2.0
+  form_builder_validators: ^11.2.0
   qr_flutter: ^4.1.0
   screenshot: ^3.0.0
   mobile_scanner: ^7.0.1
   flutter_map_animations: ^0.8.0
-  auto_route: ^10.1.0
+  auto_route: ^10.1.2
   adaptive_theme: ^3.7.0
-  connectivity_plus: ^6.1.4
+  connectivity_plus: ^6.1.5
   vector_map_tiles_mbtiles: ^1.2.0
   vector_map_tiles: ^8.0.0
   mbtiles: ^0.4.0
   sqlite3_flutter_libs: ^0.5.32
-  file_saver: ^0.2.14
-  youtube_player_flutter: ^9.1.1
+  file_saver: ^0.3.1
+  youtube_player_flutter: ^9.1.2
 #    git:
 #      url: https://github.com/MusabBoltX/youtube_player_flutter_patch_fix.git
 #      ref: 97b3618b9891eb2b05a1b71ee75c432a2dce6d1a
-  flutter_widget_from_html_core: ^0.16.0
-  fwfh_cached_network_image: ^0.16.0
-  multi_split_view: ^3.6.0
+  flutter_widget_from_html_core: ^0.17.0
+  fwfh_cached_network_image: ^0.16.1
+  multi_split_view: ^3.6.1
   timezone: ^0.10.1
 
 dev_dependencies:
-  auto_route_generator: ^10.1.0
-  build_runner: ^2.4.15
+  auto_route_generator: ^10.2.4
+  build_runner: ^2.7.0
   flutter_launcher_icons: ^0.14.3
   flutter_test:
     sdk: flutter

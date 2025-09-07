@@ -19,12 +19,16 @@ class ImageArea extends StatefulWidget {
   /// Optional hint text to display above the drop zone.
   final String? hint;
 
+  /// Controls if the user can change or remove the image.
+  final bool enabled;
+
   const ImageArea({
     super.key,
     required this.imageUrl,
     required this.onFileSelected,
     required this.onRemove,
     this.hint,
+    this.enabled = true, // New property, defaults to enabled
   });
 
   @override
@@ -99,10 +103,13 @@ class _ImageAreaState extends State<ImageArea> {
             right: 0,
             child: IconButton(
               icon: Icon(Icons.close, color: ThemeConfig.redColor(context)),
-              onPressed: () {
+              // Set onPressed to null to disable the button
+              onPressed: widget.enabled
+                  ? () {
                 widget.onRemove();
                 setState(() => _currentUrl = null);
-              },
+              }
+                  : null,
               padding: const EdgeInsets.all(4),
               constraints: const BoxConstraints(),
             ),
@@ -111,10 +118,17 @@ class _ImageAreaState extends State<ImageArea> {
       );
     }
 
-    // Otherwise, show the drop/select area
-    return DropFile(
-      hint: widget.hint,
-      onFilePathChanged: (file) => _handleFileSelected(file),
+    // Otherwise, show the drop/select area.
+    // Wrap with IgnorePointer and Opacity to disable interaction and give visual feedback.
+    return IgnorePointer(
+      ignoring: !widget.enabled,
+      child: Opacity(
+        opacity: widget.enabled ? 1.0 : 0.5,
+        child: DropFile(
+          hint: widget.hint,
+          onFilePathChanged: (file) => _handleFileSelected(file),
+        ),
+      ),
     );
   }
 }

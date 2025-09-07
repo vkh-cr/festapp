@@ -159,6 +159,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                       }
                     },
                     child: SeatWidgetHelper.buildSeat(
+                      context: context,
                       state: seatModel.seatState,
                       size: seatModel.seatSize.toDouble(),
                     ),
@@ -173,6 +174,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                         }
                       },
                       child: SeatWidgetHelper.buildSeat(
+                        context: context,
                         state: seatModel.seatState,
                         size: seatModel.seatSize.toDouble(),
                       ),

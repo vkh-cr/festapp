@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/tb.dart';
@@ -16,7 +17,6 @@ import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
-import 'package:fstapp/pages/occasion/map_page.dart';
 import 'package:fstapp/pages/occasion/settings_page.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 import 'package:fstapp/pages/user/login_page.dart';
@@ -30,6 +30,8 @@ import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
+import 'user_stay_page.dart';
+
 @RoutePage()
 class UserPage extends StatefulWidget {
   static const ROUTE = "user";
@@ -42,11 +44,11 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   void _showFullScreenDialog(
-    BuildContext context,
-    String name,
-    String eventName,
-    String id,
-  ) {
+      BuildContext context,
+      String name,
+      String eventName,
+      String id,
+      ) {
     final ScreenshotController screenshotController = ScreenshotController();
 
     showDialog(
@@ -69,16 +71,13 @@ class _UserPageState extends State<UserPage> {
                 padding: const EdgeInsets.all(6.0),
                 child: IconButton(
                   onPressed: () async {
-                    // Capture screenshot (works on all platforms now)
                     final Uint8List? captured = await screenshotController.capture();
                     if (captured == null) return;
-
-                    // Save using FileSaver, same as your CSV
                     await FileSaver.instance.saveFile(
-                      name: name,                            // your desired file name
-                      bytes: captured,                       // the PNG bytes
-                      ext: 'png',                            // extension
-                      mimeType: MimeType.png,                // PNG mime type
+                      name: name,
+                      bytes: captured,
+                      fileExtension: 'png',
+                      mimeType: MimeType.png,
                     );
                   },
                   icon: Icon(
@@ -164,7 +163,6 @@ class _UserPageState extends State<UserPage> {
               children: <Widget>[
                 const SizedBox(height: 15),
 
-                // Show QR code button only if the 'ticket' feature is enabled.
                 if (FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -181,14 +179,13 @@ class _UserPageState extends State<UserPage> {
                     ),
                   ),
 
-                // Show companions only if the 'companions' feature is enabled and there is at least one companion.
                 if (FeatureService.isFeatureEnabled(FeatureConstants.companions) &&
                     (userData?.companions?.isNotEmpty ?? false))
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(color: Colors.grey[300]!),
+                        bottom: BorderSide(color: Theme.of(context).dividerColor),
                       ),
                     ),
                     child: ListView.builder(
@@ -285,7 +282,7 @@ class _UserPageState extends State<UserPage> {
                                         TextButton(
                                           onPressed: () async {
                                             var answer =
-                                            await DialogHelper.showConfirmationDialogAsync(
+                                            await DialogHelper.showConfirmationDialog(
                                                 context,
                                                 "Delete companion".tr(),
                                                 "By deleting your companion you will also sign him/her out of all signed in sessions."
@@ -320,45 +317,59 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("I am".tr(),
                     UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 if(FeatureService.isFeatureEnabled(FeatureConstants.services))
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text("Accommodation").tr(),
-                      const SizedBox(height: 4),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        child: TextButton(
-                          onPressed: userData?.accommodationPlace == null
-                              ? null
-                              : () => RouterService.navigateOccasion(
-                            context,
-                            "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}",
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // const Text("Accommodation").tr(),
+                        // const SizedBox(height: 4),
+                        // Container(
+                        //   alignment: Alignment.topLeft,
+                        //   child: TextButton(
+                        //     onPressed: userData?.accommodationPlace == null
+                        //         ? null
+                        //         : () => RouterService.navigateOccasion(
+                        //       context,
+                        //       "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}",
+                        //     ),
+                        //     child: userData?.accommodationPlace == null
+                        //         ? Text(
+                        //       userData?.accommodationPlace?.title ?? "Without accommodation".tr(),
+                        //       style: const TextStyle(fontSize: 20),
+                        //     )
+                        //         : IntrinsicWidth(
+                        //       child: Row(
+                        //         children: [
+                        //           const Icon(Icons.place),
+                        //           const SizedBox(width: 4),
+                        //           Text(
+                        //             userData!.accommodationPlace!.title!,
+                        //             style: const TextStyle(fontSize: 20),
+                        //           ),
+                        //           const SizedBox(width: 4),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        // const SizedBox(height: 16),
+                        ListTile(
+                          tileColor: ThemeConfig.qrButtonColor(context), // Added this line
+                          leading: Icon(Icons.hotel, color: Theme.of(context).colorScheme.primary),
+                          title: Text(InventoryStrings.userStayLinkTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text(InventoryStrings.userStayLinkSubtitle),
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            // The side border has been removed to allow the background color to fill the shape fully without a separate outline.
+                            // If you still want a border, you can keep the 'side' property.
                           ),
-                          child: userData?.accommodationPlace == null
-                              ? Text(
-                            userData?.accommodationPlace?.title ?? "Without accommodation".tr(),
-                            style: const TextStyle(fontSize: 20),
-                          )
-                              : IntrinsicWidth(
-                            child: Row(
-                              children: [
-                                const Icon(Icons.place),
-                                const SizedBox(width: 4),
-                                Text(
-                                  userData!.accommodationPlace!.title!,
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                                const SizedBox(width: 4),
-                              ],
-                            ),
-                          ),
+                          onTap: () => RouterService.navigateOccasion(context, UserStayPage.ROUTE),
                         ),
-                      )
-                    ],
+                      ],
+                    ),
                   ),
-                ),
                 const SizedBox(height: 16),
                 Visibility(
                   visible: RightsService.canSeeAdmin(),
@@ -381,7 +392,7 @@ class _UserPageState extends State<UserPage> {
                   alignment: Alignment.topCenter,
                   child: TextButton(
                     onPressed: () async {
-                      var answer = await DialogHelper.showConfirmationDialogAsync(
+                      var answer = await DialogHelper.showConfirmationDialog(
                         context,
                         "Change Password Instructions".tr(),
                         "You'll receive an email with a link to reset your password. Do you want to proceed?"
@@ -463,7 +474,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> _logout() async {
-    var trPrefix = (await DbUsers.getCurrentUserInfo()).getGenderPrefix();
+    var trPrefix = RightsService.currentUser()?.getGenderPrefix();
     await AuthService.logout();
     ToastHelper.Show(context, "${trPrefix}You have been signed out.".tr());
     RouterService.popOrHome(context);
@@ -495,12 +506,12 @@ class _UserPageState extends State<UserPage> {
     var events = await OfflineDataService.getAllEvents();
     userInfo?.companions?.forEach(
             (c) {
-                for (var ei in c.eventIds) {
-                  var match = events.firstWhereOrNull((e) => e.id == ei);
-                  if (match != null) {c.schedule!.add(match);}
-                }
-                c.timeBlocks.addAll(c.schedule!.map((e) => TimeBlockItem.forCompanion(e)));
-            });
+          for (var ei in c.eventIds) {
+            var match = events.firstWhereOrNull((e) => e.id == ei);
+            if (match != null) {c.schedule!.add(match);}
+          }
+          c.timeBlocks.addAll(c.schedule!.map((e) => TimeBlockItem.forCompanion(e)));
+        });
   }
 }
 
