@@ -786,7 +786,8 @@
     "groupUpcoming": "Upcoming",
     "groupOther": "Other",
     "numberOfResponsesTooltip": "Number of responses: {0}",
-    "noFormsForEventPrompt": "There are no forms for this event. Click '{createNew}' to add one."
+    "noFormsForEventPrompt": "There are no forms for this event. Click '{createNew}' to add one.",
+    "typeHere": "Type here..."
   },
   "FeatureOrders": {
     "cancel": "Cancel",
