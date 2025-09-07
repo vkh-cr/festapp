@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/language_model.dart';
+import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://hvtsoseaywurkmhywdbd.supabase.co';
@@ -15,6 +16,7 @@ class AppConfig {
   static const bool isWebNotificationsSupported = true;
   static const bool isUsersImportSupported = false;
   static const String oneSignalAppId = '4c5b7280-510f-4628-8fb8-b4bdd4fed1b2';
+  static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
   static const int organization = 1;
   //setup occasion id to force occasion
@@ -24,10 +26,6 @@ class AppConfig {
   static const bool isAppSupported = true;
 
   static const String webLink = "https://app.festivalslunovrat.cz";
-  static const String appStoreLink = "https://apps.apple.com/us/app/festival-slunovrat/id6481703402";
-  static const String playStoreLink = "";
-  static const String playStoreLaunchLink = "";
-  static const String desktopAppLink = "";
   static bool isProLicense = true;
   static const int imagesMaxWidth = 1200;
   static const int imagesMaxBytes = 800000;

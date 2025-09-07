@@ -3,9 +3,53 @@ import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/services/time_helper.dart';
 
+/// Represents the statistics for an occasion.
+class StatsModel {
+  final int total;
+  final int paidOrSent;
+  final int used;
+  final int ordered;
+  final int storno;
+  final int users;
+
+  StatsModel({
+    this.total = 0,
+    this.paidOrSent = 0,
+    this.used = 0,
+    this.ordered = 0,
+    this.storno = 0,
+    this.users = 0,
+  });
+
+  /// A helper getter to easily check if all stats are zero.
+  bool get areAllZero => total == 0 && paidOrSent == 0 && used == 0 && ordered == 0 && storno == 0 && users == 0;
+
+  factory StatsModel.fromJson(Map<String, dynamic> json) {
+    return StatsModel(
+      total: json['total'] ?? 0,
+      paidOrSent: json['paid_or_sent'] ?? 0,
+      used: json['used'] ?? 0,
+      ordered: json['ordered'] ?? 0,
+      storno: json['storno'] ?? 0,
+      users: json['users'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'total': total,
+      'paid_or_sent': paidOrSent,
+      'used': used,
+      'ordered': ordered,
+      'storno': storno,
+      'users': users,
+    };
+  }
+}
+
+
 class OccasionModel {
   static const String occasionsOffline = "occasionsOffline";
-  static const String registrationEnabled = "occasionsOffline";
 
   int? id;
   DateTime? createdAt;
@@ -22,6 +66,7 @@ class OccasionModel {
   int? unit;
   FormModel? form;
   List<Feature> features;
+  StatsModel? stats;
 
   OccasionModel({
     this.id,
@@ -39,6 +84,7 @@ class OccasionModel {
     this.unit,
     this.form,
     List<Feature>? features,
+    this.stats,
   }) : features = features ?? [];
 
   factory OccasionModel.fromJson(Map<String, dynamic> json) {
@@ -71,6 +117,7 @@ class OccasionModel {
           (json[Tb.occasions.features] as List)
               .map((featureJson) => Feature.fromJson(featureJson)))
           : [],
+      stats: json['stats'] != null ? StatsModel.fromJson(json['stats']) : null,
     );
   }
 
@@ -88,6 +135,7 @@ class OccasionModel {
       Tb.occasions.organization: organization,
       Tb.occasions.unit: unit,
       Tb.occasions.features: features,
+      'stats': stats,
     };
   }
 }

@@ -207,7 +207,7 @@ class _EventPageState extends State<EventPage> {
                                             // ignore: use_build_context_synchronously
                                             DialogHelper.chooseUser(context,
                                                     (person) async {
-                                                  await signIn(person);
+                                                  await signIn(context, person);
                                                   await loadData(_event!.id!);
                                                 }, _queriedParticipants,
                                                 "Sign in someone".tr());
@@ -216,7 +216,7 @@ class _EventPageState extends State<EventPage> {
                                           const Text("Sign in other").tr()),
                                     ),
                                   ),
-                                  if (AuthService.isGroupLeader() &&
+                                  if (RightsService.isGroupAdmin() &&
                                       _event != null &&
                                       (_event!.isGroupEvent ?? false))
                                     ElevatedButton(
@@ -397,12 +397,12 @@ class _EventPageState extends State<EventPage> {
                             padding: EdgeInsets.all(8.0),
                           ),
                           Visibility(
-                            visible: _groupInfoModel?.leader != null,
+                            visible: _groupInfoModel?.participants?.firstWhereOrNull((p) => p.isAdmin!) != null,
                             child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 8.0, horizontal: 16),
                                 child: Text(
-                                    "${"Moderator".tr()}: ${_groupInfoModel?.leader?.name ?? ""}",
+                                    "${"Moderator".tr()}: ${_groupInfoModel?.participants?.firstWhereOrNull((p) => p.isAdmin!)?.userInfo?.name ?? ""}",
                                     style: StylesConfig.normalTextStyle)),
                           ),
                           Padding(
@@ -421,7 +421,7 @@ class _EventPageState extends State<EventPage> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 16.0, vertical: 4.0),
                                   child: Text(
-                                      "${_groupInfoModel?.participants!.toList()[index].name}",
+                                      "${_groupInfoModel?.participants!.toList()[index].userInfo?.name}",
                                       style: StylesConfig.normalTextStyle),
                                 );
                               })
@@ -531,7 +531,7 @@ class _EventPageState extends State<EventPage> {
 
     if ((event.isGroupEvent ?? false) && (event.isMyGroupEvent ?? false)) {
       var group = await DbGroups.getUserGroupInfo(
-          AuthService.currentUserGroup()!.id!);
+          RightsService.currentUserGroup()!.id!);
       if (group == null) {
         if (mounted) RouterService.goBack(context);
         return;

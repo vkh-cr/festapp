@@ -1,7 +1,7 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
 import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.2';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
   }
 
   const reqData = await req.json();
-  const userEmail = reqData.email ? reqData.email.toLowerCase() : "bujnmi@gmail.com";
+  const userEmail = reqData.email ? reqData.email.toLowerCase() : "michael.bujnovsky@festapp.net";
   const organizationId = reqData.organization;
 
   const orgData = await supabaseAdmin
@@ -89,6 +89,7 @@ Deno.serve(async (req) => {
 
   // Prepare substitutions
   const subs = {
+    email: userData.data.email_readonly,
     resetPasswordLink: resetPasswordLink,
     platformLinks: platformLinksHtml,
     appName: appName,

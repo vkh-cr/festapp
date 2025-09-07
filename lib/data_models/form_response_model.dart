@@ -1,17 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/eshop/eshop_columns.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
-import 'package:fstapp/data_models_eshop/ticket_model.dart';
-import 'package:fstapp/pages/eshop/eshop_columns.dart';
-import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 
-import '../pages/form/models/id_document_data.dart';
+import '../components/forms/models/id_document_data.dart';
 
 class FormResponseModel extends ITrinaRowModel {
   @override
@@ -29,16 +27,16 @@ class FormResponseModel extends ITrinaRowModel {
 
   static FormResponseModel fromPlutoJson(Map<String, dynamic> json) {
     return FormResponseModel(
-        order: json[TbEshop.orders.order_symbol]);
+        order: json[EshopColumns.ORDER_SYMBOL]);
   }
 
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     Map<String, TrinaCell> cells = {
-      TbEshop.orders.id: TrinaCell(value: id),
-      TbEshop.orders.order_symbol: TrinaCell(value: order!.id),
-      TbEshop.orders.state: TrinaCell(value: order!.state),
-      TicketModel.metaTicketsProducts: TrinaCell(
+      EshopColumns.ORDER_ID: TrinaCell(value: id),
+      EshopColumns.ORDER_SYMBOL: TrinaCell(value: order!.toBasicString()),
+      EshopColumns.ORDER_STATE: TrinaCell(value: order!.state),
+      EshopColumns.TICKET_PRODUCTS: TrinaCell(
           value: order!.relatedProducts != null
               ? order!.relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
               : ""),
@@ -78,7 +76,7 @@ class FormResponseModel extends ITrinaRowModel {
         continue;
       }
       var rValue =
-      Utilities.removeTabsAndNewLines(fields![f.id.toString()] ?? "");
+      Utilities.removeTabsAndNewLines((fields![f.id.toString()] ?? "").toString());
       cells[f.id.toString()] = TrinaCell(value: rValue);
     }
 
@@ -106,19 +104,19 @@ class FormResponseModel extends ITrinaRowModel {
     }
 
     return FormResponseModel(
-      id: order.id,
-      order: order,
-      fields: extractedFields,
-      allFields: allFields
+        id: order.id,
+        order: order,
+        fields: extractedFields,
+        allFields: allFields
     );
   }
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
   }
 
   @override
