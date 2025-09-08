@@ -786,7 +786,8 @@
     "groupUpcoming": "Nadcházející",
     "groupOther": "Ostatní",
     "numberOfResponsesTooltip": "Počet odpovědí: {0}",
-    "noFormsForEventPrompt": "Formuláře k této události nejsou k dispozici. Klikněte na '{createNew}' pro vytvoření."
+    "noFormsForEventPrompt": "Formuláře k této události nejsou k dispozici. Klikněte na '{createNew}' pro vytvoření.",
+    "typeHere": "Vyplňte zde..."
   },
   "FeatureOrders": {
     "cancel": "Stornovat",
