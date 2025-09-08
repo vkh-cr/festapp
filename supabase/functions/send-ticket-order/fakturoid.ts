@@ -49,6 +49,7 @@ export async function useFakturoid(
 
   const createBody: any = {
     document_type: "proforma",
+    proforma_followup_document: "none",
     subject_id,
     issued_on: today,
     taxable_fulfillment_due: today,
@@ -60,7 +61,7 @@ export async function useFakturoid(
         name: unitName,
         quantity: 1,
         // Enforce a maximum of 10 characters for unit_name
-        unit_name: unitName.slice(0, 10),
+        unit_name: "Záloha",
         unit_price: total,
         vat_rate: 0,
       },

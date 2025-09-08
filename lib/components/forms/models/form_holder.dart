@@ -48,13 +48,13 @@ class FormHolder {
 
   factory FormHolder.fromFormFieldModel(FormModel formModel) {
     // Extract and sort ticket child fields.
-    final ticketChildFields = formModel.relatedFields!
+    final ticketChildFields = formModel.relatedFields
         .where((f) => f.isTicketField == true)
         .toList()
       ..sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
 
     // Process non-ticket fields.
-    final otherFields = formModel.relatedFields!
+    final otherFields = formModel.relatedFields
         .where((f) => f.isTicketField != true)
         .map((f) => createFieldHolder(f))
         .toList();
