@@ -50,7 +50,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   Widget _buildFieldsList() {
     // Use the form from the bundle
-    final topLevelFields = widget.bundle.form.relatedFields!
+    final topLevelFields = widget.bundle.form.relatedFields
         .where((f) => f.isTicketField != true)
         .toList();
 
@@ -73,12 +73,12 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
           final form = widget.bundle.form;
           final updatedList = <FormFieldModel>[];
           updatedList.addAll(topLevelFields);
-          updatedList.addAll(form.relatedFields!
+          updatedList.addAll(form.relatedFields
               .where((f) => f.isTicketField == true));
           form.relatedFields = updatedList;
 
-          for (int i = 0; i < form.relatedFields!.length; i++) {
-            form.relatedFields![i].order = i;
+          for (int i = 0; i < form.relatedFields.length; i++) {
+            form.relatedFields[i].order = i;
           }
 
           if (selectedIndex == oldIndex) {
@@ -376,7 +376,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                 onPressed: () {
                   setState(() {
                     displayList.remove(field);
-                    widget.bundle.form.relatedFields!.remove(field);
+                    widget.bundle.form.relatedFields.remove(field);
                     if (selectedIndex == index) {
                       selectedIndex = null;
                     }
