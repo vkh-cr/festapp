@@ -217,33 +217,37 @@ class FormFieldBuilders {
   }
 
   static Widget buildTextField(
-      BuildContext context, FieldHolder fieldHolder, Iterable<String> autofillHints) {
+      BuildContext context, FormHolder formHolder, FieldHolder fieldHolder, Iterable<String> autofillHints) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
+      formHolder: formHolder,
       autofillHints: autofillHints,
       isEmail: false,
     );
   }
 
-  static Widget buildEmailField(BuildContext context, FieldHolder fieldHolder) {
+  static Widget buildEmailField(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
+      formHolder: formHolder,
       autofillHints: [AutofillHints.email],
       isEmail: true,
     );
   }
 
-  static Widget buildPhoneNumber(BuildContext context, FieldHolder fieldHolder) {
+  static Widget buildPhoneNumber(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
+      formHolder: formHolder,
       autofillHints: [AutofillHints.telephoneNumber],
       isPhone: true,
     );
   }
 
-  static Widget buildAddressField(BuildContext context, FieldHolder fieldHolder) {
+  static Widget buildAddressField(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
+      formHolder: formHolder,
       autofillHints: [
         AutofillHints.fullStreetAddress,
         AutofillHints.streetAddressLevel1,
@@ -255,9 +259,10 @@ class FormFieldBuilders {
     );
   }
 
-  static Widget buildNationalityField(BuildContext context, FieldHolder fieldHolder) {
+  static Widget buildNationalityField(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
+      formHolder: formHolder,
       autofillHints: [AutofillHints.countryName],
       isNationality: true,
     );
