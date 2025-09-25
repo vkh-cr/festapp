@@ -18,10 +18,10 @@ const staticOrganizerData = {
     phone: "+420 774 292 428",
     account: "CZK - 2303165450/2010, EUR - 2503165455/2010  (Fio Banka a.s.)",
 };
-const staticPaymentClause = "Platba zálohy se uskutečňuje převodem na účet a platba doplatku v hotovosti v eurech při nástupu do autobusu.";
-const staticTermsClause = "Zákazník svým podpisem potvrzuje, že tato smlouva je pro něj i ostatní přihlášené osoby ZÁVAZNÁ a že mu jsou známy Všeobecné obchodní podmínky cestovní kanceláře a SOUHLASÍ s nimi. Dále souhlasí, aby veškerá korespondence byla zasílána na jeho výše uvedený email a zavazuje se svoje spolucestující včas a plně informovat. Objednavatel a jeho spolucestující též souhlasí se zpracováním jejich osobních údajů ve smyslu platných právních předpisů (GDPR).";
+const staticPaymentClause = "Platba zálohy probíhá převodem na účet, doplatek se hradí v hotovosti v eurech při příjezdu na místo ubytování.";
+const staticTermsClause = "Zákazník svým podpisem/zaplacením zálohy potvrzuje, že tato smlouva je pro něj i ostatní přihlášené osoby ZÁVAZNÁ a že mu jsou známy Všeobecné obchodní podmínky cestovní kanceláře a SOUHLASÍ s nimi. Dále souhlasí, aby veškerá korespondence byla zasílána na jeho výše uvedený email a zavazuje se svoje spolucestující včas a plně informovat. Objednavatel a jeho spolucestující též souhlasí se zpracováním jejich osobních údajů ve smyslu platných právních předpisů (GDPR).";
 const DEFAULT_FONT_URL = "https://fonts.cdnfonts.com/s/12165/Roboto-Regular.woff";
-const LOGO_IMAGE_URL = "https://lwfpdjxsdmkfyrzqbrlk.supabase.co/storage/v1/object/public/public-files/hvezdamorska/fstapplogo.png";
+const LOGO_IMAGE_URL = "https://lwfpdjxsdmkfyrzqbrlk.supabase.co/storage/v1/object/public/public-files/hvezdamorska/hvezdamorskaCKlogo.png";
 
 
 // --- HELPER FUNCTIONS ---
@@ -199,7 +199,7 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
   rowY = fieldTopInfo2 - fieldHeight - spaceBetweenRows;
 
   y = rowY;
-  y -= smallFontSize; drawLabel("Nástupní místo:", margin, y); drawLabel("Počet nocí:", margin + contentWidth/2 + gap, y);
+  y -= smallFontSize; drawLabel("Nástupní místo:", margin, y); drawLabel("Počet dní:", margin + contentWidth/2 + gap, y);
   y -= spaceBelowLabel; const fieldTopInfo3 = y;
   drawField(data.tourInfo.departurePoint || '', margin, fieldTopInfo3, contentWidth/2 - gap, fieldHeight);
   drawField(data.tourInfo.nights || '', margin + contentWidth/2 + gap, fieldTopInfo3, contentWidth/2 - gap, fieldHeight);
@@ -521,7 +521,7 @@ Deno.serve(async (req: Request) => {
             castka: "Dle pokynů",
             uhraditDo: "Dle pokynů"
         },
-        totalPriceForDisplay: totalFromFeatures || fallbackTotal
+        totalPriceForDisplay: fallbackTotal + " + doplatek"
     };
 
     const dataForPdf = {
