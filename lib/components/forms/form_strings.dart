@@ -34,6 +34,22 @@ class FormStrings {
   static String get labelEnableReminders => 'FeatureFormSettings.labelEnableReminders'.tr();
   static String get subtitleEnableReminders => 'FeatureFormSettings.subtitleEnableReminders'.tr();
   static String get subtitleRemindersDisabled => 'FeatureFormSettings.subtitleRemindersDisabled'.tr();
+  static String get paymentDetailsTitle => 'FeatureFormSettings.paymentDetailsTitle'.tr();
+  static String get labelVariableSymbol => 'FeatureFormSettings.labelVariableSymbol'.tr();
+  static String get vsTypeRandom => 'FeatureFormSettings.vsTypeRandom'.tr();
+  static String get vsTypeSequence => 'FeatureFormSettings.vsTypeSequence'.tr();
+  static String get labelStartingNumber => 'FeatureFormSettings.labelStartingNumber'.tr();
+  static String get helperStartingNumber => 'FeatureFormSettings.helperStartingNumber'.tr();
+  static String get labelPaymentMessage => 'FeatureFormSettings.labelPaymentMessage'.tr();
+  static String get msgTypeNameSurname => 'FeatureFormSettings.msgTypeNameSurname'.tr();
+  static String get msgTypeNone => 'FeatureFormSettings.msgTypeNone'.tr();
+  static String get msgTypeOccasionTitle => 'FeatureFormSettings.msgTypeOccasionTitle'.tr();
+
+  // --- Form Fields (General) ---
+  static String get noOptionsForCurrency => 'FormsFeature.noOptionsForCurrency'.tr();
+  static String get clearSelection => 'FormsFeature.clearSelection'.tr();
+  static String get unavailable => 'FormsFeature.unavailable'.tr();
+  static String get inWhatCurrency => 'FormsFeature.inWhatCurrency'.tr();
 
 
 // --- FormsTab (Main Grid View) ---

@@ -35,6 +35,7 @@ DECLARE
     form_key UUID;
     deadline TIMESTAMPTZ;
     form_deadline_duration BIGINT;
+    form_data JSONB;
     currency_code TEXT;
     first_currency_code TEXT := NULL;
     field_item JSONB;
@@ -55,8 +56,8 @@ BEGIN
         END IF;
 
         form_key := (input_data->>'form')::UUID;
-        SELECT id, occasion, bank_account, deadline_duration_seconds
-        INTO form_id, occasion_id, bank_account_id, form_deadline_duration
+        SELECT id, occasion, bank_account, deadline_duration_seconds, data
+        INTO form_id, occasion_id, bank_account_id, form_deadline_duration, form_data
         FROM public.forms
         WHERE key = form_key;
 
@@ -129,8 +130,8 @@ BEGIN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1002, 'message', 'Missing email in input data')::TEXT;
         END IF;
 
-        INSERT INTO eshop.orders (created_at, updated_at, occasion)
-        VALUES (now, now, occasion_id)
+        INSERT INTO eshop.orders (created_at, updated_at, occasion, form)
+        VALUES (now, now, occasion_id, form_id)
         RETURNING id INTO order_id;
 
         -- Process each ticket in the input_data "ticket" array
@@ -358,7 +359,7 @@ BEGIN
         END IF;
 
         -- Generate a variable symbol and create the payment info record
-        generated_variable_symbol := generate_variable_symbol(bank_account_id);
+        generated_variable_symbol := generate_payment_variable_symbol(bank_account_id, form_id);
         INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, currency_code, created_at)
         VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now)
         RETURNING id INTO payment_info_id;
@@ -410,6 +411,10 @@ BEGIN
             'order', JSONB_BUILD_OBJECT(
                 'id', order_id,
                 'data', order_data,
+                'form', JSONB_BUILD_OBJECT(
+                    'id', form_id,
+                    'data', form_data
+                ),
                 'payment_info', JSONB_BUILD_OBJECT(
                     'id', payment_info_id,
                     'variable_symbol', generated_variable_symbol,
