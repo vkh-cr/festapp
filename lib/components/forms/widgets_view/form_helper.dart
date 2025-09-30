@@ -358,34 +358,34 @@ class FormHelper {
     final bool isRequiredField = field.isRequired;
     switch (field.fieldType) {
       case fieldTypeText:
-        return FormFieldBuilders.buildTextField(context, field, []);
+        return FormFieldBuilders.buildTextField(context, formHolder, field, []);
       case fieldTypeNote:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, noteLabel());
-        return FormFieldBuilders.buildTextField(context, field, []);
+        return FormFieldBuilders.buildTextField(context, formHolder, field, []);
       case fieldTypeName:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, nameLabel());
-        return FormFieldBuilders.buildTextField(context, field, [AutofillHints.givenName]);
+        return FormFieldBuilders.buildTextField(context, formHolder, field, [AutofillHints.givenName]);
       case fieldTypeSurname:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, surnameLabel());
-        return FormFieldBuilders.buildTextField(context, field, [AutofillHints.familyName]);
+        return FormFieldBuilders.buildTextField(context, formHolder, field, [AutofillHints.familyName]);
       case fieldTypeCity:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, cityLabel());
-        return FormFieldBuilders.buildTextField(context, field, [AutofillHints.addressCity]);
+        return FormFieldBuilders.buildTextField(context, formHolder, field, [AutofillHints.addressCity]);
       case fieldTypeAddress:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, addressLabel());
-        return FormFieldBuilders.buildAddressField(context, field);
+        return FormFieldBuilders.buildAddressField(context, formHolder, field);
       case fieldTypeNationality:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, nationalityLabel());
-        return FormFieldBuilders.buildNationalityField(context, field);
+        return FormFieldBuilders.buildNationalityField(context, formHolder, field);
       case fieldTypeSpot:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, spotLabel());
         return FormFieldBuilders.buildSpotField(context, formKey, formHolder, field);
       case fieldTypeEmail:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, emailLabel());
-        return FormFieldBuilders.buildEmailField(context, field);
+        return FormFieldBuilders.buildEmailField(context, formHolder, field);
       case fieldTypePhone:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, phoneLabel());
-        return FormFieldBuilders.buildPhoneNumber(context, field);
+        return FormFieldBuilders.buildPhoneNumber(context, formHolder, field);
       case fieldTypeSex:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, sexLabel());
         var sexOptions = [
