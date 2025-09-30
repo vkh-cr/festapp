@@ -7,7 +7,14 @@ export function formatCurrency(amount, currencyCode = "CZK") {
   }).format(amount);
 }
 
-export function formatDatetime(datetime: string): string {
+export function formatDatetime(datetime: string | null): string | null {
+  // Check if the datetime is null, undefined, or an empty string.
+  // If it is, return null immediately.
+  if (!datetime) {
+    return null;
+  }
+
+  // If datetime is a valid string, proceed with the original formatting.
   return new Intl.DateTimeFormat("cs-CZ", {
     year: "numeric",
     month: "2-digit",
