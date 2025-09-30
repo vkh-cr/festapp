@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
       if (paymentInfo.amount > 0) {
         const qr = await generateQrCode(
           paymentInfo,
-          ticketOrder.order.data,
+          ticketOrder.order,
           occasion.title,
         );
         attachments.push({

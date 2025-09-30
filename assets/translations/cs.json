@@ -713,7 +713,17 @@
     "validationReminderInterval": "Interval připomínky musí být kratší než termín platby.",
     "labelEnableReminders": "Povolit připomínky",
     "subtitleEnableReminders": "Pokud je povoleno, automatická e-mailová připomínka o platbě bude zaslána zákazníkům.",
-    "subtitleRemindersDisabled": "Připomínky jsou zakázány. Nejprve povolte funkci připomínek v nastavení akce."
+    "subtitleRemindersDisabled": "Připomínky jsou zakázány. Nejprve povolte funkci připomínek v nastavení akce.",
+    "paymentDetailsTitle": "Platební údaje",
+    "labelVariableSymbol": "Generování variabilního symbolu",
+    "vsTypeRandom": "Náhodné",
+    "vsTypeSequence": "Sekvenční",
+    "labelStartingNumber": "Počáteční číslo",
+    "helperStartingNumber": "První číslo v sekvenci. Maximálně 10 číslic.",
+    "labelPaymentMessage": "Zpráva pro příjemce",
+    "msgTypeNameSurname": "Jméno a příjmení zákazníka",
+    "msgTypeNone": "Žádná",
+    "msgTypeOccasionTitle": "Název události"
   },
   "OrderGridColumns": {
     "id": "Id",
@@ -787,7 +797,11 @@
     "groupOther": "Ostatní",
     "numberOfResponsesTooltip": "Počet odpovědí: {0}",
     "noFormsForEventPrompt": "Formuláře k této události nejsou k dispozici. Klikněte na '{createNew}' pro vytvoření.",
-    "typeHere": "Vyplňte zde..."
+    "typeHere": "Vyplňte zde...",
+    "noOptionsForCurrency": "Pro zvolenou měnu nejsou k dispozici žádné možnosti.",
+    "clearSelection": "Zrušit výběr",
+    "unavailable": "Nedostupné",
+    "inWhatCurrency": "V jaké měně chcete platit?"
   },
   "FeatureOrders": {
     "cancel": "Stornovat",
