@@ -1,9 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/theme_config.dart';
+import '../form_strings.dart';
 import '../models/field_holder.dart';
 import '../models/form_holder.dart';
 import 'form_helper.dart';
@@ -57,7 +57,7 @@ class RadioFieldBuilder {
           context: context,
           fieldHolder: fieldHolder,
           hasError: false,
-          content: Center(child: Text("No options available for the selected currency.").tr())
+          content: Center(child: Text(FormStrings.noOptionsForCurrency))
       );
     }
     return ClipRect(
@@ -97,7 +97,7 @@ class RadioFieldBuilder {
                           formHolder.controller?.updateTotalPrice?.call();
                           field.validate();
                         },
-                        child: Text("Clear selection").tr(),
+                        child: Text(FormStrings.clearSelection),
                       ),
                     )
                         : SizedBox(key: ValueKey('empty')),
@@ -135,7 +135,7 @@ class RadioFieldBuilder {
     final bool isDisabled = o is FormOptionProductModel && !o.isAvailable;
     final title = OptionFieldHelper.buildOptionTitle(context, o);
     // If disabled, update text style to use the disabled color and append "Unavailable".
-    final effectiveTitle = isDisabled ? "$title (${tr('Unavailable')})" : title;
+    final effectiveTitle = isDisabled ? "$title (${FormStrings.unavailable})" : title;
     final isSelected = (field.value == o);
     final optionCard = OptionFieldHelper.buildOptionCard(
       context: context,
@@ -222,7 +222,7 @@ class _CurrencyFilteredRadioFieldState extends State<_CurrencyFilteredRadioField
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "V jaké měně chcete platit?",
+            FormStrings.inWhatCurrency,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
@@ -315,7 +315,7 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
     if (widget.optionsIn.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Text("No options available for the selected currency.").tr(),
+        child: Text(FormStrings.noOptionsForCurrency),
       );
     }
 
@@ -326,7 +326,7 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
         color: isDisabled ? Theme.of(context).disabledColor : null,
       );
       final title = OptionFieldHelper.buildOptionTitle(context, o);
-      final effectiveTitle = isDisabled ? "$title (${tr('Unavailable')})" : title;
+      final effectiveTitle = isDisabled ? "$title (${FormStrings.unavailable})" : title;
       return FormBuilderFieldOption<FormOptionModel>(
         value: o,
         child: Text(
@@ -375,7 +375,7 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
                 _radioGroupKey.currentState?.validate();
                 widget.formHolder.controller?.updateTotalPrice?.call();
               },
-              child: Text("Clear selection").tr(),
+              child: Text(FormStrings.clearSelection),
             ),
           ),
         Divider(
