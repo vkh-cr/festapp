@@ -1,4 +1,4 @@
-DROP FUNCTION update_scan_code(text, text);
+DROP FUNCTION IF EXISTS update_scan_code(text, text);
 
 CREATE OR REPLACE FUNCTION update_scan_code(
     occasion_link TEXT,
