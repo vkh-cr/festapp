@@ -24,8 +24,7 @@ Deno.serve(async (req) => {
     const { requestSecret } = requestData;
     await authorizeRequest({ requestSecret });
 
-    // Retrieve all fetchable bank accounts (returns bank_account_id, bank_secret, and account_type).
-    const { data: bankAccounts, error: bankAccountsError } = await supabaseAdmin.rpc("get_fetchable_bank_accounts");
+    const { data: bankAccounts, error: bankAccountsError } = await supabaseAdmin.rpc("get_fetchable_bank_accounts_with_t_count");
     if (bankAccountsError) {
       console.error("Error retrieving fetchable bank accounts", bankAccountsError);
       return new Response(
@@ -66,11 +65,41 @@ Deno.serve(async (req) => {
     for (const account of fioAccounts) {
       const bankAccountId = account.bank_account_id;
       const bankSecret = account.bank_secret;
-      const apiUrl = `https://fioapi.fio.cz/v1/rest/last/${bankSecret}/transactions.json`;
+      const transactionCount = account.transaction_count_last_90_days;
 
       try {
+        let apiUrl = "";
+        let fetchDescription = "";
+
+        if (transactionCount === 0) {
+          // If there are no recent transactions in our DB, fetch the last 90 days to populate history.
+          fetchDescription = `Account ${bankAccountId} has 0 recent DB transactions. Fetching last 90 days.`;
+
+          const endDate = new Date();
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 90);
+
+          const formattedStartDate = startDate.toISOString().split("T")[0];
+          const formattedEndDate = endDate.toISOString().split("T")[0];
+
+          apiUrl = `https://fioapi.fio.cz/v1/rest/periods/${bankSecret}/${formattedStartDate}/${formattedEndDate}/transactions.json`;
+        } else {
+          // If the account has recent transactions in our DB, fetch only the latest ones since the last check.
+          fetchDescription = `Account ${bankAccountId} has existing DB transactions. Fetching latest.`;
+          apiUrl = `https://fioapi.fio.cz/v1/rest/last/${bankSecret}/transactions.json`;
+        }
+
+        console.log(fetchDescription);
+
+        // The previous fallback logic for status 422 has been removed, as this new approach is more deterministic.
         const apiResponse = await fetch(apiUrl);
-        console.log(`Fetching transactions for bank account ${bankAccountId}: ${apiResponse.status}`);
+        console.log(`Fio API fetch for bank account ${bankAccountId}: ${apiResponse.status}`);
+
+        if (!apiResponse.ok) {
+            console.error(`Fio API request failed for account ${bankAccountId} with status: ${apiResponse.status}`);
+            fetchResults.push({ bankAccountId, error: `Fio API request failed with status: ${apiResponse.status}` });
+            continue; // Move to the next account
+        }
 
         const transactionData = await apiResponse.json();
         const transactions = transactionData?.accountStatement?.transactionList?.transaction || [];
@@ -88,7 +117,7 @@ Deno.serve(async (req) => {
             fetchResults.push({ bankAccountId, message: "Transactions processed successfully", result: insertResult });
           }
         } else {
-          fetchResults.push({ bankAccountId, message: "No transactions to process" });
+          fetchResults.push({ bankAccountId, message: "No new transactions to process" });
         }
 
         // Update the last fetch time for this bank account.

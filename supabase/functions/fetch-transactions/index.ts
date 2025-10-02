@@ -81,21 +81,33 @@ Deno.serve(async (req) => {
       }
 
       try {
-//        const startDate = new Date(2025, 7, 1)
-//                     .toISOString()
-//                     .split("T")[0];
-//        const endDate = new Date(2025, 8, 20)
-//                     .toISOString()
-//                     .split("T")[0];
-//         const apiUrl = `https://fioapi.fio.cz/v1/rest/periods/${secret}/${startDate}/${endDate}/transactions.json`;
+        // Attempt to fetch from the 'last' endpoint first.
+        const initialApiUrl = `https://fioapi.fio.cz/v1/rest/last/${secret}/transactions.json`;
+        let apiResponse = await fetch(initialApiUrl);
 
-        const apiUrl = `https://fioapi.fio.cz/v1/rest/last/${secret}/transactions.json`;
-        const apiResponse = await fetch(apiUrl);
+        // If the initial request fails with a 422 error, fall back to fetching the last month.
+        if (apiResponse.status === 422) {
+          console.log(`Fio API returned 422 for 'last' endpoint on account ${bankAccountId}. Falling back to last month's period.`);
 
+          // Calculate the start and end dates for the last month
+          const endDate = new Date();
+          const startDate = new Date();
+          startDate.setMonth(startDate.getMonth() - 1);
+
+          const formattedStartDate = startDate.toISOString().split("T")[0];
+          const formattedEndDate = endDate.toISOString().split("T")[0];
+
+          const fallbackApiUrl = `https://fioapi.fio.cz/v1/rest/periods/${secret}/${formattedStartDate}/${formattedEndDate}/transactions.json`;
+
+          // Retry the fetch with the new URL
+          apiResponse = await fetch(fallbackApiUrl);
+        }
+
+        // Now, check if the final response (either initial or fallback) is OK.
         if (!apiResponse.ok) {
             console.error(`Fio API request failed for account ${bankAccountId} with status: ${apiResponse.status}`);
             syncResults.push({ bankAccountId, status: 'error', message: `Fio API request failed with status: ${apiResponse.status}` });
-            continue;
+            continue; // Move to the next account
         }
 
         const transactionData = await apiResponse.json();
