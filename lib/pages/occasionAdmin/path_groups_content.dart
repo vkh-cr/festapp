@@ -112,7 +112,7 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
           svgIcons.firstWhereOrNull((i) => i.id == d)?.link ?? "",
           type: TrinaColumnType.select(
             mapIcons,
-            builder: (icon) =>
+            menuItemBuilder: (icon) =>
                 DataGridHelper.iconToRow(context, icon, svgIcons),
             defaultValue: null,
           ),
