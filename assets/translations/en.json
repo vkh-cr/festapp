@@ -713,7 +713,17 @@
     "validationReminderInterval": "Reminder interval must be less than the payment deadline.",
     "labelEnableReminders": "Enable Reminders",
     "subtitleEnableReminders": "If enabled, an automatic email reminder about payment will be sent to customers.",
-    "subtitleRemindersDisabled": "Reminders are disabled. Please enable the reminder feature in the occasion settings first."
+    "subtitleRemindersDisabled": "Reminders are disabled. Please enable the reminder feature in the occasion settings first.",
+    "paymentDetailsTitle": "Payment Details",
+    "labelVariableSymbol": "Variable Symbol Generation",
+    "vsTypeRandom": "Random",
+    "vsTypeSequence": "Sequence",
+    "labelStartingNumber": "Starting Number",
+    "helperStartingNumber": "The first number in the sequence. Maximum 10 digits.",
+    "labelPaymentMessage": "Message for Beneficiary",
+    "msgTypeNameSurname": "Customer Name & Surname",
+    "msgTypeNone": "None",
+    "msgTypeOccasionTitle": "Occasion Title"
   },
   "OrderGridColumns": {
     "id": "Id",
@@ -786,7 +796,12 @@
     "groupUpcoming": "Upcoming",
     "groupOther": "Other",
     "numberOfResponsesTooltip": "Number of responses: {0}",
-    "noFormsForEventPrompt": "There are no forms for this event. Click '{createNew}' to add one."
+    "noFormsForEventPrompt": "There are no forms for this event. Click '{createNew}' to add one.",
+    "typeHere": "Type here...",
+    "noOptionsForCurrency": "No options available for the selected currency.",
+    "clearSelection": "Clear selection",
+    "unavailable": "Unavailable",
+    "inWhatCurrency": "In what currency do you want to pay?"
   },
   "FeatureOrders": {
     "cancel": "Cancel",
