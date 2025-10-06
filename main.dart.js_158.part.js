@@ -1,9 +1,16 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A={
-d9J(d,e){var y
-for(y=J.aJ(d);y.t();)if(e.$1(y.gM(y)))return!1
-return!0}}
-J=c[1]
-A=a.updateHolder(c[55],A)
-var z=a.updateTypes([])};
-(a=>{a["+BYydhb9iKIMWhzMsWzZcvwBFqw="]=a.current})($__dart_deferred_initializers__);
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
+aDO(){var x=0,w=A.l(y.a),v
+var $async$aDO=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:x=3
+return A.d($.A2().bJh("requestNotificationPermission",[]),$async$aDO)
+case 3:v=e
+x=1
+break
+case 1:return A.j(v,w)}})
+return A.k($async$aDO,w)}}
+A=c[0]
+B=a.updateHolder(c[45],B)
+var z=a.updateTypes([])
+var y={a:A.J("x")}};
+(a=>{a["GjQmjCWJlNajiuHTTAcOZr9DXb4="]=a.current})($__dart_deferred_initializers__);
