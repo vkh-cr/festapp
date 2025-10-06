@@ -59,7 +59,7 @@ export async function getTicketOrderUpdateTemplate(reqData: any, authorizationHe
   };
   const sender = occasion.title;
   const receiver = order.data.email;
-  const context = { occasion: occasion.id, organization: occasion.organization, orderHistoryId: latest_history_id };
+  const context = { occasion: occasion.id, organization: occasion.organization, unit: occasion.unit, orderHistoryId: latest_history_id };
 
   return { subs, sender, receiver, context, attachments };
 }

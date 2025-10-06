@@ -68,30 +68,34 @@ Deno.serve(async (req) => {
       const transactionCount = account.transaction_count_last_90_days;
 
       try {
-        let apiUrl = "";
-        let fetchDescription = "";
-
+        // If there are no recent transactions in our DB, set the Fio API pointer to 90 days ago.
+        // This prevents downloading a large initial payload and instead prepares the 'last' endpoint to fetch from that date.
         if (transactionCount === 0) {
-          // If there are no recent transactions in our DB, fetch the last 90 days to populate history.
-          fetchDescription = `Account ${bankAccountId} has 0 recent DB transactions. Fetching last 90 days.`;
-
-          const endDate = new Date();
           const startDate = new Date();
           startDate.setDate(startDate.getDate() - 90);
-
           const formattedStartDate = startDate.toISOString().split("T")[0];
-          const formattedEndDate = endDate.toISOString().split("T")[0];
 
-          apiUrl = `https://fioapi.fio.cz/v1/rest/periods/${bankSecret}/${formattedStartDate}/${formattedEndDate}/transactions.json`;
-        } else {
-          // If the account has recent transactions in our DB, fetch only the latest ones since the last check.
-          fetchDescription = `Account ${bankAccountId} has existing DB transactions. Fetching latest.`;
-          apiUrl = `https://fioapi.fio.cz/v1/rest/last/${bankSecret}/transactions.json`;
+          const setDateUrl = `https://fioapi.fio.cz/v1/rest/set-last-date/${bankSecret}/${formattedStartDate}/`;
+          console.log(`Account ${bankAccountId} has 0 recent DB transactions. Setting Fio API pointer to ${formattedStartDate}.`);
+
+          const setDateResponse = await fetch(setDateUrl);
+          if (!setDateResponse.ok) {
+              // Log the error but proceed anyway, as the subsequent 'last' fetch might still work or provide a useful error.
+              console.error(`Failed to set last date for account ${bankAccountId}. Status: ${setDateResponse.status}`);
+              fetchResults.push({ bankAccountId, error: `Failed to set Fio API pointer with status: ${setDateResponse.status}` });
+          } else {
+              console.log(`Successfully set Fio API pointer for account ${bankAccountId}.`);
+          }
         }
+
+        // Always fetch the latest transactions.
+        // If the date was just set, this will get everything since that date.
+        // If transactions already exist in our DB, this gets transactions since the last fetch.
+        const fetchDescription = `Fetching latest transactions for account ${bankAccountId}.`;
+        const apiUrl = `https://fioapi.fio.cz/v1/rest/last/${bankSecret}/transactions.json`;
 
         console.log(fetchDescription);
 
-        // The previous fallback logic for status 422 has been removed, as this new approach is more deterministic.
         const apiResponse = await fetch(apiUrl);
         console.log(`Fio API fetch for bank account ${bankAccountId}: ${apiResponse.status}`);
 
@@ -124,6 +128,7 @@ Deno.serve(async (req) => {
         const { error: updateError } = await supabaseAdmin.rpc("set_last_fetch_time", { p_bank_account_id: bankAccountId });
         if (updateError) {
           console.error(`Error updating last fetch time for account ${bankAccountId}:`, updateError);
+          // Note: This error is pushed in addition to any transaction processing results.
           fetchResults.push({ bankAccountId, updateError: "Failed to update last fetch time" });
         }
       } catch (error) {
