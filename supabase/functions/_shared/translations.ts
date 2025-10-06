@@ -79,25 +79,37 @@ export const translations = {
         verticalSpacer(spaceAfterText),
     ].join(''),
     underpaid: (
-      paid: string, remaining: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string
-    ) => [
+      paid: string, remaining: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string | null
+    ) => {
+      const mainText = deadline
+        ? `Pro úplné dokončení objednávky, prosím, uhraď zbývající částku ${bold(remaining)} do ${bold(deadline)}.`
+        : `Pro úplné dokončení objednávky, prosím, uhraď zbývající částku ${bold(remaining)}. Platbu můžeš provést online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
+
+      return [
         verticalSpacer(spaceBeforeText),
-        styledParagraph(`Děkujeme za Tvou platbu ve výši ${bold(paid)}. Pro úplné dokončení objednávky, prosím, uhraď zbývající částku ${bold(remaining)} do ${bold(deadline)}. Jakmile platbu obdržíme, pošleme Ti potvrzení.`),
+        styledParagraph(`Děkujeme za Tvou platbu ve výši ${bold(paid)}. ${mainText} Jakmile platbu obdržíme, pošleme Ti potvrzení.`),
         verticalSpacer('15px'),
         styledParagraph(`Pro zjednodušení platby přikládáme QR kód.`),
         verticalSpacer(spaceAfterText),
         generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'cs' }),
-    ].join(''),
+      ].join('');
+    },
     unpaid: (
-      total: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string
-    ) => [
+      total: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string | null
+    ) => {
+      const mainText = deadline
+        ? `Pro dokončení objednávky ji, prosím, uhraď do ${bold(deadline)}.`
+        : `Pro dokončení objednávky, prosím, proveď platbu online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
+
+      return [
         verticalSpacer(spaceBeforeText),
-        styledParagraph(`Zbývá uhradit celkovou částku ${bold(total)}. Pro dokončení objednávky ji, prosím, uhraď do ${bold(deadline)}. Jakmile platbu obdržíme, pošleme Ti potvrzení.`),
+        styledParagraph(`Zbývá uhradit celkovou částku ${bold(total)}. ${mainText} Jakmile platbu obdržíme, pošleme Ti potvrzení.`),
         verticalSpacer('15px'),
         styledParagraph(`Pro zjednodušení platby přikládáme QR kód.`),
         verticalSpacer(spaceAfterText),
         generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: total, lang: 'cs' }),
-    ].join(''),
+      ].join('');
+    },
     fullyPaid: () => [
         verticalSpacer(spaceBeforeText),
         styledParagraph("Je kompletně zaplacená. Děkujeme!"),
@@ -162,25 +174,38 @@ export const translations = {
         verticalSpacer(spaceAfterText),
     ].join(''),
     underpaid: (
-      paid: string, remaining: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string
-    ) => [
+      paid: string, remaining: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string | null
+    ) => {
+      const mainText = deadline
+        ? `To complete the order, please pay the remaining amount of ${bold(remaining)} by ${bold(deadline)}.`
+        : `To complete the order, please pay the remaining amount of ${bold(remaining)} using the payment details below or in cash on-site.`;
+
+      return [
         verticalSpacer(spaceBeforeText),
-        styledParagraph(`Thank you for your payment of ${bold(paid)}. To complete the order, please pay the remaining amount of ${bold(remaining)} by ${bold(deadline)}. We will send a confirmation once the payment is received.`),
+        styledParagraph(`Thank you for your payment of ${bold(paid)}. ${mainText} We will send a confirmation once the payment is received.`),
         verticalSpacer('15px'),
         styledParagraph(`A QR code is attached to simplify the payment.`),
         verticalSpacer(spaceAfterText),
         generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'en' }),
-    ].join(''),
+      ].join('');
+    },
+    // MODIFIED to handle null deadline
     unpaid: (
-      total: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string
-    ) => [
+      total: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string | null
+    ) => {
+      const mainText = deadline
+        ? `To complete your order, the total amount of ${bold(total)} is due by ${bold(deadline)}.`
+        : `To complete your order, please pay the total amount of ${bold(total)} using the payment details below or in cash on-site.`;
+
+      return [
         verticalSpacer(spaceBeforeText),
-        styledParagraph(`To complete your order, the total amount of ${bold(total)} is due by ${bold(deadline)}. We will send a confirmation once the payment is received.`),
+        styledParagraph(`${mainText} We will send a confirmation once the payment is received.`),
         verticalSpacer('15px'),
         styledParagraph(`A QR code is attached to simplify the payment.`),
         verticalSpacer(spaceAfterText),
         generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: total, lang: 'en' }),
-    ].join(''),
+      ].join('');
+    },
     fullyPaid: () => [
         verticalSpacer(spaceBeforeText),
         styledParagraph("It is now fully paid. Thank you!"),

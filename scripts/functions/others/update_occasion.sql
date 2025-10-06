@@ -110,11 +110,11 @@ CREATE OR REPLACE FUNCTION update_occasion_182(input_data JSONB)
 
          -- Create a default form if one doesn't exist for the occasion
          IF NOT EXISTS (SELECT 1 FROM public.forms WHERE occasion = occ_id) THEN
-             PERFORM create_form(JSONB_BUILD_OBJECT(
-                 'occasion_id', occ_id,
-                 'link', COALESCE(input_data->>'form_link', updated_occ.link),
-                 'title', 'Registration'
-             ));
+             PERFORM create_form(
+                 occ_id,
+                 COALESCE(input_data->>'form_link', updated_occ.link),
+                 'Registration'
+             );
          END IF;
 
          -- Check if reminders are enabled within the form feature
