@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
     // Fetch occasion data for the email template.
     const { data: occasionData, error: occasionError } = await supabaseAdmin
       .from("occasions")
-      .select("organization, title, features")
+      .select("organization, unit, title, features")
       .eq("id", occasionId)
       .single();
 
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
 
     // Get email template and wrapper via RPC.
     const organizationId = occasionData.organization;
-    const context = { organization: organizationId, occasion: occasionId };
+    const context = { organization: organizationId, occasion: occasionId, unit: occasionData.unit};
     const templateAndWrapper: any = await getEmailTemplateAndWrapper("TICKET_ORDER_PAYMENT_DONE", context);
     if (!templateAndWrapper || !templateAndWrapper.template) {
       console.error("Email template not found for code TICKET_ORDER_PAYMENT_DONE.");
