@@ -223,7 +223,9 @@ create table if not exists eshop.orders (
   payment_info BIGINT NULL,
   currency_code CHARACTER(3) NOT NULL DEFAULT 'CZK'::bpchar,
   note_hidden TEXT NULL,
+  form bigint null,
   CONSTRAINT orders_occasion_fkey FOREIGN KEY (occasion) REFERENCES public.occasions (id),
+  CONSTRAINT orders_form_fkey FOREIGN KEY (form) REFERENCES forms (id),
   CONSTRAINT orders_payment_info_fkey FOREIGN KEY (payment_info) REFERENCES eshop.payment_info (id),
   CONSTRAINT orders_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;
