@@ -54,7 +54,7 @@ export async function getTicketOrderReminderTemplate(reqData: any, authorization
   const subs = { occasionTitle: occasion.title, fullOrder: generateFullOrder(order.data, order.data.tickets, occasion.features, lang), balanceReasoning: balanceReasoning };
   const sender = occasion.title;
   const receiver = order.data.email;
-  const context = { occasion: occasion.id, organization: occasion.organization, orderHistoryId: latest_history_id, paymentInfoId: payment_info.id };
+  const context = { occasion: occasion.id, organization: occasion.organization, unit: occasion.unit, orderHistoryId: latest_history_id, paymentInfoId: payment_info.id };
 
   return { subs, sender, receiver, context, attachments };
 }

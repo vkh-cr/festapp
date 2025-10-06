@@ -56,6 +56,10 @@ class FormModel {
   static const String metaIsCardDesign = "is_card_design";
   static const String metaIsReminderEnabled = "is_reminder_enabled";
   static const String metaFields = "fields";
+  static const String metaVariableSymbol = "variable_symbol";
+  static const String metaPaymentMessage = "payment_message";
+  static const String metaType = "type";
+  static const String metaStartingNumber = "starting_number";
 
   FormModel({
     this.id,

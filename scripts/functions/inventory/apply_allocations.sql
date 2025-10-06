@@ -10,11 +10,16 @@ DECLARE
     v_available_spot_id BIGINT;
     v_occasion_id BIGINT;
     v_spots_to_disallocate BIGINT[];
+    v_occasion_features JSONB;
+    v_is_blueprint_enabled BOOLEAN;
 BEGIN
     -- Initial check for the order's state.
     SELECT state, occasion INTO v_order_state, v_occasion_id
     FROM eshop.orders
     WHERE id = p_order_id;
+
+    SELECT features INTO v_occasion_features FROM public.occasions WHERE id = v_occasion_id;
+    v_is_blueprint_enabled := jsonb_path_exists(v_occasion_features, '$[*] ? (@.code == "blueprint" && @.is_enabled == true)');
 
     -- If the order is not found, raise a structured exception.
     IF NOT FOUND THEN
@@ -46,7 +51,11 @@ BEGIN
     INTO v_spots_to_disallocate
     FROM current_spots cs
     LEFT JOIN required_spots rs ON cs.order_product_ticket = rs.order_product_ticket_id AND cs.inventory_context = rs.inventory_context_id
-    WHERE rs.order_product_ticket_id IS NULL;
+    JOIN eshop.order_product_ticket opt ON cs.order_product_ticket = opt.id
+    JOIN eshop.products p ON opt.product = p.id
+    JOIN eshop.product_types pt ON p.product_type = pt.id
+    WHERE rs.order_product_ticket_id IS NULL
+      AND NOT (v_is_blueprint_enabled AND pt.type = 'spot');
 
     IF v_spots_to_disallocate IS NOT NULL AND array_length(v_spots_to_disallocate, 1) > 0 THEN
         UPDATE eshop.spots
