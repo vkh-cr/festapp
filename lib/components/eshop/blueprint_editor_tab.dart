@@ -1,12 +1,15 @@
+import 'dart:typed_data';
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
+import 'package:fstapp/components/blueprint/blueprint_strings.dart';
 import 'package:fstapp/components/seat_reservation/widgets/seat_widget.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/data_services/db_images.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -104,10 +107,10 @@ class _BlueprintTabState extends State<BlueprintTab> {
         Padding(
           padding: const EdgeInsets.only(bottom: 16.0),
           child: Text(
-            "Click an option in the legend to add seats.",
+            BlueprintStrings.legendInstruction.tr(),
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.left,
-          ).tr(),
+          ),
         ),
         buildLegend(),
       ],
@@ -152,11 +155,11 @@ class _BlueprintTabState extends State<BlueprintTab> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(blueprint?.title ?? "Edit".tr()),
+        title: Text(blueprint?.title ?? BlueprintStrings.edit.tr()),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            tooltip: "Change title".tr(),
+            tooltip: BlueprintStrings.changeTitle.tr(),
             onPressed: RightsService.canEditOccasion() ? editBlueprintTitle : null,
           ),
         ],
@@ -183,12 +186,12 @@ class _BlueprintTabState extends State<BlueprintTab> {
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
               ),
-              child: Text("Storno").tr(),
+              child: Text(BlueprintStrings.storno.tr()),
             ),
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: RightsService.canEditOccasion() ? saveChanges : null,
-              child: Text("Save").tr(),
+              child: Text(BlueprintStrings.save.tr()),
             ),
           ],
         ),
@@ -205,24 +208,24 @@ class _BlueprintTabState extends State<BlueprintTab> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Groups (Tables):",
+              BlueprintStrings.groupsTitle.tr(),
               style: Theme.of(context).textTheme.titleMedium,
-            ).tr(),
+            ),
             Row(
               children: [
                 IconButton(
                   icon: const Icon(Icons.add),
-                  tooltip: "Add new".tr(),
+                  tooltip: BlueprintStrings.addNew.tr(),
                   onPressed: RightsService.canEditOccasion() ? addGroup : null,
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
-                  tooltip: "Delete".tr(),
+                  tooltip: BlueprintStrings.delete.tr(),
                   onPressed: RightsService.canEditOccasion() ? deleteGroup : null,
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  tooltip: "Rename".tr(),
+                  tooltip: BlueprintStrings.rename.tr(),
                   onPressed: RightsService.canEditOccasion() ? renameGroup : null,
                 ),
               ],
@@ -302,8 +305,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     final newTitle = await DialogHelper.showInputDialog(
       context: context,
-      dialogTitle: "Add new".tr(),
-      labelText: "Group number".tr(),
+      dialogTitle: BlueprintStrings.addNew.tr(),
+      labelText: BlueprintStrings.dialogGroupNumber.tr(),
       initialValue: defaultName,
     );
 
@@ -329,8 +332,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     final newTitle = await DialogHelper.showInputDialog(
       context: context,
-      dialogTitle: "Rename".tr(),
-      labelText: "Title".tr(),
+      dialogTitle: BlueprintStrings.rename.tr(),
+      labelText: BlueprintStrings.dialogTitle.tr(),
       initialValue: currentGroup!.title,
     );
 
@@ -347,7 +350,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         buildLegendItem(
-          "Black area".tr(),
+          BlueprintStrings.legendBlackArea.tr(),
           SeatState.black,
           isActive: currentSelectionMode == selectionMode.addBlack,
           onTap: () {
@@ -358,7 +361,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
         ),
         const SizedBox(height: 8),
         buildLegendItem(
-          "Available".tr(),
+          BlueprintStrings.legendAvailable.tr(),
           SeatState.available,
           isActive: currentSelectionMode == selectionMode.addAvailable,
           onTap: () {
@@ -369,7 +372,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
         ),
         const SizedBox(height: 8),
         buildLegendItem(
-          "Empty".tr(),
+          BlueprintStrings.legendEmpty.tr(),
           SeatState.empty,
           isActive: currentSelectionMode == selectionMode.emptyArea,
           onTap: () {
@@ -380,21 +383,21 @@ class _BlueprintTabState extends State<BlueprintTab> {
         ),
         const SizedBox(height: 8),
         buildLegendItem(
-          "Used".tr(),
+          BlueprintStrings.legendUsed.tr(),
           SeatState.used,
           isActive: false,
           grayedOut: true,
         ),
         const SizedBox(height: 8),
         buildLegendItem(
-          "Occupied".tr(),
+          BlueprintStrings.legendOccupied.tr(),
           SeatState.ordered,
           isActive: false, // Not clickable
           grayedOut: true,
         ),
         const SizedBox(height: 8),
         buildLegendItem(
-          "Selected".tr(),
+          BlueprintStrings.legendSelected.tr(),
           SeatState.selected_by_me,
           isActive: false, // Not clickable
           grayedOut: true,
@@ -450,7 +453,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         buildDimensionEditor(
-          "Width".tr(),
+          BlueprintStrings.width.tr(),
           blueprint!.configuration!.width!,
               (value) {
             setState(() {
@@ -459,9 +462,9 @@ class _BlueprintTabState extends State<BlueprintTab> {
             seatLayoutController.fitContent();
           },
         ),
-        const SizedBox(width: 12), // Reduced spacing between editors
+        const SizedBox(width: 12),
         buildDimensionEditor(
-          "Height".tr(),
+          BlueprintStrings.height.tr(),
           blueprint!.configuration!.height!,
               (value) {
             setState(() {
@@ -470,42 +473,64 @@ class _BlueprintTabState extends State<BlueprintTab> {
             seatLayoutController.fitContent();
           },
         ),
-        const SizedBox(width: 12),
-        TextButton(
-          onPressed: () async {
-            var file = await DialogHelper.dropFilesHere(
-              context,
-              "Import SVG background".tr(),
-              "Ok".tr(),
-              "Storno".tr(),
-            );
-            if (file != null) {
-              var content = await file.readAsString();
-              setState(() {
-                blueprint!.backgroundSvg = content;
-              });
-              ToastHelper.Show(context, "File uploaded successfully.".tr());
-            }
-          },
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Import background").tr(),
-              const SizedBox(width: 8), // Optional spacing between text and icon
-              const Icon(Icons.grid_on),
-            ],
-          ),
-        ),
+        const SizedBox(width: 24),
+        _buildBackgroundControls(),
       ],
     );
   }
+
+  Widget _buildBackgroundControls() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        PopupMenuButton<String>(
+          tooltip: BlueprintStrings.changeBackground.tr(),
+          onSelected: (value) {
+            if (value == 'svg') {
+              _uploadSvgBackground();
+            } else if (value == 'image') {
+              _uploadImageBackground();
+            }
+          },
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+            PopupMenuItem<String>(
+              value: 'svg',
+              child: Text(BlueprintStrings.uploadSVG.tr()),
+            ),
+            PopupMenuItem<String>(
+              value: 'image',
+              child: Text(BlueprintStrings.uploadImage.tr()),
+            ),
+          ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(BlueprintStrings.background.tr()),
+                const SizedBox(width: 8),
+                const Icon(Icons.grid_on),
+              ],
+            ),
+          ),
+        ),
+        if (blueprint?.backgroundSvg != null && blueprint!.backgroundSvg!.isNotEmpty)
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: BlueprintStrings.removeBackground.tr(),
+            onPressed: _removeBackground,
+          ),
+      ],
+    );
+  }
+
 
   Widget buildDimensionEditor(String label, int currentValue, ValueChanged<int> onChanged) {
     return Column(
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
           ),
         ),
@@ -525,7 +550,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
             ),
             Text(
               "$currentValue",
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
               ),
             ),
@@ -550,12 +575,12 @@ class _BlueprintTabState extends State<BlueprintTab> {
       children: [
         ElevatedButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("Storno").tr(),
+          child: Text(BlueprintStrings.storno.tr()),
         ),
         const SizedBox(width: 12),
         ElevatedButton(
           onPressed: saveChanges,
-          child: const Text("Save").tr(),
+          child: Text(BlueprintStrings.save.tr()),
         ),
       ],
     );
@@ -564,8 +589,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
   void editBlueprintTitle() async {
     final newTitle = await DialogHelper.showInputDialog(
       context: context,
-      dialogTitle: "Rename".tr(),
-      labelText: "Title".tr(),
+      dialogTitle: BlueprintStrings.rename.tr(),
+      labelText: BlueprintStrings.dialogTitle.tr(),
       initialValue: blueprint?.title ?? "",
     );
 
@@ -578,7 +603,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
   void handleSeatTap(SeatModel model) {
     if (model.objectModel?.isOrdered() ?? false) {
-      ToastHelper.Show(context, "Places that are occupied cannot be changed.".tr(), severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged.tr(), severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -614,7 +639,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
   void _handleAddAvailable(SeatModel model) {
     if(currentGroup == null){
-      ToastHelper.Show(context, "First, select or create a group to add a spot (on the right).".tr(), severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, BlueprintStrings.toastSelectGroupFirst.tr(), severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -635,15 +660,15 @@ class _BlueprintTabState extends State<BlueprintTab> {
     model.objectModel!.title = currentGroup?.getNextBoxName();
     currentGroup?.objects.add(model.objectModel!);
     blueprint!.objects!.add(model.objectModel!);
-    ToastHelper.Show(context, "${"Spot added:".tr()} ${model.objectModel!.title}");
+    ToastHelper.Show(context, "${BlueprintStrings.toastSpotAdded.tr()} ${model.objectModel!.title}");
   }
 
   void _handleEmptyArea(SeatModel model) {
     if (model.objectModel != null) {
       if (model.seatState == SeatState.black) {
-        ToastHelper.Show(context, "Area removed.".tr());
+        ToastHelper.Show(context, BlueprintStrings.toastAreaRemoved.tr());
       } else {
-        ToastHelper.Show(context, "Spot removed.".tr());
+        ToastHelper.Show(context, BlueprintStrings.toastSpotRemoved.tr());
       }
       blueprint!.objects!.remove(model.objectModel);
       for (var group in blueprint!.groups!) {
@@ -654,11 +679,79 @@ class _BlueprintTabState extends State<BlueprintTab> {
     }
   }
 
+  void _uploadSvgBackground() async {
+    var file = await DialogHelper.dropFilesHere(
+      context,
+      BlueprintStrings.dialogImportSvgTitle.tr(),
+      BlueprintStrings.dialogOk.tr(),
+      BlueprintStrings.storno.tr(),
+    );
+    if (file != null) {
+      try {
+        var content = await file.readAsString();
+        if (!content.trim().startsWith('<svg')) {
+          ToastHelper.Show(context, BlueprintStrings.toastInvalidSvg.tr(), severity: ToastSeverity.NotOk);
+          return;
+        }
+        setState(() {
+          blueprint!.backgroundSvg = content;
+        });
+        ToastHelper.Show(context, BlueprintStrings.toastSvgUploadSuccess.tr());
+      } catch (e) {
+        ToastHelper.Show(context, BlueprintStrings.toastSvgReadFail.tr(), severity: ToastSeverity.NotOk);
+      }
+    }
+  }
+
+  void _uploadImageBackground() async {
+    var file = await DialogHelper.dropFilesHere(
+      context,
+      BlueprintStrings.dialogImportImageTitle.tr(),
+      BlueprintStrings.dialogOk.tr(),
+      BlueprintStrings.storno.tr(),
+    );
+    if (file != null) {
+      try {
+        Uint8List imageData = await file.readAsBytes();
+        final publicUrl = await DbImages.uploadImage(imageData, blueprint!.occasion, null);
+        setState(() {
+          blueprint!.backgroundSvg = publicUrl;
+        });
+        ToastHelper.Show(context, BlueprintStrings.toastImageUploadSuccess.tr());
+      } catch (e) {
+        ToastHelper.Show(context, BlueprintStrings.toastImageUploadFail.tr(), severity: ToastSeverity.NotOk);
+      }
+    }
+  }
+
+  void _removeBackground() async {
+    final confirmed = await DialogHelper.showConfirmationDialog(
+        context,
+        BlueprintStrings.dialogConfirmRemoveBackgroundTitle.tr(),
+        BlueprintStrings.dialogConfirmRemoveBackgroundContent.tr());
+
+    if (confirmed == true) {
+      final currentBackground = blueprint!.backgroundSvg;
+      if (currentBackground != null && (currentBackground.startsWith("http://") || currentBackground.startsWith("https://"))) {
+        try {
+          await DbImages.removeImage(currentBackground);
+        } catch (e) {
+          debugPrint("Failed to remove background image from storage: $e");
+        }
+      }
+      setState(() {
+        blueprint!.backgroundSvg = null;
+      });
+      ToastHelper.Show(context, BlueprintStrings.toastBackgroundRemoved.tr());
+    }
+  }
+
+
   void saveChanges() async {
     if (blueprint == null) return;
     try {
       await DbForms.updateBlueprint(blueprint!);
-      ToastHelper.Show(context, "Saved".tr(), severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, BlueprintStrings.saved.tr(), severity: ToastSeverity.Ok);
       await loadData();
     } catch (e) {
       ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""), severity: ToastSeverity.NotOk);
