@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_app_config_v182(data_in jsonb)
+CREATE OR REPLACE FUNCTION get_app_config_v203(data_in jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
@@ -12,6 +12,7 @@ DECLARE
     platform_name text := platform_info->>'platform';
     occasionId bigint;
     default_unit bigint;
+    editor_unit_id bigint;
     is_open_bool BOOLEAN;
     occasion_user occasion_users%rowtype;
     unit_user unit_users%rowtype;
@@ -71,12 +72,23 @@ BEGIN
             );
         END IF;
 
-    -- New: If a unit_id is provided directly (and no links), prioritize it and do not load an occasion.
+    -- If a unit_id is provided directly (and no links), prioritize it.
     ELSIF unit_id IS NOT NULL THEN
-        occasionId := NULL; -- Ensure no occasion is loaded, even if a default is set for the org.
-        default_unit := unit_id; -- Use the provided unit_id as the context.
+        occasionId := NULL; -- Ensure no occasion is loaded.
 
-        -- Fetch unit details from the provided unit_id
+        -- First, check if the user is an editor on any unit.
+        SELECT uu.unit
+          INTO editor_unit_id
+        FROM public.unit_users uu
+        WHERE uu."user" = current_user_id
+          AND (uu.is_editor_view = TRUE OR uu.is_editor = TRUE) -- Check for editor or higher permissions
+        ORDER BY uu.unit -- Get the first one consistently
+        LIMIT 1;
+
+        -- Use the editor unit if found; otherwise, fall back to the provided unit_id.
+        default_unit := COALESCE(editor_unit_id, unit_id);
+
+        -- Fetch unit details from the determined default_unit
         SELECT json_build_object('id', u.id, 'title', u.title)
             INTO unit_json
         FROM units u
