@@ -731,14 +731,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
         BlueprintStrings.dialogConfirmRemoveBackgroundContent.tr());
 
     if (confirmed == true) {
-      final currentBackground = blueprint!.backgroundSvg;
-      if (currentBackground != null && (currentBackground.startsWith("http://") || currentBackground.startsWith("https://"))) {
-        try {
-          await DbImages.removeImage(currentBackground);
-        } catch (e) {
-          debugPrint("Failed to remove background image from storage: $e");
-        }
-      }
+
       setState(() {
         blueprint!.backgroundSvg = null;
       });

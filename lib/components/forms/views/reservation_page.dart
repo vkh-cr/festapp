@@ -11,9 +11,8 @@ import 'package:fstapp/pages/user/login_page.dart';
 @RoutePage()
 class ReservationsPage extends StatefulWidget {
   static const ROUTE = "reservations";
-  String? formLink;
 
-  ReservationsPage({super.key, @pathParam this.formLink});
+  ReservationsPage({super.key});
 
   @override
   _ReservationsPageState createState() => _ReservationsPageState();

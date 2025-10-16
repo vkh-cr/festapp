@@ -13,12 +13,13 @@ import 'package:auto_route/auto_route.dart' as _i34;
 import 'package:collection/collection.dart' as _i36;
 import 'package:flutter/foundation.dart' as _i37;
 import 'package:flutter/material.dart' as _i35;
+import 'package:fstapp/components/forms/views/form_page.dart' deferred as _i6;
+import 'package:fstapp/components/forms/views/forms_tab.dart' deferred as _i7;
+import 'package:fstapp/components/forms/views/reservation_page.dart'
+    deferred as _i20;
 import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart'
     deferred as _i13;
 import 'package:fstapp/data_models/place_model.dart' as _i38;
-import 'package:fstapp/components/forms/views/form_page.dart' deferred as _i6;
-import 'package:fstapp/components/forms/views/forms_tab.dart' deferred as _i7;
-import 'package:fstapp/components/forms/views/reservation_page.dart' deferred as _i20;
 import 'package:fstapp/pages/occasion/check_page.dart' deferred as _i2;
 import 'package:fstapp/pages/occasion/event_edit_page.dart' deferred as _i3;
 import 'package:fstapp/pages/occasion/event_page.dart' deferred as _i4;
@@ -681,14 +682,10 @@ class OccasionHomeRoute extends _i34.PageRouteInfo<void> {
 /// generated route for
 /// [_i20.ReservationsPage]
 class ReservationsRoute extends _i34.PageRouteInfo<ReservationsRouteArgs> {
-  ReservationsRoute({
-    _i35.Key? key,
-    String? formLink,
-    List<_i34.PageRouteInfo>? children,
-  }) : super(
+  ReservationsRoute({_i35.Key? key, List<_i34.PageRouteInfo>? children})
+      : super(
           ReservationsRoute.name,
-          args: ReservationsRouteArgs(key: key, formLink: formLink),
-          rawPathParams: {'formLink': formLink},
+          args: ReservationsRouteArgs(key: key),
           initialChildren: children,
         );
 
@@ -697,40 +694,36 @@ class ReservationsRoute extends _i34.PageRouteInfo<ReservationsRouteArgs> {
   static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      final pathParams = data.inheritedPathParams;
       final args = data.argsAs<ReservationsRouteArgs>(
-        orElse: () =>
-            ReservationsRouteArgs(formLink: pathParams.optString('formLink')),
+        orElse: () => const ReservationsRouteArgs(),
       );
       return _i34.DeferredWidget(
         _i20.loadLibrary,
-        () => _i20.ReservationsPage(key: args.key, formLink: args.formLink),
+        () => _i20.ReservationsPage(key: args.key),
       );
     },
   );
 }
 
 class ReservationsRouteArgs {
-  const ReservationsRouteArgs({this.key, this.formLink});
+  const ReservationsRouteArgs({this.key});
 
   final _i35.Key? key;
 
-  final String? formLink;
-
   @override
   String toString() {
-    return 'ReservationsRouteArgs{key: $key, formLink: $formLink}';
+    return 'ReservationsRouteArgs{key: $key}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! ReservationsRouteArgs) return false;
-    return key == other.key && formLink == other.formLink;
+    return key == other.key;
   }
 
   @override
-  int get hashCode => key.hashCode ^ formLink.hashCode;
+  int get hashCode => key.hashCode;
 }
 
 /// generated route for
