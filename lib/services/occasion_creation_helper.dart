@@ -13,8 +13,8 @@ import 'package:fstapp/widgets/mouse_detector.dart';
 import 'package:fstapp/widgets/time_data_range_picker.dart';
 
 class OccasionCreationHelper {
-  static Future<void> createNewOccasion(
-      BuildContext context, UnitModel unit, List<OccasionModel> existingOccasions, Function Function(OccasionModel occasion) onEventCreated) async {
+  static Future<OccasionModel?> createNewOccasion(
+      BuildContext context, UnitModel unit, List<OccasionModel> existingOccasions) async {
     final formKey = GlobalKey<FormState>();
     String? title = AdministrationStrings.myFestival;
     String? link = "myfestival${DateTime.now().add(Duration(days: 33)).year}";
@@ -57,7 +57,7 @@ class OccasionCreationHelper {
       }
     });
 
-    await showDialog(
+    return await showDialog<OccasionModel?>(
       context: context,
       builder: (BuildContext context) {
         return MouseDetector(
@@ -166,7 +166,7 @@ class OccasionCreationHelper {
                   actions: [
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(null);
                       },
                       child: Text(AdministrationStrings.cancelButton),
                     ),
@@ -190,8 +190,7 @@ class OccasionCreationHelper {
                           );
 
                           await DbOccasions.updateOccasion(newOccasion);
-                          onEventCreated(newOccasion);
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(newOccasion);
                         }
                       }
                           : null,
