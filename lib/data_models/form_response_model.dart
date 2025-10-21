@@ -135,7 +135,7 @@ class FormResponseModel extends ITrinaRowModel {
 
   @override
   String toBasicString() {
-    return order.toString();
+    return order?.toBasicString() ?? id.toString();
   }
 
 }
