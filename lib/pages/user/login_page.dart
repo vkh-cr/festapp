@@ -145,7 +145,11 @@ class _LoginPageState extends State<LoginPage> {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
       var unit = RightsService.currentUnit();
-      RightsService.updateAppData(unitId: unit?.id, link: RouterService.currentOccasionLink, force: true);
+      if(AppConfig.isAppSupported){
+        RightsService.updateAppData(unitId: unit?.id, link: RouterService.currentOccasionLink, force: true);
+      } else {
+        await RightsService.updateAppData(unitId: unit?.id, link: RouterService.currentOccasionLink, force: true);
+      }
       RouterService.popOrHome(context);
     }
   }

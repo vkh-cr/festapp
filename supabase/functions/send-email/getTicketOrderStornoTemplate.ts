@@ -29,7 +29,7 @@ export async function getTicketOrderStornoTemplate(reqData: any, authorizationHe
   // Fetch occasion data
   const { data: occasionData, error: occasionError } = await supabaseAdmin
     .from("occasions")
-    .select("organization, title")
+    .select("organization, title, unit")
     .eq("id", occasionId)
     .single();
 
@@ -69,6 +69,7 @@ export async function getTicketOrderStornoTemplate(reqData: any, authorizationHe
   // Build a context object for template selection.
   const context = {
     occasion: occasionId,
+    unit: occasionData.unit,
     organization: occasionData.organization,
   };
 

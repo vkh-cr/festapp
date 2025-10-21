@@ -37,36 +37,65 @@ class _UnitPageState extends State<UnitPage> {
   List<OccasionModel> _occasions = [];
   InformationModel? _quote;
   final ScrollController _scrollController = ScrollController();
-  int? _initialId;
+  int? _currentUnitId;
 
   @override
   void initState() {
     super.initState();
-    _loadUnitAndOccasions();
+    _initialLoad();
   }
 
-  Future<void> _loadUnitAndOccasions() async {
-    _occasions = await OfflineDataService.getAllOccasions();
-    if (mounted) setState(() {});
-
-    _initialId = widget.id ?? RightsService.currentUnit()!.id!;
-
-    await RightsService.updateAppData(unitId: _initialId, refreshOffline: false);
-
-    final unit = await DbUnits.getUnit(_initialId!);
-
-    final occasions = unit.occasions!;
-    OfflineDataService.saveAllOccasions(occasions);
-
-    if (FeatureService.isFeatureEnabled(FeatureConstants.quotes,
-        features: unit.features)) {
-      _quote = await DbInformation.getCurrentQuote(_initialId!);
+  // Handles the very first load when the widget is created.
+  Future<void> _initialLoad() async {
+    // Immediately load from cache for a faster UI response.
+    final cachedOccasions = await OfflineDataService.getAllOccasions();
+    if (mounted) {
+      setState(() {
+        _occasions = cachedOccasions;
+      });
     }
+
+    // Determine the ID: prioritize URL, then fallback to current user's unit.
+    final idToLoad = widget.id ?? RightsService.currentUnit()?.id;
+
+    if (idToLoad != null) {
+      await _loadDataForUnit(idToLoad);
+    }
+  }
+
+  // Centralized method to fetch and set all data for a given unit ID.
+  Future<void> _loadDataForUnit(int unitId) async {
+    _currentUnitId = unitId;
+
+    // Update global app context for the selected unit.
+    await RightsService.updateAppData(unitId: unitId, refreshOffline: false);
+
+    final unit = await DbUnits.getUnit(unitId);
+    final occasions = unit.occasions ?? [];
+    await OfflineDataService.saveAllOccasions(occasions);
+
+    InformationModel? quote;
+    if (FeatureService.isFeatureEnabled(FeatureConstants.quotes, features: unit.features)) {
+      quote = await DbInformation.getCurrentQuote(unitId);
+    }
+
     if (mounted) {
       setState(() {
         _unit = unit;
         _occasions = occasions;
+        _quote = quote;
       });
+    }
+  }
+
+  // Callback specifically for handling sign-in/out events.
+  Future<void> _handleSignInOut() async {
+    // After sign-in/out, get the new unit associated with the user.
+    final newUnitId = RightsService.currentUnit()!.id!;
+
+    if(mounted) {
+      await _loadDataForUnit(newUnitId);
+      await RouterService.goToUnit(context, newUnitId);
     }
   }
 
@@ -92,8 +121,15 @@ class _UnitPageState extends State<UnitPage> {
       floatingActionButton: RightsService.canUserSeeUnitWorkspace()
           ? FloatingActionButton(
         onPressed: () {
-          RouterService.navigate(context, "unit/$_initialId/edit")
-              .then((_) => _loadUnitAndOccasions());
+          if (_currentUnitId != null) {
+            RouterService.navigate(context, "unit/$_currentUnitId/edit")
+                .then((_) {
+              // After editing, reload data for the same unit.
+              if (_currentUnitId != null) {
+                _loadDataForUnit(_currentUnitId!);
+              }
+            });
+          }
         },
         child: const Icon(Icons.edit),
       )
@@ -104,7 +140,7 @@ class _UnitPageState extends State<UnitPage> {
         slivers: [
           UniversalHeader(
             scrollController: _scrollController,
-            onSignInOut: _loadUnitAndOccasions,
+            onSignInOut: _handleSignInOut, // Use the new callback
           ),
           // Quote section rendered as HTML in a paper-like container.
           if (_unit != null && _quote != null)
