@@ -108,6 +108,18 @@ class FormHelper {
     FormHelper.fieldTypePhone: Icons.phone,
   };
 
+  static const List<String> nonEditableFields = [
+    fieldTypeSex,
+    fieldTypeBirthYear,
+    fieldTypeBirthDate,
+    fieldTypeIdDocument,
+    fieldTypeSelectMany,
+    fieldTypeNote,
+    fieldTypeSpot,
+    fieldTypeProductType,
+    fieldTypeTicket
+  ];
+
   static const List<String> personalInfoFields = [
     fieldTypeName,
     fieldTypeSurname,

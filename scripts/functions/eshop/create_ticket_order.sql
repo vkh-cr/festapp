@@ -371,7 +371,7 @@ BEGIN
           currency_code = first_currency_code,
           payment_info  = payment_info_id,
           data          = order_data,
-          updated_at    = now()
+          updated_at    = now
         WHERE id = order_id;
 
         -- Apply inventory allocations. This will raise an overbooking error if spots are unavailable.
