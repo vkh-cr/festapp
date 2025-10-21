@@ -71,9 +71,6 @@ class FormResponseModel extends ITrinaRowModel {
       }
       else if (f.type == FormHelper.fieldTypeIdDocument) {
         var val = fields![f.id.toString()];
-        if(val != null){
-          val = IdDocumentData.fromJson(val);
-        }
         cells[f.id.toString()] = TrinaCell(
             value: val?.toString() ?? "");
         continue;
@@ -135,7 +132,7 @@ class FormResponseModel extends ITrinaRowModel {
 
   @override
   String toBasicString() {
-    return order.toString();
+    return order?.toBasicString() ?? id.toString();
   }
 
 }
