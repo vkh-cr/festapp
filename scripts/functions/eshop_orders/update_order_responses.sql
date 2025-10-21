@@ -36,8 +36,8 @@ BEGIN
     FROM eshop.orders o
     WHERE o.id = p_order_id;
 
-    -- Raise an exception if the order is not found
-    IF NOT FOUND THEN
+    -- Raise an exception if the SELECT INTO returned no row
+    IF v_occasion_id IS NULL THEN
         RAISE EXCEPTION 'Order not found: %', p_order_id;
     END IF;
 
@@ -62,11 +62,12 @@ BEGIN
         RAISE EXCEPTION 'No form fields found for form %', v_order_form_id;
     END IF;
 
-    -- Convert the existing 'fields' array [ {"id": "val"} ] into a flat map { "id": "val" }
-    SELECT jsonb_object_agg(key, value)
+    -- FIX: Use a LATERAL join to explicitly reference the columns from jsonb_each,
+    -- resolving the "ambiguous column 'value'" error.
+    SELECT jsonb_object_agg(je.key, je.value)
     INTO v_current_fields_map
-    FROM jsonb_array_elements(v_current_data -> 'fields') AS elem,
-         jsonb_each(elem);
+    FROM jsonb_array_elements(v_current_data -> 'fields') AS jae(field_object),
+         LATERAL jsonb_each(jae.field_object) AS je(key, value);
 
     -- Start with the current order data
     v_new_data := v_current_data;
@@ -115,8 +116,6 @@ BEGIN
             ELSIF v_field_type = 'phone' THEN
                 v_new_data := v_new_data || jsonb_build_object('phone', v_new_value);
             END IF;
-
-            -- The v_merged_fields_map already contains the correct new value from the `||` operation
 
         END IF;
     END LOOP;
