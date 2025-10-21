@@ -60,12 +60,13 @@ export function generateFullOrder(orderData: any, tickets: any[], occasionFeatur
             overallTotal += price;
             const formattedPrice = formatCurrency(price, product.currency_code || currencyCode);
 
+            const title = product.spot_title || product.title;
+
             const rowStyle = 'style="border-bottom: 1px solid #e2e8f0;"';
 
-            // --- MODIFICATION: Changed vertical-align for the price cell to "bottom" ---
             return `
                 <tr ${rowStyle}>
-                    <td style="padding: 12px 0; vertical-align: top;">${product.type_title}: ${product.title}</td>
+                    <td style="padding: 12px 0; vertical-align: top;">${product.type_title}: ${title}</td>
                     <td style="padding: 12px 0; text-align: right; white-space: nowrap; vertical-align: bottom; padding-left: 16px;"><strong>${formattedPrice}</strong></td>
                 </tr>`;
         }).join("");

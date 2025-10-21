@@ -30,6 +30,8 @@ import 'package:fstapp/widgets/html_view.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import '../forms/views/reservation_page.dart';
+
 class OccasionSettingsTab extends StatefulWidget {
   const OccasionSettingsTab({super.key});
 
@@ -137,11 +139,16 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
   }
 
   Future<void> _saveSettings() async {
+    // 1. Validate the form. If it's not valid, do nothing.
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    // 2. Set the state to "saving" to show a loading indicator on the button.
     setState(() { _isSaving = true; });
 
+    // 3. Save the form fields to update the local state variables.
     _formKey.currentState!.save();
+
+    // 4. Update the occasion model with the new values from the form.
     occasion!.title = _title;
     occasion!.link = _linkValue;
     occasion!.startTime = _from;
@@ -153,19 +160,32 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     occasion!.data ??= {};
     occasion!.data![Tb.occasions.data_timezone] = _selectedTimezone;
 
+    // 5. Persist the changes to the database.
     await DbOccasions.updateOccasion(occasion!);
 
-    if(occasionLink != null) {
-      await RightsService.updateAppData(
-        link: occasionLink!,
-        force: true,
-        refreshOffline: false,
+    final newLink = occasion!.link;
+
+    // 6. Check if the component is still mounted and the new link is valid.
+    if (mounted && newLink != null) {
+      // Show a success message. It's good practice to show it before navigation
+      // in case the context becomes invalid during the transition.
+      ToastHelper.Show(context, "${"Saved".tr()}: ${occasion!.title!}");
+
+      // 7. Trigger the full page refresh.
+      // This router method handles updating RightsService with the new link
+      // and then navigates to the correct administration page (AdminPage or
+      // ReservationsPage). This is crucial, especially if the event link
+      // itself has been changed.
+      await RouterService.navigateToOccasionAdministration(
+        context,
+        occasionLink: newLink,
       );
     }
 
-    if(mounted) {
+    // 8. Reset the saving state. This is good practice, although the navigation
+    // might unmount this widget, making this line not strictly necessary.
+    if (mounted) {
       setState(() { _isSaving = false; });
-      ToastHelper.Show(context, "${"Saved".tr()}: ${occasion!.title!}");
     }
   }
 

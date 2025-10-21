@@ -10,6 +10,7 @@ import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import '../components/forms/models/id_document_data.dart';
+import '../data_services_eshop/db_orders.dart';
 
 class FormResponseModel extends ITrinaRowModel {
   @override
@@ -26,8 +27,20 @@ class FormResponseModel extends ITrinaRowModel {
   });
 
   static FormResponseModel fromPlutoJson(Map<String, dynamic> json) {
+    final int? orderId = json[EshopColumns.ORDER_ID] as int?;
+    final Map<String, dynamic> responseFields = {};
+
+    for (var entry in json.entries) {
+      // Check if the key is a numeric string
+      if (int.tryParse(entry.key) != null) {
+        responseFields[entry.key] = entry.value;
+      }
+    }
+
     return FormResponseModel(
-        order: json[EshopColumns.ORDER_SYMBOL]);
+      id: orderId,
+      fields: responseFields,
+    );
   }
 
   @override
@@ -56,7 +69,7 @@ class FormResponseModel extends ITrinaRowModel {
             value: UserInfoModel.sexToLocale(fields![f.id.toString()]));
         continue;
       }
-      if (f.type == FormHelper.fieldTypeIdDocument) {
+      else if (f.type == FormHelper.fieldTypeIdDocument) {
         var val = fields![f.id.toString()];
         if(val != null){
           val = IdDocumentData.fromJson(val);
@@ -65,7 +78,7 @@ class FormResponseModel extends ITrinaRowModel {
             value: val?.toString() ?? "");
         continue;
       }
-      if (f.type == FormHelper.fieldTypeBirthDate) {
+      else if (f.type == FormHelper.fieldTypeBirthDate) {
         // Parse ISO datetime string into a DateTime object.
         var dt = DateTime.tryParse(fields![f.id.toString()] ?? "");
         // Format the DateTime into a "year-month-day" string.
@@ -117,6 +130,7 @@ class FormResponseModel extends ITrinaRowModel {
 
   @override
   Future<void> updateMethod(BuildContext context) async {
+    await DbOrders.updateOrderResponses(this);
   }
 
   @override

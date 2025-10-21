@@ -112,16 +112,14 @@ class AppPanelHelper {
           }
         },
         onCreateNew: !RightsService.isUnitEditor() ? null :
-            () =>
-            OccasionCreationHelper.createNewOccasion(
-                originalContext, currentUnit, occasionsInCurrentUnit, (
-                newOccasion) =>
-                () async {
-              if (newOccasion.link != null) {
-                await RouterService.navigateToOccasionAdministration(
-                    originalContext, occasionLink: newOccasion.link!);
-              }
-            }),
+            () async {
+          final newOccasion = await OccasionCreationHelper.createNewOccasion(
+              originalContext, currentUnit, occasionsInCurrentUnit);
+          if (newOccasion != null && newOccasion.link != null) {
+            await RouterService.navigateToOccasionAdministration(
+                originalContext, occasionLink: newOccasion.link!);
+          }
+        },
         onTitleTap: () async {
           if (currentOccasion.link != null) {
             await RouterService.navigateToOccasionAdministration(

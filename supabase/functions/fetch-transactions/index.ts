@@ -72,7 +72,13 @@ Deno.serve(async (req) => {
 
     // 4. Loop through each bank account and synchronize transactions
     for (const account of bankAccounts) {
-      const { bank_account_id: bankAccountId, bank_secret: secret, account_type: accountType } = account;
+      // NOTE: Assuming the RPC returns 'transaction_count_last_90_days' for this logic to work.
+      const {
+        bank_account_id: bankAccountId,
+        bank_secret: secret,
+        account_type: accountType,
+        transaction_count_last_90_days: transactionCount
+      } = account;
 
       // We only process "FIO" accounts in this function
       if (accountType !== 'FIO') {
@@ -81,21 +87,35 @@ Deno.serve(async (req) => {
       }
 
       try {
-//        const startDate = new Date(2025, 7, 1)
-//                     .toISOString()
-//                     .split("T")[0];
-//        const endDate = new Date(2025, 8, 20)
-//                     .toISOString()
-//                     .split("T")[0];
-//         const apiUrl = `https://fioapi.fio.cz/v1/rest/periods/${secret}/${startDate}/${endDate}/transactions.json`;
+        // If there are no recent transactions in our DB, set the Fio API pointer to 90 days ago.
+        if (transactionCount === 0) {
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 90);
+          const formattedStartDate = startDate.toISOString().split("T")[0];
 
+          const setDateUrl = `https://fioapi.fio.cz/v1/rest/set-last-date/${secret}/${formattedStartDate}/`;
+          console.log(`Account ${bankAccountId} has 0 recent DB transactions. Setting Fio API pointer to ${formattedStartDate}.`);
+
+          const setDateResponse = await fetch(setDateUrl);
+          if (!setDateResponse.ok) {
+              // Log the error but proceed, as the 'last' fetch might still provide a useful response.
+              console.error(`Failed to set last date for account ${bankAccountId}. Status: ${setDateResponse.status}`);
+              syncResults.push({ bankAccountId, status: 'error', message: `Failed to set Fio API pointer with status: ${setDateResponse.status}` });
+          } else {
+              console.log(`Successfully set Fio API pointer for account ${bankAccountId}.`);
+          }
+        }
+
+        // Always fetch the latest transactions.
         const apiUrl = `https://fioapi.fio.cz/v1/rest/last/${secret}/transactions.json`;
+        console.log(`Fetching latest transactions for account ${bankAccountId}.`);
         const apiResponse = await fetch(apiUrl);
 
+        // Check if the API request was successful.
         if (!apiResponse.ok) {
             console.error(`Fio API request failed for account ${bankAccountId} with status: ${apiResponse.status}`);
             syncResults.push({ bankAccountId, status: 'error', message: `Fio API request failed with status: ${apiResponse.status}` });
-            continue;
+            continue; // Move to the next account
         }
 
         const transactionData = await apiResponse.json();
@@ -115,7 +135,7 @@ Deno.serve(async (req) => {
             syncResults.push({ bankAccountId, status: 'error', message: 'Failed to insert transactions.' });
           } else {
             console.log(`Insert result for account ${bankAccountId}:`, insertResult);
-            syncResults.push({ bankAccountId, status: 'success', result: insertResult });
+            syncResults.push({ bankAccountId, status: 'success', new_transactions: transactions.length });
           }
         } else {
           syncResults.push({ bankAccountId, status: 'success', message: 'No new transactions to process.' });

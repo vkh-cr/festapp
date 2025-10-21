@@ -90,6 +90,19 @@ class _HtmlViewState extends State<HtmlView> {
         inherit: false,
       ),
       customStylesBuilder: (el) {
+        // Handle alignment classes from rich text editors like Quill.js
+        if (el.attributes['class'] != null) {
+          final classes = el.attributes['class']!.split(' ');
+          if (classes.contains('ql-align-center')) {
+            return {'text-align': 'center'};
+          }
+          if (classes.contains('ql-align-right')) {
+            return {'text-align': 'right'};
+          }
+          if (classes.contains('ql-align-justify')) {
+            return {'text-align': 'justify'};
+          }
+        }
         switch (el.localName) {
           case 'a':
             return {'color': linkColor};
