@@ -2,7 +2,7 @@ import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { formatCurrency, formatDatetime, formatIBAN } from "../_shared/utilities.ts";
 import { generateFullOrder } from "../_shared/orderOverview.ts";
 import { generateQrCode } from "../_shared/qrCodePayment.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 
 import {
   getEmailTemplateAndWrapper,
