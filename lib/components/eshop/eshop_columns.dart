@@ -669,7 +669,7 @@ class EshopColumns {
       }
       var columns = <TrinaColumn>[];
       for(var f in (data[TICKET_PRODUCTS_EXTENDED]) as List<String>){
-        var cc = genericTextColumn(ProductModel.typeToLocale(f), f, false);
+        var cc = genericTextColumn(ProductModel.typeToLocale(f), f, alignToEnd: false);
         columns.add(cc);
       }
       return columns;
@@ -681,7 +681,18 @@ class EshopColumns {
       var columns = <TrinaColumn>[];
       for(FormFieldModel f in (data[RESPONSES]) as List<FormFieldModel>){
         var title = f.title?.trim();
-        var cc = genericTextColumn((title == null || title.isEmpty ? FormHelper.fieldTypeToLocale(f.type!) : title), f.id.toString());
+        TrinaColumn cc;
+
+        if (!FormHelper.nonEditableFields.contains(f.type)){
+          cc = genericTextColumn(
+              (title == null || title.isEmpty ? FormHelper.fieldTypeToLocale(f.type!) : title),
+              f.id.toString(),
+              enableEditing: true);
+        } else {
+          cc = genericTextColumn(
+              (title == null || title.isEmpty ? FormHelper.fieldTypeToLocale(f.type!) : title),
+              f.id.toString());
+        }
         columns.add(cc);
       }
       return columns;
@@ -786,9 +797,9 @@ class EshopColumns {
     );
   }
 
-  static TrinaColumn genericTextColumn(String title, String field, [bool alignToEnd = true]) {
+  static TrinaColumn genericTextColumn(String title, String field, {bool alignToEnd = true, bool enableEditing = false}) {
     return TrinaColumn(
-      readOnly: true,
+      readOnly: !enableEditing,
       enableEditingMode: true,
       title: title,
       field: field,
