@@ -41,7 +41,11 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
         controller = SingleDataGridController<FormResponseModel>(
           context: context,
           loadData: () => DbForms.getAllResponses(_formLink!),
-          fromPlutoJson: FormResponseModel.fromPlutoJson,
+
+          fromPlutoJson: (Map<String, dynamic> json) {
+            return FormResponseModel.fromPlutoJson(json, formFieldModels ?? []);
+          },
+
           firstColumnType: DataGridFirstColumn.none,
           idColumn: TbEshop.orders.id,
           actionsExtended: DataGridActionsController(
