@@ -13,6 +13,7 @@ import 'package:fstapp/data_services/db_images.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
@@ -713,7 +714,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
     if (file != null) {
       try {
         Uint8List imageData = await file.readAsBytes();
-        final publicUrl = await DbImages.uploadImage(imageData, blueprint!.occasion, null);
+        var compressedImageData = await ImageCompressionHelper.compress(imageData, 3000, quality: 100);
+        final publicUrl = await DbImages.uploadImage(compressedImageData, blueprint!.occasion, null);
         setState(() {
           blueprint!.backgroundSvg = publicUrl;
         });
