@@ -26,20 +26,67 @@ class FormResponseModel extends ITrinaRowModel {
     this.allFields,
   });
 
-  static FormResponseModel fromPlutoJson(Map<String, dynamic> json) {
+  static FormResponseModel fromPlutoJson(Map<String, dynamic> json, List<FormFieldModel> allFields) {
     final int? orderId = json[EshopColumns.ORDER_ID] as int?;
     final Map<String, dynamic> responseFields = {};
 
+    // Create a quick lookup map for field models by their string ID
+    final Map<String, FormFieldModel> fieldMap = {
+      for (var f in allFields) f.id.toString(): f
+    };
+
     for (var entry in json.entries) {
-      // Check if the key is a numeric string
-      if (int.tryParse(entry.key) != null) {
-        responseFields[entry.key] = entry.value;
+      final String fieldId = entry.key;
+      final dynamic value = entry.value;
+
+      // Find the corresponding field model using the ID (key)
+      final FormFieldModel? fieldModel = fieldMap[fieldId];
+
+      if (fieldModel != null) {
+        // As requested, skip fields that are listed as non-editable
+        // in FormHelper.nonEditableFields
+        if (FormHelper.nonEditableFields.contains(fieldModel.type)) {
+          continue; // Skip this field entirely
+        }
+
+        if (fieldModel.type == FormHelper.fieldTypeSex) {
+          // Sex is independent, handled as a single string-to-string mapping
+          responseFields[fieldId] = UserInfoModel.sexFromLocale(value as String?);
+        }
+        else if (fieldModel.type == FormHelper.fieldTypeBirthDate) {
+          // BirthDate is handled
+          final dt = DateTime.tryParse(value as String? ?? "");
+          responseFields[fieldId] = dt?.toIso8601String();
+        }
+        else if (fieldModel.type == FormHelper.fieldTypeIdDocument) {
+          // IdDocument is handled
+          responseFields[fieldId] = value;
+        }
+        else if (fieldModel.type == FormHelper.fieldTypeSelectMany) {
+
+          final String? stringValue = value as String?;
+          if (stringValue == null || stringValue.isEmpty) {
+            // If the grid value is empty, store an empty list
+            responseFields[fieldId] = <String>[];
+          } else {
+            responseFields[fieldId] = stringValue.split(FormHelper.optionDelimiter);
+          }
+        }
+        else {
+          // Default for all other field types (text, number, etc.)
+          responseFields[fieldId] = value;
+        }
+      }
+      else if (int.tryParse(fieldId) != null) {
+        // Preserve numeric keys even if not in allFields
+        responseFields[fieldId] = value;
       }
     }
 
     return FormResponseModel(
       id: orderId,
       fields: responseFields,
+      allFields: allFields,
     );
   }
 
@@ -71,9 +118,6 @@ class FormResponseModel extends ITrinaRowModel {
       }
       else if (f.type == FormHelper.fieldTypeIdDocument) {
         var val = fields![f.id.toString()];
-        if(val != null){
-          val = IdDocumentData.fromJson(val);
-        }
         cells[f.id.toString()] = TrinaCell(
             value: val?.toString() ?? "");
         continue;
