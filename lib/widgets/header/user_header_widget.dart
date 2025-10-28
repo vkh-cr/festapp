@@ -13,8 +13,8 @@ import 'package:flutter/material.dart';
 
 class UserHeaderWidget extends StatefulWidget {
   final Color? appBarIconColor;
-  final VoidCallback? onSignInOut;
-  const UserHeaderWidget({super.key, this.appBarIconColor, this.onSignInOut});
+  final Future<void> Function()? onSignIn;
+  const UserHeaderWidget({super.key, this.appBarIconColor, this.onSignIn});
 
   @override
   _UserHeaderWidgetState createState() => _UserHeaderWidgetState();
@@ -295,9 +295,9 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                       onTap: () async {
                         Navigator.pop(context);
                         await AuthService.logout();
-                        widget.onSignInOut?.call();
                         if (mounted) setState(() {});
-                      },
+                        await RouterService.goToUnit(context, RightsService.currentUnit()!.id!);
+                        },
                     ),
                   ],
                 ),
@@ -403,7 +403,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               tooltip: "Sign In".tr(),
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
-                widget.onSignInOut?.call();
+                await widget.onSignIn?.call();
                 if(mounted) setState(() {});
               },
             ),
@@ -431,7 +431,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
             OutlinedButton.icon(
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
-                widget.onSignInOut?.call();
+                await widget.onSignIn?.call();
                 if(mounted) setState(() {}); // refresh after sign in
               },
               icon: Icon(
