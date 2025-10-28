@@ -121,10 +121,10 @@ class RouterService {
   }
 
   /// Navigates to a specific unit's edit page after updating app data.
-  static Future<void> navigateToUnit(BuildContext context, UnitModel unit) async {
+  static Future<void> navigateToUnitAdmin(BuildContext context, UnitModel unit) async {
     await RightsService.updateAppData(
         unitId: unit.id, force: true, refreshOffline: false);
-    await RouterService.navigate(context, "unit/${unit.id}/edit");
+    await RouterService.navigate(context, "unit/${RightsService.currentUnit()!.id!}/edit");
   }
 
   /// Navigates to a specific occasion's admin page after updating app data.
