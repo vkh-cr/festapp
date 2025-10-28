@@ -65,12 +65,13 @@ class _UnitPageState extends State<UnitPage> {
 
   // Centralized method to fetch and set all data for a given unit ID.
   Future<void> _loadDataForUnit(int unitId) async {
-    _currentUnitId = unitId;
 
     // Update global app context for the selected unit.
     await RightsService.updateAppData(unitId: unitId, refreshOffline: false);
+    RouterService.goToUnit(context, RightsService.currentUnit()!.id!);
+    _currentUnitId = RightsService.currentUnit()!.id!;
 
-    final unit = await DbUnits.getUnit(unitId);
+    final unit = await DbUnits.getUnit(RightsService.currentUnit()!.id!);
     final occasions = unit.occasions ?? [];
     await OfflineDataService.saveAllOccasions(occasions);
 
@@ -88,9 +89,7 @@ class _UnitPageState extends State<UnitPage> {
     }
   }
 
-  // Callback specifically for handling sign-in/out events.
-  Future<void> _handleSignInOut() async {
-    // After sign-in/out, get the new unit associated with the user.
+  Future<void> _handleSignIn() async {
     final newUnitId = RightsService.currentUnit()!.id!;
 
     if(mounted) {
@@ -140,7 +139,7 @@ class _UnitPageState extends State<UnitPage> {
         slivers: [
           UniversalHeader(
             scrollController: _scrollController,
-            onSignInOut: _handleSignInOut, // Use the new callback
+            onSignIn: _handleSignIn,
           ),
           // Quote section rendered as HTML in a paper-like container.
           if (_unit != null && _quote != null)
