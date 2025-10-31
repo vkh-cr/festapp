@@ -1,16 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/blueprint/get_orders_helper.dart';
 import 'package:fstapp/components/eshop/models/orders_history_model.dart';
-import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
-import 'package:fstapp/components/inventory/models/inventory_pool_model.dart';
-import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/order_product_ticket_model.dart';
-import 'package:fstapp/components/eshop/models/product_edit_bundle.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
-import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
+import 'package:fstapp/data_models/form_response_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -187,8 +183,6 @@ class DbOrders {
   }
 
   static Future<void> deleteOrder(OrderModel model) async {
-    // The `rpc` call will throw a PostgrestException on failure,
-    // which is caught by the calling UI code.
     await _supabase.rpc(
       'delete_order',
       params: {
@@ -197,7 +191,17 @@ class DbOrders {
     );
   }
 
-  /// **NEW**: Deletes a specific order history record by its ID.
+  static Future<void> updateOrderResponses(FormResponseModel responses) async {
+    await _supabase.rpc(
+      'update_order_responses',
+      params: {
+        'p_order_id': responses.id,
+        'responses': responses.fields
+      },
+    );
+  }
+
+  /// Deletes a specific order history record by its ID.
   /// Throws a [PostgrestException] if the deletion fails due to permissions or other issues.
   static Future<void> deleteOrderHistory(int historyId) async {
     await _supabase.rpc(

@@ -12,7 +12,7 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:flutter/services.dart';
 
-
+import 'birth_year_field_builder.dart';
 import '../models/field_holder.dart';
 import '../models/form_holder.dart';
 import '../models/form_ticket_model.dart';
@@ -281,31 +281,11 @@ class FormFieldBuilders {
     );
   }
 
-  static FormBuilderTextField buildBirthYearField(BuildContext context, FieldHolder fieldHolder) {
-    FocusNode focusNode = FocusNode();
-    return FormBuilderTextField(
-      name: fieldHolder.id.toString(),
-      focusNode: focusNode,
-      decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
-      ),
-      validator: FormBuilderValidators.compose([
-        if (fieldHolder.isRequired) FormBuilderValidators.required(),
-            (value) {
-          if (value == null || value.isEmpty || value == "") {
-            return null;
-          }
-          if (int.tryParse(value) == null) {
-            return NumericValidator().translatedErrorText;
-          }
-          final numericValue = int.parse(value);
-          if (numericValue < 1900 || numericValue > DateTime.now().year - 12) {
-            return RangeValidator(DateTime.now().year - 12, 1900).translatedErrorText;
-          }
-          return null;
-        },
-      ]),
-      keyboardType: TextInputType.number,
+  static Widget buildBirthYearField(
+      BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
+    return BirthYearFieldBuilder(
+      fieldHolder: fieldHolder,
+      formHolder: formHolder,
     );
   }
 }

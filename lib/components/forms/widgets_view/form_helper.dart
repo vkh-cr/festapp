@@ -108,6 +108,18 @@ class FormHelper {
     FormHelper.fieldTypePhone: Icons.phone,
   };
 
+  static const List<String> nonEditableFields = [
+    fieldTypeSex,
+    fieldTypeBirthYear,
+    fieldTypeBirthDate,
+    fieldTypeIdDocument,
+    fieldTypeSelectMany,
+    fieldTypeNote,
+    fieldTypeSpot,
+    fieldTypeProductType,
+    fieldTypeTicket
+  ];
+
   static const List<String> personalInfoFields = [
     fieldTypeName,
     fieldTypeSurname,
@@ -426,7 +438,7 @@ class FormHelper {
         );
       case fieldTypeBirthYear:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, birthYearLabel());
-        return FormFieldBuilders.buildBirthYearField(context, field);
+        return FormFieldBuilders.buildBirthYearField(context, formHolder, field);
       case fieldTypeTicket:
         var ticketHolder = field as TicketHolder;
         return FormFieldBuilders.buildTicketField(context, formHolder, ticketHolder);

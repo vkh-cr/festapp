@@ -120,10 +120,9 @@ class OccasionEditCard extends StatelessWidget {
                           spacing: 12.0,
                           runSpacing: 4.0,
                           children: [
-                            _buildStat(context, icon: Icons.chat_bubble, value: occasion.stats!.total.toString(), tooltip: FormStrings.responses.tr()),
+                            _buildStat(context, icon: Icons.chat_bubble, value: (occasion.stats!.total - occasion.stats!.storno).toString(), tooltip: FormStrings.responses.tr()),
                             _buildStat(context, icon: Icons.check_circle_outline, value: (occasion.stats!.paidOrSent + occasion.stats!.used).toString(), tooltip: OrdersStrings.gridPaidOrSent.tr()),
                             _buildStat(context, icon: Icons.shopping_cart_outlined, value: occasion.stats!.ordered.toString(), tooltip: OrdersStrings.gridOrdered.tr()),
-                            _buildStat(context, icon: Icons.cancel_outlined, value: occasion.stats!.storno.toString(), tooltip: OrdersStrings.gridCancelled.tr()),
                           ],
                         )
                       ] else ...[
