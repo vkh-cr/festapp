@@ -72,11 +72,11 @@ class AppPanelHelper {
         itemTitleBuilder: (item) => item.title ?? '---',
         itemIdBuilder: (item) => item.id,
         onItemSelected: (item) async {
-          await RouterService.navigateToUnit(originalContext, item);
+          await RouterService.navigateToUnitAdmin(originalContext, item);
         },
         onCreateNew: null,
         onTitleTap: () async =>
-        await RouterService.navigateToUnit(originalContext, currentUnit),
+        await RouterService.navigateToUnitAdmin(originalContext, currentUnit),
         searchHintText: AdministrationStrings.findUnitHint,
         createNewText: AdministrationStrings.newUnitButton,
       ));
@@ -112,16 +112,14 @@ class AppPanelHelper {
           }
         },
         onCreateNew: !RightsService.isUnitEditor() ? null :
-            () =>
-            OccasionCreationHelper.createNewOccasion(
-                originalContext, currentUnit, occasionsInCurrentUnit, (
-                newOccasion) =>
-                () async {
-              if (newOccasion.link != null) {
-                await RouterService.navigateToOccasionAdministration(
-                    originalContext, occasionLink: newOccasion.link!);
-              }
-            }),
+            () async {
+          final newOccasion = await OccasionCreationHelper.createNewOccasion(
+              originalContext, currentUnit, occasionsInCurrentUnit);
+          if (newOccasion != null && newOccasion.link != null) {
+            await RouterService.navigateToOccasionAdministration(
+                originalContext, occasionLink: newOccasion.link!);
+          }
+        },
         onTitleTap: () async {
           if (currentOccasion.link != null) {
             await RouterService.navigateToOccasionAdministration(
@@ -598,7 +596,7 @@ class AppPanelHelper {
               final currentUnit = RightsService.currentUnit();
               if (currentUnit != null &&
                   RightsService.canUserSeeUnitWorkspace()) {
-                await RouterService.navigateToUnit(context, currentUnit);
+                await RouterService.navigateToUnitAdmin(context, currentUnit);
               }
             },
             child: Padding(
@@ -672,7 +670,7 @@ class AppPanelHelper {
             final currentUnit = RightsService.currentUnit();
             if (currentUnit != null &&
                 RightsService.canUserSeeUnitWorkspace()) {
-              await RouterService.navigateToUnit(context, currentUnit);
+              await RouterService.navigateToUnitAdmin(context, currentUnit);
             }
           },
           child: LogoWidget(height: 40, forceDark: true),
@@ -707,7 +705,7 @@ class AppPanelHelper {
                         fontSize: 16, fontWeight: FontWeight.normal),
                   ),
                   onPressed: () async {
-                    await RouterService.navigateToUnit(context, currentUnit);
+                    await RouterService.navigateToUnitAdmin(context, currentUnit);
                   },
                   child: Text(
                     currentUnit.title ?? '---',
@@ -730,7 +728,7 @@ class AppPanelHelper {
                           itemTitleBuilder: (i) => i.title ?? '---',
                           itemIdBuilder: (i) => i.id,
                           onItemSelected: (item) async =>
-                          await RouterService.navigateToUnit(context, item),
+                          await RouterService.navigateToUnitAdmin(context, item),
                           onCreateNew: null,
                           searchHintText: AdministrationStrings.findUnitHint,
                           createNewText: AdministrationStrings.newUnitButton,

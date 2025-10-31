@@ -189,6 +189,22 @@ class UserInfoModel extends IHasId {
     return "Not specified".tr();
   }
 
+  static String? sexFromLocale(String? localeString) {
+    if (localeString == null) {
+      return null;
+    }
+
+    String trimmedVal = localeString.trim();
+
+    if (trimmedVal == "Female".tr() || trimmedVal == "Female") {
+      return "female";
+    } else if (trimmedVal == "Male".tr() || trimmedVal == "Male") {
+      return "male";
+    }
+
+    return null;
+  }
+
   @override
   int get hashCode {
     return id.hashCode;

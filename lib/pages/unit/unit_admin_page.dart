@@ -6,6 +6,7 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/data_models/unit_model.dart';
 import 'package:fstapp/data_services/db_users.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/unit/occasions_screen.dart';
 import 'package:fstapp/pages/unit/quotes_tab.dart';
 import 'package:fstapp/pages/unit/unit_page.dart';
@@ -48,6 +49,9 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
   }
 
   Future<void> _loadOrganization() async {
+    if (RightsService.currentUnit()?.id != widget.id!){
+      await RightsService.updateAppData(unitId: widget.id!);
+    }
     _currentUnit = await DbUsers.getCurrentUnit(widget.id!);
     if (_currentUnit != null) {
       _setCurrentScreen(OccasionsScreen(unit: _currentUnit!), "Occasions");
