@@ -144,11 +144,11 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _refreshSignedInStatus(dynamic value) async {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
-      var unit = RightsService.currentUnit();
+      var unitId = RightsService.currentUnit()?.id == 1 ? null : RightsService.currentUnit()?.id;
       if(AppConfig.isAppSupported){
-        RightsService.updateAppData(unitId: unit?.id, link: RouterService.currentOccasionLink, force: true);
+        RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
       } else {
-        await RightsService.updateAppData(unitId: unit?.id, link: RouterService.currentOccasionLink, force: true);
+        await RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
       }
       RouterService.popOrHome(context);
     }
