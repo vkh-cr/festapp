@@ -438,7 +438,7 @@ class FormHelper {
         );
       case fieldTypeBirthYear:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, birthYearLabel());
-        return FormFieldBuilders.buildBirthYearField(context, field);
+        return FormFieldBuilders.buildBirthYearField(context, formHolder, field);
       case fieldTypeTicket:
         var ticketHolder = field as TicketHolder;
         return FormFieldBuilders.buildTicketField(context, formHolder, ticketHolder);
