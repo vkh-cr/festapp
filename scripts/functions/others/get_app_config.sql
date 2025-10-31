@@ -76,25 +76,38 @@ BEGIN
     ELSIF unit_id IS NOT NULL THEN
         occasionId := NULL; -- Ensure no occasion is loaded.
 
-        -- First, check if the user is an editor on any unit.
-        SELECT uu.unit
-          INTO editor_unit_id
-        FROM public.unit_users uu
-        WHERE uu."user" = current_user_id
-          AND (uu.is_editor_view = TRUE OR uu.is_editor = TRUE) -- Check for editor or higher permissions
-        ORDER BY uu.unit -- Get the first one consistently
-        LIMIT 1;
+        -- 1. Try to use the provided unit_id
+        default_unit := unit_id;
 
-        -- Use the editor unit if found; otherwise, fall back to the provided unit_id.
-        default_unit := COALESCE(editor_unit_id, unit_id);
-
-        -- Fetch unit details from the determined default_unit
+        -- 2. Fetch unit details to check for existence
         SELECT json_build_object('id', u.id, 'title', u.title)
             INTO unit_json
         FROM units u
         WHERE u.id = default_unit;
 
-        -- Fetch the user's relationship with this unit
+        -- 3. If the provided unit_id doesn't exist, fall back to the first admin unit
+        IF unit_json IS NULL THEN
+            SELECT uu.unit
+              INTO editor_unit_id
+            FROM public.unit_users uu
+            WHERE uu."user" = current_user_id
+              AND (uu.is_editor_view = TRUE OR uu.is_editor = TRUE)
+            ORDER BY uu.unit
+            LIMIT 1;
+
+            default_unit := editor_unit_id; -- This will be NULL if no admin unit is found
+
+            -- 4. Re-fetch unit_json with the fallback unit (if one exists)
+            IF default_unit IS NOT NULL THEN
+                SELECT json_build_object('id', u.id, 'title', u.title)
+                    INTO unit_json
+                FROM units u
+                WHERE u.id = default_unit;
+            END IF;
+        END IF;
+
+        -- 5. Fetch the user's relationship with the determined unit (if any)
+        --    (unit_user will remain NULL if default_unit is NULL)
         SELECT *
             INTO unit_user
         FROM unit_users
@@ -102,7 +115,8 @@ BEGIN
             AND "user" = current_user_id;
 
     ELSE
-        -- No link or specific unit_id provided: first try to get the representative or default occasion
+        -- No link or specific unit_id provided:
+        -- 1. Try to get the representative or default occasion
         SELECT COALESCE(
                  (data->>'REPRESENTATIVE_OCCASION')::bigint,
                  (data->>'DEFAULT_OCCASION')::bigint
@@ -112,40 +126,71 @@ BEGIN
         WHERE id = org_id;
 
         IF occasionId IS NULL THEN
-            -- No default occasion; try to get the default unit instead
-            SELECT (data->>'DEFAULT_UNIT')::bigint
-              INTO default_unit
-            FROM organizations
-            WHERE id = org_id;
+            -- No default occasion found.
+            -- 2. Try to find the user's first editor/admin unit.
+            SELECT uu.unit
+              INTO editor_unit_id
+            FROM public.unit_users uu
+            WHERE uu."user" = current_user_id
+              AND (uu.is_editor_view = TRUE OR uu.is_editor = TRUE)
+            ORDER BY uu.unit
+            LIMIT 1;
 
-            IF default_unit IS NOT NULL THEN
-                -- Default unit exists so we leave occasion unset
-                occasionId := NULL;
-                -- Fetch unit details from the default unit
+            IF editor_unit_id IS NOT NULL THEN
+                -- Found an admin unit, use it.
+                default_unit := editor_unit_id;
+                occasionId := NULL; -- Ensure no occasion is loaded
+
+                -- Fetch unit details
                 SELECT json_build_object('id', u.id, 'title', u.title)
                   INTO unit_json
                 FROM units u
                 WHERE u.id = default_unit;
 
+                -- Fetch user's relationship with this unit
                 SELECT *
                   INTO unit_user
                 FROM unit_users
                 WHERE unit = default_unit
                   AND "user" = current_user_id;
-            ELSE
-                -- Neither default occasion nor default unit exists; search for first open, non-hidden occasion
-                SELECT id, link
-                  INTO occasionId, occasion_link
-                FROM occasions
-                WHERE is_open = true
-                  AND organization = org_id
-                LIMIT 1;
 
-                IF occasionId IS NULL THEN
-                    RETURN json_build_object(
-                        'code', 404,
-                        'message', 'No open occasion found for the organization'
-                    );
+            ELSE
+                -- 3. No admin unit found, fall back to org's DEFAULT_UNIT
+                SELECT (data->>'DEFAULT_UNIT')::bigint
+                  INTO default_unit
+                FROM organizations
+                WHERE id = org_id;
+
+                IF default_unit IS NOT NULL THEN
+                    -- Default unit exists, use it.
+                    occasionId := NULL;
+                    -- Fetch unit details
+                    SELECT json_build_object('id', u.id, 'title', u.title)
+                      INTO unit_json
+                    FROM units u
+                    WHERE u.id = default_unit;
+
+                    SELECT *
+                      INTO unit_user
+                    FROM unit_users
+                    WHERE unit = default_unit
+                      AND "user" = current_user_id;
+                ELSE
+                    -- 4. No admin unit AND no default unit.
+                    -- Fall back to first open occasion.
+                    SELECT id, link
+                      INTO occasionId, occasion_link
+                    FROM occasions
+                    WHERE is_open = true
+                      AND organization = org_id
+                    LIMIT 1;
+
+                    IF occasionId IS NULL THEN
+                        RETURN json_build_object(
+                            'code', 404,
+                            'message', 'No open occasion found for the organization'
+                        );
+                    END IF;
                 END IF;
             END IF;
         ELSE
