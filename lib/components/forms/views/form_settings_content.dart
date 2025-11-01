@@ -119,7 +119,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
       final msgData = _form!.data?[FormModel.metaPaymentMessage] as Map<String, dynamic>?;
       _paymentMessageType = msgData?[FormModel.metaType] as String? ?? 'name_surname';
 
-      _communicationTone = _form!.data?[_communicationTone] as String? ?? 'formal';
+      _communicationTone = _form!.data?[FormHelper.metaCommunicationTone] as String? ?? 'formal';
 
       if (_form!.deadlineDurationSeconds != null && _form!.deadlineDurationSeconds! > 0) {
         final days = (_form!.deadlineDurationSeconds! / (24 * 3600)).round();
