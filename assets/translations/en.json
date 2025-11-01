@@ -703,7 +703,12 @@
     "labelPaymentMessage": "Message for Beneficiary",
     "msgTypeNameSurname": "Customer Name & Surname",
     "msgTypeNone": "None",
-    "msgTypeOccasionTitle": "Occasion Title"
+    "msgTypeOccasionTitle": "Occasion Title",
+    "communicationToneTitle": "Communication Tone",
+    "helperCommunicationTone": "Select the tone for automated communications, like payment confirmation emails or reminders. This will affect the wording in the email templates.",
+    "labelCommunicationTone": "Tone",
+    "toneFormal": "Formal",
+    "toneInformal": "Informal"
   },
   "OrderGridColumns": {
     "id": "Id",

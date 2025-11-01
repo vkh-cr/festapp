@@ -4,6 +4,7 @@ DECLARE
     result_data jsonb;
     reference_history_data jsonb;
     form_fields_data jsonb;
+    form_data jsonb;
     form_key uuid;
     latest_history_id bigint;
 BEGIN
@@ -23,6 +24,7 @@ BEGIN
 
     -- Check if the order was found
     IF result_data IS NULL THEN
+
         RETURN jsonb_build_object('code', 404, 'message', 'Order not found.');
     END IF;
 
@@ -62,27 +64,35 @@ BEGIN
 
     -- If a form key exists, fetch all associated form fields
     IF form_key IS NOT NULL THEN
-        SELECT jsonb_object_agg(ff.id, to_jsonb(ff.*))
-        INTO form_fields_data
-        FROM public.form_fields AS ff
-        JOIN public.forms AS f ON ff.form = f.id
-        WHERE f.key = form_key;
+        -- 2. Modified query to fetch both form_fields and form_data at the same time
+        SELECT
+            jsonb_object_agg(ff.id, to_jsonb(ff.*)), -- All fields
+            f.data                                   -- The form's data
+        INTO
+            form_fields_data,
+            form_data
+        FROM
+            public.form_fields AS ff
+        JOIN
+            public.forms AS f ON ff.form = f.id
+        WHERE
+            f.key = form_key
+        GROUP BY
+            f.data; -- Group by the non-aggregated column
 
         -- If form fields were found, add them to the result data
         IF form_fields_data IS NOT NULL THEN
             result_data := result_data || jsonb_build_object('form_fields', form_fields_data);
+        END IF;
+
+        -- 3. Added this block to merge the form_data
+        IF form_data IS NOT NULL THEN
+            result_data := result_data || jsonb_build_object('form_data', form_data);
         END IF;
     END IF;
 
     -- Return a success response with the collected data
     RETURN jsonb_build_object('code', 200, 'data', result_data);
 
-EXCEPTION WHEN OTHERS THEN
-    -- Handle any unexpected errors and return a detailed error message
-    RETURN jsonb_build_object(
-        'code', 500,
-        'message', 'An unexpected error occurred.',
-        'detail', SQLERRM
-    );
 END;
 $$ LANGUAGE plpgsql;
