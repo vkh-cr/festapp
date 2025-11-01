@@ -18,11 +18,11 @@ export async function getBaseOrderData(orderId: string, requestSecret: string, a
     throw new Error("Failed to fetch order details.");
   }
 
-  const { order, occasion, payment_info, bank_account, latest_history_id, reference_history } = orderDetailsResponse.data;
+  const { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data } = orderDetailsResponse.data;
 
   // 2. Perform authorization to ensure the request is legitimate
   await authorizeRequest({ requestSecret, authorizationHeader, occasionId: occasion.id });
 
   // 3. Return the consolidated data
-  return { order, occasion, payment_info, bank_account, latest_history_id, reference_history };
+  return { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data };
 }
