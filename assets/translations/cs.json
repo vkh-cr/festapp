@@ -703,7 +703,12 @@
     "labelPaymentMessage": "Zpráva pro příjemce",
     "msgTypeNameSurname": "Jméno a příjmení zákazníka",
     "msgTypeNone": "Žádná",
-    "msgTypeOccasionTitle": "Název události"
+    "msgTypeOccasionTitle": "Název události",
+    "communicationToneTitle": "Tón komunikace",
+    "helperCommunicationTone": "Vyberte tón pro automatickou komunikaci, jako jsou e-maily s potvrzením platby nebo připomínky. Ovlivní to styl textů v e-mailových šablonách.",
+    "labelCommunicationTone": "Tón",
+    "toneFormal": "Formální (Vy)",
+    "toneInformal": "Neformální (Ty)"
   },
   "OrderGridColumns": {
     "id": "Id",

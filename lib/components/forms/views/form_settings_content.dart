@@ -4,8 +4,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/features/form_feature.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
@@ -47,6 +47,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
 
   String _variableSymbolType = 'random';
   String _paymentMessageType = 'name_surname';
+  String _communicationTone = 'formal';
 
   @override
   void initState() {
@@ -118,6 +119,8 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
       final msgData = _form!.data?[FormModel.metaPaymentMessage] as Map<String, dynamic>?;
       _paymentMessageType = msgData?[FormModel.metaType] as String? ?? 'name_surname';
 
+      _communicationTone = _form!.data?[_communicationTone] as String? ?? 'formal';
+
       if (_form!.deadlineDurationSeconds != null && _form!.deadlineDurationSeconds! > 0) {
         final days = (_form!.deadlineDurationSeconds! / (24 * 3600)).round();
         _deadlineDaysController.text = days.toString();
@@ -173,6 +176,8 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
     _form!.data![FormModel.metaPaymentMessage] = {
       FormModel.metaType: _paymentMessageType,
     };
+
+    _form!.data![FormHelper.metaCommunicationTone] = _communicationTone;
 
     final days = int.tryParse(_deadlineDaysController.text);
     if (days != null && days > 0) {
@@ -418,6 +423,47 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                               : null,
                           contentPadding: EdgeInsets.zero,
                         ),
+
+                        const SizedBox(height: 24),
+                        const Divider(),
+                        const SizedBox(height: 16),
+
+                        Text(
+                            FormStrings.communicationToneTitle,
+                            style: Theme.of(innerContext).textTheme.titleLarge
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          FormStrings.helperCommunicationTone,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 24),
+
+                        DropdownButtonFormField<String>(
+                          value: _communicationTone,
+                          decoration: InputDecoration(
+                            labelText: FormStrings.labelCommunicationTone,
+                            border: const OutlineInputBorder(),
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                                value: 'formal',
+                                child: Text(FormStrings.toneFormal)
+                            ),
+                            DropdownMenuItem(
+                                value: 'informal',
+                                child: Text(FormStrings.toneInformal)
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _communicationTone = value;
+                              });
+                            }
+                          },
+                        ),
+
                         const SizedBox(height: 48),
                         if (RightsService.canEditOccasion())
                           Center(
@@ -466,4 +512,3 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
     );
   }
 }
-

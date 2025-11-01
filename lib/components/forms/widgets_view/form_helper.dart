@@ -62,6 +62,8 @@ class FormHelper {
   static const String metaForm = "form";
   static const String metaEmpty = "---";
   static const String metaProducts = "products";
+  static const String metaCommunicationTone = "communication_tone";
+
 
   // Labels and messages
   static String noteLabel() => "Note".tr();
