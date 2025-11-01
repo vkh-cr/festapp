@@ -15,6 +15,9 @@ class SeatLayoutWidget extends StatefulWidget {
   final AutoResizeInteractiveViewerController? controller;
   final void Function(SeatModel model)? onSeatTap;
   final bool? isEditorMode;
+
+  static const Color _defaultBackgroundColor = Colors.white;
+
   const SeatLayoutWidget({
     super.key,
     required this.stateModel,
@@ -159,10 +162,8 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                 width: layoutWidth,
                 height: layoutHeight,
                 decoration: BoxDecoration(
-                  // Adjust color based on whether there is a background image/svg
-                  color: backgroundSource == null || backgroundSource.isEmpty
-                      ? ThemeConfig.grey300(context)
-                      : Colors.transparent,
+                  // Use the static const
+                  color: SeatLayoutWidget._defaultBackgroundColor,
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 // Use the new helper to render the background

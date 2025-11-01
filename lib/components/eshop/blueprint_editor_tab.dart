@@ -312,9 +312,14 @@ class _BlueprintTabState extends State<BlueprintTab> {
     );
 
     if (newTitle != null && newTitle.isNotEmpty) {
+      final newGroup = BlueprintGroupModel(
+          title: newTitle, id: blueprint!.getFirstAvailableGroupId());
+
       setState(() {
-        blueprint!.groups!.add(BlueprintGroupModel(title: newTitle, id: blueprint!.getFirstAvailableGroupId()));
-        blueprint!.groups!.sort((a, b) => Utilities.naturalCompare(a.title!, b.title!));
+        blueprint!.groups!.add(newGroup);
+        blueprint!.groups!
+            .sort((a, b) => Utilities.naturalCompare(a.title!, b.title!));
+        currentGroup = newGroup;
       });
     }
   }
