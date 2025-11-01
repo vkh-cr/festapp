@@ -94,6 +94,16 @@ class FormStrings {
 
   static String get typeHere => 'FormsFeature.typeHere'.tr();
 
+  // --- Strings from TicketEditorWidgets ---
+  static String get noProductTypes => 'FormsFeature.noProductTypes'.tr(); // "No Product Types"
+  static String get productTypes => 'FormsFeature.productTypes'.tr(); // "Product Types"
+  static String get seatSelection => 'FormsFeature.seatSelection'.tr(); // "Seat selection"
+  static String get note => 'FormsFeature.note'.tr(); // "Note"
+  // --- Strings for TicketEditorWidgets (Max Tickets) ---
+  static String get labelMaxTicketsPerOrder => 'FormsFeature.labelMaxTicketsPerOrder'.tr(); // "Max tickets per order:"
+  static String get helperMaxTicketsPerOrder => 'FormsFeature.helperMaxTicketsPerOrder'.tr(); // "How many tickets a user can buy in a single order (default: 1)."
+  static String get validationMaxTicketsInvalid => 'FormsFeature.validationMaxTicketsInvalid'.tr(); // "Please enter a valid number (1 or more)."
+
 // --- Create/Copy Dialog (_CreateOrCopyFormDialog) ---
   static String get createFormTitle => 'FormsFeature.createFormTitle'.tr(); // "Create a Form"
   static String get createNewBlankForm => 'FormsFeature.createNewBlankForm'.tr(); // "Create a new blank form"
