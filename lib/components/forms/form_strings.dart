@@ -1,6 +1,4 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/features/feature_constants.dart';
-import 'package:fstapp/components/features/feature_service.dart';
 
 class FormStrings {
 
@@ -44,6 +42,12 @@ class FormStrings {
   static String get msgTypeNameSurname => 'FeatureFormSettings.msgTypeNameSurname'.tr();
   static String get msgTypeNone => 'FeatureFormSettings.msgTypeNone'.tr();
   static String get msgTypeOccasionTitle => 'FeatureFormSettings.msgTypeOccasionTitle'.tr();
+
+  static String get communicationToneTitle => 'FeatureFormSettings.communicationToneTitle'.tr(); // "Communication Tone"
+  static String get helperCommunicationTone => 'FeatureFormSettings.helperCommunicationTone'.tr(); // "Select the tone for automated communications, like payment confirmation emails or reminders. This will affect the wording in the email templates."
+  static String get labelCommunicationTone => 'FeatureFormSettings.labelCommunicationTone'.tr(); // "Tone"
+  static String get toneFormal => 'FeatureFormSettings.toneFormal'.tr(); // "Formal"
+  static String get toneInformal => 'FeatureFormSettings.toneInformal'.tr(); // "Informal "
 
   // --- Form Fields (General) ---
   static String get noOptionsForCurrency => 'FormsFeature.noOptionsForCurrency'.tr();
