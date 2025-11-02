@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/app_panel_helper.dart';
+import 'package:fstapp/components/_shared/red_strip_widget.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/data_models/unit_model.dart';
@@ -64,43 +65,55 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppPanelHelper.buildAdaptiveAdminAppBar(context),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Row(
-              children: [
-                const SizedBox(width: SideMenu.collapsedWidth),
-                Expanded(
-                  // Conditionally apply the width constraint ONLY for the "Occasions" screen.
-                  child: (_currentMenu == "Occasions")
-                      ? Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                          maxWidth: UnitAdminPage.contentMaxWidth),
-                      child: _currentScreen,
-                    ),
-                  )
-                      : _currentScreen, // Other screens take the full available width.
-                ),
-              ],
-            ),
-            SideMenu(
-              onMenuItemSelected: _setCurrentScreen,
-              unit: _currentUnit,
-              currentMenu: _currentMenu,
-            ),
-          ],
+    return Column(
+      children: [
+        SafeArea(
+          bottom: false,
+          child: RedStripWidget(
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          RouterService.navigate(context, "${UnitPage.ROUTE}/${widget.id}")
-              .then((_) => _loadOrganization());
-        },
-        child: const Icon(Icons.remove_red_eye_rounded),
-      ),
+        Expanded(
+          child: Scaffold(
+            appBar: AppPanelHelper.buildAdaptiveAdminAppBar(context),
+            body: SafeArea(
+              top: false, // Top padding is now handled above
+              child: Stack(
+                children: [
+                  Row(
+                    children: [
+                      const SizedBox(width: SideMenu.collapsedWidth),
+                      Expanded(
+                        // Conditionally apply the width constraint ONLY for the "Occasions" screen.
+                        child: (_currentMenu == "Occasions")
+                            ? Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                                maxWidth: UnitAdminPage.contentMaxWidth),
+                            child: _currentScreen,
+                          ),
+                        )
+                            : _currentScreen, // Other screens take the full available width.
+                      ),
+                    ],
+                  ),
+                  SideMenu(
+                    onMenuItemSelected: _setCurrentScreen,
+                    unit: _currentUnit,
+                    currentMenu: _currentMenu,
+                  ),
+                ],
+              ),
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                RouterService.navigate(context, "${UnitPage.ROUTE}/${widget.id}")
+                    .then((_) => _loadOrganization());
+              },
+              child: const Icon(Icons.remove_red_eye_rounded),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
