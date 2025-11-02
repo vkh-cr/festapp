@@ -70,6 +70,7 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
         SafeArea(
           bottom: false,
           child: RedStripWidget(
+            text: 'Došlo ke změně domény. Nadále využívejte <a href="https://vstupenky.online" style="color: inherit; text-decoration: underline;">vstupenky.online</a> místo <s>vstupenka.online</s>.',
           ),
         ),
         Expanded(
