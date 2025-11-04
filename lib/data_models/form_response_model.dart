@@ -95,7 +95,7 @@ class FormResponseModel extends ITrinaRowModel {
     Map<String, TrinaCell> cells = {
       EshopColumns.ORDER_ID: TrinaCell(value: id),
       EshopColumns.ORDER_SYMBOL: TrinaCell(value: order!.toBasicString()),
-      EshopColumns.ORDER_STATE: TrinaCell(value: order!.state),
+      EshopColumns.ORDER_STATE: TrinaCell(value: OrderModel.formatState(order!.state!)),
       EshopColumns.TICKET_PRODUCTS: TrinaCell(
           value: order!.relatedProducts != null
               ? order!.relatedProducts!.map((p)=>p.toBasicString()).join(" | ")

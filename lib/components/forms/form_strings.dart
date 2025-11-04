@@ -100,7 +100,7 @@ class FormStrings {
 
   // --- Strings from TicketEditorWidgets ---
   static String get noProductTypes => 'FormsFeature.noProductTypes'.tr(); // "No Product Types"
-  static String get productTypes => 'FormsFeature.productTypes'.tr(); // "Product Types"
+  static String get productTypes => 'FormsFeature.productTypes'.tr(); // "ProductTypes"
   static String get seatSelection => 'FormsFeature.seatSelection'.tr(); // "Seat selection"
   static String get note => 'FormsFeature.note'.tr(); // "Note"
   // --- Strings for TicketEditorWidgets (Max Tickets) ---
