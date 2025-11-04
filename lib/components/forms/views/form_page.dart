@@ -46,6 +46,8 @@ class _FormPageState extends State<FormPage> {
   double _totalPrice = 0.0;
 
   int _totalTickets = 0;
+  int _totalProducts = 0;
+
   Map<String, dynamic>? formResult;
   FormHolder? formHolder;
   FormModel? form;
@@ -123,6 +125,7 @@ class _FormPageState extends State<FormPage> {
     String? currencyC;
     _totalPrice = 0.0;
     _totalTickets = 0;
+    _totalProducts = 0;
 
     for (var field in formHolder!.fields) {
       if (field.fieldType == FormHelper.fieldTypeProductType) {
@@ -147,6 +150,7 @@ class _FormPageState extends State<FormPage> {
         } else {
           for (var s in field.tickets) {
             if (s.seat != null) {
+              _totalProducts++;
               _totalPrice += s.seat!.objectModel!.product!.price!;
               currencyC ??= s.seat!.objectModel!.product!.currencyCode;
             }
@@ -159,11 +163,13 @@ class _FormPageState extends State<FormPage> {
           for (var ticketField in ticketData[FormHelper.metaFields]) {
             for (var fValue in ticketField.values) {
               if (fValue is FormOptionProductModel) {
+                _totalProducts++;
                 _totalPrice += fValue.price;
                 currencyC ??= fValue.currencyCode;
               } else if (fValue is Iterable) {
                 // Convert the JSArray (or any iterable) to a Dart list and sum the prices.
                 var products = List<FormOptionProductModel>.from(fValue);
+                _totalProducts += products.length;
                 _totalPrice += products.fold(0, (sum, product) => sum + product.price);
                 currencyC ??= products.firstOrNull?.currencyCode;
               }
@@ -328,14 +334,13 @@ class _FormPageState extends State<FormPage> {
                               const SizedBox(height: 32),
                               ButtonsHelper.primaryButton(
                                 context: context,
-                                onPressed: _isLoading
+                                onPressed: (_isLoading || _totalProducts == 0)
                                     ? null
                                     : () => _showOrderPreview(scrollContext),
                                 label: "Continue".tr(),
                                 isLoading: _isLoading,
                                 height: 50.0,
                                 width: 250.0,
-                                //isEnabled: _totalPrice > 0,
                               ),
                               const SizedBox(height: 32),
                             ],

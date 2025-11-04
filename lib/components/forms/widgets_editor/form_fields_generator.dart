@@ -398,7 +398,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
             ? TicketEditorWidgets.buildTicketEditor(
             context,
             form,
-            // UPDATED: Pass the list of all product types from the bundle
+            field,
             widget.bundle.productTypes,
                 () { setState(() {}); })
             : TicketEditorWidgets.buildTicketEditorReadOnly(

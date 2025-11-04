@@ -1,9 +1,12 @@
 import 'dart:typed_data';
-import 'package:easy_localization/easy_localization.dart';
+
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/features/feature_metadata.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
@@ -17,6 +20,7 @@ import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
+import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/help_widget.dart';
 import 'package:fstapp/widgets/image_area.dart';
@@ -27,105 +31,183 @@ import 'package:fstapp/widgets/html_view.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-class OccasionSettingsPage extends StatefulWidget {
-  final OccasionModel occasion;
-  const OccasionSettingsPage({super.key, required this.occasion});
+import '../_shared/common_strings.dart';
+import 'occasion_settings_strings.dart';
+
+class OccasionSettingsTab extends StatefulWidget {
+  const OccasionSettingsTab({super.key});
 
   @override
-  _OccasionSettingsPageState createState() => _OccasionSettingsPageState();
+  _OccasionSettingsTabState createState() => _OccasionSettingsTabState();
 }
 
-class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
+class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
   final _formKey = GlobalKey<FormState>();
+
+  // Data
+  OccasionModel? occasion;
+  String? occasionLink;
+  bool _isLoading = true;
+  bool _isSaving = false;
+
+  // Form fields state
   late String? _title;
-  late String? _linkValue; // To store link from controller on save
+  late String? _linkValue;
   DateTime? _from;
   DateTime? _to;
   late TextEditingController _linkController;
+  late TextEditingController _replyToEmailController;
   String? _description;
   bool _isOpen = false;
   bool _isHidden = false;
-
-  // Timezone
   String? _selectedTimezone;
   List<String> _allTimezones = [];
-  // TextEditingController for Autocomplete is managed internally by the Autocomplete widget if initialValue is used.
-  // We will use the controller provided by fieldViewBuilder.
-
-  // Feature search
   String _featureSearchQuery = "";
   late TextEditingController _featureSearchController;
-
   bool _advancedSettingsExpanded = false;
 
   @override
   void initState() {
     super.initState();
-    _title = widget.occasion.title;
-    _linkValue = widget.occasion.link;
-    _linkController = TextEditingController(text: _linkValue);
-    _from = widget.occasion.startTime;
-    _to = widget.occasion.endTime;
-    _description = widget.occasion.description ?? "";
-    _isOpen = widget.occasion.isOpen;
-    _isHidden = widget.occasion.isHidden;
+    _linkController = TextEditingController();
     _featureSearchController = TextEditingController();
+    _replyToEmailController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (occasionLink == null && context.routeData.params.isNotEmpty) {
+      occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
+      _loadData();
+    }
+  }
+
+  @override
+  void dispose() {
+    _linkController.dispose();
+    _replyToEmailController.dispose();
+    _featureSearchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadData() async {
+    if (occasionLink == null) return;
+    setState(() { _isLoading = true; });
+
+    final fetchedOccasion = await DbOccasions.getOccasionByLink(occasionLink!);
+
+    if (mounted) {
+      setState(() {
+        occasion = fetchedOccasion;
+        _initializeFormState();
+        _isLoading = false;
+      });
+    } else if (mounted) {
+      setState(() { _isLoading = false; });
+    }
+  }
+
+  void _initializeFormState() {
+    if (occasion == null) return;
+
+    _title = occasion!.title;
+    _linkValue = occasion!.link;
+    _linkController.text = _linkValue ?? "";
+    _from = occasion!.startTime;
+    _to = occasion!.endTime;
+    _description = occasion!.description ?? "";
+    _isOpen = occasion!.isOpen;
+    _isHidden = occasion!.isHidden;
+
+    // Initialize reply-to email
+    _replyToEmailController.text = occasion!.data?[FormHelper.metaReplyTo] as String? ?? '';
 
     // Initialize timezone
     _allTimezones = TimeHelper.getAvailableTimezoneNames();
-    _selectedTimezone = widget.occasion.data?[Tb.occasions.data_timezone] as String? ?? tz.local.name;
+    _selectedTimezone = occasion!.data?[Tb.occasions.data_timezone] as String? ?? tz.local.name;
 
     if (!_allTimezones.contains(_selectedTimezone) && _allTimezones.isNotEmpty) {
       _selectedTimezone = _allTimezones.contains("Europe/Prague") ? "Europe/Prague" : _allTimezones.first;
     }
-    // If _selectedTimezone is still null after this (e.g. _allTimezones is empty), Autocomplete will handle it.
 
     final defaultFeatures = FeatureService.getDefaultFeatures();
     for (var defaultFeature in defaultFeatures) {
-      bool exists = widget.occasion.features.any((f) => f.code == defaultFeature.code);
+      bool exists = occasion!.features.any((f) => f.code == defaultFeature.code);
       if (!exists) {
-        widget.occasion.features.add(defaultFeature);
+        occasion!.features.add(defaultFeature);
       }
     }
 
-    widget.occasion.features.sort((a, b) {
+    occasion!.features.sort((a, b) {
       final aIndex = defaultFeatures.indexWhere((defaultFeature) => defaultFeature.code == a.code);
       final bIndex = defaultFeatures.indexWhere((defaultFeature) => defaultFeature.code == b.code);
       return aIndex.compareTo(bIndex);
     });
   }
 
-  @override
-  void dispose() {
-    _linkController.dispose();
-    _featureSearchController.dispose();
-    super.dispose();
-  }
-
   Future<void> _saveSettings() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      _formKey.currentState!.save(); // This will call onSaved for TextFormField if defined.
-      // For Autocomplete, selection is managed by _selectedTimezone.
-      widget.occasion.title = _title;
-      widget.occasion.link = _linkValue; // Use _linkValue which is updated by controller's listener or onSaved
-      widget.occasion.startTime = _from;
-      widget.occasion.endTime = _to;
-      widget.occasion.description = _description;
-      widget.occasion.isOpen = _isOpen;
-      widget.occasion.isHidden = _isHidden;
+    // 1. Validate the form. If it's not valid, do nothing.
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
-      widget.occasion.data ??= {};
-      widget.occasion.data![Tb.occasions.data_timezone] = _selectedTimezone;
+    // 2. Set the state to "saving" to show a loading indicator on the button.
+    setState(() { _isSaving = true; });
 
-      await DbOccasions.updateOccasion(widget.occasion);
-      ToastHelper.Show(context, "${"Saved".tr()}: ${widget.occasion.title!}");
-      Navigator.of(context).pop();
+    // 3. Save the form fields to update the local state variables.
+    _formKey.currentState!.save();
+
+    // 4. Update the occasion model with the new values from the form.
+    occasion!.title = _title;
+    occasion!.link = _linkValue;
+    occasion!.startTime = _from;
+    occasion!.endTime = _to;
+    occasion!.description = _description;
+    occasion!.isOpen = _isOpen;
+    occasion!.isHidden = _isHidden;
+
+    occasion!.data ??= {};
+
+    // Save Reply-To Email
+    final trimmedEmail = _replyToEmailController.text.trim();
+    if (trimmedEmail.isEmpty) {
+      occasion!.data!.remove(FormHelper.metaReplyTo);
+    } else {
+      occasion!.data![FormHelper.metaReplyTo] = trimmedEmail;
+    }
+
+    // Save Timezone
+    occasion!.data![Tb.occasions.data_timezone] = _selectedTimezone;
+
+    // 5. Persist the changes to the database.
+    await DbOccasions.updateOccasion(occasion!);
+
+    final newLink = occasion!.link;
+
+    // 6. Check if the component is still mounted and the new link is valid.
+    if (mounted && newLink != null) {
+      // Show a success message.
+      ToastHelper.Show(context, "${CommonStrings.saved}: ${occasion!.title!}");
+
+      // 7. Trigger the full page refresh.
+      // This router method handles updating RightsService with the new link
+      // and then navigates to the correct administration page (AdminPage or
+      // ReservationsPage). This is crucial, especially if the event link
+      // itself has been changed.
+      await RouterService.navigateToOccasionAdministration(
+        context,
+        occasionLink: newLink,
+      );
+    }
+
+    // 8. Reset the saving state.
+    if (mounted) {
+      setState(() { _isSaving = false; });
     }
   }
 
   Future<void> _deleteOccasion() async {
-    await DbOccasions.deleteOccasion(widget.occasion.id!);
-    ToastHelper.Show(context, "${"Deleted".tr()}: ${widget.occasion.title!}");
+    await DbOccasions.deleteOccasion(occasion!.id!);
+    ToastHelper.Show(context, "${CommonStrings.deleted}: ${occasion!.title!}");
     Navigator.of(context).pop();
   }
 
@@ -135,16 +217,16 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       builder: (context) => AlertDialog(
         insetPadding: const EdgeInsets.all(16.0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        title: Text("Delete Event".tr()),
-        content: Text("Are you sure you want to delete this event? All the event data will be lost.".tr()),
+        title: Text(OccasionSettingsStrings.deleteEvent),
+        content: Text(OccasionSettingsStrings.deleteEventConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text("Storno".tr()),
+            child: Text(CommonStrings.storno),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text("Delete".tr()),
+            child: Text(CommonStrings.delete),
           ),
         ],
       ),
@@ -155,23 +237,23 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   }
 
   Future<void> _removeImage() async {
-    final imageUrl = widget.occasion.data?[Tb.occasions.data_image];
+    final imageUrl = occasion!.data?[Tb.occasions.data_image];
     if (imageUrl != null) {
       final confirmation = await DialogHelper.showConfirmationDialog(
         context,
-        "Confirm removal".tr(),
-        "Are you sure you want to delete this image?".tr(),
+        OccasionSettingsStrings.confirmRemoval,
+        OccasionSettingsStrings.deleteImageConfirmation,
       );
       if (confirmation == true) {
         try {
           await DbImages.removeImage(imageUrl);
           setState(() {
-            widget.occasion.data ??= {};
-            widget.occasion.data![Tb.occasions.data_image] = null;
+            occasion!.data ??= {};
+            occasion!.data![Tb.occasions.data_image] = null;
           });
-          ToastHelper.Show(context, "Image removed successfully.".tr());
+          ToastHelper.Show(context, OccasionSettingsStrings.imageRemovedSuccess);
         } catch (e) {
-          ToastHelper.Show(context, "Failed to remove image.".tr());
+          ToastHelper.Show(context, OccasionSettingsStrings.imageRemovedFail);
         }
       }
     }
@@ -179,17 +261,20 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = widget.occasion.data?[Tb.occasions.data_image];
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    // Filter features based on the search query
-    final filteredFeaturesBySearch = widget.occasion.features.where((feature) {
+    final bool isEditingEnabled = RightsService.isUnitEditor();
+    final imageUrl = occasion!.data?[Tb.occasions.data_image];
+
+    final filteredFeaturesBySearch = occasion!.features.where((feature) {
       final title = FeatureMetadata.getTitle(feature.code).toLowerCase();
       final description = FeatureMetadata.getDescription(feature.code).toLowerCase();
       final query = _featureSearchQuery.toLowerCase();
       return query.isEmpty || title.contains(query) || description.contains(query);
     }).toList();
 
-    // Conditionally filter out app-supported features if the app is not supported
     final featuresToShow = AppConfig.isAppSupported
         ? filteredFeaturesBySearch
         : filteredFeaturesBySearch
@@ -200,21 +285,13 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     final disabledFeatures = featuresToShow.where((f) => !f.isEnabled).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Settings".tr()),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
+      backgroundColor: Colors.transparent,
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Form(
               key: _formKey,
               child: Column(
@@ -222,11 +299,12 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                 children: [
                   TextFormField(
                     initialValue: _title,
+                    enabled: isEditingEnabled,
                     decoration: InputDecoration(
-                      labelText: "Title".tr(),
+                      labelText: OccasionSettingsStrings.title,
                     ),
                     validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(errorText: 'Title is required'.tr()),
+                      FormBuilderValidators.required(errorText: OccasionSettingsStrings.titleIsRequired),
                     ]),
                     onSaved: (val) {
                       _title = val;
@@ -236,59 +314,54 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                   TimeDateRangePicker(
                     start: _from,
                     end: _to,
+                    enabled: isEditingEnabled,
                     onStartChanged: (dateTime) {
-                      setState(() {
-                        _from = dateTime;
-                      });
+                      setState(() { _from = dateTime; });
                     },
                     onEndChanged: (dateTime) {
-                      setState(() {
-                        _to = dateTime;
-                      });
+                      setState(() { _to = dateTime; });
                     },
                   ),
                   const SizedBox(height: 16),
-                  Text("Intro Image".tr()),
+                  Text(OccasionSettingsStrings.introImage),
                   const SizedBox(height: 8),
                   ImageArea(
-                    hint: "(${ "Image with ratio {width} : {height}".tr(
-                      namedArgs: {
-                        "width": OccasionCard.kCardWidth.toString(),
-                        "height": OccasionCard.kCardHeight.toString(),
-                      },
+                    enabled: isEditingEnabled,
+                    hint: "(${OccasionSettingsStrings.imageRatioHint(
+                      OccasionCard.kCardWidth.toString(),
+                      OccasionCard.kCardHeight.toString(),
                     )})",
                     imageUrl: imageUrl,
                     onFileSelected: (file) async {
                       Uint8List imageData = await file.readAsBytes();
                       try {
                         var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
-                        final publicUrl = await DbImages.uploadImage(compressedImageData, widget.occasion.id, null);
+                        final publicUrl = await DbImages.uploadImage(compressedImageData, occasion!.id, null);
                         setState(() {
-                          widget.occasion.data ??= {};
-                          widget.occasion.data![Tb.occasions.data_image] = publicUrl;
+                          occasion!.data ??= {};
+                          occasion!.data![Tb.occasions.data_image] = publicUrl;
                         });
-                        ToastHelper.Show(context, "File uploaded successfully.".tr());
+                        ToastHelper.Show(context, OccasionSettingsStrings.fileUploadedSuccess);
                       } catch (e) {
-                        ToastHelper.Show(context, "Failed to upload image.".tr());
+                        ToastHelper.Show(context, OccasionSettingsStrings.failedToUploadImage);
                       }
+                      return null;
                     },
                     onRemove: _removeImage,
                   ),
                   const SizedBox(height: 16),
-                  Text("Description".tr()),
+                  Text(OccasionSettingsStrings.description),
                   const SizedBox(height: 8),
                   ClipRect(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxHeight: 400),
                       child: ShaderMask(
-                        shaderCallback: (bounds) {
-                          return LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [ Colors.white, Colors.transparent,],
-                            stops: const [0.9, 1.0],
-                          ).createShader(bounds);
-                        },
+                        shaderCallback: (bounds) => LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.white, Colors.transparent],
+                          stops: const [0.9, 1.0],
+                        ).createShader(bounds),
                         blendMode: BlendMode.dstIn,
                         child: HtmlView(
                           html: _description ?? "",
@@ -300,22 +373,20 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                   const SizedBox(height: 8),
                   Center(
                     child: ElevatedButton(
-                      onPressed: () async {
+                      onPressed: isEditingEnabled ? () async {
                         RouterService.navigatePageInfo(
                           context,
                           HtmlEditorRoute(
                               content: {HtmlEditorPage.parContent: _description},
-                              occasionId: widget.occasion.id
+                              occasionId: occasion!.id
                           ),
                         ).then((value) {
                           if (value != null) {
-                            setState(() {
-                              _description = value as String;
-                            });
+                            setState(() { _description = value as String; });
                           }
                         });
-                      },
-                      child: Text("Edit content".tr()),
+                      } : null,
+                      child: Text(OccasionSettingsStrings.editContent),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -323,39 +394,38 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                     SwitchListTile(
                       title: Row(
                         children: [
-                          Expanded(child: Text("Public".tr())),
+                          Expanded(child: Text(OccasionSettingsStrings.public)),
                           HelpWidget(
-                              title: "Public".tr(),
-                              content: "Determines whether event details (schedule, info, etc.) are available to the public.".tr()
+                              title: OccasionSettingsStrings.public,
+                              content: OccasionSettingsStrings.publicHelp
                           )
                         ],
                       ),
                       value: _isOpen,
-                      onChanged: (value) {
+                      onChanged: isEditingEnabled ? (value) {
                         setState(() { _isOpen = value; });
-                      },
+                      } : null,
                     ),
                   const SizedBox(height: 16),
                   SwitchListTile(
                     title: Row(
                       children: [
-                        Expanded(child: Text("Hide".tr())),
+                        Expanded(child: Text(OccasionSettingsStrings.hide)),
                         HelpWidget(
-                          title: "Hide".tr(),
-                          content: "This determines whether this event is hidden from list views.".tr(),
+                          title: OccasionSettingsStrings.hide,
+                          content: OccasionSettingsStrings.hideHelp,
                         ),
                       ],
                     ),
                     value: _isHidden,
-                    onChanged: (value) {
+                    onChanged: isEditingEnabled ? (value) {
                       setState(() { _isHidden = value; });
-                    },
+                    } : null,
                   ),
                   const SizedBox(height: 16),
-
                   ExpansionTile(
                     title: Text(
-                      "Advanced Settings".tr(),
+                      OccasionSettingsStrings.advancedSettings,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     initiallyExpanded: _advancedSettingsExpanded,
@@ -370,11 +440,12 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                           children: [
                             TextFormField(
                                 controller: _linkController,
+                                enabled: isEditingEnabled,
                                 decoration: InputDecoration(
-                                  labelText: "Link".tr(),
+                                  labelText: OccasionSettingsStrings.link,
                                 ),
                                 validator: FormBuilderValidators.compose([
-                                  FormBuilderValidators.required(errorText: 'Link is required'.tr()),
+                                  FormBuilderValidators.required(errorText: OccasionSettingsStrings.linkIsRequired),
                                 ]),
                                 onChanged: (val) {
                                   final fixed = Utilities.sanitizeFullUrl(val);
@@ -384,25 +455,42 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                                       selection: TextSelection.collapsed(offset: fixed.length),
                                     );
                                   }
-                                  setState(() {
-                                    _linkValue = fixed;
-                                  });
+                                  setState(() { _linkValue = fixed; });
                                 },
-                                onSaved: (val){ // Also on save
+                                onSaved: (val){
                                   _linkValue = Utilities.sanitizeFullUrl(val ?? "");
                                 }
                             ),
                             const SizedBox(height: 24),
 
-                            // Timezone Autocomplete
+                            TextFormField(
+                              controller: _replyToEmailController,
+                              enabled: isEditingEnabled,
+                              decoration: InputDecoration(
+                                labelText: OccasionSettingsStrings.labelReplyToEmail,
+                                border: const OutlineInputBorder(),
+                                helperText: OccasionSettingsStrings.helperReplyToEmail,
+                                helperMaxLines: 3,
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              validator: FormBuilderValidators.compose([
+                                FormBuilderValidators.email(errorText: OccasionSettingsStrings.validationEmailInvalid),
+                              ]),
+                            ),
+
+                            const SizedBox(height: 16),
+
                             if (_allTimezones.isNotEmpty)
                               Autocomplete<String>(
                                 initialValue: _selectedTimezone != null && _allTimezones.contains(_selectedTimezone)
                                     ? TextEditingValue(text: _selectedTimezone!)
                                     : null, // Use TextEditingValue for initialValue
                                 optionsBuilder: (TextEditingValue textEditingValue) {
+                                  if (!isEditingEnabled) {
+                                    return const Iterable<String>.empty();
+                                  }
                                   if (textEditingValue.text.isEmpty) {
-                                    return _allTimezones.take(50); // Show some initial options or an empty iterable
+                                    return _allTimezones.take(50); // Show some initial options
                                   }
                                   return _allTimezones.where((String option) {
                                     return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
@@ -412,7 +500,6 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                                   setState(() {
                                     _selectedTimezone = selection;
                                   });
-                                  // The fieldViewBuilder's controller will be updated by Autocomplete
                                 },
                                 fieldViewBuilder: (BuildContext context,
                                     TextEditingController fieldTextEditingController,
@@ -421,10 +508,11 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                                   return TextFormField(
                                     controller: fieldTextEditingController,
                                     focusNode: fieldFocusNode,
+                                    enabled: isEditingEnabled,
                                     decoration: InputDecoration(
-                                      labelText: "Timezone".tr(),
+                                      labelText: OccasionSettingsStrings.timezone,
                                       border: const OutlineInputBorder(),
-                                      suffixIcon: fieldTextEditingController.text.isNotEmpty
+                                      suffixIcon: fieldTextEditingController.text.isNotEmpty && isEditingEnabled
                                           ? IconButton(
                                         icon: const Icon(Icons.clear),
                                         onPressed: () {
@@ -432,29 +520,22 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                                           setState(() {
                                             _selectedTimezone = null;
                                           });
-                                          // fieldFocusNode.requestFocus(); // Optionally re-focus
                                         },
                                       )
                                           : null,
                                     ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Timezone is required'.tr();
+                                        return OccasionSettingsStrings.timezoneIsRequired;
                                       }
                                       if (!_allTimezones.contains(value)) {
-                                        // If _selectedTimezone is set (by onSelected) and matches, it's fine.
-                                        // Otherwise, the typed text isn't a valid option.
                                         if (_selectedTimezone != value) {
-                                          return 'Please select or type a valid timezone'.tr();
+                                          return OccasionSettingsStrings.invalidTimezone;
                                         }
                                       }
-                                      // If value is in allTimezones, it means user typed it correctly
-                                      // or it was set by onSelected. In either case, update _selectedTimezone.
                                       if(_allTimezones.contains(value) && _selectedTimezone != value) {
-                                        // This syncs if user types a full valid name without selecting
-                                        // Needs setState to be effective for validation pass
                                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          if (mounted) { // Check if widget is still in the tree
+                                          if (mounted) {
                                             setState(() { _selectedTimezone = value; });
                                           }
                                         });
@@ -472,8 +553,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                                       elevation: 4.0,
                                       child: ConstrainedBox(
                                         constraints: BoxConstraints(
-                                            maxHeight: 300, // Limit dropdown height
-                                            // Ensure width matches field or is reasonable
+                                            maxHeight: 300,
                                             maxWidth: MediaQuery.of(context).size.width - 40 > 0 ? MediaQuery.of(context).size.width - 40 : 300
                                         ),
                                         child: ListView.builder(
@@ -501,7 +581,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                             else
                               Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                child: Text("Timezones loading or unavailable...".tr()),
+                                child: Text(OccasionSettingsStrings.timezonesLoading),
                               ),
                             const SizedBox(height: 16),
                           ],
@@ -510,72 +590,82 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                     ],
                   ),
                   const SizedBox(height: 24),
-
-                  Container( // Features Section
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Features".tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _featureSearchController,
-                          decoration: InputDecoration(
-                            labelText: "Search features".tr(),
-                            prefixIcon: const Icon(Icons.search),
-                            border: const OutlineInputBorder(),
-                            suffixIcon: _featureSearchQuery.isNotEmpty
-                                ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _featureSearchController.clear();
-                                setState(() {
-                                  _featureSearchQuery = "";
-                                });
-                              },
-                            )
-                                : null,
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _featureSearchQuery = value;
-                            });
-                          },
+                  Opacity(
+                    opacity: isEditingEnabled ? 1.0 : 0.5,
+                    child: AbsorbPointer(
+                      absorbing: !isEditingEnabled,
+                      child: Container(
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8)
                         ),
-                        const SizedBox(height: 16),
-                        if (enabledFeatures.isNotEmpty) ...[
-                          Text("Enabled Features".tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 8),
-                          ...enabledFeatures.map((feature) =>
-                              FeatureForm(feature: feature, occasion: widget.occasion.id!)
-                          ),
-                        ],
-                        if (disabledFeatures.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          Text("Other Features".tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 8),
-                          ...disabledFeatures.map((feature) =>
-                              FeatureForm(feature: feature, occasion: widget.occasion.id!)
-                          ),
-                        ],
-                        if (featuresToShow.isEmpty && _featureSearchQuery.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text("No features match your search.".tr()),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 80),
-                  Center(
-                    child: TextButton(
-                      onPressed: RightsService.isUnitManager() ? _confirmDelete : null,
-                      child: Text(
-                        "Delete Event".tr(),
-                        style: TextStyle(color: ThemeConfig.redColor(context)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(OccasionSettingsStrings.features, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _featureSearchController,
+                              enabled: isEditingEnabled,
+                              decoration: InputDecoration(
+                                labelText: OccasionSettingsStrings.searchFeatures,
+                                prefixIcon: const Icon(Icons.search),
+                                border: const OutlineInputBorder(),
+                                suffixIcon: _featureSearchQuery.isNotEmpty && isEditingEnabled
+                                    ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    _featureSearchController.clear();
+                                    setState(() {
+                                      _featureSearchQuery = "";
+                                    });
+                                  },
+                                )
+                                    : null,
+                              ),
+                              onChanged: (value) {
+                                setState(() { _featureSearchQuery = value; });
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            if (enabledFeatures.isNotEmpty) ...[
+                              Text(OccasionSettingsStrings.enabledFeatures, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              ...enabledFeatures.map((feature) =>
+                                  FeatureForm(feature: feature, occasion: occasion!.id!)
+                              ),
+                            ],
+                            if (disabledFeatures.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              Text(OccasionSettingsStrings.otherFeatures, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              ...disabledFeatures.map((feature) =>
+                                  FeatureForm(feature: feature, occasion: occasion!.id!)
+                              ),
+                            ],
+                            if (featuresToShow.isEmpty && _featureSearchQuery.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(OccasionSettingsStrings.noFeaturesFound),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
+                  const SizedBox(height: 24),
+                  if (RightsService.isUnitManager())
+                    Center(
+                      child: TextButton(
+                        onPressed: isEditingEnabled ? _confirmDelete : null,
+                        child: Text(
+                          OccasionSettingsStrings.deleteEvent,
+                          style: TextStyle(color: isEditingEnabled ? ThemeConfig.redColor(context) : Colors.grey),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 80), // Padding for bottom nav bar
                 ],
               ),
             ),
@@ -583,21 +673,26 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-        color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Storno".tr()),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: _saveSettings,
-              child: Text("Save".tr()),
-            ),
-          ],
+        color: Theme.of(context).appBarTheme.backgroundColor,
+        padding: const EdgeInsets.all(10),
+        child: SafeArea(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: _isSaving || !isEditingEnabled ? null : _loadData,
+                child: Text(CommonStrings.storno),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                icon: _isSaving ? const SizedBox.shrink() : const Icon(Icons.save, size: 18),
+                label: _isSaving
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Text(CommonStrings.save),
+                onPressed: _isSaving || !isEditingEnabled ? null : _saveSettings,
+              ),
+            ],
+          ),
         ),
       ),
     );
