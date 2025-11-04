@@ -196,6 +196,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
       });
       await Future.delayed(const Duration(milliseconds: 50));
       htmlText = await HtmlHelper.storeImagesToOccasion(_originalHtml ?? _html, htmlText, widget.occasionId!);
+      htmlText = HtmlHelper.applyEmailCompatibleStyleToImages(htmlText);
+
       RouterService.goBack(context, htmlText);
       return;
     }
@@ -241,6 +243,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
         }
       }
     }
+
+    htmlText = HtmlHelper.applyEmailCompatibleStyleToImages(htmlText);
 
     setState(() {
       _isSaving = false;
