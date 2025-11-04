@@ -17,7 +17,7 @@ export async function getTicketOrderUpdateTemplate(reqData: any, authorizationHe
   const attachments: any[] = [];
 
   // 1. Fetch and authorize base order data using the shared function
-  const { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data } = await getBaseOrderData(orderId, requestSecret, authorizationHeader);
+  const { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data, reply_to } = await getBaseOrderData(orderId, requestSecret, authorizationHeader);
 
   // 2. Get the communication tone
   const tone: Tone = (form_data?.communication_tone === 'informal') ? 'informal' : 'formal';
@@ -83,5 +83,5 @@ export async function getTicketOrderUpdateTemplate(reqData: any, authorizationHe
   const receiver = order.data.email;
   const context = { occasion: occasion.id, organization: occasion.organization, unit: occasion.unit, orderHistoryId: latest_history_id };
 
-  return { subs, sender, receiver, context, attachments };
+  return { subs, sender, receiver, context, attachments, reply_to };
 }

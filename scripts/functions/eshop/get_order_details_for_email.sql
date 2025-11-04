@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_order_details(orderId bigint)
+CREATE OR REPLACE FUNCTION get_order_details_for_email(p_order_id bigint)
 RETURNS jsonb AS $$
 DECLARE
     result_data jsonb;
@@ -7,6 +7,7 @@ DECLARE
     form_data jsonb;
     form_key uuid;
     latest_history_id bigint;
+    v_reply_to_email TEXT;
 BEGIN
     -- Retrieve the order, occasion, payment info, and bank account as separate objects
     SELECT jsonb_build_object(
@@ -20,19 +21,25 @@ BEGIN
     LEFT JOIN public.occasions AS occ ON o.occasion = occ.id
     LEFT JOIN eshop.payment_info AS pi ON o.payment_info = pi.id
     LEFT JOIN eshop.bank_accounts AS ba ON pi.bank_account = ba.id
-    WHERE o.id = orderId;
+    WHERE o.id = p_order_id;
 
     -- Check if the order was found
     IF result_data IS NULL THEN
-
         RETURN jsonb_build_object('code', 404, 'message', 'Order not found.');
     END IF;
+
+    -- Call the function you provided to get the email
+    SELECT get_reply_to_email_for_order(p_order_id) INTO v_reply_to_email;
+
+    -- Add the email to the result data. jsonb_build_object handles NULLs gracefully.
+    result_data := result_data || jsonb_build_object('reply_to', v_reply_to_email);
+
 
     -- Find the latest order_history ID for the given order
     SELECT oh.id
     INTO latest_history_id
     FROM eshop.orders_history AS oh
-    WHERE oh.order = orderId
+    WHERE oh.order = p_order_id
     ORDER BY oh.created_at DESC
     LIMIT 1;
 
@@ -43,14 +50,14 @@ BEGIN
     -- Get the data of the latest SENT history entry
     SELECT data INTO reference_history_data
     FROM eshop.orders_history
-    WHERE "order" = orderId AND (data->>'is_sent_to_customer')::boolean IS TRUE
+    WHERE "order" = p_order_id AND (data->>'is_sent_to_customer')::boolean IS TRUE
     ORDER BY created_at DESC LIMIT 1;
 
     -- If no sent record was found, get the oldest record as the reference
     IF NOT FOUND THEN
         SELECT data INTO reference_history_data
         FROM eshop.orders_history
-        WHERE "order" = orderId
+        WHERE "order" = p_order_id
         ORDER BY created_at ASC LIMIT 1;
     END IF;
 
