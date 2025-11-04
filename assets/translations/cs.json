@@ -703,7 +703,12 @@
     "labelPaymentMessage": "Zpráva pro příjemce",
     "msgTypeNameSurname": "Jméno a příjmení zákazníka",
     "msgTypeNone": "Žádná",
-    "msgTypeOccasionTitle": "Název události"
+    "msgTypeOccasionTitle": "Název události",
+    "communicationToneTitle": "Tón komunikace",
+    "helperCommunicationTone": "Vyberte tón pro automatickou komunikaci, jako jsou e-maily s potvrzením platby nebo připomínky. Ovlivní to styl textů v e-mailových šablonách.",
+    "labelCommunicationTone": "Tón",
+    "toneFormal": "Formální (Vy)",
+    "toneInformal": "Neformální (Ty)"
   },
   "OrderGridColumns": {
     "id": "Id",
@@ -781,7 +786,15 @@
     "noOptionsForCurrency": "Pro zvolenou měnu nejsou k dispozici žádné možnosti.",
     "clearSelection": "Zrušit výběr",
     "unavailable": "Nedostupné",
-    "inWhatCurrency": "V jaké měně chcete platit?"
+    "inWhatCurrency": "V jaké měně chcete platit?",
+    "noProductTypes": "Žádné typy produktů",
+    "productTypes": "Typy produktů",
+    "seatSelection": "Výběr místa",
+    "note": "Poznámka",
+    "labelMaxTicketsPerOrder": "Maximum vstupenek na objednávku:",
+    "helperMaxTicketsPerOrder": "Kolik vstupenek si uživatel může koupit v jedné objednávce (výchozí: 1).",
+    "validationMaxTicketsInvalid": "Zadejte prosím platné číslo (1 nebo více).",
+    "cancel": "Storno"
   },
   "FeatureOrders": {
     "cancel": "Stornovat",
@@ -1094,6 +1107,41 @@
     "toastImageUploadFail": "Nepodařilo se nahrát obrázek.",
     "toastCouldNotRemoveImage": "Obrázek se nepodařilo odstranit z úložiště, ale bude odstraněn z plánu.",
     "toastBackgroundRemoved": "Pozadí odstraněno."
+  },
+  "OccasionSettings": {
+    "title": "Nadpis",
+    "titleIsRequired": "Nadpis je povinný",
+    "introImage": "Úvodní obrázek",
+    "imageRatioHint": "Obrázek s poměrem stran {width} : {height}",
+    "description": "Popis",
+    "editContent": "Upravit obsah",
+    "public": "Veřejné",
+    "publicHelp": "Určuje, zda jsou detaily události (program, info atd.) dostupné veřejnosti.",
+    "hide": "Skrýt",
+    "hideHelp": "Toto určuje, zda je tato událost skryta ve výpisech.",
+    "advancedSettings": "Pokročilá nastavení",
+    "link": "Odkaz",
+    "linkIsRequired": "Odkaz je povinný",
+    "timezone": "Časové pásmo",
+    "timezoneIsRequired": "Časové pásmo je povinné",
+    "invalidTimezone": "Vyberte nebo zadejte platné časové pásmo",
+    "timezonesLoading": "Načítání časových pásem nebo nejsou k dispozici...",
+    "labelReplyToEmail": "E-mail pro odpovědi",
+    "helperReplyToEmail": "Odpovědi zákazníků na automatické e-maily (potvrzení, připomínky) budou zasílány na tuto adresu.",
+    "validationEmailInvalid": "Zadejte prosím platnou e-mailovou adresu.",
+    "features": "Funkce",
+    "searchFeatures": "Hledat funkce",
+    "enabledFeatures": "Povolené funkce",
+    "otherFeatures": "Ostatní funkce",
+    "noFeaturesFound": "Nebyla nalezena žádná funkce odpovídající vašemu hledání.",
+    "deleteEvent": "Smazat událost",
+    "deleteEventConfirmation": "Opravdu chcete smazat tuto událost? Všechna data události budou ztracena.",
+    "confirmRemoval": "Potvrdit odstranění",
+    "deleteImageConfirmation": "Opravdu chcete smazat tento obrázek?",
+    "imageRemovedSuccess": "Obrázek byl úspěšně odstraněn.",
+    "imageRemovedFail": "Odstranění obrázku se nezdařilo.",
+    "fileUploadedSuccess": "Soubor byl úspěšně nahrán.",
+    "failedToUploadImage": "Nahrání obrázku se nezdařilo."
   },
   "_": "_"
 }
