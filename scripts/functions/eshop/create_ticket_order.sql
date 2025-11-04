@@ -45,7 +45,8 @@ DECLARE
     key_val RECORD;
     order_data JSONB;
     order_note TEXT;
-    ticket_note TEXT; -- renamed from local_note
+    ticket_note TEXT;
+    reply_to TEXT;
 BEGIN
     -- Wrap the entire logic in a subtransaction block to ensure that if any error occurs,
     -- all operations performed inside the block are rolled back.
@@ -405,6 +406,8 @@ BEGIN
             first_currency_code
         );
 
+        -- Get the reply-to email for the order
+        reply_to := get_reply_to_email_for_order(order_id);
         -- Prepare the success response JSON
         result := JSONB_BUILD_OBJECT(
             'code', 200,
@@ -430,7 +433,8 @@ BEGIN
                     'unit', unit_id,
                     'title', occasion_title,
                     'features', occasion_features
-                )
+                ),
+                'reply_to', reply_to
             )
         );
 

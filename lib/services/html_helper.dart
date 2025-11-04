@@ -58,6 +58,17 @@ class HtmlHelper {
     return imagesToProcess;
   }
 
+  static String applyEmailCompatibleStyleToImages(String htmlText) {
+    final document = html_parser.parse(htmlText);
+    final images = document.getElementsByTagName('img');
+
+    for (var image in images) {
+      image.attributes['style'] = 'width: 100%; height: auto;';
+    }
+
+    return document.outerHtml;
+  }
+
   static Future<String> compressImage(
       String htmlText, String imageSrc, void Function() onImageProcessed) async {
     final document = html_parser.parse(htmlText);
