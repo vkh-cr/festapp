@@ -23,7 +23,8 @@ class ProductsTab extends StatefulWidget {
 }
 
 class _ProductsTabState extends State<ProductsTab> {
-  ProductsEditBundle? _bundle;
+  SingleDataGridController<ProductModel>? _controller;
+  String? _occasionLink;
   bool _isLoading = true;
 
   static List<String> columnIdentifiers = [
@@ -46,35 +47,33 @@ class _ProductsTabState extends State<ProductsTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_bundle == null && _isLoading) {
-      _loadData();
+    final newOccasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
+    // Initialize only once when the link is available
+    if (_occasionLink == null) {
+      _occasionLink = newOccasionLink;
+      _initializeController();
     }
   }
 
-  Future<void> _loadData() async {
-    final occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
-    final bundle = await DbEshop.getProductsAndTypesForOccasion(occasionLink);
-    if (mounted) {
-      setState(() {
-        _bundle = bundle;
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+  Future<void> _initializeController() async {
+    if (_occasionLink == null) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
     }
 
-    if (_bundle == null) {
-      return Center(child: Text("No data to display.".tr()));
-    }
+    final initialBundle = await DbEshop.getProductsAndTypesForOccasion(_occasionLink!);
+    if (!mounted) return;
 
-    final controller = SingleDataGridController<ProductModel>(
+    final newController = SingleDataGridController<ProductModel>(
       context: context,
-      loadData: () async => _bundle!.products,
+      loadData: () async {
+        final newBundle = await DbEshop.getProductsAndTypesForOccasion(_occasionLink!);
+        return newBundle.products;
+      },
       fromPlutoJson: ProductModel.fromPlutoJson,
       firstColumnType: DataGridFirstColumn.delete,
       idColumn: TbEshop.products.id,
@@ -87,12 +86,35 @@ class _ProductsTabState extends State<ProductsTab> {
         columnIdentifiers,
         data: {
           EshopColumns.PRODUCT_DESCRIPTION: RightsService.currentOccasionId(),
-          EshopColumns.PRODUCT_INCLUDED_INVENTORY: _bundle!.inventoryContexts,
-          EshopColumns.PRODUCT_USED_IN_FORMS: _bundle!.forms,
+          // Use the dependencies from the initial fetch
+          EshopColumns.PRODUCT_INCLUDED_INVENTORY: initialBundle.inventoryContexts,
+          EshopColumns.PRODUCT_USED_IN_FORMS: initialBundle.forms,
         },
       ),
     );
 
-    return SingleTableDataGrid<ProductModel>(controller);
+    // Update the state to assign the controller and stop loading
+    if (mounted) {
+      setState(() {
+        _controller = newController;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // If loading is finished but the controller is still null,
+    // it means initialization failed or there was no data.
+    if (_controller == null) {
+      return Center(child: Text("No data to display.".tr()));
+    }
+
+    // Pass the state-managed controller to the grid
+    return SingleTableDataGrid<ProductModel>(_controller!);
   }
 }

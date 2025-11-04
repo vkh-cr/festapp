@@ -49,7 +49,7 @@ BEGIN
     -- Ensure 'spot' product type exists for the occasion
     IF NOT EXISTS (SELECT 1 FROM eshop.product_types WHERE occasion = p_occasion_id AND type = 'spot') THEN
         INSERT INTO eshop.product_types(title, type, occasion)
-        VALUES ('', 'spot', p_occasion_id)
+        VALUES ('Spot', 'spot', p_occasion_id)
         RETURNING id INTO new_product_type_id;
     ELSE
         SELECT id INTO new_product_type_id FROM eshop.product_types WHERE occasion = p_occasion_id AND type = 'spot' LIMIT 1;

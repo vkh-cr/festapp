@@ -3,6 +3,9 @@ import '../forms/form_strings.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
 
+const int _secondsInADay = 86400;
+const int _secondsInAWeek = _secondsInADay * 7;
+
 /// Feature for external form & custom button title.
 class FormFeature extends Feature {
   bool?   formUseExternal;
@@ -35,9 +38,9 @@ class FormFeature extends Feature {
       formExternalLink:   json[FeatureConstants.formExternalLink],
       formExternalPrice:  json[FeatureConstants.formExternalPrice],
       reserveButtonTitle: json[FeatureConstants.reserveButtonTitle],
-      reminderIsEnabled: json[FeatureConstants.reminderIsEnabled],
-      reminderIntervalSeconds: json[FeatureConstants.reminderIntervalSeconds] ?? 86400,
-      deadlineDurationSeconds: json[FeatureConstants.deadlineDurationSeconds] ?? 604800,
+      reminderIsEnabled: json[FeatureConstants.reminderIsEnabled] ?? true,
+      reminderIntervalSeconds: json[FeatureConstants.reminderIntervalSeconds] ?? _secondsInADay,
+      deadlineDurationSeconds: json[FeatureConstants.deadlineDurationSeconds] ?? _secondsInAWeek,
     );
   }
 
@@ -89,12 +92,12 @@ class _FormFeatureEditorState extends State<_FormFeatureEditor> {
     // For day-based fields, convert seconds from the model to days for the UI.
     final deadlineDays = widget.formFeature.deadlineDurationSeconds;
     _deadlineController = TextEditingController(
-        text: deadlineDays != null ? (deadlineDays / 86400).round().toString() : ""
+        text: deadlineDays != null ? (deadlineDays / _secondsInADay).round().toString() : ""
     );
 
     final reminderDays = widget.formFeature.reminderIntervalSeconds;
     _reminderController = TextEditingController(
-        text: reminderDays != null ? (reminderDays / 86400).round().toString() : ""
+        text: reminderDays != null ? (reminderDays / _secondsInADay).round().toString() : ""
     );
   }
 
@@ -176,7 +179,7 @@ class _FormFeatureEditorState extends State<_FormFeatureEditor> {
                   onChanged: (_) => setState(() {}), // Rebuild for live validation
                   onSaved: (val) {
                     final days = int.tryParse(val ?? '');
-                    widget.formFeature.deadlineDurationSeconds = days != null ? days * 86400 : 604800;
+                    widget.formFeature.deadlineDurationSeconds = days != null ? days * _secondsInADay : _secondsInAWeek;
                   },
                 ),
               ),
@@ -202,7 +205,7 @@ class _FormFeatureEditorState extends State<_FormFeatureEditor> {
                     onChanged: (_) => setState(() {}), // Rebuild for live validation
                     onSaved: (val) {
                       final days = int.tryParse(val ?? '');
-                      widget.formFeature.reminderIntervalSeconds = days != null ? days * 86400 : 86400;
+                      widget.formFeature.reminderIntervalSeconds = days != null ? days * _secondsInADay : _secondsInADay;
                     },
                   ),
                 ),

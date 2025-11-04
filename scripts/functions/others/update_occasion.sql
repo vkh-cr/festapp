@@ -1,14 +1,16 @@
-CREATE OR REPLACE FUNCTION update_occasion_182(input_data JSONB)
+CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
  RETURNS void -- The function now returns nothing
  LANGUAGE plpgsql
  SECURITY DEFINER
  AS $$
  DECLARE
-     -- The updated_occ variable is kept for internal logic but not returned
      updated_occ public.occasions;
      occ_id BIGINT;
      now TIMESTAMPTZ := NOW();
      final_unit BIGINT;
+
+     -- New variable for the optional parameter
+     is_app_supported BOOLEAN;
 
      -- Variables for feature handling
      new_blueprint_id BIGINT;
@@ -16,10 +18,47 @@ CREATE OR REPLACE FUNCTION update_occasion_182(input_data JSONB)
      v_form_blueprint BIGINT;
      v_form_settings JSONB;
      v_reminder_interval_seconds BIGINT;
+
+     input_features JSONB;
+     processed_features JSONB;
+     feature JSONB;
+     form_feature_found BOOLEAN;
  BEGIN
      -- Validate input data. Raise an exception if it's missing or empty.
      IF input_data IS NULL OR input_data = '{}'::jsonb THEN
          RAISE EXCEPTION 'Input data is missing or empty';
+     END IF;
+
+     -- Extract is_app_supported, defaulting to true if not provided
+     is_app_supported := COALESCE((input_data->>'is_app_supported')::BOOLEAN, true);
+
+     --
+     -- Prepare features based on is_app_supported flag
+     --
+     input_features := COALESCE(input_data->'features', '[]'::jsonb);
+     processed_features := '[]'::jsonb;
+
+     IF NOT is_app_supported THEN
+         -- If the app is not supported, we must enable the 'form' feature.
+         form_feature_found := false;
+         -- Loop through existing features to find and enable the form feature
+         FOR feature IN SELECT * FROM jsonb_array_elements(input_features)
+         LOOP
+             IF feature->>'code' = 'form' THEN
+                 -- If form feature exists, ensure it is enabled
+                 feature := feature || '{"is_enabled": true}';
+                 form_feature_found := true;
+             END IF;
+             processed_features := processed_features || feature;
+         END LOOP;
+
+         -- If the form feature was not found in the original array, add it.
+         IF NOT form_feature_found THEN
+             processed_features := processed_features || '{"code": "form", "is_enabled": true}';
+         END IF;
+     ELSE
+         -- If app is supported, use features as they were provided.
+         processed_features := input_features;
      END IF;
 
      -- Determine if this is an UPDATE or INSERT based on the presence of an 'id'
@@ -35,11 +74,9 @@ CREATE OR REPLACE FUNCTION update_occasion_182(input_data JSONB)
          END IF;
 
          -- Determine the final unit, allowing it to be updated.
-         -- If not provided in input, use the existing unit.
          final_unit := COALESCE((input_data->>'unit')::BIGINT, final_unit);
 
          -- Security check: ensure the current user has editor rights on the target unit.
-         -- This function is expected to raise an exception on failure.
          PERFORM check_is_editor_on_unit(final_unit);
 
          UPDATE public.occasions
@@ -55,9 +92,9 @@ CREATE OR REPLACE FUNCTION update_occasion_182(input_data JSONB)
                 organization = COALESCE((input_data->>'organization')::BIGINT, organization),
                 services    = COALESCE(input_data->'services', services),
                 unit        = final_unit,
-                features    = COALESCE(input_data->'features', features)
+                features    = processed_features -- Use the processed features
           WHERE id = occ_id
-          RETURNING * INTO updated_occ; -- Return the entire updated row into the record variable
+          RETURNING * INTO updated_occ;
 
      ELSE
          -- This is an INSERT operation
@@ -70,6 +107,22 @@ CREATE OR REPLACE FUNCTION update_occasion_182(input_data JSONB)
 
          -- Security check for the new occasion's unit.
          PERFORM check_is_editor_on_unit(final_unit);
+
+         -- We still need to default 'reminder_is_enabled' for the 'form' feature if not specified.
+         -- We do this on the already processed_features array.
+         input_features := processed_features; -- Use the result from the is_app_supported logic
+         processed_features := '[]'::jsonb;
+         FOR feature IN SELECT * FROM jsonb_array_elements(input_features)
+         LOOP
+             -- If the current feature is the 'form' feature
+             IF feature->>'code' = 'form' THEN
+                 -- And if 'reminder_is_enabled' is NOT specified, default it to true.
+                 IF NOT (feature ? 'reminder_is_enabled') THEN
+                     feature := feature || '{"reminder_is_enabled": true}';
+                 END IF;
+             END IF;
+             processed_features := processed_features || feature::jsonb;
+         END LOOP;
 
          INSERT INTO public.occasions(
              created_at, updated_at, title, description, link, data,
@@ -89,9 +142,9 @@ CREATE OR REPLACE FUNCTION update_occasion_182(input_data JSONB)
              (input_data->>'organization')::BIGINT,
              COALESCE(input_data->'services', '{}'::jsonb),
              final_unit,
-             COALESCE(input_data->'features', '[]'::jsonb)
+             processed_features
          )
-         RETURNING * INTO updated_occ; -- Return the entire new row into the record variable
+         RETURNING * INTO updated_occ;
 
          -- Set the occ_id from the newly created record for subsequent logic
          occ_id := updated_occ.id;
@@ -101,7 +154,8 @@ CREATE OR REPLACE FUNCTION update_occasion_182(input_data JSONB)
      -- Post-update/insert feature handling
      --
 
-     -- Check if form feature is enabled and handle related logic
+     -- Check if form feature is enabled and handle related logic.
+     -- This will now be triggered if is_app_supported was false.
      IF jsonb_path_exists(updated_occ.features, '$[*] ? (@.code == "form" && @.is_enabled == true)') THEN
          -- Extract the settings for the 'form' feature from the newly saved data
          SELECT elem INTO v_form_settings
@@ -110,11 +164,11 @@ CREATE OR REPLACE FUNCTION update_occasion_182(input_data JSONB)
 
          -- Create a default form if one doesn't exist for the occasion
          IF NOT EXISTS (SELECT 1 FROM public.forms WHERE occasion = occ_id) THEN
-             PERFORM create_form(JSONB_BUILD_OBJECT(
-                 'occasion_id', occ_id,
-                 'link', COALESCE(input_data->>'form_link', updated_occ.link),
-                 'title', 'Registration'
-             ));
+             PERFORM create_form(
+                 occ_id,
+                 COALESCE(input_data->>'form_link', updated_occ.link),
+                 'Registration'
+             );
          END IF;
 
          -- Check if reminders are enabled within the form feature

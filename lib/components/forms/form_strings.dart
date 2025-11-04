@@ -1,6 +1,4 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/features/feature_constants.dart';
-import 'package:fstapp/components/features/feature_service.dart';
 
 class FormStrings {
 
@@ -34,6 +32,28 @@ class FormStrings {
   static String get labelEnableReminders => 'FeatureFormSettings.labelEnableReminders'.tr();
   static String get subtitleEnableReminders => 'FeatureFormSettings.subtitleEnableReminders'.tr();
   static String get subtitleRemindersDisabled => 'FeatureFormSettings.subtitleRemindersDisabled'.tr();
+  static String get paymentDetailsTitle => 'FeatureFormSettings.paymentDetailsTitle'.tr();
+  static String get labelVariableSymbol => 'FeatureFormSettings.labelVariableSymbol'.tr();
+  static String get vsTypeRandom => 'FeatureFormSettings.vsTypeRandom'.tr();
+  static String get vsTypeSequence => 'FeatureFormSettings.vsTypeSequence'.tr();
+  static String get labelStartingNumber => 'FeatureFormSettings.labelStartingNumber'.tr();
+  static String get helperStartingNumber => 'FeatureFormSettings.helperStartingNumber'.tr();
+  static String get labelPaymentMessage => 'FeatureFormSettings.labelPaymentMessage'.tr();
+  static String get msgTypeNameSurname => 'FeatureFormSettings.msgTypeNameSurname'.tr();
+  static String get msgTypeNone => 'FeatureFormSettings.msgTypeNone'.tr();
+  static String get msgTypeOccasionTitle => 'FeatureFormSettings.msgTypeOccasionTitle'.tr();
+
+  static String get communicationToneTitle => 'FeatureFormSettings.communicationToneTitle'.tr(); // "Communication Tone"
+  static String get helperCommunicationTone => 'FeatureFormSettings.helperCommunicationTone'.tr(); // "Select the tone for automated communications, like payment confirmation emails or reminders. This will affect the wording in the email templates."
+  static String get labelCommunicationTone => 'FeatureFormSettings.labelCommunicationTone'.tr(); // "Tone"
+  static String get toneFormal => 'FeatureFormSettings.toneFormal'.tr(); // "Formal"
+  static String get toneInformal => 'FeatureFormSettings.toneInformal'.tr(); // "Informal "
+
+  // --- Form Fields (General) ---
+  static String get noOptionsForCurrency => 'FormsFeature.noOptionsForCurrency'.tr();
+  static String get clearSelection => 'FormsFeature.clearSelection'.tr();
+  static String get unavailable => 'FormsFeature.unavailable'.tr();
+  static String get inWhatCurrency => 'FormsFeature.inWhatCurrency'.tr();
 
 
 // --- FormsTab (Main Grid View) ---
@@ -75,6 +95,18 @@ class FormStrings {
   static String get untitledProductType => 'FormsFeature.untitledProductType'.tr();
   static String get noProductTypesToAdd => 'FormsFeature.noProductTypesToAdd'.tr();
   static String get newProductTypeDefaultName => 'FormsFeature.newProductTypeDefaultName'.tr();
+
+  static String get typeHere => 'FormsFeature.typeHere'.tr();
+
+  // --- Strings from TicketEditorWidgets ---
+  static String get noProductTypes => 'FormsFeature.noProductTypes'.tr(); // "No Product Types"
+  static String get productTypes => 'FormsFeature.productTypes'.tr(); // "ProductTypes"
+  static String get seatSelection => 'FormsFeature.seatSelection'.tr(); // "Seat selection"
+  static String get note => 'FormsFeature.note'.tr(); // "Note"
+  // --- Strings for TicketEditorWidgets (Max Tickets) ---
+  static String get labelMaxTicketsPerOrder => 'FormsFeature.labelMaxTicketsPerOrder'.tr(); // "Max tickets per order:"
+  static String get helperMaxTicketsPerOrder => 'FormsFeature.helperMaxTicketsPerOrder'.tr(); // "How many tickets a user can buy in a single order (default: 1)."
+  static String get validationMaxTicketsInvalid => 'FormsFeature.validationMaxTicketsInvalid'.tr(); // "Please enter a valid number (1 or more)."
 
 // --- Create/Copy Dialog (_CreateOrCopyFormDialog) ---
   static String get createFormTitle => 'FormsFeature.createFormTitle'.tr(); // "Create a Form"

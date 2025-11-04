@@ -15,6 +15,9 @@ class SeatLayoutWidget extends StatefulWidget {
   final AutoResizeInteractiveViewerController? controller;
   final void Function(SeatModel model)? onSeatTap;
   final bool? isEditorMode;
+
+  static const Color _defaultBackgroundColor = Colors.white;
+
   const SeatLayoutWidget({
     super.key,
     required this.stateModel,
@@ -102,10 +105,45 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
     });
   }
 
+  /// Helper method to build the background from either an SVG string or a URL.
+  Widget _buildBackgroundWidget(String backgroundSource, double width, double height) {
+    final trimmedSource = backgroundSource.trim();
+    final isUrl = trimmedSource.startsWith('http://') || trimmedSource.startsWith('https://');
+    final isSvg = trimmedSource.startsWith('<svg');
+
+    if (isUrl) {
+      return Image.network(
+        trimmedSource,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(child: CircularProgressIndicator());
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return const Center(child: Icon(Icons.error_outline, color: Colors.red));
+        },
+      );
+    }
+
+    if (isSvg) {
+      return SvgPicture.string(
+        trimmedSource,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
   @override
   Widget build(BuildContext context) {
     double layoutWidth = (widget.stateModel.cols * widget.stateModel.seatSize).toDouble();
     double layoutHeight = (widget.stateModel.rows * widget.stateModel.seatSize).toDouble();
+    final backgroundSource = widget.stateModel.backgroundSvg;
 
     return InteractiveViewer(
       minScale: _minScale,
@@ -113,61 +151,45 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
       boundaryMargin: const EdgeInsets.all(double.infinity),
       constrained: false,
       transformationController: _controller,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Container(
+      // Wrap the complex child in a RepaintBoundary.
+      // This prevents the seat map from being repainted during pan/zoom,
+      // drastically improving performance.
+      child: RepaintBoundary(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                width: layoutWidth,
+                height: layoutHeight,
+                decoration: BoxDecoration(
+                  // Use the static const
+                  color: SeatLayoutWidget._defaultBackgroundColor,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                // Use the new helper to render the background
+                child: backgroundSource != null && backgroundSource.isNotEmpty
+                    ? ClipRRect(
+                  borderRadius: BorderRadius.circular(12.0),
+                  child: _buildBackgroundWidget(backgroundSource, layoutWidth, layoutHeight),
+                )
+                    : null,
+              ),
+            ),
+            SizedBox(
               width: layoutWidth,
               height: layoutHeight,
-              decoration: BoxDecoration(
-                color: widget.stateModel.backgroundSvg != null
-                    ? Colors.transparent
-                    : ThemeConfig.grey300(context),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: widget.stateModel.backgroundSvg != null
-                  ? ClipRRect(
-                borderRadius: BorderRadius.circular(12.0),
-                child: SvgPicture.string(
-                  widget.stateModel.backgroundSvg!,
-                  width: layoutWidth,
-                  height: layoutHeight,
-                  fit: BoxFit.cover,
-                ),
-              )
-                  : null,
-            ),
-          ),
-          SizedBox(
-            width: layoutWidth,
-            height: layoutHeight,
-            child: Stack(
-              children: _seats
-                  .where((seatModel) =>
-              (seatModel.objectModel != null &&
-                  seatModel.objectModel!.id != null) ||
-                  widget.isEditorMode == true)
-                  .map((seatModel) {
-                return Positioned(
-                  left: seatModel.colI * seatModel.seatSize.toDouble(),
-                  top: seatModel.rowI * seatModel.seatSize.toDouble(),
-                  child: seatModel.objectModel == null
-                      ? GestureDetector(
-                    onTap: () {
-                      if (widget.onSeatTap != null) {
-                        widget.onSeatTap!(seatModel);
-                      }
-                    },
-                    child: SeatWidgetHelper.buildSeat(
-                      context: context,
-                      state: seatModel.seatState,
-                      size: seatModel.seatSize.toDouble(),
-                    ),
-                  )
-                      : TextTooltipWidget(
-                    content:
-                    "${seatModel.objectModel?.blueprintTooltip(context)}",
-                    child: GestureDetector(
+              child: Stack(
+                children: _seats
+                    .where((seatModel) =>
+                (seatModel.objectModel != null &&
+                    seatModel.objectModel!.id != null) ||
+                    widget.isEditorMode == true)
+                    .map((seatModel) {
+                  return Positioned(
+                    left: seatModel.colI * seatModel.seatSize.toDouble(),
+                    top: seatModel.rowI * seatModel.seatSize.toDouble(),
+                    child: seatModel.objectModel == null
+                        ? GestureDetector(
                       onTap: () {
                         if (widget.onSeatTap != null) {
                           widget.onSeatTap!(seatModel);
@@ -178,13 +200,29 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                         state: seatModel.seatState,
                         size: seatModel.seatSize.toDouble(),
                       ),
+                    )
+                        : TextTooltipWidget(
+                      content:
+                      "${seatModel.objectModel?.blueprintTooltip(context)}",
+                      child: GestureDetector(
+                        onTap: () {
+                          if (widget.onSeatTap != null) {
+                            widget.onSeatTap!(seatModel);
+                          }
+                        },
+                        child: SeatWidgetHelper.buildSeat(
+                          context: context,
+                          state: seatModel.seatState,
+                          size: seatModel.seatSize.toDouble(),
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              }).toList(),
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

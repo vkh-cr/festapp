@@ -34,6 +34,7 @@ export async function sendEmail({
   html,
   attachments = [],
   from = _DEFAULT_EMAIL,
+  replyTo = _DEFAULT_EMAIL,
 }: {
   to: string;
   subject: string;
@@ -45,6 +46,7 @@ export async function sendEmail({
     encoding: string;
   }>;
   from?: string;
+  replyTo?: string;
 }) {
   try {
     await transporter.sendMail({
@@ -52,6 +54,7 @@ export async function sendEmail({
       to,
       subject,
       html,
+      replyTo,
       attachments: attachments.map((attachment) => ({
         filename: attachment.filename,
         content: attachment.content,
@@ -72,6 +75,7 @@ export async function sendEmailWithSubs({
   subs,
   attachments = [],
   from = _DEFAULT_EMAIL,
+  replyTo = _DEFAULT_EMAIL,
   wrapper = null,
 }: {
   to: string;
@@ -85,6 +89,7 @@ export async function sendEmailWithSubs({
     encoding: string;
   }>;
   from?: string;
+  replyTo?: string;
   wrapper?: string | null;
 }) {
   // Replace placeholders in subject and content with values from subs
@@ -112,5 +117,6 @@ export async function sendEmailWithSubs({
     html: sanitizedHtml,
     attachments,
     from,
+    replyTo,
   });
 }

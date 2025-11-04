@@ -1,6 +1,6 @@
 import { formatCurrency } from "../_shared/utilities.ts";
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 import QRCode from "npm:qrcode";
 import { PDFDocument, rgb } from "npm:pdf-lib";
 // Import all exports from fontkit (do not try to import a default)
