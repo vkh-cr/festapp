@@ -17,7 +17,7 @@ export async function getTicketOrderReminderTemplate(reqData: any, authorization
 
   // 1. Fetch and authorize base order data using the shared function
   // Added form_data to get the tone
-  const { order, occasion, payment_info, bank_account, latest_history_id, form_data } = await getBaseOrderData(orderId, requestSecret, authorizationHeader);
+  const { order, occasion, payment_info, bank_account, latest_history_id, form_data, reply_to } = await getBaseOrderData(orderId, requestSecret, authorizationHeader);
 
   // 2. Get the communication tone
   // Default to 'informal' if not specified or invalid
@@ -80,5 +80,5 @@ export async function getTicketOrderReminderTemplate(reqData: any, authorization
   const receiver = order.data.email;
   const context = { occasion: occasion.id, organization: occasion.organization, unit: occasion.unit, orderHistoryId: latest_history_id, paymentInfoId: payment_info.id };
 
-  return { subs, sender, receiver, context, attachments };
+  return { subs, sender, receiver, context, attachments, reply_to };
 }

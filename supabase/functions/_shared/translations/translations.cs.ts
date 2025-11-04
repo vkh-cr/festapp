@@ -18,16 +18,16 @@ export const csTranslations = {
     paid: string, remaining: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string | null, tone: Tone
   ) => {
     const mainText = deadline
-      ? `Pro úplné dokončení objednávky, prosím, uhraďte zbývající částku ${bold(remaining)} do ${bold(deadline)}.`
-      : `Pro úplné dokončení objednávky, prosím, uhraďte zbývající částku ${bold(remaining)}. Platbu můžete provést online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
+      ? `Pro úplné dokončení objednávky, prosíme, uhraďte zbývající částku ${bold(remaining)} do ${bold(deadline)}.`
+      : `Pro úplné dokončení objednávky, prosíme, uhraďte zbývající částku ${bold(remaining)}. Platbu můžete provést online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
 
     const formalMainText = deadline
-      ? `Pro úplné dokončení objednávky, prosím, uhraďte zbývající částku ${bold(remaining)} do ${bold(deadline)}.`
-      : `Pro úplné dokončení objednávky, prosím, uhraďte zbývající částku ${bold(remaining)}. Platbu můžete provést online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
+      ? `Pro úplné dokončení objednávky, prosíme, uhraďte zbývající částku ${bold(remaining)} do ${bold(deadline)}.`
+      : `Pro úplné dokončení objednávky, prosíme, uhraďte zbývající částku ${bold(remaining)}. Platbu můžete provést online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
 
     const informalMainText = deadline
-      ? `Pro úplné dokončení objednávky, prosím, uhraď zbývající částku ${bold(remaining)} do ${bold(deadline)}.`
-      : `Pro úplné dokončení objednávky, prosím, uhraď zbývající částku ${bold(remaining)}. Platbu můžeš provést online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
+      ? `Pro úplné dokončení objednávky, prosíme, uhraď zbývající částku ${bold(remaining)} do ${bold(deadline)}.`
+      : `Pro úplné dokončení objednávky, prosíme, uhraď zbývající částku ${bold(remaining)}. Platbu můžeš provést online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
 
     return [
       verticalSpacer(spaceBeforeText),
@@ -42,12 +42,12 @@ export const csTranslations = {
     total: string, accountNumber: string, iban: string | null, variableSymbol: string, deadline: string | null, tone: Tone
   ) => {
     const formalMainText = deadline
-      ? `Pro dokončení objednávky ji, prosím, uhraďte do ${bold(deadline)}.`
-      : `Pro dokončení objednávky, prosím, proveďte platbu online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
+      ? `Pro dokončení objednávky ji, prosíme, uhraďte do ${bold(deadline)}.`
+      : `Pro dokončení objednávky, prosíme, proveďte platbu online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
 
     const informalMainText = deadline
-      ? `Pro dokončení objednávky ji, prosím, uhraď do ${bold(deadline)}.`
-      : `Pro dokončení objednávky, prosím, proveď platbu online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
+      ? `Pro dokončení objednávky ji, prosíme, uhraď do ${bold(deadline)}.`
+      : `Pro dokončení objednávky, prosíme, proveď platbu online podle údajů níže (doporučeno) nebo v hotovosti na místě.`;
 
     return [
       verticalSpacer(spaceBeforeText),
