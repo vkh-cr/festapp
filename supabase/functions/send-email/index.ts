@@ -41,7 +41,7 @@ async function processEmailTask(taskData: any, authorization: string | null) {
     throw new Error(`Unsupported template code: ${code}`);
   }
 
-  const { subs, sender, receiver, context, attachments = [] } = await handler(taskData, authorization!);
+  const { subs, sender, receiver, context, attachments = [], reply_to } = await handler(taskData, authorization!);
 
   // --- Email Template Fetching ---
   const templateAndWrapper: any = await getEmailTemplateAndWrapper(code, context);
@@ -59,6 +59,7 @@ async function processEmailTask(taskData: any, authorization: string | null) {
     from: `${sender || "Festapp"} | Festapp <${_DEFAULT_EMAIL}>`,
     wrapper: templateAndWrapper.wrapper ? templateAndWrapper.wrapper.html : null,
     attachments,
+    replyTo: reply_to,
   });
   console.log(`Email for template ${code} sent successfully to ${receiver}.`);
 

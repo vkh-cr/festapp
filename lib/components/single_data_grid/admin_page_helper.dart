@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/_shared/occasion_settings_tab.dart';
+import 'package:fstapp/components/occasion_settings/occasion_settings_tab.dart';
 import 'package:fstapp/components/activities/activities_content.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/forms/form_strings.dart';
