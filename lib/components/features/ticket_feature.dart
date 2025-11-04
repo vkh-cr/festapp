@@ -2,11 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/data_services/db_images.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/widgets/image_area.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
-import 'feature_service.dart';
 
 /// Feature for tickets with extra UI color fields.
 class TicketFeature extends Feature {
@@ -51,6 +53,7 @@ class TicketFeature extends Feature {
   }
 
   /// Builds the ticket UI block.
+  /// will need to be updated to include `occasionId` in this method's signature.
   @override
   Widget buildFormField(BuildContext context) {
     return StatefulBuilder(builder: (ctx, setLocal) {
@@ -90,14 +93,34 @@ class TicketFeature extends Feature {
               hint: '(1600x900 px)'.tr(),
               imageUrl: ticketBackground,
               onFileSelected: (file) async {
-                final bytes = await file.readAsBytes();
-                final url = await DbImages.uploadImage(bytes, 0, null);
-                setLocal(() => ticketBackground = url);
-                ToastHelper.Show(context, 'File uploaded successfully.'.tr());
+                try {
+                  final bytes = await file.readAsBytes();
+                  var compressedImageData = await ImageCompressionHelper.compress(bytes, 1600);
+                  final url = await DbImages.uploadImage(compressedImageData, RightsService.currentOccasionId(), null);
+                  setLocal(() => ticketBackground = url);
+                  ToastHelper.Show(context, 'File uploaded successfully.'.tr());
+                } catch (e) {
+                  ToastHelper.Show(context, "Failed to upload image.".tr());
+                }
               },
-              onRemove: () {
-                ticketBackground = '';
-                setLocal(() {});
+              onRemove: () async {
+                final imageUrl = ticketBackground;
+                if (imageUrl != null && imageUrl.isNotEmpty) {
+                  final confirmation = await DialogHelper.showConfirmationDialog(
+                    context,
+                    "Confirm removal".tr(),
+                    "Are you sure you want to delete this image?".tr(),
+                  );
+                  if (confirmation == true) {
+                    try {
+                      await DbImages.removeImage(imageUrl);
+                      setLocal(() => ticketBackground = null);
+                      ToastHelper.Show(context, "Image removed successfully.".tr());
+                    } catch (e) {
+                      ToastHelper.Show(context, "Failed to remove image.".tr());
+                    }
+                  }
+                }
               },
             ),
           ],

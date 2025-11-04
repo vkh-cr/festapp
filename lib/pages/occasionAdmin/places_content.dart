@@ -108,7 +108,7 @@ class _PlacesContentState extends State<PlacesContent> {
           type: TrinaColumnType.select(
             defaultValue: null,
             mapIcons,
-            builder: (icon) =>
+            menuItemBuilder: (icon) =>
                 DataGridHelper.iconToRow(context, icon, svgIcons),
           ),
           renderer: (ctx) =>
