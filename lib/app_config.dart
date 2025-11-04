@@ -5,9 +5,9 @@ import 'package:fstapp/data_models/language_model.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 
 class AppConfig {
-  static const String supabaseUrl = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
-  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
-  static const String appName = 'Vstupenky.online';
+  static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
+  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3ZnBkanhzZG1rZnlyenFicmxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTEyMjgwNDksImV4cCI6MjAyNjgwNDA0OX0.440P3yf8ZqNjOHEQTn9uJhkKyObhD_7PZ2NwaE9e4J0';
+  static const String appName = 'Rezervace Farnost Opava';
   static String mapTitle = "Map".tr();
   static const bool showPWAInstallOption = true;
   static const bool isOwnProgramSupportedWithoutSignIn = true;
@@ -17,14 +17,14 @@ class AppConfig {
   static const String oneSignalAppId = '';
   static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
-  static const int organization = 3;
+  static const int organization = 8;
   //setup occasion id to force occasion
   static const String? forceOccasionLink = null;
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
   static const bool isAppSupported = false;
 
-  static const String webLink = "https://vstupenky.online";
+  static const String webLink = "https://rezervace.farnostopava.cz";
   static bool isProLicense = false;
   static const int imagesMaxWidth = 980;
   static const int imagesMaxBytes = 800000;
