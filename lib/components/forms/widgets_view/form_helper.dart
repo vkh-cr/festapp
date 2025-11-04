@@ -63,6 +63,7 @@ class FormHelper {
   static const String metaEmpty = "---";
   static const String metaProducts = "products";
   static const String metaCommunicationTone = "communication_tone";
+  static const String metaReplyTo = "reply_to";
 
 
   // Labels and messages

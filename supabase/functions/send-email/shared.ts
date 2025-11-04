@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
-import { authorizeRequest } from "../_shared/auth.ts";
+import { authorizeRequest, AuthError } from "../_shared/auth.ts";
 
 /**
  * Fetches comprehensive order details from Supabase and performs authorization.
@@ -11,18 +11,18 @@ import { authorizeRequest } from "../_shared/auth.ts";
  */
 export async function getBaseOrderData(orderId: string, requestSecret: string, authorizationHeader: string) {
   // 1. Fetch comprehensive order details from the database
-  const { data: orderDetailsResponse, error: rpcError } = await supabaseAdmin.rpc('get_order_details', { orderid: orderId });
+  const { data: orderDetailsResponse, error: rpcError } = await supabaseAdmin.rpc('get_order_details_for_email', { p_order_id: orderId });
 
   if (rpcError || orderDetailsResponse.code !== 200) {
     console.error("Error fetching order details:", rpcError || orderDetailsResponse.message);
     throw new Error("Failed to fetch order details.");
   }
 
-  const { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data } = orderDetailsResponse.data;
+  const { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data, reply_to } = orderDetailsResponse.data;
 
   // 2. Perform authorization to ensure the request is legitimate
   await authorizeRequest({ requestSecret, authorizationHeader, occasionId: occasion.id });
 
   // 3. Return the consolidated data
-  return { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data };
+  return { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data, reply_to };
 }
