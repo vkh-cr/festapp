@@ -6,6 +6,7 @@ import 'package:fstapp/components/_shared/red_strip_widget.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/data_models/unit_model.dart';
+import 'package:fstapp/data_services/app_config_service.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/unit/occasions_screen.dart';
@@ -50,6 +51,7 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
   }
 
   Future<void> _loadOrganization() async {
+    await AppConfigService.versionCheck(context);
     if (RightsService.currentUnit()?.id != widget.id!){
       await RightsService.updateAppData(unitId: widget.id!);
     }
