@@ -103,7 +103,7 @@ class DbOccasions {
   }
 
   static Future<List<OccasionModel>> getAllOccasionsForEdit(int unitId) async {
-    var data = await _supabase.rpc("get_all_occasions_for_edit_v182",
+    var data = await _supabase.rpc("get_all_occasions_for_edit_v212",
         params:
         {
           "unit_id": unitId,
