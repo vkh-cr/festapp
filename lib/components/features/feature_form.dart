@@ -56,12 +56,12 @@ class _FeatureFormState extends State<FeatureForm> {
                 ),
                 Switch(
                   value: isEnabled,
-                  onChanged: (value) {
+                  onChanged: widget.feature.canBeDisabled ? (value) {
                     setState(() {
                       isEnabled = value;
                       widget.feature.isEnabled = value;
                     });
-                  },
+                  } : null,
                 ),
               ],
             ),
