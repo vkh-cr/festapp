@@ -1,10 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/services/time_helper.dart';
@@ -84,7 +82,7 @@ class OccasionEditCard extends StatelessWidget {
                 itemBuilder: (BuildContext context) => [
                   PopupMenuItem(
                     value: "create_copy",
-                    child: Text(FormStrings.createCopy.tr()),
+                    child: Text(FormStrings.createCopy),
                   ),
                 ],
               ),
@@ -116,14 +114,27 @@ class OccasionEditCard extends StatelessWidget {
                     if (occasion.stats != null) ...[
                       if (FeatureService.isFeatureEnabled(FeatureConstants.form, features: occasion.features)) ...[
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 12.0,
-                          runSpacing: 4.0,
-                          children: [
-                            _buildStat(context, icon: Icons.chat_bubble, value: (occasion.stats!.total - occasion.stats!.storno).toString(), tooltip: FormStrings.responses.tr()),
-                            _buildStat(context, icon: Icons.check_circle_outline, value: (occasion.stats!.paidOrSent + occasion.stats!.used).toString(), tooltip: OrdersStrings.gridPaidOrSent.tr()),
-                            _buildStat(context, icon: Icons.shopping_cart_outlined, value: occasion.stats!.ordered.toString(), tooltip: OrdersStrings.gridOrdered.tr()),
-                          ],
+                        Builder(
+                            builder: (context) {
+                              final bool hasTickets = FeatureService.isFeatureEnabled(
+                                  FeatureConstants.ticket,
+                                  features: occasion.features);
+
+                              return Wrap(
+                                spacing: 12.0,
+                                runSpacing: 4.0,
+                                children: [
+                                  _buildStat(
+                                      context,
+                                      icon: hasTickets ? Icons.confirmation_number_outlined : Icons.chat_bubble,
+                                      value: (occasion.stats!.total - occasion.stats!.storno).toString(),
+                                      tooltip: FormStrings.responses
+                                  ),
+                                  _buildStat(context, icon: Icons.check_circle_outline, value: (occasion.stats!.paidOrSent + occasion.stats!.used).toString(), tooltip: OrdersStrings.gridPaidOrSent),
+                                  _buildStat(context, icon: Icons.shopping_cart_outlined, value: occasion.stats!.ordered.toString(), tooltip: OrdersStrings.gridOrdered),
+                                ],
+                              );
+                            }
                         )
                       ] else ...[
                         const SizedBox(height: 8),

@@ -25,6 +25,11 @@ abstract class Feature {
   })  : title = title ?? FeatureMetadata.getTitle(code),
         description = description ?? FeatureMetadata.getDescription(code);
 
+  /// A getter to determine if the UI should allow this feature to be disabled.
+  /// By default, features can be disabled.
+  /// This will be overridden by FormFeature.
+  bool get canBeDisabled => true;
+
   /// Factory constructor to create a feature from JSON.
   factory Feature.fromJson(Map<String, dynamic> json) {
     final code = json[FeatureConstants.metaCode];
