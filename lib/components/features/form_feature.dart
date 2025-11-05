@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart'; // Import AppConfig to check the condition
 import '../forms/form_strings.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
@@ -31,9 +32,11 @@ class FormFeature extends Feature {
   });
 
   factory FormFeature.fromJson(Map<String, dynamic> json) {
+    final bool mustBeEnabled = !AppConfig.isAppSupported;
+
     return FormFeature(
       code: json[FeatureConstants.metaCode],
-      isEnabled: json[FeatureConstants.metaIsEnabled] ?? false,
+      isEnabled: mustBeEnabled ? true : (json[FeatureConstants.metaIsEnabled] ?? false),
       formUseExternal:    json[FeatureConstants.formUseExternal],
       formExternalLink:   json[FeatureConstants.formExternalLink],
       formExternalPrice:  json[FeatureConstants.formExternalPrice],
@@ -46,9 +49,11 @@ class FormFeature extends Feature {
 
   @override
   Map<String, dynamic> toJson() {
+    final bool mustBeEnabled = !AppConfig.isAppSupported;
+
     final data = {
       FeatureConstants.metaCode:       code,
-      FeatureConstants.metaIsEnabled:  isEnabled,
+      FeatureConstants.metaIsEnabled:  mustBeEnabled ? true : isEnabled,
     };
     if (formUseExternal    != null) data[FeatureConstants.formUseExternal]    = formUseExternal!;
     if (formExternalLink   != null) data[FeatureConstants.formExternalLink]   = formExternalLink!;
