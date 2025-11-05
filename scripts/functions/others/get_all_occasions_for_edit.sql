@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_all_occasions_for_edit_v182(unit_id bigint)
+CREATE OR REPLACE FUNCTION get_all_occasions_for_edit_v212(unit_id bigint)
 RETURNS jsonb
 SECURITY DEFINER
 AS $$
@@ -20,7 +20,7 @@ BEGIN
     RAISE EXCEPTION 'Insufficient permissions for this unit' USING ERRCODE = '42501';
   END IF;
 
-  -- Step 3: Aggregate occasions for the unit, including forms, order stats, and user data.
+  -- Step 3: Aggregate occasions for the unit, including forms, stats (from tickets), and user data.
   SELECT jsonb_agg(
     jsonb_build_object(
       'id', o.id,
@@ -38,11 +38,11 @@ BEGIN
       'unit', o.unit,
       'features', o.features,
       'stats', jsonb_build_object(
-          'total', COALESCE(order_stats.total, 0),
-          'storno', COALESCE(order_stats.storno, 0),
-          'paid_or_sent', COALESCE(order_stats.paid_or_sent, 0),
-          'ordered', COALESCE(order_stats.ordered, 0),
-          'used', COALESCE(order_stats.used, 0),
+          'total', COALESCE(ticket_stats.total, 0),
+          'storno', COALESCE(ticket_stats.storno, 0),
+          'paid_or_sent', COALESCE(ticket_stats.paid_or_sent, 0),
+          'ordered', COALESCE(ticket_stats.ordered, 0),
+          'used', COALESCE(ticket_stats.used, 0),
           'users', COALESCE(user_stats.user_count, 0)
       ),
       'form', (
@@ -72,7 +72,6 @@ BEGIN
   INTO occasion_data
   FROM public.occasions o
   LEFT JOIN (
-      -- This subquery calculates all required order counts in a single pass over the orders table.
       SELECT
           occasion,
           COUNT(*) AS total,
@@ -80,12 +79,11 @@ BEGIN
           COUNT(*) FILTER (WHERE state IN ('paid', 'sent')) AS paid_or_sent,
           COUNT(*) FILTER (WHERE state = 'ordered') AS ordered,
           COUNT(*) FILTER (WHERE state = 'used') AS used
-      FROM eshop.orders
-      WHERE occasion IS NOT NULL
+      FROM eshop.tickets -- MODIFIED: Changed from eshop.orders
       GROUP BY occasion
-  ) AS order_stats ON o.id = order_stats.occasion
+  ) AS ticket_stats ON o.id = ticket_stats.occasion -- MODIFIED: Renamed alias
   LEFT JOIN (
-      -- New: This subquery aggregates occasion users and provides their count.
+      -- This subquery aggregates occasion users and provides their count.
       SELECT
           occasion,
           COUNT(*) as user_count
