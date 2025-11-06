@@ -1,3 +1,4 @@
+// blueprint_object_model.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
@@ -59,6 +60,7 @@ class BlueprintObjectModel {
   BlueprintModel? blueprint;
 
   factory BlueprintObjectModel.fromJson(Map<String, dynamic> json) {
+    // Constructor will handle state/stateEnum sync
     return BlueprintObjectModel(
       x: json[metaX],
       y: json[metaY],
@@ -77,6 +79,7 @@ class BlueprintObjectModel {
     metaY: y,
     metaType: type,
     metaTitle: title,
+    metaState: state, // Use the synced state string
     if (id != null) metaId: id,
     if (group?.id != null) metaGroupId: group?.id,
     if (spotProduct != null || product != null) TbEshop.spots.product: spotProduct ?? product?.id,
@@ -95,7 +98,23 @@ class BlueprintObjectModel {
     this.spotProduct,
     this.product,
     this.blueprint,
-  });
+  }) {
+    // Ensure state and stateEnum are synchronized
+    if (state != null && stateEnum == null) {
+      stateEnum = statesMap.entries
+          .firstWhere((entry) => entry.value == state,
+          orElse: () => const MapEntry(SeatState.empty, ""))
+          .key;
+    } else if (stateEnum != null && state == null) {
+      state = statesMap[stateEnum];
+    }
+  }
+
+  /// Updates both state and stateEnum
+  void setSeatState(SeatState newState) {
+    stateEnum = newState;
+    state = statesMap[newState];
+  }
 
   String blueprintTooltip(BuildContext context) {
     // Find the matching order product ticket

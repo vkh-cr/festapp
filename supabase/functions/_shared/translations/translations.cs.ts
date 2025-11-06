@@ -11,7 +11,7 @@ import type { Tone } from './payment-details.helpers.ts';
 export const csTranslations = {
   overpaid: (amount: string, tone: Tone) => [
       verticalSpacer(spaceBeforeText),
-      styledParagraph(`Evidujeme na ní přeplatek ve výši ${bold(amount)}, který ${bold(tone === 'formal' ? 'Vám' : 'Ti')} bude brzy vrácen.`),
+      styledParagraph(`Evidujeme na ní přeplatek ve výši ${bold(amount)}, který ${tone === 'formal' ? 'Vám' : 'Ti'} bude brzy vrácen.`),
       verticalSpacer(spaceAfterText),
   ].join(''),
   underpaid: (
@@ -31,7 +31,7 @@ export const csTranslations = {
 
     return [
       verticalSpacer(spaceBeforeText),
-      styledParagraph(`Děkujeme za ${bold(tone === 'formal' ? 'Vaši' : 'Tvou')} platbu ve výši ${bold(paid)}. ${tone === 'formal' ? formalMainText : informalMainText} Jakmile platbu obdržíme, pošleme ${bold(tone === 'formal' ? 'Vám' : 'Ti')} potvrzení.`),
+      styledParagraph(`Děkujeme za ${tone === 'formal' ? 'Vaši' : 'Tvou'} platbu ve výši ${bold(paid)}. ${tone === 'formal' ? formalMainText : informalMainText} Jakmile platbu obdržíme, pošleme ${tone === 'formal' ? 'Vám' : 'Ti'} potvrzení.`),
       verticalSpacer('15px'),
       styledParagraph(`Pro zjednodušení platby přikládáme QR kód.`),
       verticalSpacer(spaceAfterText),
@@ -51,7 +51,7 @@ export const csTranslations = {
 
     return [
       verticalSpacer(spaceBeforeText),
-      styledParagraph(`Zbývá uhradit celkovou částku ${bold(total)}. ${tone === 'formal' ? formalMainText : informalMainText} Jakmile platbu obdržíme, pošleme ${bold(tone === 'formal' ? 'Vám' : 'Ti')} potvrzení.`),
+      styledParagraph(`Zbývá uhradit celkovou částku ${bold(total)}. ${tone === 'formal' ? formalMainText : informalMainText} Jakmile platbu obdržíme, pošleme ${tone === 'formal' ? 'Vám' : 'Ti'} potvrzení.`),
       verticalSpacer('15px'),
       styledParagraph(`Pro zjednodušení platby přikládáme QR kód.`),
       verticalSpacer(spaceAfterText),
@@ -73,10 +73,10 @@ export const csTranslations = {
   ) => {
     const paidAmount = parseFloat(paid.replace(/[^0-9.,]+/g, "").replace(",", "."));
     const paragraphs = [
-        styledParagraph(`Připomínáme ${bold(tone === 'formal' ? 'Vám' : 'Ti')} blížící se termín splatnosti ${bold(tone === 'formal' ? 'Vaší' : 'Tvé')} objednávky. Do splatnosti zbývá ${bold(`${days}&nbsp;${days === 1 ? "den" : days < 5 ? "dny" : "dní"}`)}.`)
+        styledParagraph(`Připomínáme ${tone === 'formal' ? 'Vám' : 'Ti'} blížící se termín splatnosti ${tone === 'formal' ? 'Vaší' : 'Tvé'} objednávky. Do splatnosti zbývá ${bold(`${days}&nbsp;${days === 1 ? "den" : days < 5 ? "dny" : "dní"}`)}.`)
     ];
     if (paidAmount > 0) {
-      paragraphs.push(styledParagraph(`Již ${bold(tone === 'formal' ? 'jste' : 'jsi')} uhradil/a částku ${bold(paid)}.`));
+      paragraphs.push(styledParagraph(`Již ${tone === 'formal' ? 'jste' : 'jsi'} uhradil/a částku ${bold(paid)}.`));
     }
     paragraphs.push(styledParagraph(`Zbývá uhradit částku ${bold(remaining)}.`));
 
@@ -86,7 +86,7 @@ export const csTranslations = {
       verticalSpacer(spaceBeforeText),
       textBlock,
       verticalSpacer('15px'),
-      styledParagraph(`Pro zjednodušení platby přikládáme QR kód. Jakmile ji obdržíme, pošleme ${bold(tone === 'formal' ? 'Vám' : 'Ti')} potvrzení.`),
+      styledParagraph(`Pro zjednodušení platby přikládáme QR kód. Jakmile ji obdržíme, pošleme ${tone === 'formal' ? 'Vám' : 'Ti'} potvrzení.`),
       verticalSpacer(spaceAfterText),
       generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'cs' }),
     ].join('');
@@ -96,10 +96,10 @@ export const csTranslations = {
   ) => {
     const paidAmount = parseFloat(paid.replace(/[^0-9.,]+/g, "").replace(",", "."));
      const paragraphs = [
-        styledParagraph(`Upozorňujeme ${bold(tone === 'formal' ? 'Vás' : 'Tě')}, že ${bold(tone === 'formal' ? 'Vaše' : 'Tvá')} objednávka je ${bold(`${days}&nbsp;${days === 1 ? "den" : days < 5 ? "dny" : "dní"}`)} po datu splatnosti.`)
+        styledParagraph(`Upozorňujeme ${tone === 'formal' ? 'Vás' : 'Tě'}, že ${tone === 'formal' ? 'Vaše' : 'Tvá'} objednávka je ${bold(`${days}&nbsp;${days === 1 ? "den" : days < 5 ? "dny" : "dní"}`)} po datu splatnosti.`)
     ];
     if (paidAmount > 0) {
-      paragraphs.push(styledParagraph(`Již ${bold(tone === 'formal' ? 'jste' : 'jsi')} uhradil/a částku ${bold(paid)}.`));
+      paragraphs.push(styledParagraph(`Již ${tone === 'formal' ? 'jste' : 'jsi'} uhradil/a částku ${bold(paid)}.`));
     }
     paragraphs.push(styledParagraph(`Zbývá uhradit částku ${bold(remaining)}.`));
     paragraphs.push(styledParagraph(`Prosíme o její co nejrychlejší uhrazení.`));
@@ -109,7 +109,7 @@ export const csTranslations = {
       verticalSpacer(spaceBeforeText),
       textBlock,
       verticalSpacer('15px'),
-      styledParagraph(`Pro zjednodušení platby přikládáme QR kód a jakmile ji obdržíme, pošleme ${bold(tone === 'formal' ? 'Vám' : 'Ti')} potvrzení.`),
+      styledParagraph(`Pro zjednodušení platby přikládáme QR kód a jakmile ji obdržíme, pošleme ${tone === 'formal' ? 'Vám' : 'Ti'} potvrzení.`),
       verticalSpacer(spaceAfterText),
       generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'cs' }),
     ].join('');

@@ -1,9 +1,11 @@
 import 'dart:typed_data';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
+import 'package:fstapp/components/seat_reservation/widgets/seat_layout_controller.dart';
 import 'package:fstapp/components/seat_reservation/widgets/seat_widget.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
@@ -17,11 +19,9 @@ import 'package:fstapp/services/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/auto_resize_interactive_viewer_controller.dart';
 import 'package:fstapp/components/seat_reservation/widgets/seat_reservation_widget.dart';
 import 'package:collection/collection.dart';
 
-import '../seat_reservation/model/seat_layout_state_model.dart';
 import '../seat_reservation/model/seat_model.dart';
 import '../seat_reservation/utils/seat_state.dart';
 import '../seat_reservation/widgets/seat_layout_widget.dart';
@@ -39,10 +39,14 @@ class _BlueprintTabState extends State<BlueprintTab> {
   BlueprintGroupModel? currentGroup;
   String? occasionLink;
 
-  List<SeatModel> allBoxes = [];
   selectionMode currentSelectionMode = selectionMode.none;
-  final AutoResizeInteractiveViewerController seatLayoutController =
-  AutoResizeInteractiveViewerController();
+  late final SeatLayoutController _seatLayoutController;
+
+  @override
+  void initState() {
+    super.initState();
+    _seatLayoutController = SeatLayoutController();
+  }
 
   @override
   void didChangeDependencies() {
@@ -51,6 +55,27 @@ class _BlueprintTabState extends State<BlueprintTab> {
       occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
     }
     loadData();
+  }
+
+  @override
+  void dispose() {
+    _seatLayoutController.dispose();
+    super.dispose();
+  }
+
+  /// Helper to get all seats that have an object model
+  List<SeatModel> get _allNonEmptySeats => _seatLayoutController.seats
+      .where((s) => s.objectModel != null)
+      .toList();
+
+  /// Helper to check if a seat is in a state that prevents modification
+  bool _isSeatOccupied(BlueprintObjectModel? obj) {
+    if (obj == null || obj.stateEnum == null) return false;
+    final state = obj.stateEnum;
+    return state == SeatState.ordered ||
+        state == SeatState.used ||
+        state == SeatState.selected ||
+        state == SeatState.selected_by_me;
   }
 
   // ... (build methods and other logic remain the same)
@@ -130,16 +155,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
               ? const Center(child: CircularProgressIndicator())
               : SeatLayoutWidget(
             isEditorMode: true,
-            controller: seatLayoutController,
+            controller: _seatLayoutController,
             onSeatTap: handleSeatTap,
-            stateModel: SeatLayoutStateModel(
-              rows: blueprint!.configuration!.height!,
-              cols: blueprint!.configuration!.width!,
-              seatSize: SeatReservationWidget.boxSize,
-              currentObjects: blueprint!.objects!,
-              allBoxes: allBoxes,
-              backgroundSvg: blueprint!.backgroundSvg,
-            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -327,6 +344,23 @@ class _BlueprintTabState extends State<BlueprintTab> {
   void deleteGroup() {
     if (currentGroup == null) return;
 
+    // Check if any seat in the group is occupied
+    final bool hasOccupiedSeats = currentGroup!.objects.any(_isSeatOccupied);
+
+    if (hasOccupiedSeats) {
+      // If any seat is occupied, show toast and abort deletion
+      ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged.tr(), severity: ToastSeverity.NotOk);
+      return;
+    }
+
+    // If no seats are occupied, proceed with deleting all seats and the group
+    final objectsToRemove = List<BlueprintObjectModel>.from(currentGroup!.objects);
+
+    for (var obj in objectsToRemove) {
+      blueprint!.objects!.remove(obj);
+      _seatLayoutController.removeObject(obj);
+    }
+
     setState(() {
       blueprint!.groups!.remove(currentGroup);
       currentGroup = null;
@@ -462,10 +496,26 @@ class _BlueprintTabState extends State<BlueprintTab> {
           BlueprintStrings.width.tr(),
           blueprint!.configuration!.width!,
               (value) {
+            // Check if resizing down
+            if (value < blueprint!.configuration!.width!) {
+              int maxX = -1;
+              for (var seat in _allNonEmptySeats) {
+                if (seat.objectModel!.x! > maxX) {
+                  maxX = seat.objectModel!.x!;
+                }
+              }
+              // If new value (1-based count) is <= max 0-based index, a seat would be cut off.
+              if (value <= maxX) {
+                return; // Abort resize
+              }
+            }
+
+            // Allow change
             setState(() {
               blueprint!.configuration!.width = value;
             });
-            seatLayoutController.fitContent();
+            _seatLayoutController.setConfiguration(
+                blueprint!.configuration!.height!, value);
           },
         ),
         const SizedBox(width: 12),
@@ -473,10 +523,26 @@ class _BlueprintTabState extends State<BlueprintTab> {
           BlueprintStrings.height.tr(),
           blueprint!.configuration!.height!,
               (value) {
+            // Check if resizing down
+            if (value < blueprint!.configuration!.height!) {
+              int maxY = -1;
+              for (var seat in _allNonEmptySeats) {
+                if (seat.objectModel!.y! > maxY) {
+                  maxY = seat.objectModel!.y!;
+                }
+              }
+              // If new value (1-based count) is <= max 0-based index, a seat would be cut off.
+              if (value <= maxY) {
+                return; // Abort resize
+              }
+            }
+
+            // Allow change
             setState(() {
               blueprint!.configuration!.height = value;
             });
-            seatLayoutController.fitContent();
+            _seatLayoutController.setConfiguration(
+                value, blueprint!.configuration!.width!);
           },
         ),
         const SizedBox(width: 24),
@@ -608,10 +674,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
   }
 
   void handleSeatTap(SeatModel model) {
-    if (model.objectModel?.isOrdered() ?? false) {
-      ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged.tr(), severity: ToastSeverity.NotOk);
-      return;
-    }
+    // The main 'isOrdered' check is no longer needed here,
+    // as each handler performs the more comprehensive '_isSeatOccupied' check.
 
     switch (currentSelectionMode) {
       case selectionMode.addBlack:
@@ -624,12 +688,22 @@ class _BlueprintTabState extends State<BlueprintTab> {
         _handleEmptyArea(model);
         break;
       default:
+      // Handle other cases or do nothing
+        if (_isSeatOccupied(model.objectModel)) {
+          ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged.tr(), severity: ToastSeverity.NotOk);
+        }
         break;
     }
-    setState(() {});
+    // No longer need setState(() {}); controller handles updates
   }
 
   void _handleAddBlack(SeatModel model) {
+    // Check if the seat is occupied
+    if (_isSeatOccupied(model.objectModel)) {
+      ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged.tr(), severity: ToastSeverity.NotOk);
+      return;
+    }
+
     model.seatState = SeatState.black;
 
     if (model.objectModel != null && model.objectModel!.type == BlueprintModel.metaTableAreaType) {
@@ -640,10 +714,18 @@ class _BlueprintTabState extends State<BlueprintTab> {
     }
     model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
     model.objectModel!.type = BlueprintModel.metaTableAreaType;
+    model.objectModel!.stateEnum = SeatState.black; // Ensure state is set
     blueprint!.objects!.add(model.objectModel!);
+    _seatLayoutController.addObject(model.objectModel!);
   }
 
   void _handleAddAvailable(SeatModel model) {
+    // Check if the seat is occupied
+    if (_isSeatOccupied(model.objectModel)) {
+      ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged.tr(), severity: ToastSeverity.NotOk);
+      return;
+    }
+
     if(currentGroup == null){
       ToastHelper.Show(context, BlueprintStrings.toastSelectGroupFirst.tr(), severity: ToastSeverity.NotOk);
       return;
@@ -661,25 +743,35 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
     model.objectModel!.type = BlueprintModel.metaSpotType;
+    model.objectModel!.stateEnum = SeatState.available; // Ensure state is set
     model.objectModel!.product = blueprint!.products?.firstWhereOrNull((p)=>p.productTypeString == ProductModel.spotType);
     model.objectModel!.group = currentGroup;
     model.objectModel!.title = currentGroup?.getNextBoxName();
     currentGroup?.objects.add(model.objectModel!);
     blueprint!.objects!.add(model.objectModel!);
+    _seatLayoutController.addObject(model.objectModel!);
     ToastHelper.Show(context, "${BlueprintStrings.toastSpotAdded.tr()} ${model.objectModel!.title}");
   }
 
   void _handleEmptyArea(SeatModel model) {
-    if (model.objectModel != null) {
+    var objectToRemove = model.objectModel;
+    if (objectToRemove != null) {
+      // Check if the seat is occupied
+      if (_isSeatOccupied(objectToRemove)) {
+        ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged.tr(), severity: ToastSeverity.NotOk);
+        return;
+      }
+
       if (model.seatState == SeatState.black) {
         ToastHelper.Show(context, BlueprintStrings.toastAreaRemoved.tr());
       } else {
         ToastHelper.Show(context, BlueprintStrings.toastSpotRemoved.tr());
       }
-      blueprint!.objects!.remove(model.objectModel);
+      blueprint!.objects!.remove(objectToRemove);
       for (var group in blueprint!.groups!) {
-        group.objects.remove(model.objectModel);
+        group.objects.remove(objectToRemove);
       }
+      _seatLayoutController.removeObject(objectToRemove);
       model.objectModel = null;
       model.seatState = SeatState.empty;
     }
@@ -702,6 +794,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
         setState(() {
           blueprint!.backgroundSvg = content;
         });
+        _seatLayoutController.setBackground(content);
         ToastHelper.Show(context, BlueprintStrings.toastSvgUploadSuccess.tr());
       } catch (e) {
         ToastHelper.Show(context, BlueprintStrings.toastSvgReadFail.tr(), severity: ToastSeverity.NotOk);
@@ -724,6 +817,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
         setState(() {
           blueprint!.backgroundSvg = publicUrl;
         });
+        _seatLayoutController.setBackground(publicUrl);
         ToastHelper.Show(context, BlueprintStrings.toastImageUploadSuccess.tr());
       } catch (e) {
         ToastHelper.Show(context, BlueprintStrings.toastImageUploadFail.tr(), severity: ToastSeverity.NotOk);
@@ -738,10 +832,10 @@ class _BlueprintTabState extends State<BlueprintTab> {
         BlueprintStrings.dialogConfirmRemoveBackgroundContent.tr());
 
     if (confirmed == true) {
-
       setState(() {
         blueprint!.backgroundSvg = null;
       });
+      _seatLayoutController.setBackground(null);
       ToastHelper.Show(context, BlueprintStrings.toastBackgroundRemoved.tr());
     }
   }
@@ -750,6 +844,12 @@ class _BlueprintTabState extends State<BlueprintTab> {
   void saveChanges() async {
     if (blueprint == null) return;
     try {
+      // Ensure blueprint model objects are in sync before saving
+      blueprint!.objects = _seatLayoutController.seats
+          .map((s) => s.objectModel)
+          .whereNotNull()
+          .toList();
+
       await DbForms.updateBlueprint(blueprint!);
       ToastHelper.Show(context, BlueprintStrings.saved.tr(), severity: ToastSeverity.Ok);
       await loadData();
@@ -760,6 +860,12 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
   Future<void> loadData() async {
     blueprint = await DbForms.getBlueprintForEdit(occasionLink!);
+    if (blueprint != null) {
+      _seatLayoutController.loadBlueprint(
+        blueprint!,
+        newSeatSize: SeatReservationWidget.boxSize,
+      );
+    }
     setState(() {});
   }
 }
