@@ -24,7 +24,6 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
   List<OrderHistoryModel> _processedHistory = [];
   String _customerName = "";
 
-  // NEW: Add a state variable to hold the calculated optimal width.
   double? _optimalTagWidth;
 
   @override
@@ -33,7 +32,6 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
     _fetchHistory();
   }
 
-  // NEW: Calculate the optimal width once the context is available.
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
