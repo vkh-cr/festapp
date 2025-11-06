@@ -12,13 +12,15 @@ class SeatWidgetHelper {
   static Widget buildSeat({
     required BuildContext context,
     required SeatState state,
+    bool isHighlighted = false,
     double size = 40.0,
   }) {
     final bool hasPadding = state == SeatState.ordered ||
         state == SeatState.selected ||
         state == SeatState.selected_by_me ||
         state == SeatState.used ||
-        state == SeatState.available;
+        state == SeatState.available ||
+        (isHighlighted && state == SeatState.empty);
 
     return Container(
       color: hasPadding ? Colors.black.withOpacity(0) : getSeatColor(context, SeatState.empty),
@@ -29,6 +31,9 @@ class SeatWidgetHelper {
         decoration: BoxDecoration(
           color: getSeatColor(context, state),
           borderRadius: BorderRadius.circular(hasPadding ? padding : 0.0),
+          border: isHighlighted
+              ? Border.all(color: Colors.orange, width: 2.0)
+              : null,
         ),
         child: state == SeatState.selected_by_me
             ? Center(
@@ -65,4 +70,3 @@ class SeatWidgetHelper {
     }
   }
 }
-
