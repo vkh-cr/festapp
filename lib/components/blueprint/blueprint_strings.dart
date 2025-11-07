@@ -53,7 +53,7 @@ class BlueprintStrings {
   static String get swapHelpSelectFirst => 'FeatureBlueprint.swapHelpSelectFirst'.tr(); // "Select the first seat to swap."
   static String swapHelpSelectSecond(String seatName) => 'FeatureBlueprint.swapHelpSelectSecond'.tr(namedArgs: {'seatName': seatName}); // "Seat {seatName} selected. Select the second seat to swap."
   static String get swapConfirmTitle => 'FeatureBlueprint.swapConfirmTitle'.tr(); // "Confirm Seat Swap"
-  static String swapConfirmMessage(String summary1, String seat1, String summary2, String seat2) => 'FeatureBlueprint.swapConfirmMessage'.tr(namedArgs: {'summary1': summary1, 'seat1': seat1, 'summary2': summary2, 'seat2': seat2}); // "Are you sure you want to swap these seats?\n\n{summary1}\n(from seat {seat1})\n\n<->\n\n{summary2}\n(from seat {seat2})"
+  static String swapConfirmMessage(String summary1, String seat1, String summary2, String seat2) => 'FeatureBlueprint.swapConfirmMessage'.tr(); // "Are you sure you want to swap these seats?"
   static String get swapErrorEmpty => 'FeatureBlueprint.swapErrorEmpty'.tr(); // "Cannot swap empty or blocked areas."
   static String get swapSuccess => 'FeatureBlueprint.swapSuccess'.tr(); // "Seats swapped successfully."
 
