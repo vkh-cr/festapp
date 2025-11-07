@@ -9,6 +9,7 @@ import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:collection/collection.dart';
+import 'blueprint_strings.dart';
 
 class BlueprintObjectModel {
   static const String metaX = "x";
@@ -160,6 +161,34 @@ class BlueprintObjectModel {
 
     // Fallback for when no matching ticket or order product ticket is found
     return "${product?.title} ${title ?? ""}\n${"Price".tr()}: ${Utilities.formatPrice(context, product?.price ?? 0)}";
+  }
+
+  String getSwapSummary() {
+    if (orderProductTicket != null) {
+      var opt = blueprint?.orderProductTickets?.firstWhereOrNull((t) => t.id == orderProductTicket);
+      if (opt != null) {
+        var order = blueprint?.orders?.firstWhere((p) => p.id == opt.orderId);
+        var ticket = blueprint?.tickets?.firstWhereOrNull((t) => t.id == opt.ticketId);
+        if (order != null && ticket != null) {
+          return BlueprintStrings.swapSummaryCustomer(ticket.ticketSymbol ?? '?', order.toCustomerData());
+        }
+      }
+      return BlueprintStrings.swapSummaryOccupied;
+    }
+
+    switch (stateEnum) {
+      case SeatState.available:
+        return BlueprintStrings.swapSummaryAvailable;
+      case SeatState.black:
+        return BlueprintStrings.swapSummaryBlack;
+      case SeatState.used:
+        return BlueprintStrings.swapSummaryUsed;
+      case SeatState.selected:
+      case SeatState.selected_by_me:
+        return BlueprintStrings.swapSummarySelected;
+      default:
+        return BlueprintStrings.swapSummaryEmpty;
+    }
   }
 
   bool isOrdered(){

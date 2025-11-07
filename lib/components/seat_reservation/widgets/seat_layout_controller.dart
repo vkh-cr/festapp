@@ -109,6 +109,16 @@ class SeatLayoutController extends ChangeNotifier {
     }
   }
 
+  /// Programmatically updates a single seat's highlight state
+  void setSeatHighlight(SeatModel model, bool isHighlighted) {
+    final seat = seats.firstWhereOrNull(
+            (s) => s.rowI == model.rowI && s.colI == model.colI);
+    if (seat != null) {
+      seat.isHighlightedForSwap = isHighlighted;
+      notifyListeners();
+    }
+  }
+
   /// Adds a new object to the grid
   void addObject(BlueprintObjectModel objectModel) {
     if (objectModel.x == null || objectModel.y == null) return;

@@ -154,6 +154,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                         child: SeatWidgetHelper.buildSeat(
                           context: context,
                           state: seatModel.seatState,
+                          isHighlighted: seatModel.isHighlightedForSwap,
                           size: seatModel.seatSize.toDouble(),
                         ),
                       )
@@ -169,6 +170,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                           child: SeatWidgetHelper.buildSeat(
                             context: context,
                             state: seatModel.seatState,
+                            isHighlighted: seatModel.isHighlightedForSwap,
                             size: seatModel.seatSize.toDouble(),
                           ),
                         ),
