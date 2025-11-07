@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
     );
 
     const lang = orderDetails.lang || 'cs';
-    const tone: Tone = (ticketOrder?.order.form.data.communication_tone === 'informal') ? 'informal' : 'formal';
+    const tone: Tone = (ticketOrder?.order.form.data?.communication_tone === 'informal') ? 'informal' : 'formal';
     const tr = translations[lang];
     let balanceReasoning = '';
 

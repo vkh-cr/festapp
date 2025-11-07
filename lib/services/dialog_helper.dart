@@ -239,6 +239,43 @@ class DialogHelper{
     return result;
   }
 
+
+  static Future<bool> showConfirmationDialogRichText(
+      BuildContext context,
+      String titleMessage,
+      Text textMessage, {
+        String confirmButtonMessage = "Ok",
+        String cancelButtonMessage = "Storno",
+      }) async {
+    bool result = false;
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(titleMessage),
+          content: SingleChildScrollView(child: textMessage),
+          actions: [
+            TextButton(
+              child: Text(cancelButtonMessage),
+              onPressed: () {
+                result = false;
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text(confirmButtonMessage),
+              onPressed: () {
+                result = true;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return result;
+  }
+
   static Future<bool> showConfirmationDialogRich({
     required BuildContext context,
     required String title,
