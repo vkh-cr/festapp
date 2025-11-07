@@ -8,6 +8,7 @@ class SeatModel {
   final int colI;
   final int seatSize;
   BlueprintObjectModel? objectModel;
+  bool isHighlightedForSwap = false;
 
   SeatModel({
     required this.objectModel,
@@ -27,4 +28,3 @@ class SeatModel {
   @override
   int get hashCode => objectModel?.id.hashCode ?? 0;
 }
-
