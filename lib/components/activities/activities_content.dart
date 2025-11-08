@@ -27,7 +27,7 @@ import 'time_clamping_service.dart';
 import 'timeline_painter.dart';
 import 'timeline_row.dart';
 import 'users_panel.dart';
-import 'verticla_grid_lines_painter.dart';
+import 'vertical_grid_lines_painter.dart';
 
 class ActivitiesContent extends StatefulWidget {
   final int occasionId;
