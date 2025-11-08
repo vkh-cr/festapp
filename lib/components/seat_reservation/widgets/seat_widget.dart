@@ -43,6 +43,19 @@ class SeatWidgetHelper {
             color: Colors.white,
           ),
         )
+            : state == SeatState.ordered
+            ? Center(
+          child: SizedBox(
+            width: size * 0.45,
+            height: size * 0.45,
+            child: CustomPaint(
+              painter: _XPainter(
+                color: Colors.black,
+                strokeWidth: 0.4,
+              ),
+            ),
+          ),
+        )
             : null,
       ),
     );
@@ -62,11 +75,46 @@ class SeatWidgetHelper {
       case SeatState.used:
         return ThemeConfig.blueColor();
       case SeatState.ordered:
-        return Colors.black26;
+        return Colors.black12;
       case SeatState.empty:
         return Colors.black.withOpacity(0);
       default:
         return Colors.black.withOpacity(0);
     }
+  }
+}
+
+/// A custom painter to draw a thin 'X'.
+/// This class can be at the bottom of your file.
+class _XPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+
+  _XPainter({required this.color, required this.strokeWidth});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.butt;
+
+    canvas.drawLine(
+      Offset.zero,
+      Offset(size.width, size.height),
+      paint,
+    );
+
+    canvas.drawLine(
+      Offset(size.width, 0),
+      Offset(0, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _XPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
   }
 }
