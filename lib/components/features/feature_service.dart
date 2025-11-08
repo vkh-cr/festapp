@@ -1,3 +1,5 @@
+// feature_service.dart
+
 import 'package:collection/collection.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -41,8 +43,9 @@ class FeatureService {
   static List<Feature> getDefaultFeatures() {
     return [
       // This feature is enabled only when the main app features are NOT supported.
-      // It's intended as a fallback.
-      FormFeature(code: FeatureConstants.form, isEnabled: !AppConfig.isAppSupported),
+      // We set its default as 'false'. The FormFeature constructor
+      // will correctly override this to 'true' if !AppConfig.isAppSupported.
+      FormFeature(code: FeatureConstants.form, isEnabled: false),
 
       // These features are always part of the default configuration,
       // though they may be disabled initially.

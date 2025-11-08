@@ -20,7 +20,6 @@ class OrderStateDisplay extends StatelessWidget {
   /// width for a clean, stable UI.
   final double? stateTagWidth;
 
-  // NEW: A flag to control the responsive wrapping behavior.
   /// If true, the widget will wrap to a `Column` on smaller screens.
   /// Defaults to `false`.
   final bool enableWrapping;
@@ -141,7 +140,6 @@ class OrderStateDisplay extends StatelessWidget {
         },
       );
     } else {
-      // --- SINGLE STATE VIEW ---
       return SizedBox(
         width: double.infinity,
         child: _buildStateTag(formattedState),

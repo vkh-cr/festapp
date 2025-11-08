@@ -1,4 +1,6 @@
+// form_feature.dart
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart'; // Import AppConfig
 import '../forms/form_strings.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
@@ -18,7 +20,7 @@ class FormFeature extends Feature {
 
   FormFeature({
     required super.code,
-    super.isEnabled,
+    bool? isEnabled, // Make this a normal parameter, not 'super.isEnabled'
     super.title,
     super.description,
     this.formUseExternal,
@@ -26,14 +28,24 @@ class FormFeature extends Feature {
     this.formExternalPrice,
     this.reserveButtonTitle,
     this.reminderIsEnabled,
-    this.reminderIntervalSeconds,
     this.deadlineDurationSeconds,
-  });
+    this.reminderIntervalSeconds,
+  }) : super(
+    // Pass the processed value to the super constructor.
+    // This is the new centralized logic.
+    isEnabled: (!AppConfig.isAppSupported) ? true : (isEnabled ?? false),
+  );
+
+  /// This feature can only be disabled if the app is supported.
+  @override
+  bool get canBeDisabled => AppConfig.isAppSupported;
 
   factory FormFeature.fromJson(Map<String, dynamic> json) {
+    // This factory is now simpler. It just passes the JSON value
+    // to the main constructor, which will handle the logic.
     return FormFeature(
       code: json[FeatureConstants.metaCode],
-      isEnabled: json[FeatureConstants.metaIsEnabled] ?? false,
+      isEnabled: json[FeatureConstants.metaIsEnabled], // Let the constructor handle it
       formUseExternal:    json[FeatureConstants.formUseExternal],
       formExternalLink:   json[FeatureConstants.formExternalLink],
       formExternalPrice:  json[FeatureConstants.formExternalPrice],
@@ -46,9 +58,11 @@ class FormFeature extends Feature {
 
   @override
   Map<String, dynamic> toJson() {
+    final bool mustBeEnabled = !AppConfig.isAppSupported;
+
     final data = {
       FeatureConstants.metaCode:       code,
-      FeatureConstants.metaIsEnabled:  isEnabled,
+      FeatureConstants.metaIsEnabled:  mustBeEnabled ? true : isEnabled,
     };
     if (formUseExternal    != null) data[FeatureConstants.formUseExternal]    = formUseExternal!;
     if (formExternalLink   != null) data[FeatureConstants.formExternalLink]   = formExternalLink!;
