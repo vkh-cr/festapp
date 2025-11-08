@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
@@ -8,9 +7,9 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 
-import '../model/seat_layout_state_model.dart';
 import '../model/seat_model.dart';
 import '../utils/seat_state.dart';
+import 'seat_layout_controller.dart';
 import 'seat_layout_widget.dart';
 
 class SeatReservationWidget extends StatefulWidget {
@@ -40,13 +39,25 @@ class SeatReservationWidget extends StatefulWidget {
 }
 
 class _SeatReservationWidgetState extends State<SeatReservationWidget> {
-  List<SeatModel> allObjects = [];
   BlueprintModel? blueprint;
+  late final SeatLayoutController _seatLayoutController;
+
+  @override
+  void initState() {
+    super.initState();
+    _seatLayoutController = SeatLayoutController();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     loadData();
+  }
+
+  @override
+  void dispose() {
+    _seatLayoutController.dispose();
+    super.dispose();
   }
 
   @override
@@ -69,14 +80,8 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                         onSeatTap: (model) async {
                           await _handleSeatTap(model);
                         },
-                        stateModel: SeatLayoutStateModel(
-                          rows: blueprint!.configuration!.height!,
-                          cols: blueprint!.configuration!.width!,
-                          seatSize: SeatReservationWidget.boxSize,
-                          currentObjects: blueprint!.objects!,
-                          allBoxes: allObjects,
-                          backgroundSvg: blueprint!.backgroundSvg,
-                        ),
+                        controller: _seatLayoutController,
+                        isEditorMode: false,
                       ),
                     ),
                   ),
@@ -85,12 +90,12 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                     padding: const EdgeInsets.all(16.0),
                     child: Center(
                       child: ButtonsHelper.primaryButton(
-                        context: context,
-                        onPressed: () {
-                          widget.onCloseSeatReservation?.call(widget.selectedSeats);
-                        },
-                        label: "Continue".tr(),
-                        width: 250
+                          context: context,
+                          onPressed: () {
+                            widget.onCloseSeatReservation?.call(widget.selectedSeats);
+                          },
+                          label: "Continue".tr(),
+                          width: 250
                       ),
                     ),
                   ),
@@ -106,8 +111,11 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
   /// Handles Seat Tap Logic
   Future<void> _handleSeatTap(SeatModel model) async {
     if (model.seatState == SeatState.selected_by_me) {
-      model.seatState = SeatState.available;
+      // Deselect
+      model.seatState = SeatState.available; // Optimistic update
+      _seatLayoutController.updateSeat(model, SeatState.available);
       setState(() {});
+
       if (await DbOrders.selectSpot(
         context,
         widget.formDataKey,
@@ -115,19 +123,23 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
         model.objectModel!.id!,
         false,
       )) {
-        model.seatState = SeatState.available;
         model.objectModel!.stateEnum = SeatState.available;
         widget.selectedSeats.remove(model);
       } else {
+        // Revert
         model.seatState = SeatState.selected_by_me;
+        _seatLayoutController.updateSeat(model, SeatState.selected_by_me);
       }
     } else if (model.seatState == SeatState.available) {
+      // Select
       if(widget.maxTickets != null && widget.selectedSeats.length >= widget.maxTickets!){
         ToastHelper.Show(context, "It is not possible to select more tickets.".tr());
         return;
       }
-      model.seatState = SeatState.selected_by_me;
+      model.seatState = SeatState.selected_by_me; // Optimistic update
+      _seatLayoutController.updateSeat(model, SeatState.selected_by_me);
       setState(() {});
+
       if (await DbOrders.selectSpot(
         context,
         widget.formDataKey,
@@ -136,10 +148,11 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
         true,
       )) {
         widget.selectedSeats.add(model);
-        model.seatState = SeatState.selected_by_me;
         model.objectModel!.stateEnum = SeatState.selected_by_me;
       } else {
+        // Revert
         model.seatState = SeatState.available;
+        _seatLayoutController.updateSeat(model, SeatState.available);
       }
     }
     widget.onSelectionChanged?.call(widget.selectedSeats);
@@ -152,11 +165,19 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
       widget.formDataKey,
       widget.blueprintId,
     );
-    if (blueprint == null) return;
+    if (blueprint == null || !mounted) return;
 
-    blueprint?.objects
-        ?.firstWhereOrNull((object) => widget.selectedSeats.any((s) => s.objectModel!.id! == object.id))
-        ?.stateEnum = SeatState.selected_by_me;
+    // Manually set already selected seats
+    for (var object in blueprint!.objects ?? []) {
+      if (widget.selectedSeats.any((s) => s.objectModel!.id! == object.id)) {
+        object.stateEnum = SeatState.selected_by_me;
+      }
+    }
+
+    _seatLayoutController.loadBlueprint(
+      blueprint!,
+      newSeatSize: SeatReservationWidget.boxSize,
+    );
 
     setState(() {});
   }
