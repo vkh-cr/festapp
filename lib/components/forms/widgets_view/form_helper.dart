@@ -51,6 +51,7 @@ class FormHelper {
   static const String metaSelectionType = "selection_type";
   static const String metaSelectionTypeMany = "select_many";
   static const String metaSelectionTypeOne = "select_one";
+  static const String maxTickets = "max_tickets";
 
   static const String metaOptions = "options";
   static const String metaFields = "fields";
@@ -61,6 +62,9 @@ class FormHelper {
   static const String metaForm = "form";
   static const String metaEmpty = "---";
   static const String metaProducts = "products";
+  static const String metaCommunicationTone = "communication_tone";
+  static const String metaReplyTo = "reply_to";
+
 
   // Labels and messages
   static String noteLabel() => "Note".tr();
@@ -107,6 +111,18 @@ class FormHelper {
     FormHelper.fieldTypeTicket: Icons.confirmation_number,
     FormHelper.fieldTypePhone: Icons.phone,
   };
+
+  static const List<String> nonEditableFields = [
+    fieldTypeSex,
+    fieldTypeBirthYear,
+    fieldTypeBirthDate,
+    fieldTypeIdDocument,
+    fieldTypeSelectMany,
+    fieldTypeNote,
+    fieldTypeSpot,
+    fieldTypeProductType,
+    fieldTypeTicket
+  ];
 
   static const List<String> personalInfoFields = [
     fieldTypeName,
@@ -426,7 +442,7 @@ class FormHelper {
         );
       case fieldTypeBirthYear:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, birthYearLabel());
-        return FormFieldBuilders.buildBirthYearField(context, field);
+        return FormFieldBuilders.buildBirthYearField(context, formHolder, field);
       case fieldTypeTicket:
         var ticketHolder = field as TicketHolder;
         return FormFieldBuilders.buildTicketField(context, formHolder, ticketHolder);

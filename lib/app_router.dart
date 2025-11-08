@@ -113,7 +113,7 @@ class AppRouter extends RootStackRouter {
       return "/${RightsService.currentLink}";
     }
 
-    return "/${UnitPage.ROUTE}/${RightsService.currentUnit()?.id??1}";
+    return "/${UnitPage.ROUTE}/${RightsService.currentUnit()?.id}";
   }
 
   static void Function()? regenerateRoutes;

@@ -1,42 +1,14 @@
 import { getSupabaseUser, isUserEditorOrder, supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import { formatCurrency } from "../_shared/utilities.ts";
 import { authorizeRequest } from "../_shared/auth.ts";
+import { getBaseOrderData } from "./shared.ts";
 
 export async function getTicketOrderStornoTemplate(reqData: any, authorizationHeader: string) {
   const { orderId, requestSecret } = reqData.data;
 
   console.log("Order ID:", orderId);
 
-  const { data: orderData, error: orderError } = await supabaseAdmin.rpc(
-    "get_order",
-    { order_id: orderId }
-  );
-
-  if (orderError || !orderData) {
-    console.error("Order not found or error occurred:", orderError);
-    throw new Error("Order not found");
-  }
-
-  const occasionId = orderData.occasion;
-
-  // Perform authorization. This will throw an AuthError on failure.
-  await authorizeRequest({
-    requestSecret,
-    authorizationHeader,
-    occasionId,
-  });
-
-  // Fetch occasion data
-  const { data: occasionData, error: occasionError } = await supabaseAdmin
-    .from("occasions")
-    .select("organization, title, unit")
-    .eq("id", occasionId)
-    .single();
-
-  if (occasionError || !occasionData) {
-    console.error("Occasion not found:", occasionError);
-    throw new Error("Occasion not found");
-  }
+  const { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data, reply_to } = await getBaseOrderData(orderId, requestSecret, authorizationHeader);
 
  // Call the RPC function "get_latest_order_history" which returns the latest order history for non-zero price
  const { data: orderHistory, error: historyError } = await supabaseAdmin.rpc(
@@ -58,20 +30,20 @@ export async function getTicketOrderStornoTemplate(reqData: any, authorizationHe
 
   // Prepare substitutions with price and currency code
   const subs: Record<string, string> = {
-    occasionTitle: occasionData.title,
+    occasionTitle: occasion.title,
     amount: formatCurrency(price, currency_code),
   };
 
   // Add sender and receiver information
-  const sender = occasionData.title;
-  const receiver = orderData.data.email;
+  const sender = occasion.title;
+  const receiver = order.data.email;
 
   // Build a context object for template selection.
   const context = {
-    occasion: occasionId,
-    unit: occasionData.unit,
-    organization: occasionData.organization,
+    occasion: occasion.id,
+    unit: occasion.unit,
+    organization: occasion.organization,
   };
 
-  return { subs, sender, receiver, context };
+  return { subs, sender, receiver, context, reply_to };
 }
