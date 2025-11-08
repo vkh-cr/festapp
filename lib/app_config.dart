@@ -41,8 +41,8 @@ class AppConfig {
   }
 
   static List<LanguageModel> availableLanguages() => [
-    LanguageModel(const Locale("en"), "English"),
     LanguageModel(const Locale("cs"), "Čeština"),
+    LanguageModel(const Locale("en"), "English"),
     // LanguageModel(const Locale("sk"), "Slovenčina"),
     // LanguageModel(const Locale("pl"), "Polski"),
     // LanguageModel(const Locale("de"), "Deutsch"),
