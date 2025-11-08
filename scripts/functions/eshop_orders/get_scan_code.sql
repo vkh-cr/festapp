@@ -1,5 +1,7 @@
+DROP FUNCTION IF EXISTS  get_scan_code(text);
+
 CREATE OR REPLACE FUNCTION get_scan_code(
-    form_link TEXT
+    occasion_link TEXT
 )
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -9,17 +11,17 @@ DECLARE
     occasion_id BIGINT;
     current_scan_code TEXT;
 BEGIN
-    -- 1. Retrieve occasion_id using form_link
-    SELECT occasion
+    -- 1. Retrieve occasion_id using occasion_link
+    SELECT id
     INTO occasion_id
-    FROM public.forms
-    WHERE link = form_link;
+    FROM public.occasions
+    WHERE link = occasion_link;
 
-    -- 2. Check if form_link is valid and linked to an occasion
+    -- 2. Check if occasion_link is valid
     IF occasion_id IS NULL THEN
         RETURN jsonb_build_object(
             'code', 404,
-            'message', 'Form key does not exist or is not linked to an occasion.'
+            'message', 'Occasion link does not exist.'
         );
     END IF;
 

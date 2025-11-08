@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
@@ -11,7 +12,7 @@ import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_companions.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/db_groups.dart';
 import 'package:fstapp/data_services/db_users.dart';
@@ -69,16 +70,21 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isEventCancelled = _event?.isCancelled ?? false;
+    final scheduleFeature = FeatureService.getFeatureDetails(FeatureConstants.schedule);
+    final bool childrenScheduleIsEnabled = scheduleFeature is ScheduleFeature && scheduleFeature.enableChildren;
+    final bool showSubScheduleArea = _event?.isGroupEvent == false && (_event?.childEvents.isNotEmpty == true || (RightsService.isEditor() && childrenScheduleIsEnabled));
+
     return Scaffold(
       appBar: AppBar(
           backgroundColor: _event == null
               ? ThemeConfig.seed1
-              : ThemeConfig.eventTypeToColor(context, _event!.type),
+              : ThemeConfig.eventTypeToColor(context, _event?.type),
           title: Text(
             _event == null ? "Event".tr() : _event.toString(),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: ThemeConfig.eventTypeToColorNegative(context, _event?.type)),
           ),
-          leading: ScheduleBackButton(),
+          leading: ScheduleBackButton(color: ThemeConfig.eventTypeToColorNegative(context, _event?.type),),
           actions:[
             Visibility(
               visible: showLoginLogoutButton() && RightsService.isApprover() && FeatureService.isFeatureEnabled(FeatureConstants.entryCode),
@@ -90,18 +96,22 @@ class _EventPageState extends State<EventPage> {
                           context,
                           CheckRoute(id: _event!.id!));
                     },
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.qr_code_scanner,
+                      color: ThemeConfig.eventTypeToColorNegative(context, _event?.type),
                     )),
               ),
             ),
-            if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
+            if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule) &&
+                (!(isEventCancelled && !(_event?.isInMySchedule ?? false)) &&
+                    (_event?.childEvents.isEmpty ?? false) &&
+                    ((_event?.maxParticipants ?? 0) == 0)))
               ...ButtonsHelper.getAddToMyProgramButton(
-                  _event?.canSaveEventToMyProgram(),
+                  _event?.canSaveEventToMyProgram() ?? false,
                   addToMySchedule,
                   removeFromMySchedule,
-                  ThemeConfig.upperNavText(context),
-                  ThemeConfig.upperNavText(context))]),
+                  ThemeConfig.eventTypeToColorNegative(context, _event?.type),
+                  ThemeConfig.eventTypeToColorNegative(context, _event?.type))]),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -109,6 +119,34 @@ class _EventPageState extends State<EventPage> {
           child: PinchScrollView(
             builder: (onPinchStart, onPinchEnd) => Column(
               children: [
+                if (isEventCancelled) // Using local variable for clarity
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: ThemeConfig.grey700(context),
+                        borderRadius: BorderRadius.circular(StylesConfig.commonRoundness),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.cancel_outlined, color: ThemeConfig.whiteColor(context), size: 22),
+                          const SizedBox(width: 10),
+                          Text(
+                            "Cancelled".tr().toUpperCase(),
+                            style: TextStyle(
+                              color: ThemeConfig.whiteColor(context),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: LayoutBuilder(
@@ -125,14 +163,15 @@ class _EventPageState extends State<EventPage> {
                                 children: [
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
+                                          !isEventCancelled && // Modified
                                           !(_event?.isSignedIn??false) &&
                                           !EventModel.isEventFull(_event),
                                       child: ElevatedButton(
-                                          onPressed: () => signIn(),
+                                          onPressed: () => signIn(context), // signIn itself might also check, but button hidden
                                           child: const Text("Sign in").tr())),
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
-                                          (_event?.isSignedIn??false),
+                                          (_event?.isSignedIn??false), // Sign out always possible if signed in
                                       child: ElevatedButton(
                                           onPressed: () => signOut(),
                                           child: const Text("Sign out").tr())),
@@ -145,7 +184,7 @@ class _EventPageState extends State<EventPage> {
                                         child: ElevatedButton(
                                             onPressed: () => signInCompanion(),
                                             child:
-                                            const Text("Sign in companion")
+                                            const Text("Companions")
                                                 .tr()),
                                       )),
                                   Visibility(
@@ -168,7 +207,7 @@ class _EventPageState extends State<EventPage> {
                                             // ignore: use_build_context_synchronously
                                             DialogHelper.chooseUser(context,
                                                     (person) async {
-                                                  await signIn(person);
+                                                  await signIn(context, person);
                                                   await loadData(_event!.id!);
                                                 }, _queriedParticipants,
                                                 "Sign in someone".tr());
@@ -177,9 +216,9 @@ class _EventPageState extends State<EventPage> {
                                           const Text("Sign in other").tr()),
                                     ),
                                   ),
-                                  if (AuthService.isGroupLeader() &&
+                                  if (RightsService.isGroupAdmin() &&
                                       _event != null &&
-                                      _event!.isGroupEvent)
+                                      (_event!.isGroupEvent ?? false))
                                     ElevatedButton(
                                         onPressed: () =>
                                             RouterService.navigatePageInfo(
@@ -235,10 +274,12 @@ class _EventPageState extends State<EventPage> {
                         padding: const EdgeInsets.all(8.0),
                         alignment: Alignment.topRight,
                         child: TextButton(
-                            onPressed: () => RouterService.navigateOccasion(
-                                context,
-                                "${MapPage.ROUTE}/${_event!.place!.id}")
-                                .then((value) => loadData(_event!.id!)),
+                            onPressed: () {
+                              RouterService.navigateOccasion(
+                                  context,
+                                  "${MapPage.ROUTE}/${_event!.place!.id}")
+                                  .then((value) => loadData(_event!.id!));
+                            },
                             child: IntrinsicWidth(
                               child: Row(
                                 children: [
@@ -251,7 +292,7 @@ class _EventPageState extends State<EventPage> {
                               ),
                             )))),
                 Visibility(
-                  visible: EventModel.isEventSupportingSignIn(_event) && !AuthService.isLoggedIn(),
+                  visible: EventModel.isEventSupportingSignIn(_event) && !AuthService.isLoggedIn() && !isEventCancelled, // Hide if cancelled
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: HtmlView(
@@ -272,7 +313,7 @@ class _EventPageState extends State<EventPage> {
                 ),
                 Visibility(
                     visible: EventModel.isEventFull(_event) &&
-                        AuthService.isLoggedIn(),
+                        AuthService.isLoggedIn() && !isEventCancelled,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: const Text(
@@ -291,19 +332,18 @@ class _EventPageState extends State<EventPage> {
                     ),
                   ),
                 ),
-                if(_event?.isGroupEvent == false && (_event?.childEvents.isNotEmpty == true || RightsService.isEditor()))
+                if(showSubScheduleArea)
                   Padding(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: SingleChildScrollView(
-                          child: ScheduleTimeline(
-                              eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
-                              onEventPressed: _eventPressed,
-                              showAddNewEventButton: RightsService.isEditor,
-                              onAddNewEvent: (context, p, parent) =>
-                                  AddNewEventDialog.showAddEventDialog(context, p, TimeBlockItem.fromEventModelAsChild(_event!))
-                                      .then((_) => loadData(_event!.id!)),
-                              parentEvent: TimeBlockItem.fromEventModelAsChild(_event!),
-                              nodePosition: 0.3))),
+                      child: ScheduleTimeline(
+                          eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
+                          onEventPressed: _eventPressed,
+                          showAddNewEventButton: () => (RightsService.isEditor() && childrenScheduleIsEnabled),
+                          onAddNewEvent: (context, p, parent) =>
+                              AddNewEventDialog.showAddEventDialog(context, p, TimeBlockItem.fromEventModelAsChild(_event!))
+                                  .then((_) => loadData(_event!.id!)),
+                          parentEvent: TimeBlockItem.fromEventModelAsChild(_event!),
+                          nodePosition: 0.3)),
                 Visibility(
                   visible: RightsService.isEditor() &&
                       _event?.maxParticipants != null,
@@ -357,12 +397,12 @@ class _EventPageState extends State<EventPage> {
                             padding: EdgeInsets.all(8.0),
                           ),
                           Visibility(
-                            visible: _groupInfoModel?.leader != null,
+                            visible: _groupInfoModel?.participants?.firstWhereOrNull((p) => p.isAdmin!) != null,
                             child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 8.0, horizontal: 16),
                                 child: Text(
-                                    "${"Moderator".tr()}: ${_groupInfoModel?.leader?.name ?? ""}",
+                                    "${"Moderator".tr()}: ${_groupInfoModel?.participants?.firstWhereOrNull((p) => p.isAdmin!)?.userInfo?.name ?? ""}",
                                     style: StylesConfig.normalTextStyle)),
                           ),
                           Padding(
@@ -381,7 +421,7 @@ class _EventPageState extends State<EventPage> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 16.0, vertical: 4.0),
                                   child: Text(
-                                      "${_groupInfoModel?.participants!.toList()[index].name}",
+                                      "${_groupInfoModel?.participants!.toList()[index].userInfo?.name}",
                                       style: StylesConfig.normalTextStyle),
                                 );
                               })
@@ -402,16 +442,20 @@ class _EventPageState extends State<EventPage> {
     if (!await DbEvents.addToMySchedule(context, _event!.id!)) {
       return;
     }
-    setState(() {
-      _event!.isEventInMySchedule = true;
-    });
+    if (mounted) {
+      setState(() {
+        _event!.isInMySchedule = true;
+      });
+    }
   }
 
   Future<void> removeFromMySchedule() async {
     await DbEvents.removeFromMySchedule(context, _event!.id!);
-    setState(() {
-      _event!.isEventInMySchedule = false;
-    });
+    if (mounted) {
+      setState(() {
+        _event!.isInMySchedule = false;
+      });
+    }
   }
 
   bool showLoginLogoutButton() {
@@ -424,8 +468,13 @@ class _EventPageState extends State<EventPage> {
     await loadOfflineData(widget.id!);
 
     await loadEvent(id);
-    isLoadingEvent = false;
-    await OfflineDataService.saveEventDescription(_event!);
+    if(mounted) { // isLoadingEvent should be set after loadEvent completes
+      setState(() {
+        isLoadingEvent = false;
+      });
+    }
+
+
     if (RightsService.isEditor()) {
       await loadParticipants(id);
     }
@@ -435,7 +484,7 @@ class _EventPageState extends State<EventPage> {
     var allEvents = await OfflineDataService.getAllEvents();
     var event = allEvents.firstWhereOrNull((element) => element.id == id);
     if (event != null) {
-      if (event.isGroupEvent && AuthService.isLoggedIn()) {
+      if ((event.isGroupEvent ?? false) && AuthService.isLoggedIn()) {
         var userInfo = await OfflineDataService.getUserInfo();
         if (userInfo?.eventUserGroup != null) {
           event.title = userInfo!.eventUserGroup!.title;
@@ -445,9 +494,6 @@ class _EventPageState extends State<EventPage> {
           _groupInfoModel = userInfo.eventUserGroup;
         }
       } else {
-        var descr = await OfflineDataService.getEventDescription(id.toString());
-        event.description = descr?.description;
-
         if (event.place?.id != null) {
           var place = (await OfflineDataService.getAllPlaces())
               .firstWhereOrNull((element) => element.id == event.place!.id);
@@ -455,7 +501,7 @@ class _EventPageState extends State<EventPage> {
         } else {
           event.place = null;
         }
-        event.isEventInMySchedule = await OfflineDataService.isEventSaved(id);
+        event.isInMySchedule = await OfflineDataService.isEventSaved(id);
       }
 
       var childEvents = allEvents
@@ -467,25 +513,27 @@ class _EventPageState extends State<EventPage> {
       _childDots.addAll(
           event.childEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
 
-      setState(() {
-        _event = event;
-      });
+      if(mounted) {
+        setState(() {
+          _event = event;
+        });
+      }
     }
   }
 
   Future<void> loadParticipants(int id) async {
     _participants = await DbEvents.getParticipantsPerEvent(id);
-    setState(() => {});
+    if(mounted) setState(() => {});
   }
 
   Future<void> loadEvent(int eventId) async {
     var event = await DbEvents.getEvent(eventId);
 
-    if (event.isGroupEvent && event.isMyGroupEvent) {
+    if ((event.isGroupEvent ?? false) && (event.isMyGroupEvent ?? false)) {
       var group = await DbGroups.getUserGroupInfo(
-          AuthService.currentUserGroup()!.id!);
+          RightsService.currentUserGroup()!.id!);
       if (group == null) {
-        RouterService.goBack(context);
+        if (mounted) RouterService.goBack(context);
         return;
       }
       event.description = group.description;
@@ -493,7 +541,7 @@ class _EventPageState extends State<EventPage> {
       event.place = group.place;
       _groupInfoModel = group;
       _event = event;
-      setState(() {});
+      if(mounted) setState(() {});
       return;
     }
 
@@ -504,42 +552,52 @@ class _EventPageState extends State<EventPage> {
     _childDots.clear();
     _childDots.addAll(
         _event!.childEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
-    setState(() {});
+    if(mounted) setState(() {});
   }
 
-  _eventPressed(int id) {
+  void _eventPressed(int id) {
     RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
         .then((value) => loadData(_event!.id!));
   }
 
-  Future<void> signIn([UserInfoModel? participant]) async {
+  Future<void> signIn(BuildContext context, [UserInfoModel? participant]) async {
     await DbEvents.signInToEvent(context, _event!.id!, participant);
     await loadData(_event!.id!);
   }
 
-  Future<void> signOut() async {
+  Future<void> signOut() async { // Allowed for cancelled events if already signed in
     await DbEvents.signOutFromEvent(context, _event!.id!);
     await loadData(_event!.id!);
   }
 
   Future<void> signInCompanion() async {
     _companions = await DbCompanions.getAllCompanions();
-    showDialog(
+    if (!mounted) return;
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return CompanionDialog(
-          eventId: _event!.id!,
-          maxCompanions: FeatureService.getMaxCompanions()??0,
-          companions: _companions,
-          refreshData: () async {
-            await loadData(widget.id!);
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return CompanionDialog(
+              eventId: _event!.id!,
+              canSignIn: () => _event!.canSignIn(),
+              maxCompanions: FeatureService.getMaxCompanions() ?? 0,
+              companions: _companions,
+              refreshData: () async {
+                await loadData(widget.id!);
+                _companions = await DbCompanions.getAllCompanions();
+                if (mounted) {
+                  setState(() {});
+                }
+              },
+            );
           },
         );
       },
     );
   }
 
-  Future<String?> signOutOther(UserInfoModel participant) {
+  Future<String?> signOutOther(UserInfoModel participant) { // Allowed for cancelled events
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(

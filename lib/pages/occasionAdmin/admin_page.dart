@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/_shared/app_panel_helper.dart';
 import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -22,15 +23,18 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     AdminTabDefinition.info,
     if(!AppConfig.isAllUnit)
     AdminTabDefinition.events,
-    AdminTabDefinition.places,
+      AdminTabDefinition.places,
     if(FeatureService.isFeatureEnabled(FeatureConstants.userGroups))
-    AdminTabDefinition.groups,
+      AdminTabDefinition.groups,
     if(FeatureService.isFeatureEnabled(FeatureConstants.game))
-    AdminTabDefinition.game,
+      AdminTabDefinition.game,
     if(FeatureService.isFeatureEnabled(FeatureConstants.services))
-    AdminTabDefinition.service,
+      AdminTabDefinition.service,
+    if(FeatureService.isFeatureEnabled(FeatureConstants.volunteers))
+      AdminTabDefinition.volunteers,
     AdminTabDefinition.emailTemplates,
     AdminTabDefinition.users,
+    AdminTabDefinition.settings,
   ];
 
   @override
@@ -46,7 +50,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     return DefaultTabController(
       length: _tabController.length,
       child: Scaffold(
-        appBar: AdminPageHelper.buildAdaptiveAdminAppBar(context, activeTabs, _tabController),
+        appBar: AppPanelHelper.buildAdaptiveAdminAppBar(context, activeTabs: activeTabs, tabController: _tabController),
         body: TabBarView(
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),

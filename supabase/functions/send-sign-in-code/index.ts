@@ -1,6 +1,6 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
@@ -34,10 +34,9 @@ Deno.serve(async (req) => {
     // Generate a 6-digit sign in code.
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const { data: answer, error: passwordSetError } = await supabaseUser.rpc("set_user_password", {
-      usr: userId,
-      oc: occasionId,
-      password: code
+    const { data: answer, error: passwordSetError } = await supabaseUser.rpc("reset_user_password", {
+      p_user_id: userId,
+      p_password: code
     });
 
     if (passwordSetError || !answer) {
@@ -96,7 +95,7 @@ Deno.serve(async (req) => {
     const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
 
     // Instead of directly selecting an email template, use the RPC procedure.
-    const context = { organization: organizationId };
+    const context = { organization: organizationId, occasion: occasionId };
     const templateAndWrapper: any = await getEmailTemplateAndWrapper("SIGN_IN_CODE", context);
     if (!templateAndWrapper || !templateAndWrapper.template) {
       console.error("Email template not found for SIGN_IN_CODE.");
@@ -107,14 +106,26 @@ Deno.serve(async (req) => {
     }
 
     const subs = {
-      code: code,
-      email: occasionUser.data.data.email,
-      appName: appName,
-      platformLinks: platformLinksHtml,
+        name: occasionUser.data.data.name,
+        surname: occasionUser.data.data.surname,
+        code: code,
+        email: occasionUser.data.data.email,
+        appName: appName,
+        platformLinks: platformLinksHtml,
     };
 
+    const { data: userEmail, error: emailError } = await supabaseAdmin.rpc('get_occasion_user_email', { p_occasion: occasionId, p_user: userId });
+
+    if (emailError || !userEmail) {
+      console.error("Failed to get user's email:", emailError);
+      return new Response(JSON.stringify({ error: "Failed to get user's email" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
     await sendEmailWithSubs({
-      to: occasionUser.data.data.email,
+      to: userEmail,
       subject: templateAndWrapper.template.subject,
       content: templateAndWrapper.template.html,
       subs,
@@ -126,16 +137,15 @@ Deno.serve(async (req) => {
       .from("log_emails")
       .insert({
         "from": _DEFAULT_EMAIL,
-        "to": occasionUser.data.data.email,
+        "to": userEmail,
         "template": templateAndWrapper.template.id,
         "organization": organizationId
       });
 
     // Mark user as invited.
-    occasionUser.data.data.is_invited = true;
     const { error: updateError } = await supabaseAdmin
       .from("occasion_users")
-      .update({ data: occasionUser.data.data })
+      .update({ data: { ...occasionUser.data.data, is_invited: true } })
       .eq("user", userId)
       .eq("occasion", occasionId)
       .select()

@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/language_model.dart';
+import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
@@ -14,29 +15,24 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
   static const String oneSignalAppId = '5aeb8117-54fc-43fc-8bab-e8a01ecda2a6';
+  static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
   static const int organization = 1;
   //setup occasion id to force occasion
   static const String? forceOccasionLink = "csa2024";
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
+  static const bool isAppSupported = true;
 
   static const String webLink = "https://aksmcz.netlify.app";
-  static const String appStoreLink = "https://apps.apple.com/us/app/csa-2024/id6479449613";
-  static const String playStoreLink = "";
-  static const String playStoreLaunchLink = "";
-  static const String desktopAppLink = "";
+
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;
   static const int imagesMaxBytes = 800000;
 
-  static const bool isEventTimeUtc = true;
-
   static const int daySplitHour = 4;
 
-  static const bool isSplitByPlace = false;
-
-  static const int offsetHours = -1;
+  static const bool areAllVolunteersApprovers = false;
 
   static bool isNotificationsCurrentlySupported() {
     if(kIsWeb) {

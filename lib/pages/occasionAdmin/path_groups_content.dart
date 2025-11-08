@@ -51,7 +51,7 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
       context: context,
       loadData: DbPlaces.getAllPathGroups,
       fromPlutoJson: PathGroupsModel.fromPlutoJson,
-      firstColumnType: DataGridFirstColumn.delete,
+      firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
       idColumn: Tb.path_groups.id,
       columns: [
         TrinaColumn(
@@ -112,7 +112,7 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
           svgIcons.firstWhereOrNull((i) => i.id == d)?.link ?? "",
           type: TrinaColumnType.select(
             mapIcons,
-            builder: (icon) =>
+            menuItemBuilder: (icon) =>
                 DataGridHelper.iconToRow(context, icon, svgIcons),
             defaultValue: null,
           ),

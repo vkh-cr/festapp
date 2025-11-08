@@ -18,7 +18,9 @@ DECLARE
     used_spots JSONB := '[]'::JSONB;
     occasion_id BIGINT;
     organization_id BIGINT;
+    unit_id BIGINT;
     occasion_title TEXT;
+    occasion_features JSONB;
     account_number TEXT;
     account_number_human_readable TEXT;
     ticket_details JSONB := '[]'::JSONB;
@@ -33,6 +35,7 @@ DECLARE
     form_key UUID;
     deadline TIMESTAMPTZ;
     form_deadline_duration BIGINT;
+    form_data JSONB;
     currency_code TEXT;
     first_currency_code TEXT := NULL;
     field_item JSONB;
@@ -42,7 +45,8 @@ DECLARE
     key_val RECORD;
     order_data JSONB;
     order_note TEXT;
-    ticket_note TEXT; -- renamed from local_note
+    ticket_note TEXT;
+    reply_to TEXT;
 BEGIN
     -- Wrap the entire logic in a subtransaction block to ensure that if any error occurs,
     -- all operations performed inside the block are rolled back.
@@ -53,8 +57,8 @@ BEGIN
         END IF;
 
         form_key := (input_data->>'form')::UUID;
-        SELECT id, occasion, bank_account, deadline_duration_seconds
-        INTO form_id, occasion_id, bank_account_id, form_deadline_duration
+        SELECT id, occasion, bank_account, deadline_duration_seconds, data
+        INTO form_id, occasion_id, bank_account_id, form_deadline_duration, form_data
         FROM public.forms
         WHERE key = form_key;
 
@@ -62,11 +66,12 @@ BEGIN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1003, 'message', 'Form is not linked to any occasion')::TEXT;
         END IF;
 
-        -- Fetch organization and occasion title from the occasion
-        SELECT organization, title
-        INTO organization_id, occasion_title
+        -- Fetch organization, unit, and occasion title from the occasion
+        SELECT organization, unit, title, features
+        INTO organization_id, unit_id, occasion_title, occasion_features
         FROM public.occasions
         WHERE id = occasion_id;
+
         IF organization_id IS NULL THEN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1005, 'message', 'No organization found for the occasion')::TEXT;
         END IF;
@@ -81,48 +86,53 @@ BEGIN
         END IF;
         */
 
-        -- Calculate deadline if deadline duration is provided
-        IF form_deadline_duration IS NOT NULL THEN
-            deadline := now + make_interval(secs => form_deadline_duration);
-        ELSE
-            deadline := NULL;
-        END IF;
-
         IF input_data ? 'fields' THEN
-            FOR key_val IN
-                SELECT kv.key, kv.value
-                FROM jsonb_array_elements(input_data->'fields') AS elem,
-                     LATERAL jsonb_each_text(elem) AS kv(key, value)
-            LOOP
-                PERFORM 1 FROM public.form_fields ff
-                WHERE ff.id = key_val.key::BIGINT AND ff.form = form_id AND ff.is_hidden = false;
-                IF NOT FOUND THEN
-                    RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1016, 'message', 'Invalid form field: ' || key_val.key)::TEXT;
-                END IF;
-                SELECT ff.type INTO field_type FROM public.form_fields ff WHERE ff.id = key_val.key::BIGINT;
-                IF field_type IN ('email', 'name', 'surname', 'phone') THEN
-                    IF field_type = 'email' THEN
-                        input_data := jsonb_set(input_data, '{email}', to_jsonb(key_val.value), true);
-                    ELSIF field_type = 'name' THEN
-                        input_data := jsonb_set(input_data, '{name}', to_jsonb(key_val.value), true);
-                    ELSIF field_type = 'surname' THEN
-                        input_data := jsonb_set(input_data, '{surname}', to_jsonb(key_val.value), true);
-                    ELSIF field_type = 'phone' THEN
-                        input_data := jsonb_set(input_data, '{phone}', to_jsonb(key_val.value), true);
+            DECLARE
+                valid_fields JSONB := '[]'::JSONB;
+                elem JSONB;
+                field_key TEXT;
+            BEGIN
+                FOR elem IN SELECT * FROM jsonb_array_elements(input_data->'fields')
+                LOOP
+                    -- Correctly extract the key from the single-key/value object.
+                    -- The column returned by jsonb_object_keys is named "jsonb_object_keys".
+                    field_key := (SELECT key FROM jsonb_object_keys(elem) AS key);
+
+                    -- If the object is empty for some reason, skip it.
+                    IF field_key IS NULL THEN
+                        CONTINUE;
                     END IF;
-                ELSIF field_type = 'note' THEN
-                    -- This is the order note
-                    input_data := jsonb_set(input_data, '{note}', to_jsonb(key_val.value), true);
-                END IF;
-            END LOOP;
+
+                    -- Validate the field against the form_fields table
+                    SELECT ff.type INTO field_type
+                    FROM public.form_fields ff
+                    WHERE ff.id = field_key::BIGINT AND ff.form = form_id AND ff.is_hidden = false;
+
+                    -- If the field is valid, process it
+                    IF FOUND THEN
+                        -- Add the original valid field to the sanitized array
+                        valid_fields := valid_fields || elem;
+
+                        -- Promote specific field types to top-level keys
+                        IF field_type IN ('email', 'name', 'surname', 'phone', 'note') THEN
+                            -- Use the -> operator to get the value as JSONB directly
+                            -- and use jsonb_set to add it to the input_data.
+                            input_data := jsonb_set(input_data, ARRAY[field_type], elem->field_key, true);
+                        END IF;
+                    END IF;
+                END LOOP;
+
+                -- Replace the original 'fields' array with the sanitized one
+                input_data := jsonb_set(input_data, '{fields}', valid_fields);
+            END;
         END IF;
 
         IF input_data->>'email' IS NULL THEN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1002, 'message', 'Missing email in input data')::TEXT;
         END IF;
 
-        INSERT INTO eshop.orders (created_at, updated_at, occasion)
-        VALUES (now, now, occasion_id)
+        INSERT INTO eshop.orders (created_at, updated_at, occasion, form)
+        VALUES (now, now, occasion_id, form_id)
         RETURNING id INTO order_id;
 
         -- Process each ticket in the input_data "ticket" array
@@ -350,9 +360,9 @@ BEGIN
         END IF;
 
         -- Generate a variable symbol and create the payment info record
-        generated_variable_symbol := generate_variable_symbol(bank_account_id);
-        INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, currency_code, created_at, deadline)
-        VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now, deadline)
+        generated_variable_symbol := generate_payment_variable_symbol(bank_account_id, form_id);
+        INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, currency_code, created_at)
+        VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now)
         RETURNING id INTO payment_info_id;
 
         -- persist all of the non‐state fields
@@ -362,8 +372,11 @@ BEGIN
           currency_code = first_currency_code,
           payment_info  = payment_info_id,
           data          = order_data,
-          updated_at    = now()
+          updated_at    = now
         WHERE id = order_id;
+
+        -- Apply inventory allocations. This will raise an overbooking error if spots are unavailable.
+        PERFORM apply_allocations(order_id);
 
         -- either flag as 'ordered' or, if free, mark paid via your function
         IF calculated_price = 0 THEN
@@ -372,6 +385,14 @@ BEGIN
           UPDATE eshop.orders
           SET state      = 'ordered'
           WHERE id = order_id;
+
+          -- Calculate deadline if deadline duration is provided and then call the function
+          IF form_deadline_duration IS NOT NULL THEN
+              deadline := now + make_interval(secs => form_deadline_duration);
+              PERFORM public.set_payment_deadline(payment_info_id, deadline);
+          ELSE
+              deadline := NULL;
+          END IF;
         END IF;
 
         -- Log the order to orders_history with details
@@ -385,12 +406,18 @@ BEGIN
             first_currency_code
         );
 
+        -- Get the reply-to email for the order
+        reply_to := get_reply_to_email_for_order(order_id);
         -- Prepare the success response JSON
         result := JSONB_BUILD_OBJECT(
             'code', 200,
             'order', JSONB_BUILD_OBJECT(
                 'id', order_id,
                 'data', order_data,
+                'form', JSONB_BUILD_OBJECT(
+                    'id', form_id,
+                    'data', form_data
+                ),
                 'payment_info', JSONB_BUILD_OBJECT(
                     'id', payment_info_id,
                     'variable_symbol', generated_variable_symbol,
@@ -402,8 +429,12 @@ BEGIN
                 ),
                 'occasion', JSONB_BUILD_OBJECT(
                     'id', occasion_id,
-                    'occasion_title', occasion_title
-                )
+                    'organization', organization_id,
+                    'unit', unit_id,
+                    'title', occasion_title,
+                    'features', occasion_features
+                ),
+                'reply_to', reply_to
             )
         );
 

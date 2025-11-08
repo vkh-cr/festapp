@@ -4,8 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
-import 'package:fstapp/data_models_eshop/ticket_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -175,7 +175,7 @@ class _ScanPageState extends State<ScanPage> {
                       IconButton(
                         icon: Icon(
                           Icons.arrow_back,
-                          color: ThemeConfig.seed1,
+                          color: ThemeConfig.appBarColorNegative(),
                         ),
                         onPressed: () {
                           RouterService.goBack(context);
@@ -187,7 +187,7 @@ class _ScanPageState extends State<ScanPage> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: ThemeConfig.seed1,
+                            color: ThemeConfig.appBarColorNegative(),
                           ),
                           textAlign: TextAlign.center,
                         ),

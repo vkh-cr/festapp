@@ -174,6 +174,15 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       }
     }
 
+    usedItems.sort((a, b) {
+      if (a.isCancelled && !b.isCancelled) {
+        return -1; // a comes first
+      } else if (!a.isCancelled && b.isCancelled) {
+        return 1; // b comes first
+      }
+      return 0; // Keep original order otherwise
+    });
+
     usedPlaces = <TimeBlockPlace>[];
     for(var item in widget.timetablePlaces) {
       if(usedItems.map((e) => e.timeBlockPlace?.id).contains(item.id)) {
@@ -348,17 +357,40 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   List<Widget> generateVerticalTime() {
-    return List<Widget>.generate(
-        hourCount! + 1,
-            (i) {
-              var hour = startTime!.hour + i;
-              if (hour > 23) {
-                hour -= 24;
-              }
-              return Padding(
+    List<Widget> widgets = [];
+
+    // Calculate positioning and dimensions for the background
+    final double backgroundTopOffset = widget.controller.horizontalAxisSpaceHeight();
+    final double backgroundHeight = (hourCount! * widget.controller.pixelsInHour()) + widget.controller.verticalAxisTitleHeight();
+
+    // Add the background widget as the first element.
+    // It will be drawn first in the Stack, appearing behind other elements.
+    widgets.add(
+      Positioned(
+        top: backgroundTopOffset,
+        left: 0,
+        right: 0, // Makes the background take the full available width of its parent Stack
+        height: backgroundHeight,
+        child: Container(
+          // Use a solid color for the background
+          color: ThemeConfig.backgroundColor(context), // Example: Use primaryContainer color from theme.
+          // You can replace this with any specific Color like 'Colors.grey[200]' or a custom color.
+        ),
+      ),
+    );
+
+    // Generate the time label widgets and add them to the list
+    widgets.addAll(List<Widget>.generate(
+      hourCount! + 1,
+          (i) {
+        var hour = startTime!.hour + i;
+        if (hour > 23) {
+          hour -= 24;
+        }
+        return Padding(
           padding: EdgeInsets.fromLTRB(
               0,
-              i * (widget.controller.pixelsInHour()) + widget.controller.horizontalAxisSpaceHeight(),
+              i * widget.controller.pixelsInHour() + widget.controller.horizontalAxisSpaceHeight(),
               0,
               0),
           child: Container(
@@ -367,13 +399,16 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
               child: Text(
-                "$hour:00",
+                "$hour",
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ),
         );
-     });
+      },
+    ));
+
+    return widgets;
   }
 
   void updateScaleLimits() {
@@ -435,7 +470,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               ),
               if(!widget.controller.isTimeHorizontal)
                 Positioned(
-                    left: -10,
+                    left: 10,
                     top: widget.controller.isTimeHorizontal ?
                     0 :
                     TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() + widget.controller.horizontalAxisSpaceHeight() - 12,

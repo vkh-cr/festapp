@@ -95,8 +95,8 @@ BEGIN
         WHERE o.occasion = occasion_id
         GROUP BY o.currency_code;
 
-        result_revenue    := paid_revenue + returned_revenue;
-        remaining_balance := total_revenue - paid_revenue;
+        result_revenue    := paid_revenue - returned_revenue;
+        remaining_balance := total_revenue - (paid_revenue - returned_revenue);
 
         revenue_section := E'===========\nPřehled tržeb:\n' ||
             E'    • Suma všech objednávek: '   || to_char(total_revenue,     'FM99999990.00') || ' ' || single_cc || E'\n' ||
@@ -119,7 +119,7 @@ BEGIN
             GROUP BY o.currency_code
             ORDER BY o.currency_code
         LOOP
-            result_revenue    := rec_rev.paid_revenue + rec_rev.returned_revenue;
+            result_revenue    := rec_rev.paid_revenue - rec_rev.returned_revenue;
             remaining_balance := rec_rev.total_revenue - rec_rev.paid_revenue;
             revenue_section := revenue_section ||
                 E' - ' || rec_rev.currency_code || E':\n' ||

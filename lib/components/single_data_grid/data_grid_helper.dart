@@ -7,11 +7,13 @@ import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:fstapp/data_models_eshop/order_model.dart';
+import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/custom_three_state_checkbox.dart';
+import 'package:fstapp/widgets/html_view.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class DataGridHelper
@@ -20,16 +22,25 @@ class DataGridHelper
     required BuildContext context,
     required String field,
     required TrinaColumnRendererContext rendererContext,
-    required Future<String?> Function() loadContent,
-    int? occasionId
+    required Future<String?> Function() loadContent, // Used for both editor and potentially tooltip
+    bool showTooltipWithContent = true, // Flag to enable tooltip
+    int? occasionId,
+    String? title, // <<< New voluntary parameter for the tooltip title
   }) {
-    String? textToEdit;
-    String? oldText = rendererContext.row.cells[field]?.value;
-    if (oldText != null) {
-      textToEdit = oldText;
-    }
+    String? textToEdit = rendererContext.row.cells[field]?.value as String?;
 
-    return ElevatedButton(
+    Widget buttonChild = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.edit),
+        Padding(
+          padding: const EdgeInsets.all(6),
+          child: Text("Edit".tr()),
+        ),
+      ],
+    );
+
+    Widget button = ElevatedButton(
       onPressed: () async {
         Map<String, dynamic> param = {
           HtmlEditorPage.parContent: textToEdit,
@@ -39,6 +50,7 @@ class DataGridHelper
         RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param, occasionId: occasionId)).then((value) async {
           if (value != null) {
             var newText = value as String;
+            // Compare with the value that was in the cell when edit was initiated
             if (newText != textToEdit) {
               rendererContext.row.cells[field]?.value = newText;
               var cell = rendererContext.row.cells[field]!;
@@ -47,16 +59,95 @@ class DataGridHelper
           }
         });
       },
-      child: Row(
-        children: [
-          const Icon(Icons.edit),
-          Padding(
-            padding: const EdgeInsets.all(6),
-            child: Text("Edit".tr()),
-          ),
-        ],
-      ),
+      child: buttonChild,
     );
+
+    if (showTooltipWithContent) {
+      final tooltipTheme = TooltipTheme.of(context);
+      final effectiveDecoration = tooltipTheme.decoration ?? BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[700] : Colors.white,
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+        border: Border.all(color: Colors.grey.shade400, width: 0.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          )
+        ],
+      );
+      final baseTextStyle = tooltipTheme.textStyle ?? DefaultTextStyle.of(context).style;
+      final effectiveTextStyle = baseTextStyle.copyWith(fontSize: 14);
+
+      return Tooltip(
+        showDuration: const Duration(seconds: 15),
+        preferBelow: true,
+        verticalOffset: 52,
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        padding: EdgeInsets.zero,
+        decoration: const BoxDecoration(color: Colors.transparent),
+        richMessage: WidgetSpan(
+          alignment: PlaceholderAlignment.bottom,
+          child: FutureBuilder<String?>(
+            future: loadContent(),
+            builder: (context, snapshot) {
+              Widget? titleWidget;
+              if (title != null && title.isNotEmpty) {
+                titleWidget = Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    title,
+                    style: effectiveTextStyle.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: (effectiveTextStyle.fontSize ?? 14.0) + 2, // Slightly larger for title
+                    ),
+                    textAlign: TextAlign.start,
+                  ),
+                );
+              }
+
+              Widget mainContentArea;
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                mainContentArea = const Center(child: CircularProgressIndicator(strokeWidth: 2));
+              } else if (snapshot.hasError || HtmlHelper.isHtmlEmptyOrNull(snapshot.data)) {
+                mainContentArea = Center(
+                  child: Icon(
+                    Icons.text_snippet_outlined,
+                    size: 22,
+                    color: (effectiveTextStyle.color ?? Colors.grey).withOpacity(0.5),
+                  ),
+                );
+              } else {
+                final htmlContent = snapshot.data!;
+                mainContentArea = SingleChildScrollView(
+                  child: HtmlView(
+                    html: htmlContent,
+                    fontSize: effectiveTextStyle.fontSize!,
+                    color: effectiveTextStyle.color,
+                  ),
+                );
+              }
+
+              return Container(
+                padding: const EdgeInsets.all(10.0), // Overall padding for the tooltip content
+                constraints: const BoxConstraints(maxWidth: 450, maxHeight: 300),
+                decoration: effectiveDecoration,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch, // Make title stretch if it's multi-line
+                  mainAxisSize: MainAxisSize.min, // Let column be as tall as needed, up to constraints
+                  children: [
+                    if (titleWidget != null) titleWidget,
+                    Expanded(child: mainContentArea), // Main content takes remaining space
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        child: button,
+      );
+    }
+    return button;
   }
 
   static Widget buildTab(BuildContext context, IconData icon, String text) {
@@ -148,7 +239,7 @@ class DataGridHelper
       child: Center(child: Text(textValue)));
   }
 
-  static Widget orderState(BuildContext context, rendererContext, Color Function(String) getBackground, [Function(String)? processText]) {
+  static Widget orderState(BuildContext context, TrinaColumnRendererContext rendererContext, Color Function(String) getBackground, [Function(String)? processText]) {
     String value = rendererContext.cell.value;
     String firstPart = value.split(";")[0];
     String textValue = processText?.call(value) ?? value;
@@ -182,6 +273,54 @@ class DataGridHelper
         ),
       ),
     );
+  }
+
+  static Widget orderStateRenderer(BuildContext context, TrinaColumnRendererContext rendererContext, Color Function(String) getBackground) {
+    String value = rendererContext.cell.value;
+
+    // A helper to create a single colored state tag
+    Widget buildStateTag(String formattedState) {
+      final key = formattedState.split(";").first;
+      final text = formattedState.split(";").last;
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: getBackground(key),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          OrderModel.statesDataGridToUpper(text),
+        ),
+      );
+    }
+
+    // Check if this is a state transition
+    if (value.contains("→")) {
+      final parts = value.split("→");
+      final fromState = parts[0].trim();
+      final toState = parts[1].trim();
+      return Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            buildStateTag(fromState),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: Icon(Icons.arrow_forward, size: 18),
+            ),
+            buildStateTag(toState),
+          ],
+        ),
+      );
+    }
+    // Otherwise, render a single state
+    else {
+      return Container(
+        color: getBackground(value.split(";").first),
+        child: Center(child: Text(OrderModel.statesDataGridToUpper(value.split(";").last))),
+      );
+    }
   }
 
   static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
@@ -341,7 +480,7 @@ class DataGridHelper
     return const TrinaGridLocaleText();
   }
 
-  static textTransform(String? value, List<String> allValues, String Function(String?) transform) {
+  static String textTransform(String? value, List<String> allValues, String Function(String?) transform) {
     if(!allValues.contains(value))
     {
       return "???";

@@ -1,7 +1,8 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { generateTicketImage, fetchTicketResources } from "../_shared/generateTicket.ts";
 import { generateNamedTicketImage, fetchNamedTicketResources } from "../_shared/generateNamedTicket.ts";
-import { getEmailTemplateAndWrapper, supabaseAdmin, isUserEditorOrder, getSupabaseUser } from "../_shared/supabaseUtil.ts";
+import { getEmailTemplateAndWrapper, supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { authorizeRequest, AuthError } from "../_shared/auth.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -25,49 +26,7 @@ Deno.serve(async (req) => {
     const reqData = await req.json();
     const { requestSecret, orderId, email } = reqData;
 
-    // If a request secret is provided, validate it and skip user authentication/editor check.
-    let skipEditorCheck = false;
-    if (requestSecret) {
-      const { data: secretValid, error: secretError } = await supabaseAdmin.rpc("check_request_secret", { p_secret: requestSecret });
-      if (secretError || !secretValid) {
-        console.error("Invalid request secret", secretError);
-        return new Response(JSON.stringify({ error: "Invalid request secret" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 403,
-        });
-      }
-      skipEditorCheck = true;
-    }
-
-    // If no valid secret is provided, require user authentication and check editor status.
-    if (!skipEditorCheck) {
-      const user = await getSupabaseUser(req.headers.get("Authorization")!);
-      if (!user) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 });
-      }
-      const userId = user.user.id;
-
-      // Fetch the order to get the occasion id.
-      const { data: orderForCheck, error: orderCheckError } = await supabaseAdmin.rpc("get_order", { order_id: orderId });
-      if (orderCheckError || !orderForCheck) {
-        console.error("Order not found", orderCheckError);
-        return new Response(JSON.stringify({ error: "Order not found" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 404,
-        });
-      }
-      const occasionId = orderForCheck.occasion;
-      const userIsEditor = await isUserEditorOrder(userId, occasionId);
-      if (!userIsEditor) {
-        console.error(`User ${userId} is not an editor for occasion ${occasionId}`);
-        return new Response(JSON.stringify({ error: "Forbidden: Not an editor" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 403,
-        });
-      }
-    }
-
-    // Validate input parameters.
+    // Validate input parameters first.
     if (typeof orderId !== "number" || typeof email !== "string") {
       return new Response(JSON.stringify({ error: "Invalid input parameters" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -75,64 +34,46 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch the full order details (including occasion and order data).
-    const { data: order, error: orderError } = await supabaseAdmin.rpc("get_order", { order_id: orderId });
-    if (orderError || !order) {
-      console.error("Order not found or error occurred:", orderError);
-      return new Response(JSON.stringify({ error: "Order not found" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 404,
-      });
+    const { data: orderDetailsResponse, error: rpcError } = await supabaseAdmin.rpc('get_order_details_for_email', { p_order_id: orderId });
+
+    if (rpcError || orderDetailsResponse.code !== 200) {
+        console.error("Error fetching order details:", rpcError || orderDetailsResponse.message);
+        throw new Error("Failed to fetch order details.");
     }
 
-    console.log(order);
-    const occasionId = order.occasion;
-    console.log(occasionId);
+    const { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data, reply_to } = orderDetailsResponse.data;
 
-    // Fetch occasion data for the email template.
-    const { data: occasionData, error: occasionError } = await supabaseAdmin
-      .from("occasions")
-      .select("organization, title, features")
-      .eq("id", occasionId)
-      .single();
+    const authorizationHeader = req.headers.get("Authorization");
 
-    console.log(occasionData);
+    // 2. Perform authorization to ensure the request is legitimate
+    await authorizeRequest({ requestSecret, authorizationHeader, occasionId: occasion.id });
 
-    if (occasionError || !occasionData) {
-      console.error("Occasion not found:", occasionError);
-      return new Response(JSON.stringify({ error: "Occasion not found" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 404,
-      });
-    }
-    const occasionTitle = occasionData.title;
-    const features = occasionData.features;
+    const occasionTitle = occasion.title;
+    const features = occasion.features;
     const ticketFeature = features?.find((feature: any) => feature.code === "ticket");
     const isTicketEnabled = ticketFeature?.is_enabled ?? false;
 
     // Fetch tickets only if the ticket feature is enabled.
     let tickets: any[] = [];
-    if (isTicketEnabled) {
-      const { data: fetchedTickets, error: ticketsError } = await supabaseAdmin.rpc("get_tickets_with_details", { order_id: orderId });
-      if (ticketsError || !fetchedTickets) {
-        console.error("Error fetching tickets:", ticketsError);
-        return new Response(JSON.stringify({ error: "Error fetching tickets" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 500,
-        });
-      }
-      tickets = fetchedTickets.filter((t: any) => t.state !== "storno");
-      if (!tickets.length) {
-        return new Response(JSON.stringify({ error: "No valid tickets" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        });
-      }
+    const { data: fetchedTickets, error: ticketsError } = await supabaseAdmin.rpc("get_tickets_with_details", { order_id: orderId });
+    if (ticketsError || !fetchedTickets) {
+            console.error("Error fetching tickets:", ticketsError);
+            return new Response(JSON.stringify({ error: "Error fetching tickets" }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 500,
+            });
+        }
+        tickets = fetchedTickets.filter((t: any) => t.state !== "storno");
+        if (!tickets.length) {
+            return new Response(JSON.stringify({ error: "No valid tickets" }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 400,
+            });
     }
 
     // Get email template and wrapper via RPC.
-    const organizationId = occasionData.organization;
-    const context = { organization: organizationId, occasion: occasionId };
+    const organizationId = occasion.organization;
+    const context = { organization: organizationId, occasion: occasion.id, unit: occasion.unit};
     const templateAndWrapper: any = await getEmailTemplateAndWrapper("TICKET_ORDER_PAYMENT_DONE", context);
     if (!templateAndWrapper || !templateAndWrapper.template) {
       console.error("Email template not found for code TICKET_ORDER_PAYMENT_DONE.");
@@ -187,6 +128,7 @@ Deno.serve(async (req) => {
       from: `${occasionTitle} | Festapp <${_DEFAULT_EMAIL}>`,
       attachments,
       wrapper: templateAndWrapper.wrapper ? templateAndWrapper.wrapper.html : null,
+      replyTo: reply_to,
     });
 
     // Log the email sending in the database.
@@ -195,7 +137,7 @@ Deno.serve(async (req) => {
       to: email,
       template: templateAndWrapper.template.id,
       organization: organizationId,
-      occasion: occasionId,
+      occasion: occasion.id,
     });
 
     const ticketIds = tickets.map((ticket) => ticket.id);
@@ -213,10 +155,16 @@ Deno.serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
-    return new Response(JSON.stringify({ error: "Unexpected error occurred" }), {
+    // Handle both custom AuthError and any other unexpected errors.
+    const isAuthError = error instanceof AuthError;
+    const status = isAuthError ? error.status : 500;
+    const message = error.message || "Unexpected error occurred";
+
+    console.error(`Error [${status}]: ${message}`, isAuthError ? '' : error);
+
+    return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: status,
     });
   }
 });

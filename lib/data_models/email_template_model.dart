@@ -1,4 +1,4 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/email_templates/email_templates_strings.dart';
 import 'package:fstapp/data_models/tb.dart';
 
 /// Represents a substitution definition for an email template.
@@ -65,68 +65,98 @@ class EmailTemplateModel {
   // Common substitution definitions (codes are now without '{{' and '}}'):
   static EmailTemplateSub appPlatformLinksSub = EmailTemplateSub(
     code: 'platformLinks',
-    description: 'Links for opening app on different platforms.'.tr(),
+    description: EmailTemplatesStrings.subPlatformLinks,
     defaultValue: 'Open the app on https://live.festapp.net/.',
   );
 
   static EmailTemplateSub appNameSub = EmailTemplateSub(
     code: 'appName',
-    description: 'The name of current Application'.tr(),
+    description: EmailTemplatesStrings.subAppName,
     defaultValue: 'Festapp',
   );
 
   static EmailTemplateSub emailSub = EmailTemplateSub(
     code: 'email',
-    description: 'The email of the user'.tr(),
-    defaultValue: 'Jan Novák',
+    description: EmailTemplatesStrings.subEmail,
+    defaultValue: 'jan.novak@festapp.net',
+  );
+
+  static EmailTemplateSub nameSub = EmailTemplateSub(
+    code: 'name',
+    description: EmailTemplatesStrings.subName,
+    defaultValue: 'Jan',
+  );
+
+  static EmailTemplateSub surnameSub = EmailTemplateSub(
+    code: 'surname',
+    description: EmailTemplatesStrings.subSurname,
+    defaultValue: 'Novák',
   );
 
   static EmailTemplateSub resetLinkSub = EmailTemplateSub(
     code: 'resetLink',
-    description: 'The link to reset the password'.tr(),
+    description: EmailTemplatesStrings.subResetLink,
     defaultValue: 'https://live.festapp.net/reset',
   );
 
   static EmailTemplateSub signInCodeSub = EmailTemplateSub(
     code: 'code',
-    description: 'The sign-in code'.tr(),
+    description: EmailTemplatesStrings.subSignInCode,
     defaultValue: '123456',
   );
 
   static EmailTemplateSub occasionTitleSub = EmailTemplateSub(
     code: 'occasionTitle',
-    description: 'The title of the occasion'.tr(),
+    description: EmailTemplatesStrings.subOccasionTitle,
     defaultValue: 'Festival of Creaky Music',
   );
 
   static EmailTemplateSub amountSub = EmailTemplateSub(
     code: 'amount',
-    description: 'Payment Amount'.tr(),
+    description: EmailTemplatesStrings.subAmount,
     defaultValue: '100 CZK',
   );
 
   static EmailTemplateSub accountNumberSub = EmailTemplateSub(
     code: 'accountNumber',
-    description: 'The bank account number'.tr(),
+    description: EmailTemplatesStrings.subAccountNumber,
     defaultValue: '2502719268/2010',
+  );
+
+  static EmailTemplateSub ibanSub = EmailTemplateSub(
+    code: 'iban',
+    description: EmailTemplatesStrings.subIban,
+    defaultValue: 'CZ4520100000002502719268',
   );
 
   static EmailTemplateSub variableSymbolSub = EmailTemplateSub(
     code: 'variableSymbol',
-    description: 'Variable symbol'.tr(),
+    description: EmailTemplatesStrings.subVariableSymbol,
     defaultValue: '9654',
   );
 
   static EmailTemplateSub deadlineSub = EmailTemplateSub(
     code: 'deadline',
-    description: 'The payment deadline'.tr(),
+    description: EmailTemplatesStrings.subDeadline,
     defaultValue: '30. 2. 2026',
   );
 
   static EmailTemplateSub fullOrderSub = EmailTemplateSub(
     code: 'fullOrder',
-    description: 'Full order details'.tr(),
+    description: EmailTemplatesStrings.subFullOrder,
     defaultValue: 'Order details here',
+  );
+
+  static EmailTemplateSub changeOverviewSub = EmailTemplateSub(
+    code: 'changeOverview',
+    description: EmailTemplatesStrings.subChangeOverview,
+    defaultValue: 'Here is an overview of the changes in your order.',
+  );
+
+  static EmailTemplateSub balanceReasoningSub = EmailTemplateSub(
+    code: 'balanceReasoning',
+    description: EmailTemplatesStrings.subBalanceReasoning,
+    defaultValue: 'Your order is fully paid.',
   );
 
   /// Mapping of template codes to their available substitutions.
@@ -141,21 +171,33 @@ class EmailTemplateModel {
       appNameSub,
       appPlatformLinksSub,
       emailSub,
+      nameSub,
+      surnameSub,
       signInCodeSub,
     ],
     'TICKET_ORDER_CONFIRMATION': [
       occasionTitleSub,
       amountSub,
       accountNumberSub,
+      ibanSub,
       variableSymbolSub,
       deadlineSub,
+      balanceReasoningSub,
       fullOrderSub,
+    ],
+    'TICKET_ORDER_UPDATE': [
+      occasionTitleSub,
+      fullOrderSub,
+      changeOverviewSub,
+      balanceReasoningSub,
     ],
     'TICKET_ORDER_PAYMENT_DONE': [
       occasionTitleSub,
     ],
-    'TICKET_ORDER_PAYMENT_REMINDER': [
+    'TICKET_ORDER_REMINDER': [
       occasionTitleSub,
+      balanceReasoningSub,
+      fullOrderSub,
     ],
     'TICKET_ORDER_STORNO': [
       occasionTitleSub,
@@ -172,38 +214,44 @@ class EmailTemplateModel {
     switch (code) {
       case 'RESET_PASSWORD':
         return {
-          'title': 'Reset Password'.tr(),
-          'description': 'This template is used for sending password reset instructions.'.tr(),
+          'title': EmailTemplatesStrings.usageResetPasswordTitle,
+          'description': EmailTemplatesStrings.usageResetPasswordDescription,
           'subs': substitutionDefinitions['RESET_PASSWORD'] ?? [],
         };
       case 'SIGN_IN_CODE':
         return {
-          'title': 'Sign In Code'.tr(),
-          'description': 'This template is used for sending sign-in codes.'.tr(),
+          'title': EmailTemplatesStrings.usageSignInCodeTitle,
+          'description': EmailTemplatesStrings.usageSignInCodeDescription,
           'subs': substitutionDefinitions['SIGN_IN_CODE'] ?? [],
         };
       case 'TICKET_ORDER_CONFIRMATION':
         return {
-          'title': 'Order Confirmation'.tr(),
-          'description': 'This template is used to confirm ticket orders.'.tr(),
+          'title': EmailTemplatesStrings.usageTicketOrderConfirmationTitle,
+          'description': EmailTemplatesStrings.usageTicketOrderConfirmationDescription,
           'subs': substitutionDefinitions['TICKET_ORDER_CONFIRMATION'] ?? [],
+        };
+      case 'TICKET_ORDER_UPDATE':
+        return {
+          'title': EmailTemplatesStrings.usageTicketOrderUpdateTitle,
+          'description': EmailTemplatesStrings.usageTicketOrderUpdateDescription,
+          'subs': substitutionDefinitions['TICKET_ORDER_UPDATE'] ?? [],
         };
       case 'TICKET_ORDER_PAYMENT_DONE':
         return {
-          'title': 'Order Payment Done'.tr(),
-          'description': 'This template is used to confirm successful ticket order payments.'.tr(),
+          'title': EmailTemplatesStrings.usageTicketOrderPaymentDoneTitle,
+          'description': EmailTemplatesStrings.usageTicketOrderPaymentDoneDescription,
           'subs': substitutionDefinitions['TICKET_ORDER_PAYMENT_DONE'] ?? [],
         };
-      case 'TICKET_ORDER_PAYMENT_REMINDER':
+      case 'TICKET_ORDER_REMINDER':
         return {
-          'title': 'Order Payment Reminder'.tr(),
-          'description': 'This template is used to remind customers about pending ticket order payments.'.tr(),
-          'subs': substitutionDefinitions['TICKET_ORDER_PAYMENT_REMINDER'] ?? [],
+          'title': EmailTemplatesStrings.usageTicketOrderPaymentReminderTitle,
+          'description': EmailTemplatesStrings.usageTicketOrderPaymentReminderDescription,
+          'subs': substitutionDefinitions['TICKET_ORDER_REMINDER'] ?? [],
         };
       case 'TICKET_ORDER_STORNO':
         return {
-          'title': 'Order Cancellation'.tr(),
-          'description': 'This template is used to notify users about ticket order cancellations.'.tr(),
+          'title': EmailTemplatesStrings.usageTicketOrderStornoTitle,
+          'description': EmailTemplatesStrings.usageTicketOrderStornoDescription,
           'subs': substitutionDefinitions['TICKET_ORDER_STORNO'] ?? [],
         };
       default:

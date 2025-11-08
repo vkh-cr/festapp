@@ -82,6 +82,21 @@ else
   echo "✅ Using IPA: $IPA_PATH"
 fi
 
+# Step 3.5: Extract version and build number from compiled Info.plist
+if [ ! -f "$APP_PLIST" ]; then
+  echo "❌ Compiled Info.plist not found at: $APP_PLIST"
+  exit 1
+fi
+
+IPA_VERSION=$(plutil -extract CFBundleShortVersionString xml1 -o - "$APP_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
+IPA_BUILD_NUMBER=$(plutil -extract CFBundleVersion xml1 -o - "$APP_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
+
+export IPA_VERSION
+export IPA_BUILD_NUMBER
+
+echo "📦 IPA Version: $IPA_VERSION"
+echo "🔢 IPA Build Number: $IPA_BUILD_NUMBER"
+
 # Step 4: Copy API key to expected location
 TARGET_KEY_DIR="$HOME/.appstoreconnect/private_keys"
 PRIVATE_KEY_NAME="AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
