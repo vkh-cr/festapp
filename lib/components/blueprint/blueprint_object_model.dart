@@ -3,10 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
-import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/models/tb_eshop.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:collection/collection.dart';
+import 'blueprint_strings.dart';
 
 class BlueprintObjectModel {
   static const String metaX = "x";
@@ -39,7 +41,7 @@ class BlueprintObjectModel {
     return "Stůl ${group?.title}, Sedadlo $title";
   }
 
-  toShortString() {
+  String toShortString() {
     return "${group?.title ?? ""}${title ?? ""}";
   }
 
@@ -58,6 +60,7 @@ class BlueprintObjectModel {
   BlueprintModel? blueprint;
 
   factory BlueprintObjectModel.fromJson(Map<String, dynamic> json) {
+    // Constructor will handle state/stateEnum sync
     return BlueprintObjectModel(
       x: json[metaX],
       y: json[metaY],
@@ -76,6 +79,7 @@ class BlueprintObjectModel {
     metaY: y,
     metaType: type,
     metaTitle: title,
+    metaState: state, // Use the synced state string
     if (id != null) metaId: id,
     if (group?.id != null) metaGroupId: group?.id,
     if (spotProduct != null || product != null) TbEshop.spots.product: spotProduct ?? product?.id,
@@ -94,7 +98,23 @@ class BlueprintObjectModel {
     this.spotProduct,
     this.product,
     this.blueprint,
-  });
+  }) {
+    // Ensure state and stateEnum are synchronized
+    if (state != null && stateEnum == null) {
+      stateEnum = statesMap.entries
+          .firstWhere((entry) => entry.value == state,
+          orElse: () => const MapEntry(SeatState.empty, ""))
+          .key;
+    } else if (stateEnum != null && state == null) {
+      state = statesMap[stateEnum];
+    }
+  }
+
+  /// Updates both state and stateEnum
+  void setSeatState(SeatState newState) {
+    stateEnum = newState;
+    state = statesMap[newState];
+  }
 
   String blueprintTooltip(BuildContext context) {
     // Find the matching order product ticket
@@ -134,12 +154,40 @@ class BlueprintObjectModel {
         // Add ticket note if available
         var ticketNoteString = ticket.note != null && ticket.note!.isNotEmpty ? "\n${ticket.note}" : "";
 
-        return "${product?.title} ${title ?? ""}\n${"Ticket".tr()} ${ticket.ticketSymbol}$ticketNoteString\n$productsString$orderString";
+        return "${product?.title} ${title ?? ""}\n${OrdersStrings.itemSingular} ${ticket.ticketSymbol}$ticketNoteString\n$productsString$orderString";
       }
     }
 
     // Fallback for when no matching ticket or order product ticket is found
     return "${product?.title} ${title ?? ""}\n${"Price".tr()}: ${Utilities.formatPrice(context, product?.price ?? 0)}";
+  }
+
+  String getSwapSummary() {
+    if (orderProductTicket != null) {
+      var opt = blueprint?.orderProductTickets?.firstWhereOrNull((t) => t.id == orderProductTicket);
+      if (opt != null) {
+        var order = blueprint?.orders?.firstWhere((p) => p.id == opt.orderId);
+        var ticket = blueprint?.tickets?.firstWhereOrNull((t) => t.id == opt.ticketId);
+        if (order != null && ticket != null) {
+          return BlueprintStrings.swapSummaryCustomer(ticket.ticketSymbol ?? '?', order.toCustomerData());
+        }
+      }
+      return BlueprintStrings.swapSummaryOccupied;
+    }
+
+    switch (stateEnum) {
+      case SeatState.available:
+        return BlueprintStrings.swapSummaryAvailable;
+      case SeatState.black:
+        return BlueprintStrings.swapSummaryBlack;
+      case SeatState.used:
+        return BlueprintStrings.swapSummaryUsed;
+      case SeatState.selected:
+      case SeatState.selected_by_me:
+        return BlueprintStrings.swapSummarySelected;
+      default:
+        return BlueprintStrings.swapSummaryEmpty;
+    }
   }
 
   bool isOrdered(){

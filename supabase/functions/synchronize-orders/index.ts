@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { authorizeRequest, AuthError } from "../_shared/auth.ts";
 
 const _PROJECT_URL = Deno.env.get("PROJECT_URL")!;
 
@@ -18,39 +19,12 @@ Deno.serve(async (req) => {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // Parse request body and check for the request secret.
+    // Parse request body and authorize using the request secret.
     const requestData = await req.json();
     const { requestSecret } = requestData;
-    if (!requestSecret) {
-      return new Response(
-        JSON.stringify({ error: "Missing request secret" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        }
-      );
-    }
+    await authorizeRequest({ requestSecret });
 
-    // Validate the request secret using the "check_request_secret" RPC.
-    const { data: secretValid, error: secretError } = await supabaseAdmin.rpc(
-      "check_request_secret",
-      { p_secret: requestSecret }
-    );
-    if (secretError || !secretValid) {
-      console.error("Invalid request secret", secretError);
-      return new Response(
-        JSON.stringify({ error: "Invalid request secret" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 403,
-        }
-      );
-    }
-
-    // --- PART 1: Process Bank Accounts Transactions ---
-
-    // Retrieve all fetchable bank accounts (returns bank_account_id, bank_secret, and account_type).
-    const { data: bankAccounts, error: bankAccountsError } = await supabaseAdmin.rpc("get_fetchable_bank_accounts");
+    const { data: bankAccounts, error: bankAccountsError } = await supabaseAdmin.rpc("get_fetchable_bank_accounts_with_t_count");
     if (bankAccountsError) {
       console.error("Error retrieving fetchable bank accounts", bankAccountsError);
       return new Response(
@@ -91,11 +65,45 @@ Deno.serve(async (req) => {
     for (const account of fioAccounts) {
       const bankAccountId = account.bank_account_id;
       const bankSecret = account.bank_secret;
-      const apiUrl = `https://fioapi.fio.cz/v1/rest/last/${bankSecret}/transactions.json`;
+      const transactionCount = account.transaction_count_last_90_days;
 
       try {
+        // If there are no recent transactions in our DB, set the Fio API pointer to 90 days ago.
+        // This prevents downloading a large initial payload and instead prepares the 'last' endpoint to fetch from that date.
+        if (transactionCount === 0) {
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 90);
+          const formattedStartDate = startDate.toISOString().split("T")[0];
+
+          const setDateUrl = `https://fioapi.fio.cz/v1/rest/set-last-date/${bankSecret}/${formattedStartDate}/`;
+          console.log(`Account ${bankAccountId} has 0 recent DB transactions. Setting Fio API pointer to ${formattedStartDate}.`);
+
+          const setDateResponse = await fetch(setDateUrl);
+          if (!setDateResponse.ok) {
+              // Log the error but proceed anyway, as the subsequent 'last' fetch might still work or provide a useful error.
+              console.error(`Failed to set last date for account ${bankAccountId}. Status: ${setDateResponse.status}`);
+              fetchResults.push({ bankAccountId, error: `Failed to set Fio API pointer with status: ${setDateResponse.status}` });
+          } else {
+              console.log(`Successfully set Fio API pointer for account ${bankAccountId}.`);
+          }
+        }
+
+        // Always fetch the latest transactions.
+        // If the date was just set, this will get everything since that date.
+        // If transactions already exist in our DB, this gets transactions since the last fetch.
+        const fetchDescription = `Fetching latest transactions for account ${bankAccountId}.`;
+        const apiUrl = `https://fioapi.fio.cz/v1/rest/last/${bankSecret}/transactions.json`;
+
+        console.log(fetchDescription);
+
         const apiResponse = await fetch(apiUrl);
-        console.log(`Fetching transactions for bank account ${bankAccountId}: ${apiResponse.status}`);
+        console.log(`Fio API fetch for bank account ${bankAccountId}: ${apiResponse.status}`);
+
+        if (!apiResponse.ok) {
+            console.error(`Fio API request failed for account ${bankAccountId} with status: ${apiResponse.status}`);
+            fetchResults.push({ bankAccountId, error: `Fio API request failed with status: ${apiResponse.status}` });
+            continue; // Move to the next account
+        }
 
         const transactionData = await apiResponse.json();
         const transactions = transactionData?.accountStatement?.transactionList?.transaction || [];
@@ -113,13 +121,14 @@ Deno.serve(async (req) => {
             fetchResults.push({ bankAccountId, message: "Transactions processed successfully", result: insertResult });
           }
         } else {
-          fetchResults.push({ bankAccountId, message: "No transactions to process" });
+          fetchResults.push({ bankAccountId, message: "No new transactions to process" });
         }
 
         // Update the last fetch time for this bank account.
         const { error: updateError } = await supabaseAdmin.rpc("set_last_fetch_time", { p_bank_account_id: bankAccountId });
         if (updateError) {
           console.error(`Error updating last fetch time for account ${bankAccountId}:`, updateError);
+          // Note: This error is pushed in addition to any transaction processing results.
           fetchResults.push({ bankAccountId, updateError: "Failed to update last fetch time" });
         }
       } catch (error) {
@@ -178,10 +187,16 @@ Deno.serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
-    return new Response(JSON.stringify({ error: "Unexpected error occurred" }), {
+    // Handle both custom AuthError and any other unexpected errors.
+    const isAuthError = error instanceof AuthError;
+    const status = isAuthError ? error.status : 500;
+    const message = error.message || "Unexpected error occurred";
+
+    console.error(`Error [${status}]: ${message}`, isAuthError ? '' : error);
+
+    return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: status,
     });
   }
 });

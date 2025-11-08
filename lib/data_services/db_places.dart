@@ -3,8 +3,7 @@ import 'package:fstapp/data_models/icon_model.dart';
 import 'package:fstapp/data_models/path_group_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -94,8 +93,8 @@ class DbPlaces {
   static Future<void> saveLocation(
       int placeId, double lat, double lng) async {
     if (!(RightsService.isEditor() ||
-        (AuthService.isGroupLeader() &&
-            AuthService.currentUserGroup()!.place!.id == placeId))) {
+        (RightsService.isGroupAdmin() &&
+            RightsService.currentUserGroup()!.place!.id == placeId))) {
       throw Exception("You cannot change this place.");
     }
     await _supabase.from(Tb.places.table).update({

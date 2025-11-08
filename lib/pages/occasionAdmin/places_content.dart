@@ -90,6 +90,7 @@ class _PlacesContentState extends State<PlacesContent> {
               context: context,
               occasionId: RightsService.currentOccasionId(),
               field: Tb.places.description,
+              title: ctx.row.cells[Tb.places.title]!.value,
               rendererContext: ctx,
               loadContent: () async =>
               ctx.row.cells[Tb.places.description]!.value,
@@ -107,7 +108,7 @@ class _PlacesContentState extends State<PlacesContent> {
           type: TrinaColumnType.select(
             defaultValue: null,
             mapIcons,
-            builder: (icon) =>
+            menuItemBuilder: (icon) =>
                 DataGridHelper.iconToRow(context, icon, svgIcons),
           ),
           renderer: (ctx) =>

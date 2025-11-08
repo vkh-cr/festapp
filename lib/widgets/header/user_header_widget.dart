@@ -13,7 +13,8 @@ import 'package:flutter/material.dart';
 
 class UserHeaderWidget extends StatefulWidget {
   final Color? appBarIconColor;
-  const UserHeaderWidget({super.key, this.appBarIconColor});
+  final Future<void> Function()? onSignIn;
+  const UserHeaderWidget({super.key, this.appBarIconColor, this.onSignIn});
 
   @override
   _UserHeaderWidgetState createState() => _UserHeaderWidgetState();
@@ -31,9 +32,11 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
   void initState() {
     super.initState();
     AdaptiveTheme.getThemeMode().then((mode) {
-      setState(() {
-        _currentThemeMode = mode;
-      });
+      if (mounted) {
+        setState(() {
+          _currentThemeMode = mode;
+        });
+      }
     });
   }
 
@@ -84,61 +87,61 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
           const SizedBox(height: 16),
         ],
         if(ThemeConfig.isDarkModeEnabled)
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Appearance",
-                style: TextStyle(
-                    fontSize: 16, color: ThemeConfig.blackColor(context)))
-                .tr(),
-            const SizedBox(height: 8),
-            ToggleButtons(
-              isSelected: [
-                _currentThemeMode == AdaptiveThemeMode.dark,
-                _currentThemeMode == AdaptiveThemeMode.system,
-                _currentThemeMode == AdaptiveThemeMode.light,
-              ],
-              onPressed: (int index) {
-                AdaptiveThemeMode mode;
-                if (index == 0) {
-                  mode = AdaptiveThemeMode.dark;
-                } else if (index == 1) {
-                  mode = AdaptiveThemeMode.system;
-                } else {
-                  mode = AdaptiveThemeMode.light;
-                }
-                AdaptiveTheme.of(context).setThemeMode(mode);
-                setState(() {
-                  _currentThemeMode = mode;
-                });
-              },
-              borderRadius: BorderRadius.circular(8.0),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text("Dark",
-                      style: TextStyle(
-                          color: ThemeConfig.blackColor(context)))
-                      .tr(),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text("Auto",
-                      style: TextStyle(
-                          color: ThemeConfig.blackColor(context)))
-                      .tr(),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text("Light",
-                      style: TextStyle(
-                          color: ThemeConfig.blackColor(context)))
-                      .tr(),
-                ),
-              ],
-            ),
-          ],
-        ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Appearance",
+                  style: TextStyle(
+                      fontSize: 16, color: ThemeConfig.blackColor(context)))
+                  .tr(),
+              const SizedBox(height: 8),
+              ToggleButtons(
+                isSelected: [
+                  _currentThemeMode == AdaptiveThemeMode.dark,
+                  _currentThemeMode == AdaptiveThemeMode.system,
+                  _currentThemeMode == AdaptiveThemeMode.light,
+                ],
+                onPressed: (int index) {
+                  AdaptiveThemeMode mode;
+                  if (index == 0) {
+                    mode = AdaptiveThemeMode.dark;
+                  } else if (index == 1) {
+                    mode = AdaptiveThemeMode.system;
+                  } else {
+                    mode = AdaptiveThemeMode.light;
+                  }
+                  AdaptiveTheme.of(context).setThemeMode(mode);
+                  setState(() {
+                    _currentThemeMode = mode;
+                  });
+                },
+                borderRadius: BorderRadius.circular(8.0),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Text("Dark",
+                        style: TextStyle(
+                            color: ThemeConfig.blackColor(context)))
+                        .tr(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Text("Auto",
+                        style: TextStyle(
+                            color: ThemeConfig.blackColor(context)))
+                        .tr(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Text("Light",
+                        style: TextStyle(
+                            color: ThemeConfig.blackColor(context)))
+                        .tr(),
+                  ),
+                ],
+              ),
+            ],
+          ),
       ],
     );
   }
@@ -210,6 +213,12 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               final String fullName = user?.name ?? "User".tr();
               final String surname = user?.surname ?? "";
               final String email = user?.email ?? "";
+
+              // Determine if the settings section has any content to show
+              final bool hasLanguageSettings = AppConfig.availableLanguages().length > 1;
+              final bool hasThemeSettings = ThemeConfig.isDarkModeEnabled;
+              final bool showSettingsSection = hasLanguageSettings || hasThemeSettings;
+
               return _buildPopoverWrapper(
                 Column(
                   mainAxisSize: MainAxisSize.min,
@@ -261,38 +270,16 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    Builder(
-                      builder: (context) {
-                        final units = RightsService.currentUser()?.getUnitsWithEditorAccess();
-                        if (units == null || units.isEmpty) return SizedBox.shrink();
-                        return Column(
-                          children: units
-                              .map<Widget>(
-                                (unit) => ListTile(
-                              title: Text(
-                                unit.title ?? "---",
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: ThemeConfig.blackColor(context)),
-                              ),
-                              trailing: Icon(
-                                Icons.chevron_right,
-                                color: ThemeConfig.blackColor(context),
-                              ),
-                              onTap: () {
-                                Navigator.pop(context);
-                                RouterService.navigate(context, "unit/${unit.id}/edit");
-                              },
-                            ),
-                          )
-                              .toList(),
-                        );
-                      },
-                    ),
-                    const Divider(),
-                    const SizedBox(height: 16),
-                    _buildSettingsContentInner(localSetState),
-                    const SizedBox(height: 16),
+
+                    // Conditionally render the settings block including its top divider
+                    if (showSettingsSection) ...[
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      _buildSettingsContentInner(localSetState),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // This divider separates the content above from the sign out button
                     const Divider(),
                     ListTile(
                       leading: Icon(
@@ -307,12 +294,10 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                       ).tr(),
                       onTap: () async {
                         Navigator.pop(context);
-                        var unit = RightsService.currentUnitUser()?.unit;
                         await AuthService.logout();
-                        await RouterService.goToUnit(context, unit);
-
                         if (mounted) setState(() {});
-                      },
+                        await RouterService.goToUnit(context, RightsService.currentUnit()!.id!);
+                        },
                     ),
                   ],
                 ),
@@ -418,7 +403,8 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               tooltip: "Sign In".tr(),
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
-                setState(() {});
+                await widget.onSignIn?.call();
+                if(mounted) setState(() {});
               },
             ),
             const SizedBox(width: 8),
@@ -445,7 +431,8 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
             OutlinedButton.icon(
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
-                setState(() {}); // refresh after sign in
+                await widget.onSignIn?.call();
+                if(mounted) setState(() {}); // refresh after sign in
               },
               icon: Icon(
                 Icons.person,

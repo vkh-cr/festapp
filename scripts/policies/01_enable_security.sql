@@ -35,6 +35,18 @@ ALTER TABLE public.role_info ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.form_fields ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.request_secrets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.path_groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.queue_emails ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE public.activities    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_assignment_places  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_assignment_events  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_assignments   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_history ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE public.inventory_pools ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.resources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.resource_slots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.inventory_contexts ENABLE ROW LEVEL SECURITY;
 
 --eshop
 ALTER TABLE eshop.orders_history ENABLE ROW LEVEL SECURITY;
@@ -53,3 +65,5 @@ ALTER TABLE eshop.order_product_ticket ENABLE ROW LEVEL SECURITY;
 ALTER TABLE eshop.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE eshop.product_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE eshop.bank_accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE eshop.external_services ENABLE ROW LEVEL SECURITY;
+ALTER TABLE eshop.product_inventory_contexts ENABLE ROW LEVEL SECURITY;

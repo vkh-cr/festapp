@@ -1,11 +1,9 @@
+import 'package:fstapp/data_models/group_participant_model.dart';
 import 'package:fstapp/data_models/information_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/user_group_info_model.dart';
-import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/data_services/db_information.dart';
 import 'package:fstapp/data_services/db_places.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -19,30 +17,24 @@ class DbGroups {
   }
 
   static Future<List<UserGroupInfoModel>> getAllUserGroupInfo([String? type]) async {
-    var data = await _supabase
-        .from(Tb.user_group_info.table)
-        .select(
-        "${Tb.user_group_info.id},"
-            "${Tb.user_group_info.title},"
-            "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}),"
-            "${Tb.places.table}(*),"
-            "${Tb.user_group_info.description},"
-            "${Tb.user_group_info.type},"
-            "${Tb.user_group_info.data},"
-            "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}))")
-    .eq(Tb.user_group_info.occasion, RightsService.currentOccasionId()!)
-    .filter(Tb.user_group_info.type, type == null ? "is" : "eq", type);
+    final response = await _supabase.rpc(
+      'get_all_user_groups',
+      params: {
+        'p_occasion_id': RightsService.currentOccasionId()!,
+        'p_type': type,
+      },
+    );
+
+    final List<dynamic> groupData = response['groups'];
+    final Map<String, dynamic>? gameDefsData = response['game_definitions'];
 
     var toReturn = List<UserGroupInfoModel>.from(
-        data.map((x) => UserGroupInfoModel.fromJson(x)));
+        groupData.map((x) => UserGroupInfoModel.fromJson(x)));
 
-    if(type == InformationModel.gameType) {
-      var gameDef = await DbInformation.getAllInformationForDataGrid(InformationModel.gameType);
-      Map<int, String> dict = Map.fromIterable(
-        gameDef,
-        key: (item) => item.id!,       // Set the key as the "id"
-        value: (item) => item.title!,   // Set the value as the "title"
-      );
+    if (type == InformationModel.gameType && gameDefsData != null) {
+      Map<int, String> dict = gameDefsData.map((key, value) =>
+          MapEntry(int.parse(key), value as String));
+
       for(var u in toReturn){
         u.checkpointTitlesDict = dict;
       }
@@ -51,36 +43,28 @@ class DbGroups {
     toReturn.sort((a, b) {
       return Utilities.naturalCompare(a.title, b.title);
     });
+
     return toReturn;
   }
 
   static Future<UserGroupInfoModel?> getUserGroupInfo(int id) async {
-    var data = await _supabase
-        .from(Tb.user_group_info.table)
-        .select(
-        "${Tb.user_group_info.id},"
-            "${Tb.user_group_info.title},"
-            "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info_public.id}, ${Tb.user_info_public.name}, ${Tb.user_info_public.surname}),"
-            "${Tb.places.table}(*),"
-            "${Tb.user_group_info.description},"
-            "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info_public.id}, ${Tb.user_info_public.name}, ${Tb.user_info_public.surname}))")
-        .eq(Tb.user_group_info.id, id)
-        .maybeSingle();
-    if(data==null)
-    {
-      return null;
-    }
-    return UserGroupInfoModel.fromJson(data);
+    final response = await _supabase.rpc(
+      'get_user_group_info_with_users',
+      params: {
+        'p_group_id': id,
+      },
+    );
+
+    return UserGroupInfoModel.fromJson(response);
   }
 
-  static updateUserGroupInfo(UserGroupInfoModel model) async {
-    if(!(RightsService.isEditor() || model.leader!.id == AuthService.currentUserId())) {
+  static Future<void> updateUserGroupInfo(UserGroupInfoModel model) async {
+    if(!(RightsService.isEditor() || (model.isAdmin ?? false))) {
       throw Exception("Must be leader or admin to change the group.");
     }
 
     Map<String, dynamic> upsertObj = {
       Tb.user_group_info.title: model.title,
-      Tb.user_group_info.leader: model.leader?.id,
     };
 
     if(model.type != null) {
@@ -106,7 +90,7 @@ class DbGroups {
     await updateUserGroupParticipants(updated, model.participants!);
   }
 
-  static updateUserGroupParticipants(UserGroupInfoModel group, Set<UserInfoModel> participants) async {
+  static Future<void> updateUserGroupParticipants(UserGroupInfoModel group, Set<GroupParticipantModel> participants) async {
     await _supabase
         .from(Tb.user_groups.table)
         .delete()
@@ -117,12 +101,13 @@ class DbGroups {
           .from(Tb.user_groups.table)
           .insert({
         Tb.user_groups.group:group.id,
-        Tb.user_groups.user:p.id
+        Tb.user_groups.user:p.userInfo!.id,
+        Tb.user_groups.is_admin: p.isAdmin ?? false
       });
     }
   }
 
-  static deleteUserGroupInfo(UserGroupInfoModel model) async {
+  static Future<void> deleteUserGroupInfo(UserGroupInfoModel model) async {
     await _supabase
         .from(Tb.user_groups.table)
         .delete()
@@ -152,14 +137,9 @@ class DbGroups {
     return checkPoints;
   }
 
-  static Future<List<UserGroupInfoModel>> getUserGroups() async {
-    List<UserGroupInfoModel> userGroups = [];
-    final response = await _supabase.rpc('groups_get_user_groups');
-    if (response != null) {
-      for (var groupJson in response['data']) {
-        userGroups.add(UserGroupInfoModel.fromJson(groupJson));
-      }
-    }
-    return userGroups;
+  static Future<Set<UserGroupInfoModel>> getUserGroups() async {
+    final response = await _supabase.rpc('get_user_groups', params: {'p_occasion_id': RightsService.currentOccasionId()!});
+    return Set.from(response.values
+        .map((groupJson) => UserGroupInfoModel.fromJson(groupJson as Map<String, dynamic>)));
   }
 }

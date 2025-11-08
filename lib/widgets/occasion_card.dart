@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/features/form_feature.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -213,8 +213,8 @@ class _OccasionCardState extends State<OccasionCard> {
                               FeatureConstants.form,
                               features: widget.occasion.features)) {
                             try {
-                              await RightsService.updateOccasionData(
-                                  widget.occasion.link!);
+                              await RightsService.updateAppData(
+                                  link: widget.occasion.link, force: true);
                             } catch (e) {
                               // ignore
                             }

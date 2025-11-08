@@ -30,7 +30,7 @@ class AuthService {
         .signInWithPassword(email: email, password: password);
     await _secureStorage.write(
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
-    DbEvents.synchronizeMySchedule(true);
+    DbEvents.synchronizeMySchedule(join: true);
     SynchroService.refreshOfflineData();
     await NotificationHelper.login();
   }
@@ -40,7 +40,6 @@ class AuthService {
     await OfflineDataService.clearUserData();
     await _supabase.auth.signOut(scope: SignOutScope.local);
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
-    currentUser = null;
     RightsService.occasionLinkModel?.occasionUser = null;
     RightsService.occasionLinkModel?.unitUser = null;
     RightsService.occasionLinkModel?.userInfo = null;
@@ -52,33 +51,6 @@ class AuthService {
 
   static Future<dynamic> sendSignInCode(OccasionUserModel ou) async {
     return await _supabase.functions.invoke("send-sign-in-code", body: {"oc": ou.occasion, "usr": ou.user,});
-  }
-
-  static UserInfoModel? currentUser;
-  static Future<UserInfoModel> loadCurrentUserData() async {
-    ensureUserIsLoggedIn();
-    var jsonUser = await _supabase
-        .from(Tb.user_info.table)
-        .select()
-        .eq(Tb.user_info.id, _supabase.auth.currentUser!.id)
-        .single();
-    currentUser = UserInfoModel.fromJson(jsonUser);
-
-    currentUser!.userGroups = await DbGroups.getUserGroups();
-    var eUserGroup = currentUser!.userGroups!.firstWhereOrNull((g)=>g.type == null);
-    if(eUserGroup!=null) {
-      currentUser!.eventUserGroup = await DbGroups.getUserGroupInfo(eUserGroup.id!);
-    }
-    return currentUser!;
-  }
-
-  static String gText(String male, String female)
-  {
-    if(currentUser?.sex != "male")
-    {
-      return female;
-    }
-    return male;
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {
@@ -149,27 +121,11 @@ class AuthService {
     return _supabase.auth.currentSession != null;
   }
 
-  static UserGroupInfoModel? currentUserGroup() {
-    return currentUser?.eventUserGroup;
-  }
-
-  static hasGroup() {
-    return currentUser?.eventUserGroup != null;
-  }
-
-  static isGroupLeader() {
-    return hasGroup() && currentUser?.eventUserGroup?.leader?.id == currentUserId();
-  }
-
-  static String? currentUserEmail() {
-    return _supabase.auth.currentUser?.email;
-  }
-
   static String currentUserId() {
     return _supabase.auth.currentUser!.id;
   }
 
-  static ensureUserIsLoggedIn(){
+  static void ensureUserIsLoggedIn(){
     if(!AuthService.isLoggedIn())
     {
       throw Exception("User must be logged in.");
@@ -194,14 +150,16 @@ class AuthService {
     return resp.data;
   }
 
-  static Future<String?> unsafeChangeUserPassword(OccasionUserModel occasionUserModel, String pwd) async {
-    return await _supabase.rpc("set_user_password",
+  static Future<void> unsafeChangeUserPassword(OccasionUserModel occasionUserModel, String pwd) async {
+    var data = await _supabase.rpc("reset_user_password",
         params:
         {
-          "usr": occasionUserModel.user,
-          "oc": occasionUserModel.occasion??RightsService.currentOccasionId(),
-          "password": pwd
+          "p_user_id": occasionUserModel.user,
+          "p_password": pwd
         });
+    if(data["code"] != 200){
+      throw Exception(data["message"]);
+    }
   }
 
   static Future<void> changeMyPassword(String pw) async {

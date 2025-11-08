@@ -57,29 +57,47 @@ platform :ios do
 
     app = Spaceship::ConnectAPI::App.find(ENV['FASTLANE_APP_IDENTIFIER'])
 
-    UI.message("⏳ Waiting for App Store Connect to process the build...")
+    uploaded_version = ENV["IPA_VERSION"]
+    uploaded_build_number = ENV["IPA_BUILD_NUMBER"]
+
+    UI.message("⏳ Waiting for App Store Connect to process build #{uploaded_version} (#{uploaded_build_number})...")
+
     build = nil
     max_attempts = 40
     attempt = 0
 
     until build
       attempt += 1
-      builds = app.get_builds.sort_by(&:uploaded_date).reverse
 
-      # Print status of each build (for debug)
-      builds.each do |b|
-        UI.message("Attempt #{attempt} - Build #{b.version} (#{b}): #{b.processing_state}")
+      all_builds = app.get_builds(
+        includes: "preReleaseVersion"
+      ).sort_by(&:uploaded_date).reverse
+
+      UI.message("🔍 Attempt #{attempt}: Found #{all_builds.size} builds total")
+      all_builds.each do |b|
+        app_version = b.pre_release_version&.version || "N/A"
+        UI.message("   ↳ Build #{app_version} (#{b.version}) → #{b.processing_state}")
       end
 
-      build = builds.find { |b| b.processing_state == "VALID" }
+      matching_builds = all_builds.select do |b|
+        b.pre_release_version&.version == uploaded_version && b.version == uploaded_build_number
+      end
 
-      if build
-        UI.success("✅ Build #{build.version} (#{build}) is processed!")
-        break
+      if matching_builds.empty?
+        UI.important("⚠️ No build matches version=#{uploaded_version}, build=#{uploaded_build_number} yet")
+      else
+        build = matching_builds.find { |b| b.processing_state == "VALID" }
+
+        if build
+          UI.success("✅ Build #{build.pre_release_version.version} (#{build.version}) is processed and valid!")
+          break
+        else
+          UI.message("⌛ Matching build found, but not VALID yet: #{matching_builds.first.processing_state}")
+        end
       end
 
       if attempt >= max_attempts
-        UI.user_error!("❌ Build processing timeout after #{attempt * 15} seconds.")
+        UI.user_error!("❌ Timeout: Build #{uploaded_version} (#{uploaded_build_number}) did not become VALID.")
       end
 
       sleep(15)

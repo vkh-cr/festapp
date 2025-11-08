@@ -3,6 +3,8 @@ class FeatureConstants {
   // Core keys
   static const String metaIsEnabled = "is_enabled";
   static const String metaCode = "code";
+  static const String metaTitle = "title";
+  static const String metaDescription = "description";
 
   // Feature codes
   static const String ticket = "ticket";
@@ -19,6 +21,9 @@ class FeatureConstants {
   static const String map = "map";
   static const String quotes = "quotes";
   static const String workshops = "workshops";
+  static const String volunteers = "volunteers";
+  static const String schedule = "schedule";
+  static const String import = "import"; // New feature
 
   // Extra fields for ticket feature
   static const String ticketLightColor = "lightColor";
@@ -26,16 +31,15 @@ class FeatureConstants {
   static const String ticketBackground = "background";
   static const String ticketType = "ticket_type";
 
-  static const String scheduleType = "schedule_type";
-  static const String schedule = "schedule";
-  static const String scheduleTypeBasic = "basic";
-  static const String scheduleTypeAdvanced = "advanced";
-
   // Extra fields for form feature
   static const String formUseExternal = "use_external_form";
   static const String formExternalLink = "external_form_link";
   static const String formExternalPrice = "external_price";
   static const String reserveButtonTitle = "reserve_button_title";
+  static const String reminderIsEnabled = "reminder_is_enabled";
+  static const String reminderIntervalSeconds = "reminder_interval_seconds";
+  static const String deadlineDurationSeconds = "deadline_duration_seconds";
+
 
   // Extra field for companions feature
   static const String companionsMax = "max_companions";

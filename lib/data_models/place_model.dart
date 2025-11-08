@@ -52,7 +52,7 @@ class PlaceModel extends ITrinaRowModel {
     );
   }
 
-  Map toJson() =>
+  Map<String, dynamic> toJson() =>
   {
     Tb.places.id: id,
     Tb.places.title: title,
@@ -66,10 +66,10 @@ class PlaceModel extends ITrinaRowModel {
 
   PlaceModel({
     this.latLng,
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.type,
+    this.id,
+    this.title,
+    this.description,
+    this.type,
     this.order,
     this.icon,
     this.isHidden = false});
@@ -77,7 +77,7 @@ class PlaceModel extends ITrinaRowModel {
   String toPlutoSelectString() => "$id:$title";
 
   @override
-  Future<void> deleteMethod() async {
+  Future<void> deleteMethod(BuildContext context) async {
     await DbPlaces.deletePlace(this);
   }
 
@@ -101,7 +101,7 @@ class PlaceModel extends ITrinaRowModel {
   }
 
   @override
-  Future<void> updateMethod() async {
+  Future<void> updateMethod(BuildContext context) async {
     await DbPlaces.updatePlace(this);
   }
 }

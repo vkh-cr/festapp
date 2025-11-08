@@ -3,7 +3,6 @@ class Tb {
   static OccasionUsersTb occasion_users = const OccasionUsersTb();
   static NewsTb news = const NewsTb();
   static UserInfoTb user_info = const UserInfoTb();
-  static UserInfoPublicTb user_info_public = const UserInfoPublicTb();
   static UserNewsTb user_news = const UserNewsTb();
   static InformationTb information = const InformationTb();
   static InformationHidden information_hidden = const InformationHidden();
@@ -30,7 +29,19 @@ class Tb {
   static ImagesTb images = const ImagesTb();
   static EmailTemplatesTb email_templates = const EmailTemplatesTb();
   static PathGroupsTb path_groups = const PathGroupsTb();
+  static ActivitiesTb activities = const ActivitiesTb();
+  static ActivityAssignmentsTb activity_assignments = const ActivityAssignmentsTb();
+  static ActivityAssignmentPlacesTb activity_assignment_places = const ActivityAssignmentPlacesTb();
+  static ActivityAssignmentEventsTb activity_assignment_events = const ActivityAssignmentEventsTb();
+
+  // New tables based on the updated schema
+  static InventoryPoolsTb inventory_pools = const InventoryPoolsTb();
+  static ResourcesTb resources = const ResourcesTb();
+  static ResourceSlotsTb resource_slots = const ResourceSlotsTb();
+  static InventoryContextsTb inventory_contexts = const InventoryContextsTb();
+  static ProductsTb products = const ProductsTb(); // Assuming a products class is needed
 }
+
 class OccasionsTb {
   const OccasionsTb();
   String get table => "occasions";
@@ -70,6 +81,8 @@ class OccasionsTb {
   String get services => "services";
   String get data_features_code => "code";
   String get data_features_is_enabled => "is_enabled";
+
+  String get data_timezone => "timezone";
 }
 class OccasionUsersTb{
   const OccasionUsersTb();
@@ -93,6 +106,7 @@ class OccasionUsersTb{
   String get data_birthDate => "birthDate";
   String get data_phone => "phone";
   String get data_isInvited => "is_invited";
+  String get data_is_volunteer => "is_volunteer";
   String get data_note => "note";
   String get data_diet => "diet";
   String get data_text1 => "text1";
@@ -139,14 +153,6 @@ class UserInfoTb{
   String get is_editor_readonly => "is_editor_readonly";
   String get is_admin_readonly => "is_admin_readonly";
   String get data => "data";
-}
-class UserInfoPublicTb{
-  const UserInfoPublicTb();
-  String get table => "user_info_public";
-  String get id => "id";
-  String get name => "name";
-  String get surname => "surname";
-  String get sex => "sex";
 }
 
 class RoleInfoTb{
@@ -210,6 +216,7 @@ class EventsTb{
   String get data => "data";
 
   String get dataHeaderImage => "header_image";
+  String get dataIsCancelled => "is_cancelled";
 
 
 }
@@ -267,7 +274,6 @@ class UserGroupInfoTb{
   String get id => "id";
   String get occasion => "occasion";
   String get title => "title";
-  String get leader => "leader";
   String get place => "place";
   String get description => "description";
   String get type => "type";
@@ -334,6 +340,7 @@ class FormsTb {
   String get created_at => "created_at";
   String get data => "data";
   String get key => "key";
+  String get title => "title";
   String get occasion => "occasion";
   String get blueprint => "blueprint";
   String get type => "type";
@@ -419,4 +426,112 @@ class PathGroupsTb {
   String get color    => "color";
   String get occasion => "occasion";
   String get order => "order";
+}
+
+
+class ActivitiesTb {
+  const ActivitiesTb();
+  String get table        => 'activities';
+  String get id           => 'id';
+  String get created_at   => 'created_at';
+  String get updated_at   => 'updated_at';
+  String get title        => 'title';
+  String get description  => 'description';
+  String get type         => 'type';
+  String get occasion     => 'occasion';
+  String get unit         => 'unit';
+  String get is_hidden    => 'is_hidden';
+  String get data         => 'data';
+  String get order        => 'order';
+}
+
+class ActivityAssignmentsTb {
+  const ActivityAssignmentsTb();
+  String get table        => 'activity_assignments';
+  String get id           => 'id';
+  String get activity_id  => 'activity_id';
+  String get user         => 'user';
+  String get start_time   => 'start_time';
+  String get end_time     => 'end_time';
+  String get title        => 'title';
+  String get description  => 'description';
+  String get data         => 'data';
+}
+
+class ActivityAssignmentPlacesTb {
+  const ActivityAssignmentPlacesTb();
+  String get table         => 'activity_assignment_places';
+  String get assignment_id => 'assignment_id';
+  String get place_id      => 'place_id';
+}
+
+class ActivityAssignmentEventsTb {
+  const ActivityAssignmentEventsTb();
+  String get table         => 'activity_assignment_events';
+  String get assignment_id => 'assignment_id';
+  String get event_id      => 'event_id';
+}
+
+class InventoryPoolsTb {
+  const InventoryPoolsTb();
+  String get table => "inventory_pools";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get data => "data";
+  String get title => "title";
+  String get sellable_capacity => "sellable_capacity";
+  String get occasion => "occasion";
+  String get type => "type";
+  String get description => "description";
+  String get data_is_auto_resource_assignment => "is_auto_resource_assignment";
+  String get data_place_id => "place_id";
+}
+
+class ResourcesTb {
+  const ResourcesTb();
+  String get table => "resources";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get title => "title";
+  String get description => "description";
+  String get capacity => "capacity";
+  String get booking_rules => "booking_rules";
+  String get inventory_pool => "inventory_pool";
+  String get place => "place";
+  String get occasion => "occasion";
+  String get unit => "unit";
+  String get data => "data";
+}
+
+class ResourceSlotsTb {
+  const ResourceSlotsTb();
+  String get table => "resource_slots";
+  String get id => "id";
+  String get resource => "resource";
+  String get title => "title";
+  String get data => "data";
+}
+
+class InventoryContextsTb {
+  const InventoryContextsTb();
+  String get table => "inventory_contexts";
+  String get id => "id";
+  String get inventory_pool => "inventory_pool";
+  String get block_date => "block_date";
+  String get title => "title";
+  String get order => "order";
+  String get data => "data";
+  String get data_product_id => "product_id";
+}
+
+class ProductsTb {
+  const ProductsTb();
+  String get table => "products";
+  String get id => "id";
+  String get title => "title";
+  String get price => "price";
+  String get data => "data";
+  String get occasion => "occasion";
 }

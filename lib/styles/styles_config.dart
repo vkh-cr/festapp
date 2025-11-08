@@ -19,6 +19,7 @@ class StylesConfig {
   static const double normalClickableFontSize = 18;
 
   // Dimensions
+  static const double gridMaxWidth = 1200;
   static const double appMaxWidth = 720;
   static const double formMaxWidth = 680;
   static const double formMaxWidthMid = 580;
@@ -32,11 +33,16 @@ class StylesConfig {
   static const double newsItemRoundness = 10; //2
   static const double imageRoundness = 100;
 
+  static const double commonRoundness = 10;
+
+
   static const EdgeInsets tabHeaderPadding = EdgeInsets.symmetric(vertical: 4); //4
   static Border? indicatorBorder() => null;
   static Border? headerBorder() => null; //Theme.of(context).scaffoldBackgroundColor
 
   static TextStyle textStyleBig = TextStyle(fontWeight: FontWeight.w900, fontSize: 16);
+
+  static const double scheduleTimelineNodePosition = 0.35;
 
   // Button styles
   static ButtonStyle mainPageButtonStyle(BuildContext context) =>

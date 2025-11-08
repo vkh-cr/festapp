@@ -1,12 +1,11 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
+import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/pages/user/forgot_password_page.dart';
 import 'package:fstapp/pages/occasion/settings_page.dart';
 import 'package:fstapp/pages/user/signup_page.dart';
-import 'package:fstapp/services/link_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -62,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,
@@ -142,10 +141,15 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> _refreshSignedInStatus(value) async {
+  Future<void> _refreshSignedInStatus(dynamic value) async {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
-      await RouterService.updateOccasionFromLink(LinkModel(occasionLink: RouterService.currentOccasionLink));
+      var unitId = RightsService.currentUnit()?.id == 1 ? null : RightsService.currentUnit()?.id;
+      if(AppConfig.isAppSupported){
+        RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
+      } else {
+        await RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
+      }
       RouterService.popOrHome(context);
     }
   }

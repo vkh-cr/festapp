@@ -186,6 +186,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
     String? htmlTextEdited = await controller.getText();
     var htmlText = HtmlHelper.removeColor(htmlTextEdited);
     htmlText = HtmlHelper.detectAndReplaceLinks(htmlText);
+    htmlText = HtmlHelper.htmlTrim(htmlText);
 
     // New way using storeImagesToOccasion with the occasionId from widget
     if (widget.occasionId != null) {
@@ -195,6 +196,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
       });
       await Future.delayed(const Duration(milliseconds: 50));
       htmlText = await HtmlHelper.storeImagesToOccasion(_originalHtml ?? _html, htmlText, widget.occasionId!);
+      htmlText = HtmlHelper.applyEmailCompatibleStyleToImages(htmlText);
+
       RouterService.goBack(context, htmlText);
       return;
     }
@@ -240,6 +243,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
         }
       }
     }
+
+    htmlText = HtmlHelper.applyEmailCompatibleStyleToImages(htmlText);
 
     setState(() {
       _isSaving = false;
