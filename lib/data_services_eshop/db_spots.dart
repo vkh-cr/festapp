@@ -60,20 +60,23 @@ class DbSpots {
     return bundle;
   }
 
-  /// NEW: Updates a batch of spot assignments in a single transaction.
-  /// This is more efficient than calling updateSpot multiple times.
   static Future<void> updateSpotAssignments(List<Map<String, dynamic>> changes) async {
     if (changes.isEmpty) {
       return;
     }
-
-    // The RPC function `update_spot_assignments` will handle errors internally
-    // and throw a PSQLException, which Supabase will catch and re-throw as a PostgrestException.
-    // The default behavior of the Supabase client will handle this exception,
-    // so we don't need to check the response body for a custom error code here.
     await _supabase.rpc(
       'update_spot_assignments',
       params: {'p_changes': changes},
+    );
+  }
+
+  static Future<void> swapSpotTickets(int spotId1, int spotId2,) async {
+    await _supabase.rpc(
+      'swap_spot_tickets',
+      params: {
+        'spot_id_1': spotId1,
+        'spot_id_2': spotId2,
+      },
     );
   }
 }
