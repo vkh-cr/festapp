@@ -50,6 +50,32 @@ class Utilities {
     return regex.hasMatch(link);
   }
 
+  /// Validates a string for a common email format.
+  ///
+  /// This provides practical validation, not full RFC 5322 compliance.
+  /// It returns `true` for valid formats (e.g., "name@domain.com")
+  /// and `false` for null, empty, or improperly formatted strings.
+  static bool isValidEmail(String? email) {
+    // 1. Check if the email is null or empty (after trimming)
+    if (email == null || email.trim().isEmpty) {
+      return false;
+    }
+
+    // 2. Define the regex pattern for a common email format.
+    // This checks for:
+    // - local-part: [a-z0-9._%+-]
+    // - @ symbol
+    // - domain-part: [a-z0-9.-]
+    // - . (dot)
+    // - top-level-domain: [a-z]{2,} (at least 2 letters)
+    final String emailPattern = r'^[a-z0-9\._%+-]+@[a-z0-9\.-]+\.[a-z]{2,}$';
+
+    // 3. Create a RegExp object (case-insensitive) and check for a match.
+    // We trim the email again to ensure the regex doesn't fail on trailing whitespace.
+    final RegExp regex = RegExp(emailPattern, caseSensitive: false);
+    return regex.hasMatch(email.trim());
+  }
+
   static String sanitizeFullUrl(String link) {
     // First, remove diacritics from the input string.
     final String cleaned = removeDiacritics(link);

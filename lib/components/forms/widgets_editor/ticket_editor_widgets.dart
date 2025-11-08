@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/services.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
@@ -19,20 +20,41 @@ class TicketEditorWidgets {
     return '$count / $maxStr';
   }
 
+  /// Helper to get the `max_tickets` value, defaulting to 1.
+  static int _getMaxTickets(FormFieldModel ticketField) {
+    ticketField.data ??= {};
+    int currentValue = 1;
+    dynamic rawValue = ticketField.data![FormHelper.maxTickets];
+    if (rawValue is int) {
+      currentValue = rawValue;
+    } else if (rawValue is String) {
+      currentValue = int.tryParse(rawValue) ?? 1;
+    }
+    return (currentValue < 1) ? 1 : currentValue;
+  }
+
   static Widget buildTicketEditorReadOnly(BuildContext context, FormModel form, FormFieldModel ticketField) {
     List<Widget> children = [];
     if (FeatureService.isFeatureEnabled(FeatureConstants.blueprint)) {
       children.add(buildSpotFieldReadOnly(context, form));
       children.add(const SizedBox(height: 8));
     }
-    final productTypeFields = form.relatedFields!
+
+    // Show "Max tickets per order" only if both ticket and blueprint features are enabled.
+    if (FeatureService.isFeatureEnabled(FeatureConstants.ticket) &&
+        FeatureService.isFeatureEnabled(FeatureConstants.blueprint)) {
+      children.add(_buildMaxTicketsReadOnly(context, ticketField));
+      children.add(const SizedBox(height: 8));
+    }
+
+    final productTypeFields = form.relatedFields
         .where((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeProductType)
         .toList();
     if (productTypeFields.isEmpty) {
       children.add(Padding(
         padding: const EdgeInsets.only(top: 8.0),
         child: Text(
-          'No Product Types'.tr(),
+          FormStrings.noProductTypes,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ));
@@ -49,18 +71,31 @@ class TicketEditorWidgets {
     );
   }
 
-  static Widget buildTicketEditor(BuildContext context, FormModel form, List<ProductTypeModel> allProductTypes, VoidCallback refresh) {
+  static Widget buildTicketEditor(
+      BuildContext context,
+      FormModel form,
+      FormFieldModel ticketField, // <-- This parameter was added
+      List<ProductTypeModel> allProductTypes,
+      VoidCallback refresh) {
     List<Widget> children = [];
     if (FeatureService.isFeatureEnabled(FeatureConstants.blueprint)) {
       children.add(buildSpotFieldEditor(context, form, refresh));
       children.add(const SizedBox(height: 16));
     }
-    final productTypeFields = form.relatedFields!
+
+    // Show "Max tickets per order" only if both ticket and blueprint features are enabled.
+    if (FeatureService.isFeatureEnabled(FeatureConstants.ticket) &&
+        FeatureService.isFeatureEnabled(FeatureConstants.blueprint)) {
+      children.add(_buildMaxTicketsEditor(context, ticketField));
+      children.add(const SizedBox(height: 24));
+    }
+
+    final productTypeFields = form.relatedFields
         .where((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeProductType)
         .toList();
     productTypeFields.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
     children.add(Text(
-      'Product Types'.tr(),
+      FormStrings.productTypes,
       style: Theme.of(context).textTheme.titleSmall,
     ));
     children.add(const SizedBox(height: 8));
@@ -75,7 +110,7 @@ class TicketEditorWidgets {
           icon: const Icon(Icons.add),
           label: Text(FormStrings.addProductTypeTitle),
           onPressed: () async {
-            final existingPtIds = form.relatedFields!
+            final existingPtIds = form.relatedFields
                 .where((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeProductType && f.productType != null)
                 .map((f) => f.productType!.id)
                 .toSet();
@@ -109,6 +144,64 @@ class TicketEditorWidgets {
     );
   }
 
+  /// Builds the editor for the "max_tickets" setting
+  static Widget _buildMaxTicketsEditor(BuildContext context, FormFieldModel ticketField) {
+    return TextFormField(
+      initialValue: _getMaxTickets(ticketField).toString(),
+      decoration: InputDecoration(
+        labelText: FormStrings.labelMaxTicketsPerOrder,
+        helperText: FormStrings.helperMaxTicketsPerOrder,
+        border: const OutlineInputBorder(),
+        isDense: true,
+      ),
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return FormStrings.validationMaxTicketsInvalid;
+        }
+        final number = int.tryParse(value);
+        if (number == null || number < 1) {
+          return FormStrings.validationMaxTicketsInvalid;
+        }
+        return null; // Valid
+      },
+      onChanged: (value) {
+        final number = int.tryParse(value);
+        ticketField.data ??= {};
+        if (number != null && number >= 1) {
+          ticketField.data![FormHelper.maxTickets] = number;
+        } else {
+          // If user clears the field or enters 0, default back to 1
+          ticketField.data![FormHelper.maxTickets] = 1;
+        }
+      },
+    );
+  }
+
+  /// Builds the read-only display for the "max_tickets" setting
+  static Widget _buildMaxTicketsReadOnly(BuildContext context, FormFieldModel ticketField) {
+    final int maxTickets = _getMaxTickets(ticketField);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        // This layout places the label on the left and the number on the right.
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            FormStrings.labelMaxTicketsPerOrder,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            maxTickets.toString(),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
   static void _createNewProductType(FormModel form) {
     final newProductTypeField = FormFieldModel(
       title: FormStrings.newProductTypeDefaultName,
@@ -118,9 +211,9 @@ class TicketEditorWidgets {
         title: FormStrings.newProductTypeDefaultName,
         products: [],
       ),
-      order: (form.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
+      order: (form.relatedFields.map((x) => x.order ?? 0).fold(0, max)) + 1,
     );
-    form.relatedFields!.add(newProductTypeField);
+    form.relatedFields.add(newProductTypeField);
   }
 
   static void _addExistingProductType(FormModel form, ProductTypeModel productType) {
@@ -129,9 +222,9 @@ class TicketEditorWidgets {
       type: FormHelper.fieldTypeProductType,
       isTicketField: true,
       productType: productType,
-      order: (form.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
+      order: (form.relatedFields.map((x) => x.order ?? 0).fold(0, max)) + 1,
     );
-    form.relatedFields!.add(newProductTypeField);
+    form.relatedFields.add(newProductTypeField);
   }
 
   static Future<dynamic> _showAddProductTypeDialog(BuildContext context, List<ProductTypeModel> availableProductTypes) async {
@@ -178,7 +271,7 @@ class TicketEditorWidgets {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => Navigator.of(dialogContext).pop(),
-                      child: Text("Storno".tr()),
+                      child: Text("Storno").tr(), // Using FormStrings for localization
                     ),
                   )
                 ],
@@ -191,7 +284,7 @@ class TicketEditorWidgets {
   }
 
   static Widget buildSpotFieldEditor(BuildContext context, FormModel form, VoidCallback refresh) {
-    var spotField = form.relatedFields!.firstWhereOrNull((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeSpot);
+    var spotField = form.relatedFields.firstWhereOrNull((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeSpot);
     return Card(
       elevation: 3,
       child: Padding(
@@ -202,7 +295,7 @@ class TicketEditorWidgets {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                "Seat selection".tr(),
+                FormStrings.seatSelection,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -215,13 +308,13 @@ class TicketEditorWidgets {
                       type: FormHelper.fieldTypeSpot,
                       isTicketField: true,
                       isHidden: false,
-                      order: (form.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
+                      order: (form.relatedFields.map((x) => x.order ?? 0).fold(0, max)) + 1,
                     );
-                    form.relatedFields!.add(spotField!);
+                    form.relatedFields.add(spotField!);
                   }
                   spotField!.isHidden = false;
                 } else {
-                  var field = form.relatedFields!.firstWhereOrNull((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeSpot);
+                  var field = form.relatedFields.firstWhereOrNull((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeSpot);
                   if (field != null) {
                     field.isHidden = true;
                   }
@@ -236,7 +329,7 @@ class TicketEditorWidgets {
   }
 
   static Widget buildSpotFieldReadOnly(BuildContext context, FormModel form) {
-    bool spotExists = form.relatedFields!.any((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeSpot && !(f.isHidden ?? false));
+    bool spotExists = form.relatedFields.any((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeSpot && !(f.isHidden ?? false));
     return Card(
       elevation: 3,
       child: Padding(
@@ -247,7 +340,7 @@ class TicketEditorWidgets {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                "Seat selection".tr(),
+                FormStrings.seatSelection,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -262,7 +355,7 @@ class TicketEditorWidgets {
   }
 
   static Widget buildTicketNoteCheckbox(BuildContext context, FormModel form, VoidCallback refresh) {
-    final noteFieldIndex = form.relatedFields!.indexWhere((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote && !(f.isHidden ?? true));
+    final noteFieldIndex = form.relatedFields.indexWhere((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote && !(f.isHidden ?? true));
     final noteExists = noteFieldIndex != -1;
     return Checkbox(
       value: noteExists,
@@ -274,20 +367,20 @@ class TicketEditorWidgets {
   }
 
   static void _toggleTicketNote(FormModel form, bool val) {
-    var ticketNote = form.relatedFields!.firstWhereOrNull((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote);
+    var ticketNote = form.relatedFields.firstWhereOrNull((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote);
     if (val) {
       if (ticketNote == null) {
         final newNoteField = FormFieldModel(
-          title: "Note".tr(),
+          title: FormStrings.note,
           type: FormHelper.fieldTypeNote,
           isTicketField: true,
           isHidden: false,
-          order: (form.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
+          order: (form.relatedFields.map((x) => x.order ?? 0).fold(0, max)) + 1,
         );
-        form.relatedFields!.add(newNoteField);
+        form.relatedFields.add(newNoteField);
       } else {
         ticketNote.isHidden = false;
-        ticketNote.order = (form.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1;
+        ticketNote.order = (form.relatedFields.map((x) => x.order ?? 0).fold(0, max)) + 1;
       }
     } else {
       if (ticketNote != null) {
