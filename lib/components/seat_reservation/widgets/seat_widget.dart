@@ -12,13 +12,15 @@ class SeatWidgetHelper {
   static Widget buildSeat({
     required BuildContext context,
     required SeatState state,
+    bool isHighlighted = false,
     double size = 40.0,
   }) {
     final bool hasPadding = state == SeatState.ordered ||
         state == SeatState.selected ||
         state == SeatState.selected_by_me ||
         state == SeatState.used ||
-        state == SeatState.available;
+        state == SeatState.available ||
+        (isHighlighted && state == SeatState.empty);
 
     return Container(
       color: hasPadding ? Colors.black.withOpacity(0) : getSeatColor(context, SeatState.empty),
@@ -29,6 +31,9 @@ class SeatWidgetHelper {
         decoration: BoxDecoration(
           color: getSeatColor(context, state),
           borderRadius: BorderRadius.circular(hasPadding ? padding : 0.0),
+          border: isHighlighted
+              ? Border.all(color: Colors.orange, width: 2.0)
+              : null,
         ),
         child: state == SeatState.selected_by_me
             ? Center(
@@ -36,6 +41,19 @@ class SeatWidgetHelper {
             Icons.check,
             size: size * 0.7,
             color: Colors.white,
+          ),
+        )
+            : state == SeatState.ordered
+            ? Center(
+          child: SizedBox(
+            width: size * 0.45,
+            height: size * 0.45,
+            child: CustomPaint(
+              painter: _XPainter(
+                color: Colors.black,
+                strokeWidth: 0.4,
+              ),
+            ),
           ),
         )
             : null,
@@ -57,7 +75,7 @@ class SeatWidgetHelper {
       case SeatState.used:
         return ThemeConfig.blueColor();
       case SeatState.ordered:
-        return Colors.black26;
+        return Colors.black12;
       case SeatState.empty:
         return Colors.black.withOpacity(0);
       default:
@@ -66,3 +84,37 @@ class SeatWidgetHelper {
   }
 }
 
+/// A custom painter to draw a thin 'X'.
+/// This class can be at the bottom of your file.
+class _XPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+
+  _XPainter({required this.color, required this.strokeWidth});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.butt;
+
+    canvas.drawLine(
+      Offset.zero,
+      Offset(size.width, size.height),
+      paint,
+    );
+
+    canvas.drawLine(
+      Offset(size.width, 0),
+      Offset(0, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _XPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
+  }
+}
