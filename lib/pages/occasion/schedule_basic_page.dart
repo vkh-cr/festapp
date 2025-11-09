@@ -200,48 +200,56 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
       child: Column(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  GestureDetector(
-                    onTap: () async {
-                      RouterService.navigate(context, "${UnitPage.ROUTE}/${RightsService.currentUnit()!.id!}");
-                    },
-                    onDoubleTap: () async {
-                      var packageInfo = await PackageInfo.fromPlatform();
-                      ToastHelper.Show(context,
-                          "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
-                      if (RightsService.isEditor()) {
-                        TimeHelper.toggleTimeTravel?.call();
-                        setState(() {});
-                      }
-                    },
-                    child: LogoWidget(width: 120,),
-                  ),
-                  const Spacer(),
-                  if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
-                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-                      CircularButton(
-                        onPressed: _mySchedulePressed,
-                        backgroundColor: ThemeConfig.profileButtonColor(context),
-                        child: Icon(Icons.favorite,
-                            color: ThemeConfig.profileButtonTextColor(context)),
+          Container(
+            color: ThemeConfig.logoBackgroundColor(context),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      GestureDetector(
+                        onTap: () async {
+                          RouterService.navigate(context, "${UnitPage.ROUTE}/${RightsService.currentUnit()!.id!}");
+                        },
+                        onDoubleTap: () async {
+                          var packageInfo = await PackageInfo.fromPlatform();
+                          ToastHelper.Show(context,
+                              "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                          if (RightsService.isEditor()) {
+                            TimeHelper.toggleTimeTravel?.call();
+                            setState(() {});
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: LogoWidget(width: 120,),
+                        ),
                       ),
-                      Text("My schedule".tr()),
+                      const Spacer(),
+                      if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
+                        Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                          CircularButton(
+                            onPressed: _mySchedulePressed,
+                            backgroundColor: ThemeConfig.profileButtonColor(context),
+                            child: Icon(Icons.favorite,
+                                color: ThemeConfig.profileButtonTextColor(context)),
+                          ),
+                          Text("My schedule".tr()),
+                        ]),
+                      if(FeatureService.isFeatureEnabled(FeatureConstants.timetable))
+                        Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                          CircularButton(
+                            onPressed: _schedulePressed,
+                            backgroundColor: ThemeConfig.profileButtonColor(context),
+                            child: Icon(Icons.calendar_month,
+                                color: ThemeConfig.profileButtonTextColor(context)),
+                          ),
+                          Text("Schedule".tr()),
+                        ]),
                     ]),
-                  if(FeatureService.isFeatureEnabled(FeatureConstants.timetable))
-                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-                      CircularButton(
-                        onPressed: _schedulePressed,
-                        backgroundColor: ThemeConfig.profileButtonColor(context),
-                        child: Icon(Icons.calendar_month,
-                            color: ThemeConfig.profileButtonTextColor(context)),
-                      ),
-                      Text("Schedule".tr()),
-                    ]),
-                ]),
+              ),
+            ),
           ),
           Expanded(
             child: ScheduleTabView(
