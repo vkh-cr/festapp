@@ -581,6 +581,7 @@ class AppPanelHelper {
       List<AdminTabDefinition>? activeTabs,
       TabController? tabController,) {
     return AppBar(
+      backgroundColor: ThemeConfig.logoBackgroundColor(context),
       toolbarHeight: 60,
       automaticallyImplyLeading: false,
       // Use a fully custom title area
@@ -660,6 +661,7 @@ class AppPanelHelper {
     final separatorColor = onAppBarColor.withOpacity(0.5);
 
     return AppBar(
+      backgroundColor: ThemeConfig.logoBackgroundColor(context),
       automaticallyImplyLeading: false,
       leadingWidth: 56,
       titleSpacing: 4.0,

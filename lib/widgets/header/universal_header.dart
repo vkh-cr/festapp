@@ -20,7 +20,7 @@ class UniversalHeader extends StatelessWidget {
       snap: true,
       pinned: false,
       toolbarHeight: kToolbarHeight,
-      backgroundColor: ThemeConfig.whiteColorDarker(context),
+      backgroundColor: ThemeConfig.logoBackgroundColor(context),
       elevation: 2,
       centerTitle: false,
       titleSpacing: kHorizontalPadding,
