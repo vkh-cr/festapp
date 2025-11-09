@@ -200,7 +200,8 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
       child: Column(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
-          Padding(
+          Container(
+            color: ThemeConfig.logoBackgroundColor(context),
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -218,7 +219,10 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                         setState(() {});
                       }
                     },
-                    child: LogoWidget(width: 120,),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: LogoWidget(width: 120,),
+                    ),
                   ),
                   const Spacer(),
                   if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
