@@ -21,6 +21,12 @@ BEGIN
             SET is_hidden = change.new_value::BOOLEAN
             WHERE id = change.subject_id;
 
+        ELSIF change.change_type = 'forms.is_open' THEN
+            -- Update form open state
+            UPDATE public.forms
+            SET is_open = change.new_value::BOOLEAN
+            WHERE id = change.subject_id;
+
         ELSE
             RAISE NOTICE 'Unknown change_type: %', change.change_type;
         END IF;
