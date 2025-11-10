@@ -1,12 +1,14 @@
 import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/form_feature.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/dialogs/occasion_detail_dialog.dart';
@@ -60,6 +62,35 @@ class _OccasionCardState extends State<OccasionCard> {
     String? externalPrice = details is FormFeature
         ? details.formExternalPrice
         : null;
+
+    // Check if the form feature is enabled
+    final bool hasFormFeature = FeatureService.isFeatureEnabled(
+        FeatureConstants.form,
+        features: widget.occasion.features);
+
+    // Check if the description is empty using the correct helper
+    final bool isDescriptionEmpty =
+    HtmlHelper.isHtmlEmptyOrNull(widget.occasion.description);
+
+    // Get the "Reserve" button title, if applicable
+    final String reserveTitle = details is FormFeature
+        ? details.reserveButtonTitle ?? "Reserve a spot".tr()
+        : "Reserve a spot".tr();
+
+    // Get the default "Detail" button title
+    final String detailTitle = "Detail".tr();
+
+    // Determine if we should skip the dialog
+    final bool skipDialog = hasFormFeature && isDescriptionEmpty;
+
+    // Determine the button's final text
+    final String buttonText = skipDialog ? reserveTitle : detailTitle;
+
+    // Determine if the button should be shown at all
+    // It should be shown if:
+    // 1. It has a form (is a "Reserve" or "Detail" button that leads to a form)
+    // 2. It does NOT have a form, but IS in the supported app (is a "Detail" button that navigates)
+    final bool showButton = hasFormFeature || AppConfig.isAllUnit;
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
@@ -203,50 +234,58 @@ class _OccasionCardState extends State<OccasionCard> {
                       ),
                     ),
 
-                    // Detail button
-                    Positioned(
-                      bottom: 6 * buttonScale,
-                      right: 10 * buttonScale,
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          if (!FeatureService.isFeatureEnabled(
-                              FeatureConstants.form,
-                              features: widget.occasion.features)) {
-                            try {
-                              await RightsService.updateAppData(
-                                  link: widget.occasion.link, force: true);
-                            } catch (e) {
-                              // ignore
+                    // Conditionally render the button based on the new 'showButton' flag
+                    if (showButton)
+                      Positioned(
+                        bottom: 6 * buttonScale,
+                        right: 10 * buttonScale,
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            if (skipDialog) {
+                              // Case 1: Has form, empty description -> Reserve
+                              await OccasionDetailDialog.handleReserveAction(context, widget.occasion);
                             }
-                            await RouterService.navigateOccasion(
-                                context, "");
-                          } else {
-                            showDialog(
-                              context: context,
-                              builder: (context) =>
-                                  OccasionDetailDialog(
-                                      occasion: widget.occasion),
-                            );
-                          }
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.white),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16 * buttonScale,
-                            vertical: 8 * buttonScale,
+                            else if (hasFormFeature && !isDescriptionEmpty) {
+                              // Case 2: Has form, has description -> Show Dialog
+                              showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    OccasionDetailDialog(
+                                        occasion: widget.occasion),
+                              );
+                            }
+                            else if (!hasFormFeature) {
+                              // Case 3: No form.
+                              // We only get here if AppConfig.isAllUnit is true
+                              // (because of the 'showButton' check).
+                              try {
+                                await RightsService.updateAppData(
+                                    link: widget.occasion.link, force: true);
+                              } catch (e) {
+                                // ignore
+                              }
+                              await RouterService.navigateOccasion(
+                                  context, "");
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.white),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16 * buttonScale,
+                              vertical: 8 * buttonScale,
+                            ),
+                            minimumSize: Size(
+                                112 * buttonScale, 36 * buttonScale),
                           ),
-                          minimumSize: Size(
-                              112 * buttonScale, 36 * buttonScale),
-                        ),
-                        child: Text(
-                          "Detail".tr(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14 * buttonScale,
+                          child: Text(
+                            buttonText,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14 * buttonScale,
+                            ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
