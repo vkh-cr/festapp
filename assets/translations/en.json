@@ -1123,6 +1123,8 @@
     "publicHelp": "Determines whether event details (schedule, info, etc.) are available to the public.",
     "hide": "Hide",
     "hideHelp": "This determines whether this event is hidden from list views.",
+    "promoted": "Promoted",
+    "promotedHelp": "Promote this event to make it stand out in lists or on the homepage.",
     "advancedSettings": "Advanced Settings",
     "link": "Link",
     "linkIsRequired": "Link is required",

@@ -58,6 +58,7 @@ class OccasionModel {
   DateTime? endTime;
   bool isOpen;
   bool isHidden;
+  bool isPromoted;
   String? link;
   String? title;
   String? description;
@@ -76,6 +77,7 @@ class OccasionModel {
     this.endTime,
     required this.isOpen,
     required this.isHidden,
+    required this.isPromoted,
     this.link,
     this.title,
     this.description,
@@ -105,6 +107,7 @@ class OccasionModel {
           : null,
       isOpen: json[Tb.occasions.is_open] ?? false,
       isHidden: json[Tb.occasions.is_hidden] ?? false,
+      isPromoted: json[Tb.occasions.is_promoted] ?? false,
       link: json[Tb.occasions.link],
       title: json[Tb.occasions.title],
       description: json[Tb.occasions.description],
@@ -128,6 +131,7 @@ class OccasionModel {
       Tb.occasions.end_time: endTime?.toUtcFromOccasionTime(data?[Tb.occasions.data_timezone]).toIso8601String(),
       Tb.occasions.is_open: isOpen,
       Tb.occasions.is_hidden: isHidden,
+      Tb.occasions.is_promoted: isPromoted,
       Tb.occasions.link: link,
       Tb.occasions.title: title,
       Tb.occasions.description: description,
