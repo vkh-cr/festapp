@@ -22,7 +22,7 @@ import 'package:fstapp/pages/occasion/map_page.dart';
 import 'package:fstapp/pages/occasion/my_schedule_page.dart';
 import 'package:fstapp/pages/occasion/timetable_page.dart';
 import 'package:fstapp/pages/occasion/occasion_home_page.dart';
-import 'package:fstapp/pages/unit/unit_page.dart';
+import 'package:fstapp/pages/unit/unit_page_base.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -35,6 +35,8 @@ import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/dialogs/companion_dialog.dart';
 import 'package:fstapp/data_services/db_companions.dart';
 import 'package:fstapp/data_models/companion_model.dart';
+
+import '../unit/unit_page.dart';
 
 @RoutePage()
 class SchedulePage extends StatefulWidget {

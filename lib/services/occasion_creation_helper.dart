@@ -184,6 +184,7 @@ class OccasionCreationHelper {
                             link: link,
                             isOpen: true,
                             isHidden: false,
+                            isPromoted: false,
                             unit: unit.id,
                             organization: unit.organization,
                             data: { Tb.occasions.data_timezone: TimeHelper.getSystemTimezoneName() },

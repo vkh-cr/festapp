@@ -127,6 +127,23 @@ class RouterService {
     await RouterService.navigate(context, "unit/${RightsService.currentUnit()!.id!}/edit");
   }
 
+  static Future<void> navigateHome(BuildContext context) async {
+    String targetHomePath = fixPath(""); // This resolves to "/"
+
+    // First, update app data regardless of navigation
+    await RightsService.updateAppData(
+        unitId: null, force: true, refreshOffline: false);
+
+    // Check if the current path is already the target home path
+    if (context.routeData.path == targetHomePath) {
+      // Already at home, so don't navigate
+      return;
+    }
+
+    // Not at home, navigate
+    await RouterService.navigate(context, ""); // Navigates to "/"
+  }
+
   /// Navigates to a specific occasion's admin page after updating app data.
   static Future<void> navigateToOccasionByLink(BuildContext context, String link) async {
     await RightsService.updateAppData(

@@ -593,11 +593,7 @@ class AppPanelHelper {
           // Logo on the far left, acting like a leading widget
           GestureDetector(
             onTap: () async {
-              final currentUnit = RightsService.currentUnit();
-              if (currentUnit != null &&
-                  RightsService.canUserSeeUnitWorkspace()) {
-                await RouterService.navigateToUnitAdmin(context, currentUnit);
-              }
+              await RouterService.navigateHome(context);
             },
             child: Padding(
               // Add padding to space it from the screen edge and from the breadcrumbs
