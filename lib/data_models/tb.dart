@@ -54,6 +54,7 @@ class OccasionsTb {
   String get start_time => "start_time";
   String get end_time => "end_time";
   String get is_open => "is_open";
+  String get is_promoted => "is_promoted";
   String get link => "link";
   String get title => "title";
   String get description => "description";

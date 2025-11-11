@@ -22,6 +22,9 @@ class OccasionSettingsStrings {
   static String get hide => 'OccasionSettings.hide'.tr(); // "Hide"
   static String get hideHelp => 'OccasionSettings.hideHelp'.tr(); // "This determines whether this event is hidden from list views."
 
+  static String get promoted => 'OccasionSettings.promoted'.tr(); // "Promoted"
+  static String get promotedHelp => 'OccasionSettings.promotedHelp'.tr(); // "Promote this event to make it stand out in lists or on the homepage."
+
   // Advanced Settings
   static String get advancedSettings => 'OccasionSettings.advancedSettings'.tr(); // "Advanced Settings"
   static String get link => 'OccasionSettings.link'.tr(); // "Link"
