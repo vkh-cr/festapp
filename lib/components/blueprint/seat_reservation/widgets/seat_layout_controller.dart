@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
-import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
+
+import '../model/seat_model.dart';
+import '../utils/seat_state.dart';
 
 class SeatLayoutController extends ChangeNotifier {
   /// Transformation controller for the InteractiveViewer

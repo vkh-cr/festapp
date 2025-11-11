@@ -72,7 +72,13 @@ class TimeHelper {
 
   static String getMinimalisticDateRange(BuildContext context, DateTime start, DateTime end) {
     final locale = Localizations.localeOf(context).languageCode;
-    final fullEnd = DateFormat.yMMMd(locale).format(end);
+    final fullFormat = DateFormat.yMMMd(locale);
+
+    if (start.year == end.year && start.month == end.month && start.day == end.day) {
+      return fullFormat.format(end);
+    }
+
+    final fullEnd = fullFormat.format(end);
     String minimalStart;
 
     if (start.year == end.year) {
@@ -82,7 +88,7 @@ class TimeHelper {
         minimalStart = DateFormat.MMMd(locale).format(start);
       }
     } else {
-      minimalStart = DateFormat.yMMMd(locale).format(start);
+      minimalStart = fullFormat.format(start);
     }
 
     return '$minimalStart - $fullEnd';
