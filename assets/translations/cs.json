@@ -1124,8 +1124,8 @@
     "swapSummaryEmpty": "Prázdná oblast"
   },
   "OccasionSettings": {
-    "title": "Nadpis",
-    "titleIsRequired": "Nadpis je povinný",
+    "title": "Název",
+    "titleIsRequired": "Název je povinný",
     "introImage": "Úvodní obrázek",
     "imageRatioHint": "Obrázek s poměrem stran {width} : {height}",
     "description": "Popis",
