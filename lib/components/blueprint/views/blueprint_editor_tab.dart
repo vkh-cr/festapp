@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
@@ -24,6 +27,7 @@ import '../seat_reservation/widgets/seat_reservation_widget.dart';
 import 'blueprint_controls_bar.dart';
 import 'blueprint_groups_panel.dart';
 import 'blueprint_legend.dart';
+import 'blueprint_product_dialogs.dart'; // Import
 
 class BlueprintTab extends StatefulWidget {
   const BlueprintTab({super.key});
@@ -174,6 +178,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       onAddGroup: canEdit ? addGroup : null,
       onDeleteGroup: canEdit ? deleteGroup : null,
       onRenameGroup: canEdit ? renameGroup : null,
+      onEditGroupProduct: canEdit ? _editGroupProduct : null,
     );
   }
 
@@ -231,7 +236,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
   //
   // LOGIC & HANDLERS
-  // (Kept in the main state class)
   //
 
   void _handleModeSelected(selectionMode mode) {
@@ -409,12 +413,17 @@ class _BlueprintTabState extends State<BlueprintTab> {
       blueprint!.objects!.remove(model.objectModel!);
     }
 
+    // Check if a product is assigned to the group
+    final groupProduct = currentGroup!.objects.isNotEmpty
+        ? currentGroup!.objects.first.product
+        : null;
+
     model.objectModel =
         model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
     model.objectModel!.type = BlueprintModel.metaSpotType;
     model.objectModel!.setSeatState(SeatState.available); // Use new method
-    model.objectModel!.product = blueprint!.products
-        ?.firstWhereOrNull((p) => p.productTypeString == ProductModel.spotType);
+    // Assign group's product or first available spot product
+    model.objectModel!.product = groupProduct ?? blueprint!.spotProducts.firstOrNull;
     model.objectModel!.group = currentGroup;
     model.objectModel!.title = currentGroup?.getNextBoxName().toUpperCase();
 
@@ -579,6 +588,56 @@ class _BlueprintTabState extends State<BlueprintTab> {
     _seatToSwap2 = null;
   }
 
+  //
+  // (Modified) Product Management Logic
+  //
+
+  /// Assigns a selected product to all spots in a group
+  void _editGroupProduct(BlueprintGroupModel group) async {
+    if (blueprint == null) return;
+
+    // Check if any seat in the group is occupied
+    final bool hasOccupiedSeats = group.objects.any(_isSeatOccupied);
+    if (hasOccupiedSeats) {
+      ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
+          severity: ToastSeverity.NotOk);
+      return;
+    }
+
+    // (Modified) Find the current product to pass its ID
+    final currentProduct = group.objects.isNotEmpty
+        ? group.objects.first.product
+        : null;
+
+    final selectedProduct = await showDialog<ProductModel>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return SelectProductDialog(
+          blueprint: blueprint!,
+          currentProductId: currentProduct?.id, // Pass the ID
+        );
+      },
+    );
+
+    if (selectedProduct != null) {
+      setState(() {
+        for (var obj in group.objects) {
+          obj.product = selectedProduct;
+          obj.spotProduct = selectedProduct.id; // Ensure ID is also synced
+        }
+      });
+      ToastHelper.Show(context, BlueprintStrings.productAssigned, severity: ToastSeverity.Ok);
+    } else {
+      // If the user closed the dialog, we might need to refresh state
+      // in case they added/edited products but didn't select one.
+      setState(() {});
+    }
+  }
+
+  //
+  // Save & Load
+  //
+
   void saveChanges() async {
     if (blueprint == null) return;
     try {
@@ -587,6 +646,13 @@ class _BlueprintTabState extends State<BlueprintTab> {
           .map((s) => s.objectModel)
           .whereNotNull()
           .toList();
+
+      // Ensure products on objects are properly saved as IDs
+      for(var obj in blueprint!.objects!) {
+        if(obj.product != null) {
+          obj.spotProduct = obj.product!.id;
+        }
+      }
 
       await DbForms.updateBlueprint(blueprint!);
       ToastHelper.Show(context, CommonStrings.saved, severity: ToastSeverity.Ok);
