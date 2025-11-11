@@ -58,7 +58,7 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
   late TextEditingController _linkController;
   late TextEditingController _replyToEmailController;
   String? _description;
-  bool _isOpen = false;
+  bool _isOpen = true;
   bool _isHidden = false;
   bool _isPromoted = false;
   String? _selectedTimezone;
