@@ -44,8 +44,10 @@ class AppRouter extends RootStackRouter {
 
   @override
   List<AutoRoute> get routes => [
-    // Use OrganizationPage for the root path
-    AutoRoute(page: OrganizationRoute.page, path: "/"),
+    CustomRoute(
+        page: OrganizationRoute.page,
+        path: "/",
+        transitionsBuilder: TransitionsBuilders.noTransition),
 
     AutoRoute(page: ResetPasswordRoute.page, path: sl(ResetPasswordPage.ROUTE)),
     AutoRoute(

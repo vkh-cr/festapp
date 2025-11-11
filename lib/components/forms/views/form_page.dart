@@ -61,6 +61,8 @@ class _FormPageState extends State<FormPage> {
   StreamSubscription<dynamic>? _popStateSubscription;
   bool _isClosingProgrammatically = false;
 
+  bool _dependenciesInitialized = false;
+
   @override
   void dispose() {
     _popStateSubscription?.cancel();
@@ -69,19 +71,32 @@ class _FormPageState extends State<FormPage> {
   }
 
   @override
-  Future<void> didChangeDependencies() async {
+  void didChangeDependencies() {
+    super.didChangeDependencies(); // Call super FIRST
+
+    // This ensures that if the widget rebuilds (e.g., from pop state),
+    // we don't re-trigger the data load, but we do re-subscribe the listener.
+    if (_dependenciesInitialized) {
+      _popStateSubscription?.cancel();
+      _popStateSubscription = RouterService.onPopState.listen(_handlePopState);
+      return;
+    }
+
     if (widget.formLink == null && context.routeData.hasPendingChildren) {
       widget.formLink =
           context.routeData.pendingChildren[0].params.getString("formLink");
     }
 
-    await loadData();
+    // Call loadData, but DO NOT await it.
+    // `loadData` correctly sets _isLoading, and the `build` method
+    // will show a CircularProgressIndicator. This is the correct pattern.
+    loadData();
 
     // Add the popstate listener from RouterService
     _popStateSubscription?.cancel(); // Cancel any old one
     _popStateSubscription = RouterService.onPopState.listen(_handlePopState);
 
-    super.didChangeDependencies();
+    _dependenciesInitialized = true; // Mark as initialized
   }
 
   /// Handles browser back/forward events
@@ -105,8 +120,8 @@ class _FormPageState extends State<FormPage> {
 
       if (_seatReservationCompleter != null &&
           !_seatReservationCompleter!.isCompleted) {
-          // User wants browser back to function as a "Confirm"
-         _seatReservationCompleter!.complete(selectedSeats);
+        // User wants browser back to function as a "Confirm"
+        _seatReservationCompleter!.complete(selectedSeats);
       }
       _seatReservationCompleter = null;
     }
