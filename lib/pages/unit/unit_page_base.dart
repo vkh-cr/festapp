@@ -59,6 +59,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
   Future<void> _initialLoad() async {
     // Immediately load from cache for a faster UI response.
     final cachedOccasions = await OfflineDataService.getAllOccasions();
+
     if (mounted) {
       setState(() {
         _occasions = cachedOccasions;
@@ -75,6 +76,9 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
   Future<void> _loadDataForUnit(int? unitId) async {
     await RightsService.updateAppData(unitId: unitId, refreshOffline: false);
 
+    // **CHANGED**: Added mounted check before using context
+    if (!mounted) return;
+
     if (widget.id != null) {
       RouterService.goToUnit(context, RightsService.currentUnit()!.id!);
     }
@@ -83,6 +87,9 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
 
     final unit = await DbUnits.getPublicOccasions(
         AppConfig.organization, RightsService.currentUnit()?.id);
+
+    if (!mounted) return;
+
     final occasions = unit.occasions ?? [];
     await OfflineDataService.saveAllOccasions(occasions);
 
@@ -92,6 +99,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
       quote = await DbInformation.getCurrentQuote(unitId!);
     }
 
+    // This final mounted check is correct and will catch the await above
     if (mounted) {
       setState(() {
         _unit = unit;
@@ -104,11 +112,12 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
   Future<void> _handleSignIn() async {
     final newUnitId = RightsService.currentUnit()!.id!;
 
-    if (mounted) {
-      await _loadDataForUnit(newUnitId);
-      if (widget.id != null) {
-        await RouterService.goToUnit(context, newUnitId);
-      }
+    await _loadDataForUnit(newUnitId);
+
+    if (!mounted) return;
+
+    if (widget.id != null) {
+      await RouterService.goToUnit(context, newUnitId);
     }
   }
 
@@ -158,6 +167,9 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
         RouterService.navigate(context, "unit/$_currentUnitId/edit")
             .then((_) {
           // After editing, reload data for the same unit.
+          // This .then() block is safe because RouterService.navigate
+          // returns a Future that completes when the route is popped,
+          // so the context is valid again.
           if (_currentUnitId != null) {
             _loadDataForUnit(_currentUnitId!);
           }
