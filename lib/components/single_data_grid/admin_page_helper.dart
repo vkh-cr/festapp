@@ -7,7 +7,7 @@ import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/components/eshop/blueprint_editor_tab.dart';
+import 'package:fstapp/components/blueprint/views/blueprint_editor_tab.dart';
 import 'package:fstapp/components/email_templates/views/email_templates_tab.dart';
 import 'package:fstapp/components/forms/views/forms_tab.dart';
 import 'package:fstapp/components/eshop/orders_tab.dart';
