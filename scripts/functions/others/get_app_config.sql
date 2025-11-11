@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_app_config_v203(data_in jsonb)
+CREATE OR REPLACE FUNCTION get_app_config_v216(data_in jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
@@ -85,28 +85,10 @@ BEGIN
         FROM units u
         WHERE u.id = default_unit;
 
-        -- 3. If the provided unit_id doesn't exist, fall back to the first admin unit
-        IF unit_json IS NULL THEN
-            SELECT uu.unit
-              INTO editor_unit_id
-            FROM public.unit_users uu
-            WHERE uu."user" = current_user_id
-              AND (uu.is_editor_view = TRUE OR uu.is_editor = TRUE)
-            ORDER BY uu.unit
-            LIMIT 1;
+        -- 3. (REMOVED) Fallback to first admin unit is removed.
+        --    If unit_id is invalid, unit_json will be NULL.
 
-            default_unit := editor_unit_id; -- This will be NULL if no admin unit is found
-
-            -- 4. Re-fetch unit_json with the fallback unit (if one exists)
-            IF default_unit IS NOT NULL THEN
-                SELECT json_build_object('id', u.id, 'title', u.title)
-                    INTO unit_json
-                FROM units u
-                WHERE u.id = default_unit;
-            END IF;
-        END IF;
-
-        -- 5. Fetch the user's relationship with the determined unit (if any)
+        -- 4. Fetch the user's relationship with the determined unit (if any)
         --    (unit_user will remain NULL if default_unit is NULL)
         SELECT *
             INTO unit_user
@@ -127,72 +109,12 @@ BEGIN
 
         IF occasionId IS NULL THEN
             -- No default occasion found.
-            -- 2. Try to find the user's first editor/admin unit.
-            SELECT uu.unit
-              INTO editor_unit_id
-            FROM public.unit_users uu
-            WHERE uu."user" = current_user_id
-              AND (uu.is_editor_view = TRUE OR uu.is_editor = TRUE)
-            ORDER BY uu.unit
-            LIMIT 1;
-
-            IF editor_unit_id IS NOT NULL THEN
-                -- Found an admin unit, use it.
-                default_unit := editor_unit_id;
-                occasionId := NULL; -- Ensure no occasion is loaded
-
-                -- Fetch unit details
-                SELECT json_build_object('id', u.id, 'title', u.title)
-                  INTO unit_json
-                FROM units u
-                WHERE u.id = default_unit;
-
-                -- Fetch user's relationship with this unit
-                SELECT *
-                  INTO unit_user
-                FROM unit_users
-                WHERE unit = default_unit
-                  AND "user" = current_user_id;
-
-            ELSE
-                -- 3. No admin unit found, fall back to org's DEFAULT_UNIT
-                SELECT (data->>'DEFAULT_UNIT')::bigint
-                  INTO default_unit
-                FROM organizations
-                WHERE id = org_id;
-
-                IF default_unit IS NOT NULL THEN
-                    -- Default unit exists, use it.
-                    occasionId := NULL;
-                    -- Fetch unit details
-                    SELECT json_build_object('id', u.id, 'title', u.title)
-                      INTO unit_json
-                    FROM units u
-                    WHERE u.id = default_unit;
-
-                    SELECT *
-                      INTO unit_user
-                    FROM unit_users
-                    WHERE unit = default_unit
-                      AND "user" = current_user_id;
-                ELSE
-                    -- 4. No admin unit AND no default unit.
-                    -- Fall back to first open occasion.
-                    SELECT id, link
-                      INTO occasionId, occasion_link
-                    FROM occasions
-                    WHERE is_open = true
-                      AND organization = org_id
-                    LIMIT 1;
-
-                    IF occasionId IS NULL THEN
-                        RETURN json_build_object(
-                            'code', 404,
-                            'message', 'No open occasion found for the organization'
-                        );
-                    END IF;
-                END IF;
-            END IF;
+            -- Per new requirements, we NO LONGER fall back to:
+            -- 1. User's first editor/admin unit
+            -- 2. Organization's DEFAULT_UNIT
+            -- 3. First open occasion
+            -- Both occasionId and default_unit will remain NULL.
+            NULL;
         ELSE
             -- Default occasion exists; fetch its link
             SELECT link

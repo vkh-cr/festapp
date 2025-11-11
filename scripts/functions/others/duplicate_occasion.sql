@@ -19,8 +19,8 @@ BEGIN
   --    Modify the link to ensure uniqueness by appending a unique suffix.
   ------------------------------------------------------------------
   INSERT INTO public.occasions
-    (created_at, updated_at, data, is_hidden, is_open, start_time, end_time, link, title, organization, services, unit, features, occasion_hidden, description)
-  SELECT now(), now(), data, is_hidden, is_open, start_time, end_time,
+    (created_at, updated_at, data, is_hidden, is_open, is_promoted, start_time, end_time, link, title, organization, services, unit, features, occasion_hidden, description)
+  SELECT now(), now(), data, is_hidden, is_open, is_promoted, start_time, end_time,
          link || '-copy-' || substring(md5(random()::text) from 1 for 8) AS link,
          title || ' (Copy)', organization, services, unit, features, occasion_hidden, description
   FROM public.occasions

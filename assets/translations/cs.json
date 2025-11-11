@@ -1134,6 +1134,8 @@
     "publicHelp": "Určuje, zda jsou detaily události (program, info atd.) dostupné veřejnosti.",
     "hide": "Skrýt",
     "hideHelp": "Toto určuje, zda je tato událost skryta ve výpisech.",
+    "promoted": "Propagované",
+    "promotedHelp": "Propagujte tuto událost, aby byla viditelnější ve výpisech nebo na domovské stránce.",
     "advancedSettings": "Pokročilá nastavení",
     "link": "Odkaz",
     "linkIsRequired": "Odkaz je povinný",
