@@ -1,7 +1,6 @@
 // blueprint_object_model.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
@@ -10,6 +9,7 @@ import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:collection/collection.dart';
 import 'blueprint_strings.dart';
+import 'seat_reservation/utils/seat_state.dart';
 
 class BlueprintObjectModel {
   static const String metaX = "x";
