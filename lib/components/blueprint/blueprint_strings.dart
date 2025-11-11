@@ -26,6 +26,8 @@ class BlueprintStrings {
 
   // --- Right Panel (Groups) ---
   static String get groupsTitle => 'FeatureBlueprint.groupsTitle'.tr(); // "Groups (Tables):"
+  static String get assignProductToGroup => 'FeatureBlueprint.assignProductToGroup'.tr(); // "Assign product to group"
+  static String get noProductAssigned => 'FeatureBlueprint.noProductAssigned'.tr(); // "No Product Assigned"
 
   // --- Dialogs ---
   static String get dialogGroupNumber => 'FeatureBlueprint.dialogGroupNumber'.tr(); // "Group number"
@@ -65,4 +67,13 @@ class BlueprintStrings {
   static String get swapSummaryUsed => 'FeatureBlueprint.swapSummaryUsed'.tr(); // "Used Seat"
   static String get swapSummarySelected => 'FeatureBlueprint.swapSummarySelected'.tr(); // "Selected Seat"
   static String get swapSummaryEmpty => 'FeatureBlueprint.swapSummaryEmpty'.tr(); // "Empty Area"
+
+  // --- Product Management (New) ---
+  static String get editProduct => 'FeatureBlueprint.editProduct'.tr(); // "Edit Product"
+  static String get createProduct => 'FeatureBlueprint.createProduct'.tr(); // "Create New Product"
+  static String get selectProduct => 'FeatureBlueprint.selectProduct'.tr(); // "Select Product"
+  static String get noSpotProducts => 'FeatureBlueprint.noSpotProducts'.tr(); // "No spot products are defined. You can create them in the product manager."
+  static String get productAssigned => 'FeatureBlueprint.productAssigned'.tr(); // "Product assigned to all spots in the group."
+  static String get productCreated => 'FeatureBlueprint.productCreated'.tr(); // "Product created."
+  static String get productUpdated => 'FeatureBlueprint.productUpdated'.tr(); // "Product updated."
 }

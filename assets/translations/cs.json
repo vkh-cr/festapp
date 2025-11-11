@@ -623,6 +623,10 @@
   "Nationality": "Státní příslušnost",
   "Registration": "Přihláška",
   "Constraints": "Omezení",
+  "Common": {
+    "fieldCannotBeEmpty": "Pole nemůže být prázdné",
+    "invalidFormat": "Neplatný formát"
+  },
   "FeatureSchedule": {
     "labelScheduleType": "Typ programu",
     "optionBasic": "základní",
@@ -1088,12 +1092,10 @@
     "uploadImage": "Nahrát obrázek (doporučeno PNG)",
     "removeBackground": "Odstranit pozadí",
     "groupsTitle": "Skupiny (stoly):",
-    "addNew": "Přidat nový",
     "dialogGroupNumber": "Číslo skupiny",
     "dialogTitle": "Název",
     "dialogImportSvgTitle": "Importovat SVG pozadí",
     "dialogImportImageTitle": "Importovat obrázkové pozadí",
-    "dialogOk": "Ok",
     "dialogConfirmRemoveBackgroundTitle": "Odstranit pozadí",
     "dialogConfirmRemoveBackgroundContent": "Jste si jisti, že chcete odstranit pozadí?",
     "toastOccupiedCannotBeChanged": "Obsazená místa nelze měnit.",
@@ -1106,7 +1108,6 @@
     "toastSvgReadFail": "Nepodařilo se načíst SVG soubor.",
     "toastImageUploadSuccess": "Obrázkové pozadí úspěšně nahráno.",
     "toastImageUploadFail": "Nepodařilo se nahrát obrázek.",
-    "toastCouldNotRemoveImage": "Obrázek se nepodařilo odstranit z úložiště, ale bude odstraněn z plánu.",
     "toastBackgroundRemoved": "Pozadí odstraněno.",
     "swapHelpIntro": "REŽIM PROHOZENÍ: Vyberte dvě místa pro jejich prohození.",
     "swapHelpSelectFirst": "Vyberte první místo k prohození.",
@@ -1121,7 +1122,17 @@
     "swapSummaryBlack": "Blokovaná oblast",
     "swapSummaryUsed": "Použité místo",
     "swapSummarySelected": "Vybrané místo",
-    "swapSummaryEmpty": "Prázdná oblast"
+    "swapSummaryEmpty": "Prázdná oblast",
+    "edit": "Upravit",
+    "assignProductToGroup": "Přiřadit produkt ke skupině",
+    "noProductAssigned": "Není přiřazen žádný produkt",
+    "editProduct": "Upravit produkt",
+    "createProduct": "Vytvořit nový produkt",
+    "selectProduct": "Vybrat produkt",
+    "noSpotProducts": "Nejsou definovány žádné produkty pro místa. Můžete je vytvořit ve správci produktů.",
+    "productAssigned": "Produkt přiřazen všem místům ve skupině.",
+    "productCreated": "Produkt vytvořen.",
+    "productUpdated": "Produkt aktualizován."
   },
   "OccasionSettings": {
     "title": "Název",
