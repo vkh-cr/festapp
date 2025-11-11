@@ -663,18 +663,20 @@ class AppPanelHelper {
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
         child: GestureDetector(
           onTap: () async {
-            final currentUnit = RightsService.currentUnit();
-            if (currentUnit != null &&
-                RightsService.canUserSeeUnitWorkspace()) {
-              await RouterService.navigateToUnitAdmin(context, currentUnit);
-            }
+            await RouterService.navigateHome(context);
+            // final currentUnit = RightsService.currentUnit();
+            // if (currentUnit != null &&
+            //     RightsService.canUserSeeUnitWorkspace()) {
+            //   // This 'context' is correct (it's the one passed into the function)
+            //   await RouterService.navigateToUnitAdmin(context, currentUnit);
+            // }
           },
           child: LogoWidget(height: 40, forceDark: true),
         ),
       ),
       title: ValueListenableBuilder<OccasionLinkModel?>(
         valueListenable: RightsService.occasionLinkModelNotifier,
-        builder: (context, _, __) {
+        builder: (listenableContext, _, __) {
           final allUnits = RightsService
               .currentUser()
               ?.units ?? [];
@@ -688,11 +690,9 @@ class AppPanelHelper {
 
           return Row(
             children: [
-              // Unit Switcher
               Flexible(
                 flex: 2,
                 child: allUnits.length <= 1
-                // If only one unit, display a clickable title without the dropdown icon.
                     ? TextButton(
                   style: TextButton.styleFrom(
                     foregroundColor: onAppBarColor,
@@ -799,7 +799,7 @@ class AppPanelHelper {
       actions: [
         ValueListenableBuilder<OccasionLinkModel?>(
           valueListenable: RightsService.occasionLinkModelNotifier,
-          builder: (context, _, __) {
+          builder: (listenableContext, _, __) {
             final currentOccasion = RightsService.currentOccasion();
             if (currentOccasion == null || !AppConfig.isAppSupported) {
               return const SizedBox.shrink();
