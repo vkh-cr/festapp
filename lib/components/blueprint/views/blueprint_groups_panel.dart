@@ -3,6 +3,7 @@ import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
 import 'package:fstapp/services/utilities_all.dart';
+import 'package:fstapp/theme_config.dart';
 
 import '../../_shared/common_strings.dart';
 
@@ -128,7 +129,7 @@ class BlueprintGroupsPanel extends StatelessWidget {
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: isSelected
                                           ? Theme.of(context).colorScheme.primary.withOpacity(0.9)
-                                          : Colors.grey.shade800,
+                                          : ThemeConfig.grey600(context),
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   );
