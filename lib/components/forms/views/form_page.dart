@@ -56,6 +56,18 @@ class _FormPageState extends State<FormPage> {
   final _formKey = GlobalKey<FormBuilderState>();
   final ScrollController _scrollController = ScrollController();
 
+  bool _isSeatReservationVisible = false;
+  Completer<List<SeatModel>?>? _seatReservationCompleter;
+  StreamSubscription<dynamic>? _popStateSubscription;
+  bool _isClosingProgrammatically = false;
+
+  @override
+  void dispose() {
+    _popStateSubscription?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Future<void> didChangeDependencies() async {
     if (widget.formLink == null && context.routeData.hasPendingChildren) {
@@ -64,14 +76,51 @@ class _FormPageState extends State<FormPage> {
     }
 
     await loadData();
+
+    // Add the popstate listener from RouterService
+    _popStateSubscription?.cancel(); // Cancel any old one
+    _popStateSubscription = RouterService.onPopState.listen(_handlePopState);
+
     super.didChangeDependencies();
   }
 
-  bool _isSeatReservationVisible = false;
-  Completer<List<SeatModel>?>? _seatReservationCompleter;
+  /// Handles browser back/forward events
+  void _handlePopState(dynamic event) {
+    if (_isClosingProgrammatically) {
+      // This was a "Confirm" click from _hideSeatReservation.
+      // The history is popped, and the overlay is already closing.
+      // We just reset the flag and do nothing.
+      _isClosingProgrammatically = false;
+      return;
+    }
 
-  /// Simulates the showDialog functionality for SeatReservation
+    // This was a "Browser Back" click.
+    if (_isSeatReservationVisible) {
+      // The overlay is visible, so this pop event must close it.
+      // This handles both the "Confirm" case (if user uses fwd/back)
+      // and the "Cancel" case (where user hits back to clear the hash).
+      setState(() {
+        _isSeatReservationVisible = false;
+      });
+
+      if (_seatReservationCompleter != null &&
+          !_seatReservationCompleter!.isCompleted) {
+          // User wants browser back to function as a "Confirm"
+         _seatReservationCompleter!.complete(selectedSeats);
+      }
+      _seatReservationCompleter = null;
+    }
+    // If the overlay is *not* visible, this pop event was
+    // just cleaning up a dangling state from a "Cancel".
+    // We don't need to do anything. The browser handles the URL.
+  }
+
   Future<List<SeatModel>?> _showSeatReservation(List<SeatModel> seats) {
+    if (_isSeatReservationVisible) return _seatReservationCompleter!.future;
+
+    // Push a new history state via RouterService
+    RouterService.pushOverlayState('seat-reservation');
+
     selectedSeats = seats;
     setState(() {
       _isSeatReservationVisible = true;
@@ -84,11 +133,22 @@ class _FormPageState extends State<FormPage> {
 
   /// Hides the SeatReservationWidget and resolves the completer
   void _hideSeatReservation(List<SeatModel>? seats) {
+    if (!_isSeatReservationVisible) return;
+
+    if (seats != null) {
+      _isClosingProgrammatically = true;
+      RouterService.goBackProgrammatically();
+    }
+
     setState(() {
       _isSeatReservationVisible = false;
     });
 
-    _seatReservationCompleter!.complete(seats);
+    // Complete the future with the result (null for cancel, list for confirm)
+    if (_seatReservationCompleter != null &&
+        !_seatReservationCompleter!.isCompleted) {
+      _seatReservationCompleter!.complete(seats);
+    }
     _seatReservationCompleter = null;
   }
 
@@ -106,6 +166,7 @@ class _FormPageState extends State<FormPage> {
             selectedSeats: selectedSeats,
             maxTickets: formHolder!.getTicket()?.maxTickets,
             onSelectionChanged: (sts) {
+              selectedSeats = sts;
               _totalTickets = sts.length;
               _totalPrice = 0;
               for (var s in sts) {
@@ -170,7 +231,8 @@ class _FormPageState extends State<FormPage> {
                 // Convert the JSArray (or any iterable) to a Dart list and sum the prices.
                 var products = List<FormOptionProductModel>.from(fValue);
                 _totalProducts += products.length;
-                _totalPrice += products.fold(0, (sum, product) => sum + product.price);
+                _totalPrice +=
+                    products.fold(0, (sum, product) => sum + product.price);
                 currencyC ??= products.firstOrNull?.currencyCode;
               }
             }
@@ -192,7 +254,9 @@ class _FormPageState extends State<FormPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withOpacity(0.7), // Primary color background
+          color: Theme.of(context)
+              .primaryColor
+              .withOpacity(0.7), // Primary color background
           borderRadius: BorderRadius.circular(8.0),
           boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black26)],
         ),
@@ -215,7 +279,8 @@ class _FormPageState extends State<FormPage> {
             ),
             const SizedBox(width: 10), // Increased spacing
             Text(
-              Utilities.formatPrice(context, _totalPrice, currencyCode: formHolder!.controller!.currencyCode),
+              Utilities.formatPrice(context, _totalPrice,
+                  currencyCode: formHolder!.controller!.currencyCode),
               style: const TextStyle(
                 fontSize: 18, // Increased font size
                 fontWeight: FontWeight.bold,
@@ -303,52 +368,54 @@ class _FormPageState extends State<FormPage> {
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
                 child: Builder(
-                  builder: (scrollContext)
-                  {
+                  builder: (scrollContext) {
                     return SingleChildScrollView(
-                    controller: _scrollController,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: _isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : _formNotAvailable
-                          ? _buildFormNotAvailableMessage()
-                          : (formHolder == null
-                          ? const Center(child: CircularProgressIndicator())
-                          : FormBuilder(
-                        key: _formKey,
-                        child: AutofillGroup(
-                          child: Column(
-                            children: [
-                              if (form!.header != null)
-                                Column(
-                                  children: [
-                                    HtmlView(
-                                        html: form!.header!,
-                                        isSelectable: true),
-                                    const SizedBox(height: 16),
-                                  ],
+                      controller: _scrollController,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _formNotAvailable
+                            ? _buildFormNotAvailableMessage()
+                            : (formHolder == null
+                            ? const Center(
+                            child: CircularProgressIndicator())
+                            : FormBuilder(
+                          key: _formKey,
+                          child: AutofillGroup(
+                            child: Column(
+                              children: [
+                                if (form!.header != null)
+                                  Column(
+                                    children: [
+                                      HtmlView(
+                                          html: form!.header!,
+                                          isSelectable: true),
+                                      const SizedBox(height: 16),
+                                    ],
+                                  ),
+                                ...FormHelper.getAllFormFields(
+                                    context, _formKey, formHolder!),
+                                const SizedBox(height: 32),
+                                ButtonsHelper.primaryButton(
+                                  context: context,
+                                  onPressed: (_isLoading ||
+                                      _totalProducts == 0)
+                                      ? null
+                                      : () => _showOrderPreview(
+                                      scrollContext),
+                                  label: "Continue".tr(),
+                                  isLoading: _isLoading,
+                                  height: 50.0,
+                                  width: 250.0,
                                 ),
-                              ...FormHelper.getAllFormFields(
-                                  context, _formKey, formHolder!),
-                              const SizedBox(height: 32),
-                              ButtonsHelper.primaryButton(
-                                context: context,
-                                onPressed: (_isLoading || _totalProducts == 0)
-                                    ? null
-                                    : () => _showOrderPreview(scrollContext),
-                                label: "Continue".tr(),
-                                isLoading: _isLoading,
-                                height: 50.0,
-                                width: 250.0,
-                              ),
-                              const SizedBox(height: 32),
-                            ],
+                                const SizedBox(height: 32),
+                              ],
+                            ),
                           ),
-                        ),
-                      )),
-                    ),
-                  );
+                        )),
+                      ),
+                    );
                   },
                 ),
               ),
@@ -365,8 +432,7 @@ class _FormPageState extends State<FormPage> {
           visible: RightsService.isEditor(),
           child: FloatingActionButton(
             onPressed: () {
-              RouterService.navigateOccasion(
-                  context, ReservationsPage.ROUTE)
+              RouterService.navigateOccasion(context, ReservationsPage.ROUTE)
                   .then((value) => loadData());
             },
             child: const Icon(Icons.edit),
@@ -395,7 +461,7 @@ class _FormPageState extends State<FormPage> {
             const Text(
               "Reservation Unavailable",
               style: TextStyle(
-                fontSize:  24,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
@@ -466,6 +532,9 @@ class _FormPageState extends State<FormPage> {
         });
         return;
       }
+
+      await RightsService.updateAppData(
+          formLink: widget.formLink);
 
       formHolder = FormHolder.fromFormFieldModel(form!);
 
