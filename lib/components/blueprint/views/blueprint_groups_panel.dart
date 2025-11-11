@@ -128,7 +128,7 @@ class BlueprintGroupsPanel extends StatelessWidget {
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: isSelected
                                           ? Theme.of(context).colorScheme.primary.withOpacity(0.9)
-                                          : Colors.grey.shade600,
+                                          : Colors.grey.shade800,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   );
