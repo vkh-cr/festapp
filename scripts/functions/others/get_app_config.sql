@@ -40,7 +40,10 @@ BEGIN
         platform_name := 'web';
     END IF;
 
-    -- If form_link is provided, fetch the occasion from forms
+    -- We will try to find an occasion or unit in order of priority.
+    -- occasionId and default_unit are NULL by default.
+
+    -- 1. Try to find occasion via form_link
     IF form_link IS NOT NULL AND form_link <> '' THEN
         SELECT forms.occasion, occasions.link
           INTO occasionId, occasion_link
@@ -48,23 +51,20 @@ BEGIN
         JOIN occasions ON forms.occasion = occasions.id
         WHERE forms.link = form_link
           AND occasions.organization = org_id;
+        -- Per your request, if form_link is provided but doesn't resolve,
+        -- we NO LONGER return 404. We let occasionId remain NULL
+        -- and fall through to the next checks.
+    END IF;
 
-        -- If no occasion is found, return a 404 response
-        IF occasionId IS NULL THEN
-            RETURN json_build_object(
-                'code', 404,
-                'message', 'No occasion found for the provided form link'
-            );
-        END IF;
-
-    -- If no form_link but link_txt is provided
-    ELSIF link_txt IS NOT NULL AND link_txt <> '' THEN
+    -- 2. If no occasion found yet, try via link_txt
+    IF occasionId IS NULL AND link_txt IS NOT NULL AND link_txt <> '' THEN
         SELECT id, link
           INTO occasionId, occasion_link
         FROM occasions
         WHERE link = link_txt
           AND organization = org_id;
 
+        -- If link_txt is provided but *not* found, this is a hard 404.
         IF occasionId IS NULL THEN
             RETURN json_build_object(
                 'code', 404,
@@ -72,8 +72,8 @@ BEGIN
             );
         END IF;
 
-    -- If a unit_id is provided directly (and no links), prioritize it.
-    ELSIF unit_id IS NOT NULL THEN
+    -- 3. If no occasion found yet, try to use unit_id
+    ELSIF occasionId IS NULL AND unit_id IS NOT NULL THEN
         occasionId := NULL; -- Ensure no occasion is loaded.
 
         -- 1. Try to use the provided unit_id
@@ -96,7 +96,8 @@ BEGIN
         WHERE unit = default_unit
             AND "user" = current_user_id;
 
-    ELSE
+    -- 4. If no occasion or unit context found yet, try to get default occasion
+    ELSIF occasionId IS NULL THEN
         -- No link or specific unit_id provided:
         -- 1. Try to get the representative or default occasion
         SELECT COALESCE(
@@ -265,7 +266,7 @@ BEGIN
     SELECT row_to_json(ui)::jsonb || jsonb_build_object(
             'units',
             (
-                SELECT json_agg(jsonb_build_object('id', u.id, 'title', u.title))
+                SELECT json_agg(jsonb_build_object('id', u.id, 'title', u.title) ORDER BY u.title)
                 FROM public.units u
                 JOIN public.unit_users uu ON uu.unit = u.id
                 WHERE uu."user" = ui.id AND uu.is_editor_view = TRUE
