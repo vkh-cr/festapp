@@ -17,13 +17,15 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
 import 'package:fstapp/pages/occasion/timetable_page.dart';
-import 'package:fstapp/pages/unit/unit_page.dart';
+import 'package:fstapp/pages/unit/unit_page_base.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/logo_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+import '../unit/unit_page.dart';
 
 @RoutePage()
 class ScheduleBasicPage extends StatefulWidget {
