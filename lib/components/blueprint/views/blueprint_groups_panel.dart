@@ -13,6 +13,7 @@ class BlueprintGroupsPanel extends StatelessWidget {
   final VoidCallback? onAddGroup;
   final VoidCallback? onDeleteGroup;
   final VoidCallback? onRenameGroup;
+  final ValueChanged<BlueprintGroupModel>? onEditGroupProduct; // Callback
   final bool canEdit;
 
   const BlueprintGroupsPanel({
@@ -23,6 +24,7 @@ class BlueprintGroupsPanel extends StatelessWidget {
     this.onAddGroup,
     this.onDeleteGroup,
     this.onRenameGroup,
+    this.onEditGroupProduct,
     required this.canEdit,
   });
 
@@ -50,17 +52,17 @@ class BlueprintGroupsPanel extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.add),
                   tooltip: CommonStrings.addNew,
-                  onPressed: onAddGroup,
+                  onPressed: canEdit ? onAddGroup : null, // Apply canEdit
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   tooltip: CommonStrings.delete,
-                  onPressed: onDeleteGroup,
+                  onPressed: canEdit ? onDeleteGroup : null, // Apply canEdit
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   tooltip: CommonStrings.rename,
-                  onPressed: onRenameGroup,
+                  onPressed: canEdit ? onRenameGroup : null, // Apply canEdit
                 ),
               ],
             ),
@@ -94,22 +96,66 @@ class BlueprintGroupsPanel extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center, // Align center
                     children: [
-                      Text(
-                        group.title!,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : null,
-                          fontWeight: isSelected ? FontWeight.bold : null,
+                      Expanded( // Allow text to wrap if needed
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              group.title!,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : null,
+                                fontWeight: isSelected ? FontWeight.bold : null,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            // Show product and price
+                            Builder(
+                                builder: (context) {
+                                  final groupProduct = group.objects.isNotEmpty
+                                      ? group.objects.first.product
+                                      : null;
+                                  final priceString = groupProduct != null
+                                      ? Utilities.formatPrice(context, groupProduct.price ?? 0)
+                                      : null;
+                                  final productTitle = groupProduct?.title ?? BlueprintStrings.noProductAssigned;
+
+                                  return Text(
+                                    priceString != null ? "$productTitle ($priceString)" : productTitle,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: isSelected
+                                          ? Theme.of(context).colorScheme.primary.withOpacity(0.9)
+                                          : Colors.grey.shade600,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  );
+                                }
+                            ),
+                          ],
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      // Group for count and edit button
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             "(${group.objects.length})",
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
+                          if (canEdit) // Only show if editable
+                            IconButton(
+                              // Use category icon
+                              icon: const Icon(Icons.category_outlined),
+                              iconSize: 20,
+                              padding: const EdgeInsets.all(4),
+                              constraints: const BoxConstraints(),
+                              tooltip: BlueprintStrings.assignProductToGroup,
+                              onPressed: () => onEditGroupProduct?.call(group),
+                            ),
                         ],
                       ),
                     ],
