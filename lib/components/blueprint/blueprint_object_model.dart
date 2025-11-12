@@ -193,4 +193,8 @@ class BlueprintObjectModel {
   bool isOrdered(){
     return orderProductTicket != null;
   }
+
+  String toSpotString() {
+    return title ?? "";
+  }
 }
