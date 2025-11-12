@@ -4,6 +4,7 @@ import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:collection/collection.dart';
 
 import '../../_shared/common_strings.dart';
 
@@ -118,7 +119,8 @@ class BlueprintGroupsPanel extends StatelessWidget {
                                 builder: (context) {
                                   final groupProduct = group.objects.isNotEmpty
                                       ? group.objects.first.product
-                                      : null;
+                                      : blueprint!.spotProducts.firstOrNull;
+
                                   final priceString = groupProduct != null
                                       ? Utilities.formatPrice(context, groupProduct.price ?? 0)
                                       : null;
