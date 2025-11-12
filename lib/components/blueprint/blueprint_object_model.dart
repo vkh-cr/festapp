@@ -39,11 +39,10 @@ class BlueprintObjectModel {
 
   @override
   toString() {
-    return "Stůl ${group?.title}, Sedadlo $title";
-  }
-
-  String toShortString() {
-    return "${group?.title ?? ""}${title ?? ""}";
+    return BlueprintStrings.objectModelToString(
+      group?.title ?? '',
+      title ?? '',
+    );
   }
 
   int? x;

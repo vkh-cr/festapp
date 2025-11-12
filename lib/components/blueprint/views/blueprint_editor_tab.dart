@@ -187,7 +187,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(blueprint?.title ?? BlueprintStrings.edit),
+        title: Text(blueprint?.title ?? CommonStrings.edit),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -491,7 +491,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       _seatToSwap1 = model;
       _seatLayoutController.setSeatHighlight(model, true);
       ToastHelper.Show(
-          context, BlueprintStrings.swapHelpSelectSecond(obj.toShortString()));
+          context, BlueprintStrings.swapHelpSelectSecond(obj.toString()));
       return;
     }
 
@@ -511,9 +511,9 @@ class _BlueprintTabState extends State<BlueprintTab> {
     final obj2 = _seatToSwap2!.objectModel!;
 
     final summary1 = obj1.getSwapSummary();
-    final seatName1 = obj1.toShortString();
+    final seatName1 = obj1.toString();
     final summary2 = obj2.getSwapSummary();
-    final seatName2 = obj2.toShortString();
+    final seatName2 = obj2.toString();
 
     // Using the new DialogHelper API structure from your file
     final confirmed = await DialogHelper.showConfirmationDialogRichText(

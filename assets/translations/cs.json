@@ -1123,7 +1123,7 @@
     "swapSummaryUsed": "Použité místo",
     "swapSummarySelected": "Vybrané místo",
     "swapSummaryEmpty": "Prázdná oblast",
-    "edit": "Upravit",
+    "objectModelToString": "Stůl {groupTitle}, Sedadlo {seatTitle}",
     "assignProductToGroup": "Přiřadit produkt ke skupině",
     "noProductAssigned": "Není přiřazen žádný produkt",
     "editProduct": "Upravit produkt",
