@@ -413,17 +413,21 @@ class _BlueprintTabState extends State<BlueprintTab> {
       blueprint!.objects!.remove(model.objectModel!);
     }
 
-    // Check if a product is assigned to the group
-    final groupProduct = currentGroup!.objects.isNotEmpty
-        ? currentGroup!.objects.first.product
-        : null;
+    // 1. Prioritize the product assigned directly to the group.
+    // 2. Fallback to the product of the first object in the group.
+    final groupProduct = currentGroup!.product ??
+        (currentGroup!.objects.isNotEmpty
+            ? currentGroup!.objects.first.product
+            : null);
 
     model.objectModel =
         model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
     model.objectModel!.type = BlueprintModel.metaSpotType;
     model.objectModel!.setSeatState(SeatState.available); // Use new method
-    // Assign group's product or first available spot product
+
+    // 3. Final fallback to the blueprint's first available product.
     model.objectModel!.product = groupProduct ?? blueprint!.spotProducts.firstOrNull;
+
     model.objectModel!.group = currentGroup;
     model.objectModel!.title = currentGroup?.getNextBoxName().toUpperCase();
 
@@ -596,7 +600,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
   void _editGroupProduct(BlueprintGroupModel group) async {
     if (blueprint == null) return;
 
-    // Check if any seat in the group is occupied
     final bool hasOccupiedSeats = group.objects.any(_isSeatOccupied);
     if (hasOccupiedSeats) {
       ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
@@ -604,32 +607,35 @@ class _BlueprintTabState extends State<BlueprintTab> {
       return;
     }
 
-    // (Modified) Find the current product to pass its ID
-    final currentProduct = group.objects.isNotEmpty
-        ? group.objects.first.product
-        : null;
+    // Find the current product, prioritizing the group's own product field.
+    final currentProduct = group.product ??
+        (group.objects.isNotEmpty
+            ? group.objects.first.product
+            : null);
 
     final selectedProduct = await showDialog<ProductModel>(
       context: context,
       builder: (BuildContext dialogContext) {
         return SelectProductDialog(
           blueprint: blueprint!,
-          currentProductId: currentProduct?.id, // Pass the ID
+          currentProductId: currentProduct?.id,
         );
       },
     );
 
     if (selectedProduct != null) {
       setState(() {
+        // Assign the product directly to the group itself.
+        group.product = selectedProduct;
+
+        // Also update all existing objects in that group to match.
         for (var obj in group.objects) {
           obj.product = selectedProduct;
-          obj.spotProduct = selectedProduct.id; // Ensure ID is also synced
+          obj.spotProduct = selectedProduct.id;
         }
       });
       ToastHelper.Show(context, BlueprintStrings.productAssigned, severity: ToastSeverity.Ok);
     } else {
-      // If the user closed the dialog, we might need to refresh state
-      // in case they added/edited products but didn't select one.
       setState(() {});
     }
   }

@@ -117,9 +117,13 @@ class BlueprintGroupsPanel extends StatelessWidget {
                             // Show product and price
                             Builder(
                                 builder: (context) {
-                                  final groupProduct = group.objects.isNotEmpty
-                                      ? group.objects.first.product
-                                      : blueprint!.spotProducts.firstOrNull;
+                                  // 1. Check group's product
+                                  // 2. Fallback to first object's product
+                                  // 3. Fallback to blueprint's first product
+                                  final groupProduct = group.product ??
+                                      (group.objects.isNotEmpty
+                                          ? group.objects.first.product
+                                          : blueprint!.spotProducts.firstOrNull);
 
                                   final priceString = groupProduct != null
                                       ? Utilities.formatPrice(context, groupProduct.price ?? 0)
