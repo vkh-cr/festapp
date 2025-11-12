@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 
 class BlueprintStrings {
   // --- BlueprintTab (General) ---
-  static String get edit => 'Edit'.tr(); // "Edit"
   static String get changeTitle => 'FeatureBlueprint.changeTitle'.tr(); // "Change title"
 
   // --- Left Panel (Legend) ---
@@ -67,6 +66,9 @@ class BlueprintStrings {
   static String get swapSummaryUsed => 'FeatureBlueprint.swapSummaryUsed'.tr(); // "Used Seat"
   static String get swapSummarySelected => 'FeatureBlueprint.swapSummarySelected'.tr(); // "Selected Seat"
   static String get swapSummaryEmpty => 'FeatureBlueprint.swapSummaryEmpty'.tr(); // "Empty Area"
+
+  // --- Object Model (New) ---
+  static String objectModelToString(String groupTitle, String seatTitle) => 'FeatureBlueprint.objectModelToString'.tr(namedArgs: {'groupTitle': groupTitle, 'seatTitle': seatTitle}); // "Table {groupTitle}, Seat {seatTitle}"
 
   // --- Product Management (New) ---
   static String get editProduct => 'FeatureBlueprint.editProduct'.tr(); // "Edit Product"
