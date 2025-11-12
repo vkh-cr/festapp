@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 
+import '../../blueprint_group.dart';
 import '../model/seat_model.dart';
 import '../utils/seat_state.dart';
 
@@ -121,13 +122,14 @@ class SeatLayoutController extends ChangeNotifier {
   }
 
   /// Adds a new object to the grid
-  void addObject(BlueprintObjectModel objectModel) {
+  void addObject(BlueprintObjectModel objectModel, {bool isHighlighted = false}) {
     if (objectModel.x == null || objectModel.y == null) return;
     final seat = seats.firstWhereOrNull(
             (s) => s.rowI == objectModel.y && s.colI == objectModel.x);
     if (seat != null) {
       seat.objectModel = objectModel;
       seat.seatState = objectModel.stateEnum ?? SeatState.available;
+      seat.isHighlightedForGroup = isHighlighted;
       notifyListeners();
     }
   }
@@ -140,8 +142,28 @@ class SeatLayoutController extends ChangeNotifier {
     if (seat != null) {
       seat.objectModel = null;
       seat.seatState = SeatState.empty;
+      seat.isHighlightedForGroup = false;
       notifyListeners();
     }
+  }
+
+  /// Highlights all seats belonging to the given group
+  void setHighlightedGroup(BlueprintGroupModel? group) {
+    // Clear all previous group highlights
+    for (final seat in seats) {
+      seat.isHighlightedForGroup = false;
+    }
+
+    if (group != null) {
+      // Create a set of object IDs for efficient lookup
+      final groupObjectIds = group.objects.map((o) => o.id).toSet();
+      for (final seat in seats) {
+        if (seat.objectModel != null && groupObjectIds.contains(seat.objectModel!.id)) {
+          seat.isHighlightedForGroup = true;
+        }
+      }
+    }
+    notifyListeners();
   }
 
   /// Calculates and applies the correct scale and translation to fit the layout

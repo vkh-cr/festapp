@@ -170,11 +170,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       blueprint: blueprint,
       currentGroup: currentGroup,
       canEdit: canEdit,
-      onGroupSelected: (group) {
-        setState(() {
-          currentGroup = group;
-        });
-      },
+      onGroupSelected: _onGroupSelected,
       onAddGroup: canEdit ? addGroup : null,
       onDeleteGroup: canEdit ? deleteGroup : null,
       onRenameGroup: canEdit ? renameGroup : null,
@@ -238,6 +234,19 @@ class _BlueprintTabState extends State<BlueprintTab> {
   // LOGIC & HANDLERS
   //
 
+  /// Handles group selection and toggling
+  void _onGroupSelected(BlueprintGroupModel? group) {
+    // This now receives a nullable group from BlueprintGroupsPanel
+    // If the selected group is the same as the current one,
+    // the user is toggling it off (so group will be null).
+    setState(() {
+      currentGroup = group;
+    });
+
+    // Tell the controller to update the highlights
+    _seatLayoutController.setHighlightedGroup(currentGroup);
+  }
+
   void _handleModeSelected(selectionMode mode) {
     if (mode == selectionMode.swapSeats) {
       setState(() {
@@ -272,6 +281,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
             .sort((a, b) => Utilities.naturalCompare(a.title!, b.title!));
         currentGroup = newGroup;
       });
+      // Highlight the new group
+      _seatLayoutController.setHighlightedGroup(currentGroup);
     }
   }
 
@@ -301,6 +312,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
       blueprint!.groups!.remove(currentGroup);
       currentGroup = null;
     });
+    // Clear highlights
+    _seatLayoutController.setHighlightedGroup(null);
   }
 
   void renameGroup() async {
@@ -384,7 +397,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
     model.objectModel!.type = BlueprintModel.metaTableAreaType;
     model.objectModel!.setSeatState(SeatState.black); // Use new method
     blueprint!.objects!.add(model.objectModel!);
-    _seatLayoutController.addObject(model.objectModel!);
+    _seatLayoutController.addObject(model.objectModel!, isHighlighted: false);
   }
 
   void _handleAddAvailable(SeatModel model) {
@@ -433,7 +446,13 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     currentGroup?.objects.add(model.objectModel!);
     blueprint!.objects!.add(model.objectModel!);
-    _seatLayoutController.addObject(model.objectModel!);
+
+    // Pass the highlight status
+    _seatLayoutController.addObject(
+        model.objectModel!,
+        isHighlighted: currentGroup != null
+    );
+
     ToastHelper.Show(
         context, "${BlueprintStrings.toastSpotAdded} ${model.objectModel!.title}");
   }
