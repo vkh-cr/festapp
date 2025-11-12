@@ -12,7 +12,8 @@ class SeatWidgetHelper {
   static Widget buildSeat({
     required BuildContext context,
     required SeatState state,
-    bool isHighlighted = false,
+    bool isHighlightedForSwap = false,
+    bool isHighlightedForGroup = false,
     double size = 40.0,
   }) {
     final bool hasPadding = state == SeatState.ordered ||
@@ -20,7 +21,18 @@ class SeatWidgetHelper {
         state == SeatState.selected_by_me ||
         state == SeatState.used ||
         state == SeatState.available ||
-        (isHighlighted && state == SeatState.empty);
+        ((isHighlightedForSwap || isHighlightedForGroup) && state == SeatState.empty);
+
+    // Logic to determine the border
+    Border? border;
+    if (isHighlightedForSwap) {
+      border = Border.all(color: Colors.orange, width: 2.0);
+    } else if (isHighlightedForGroup) {
+      border = Border.all(
+        color: Theme.of(context).colorScheme.primary,
+        width: 2.0,
+      );
+    }
 
     return Container(
       color: hasPadding ? Colors.black.withOpacity(0) : getSeatColor(context, SeatState.empty),
@@ -31,9 +43,7 @@ class SeatWidgetHelper {
         decoration: BoxDecoration(
           color: getSeatColor(context, state),
           borderRadius: BorderRadius.circular(hasPadding ? padding : 0.0),
-          border: isHighlighted
-              ? Border.all(color: Colors.orange, width: 2.0)
-              : null,
+          border: border, // Apply the border logic
         ),
         child: state == SeatState.selected_by_me
             ? Center(

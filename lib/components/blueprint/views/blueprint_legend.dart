@@ -135,7 +135,7 @@ class BlueprintLegend extends StatelessWidget {
                 SeatWidgetHelper.buildSeat(
                   context: context,
                   state: state,
-                  isHighlighted: forceHighlight,
+                  isHighlightedForSwap: forceHighlight,
                   size: SeatReservationWidget.boxSize.toDouble(),
                 ),
                 const SizedBox(width: 4),

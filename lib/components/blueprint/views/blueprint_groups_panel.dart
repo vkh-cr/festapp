@@ -11,7 +11,7 @@ import '../../_shared/common_strings.dart';
 class BlueprintGroupsPanel extends StatelessWidget {
   final BlueprintModel? blueprint;
   final BlueprintGroupModel? currentGroup;
-  final ValueChanged<BlueprintGroupModel> onGroupSelected;
+  final ValueChanged<BlueprintGroupModel?> onGroupSelected;
   final VoidCallback? onAddGroup;
   final VoidCallback? onDeleteGroup;
   final VoidCallback? onRenameGroup;
@@ -78,7 +78,13 @@ class BlueprintGroupsPanel extends StatelessWidget {
               final group = blueprint!.groups![index];
               final isSelected = currentGroup == group;
               return GestureDetector(
-                onTap: () => onGroupSelected(group),
+                onTap: () {
+                  if (isSelected) {
+                    onGroupSelected(null);
+                  } else {
+                    onGroupSelected(group);
+                  }
+                },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.symmetric(vertical: 4),
