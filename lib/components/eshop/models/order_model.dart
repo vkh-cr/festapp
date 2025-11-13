@@ -238,7 +238,33 @@ class OrderModel extends ITrinaRowModel {
   @override
   String toBasicString() => "Order #$id";
 
-  String toCustomerData() => "${data?["name"]} ${data?["surname"]}";
+  String toCustomerData() {
+    final name = data?['name'] as String?;
+    final surname = data?['surname'] as String?;
+
+    bool hasName = name != null && name.isNotEmpty;
+    bool hasSurname = surname != null && surname.isNotEmpty;
+
+    if (hasName || hasSurname) {
+      List<String> nameParts = [];
+      if (hasName) {
+        nameParts.add(name);
+      }
+      if (hasSurname) {
+        nameParts.add(surname);
+      }
+      return nameParts.join(" ");
+    } else {
+      final email = data?['email'] as String?;
+      bool hasEmail = email != null && email.isNotEmpty;
+
+      if (hasEmail) {
+        return email;
+      }
+    }
+
+    return "";
+  }
 
   String toCustomerNote() => "${data?["note"] ?? ""}";
   String toCustomerNoteHidden() => "${data?["note_hidden"] ?? ""}";

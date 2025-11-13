@@ -46,6 +46,8 @@ class ThemeConfig {
 
   // Dynamic color methods with BuildContext for theme-based color adaptation
   static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : lllBackground;
+  static Color logoBackgroundColor(BuildContext context) => backgroundColor(context);
+
   static Color surfaceColor(BuildContext context) => grey200(context);
   static Color seed1 = const Color(0xFF122640);
   static Color seed2 = const Color(0xFFBF8641);
