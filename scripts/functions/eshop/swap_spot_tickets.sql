@@ -1,44 +1,192 @@
-CREATE OR REPLACE FUNCTION swap_spot_tickets(spot_id_1 BIGINT, spot_id_2 BIGINT)
+CREATE OR REPLACE FUNCTION public._swap_spots_generate_product_json(
+    p_product_id BIGINT,
+    p_spot_id BIGINT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+STABLE
+AS $$
+DECLARE
+    product_data RECORD;
+BEGIN
+    -- This query joins product, its type, and the spot (if provided)
+    -- to get all data needed for the JSON object.
+    SELECT
+        p.id,
+        p.price,
+        p.title,
+        p.description,
+        p.currency_code,
+        pt.title AS type_title,
+        pt.type AS type,
+        s.title AS spot_title
+    INTO
+        product_data
+    FROM
+        eshop.products AS p
+    JOIN
+        eshop.product_types AS pt ON p.product_type = pt.id
+    LEFT JOIN
+        eshop.spots AS s ON s.id = p_spot_id -- Use p_spot_id for spot_title
+    WHERE
+        p.id = p_product_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Product data not found for product_id %', p_product_id;
+    END IF;
+
+    -- Build the JSON object.
+    -- jsonb_strip_nulls ensures that if 'spot_title' is NULL
+    -- (because p_spot_id was NULL), the key is removed entirely.
+    RETURN jsonb_strip_nulls(jsonb_build_object(
+        'id', product_data.id,
+        'type', product_data.type,
+        'price', product_data.price,
+        'title', product_data.title,
+        'spot_title', product_data.spot_title,
+        'type_title', product_data.type_title,
+        'description', product_data.description,
+        'currency_code', product_data.currency_code
+    ));
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public._swap_spots_update_ticket(
+    p_opt_id BIGINT,
+    p_new_product_id BIGINT,
+    p_new_spot_id BIGINT
+)
+RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    opt RECORD;
+    ord RECORD;
+    original_product_id BIGINT;
+    original_product_json JSONB;
+    original_price NUMERIC;
+
+    new_product_json JSONB;
+    new_price NUMERIC;
+    new_data JSONB;
+    new_order_price NUMERIC;
+    new_state TEXT;
+
+    price_delta NUMERIC;
+    history_needed BOOLEAN;
+    now_time TIMESTAMP WITH TIME ZONE := NOW();
+BEGIN
+    -- 1. Get current ticket and order data
+    SELECT * INTO opt FROM eshop.order_product_ticket WHERE id = p_opt_id;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Order Product Ticket % not found', p_opt_id; END IF;
+
+    SELECT * INTO ord FROM eshop.orders WHERE id = opt."order";
+    IF NOT FOUND THEN RAISE EXCEPTION 'Order % not found', opt."order"; END IF;
+
+    original_product_id := opt.product;
+
+    -- 2. Find the *original* product JSON and price from the orders.data
+    SELECT prod, (prod->>'price')::numeric
+    INTO original_product_json, original_price
+    FROM jsonb_array_elements(ord.data->'tickets') tckt,
+         jsonb_array_elements(tckt->'products') prod
+    WHERE (tckt->>'id')::bigint = opt.ticket
+      AND (prod->>'id')::bigint = original_product_id;
+
+    IF original_price IS NULL THEN
+        RAISE EXCEPTION 'Could not find original price for product % on ticket %', original_product_id, opt.ticket;
+    END IF;
+
+    -- 3. Generate the *new* product JSON
+    new_product_json := public._swap_spots_generate_product_json(p_new_product_id, p_new_spot_id);
+    new_price := (new_product_json->>'price')::numeric;
+
+    -- 4. Check if an update is even needed.
+    -- If the new JSON is identical to the old, nothing needs to be done.
+    IF original_product_json = new_product_json THEN
+        RETURN;
+    END IF;
+
+    -- 5. Calculate financials and state
+    price_delta := new_price - original_price;
+    history_needed := (original_product_id IS DISTINCT FROM p_new_product_id);
+    new_order_price := COALESCE(ord.price, 0) + price_delta;
+
+    -- Recalculate order state
+    SELECT CASE
+        WHEN COALESCE(pi.paid, 0) >= new_order_price AND new_order_price > 0 THEN 'paid'
+        WHEN new_order_price <= 0 THEN 'paid'
+        ELSE 'ordered'
+    END INTO new_state
+    FROM eshop.payment_info pi WHERE pi.id = ord.payment_info;
+
+    -- 6. Build the new orders.data JSON
+    new_data := jsonb_set(
+        ord.data,
+        '{tickets}',
+        (SELECT jsonb_agg(
+            -- Find the matching ticket
+            CASE WHEN (tckt->>'id')::bigint = opt.ticket
+            THEN jsonb_set(
+                tckt,
+                '{products}',
+                (SELECT jsonb_agg(
+                    -- Find the matching product and replace it
+                    CASE
+                        WHEN (prod->>'id')::bigint = original_product_id
+                        THEN new_product_json -- Swap in the new product JSON
+                        ELSE prod
+                    END
+                ) FROM jsonb_array_elements(tckt->'products') prod)
+            )
+            ELSE tckt
+            END
+        ) FROM jsonb_array_elements(ord.data->'tickets') tckt)
+    );
+
+    -- 7. Perform all database updates
+
+    -- Update payment info
+    IF price_delta <> 0 THEN
+        UPDATE eshop.payment_info SET amount = amount + price_delta WHERE id = ord.payment_info;
+    END IF;
+
+    -- Update the order itself
+    UPDATE eshop.orders
+    SET
+        price = new_order_price,
+        data = new_data,
+        state = new_state,
+        updated_at = now_time
+    WHERE id = ord.id;
+
+    -- Update the link table
+    UPDATE eshop.order_product_ticket
+    SET
+        product = p_new_product_id
+    WHERE id = p_opt_id;
+
+    -- 8. Create history log *only if* the product ID actually changed
+    IF history_needed THEN
+        INSERT INTO eshop.orders_history("order", data, state, price, currency_code)
+        VALUES (ord.id, new_data, new_state, new_order_price, ord.currency_code);
+    END IF;
+
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION public.swap_spot_tickets(spot_id_1 BIGINT, spot_id_2 BIGINT)
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-    -- Spot & Occasion Data
     spot1 RECORD;
     spot2 RECORD;
     occasion_id_common BIGINT;
     has_permission BOOLEAN;
     now_time TIMESTAMP WITH TIME ZONE := NOW();
-
-    -- Data for Spot 1's Ticket/Order
-    opt_1 RECORD; -- Full row from order_product_ticket
-    order_1 RECORD; -- Full row from orders
-    ticket_1_json JSONB;
-    product_1_price NUMERIC;
-    product_1_json_full JSONB;
-    original_product_id_1 BIGINT;
-
-    -- Data for Spot 2's Ticket/Order
-    opt_2 RECORD; -- Full row from order_product_ticket
-    order_2 RECORD; -- Full row from orders
-    ticket_2_json JSONB;
-    product_2_price NUMERIC;
-    product_2_json_full JSONB;
-    original_product_id_2 BIGINT;
-
-    -- New Order Data
-    new_data_1 JSONB;
-    new_data_2 JSONB;
-    new_price_1 NUMERIC;
-    new_price_2 NUMERIC;
-    new_state_1 TEXT;
-    new_state_2 TEXT;
-
-    -- Price Deltas
-    delta_1 NUMERIC;
-    delta_2 NUMERIC;
-
 BEGIN
     -- 1. Input Validation
     IF spot_id_1 IS NULL OR spot_id_2 IS NULL THEN
@@ -75,219 +223,33 @@ BEGIN
     END IF;
 
     -- 4. Main Swap Logic: Branch based on assignment status
+    -- This logic is now greatly simplified by the helper functions.
+
     IF spot1.order_product_ticket IS NOT NULL AND spot2.order_product_ticket IS NOT NULL THEN
         -- ----------------------------------------------------------------
-        -- CASE A: BOTH SPOTS ARE ASSIGNED (Complex financial swap)
+        -- CASE A: BOTH SPOTS ARE ASSIGNED
         -- ----------------------------------------------------------------
 
-        -- 4a. Get Full Ticket, Product, and Order Data
-        SELECT * INTO opt_1 FROM eshop.order_product_ticket WHERE id = spot1.order_product_ticket;
-        SELECT * INTO order_1 FROM eshop.orders WHERE id = opt_1."order";
-        original_product_id_1 := opt_1.product; -- Store original product ID
+        -- Ticket 1 (from spot 1) moves to Spot 2, so it must adopt Spot 2's product.
+        PERFORM public._swap_spots_update_ticket(spot1.order_product_ticket, spot2.product, spot_id_2);
 
-        SELECT tckt INTO ticket_1_json
-        FROM jsonb_array_elements(order_1.data->'tickets') tckt
-        WHERE (tckt->>'id')::bigint = opt_1.ticket;
-
-        SELECT prod, (prod->>'price')::numeric INTO product_1_json_full, product_1_price
-        FROM jsonb_array_elements(ticket_1_json->'products') prod
-        WHERE (prod->>'id')::bigint = original_product_id_1;
-
-        IF product_1_price IS NULL OR product_1_json_full IS NULL THEN
-            RAISE EXCEPTION 'Could not find price/data for product % on ticket %.', original_product_id_1, opt_1.ticket;
-        END IF;
-
-        -- Get all data for Spot 2's ticket/order
-        SELECT * INTO opt_2 FROM eshop.order_product_ticket WHERE id = spot2.order_product_ticket;
-        SELECT * INTO order_2 FROM eshop.orders WHERE id = opt_2."order";
-        original_product_id_2 := opt_2.product; -- Store original product ID
-
-        SELECT tckt INTO ticket_2_json
-        FROM jsonb_array_elements(order_2.data->'tickets') tckt
-        WHERE (tckt->>'id')::bigint = opt_2.ticket;
-
-        SELECT prod, (prod->>'price')::numeric INTO product_2_json_full, product_2_price
-        FROM jsonb_array_elements(ticket_2_json->'products') prod
-        WHERE (prod->>'id')::bigint = original_product_id_2;
-
-        IF product_2_price IS NULL OR product_2_json_full IS NULL THEN
-            RAISE EXCEPTION 'Could not find price/data for product % on ticket %.', original_product_id_2, opt_2.ticket;
-        END IF;
-
-        -- 4b. Perform the Financial & Structural Swap (Conditionally)
-        -- Only do this complex update if the products are different.
-        IF original_product_id_1 IS DISTINCT FROM original_product_id_2 THEN
-
-            -- First, update the FK on the order_product_ticket table
-            UPDATE eshop.order_product_ticket SET product = original_product_id_2 WHERE id = opt_1.id;
-            UPDATE eshop.order_product_ticket SET product = original_product_id_1 WHERE id = opt_2.id;
-
-            -- Check if orders are different
-            IF order_1.id <> order_2.id THEN
-                -- CASE 1: DIFFERENT ORDERS
-                delta_1 := product_2_price - product_1_price; -- For Order 1
-                delta_2 := product_1_price - product_2_price; -- For Order 2
-
-                IF delta_1 <> 0 THEN
-                    UPDATE eshop.payment_info SET amount = amount + delta_1 WHERE id = order_1.payment_info;
-                END IF;
-                IF delta_2 <> 0 THEN
-                    UPDATE eshop.payment_info SET amount = amount + delta_2 WHERE id = order_2.payment_info;
-                END IF;
-
-                new_data_1 := jsonb_set(
-                    order_1.data,
-                    '{tickets}',
-                    (SELECT jsonb_agg(
-                        CASE WHEN (tckt->>'id')::bigint = opt_1.ticket
-                        THEN jsonb_set(
-                            tckt,
-                            '{products}',
-                            (SELECT jsonb_agg(
-                                CASE
-                                    WHEN (prod->>'id')::bigint = original_product_id_1
-                                    THEN product_2_json_full -- Swap in Product 2's JSON
-                                    ELSE prod
-                                END
-                            ) FROM jsonb_array_elements(tckt->'products') prod)
-                        )
-                        ELSE tckt
-                        END
-                    ) FROM jsonb_array_elements(order_1.data->'tickets') tckt)
-                );
-
-                new_data_2 := jsonb_set(
-                    order_2.data,
-                    '{tickets}',
-                    (SELECT jsonb_agg(
-                        CASE WHEN (tckt->>'id')::bigint = opt_2.ticket
-                        THEN jsonb_set(
-                            tckt,
-                            '{products}',
-                            (SELECT jsonb_agg(
-                                CASE
-                                    WHEN (prod->>'id')::bigint = original_product_id_2
-                                    THEN product_1_json_full -- Swap in Product 1's JSON
-                                    ELSE prod
-                                END
-                            ) FROM jsonb_array_elements(tckt->'products') prod)
-                        )
-                        ELSE tckt
-                        END
-                    ) FROM jsonb_array_elements(order_2.data->'tickets') tckt)
-                );
-
-                new_price_1 := COALESCE(order_1.price, 0) + delta_1;
-                new_price_2 := COALESCE(order_2.price, 0) + delta_2;
-
-                SELECT CASE
-                    WHEN COALESCE(pi.paid, 0) >= new_price_1 AND new_price_1 > 0 THEN 'paid'
-                    WHEN new_price_1 <= 0 THEN 'paid'
-                    ELSE 'ordered'
-                END INTO new_state_1
-                FROM eshop.payment_info pi WHERE pi.id = order_1.payment_info;
-
-                SELECT CASE
-                    WHEN COALESCE(pi.paid, 0) >= new_price_2 AND new_price_2 > 0 THEN 'paid'
-                    WHEN new_price_2 <= 0 THEN 'paid'
-                    ELSE 'ordered'
-                END INTO new_state_2
-                FROM eshop.payment_info pi WHERE pi.id = order_2.payment_info;
-
-                UPDATE eshop.orders
-                SET price = new_price_1, data = new_data_1, state = new_state_1, updated_at = now_time
-                WHERE id = order_1.id;
-
-                UPDATE eshop.orders
-                SET price = new_price_2, data = new_data_2, state = new_state_2, updated_at = now_time
-                WHERE id = order_2.id;
-
-                INSERT INTO eshop.orders_history("order", data, state, price, currency_code)
-                VALUES (order_1.id, new_data_1, new_state_1, new_price_1, order_1.currency_code);
-
-                INSERT INTO eshop.orders_history("order", data, state, price, currency_code)
-                VALUES (order_2.id, new_data_2, new_state_2, new_price_2, order_2.currency_code);
-
-            ELSE
-                -- CASE 2: SAME ORDER
-                new_data_1 := jsonb_set(
-                    order_1.data,
-                    '{tickets}',
-                    (SELECT jsonb_agg(
-                        CASE
-                            WHEN (tckt->>'id')::bigint = opt_1.ticket THEN jsonb_set(
-                                tckt, '{products}',
-                                (SELECT jsonb_agg(
-                                    CASE WHEN (prod->>'id')::bigint = original_product_id_1 THEN product_2_json_full
-                                         ELSE prod
-                                    END
-                                ) FROM jsonb_array_elements(tckt->'products') prod)
-                            )
-                            WHEN (tckt->>'id')::bigint = opt_2.ticket THEN jsonb_set(
-                                tckt, '{products}',
-                                (SELECT jsonb_agg(
-                                    CASE WHEN (prod->>'id')::bigint = original_product_id_2 THEN product_1_json_full
-                                         ELSE prod
-                                    END
-                                ) FROM jsonb_array_elements(tckt->'products') prod)
-                            )
-                            ELSE tckt
-                        END
-                    ) FROM jsonb_array_elements(order_1.data->'tickets') tckt)
-                );
-
-                new_price_1 := order_1.price;
-                new_state_1 := order_1.state;
-
-                UPDATE eshop.orders
-                SET data = new_data_1, updated_at = now_time
-                WHERE id = order_1.id;
-
-                INSERT INTO eshop.orders_history("order", data, state, price, currency_code)
-                VALUES (order_1.id, new_data_1, new_state_1, new_price_1, order_1.currency_code);
-
-            END IF; -- End same-order vs different-order logic
-        END IF; -- End financial update (products were different)
-
-        -- 4c. Perform the Spot Swap (This *always* happens in CASE A)
-        -- This swaps the tickets (which now may have new products) between the spots.
-        -- The `product` column on the spot must match the product *now* on the ticket.
-        UPDATE eshop.spots
-        SET
-            order_product_ticket = CASE
-                WHEN id = spot_id_1 THEN opt_2.id -- Spot 1 gets ticket 2
-                WHEN id = spot_id_2 THEN opt_1.id -- Spot 2 gets ticket 1
-            END,
-            product = CASE
-                -- Spot 1 is getting ticket 2. Ticket 2 now has original_product_id_1.
-                WHEN id = spot_id_1 THEN original_product_id_1
-                -- Spot 2 is getting ticket 1. Ticket 1 now has original_product_id_2.
-                WHEN id = spot_id_2 THEN original_product_id_2
-            END,
-            updated_at = now_time
-        WHERE id IN (spot_id_1, spot_id_2);
+        -- Ticket 2 (from spot 2) moves to Spot 1, so it must adopt Spot 1's product.
+        PERFORM public._swap_spots_update_ticket(spot2.order_product_ticket, spot1.product, spot_id_1);
 
     ELSIF spot1.order_product_ticket IS NOT NULL OR spot2.order_product_ticket IS NOT NULL THEN
         -- ----------------------------------------------------------------
-        -- CASE B/C: ONE SPOT IS ASSIGNED, ONE IS UNASSIGNED (Simple swap)
+        -- CASE B/C: ONE SPOT IS ASSIGNED, ONE IS UNASSIGNED
         -- ----------------------------------------------------------------
-        -- No financial changes, no history logs.
-        -- Just swap the FKs on the spots table.
-        -- The 'spot1' and 'spot2' records have the values as of the start
-        -- of the function, which is what we want to swap.
 
-        UPDATE eshop.spots
-        SET
-            order_product_ticket = CASE
-                WHEN id = spot_id_1 THEN spot2.order_product_ticket
-                WHEN id = spot_id_2 THEN spot1.order_product_ticket
-            END,
-            product = CASE
-                WHEN id = spot_id_1 THEN spot2.product
-                WHEN id = spot_id_2 THEN spot1.product
-            END,
-            updated_at = now_time
-        WHERE id IN (spot_id_1, spot_id_2);
+        IF spot1.order_product_ticket IS NOT NULL THEN
+            -- Spot 1 is assigned, Spot 2 is unassigned.
+            -- Ticket 1 moves to Spot 2 and adopts Spot 2's product.
+            PERFORM public._swap_spots_update_ticket(spot1.order_product_ticket, spot2.product, spot_id_2);
+        ELSE
+            -- Spot 2 is assigned, Spot 1 is unassigned.
+            -- Ticket 2 moves to Spot 1 and adopts Spot 1's product.
+            PERFORM public._swap_spots_update_ticket(spot2.order_product_ticket, spot1.product, spot_id_1);
+        END IF;
 
     ELSE
         -- ----------------------------------------------------------------
@@ -296,6 +258,18 @@ BEGIN
         -- Nothing to do.
         RETURN;
     END IF;
+
+    -- 5. Final Spot Update
+    -- This block runs for Cases A, B, and C.
+    -- We ONLY swap the 'order_product_ticket' FK. The 'product' column
+    -- on the spot (spot1.product, spot2.product) never changes.
+    UPDATE eshop.spots
+    SET
+        order_product_ticket = CASE
+            WHEN id = spot_id_1 THEN spot2.order_product_ticket -- Spot 1 gets Ticket 2
+            WHEN id = spot_id_2 THEN spot1.order_product_ticket -- Spot 2 gets Ticket 1
+        END
+    WHERE id IN (spot_id_1, spot_id_2);
 
 END;
 $$;
