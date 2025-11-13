@@ -12,6 +12,10 @@ class CommonStrings {
   static String get rename => 'Rename'.tr(); // "Rename"
   static String get addNew => 'AddNew'.tr(); // "Add new"
 
+  // --- Common Nouns & Labels ---
+  static String get title => 'Title'.tr(); // "Title"
+  static String get price => 'Price'.tr(); // "Price"
+
   // --- Common Statuses & Feedback ---
   static String get saved => 'Saved'.tr(); // "Saved"
   static String get deleted => 'Deleted'.tr(); // "Deleted"
@@ -20,4 +24,7 @@ class CommonStrings {
   static String get loading => 'Loading'.tr(); // "Loading..."
   static String get settings => 'Settings'.tr(); // "Settings"
 
+  // --- Forms & Validation (New) ---
+  static String get fieldCannotBeEmpty => 'Common.fieldCannotBeEmpty'.tr(); // "Field cannot be empty"
+  static String get invalidFormat => 'Common.invalidFormat'.tr(); // "Invalid format"
 }

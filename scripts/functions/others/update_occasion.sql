@@ -87,6 +87,7 @@ CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
                 data        = COALESCE(input_data->'data', data),
                 is_hidden   = COALESCE((input_data->>'is_hidden')::BOOLEAN, is_hidden),
                 is_open     = COALESCE((input_data->>'is_open')::BOOLEAN, is_open),
+                is_promoted = COALESCE((input_data->>'is_promoted')::BOOLEAN, is_promoted),
                 start_time  = COALESCE((input_data->>'start_time')::TIMESTAMPTZ, start_time),
                 end_time    = COALESCE((input_data->>'end_time')::TIMESTAMPTZ, end_time),
                 organization = COALESCE((input_data->>'organization')::BIGINT, organization),
@@ -126,7 +127,7 @@ CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
 
          INSERT INTO public.occasions(
              created_at, updated_at, title, description, link, data,
-             is_hidden, is_open, start_time, end_time, organization,
+             is_hidden, is_open, is_promoted, start_time, end_time, organization,
              services, unit, features
          )
          VALUES(
@@ -137,6 +138,7 @@ CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
              COALESCE(input_data->'data', '{}'::jsonb),
              COALESCE((input_data->>'is_hidden')::BOOLEAN, false),
              COALESCE((input_data->>'is_open')::BOOLEAN, true),
+             COALESCE((input_data->>'is_promoted')::BOOLEAN, false),
              (input_data->>'start_time')::TIMESTAMPTZ,
              (input_data->>'end_time')::TIMESTAMPTZ,
              (input_data->>'organization')::BIGINT,
