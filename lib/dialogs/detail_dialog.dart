@@ -2,14 +2,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/html_view.dart';
-import 'package:fstapp/widgets/zoomable_image/zoomable_image.dart'; // For PinchScrollView
+import 'package:fstapp/widgets/zoomable_image/zoomable_image.dart';
 
 class DetailDialog extends StatefulWidget {
   final String title;
   final String? htmlDescription;
   final bool canEdit;
-  final VoidCallback? onEditPressed; // Callback for the edit action
-  final Widget? customContentWidget; // Optional custom widget
+  final VoidCallback? onEditPressed;
+  final Widget? customContentWidget;
 
   const DetailDialog({
     super.key,
@@ -50,23 +50,21 @@ class _DetailDialogState extends State<DetailDialog> {
         child: SizedBox(
           height: widget.customContentWidget != null ? 500 : null,
           width: widget.customContentWidget != null ? StylesConfig.formMaxWidthMid : null,
-          child: PinchScrollView( // PinchScrollView kept for description zooming
+          child: PinchScrollView(
             builder: (onPinchStart, onPinchEnd) => Column(
               crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min, // Important for Column in ScrollView
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Edit button, shown if canEdit is true and onEditPressed is provided
                 if (widget.canEdit && widget.onEditPressed != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: TextButton.icon(
                       onPressed: _handleEditPressed,
-                      icon: const Icon(Icons.edit), // Generic edit icon
-                      label: Text('Edit'.tr()), // Generic edit text
+                      icon: const Icon(Icons.edit),
+                      label: Text('Edit'.tr()),
                     ),
                   ),
 
-                // (Optional) Custom widget slot below description
                 if (widget.customContentWidget != null) ...[
                   const SizedBox(height: 16),
                   widget.customContentWidget!,
@@ -74,7 +72,7 @@ class _DetailDialogState extends State<DetailDialog> {
 
                 if(widget.htmlDescription != null)
                   HtmlView(
-                    html: widget.htmlDescription!, // Use the passed-in HTML description
+                    html: widget.htmlDescription!,
                     isSelectable: true,
                     twoFingersOn: onPinchStart,
                     twoFingersOff: onPinchEnd,
@@ -96,8 +94,8 @@ class _DetailDialogState extends State<DetailDialog> {
 
   void _handleEditPressed() {
     if (widget.onEditPressed != null) {
-      Navigator.of(context).pop(); // Pop the dialog first
-      widget.onEditPressed!();     // Then call the edit action
+      Navigator.of(context).pop();
+      widget.onEditPressed!();
     }
   }
 }

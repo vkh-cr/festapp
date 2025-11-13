@@ -124,6 +124,7 @@ class _UsersTabState extends State<UsersTab> {
         context: context,
         loadData: DbUsers.getOccasionEditorData,
         fromPlutoJson: OccasionUserModel.fromPlutoJson,
+        getNewObject: () => OccasionUserModel.newRow(RightsService.currentOccasionId()!),
         firstColumnType: DataGridFirstColumn.deleteAndCheck,
         idColumn: Tb.occasion_users.user,
         actionsExtended: DataGridActionsController(
