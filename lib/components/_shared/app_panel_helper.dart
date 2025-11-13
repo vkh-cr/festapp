@@ -72,11 +72,11 @@ class AppPanelHelper {
         itemTitleBuilder: (item) => item.title ?? '---',
         itemIdBuilder: (item) => item.id,
         onItemSelected: (item) async {
-          await RouterService.navigateToUnit(originalContext, item);
+          await RouterService.navigateToUnitAdmin(originalContext, item);
         },
         onCreateNew: null,
         onTitleTap: () async =>
-        await RouterService.navigateToUnit(originalContext, currentUnit),
+        await RouterService.navigateToUnitAdmin(originalContext, currentUnit),
         searchHintText: AdministrationStrings.findUnitHint,
         createNewText: AdministrationStrings.newUnitButton,
       ));
@@ -112,16 +112,14 @@ class AppPanelHelper {
           }
         },
         onCreateNew: !RightsService.isUnitEditor() ? null :
-            () =>
-            OccasionCreationHelper.createNewOccasion(
-                originalContext, currentUnit, occasionsInCurrentUnit, (
-                newOccasion) =>
-                () async {
-              if (newOccasion.link != null) {
-                await RouterService.navigateToOccasionAdministration(
-                    originalContext, occasionLink: newOccasion.link!);
-              }
-            }),
+            () async {
+          final newOccasion = await OccasionCreationHelper.createNewOccasion(
+              originalContext, currentUnit, occasionsInCurrentUnit);
+          if (newOccasion != null && newOccasion.link != null) {
+            await RouterService.navigateToOccasionAdministration(
+                originalContext, occasionLink: newOccasion.link!);
+          }
+        },
         onTitleTap: () async {
           if (currentOccasion.link != null) {
             await RouterService.navigateToOccasionAdministration(
@@ -595,11 +593,7 @@ class AppPanelHelper {
           // Logo on the far left, acting like a leading widget
           GestureDetector(
             onTap: () async {
-              final currentUnit = RightsService.currentUnit();
-              if (currentUnit != null &&
-                  RightsService.canUserSeeUnitWorkspace()) {
-                await RouterService.navigateToUnit(context, currentUnit);
-              }
+              await RouterService.navigateHome(context);
             },
             child: Padding(
               // Add padding to space it from the screen edge and from the breadcrumbs
@@ -669,18 +663,20 @@ class AppPanelHelper {
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
         child: GestureDetector(
           onTap: () async {
-            final currentUnit = RightsService.currentUnit();
-            if (currentUnit != null &&
-                RightsService.canUserSeeUnitWorkspace()) {
-              await RouterService.navigateToUnit(context, currentUnit);
-            }
+            await RouterService.navigateHome(context);
+            // final currentUnit = RightsService.currentUnit();
+            // if (currentUnit != null &&
+            //     RightsService.canUserSeeUnitWorkspace()) {
+            //   // This 'context' is correct (it's the one passed into the function)
+            //   await RouterService.navigateToUnitAdmin(context, currentUnit);
+            // }
           },
           child: LogoWidget(height: 40, forceDark: true),
         ),
       ),
       title: ValueListenableBuilder<OccasionLinkModel?>(
         valueListenable: RightsService.occasionLinkModelNotifier,
-        builder: (context, _, __) {
+        builder: (listenableContext, _, __) {
           final allUnits = RightsService
               .currentUser()
               ?.units ?? [];
@@ -694,11 +690,9 @@ class AppPanelHelper {
 
           return Row(
             children: [
-              // Unit Switcher
               Flexible(
                 flex: 2,
                 child: allUnits.length <= 1
-                // If only one unit, display a clickable title without the dropdown icon.
                     ? TextButton(
                   style: TextButton.styleFrom(
                     foregroundColor: onAppBarColor,
@@ -707,7 +701,7 @@ class AppPanelHelper {
                         fontSize: 16, fontWeight: FontWeight.normal),
                   ),
                   onPressed: () async {
-                    await RouterService.navigateToUnit(context, currentUnit);
+                    await RouterService.navigateToUnitAdmin(context, currentUnit);
                   },
                   child: Text(
                     currentUnit.title ?? '---',
@@ -730,7 +724,7 @@ class AppPanelHelper {
                           itemTitleBuilder: (i) => i.title ?? '---',
                           itemIdBuilder: (i) => i.id,
                           onItemSelected: (item) async =>
-                          await RouterService.navigateToUnit(context, item),
+                          await RouterService.navigateToUnitAdmin(context, item),
                           onCreateNew: null,
                           searchHintText: AdministrationStrings.findUnitHint,
                           createNewText: AdministrationStrings.newUnitButton,
@@ -805,7 +799,7 @@ class AppPanelHelper {
       actions: [
         ValueListenableBuilder<OccasionLinkModel?>(
           valueListenable: RightsService.occasionLinkModelNotifier,
-          builder: (context, _, __) {
+          builder: (listenableContext, _, __) {
             final currentOccasion = RightsService.currentOccasion();
             if (currentOccasion == null || !AppConfig.isAppSupported) {
               return const SizedBox.shrink();

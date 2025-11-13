@@ -85,9 +85,13 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
     });
   }
 
-  void _addNewEvent() {
-    OccasionCreationHelper.createNewOccasion(
-        context, widget.unit, _allOccasions, (_) => _loadOccasions);
+  Future<void> _addNewEvent() async {
+    final newOccasion = await OccasionCreationHelper.createNewOccasion(
+        context, widget.unit, _allOccasions);
+
+    if (newOccasion != null && mounted) {
+      await _loadOccasions();
+    }
   }
 
   Future<void> _handleView(OccasionModel occasion) async {

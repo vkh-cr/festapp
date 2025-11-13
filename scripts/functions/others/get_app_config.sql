@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_app_config_v182(data_in jsonb)
+CREATE OR REPLACE FUNCTION get_app_config_v216(data_in jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
@@ -12,6 +12,7 @@ DECLARE
     platform_name text := platform_info->>'platform';
     occasionId bigint;
     default_unit bigint;
+    editor_unit_id bigint;
     is_open_bool BOOLEAN;
     occasion_user occasion_users%rowtype;
     unit_user unit_users%rowtype;
@@ -39,7 +40,10 @@ BEGIN
         platform_name := 'web';
     END IF;
 
-    -- If form_link is provided, fetch the occasion from forms
+    -- We will try to find an occasion or unit in order of priority.
+    -- occasionId and default_unit are NULL by default.
+
+    -- 1. Try to find occasion via form_link
     IF form_link IS NOT NULL AND form_link <> '' THEN
         SELECT forms.occasion, occasions.link
           INTO occasionId, occasion_link
@@ -47,23 +51,20 @@ BEGIN
         JOIN occasions ON forms.occasion = occasions.id
         WHERE forms.link = form_link
           AND occasions.organization = org_id;
+        -- Per your request, if form_link is provided but doesn't resolve,
+        -- we NO LONGER return 404. We let occasionId remain NULL
+        -- and fall through to the next checks.
+    END IF;
 
-        -- If no occasion is found, return a 404 response
-        IF occasionId IS NULL THEN
-            RETURN json_build_object(
-                'code', 404,
-                'message', 'No occasion found for the provided form link'
-            );
-        END IF;
-
-    -- If no form_link but link_txt is provided
-    ELSIF link_txt IS NOT NULL AND link_txt <> '' THEN
+    -- 2. If no occasion found yet, try via link_txt
+    IF occasionId IS NULL AND link_txt IS NOT NULL AND link_txt <> '' THEN
         SELECT id, link
           INTO occasionId, occasion_link
         FROM occasions
         WHERE link = link_txt
           AND organization = org_id;
 
+        -- If link_txt is provided but *not* found, this is a hard 404.
         IF occasionId IS NULL THEN
             RETURN json_build_object(
                 'code', 404,
@@ -71,26 +72,34 @@ BEGIN
             );
         END IF;
 
-    -- New: If a unit_id is provided directly (and no links), prioritize it and do not load an occasion.
-    ELSIF unit_id IS NOT NULL THEN
-        occasionId := NULL; -- Ensure no occasion is loaded, even if a default is set for the org.
-        default_unit := unit_id; -- Use the provided unit_id as the context.
+    -- 3. If no occasion found yet, try to use unit_id
+    ELSIF occasionId IS NULL AND unit_id IS NOT NULL THEN
+        occasionId := NULL; -- Ensure no occasion is loaded.
 
-        -- Fetch unit details from the provided unit_id
+        -- 1. Try to use the provided unit_id
+        default_unit := unit_id;
+
+        -- 2. Fetch unit details to check for existence
         SELECT json_build_object('id', u.id, 'title', u.title)
             INTO unit_json
         FROM units u
         WHERE u.id = default_unit;
 
-        -- Fetch the user's relationship with this unit
+        -- 3. (REMOVED) Fallback to first admin unit is removed.
+        --    If unit_id is invalid, unit_json will be NULL.
+
+        -- 4. Fetch the user's relationship with the determined unit (if any)
+        --    (unit_user will remain NULL if default_unit is NULL)
         SELECT *
             INTO unit_user
         FROM unit_users
         WHERE unit = default_unit
             AND "user" = current_user_id;
 
-    ELSE
-        -- No link or specific unit_id provided: first try to get the representative or default occasion
+    -- 4. If no occasion or unit context found yet, try to get default occasion
+    ELSIF occasionId IS NULL THEN
+        -- No link or specific unit_id provided:
+        -- 1. Try to get the representative or default occasion
         SELECT COALESCE(
                  (data->>'REPRESENTATIVE_OCCASION')::bigint,
                  (data->>'DEFAULT_OCCASION')::bigint
@@ -100,42 +109,13 @@ BEGIN
         WHERE id = org_id;
 
         IF occasionId IS NULL THEN
-            -- No default occasion; try to get the default unit instead
-            SELECT (data->>'DEFAULT_UNIT')::bigint
-              INTO default_unit
-            FROM organizations
-            WHERE id = org_id;
-
-            IF default_unit IS NOT NULL THEN
-                -- Default unit exists so we leave occasion unset
-                occasionId := NULL;
-                -- Fetch unit details from the default unit
-                SELECT json_build_object('id', u.id, 'title', u.title)
-                  INTO unit_json
-                FROM units u
-                WHERE u.id = default_unit;
-
-                SELECT *
-                  INTO unit_user
-                FROM unit_users
-                WHERE unit = default_unit
-                  AND "user" = current_user_id;
-            ELSE
-                -- Neither default occasion nor default unit exists; search for first open, non-hidden occasion
-                SELECT id, link
-                  INTO occasionId, occasion_link
-                FROM occasions
-                WHERE is_open = true
-                  AND organization = org_id
-                LIMIT 1;
-
-                IF occasionId IS NULL THEN
-                    RETURN json_build_object(
-                        'code', 404,
-                        'message', 'No open occasion found for the organization'
-                    );
-                END IF;
-            END IF;
+            -- No default occasion found.
+            -- Per new requirements, we NO LONGER fall back to:
+            -- 1. User's first editor/admin unit
+            -- 2. Organization's DEFAULT_UNIT
+            -- 3. First open occasion
+            -- Both occasionId and default_unit will remain NULL.
+            NULL;
         ELSE
             -- Default occasion exists; fetch its link
             SELECT link
@@ -286,7 +266,7 @@ BEGIN
     SELECT row_to_json(ui)::jsonb || jsonb_build_object(
             'units',
             (
-                SELECT json_agg(jsonb_build_object('id', u.id, 'title', u.title))
+                SELECT json_agg(jsonb_build_object('id', u.id, 'title', u.title) ORDER BY u.title)
                 FROM public.units u
                 JOIN public.unit_users uu ON uu.unit = u.id
                 WHERE uu."user" = ui.id AND uu.is_editor_view = TRUE

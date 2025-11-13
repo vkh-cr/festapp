@@ -58,7 +58,7 @@ class SynchroService {
     print(link.occasionLink);
     print(link.formLink);
 
-    var data = await _supabase.rpc("get_app_config_v182",
+    var data = await _supabase.rpc("get_app_config_v216",
         params: {"data_in": {
           "link": link.occasionLink,
           "form_link": link.formLink,

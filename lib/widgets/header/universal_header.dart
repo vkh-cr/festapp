@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/router_service.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/logo_widget.dart';
 import 'package:fstapp/widgets/header/user_header_widget.dart';
@@ -8,9 +9,14 @@ const double kHorizontalPadding = 16.0;
 
 class UniversalHeader extends StatelessWidget {
   final ScrollController scrollController;
-  final VoidCallback? onSignInOut;
+  final Future<void> Function()? onSignIn;
+  final VoidCallback? onAdminPressed;
 
-  const UniversalHeader({super.key, required this.scrollController, this.onSignInOut});
+  const UniversalHeader(
+      {super.key,
+        required this.scrollController,
+        this.onSignIn,
+        this.onAdminPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +36,8 @@ class UniversalHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             InkWell(
-              onTap: () {
+              onTap: () async {
+                await RouterService.navigateHome(context);
                 scrollController.animateTo(
                   0.0,
                   duration: const Duration(milliseconds: 300),
@@ -39,7 +46,10 @@ class UniversalHeader extends StatelessWidget {
               },
               child: LogoWidget(height: 60),
             ),
-            UserHeaderWidget(onSignInOut: onSignInOut), // Pass callback here
+            UserHeaderWidget(
+              onSignIn: onSignIn,
+              onAdminPressed: onAdminPressed,
+            ), // Pass callback here
           ],
         ),
       ),

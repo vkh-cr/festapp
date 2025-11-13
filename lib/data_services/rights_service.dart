@@ -36,10 +36,10 @@ class RightsService{
 
   static List<int>? bankAccountAdmin() => occasionLinkModelNotifier.value?.bankAccountsAdmin;
 
-  static Future<bool> updateAppData({int? unitId, String? link, bool force = false, bool refreshOffline = true}) async {
+  static Future<bool> updateAppData({int? unitId, String? link, bool force = false, bool refreshOffline = AppConfig.isAppSupported, String? formLink}) async {
     // Check if an update is needed
     if (occasionLinkModelNotifier.value?.occasion?.id == null || link != currentLink || force) {
-      LinkModel model = LinkModel(occasionLink: link, unitId: unitId);
+      LinkModel model = LinkModel(occasionLink: link, unitId: unitId, formLink: formLink);
       if(unitId == null){
         var occasionLink = link ?? RouterService.currentOccasionLink;
         if (occasionLink.isEmpty) {
