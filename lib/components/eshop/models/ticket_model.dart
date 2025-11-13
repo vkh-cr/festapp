@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
@@ -92,7 +92,7 @@ class TicketModel extends ITrinaRowModel {
               : ""),
       EshopColumns.TICKET_SPOT: TrinaCell(
           value: relatedSpot != null
-              ? relatedSpot?.toShortString()
+              ? relatedSpot?.toSpotString()
               : ""),
       EshopColumns.TICKET_TOTAL_PRICE: TrinaCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
       EshopColumns.TICKET_PRODUCTS_EDIT: TrinaCell(value: ""),

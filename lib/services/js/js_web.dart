@@ -1,5 +1,3 @@
-// lib/services/js/js_web.dart
-
 import 'dart:async';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
@@ -10,14 +8,30 @@ JSAny? _toJSAny(dynamic v) {
   if (v == null) return null;
   if (v is JSAny?) return v;
   if (v is String) return v.toJS;
-  if (v is bool)   return v.toJS;
-  if (v is int)    return v.toJS;
+  if (v is bool) return v.toJS;
+  if (v is int) return v.toJS;
   if (v is double) return v.toJS;
   // TODO: recursively handle List/Map if you need JS arrays or objects
   throw ArgumentError('Cannot convert `${v.runtimeType}` to JSAny');
 }
 
 class JSInterop {
+  // --- Singleton Setup ---
+  static final JSInterop _instance = JSInterop._internal();
+  factory JSInterop() => _instance;
+
+  final StreamController<web.PopStateEvent> _popStateController =
+  StreamController.broadcast();
+
+  JSInterop._internal() {
+    web.window.onpopstate = (web.PopStateEvent event) {
+      _popStateController.add(event);
+    }.toJS;
+  }
+
+  Stream<web.PopStateEvent> get onPopState => _popStateController.stream;
+  // --- End Singleton Setup ---
+
   /// globalThis[method](...args)
   void callMethod(String method, List<dynamic> args) {
     final jsArgs = args.map(_toJSAny).toList();
@@ -41,7 +55,7 @@ class JSInterop {
     final jsArgs = args.map(_toJSAny).toList();
 
     void onSuccess(JSAny? r) => completer.complete(r.dartify() as bool);
-    void onError(JSAny? _)    => completer.complete(false);
+    void onError(JSAny? _) => completer.complete(false);
 
     globalContext.callMethodVarArgs<JSAny?>(
       method.toJS,
@@ -61,7 +75,7 @@ class JSInterop {
     final jsArgs = args.map(_toJSAny).toList();
 
     void onSuccess(JSAny? r) => completer.complete(r.dartify());
-    void onError(JSAny? e)   => completer.complete(e.dartify());
+    void onError(JSAny? e) => completer.complete(e.dartify());
 
     globalContext.callMethodVarArgs<JSAny?>(
       method.toJS,
@@ -88,7 +102,23 @@ class JSInterop {
   }
 
   /// history.replaceState(null, "", newUrl)
+  /// Kept for compatibility with older code (e.g. NotificationHelper).
   void changeUrl(String newUrl) {
     web.window.history.replaceState(null, '', newUrl);
+  }
+
+  /// history.pushState(null, "", newUrl)
+  void pushState(String newUrl) {
+    web.window.history.pushState(null, '', newUrl);
+  }
+
+  /// history.back()
+  void goBack() {
+    web.window.history.back();
+  }
+
+  /// Returns window.location.href
+  String getCurrentUrl() {
+    return web.window.location.href;
   }
 }
