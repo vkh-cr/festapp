@@ -117,18 +117,15 @@ class _TicketsTabState extends State<TicketsTab> {
     if (confirm) {
       var stornoFutures = selectedTickets.map((ticket) {
         return () async {
-          if (await DbTickets.stornoTicket(ticket.id!)) {
-            ToastHelper.Show(
-              context,
-              OrdersStrings.stornoCompletedText.tr(
-                namedArgs: {
-                  "item": ticket.ticketSymbol ?? ticket.id.toString(),
-                },
-              ),
-            );
-          } else {
-            throw Exception(OrdersStrings.stornoFailed);
-          }
+          await DbTickets.stornoTicket(ticket.id!);
+          ToastHelper.Show(
+            context,
+            OrdersStrings.stornoCompletedText.tr(
+              namedArgs: {
+                "item": ticket.ticketSymbol ?? ticket.id.toString(),
+              },
+            ),
+          );
         };
       }).toList();
 
