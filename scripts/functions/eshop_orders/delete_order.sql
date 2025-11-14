@@ -1,5 +1,5 @@
-CREATE OR REPLACE FUNCTION delete_order(order_id BIGINT)
-RETURNS JSONB
+CREATE OR REPLACE FUNCTION delete_order_221(order_id BIGINT)
+RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
@@ -10,6 +10,7 @@ DECLARE
   order_oc BIGINT;
   unit_id BIGINT;
   is_manager BOOLEAN;
+  ou_record RECORD;
 BEGIN
   -- Retrieve the order's occasion and payment_info.
   SELECT occasion, payment_info
@@ -52,7 +53,27 @@ BEGIN
   -- Delete the related order_product_ticket entries.
   DELETE FROM eshop.order_product_ticket WHERE "order" = order_id;
 
+  -- Before deleting the tickets, find any occasion_users rows that are
+  -- bound to these tickets and call the workspace deletion function.
+  -- This function runs as SECURITY INVOKER, so it will correctly
+  -- check the *caller's* permissions (e.g., is_companion, is_manager).
+  IF ticket_ids IS NOT NULL AND array_length(ticket_ids, 1) > 0 THEN
+    FOR ou_record IN
+      SELECT "user", occasion
+      FROM public.occasion_users
+      WHERE ticket = ANY(ticket_ids)
+    LOOP
+      -- Call the function to delete the user from the occasion.
+      -- This respects the security and permission logic defined in
+      -- delete_occasion_user_ws. If this fails, the whole transaction
+      -- will be rolled back.
+      PERFORM public.delete_occasion_user_ws(ou_record."user", ou_record.occasion);
+    END LOOP;
+  END IF;
+
   -- Delete the related tickets.
+  -- This is now safe, as any occasion_users foreign key constraints
+  -- should be resolved by the loop above.
   DELETE FROM eshop.tickets WHERE id = ANY(ticket_ids);
 
   -- Delete order history rows.
@@ -70,11 +91,5 @@ BEGIN
   -- Finally, delete the order record.
   DELETE FROM eshop.orders WHERE id = order_id;
 
-  -- Return success response.
-  RETURN JSONB_BUILD_OBJECT('code', 200, 'message', 'Order successfully deleted.');
-
-EXCEPTION WHEN OTHERS THEN
-  -- In case of any error, return an error JSON and rollback.
-  RETURN JSONB_BUILD_OBJECT('code', 500, 'message', SQLERRM);
 END;
 $$;
