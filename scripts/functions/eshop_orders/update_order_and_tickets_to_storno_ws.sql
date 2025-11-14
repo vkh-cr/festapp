@@ -1,5 +1,8 @@
-CREATE OR REPLACE FUNCTION update_order_and_tickets_to_storno_ws(order_id bigint)
-RETURNS jsonb SECURITY DEFINER AS $$
+CREATE OR REPLACE FUNCTION update_order_and_tickets_to_storno_ws_221(order_id bigint)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 DECLARE
     occasion_id bigint;
 BEGIN
@@ -17,13 +20,6 @@ BEGIN
     END IF;
 
     -- Call the original function to update the order and tickets
-    RETURN update_order_and_tickets_to_storno(order_id);
-EXCEPTION WHEN OTHERS THEN
-    -- Handle any exceptions
-    RETURN jsonb_build_object(
-        'code', 500,
-        'message', SQLERRM,
-        'detail', coalesce(SQLERRM, 'An unexpected error occurred')
-    );
+    PERFORM update_order_and_tickets_to_storno_221(order_id);
 END;
-$$ LANGUAGE plpgsql;
+$$;
