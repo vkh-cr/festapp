@@ -395,7 +395,7 @@ class DbUsers {
   }
 
   static Future<OccasionUserModel> getOccasionUser(String id) async {
-    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.user, id).limit(1).single();
+    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.user, id).eq(Tb.occasion_users.occasion, RightsService.currentOccasionId()!).limit(1).single();
     return OccasionUserModel.fromJson(data);
   }
 
