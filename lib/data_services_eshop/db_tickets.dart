@@ -10,18 +10,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class DbTickets {
   static final _supabase = Supabase.instance.client;
 
-  static Future<bool> stornoTicket(int ticketId) async {
+  static Future<void> stornoTicket(int ticketId) async {
     final response = await _supabase.rpc(
-      'storno_ticket',
+      'storno_ticket_221',
       params: {
         'ticket_id': ticketId,
       },
     );
-
-    if (response["code"] != 200) {
-      return false;
-    }
-    return true;
   }
 
   static Future<List<TicketModel>> getAllTickets(String occasionLink) async {
