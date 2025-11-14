@@ -30,6 +30,7 @@ import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
+import 'map_page.dart';
 import 'user_stay_page.dart';
 
 @RoutePage()
@@ -326,51 +327,51 @@ class _UserPageState extends State<UserPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // const Text("Accommodation").tr(),
-                        // const SizedBox(height: 4),
-                        // Container(
-                        //   alignment: Alignment.topLeft,
-                        //   child: TextButton(
-                        //     onPressed: userData?.accommodationPlace == null
-                        //         ? null
-                        //         : () => RouterService.navigateOccasion(
-                        //       context,
-                        //       "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}",
-                        //     ),
-                        //     child: userData?.accommodationPlace == null
-                        //         ? Text(
-                        //       userData?.accommodationPlace?.title ?? "Without accommodation".tr(),
-                        //       style: const TextStyle(fontSize: 20),
-                        //     )
-                        //         : IntrinsicWidth(
-                        //       child: Row(
-                        //         children: [
-                        //           const Icon(Icons.place),
-                        //           const SizedBox(width: 4),
-                        //           Text(
-                        //             userData!.accommodationPlace!.title!,
-                        //             style: const TextStyle(fontSize: 20),
-                        //           ),
-                        //           const SizedBox(width: 4),
-                        //         ],
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                        // const SizedBox(height: 16),
-                        ListTile(
-                          tileColor: ThemeConfig.qrButtonColor(context), // Added this line
-                          leading: Icon(Icons.hotel, color: Theme.of(context).colorScheme.primary),
-                          title: Text(InventoryStrings.userStayLinkTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(InventoryStrings.userStayLinkSubtitle),
-                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            // The side border has been removed to allow the background color to fill the shape fully without a separate outline.
-                            // If you still want a border, you can keep the 'side' property.
+                        const Text("Accommodation").tr(),
+                        const SizedBox(height: 4),
+                        Container(
+                          alignment: Alignment.topLeft,
+                          child: TextButton(
+                            onPressed: userData?.accommodationPlace == null
+                                ? null
+                                : () => RouterService.navigateOccasion(
+                              context,
+                              "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}",
+                            ),
+                            child: userData?.accommodationPlace == null
+                                ? Text(
+                              userData?.accommodationPlace?.title ?? "Ubytování neuvedeno",
+                              style: const TextStyle(fontSize: 20),
+                            )
+                                : IntrinsicWidth(
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.place),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    userData!.accommodationPlace!.title!,
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                  const SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
                           ),
-                          onTap: () => RouterService.navigateOccasion(context, UserStayPage.ROUTE),
                         ),
+                        const SizedBox(height: 16),
+                        // ListTile(
+                        //   tileColor: ThemeConfig.qrButtonColor(context), // Added this line
+                        //   leading: Icon(Icons.hotel, color: Theme.of(context).colorScheme.primary),
+                        //   title: Text(InventoryStrings.userStayLinkTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        //   subtitle: Text(InventoryStrings.userStayLinkSubtitle),
+                        //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        //   shape: RoundedRectangleBorder(
+                        //     borderRadius: BorderRadius.circular(12),
+                        //     // The side border has been removed to allow the background color to fill the shape fully without a separate outline.
+                        //     // If you still want a border, you can keep the 'side' property.
+                        //   ),
+                        //   onTap: () => RouterService.navigateOccasion(context, UserStayPage.ROUTE),
+                        // ),
                       ],
                     ),
                   ),
