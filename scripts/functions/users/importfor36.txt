@@ -142,7 +142,10 @@ BEGIN
                     FROM public.occasion_users
                     WHERE "user" = ticket_record.existing_occasion_user_id AND occasion = p_occasion_id;
 
-                    -- Build payload for all 6 fields
+                    -- Build payload for all fields (Added Email here)
+                    IF user_email IS NOT NULL AND COALESCE(current_data->>'email', 'NULL_FLAG') != user_email THEN
+                        update_payload := update_payload || jsonb_build_object('email', user_email);
+                    END IF;
                     IF user_name IS NOT NULL AND COALESCE(current_data->>'name', 'NULL_FLAG') != user_name THEN
                         update_payload := update_payload || jsonb_build_object('name', user_name);
                     END IF;
@@ -171,7 +174,7 @@ BEGIN
                         WHERE "user" = ticket_record.existing_occasion_user_id
                           AND occasion = p_occasion_id;
 
-                        -- 2. Update the global user_info table
+                        -- 2. Update the global user_info table (excluding email, usually kept readonly/separate logic)
                         UPDATE public.user_info
                         SET
                             name = COALESCE(update_payload->>'name', name),
@@ -223,6 +226,7 @@ BEGIN
                         email_suffix := email_suffix + 1;
                     END LOOP;
 
+                    -- Note: Email is already set here in your original code
                     user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', new_email, 'sex', user_sex);
                     IF p_occasion_id = 36 THEN
                         IF v_text1 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text1', v_text1); END IF;
@@ -239,8 +243,8 @@ BEGIN
                     -- SCENARIO 1: User exists, but either isn't linked to the occasion yet, or is linked but without a ticket.
 
                     -- ### MODIFIED SECTION ###
-                    -- Build the full data payload
-                    user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'sex', user_sex);
+                    -- Build the full data payload (ADDED EMAIL HERE)
+                    user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', user_email, 'sex', user_sex);
                     IF p_occasion_id = 36 THEN
                         IF v_text1 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text1', v_text1); END IF;
                         IF v_text2 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text2', v_text2); END IF;
@@ -253,7 +257,8 @@ BEGIN
                         name = user_name,
                         surname = user_surname,
                         sex = user_sex,
-                        data = user_info.data || jsonb_build_object('name', user_name, 'surname', user_surname, 'sex', user_sex)
+                        -- Also ensure global data has the email
+                        data = user_info.data || jsonb_build_object('name', user_name, 'surname', user_surname, 'email', user_email, 'sex', user_sex)
                     WHERE id = v_user_id;
 
                     IF v_occasion_user_row."user" IS NULL THEN
@@ -263,14 +268,14 @@ BEGIN
                         -- Now set their data and ticket
                         UPDATE public.occasion_users
                         SET
-                            data = user_data, -- Set the data
+                            data = user_data, -- Set the data (includes email now)
                             ticket = ticket_record.ticket_id
                         WHERE "user" = v_user_id AND occasion = p_occasion_id;
                     ELSE
                         -- User is already on the occasion, just update data and ticket
                         UPDATE public.occasion_users
                         SET
-                            data = occasion_users.data || user_data, -- Merge the data
+                            data = occasion_users.data || user_data, -- Merge the data (includes email now)
                             ticket = ticket_record.ticket_id
                         WHERE "user" = v_user_id AND occasion = p_occasion_id;
                     END IF;
@@ -280,6 +285,7 @@ BEGIN
                 END IF;
             ELSE
                 -- NEW USER: (Unchanged) No user with this email exists in the organization.
+                -- Note: Email is already set here in your original code
                 user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', user_email, 'sex', user_sex);
                 IF p_occasion_id = 36 THEN
                     IF v_text1 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text1', v_text1); END IF;
