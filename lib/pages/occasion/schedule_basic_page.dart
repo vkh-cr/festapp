@@ -195,7 +195,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      top: true,
+      top: false,
       bottom: false,
       left: false,
       right: false,
