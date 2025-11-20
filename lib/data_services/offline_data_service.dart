@@ -6,7 +6,7 @@ import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/icon_model.dart';
 import 'package:fstapp/data_models/information_model.dart';
 import 'package:fstapp/data_models/news_model.dart';
-import 'package:fstapp/data_models/occasion_settings_model.dart';
+import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
 import 'package:fstapp/data_models/path_group_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
