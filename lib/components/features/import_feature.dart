@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
 import 'features_strings.dart';
@@ -11,6 +12,7 @@ class ImportFeature extends Feature {
 
   bool importFromCsv;
   bool importFromTickets;
+  bool autoImport;
 
   ImportFeature({
     super.code = FeatureConstants.import,
@@ -19,6 +21,7 @@ class ImportFeature extends Feature {
     super.description,
     this.importFromCsv = false,
     this.importFromTickets = false,
+    this.autoImport = false,
   });
 
   /// Creates an ImportFeature from a JSON object.
@@ -30,6 +33,7 @@ class ImportFeature extends Feature {
       description: json[FeatureConstants.metaDescription],
       importFromCsv: json[metaImportFromCsv] ?? false,
       importFromTickets: json[metaImportFromTickets] ?? false,
+      autoImport: json[FeatureConstants.importAutoImport] ?? false,
     );
   }
 
@@ -41,6 +45,7 @@ class ImportFeature extends Feature {
       FeatureConstants.metaIsEnabled: isEnabled,
       metaImportFromCsv: importFromCsv,
       metaImportFromTickets: importFromTickets,
+      FeatureConstants.importAutoImport: autoImport,
     };
   }
 
@@ -64,12 +69,14 @@ class _ImportFeatureForm extends StatefulWidget {
 class _ImportFeatureFormState extends State<_ImportFeatureForm> {
   late bool _importFromCsv;
   late bool _importFromTickets;
+  late bool _autoImport;
 
   @override
   void initState() {
     super.initState();
     _importFromCsv = widget.feature.importFromCsv;
     _importFromTickets = widget.feature.importFromTickets;
+    _autoImport = widget.feature.autoImport;
   }
 
   @override
@@ -79,7 +86,7 @@ class _ImportFeatureFormState extends State<_ImportFeatureForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SwitchListTile(
-          title: Text(FeaturesStrings.labelImportFromCsv.tr()),
+          title: Text(FeaturesStrings.labelImportFromCsv),
           value: _importFromCsv,
           onChanged: (bool value) {
             setState(() {
@@ -89,7 +96,7 @@ class _ImportFeatureFormState extends State<_ImportFeatureForm> {
           },
         ),
         SwitchListTile(
-          title: Text(FeaturesStrings.labelImportFromTickets.tr()),
+          title: Text(FeaturesStrings.labelImportFromTickets),
           value: _importFromTickets,
           onChanged: (bool value) {
             setState(() {
@@ -98,6 +105,23 @@ class _ImportFeatureFormState extends State<_ImportFeatureForm> {
             });
           },
         ),
+        if (AppConfig.isAppSupported)
+          Column(
+            children: [
+              const Divider(),
+              SwitchListTile(
+                title: Text(FeaturesStrings.labelAutoImport),
+                subtitle: Text(FeaturesStrings.helperAutoImport),
+                value: _autoImport,
+                onChanged: (bool value) {
+                  setState(() {
+                    _autoImport = value;
+                    widget.feature.autoImport = value;
+                  });
+                },
+              ),
+            ],
+          ),
       ],
     );
   }

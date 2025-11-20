@@ -225,6 +225,24 @@ class DbUsers {
     return [];
   }
 
+  static Future<List<UserInfoModel>> getAllUsersBasicsForScan(String scanCode) async {
+    // This calls the RPC.
+    // If the scanCode is invalid, the SQL function raises an EXCEPTION,
+    // which causes this line to throw a PostgrestException immediately.
+    final result = await _supabase.rpc(
+      "get_all_user_basics_for_scan",
+      params: {"scan_code": scanCode},
+    );
+
+    // If successful, 'result' is the JSON List directly
+    if (result is List) {
+      return List<UserInfoModel>.from(result.map((x) => UserInfoModel.fromJson(x)));
+    }
+
+    // Fallback for unexpected return types
+    return [];
+  }
+
   static Future<List<UserInfoModel>> getAllUsersBasicsForUnit() async {
     var result = await _supabase.rpc("get_all_user_basics_from_occasion_unit",
         params: {"oc": RightsService.currentOccasionId()});
@@ -256,7 +274,7 @@ class DbUsers {
   }
 
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw, dynamic data) async {
-    var newId = await _supabase.rpc("create_user_in_organization_with_data",
+    var newId = await _supabase.rpc("create_user_in_organization_with_data_ws",
         params: {"org": AppConfig.organization, "email": email, "password": pw, "data": data});
     if (newId==null)
     {
