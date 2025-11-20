@@ -103,7 +103,7 @@ class _CheckPageState extends State<CheckPage> {
         child: Padding(
             padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
             child: const Text(
-                "Point the camera at the attendee's code for a entry verification.").tr()),
+                "Point the camera at the attendee's code for an entry verification.").tr()),
       );
     }
 
