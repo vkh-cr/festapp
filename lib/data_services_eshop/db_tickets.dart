@@ -7,6 +7,8 @@ import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../app_config.dart';
+
 class DbTickets {
   static final _supabase = Supabase.instance.client;
 
@@ -164,4 +166,22 @@ class DbTickets {
     return response["scan_code"];
   }
 
+  /// Resets the password for the user associated with the ticket.
+  /// Returns the user's email if successful, otherwise null.
+  static Future<String?> resetPassword(int ticketId, String password, String scannedCode) async {
+    try {
+      final response = await _supabase.rpc('reset_password_via_scan', params: {
+        'ticket_id': ticketId,
+        'password': password,
+        'scan_code': scannedCode,
+      });
+
+      if (response["code"] == 200) {
+        return AppConfig.removeUserPrefix(response["email"] as String);
+      }
+    } catch (e) {
+      print("Error in resetPassword: $e");
+    }
+    return null;
+  }
 }

@@ -9,11 +9,14 @@ import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/services/vibrate_service.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-enum ScanState { valid, invalid, used, nothing }
+import '../../widgets/html_view.dart';
+
+enum ScanState { valid, invalid, used, nothing, ordered }
 
 @RoutePage()
 class ScanPage extends StatefulWidget {
@@ -27,6 +30,9 @@ class ScanPage extends StatefulWidget {
 }
 
 class _ScanPageState extends State<ScanPage> {
+  static const String _defaultResetPassword = "1";
+  static const bool _showResetPasswordButton = true;
+
   EventModel? _event;
   TicketModel? _scannedObject;
   ScanState _scanState = ScanState.nothing;
@@ -35,7 +41,15 @@ class _ScanPageState extends State<ScanPage> {
   // To prevent multiple scans
   String? rightNowScanned;
 
-  final MobileScannerController _mobileScannerController = MobileScannerController(
+  // DEFINITION: Mapping array for specific fields to show
+  final Map<String, String> _specificFieldMappings = {
+    "735": "Typ účastníka",
+    "725": "Člen Anima Iuventutis, z. s.",
+    "739": "Stravovací omezení",
+  };
+
+  final MobileScannerController _mobileScannerController =
+  MobileScannerController(
     formats: [BarcodeFormat.qrCode],
     detectionSpeed: DetectionSpeed.noDuplicates,
   );
@@ -51,7 +65,8 @@ class _ScanPageState extends State<ScanPage> {
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
     if (widget.scanCode == null && context.routeData.hasPendingChildren) {
-      widget.scanCode = context.routeData.pendingChildren[0].params.getString("scanCode");
+      widget.scanCode =
+          context.routeData.pendingChildren[0].params.getString("scanCode");
     }
 
     if (kIsWeb) {
@@ -64,8 +79,8 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> checkForCode() async {
-    await Future.delayed(Duration(milliseconds: 500));
-    if(widget.scanCode == null) {
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (widget.scanCode == null) {
       String? inputScanCode = await DialogHelper.showInputDialog(
         context: context,
         dialogTitle: "Enter Scan Code".tr(),
@@ -75,6 +90,71 @@ class _ScanPageState extends State<ScanPage> {
         widget.scanCode = inputScanCode;
       }
     }
+  }
+
+  /// Helper to extract value from dynamic fields
+  String? _getFieldValue(OrderModel order, String targetFieldId) {
+    if (order.data == null || order.data!['fields'] == null) {
+      return null;
+    }
+    var fieldsList = order.data!['fields'];
+    if (fieldsList is! List) return null;
+
+    for (var fieldEntry in fieldsList) {
+      if (fieldEntry is Map) {
+        if (fieldEntry.containsKey(targetFieldId)) {
+          var value = fieldEntry[targetFieldId];
+          return (value != null && value.toString().isNotEmpty)
+              ? value.toString()
+              : null;
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Helper to get specific ticket price from order.data['tickets']
+  double? _getTicketPrice() {
+    if (_scannedObject == null ||
+        _scannedObject!.relatedOrder == null ||
+        _scannedObject!.relatedOrder!.data == null) {
+      return null;
+    }
+
+    final data = _scannedObject!.relatedOrder!.data!;
+
+    // 1. Access the 'tickets' list in the order JSON
+    if (data.containsKey('tickets') && data['tickets'] is List) {
+      final ticketsList = data['tickets'] as List;
+
+      // 2. Find the specific ticket in the JSON that matches the scanned object's ID
+      final ticketData = ticketsList.firstWhereOrNull(
+              (t) => t is Map && t['id'] == _scannedObject!.id);
+
+      if (ticketData != null && ticketData is Map) {
+        double totalTicketPrice = 0.0;
+        bool productsFound = false;
+
+        // 3. Iterate through the 'products' list inside this specific ticket
+        if (ticketData.containsKey('products') && ticketData['products'] is List) {
+          final productsList = ticketData['products'] as List;
+
+          for (var product in productsList) {
+            if (product is Map && product.containsKey('price')) {
+              productsFound = true;
+              totalTicketPrice += double.tryParse(product['price'].toString()) ?? 0.0;
+            }
+          }
+        }
+
+        // Only return a value if we actually found a products list (even if empty/free),
+        // otherwise return null to indicate no price data.
+        if (productsFound || (ticketData.containsKey('products') && (ticketData['products'] as List).isEmpty)) {
+          return totalTicketPrice;
+        }
+      }
+    }
+    return null;
   }
 
   Widget buildScannedUserDetails() {
@@ -89,48 +169,119 @@ class _ScanPageState extends State<ScanPage> {
       );
     }
 
+    // --- UPDATED ICONS ---
     IconData icon;
     if (_scanState == ScanState.valid) {
-      icon = Icons.check_circle;
+      icon = Icons.verified;
+    } else if (_scanState == ScanState.ordered) {
+      icon = Icons.pending_actions;
     } else if (_scanState == ScanState.invalid) {
-      icon = Icons.cancel;
+      icon = Icons.block;
     } else if (_scanState == ScanState.used) {
-      icon = Icons.info; // You can choose an appropriate icon for 'used'
+      icon = Icons.beenhere;
     } else {
       return const SizedBox.shrink();
+    }
+
+    // Prepare Price and Status Text
+    Widget priceWidget = const SizedBox.shrink();
+    double? price = _getTicketPrice();
+
+    if (price != null) {
+      String formattedPrice = Utilities.formatPrice(
+        context,
+        price,
+        currencyCode: _scannedObject!.relatedOrder!.currencyCode,
+      );
+
+      String statusText = "";
+      Color statusColor = Colors.black;
+
+      if (_scanState == ScanState.valid || _scanState == ScanState.used) {
+        statusText = "Zaplaceno";
+      } else if (_scanState == ScanState.ordered) {
+        statusText = "Nezaplaceno";
+      }
+
+      if (statusText.isNotEmpty) {
+        priceWidget = Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: const TextStyle(fontSize: 20, color: Colors.black),
+              children: [
+                TextSpan(
+                  text: "$formattedPrice  ",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                TextSpan(
+                  text: statusText,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: statusColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+
+    // Prepare State String with Date if Used
+    String stateString = OrderModel.stateToLocale(_scannedObject!.state);
+    if (_scannedObject!.state == OrderModel.usedState && _scannedObject!.updatedAt != null) {
+      String formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(_scannedObject!.updatedAt!);
+      stateString += " ($formattedDate)";
     }
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Center the customer info
+          // --- USER DETAILS SECTION ---
           Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Display related products in separate rows
+                // 1. Display related products nicely with HTML description
                 if (_scannedObject!.relatedProducts != null &&
                     _scannedObject!.relatedProducts!.isNotEmpty)
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _scannedObject!.relatedProducts!
-                        .map((product) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2.0),
-                      child: Text(
-                        product.toBasicString(),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: _scannedObject!.relatedProducts!.map((product) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              product.title ?? "",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            if (product.description != null &&
+                                product.description!.trim().isNotEmpty)
+                              HtmlView(
+                                html: product.description!,
+                                fontSize: 14,
+                                color: Colors.black87,
+                              ),
+                          ],
                         ),
-                      ),
-                    ))
-                        .toList(),
+                      );
+                    }).toList(),
                   ),
+
                 const SizedBox(height: 8),
-                // Display customer data, ticket symbol, and state
+
+                // 2. Display customer data, ticket symbol, and state (localized + date)
                 Text(
-                  "${_scannedObject!.relatedOrder!.toCustomerData()}   ${_scannedObject!.ticketSymbol}   ${_scannedObject!.state!}",
+                  "${_scannedObject!.relatedOrder!.toCustomerData()}   ${_scannedObject!.ticketSymbol}   $stateString",
                   style: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
@@ -138,18 +289,86 @@ class _ScanPageState extends State<ScanPage> {
                   ),
                   textAlign: TextAlign.center,
                 ),
+
+                // 3. Display Related Spot if it exists
+                if (_scannedObject!.relatedSpot != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      _scannedObject!.relatedSpot!.toSpotString(),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                // 4. Display Price and Payment Status
+                priceWidget,
+
+                // 5. Display specific extra fields
+                if (_scannedObject!.relatedOrder != null)
+                  ..._specificFieldMappings.entries.map((entry) {
+                    String fieldId = entry.key;
+                    String label = entry.value;
+                    String? value =
+                    _getFieldValue(_scannedObject!.relatedOrder!, fieldId);
+
+                    if (value == null) return const SizedBox.shrink();
+
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: const TextStyle(
+                              color: Colors.black, fontSize: 15),
+                          children: [
+                            TextSpan(
+                              text: "$label: ",
+                              style:
+                              const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            TextSpan(text: value),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
               ],
             ),
           ),
           const SizedBox(height: 8),
-          // Display the icon indicating scan state
-          Icon(icon, color: Colors.black, size: 30),
+
+          // --- ICON SECTION ---
+          Icon(icon, color: Colors.black, size: 40),
           const SizedBox(height: 16),
-          // If scan state is valid, show the "Confirm Ticket" button
-          if (_scanState == ScanState.valid)
+
+          // --- ACTION BUTTONS SECTION ---
+
+          // Confirm Ticket Button (Shows if ticket is VALID or ORDERED)
+          if (_scanState == ScanState.valid || _scanState == ScanState.ordered)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: ElevatedButton(
+                onPressed: _confirmTicket,
+                child: const Text("Confirm Ticket").tr(),
+              ),
+            ),
+
+          // Reset Password Button
+          if (_showResetPasswordButton)
             ElevatedButton(
-              onPressed: _confirmTicket,
-              child: const Text("Confirm Ticket").tr(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                Theme.of(context).colorScheme.secondaryContainer,
+                foregroundColor:
+                Theme.of(context).colorScheme.onSecondaryContainer,
+              ),
+              onPressed: _resetPassword,
+              child: Text("Resetovat heslo na '$_defaultResetPassword'"),
             ),
         ],
       ),
@@ -167,7 +386,7 @@ class _ScanPageState extends State<ScanPage> {
           children: [
             Column(
               children: [
-                // Header with back button and event title
+                // Header
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
@@ -228,32 +447,43 @@ class _ScanPageState extends State<ScanPage> {
     rightNowScanned = scannedId;
 
     _scannedObject = await DbTickets.scanTicket(scannedId, widget.scanCode!);
-    if (_scannedObject != null &&
-        (_scannedObject!.state == OrderModel.sentState ||
-            _scannedObject!.state == OrderModel.paidState)) {
-      _scanState = ScanState.valid;
-      VibrateService.vibrateOk();
-      setState(() {});
-      return;
-    } else if (_scannedObject != null &&
-        (_scannedObject!.state == OrderModel.stornoState ||
-            _scannedObject!.state == OrderModel.orderedState)) {
-      _scanState = ScanState.invalid;
-      VibrateService.vibrateNotOk();
-      setState(() {});
-      return;
-    } else if (_scannedObject != null &&
-        (_scannedObject!.state == OrderModel.usedState)) {
-      _scanState = ScanState.used;
-      VibrateService.vibrateNotOk();
-      setState(() {});
-      return;
+
+    if (_scannedObject != null) {
+      // 1. Valid (Paid/Sent)
+      if (_scannedObject!.state == OrderModel.sentState ||
+          _scannedObject!.state == OrderModel.paidState) {
+        _scanState = ScanState.valid;
+        VibrateService.vibrateOk();
+        setState(() {});
+        return;
+      }
+      // 2. Ordered (Valid but Unpaid)
+      else if (_scannedObject!.state == OrderModel.orderedState) {
+        _scanState = ScanState.ordered;
+        VibrateService.vibrateOk();
+        setState(() {});
+        return;
+      }
+      // 3. Invalid (Storno)
+      else if (_scannedObject!.state == OrderModel.stornoState) {
+        _scanState = ScanState.invalid;
+        VibrateService.vibrateNotOk();
+        setState(() {});
+        return;
+      }
+      // 4. Used
+      else if (_scannedObject!.state == OrderModel.usedState) {
+        _scanState = ScanState.used;
+        VibrateService.vibrateNotOk();
+        setState(() {});
+        return;
+      }
     }
+
     _scanState = ScanState.nothing;
     setState(() {});
   }
 
-  // Function to handle "Confirm Ticket" button press
   Future<void> _confirmTicket() async {
     if (_scannedObject == null) return;
 
@@ -261,14 +491,13 @@ class _ScanPageState extends State<ScanPage> {
         _scannedObject!.id!, widget.scanCode!);
 
     if (success) {
-      // Update the ticket state to 'used'
       setState(() {
         _scannedObject!.state = OrderModel.usedState;
+        _scannedObject!.updatedAt = DateTime.now(); // Update local object immediately
         _scanState = ScanState.used;
       });
       VibrateService.vibrateOk();
     } else {
-      // Handle failure, possibly show an error message
       VibrateService.vibrateNotOk();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to confirm ticket").tr()),
@@ -276,14 +505,97 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
+  Future<void> _resetPassword() async {
+    if (_scannedObject == null) return;
+
+    bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Opravdu resetovat heslo?"),
+          content: Text(
+              "Opravdu chcete změnit heslo tohoto uživatele na '$_defaultResetPassword'?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text("Zrušit"),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text("Resetovat"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      String? email = await DbTickets.resetPassword(
+          _scannedObject!.id!, _defaultResetPassword, widget.scanCode!);
+
+      if (!mounted) return;
+
+      if (email != null && email.isNotEmpty) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Nové údaje pro přihlášení"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("E-mail:",
+                    style:
+                    TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                SelectableText(email, style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 24),
+                const Text("Heslo:",
+                    style:
+                    TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                const SelectableText(_defaultResetPassword,
+                    style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Chyba: Email nebyl vrácen.")),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Chyba při resetu hesla: $e")),
+        );
+      }
+    }
+  }
+
   Color getResultColor(ScanState scannedState) {
     switch (scannedState) {
       case ScanState.valid:
         return Colors.greenAccent;
+      case ScanState.ordered:
+        return Colors.orangeAccent;
       case ScanState.used:
         return Colors.blueAccent;
       case ScanState.invalid:
-        return Colors.redAccent; // Changed from break to return
+        return Colors.redAccent;
       case ScanState.nothing:
         return ThemeConfig.backgroundColor(context);
     }
