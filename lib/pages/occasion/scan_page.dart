@@ -4,9 +4,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/app_config.dart'; // Added import
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_models/event_model.dart';
+// ADDED: Imports for User Search
+import 'package:fstapp/data_models/user_info_model.dart';
+import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -36,7 +40,6 @@ class _ScanPageState extends State<ScanPage> {
   EventModel? _event;
   TicketModel? _scannedObject;
   ScanState _scanState = ScanState.nothing;
-  final TextEditingController _searchController = TextEditingController();
 
   // To prevent multiple scans
   String? rightNowScanned;
@@ -46,6 +49,10 @@ class _ScanPageState extends State<ScanPage> {
     "735": "Typ účastníka",
     "725": "Člen Anima Iuventutis, z. s.",
     "739": "Stravovací omezení",
+    "615": "Typ účastníka",
+    "616": "Přípravný tým",
+    "629": "Člen Anima Iuventutis, z. s.",
+    "620": "Stravovací omezení",
   };
 
   final MobileScannerController _mobileScannerController =
@@ -57,7 +64,6 @@ class _ScanPageState extends State<ScanPage> {
   @override
   void dispose() {
     _mobileScannerController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -93,6 +99,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   /// Helper to extract value from dynamic fields
+  /// Updated to be robust against Key types (String vs Int)
   String? _getFieldValue(OrderModel order, String targetFieldId) {
     if (order.data == null || order.data!['fields'] == null) {
       return null;
@@ -102,11 +109,14 @@ class _ScanPageState extends State<ScanPage> {
 
     for (var fieldEntry in fieldsList) {
       if (fieldEntry is Map) {
-        if (fieldEntry.containsKey(targetFieldId)) {
-          var value = fieldEntry[targetFieldId];
-          return (value != null && value.toString().isNotEmpty)
-              ? value.toString()
-              : null;
+        // Iterate keys to handle potential type mismatches (e.g. key 735 vs "735")
+        for (var key in fieldEntry.keys) {
+          if (key.toString() == targetFieldId) {
+            var value = fieldEntry[key];
+            return (value != null && value.toString().isNotEmpty)
+                ? value.toString()
+                : null;
+          }
         }
       }
     }
@@ -136,20 +146,24 @@ class _ScanPageState extends State<ScanPage> {
         bool productsFound = false;
 
         // 3. Iterate through the 'products' list inside this specific ticket
-        if (ticketData.containsKey('products') && ticketData['products'] is List) {
+        if (ticketData.containsKey('products') &&
+            ticketData['products'] is List) {
           final productsList = ticketData['products'] as List;
 
           for (var product in productsList) {
             if (product is Map && product.containsKey('price')) {
               productsFound = true;
-              totalTicketPrice += double.tryParse(product['price'].toString()) ?? 0.0;
+              totalTicketPrice +=
+                  double.tryParse(product['price'].toString()) ?? 0.0;
             }
           }
         }
 
         // Only return a value if we actually found a products list (even if empty/free),
         // otherwise return null to indicate no price data.
-        if (productsFound || (ticketData.containsKey('products') && (ticketData['products'] as List).isEmpty)) {
+        if (productsFound ||
+            (ticketData.containsKey('products') &&
+                (ticketData['products'] as List).isEmpty)) {
           return totalTicketPrice;
         }
       }
@@ -169,7 +183,7 @@ class _ScanPageState extends State<ScanPage> {
       );
     }
 
-    // --- UPDATED ICONS ---
+    // --- ICONS ---
     IconData icon;
     if (_scanState == ScanState.valid) {
       icon = Icons.verified;
@@ -231,8 +245,10 @@ class _ScanPageState extends State<ScanPage> {
 
     // Prepare State String with Date if Used
     String stateString = OrderModel.stateToLocale(_scannedObject!.state);
-    if (_scannedObject!.state == OrderModel.usedState && _scannedObject!.updatedAt != null) {
-      String formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(_scannedObject!.updatedAt!);
+    if (_scannedObject!.state == OrderModel.usedState &&
+        _scannedObject!.updatedAt != null) {
+      String formattedDate =
+      DateFormat('dd.MM.yyyy HH:mm').format(_scannedObject!.updatedAt!);
       stateString += " ($formattedDate)";
     }
 
@@ -308,7 +324,7 @@ class _ScanPageState extends State<ScanPage> {
                 // 4. Display Price and Payment Status
                 priceWidget,
 
-                // 5. Display specific extra fields
+                // 5. Display specific extra fields (FIXED & RESTORED)
                 if (_scannedObject!.relatedOrder != null)
                   ..._specificFieldMappings.entries.map((entry) {
                     String fieldId = entry.key;
@@ -381,6 +397,16 @@ class _ScanPageState extends State<ScanPage> {
       backgroundColor: _scannedObject == null
           ? ThemeConfig.grey200(context)
           : getResultColor(_scanState),
+      // UPDATED: Floating Action Button controlled by AppConfig
+      floatingActionButton: AppConfig.isAppSupported
+          ? FloatingActionButton(
+        onPressed: _openUserSearchDialog,
+        tooltip: "Hledat účastníka",
+        backgroundColor: ThemeConfig.appBarColor(),
+        foregroundColor: ThemeConfig.appBarColorNegative(),
+        child: const Icon(Icons.search),
+      )
+          : null,
       body: SafeArea(
         child: Stack(
           children: [
@@ -440,6 +466,24 @@ class _ScanPageState extends State<ScanPage> {
     );
   }
 
+  // Function to handle User Search
+  Future<void> _openUserSearchDialog() async {
+    // Fetch all users basics
+    List<UserInfoModel> allUsers = await DbUsers.getAllUsersBasicsForScan(widget.scanCode!);
+
+    if (!mounted) return;
+
+    final UserInfoModel? selectedUser = await showDialog(
+      context: context,
+      builder: (ctx) => UserSearchDialog(allUsers: allUsers),
+    );
+
+    if (selectedUser != null) {
+      // Treat selected user as if their ID was scanned
+      await setupNewId(selectedUser.id.toString());
+    }
+  }
+
   Future<void> setupNewId(String scannedId) async {
     if (scannedId == rightNowScanned) {
       return;
@@ -493,7 +537,8 @@ class _ScanPageState extends State<ScanPage> {
     if (success) {
       setState(() {
         _scannedObject!.state = OrderModel.usedState;
-        _scannedObject!.updatedAt = DateTime.now(); // Update local object immediately
+        _scannedObject!.updatedAt =
+            DateTime.now(); // Update local object immediately
         _scanState = ScanState.used;
       });
       VibrateService.vibrateOk();
@@ -600,5 +645,107 @@ class _ScanPageState extends State<ScanPage> {
         return ThemeConfig.backgroundColor(context);
     }
     return Colors.redAccent;
+  }
+}
+
+class UserSearchDialog extends StatefulWidget {
+  final List<UserInfoModel> allUsers;
+  const UserSearchDialog({super.key, required this.allUsers});
+
+  @override
+  State<UserSearchDialog> createState() => _UserSearchDialogState();
+}
+
+class _UserSearchDialogState extends State<UserSearchDialog> {
+  late List<UserInfoModel> _filteredUsers;
+  final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredUsers = List.from(widget.allUsers);
+    _searchController.addListener(_filterUsers);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_filterUsers);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterUsers() {
+    final query = _searchController.text;
+    if (query.isEmpty) {
+      setState(() {
+        _filteredUsers = List.from(widget.allUsers);
+      });
+    } else {
+      final normalizedQuery = Utilities.removeDiacritics(query.toLowerCase());
+      setState(() {
+        _filteredUsers = widget.allUsers.where((user) {
+          // Search in Full Name
+          final normalizedName =
+          Utilities.removeDiacritics(user.toFullNameString().toLowerCase());
+          // Search in Email
+          final normalizedEmail =
+          Utilities.removeDiacritics((user.email ?? "").toLowerCase());
+
+          return normalizedName.contains(normalizedQuery) ||
+              normalizedEmail.contains(normalizedQuery);
+        }).toList();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Vybrat účastníka"),
+      content: SizedBox(
+        width: 300,
+        height: 400,
+        child: Column(
+          children: [
+            TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: "Hledat (jméno, email)...",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _filteredUsers.length,
+                itemBuilder: (context, index) {
+                  final user = _filteredUsers[index];
+                  return ListTile(
+                    visualDensity: VisualDensity.compact,
+                    title: Text(
+                      user.toFullNameString(),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: user.email != null && user.email!.isNotEmpty
+                        ? Text(user.email!)
+                        : null,
+                    onTap: () => Navigator.of(context).pop(user),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text("Zrušit"),
+        ),
+      ],
+    );
   }
 }
