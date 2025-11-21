@@ -4,6 +4,7 @@ import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
+import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -104,23 +105,32 @@ class DbTickets {
       return null;
     }
 
-    // Parse the returned ticket JSON data.
+    // 1. Parse the returned ticket JSON data.
     final ticketJson = response["ticket"] as Map<String, dynamic>;
     TicketModel ticket = TicketModel.fromJson(ticketJson);
 
-    // Optionally, attach related order, products, and spot using the response data.
+    // 2. Attach related order
     if (response.containsKey("order") && response["order"] != null) {
       ticket.relatedOrder = OrderModel.fromJson(response["order"]);
     }
 
+    // 3. Attach related products
     if (response.containsKey("products") && response["products"] != null) {
       ticket.relatedProducts = (response["products"] as List)
           .map((p) => ProductModel.fromJson(p))
           .toList();
     }
 
+    // 4. Attach related spot
     if (response.containsKey("spot") && response["spot"] != null) {
       ticket.relatedSpot = BlueprintObjectModel.fromJson(response["spot"]);
+    }
+
+    // 5. Attach related groups (NEW)
+    if (response.containsKey("groups") && response["groups"] != null) {
+      ticket.relatedGroups = (response["groups"] as List)
+          .map((g) => UserGroupInfoModel.fromJson(g))
+          .toList();
     }
 
     return ticket;

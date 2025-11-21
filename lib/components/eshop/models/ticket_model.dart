@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
+import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -23,12 +24,12 @@ class TicketModel extends ITrinaRowModel {
   String? noteHidden;
   double? totalPrice;
 
-  // Relating spots and products directly to the ticket
+  // Relating spots, products, and orders directly to the ticket
   BlueprintObjectModel? relatedSpot;
   List<ProductModel>? relatedProducts;
-
-  // Relating order directly to the ticket
   OrderModel? relatedOrder;
+
+  List<UserGroupInfoModel>? relatedGroups;
 
   TicketModel({
     this.id,
@@ -42,6 +43,7 @@ class TicketModel extends ITrinaRowModel {
     this.relatedSpot,
     this.relatedProducts,
     this.relatedOrder,
+    this.relatedGroups,
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
