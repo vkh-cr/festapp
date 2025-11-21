@@ -8,8 +8,10 @@ DECLARE
     order_json JSONB;
     products_json JSONB;
     spot_json JSONB;
+    groups_json JSONB; -- New variable for groups
     order_id BIGINT;
     occasion_id BIGINT;
+    target_user_id UUID; -- New variable to store the resolved User ID
     expected_scan_code TEXT;
     is_uuid BOOLEAN;
 BEGIN
@@ -26,23 +28,20 @@ BEGIN
     -- 1.a. Fallback: Scan by User ID if Ticket Symbol not found
     -----------------------------------------------------
     IF ticket_row IS NULL THEN
-        -- Check if the scanned_id is a valid UUID format to avoid casting errors
+        -- Check if the scanned_id is a valid UUID format
         is_uuid := scanned_id ~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$';
 
         IF is_uuid THEN
-            -- Logic:
-            -- 1. Find the user in occasion_users (using scanned_id as user UUID).
-            -- 2. Join with Occasion and Occasion_Hidden to validate the SECRET (scanned_code) immediately.
-            --    (We must do this here because a user might belong to multiple occasions,
-            --     so the secret tells us which occasion context we are in).
-            -- 3. Retrieve the linked ticket.
+            -- If scanned by UUID, we know the user immediately
+            target_user_id := scanned_id::UUID;
+
             SELECT t.*
               INTO ticket_row
             FROM public.occasion_users ou
             JOIN public.occasions o ON ou.occasion = o.id
             JOIN public.occasions_hidden oh ON o.occasion_hidden = oh.id
             JOIN eshop.tickets t ON ou.ticket = t.id
-            WHERE ou.user = scanned_id::UUID
+            WHERE ou.user = target_user_id
               AND oh.secret = scanned_code
             LIMIT 1;
         END IF;
@@ -80,9 +79,20 @@ BEGIN
     END IF;
 
     -----------------------------------------------------
+    -- 3.b. Resolve User ID if not already found via UUID scan
+    -----------------------------------------------------
+    -- If we found the ticket via Symbol (Step 1), we need to find who holds it
+    IF target_user_id IS NULL THEN
+        SELECT "user" INTO target_user_id
+        FROM public.occasion_users
+        WHERE ticket = ticket_row.id
+          AND occasion = occasion_id
+        LIMIT 1;
+    END IF;
+
+    -----------------------------------------------------
     -- 4. Retrieve the expected scan_code
     -----------------------------------------------------
-    -- Retrieve secret from occasions_hidden table via foreign key
     SELECT oh.secret
       INTO expected_scan_code
     FROM public.occasions_hidden oh
@@ -91,37 +101,26 @@ BEGIN
     LIMIT 1;
 
     IF expected_scan_code IS NULL THEN
-        RETURN jsonb_build_object(
-            'code', 400,
-            'message', 'Scan code not defined for this occasion'
-        );
+        RETURN jsonb_build_object('code', 400, 'message', 'Scan code not defined for this occasion');
     END IF;
 
     -----------------------------------------------------
     -- 5. Validate the scanned_code
     -----------------------------------------------------
-    -- Note: If we found the ticket via the User Fallback (Step 1.a),
-    -- we effectively already validated the code in the JOIN.
-    -- However, repeating this check here ensures security consistency
-    -- for both lookup methods.
     IF scanned_code != expected_scan_code THEN
-        RETURN jsonb_build_object(
-            'code', 401,
-            'message', 'Scan code is not correct'
-        );
+        RETURN jsonb_build_object('code', 401, 'message', 'Scan code is not correct');
     END IF;
 
     -----------------------------------------------------
-    -- 6. Proceed with fetching order, products, and spot details
+    -- 6. Fetch order, products, spot, AND GROUPS
     -----------------------------------------------------
 
-    -- Fetch the order details as JSON
-    SELECT row_to_json(o)
-      INTO order_json
+    -- A. Fetch Order
+    SELECT row_to_json(o) INTO order_json
     FROM eshop.orders o
     WHERE o.id = order_id;
 
-    -- Fetch the associated products as JSONB array
+    -- B. Fetch Products
     SELECT jsonb_agg(
              jsonb_build_object(
                'id', p.id,
@@ -140,9 +139,8 @@ BEGIN
          WHERE opt.ticket = ticket_row.id
     );
 
-    -- Fetch the associated spot as JSON
-    SELECT row_to_json(s)
-      INTO spot_json
+    -- C. Fetch Spot
+    SELECT row_to_json(s) INTO spot_json
     FROM eshop.spots s
     WHERE s.order_product_ticket IN (
         SELECT opt.id
@@ -150,6 +148,24 @@ BEGIN
          WHERE opt.ticket = ticket_row.id
     )
     LIMIT 1;
+
+    -- D. Fetch User Groups (New Logic)
+    IF target_user_id IS NOT NULL THEN
+        -- We construct a JSON object compatible with UserGroupInfoModel
+        -- We join user_groups -> user_group_info -> places to get full context
+        SELECT jsonb_agg(
+                 to_jsonb(ugi) ||
+                 jsonb_build_object(
+                    'place_object', row_to_json(p)
+                 )
+               )
+        INTO groups_json
+        FROM public.user_groups ug
+        JOIN public.user_group_info ugi ON ug."group" = ugi.id
+        LEFT JOIN public.places p ON ugi.place = p.id
+        WHERE ug."user" = target_user_id
+          AND ugi.occasion = occasion_id;
+    END IF;
 
     -----------------------------------------------------
     -- 7. Return the compiled JSONB response
@@ -159,12 +175,12 @@ BEGIN
         'ticket', row_to_json(ticket_row),
         'order', order_json,
         'products', products_json,
-        'spot', spot_json
+        'spot', spot_json,
+        'groups', COALESCE(groups_json, '[]'::jsonb)
     );
 
 EXCEPTION
     WHEN OTHERS THEN
-        -- Handle unexpected errors gracefully
         RETURN jsonb_build_object(
             'code', 500,
             'message', 'An unexpected error occurred: ' || SQLERRM

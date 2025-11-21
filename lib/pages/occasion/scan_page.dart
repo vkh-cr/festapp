@@ -4,11 +4,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/app_config.dart'; // Added import
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_models/event_model.dart';
-// ADDED: Imports for User Search
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
@@ -99,7 +98,6 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   /// Helper to extract value from dynamic fields
-  /// Updated to be robust against Key types (String vs Int)
   String? _getFieldValue(OrderModel order, String targetFieldId) {
     if (order.data == null || order.data!['fields'] == null) {
       return null;
@@ -109,7 +107,6 @@ class _ScanPageState extends State<ScanPage> {
 
     for (var fieldEntry in fieldsList) {
       if (fieldEntry is Map) {
-        // Iterate keys to handle potential type mismatches (e.g. key 735 vs "735")
         for (var key in fieldEntry.keys) {
           if (key.toString() == targetFieldId) {
             var value = fieldEntry[key];
@@ -159,8 +156,6 @@ class _ScanPageState extends State<ScanPage> {
           }
         }
 
-        // Only return a value if we actually found a products list (even if empty/free),
-        // otherwise return null to indicate no price data.
         if (productsFound ||
             (ticketData.containsKey('products') &&
                 (ticketData['products'] as List).isEmpty)) {
@@ -261,7 +256,7 @@ class _ScanPageState extends State<ScanPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // 1. Display related products nicely with HTML description
+                // 1. Display related products
                 if (_scannedObject!.relatedProducts != null &&
                     _scannedObject!.relatedProducts!.isNotEmpty)
                   Column(
@@ -295,7 +290,7 @@ class _ScanPageState extends State<ScanPage> {
 
                 const SizedBox(height: 8),
 
-                // 2. Display customer data, ticket symbol, and state (localized + date)
+                // 2. Customer data, symbol, state
                 Text(
                   "${_scannedObject!.relatedOrder!.toCustomerData()}   ${_scannedObject!.ticketSymbol}   $stateString",
                   style: const TextStyle(
@@ -306,7 +301,33 @@ class _ScanPageState extends State<ScanPage> {
                   textAlign: TextAlign.center,
                 ),
 
-                // 3. Display Related Spot if it exists
+                // ---------------------------------------------------
+                // 2b. NEW: Display User Groups if available
+                // ---------------------------------------------------
+                if (_scannedObject!.relatedGroups != null &&
+                    _scannedObject!.relatedGroups!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: const TextStyle(color: Colors.black, fontSize: 16),
+                        children: [
+                          const TextSpan(
+                            text: "Velká hra: ",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          TextSpan(
+                            text: _scannedObject!.relatedGroups!
+                                .map((g) => g.title)
+                                .join(", "),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // 3. Display Related Spot
                 if (_scannedObject!.relatedSpot != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
@@ -321,10 +342,10 @@ class _ScanPageState extends State<ScanPage> {
                     ),
                   ),
 
-                // 4. Display Price and Payment Status
+                // 4. Price and Payment Status
                 priceWidget,
 
-                // 5. Display specific extra fields (FIXED & RESTORED)
+                // 5. Extra fields
                 if (_scannedObject!.relatedOrder != null)
                   ..._specificFieldMappings.entries.map((entry) {
                     String fieldId = entry.key;
@@ -364,7 +385,6 @@ class _ScanPageState extends State<ScanPage> {
 
           // --- ACTION BUTTONS SECTION ---
 
-          // Confirm Ticket Button (Shows if ticket is VALID or ORDERED)
           if (_scanState == ScanState.valid || _scanState == ScanState.ordered)
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
@@ -374,7 +394,6 @@ class _ScanPageState extends State<ScanPage> {
               ),
             ),
 
-          // Reset Password Button
           if (_showResetPasswordButton)
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -397,7 +416,6 @@ class _ScanPageState extends State<ScanPage> {
       backgroundColor: _scannedObject == null
           ? ThemeConfig.grey200(context)
           : getResultColor(_scanState),
-      // UPDATED: Floating Action Button controlled by AppConfig
       floatingActionButton: AppConfig.isAppSupported
           ? FloatingActionButton(
         onPressed: _openUserSearchDialog,
@@ -466,10 +484,9 @@ class _ScanPageState extends State<ScanPage> {
     );
   }
 
-  // Function to handle User Search
   Future<void> _openUserSearchDialog() async {
-    // Fetch all users basics
-    List<UserInfoModel> allUsers = await DbUsers.getAllUsersBasicsForScan(widget.scanCode!);
+    List<UserInfoModel> allUsers =
+    await DbUsers.getAllUsersBasicsForScan(widget.scanCode!);
 
     if (!mounted) return;
 
@@ -479,7 +496,6 @@ class _ScanPageState extends State<ScanPage> {
     );
 
     if (selectedUser != null) {
-      // Treat selected user as if their ID was scanned
       await setupNewId(selectedUser.id.toString());
     }
   }
@@ -537,8 +553,7 @@ class _ScanPageState extends State<ScanPage> {
     if (success) {
       setState(() {
         _scannedObject!.state = OrderModel.usedState;
-        _scannedObject!.updatedAt =
-            DateTime.now(); // Update local object immediately
+        _scannedObject!.updatedAt = DateTime.now();
         _scanState = ScanState.used;
       });
       VibrateService.vibrateOk();
@@ -684,10 +699,8 @@ class _UserSearchDialogState extends State<UserSearchDialog> {
       final normalizedQuery = Utilities.removeDiacritics(query.toLowerCase());
       setState(() {
         _filteredUsers = widget.allUsers.where((user) {
-          // Search in Full Name
           final normalizedName =
           Utilities.removeDiacritics(user.toFullNameString().toLowerCase());
-          // Search in Email
           final normalizedEmail =
           Utilities.removeDiacritics((user.email ?? "").toLowerCase());
 
