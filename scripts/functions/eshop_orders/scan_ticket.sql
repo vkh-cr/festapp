@@ -127,7 +127,9 @@ BEGIN
                'id', p.id,
                'title', p.title,
                'price', p.price,
-               'order', p."order"
+               'order', p."order",
+               'description', p.description,
+               'currency_code', p.currency_code
              )
            )
       INTO products_json
