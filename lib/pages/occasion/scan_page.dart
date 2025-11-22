@@ -34,7 +34,7 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   static const String _defaultResetPassword = "1";
-  static const bool _showResetPasswordButton = true;
+  static const bool _showResetPasswordButton = false;
 
   EventModel? _event;
   TicketModel? _scannedObject;
