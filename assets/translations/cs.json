@@ -533,6 +533,9 @@
   "Allows management of activities for volunteers.": "Umožňuje správu činností pro dobrovolníky.",
   "Displayed rows": "Zobrazeno řádků",
   "Right Now": "Právě Teď",
+  "Confirm": "Potvrdit",
+  "Rename": "Přejmenovat",
+  "AddNew": "Přidat nové",
   "ActivitiesComponentStrings.buttonCancel": "Zrušit",
   "ActivitiesComponentStrings.buttonOK": "OK",
   "ActivitiesComponentStrings.buttonPublish": "Publikovat",
@@ -665,7 +668,9 @@
     "createdUsers": "Vytvoření uživatelé",
     "updatedUsers": "Aktualizovaní uživatelé",
     "deletedUsers": "Odebraní uživatelé",
-    "none": "Žádní"
+    "none": "Žádní",
+    "labelAutoImport": "Automatický import uživatelů",
+    "helperAutoImport": "Uživatelům se po přihlášení skrz formulář automaticky vytvoří účet. Výchozí heslo je '1'."
   },
   "FeatureFormSettings": {
     "title": "Nastavení formuláře",
@@ -797,8 +802,7 @@
     "note": "Poznámka",
     "labelMaxTicketsPerOrder": "Maximum vstupenek na objednávku:",
     "helperMaxTicketsPerOrder": "Kolik vstupenek si uživatel může koupit v jedné objednávce (výchozí: 1).",
-    "validationMaxTicketsInvalid": "Zadejte prosím platné číslo (1 nebo více).",
-    "cancel": "Storno"
+    "validationMaxTicketsInvalid": "Zadejte prosím platné číslo (1 nebo více)."
   },
   "FeatureOrders": {
     "cancel": "Stornovat",
@@ -826,7 +830,16 @@
     "application": "Přihláška",
     "ordersTab": "Objednávky",
     "ordersHistoryTab": "Historie objednávek",
-    "setAsUsed": "Změnit na využito"
+    "setAsUsed": "Změnit na využito",
+    "bigGame": "Velká hra: ",
+    "selectAttendee": "Vybrat účastníka",
+    "searchPlaceholder": "Hledat (jméno, email)...",
+    "newLoginCredentials": "Nové údaje pro přihlášení",
+    "errorEmailNotReturned": "Chyba: E-mail nebyl vrácen.",
+    "confirmTicketFailed": "Nepodařilo se potvrdit vstupenku",
+    "resetPasswordTo": "Resetovat heslo na '{password}'",
+    "resetPasswordConfirmationContent": "Opravdu chcete změnit heslo na '{password}'?",
+    "errorResetPassword": "Chyba při resetu hesla: {error}"
   },
   "UserColumns": {
     "id": "Id",
