@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION get_users_from_occasion_with_orders(oc bigint)
 RETURNS jsonb
-SECURITY definer
+SECURITY DEFINER
 AS $$
 DECLARE
   users_data jsonb;
@@ -9,11 +9,17 @@ DECLARE
   orders_data jsonb;
   forms_data jsonb;
   form_fields_data jsonb;
+  org_id bigint; -- Variable to store Organization ID
 BEGIN
+  -- 0. Retrieve Organization ID
+  -- We need this to check the organization_users table
+  SELECT organization INTO org_id
+  FROM public.occasions
+  WHERE id = oc;
+
   -- Security check: If the user lacks permission, raise an exception.
-  -- This will halt execution and return a proper error to the client.
   IF (SELECT get_is_editor_view_on_occasion(oc)) <> TRUE THEN
-      RAISE EXCEPTION 'User is not authorized to access this occasion' USING ERRCODE = '42501'; -- 'insufficient_privilege'
+      RAISE EXCEPTION 'User is not authorized to access this occasion' USING ERRCODE = '42501';
   END IF;
 
   -- 1. Fetch users as a JSON object, keyed by user ID.
@@ -44,17 +50,28 @@ BEGIN
   ) INTO users_data
   FROM public.occasion_users ou
   JOIN public.user_info ui ON ou."user" = ui.id
-  WHERE ou.occasion = oc;
+
+  -- Join to check visibility
+  LEFT JOIN public.organization_users org_u ON ui.id = org_u."user" AND org_u.organization = org_id
+
+  WHERE ou.occasion = oc
+  -- Filter hidden users
+  AND (org_u.is_hidden IS NOT TRUE);
 
   -- 2. Use CTEs to gather the unique IDs of all related items, preventing duplicates.
   WITH relevant_tickets AS (
       -- Get unique ticket IDs directly linked to users on the occasion
-      SELECT DISTINCT ticket AS id
-      FROM public.occasion_users
-      WHERE occasion = oc AND ticket IS NOT NULL
+      -- We MUST apply the same hidden filter here, otherwise we might fetch tickets for hidden users
+      SELECT DISTINCT ou.ticket AS id
+      FROM public.occasion_users ou
+      LEFT JOIN public.organization_users org_u ON ou."user" = org_u."user" AND org_u.organization = org_id
+      WHERE ou.occasion = oc
+        AND ou.ticket IS NOT NULL
+        AND (org_u.is_hidden IS NOT TRUE)
   ),
   relevant_orders AS (
       -- From those tickets, get unique order IDs via the join table
+      -- (This automatically excludes orders from hidden users because relevant_tickets is filtered)
       SELECT DISTINCT "order" AS id
       FROM eshop.order_product_ticket
       WHERE ticket IN (SELECT id FROM relevant_tickets)
