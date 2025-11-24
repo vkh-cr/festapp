@@ -8,6 +8,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
     occasion_id bigint;
+    current_state text;
     expected_scan_code text;
 BEGIN
     -- 1. Validate Ticket Existence
@@ -20,17 +21,30 @@ BEGIN
         );
     END IF;
 
-    -- 2. Retrieve Associated Occasion ID
-    SELECT occasion
-    INTO occasion_id
+    -- 2. Retrieve Associated Occasion ID AND Current State
+    SELECT occasion, state
+    INTO occasion_id, current_state
     FROM eshop.tickets
     WHERE id = ticket_id;
 
-    -- Check if occasion_id is present
+    -- Check if occasion_id is present (Integrity check)
     IF occasion_id IS NULL THEN
         RETURN jsonb_build_object(
             'code', 404,
             'message', 'Occasion associated with ticket not found.'
+        );
+    END IF;
+
+    -- 2a. Validate Ticket State (New Check)
+    IF current_state = 'used' THEN
+        RETURN jsonb_build_object(
+            'code', 409,
+            'message', 'Ticket has already been used.'
+        );
+    ELSIF current_state = 'storno' THEN
+        RETURN jsonb_build_object(
+            'code', 409,
+            'message', 'Ticket is cancelled (storno).'
         );
     END IF;
 
@@ -58,9 +72,11 @@ BEGIN
         );
     END IF;
 
-    -- 5. Update Ticket State to 'used'
+    -- 5. Update Ticket State to 'used' AND update timestamp
     UPDATE eshop.tickets
-    SET state = 'used'
+    SET
+        state = 'used',
+        updated_at = now()
     WHERE id = ticket_id;
 
     -- 6. Return Success Message

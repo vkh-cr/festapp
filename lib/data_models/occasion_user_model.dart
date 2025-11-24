@@ -105,6 +105,10 @@ class OccasionUserModel extends ITrinaRowModel {
     );
   }
 
+  factory OccasionUserModel.newRow(int occasionId) {
+    return OccasionUserModel(occasion: occasionId);
+  }
+
   Map<String, dynamic> convertDateTime(Map<String, dynamic> map) {
     map.forEach((key, value) {
       if (value is DateTime) {

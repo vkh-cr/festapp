@@ -1,5 +1,5 @@
-CREATE OR REPLACE FUNCTION storno_ticket(ticket_id BIGINT)
-RETURNS JSONB
+CREATE OR REPLACE FUNCTION storno_ticket_221(ticket_id BIGINT)
+RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
@@ -11,7 +11,7 @@ DECLARE
     original_data JSONB;
     ticket_data JSONB;
     product JSONB;
-    remaining_opt_id BIGINT;
+    remaining_active_tickets_count BIGINT;
 BEGIN
     -- Check if the ticket exists and fetch its associated data
     SELECT t.*, o.id AS order_id, o.data AS order_data, t.occasion
@@ -22,40 +22,32 @@ BEGIN
     WHERE t.id = ticket_id;
 
     IF NOT FOUND THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1001, 'message', 'Ticket not found');
+        RAISE EXCEPTION 'Ticket not found (ID: %)', ticket_id;
     END IF;
 
     IF NOT get_is_editor_order_on_occasion(ticket_record.occasion) THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1002, 'message', 'Permission denied');
+        RAISE EXCEPTION 'Permission denied to storno ticket on occasion %', ticket_record.occasion;
     END IF;
 
-    -- Update ticket state to "storno"
-    UPDATE eshop.tickets
-    SET state = 'storno', updated_at = NOW()
-    WHERE id = ticket_id;
+    -- Check if this is the last non-storno ticket on the order.
+    SELECT COUNT(t.id)
+    INTO remaining_active_tickets_count
+    FROM eshop.tickets t
+    JOIN eshop.order_product_ticket opt ON opt.ticket = t.id
+    WHERE opt."order" = ticket_record.order_id
+      AND t.id != ticket_id
+      AND (t.state IS NULL OR t.state != 'storno');
 
-    -- Nullify the relevant spot's order_product_ticket
-    UPDATE eshop.spots
-    SET order_product_ticket = NULL, secret = NULL, secret_expiration_time = NULL, updated_at = NOW(), resource = NULL, state = NULL
-    WHERE order_product_ticket IN (
-        SELECT id FROM eshop.order_product_ticket WHERE ticket = ticket_id
-    );
-
-    -- Find and keep one order_product_ticket and update its product to NULL
-    SELECT id INTO remaining_opt_id
-    FROM eshop.order_product_ticket
-    WHERE ticket = ticket_id
-    LIMIT 1;
-
-    IF remaining_opt_id IS NOT NULL THEN
-        UPDATE eshop.order_product_ticket
-        SET product = NULL
-        WHERE id = remaining_opt_id;
-
-        -- Delete all other order_product_ticket records for the ticket
-        DELETE FROM eshop.order_product_ticket
-        WHERE ticket = ticket_id AND id != remaining_opt_id;
+    -- If it is the last active ticket, storno the whole order instead and exit.
+    IF remaining_active_tickets_count = 0 THEN
+        PERFORM public.update_order_and_tickets_to_storno_ws_221(ticket_record.order_id);
+        RETURN; -- Exit the function
     END IF;
+
+
+    -- Call the helper to storno the single ticket and its relations
+    PERFORM internal_storno_tickets_221(ARRAY[ticket_id]);
+    -- All the logic for tickets, spots, and occasion_users is now done.
 
     -- Remove the ticket from orders.data and calculate the price reduction
     original_data := ticket_record.order_data;
@@ -95,17 +87,5 @@ BEGIN
         NOW()
     );
 
-    -- Return success response
-    RETURN JSONB_BUILD_OBJECT(
-        'code', 200,
-        'message', 'Ticket successfully cancelled',
-        'ticket_id', ticket_id,
-        'order_id', ticket_record.order_id,
-        'price_reduction', ticket_price,
-        'remaining_order_product_ticket', remaining_opt_id
-    );
-EXCEPTION
-    WHEN OTHERS THEN
-        RETURN JSONB_BUILD_OBJECT('code', 500, 'message', 'An error occurred', 'details', SQLERRM);
 END;
 $$;

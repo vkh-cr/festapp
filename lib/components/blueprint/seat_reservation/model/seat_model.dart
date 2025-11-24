@@ -9,6 +9,7 @@ class SeatModel {
   final int seatSize;
   BlueprintObjectModel? objectModel;
   bool isHighlightedForSwap = false;
+  bool isHighlightedForGroup = false;
 
   SeatModel({
     required this.objectModel,
