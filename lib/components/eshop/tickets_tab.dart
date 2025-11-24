@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
@@ -80,7 +81,7 @@ class _TicketsTabState extends State<TicketsTab> {
       ),
       headerChildren: [
         DataGridAction(
-          name: OrdersStrings.cancel,
+          name: CommonStrings.cancel,
           action: (SingleDataGridController singleDataGrid, [_]) =>
               _stornoTickets(singleDataGrid),
           isEnabled: RightsService.isOrderEditor,
@@ -149,7 +150,7 @@ class _TicketsTabState extends State<TicketsTab> {
 
     var confirm = await DialogHelper.showConfirmationDialog(
       context,
-      OrdersStrings.cancel,
+      CommonStrings.cancel,
       "${OrdersStrings.cancelItemsConfirmationText} (${selectedTickets.length})",
     );
 

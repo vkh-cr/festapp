@@ -3,6 +3,8 @@ import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
@@ -34,7 +36,7 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   static const String _defaultResetPassword = "1";
-  static const bool _showResetPasswordButton = false;
+  static const bool _showResetPasswordButton = true;
 
   EventModel? _event;
   TicketModel? _scannedObject;
@@ -88,8 +90,8 @@ class _ScanPageState extends State<ScanPage> {
     if (widget.scanCode == null) {
       String? inputScanCode = await DialogHelper.showInputDialog(
         context: context,
-        dialogTitle: "Enter Scan Code".tr(),
-        labelText: "Scan Code".tr(),
+        dialogTitle: OrdersStrings.enterScanCode,
+        labelText: OrdersStrings.scanCodeLabel,
       );
       if (inputScanCode != null && inputScanCode.isNotEmpty) {
         widget.scanCode = inputScanCode;
@@ -171,9 +173,7 @@ class _ScanPageState extends State<ScanPage> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
-          child: const Text(
-              "Point the camera at the attendee's code for an entry verification.")
-              .tr(),
+          child: Text(OrdersStrings.scanCameraInstruction),
         ),
       );
     }
@@ -207,9 +207,9 @@ class _ScanPageState extends State<ScanPage> {
       Color statusColor = Colors.black;
 
       if (_scanState == ScanState.valid || _scanState == ScanState.used) {
-        statusText = "Zaplaceno";
+        statusText = OrdersStrings.gridPaid;
       } else if (_scanState == ScanState.ordered) {
-        statusText = "Nezaplaceno";
+        statusText = OrdersStrings.gridOrdered;
       }
 
       if (statusText.isNotEmpty) {
@@ -311,11 +311,12 @@ class _ScanPageState extends State<ScanPage> {
                     child: RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(
-                        style: const TextStyle(color: Colors.black, fontSize: 16),
+                        style:
+                        const TextStyle(color: Colors.black, fontSize: 16),
                         children: [
-                          const TextSpan(
-                            text: "Velká hra: ",
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                          TextSpan(
+                            text: OrdersStrings.bigGameLabel,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           TextSpan(
                             text: _scannedObject!.relatedGroups!
@@ -390,7 +391,7 @@ class _ScanPageState extends State<ScanPage> {
               padding: const EdgeInsets.only(bottom: 16.0),
               child: ElevatedButton(
                 onPressed: _confirmTicket,
-                child: const Text("Confirm Ticket").tr(),
+                child: Text(OrdersStrings.confirmTicketAction),
               ),
             ),
 
@@ -403,7 +404,7 @@ class _ScanPageState extends State<ScanPage> {
                 Theme.of(context).colorScheme.onSecondaryContainer,
               ),
               onPressed: _resetPassword,
-              child: Text("Resetovat heslo na '$_defaultResetPassword'"),
+              child: Text(OrdersStrings.resetPasswordTo(_defaultResetPassword)),
             ),
         ],
       ),
@@ -419,7 +420,7 @@ class _ScanPageState extends State<ScanPage> {
       floatingActionButton: AppConfig.isAppSupported
           ? FloatingActionButton(
         onPressed: _openUserSearchDialog,
-        tooltip: "Hledat účastníka",
+        tooltip: OrdersStrings.searchAttendees,
         backgroundColor: ThemeConfig.appBarColor(),
         foregroundColor: ThemeConfig.appBarColorNegative(),
         child: const Icon(Icons.search),
@@ -560,7 +561,7 @@ class _ScanPageState extends State<ScanPage> {
     } else {
       VibrateService.vibrateNotOk();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to confirm ticket").tr()),
+        SnackBar(content: Text(OrdersStrings.confirmTicketFailed)),
       );
     }
   }
@@ -572,20 +573,19 @@ class _ScanPageState extends State<ScanPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Opravdu resetovat heslo?"),
-          content: Text(
-              "Opravdu chcete změnit heslo tohoto uživatele na '$_defaultResetPassword'?"),
+          title: Text(OrdersStrings.resetPasswordTitle),
+          content: Text(OrdersStrings.resetPasswordConfirmationContent(_defaultResetPassword)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text("Zrušit"),
+              child: Text(CommonStrings.cancel), // Use CommonStrings
             ),
             TextButton(
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,
               ),
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text("Resetovat"),
+              child: Text(CommonStrings.reset), // Use CommonStrings
             ),
           ],
         );
@@ -604,20 +604,20 @@ class _ScanPageState extends State<ScanPage> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text("Nové údaje pro přihlášení"),
+            title: Text(OrdersStrings.newLoginCredentials),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("E-mail:",
+                Text(OrdersStrings.gridEmail,
                     style:
-                    TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 SelectableText(email, style: const TextStyle(fontSize: 18)),
                 const SizedBox(height: 24),
-                const Text("Heslo:",
+                Text(CommonStrings.password, // Use CommonStrings
                     style:
-                    TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 const SelectableText(_defaultResetPassword,
                     style:
@@ -627,20 +627,20 @@ class _ScanPageState extends State<ScanPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text("OK"),
+                child: Text(CommonStrings.ok), // Use CommonStrings
               ),
             ],
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Chyba: Email nebyl vrácen.")),
+          SnackBar(content: Text(OrdersStrings.errorEmailNotReturned)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Chyba při resetu hesla: $e")),
+          SnackBar(content: Text(OrdersStrings.errorResetPassword(e.toString()))),
         );
       }
     }
@@ -714,7 +714,7 @@ class _UserSearchDialogState extends State<UserSearchDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Vybrat účastníka"),
+      title: Text(OrdersStrings.selectAttendee),
       content: SizedBox(
         width: 300,
         height: 400,
@@ -723,10 +723,10 @@ class _UserSearchDialogState extends State<UserSearchDialog> {
             TextField(
               controller: _searchController,
               autofocus: true,
-              decoration: const InputDecoration(
-                hintText: "Hledat (jméno, email)...",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: OrdersStrings.searchPlaceholder,
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
             ),
@@ -756,7 +756,7 @@ class _UserSearchDialogState extends State<UserSearchDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text("Zrušit"),
+          child: Text(CommonStrings.cancel), // Use CommonStrings
         ),
       ],
     );
