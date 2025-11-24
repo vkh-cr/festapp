@@ -4,11 +4,31 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class DbUnits {
   static final _supabase = Supabase.instance.client;
 
-  static Future<UnitModel> getUnit(int unitId) async {
-    var result = await _supabase.rpc("get_unit", params: {
-      'unit_id': unitId,
-    });
-    return UnitModel.fromJson(result["data"]);
-  }
+  /// Fetches a unit and its public occasions, or all occasions for an organization.
+  ///
+  /// [organizationId]: The ID of the organization (required).
+  /// [unitId]: The ID of the specific unit (optional). If null, fetches all
+  ///           occasions for the given [organizationId].
+  static Future<UnitModel> getPublicOccasions(
+      int organizationId, int? unitId) async {
+    try {
+      final result = await _supabase.rpc(
+        "get_public_occasions",
+        params: {
+          'p_organization_id': organizationId,
+          'p_unit_id': unitId, // This will be 'null' if unitId is null
+        },
+      );
 
+      return UnitModel.fromJson(result);
+
+    } catch (e) {
+      // You can re-throw, log, or handle the error as needed.
+      // For example:
+      // if (e is PostgrestException) {
+      //   print("Error fetching public occasions: ${e.message}");
+      // }
+      rethrow;
+    }
+  }
 }

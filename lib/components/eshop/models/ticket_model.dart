@@ -1,7 +1,9 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
+import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 import '../eshop_columns.dart';
@@ -22,12 +24,12 @@ class TicketModel extends ITrinaRowModel {
   String? noteHidden;
   double? totalPrice;
 
-  // Relating spots and products directly to the ticket
+  // Relating spots, products, and orders directly to the ticket
   BlueprintObjectModel? relatedSpot;
   List<ProductModel>? relatedProducts;
-
-  // Relating order directly to the ticket
   OrderModel? relatedOrder;
+
+  List<UserGroupInfoModel>? relatedGroups;
 
   TicketModel({
     this.id,
@@ -41,16 +43,17 @@ class TicketModel extends ITrinaRowModel {
     this.relatedSpot,
     this.relatedProducts,
     this.relatedOrder,
+    this.relatedGroups,
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
     return TicketModel(
       id: json[TbEshop.tickets.id],
       createdAt: json[TbEshop.tickets.created_at] != null
-          ? DateTime.parse(json[TbEshop.tickets.created_at])
+          ? DateTime.parse(json[TbEshop.tickets.created_at]).toOccasionTime()
           : null,
       updatedAt: json[TbEshop.tickets.updated_at] != null
-          ? DateTime.parse(json[TbEshop.tickets.updated_at])
+          ? DateTime.parse(json[TbEshop.tickets.updated_at]).toOccasionTime()
           : null,
       ticketSymbol: json[TbEshop.tickets.ticket_symbol],
       state: json[TbEshop.tickets.state],
@@ -74,6 +77,10 @@ class TicketModel extends ITrinaRowModel {
           value: createdAt != null
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
+      EshopColumns.TICKET_LAST_CHANGE: TrinaCell(
+          value: updatedAt != null
+              ? DateFormat('yyyy-MM-dd HH:mm').format(updatedAt!)
+              : ""),
       EshopColumns.TICKET_SYMBOL: TrinaCell(value: ticketSymbol ?? ""),
       EshopColumns.TICKET_STATE: TrinaCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
       EshopColumns.TICKET_NOTE: TrinaCell(value: note ?? ""),
@@ -92,7 +99,7 @@ class TicketModel extends ITrinaRowModel {
               : ""),
       EshopColumns.TICKET_SPOT: TrinaCell(
           value: relatedSpot != null
-              ? relatedSpot?.toShortString()
+              ? relatedSpot?.toSpotString()
               : ""),
       EshopColumns.TICKET_TOTAL_PRICE: TrinaCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
       EshopColumns.TICKET_PRODUCTS_EDIT: TrinaCell(value: ""),

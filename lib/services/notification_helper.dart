@@ -1,7 +1,7 @@
 import 'dart:async' as notification_helper;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/pages/occasion/news_page.dart';
 import 'package:fstapp/router_service.dart';
@@ -12,7 +12,6 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/js/js_interop.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:fstapp/app_config.dart';
-import 'navigation_service.dart';
 
 class NotificationHelper {
   static const notificationAllowedAsked = "NotificationAllowed";
