@@ -19,8 +19,8 @@ class OccasionDetailDialog extends StatelessWidget {
 
   const OccasionDetailDialog({super.key, required this.occasion});
 
-  /// Unified reserve button logic.
-  void _onReservePressed(BuildContext context) async {
+  /// Unified reserve button logic, usable from anywhere.
+  static Future<void> handleReserveAction(BuildContext context, OccasionModel occasion) async {
     var details = FeatureService.getFeatureDetails(
       FeatureConstants.form,
       features: occasion.features,
@@ -39,6 +39,11 @@ class OccasionDetailDialog extends StatelessWidget {
       context,
       "${FormPage.ROUTE}/${occasion.form!.link!}",
     );
+  }
+
+  /// Unified reserve button logic.
+  void _onReservePressed(BuildContext context) async {
+    await OccasionDetailDialog.handleReserveAction(context, occasion);
   }
 
   @override
@@ -116,48 +121,17 @@ class OccasionDetailDialog extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    if (!AppConfig.isAllUnit && occasion.isOpen)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => _onReservePressed(context),
-                              style: unifiedButtonStyle,
-                              child: Text(
-                                reserveTitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () async {
-                                await RightsService.updateAppData(
-                                    link: occasion.link!, force: true);
-                                await RouterService.navigateOccasion(context, "");
-                              },
-                              style: unifiedButtonStyle,
-                              child: Text(
-                                "Detail".tr(),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                      OutlinedButton(
-                        onPressed: () => _onReservePressed(context),
-                        style: unifiedButtonStyle,
-                        child: Text(
-                          reserveTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+
+                    OutlinedButton(
+                      onPressed: () => _onReservePressed(context),
+                      style: unifiedButtonStyle,
+                      child: Text(
+                        reserveTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                    ),
+
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -173,7 +147,7 @@ class OccasionDetailDialog extends StatelessWidget {
                   ),
                   splashRadius: 20,
                   onPressed: () => Navigator.of(context).pop(),
-                  tooltip: 'Close'.tr(), // Accessibility feature
+                  tooltip: 'Close'.tr(),
                 ),
               ),
             ],

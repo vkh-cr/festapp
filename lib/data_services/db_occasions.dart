@@ -111,12 +111,6 @@ class DbOccasions {
     return List<OccasionModel>.from(data.map((x) => OccasionModel.fromJson(x)));
   }
 
-  static Future<List<OccasionModel>> getAllOccasions(int unit) async {
-    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.unit, unit);
-    var toReturn = List<OccasionModel>.from(data.map((x) => OccasionModel.fromJson(x)));
-    return toReturn;
-  }
-
   static Future<void> updateOccasion(OccasionModel occasionModel) async {
     final Map<String, dynamic> occasionJson = occasionModel.toJson();
     occasionJson['is_app_supported'] = AppConfig.isAppSupported;

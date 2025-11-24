@@ -5,23 +5,22 @@ import 'package:fstapp/components/features/feature_service.dart';
 class OrdersStrings {
 
   // --- Orders Tab ---
-  static String get cancel => 'FeatureOrders.cancel'.tr();
-  static String get synchronizePayments => 'FeatureOrders.synchronizePayments'.tr();
-  static String get processing => 'FeatureOrders.processing'.tr();
-  static String get changeStateToPaid => 'FeatureOrders.changeStateToPaid'.tr();
-  static String get changeStateToPaidConfirmation => 'FeatureOrders.changeStateToPaidConfirmation'.tr();
-  static String get tickets => 'FeatureOrders.tickets'.tr();
-  static String get ticket => 'FeatureOrders.ticket'.tr();
-  static String get applications => 'FeatureOrders.applications'.tr();
-  static String get application => 'FeatureOrders.application'.tr();
-  static String get stornoFailed => 'FeatureOrders.stornoFailed'.tr();
-  static String get ordersTab => 'FeatureOrders.ordersTab'.tr();
-  static String get ordersHistoryTab => 'FeatureOrders.ordersHistoryTab'.tr();
+  static String get synchronizePayments => 'FeatureOrders.synchronizePayments'.tr(); // "Synchronize Payments"
+  static String get processing => 'FeatureOrders.processing'.tr(); // "Processing..."
+  static String get changeStateToPaid => 'FeatureOrders.changeStateToPaid'.tr(); // "Change state to paid"
+  static String get changeStateToPaidConfirmation => 'FeatureOrders.changeStateToPaidConfirmation'.tr(); // "Do you want to change orders to paid?"
+  static String get tickets => 'FeatureOrders.tickets'.tr(); // "Tickets"
+  static String get ticket => 'FeatureOrders.ticket'.tr(); // "Ticket"
+  static String get applications => 'FeatureOrders.applications'.tr(); // "Applications"
+  static String get application => 'FeatureOrders.application'.tr(); // "Application"
+  static String get stornoFailed => 'FeatureOrders.stornoFailed'.tr(); // "Action has failed."
+  static String get ordersTab => 'FeatureOrders.ordersTab'.tr(); // "Orders"
+  static String get ordersHistoryTab => 'FeatureOrders.ordersHistoryTab'.tr(); // "Orders History"
 
-  static String get confirmTicket => 'FeatureOrders.setAsUsed'.tr();
+  static String get confirmTicket => 'FeatureOrders.setAsUsed'.tr(); // "Set as used"
 
   // --- Tickets/Items Tab ---
-  static String get stornoCompletedText => 'FeatureOrders.stornoCompletedItem'.tr();
+  static String get stornoCompletedText => 'FeatureOrders.stornoCompletedItem'.tr(); // "Storno completed for {item}."
 
   /// Returns "Tickets" or "Applications" based on whether the ticket feature is enabled.
   static String get itemsPlural {
@@ -42,134 +41,161 @@ class OrdersStrings {
   /// Returns "Send tickets" or "Send confirmations" based on whether the ticket feature is enabled.
   static String get sendActionText {
     if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
-      return 'FeatureOrders.sendTickets'.tr();
+      return 'FeatureOrders.sendTickets'.tr(); // "Send tickets"
     }
-    return 'FeatureOrders.sendConfirmations'.tr();
+    return 'FeatureOrders.sendConfirmations'.tr(); // "Send confirmations"
   }
 
   /// Returns confirmation text for cancelling orders, with or without mentioning tickets.
   static String get cancelOrdersConfirmationText {
     if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
-      return 'FeatureOrders.cancelOrdersAndTicketsConfirmation'.tr();
+      return 'FeatureOrders.cancelOrdersAndTicketsConfirmation'.tr(); // "Do you want to cancel orders and all included tickets? The customer will receive an email about this cancellation."
     }
-    return 'FeatureOrders.cancelOrdersConfirmation'.tr();
+    return 'FeatureOrders.cancelOrdersConfirmation'.tr(); // "Do you want to cancel orders? The customer will receive an email about this cancellation."
   }
 
   static String get itemSymbol {
     if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
-      return 'FeatureOrders.ticketSymbol'.tr();
+      return 'FeatureOrders.ticketSymbol'.tr(); // "Ticket Symbol"
     }
-    return 'FeatureOrders.applicationSymbol'.tr();
+    return 'FeatureOrders.applicationSymbol'.tr(); // "Application Symbol"
   }
 
   /// Returns confirmation text for sending tickets/confirmations.
   static String get sendActionConfirmationText {
     if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
-      return 'FeatureOrders.sendTicketsToOrdersConfirmation'.tr();
+      return 'FeatureOrders.sendTicketsToOrdersConfirmation'.tr(); // "Do you want to send the tickets to orders?"
     }
-    return 'FeatureOrders.sendConfirmationsToOrdersConfirmation'.tr();
+    return 'FeatureOrders.sendConfirmationsToOrdersConfirmation'.tr(); // "Do you want to send the confirmations to orders?"
   }
+
+  // --- Scan Page Specific ---
+  static String get scanCodeLabel => 'Scan Code'.tr(); // "Scan Code"
+  static String get enterScanCode => 'Enter Scan Code'.tr(); // "Enter Scan Code"
+  static String get confirmTicketAction => 'Confirm Ticket'.tr(); // "Confirm Ticket"
+  static String get scanCameraInstruction => 'Point the camera at the attendee\'s code for an entry verification.'.tr(); // "Point the camera at the attendee's code for an entry verification."
+  static String get searchAttendees => 'Search Attendees'.tr(); // "Search Attendees"
+  static String get resetPasswordTitle => 'Reset Password'.tr(); // "Reset Password"
+
+  // New Migrated Strings (previously hardcoded in Czech)
+  static String get bigGameLabel => 'FeatureOrders.bigGameLabel'.tr(); // "Big Game: "
+  static String get selectAttendee => 'FeatureOrders.selectAttendee'.tr(); // "Select attendee"
+  static String get searchPlaceholder => 'FeatureOrders.searchPlaceholder'.tr(); // "Search (name, email)..."
+  static String get newLoginCredentials => 'FeatureOrders.newLoginCredentials'.tr(); // "New login credentials"
+  static String get errorEmailNotReturned => 'FeatureOrders.errorEmailNotReturned'.tr(); // "Error: Email was not returned."
+  static String get confirmTicketFailed => 'FeatureOrders.confirmTicketFailed'.tr(); // "Failed to confirm ticket"
+
+  // Specific Field Mappings (previously hardcoded)
+  static String get fieldTypeParticipant => 'FeatureOrders.fieldTypeParticipant'.tr(); // "Participant Type"
+  static String get fieldMemberAnima => 'FeatureOrders.fieldMemberAnima'.tr(); // "Member of Anima Iuventutis"
+  static String get fieldDietary => 'FeatureOrders.fieldDietary'.tr(); // "Dietary restrictions"
+  static String get fieldPrepTeam => 'FeatureOrders.fieldPrepTeam'.tr(); // "Preparatory team"
+
+  // Dynamic Methods
+  static String resetPasswordTo(String password) => 'FeatureOrders.resetPasswordTo'.tr(namedArgs: {'password': password}); // "Reset password to '{password}'"
+  static String resetPasswordConfirmationContent(String password) => 'FeatureOrders.resetPasswordConfirmationContent'.tr(namedArgs: {'password': password}); // "Are you sure you want to change the password to '{password}'?"
+  static String errorResetPassword(String error) => 'FeatureOrders.errorResetPassword'.tr(namedArgs: {'error': error}); // "Error resetting password: {error}"
 
   // Tickets Tab
   static String get scanActionText {
     if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
-      return 'FeatureOrders.scanTickets'.tr();
+      return 'FeatureOrders.scanTickets'.tr(); // "Scan tickets"
     }
-    return 'FeatureOrders.scanEntries'.tr();
+    return 'FeatureOrders.scanEntries'.tr(); // "Scan applications"
   }
 
   static String get cancelItemsConfirmationText {
     if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
-      return 'FeatureOrders.cancelTicketsConfirmation'.tr();
+      return 'FeatureOrders.cancelTicketsConfirmation'.tr(); // "Do you want to cancel the selected tickets?"
     }
-    return 'FeatureOrders.cancelItemsConfirmation'.tr();
+    return 'FeatureOrders.cancelItemsConfirmation'.tr(); // "Do you want to cancel the selected items?"
   }
 
   // --- Order Grid Columns ---
-  static String get gridId => 'OrderGridColumns.id'.tr();
-  static String get gridHide => 'OrderGridColumns.hide'.tr();
-  static String get gridTitle => 'OrderGridColumns.title'.tr();
-  static String get gridPrice => 'OrderGridColumns.price'.tr();
-  static String get gridProductType => 'OrderGridColumns.productType'.tr();
-  static String get gridOrder => 'OrderGridColumns.order'.tr();
-  static String get gridMax => 'OrderGridColumns.max'.tr();
-  static String get gridOrdered => 'OrderGridColumns.ordered'.tr();
-  static String get gridPaid => 'OrderGridColumns.paid'.tr();
-  static String get gridCurrency => 'OrderGridColumns.currency'.tr();
-  static String get gridDescription => 'OrderGridColumns.description'.tr();
-  static String get gridState => 'OrderGridColumns.state'.tr();
-  static String get gridCreated => 'OrderGridColumns.created'.tr();
-  static String get gridProducts => 'OrderGridColumns.products'.tr();
-  static String get gridNote => 'OrderGridColumns.note'.tr();
-  static String get gridHiddenNote => 'OrderGridColumns.hiddenNote'.tr();
-  static String get gridSpot => 'OrderGridColumns.spot'.tr();
-  static String get gridOrderSymbol => 'OrderGridColumns.orderSymbol'.tr();
-  static String get gridCustomer => 'OrderGridColumns.customer'.tr();
-  static String get gridEmail => 'OrderGridColumns.email'.tr();
-  static String get gridHistory => 'OrderGridColumns.history'.tr();
-  static String get gridTransactions => 'OrderGridColumns.transactions'.tr();
-  static String get gridAmount => 'OrderGridColumns.amount'.tr();
-  static String get gridReturned => 'OrderGridColumns.returned'.tr();
-  static String get gridVariableSymbol => 'OrderGridColumns.variableSymbol'.tr();
-  static String get gridDeadline => 'OrderGridColumns.deadline'.tr();
-  static String get gridForm => 'OrderGridColumns.form'.tr();
-  static String get gridReminderSent => 'OrderGridColumns.reminderSent'.tr();
-  static String get gridChangedAt => 'OrderGridColumns.changedAt'.tr();
-  static String get gridChangedBy => 'OrderGridColumns.changedBy'.tr();
-  static String get gridChanges => 'OrderGridColumns.changes'.tr();
-  static String get gridPaidOrSent => 'OrderGridColumns.paidOrSent'.tr();
-  static String get gridCancelled => 'OrderGridColumns.cancelled'.tr();
-  static String get gridUsedInForms => 'OrderGridColumns.usedInForms'.tr();
+  static String get gridId => 'OrderGridColumns.id'.tr(); // "Id"
+  static String get gridHide => 'OrderGridColumns.hide'.tr(); // "Hide"
+  static String get gridTitle => 'OrderGridColumns.title'.tr(); // "Title"
+  static String get gridPrice => 'OrderGridColumns.price'.tr(); // "Price"
+  static String get gridProductType => 'OrderGridColumns.productType'.tr(); // "Product Type"
+  static String get gridOrder => 'OrderGridColumns.order'.tr(); // "Order"
+  static String get gridMax => 'OrderGridColumns.max'.tr(); // "Max"
+  static String get gridOrdered => 'OrderGridColumns.ordered'.tr(); // "Ordered"
+  static String get gridPaid => 'OrderGridColumns.paid'.tr(); // "Paid"
+  static String get gridCurrency => 'OrderGridColumns.currency'.tr(); // "Currency"
+  static String get gridDescription => 'OrderGridColumns.description'.tr(); // "Description"
+  static String get gridState => 'OrderGridColumns.state'.tr(); // "State"
+  static String get gridCreated => 'OrderGridColumns.created'.tr(); // "Created"
+  static String get gridProducts => 'OrderGridColumns.products'.tr(); // "Products"
+  static String get gridNote => 'OrderGridColumns.note'.tr(); // "Note"
+  static String get gridHiddenNote => 'OrderGridColumns.hiddenNote'.tr(); // "Hidden note"
+  static String get gridSpot => 'OrderGridColumns.spot'.tr(); // "Spot"
+  static String get gridOrderSymbol => 'OrderGridColumns.orderSymbol'.tr(); // "Order Symbol"
+  static String get gridCustomer => 'OrderGridColumns.customer'.tr(); // "Customer"
+  static String get gridEmail => 'OrderGridColumns.email'.tr(); // "E-mail"
+  static String get gridHistory => 'OrderGridColumns.history'.tr(); // "History"
+  static String get gridTransactions => 'OrderGridColumns.transactions'.tr(); // "Transactions"
+  static String get gridAmount => 'OrderGridColumns.amount'.tr(); // "Amount"
+  static String get gridReturned => 'OrderGridColumns.returned'.tr(); // "Returned"
+  static String get gridVariableSymbol => 'OrderGridColumns.variableSymbol'.tr(); // "Variable symbol"
+  static String get gridDeadline => 'OrderGridColumns.deadline'.tr(); // "Deadline"
+  static String get gridForm => 'OrderGridColumns.form'.tr(); // "Form"
+  static String get gridReminderSent => 'OrderGridColumns.reminderSent'.tr(); // "Reminder Sent"
+  static String get gridChangedAt => 'OrderGridColumns.changedAt'.tr(); // "Changed At"
+  static String get gridChangedBy => 'OrderGridColumns.changedBy'.tr(); // "Changed By"
+  static String get gridChanges => 'OrderGridColumns.changes'.tr(); // "Changes"
+  static String get gridPaidOrSent => 'OrderGridColumns.paidOrSent'.tr(); // "Paid or Sent"
+  static String get gridCancelled => 'OrderGridColumns.cancelled'.tr(); // "Cancelled"
+  static String get gridUsedInForms => 'OrderGridColumns.usedInForms'.tr(); // "Used in Forms"
 
   // --- Products Dialog ---
-  static String get productsUpdateSuccess => 'ProductsDialog.productsUpdateSuccess'.tr();
-  static String get productsUpdateFailed => 'ProductsDialog.productsUpdateFailed'.tr();
-  static String get sendUpdateTitle => 'ProductsDialog.sendUpdateTitle'.tr();
-  static String sendUpdateContent(String email) => 'ProductsDialog.sendUpdateContent'.tr(namedArgs: {'email': email});
-  static String get sendUpdateItemSummary => 'ProductsDialog.sendUpdateItemSummary'.tr();
-  static String get sendUpdateItemStatus => 'ProductsDialog.sendUpdateItemStatus'.tr();
-  static String get sendUpdateItemQr => 'ProductsDialog.sendUpdateItemQr'.tr();
-  static String get sendUpdateItemRefund => 'ProductsDialog.sendUpdateItemRefund'.tr();
-  static String get sendEmailButton => 'ProductsDialog.sendEmailButton'.tr();
-  static String get sendEmailFailed => 'ProductsDialog.sendEmailFailed'.tr();
-  static String get sendEmailSuccess => 'ProductsDialog.sendEmailSuccess'.tr();
-  static String get dialogTitleFallback => 'ProductsDialog.dialogTitleFallback'.tr();
-  static String get originalPrice => 'ProductsDialog.originalPrice'.tr();
-  static String get currentPrice => 'ProductsDialog.currentPrice'.tr();
-  static String get priceChange => 'ProductsDialog.priceChange'.tr();
-  static String get noProducts => 'ProductsDialog.noProducts'.tr();
-  static String get addBackTooltip => 'ProductsDialog.addBackTooltip'.tr();
-  static String get removeTooltip => 'ProductsDialog.removeTooltip'.tr();
-  static String get addProductsButton => 'ProductsDialog.addProductsButton'.tr();
-  static String get infoTicketSymbol => 'ProductsDialog.infoTicketSymbol'.tr();
-  static String get infoEmail => 'ProductsDialog.infoEmail'.tr();
-  static String get infoOrderStatus => 'ProductsDialog.infoOrderStatus'.tr();
-  static String get infoPayment => 'ProductsDialog.infoPayment'.tr();
-  static String get outdatedTitle => 'ProductsDialog.outdatedTitle'.tr();
-  static String get outdatedSubtitle => 'ProductsDialog.outdatedSubtitle'.tr();
-  static String get sendUpdateButton => 'ProductsDialog.sendUpdateButton'.tr();
-  static String get editPriceTooltip => 'ProductsDialog.editPriceTooltip'.tr();
-  static String get editPriceTitle => 'ProductsDialog.editPriceTitle'.tr();
-  static String get newPriceLabel => 'ProductsDialog.newPriceLabel'.tr();
-  static String get priceValidationRequired => 'ProductsDialog.priceValidationRequired'.tr();
-  static String get priceValidationInvalid => 'ProductsDialog.priceValidationInvalid'.tr();
-  static String get noProductChangesDetected => 'ProductsDialog.noProductChangesDetected'.tr();
-  static String get addedProductsTitle => 'ProductsDialog.addedProductsTitle'.tr();
-  static String get removedProductsTitle => 'ProductsDialog.removedProductsTitle'.tr();
-  static String get changedPricesTitle => 'ProductsDialog.changedPricesTitle'.tr();
-  static String get emailContentIntro => 'ProductsDialog.emailContentIntro'.tr();
-  static String get setToZeroButton => 'ProductsDialog.setToZeroButton'.tr(); // e.g., "Set to Zero"
-  static String get sendUpdateItemChanges => 'ProductsDialog.sendUpdateItemChanges'.tr(); // e.g., "Overview of product changes"
-  static String get priceValidationNegative => 'ProductsDialog.priceValidationNegative'.tr(); // e.g., "Price cannot be negative."
-  static String get totalPriceChange => 'ProductsDialog.totalPriceChange'.tr();
+  static String get productsUpdateSuccess => 'ProductsDialog.productsUpdateSuccess'.tr(); // "Products updated successfully."
+  static String get productsUpdateFailed => 'ProductsDialog.productsUpdateFailed'.tr(); // "Failed to update products."
+  static String get sendUpdateTitle => 'ProductsDialog.sendUpdateTitle'.tr(); // "Send Update to Customer?"
+  static String sendUpdateContent(String email) => 'ProductsDialog.sendUpdateContent'.tr(namedArgs: {'email': email}); // "This will send an email to {email} with:"
+  static String get sendUpdateItemSummary => 'ProductsDialog.sendUpdateItemSummary'.tr(); // "Updated order summary"
+  static String get sendUpdateItemStatus => 'ProductsDialog.sendUpdateItemStatus'.tr(); // "Current payment status and balance"
+  static String get sendUpdateItemQr => 'ProductsDialog.sendUpdateItemQr'.tr(); // "Payment QR code for the balance due"
+  static String get sendUpdateItemRefund => 'ProductsDialog.sendUpdateItemRefund'.tr(); // "Information that the overpayment will be refunded"
+  static String get sendEmailButton => 'ProductsDialog.sendEmailButton'.tr(); // "Send Email"
+  static String get sendEmailFailed => 'ProductsDialog.sendEmailFailed'.tr(); // "Failed to send update email."
+  static String get sendEmailSuccess => 'ProductsDialog.sendEmailSuccess'.tr(); // "Update email sent successfully."
+  static String get dialogTitleFallback => 'ProductsDialog.dialogTitleFallback'.tr(); // "Ticket products"
+  static String get originalPrice => 'ProductsDialog.originalPrice'.tr(); // "Original"
+  static String get currentPrice => 'ProductsDialog.currentPrice'.tr(); // "Current"
+  static String get priceChange => 'ProductsDialog.priceChange'.tr(); // "Change"
+  static String get noProducts => 'ProductsDialog.noProducts'.tr(); // "No products selected."
+  static String get addBackTooltip => 'ProductsDialog.addBackTooltip'.tr(); // "Add back"
+  static String get removeTooltip => 'ProductsDialog.removeTooltip'.tr(); // "Remove"
+  static String get addProductsButton => 'ProductsDialog.addProductsButton'.tr(); // "Add products"
+  static String get infoTicketSymbol => 'ProductsDialog.infoTicketSymbol'.tr(); // "Ticket Symbol"
+  static String get infoEmail => 'ProductsDialog.infoEmail'.tr(); // "Email"
+  static String get infoOrderStatus => 'ProductsDialog.infoOrderStatus'.tr(); // "Order Status"
+  static String get infoPayment => 'ProductsDialog.infoPayment'.tr(); // "Payment"
+  static String get outdatedTitle => 'ProductsDialog.outdatedTitle'.tr(); // "Outdated Confirmation"
+  static String get outdatedSubtitle => 'ProductsDialog.outdatedSubtitle'.tr(); // "The order has changed since the last email was sent."
+  static String get sendUpdateButton => 'ProductsDialog.sendUpdateButton'.tr(); // "Send Update to Customer"
+  static String get editPriceTooltip => 'ProductsDialog.editPriceTooltip'.tr(); // "Edit price"
+  static String get editPriceTitle => 'ProductsDialog.editPriceTitle'.tr(); // "Edit Price"
+  static String get newPriceLabel => 'ProductsDialog.newPriceLabel'.tr(); // "New price"
+  static String get priceValidationRequired => 'ProductsDialog.priceValidationRequired'.tr(); // "Price is required."
+  static String get priceValidationInvalid => 'ProductsDialog.priceValidationInvalid'.tr(); // "Please enter a valid price."
+  static String get noProductChangesDetected => 'ProductsDialog.noProductChangesDetected'.tr(); // "No changes detected to be sent."
+  static String get addedProductsTitle => 'ProductsDialog.addedProductsTitle'.tr(); // "Added Products:"
+  static String get removedProductsTitle => 'ProductsDialog.removedProductsTitle'.tr(); // "Removed Products:"
+  static String get changedPricesTitle => 'ProductsDialog.changedPricesTitle'.tr(); // "Changed Prices:"
+  static String get emailContentIntro => 'ProductsDialog.emailContentIntro'.tr(); // "The email will include the following:"
+  static String get setToZeroButton => 'ProductsDialog.setToZeroButton'.tr(); // "Set to Zero"
+  static String get sendUpdateItemChanges => 'ProductsDialog.sendUpdateItemChanges'.tr(); // "Overview of product changes"
+  static String get priceValidationNegative => 'ProductsDialog.priceValidationNegative'.tr(); // "Price cannot be negative."
+  static String get totalPriceChange => 'ProductsDialog.totalPriceChange'.tr(); // "Total Price Change"
 
   // --- Order History ---
-  static String get noHistoryFound => 'OrderHistory.noHistoryFound'.tr();
-  static String get currentState => 'OrderHistory.currentState'.tr();
-  static String get systemUser => 'OrderHistory.systemUser'.tr();
-  static String get changes => 'OrderHistory.changes'.tr();
-  static String get totalPrice => 'OrderHistory.totalPrice'.tr();
-  static String get noProductChanges => 'OrderHistory.noProductChanges'.tr();
-  static String get expiredOrderTooltip => 'OrderHistory.expiredOrderTooltip'.tr();
-  static String toBasicString(int id, int orderId) => 'OrderHistory.toBasicString'.tr(namedArgs: {"id": id.toString(), "orderId": orderId.toString()});
+  static String get noHistoryFound => 'OrderHistory.noHistoryFound'.tr(); // "No history found"
+  static String get currentState => 'OrderHistory.currentState'.tr(); // "Current state"
+  static String get systemUser => 'OrderHistory.systemUser'.tr(); // "System"
+  static String get changes => 'OrderHistory.changes'.tr(); // "Changes"
+  static String get totalPrice => 'OrderHistory.totalPrice'.tr(); // "Total Price: {price}"
+  static String get noProductChanges => 'OrderHistory.noProductChanges'.tr(); // "No product changes"
+  static String get expiredOrderTooltip => 'OrderHistory.expiredOrderTooltip'.tr(); // "Expired order"
+  static String toBasicString(int id, int orderId) => 'OrderHistory.toBasicString'.tr(namedArgs: {"id": id.toString(), "orderId": orderId.toString()}); // "Item {id} (Order {orderId})"
 }
