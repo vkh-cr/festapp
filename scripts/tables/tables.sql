@@ -64,7 +64,7 @@ create table if not exists public.units (
 
 create table if not exists public.user_info (
   created_at TIMESTAMP WITH TIME ZONE NULL DEFAULT now(),
-  name TEXT NOT NULL,
+  name TEXT NULL,
   surname TEXT NULL,
   sex TEXT NULL,
   phone TEXT NULL,
