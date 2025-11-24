@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/data_models/occasion_link_model.dart';
-import 'package:fstapp/data_models/occasion_settings_model.dart';
+import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
 import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';

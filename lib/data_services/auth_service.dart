@@ -67,7 +67,8 @@ class AuthService {
     if(FeatureService.isFeatureEnabled(FeatureConstants.companions)) {
       user.companions = await DbCompanions.getAllCompanions();
     }
-    var place = SynchroService.globalSettingsModel!.getReferenceToService(DbOccasions.serviceTypeAccommodation, user.occasionUser?.services);
+    var oc = RightsService.currentOccasion()!;
+    var place = oc.getReferenceToService(DbOccasions.serviceTypeAccommodation, user.occasionUser?.services);
     if(place!=null){
       user.accommodationPlace = PlaceModel(id: place.reference, title: place.title, description: "", type: "");
     }

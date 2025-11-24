@@ -1,10 +1,8 @@
-CREATE OR REPLACE FUNCTION create_user_in_organization_with_data(org bigint, email text, password text, data jsonb)
+CREATE OR REPLACE FUNCTION create_user_in_organization_with_data_pure(org bigint, email text, password text, data jsonb)
 RETURNS uuid
 LANGUAGE plpgsql
-SECURITY DEFINER
 AS $$
 DECLARE
-    is_registration_enabled BOOLEAN;
     usr uuid;
     encrypted_pw text;
     user_meta_data jsonb := '{}';
@@ -18,26 +16,6 @@ BEGIN
 
     -- Add organization prefix to the email for auth tables
     email := format('%s+%s', org, original_email);
-
-    -- Retrieve IS_REGISTRATION_ENABLED value from organizations.data JSON
-    SELECT (organizations.data->>'IS_REGISTRATION_ENABLED')::boolean
-      INTO is_registration_enabled
-    FROM organizations
-    WHERE id = org;
-
-    -- Check if registration is enabled OR if the caller is a manager on any occasion
-    -- OR if the caller is an editor on at least one unit associated with an occasion in this organization.
-    IF NOT is_registration_enabled AND NOT (
-           get_is_manager_on_any_occasion()
-           OR EXISTS (
-               SELECT 1
-               FROM occasions o
-               WHERE o.organization = org
-                 AND get_is_editor_on_unit(o.unit)
-           )
-       ) THEN
-        RETURN jsonb_build_object('code', 403, 'error', 'Registration is disabled for this organization');
-    END IF;
 
     -- Trim all values in the data JSONB object and build a new trimmed_data JSONB object
     FOR _key, _value IN
