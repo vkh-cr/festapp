@@ -1,20 +1,16 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,C={
-a6l(d,e){var x=0,w=A.m(y.b),v
-var $async$a6l=A.i(function(f,g){if(f===1)return A.j(g,w)
-while(true)switch(x){case 0:x=4
-return A.d(B.cXv(A.dJ(d,0,null)),$async$a6l)
-case 4:x=g?2:3
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
+aET(){var x=0,w=A.n(y.a),v
+var $async$aET=A.i(function(d,e){if(d===1)return A.k(e,w)
+for(;;)switch(x){case 0:x=3
+return A.d($.Ag().bMz("requestNotificationPermission",[]),$async$aET)
+case 3:v=e
+x=1
 break
-case 2:v=A.dJ(d,0,null)
-x=5
-return A.d(B.aoP(v,D.aE0,e?"_self":null),$async$a6l)
-case 5:case 3:return A.k(null,w)}})
-return A.l($async$a6l,w)}},B,D
+case 1:return A.l(v,w)}})
+return A.m($async$aET,w)}}
 A=c[0]
-C=a.updateHolder(c[75],C)
-B=c[151]
-D=c[218]
+B=a.updateHolder(c[47],B)
 var z=a.updateTypes([])
-var y={b:A.J("~")}};
-(a=>{a["k8jap0aWWRIw3CI54Nf7SlyltFo="]=a.current})($__dart_deferred_initializers__);
+var y={a:A.J("x")}};
+(a=>{a["n5OhKOPsqk21imDg9QjR5OIpaho="]=a.current})($__dart_deferred_initializers__);
