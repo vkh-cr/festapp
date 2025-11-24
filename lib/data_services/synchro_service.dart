@@ -1,6 +1,6 @@
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/occasion_link_model.dart';
-import 'package:fstapp/data_models/occasion_settings_model.dart';
+import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/db_information.dart';
