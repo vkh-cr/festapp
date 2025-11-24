@@ -69,43 +69,47 @@ class _TicketsTabState extends State<TicketsTab> {
       EshopColumns.TICKET_NOTE_HIDDEN,
     ];
 
-  @override
-  Future<void> didChangeDependencies() async {
-    super.didChangeDependencies();
-    if (occasionLink == null && context.routeData.params.isNotEmpty) {
-      occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
-      _controller = SingleDataGridController<TicketModel>(
-        context: context,
-        loadData: () => DbTickets.getAllTickets(occasionLink!),
-        fromPlutoJson: TicketModel.fromPlutoJson,
-        firstColumnType: DataGridFirstColumn.check,
-        idColumn: EshopColumns.TICKET_ID,
-        actionsExtended: DataGridActionsController(
-          areAllActionsEnabled: RightsService.isEditorOrder,
-          isAddActionPossible: () => false,
+    final newController = SingleDataGridController<TicketModel>(
+      context: context,
+      loadData: () => DbTickets.getAllTickets(occasionLink!),
+      fromPlutoJson: TicketModel.fromPlutoJson,
+      firstColumnType: DataGridFirstColumn.check,
+      idColumn: EshopColumns.TICKET_ID,
+      actionsExtended: DataGridActionsController(
+        areAllActionsEnabled: RightsService.isEditorOrder,
+        isAddActionPossible: () => false,
+      ),
+      headerChildren: [
+        DataGridAction(
+          name: CommonStrings.cancel,
+          action: (SingleDataGridController singleDataGrid, [_]) =>
+              _stornoTickets(singleDataGrid),
+          isEnabled: RightsService.isOrderEditor,
         ),
-        headerChildren: [
+        if (FeatureService.isFeatureEnabled(FeatureConstants.ticket))
           DataGridAction(
-            name: CommonStrings.cancel,
+            name: OrdersStrings.scanActionText,
             action: (SingleDataGridController singleDataGrid, [_]) =>
-                _stornoTickets(singleDataGrid),
+                _scanTickets(singleDataGrid),
             isEnabled: RightsService.isOrderEditor,
           ),
-          if(FeatureService.isFeatureEnabled(FeatureConstants.ticket))
-            DataGridAction(
-              name: OrdersStrings.scanActionText,
-              action: (SingleDataGridController singleDataGrid, [_]) =>
-                  _scanTickets(singleDataGrid),
-              isEnabled: RightsService.isOrderEditor,
-            ),
-        ],
-        columns: EshopColumns.generateColumns(context, columnIdentifiers,
-          data: {
-            EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
-            EshopColumns.TICKET_PRODUCTS_EDIT: refreshData,
-            EshopColumns.TICKET_CONFIRM: refreshData
-          },),
-      );
+      ],
+      columns: EshopColumns.generateColumns(
+        context,
+        columnIdentifiers,
+        data: {
+          EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
+          EshopColumns.TICKET_PRODUCTS_EDIT: refreshData,
+          EshopColumns.TICKET_CONFIRM: refreshData
+        },
+      ),
+    );
+
+    if (mounted) {
+      setState(() {
+        _controller = newController;
+        _isLoading = false;
+      });
     }
   }
 
