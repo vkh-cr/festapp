@@ -62,4 +62,7 @@ class FeatureConstants {
   static const String mapLogoLink = "logo_link";
   static const String mapTextLink = "text_link";
   static const String mapLayerLink = "layer_link";
+
+  // Import Feature
+  static const String importAutoImport = "auto_import";
 }

@@ -77,6 +77,10 @@ class TicketModel extends ITrinaRowModel {
           value: createdAt != null
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
+      EshopColumns.TICKET_LAST_CHANGE: TrinaCell(
+          value: updatedAt != null
+              ? DateFormat('yyyy-MM-dd HH:mm').format(updatedAt!)
+              : ""),
       EshopColumns.TICKET_SYMBOL: TrinaCell(value: ticketSymbol ?? ""),
       EshopColumns.TICKET_STATE: TrinaCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
       EshopColumns.TICKET_NOTE: TrinaCell(value: note ?? ""),

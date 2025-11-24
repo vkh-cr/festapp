@@ -274,7 +274,7 @@ class DbUsers {
   }
 
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw, dynamic data) async {
-    var newId = await _supabase.rpc("create_user_in_organization_with_data",
+    var newId = await _supabase.rpc("create_user_in_organization_with_data_ws",
         params: {"org": AppConfig.organization, "email": email, "password": pw, "data": data});
     if (newId==null)
     {
