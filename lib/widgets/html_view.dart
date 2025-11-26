@@ -37,31 +37,31 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
         .any((u) => url.startsWith(u)) ||
         url.contains("localhost")) {
 
-      // 1. Remove the fragment (the part starting with '#') from the URL if it exists
-      final uriWithoutFragment = Uri.parse(url).removeFragment();
-      final cleanUrl = uriWithoutFragment.toString(); // Use the URI string without the fragment
+      String path = url;
 
-      // Find the base URL that the current URL starts with
-      final baseUrl = AppConfig.compatibleUrls().firstWhere(
-            (u) => u.isNotEmpty && cleanUrl.startsWith(u), // Use cleanUrl for the check
-        orElse: () => cleanUrl.contains("localhost") ? "http://localhost" : "",
+      // 1. Determine base to strip (Configured URL or dynamic localhost origin)
+      final matchedBase = AppConfig.compatibleUrls().firstWhere(
+            (u) => u.isNotEmpty && url.startsWith(u),
+        orElse: () => "",
       );
 
-      String path;
-      if (baseUrl.isNotEmpty) {
-        // Remove the base URL from the start of the current URL
-        path = cleanUrl.substring(baseUrl.length);
-        // Clean up any leading slashes, but preserve the rest of the path
-        if (path.startsWith('/')) {
-          path = path.substring(1);
+      if (matchedBase.isNotEmpty) {
+        path = url.substring(matchedBase.length);
+      } else if (url.contains("localhost")) {
+        final uri = Uri.tryParse(url);
+        if (uri != null && url.startsWith(uri.origin)) {
+          path = url.substring(uri.origin.length);
         }
-      } else {
-        try {
-          final uri = Uri.parse(cleanUrl);
-          path = uri.path.startsWith('/') ? uri.path.substring(1) : uri.path;
-        } catch (_) {
-          path = cleanUrl;
-        }
+      }
+
+      // 2. Remove specific legacy hash "/#" only if it immediately follows the domain
+      if (path.startsWith('/#')) {
+        path = path.replaceFirst('/#', '');
+      }
+
+      // 3. Remove leading slash to get clean path for router
+      if (path.startsWith('/')) {
+        path = path.substring(1);
       }
 
       RouterService.navigate(context, path);
