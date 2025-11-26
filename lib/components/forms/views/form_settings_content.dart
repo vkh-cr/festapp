@@ -78,7 +78,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
 
   String _generateFormHtml(String? link) {
     if (link == null || link.isEmpty) return "";
-    final fullUrl = "${AppConfig.webLink}/#/form/$link";
+    final fullUrl = "${AppConfig.webLink}/form/$link";
     return '''
        <p>${FormStrings.formAvailableAt}:<br>
        <a href="$fullUrl">$fullUrl</a></p>
