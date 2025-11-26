@@ -11,6 +11,7 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/components/feedback/feedack_floating_button.dart';
 import 'package:fstapp/widgets/html_view.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/occasion_card.dart';
@@ -166,10 +167,6 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
         _currentUnitId ??= RightsService.currentUser()!.units!.first.id;
         RouterService.navigate(context, "unit/$_currentUnitId/edit")
             .then((_) {
-          // After editing, reload data for the same unit.
-          // This .then() block is safe because RouterService.navigate
-          // returns a Future that completes when the route is popped,
-          // so the context is valid again.
           if (_currentUnitId != null) {
             _loadDataForUnit(_currentUnitId!);
           }
@@ -178,6 +175,12 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
     }
 
     return Scaffold(
+      floatingActionButton: AppConfig.isFeedbackEnabled
+          ? const FeedbackFloatingButton()
+          : null,
+      // Ensure the button sits above the bottom safe area
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
       body: CustomScrollView(
         controller: _scrollController,
         cacheExtent: 500,
@@ -274,7 +277,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                 ),
               ),
             ),
-          // **CHANGED**: Grid of present occasion cards.
+          // Grid of present occasion cards.
           if (presentEvents.isNotEmpty)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -309,7 +312,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                 ),
               ),
             ),
-          // **CHANGED**: Grid of upcoming occasion cards.
+          // Grid of upcoming occasion cards.
           if (upcomingEvents.isNotEmpty)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -343,7 +346,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                 ),
               ),
             ),
-          // **CHANGED**: Grid of past occasion cards.
+          // Grid of past occasion cards.
           if (pastEvents.isNotEmpty)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
