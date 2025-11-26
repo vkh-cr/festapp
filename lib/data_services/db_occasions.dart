@@ -113,7 +113,6 @@ class DbOccasions {
 
   static Future<void> updateOccasion(OccasionModel occasionModel) async {
     final Map<String, dynamic> occasionJson = occasionModel.toJson();
-    occasionJson['is_app_supported'] = AppConfig.isAppSupported;
     await _supabase.rpc("update_occasion_203",
         params: {
           "input_data": occasionJson,

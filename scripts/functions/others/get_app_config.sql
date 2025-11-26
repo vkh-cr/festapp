@@ -14,6 +14,7 @@ DECLARE
     default_unit bigint;
     editor_unit_id bigint;
     is_open_bool BOOLEAN;
+    is_app_supported_bool BOOLEAN := FALSE;
     occasion_user occasion_users%rowtype;
     unit_user unit_users%rowtype;
     is_admin_bool BOOLEAN;
@@ -174,8 +175,15 @@ BEGIN
         -- Check if the current user has editor_view permissions on the occasion
         is_editor_view_on_occasion_bool := get_is_editor_view_on_occasion(occasionId);
 
+        -- NEW: Retrieve IS_APP_SUPPORTED from Organization data. Defaults to FALSE.
+        SELECT COALESCE((data->>'IS_APP_SUPPORTED')::boolean, FALSE)
+          INTO is_app_supported_bool
+        FROM organizations
+        WHERE id = org_id;
+
         -- If the occasion is not open, enforce access restrictions
-        IF is_open_bool = FALSE THEN
+        -- BUT bypass this check if is_app_supported_bool is FALSE.
+        IF is_open_bool = FALSE AND is_app_supported_bool = TRUE THEN
             IF is_editor_view_on_occasion_bool <> TRUE
                AND (SELECT get_is_editor_order_view_on_occasion(occasionId)) <> TRUE
                AND (SELECT get_is_editor_on_unit(occasion_unit)) <> TRUE THEN
