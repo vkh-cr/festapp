@@ -36,7 +36,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
         .where((u) => u.isNotEmpty)
         .any((u) => url.startsWith(u)) ||
         url.contains("localhost")) {
-      final path = url.split('/#/').last;
+      final path = url.split('/').last;
       RouterService.navigate(context, path);
       return true;
     }

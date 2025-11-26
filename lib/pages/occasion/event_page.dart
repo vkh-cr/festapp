@@ -299,7 +299,7 @@ class _EventPageState extends State<EventPage> {
                       html: '''
                       <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
                         <div>${"An account is required to join this event.".tr()}</div>
-                        <a href="${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
+                        <a href="${AppConfig.webLink}/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
                           ${"Click here to sign in.".tr()}
                         </a>
                       </div>
