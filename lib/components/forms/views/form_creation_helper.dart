@@ -11,7 +11,7 @@ import '../form_strings.dart';
 class FormCreationHelper {
   static String _generateFormHtml(String? link) {
     if (link == null || link.isEmpty) return "";
-    final fullUrl = "${AppConfig.webLink}/#/form/$link";
+    final fullUrl = "${AppConfig.webLink}/form/$link";
     return '''
        <p>${FormStrings.formAvailableAt}:<br>
        <a href="$fullUrl">$fullUrl</a></p>
