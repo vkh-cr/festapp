@@ -4,13 +4,13 @@ SECURITY DEFINER
 AS $$
 DECLARE
   oid bigint;
+  org_id bigint;
   user_basics jsonb;
 BEGIN
   -----------------------------------------------------
-  -- 1. Validate Code & Get Occasion ID
-  -- (Matches logic from scan_ticket)
+  -- 1. Validate Code & Get Occasion AND Organization ID
   -----------------------------------------------------
-  SELECT o.id INTO oid
+  SELECT o.id, o.organization INTO oid, org_id
   FROM public.occasions o
   JOIN public.occasions_hidden oh ON o.occasion_hidden = oh.id
   WHERE oh.secret = scan_code
@@ -47,7 +47,16 @@ BEGIN
   FROM public.user_info ui
   LEFT JOIN public.user_companions uc ON ui.id = uc.companion
   JOIN public.occasion_users uo ON ui.id = uo."user"
-  WHERE uo.occasion = oid;
+
+  -- This keeps the user in the list even if they have no record in organization_users
+  LEFT JOIN public.organization_users ou ON ui.id = ou."user" AND ou.organization = org_id
+
+  WHERE uo.occasion = oid
+
+  -- "IS NOT TRUE" covers two cases:
+  -- 1. is_hidden is FALSE
+  -- 2. is_hidden is NULL (record doesn't exist)
+  AND (ou.is_hidden IS NOT TRUE);
 
   -----------------------------------------------------
   -- 3. Handle Empty Results & Return
