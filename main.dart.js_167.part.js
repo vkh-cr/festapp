@@ -1,125 +1,81 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,F,G,H,I,K,B={
-dKI(){return new B.HA(null)},
-HA:function HA(d){this.a=d},
-b0o:function b0o(d,e){var _=this
-_.e=_.d=!1
-_.r=_.f=null
-_.w=d
-_.x=e
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,F,D,G,H,I,K,B={
+dDT(){return new B.Ft(null)},
+Ft:function Ft(d){this.a=d},
+aUE:function aUE(d,e){var _=this
+_.d=d
+_.e=e
+_.f=!1
 _.c=_.a=null},
-cNU:function cNU(d){this.a=d},
-cNV:function cNV(d,e){this.a=d
+cp_:function cp_(d){this.a=d},
+cp0:function cp0(d,e){this.a=d
 this.b=e},
-cNR:function cNR(d){this.a=d},
-cNS:function cNS(d){this.a=d},
-cNT:function cNT(d){this.a=d},
-bbi(d){var x=0,w=A.n(y.y),v,u
-var $async$bbi=A.i(function(e,f){if(e===1)return A.k(f,w)
-for(;;)switch(x){case 0:d.m(0,"organization",1)
-u=$.e8().as
-u===$&&A.a()
-x=3
-return A.d(u.n6("register",d),$async$bbi)
-case 3:v=f.a
-x=1
-break
-case 1:return A.l(v,w)}})
-return A.m($async$bbi,w)}},D,L,E,M,N,O,P
+coX:function coX(d){this.a=d},
+coY:function coY(d){this.a=d},
+coZ:function coZ(d){this.a=d}},E,L,M,N,O
 J=c[1]
 A=c[0]
 C=c[2]
-F=c[103]
-G=c[167]
-H=c[134]
+F=c[167]
+D=c[103]
+G=c[97]
+H=c[132]
 I=c[153]
-K=c[150]
-B=a.updateHolder(c[28],B)
-D=c[292]
-L=c[57]
-E=c[35]
-M=c[293]
+K=c[287]
+B=a.updateHolder(c[7],B)
+E=c[286]
+L=c[53]
+M=c[51]
 N=c[169]
-O=c[197]
-P=c[164]
-B.HA.prototype={
-K(){var x=null
-return new B.b0o(A.b([A.wq(x,x,x,x,1,x,!0,x,x,x,x,x,x,"name"),A.wq(x,x,x,x,2,x,!0,x,x,x,x,x,x,"surname"),A.wq(x,x,x,x,3,x,x,x,x,x,x,x,x,"sex"),A.wq(x,x,x,x,4,x,!0,x,x,x,x,x,x,"email"),A.wq(x,x,x,x,5,x,!0,x,x,x,x,x,x,"city"),A.wq(x,x,x,x,6,x,x,x,x,x,x,x,x,"birth_year")],y.a),new A.aK(x,y.c))}}
-B.b0o.prototype={
+O=c[164]
+B.Ft.prototype={
+K(){return new B.aUE(new A.aK(null,y.o),new A.bz(C.af,$.a7()))}}
+B.aUE.prototype={
 l(){this.ab()},
-A(d){var x,w,v,u,t,s=this,r=null,q=A.deW(r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r)
-q.cx=s.w
-x=E.deU(q)
-s.r=x
-w=s.x
-x.a=new E.ayN(r,r,w,r,r,r,r)
-x=G.ca(D.bJf,r)
-x=P.ix(r,r,r,!0,!0,r,r,1,!0,r,r,!1,r,!1,r,r,I.ua(r,new B.cNU(d)),r,!0,r,r,r,r,r,x,r,r,r,1,r,!0)
-if(s.e){w=A.ad(r,r,A.z(d).ax.a===C.r?$.dI():C.q,r,r,r,r,r,r,r,r,18,r,r,r,r,r,!0,r,r,r,r,r,r,r,r)
-v=s.f
-v=v==null?r:v.h(0,"email")
-u=y.w
-u=new A.U(D.ax8,A.tz(r,r,r,C.bL,r,r,!0,r,A.c9(A.b([A.c9(r,r,r,r,w,A.f("Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.",r,A.w(["email",v],u,u))),D.bOt],y.F),r,r,r,r,r),C.aJ,r,r,C.at,C.aF),r)
-w=u}else{v=s.r
-v=A.B(E.deR(d,v.a.c,v),y.u)
-v.push(C.Y)
-u=s.d?r:new B.cNV(s,d)
-t=A.f("Sign up",r,r)
-v.push(H.JR(C.es,d,50,!s.d,t,u,C.m,250))
-w=L.btP(new F.Au(A.a9(v,C.i,C.f,C.h,0,r,C.l),r),w,r)}return N.eR(x,r,new A.cy(C.aU,r,r,new A.ct(new A.ac(0,720,0,1/0),A.d3(new A.U(C.bm,w,r),C.n,r,C.p,C.F,r,r,r,r,r,r,!1,C.C),r),r),r,r,r,r)}}
+aZ(){var x=0,w=A.n(y.f),v=this
+var $async$aZ=A.i(function(d,e){if(d===1)return A.k(e,w)
+for(;;)switch(x){case 0:v.bS()
+return A.l(null,w)}})
+return A.m($async$aZ,w)},
+A(d){var x,w,v,u=this,t=null,s=F.ca(E.bJy,t)
+s=O.ix(t,t,t,!0,!0,t,t,1,!0,t,t,!1,t,!1,t,t,I.ua(t,new B.cp_(d)),t,!0,t,t,t,t,t,s,t,t,t,1,t,!0)
+x=L.dgq(u.e)
+w=u.f?t:new B.cp0(u,d)
+v=A.f("Send Reset Email",t,t)
+return N.eR(s,t,new A.cy(C.Q,t,t,new A.ct(new A.ac(0,720,0,1/0),A.d0(A.n6(t,t,new D.Aw(A.a9(A.b([new A.T(K.EK,x,t),C.X,H.JR(C.es,d,50,!u.f,v,w,C.m,380)],y.e),C.i,C.f,C.h,0,t,C.l),t),u.d,t,t),C.n,t,C.q,C.F,t,t,t,t,t,t,!1,C.C),t),t),t,t,t,t)}}
 var z=a.updateTypes([])
-B.cNU.prototype={
-$0(){return K.zq(this.a)},
+B.cp_.prototype={
+$0(){return G.aIE(this.a)},
 $S:0}
-B.cNV.prototype={
-$0(){var x=0,w=A.n(y.q),v=this,u,t,s,r,q,p
+B.cp0.prototype={
+$0(){var x=0,w=A.n(y.f),v=this,u,t,s
 var $async$$0=A.i(function(d,e){if(d===1)return A.k(e,w)
-for(;;)switch(x){case 0:F.adl(!0)
-u=v.a
-t=u.x.gZ()
-t=t==null?null:t.anQ()
-x=t===!0?2:3
+for(;;)switch(x){case 0:s=v.a
+x=s.d.gZ().iG()?2:3
 break
-case 2:u.q(new B.cNR(u))
-t=u.r
-t.toString
-s=y.w
-t=A.i_(E.deS(t,!0).h(0,"fields"),s,y.b)
-u.f=t
-r=v.b
-q=r.ag(y.v)
-if(q==null)q=null
-else{q=q.r.a
-q===$&&A.a()
-q=q.ji("_")}t.m(0,"lang",q)
-q=u.f
-q.toString
+case 2:D.ads(!0)
+s.q(new B.coX(s))
+u=v.b
+t=y.p
 x=4
-return A.d(B.bbi(q),$async$$0)
-case 4:p=e
-t=J.a2(p)
-if(J.q(t.h(p,"code"),200)){A.b5(r,A.f("Registration is almost complete!",null,null),C.Z)
-u.q(new B.cNS(u))}else if(J.q(t.h(p,"code"),409))A.b5(r,A.f("Registration failed: Email {email} is already in use.",null,A.w(["email",t.h(p,"email")],s,s)),C.ay)
-else A.b5(r,A.f("Registration has failed.",null,null),C.ay)
-u.q(new B.cNT(u))
-case 3:return A.l(null,w)}})
+return A.d(A.az5(M.arE(s.e.a.a).aN(new B.coY(u),t),new B.coZ(u),t,y.n),$async$$0)
+case 4:case 3:return A.l(null,w)}})
 return A.m($async$$0,w)},
 $S:2}
-B.cNR.prototype={
-$0(){this.a.d=!0},
+B.coX.prototype={
+$0(){this.a.f=!0},
 $S:0}
-B.cNS.prototype={
-$0(){this.a.e=!0},
-$S:0}
-B.cNT.prototype={
-$0(){this.a.d=!1},
-$S:0};(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(B.HA,A.L)
-x(B.b0o,A.N)
-w(A.d2,[B.cNU,B.cNV,B.cNR,B.cNS,B.cNT])})()
-A.cf(b.typeUniverse,JSON.parse('{"HA":{"L":[],"e":[]},"b0o":{"N":["HA"]}}'))
-var y={a:A.J("u<i8>"),F:A.J("u<ke>"),c:A.J("aK<wp>"),y:A.J("y<h,@>"),w:A.J("h"),u:A.J("e"),v:A.J("lE"),b:A.J("@"),q:A.J("~")};(function constants(){D.ax8=new A.af(12,88,12,12)
-D.bJf=new A.ch("Sign up",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bvZ=new A.U(O.P9,M.QH,null)
-D.bOt=new A.md(D.bvZ,C.fe,null,null)})()};
-(a=>{a["Jc1m3O3wO5aF3WtOXmLaPlcBygY="]=a.current})($__dart_deferred_initializers__);
+B.coY.prototype={
+$1(d){A.b5(this.a,A.f("Password reset email has been sent.",null,null),C.Z)},
+$S:16}
+B.coZ.prototype={
+$2(d,e){A.b5(this.a,J.aq(d),C.Z)},
+$S:538};(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B.Ft,A.L)
+x(B.aUE,A.N)
+w(A.d3,[B.cp_,B.cp0,B.coX])
+x(B.coY,A.cp)
+x(B.coZ,A.ef)})()
+A.cg(b.typeUniverse,JSON.parse('{"Ft":{"L":[],"e":[]},"aUE":{"N":["Ft"]}}'))
+var y={e:A.J("u<e>"),o:A.J("aK<qK>"),p:A.J("aI"),n:A.J("H"),f:A.J("~")};(function constants(){E.bJy=new A.ch("Forgot Password?",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
+(a=>{a["hxYjHf5ubBTKe3kn+OCGvRas9eo="]=a.current})($__dart_deferred_initializers__);
