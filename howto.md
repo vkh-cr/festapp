@@ -10,7 +10,7 @@
 - Visit [supabase.com](https://supabase.com) and start a new project.
 
 ##### Supabase / Database Setup
-1. Launch the installation tool on [live.festapp.net/#/instanceInstall](https://live.festapp.net/#/instanceInstall) (or build your own and run on localhost with Flutter Web).
+1. Launch the installation tool on [live.festapp.net/instanceInstall](https://live.festapp.net/instanceInstall) (or build your own and run on localhost with Flutter Web).
 2. Fill in the correct reference links and connection string with your Database password (It can be obtained via Supabase - Project Settings - Database - Database password).
 3. Copy composed supabase functions from installation tool and deploy them to Supabase via CLI. For deployment is needed:
     - Docker
