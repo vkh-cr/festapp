@@ -210,7 +210,7 @@ class OccasionCreationHelper {
   static String _generateHtml(String? link) {
     return '''
       <p>${AdministrationStrings.eventAvailableAt}<br>
-      <a href="${AppConfig.webLink}/#/$link">${AppConfig.webLink}/#/$link</a></p>
+      <a href="${AppConfig.webLink}/$link">${AppConfig.webLink}/#/$link</a></p>
     ''';
   }
 
