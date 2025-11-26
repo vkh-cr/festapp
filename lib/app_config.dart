@@ -33,6 +33,9 @@ class AppConfig {
 
   static const bool areAllVolunteersApprovers = false;
 
+  static const bool isFeedbackEnabled = true;
+  static const String feedbackEmail = "info@festapp.net";
+
   static bool isNotificationsCurrentlySupported() {
     if(kIsWeb) {
       return isNotificationsSupported && isWebNotificationsSupported;
@@ -49,8 +52,20 @@ class AppConfig {
     // LanguageModel(const Locale("uk"), "українська"),
   ];
 
+
+  /// This is the single definition place for the prefix structure.
+  /// It combines the organization ID and the separator (e.g., "2+").
+  static String get _prefixBase => "$organization+";
+
   static String getUserPrefix(String email){
-    return "$organization+$email";
+    return "$_prefixBase$email";
+  }
+
+  static String removeUserPrefix(String emailWithPrefix){
+    if (emailWithPrefix.startsWith(_prefixBase)) {
+      return emailWithPrefix.substring(_prefixBase.length);
+    }
+    return emailWithPrefix;
   }
 
   static List<String> compatibleUrls() => [

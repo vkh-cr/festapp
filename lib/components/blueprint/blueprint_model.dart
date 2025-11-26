@@ -30,6 +30,11 @@ class BlueprintModel {
   List<OrderModel>? orders;
   List<OrderProductTicketModel>? orderProductTickets;
 
+  /// (New) Helper to get only products of type "spot"
+  List<ProductModel> get spotProducts =>
+      products?.where((p) => p.productTypeString == ProductModel.spotType)
+          .toList() ?? [];
+
   factory BlueprintModel.fromJson(Map<String, dynamic> json) {
     final List<BlueprintGroupModel> groups = GetOrdersHelper.parseGroups(json);
     final List<BlueprintObjectModel>? rawObjects = GetOrdersHelper.parseObjects(json);

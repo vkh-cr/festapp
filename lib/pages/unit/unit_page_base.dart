@@ -11,6 +11,7 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/components/feedback/feedack_floating_button.dart';
 import 'package:fstapp/widgets/html_view.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/occasion_card.dart';
@@ -59,6 +60,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
   Future<void> _initialLoad() async {
     // Immediately load from cache for a faster UI response.
     final cachedOccasions = await OfflineDataService.getAllOccasions();
+
     if (mounted) {
       setState(() {
         _occasions = cachedOccasions;
@@ -75,6 +77,9 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
   Future<void> _loadDataForUnit(int? unitId) async {
     await RightsService.updateAppData(unitId: unitId, refreshOffline: false);
 
+    // **CHANGED**: Added mounted check before using context
+    if (!mounted) return;
+
     if (widget.id != null) {
       RouterService.goToUnit(context, RightsService.currentUnit()!.id!);
     }
@@ -83,6 +88,9 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
 
     final unit = await DbUnits.getPublicOccasions(
         AppConfig.organization, RightsService.currentUnit()?.id);
+
+    if (!mounted) return;
+
     final occasions = unit.occasions ?? [];
     await OfflineDataService.saveAllOccasions(occasions);
 
@@ -92,6 +100,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
       quote = await DbInformation.getCurrentQuote(unitId!);
     }
 
+    // This final mounted check is correct and will catch the await above
     if (mounted) {
       setState(() {
         _unit = unit;
@@ -104,11 +113,12 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
   Future<void> _handleSignIn() async {
     final newUnitId = RightsService.currentUnit()!.id!;
 
-    if (mounted) {
-      await _loadDataForUnit(newUnitId);
-      if (widget.id != null) {
-        await RouterService.goToUnit(context, newUnitId);
-      }
+    await _loadDataForUnit(newUnitId);
+
+    if (!mounted) return;
+
+    if (widget.id != null) {
+      await RouterService.goToUnit(context, newUnitId);
     }
   }
 
@@ -157,7 +167,6 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
         _currentUnitId ??= RightsService.currentUser()!.units!.first.id;
         RouterService.navigate(context, "unit/$_currentUnitId/edit")
             .then((_) {
-          // After editing, reload data for the same unit.
           if (_currentUnitId != null) {
             _loadDataForUnit(_currentUnitId!);
           }
@@ -166,6 +175,12 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
     }
 
     return Scaffold(
+      floatingActionButton: AppConfig.isFeedbackEnabled
+          ? const FeedbackFloatingButton()
+          : null,
+      // Ensure the button sits above the bottom safe area
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
       body: CustomScrollView(
         controller: _scrollController,
         cacheExtent: 500,
@@ -262,7 +277,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                 ),
               ),
             ),
-          // **CHANGED**: Grid of present occasion cards.
+          // Grid of present occasion cards.
           if (presentEvents.isNotEmpty)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -297,7 +312,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                 ),
               ),
             ),
-          // **CHANGED**: Grid of upcoming occasion cards.
+          // Grid of upcoming occasion cards.
           if (upcomingEvents.isNotEmpty)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -331,7 +346,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                 ),
               ),
             ),
-          // **CHANGED**: Grid of past occasion cards.
+          // Grid of past occasion cards.
           if (pastEvents.isNotEmpty)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),

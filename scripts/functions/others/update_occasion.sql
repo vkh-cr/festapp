@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
- RETURNS void -- The function now returns nothing
+ RETURNS void
  LANGUAGE plpgsql
  SECURITY DEFINER
  AS $$
@@ -9,8 +9,11 @@ CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
      now TIMESTAMPTZ := NOW();
      final_unit BIGINT;
 
-     -- New variable for the optional parameter
+     -- Variable for the determined support flag
      is_app_supported BOOLEAN;
+
+     -- Variable to help find the organization to check settings
+     v_org_id BIGINT;
 
      -- Variables for feature handling
      new_blueprint_id BIGINT;
@@ -29,8 +32,37 @@ CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
          RAISE EXCEPTION 'Input data is missing or empty';
      END IF;
 
-     -- Extract is_app_supported, defaulting to true if not provided
-     is_app_supported := COALESCE((input_data->>'is_app_supported')::BOOLEAN, true);
+     -- 1. Identify the Organization ID
+     IF (input_data->>'id') IS NOT NULL THEN
+         -- Case A: UPDATE - Get organization from the existing occasion
+         SELECT organization INTO v_org_id
+         FROM public.occasions
+         WHERE id = (input_data->>'id')::BIGINT;
+     ELSE
+         -- Case B: INSERT - Try to get organization from input
+         v_org_id := (input_data->>'organization')::BIGINT;
+
+         -- Case C: INSERT fallback - If org is missing, try to get it via the Unit
+         IF v_org_id IS NULL AND (input_data->>'unit') IS NOT NULL THEN
+            SELECT organization INTO v_org_id
+            FROM public.units
+            WHERE id = (input_data->>'unit')::BIGINT;
+         END IF;
+     END IF;
+
+     -- 2. Fetch the setting from public.organizations.data
+     -- Defaults to TRUE if the organization or the key is not found to ensure backward compatibility
+     IF v_org_id IS NOT NULL THEN
+         SELECT COALESCE((data->>'IS_APP_SUPPORTED')::BOOLEAN, false)
+         INTO is_app_supported
+         FROM public.organizations
+         WHERE id = v_org_id;
+     ELSE
+         is_app_supported := false;
+     END IF;
+
+     -- Ensure is_app_supported is not null (redundant safety check)
+     is_app_supported := COALESCE(is_app_supported, false);
 
      --
      -- Prepare features based on is_app_supported flag
@@ -157,7 +189,7 @@ CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
      --
 
      -- Check if form feature is enabled and handle related logic.
-     -- This will now be triggered if is_app_supported was false.
+     -- This will now be triggered if is_app_supported was false (based on organization settings).
      IF jsonb_path_exists(updated_occ.features, '$[*] ? (@.code == "form" && @.is_enabled == true)') THEN
          -- Extract the settings for the 'form' feature from the newly saved data
          SELECT elem INTO v_form_settings
@@ -205,7 +237,5 @@ CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
               WHERE id = v_form_id;
          END IF;
      END IF;
-
-     -- No return statement is needed as the function returns void.
  END;
  $$;
