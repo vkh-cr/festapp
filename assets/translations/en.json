@@ -203,7 +203,7 @@
   "Signed in events: {count}": "Signed in events: {count}",
   "This event is fully booked.": "This event is fully booked.",
   "Companion of": "Companion of",
-  "Point the camera at the attendee's code for a entry verification.": "Point the camera at the attendee's code for a entry verification.",
+  "Point the camera at the attendee's code for an entry verification.": "Point the camera at the attendee's code for an entry verification.",
   "Signed in companions": "Signed in companions",
   "Search Attendees": "Search Attendees",
   "Heading": "Heading",
@@ -533,6 +533,9 @@
   "Allows management of activities for volunteers.": "Allows management of activities for volunteers.",
   "Displayed rows": "Displayed rows",
   "Right Now": "Right Now",
+  "Confirm": "Confirm",
+  "Rename": "Rename",
+  "AddNew": "Add new",
   "ActivitiesComponentStrings.buttonCancel": "Cancel",
   "ActivitiesComponentStrings.buttonOK": "OK",
   "ActivitiesComponentStrings.buttonPublish": "Publish",
@@ -623,6 +626,10 @@
   "Nationality": "Nationality",
   "Registration": "Registration",
   "Constraints": "Constraints",
+  "Common": {
+    "fieldCannotBeEmpty": "Field cannot be empty",
+    "invalidFormat": "Invalid format"
+  },
   "FeatureSchedule": {
     "labelScheduleType": "Schedule Type",
     "optionBasic": "basic",
@@ -661,7 +668,9 @@
     "createdUsers": "Created users",
     "updatedUsers": "Updated users",
     "deletedUsers": "Deleted users",
-    "none": "None"
+    "none": "None",
+    "labelAutoImport": "Auto-Import Users",
+    "helperAutoImport": "Users will automatically have an account created upon signing up through the form. Default password is '1'."
   },
   "FeatureFormSettings": {
     "title": "Form Settings",
@@ -793,8 +802,7 @@
     "note": "Note",
     "labelMaxTicketsPerOrder": "Max tickets per order:",
     "helperMaxTicketsPerOrder": "How many tickets a user can buy in a single order (default: 1).",
-    "validationMaxTicketsInvalid": "Please enter a valid number (1 or more).",
-    "cancel": "Cancel"
+    "validationMaxTicketsInvalid": "Please enter a valid number (1 or more)."
   },
   "FeatureOrders": {
     "cancel": "Cancel",
@@ -822,7 +830,16 @@
     "application": "Application",
     "ordersTab": "Orders",
     "ordersHistoryTab": "Orders History",
-    "setAsUsed": "Set as used"
+    "setAsUsed": "Set as used",
+    "bigGame": "Big Game: ",
+    "selectAttendee": "Select Attendee",
+    "searchPlaceholder": "Search (name, email)...",
+    "newLoginCredentials": "New login credentials",
+    "errorEmailNotReturned": "Error: Email was not returned.",
+    "confirmTicketFailed": "Failed to confirm ticket.",
+    "resetPasswordTo": "Reset password to '{password}'",
+    "resetPasswordConfirmationContent": "Are you sure you want to change the password to '{password}'?",
+    "errorResetPassword": "Error resetting password: {error}"
   },
   "UserColumns": {
     "id": "Id",
@@ -1078,12 +1095,12 @@
     "uploadImage": "Upload Image (PNG recommended)",
     "removeBackground": "Remove background",
     "groupsTitle": "Groups (Tables):",
-    "addNew": "Add new",
+    "assignProductToGroup": "Assign product to group",
+    "noProductAssigned": "No Product Assigned",
     "dialogGroupNumber": "Group number",
     "dialogTitle": "Title",
     "dialogImportSvgTitle": "Import SVG background",
     "dialogImportImageTitle": "Import image background",
-    "dialogOk": "Ok",
     "dialogConfirmRemoveBackgroundTitle": "Remove background",
     "dialogConfirmRemoveBackgroundContent": "Are you sure you want to remove the background?",
     "toastOccupiedCannotBeChanged": "Places that are occupied cannot be changed.",
@@ -1097,20 +1114,28 @@
     "toastImageUploadSuccess": "Image background uploaded successfully.",
     "toastImageUploadFail": "Failed to upload image.",
     "toastBackgroundRemoved": "Background removed.",
-    "swapHelpIntro": "SWAP MODE: Select two seats to swap.",
+    "swapHelpIntro": "SWAP MODE: Select two seats to exchange their orders.",
     "swapHelpSelectFirst": "Select the first seat to swap.",
     "swapHelpSelectSecond": "Seat {seatName} selected. Select the second seat to swap.",
     "swapConfirmTitle": "Confirm Seat Swap",
     "swapConfirmMessage": "Are you sure you want to swap these seats?",
     "swapErrorEmpty": "Cannot swap empty or blocked areas.",
-    "swapSuccess": "Swap was successful.",
+    "swapSuccess": "Seats swapped successfully.",
     "swapSummaryCustomer": "Ticket: {ticketSymbol} ({customerName})",
     "swapSummaryOccupied": "Occupied Seat",
     "swapSummaryAvailable": "Available Seat",
     "swapSummaryBlack": "Blocked Area",
     "swapSummaryUsed": "Used Seat",
     "swapSummarySelected": "Selected Seat",
-    "swapSummaryEmpty": "Empty Area"
+    "swapSummaryEmpty": "Empty Area",
+    "objectModelToString": "Table {groupTitle}, Seat {seatTitle}",
+    "editProduct": "Edit Product",
+    "createProduct": "Create New Product",
+    "selectProduct": "Select Product",
+    "noSpotProducts": "No spot products are defined. You can create them in the product manager.",
+    "productAssigned": "Product assigned to all spots in the group.",
+    "productCreated": "Product created.",
+    "productUpdated": "Product updated."
   },
   "OccasionSettings": {
     "title": "Title",
@@ -1148,6 +1173,30 @@
     "labelReplyToEmail": "Reply-To Email",
     "helperReplyToEmail": "Replies from customers to automated emails (confirmations, reminders) will be sent to this address.",
     "validationEmailInvalid": "Please enter a valid email address."
+  },
+  "Feedback": {
+    "helpTitle": "How can we help?",
+    "requestFeature": "Request Feature",
+    "reportBug": "Report Bug",
+    "support": "Support / Help",
+    "other": "Other / Feedback",
+    "openEmailApp": "Open Email App",
+    "manualInstructions": "Please send an email in the following format:",
+    "copyToClipboard": "Copy to clipboard",
+    "copied": "Copied!",
+    "emailTo": "To:",
+    "emailSubject": "Subject:",
+    "emailBody": "Message:",
+    "close": "Close",
+    "subjectFeature": "[{appName}] Feature Request",
+    "subjectBug": "[{appName}] Bug Report",
+    "subjectSupport": "[{appName}] Support Request",
+    "subjectGeneral": "[{appName}] Feedback",
+    "hintFeature": "I would like to suggest a feature: [Describe your idea]",
+    "hintBug": "I encountered an issue: [Describe what happened]",
+    "hintSupport": "I need help with: [Describe your problem]",
+    "hintGeneral": "Message: [Your feedback]",
+    "sentFrom": "Sent from {appName}"
   },
   "_":"_"
 }

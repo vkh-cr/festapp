@@ -44,8 +44,11 @@ class AppRouter extends RootStackRouter {
 
   @override
   List<AutoRoute> get routes => [
-    // Use OrganizationPage for the root path
-    AutoRoute(page: OrganizationRoute.page, path: "/"),
+    CustomRoute(
+        page: OrganizationRoute.page,
+        path: "/",
+        guards: [InitialRedirectGuard()],
+        transitionsBuilder: TransitionsBuilders.noTransition),
 
     AutoRoute(page: ResetPasswordRoute.page, path: sl(ResetPasswordPage.ROUTE)),
     AutoRoute(
@@ -212,5 +215,22 @@ class RoutingObserver extends AutoRouteObserver {
   @override
   void didChangeTabRoute(TabPageRoute route, TabPageRoute previousRoute) {
     print('Tab route re-visited: ${route.name}');
+  }
+}
+
+/// This guard checks if the app is supported when landing on the root '/'.
+/// If the app is supported, it redirects to the appropriate unit or occasion.
+/// If not, it allows the user to see the OrganizationPage at '/'.
+class InitialRedirectGuard extends AutoRouteGuard {
+  @override
+  void onNavigation(NavigationResolver resolver, StackRouter router) {
+      final redirectPath = AppRouter.getDefaultLink();
+
+      if (redirectPath != "/") {
+        router.replacePath(redirectPath);
+
+      } else {
+        resolver.next(true);
+      }
   }
 }

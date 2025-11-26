@@ -408,6 +408,10 @@ BEGIN
 
         -- Get the reply-to email for the order
         reply_to := get_reply_to_email_for_order(order_id);
+
+        -- Check features and auto-import users if enabled
+        PERFORM public.process_occasion_auto_import(occasion_id);
+
         -- Prepare the success response JSON
         result := JSONB_BUILD_OBJECT(
             'code', 200,

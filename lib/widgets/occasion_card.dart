@@ -43,32 +43,34 @@ class OccasionCard extends StatefulWidget {
 class _OccasionCardState extends State<OccasionCard> {
   bool isHovered = false;
 
-  /// Builds the new button with a blurred background.
-  Widget _buildBlurredButton(
-      {required String text, required VoidCallback onPressed, required double scale}) {
-    // Use RepaintBoundary to cache the blur filter
-    return RepaintBoundary(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12.0 * scale),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: InkWell(
-            onTap: onPressed,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 12 * scale, vertical: 6 * scale),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.4),
-              ),
-              child: Text(
-                text,
-                style: TextStyle(color: Colors.white, fontSize: 14 * scale),
-              ),
-            ),
-          ),
-        ),
-      ),
+  // We initialize these in didChangeDependencies to avoid build-time context issues.
+  bool _skipDialog = false;
+  bool _hasFormFeature = false;
+  bool _isDescriptionEmpty = false;
+  String? _externalPrice;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // This is the safest place to get translations as it's called
+    // when dependencies (like EasyLocalization's BuildContext) are available.
+
+    var details = FeatureService.getFeatureDetails(
+      FeatureConstants.form,
+      features: widget.occasion.features,
     );
+    _externalPrice =
+    details is FormFeature ? details.formExternalPrice : null;
+
+    _hasFormFeature = FeatureService.isFeatureEnabled(
+        FeatureConstants.form,
+        features: widget.occasion.features);
+
+    _isDescriptionEmpty =
+        HtmlHelper.isHtmlEmptyOrNull(widget.occasion.description);
+
+    _skipDialog = _hasFormFeature && _isDescriptionEmpty;
   }
 
   @override
@@ -84,38 +86,24 @@ class _OccasionCardState extends State<OccasionCard> {
         ? OccasionCard.kCardBorderRadius - OccasionCard.kPresentBorderWidth
         : OccasionCard.kCardBorderRadius;
 
-    // --- Feature & Button Logic ---
-    var details = FeatureService.getFeatureDetails(
-      FeatureConstants.form,
-      features: widget.occasion.features,
-    );
-    String? externalPrice =
-    details is FormFeature ? details.formExternalPrice : null;
+    // All logic is now handled by state variables set in didChangeDependencies.
+    final String? externalPrice = _externalPrice;
 
-    final bool hasFormFeature = FeatureService.isFeatureEnabled(
-        FeatureConstants.form,
-        features: widget.occasion.features);
-    final bool isDescriptionEmpty =
-    HtmlHelper.isHtmlEmptyOrNull(widget.occasion.description);
-    final String reserveTitle = details is FormFeature
-        ? details.reserveButtonTitle ?? "Reserve a spot".tr()
-        : "Reserve a spot".tr();
-    final String detailTitle = "Detail".tr();
-    final bool skipDialog = hasFormFeature && isDescriptionEmpty;
-    final String buttonText = skipDialog ? reserveTitle : detailTitle;
-    final bool showButton = hasFormFeature || AppConfig.isAllUnit;
+    // Determines if the card interaction is enabled (previously governed button visibility)
+    final bool isActionEnabled = _hasFormFeature || AppConfig.isAllUnit;
     // --- End of Logic ---
 
-    // Button press logic
-    void handleButtonPress() async {
-      if (skipDialog) {
+    // Card press logic (formerly Button press logic)
+    void handleCardPress() async {
+      // Use the state variables
+      if (_skipDialog) {
         await OccasionDetailDialog.handleReserveAction(context, widget.occasion);
-      } else if (hasFormFeature && !isDescriptionEmpty) {
+      } else if (_hasFormFeature && !_isDescriptionEmpty) {
         showDialog(
           context: context,
           builder: (context) => OccasionDetailDialog(occasion: widget.occasion),
         );
-      } else if (!hasFormFeature) {
+      } else if (!_hasFormFeature) {
         try {
           await RightsService.updateAppData(
               link: widget.occasion.link, force: true);
@@ -132,13 +120,13 @@ class _OccasionCardState extends State<OccasionCard> {
       child: RepaintBoundary(
         // ← cache the entire card (including its BackdropFilters)
         child: LayoutBuilder(builder: (context, constraints) {
+          // Scales kept for consistency, though button is gone
           final double widthScale =
           (constraints.maxWidth / OccasionCard.kMinCardWidth)
               .clamp(1.0, 1.5);
           final double heightScale =
           (constraints.maxHeight / OccasionCard.kMinCardHeight)
               .clamp(1.0, 1.2);
-          final double buttonScale = (widthScale + heightScale) / 2;
 
           return ConstrainedBox(
             constraints: const BoxConstraints(
@@ -147,6 +135,9 @@ class _OccasionCardState extends State<OccasionCard> {
             ),
             child: AnimatedContainer(
               duration: OccasionCard.kAnimationDuration,
+              // Added transform for scale effect on hover
+              transform: Matrix4.identity()..scale(isHovered ? 1.03 : 1.0),
+              transformAlignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius:
                 BorderRadius.circular(OccasionCard.kCardBorderRadius),
@@ -158,10 +149,11 @@ class _OccasionCardState extends State<OccasionCard> {
                       blurRadius: 20,
                       spreadRadius: 4,
                     ),
+                  // Enhanced shadow effect on hover
                   BoxShadow(
-                    color: isHovered ? Colors.black26 : Colors.black12,
-                    blurRadius: isHovered ? 8 : 4,
-                    offset: isHovered ? const Offset(0, 4) : const Offset(0, 2),
+                    color: isHovered ? Colors.black45 : Colors.black12,
+                    blurRadius: isHovered ? 16 : 4,
+                    offset: isHovered ? const Offset(0, 8) : const Offset(0, 2),
                   ),
                 ],
               ),
@@ -169,6 +161,7 @@ class _OccasionCardState extends State<OccasionCard> {
                 borderRadius: BorderRadius.circular(innerRadius),
                 child: Stack(
                   children: [
+                    // 1. Background Image
                     if (widget.occasion.data?[Tb.occasions.data_image] != null)
                       Positioned.fill(
                         child: CachedNetworkImage(
@@ -177,6 +170,8 @@ class _OccasionCardState extends State<OccasionCard> {
                           fit: BoxFit.cover,
                         ),
                       ),
+
+                    // 2. Past Overlay
                     if (widget.isPast)
                       Positioned.fill(
                         child: Container(
@@ -184,7 +179,7 @@ class _OccasionCardState extends State<OccasionCard> {
                         ),
                       ),
 
-                    // Top overlay with cached blur (Date, Title, and Price)
+                    // 3. Top overlay with cached blur (Date, Title, and Price)
                     Positioned(
                       left: 0,
                       right: 0,
@@ -229,7 +224,7 @@ class _OccasionCardState extends State<OccasionCard> {
                                       ],
                                     ),
                                   ),
-                                  // External price badge (no blur, just container)
+                                  // External price badge (uses state variable)
                                   if (externalPrice != null &&
                                       externalPrice.trim().isNotEmpty)
                                     Container(
@@ -257,17 +252,20 @@ class _OccasionCardState extends State<OccasionCard> {
                       ),
                     ),
 
-                    // **NEW** Blurred Button
-                    if (showButton)
-                      Positioned(
-                        bottom: 8 * buttonScale,
-                        right: 10 * buttonScale,
-                        child: _buildBlurredButton(
-                          text: buttonText,
-                          onPressed: handleButtonPress,
-                          scale: buttonScale, // Scale the button with the card
+                    // 4. Whole Card Click Area (Replaces Button)
+                    // We use Positioned.fill + Material + InkWell to get the ripple effect
+                    // over the image but it will sit inside the ClipRRect.
+                    Positioned.fill(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          // Only enable tap if action is enabled (matching original button logic)
+                          onTap: isActionEnabled ? handleCardPress : null,
+                          splashColor: Colors.white.withOpacity(0.2),
+                          highlightColor: Colors.white.withOpacity(0.1),
                         ),
                       ),
+                    ),
                   ],
                 ),
               ),

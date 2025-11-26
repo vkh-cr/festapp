@@ -36,6 +36,7 @@ class EshopColumns {
   static const String TICKET_CONFIRM = "confirmTicket";
 
   static const String TICKET_CREATED_AT = "ticketCreatedAt";
+  static const String TICKET_LAST_CHANGE = "ticketLastChangedAt";
   static const String TICKET_SPOT = "ticketSpot";
 
   static const String ORDER_ID = "orderId";
@@ -309,6 +310,17 @@ class EshopColumns {
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 100,
+      ),
+    ],
+    TICKET_LAST_CHANGE: [
+      TrinaColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: OrdersStrings.gridChangedAt,
+        field: TICKET_LAST_CHANGE,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
+        width: 140,
       ),
     ],
     TICKET_PRODUCTS: [
