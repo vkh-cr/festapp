@@ -36,26 +36,31 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
         .where((u) => u.isNotEmpty)
         .any((u) => url.startsWith(u)) ||
         url.contains("localhost")) {
+
+      // 1. Remove the fragment (the part starting with '#') from the URL if it exists
+      final uriWithoutFragment = Uri.parse(url).removeFragment();
+      final cleanUrl = uriWithoutFragment.toString(); // Use the URI string without the fragment
+
       // Find the base URL that the current URL starts with
       final baseUrl = AppConfig.compatibleUrls().firstWhere(
-            (u) => u.isNotEmpty && url.startsWith(u),
-        orElse: () => url.contains("localhost") ? "http://localhost" : "",
+            (u) => u.isNotEmpty && cleanUrl.startsWith(u), // Use cleanUrl for the check
+        orElse: () => cleanUrl.contains("localhost") ? "http://localhost" : "",
       );
 
       String path;
       if (baseUrl.isNotEmpty) {
         // Remove the base URL from the start of the current URL
-        path = url.substring(baseUrl.length);
+        path = cleanUrl.substring(baseUrl.length);
         // Clean up any leading slashes, but preserve the rest of the path
         if (path.startsWith('/')) {
           path = path.substring(1);
         }
       } else {
         try {
-          final uri = Uri.parse(url);
+          final uri = Uri.parse(cleanUrl);
           path = uri.path.startsWith('/') ? uri.path.substring(1) : uri.path;
         } catch (_) {
-          path = url;
+          path = cleanUrl;
         }
       }
 
