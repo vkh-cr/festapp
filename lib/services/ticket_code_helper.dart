@@ -33,7 +33,7 @@ class TicketCodeHelper {
     }
     String generatedCode = getCode;
     bool result = false;
-    String linkBase = "${AppConfig.webLink}/#/${ScanPage.ROUTE}/";
+    String linkBase = "${AppConfig.webLink}/${ScanPage.ROUTE}/";
     String fullLink = linkBase + generatedCode;
 
     // Add the htmlLink field here
