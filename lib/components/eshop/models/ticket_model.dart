@@ -83,6 +83,7 @@ class TicketModel extends ITrinaRowModel {
               : ""),
       EshopColumns.TICKET_SYMBOL: TrinaCell(value: ticketSymbol ?? ""),
       EshopColumns.TICKET_STATE: TrinaCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
+      EshopColumns.TICKET_DOWNLOAD: TrinaCell(value: ""),
       EshopColumns.TICKET_NOTE: TrinaCell(value: note ?? ""),
       EshopColumns.TICKET_NOTE_HIDDEN: TrinaCell(value: noteHidden ?? ""),
       EshopColumns.ORDER_SYMBOL: TrinaCell(
