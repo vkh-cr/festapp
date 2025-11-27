@@ -147,6 +147,12 @@ class OrdersStrings {
   static String get gridCancelled => 'OrderGridColumns.cancelled'.tr(); // "Cancelled"
   static String get gridUsedInForms => 'OrderGridColumns.usedInForms'.tr(); // "Used in Forms"
 
+  // --- PDF Generation Strings ---
+  static String get generatingPdf => 'FeatureOrders.generatingPdf'.tr(); // "Generating PDF..."
+  static String get downloadTicket => 'FeatureOrders.downloadTicket'.tr(); // "Download Ticket"
+  static String generatingPdfFor(String customer) => 'FeatureOrders.generatingPdfFor'.tr(namedArgs: {'customer': customer}); // "Generating PDF for {customer}..."
+  static String generatingPdfForWithSpot(String customer, String spot) => 'FeatureOrders.generatingPdfForWithSpot'.tr(namedArgs: {'customer': customer, 'spot': spot}); // "Generating PDF for {customer} - {spot}..."
+
   // --- Products Dialog ---
   static String get productsUpdateSuccess => 'ProductsDialog.productsUpdateSuccess'.tr(); // "Products updated successfully."
   static String get productsUpdateFailed => 'ProductsDialog.productsUpdateFailed'.tr(); // "Failed to update products."
