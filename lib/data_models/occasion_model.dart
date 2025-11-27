@@ -61,6 +61,7 @@ class OccasionModel {
   bool isOpen;
   bool isHidden;
   bool isPromoted;
+  bool hasOrders;
   String? link;
   String? title;
   String? description;
@@ -81,6 +82,7 @@ class OccasionModel {
     required this.isOpen,
     required this.isHidden,
     required this.isPromoted,
+    this.hasOrders = false,
     this.link,
     this.title,
     this.description,
@@ -115,6 +117,7 @@ class OccasionModel {
       isOpen: json[Tb.occasions.is_open] ?? false,
       isHidden: json[Tb.occasions.is_hidden] ?? false,
       isPromoted: json[Tb.occasions.is_promoted] ?? false,
+      hasOrders: json['has_orders'] ?? false,
       link: json[Tb.occasions.link],
       title: json[Tb.occasions.title],
       description: json[Tb.occasions.description],
@@ -145,6 +148,7 @@ class OccasionModel {
       Tb.occasions.is_open: isOpen,
       Tb.occasions.is_hidden: isHidden,
       Tb.occasions.is_promoted: isPromoted,
+      'has_orders': hasOrders,
       Tb.occasions.link: link,
       Tb.occasions.title: title,
       Tb.occasions.description: description,
