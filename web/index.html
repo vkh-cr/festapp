@@ -14,6 +14,25 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
+
+<!--    old hash compatibility-->
+    <script>
+        if (window.location.hash) {
+          var hash = window.location.hash;
+
+          // Only run if the hash looks like a Flutter Route ("#/")
+          if (hash.startsWith('#/')) {
+
+            // Remove the '#' symbol (substring(1) drops the first character)
+            // "#/events" becomes "/events"
+            var newPath = hash.substring(1);
+
+            // Replace the current history state
+            window.history.replaceState(null, null, newPath);
+          }
+        }
+    </script>
+
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">

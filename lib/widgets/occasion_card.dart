@@ -44,7 +44,6 @@ class _OccasionCardState extends State<OccasionCard> {
   bool isHovered = false;
 
   // We initialize these in didChangeDependencies to avoid build-time context issues.
-  String _buttonText = "";
   bool _skipDialog = false;
   bool _hasFormFeature = false;
   bool _isDescriptionEmpty = false;
@@ -71,46 +70,7 @@ class _OccasionCardState extends State<OccasionCard> {
     _isDescriptionEmpty =
         HtmlHelper.isHtmlEmptyOrNull(widget.occasion.description);
 
-    // Get translations using the more robust .tr() extension
-    // This logic is now run only when dependencies change, not on every build.
-    final String reserveTitle = details is FormFeature
-        ? details.reserveButtonTitle ?? "Reserve a spot".tr()
-        : "Reserve a spot".tr();
-    final String detailTitle = "Detail".tr();
-
     _skipDialog = _hasFormFeature && _isDescriptionEmpty;
-    _buttonText = _skipDialog ? reserveTitle : detailTitle;
-  }
-
-  /// Builds the new button with a blurred background.
-  Widget _buildBlurredButton(
-      {required String text, required VoidCallback onPressed, required double scale}) {
-    // Use RepaintBoundary to cache the blur filter
-    return RepaintBoundary(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12.0 * scale),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: InkWell(
-            onTap: onPressed,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 12 * scale, vertical: 6 * scale),
-              decoration: BoxDecoration(
-                // Increased opacity for more distinction
-                  color: Colors.black.withOpacity(0.6),
-                  // Added a subtle border
-                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.0)
-              ),
-              child: Text(
-                text,
-                style: TextStyle(color: Colors.white, fontSize: 14 * scale),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -126,15 +86,15 @@ class _OccasionCardState extends State<OccasionCard> {
         ? OccasionCard.kCardBorderRadius - OccasionCard.kPresentBorderWidth
         : OccasionCard.kCardBorderRadius;
 
-    // --- Feature & Button Logic ---
     // All logic is now handled by state variables set in didChangeDependencies.
-    // We just read the pre-calculated values here.
     final String? externalPrice = _externalPrice;
-    final bool showButton = _hasFormFeature || AppConfig.isAllUnit;
+
+    // Determines if the card interaction is enabled (previously governed button visibility)
+    final bool isActionEnabled = _hasFormFeature || AppConfig.isAllUnit;
     // --- End of Logic ---
 
-    // Button press logic
-    void handleButtonPress() async {
+    // Card press logic (formerly Button press logic)
+    void handleCardPress() async {
       // Use the state variables
       if (_skipDialog) {
         await OccasionDetailDialog.handleReserveAction(context, widget.occasion);
@@ -160,13 +120,13 @@ class _OccasionCardState extends State<OccasionCard> {
       child: RepaintBoundary(
         // ← cache the entire card (including its BackdropFilters)
         child: LayoutBuilder(builder: (context, constraints) {
+          // Scales kept for consistency, though button is gone
           final double widthScale =
           (constraints.maxWidth / OccasionCard.kMinCardWidth)
               .clamp(1.0, 1.5);
           final double heightScale =
           (constraints.maxHeight / OccasionCard.kMinCardHeight)
               .clamp(1.0, 1.2);
-          final double buttonScale = (widthScale + heightScale) / 2;
 
           return ConstrainedBox(
             constraints: const BoxConstraints(
@@ -201,6 +161,7 @@ class _OccasionCardState extends State<OccasionCard> {
                 borderRadius: BorderRadius.circular(innerRadius),
                 child: Stack(
                   children: [
+                    // 1. Background Image
                     if (widget.occasion.data?[Tb.occasions.data_image] != null)
                       Positioned.fill(
                         child: CachedNetworkImage(
@@ -209,6 +170,8 @@ class _OccasionCardState extends State<OccasionCard> {
                           fit: BoxFit.cover,
                         ),
                       ),
+
+                    // 2. Past Overlay
                     if (widget.isPast)
                       Positioned.fill(
                         child: Container(
@@ -216,7 +179,7 @@ class _OccasionCardState extends State<OccasionCard> {
                         ),
                       ),
 
-                    // Top overlay with cached blur (Date, Title, and Price)
+                    // 3. Top overlay with cached blur (Date, Title, and Price)
                     Positioned(
                       left: 0,
                       right: 0,
@@ -289,17 +252,20 @@ class _OccasionCardState extends State<OccasionCard> {
                       ),
                     ),
 
-                    // Blurred Button
-                    if (showButton)
-                      Positioned(
-                        bottom: 8 * buttonScale,
-                        right: 10 * buttonScale,
-                        child: _buildBlurredButton(
-                          text: _buttonText, // <-- Use the state variable
-                          onPressed: handleButtonPress,
-                          scale: buttonScale, // Scale the button with the card
+                    // 4. Whole Card Click Area (Replaces Button)
+                    // We use Positioned.fill + Material + InkWell to get the ripple effect
+                    // over the image but it will sit inside the ClipRRect.
+                    Positioned.fill(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          // Only enable tap if action is enabled (matching original button logic)
+                          onTap: isActionEnabled ? handleCardPress : null,
+                          splashColor: Colors.white.withOpacity(0.2),
+                          highlightColor: Colors.white.withOpacity(0.1),
                         ),
                       ),
+                    ),
                   ],
                 ),
               ),

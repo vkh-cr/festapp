@@ -1174,5 +1174,29 @@
     "helperReplyToEmail": "Replies from customers to automated emails (confirmations, reminders) will be sent to this address.",
     "validationEmailInvalid": "Please enter a valid email address."
   },
+  "Feedback": {
+    "helpTitle": "How can we help?",
+    "requestFeature": "Request Feature",
+    "reportBug": "Report Bug",
+    "support": "Support / Help",
+    "other": "Other / Feedback",
+    "openEmailApp": "Open Email App",
+    "manualInstructions": "Please send an email in the following format:",
+    "copyToClipboard": "Copy to clipboard",
+    "copied": "Copied!",
+    "emailTo": "To:",
+    "emailSubject": "Subject:",
+    "emailBody": "Message:",
+    "close": "Close",
+    "subjectFeature": "[{appName}] Feature Request",
+    "subjectBug": "[{appName}] Bug Report",
+    "subjectSupport": "[{appName}] Support Request",
+    "subjectGeneral": "[{appName}] Feedback",
+    "hintFeature": "I would like to suggest a feature: [Describe your idea]",
+    "hintBug": "I encountered an issue: [Describe what happened]",
+    "hintSupport": "I need help with: [Describe your problem]",
+    "hintGeneral": "Message: [Your feedback]",
+    "sentFrom": "Sent from {appName}"
+  },
   "_":"_"
 }

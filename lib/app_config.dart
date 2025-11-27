@@ -33,6 +33,9 @@ class AppConfig {
 
   static const bool areAllVolunteersApprovers = false;
 
+  static const bool isFeedbackEnabled = true;
+  static const String feedbackEmail = "info@festapp.net";
+
   static bool isNotificationsCurrentlySupported() {
     if(kIsWeb) {
       return isNotificationsSupported && isWebNotificationsSupported;
@@ -59,7 +62,6 @@ class AppConfig {
     }
     return emailWithPrefix;
   }
-
 
   static List<String> compatibleUrls() => [
     AppConfig.webLink
