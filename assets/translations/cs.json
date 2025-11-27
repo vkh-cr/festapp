@@ -1183,6 +1183,7 @@
     "noFeaturesFound": "Nebyla nalezena žádná funkce odpovídající vašemu hledání.",
     "deleteEvent": "Smazat událost",
     "deleteEventConfirmation": "Opravdu chcete smazat tuto událost? Všechna data události budou ztracena.",
+    "cannotDeleteWithOrders": "Událost nelze smazat, protože obsahuje objednávky (včetně stornovaných).",
     "confirmRemoval": "Potvrdit odstranění",
     "deleteImageConfirmation": "Opravdu chcete smazat tento obrázek?",
     "imageRemovedSuccess": "Obrázek byl úspěšně odstraněn.",
