@@ -102,6 +102,12 @@ class _ImportFeatureFormState extends State<_ImportFeatureForm> {
             setState(() {
               _importFromTickets = value;
               widget.feature.importFromTickets = value;
+
+              // If Import from Tickets is disabled, Auto Import must also be disabled.
+              if (!value) {
+                _autoImport = false;
+                widget.feature.autoImport = false;
+              }
             });
           },
         ),
@@ -113,12 +119,16 @@ class _ImportFeatureFormState extends State<_ImportFeatureForm> {
                 title: Text(FeaturesStrings.labelAutoImport),
                 subtitle: Text(FeaturesStrings.helperAutoImport),
                 value: _autoImport,
-                onChanged: (bool value) {
+                // If _importFromTickets is false, we set onChanged to null.
+                // This creates a disabled (greyed out) UI state.
+                onChanged: _importFromTickets
+                    ? (bool value) {
                   setState(() {
                     _autoImport = value;
                     widget.feature.autoImport = value;
                   });
-                },
+                }
+                    : null,
               ),
             ],
           ),

@@ -1184,5 +1184,29 @@
     "fileUploadedSuccess": "Soubor byl úspěšně nahrán.",
     "failedToUploadImage": "Nahrání obrázku se nezdařilo."
   },
+  "Feedback": {
+    "helpTitle": "Jak můžeme pomoci?",
+    "requestFeature": "Navrhnout funkci",
+    "reportBug": "Nahlásit chybu",
+    "support": "Podpora / Pomoc",
+    "other": "Ostatní / Zpětná vazba",
+    "openEmailApp": "Otevřít e-mail",
+    "manualInstructions": "Prosím, zašlete e-mail v tomto tvaru:",
+    "copyToClipboard": "Zkopírovat do schránky",
+    "copied": "Zkopírováno!",
+    "emailTo": "Komu:",
+    "emailSubject": "Předmět:",
+    "emailBody": "Zpráva:",
+    "close": "Zavřít",
+    "subjectFeature": "[{appName}] Návrh funkce",
+    "subjectBug": "[{appName}] Hlášení chyby",
+    "subjectSupport": "[{appName}] Žádost o podporu",
+    "subjectGeneral": "[{appName}] Zpětná vazba",
+    "hintFeature": "Rád bych navrhl funkci: [Popište svůj nápad]",
+    "hintBug": "Narazil jsem na problém: [Popište, co se stalo]",
+    "hintSupport": "Potřebuji pomoci s: [Popište svůj problém]",
+    "hintGeneral": "Zpráva: [Vaše zpětná vazba]",
+    "sentFrom": "Odesláno z {appName}"
+  },
   "_": "_"
 }

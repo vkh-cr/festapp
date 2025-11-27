@@ -36,7 +36,34 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
         .where((u) => u.isNotEmpty)
         .any((u) => url.startsWith(u)) ||
         url.contains("localhost")) {
-      final path = url.split('/#/').last;
+
+      String path = url;
+
+      // 1. Determine base to strip (Configured URL or dynamic localhost origin)
+      final matchedBase = AppConfig.compatibleUrls().firstWhere(
+            (u) => u.isNotEmpty && url.startsWith(u),
+        orElse: () => "",
+      );
+
+      if (matchedBase.isNotEmpty) {
+        path = url.substring(matchedBase.length);
+      } else if (url.contains("localhost")) {
+        final uri = Uri.tryParse(url);
+        if (uri != null && url.startsWith(uri.origin)) {
+          path = url.substring(uri.origin.length);
+        }
+      }
+
+      // 2. Remove specific legacy hash "/#" only if it immediately follows the domain
+      if (path.startsWith('/#')) {
+        path = path.replaceFirst('/#', '');
+      }
+
+      // 3. Remove leading slash to get clean path for router
+      if (path.startsWith('/')) {
+        path = path.substring(1);
+      }
+
       RouterService.navigate(context, path);
       return true;
     }
