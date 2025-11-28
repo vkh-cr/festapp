@@ -927,7 +927,18 @@
     "setToZeroButton": "Nastavit na nulu",
     "sendUpdateItemChanges": "Přehled změn v produktech",
     "priceValidationNegative": "Cena nemůže být záporná.",
-    "totalPriceChange": "Změna celkové ceny"
+    "totalPriceChange": "Změna celkové ceny",
+    "cancelledItemsTitle": "Zrušené položky",
+    "newOrderTitle": "Nová objednávka",
+    "fullCancelLabel": "Úplné zrušení objednávky",
+    "partialCancelLabel": "Částečné zrušení / Změna",
+    "cancelOrderPrefix": "ZRUŠIT OBJEDNÁVKU ",
+    "cancelTicketPrefix": "ZRUŠIT VSTUPENKU ",
+    "willBeRemoved": "Celá objednávka bude odstraněna",
+    "newOrderTotal": "Celkem za novou objednávku",
+    "emailHelpText": "Zadejte e-mailovou adresu zákazníka pro zaslání potvrzení nové objednávky a platebních údajů.",
+    "noDetailsFound": "Podrobnosti nenalezeny",
+    "customerExample": "zakaznik@priklad.cz"
   },
   "EmailTemplates": {
     "subs": {
@@ -1151,7 +1162,12 @@
     "noSpotProducts": "Nejsou definovány žádné produkty pro místa. Můžete je vytvořit ve správci produktů.",
     "productAssigned": "Produkt přiřazen všem místům ve skupině.",
     "productCreated": "Produkt vytvořen.",
-    "productUpdated": "Produkt aktualizován."
+    "productUpdated": "Produkt aktualizován.",
+    "legendCreateOrder": "Vytvořit objednávku",
+    "createOrderHelp": "Vyberte místa pro vytvoření nové objednávky (i obsazená).",
+    "btnCreateOrder": "Vytvořit objednávku",
+    "confirmOrder": "Potvrdit objednávku",
+    "orderCreatedSuccess": "Objednávka byla úspěšně vytvořena."
   },
   "OccasionSettings": {
     "title": "Název",
