@@ -17,10 +17,18 @@ class DbTickets {
   static final _supabase = Supabase.instance.client;
 
   static Future<void> stornoTicket(int ticketId) async {
-    final response = await _supabase.rpc(
-      'storno_ticket_221',
+    await stornoTickets([ticketId]);
+  }
+
+  /// Bulk cancels specific tickets.
+  /// Uses 'storno_tickets_bulk' to ensure efficient processing and single history entries per order.
+  static Future<void> stornoTickets(List<int> ticketIds) async {
+    if (ticketIds.isEmpty) return;
+
+    await _supabase.rpc(
+      'storno_tickets_bulk',
       params: {
-        'ticket_id': ticketId,
+        'p_ticket_ids': ticketIds,
       },
     );
   }
