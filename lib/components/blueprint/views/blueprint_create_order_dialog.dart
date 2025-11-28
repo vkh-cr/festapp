@@ -28,7 +28,6 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
   static const String _kTotalPrice = 'total_price';
   static const String _kPrice = 'price';
   static const String _kEmail = 'email';
-  // Updated keys to match SQL structure
   static const String _kName = 'name';
   static const String _kSurname = 'surname';
 
@@ -40,6 +39,9 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
   static const String _kProductTitle = 'product_title';
 
   bool _loading = true;
+  // New state to track the submission process
+  bool _isSubmitting = false;
+
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final ScrollController _scrollController = ScrollController();
@@ -104,10 +106,30 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
       return;
     }
 
-    Navigator.of(context).pop({
-      'confirmed': true,
-      'email': _emailController.text.trim(),
+    setState(() {
+      _isSubmitting = true;
     });
+
+    final inputData = {
+      'email': _emailController.text.trim(),
+    };
+
+    try {
+      // API call performed here so we can show loading state
+      await DbEshop.createOrderFromSpots(widget.selectedSpotIds, inputData);
+
+      if (mounted) {
+        // Return true to indicate success
+        Navigator.of(context).pop(true);
+      }
+    } catch (e) {
+      if (mounted) {
+        ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""), severity: ToastSeverity.NotOk);
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
@@ -123,7 +145,8 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
           Expanded(child: Text(BlueprintStrings.legendCreateOrder)),
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
+            // Prevent closing while submitting
+            onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
           )
         ],
       ),
@@ -157,7 +180,6 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
                       ],
                     ),
                   ),
-                  // Render a card for each affected Order
                   ...groupedConflicts.entries.map((entry) {
                     return _buildOrderConflictCard(entry.key, entry.value);
                   }),
@@ -204,6 +226,7 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
                   key: _formKey,
                   child: TextFormField(
                     controller: _emailController,
+                    enabled: !_isSubmitting, // Disable input while submitting
                     decoration: InputDecoration(
                       hintText: OrdersStrings.customerExample,
                       hintStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
@@ -225,152 +248,77 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
           child: Text(CommonStrings.storno),
         ),
-        ElevatedButton.icon(
-          onPressed: _loading ? null : _confirm,
+        ElevatedButton(
+          onPressed: (_loading || _isSubmitting) ? null : _confirm,
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.primary,
             foregroundColor: theme.colorScheme.onPrimary,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-          icon: const Icon(Icons.check),
-          label: Text(BlueprintStrings.confirmOrder),
+          // Swap label/icon for ProgressIndicator when submitting
+          child: _isSubmitting
+              ? SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.onPrimary)
+          )
+              : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check, size: 18),
+              const SizedBox(width: 8),
+              Text(BlueprintStrings.confirmOrder),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  // --- Helper Widgets ---
-
   Widget _buildOrderConflictCard(dynamic orderId, List<dynamic> tickets) {
+    return _buildOrderConflictCardOriginal(orderId, tickets);
+  }
+
+  Widget _buildNewOrderCard() {
+    return _buildNewOrderCardOriginal();
+  }
+
+  Widget _buildOrderConflictCardOriginal(dynamic orderId, List<dynamic> tickets) {
     final theme = Theme.of(context);
-
-    // Stats calculation
     final double orderTotalRefund = tickets.fold(0.0, (sum, t) => sum + ((t[_kTotalPrice] as num?)?.toDouble() ?? 0.0));
-
-    // Extract info from the first ticket (they belong to same order)
     final firstTicket = tickets.first;
     final String email = firstTicket[_kEmail] ?? 'No Email';
     final String name = firstTicket[_kName] ?? '';
     final String surname = firstTicket[_kSurname] ?? '';
     final String fullName = "$name $surname".trim();
-
     final String customerInfo = fullName.isNotEmpty ? "$fullName ($email)" : email;
-
     final bool isFullyCancelled = tickets.any((t) => t[_kIsFullyCancelled] == true);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
       color: theme.colorScheme.errorContainer.withOpacity(0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: theme.colorScheme.error.withOpacity(0.3)),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: theme.colorScheme.error.withOpacity(0.3))),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Order Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                          "#$orderId",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: theme.colorScheme.onSurface)
-                      ),
-                      Text(
-                        customerInfo,
-                        style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "-${Utilities.formatPrice(context, orderTotalRefund)}",
-                      style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 15),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 2),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                          color: isFullyCancelled ? theme.colorScheme.error : Colors.orange,
-                          borderRadius: BorderRadius.circular(4)
-                      ),
-                      child: Text(
-                          isFullyCancelled ? OrdersStrings.fullCancelLabel : OrdersStrings.partialCancelLabel,
-                          style: TextStyle(
-                              fontSize: 10,
-                              color: isFullyCancelled ? theme.colorScheme.onError : Colors.white,
-                              fontWeight: FontWeight.bold
-                          )
-                      ),
-                    )
-                  ],
-                ),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text("#$orderId", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: theme.colorScheme.onSurface)), Text(customerInfo, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface), overflow: TextOverflow.ellipsis)])),
+                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [Text("-${Utilities.formatPrice(context, orderTotalRefund)}", style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 15)), Container(margin: const EdgeInsets.only(top: 2), padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: isFullyCancelled ? theme.colorScheme.error : Colors.orange, borderRadius: BorderRadius.circular(4)), child: Text(isFullyCancelled ? OrdersStrings.fullCancelLabel : OrdersStrings.partialCancelLabel, style: TextStyle(fontSize: 10, color: isFullyCancelled ? theme.colorScheme.onError : Colors.white, fontWeight: FontWeight.bold)))])
               ],
             ),
             const Divider(),
-
-            // Tickets List
             ...tickets.map((ticket) {
               final products = ticket[_kProducts] as List<dynamic>? ?? [];
               final ticketSymbol = ticket[_kTicketSymbol] ?? '';
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.confirmation_number_outlined, size: 14, color: theme.colorScheme.error),
-                        const SizedBox(width: 4),
-                        Text(
-                            "${OrdersStrings.ticket} $ticketSymbol",
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)
-                        ),
-                      ],
-                    ),
-                    if (products.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20.0),
-                        child: Text(OrdersStrings.noDetailsFound, style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic)),
-                      )
-                    else
-                      ...products.map((p) {
-                        String title = p[_kTitle] ?? '';
-                        final spotTitle = p[_kSpotTitle];
-                        if (spotTitle != null && spotTitle.toString().isNotEmpty) {
-                          title += " ($spotTitle)";
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 20.0, top: 2.0),
-                          child: Row(
-                            children: [
-                              Expanded(child: Text("• $title", style: const TextStyle(fontSize: 12))),
-                              Text(
-                                Utilities.formatPrice(context, (p[_kPrice] as num?)?.toDouble() ?? 0),
-                                style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                  ],
-                ),
-              );
+              return Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Icon(Icons.confirmation_number_outlined, size: 14, color: theme.colorScheme.error), const SizedBox(width: 4), Text("${OrdersStrings.ticket} $ticketSymbol", style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13))]), if (products.isEmpty) Padding(padding: const EdgeInsets.only(left: 20.0), child: Text(OrdersStrings.noDetailsFound, style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic))) else ...products.map((p) { String title = p[_kTitle] ?? ''; final spotTitle = p[_kSpotTitle]; if (spotTitle != null && spotTitle.toString().isNotEmpty) { title += " ($spotTitle)"; } return Padding(padding: const EdgeInsets.only(left: 20.0, top: 2.0), child: Row(children: [Expanded(child: Text("• $title", style: const TextStyle(fontSize: 12))), Text(Utilities.formatPrice(context, (p[_kPrice] as num?)?.toDouble() ?? 0), style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface))])); })]));
             }),
           ],
         ),
@@ -378,64 +326,22 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
     );
   }
 
-  Widget _buildNewOrderCard() {
+  Widget _buildNewOrderCardOriginal() {
     final theme = Theme.of(context);
-
     return Card(
       elevation: 0,
       color: theme.colorScheme.primaryContainer.withOpacity(0.2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.3)),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.3))),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // List of new items
             ..._newItems.map((item) {
               final price = (item[_kPrice] as num?)?.toDouble() ?? 0.0;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle_outline, color: theme.colorScheme.primary, size: 18),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(item[_kSpotTitle] ?? "Spot", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        Text(item[_kProductTitle] ?? "Product", style: const TextStyle(fontSize: 11)),
-                      ],
-                    ),
-                    const Spacer(),
-                    Text(
-                      "+${Utilities.formatPrice(context, price)}",
-                      style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              );
+              return Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Row(children: [Icon(Icons.check_circle_outline, color: theme.colorScheme.primary, size: 18), const SizedBox(width: 8), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(item[_kSpotTitle] ?? "Spot", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), Text(item[_kProductTitle] ?? "Product", style: const TextStyle(fontSize: 11))]), const Spacer(), Text("+${Utilities.formatPrice(context, price)}", style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold))]));
             }),
             const Divider(),
-            // Total Price
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                    OrdersStrings.newOrderTotal,
-                    style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)
-                ),
-                Text(
-                  Utilities.formatPrice(context, _sumCur),
-                  style: TextStyle(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16
-                  ),
-                ),
-              ],
-            ),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(OrdersStrings.newOrderTotal, style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)), Text(Utilities.formatPrice(context, _sumCur), style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 16))]),
           ],
         ),
       ),

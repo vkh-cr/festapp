@@ -419,7 +419,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     if (spotIds.isEmpty) return;
 
-    final result = await showDialog<Map<String, dynamic>>(
+    final dynamic result = await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => BlueprintCreateOrderDialog(
@@ -427,10 +427,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
       ),
     );
 
-    if (result != null && result['confirmed'] == true) {
-      // FIX: Use the specific success string for Order Creation, not Swap
+    if (result == true) {
       ToastHelper.Show(context, BlueprintStrings.orderCreatedSuccess, severity: ToastSeverity.Ok);
-
       _handleModeSelected(selectionMode.none);
       await loadData();
     }
