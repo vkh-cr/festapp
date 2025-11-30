@@ -217,9 +217,13 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
   }
 
   Future<void> _deleteOccasion() async {
-    await DbOccasions.deleteOccasion(occasion!.id!);
-    ToastHelper.Show(context, "${CommonStrings.deleted}: ${occasion!.title!}");
-    Navigator.of(context).pop();
+    try {
+      await DbOccasions.deleteOccasion(occasion!.id!);
+      ToastHelper.Show(context, "${CommonStrings.deleted}: ${occasion!.title!}");
+      Navigator.of(context).pop();
+    } catch (e) {
+      ToastHelper.Show(context, e.toString());
+    }
   }
 
   Future<void> _confirmDelete() async {
@@ -311,6 +315,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
 
     final enabledFeatures = featuresToShow.where((f) => f.isEnabled).toList();
     final disabledFeatures = featuresToShow.where((f) => !f.isEnabled).toList();
+    final bool hasOrders = occasion?.hasOrders ?? false;
+    final bool canDelete = !hasOrders;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -709,11 +715,30 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                   const SizedBox(height: 24),
                   if (RightsService.isUnitManager())
                     Center(
-                      child: TextButton(
-                        onPressed: isEditingEnabled ? _confirmDelete : null,
-                        child: Text(
-                          OccasionSettingsStrings.deleteEvent,
-                          style: TextStyle(color: isEditingEnabled ? ThemeConfig.redColor(context) : Colors.grey),
+                      child: Tooltip(
+                        message: hasOrders ? OccasionSettingsStrings.cannotDeleteWithOrders : "",
+                        child: TextButton(
+                          onPressed: isEditingEnabled
+                              ? () {
+                            if (hasOrders) {
+                              ToastHelper.Show(
+                                  context,
+                                  OccasionSettingsStrings.cannotDeleteWithOrders,
+                                  severity: ToastSeverity.NotOk
+                              );
+                              return;
+                            }
+                            _confirmDelete();
+                          }
+                              : null,
+                          child: Text(
+                            OccasionSettingsStrings.deleteEvent,
+                            style: TextStyle(
+                                color: isEditingEnabled
+                                    ? (canDelete ? ThemeConfig.redColor(context) : Colors.grey)
+                                    : Colors.grey
+                            ),
+                          ),
                         ),
                       ),
                     ),

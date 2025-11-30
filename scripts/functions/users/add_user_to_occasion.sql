@@ -11,7 +11,7 @@ DECLARE
     occasion_org          BIGINT;
     unit_id               BIGINT;
 
-    -- Initialize flags to false to handle 'NOT FOUND' cases gracefully
+    -- Initialize flags (though SELECT INTO will overwrite these with NULL if no row found)
     unit_is_manager       BOOLEAN := false;
     unit_is_editor        BOOLEAN := false;
     unit_is_editor_view   BOOLEAN := false;
@@ -39,13 +39,16 @@ BEGIN
     END IF;
 
     -- 4. Retrieve the unit-level role information from unit_users.
-    --    (Moved up so we can calculate privilege immediately)
     SELECT is_manager, is_editor, is_editor_view
       INTO unit_is_manager, unit_is_editor, unit_is_editor_view
       FROM unit_users
      WHERE unit = unit_id AND "user" = usr;
 
-     -- Check if record was found; if not, flags remain false (set in DECLARE)
+    -- CRITICAL FIX: SELECT INTO sets variables to NULL if no row is found.
+    -- We must ensure they are boolean FALSE to satisfy NOT NULL constraints later.
+    unit_is_manager     := COALESCE(unit_is_manager, false);
+    unit_is_editor      := COALESCE(unit_is_editor, false);
+    unit_is_editor_view := COALESCE(unit_is_editor_view, false);
 
     -- 5. Define is_privileged.
     --    User is privileged if they have specific unit roles OR are an admin on the occasion.
