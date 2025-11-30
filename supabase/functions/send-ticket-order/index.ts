@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
     );
 
     const lang = orderDetails.lang || 'cs';
-    const tone: Tone = (ticketOrder?.order.form.data.communication_tone === 'informal') ? 'informal' : 'formal';
+    const tone: Tone = (ticketOrder?.order.form.data?.communication_tone === 'informal') ? 'informal' : 'formal';
     const tr = translations[lang];
     let balanceReasoning = '';
 
@@ -208,7 +208,7 @@ Deno.serve(async (req) => {
       from: `${occasion.title} | Festapp <${_DEFAULT_EMAIL}>`,
       attachments,
       wrapper: wrapper?.html ?? null,
-      replyTo: ticketOrder.reply_to,
+      replyTo: ticketOrder.order.reply_to,
     });
 
     await supabaseAdmin.from("log_emails").insert({

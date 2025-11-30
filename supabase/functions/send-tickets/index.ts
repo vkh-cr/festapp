@@ -1,7 +1,7 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { generateTicketImage, fetchTicketResources } from "../_shared/generateTicket.ts";
 import { generateNamedTicketImage, fetchNamedTicketResources } from "../_shared/generateNamedTicket.ts";
-import { getEmailTemplateAndWrapper, supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { getEmailTemplateAndWrapper, supabaseAdmin, createUserClient } from "../_shared/supabaseUtil.ts";
 import { authorizeRequest, AuthError } from "../_shared/auth.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
@@ -34,6 +34,7 @@ Deno.serve(async (req) => {
       });
     }
 
+    // etch Order Details (Admin level access required to get initial data)
     const { data: orderDetailsResponse, error: rpcError } = await supabaseAdmin.rpc('get_order_details_for_email', { p_order_id: orderId });
 
     if (rpcError || orderDetailsResponse.code !== 200) {
@@ -45,8 +46,8 @@ Deno.serve(async (req) => {
 
     const authorizationHeader = req.headers.get("Authorization");
 
-    // 2. Perform authorization to ensure the request is legitimate
-    await authorizeRequest({ requestSecret, authorizationHeader, occasionId: occasion.id });
+    // Perform authorization. Returns the user object if authorized via Token, or null if via Secret.
+    const { user } = await authorizeRequest({ requestSecret, authorizationHeader, occasionId: occasion.id });
 
     const occasionTitle = occasion.title;
     const features = occasion.features;
@@ -141,7 +142,22 @@ Deno.serve(async (req) => {
     });
 
     const ticketIds = tickets.map((ticket) => ticket.id);
-    const { error: updateError } = await supabaseAdmin.rpc("update_order_and_tickets_to_sent", { order_id: orderId, ticket_ids: ticketIds });
+    let updateError = null;
+
+    // Update Status Logic
+    // If we have an authenticated user (from authorizeRequest), use the User-scoped client and _ws RPC
+    if (user && authorizationHeader) {
+        console.log("Updating via User Scoped Client (_ws)");
+        const userClient = createUserClient(authorizationHeader);
+        const { error } = await userClient.rpc("update_order_and_tickets_to_sent_ws", { order_id: orderId, ticket_ids: ticketIds });
+        updateError = error;
+    } else {
+        // Fallback to Admin client for Secret/System requests
+        console.log("Updating via Admin Client");
+        const { error } = await supabaseAdmin.rpc("update_order_and_tickets_to_sent", { order_id: orderId, ticket_ids: ticketIds });
+        updateError = error;
+    }
+
     if (updateError) {
       console.error("Failed to update order and tickets to sent:", updateError);
       return new Response(JSON.stringify({ error: "Failed to update order/tickets to sent" }), {

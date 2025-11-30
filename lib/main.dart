@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_config.dart';
@@ -41,7 +42,9 @@ Future<void> main() async {
 
 Future<void> initializeEverything() async {
   print('Initialization started');
-  //GoRouter.optionURLReflectsImperativeAPIs = true;
+
+  usePathUrlStrategy();
+
   WidgetsFlutterBinding.ensureInitialized();
   print('Widgets binding initialized');
 
@@ -91,7 +94,7 @@ Future<void> initializeEverything() async {
     var settings = await OfflineDataService.getGlobalSettings();
     if (settings != null) {
       SynchroService.globalSettingsModel = settings;
-      RightsService.occasionLinkModelNotifier.value = OccasionLinkModel(occasion: OccasionModel(features: settings.features, isOpen: true, isHidden: false, data: settings.data));
+      RightsService.occasionLinkModelNotifier.value = OccasionLinkModel(occasion: OccasionModel(features: settings.features, isOpen: true, isHidden: false, isPromoted: false, data: settings.data));
       TimeHelper.setTimeZoneLocation(RightsService.currentOccasion()?.data?["timezone"]);
       print('Global settings loaded');
     }

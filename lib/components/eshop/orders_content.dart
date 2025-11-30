@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/features/form_feature.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -107,7 +108,7 @@ class _OrdersContentState extends State<OrdersContent> {
       ),
       headerChildren: [
         DataGridAction(
-          name: OrdersStrings.cancel,
+          name: CommonStrings.cancel,
           action: (SingleDataGridController singleDataGrid, [_]) => cancelOrders(singleDataGrid),
           isEnabled: RightsService.isOrderEditor,
         ),
@@ -159,7 +160,7 @@ class _OrdersContentState extends State<OrdersContent> {
     if (selected.isNotEmpty) {
       var confirm = await DialogHelper.showConfirmationDialog(
           context,
-          OrdersStrings.cancel,
+          CommonStrings.cancel,
           "${OrdersStrings.cancelOrdersConfirmationText} (${selected.length})"
       );
 

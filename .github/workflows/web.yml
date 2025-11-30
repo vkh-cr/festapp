@@ -15,10 +15,16 @@ jobs:
       - name: Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.7'
+          flutter-version: '3.38.3'
           channel: 'stable'
 
+      # Build with base-href set to root (correct for custom domain)
       - run: flutter build web --release --base-href /
+
+      # GitHub Pages returns 404 for direct paths (e.g. /events).
+      # We copy index.html to 404.html so GitHub serves the app
+      # instead of an error page.
+      - run: cp build/web/index.html build/web/404.html
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

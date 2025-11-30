@@ -136,7 +136,7 @@ BEGIN
     ELSE
       -- If user does not exist, create a new one.
       v_password := encode(gen_random_bytes(16), 'hex');
-      new_user := create_user_in_organization_with_data(v_org, v_email, v_password, v_data);
+      new_user := create_user_in_organization_with_data_ws(v_org, v_email, v_password, v_data);
 
       RETURN jsonb_build_object(
        'code', 201, -- Created
