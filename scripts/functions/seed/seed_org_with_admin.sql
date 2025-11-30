@@ -34,7 +34,7 @@ BEGIN
     ----------------------------------------------------------------
     -- 3. Create the Admin User using your provided function
     ----------------------------------------------------------------
-    admin_uid := create_user_in_organization_with_data(
+    admin_uid := create_user_in_organization_with_data_pure(
         org_id,
         admin_email,
         admin_password,

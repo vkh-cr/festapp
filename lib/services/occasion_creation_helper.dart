@@ -184,6 +184,7 @@ class OccasionCreationHelper {
                             link: link,
                             isOpen: true,
                             isHidden: false,
+                            isPromoted: false,
                             unit: unit.id,
                             organization: unit.organization,
                             data: { Tb.occasions.data_timezone: TimeHelper.getSystemTimezoneName() },
@@ -209,7 +210,7 @@ class OccasionCreationHelper {
   static String _generateHtml(String? link) {
     return '''
       <p>${AdministrationStrings.eventAvailableAt}<br>
-      <a href="${AppConfig.webLink}/#/$link">${AppConfig.webLink}/#/$link</a></p>
+      <a href="${AppConfig.webLink}/$link">${AppConfig.webLink}/#/$link</a></p>
     ''';
   }
 

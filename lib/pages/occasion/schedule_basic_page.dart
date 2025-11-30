@@ -17,13 +17,15 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
 import 'package:fstapp/pages/occasion/timetable_page.dart';
-import 'package:fstapp/pages/unit/unit_page.dart';
+import 'package:fstapp/pages/unit/unit_page_base.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/logo_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+import '../unit/unit_page.dart';
 
 @RoutePage()
 class ScheduleBasicPage extends StatefulWidget {
@@ -193,55 +195,63 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      top: true,
+      top: false,
       bottom: false,
       left: false,
       right: false,
       child: Column(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  GestureDetector(
-                    onTap: () async {
-                      RouterService.navigate(context, "${UnitPage.ROUTE}/${RightsService.currentUnit()!.id!}");
-                    },
-                    onDoubleTap: () async {
-                      var packageInfo = await PackageInfo.fromPlatform();
-                      ToastHelper.Show(context,
-                          "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
-                      if (RightsService.isEditor()) {
-                        TimeHelper.toggleTimeTravel?.call();
-                        setState(() {});
-                      }
-                    },
-                    child: LogoWidget(height: 60,),
-                  ),
-                  const Spacer(),
-                  if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
-                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-                      CircularButton(
-                        onPressed: _mySchedulePressed,
-                        backgroundColor: ThemeConfig.profileButtonColor(context),
-                        child: Icon(Icons.favorite,
-                            color: ThemeConfig.profileButtonTextColor(context)),
+          Container(
+            color: ThemeConfig.logoBackgroundColor(context),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      GestureDetector(
+                        onTap: () async {
+                          RouterService.navigate(context, "${UnitPage.ROUTE}/${RightsService.currentUnit()!.id!}");
+                        },
+                        onDoubleTap: () async {
+                          var packageInfo = await PackageInfo.fromPlatform();
+                          ToastHelper.Show(context,
+                              "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                          if (RightsService.isEditor()) {
+                            TimeHelper.toggleTimeTravel?.call();
+                            setState(() {});
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: LogoWidget(height: 60,),
+                        ),
                       ),
-                      Text("My schedule".tr()),
+                      const Spacer(),
+                      if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
+                        Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                          CircularButton(
+                            onPressed: _mySchedulePressed,
+                            backgroundColor: ThemeConfig.profileButtonColor(context),
+                            child: Icon(Icons.favorite,
+                                color: ThemeConfig.profileButtonTextColor(context)),
+                          ),
+                          Text("My schedule".tr()),
+                        ]),
+                      if(FeatureService.isFeatureEnabled(FeatureConstants.timetable))
+                        Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                          CircularButton(
+                            onPressed: _schedulePressed,
+                            backgroundColor: ThemeConfig.profileButtonColor(context),
+                            child: Icon(Icons.calendar_month,
+                                color: ThemeConfig.profileButtonTextColor(context)),
+                          ),
+                          Text("Schedule".tr()),
+                        ]),
                     ]),
-                  if(FeatureService.isFeatureEnabled(FeatureConstants.timetable))
-                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-                      CircularButton(
-                        onPressed: _schedulePressed,
-                        backgroundColor: ThemeConfig.profileButtonColor(context),
-                        child: Icon(Icons.calendar_month,
-                            color: ThemeConfig.profileButtonTextColor(context)),
-                      ),
-                      Text("Schedule".tr()),
-                    ]),
-                ]),
+              ),
+            ),
           ),
           Expanded(
             child: ScheduleTabView(

@@ -1,8 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 
 class OccasionSettingsStrings {
-  // --- Page Specific (OccasionSettings) ---
-
   // Form Fields
   static String get title => 'OccasionSettings.title'.tr(); // "Title"
   static String get titleIsRequired => 'OccasionSettings.titleIsRequired'.tr(); // "Title is required"
@@ -22,6 +20,9 @@ class OccasionSettingsStrings {
   static String get hide => 'OccasionSettings.hide'.tr(); // "Hide"
   static String get hideHelp => 'OccasionSettings.hideHelp'.tr(); // "This determines whether this event is hidden from list views."
 
+  static String get promoted => 'OccasionSettings.promoted'.tr(); // "Promoted"
+  static String get promotedHelp => 'OccasionSettings.promotedHelp'.tr(); // "Promote this event to make it stand out in lists or on the homepage."
+
   // Advanced Settings
   static String get advancedSettings => 'OccasionSettings.advancedSettings'.tr(); // "Advanced Settings"
   static String get link => 'OccasionSettings.link'.tr(); // "Link"
@@ -31,11 +32,10 @@ class OccasionSettingsStrings {
   static String get invalidTimezone => 'OccasionSettings.invalidTimezone'.tr(); // "Please select or type a valid timezone"
   static String get timezonesLoading => 'OccasionSettings.timezonesLoading'.tr(); // "Timezones loading or unavailable..."
 
-  // --- Strings moved from FormStrings ---
+  // Email Settings
   static String get labelReplyToEmail => 'OccasionSettings.labelReplyToEmail'.tr(); // "Reply-To Email"
   static String get helperReplyToEmail => 'OccasionSettings.helperReplyToEmail'.tr(); // "Replies from customers to automated emails (confirmations, reminders) will be sent to this address."
   static String get validationEmailInvalid => 'OccasionSettings.validationEmailInvalid'.tr(); // "Please enter a valid email address."
-  // --- End of moved Strings ---
 
   // Features Section
   static String get features => 'OccasionSettings.features'.tr(); // "Features"
@@ -47,6 +47,9 @@ class OccasionSettingsStrings {
   // Dialogs & Toasts
   static String get deleteEvent => 'OccasionSettings.deleteEvent'.tr(); // "Delete Event"
   static String get deleteEventConfirmation => 'OccasionSettings.deleteEventConfirmation'.tr(); // "Are you sure you want to delete this event? All the event data will be lost."
+
+  static String get cannotDeleteWithOrders => 'OccasionSettings.cannotDeleteWithOrders'.tr(); // "Cannot delete event because it contains orders (including storno)."
+
   static String get confirmRemoval => 'OccasionSettings.confirmRemoval'.tr(); // "Confirm removal"
   static String get deleteImageConfirmation => 'OccasionSettings.deleteImageConfirmation'.tr(); // "Are you sure you want to delete this image?"
   static String get imageRemovedSuccess => 'OccasionSettings.imageRemovedSuccess'.tr(); // "Image removed successfully."

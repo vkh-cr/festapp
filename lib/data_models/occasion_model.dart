@@ -1,5 +1,7 @@
+import 'package:collection/collection.dart';
 import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/data_models/service_item_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/services/time_helper.dart';
 
@@ -58,10 +60,13 @@ class OccasionModel {
   DateTime? endTime;
   bool isOpen;
   bool isHidden;
+  bool isPromoted;
+  bool hasOrders;
   String? link;
   String? title;
   String? description;
   Map<String, dynamic>? data;
+  Map<String, dynamic>? services;
   int? organization;
   int? unit;
   FormModel? form;
@@ -76,10 +81,13 @@ class OccasionModel {
     this.endTime,
     required this.isOpen,
     required this.isHidden,
+    required this.isPromoted,
+    this.hasOrders = false,
     this.link,
     this.title,
     this.description,
     this.data,
+    this.services,
     this.organization,
     this.unit,
     this.form,
@@ -89,6 +97,9 @@ class OccasionModel {
 
   factory OccasionModel.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> data = json[Tb.occasions.data] ?? {};
+
+    var servicesData = json[Tb.occasions.services];
+
     return OccasionModel(
       id: json[Tb.occasions.id],
       createdAt: json[Tb.occasions.created_at] != null
@@ -105,10 +116,18 @@ class OccasionModel {
           : null,
       isOpen: json[Tb.occasions.is_open] ?? false,
       isHidden: json[Tb.occasions.is_hidden] ?? false,
+      isPromoted: json[Tb.occasions.is_promoted] ?? false,
+      hasOrders: json['has_orders'] ?? false,
       link: json[Tb.occasions.link],
       title: json[Tb.occasions.title],
       description: json[Tb.occasions.description],
       data: data,
+
+      // Assign the extracted services map to the dedicated field
+      services: servicesData is Map<String, dynamic>
+          ? servicesData
+          : (servicesData is Map ? Map<String, dynamic>.from(servicesData) : null),
+
       organization: json[Tb.occasions.organization],
       unit: json[Tb.occasions.unit],
       form: json["form"] != null ? FormModel.fromJson(json["form"]) : null,
@@ -128,14 +147,40 @@ class OccasionModel {
       Tb.occasions.end_time: endTime?.toUtcFromOccasionTime(data?[Tb.occasions.data_timezone]).toIso8601String(),
       Tb.occasions.is_open: isOpen,
       Tb.occasions.is_hidden: isHidden,
+      Tb.occasions.is_promoted: isPromoted,
+      'has_orders': hasOrders,
       Tb.occasions.link: link,
       Tb.occasions.title: title,
       Tb.occasions.description: description,
       Tb.occasions.data: data,
+      Tb.occasions.services: services,
       Tb.occasions.organization: organization,
       Tb.occasions.unit: unit,
       Tb.occasions.features: features,
       'stats': stats,
     };
+  }
+
+  /// Gets a reference to a specific service item based on user's data.
+  ///
+  /// This method now uses the top-level [services] field.
+  ServiceItemModel? getReferenceToService(String serviceType, Map<String, dynamic>? userServices) {
+    // Retrieve the list of services for the specified service type
+    // This now uses the 'services' field
+    var servs = services?[serviceType] ?? [];
+
+    var serviceRecords = userServices?[serviceType] as Map? ?? {};
+    var userCode = serviceRecords.keys.firstWhereOrNull((key) => key.isNotEmpty);
+    if(userCode == null) {
+      return null;
+    }
+    for (var service in servs) {
+      // Ensure service is a Map before accessing "code"
+      if (service is Map && service["code"] == userCode) {
+        return ServiceItemModel.fromJson(service as Map<String, dynamic>);
+      }
+    }
+
+    return null;
   }
 }
