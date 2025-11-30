@@ -10,23 +10,27 @@ DECLARE
     user_org              BIGINT;
     occasion_org          BIGINT;
     unit_id               BIGINT;
+
+    -- Initialize flags (though SELECT INTO will overwrite these with NULL if no row found)
     unit_is_manager       BOOLEAN := false;
     unit_is_editor        BOOLEAN := false;
     unit_is_editor_view   BOOLEAN := false;
+
+    is_privileged         BOOLEAN := false;
 BEGIN
-    -- Retrieve the organization, the unit, and the open status of the occasion.
+    -- 1. Retrieve the organization, the unit, and the open status of the occasion.
     SELECT organization, unit, is_open
       INTO occasion_org, unit_id, occasion_open
       FROM occasions
      WHERE id = oc;
 
-    -- Get the organization of the user.
+    -- 2. Get the organization of the user.
     SELECT organization
       INTO user_org
       FROM user_info
      WHERE id = usr;
 
-    -- Ensure the user and the occasion belong to the same organization.
+    -- 3. Ensure the user and the occasion belong to the same organization.
     IF user_org IS DISTINCT FROM occasion_org THEN
         RETURN jsonb_build_object(
                   'code', 403,
@@ -34,28 +38,32 @@ BEGIN
               );
     END IF;
 
-    -- If the occasion is not open, allow only those with manager, admin, or editor (on the unit) permissions.
-    IF NOT occasion_open THEN
-        IF (SELECT get_is_manager_on_occasion(oc)) IS NOT TRUE
-           AND (SELECT get_is_admin_on_occasion(oc)) IS NOT TRUE
-           AND (SELECT get_is_editor_on_unit(unit_id)) IS NOT TRUE
-        THEN
-            RETURN jsonb_build_object('code', 403);
-        END IF;
-    END IF;
-
-    -- Retrieve the unit-level role information from unit_users.
+    -- 4. Retrieve the unit-level role information from unit_users.
     SELECT is_manager, is_editor, is_editor_view
       INTO unit_is_manager, unit_is_editor, unit_is_editor_view
       FROM unit_users
      WHERE unit = unit_id AND "user" = usr;
-    IF NOT FOUND THEN
-        unit_is_manager     := false;
-        unit_is_editor      := false;
-        unit_is_editor_view := false;
+
+    -- CRITICAL FIX: SELECT INTO sets variables to NULL if no row is found.
+    -- We must ensure they are boolean FALSE to satisfy NOT NULL constraints later.
+    unit_is_manager     := COALESCE(unit_is_manager, false);
+    unit_is_editor      := COALESCE(unit_is_editor, false);
+    unit_is_editor_view := COALESCE(unit_is_editor_view, false);
+
+    -- 5. Define is_privileged.
+    --    User is privileged if they have specific unit roles OR are an admin on the occasion.
+    is_privileged := unit_is_manager
+                     OR unit_is_editor
+                     OR unit_is_editor_view
+                     OR (SELECT get_is_admin_on_occasion(oc));
+
+    -- 6. Permission Check: Closed Occasions.
+    --    If the occasion is not open, only privileged users can be added/modified.
+    IF NOT occasion_open AND NOT is_privileged THEN
+        RETURN jsonb_build_object('code', 403);
     END IF;
 
-    -- Retrieve the user info and build a JSON object merging any existing data.
+    -- 7. Retrieve the user info and build a JSON object merging any existing data.
     SELECT COALESCE(ui.data, '{}'::jsonb) || jsonb_build_object(
                 'name', ui.name,
                 'surname', ui.surname,
@@ -66,7 +74,7 @@ BEGIN
       FROM user_info ui
      WHERE ui.id = usr;
 
-    -- Check if the user already exists in the occasion_users table.
+    -- 8. Check if the user already exists in the occasion_users table.
     SELECT EXISTS (
              SELECT 1
                FROM occasion_users

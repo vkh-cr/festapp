@@ -1,12 +1,18 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
+
+// Export the Admin client (Service Role)
+export const supabaseAdmin = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+);
 
 /**
- * Gets the authenticated Supabase user.
- * @param authorizationHeader - The authorization header from the request.
- * @returns A promise that resolves to the authenticated user.
+ * Creates a Supabase client scoped to a specific user via their Auth header.
+ * This is used for RLS (Row Level Security) operations.
+ * * @param authorizationHeader - The full Bearer token string.
  */
-export async function getSupabaseUser(authorizationHeader: string) {
-  const supabaseUser = createClient(
+export function createUserClient(authorizationHeader: string) {
+  return createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? "",
     {
@@ -15,6 +21,15 @@ export async function getSupabaseUser(authorizationHeader: string) {
       },
     }
   );
+}
+
+/**
+ * Gets the authenticated Supabase user.
+ * @param authorizationHeader - The authorization header from the request.
+ * @returns A promise that resolves to the authenticated user.
+ */
+export async function getSupabaseUser(authorizationHeader: string) {
+  const supabaseUser = createUserClient(authorizationHeader);
 
   const { data: user, error: userError } = await supabaseUser.auth.getUser();
   if (userError || !user) {
@@ -82,9 +97,3 @@ export async function getEmailTemplateAndWrapper(p_code: string, p_context: any)
 
   return data;
 }
-
-
-export const supabaseAdmin = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-);

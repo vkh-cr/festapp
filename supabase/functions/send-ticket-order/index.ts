@@ -2,14 +2,15 @@ import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { formatCurrency, formatDatetime, formatIBAN } from "../_shared/utilities.ts";
 import { generateFullOrder } from "../_shared/orderOverview.ts";
 import { generateQrCode } from "../_shared/qrCodePayment.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 
 import {
   getEmailTemplateAndWrapper,
   supabaseAdmin,
 } from "../_shared/supabaseUtil.ts";
 import { useFakturoid } from "./fakturoid.ts";
-import { translations } from "../_shared/translations.ts";
+import { translations } from "../_shared/translations/translations.ts";
+import type { Tone } from "../_shared/translations/translations.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -134,7 +135,7 @@ Deno.serve(async (req) => {
       if (paymentInfo.amount > 0) {
         const qr = await generateQrCode(
           paymentInfo,
-          ticketOrder.order.data,
+          ticketOrder.order,
           occasion.title,
         );
         attachments.push({
@@ -164,6 +165,7 @@ Deno.serve(async (req) => {
     );
 
     const lang = orderDetails.lang || 'cs';
+    const tone: Tone = (ticketOrder?.order.form.data?.communication_tone === 'informal') ? 'informal' : 'formal';
     const tr = translations[lang];
     let balanceReasoning = '';
 
@@ -173,10 +175,11 @@ Deno.serve(async (req) => {
             paymentInfo.account_number_human_readable,
             formatIBAN(paymentInfo.account_number),
             paymentInfo.variable_symbol,
-            formatDatetime(paymentInfo.deadline, lang)
+            formatDatetime(paymentInfo.deadline, lang),
+            tone // Pass tone
         );
     } else {
-        balanceReasoning = tr.zeroOrder(paymentInfo.currency_code);
+        balanceReasoning = tr.zeroOrder(paymentInfo.currency_code, tone); // Pass tone
     }
 
     const subs = {
@@ -193,6 +196,7 @@ Deno.serve(async (req) => {
         ticketOrder.order.data,
         ticketOrder.order.data.tickets,
         occasion.features,
+        lang
       ),
     };
 
@@ -204,6 +208,7 @@ Deno.serve(async (req) => {
       from: `${occasion.title} | Festapp <${_DEFAULT_EMAIL}>`,
       attachments,
       wrapper: wrapper?.html ?? null,
+      replyTo: ticketOrder.order.reply_to,
     });
 
     await supabaseAdmin.from("log_emails").insert({

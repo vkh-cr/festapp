@@ -4,8 +4,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/features/form_feature.dart';
+import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
@@ -36,6 +36,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _linkController = TextEditingController();
   final TextEditingController _deadlineDaysController = TextEditingController();
+  final TextEditingController _startingNumberController = TextEditingController();
   final ValueNotifier<String> _htmlNotifier = ValueNotifier<String>("");
 
   bool _isCardDesign = false;
@@ -43,6 +44,10 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
   late FormFeature _formFeature;
   String? _linkError;
   bool _isLoading = true;
+
+  String _variableSymbolType = 'random';
+  String _paymentMessageType = 'name_surname';
+  String _communicationTone = 'formal';
 
   @override
   void initState() {
@@ -66,13 +71,14 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
     _linkController.removeListener(_updateHtml);
     _linkController.dispose();
     _deadlineDaysController.dispose();
+    _startingNumberController.dispose();
     _htmlNotifier.dispose();
     super.dispose();
   }
 
   String _generateFormHtml(String? link) {
     if (link == null || link.isEmpty) return "";
-    final fullUrl = "${AppConfig.webLink}/#/form/$link";
+    final fullUrl = "${AppConfig.webLink}/form/$link";
     return '''
        <p>${FormStrings.formAvailableAt}:<br>
        <a href="$fullUrl">$fullUrl</a></p>
@@ -100,6 +106,21 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
       _linkController.addListener(_updateHtml);
       _isCardDesign = _form!.data?[FormModel.metaIsCardDesign] as bool? ?? false;
       _isReminderEnabled = _form!.data?[FormModel.metaIsReminderEnabled] as bool? ?? false;
+
+      final vsData = _form!.data?[FormModel.metaVariableSymbol] as Map<String, dynamic>?;
+      _variableSymbolType = vsData?[FormModel.metaType] as String? ?? 'random';
+      if (_variableSymbolType == 'sequence') {
+        final startNum = vsData?[FormModel.metaStartingNumber];
+        _startingNumberController.text = startNum?.toString() ?? '';
+      } else {
+        _startingNumberController.text = '';
+      }
+
+      final msgData = _form!.data?[FormModel.metaPaymentMessage] as Map<String, dynamic>?;
+      _paymentMessageType = msgData?[FormModel.metaType] as String? ?? 'name_surname';
+
+      _communicationTone = _form!.data?[FormHelper.metaCommunicationTone] as String? ?? 'formal';
+
       if (_form!.deadlineDurationSeconds != null && _form!.deadlineDurationSeconds! > 0) {
         final days = (_form!.deadlineDurationSeconds! / (24 * 3600)).round();
         _deadlineDaysController.text = days.toString();
@@ -139,6 +160,25 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
     _form!.data ??= {};
     _form!.data![FormModel.metaIsCardDesign] = _isCardDesign;
     _form!.data![FormModel.metaIsReminderEnabled] = _isReminderEnabled;
+
+    if (_variableSymbolType == 'sequence') {
+      final startingNumber = int.tryParse(_startingNumberController.text);
+      _form!.data![FormModel.metaVariableSymbol] = {
+        FormModel.metaType: 'sequence',
+        FormModel.metaStartingNumber: startingNumber,
+      };
+    } else {
+      _form!.data![FormModel.metaVariableSymbol] = {
+        FormModel.metaType: 'random',
+      };
+    }
+
+    _form!.data![FormModel.metaPaymentMessage] = {
+      FormModel.metaType: _paymentMessageType,
+    };
+
+    _form!.data![FormHelper.metaCommunicationTone] = _communicationTone;
+
     final days = int.tryParse(_deadlineDaysController.text);
     if (days != null && days > 0) {
       _form!.deadlineDurationSeconds = days * 24 * 60 * 60;
@@ -297,7 +337,79 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                             FilteringTextInputFormatter.digitsOnly
                           ],
                         ),
+
                         const SizedBox(height: 24),
+                        const Divider(),
+                        const SizedBox(height: 16),
+                        Text(FormStrings.paymentDetailsTitle, style: Theme.of(innerContext).textTheme.titleLarge),
+                        const SizedBox(height: 24),
+
+                        DropdownButtonFormField<String>(
+                          value: _variableSymbolType,
+                          decoration: InputDecoration(
+                            labelText: FormStrings.labelVariableSymbol,
+                            border: const OutlineInputBorder(),
+                          ),
+                          items: [
+                            DropdownMenuItem(value: 'random', child: Text(FormStrings.vsTypeRandom)),
+                            DropdownMenuItem(value: 'sequence', child: Text(FormStrings.vsTypeSequence)),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _variableSymbolType = value;
+                              });
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        Visibility(
+                          visible: _variableSymbolType == 'sequence',
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 24.0),
+                            child: TextFormField(
+                              controller: _startingNumberController,
+                              decoration: InputDecoration(
+                                labelText: FormStrings.labelStartingNumber,
+                                border: const OutlineInputBorder(),
+                                helperText: FormStrings.helperStartingNumber,
+                                counterText: "",
+                              ),
+                              keyboardType: TextInputType.number,
+                              maxLength: 10,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(10),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        DropdownButtonFormField<String>(
+                          value: _paymentMessageType,
+                          decoration: InputDecoration(
+                            labelText: FormStrings.labelPaymentMessage,
+                            border: const OutlineInputBorder(),
+                          ),
+                          items: [
+                            DropdownMenuItem(value: 'name_surname', child: Text(FormStrings.msgTypeNameSurname)),
+                            DropdownMenuItem(value: 'none', child: Text(FormStrings.msgTypeNone)),
+                            DropdownMenuItem(value: 'occasion_title', child: Text(FormStrings.msgTypeOccasionTitle)),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _paymentMessageType = value;
+                              });
+                            }
+                          },
+                        ),
+
+                        const SizedBox(height: 24),
+                        const Divider(),
+                        const SizedBox(height: 16),
+
                         SwitchListTile(
                           title: Text(FormStrings.labelCardDesign),
                           subtitle: Text(FormStrings.subtitleCardDesign),
@@ -311,6 +423,47 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                               : null,
                           contentPadding: EdgeInsets.zero,
                         ),
+
+                        const SizedBox(height: 24),
+                        const Divider(),
+                        const SizedBox(height: 16),
+
+                        Text(
+                            FormStrings.communicationToneTitle,
+                            style: Theme.of(innerContext).textTheme.titleLarge
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          FormStrings.helperCommunicationTone,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 24),
+
+                        DropdownButtonFormField<String>(
+                          value: _communicationTone,
+                          decoration: InputDecoration(
+                            labelText: FormStrings.labelCommunicationTone,
+                            border: const OutlineInputBorder(),
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                                value: 'formal',
+                                child: Text(FormStrings.toneFormal)
+                            ),
+                            DropdownMenuItem(
+                                value: 'informal',
+                                child: Text(FormStrings.toneInformal)
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _communicationTone = value;
+                              });
+                            }
+                          },
+                        ),
+
                         const SizedBox(height: 48),
                         if (RightsService.canEditOccasion())
                           Center(

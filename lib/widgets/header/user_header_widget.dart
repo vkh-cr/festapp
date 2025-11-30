@@ -13,8 +13,10 @@ import 'package:flutter/material.dart';
 
 class UserHeaderWidget extends StatefulWidget {
   final Color? appBarIconColor;
-  final VoidCallback? onSignInOut;
-  const UserHeaderWidget({super.key, this.appBarIconColor, this.onSignInOut});
+  final Future<void> Function()? onSignIn;
+  final VoidCallback? onAdminPressed;
+  const UserHeaderWidget(
+      {super.key, this.appBarIconColor, this.onSignIn, this.onAdminPressed});
 
   @override
   _UserHeaderWidgetState createState() => _UserHeaderWidgetState();
@@ -295,8 +297,8 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                       onTap: () async {
                         Navigator.pop(context);
                         await AuthService.logout();
-                        widget.onSignInOut?.call();
                         if (mounted) setState(() {});
+                        await RouterService.goToUnit(context, RightsService.currentUnit()!.id!);
                       },
                     ),
                   ],
@@ -379,9 +381,61 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
     final bool isMobile = ResponsiveService.isMobile(context);
     final iconColor = widget.appBarIconColor ?? ThemeConfig.blackColor(context);
 
+    // Define the admin button widget first if it exists
+    Widget? adminButton;
+    if (widget.onAdminPressed != null) {
+      if (isMobile) {
+        // Mobile version: Icon button
+        adminButton = IconButton(
+          padding: EdgeInsets.zero, // Remove padding for alignment
+          constraints: const BoxConstraints(
+            minWidth: 38, // Match avatar height
+            minHeight: 38, // Match avatar height
+          ),
+          icon: Icon(
+            Icons.edit_calendar,
+            size: 32,
+            color: iconColor,
+          ),
+          tooltip: "Admin".tr(),
+          onPressed: widget.onAdminPressed,
+        );
+      } else {
+        // Desktop version: Outlined button
+        adminButton = OutlinedButton.icon(
+          onPressed: widget.onAdminPressed,
+          icon: Icon(
+            Icons.edit_calendar, // Added icon back
+            color: iconColor,
+          ),
+          label: const Text("Admin").tr(),
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+            side: BorderSide(
+              color: iconColor,
+            ),
+            padding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            textStyle: const TextStyle(fontSize: 16),
+          ),
+        );
+      }
+    }
+
     if (isSignedIn) {
-      // Return the same signed-in widget regardless of platform.
-      return _buildSignedInWidget(iconColor);
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (adminButton != null) ...[
+            adminButton,
+            SizedBox(width: isMobile ? 24 : 16), // Adjust spacing
+          ],
+          _buildSignedInWidget(iconColor), // The user avatar
+        ],
+      );
     } else {
       // Non-signed in state remains platform-specific.
       if (isMobile) {
@@ -403,7 +457,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               tooltip: "Sign In".tr(),
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
-                widget.onSignInOut?.call();
+                await widget.onSignIn?.call();
                 if(mounted) setState(() {});
               },
             ),
@@ -431,7 +485,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
             OutlinedButton.icon(
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
-                widget.onSignInOut?.call();
+                await widget.onSignIn?.call();
                 if(mounted) setState(() {}); // refresh after sign in
               },
               icon: Icon(
