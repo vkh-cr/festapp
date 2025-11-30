@@ -1,4 +1,5 @@
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
+import 'package:fstapp/components/eshop/models/product_model.dart';
 
 class BlueprintGroupModel {
   static const String metaId = "id";
@@ -10,10 +11,15 @@ class BlueprintGroupModel {
   List<int>? objectIds;
   List<BlueprintObjectModel> objects = [];
 
+  // Transient field: Not saved in JSON.
+  // Populated at runtime by BlueprintModel.
+  ProductModel? product;
+
   BlueprintGroupModel({
     this.id,
     this.title,
     this.objectIds,
+    this.product, // Allow setting it in constructor
   });
 
   factory BlueprintGroupModel.fromJson(Map<String, dynamic> json) {

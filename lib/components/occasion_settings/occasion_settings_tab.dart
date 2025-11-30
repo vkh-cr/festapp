@@ -58,8 +58,9 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
   late TextEditingController _linkController;
   late TextEditingController _replyToEmailController;
   String? _description;
-  bool _isOpen = false;
+  bool _isOpen = true;
   bool _isHidden = false;
+  bool _isPromoted = false;
   String? _selectedTimezone;
   List<String> _allTimezones = [];
   String _featureSearchQuery = "";
@@ -119,6 +120,7 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     _description = occasion!.description ?? "";
     _isOpen = occasion!.isOpen;
     _isHidden = occasion!.isHidden;
+    _isPromoted = occasion!.isPromoted;
 
     // Initialize reply-to email
     _replyToEmailController.text = occasion!.data?[FormHelper.metaReplyTo] as String? ?? '';
@@ -164,6 +166,15 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     occasion!.description = _description;
     occasion!.isOpen = _isOpen;
     occasion!.isHidden = _isHidden;
+    occasion!.isPromoted = _isPromoted;
+
+    // <-- MODIFIED (Safety check, though UI logic should prevent this) -->
+    final imageUrl = occasion!.data?[Tb.occasions.data_image];
+    final bool hasImage = (imageUrl as String?)?.isNotEmpty ?? false;
+    if (_isPromoted && !hasImage) {
+      occasion!.isPromoted = false;
+    }
+    // <-- END MODIFICATION -->
 
     occasion!.data ??= {};
 
@@ -206,9 +217,13 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
   }
 
   Future<void> _deleteOccasion() async {
-    await DbOccasions.deleteOccasion(occasion!.id!);
-    ToastHelper.Show(context, "${CommonStrings.deleted}: ${occasion!.title!}");
-    Navigator.of(context).pop();
+    try {
+      await DbOccasions.deleteOccasion(occasion!.id!);
+      ToastHelper.Show(context, "${CommonStrings.deleted}: ${occasion!.title!}");
+      Navigator.of(context).pop();
+    } catch (e) {
+      ToastHelper.Show(context, e.toString());
+    }
   }
 
   Future<void> _confirmDelete() async {
@@ -250,6 +265,13 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
           setState(() {
             occasion!.data ??= {};
             occasion!.data![Tb.occasions.data_image] = null;
+
+            // <-- MODIFIED (Added) -->
+            // If the image is removed, it can no longer be promoted.
+            if (_isPromoted) {
+              _isPromoted = false;
+            }
+            // <-- END MODIFICATION -->
           });
           ToastHelper.Show(context, OccasionSettingsStrings.imageRemovedSuccess);
         } catch (e) {
@@ -268,6 +290,16 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     final bool isEditingEnabled = RightsService.isUnitEditor();
     final imageUrl = occasion!.data?[Tb.occasions.data_image];
 
+    // <-- MODIFIED (Added) -->
+    // Check if a valid image URL exists.
+    final bool hasImage = (imageUrl as String?)?.isNotEmpty ?? false;
+    // Determine if the promotion switch can be changed.
+    // It can be changed if:
+    // 1. It's already promoted (to allow turning it OFF).
+    // 2. It's not promoted, but it HAS an image (to allow turning it ON).
+    final bool canChangePromotion = _isPromoted || hasImage;
+    // <-- END MODIFICATION -->
+
     final filteredFeaturesBySearch = occasion!.features.where((feature) {
       final title = FeatureMetadata.getTitle(feature.code).toLowerCase();
       final description = FeatureMetadata.getDescription(feature.code).toLowerCase();
@@ -283,6 +315,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
 
     final enabledFeatures = featuresToShow.where((f) => f.isEnabled).toList();
     final disabledFeatures = featuresToShow.where((f) => !f.isEnabled).toList();
+    final bool hasOrders = occasion?.hasOrders ?? false;
+    final bool canDelete = !hasOrders;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -406,7 +440,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                         setState(() { _isOpen = value; });
                       } : null,
                     ),
-                  const SizedBox(height: 16),
+                  if (AppConfig.isAppSupported)
+                    const SizedBox(height: 16),
                   SwitchListTile(
                     title: Row(
                       children: [
@@ -422,6 +457,29 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                       setState(() { _isHidden = value; });
                     } : null,
                   ),
+                  const SizedBox(height: 16),
+
+                  SwitchListTile(
+                    title: Row(
+                      children: [
+                        Expanded(child: Text(OccasionSettingsStrings.promoted)),
+                        HelpWidget(
+                          title: OccasionSettingsStrings.promoted,
+                          content: OccasionSettingsStrings.promotedHelp,
+                        ),
+                      ],
+                    ),
+                    value: _isPromoted,
+                    // <-- MODIFIED (Updated onChanged logic) -->
+                    // Only allow changing the switch if:
+                    // 1. Editing is enabled AND
+                    // 2. canChangePromotion is true (meaning it's already ON, or it's OFF but has an image)
+                    onChanged: isEditingEnabled && canChangePromotion ? (value) {
+                      setState(() { _isPromoted = value; });
+                    } : null,
+                    // <-- END MODIFICATION -->
+                  ),
+
                   const SizedBox(height: 16),
                   ExpansionTile(
                     title: Text(
@@ -657,11 +715,30 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                   const SizedBox(height: 24),
                   if (RightsService.isUnitManager())
                     Center(
-                      child: TextButton(
-                        onPressed: isEditingEnabled ? _confirmDelete : null,
-                        child: Text(
-                          OccasionSettingsStrings.deleteEvent,
-                          style: TextStyle(color: isEditingEnabled ? ThemeConfig.redColor(context) : Colors.grey),
+                      child: Tooltip(
+                        message: hasOrders ? OccasionSettingsStrings.cannotDeleteWithOrders : "",
+                        child: TextButton(
+                          onPressed: isEditingEnabled
+                              ? () {
+                            if (hasOrders) {
+                              ToastHelper.Show(
+                                  context,
+                                  OccasionSettingsStrings.cannotDeleteWithOrders,
+                                  severity: ToastSeverity.NotOk
+                              );
+                              return;
+                            }
+                            _confirmDelete();
+                          }
+                              : null,
+                          child: Text(
+                            OccasionSettingsStrings.deleteEvent,
+                            style: TextStyle(
+                                color: isEditingEnabled
+                                    ? (canDelete ? ThemeConfig.redColor(context) : Colors.grey)
+                                    : Colors.grey
+                            ),
+                          ),
                         ),
                       ),
                     ),

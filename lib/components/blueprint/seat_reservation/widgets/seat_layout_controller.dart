@@ -2,41 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
-import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
+
+import '../../blueprint_group.dart';
+import '../model/seat_model.dart';
+import '../utils/seat_state.dart';
 
 class SeatLayoutController extends ChangeNotifier {
-  /// Transformation controller for the InteractiveViewer
   final TransformationController transformationController = TransformationController();
-
-  /// The complete list of seat models representing the grid
   List<SeatModel> seats = [];
-
-  /// Dimensions of the grid
   int rows = 0;
   int cols = 0;
   int seatSize = 15;
-
-  /// Background SVG or Image URL string
   String? backgroundSvg;
-
-  /// Minimum scale for the InteractiveViewer
   double minScale = 1.0;
-
-  /// Key to get the layout widget's size for fitting content
   GlobalKey? _layoutKey;
 
   SeatLayoutController() {
-    // Listen to transformation changes to apply boundary constraints
     transformationController.addListener(_onTransformationChanged);
   }
 
-  /// Attaches the GlobalKey from the layout widget to this controller
   void attachLayoutKey(GlobalKey key) {
     _layoutKey = key;
   }
 
-  /// Loads a blueprint, generates the seat grid, and fits it to the view
   void loadBlueprint(BlueprintModel model, {int newSeatSize = 15}) {
     rows = model.configuration?.height ?? 1;
     cols = model.configuration?.width ?? 1;
@@ -44,7 +32,6 @@ class SeatLayoutController extends ChangeNotifier {
     backgroundSvg = model.backgroundSvg;
     _generateSeatModels(model.objects ?? []);
 
-    // Fit layout after the frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fitLayout();
     });
@@ -52,7 +39,6 @@ class SeatLayoutController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Generates the list of SeatModel objects based on blueprint objects
   void _generateSeatModels(List<BlueprintObjectModel> objects) {
     final List<SeatModel> newSeats = [];
     for (int row = 0; row < rows; row++) {
@@ -73,11 +59,9 @@ class SeatLayoutController extends ChangeNotifier {
     seats = newSeats;
   }
 
-  /// Updates the grid dimensions
   void setConfiguration(int newRows, int newCols) {
     rows = newRows;
     cols = newCols;
-    // Re-generate seats with existing objects
     final objects = seats
         .map((s) => s.objectModel)
         .whereNotNull()
@@ -92,24 +76,35 @@ class SeatLayoutController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Updates the background
   void setBackground(String? svgOrUrl) {
     backgroundSvg = svgOrUrl;
     notifyListeners();
   }
 
-  /// Programmatically updates a single seat's state
+  /// Updates both the visual seat state AND the underlying data model.
+  /// Use this for permanent changes (Edit mode).
   void updateSeat(SeatModel model, SeatState newState) {
     final seat = seats.firstWhereOrNull(
             (s) => s.rowI == model.rowI && s.colI == model.colI);
     if (seat != null) {
       seat.seatState = newState;
-      seat.objectModel?.stateEnum = newState; // Keep object model in sync
+      seat.objectModel?.stateEnum = newState;
       notifyListeners();
     }
   }
 
-  /// Programmatically updates a single seat's highlight state
+  /// NEW: Updates ONLY the visual appearance of the seat.
+  /// Use this for temporary selections (Create Order, Swapping) so the
+  /// underlying data (objectModel) remains untouched for saving.
+  void updateVisualState(SeatModel model, SeatState visualState) {
+    final seat = seats.firstWhereOrNull(
+            (s) => s.rowI == model.rowI && s.colI == model.colI);
+    if (seat != null) {
+      seat.seatState = visualState;
+      notifyListeners();
+    }
+  }
+
   void setSeatHighlight(SeatModel model, bool isHighlighted) {
     final seat = seats.firstWhereOrNull(
             (s) => s.rowI == model.rowI && s.colI == model.colI);
@@ -119,19 +114,18 @@ class SeatLayoutController extends ChangeNotifier {
     }
   }
 
-  /// Adds a new object to the grid
-  void addObject(BlueprintObjectModel objectModel) {
+  void addObject(BlueprintObjectModel objectModel, {bool isHighlighted = false}) {
     if (objectModel.x == null || objectModel.y == null) return;
     final seat = seats.firstWhereOrNull(
             (s) => s.rowI == objectModel.y && s.colI == objectModel.x);
     if (seat != null) {
       seat.objectModel = objectModel;
       seat.seatState = objectModel.stateEnum ?? SeatState.available;
+      seat.isHighlightedForGroup = isHighlighted;
       notifyListeners();
     }
   }
 
-  /// Removes an object from the grid
   void removeObject(BlueprintObjectModel objectModel) {
     if (objectModel.x == null || objectModel.y == null) return;
     final seat = seats.firstWhereOrNull(
@@ -139,11 +133,27 @@ class SeatLayoutController extends ChangeNotifier {
     if (seat != null) {
       seat.objectModel = null;
       seat.seatState = SeatState.empty;
+      seat.isHighlightedForGroup = false;
       notifyListeners();
     }
   }
 
-  /// Calculates and applies the correct scale and translation to fit the layout
+  void setHighlightedGroup(BlueprintGroupModel? group) {
+    for (final seat in seats) {
+      seat.isHighlightedForGroup = false;
+    }
+
+    if (group != null) {
+      final groupObjectIds = group.objects.map((o) => o.id).toSet();
+      for (final seat in seats) {
+        if (seat.objectModel != null && groupObjectIds.contains(seat.objectModel!.id)) {
+          seat.isHighlightedForGroup = true;
+        }
+      }
+    }
+    notifyListeners();
+  }
+
   void _fitLayout() {
     if (_layoutKey?.currentContext == null) return;
 
@@ -173,10 +183,9 @@ class SeatLayoutController extends ChangeNotifier {
         (widgetHeight - layoutHeight * scaleFactor) / 2,
         0,
       );
-    notifyListeners(); // Notify to update minScale
+    notifyListeners();
   }
 
-  /// Listener for transformation changes to enforce boundaries
   void _onTransformationChanged() {
     if (_layoutKey?.currentContext == null) return;
 

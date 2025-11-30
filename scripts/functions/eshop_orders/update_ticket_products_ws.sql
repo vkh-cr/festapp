@@ -38,14 +38,16 @@ BEGIN
   JOIN public.occasions          AS occ ON occ.id = o.occasion
   WHERE opt.ticket = p_ticket_id
   LIMIT 1;
+
   IF NOT FOUND THEN
     RAISE EXCEPTION '%', jsonb_build_object('code', 404, 'message', 'Ticket not linked to any order')::text;
   END IF;
+
   IF NOT get_is_editor_order_on_occasion(v_occasion_id) THEN
     RAISE EXCEPTION '%', jsonb_build_object('code', 403, 'message', 'Not authorized')::text;
   END IF;
 
-  /* NEW: Check for negative prices in the input */
+  /* Check for negative prices in the input */
   IF EXISTS (
     SELECT 1
     FROM jsonb_array_elements(p_products) AS p
@@ -81,16 +83,32 @@ BEGIN
   INTO v_sum_old
   FROM jsonb_array_elements(v_old_products) AS p;
 
-  /* 2) new products JSON + subtotal */
+  /* 2) new products JSON + subtotal (FIXED HERE) */
+  -- We now find the matching old product and merge it (||) with the new data.
+  -- This preserves 'spot_title', 'spot_id' or any other extra fields.
   SELECT
-    jsonb_agg(jsonb_build_object(
-      'id',            p_info.id,
-      'type',          pt.type,
-      'price',         (p_new.data->>'price')::numeric, -- Use price from input
-      'title',         p_info.title,
-      'type_title',    pt.title,
-      'currency_code', p_info.currency_code
-    )),
+    jsonb_agg(
+      -- Start with the old product object if it exists (for this ID)
+      COALESCE(
+        (
+           SELECT old_p
+           FROM jsonb_array_elements(v_old_products) AS old_p
+           WHERE (old_p->>'id')::bigint = p_info.id
+           LIMIT 1
+        ),
+        '{}'::jsonb
+      )
+      ||
+      -- Overwrite with refreshed/new standard fields
+      jsonb_build_object(
+        'id',            p_info.id,
+        'type',          pt.type,
+        'price',         (p_new.data->>'price')::numeric, -- Use price from input
+        'title',         p_info.title,
+        'type_title',    pt.title,
+        'currency_code', p_info.currency_code
+      )
+    ),
     COALESCE(SUM((p_new.data->>'price')::numeric), 0)
   INTO v_products_json, v_sum_new
   FROM jsonb_array_elements(p_products) AS p_new(data)
@@ -119,11 +137,16 @@ BEGIN
      SET data = v_new_data
    WHERE id = v_order_id;
 
+  /* Update the ticket timestamp */
+  UPDATE eshop.tickets
+     SET updated_at = now()
+   WHERE id = p_ticket_id;
+
   /* 4) granularly update the link‐table rows */
   v_old_ids := COALESCE(v_old_ids, ARRAY[]::bigint[]);
   v_new_ids := COALESCE(v_new_ids, ARRAY[]::bigint[]);
 
-  -- Before deleting order_product_ticket rows, nullify the reference in eshop.spots to de-allocate the spot.
+  -- Before deleting order_product_ticket rows, nullify the reference in eshop.spots
   UPDATE eshop.spots s
      SET order_product_ticket = NULL
   WHERE s.order_product_ticket IN (
@@ -165,7 +188,7 @@ BEGIN
 
   v_new_state := CASE
                    WHEN v_paid >= v_price AND v_price > 0 THEN 'paid'
-                   WHEN v_price <= 0 THEN 'paid' -- Handle free orders
+                   WHEN v_price <= 0 THEN 'paid'
                    ELSE 'ordered'
                  END;
 

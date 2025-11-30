@@ -8,7 +8,14 @@ AS $$
 DECLARE
     users_data JSONB;
     forms_data JSONB;
+    org_id BIGINT;
 BEGIN
+    -- 0. Retrieve the Organization ID
+    -- We need this to check against the organization_users table later
+    SELECT organization INTO org_id
+    FROM public.occasions
+    WHERE id = p_occasion_id;
+
     -- Authorization check: Ensure the user has editor rights for the occasion.
     IF (SELECT get_is_editor_view_on_occasion(p_occasion_id)) <> TRUE AND (SELECT get_is_editor_order_view_on_occasion(p_occasion_id)) <> TRUE THEN
         RETURN jsonb_build_object('code', 403, 'message', 'User is not authorized to view this occasion''s data');
@@ -29,6 +36,10 @@ BEGIN
     JOIN public.user_info ui ON ou."user" = ui.id
     LEFT JOIN auth.users au ON au.id = ui.id
     LEFT JOIN eshop.tickets t ON ou.ticket = t.id
+
+    -- Left Join to check organization-wide visibility settings
+    LEFT JOIN public.organization_users org_u ON ui.id = org_u."user" AND org_u.organization = org_id
+
     LEFT JOIN LATERAL (
         SELECT
             o.data->>'form' AS form_id,
@@ -38,7 +49,12 @@ BEGIN
         WHERE opt.ticket = t.id
         LIMIT 1
     ) AS order_info ON true
-    WHERE ou.occasion = p_occasion_id;
+
+    WHERE ou.occasion = p_occasion_id
+
+    -- Filter out hidden users
+    -- (org_u.is_hidden IS NOT TRUE) allows FALSE (visible) and NULL (no record, so visible)
+    AND (org_u.is_hidden IS NOT TRUE);
 
     -- 2. Get all forms associated with the occasion, selecting only the specified fields.
     SELECT jsonb_agg(
