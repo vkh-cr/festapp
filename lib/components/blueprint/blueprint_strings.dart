@@ -78,4 +78,11 @@ class BlueprintStrings {
   static String get productAssigned => 'FeatureBlueprint.productAssigned'.tr(); // "Product assigned to all spots in the group."
   static String get productCreated => 'FeatureBlueprint.productCreated'.tr(); // "Product created."
   static String get productUpdated => 'FeatureBlueprint.productUpdated'.tr(); // "Product updated."
+
+  // --- Create New Order Feature ---
+  static String get legendCreateOrder => 'FeatureBlueprint.legendCreateOrder'.tr(); // "Create Order"
+  static String get createOrderHelp => 'FeatureBlueprint.createOrderHelp'.tr(); // "Select seats to create a new order."
+  static String get btnCreateOrder => 'FeatureBlueprint.btnCreateOrder'.tr(); // "Create Order"
+  static String get confirmOrder => 'FeatureBlueprint.confirmOrder'.tr(); // "Confirm Order"
+  static String get orderCreatedSuccess => 'FeatureBlueprint.orderCreatedSuccess'.tr(); // "Order created successfully."
 }
