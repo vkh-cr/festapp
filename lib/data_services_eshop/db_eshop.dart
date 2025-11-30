@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
 import 'package:fstapp/components/inventory/models/inventory_pool_model.dart';
 import 'package:fstapp/components/inventory/models/resource_model.dart';
@@ -91,6 +92,45 @@ class DbEshop {
     }catch(e){
       ToastHelper.Show(context, e.toString());
       rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> analyzeNewOrderSpots(List<int> spotIds) async {
+    final response = await _supabase.rpc(
+      'analyze_new_order_spots',
+      params: {'p_spot_ids': spotIds},
+    );
+    return response as Map<String, dynamic>;
+  }
+
+  static Future<void> createOrderFromSpots(List<int> spotIds, Map<String, dynamic> inputData) async {
+    // STEP 1: Call SQL to perform Storno and get order payload
+    // We pass the full inputData map (containing email, and potentially name/note)
+    final dbResponse = await _supabase.rpc(
+      'confirm_blueprint_order_change',
+      params: {
+        'p_spot_ids': spotIds,
+        'p_input_data': inputData,
+      },
+    );
+
+    if (dbResponse == null || dbResponse['success'] != true) {
+      throw Exception(dbResponse?['message'] ?? 'Database error during order preparation.');
+    }
+
+    // Extract the payload prepared by SQL
+    final orderDetails = dbResponse['orderDetails'];
+
+    // STEP 2: Call Edge Function to create the new order
+    final edgeResponse = await _supabase.functions.invoke(
+      "send-ticket-order",
+      body: {"orderDetails": orderDetails},
+    );
+
+    if (edgeResponse.status != 200) {
+      // NOTE: At this point, Storno is already committed in DB step 1.
+      // If this fails, the spots are free but no order is created.
+      throw Exception("Order creation failed: ${edgeResponse.data}");
     }
   }
 

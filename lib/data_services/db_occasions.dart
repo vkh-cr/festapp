@@ -98,7 +98,14 @@ class DbOccasions {
   }
 
   static Future<OccasionModel> getOccasionByLink(String link) async {
-    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.link, link).single();
+    var data = await _supabase.rpc("get_occasion_by_link", params: {
+      'link_param': link,
+    });
+
+    if (data == null) {
+      throw const PostgrestException(message: 'Occasion not found');
+    }
+
     return OccasionModel.fromJson(data);
   }
 
@@ -113,7 +120,6 @@ class DbOccasions {
 
   static Future<void> updateOccasion(OccasionModel occasionModel) async {
     final Map<String, dynamic> occasionJson = occasionModel.toJson();
-    occasionJson['is_app_supported'] = AppConfig.isAppSupported;
     await _supabase.rpc("update_occasion_203",
         params: {
           "input_data": occasionJson,

@@ -5,15 +5,18 @@ AS $$
 DECLARE
   user_basics jsonb;
   unit_id bigint;
+  org_id bigint;
 BEGIN
-  -- Step 1: Retrieve the unit_id for the given occasion
-  SELECT unit INTO unit_id FROM public.occasions WHERE id = oc;
+  -- Step 1: Retrieve the unit_id AND organization for the given occasion
+  SELECT unit, organization INTO unit_id, org_id
+  FROM public.occasions
+  WHERE id = oc;
 
   -- If the occasion does not exist, return a 404 error
   IF unit_id IS NULL THEN
     RETURN jsonb_build_object(
       'code', 404,
-      'message', 'Unit not found'
+      'message', 'Unit or Occasion not found'
     );
   END IF;
 
@@ -45,6 +48,10 @@ BEGIN
   ) INTO user_basics
   FROM public.user_info ui
   LEFT JOIN public.user_companions uc ON ui.id = uc.companion
+
+  -- EFT JOIN to check visibility settings against the Organization
+  LEFT JOIN public.organization_users ou ON ui.id = ou."user" AND ou.organization = org_id
+
   WHERE ui.id IN (
     -- Users from all occasions under the same unit
     SELECT DISTINCT uo."user"
@@ -57,7 +64,11 @@ BEGIN
     SELECT DISTINCT uu."user"
     FROM public.unit_users uu
     WHERE uu.unit = unit_id
-  );
+  )
+
+  -- Filter out hidden users
+  -- Keeps users who are FALSE (visible) or NULL (no record, so visible)
+  AND (ou.is_hidden IS NOT TRUE);
 
   -- Step 4: Handle cases with no users found
   IF user_basics IS NULL THEN
