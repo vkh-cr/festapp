@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
@@ -14,10 +17,18 @@ class DbTickets {
   static final _supabase = Supabase.instance.client;
 
   static Future<void> stornoTicket(int ticketId) async {
-    final response = await _supabase.rpc(
-      'storno_ticket_221',
+    await stornoTickets([ticketId]);
+  }
+
+  /// Bulk cancels specific tickets.
+  /// Uses 'storno_tickets_bulk' to ensure efficient processing and single history entries per order.
+  static Future<void> stornoTickets(List<int> ticketIds) async {
+    if (ticketIds.isEmpty) return;
+
+    await _supabase.rpc(
+      'storno_tickets_bulk',
       params: {
-        'ticket_id': ticketId,
+        'p_ticket_ids': ticketIds,
       },
     );
   }
@@ -63,6 +74,27 @@ class DbTickets {
       return response;
     } catch (e) {
       print("Unexpected error in sendTicketsToEmail: $e");
+      rethrow;
+    }
+  }
+
+  /// Downloads the PDF for a specific ticket.
+  static Future<Uint8List?> downloadTicketPdf(int ticketId) async {
+    try {
+      // Updated function name to 'download-ticket'
+      final response = await _supabase.functions.invoke(
+        "download-ticket",
+        body: {"ticketId": ticketId},
+      );
+
+      final String? base64Str = response.data['file'];
+
+      if (base64Str != null) {
+        return base64Decode(base64Str);
+      }
+      return null;
+    } catch (e) {
+      print("Error downloading ticket PDF: $e");
       rethrow;
     }
   }

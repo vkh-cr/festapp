@@ -14,9 +14,20 @@ BEGIN
 
   PERFORM check_is_manager_on_unit(unit_id);
 
+-- ***********************************************************
+  -- 0. SAFETY CHECK: Strict Order Check
+  --    Prevent deletion if ANY order exists (even storno).
+  -- ***********************************************************
+  IF EXISTS (
+      SELECT 1
+      FROM eshop.orders
+      WHERE occasion = oc
+  ) THEN
+      RAISE EXCEPTION 'Cannot delete occasion % because it contains orders (including storno).', oc;
+  END IF;
+
   -- ***********************************************************
   -- 1. Delete records that depend on 'events'.
-  --    This must be done before deleting the events themselves.
   -- ***********************************************************
   DELETE FROM public.event_groups
     WHERE event_parent IN (SELECT id FROM public.events WHERE occasion = oc)
@@ -36,9 +47,6 @@ BEGIN
 
   -- ***********************************************************
   -- 2. Delete the 'events' themselves.
-  --    This is now safe because all records that referenced events
-  --    were deleted in Step 1. This step resolves the foreign
-  --    key violation with the 'places' table.
   -- ***********************************************************
   DELETE FROM public.events
     WHERE occasion = oc;
@@ -50,6 +58,9 @@ BEGIN
     WHERE "order" IN (SELECT id FROM eshop.orders WHERE occasion = oc);
 
   DELETE FROM eshop.orders_history
+    WHERE "order" IN (SELECT id FROM eshop.orders WHERE occasion = oc);
+
+  DELETE FROM eshop.bank_account_requests
     WHERE "order" IN (SELECT id FROM eshop.orders WHERE occasion = oc);
 
   -- ***********************************************************
@@ -94,7 +105,6 @@ BEGIN
   DELETE FROM public.user_news
     WHERE occasion = oc;
 
-  -- This is now safe because 'events' (which reference 'places') were deleted in Step 2.
   DELETE FROM public.places
     WHERE occasion = oc;
 
@@ -134,7 +144,8 @@ BEGIN
   DELETE FROM eshop.blueprints
     WHERE occasion = oc;
 
-  -- Delete orders (after their dependent rows have been removed)
+  -- Delete orders (Safe now: we checked for non-storno orders at step 0,
+  -- and deleted dependents in step 3).
   DELETE FROM eshop.orders
     WHERE occasion = oc;
 
