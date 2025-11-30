@@ -259,8 +259,8 @@ export async function generateTicketImage(
     }
 
     // Add Ticket Price not null.
-    if (ticket.price) {
-      texts.push(`Cena: ${formatCurrency(ticket.price, ticket.currency_code)}`);
+    if (ticket.price != null) {
+          texts.push(`Cena: ${formatCurrency(ticket.price, ticket.currency_code)}`);
     }
 
     texts.forEach((text) => {

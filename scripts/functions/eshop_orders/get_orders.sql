@@ -102,6 +102,7 @@ BEGIN
     SELECT jsonb_agg(jsonb_build_object(
         'id', t.id,
         'created_at', t.created_at,
+        'updated_at', t.updated_at,
         'ticket_symbol', t.ticket_symbol,
         'state', t.state,
         'note', t.note,

@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
@@ -13,6 +14,7 @@ import 'package:fstapp/data_services_eshop/db_tickets.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/ticket_code_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/services/platform_helper.dart'; // Import PlatformHelper
 
 import 'eshop_columns.dart';
 import 'orders_strings.dart';
@@ -25,72 +27,114 @@ class TicketsTab extends StatefulWidget {
 }
 
 class _TicketsTabState extends State<TicketsTab> {
+  SingleDataGridController<TicketModel>? _controller;
   String? occasionLink;
-  late SingleDataGridController<TicketModel> _controller;
-
-  static const List<String> columnIdentifiers = [
-    EshopColumns.TICKET_ID,
-    EshopColumns.ORDER_SYMBOL,
-    EshopColumns.ORDER_DATA,
-    EshopColumns.TICKET_SYMBOL,
-    EshopColumns.TICKET_CREATED_AT,
-    EshopColumns.TICKET_STATE,
-    EshopColumns.TICKET_CONFIRM,
-    EshopColumns.TICKET_TOTAL_PRICE,
-    EshopColumns.TICKET_SPOT,
-    EshopColumns.TICKET_PRODUCTS_EXTENDED,
-    EshopColumns.TICKET_PRODUCTS_EDIT,
-    EshopColumns.TICKET_NOTE,
-    EshopColumns.TICKET_NOTE_HIDDEN,
-  ];
+  bool _isLoading = true;
 
   @override
-  Future<void> didChangeDependencies() async {
+  void didChangeDependencies() {
     super.didChangeDependencies();
-    if (occasionLink == null && context.routeData.params.isNotEmpty) {
-      occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
-      _controller = SingleDataGridController<TicketModel>(
-        context: context,
-        loadData: () => DbTickets.getAllTickets(occasionLink!),
-        fromPlutoJson: TicketModel.fromPlutoJson,
-        firstColumnType: DataGridFirstColumn.check,
-        idColumn: EshopColumns.TICKET_ID,
-        actionsExtended: DataGridActionsController(
-          areAllActionsEnabled: RightsService.isEditorOrder,
-          isAddActionPossible: () => false,
+    final newOccasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
+    // Initialize only once when the link is available
+    if (occasionLink == null) {
+      occasionLink = newOccasionLink;
+      _initializeController();
+    }
+  }
+
+  Future<void> _initializeController() async {
+    if (occasionLink == null) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
+    final List<String> columnIdentifiers = [
+      EshopColumns.TICKET_ID,
+      EshopColumns.ORDER_SYMBOL,
+      EshopColumns.ORDER_DATA,
+      EshopColumns.TICKET_SYMBOL,
+      EshopColumns.TICKET_CREATED_AT,
+      EshopColumns.TICKET_STATE,
+      if (PlatformHelper.isWeb && FeatureService.isFeatureEnabled(FeatureConstants.ticket))
+        EshopColumns.TICKET_DOWNLOAD,
+      EshopColumns.TICKET_CONFIRM,
+      EshopColumns.TICKET_TOTAL_PRICE,
+      if (FeatureService.isFeatureEnabled(FeatureConstants.blueprint))
+        EshopColumns.TICKET_SPOT,
+      EshopColumns.TICKET_PRODUCTS_EXTENDED,
+      EshopColumns.TICKET_PRODUCTS_EDIT,
+      if (FeatureService.isFeatureEnabled(FeatureConstants.ticket))
+        EshopColumns.TICKET_LAST_CHANGE,
+      EshopColumns.TICKET_NOTE,
+      EshopColumns.TICKET_NOTE_HIDDEN,
+    ];
+
+    final newController = SingleDataGridController<TicketModel>(
+      context: context,
+      loadData: () => DbTickets.getAllTickets(occasionLink!),
+      fromPlutoJson: TicketModel.fromPlutoJson,
+      firstColumnType: DataGridFirstColumn.check,
+      idColumn: EshopColumns.TICKET_ID,
+      actionsExtended: DataGridActionsController(
+        areAllActionsEnabled: RightsService.isEditorOrder,
+        isAddActionPossible: () => false,
+      ),
+      headerChildren: [
+        DataGridAction(
+          name: CommonStrings.cancel,
+          action: (SingleDataGridController singleDataGrid, [_]) =>
+              _stornoTickets(singleDataGrid),
+          isEnabled: RightsService.isOrderEditor,
         ),
-        headerChildren: [
+        if (FeatureService.isFeatureEnabled(FeatureConstants.ticket))
           DataGridAction(
-            name: OrdersStrings.cancel,
+            name: OrdersStrings.scanActionText,
             action: (SingleDataGridController singleDataGrid, [_]) =>
-                _stornoTickets(singleDataGrid),
+                _scanTickets(singleDataGrid),
             isEnabled: RightsService.isOrderEditor,
           ),
-          if(FeatureService.isFeatureEnabled(FeatureConstants.ticket))
-            DataGridAction(
-              name: OrdersStrings.scanActionText,
-              action: (SingleDataGridController singleDataGrid, [_]) =>
-                  _scanTickets(singleDataGrid),
-              isEnabled: RightsService.isOrderEditor,
-            ),
-        ],
-        columns: EshopColumns.generateColumns(context, columnIdentifiers,
-          data: {
-            EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
-            EshopColumns.TICKET_PRODUCTS_EDIT: refreshData,
-            EshopColumns.TICKET_CONFIRM: refreshData
-          },),
-      );
+      ],
+      columns: EshopColumns.generateColumns(
+        context,
+        columnIdentifiers,
+        data: {
+          EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
+          EshopColumns.TICKET_PRODUCTS_EDIT: refreshData,
+          EshopColumns.TICKET_CONFIRM: refreshData,
+          EshopColumns.TICKET_DOWNLOAD: null,
+        },
+      ),
+    );
+
+    if (mounted) {
+      setState(() {
+        _controller = newController;
+        _isLoading = false;
+      });
     }
   }
 
   Future<void> refreshData() async {
-    await _controller.reloadData();
+    await _controller?.reloadData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleTableDataGrid<TicketModel>(_controller);
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // If loading is finished but the controller is still null,
+    // it means initialization failed or there was no data context.
+    if (_controller == null) {
+      return Center(child: Text("No data to display.".tr()));
+    }
+
+    return SingleTableDataGrid<TicketModel>(_controller!);
   }
 
   Future<void> _scanTickets(SingleDataGridController singleDataGrid) async {
@@ -99,6 +143,7 @@ class _TicketsTabState extends State<TicketsTab> {
       OrdersStrings.scanActionText,
       occasionLink!,
     );
+    refreshData();
   }
 
   Future<void> _stornoTickets(SingleDataGridController singleDataGrid) async {
@@ -110,22 +155,24 @@ class _TicketsTabState extends State<TicketsTab> {
 
     var confirm = await DialogHelper.showConfirmationDialog(
       context,
-      OrdersStrings.cancel,
+      CommonStrings.cancel,
       "${OrdersStrings.cancelItemsConfirmationText} (${selectedTickets.length})",
     );
 
-    if (confirm) {
+    if (confirm && mounted) {
       var stornoFutures = selectedTickets.map((ticket) {
         return () async {
           await DbTickets.stornoTicket(ticket.id!);
-          ToastHelper.Show(
-            context,
-            OrdersStrings.stornoCompletedText.tr(
-              namedArgs: {
-                "item": ticket.ticketSymbol ?? ticket.id.toString(),
-              },
-            ),
-          );
+          if (mounted) {
+            ToastHelper.Show(
+              context,
+              OrdersStrings.stornoCompletedText.tr(
+                namedArgs: {
+                  "item": ticket.ticketSymbol ?? ticket.id.toString(),
+                },
+              ),
+            );
+          }
         };
       }).toList();
 

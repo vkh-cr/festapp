@@ -49,4 +49,8 @@ class FeaturesStrings {
   static String get updatedUsers => 'FeatureImport.updatedUsers'.tr();
   static String get deletedUsers => 'FeatureImport.deletedUsers'.tr();
   static String get none => 'FeatureImport.none'.tr();
+
+  // New Auto Import strings
+  static String get labelAutoImport => 'FeatureImport.labelAutoImport'.tr(); // "Auto-Import Users"
+  static String get helperAutoImport => 'FeatureImport.helperAutoImport'.tr(); // "UUsers will automatically have an account created upon signing up through the form. Default password is '1'."
 }
