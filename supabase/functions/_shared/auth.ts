@@ -19,33 +19,44 @@ interface AuthParams {
   occasionId?: number;
 }
 
+interface AuthResult {
+  user: any | null; // Returns the Supabase user object if authenticated via header, else null
+}
+
 /**
  * Authorizes a request by checking for a valid secret or editor permissions.
  * Throws an AuthError if authorization fails.
  * @param {AuthParams} params - The authorization parameters.
+ * @returns Promise<AuthResult> - Contains the user object if applicable.
  */
-export async function authorizeRequest({ requestSecret, authorizationHeader, occasionId }: AuthParams): Promise<void> {
+export async function authorizeRequest({ requestSecret, authorizationHeader, occasionId }: AuthParams): Promise<AuthResult> {
   // Path 1: Authorization via request secret (for cron jobs, etc.)
   if (requestSecret) {
     const { data: secretValid, error: secretError } = await supabaseAdmin.rpc("check_request_secret", { p_secret: requestSecret });
     if (secretError || !secretValid) {
       throw new AuthError("Invalid request secret", 403);
     }
-    return; // Success
+    return { user: null }; // Authorized as system/admin, no specific user context
   }
 
   // Path 2: Authorization via user token and editor role on a specific occasion
   if (authorizationHeader && occasionId) {
-    const user = await getSupabaseUser(authorizationHeader);
-    if (!user) {
+    const userResponse = await getSupabaseUser(authorizationHeader);
+
+    // getSupabaseUser throws if unauthorized, but we double check existence
+    if (!userResponse || !userResponse.user) {
       throw new AuthError("Unauthorized", 401);
     }
-    const userId = user.user.id;
-    const userIsEditor = await isUserEditorOrder(userId, occasionId);
+
+    const userId = userResponse.user.id;
+    // Note: Passing BigInt(occasionId) assuming occasionId comes in as number but DB expects BigInt context
+    const userIsEditor = await isUserEditorOrder(userId, BigInt(occasionId));
+
     if (!userIsEditor) {
       throw new AuthError("Forbidden: Not an editor", 403);
     }
-    return; // Success
+
+    return { user: userResponse.user }; // Success with User Context
   }
 
   // If neither valid path's parameters are met, fail the request.
