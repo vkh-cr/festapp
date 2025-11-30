@@ -19,8 +19,6 @@ class OrdersStrings {
 
   static String get confirmTicket => 'FeatureOrders.setAsUsed'.tr(); // "Set as used"
 
-  static String get confirmTicket => 'FeatureOrders.setAsUsed'.tr();
-
   // --- Tickets/Items Tab ---
   static String get stornoCompletedText => 'FeatureOrders.stornoCompletedItem'.tr(); // "Storno completed for {item}."
 
