@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/data_models/occasion_link_model.dart';
-import 'package:fstapp/data_models/occasion_settings_model.dart';
+import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
 import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
@@ -36,10 +36,10 @@ class RightsService{
 
   static List<int>? bankAccountAdmin() => occasionLinkModelNotifier.value?.bankAccountsAdmin;
 
-  static Future<bool> updateAppData({int? unitId, String? link, bool force = false, bool refreshOffline = AppConfig.isAppSupported}) async {
+  static Future<bool> updateAppData({int? unitId, String? link, bool force = false, bool refreshOffline = AppConfig.isAppSupported, String? formLink}) async {
     // Check if an update is needed
     if (occasionLinkModelNotifier.value?.occasion?.id == null || link != currentLink || force) {
-      LinkModel model = LinkModel(occasionLink: link, unitId: unitId);
+      LinkModel model = LinkModel(occasionLink: link, unitId: unitId, formLink: formLink);
       if(unitId == null){
         var occasionLink = link ?? RouterService.currentOccasionLink;
         if (occasionLink.isEmpty) {

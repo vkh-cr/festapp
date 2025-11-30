@@ -35,16 +35,12 @@ class DbOrders {
   }
 
   static Future<void> stornoOrder(int id) async {
-    final response = await _supabase.rpc(
-      'update_order_and_tickets_to_storno_ws',
+    await _supabase.rpc(
+      'update_order_and_tickets_to_storno_ws_221',
       params: {
         'order_id': id,
       },
     );
-
-    if (response["code"] != 200) {
-      throw Exception("Storno order failed: ${response['code']}: ${response['message']}");
-    }
 
     await sendStornoTicketOrderEmail(orderId: id);
   }
@@ -184,7 +180,7 @@ class DbOrders {
 
   static Future<void> deleteOrder(OrderModel model) async {
     await _supabase.rpc(
-      'delete_order',
+      'delete_order_221',
       params: {
         'order_id': model.id,
       },

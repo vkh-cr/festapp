@@ -14,28 +14,36 @@ DECLARE
     v_organization_id BIGINT;
     field_element JSONB;
     field_key TEXT;
-    is_sex_field BOOLEAN;
+
+    field_info RECORD;
+    field_value TEXT;
+    v_text1 TEXT;
+    v_text2 TEXT;
+    v_birthDate TEXT;
+
     v_occasion_user_row public.occasion_users%ROWTYPE;
     new_email TEXT;
     email_local_part TEXT;
     email_domain_part TEXT;
     email_suffix INT;
+
+    -- Arrays to store results
     inserted_users JSONB[] := ARRAY[]::JSONB[];
     updated_users JSONB[] := ARRAY[]::JSONB[];
+    deleted_users JSONB[] := ARRAY[]::JSONB[];
 
     storno_record RECORD;
     deleted_user_info RECORD;
-    deleted_users JSONB[] := ARRAY[]::JSONB[];
-
+    update_report_info RECORD;
 BEGIN
-    -- Get the organization_id from the occasion
+    -- 1. Get the organization_id from the occasion
     SELECT organization INTO v_organization_id FROM public.occasions WHERE id = p_occasion_id;
 
     IF v_organization_id IS NULL THEN
         RAISE EXCEPTION 'Occasion with id % not found or has no organization.', p_occasion_id;
     END IF;
 
-    -- Find users in this occasion whose linked ticket has been canceled.
+    -- 2. Handle Storno (Canceled) Tickets
     FOR storno_record IN
         SELECT ou."user", ou.ticket
         FROM public.occasion_users ou
@@ -44,16 +52,13 @@ BEGIN
           AND ou.ticket IS NOT NULL
           AND t.state = 'storno'
     LOOP
-        -- For reporting, get user details before deleting their occasion association.
         SELECT ui.email_readonly, ui.name, ui.surname
         INTO deleted_user_info
         FROM public.user_info ui
         WHERE ui.id = storno_record."user";
 
-        -- Call the provided function to delete the user from the occasion and all related entities.
         PERFORM public.delete_occasion_user(storno_record."user", p_occasion_id);
 
-        -- Add to the deleted list for the final JSONB report.
         deleted_users := array_append(deleted_users,
             jsonb_build_object(
                 'email', deleted_user_info.email_readonly,
@@ -64,19 +69,18 @@ BEGIN
         );
     END LOOP;
 
-    -- >> ORIGINAL IMPORT LOGIC STARTS HERE
-    -- Query for tickets that have not yet been assigned to a user for this occasion.
+    -- 3. IMPORT & SYNC LOGIC
     FOR ticket_record IN
         SELECT DISTINCT ON (t.id)
             t.id as ticket_id,
-            o.data as order_data
+            o.data as order_data,
+            ou."user" as existing_occasion_user_id
         FROM eshop.tickets t
         JOIN eshop.order_product_ticket opt ON t.id = opt.ticket
         JOIN eshop.orders o ON opt."order" = o.id
         LEFT JOIN public.occasion_users ou ON t.id = ou.ticket
         WHERE t.occasion = p_occasion_id
-          AND t.state IN ('ordered', 'sent', 'used', 'paid') -- Only import users with valid tickets
-          AND ou.ticket IS NULL
+          AND t.state IN ('ordered', 'sent', 'used', 'paid')
         ORDER BY t.id, o.id DESC
     LOOP
         order_data := ticket_record.order_data;
@@ -85,74 +89,200 @@ BEGIN
         user_surname := order_data->>'surname';
         user_sex := NULL;
 
+        v_text1 := NULL;
+        v_text2 := NULL;
+        v_birthDate := NULL;
+
+        -- Extract Form Fields (Generic loop, checking specifically for known titles)
         IF jsonb_typeof(order_data->'fields') = 'array' THEN
             FOR field_element IN SELECT * FROM jsonb_array_elements(order_data->'fields')
             LOOP
                 field_key := (SELECT * FROM jsonb_object_keys(field_element));
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM public.form_fields
-                    WHERE id = field_key::bigint AND type = 'sex'
-                ) INTO is_sex_field;
-                IF is_sex_field THEN
-                    user_sex := field_element->>field_key;
-                    EXIT;
+                field_value := field_element->>field_key;
+
+                SELECT ff.type, ff.title
+                INTO field_info
+                FROM public.form_fields ff
+                WHERE ff.id = field_key::bigint;
+
+                -- Basic mappings
+                IF field_info.type = 'sex' THEN
+                    user_sex := field_value;
                 END IF;
+
+--                -- Custom mappings (removed IF ID=36 check to make it generic for the feature)
+--                CASE field_info.title
+--                    WHEN 'Typ účastníka' THEN
+--                        v_text1 := field_value;
+--                    WHEN 'Přípravný tým' THEN
+--                        v_text2 := field_value;
+--                    WHEN 'Datum narození' THEN
+--                        v_birthDate := field_value;
+--                    ELSE
+--                        -- Do nothing
+--                END CASE;
             END LOOP;
         END IF;
 
-        SELECT id INTO v_user_id FROM public.user_info WHERE email_readonly = user_email AND organization = v_organization_id;
+        -- ========================================================
+        -- CASE A: EXISTING OCCASION USER -> UPDATE BY ID
+        -- ========================================================
+        IF ticket_record.existing_occasion_user_id IS NOT NULL THEN
+            DECLARE
+                current_ou_data JSONB;
+                update_payload JSONB := '{}'::jsonb;
+                target_uuid UUID := ticket_record.existing_occasion_user_id; -- STRICT ID DEPENDENCY
+            BEGIN
+                -- Get current occasion data
+                SELECT data INTO current_ou_data
+                FROM public.occasion_users
+                WHERE "user" = target_uuid AND occasion = p_occasion_id;
 
-        IF v_user_id IS NOT NULL THEN
-            -- A user with this email already exists in the organization.
-            SELECT * INTO v_occasion_user_row FROM public.occasion_users WHERE "user" = v_user_id AND occasion = p_occasion_id;
+                -- Build payload comparing Order Data vs Current DB Data
+                IF user_email IS NOT NULL AND COALESCE(current_ou_data->>'email', 'NULL_FLAG') != user_email THEN
+                    update_payload := update_payload || jsonb_build_object('email', user_email);
+                END IF;
+                IF user_name IS NOT NULL AND COALESCE(current_ou_data->>'name', 'NULL_FLAG') != user_name THEN
+                    update_payload := update_payload || jsonb_build_object('name', user_name);
+                END IF;
+                IF user_surname IS NOT NULL AND COALESCE(current_ou_data->>'surname', 'NULL_FLAG') != user_surname THEN
+                    update_payload := update_payload || jsonb_build_object('surname', user_surname);
+                END IF;
+                IF user_sex IS NOT NULL AND COALESCE(current_ou_data->>'sex', 'NULL_FLAG') != user_sex THEN
+                    update_payload := update_payload || jsonb_build_object('sex', user_sex);
+                END IF;
+                -- Custom fields
+--                IF v_text1 IS NOT NULL AND COALESCE(current_ou_data->>'text1', 'NULL_FLAG') != v_text1 THEN
+--                    update_payload := update_payload || jsonb_build_object('text1', v_text1);
+--                END IF;
+--                IF v_text2 IS NOT NULL AND COALESCE(current_ou_data->>'text2', 'NULL_FLAG') != v_text2 THEN
+--                    update_payload := update_payload || jsonb_build_object('text2', v_text2);
+--                END IF;
+--                IF v_birthDate IS NOT NULL AND COALESCE(current_ou_data->>'birthDate', 'NULL_FLAG') != v_birthDate THEN
+--                    update_payload := update_payload || jsonb_build_object('birthDate', v_birthDate);
+--                END IF;
 
-            IF v_occasion_user_row."user" IS NOT NULL AND v_occasion_user_row.ticket IS NOT NULL THEN
-                -- SCENARIO 2: User exists and already has a ticket for this occasion.
-                email_suffix := 1;
-                email_local_part := split_part(user_email, '@', 1);
-                email_domain_part := split_part(user_email, '@', 2);
-                LOOP
-                    new_email := email_local_part || '+' || email_suffix || '@' || email_domain_part;
-                    IF NOT EXISTS (SELECT 1 FROM public.user_info WHERE email_readonly = new_email AND organization = v_organization_id) THEN
-                        EXIT;
+                -- Perform Updates if needed
+                IF update_payload != '{}'::jsonb THEN
+                    -- 1. Update Occasion Specific Data
+                    UPDATE public.occasion_users
+                    SET data = data || update_payload
+                    WHERE "user" = target_uuid
+                      AND occasion = p_occasion_id;
+
+                    -- 2. Update Global User Info (Sync core fields)
+                    UPDATE public.user_info
+                    SET
+                        name = COALESCE(update_payload->>'name', name),
+                        surname = COALESCE(update_payload->>'surname', surname),
+                        sex = COALESCE(update_payload->>'sex', sex)
+                    WHERE id = target_uuid;
+
+                    -- Logging
+                    SELECT ui.email_readonly, ui.name, ui.surname
+                    INTO update_report_info
+                    FROM public.user_info ui
+                    WHERE ui.id = target_uuid;
+
+                    updated_users := array_append(updated_users,
+                        jsonb_build_object(
+                            'id', target_uuid, -- Return ID for safety
+                            'email', update_report_info.email_readonly,
+                            'name', update_report_info.name,
+                            'surname', update_report_info.surname,
+                            'reason', 'data_sync',
+                            'changes', update_payload
+                        )
+                    );
+                END IF;
+            END;
+
+        -- ========================================================
+        -- CASE B: NO LINKED USER -> CREATE OR LINK (FALLBACK TO EMAIL)
+        -- ========================================================
+        ELSE
+            -- 1. Check if user exists globally by email
+            SELECT id INTO v_user_id
+            FROM public.user_info
+            WHERE email_readonly = user_email AND organization = v_organization_id;
+
+            IF v_user_id IS NOT NULL THEN
+                -- USER EXISTS GLOBALLY
+                SELECT * INTO v_occasion_user_row
+                FROM public.occasion_users
+                WHERE "user" = v_user_id AND occasion = p_occasion_id;
+
+                IF v_occasion_user_row."user" IS NOT NULL AND v_occasion_user_row.ticket IS NOT NULL THEN
+                    -- User exists on occasion AND has a ticket -> DUPLICATE EMAIL Conflict
+                    -- Create new user with +suffix
+                    email_suffix := 1;
+                    email_local_part := split_part(user_email, '@', 1);
+                    email_domain_part := split_part(user_email, '@', 2);
+                    LOOP
+                        new_email := email_local_part || '+' || email_suffix || '@' || email_domain_part;
+                        IF NOT EXISTS (SELECT 1 FROM public.user_info WHERE email_readonly = new_email AND organization = v_organization_id) THEN
+                            EXIT;
+                        END IF;
+                        email_suffix := email_suffix + 1;
+                    END LOOP;
+
+                    user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', new_email, 'sex', user_sex);
+--                    IF v_text1 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text1', v_text1); END IF;
+--                    IF v_text2 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text2', v_text2); END IF;
+--                    IF v_birthDate IS NOT NULL THEN user_data := user_data || jsonb_build_object('birthDate', v_birthDate); END IF;
+
+                    v_user_id := create_user_in_organization_with_data_pure(v_organization_id, new_email, gen_random_uuid()::text, user_data);
+                    PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
+                    UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
+
+                    inserted_users := array_append(inserted_users, jsonb_build_object('id', v_user_id, 'email', new_email, 'name', user_name, 'surname', user_surname));
+                ELSE
+                    -- LINK EXISTING USER (User exists, but no ticket on this occasion)
+
+                    user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', user_email, 'sex', user_sex);
+--                    IF v_text1 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text1', v_text1); END IF;
+--                    IF v_text2 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text2', v_text2); END IF;
+--                    IF v_birthDate IS NOT NULL THEN user_data := user_data || jsonb_build_object('birthDate', v_birthDate); END IF;
+
+                    -- Update Global Info
+                    UPDATE public.user_info
+                    SET
+                        name = user_name,
+                        surname = user_surname,
+                        sex = user_sex,
+                        data = COALESCE(user_info.data, '{}'::jsonb) || user_data
+                    WHERE id = v_user_id;
+
+                    IF v_occasion_user_row."user" IS NULL THEN
+                        -- Link to occasion
+                        PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
                     END IF;
-                    email_suffix := email_suffix + 1;
-                END LOOP;
 
-                user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', new_email, 'sex', user_sex);
-                v_user_id := create_user_in_organization_with_data(v_organization_id, new_email, gen_random_uuid()::text, user_data);
+                    -- Update Occasion Data & Ticket
+                    UPDATE public.occasion_users
+                    SET
+                        data = COALESCE(occasion_users.data, '{}'::jsonb) || user_data,
+                        ticket = ticket_record.ticket_id
+                    WHERE "user" = v_user_id AND occasion = p_occasion_id;
 
+                    updated_users := array_append(updated_users, jsonb_build_object('id', v_user_id, 'email', user_email, 'name', user_name, 'surname', user_surname, 'reason', 'initial_import_link'));
+                END IF;
+            ELSE
+                -- NEW USER CREATION
+                user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', user_email, 'sex', user_sex);
+--                IF v_text1 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text1', v_text1); END IF;
+--                IF v_text2 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text2', v_text2); END IF;
+--                IF v_birthDate IS NOT NULL THEN user_data := user_data || jsonb_build_object('birthDate', v_birthDate); END IF;
+
+                v_user_id := create_user_in_organization_with_data_pure(v_organization_id, user_email, gen_random_uuid()::text, user_data);
                 PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
                 UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
 
-                inserted_users := array_append(inserted_users, jsonb_build_object('email', new_email, 'name', user_name, 'surname', user_surname));
-            ELSE
-                -- SCENARIO 1: User exists, but either isn't linked to the occasion yet, or is linked but without a ticket.
-                user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'sex', user_sex);
-                PERFORM update_user(v_user_id, p_occasion_id, user_data);
-
-                IF v_occasion_user_row."user" IS NULL THEN
-                    PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
-                END IF;
-
-                UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
-
-                updated_users := array_append(updated_users, jsonb_build_object('email', user_email, 'name', user_name, 'surname', user_surname));
+                inserted_users := array_append(inserted_users, jsonb_build_object('id', v_user_id, 'email', user_email, 'name', user_name, 'surname', user_surname));
             END IF;
-        ELSE
-            -- NEW USER: No user with this email exists in the organization.
-            user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', user_email, 'sex', user_sex);
-            v_user_id := create_user_in_organization_with_data(v_organization_id, user_email, gen_random_uuid()::text, user_data);
-
-            PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
-            UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
-
-            inserted_users := array_append(inserted_users, jsonb_build_object('email', user_email, 'name', user_name, 'surname', user_surname));
         END IF;
     END LOOP;
 
-    -- Return the results as a JSONB object, now including the deleted users.
     RETURN jsonb_build_object(
         'inserted', to_jsonb(inserted_users),
         'updated', to_jsonb(updated_users),

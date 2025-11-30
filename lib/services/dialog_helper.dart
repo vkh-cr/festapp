@@ -239,6 +239,43 @@ class DialogHelper{
     return result;
   }
 
+
+  static Future<bool> showConfirmationDialogRichText(
+      BuildContext context,
+      String titleMessage,
+      Text textMessage, {
+        String confirmButtonMessage = "Ok",
+        String cancelButtonMessage = "Storno",
+      }) async {
+    bool result = false;
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(titleMessage),
+          content: SingleChildScrollView(child: textMessage),
+          actions: [
+            TextButton(
+              child: Text(cancelButtonMessage),
+              onPressed: () {
+                result = false;
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text(confirmButtonMessage),
+              onPressed: () {
+                result = true;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return result;
+  }
+
   static Future<bool> showConfirmationDialogRich({
     required BuildContext context,
     required String title,
@@ -694,5 +731,51 @@ class DialogHelper{
         );
       },
     );
+  }
+
+  /// Shows a dialog for a single long-running task (like a download)
+  /// and returns the result of the future.
+  static Future<T?> showFutureProgressDialog<T>({
+    required BuildContext context,
+    required String title,
+    required Future<T> Function() futureCallback,
+  }) async {
+    // 1. Show the dialog immediately
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const LinearProgressIndicator(), // Indeterminate loading
+              const SizedBox(height: 20),
+              Text("Processing...".tr()),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      // 2. Await the task
+      final result = await futureCallback();
+
+      // 3. Close the dialog on success
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+      return result;
+    } catch (e) {
+      // 4. Close the dialog on error and handle it
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        // Optional: Show error info
+        ToastHelper.Show(context, "Error: $e");
+      }
+      return null;
+    }
   }
 }

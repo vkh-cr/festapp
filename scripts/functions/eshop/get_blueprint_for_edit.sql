@@ -99,7 +99,9 @@ BEGIN
         'title', p.title,
         'price', p.price,
         'type', pt.type,
-        'description', pt.description
+        'description', pt.description,
+        'product_type', p.product_type,
+        'currency_code', p.currency_code
     ))
     INTO productsData
     FROM eshop.products p
