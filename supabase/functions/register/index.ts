@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Create the user via RPC
-    await supabaseAdmin.rpc("create_user_in_organization_with_data", {
+    await supabaseAdmin.rpc("create_user_in_organization_with_data_ws", {
       org: organizationId,
       email: userEmail,
       password: code,

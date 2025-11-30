@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/forms/models/id_document_field_holder.dart';
@@ -12,7 +12,7 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:flutter/services.dart';
 
-
+import 'birth_year_field_builder.dart';
 import '../models/field_holder.dart';
 import '../models/form_holder.dart';
 import '../models/form_ticket_model.dart';
@@ -217,33 +217,37 @@ class FormFieldBuilders {
   }
 
   static Widget buildTextField(
-      BuildContext context, FieldHolder fieldHolder, Iterable<String> autofillHints) {
+      BuildContext context, FormHolder formHolder, FieldHolder fieldHolder, Iterable<String> autofillHints) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
+      formHolder: formHolder,
       autofillHints: autofillHints,
       isEmail: false,
     );
   }
 
-  static Widget buildEmailField(BuildContext context, FieldHolder fieldHolder) {
+  static Widget buildEmailField(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
+      formHolder: formHolder,
       autofillHints: [AutofillHints.email],
       isEmail: true,
     );
   }
 
-  static Widget buildPhoneNumber(BuildContext context, FieldHolder fieldHolder) {
+  static Widget buildPhoneNumber(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
+      formHolder: formHolder,
       autofillHints: [AutofillHints.telephoneNumber],
       isPhone: true,
     );
   }
 
-  static Widget buildAddressField(BuildContext context, FieldHolder fieldHolder) {
+  static Widget buildAddressField(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
+      formHolder: formHolder,
       autofillHints: [
         AutofillHints.fullStreetAddress,
         AutofillHints.streetAddressLevel1,
@@ -255,9 +259,10 @@ class FormFieldBuilders {
     );
   }
 
-  static Widget buildNationalityField(BuildContext context, FieldHolder fieldHolder) {
+  static Widget buildNationalityField(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
+      formHolder: formHolder,
       autofillHints: [AutofillHints.countryName],
       isNationality: true,
     );
@@ -276,31 +281,11 @@ class FormFieldBuilders {
     );
   }
 
-  static FormBuilderTextField buildBirthYearField(BuildContext context, FieldHolder fieldHolder) {
-    FocusNode focusNode = FocusNode();
-    return FormBuilderTextField(
-      name: fieldHolder.id.toString(),
-      focusNode: focusNode,
-      decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
-      ),
-      validator: FormBuilderValidators.compose([
-        if (fieldHolder.isRequired) FormBuilderValidators.required(),
-            (value) {
-          if (value == null || value.isEmpty || value == "") {
-            return null;
-          }
-          if (int.tryParse(value) == null) {
-            return NumericValidator().translatedErrorText;
-          }
-          final numericValue = int.parse(value);
-          if (numericValue < 1900 || numericValue > DateTime.now().year - 12) {
-            return RangeValidator(DateTime.now().year - 12, 1900).translatedErrorText;
-          }
-          return null;
-        },
-      ]),
-      keyboardType: TextInputType.number,
+  static Widget buildBirthYearField(
+      BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
+    return BirthYearFieldBuilder(
+      fieldHolder: fieldHolder,
+      formHolder: formHolder,
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
+import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +51,7 @@ class FormHelper {
   static const String metaSelectionType = "selection_type";
   static const String metaSelectionTypeMany = "select_many";
   static const String metaSelectionTypeOne = "select_one";
+  static const String maxTickets = "max_tickets";
 
   static const String metaOptions = "options";
   static const String metaFields = "fields";
@@ -61,6 +62,9 @@ class FormHelper {
   static const String metaForm = "form";
   static const String metaEmpty = "---";
   static const String metaProducts = "products";
+  static const String metaCommunicationTone = "communication_tone";
+  static const String metaReplyTo = "reply_to";
+
 
   // Labels and messages
   static String noteLabel() => "Note".tr();
@@ -107,6 +111,18 @@ class FormHelper {
     FormHelper.fieldTypeTicket: Icons.confirmation_number,
     FormHelper.fieldTypePhone: Icons.phone,
   };
+
+  static const List<String> nonEditableFields = [
+    fieldTypeSex,
+    fieldTypeBirthYear,
+    fieldTypeBirthDate,
+    fieldTypeIdDocument,
+    fieldTypeSelectMany,
+    fieldTypeNote,
+    fieldTypeSpot,
+    fieldTypeProductType,
+    fieldTypeTicket
+  ];
 
   static const List<String> personalInfoFields = [
     fieldTypeName,
@@ -358,34 +374,34 @@ class FormHelper {
     final bool isRequiredField = field.isRequired;
     switch (field.fieldType) {
       case fieldTypeText:
-        return FormFieldBuilders.buildTextField(context, field, []);
+        return FormFieldBuilders.buildTextField(context, formHolder, field, []);
       case fieldTypeNote:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, noteLabel());
-        return FormFieldBuilders.buildTextField(context, field, []);
+        return FormFieldBuilders.buildTextField(context, formHolder, field, []);
       case fieldTypeName:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, nameLabel());
-        return FormFieldBuilders.buildTextField(context, field, [AutofillHints.givenName]);
+        return FormFieldBuilders.buildTextField(context, formHolder, field, [AutofillHints.givenName]);
       case fieldTypeSurname:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, surnameLabel());
-        return FormFieldBuilders.buildTextField(context, field, [AutofillHints.familyName]);
+        return FormFieldBuilders.buildTextField(context, formHolder, field, [AutofillHints.familyName]);
       case fieldTypeCity:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, cityLabel());
-        return FormFieldBuilders.buildTextField(context, field, [AutofillHints.addressCity]);
+        return FormFieldBuilders.buildTextField(context, formHolder, field, [AutofillHints.addressCity]);
       case fieldTypeAddress:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, addressLabel());
-        return FormFieldBuilders.buildAddressField(context, field);
+        return FormFieldBuilders.buildAddressField(context, formHolder, field);
       case fieldTypeNationality:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, nationalityLabel());
-        return FormFieldBuilders.buildNationalityField(context, field);
+        return FormFieldBuilders.buildNationalityField(context, formHolder, field);
       case fieldTypeSpot:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, spotLabel());
         return FormFieldBuilders.buildSpotField(context, formKey, formHolder, field);
       case fieldTypeEmail:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, emailLabel());
-        return FormFieldBuilders.buildEmailField(context, field);
+        return FormFieldBuilders.buildEmailField(context, formHolder, field);
       case fieldTypePhone:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, phoneLabel());
-        return FormFieldBuilders.buildPhoneNumber(context, field);
+        return FormFieldBuilders.buildPhoneNumber(context, formHolder, field);
       case fieldTypeSex:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, sexLabel());
         var sexOptions = [
@@ -426,7 +442,7 @@ class FormHelper {
         );
       case fieldTypeBirthYear:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, birthYearLabel());
-        return FormFieldBuilders.buildBirthYearField(context, field);
+        return FormFieldBuilders.buildBirthYearField(context, formHolder, field);
       case fieldTypeTicket:
         var ticketHolder = field as TicketHolder;
         return FormFieldBuilders.buildTicketField(context, formHolder, ticketHolder);

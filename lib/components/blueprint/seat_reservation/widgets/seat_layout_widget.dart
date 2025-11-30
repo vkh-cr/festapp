@@ -1,0 +1,190 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fstapp/widgets/text_tooltip_widget.dart';
+
+import 'seat_layout_controller.dart';
+import '../model/seat_model.dart';
+import 'seat_widget.dart';
+
+class SeatLayoutWidget extends StatefulWidget {
+  final SeatLayoutController controller;
+  final void Function(SeatModel model)? onSeatTap;
+  final bool? isEditorMode;
+
+  static const Color _defaultBackgroundColor = Colors.white;
+
+  const SeatLayoutWidget({
+    super.key,
+    required this.controller,
+    this.onSeatTap,
+    this.isEditorMode,
+  });
+
+  @override
+  _SeatLayoutWidgetState createState() => _SeatLayoutWidgetState();
+}
+
+class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
+  final GlobalKey _layoutKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // Attach the key and a listener to rebuild on state changes
+    widget.controller.attachLayoutKey(_layoutKey);
+    widget.controller.addListener(_onStateChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onStateChanged);
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant SeatLayoutWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the controller instance changes, swap listeners
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller.removeListener(_onStateChanged);
+      widget.controller.attachLayoutKey(_layoutKey);
+      widget.controller.addListener(_onStateChanged);
+    }
+  }
+
+  // Rebuild the widget when the controller notifies
+  void _onStateChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  /// Helper method to build the background from either an SVG string or a URL.
+  Widget _buildBackgroundWidget(String backgroundSource, double width, double height) {
+    final trimmedSource = backgroundSource.trim();
+    final isUrl = trimmedSource.startsWith('http://') || trimmedSource.startsWith('https://');
+    final isSvg = trimmedSource.startsWith('<svg');
+
+    if (isUrl) {
+      return Image.network(
+        trimmedSource,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(child: CircularProgressIndicator());
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return const Center(child: Icon(Icons.error_outline, color: Colors.red));
+        },
+      );
+    }
+
+    if (isSvg) {
+      return SvgPicture.string(
+        trimmedSource,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Get all state directly from the controller
+    double layoutWidth = (widget.controller.cols * widget.controller.seatSize).toDouble();
+    double layoutHeight = (widget.controller.rows * widget.controller.seatSize).toDouble();
+    final backgroundSource = widget.controller.backgroundSvg;
+
+    // Wrap InteractiveViewer in a Container and attach the key here.
+    // This allows the controller to get the correct viewport size.
+    return Container(
+      key: _layoutKey,
+      child: InteractiveViewer(
+        minScale: widget.controller.minScale,
+        maxScale: 5,
+        boundaryMargin: const EdgeInsets.all(double.infinity),
+        constrained: false,
+        transformationController: widget.controller.transformationController,
+        child: RepaintBoundary(
+          child: Stack(
+            children: [
+              // Background
+              Positioned.fill(
+                child: Container(
+                  width: layoutWidth,
+                  height: layoutHeight,
+                  decoration: BoxDecoration(
+                    color: SeatLayoutWidget._defaultBackgroundColor,
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: backgroundSource != null && backgroundSource.isNotEmpty
+                      ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: _buildBackgroundWidget(backgroundSource, layoutWidth, layoutHeight),
+                  )
+                      : null,
+                ),
+              ),
+              // Seats
+              SizedBox(
+                width: layoutWidth,
+                height: layoutHeight,
+                child: Stack(
+                  children: widget.controller.seats
+                      .where((seatModel) =>
+                  (seatModel.objectModel != null &&
+                      seatModel.objectModel!.id != null) ||
+                      widget.isEditorMode == true)
+                      .map((seatModel) {
+                    return Positioned(
+                      left: seatModel.colI * seatModel.seatSize.toDouble(),
+                      top: seatModel.rowI * seatModel.seatSize.toDouble(),
+                      child: seatModel.objectModel == null
+                          ? GestureDetector(
+                        onTap: () {
+                          if (widget.onSeatTap != null) {
+                            widget.onSeatTap!(seatModel);
+                          }
+                        },
+                        child: SeatWidgetHelper.buildSeat(
+                          context: context,
+                          state: seatModel.seatState,
+                          isHighlightedForSwap: seatModel.isHighlightedForSwap,
+                          isHighlightedForGroup: seatModel.isHighlightedForGroup,
+                          size: seatModel.seatSize.toDouble(),
+                        ),
+                      )
+                          : TextTooltipWidget(
+                        content:
+                        "${seatModel.objectModel?.blueprintTooltip(context)}",
+                        child: GestureDetector(
+                          onTap: () {
+                            if (widget.onSeatTap != null) {
+                              widget.onSeatTap!(seatModel);
+                            }
+                          },
+                          child: SeatWidgetHelper.buildSeat(
+                            context: context,
+                            state: seatModel.seatState,
+                            isHighlightedForSwap: seatModel.isHighlightedForSwap,
+                            isHighlightedForGroup: seatModel.isHighlightedForGroup,
+                            size: seatModel.seatSize.toDouble(),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
