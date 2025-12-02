@@ -166,6 +166,9 @@ class _BlueprintTabState extends State<BlueprintTab> {
             isEditorMode: true,
             controller: _seatLayoutController,
             onSeatTap: handleSeatTap,
+            shouldShowTooltipOnTap: (model) {
+              return currentSelectionMode == selectionMode.none;
+            },
           ),
         ),
         const SizedBox(height: 16),
@@ -353,6 +356,10 @@ class _BlueprintTabState extends State<BlueprintTab> {
   /// Main Tap Handler
   void handleSeatTap(SeatModel model) {
     if (currentSelectionMode != selectionMode.createNewOrder && _isSeatOccupied(model.objectModel)) {
+      if (currentSelectionMode == selectionMode.none) {
+        // Do nothing, let the tooltip handle it (via SeatLayoutWidget)
+        return;
+      }
       if (currentSelectionMode != selectionMode.swapSeats) {
         ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
             severity: ToastSeverity.NotOk);
@@ -660,40 +667,17 @@ class _BlueprintTabState extends State<BlueprintTab> {
   void _editGroupProduct(BlueprintGroupModel group) async {
     if (blueprint == null) return;
 
-    final bool hasOccupiedSeats = group.objects.any(_isSeatOccupied);
-    if (hasOccupiedSeats) {
-      ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
-          severity: ToastSeverity.NotOk);
-      return;
-    }
-
-    final currentProduct = group.product ??
-        (group.objects.isNotEmpty
-            ? group.objects.first.product
-            : null);
-
-    final selectedProduct = await showDialog<ProductModel>(
+    // Open the Unified Manager Dialog
+    await showDialog(
       context: context,
-      builder: (BuildContext dialogContext) {
-        return SelectProductDialog(
-          blueprint: blueprint!,
-          currentProductId: currentProduct?.id,
-        );
-      },
+      builder: (context) => GroupProductManagerDialog(
+        blueprint: blueprint!,
+        group: group,
+      ),
     );
 
-    if (selectedProduct != null) {
-      setState(() {
-        group.product = selectedProduct;
-        for (var obj in group.objects) {
-          obj.product = selectedProduct;
-          obj.spotProduct = selectedProduct.id;
-        }
-      });
-      ToastHelper.Show(context, BlueprintStrings.productAssigned, severity: ToastSeverity.Ok);
-    } else {
-      setState(() {});
-    }
+    // Refresh UI after dialog closes to show changes in price/titles
+    setState(() {});
   }
 
   void saveChanges() async {

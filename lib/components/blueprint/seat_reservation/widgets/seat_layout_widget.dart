@@ -10,6 +10,7 @@ class SeatLayoutWidget extends StatefulWidget {
   final SeatLayoutController controller;
   final void Function(SeatModel model)? onSeatTap;
   final bool? isEditorMode;
+  final bool Function(SeatModel model)? shouldShowTooltipOnTap;
 
   static const Color _defaultBackgroundColor = Colors.white;
 
@@ -18,6 +19,7 @@ class SeatLayoutWidget extends StatefulWidget {
     required this.controller,
     this.onSeatTap,
     this.isEditorMode,
+    this.shouldShowTooltipOnTap,
   });
 
   @override
@@ -160,14 +162,19 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                         ),
                       )
                           : TextTooltipWidget(
+                        triggerMode: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
+                            ? TooltipTriggerMode.tap
+                            : null,
                         content:
                         "${seatModel.objectModel?.blueprintTooltip(context)}",
                         child: GestureDetector(
-                          onTap: () {
-                            if (widget.onSeatTap != null) {
-                              widget.onSeatTap!(seatModel);
-                            }
-                          },
+                          onTap: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
+                              ? null
+                              : () {
+                                  if (widget.onSeatTap != null) {
+                                    widget.onSeatTap!(seatModel);
+                                  }
+                                },
                           child: SeatWidgetHelper.buildSeat(
                             context: context,
                             state: seatModel.seatState,

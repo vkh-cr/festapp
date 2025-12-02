@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -8,6 +7,8 @@ import 'package:fstapp/components/forms/widgets_view/form_field_builders.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:flutter/services.dart';
+import 'package:fstapp/components/forms/widgets_view/phone_input_formatter.dart';
 
 import '../form_strings.dart';
 
@@ -43,6 +44,18 @@ class TextFieldBuilder extends StatelessWidget {
   Widget _buildStandardTextField(BuildContext context) {
     FocusNode focusNode = FocusNode();
     List<String? Function(String?)> validators = [];
+    
+    // Default prefill for phone
+    if (isPhone) {
+      var field = FormBuilder.of(context)?.fields[fieldHolder.id.toString()];
+      if (field != null && (field.value == null || field.value.toString().isEmpty)) {
+        // We can't easily set initial value here for FormBuilderTextField without controller or initialValue param
+        // But FormBuilderTextField takes initialValue.
+        // However, we are inside build.
+        // Let's use the initialValue of FormBuilderTextField if possible, but it depends on fieldHolder.
+        // Actually, we can just set it in the FormBuilderTextField's initialValue if it's not set in formHolder.
+      }
+    }
 
     if (fieldHolder.isRequired) {
       validators.add(FormBuilderValidators.required());
@@ -55,28 +68,61 @@ class TextFieldBuilder extends StatelessWidget {
     }
 
     if (isPhone) {
-      validators.add(FormBuilderValidators.phoneNumber(regex: RegExp(r'^\+?[1-9]\d{9,12}$'), checkNullOrEmpty: false));
+      validators.add(FormBuilderValidators.phoneNumber(
+        regex: RegExp(r'^\+?[0-9]{' + PhoneInputFormatter.kMaxPhoneNumberLength.toString() + r'}$'),
+        checkNullOrEmpty: false,
+        errorText: FormStrings.phoneFormatValidation,
+      ));
     }
 
-    return FormBuilderTextField(
-      maxLines: null,
-      name: fieldHolder.id.toString(),
-      focusNode: focusNode,
-      autofillHints: autofillHints,
-      autovalidateMode: isEmail || isPhone
-          ? AutovalidateMode.onUnfocus
-          : AutovalidateMode.onUserInteraction,
-      decoration: InputDecoration(
-        label: FormFieldBuilders.buildTitleWidget(
-          fieldHolder.title!,
-          fieldHolder.isRequired,
-          context,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FormBuilderTextField(
+          maxLines: null,
+          name: fieldHolder.id.toString(),
+          initialValue: isPhone ? '+420' : null,
           focusNode: focusNode,
+          autofillHints: autofillHints,
+          autovalidateMode: isEmail || isPhone
+              ? AutovalidateMode.onUnfocus
+              : AutovalidateMode.onUserInteraction,
+          decoration: InputDecoration(
+            hintText: isPhone ? FormStrings.phoneFormatHint : null,
+            label: FormFieldBuilders.buildTitleWidget(
+              fieldHolder.title!,
+              fieldHolder.isRequired,
+              context,
+              focusNode: focusNode,
+            ),
+          ),
+          inputFormatters: isPhone ? [PhoneInputFormatter()] : null,
+          validator: validators.isNotEmpty
+              ? FormBuilderValidators.compose(validators)
+              : null,
+          onChanged: (value) {
+            // Intelligent validation: if field has error, validate on change to clear it immediately when fixed
+            var field = FormBuilder.of(context)?.fields[fieldHolder.id.toString()];
+            if (field != null && field.hasError) {
+              field.validate();
+            }
+          },
         ),
-      ),
-      validator: validators.isNotEmpty
-          ? FormBuilderValidators.compose(validators)
-          : null,
+        if (isPhone)
+          _PhonePrefixHelpers(
+            onPrefixSelected: (prefix) {
+              // Keep focus to prevent onUnfocus validation
+              focusNode.requestFocus();
+              
+              var field = FormBuilder.of(context)?.fields[fieldHolder.id.toString()];
+              if (field != null) {
+                String current = field.value?.toString() ?? '';
+                String newText = _applyPrefix(current, prefix);
+                field.didChange(newText);
+              }
+            },
+          ),
+      ],
     );
   }
 
@@ -94,7 +140,11 @@ class TextFieldBuilder extends StatelessWidget {
     }
 
     if (isPhone) {
-      validators.add(FormBuilderValidators.phoneNumber(regex: RegExp(r'^\+?[1-9]\d{9,12}$'), checkNullOrEmpty: false));
+      validators.add(FormBuilderValidators.phoneNumber(
+        regex: RegExp(r'^\+?[0-9]{' + PhoneInputFormatter.kMaxPhoneNumberLength.toString() + r'}$'),
+        checkNullOrEmpty: false,
+        errorText: FormStrings.phoneFormatValidation,
+      ));
     }
 
     return ClipRect(
@@ -144,16 +194,22 @@ class _CardTextField extends StatefulWidget {
 
 class _CardTextFieldState extends State<_CardTextField> {
   late final TextEditingController _controller;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.field.value);
+    String? initialValue = widget.field.value;
+    if (widget.isPhone && (initialValue == null || initialValue.isEmpty)) {
+      initialValue = '+420';
+    }
+    _controller = TextEditingController(text: initialValue);
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -175,6 +231,12 @@ class _CardTextFieldState extends State<_CardTextField> {
     return TextInputType.text;
   }
 
+  String? _getPrefixFromText(String text) {
+    if (text.startsWith('+420')) return '+420';
+    if (text.startsWith('+421')) return '+421';
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return FormHelper.buildCardWrapperDesign(
@@ -186,11 +248,13 @@ class _CardTextFieldState extends State<_CardTextField> {
         children: [
           TextField(
             controller: _controller,
+            focusNode: _focusNode,
             maxLines: null,
             autofillHints: widget.autofillHints,
             keyboardType: _getKeyboardType(),
+            inputFormatters: widget.isPhone ? [PhoneInputFormatter()] : null,
             decoration: InputDecoration(
-              hintText: FormStrings.typeHere,
+              hintText: widget.isPhone ? FormStrings.phoneFormatHint : FormStrings.typeHere,
               isDense: true,
               contentPadding: const EdgeInsets.fromLTRB(2, 12, 2, 12),
               border: const UnderlineInputBorder(),
@@ -206,8 +270,27 @@ class _CardTextFieldState extends State<_CardTextField> {
             ),
             onChanged: (value) {
               widget.field.didChange(value.isEmpty ? null : value);
+              // Intelligent validation: if field has error, validate on change to clear it immediately when fixed
+              if (widget.field.hasError) {
+                widget.field.validate();
+              }
             },
           ),
+          if (widget.isPhone)
+            _PhonePrefixHelpers(
+              onPrefixSelected: (prefix) {
+                // Keep focus to prevent onUnfocus validation
+                _focusNode.requestFocus();
+                
+                String current = _controller.text;
+                String newText = _applyPrefix(current, prefix);
+                _controller.value = TextEditingValue(
+                  text: newText,
+                  selection: TextSelection.collapsed(offset: newText.length),
+                );
+                widget.field.didChange(newText);
+              },
+            ),
           if (widget.field.hasError)
             Padding(
               padding: const EdgeInsets.only(top: 8.0, left: 2.0),
@@ -220,6 +303,76 @@ class _CardTextFieldState extends State<_CardTextField> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+String _applyPrefix(String current, String prefix) {
+  String result = current;
+  if (current.startsWith(prefix)) {
+    result = current;
+  } else if (current.startsWith('+420')) {
+    result = prefix + current.substring(4);
+  } else if (current.startsWith('+421')) {
+    result = prefix + current.substring(4);
+  } else if (current.startsWith('+')) {
+     // If starts with +, replace until space or just replace first 4 chars if they are +ddd?
+     // Safest is: if empty, set prefix. If starts with +, replace.
+     // But user might have typed +1.
+     // Let's stick to replacing known prefixes or just prepending if empty.
+     // If user typed +123, and clicks +420, maybe they want to replace +123?
+     // Let's go with: replace known prefixes, otherwise prepend/replace start.
+     result = prefix + current.substring(current.indexOf(' ') > 0 ? current.indexOf(' ') : current.length); 
+  } else {
+    result = prefix + current;
+  }
+
+  // Clean and enforce max length using shared logic
+  String cleaned = PhoneInputFormatter.cleanPhoneNumber(result);
+  
+  // Re-apply formatting to the result
+  return PhoneInputFormatter.formatPhoneNumber(cleaned);
+}
+
+class _PhonePrefixHelpers extends StatelessWidget {
+  final Function(String) onPrefixSelected;
+
+  const _PhonePrefixHelpers({required this.onPrefixSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Wrap(
+        spacing: 8.0,
+        children: [
+          _buildChip(context, 'CZ +420', '+420'),
+          _buildChip(context, 'SK +421', '+421'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChip(BuildContext context, String label, String value) {
+    return InkWell(
+      onTap: () => onPrefixSelected(value),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).primaryColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
   }
