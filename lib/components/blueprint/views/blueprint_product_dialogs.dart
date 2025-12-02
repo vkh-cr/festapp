@@ -71,7 +71,7 @@ class _SelectProductDialogState extends State<SelectProductDialog> {
           if (_spotProducts.isEmpty) {
             ToastHelper.Show(
               context,
-              "Cannot create product: At least one 'Spot' product must exist to act as a template.",
+              BlueprintStrings.toastNoTemplateProduct,
               severity: ToastSeverity.NotOk,
             );
             return;
@@ -553,7 +553,7 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
                       Icon(Icons.format_list_bulleted, size: 48, color: Theme.of(context).disabledColor),
                       const SizedBox(height: 16),
                       Text(
-                        "All seats share the same product.\nEnable the switch to customize specific seats.",
+                        BlueprintStrings.uniformViewHelp,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
