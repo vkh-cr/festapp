@@ -877,6 +877,16 @@
     "approved": "Approved",
     "invited": "Invited"
   },
+  "OrderHistory": {
+    "noHistoryFound": "No history found.",
+    "currentState": "Current state",
+    "systemUser": "SYSTEM",
+    "changes": "Changes",
+    "totalPrice": "Total price",
+    "noProductChanges": "No changes in products.",
+    "expiredOrderTooltip": "Expired order",
+    "toBasicString": "History No. {id} for Order No. {orderId}"
+  },
   "ProductsDialog": {
     "productsUpdateSuccess": "Products updated successfully.",
     "productsUpdateFailed": "Failed to update products.",
@@ -1157,7 +1167,18 @@
     "createOrderHelp": "Select seats to create a new order (even occupied ones).",
     "btnCreateOrder": "Create Order",
     "confirmOrder": "Confirm Order",
-    "orderCreatedSuccess": "Order created successfully."
+    "orderCreatedSuccess": "Order created successfully.",
+    "manageGroupProducts": "Manage Group Products",
+    "groupDefaultProduct": "Group Product",
+    "individualSeats": "Individual Seats",
+    "customizeIndividualSeats": "Customize individual seats",
+    "occupiedWarningInline": "Note: Changing products here will NOT affect existing orders.",
+    "customProductLabel": "Custom",
+    "productAssignedToAll": "Product assigned to all seats.",
+    "statusUniform": "Applied to all seats",
+    "statusMixed": "Mixed products",
+    "currentProductPrefix": "Current: ",
+    "mixedProducts": "Mixed / Various"
   },
   "OccasionSettings": {
     "title": "Title",
