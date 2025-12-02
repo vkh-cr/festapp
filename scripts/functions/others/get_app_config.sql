@@ -243,7 +243,7 @@ BEGIN
 
     -- Fetch full unit details as a JSON object
     IF occasion_unit IS NOT NULL THEN
-        SELECT json_build_object('id', u.id, 'title', u.title)
+        SELECT json_build_object('id', u.id, 'title', u.title)dat, a', u.data
           INTO unit_json
         FROM units u
         WHERE u.id = occasion_unit;

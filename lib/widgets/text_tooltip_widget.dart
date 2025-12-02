@@ -4,17 +4,22 @@ import 'package:fstapp/theme_config.dart';
 class TextTooltipWidget extends StatelessWidget {
   final String content;
   final Widget child;
+  final TooltipTriggerMode? triggerMode;
 
   const TextTooltipWidget({
     super.key,
     required this.content,
     required this.child,
+    this.triggerMode,
   });
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      showDuration: const Duration(seconds: 0),
+      triggerMode: triggerMode,
+      showDuration: triggerMode == TooltipTriggerMode.tap
+          ? const Duration(days: 1)
+          : const Duration(seconds: 0),
       message: content,
       decoration: BoxDecoration(
         color: ThemeConfig.whiteColor(context),
