@@ -15,6 +15,7 @@ import 'package:fstapp/pages/unit/unit_users_screen.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'package:fstapp/pages/unit/unit_settings_screen.dart';
 import 'unit_page.dart';
 
 @RoutePage()
@@ -51,19 +52,38 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
     _loadOrganization();
   }
 
-  Future<void> _loadOrganization() async {
+  Future<void> _loadOrganization({bool force = false}) async {
     await AppConfigService.versionCheck(context);
-    if (RightsService.currentUnit()?.id != widget.id!){
-      await RightsService.updateAppData(unitId: widget.id!);
+    if (RightsService.currentUnit()?.id != widget.id! || force) {
+      await RightsService.updateAppData(unitId: widget.id!, force: force);
     }
     _currentUnit = await DbUsers.getCurrentUnit(widget.id!);
     if (_currentUnit != null) {
-      _setCurrentScreen(OccasionsScreen(unit: _currentUnit!), "Occasions");
+      // If we are already on a screen, keep it, otherwise default to Occasions
+      if (_currentMenu.isEmpty) {
+        _setCurrentScreen(OccasionsScreen(unit: _currentUnit!), "Occasions");
+      } else {
+        // Refresh the current screen if needed, or just let the user stay where they are.
+        // For Settings, we might want to re-inject the updated unit.
+        if (_currentMenu == "Settings") {
+          _setCurrentScreen(
+              UnitSettingsScreen(
+                  unit: _currentUnit!,
+                  onUnitUpdated: _handleUnitUpdate
+              ),
+              "Settings"
+          );
+        }
+      }
     } else if (mounted) {
       setState(() {
         _currentScreen = Center(child: Text("Failed to load unit data.".tr()));
       });
     }
+  }
+
+  void _handleUnitUpdate() {
+    _loadOrganization(force: true);
   }
 
   @override
@@ -99,11 +119,12 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
                       ),
                     ],
                   ),
-                  SideMenu(
-                    onMenuItemSelected: _setCurrentScreen,
-                    unit: _currentUnit,
-                    currentMenu: _currentMenu,
-                  ),
+                    SideMenu(
+                      onMenuItemSelected: _setCurrentScreen,
+                      unit: _currentUnit,
+                      currentMenu: _currentMenu,
+                      onUnitUpdated: _handleUnitUpdate,
+                    ),
                 ],
               ),
             ),
@@ -125,6 +146,7 @@ class SideMenu extends StatefulWidget {
   final Function(Widget, String) onMenuItemSelected;
   final UnitModel? unit;
   final String currentMenu;
+  final VoidCallback onUnitUpdated;
 
   static const double collapsedWidth = 56.0;
   static const double expandedWidth = 220.0;
@@ -134,6 +156,7 @@ class SideMenu extends StatefulWidget {
     required this.onMenuItemSelected,
     required this.unit,
     required this.currentMenu,
+    required this.onUnitUpdated,
   });
 
   @override
@@ -238,6 +261,26 @@ class _SideMenuState extends State<SideMenu> {
                           QuotesTab(unitId: widget.unit!.id!),
                           "Quotes",
                         );
+                      },
+                      ),
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.settings,
+                      label: "Settings".tr(),
+                      isSelected: widget.currentMenu == "Settings",
+                      isExpanded: _isExpanded,
+                      isHovered: _hoveredLabel == "Settings".tr(),
+                      onHover: (label) => setState(() => _hoveredLabel = label),
+                      onTap: () {
+                        if (widget.unit != null) {
+                          widget.onMenuItemSelected(
+                            UnitSettingsScreen(
+                              unit: widget.unit!,
+                              onUnitUpdated: widget.onUnitUpdated,
+                            ),
+                            "Settings",
+                          );
+                        }
                       },
                     ),
                 ],

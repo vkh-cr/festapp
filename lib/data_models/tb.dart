@@ -84,6 +84,7 @@ class OccasionsTb {
   String get data_features_is_enabled => "is_enabled";
 
   String get data_timezone => "timezone";
+  String get data_reply_to => "reply_to";
 }
 class OccasionUsersTb{
   const OccasionUsersTb();
@@ -380,6 +381,7 @@ class UnitsTb {
   String get organization => "organization";
   String get features => "features";
   String get data => "data";
+  String get data_reply_to => "reply_to";
 }
 
 class UnitUsersTb {
