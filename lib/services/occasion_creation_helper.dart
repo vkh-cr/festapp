@@ -187,7 +187,7 @@ class OccasionCreationHelper {
                             isPromoted: false,
                             unit: unit.id,
                             organization: unit.organization,
-                            data: { Tb.occasions.data_timezone: TimeHelper.getSystemTimezoneName() },
+                            data: { Tb.occasions.data_timezone: unit.data?[Tb.occasions.data_timezone] ?? TimeHelper.getSystemTimezoneName() },
                           );
 
                           await DbOccasions.updateOccasion(newOccasion);

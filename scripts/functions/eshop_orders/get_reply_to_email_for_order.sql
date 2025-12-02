@@ -5,14 +5,16 @@ RETURNS TEXT
 LANGUAGE sql
 STABLE
 AS $$
-    -- This function retrieves the 'reply_to' email for a given order
     -- by joining its occasion and extracting the email from the occasion's 'data'.
+    -- If occasion's reply_to is null, it falls back to the unit's reply_to.
     SELECT
-        occ.data->>'reply_to'
+        COALESCE(occ.data->>'reply_to', u.data->>'reply_to')
     FROM
         eshop.orders AS ord
     JOIN
         public.occasions AS occ ON ord.occasion = occ.id
+    LEFT JOIN
+        public.units AS u ON occ.unit = u.id
     WHERE
         ord.id = p_order_id;
 $$;
