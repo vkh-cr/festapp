@@ -100,4 +100,6 @@ class BlueprintStrings {
   static String get statusMixed => 'FeatureBlueprint.statusMixed'.tr(); // "Mixed products"
   static String get currentProductPrefix => 'FeatureBlueprint.currentProductPrefix'.tr(); // "Current: "
   static String get mixedProducts => 'FeatureBlueprint.mixedProducts'.tr(); // "Mixed / Various"
+  static String get toastNoTemplateProduct => 'FeatureBlueprint.toastNoTemplateProduct'.tr(); // "Cannot create product..."
+  static String get uniformViewHelp => 'FeatureBlueprint.uniformViewHelp'.tr(); // "All seats share the same product..."
 }

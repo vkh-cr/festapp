@@ -1178,7 +1178,9 @@
     "statusUniform": "Applied to all seats",
     "statusMixed": "Mixed products",
     "currentProductPrefix": "Current: ",
-    "mixedProducts": "Mixed / Various"
+    "mixedProducts": "Mixed / Various",
+    "toastNoTemplateProduct": "Cannot create product: At least one 'Spot' product must exist to act as a template.",
+    "uniformViewHelp": "All seats share the same product.\nEnable the switch to customize specific seats."
   },
   "OccasionSettings": {
     "title": "Title",
