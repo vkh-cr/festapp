@@ -31,4 +31,14 @@ class DbUnits {
       rethrow;
     }
   }
+  static Future<void> updateUnit(UnitModel unit) async {
+    await _supabase.rpc(
+      "update_unit",
+      params: {
+        'p_unit_id': unit.id,
+        'p_title': unit.title,
+        'p_data': unit.data,
+      },
+    );
+  }
 }

@@ -794,6 +794,8 @@
     "numberOfResponsesTooltip": "Počet odpovědí: {0}",
     "noFormsForEventPrompt": "Formuláře k této události nejsou k dispozici. Klikněte na '{createNew}' pro vytvoření.",
     "typeHere": "Vyplňte zde...",
+    "phoneFormatHint": "+420 123 456 789",
+    "phoneFormatValidation": "Neplatný formát. Příklad: +420 123 456 789",
     "noOptionsForCurrency": "Pro zvolenou měnu nejsou k dispozici žádné možnosti.",
     "clearSelection": "Zrušit výběr",
     "unavailable": "Nedostupné",
@@ -1167,7 +1169,20 @@
     "createOrderHelp": "Vyberte místa pro vytvoření nové objednávky (i obsazená).",
     "btnCreateOrder": "Vytvořit objednávku",
     "confirmOrder": "Potvrdit objednávku",
-    "orderCreatedSuccess": "Objednávka byla úspěšně vytvořena."
+    "orderCreatedSuccess": "Objednávka byla úspěšně vytvořena.",
+    "manageGroupProducts": "Správa produktů skupiny",
+    "groupDefaultProduct": "Produkt skupiny",
+    "individualSeats": "Jednotlivá místa",
+    "customizeIndividualSeats": "Upravit jednotlivá místa",
+    "occupiedWarningInline": "Poznámka: změna produktu se nedotkne aktuálních objednávek.",
+    "customProductLabel": "Vlastní",
+    "productAssignedToAll": "Produkt přiřazen všem místům.",
+    "statusUniform": "Použito pro všechna místa",
+    "statusMixed": "Různé produkty",
+    "currentProductPrefix": "Aktuální: ",
+    "mixedProducts": "Různé / Smíšené",
+    "toastNoTemplateProduct": "Nelze vytvořit produkt: Musí existovat alespoň jeden produkt typu 'Místo', který poslouží jako šablona.",
+    "uniformViewHelp": "Všechna místa mají stejný produkt.\nZapněte přepínač pro úpravu konkrétních míst."
   },
   "OccasionSettings": {
     "title": "Název",
@@ -1230,6 +1245,10 @@
     "hintSupport": "Potřebuji pomoci s: [Popište svůj problém]",
     "hintGeneral": "Zpráva: [Vaše zpětná vazba]",
     "sentFrom": "Odesláno z {appName}"
+  },
+  "UnitSettings": {
+    "labelReplyToEmail": "Výchozí e-mail pro odpovědi",
+    "labelDefaultTimezone": "Výchozí časová zóna"
   },
   "_": "_"
 }
