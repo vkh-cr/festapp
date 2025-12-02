@@ -1167,7 +1167,20 @@
     "createOrderHelp": "Vyberte místa pro vytvoření nové objednávky (i obsazená).",
     "btnCreateOrder": "Vytvořit objednávku",
     "confirmOrder": "Potvrdit objednávku",
-    "orderCreatedSuccess": "Objednávka byla úspěšně vytvořena."
+    "orderCreatedSuccess": "Objednávka byla úspěšně vytvořena.",
+    "manageGroupProducts": "Správa produktů skupiny",
+    "groupDefaultProduct": "Produkt skupiny",
+    "individualSeats": "Jednotlivá místa",
+    "customizeIndividualSeats": "Upravit jednotlivá místa",
+    "occupiedWarningInline": "Poznámka: změna produktu se nedotkne aktuálních objednávek.",
+    "customProductLabel": "Vlastní",
+    "productAssignedToAll": "Produkt přiřazen všem místům.",
+    "statusUniform": "Použito pro všechna místa",
+    "statusMixed": "Různé produkty",
+    "currentProductPrefix": "Aktuální: ",
+    "mixedProducts": "Různé / Smíšené",
+    "toastNoTemplateProduct": "Nelze vytvořit produkt: Musí existovat alespoň jeden produkt typu 'Místo', který poslouží jako šablona.",
+    "uniformViewHelp": "Všechna místa mají stejný produkt.\nZapněte přepínač pro úpravu konkrétních míst."
   },
   "OccasionSettings": {
     "title": "Název",
