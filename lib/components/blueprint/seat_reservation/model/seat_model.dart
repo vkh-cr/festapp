@@ -10,6 +10,7 @@ class SeatModel {
   BlueprintObjectModel? objectModel;
   bool isHighlightedForSwap = false;
   bool isHighlightedForGroup = false;
+  bool isHighlightedForTooltip = false;
 
   SeatModel({
     required this.objectModel,

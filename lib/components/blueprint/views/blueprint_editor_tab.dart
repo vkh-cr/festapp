@@ -239,6 +239,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
     setState(() {
       currentGroup = group;
     });
+    _seatLayoutController.setTooltipSeat(null);
     _seatLayoutController.setHighlightedGroup(currentGroup);
   }
 
@@ -247,6 +248,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
     // 1. If clicking the SAME mode, toggle it OFF.
     if (currentSelectionMode == mode) {
       _resetAllSelections();
+      _seatLayoutController.setTooltipSeat(null);
       setState(() {
         currentSelectionMode = selectionMode.none;
       });
@@ -255,6 +257,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     // 2. If clicking a DIFFERENT mode, clear previous state and switch.
     _resetAllSelections();
+    _seatLayoutController.setTooltipSeat(null);
 
     setState(() {
       currentSelectionMode = mode;
