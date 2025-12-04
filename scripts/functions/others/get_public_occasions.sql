@@ -54,7 +54,8 @@ BEGIN
              )
              FROM public.forms f
              WHERE f.occasion = o.id
-             ORDER BY f.id
+             -- Sort by is_open DESC (True first), then by ID
+             ORDER BY f.is_open DESC, f.id
              LIMIT 1
           )
         )
@@ -137,7 +138,8 @@ BEGIN
                   )
                   FROM public.forms f
                   WHERE f.occasion = o.id
-                  ORDER BY f.id
+                  -- Sort by is_open DESC (True first), then by ID
+                  ORDER BY f.is_open DESC, f.id
                   LIMIT 1
                )
              )
@@ -147,7 +149,7 @@ BEGIN
          )
          FROM public.occasions o
          WHERE o.unit = u.id
-           AND o.is_hidden = false -- This block remains unchanged
+           AND o.is_hidden = false
       )
     )
     INTO result_data

@@ -6,7 +6,6 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_router.gr.dart';
-import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/features/feature_metadata.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
@@ -123,7 +122,7 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     _isPromoted = occasion!.isPromoted;
 
     // Initialize reply-to email
-    _replyToEmailController.text = occasion!.data?[FormHelper.metaReplyTo] as String? ?? '';
+    _replyToEmailController.text = occasion!.data?[Tb.occasions.data_reply_to] as String? ?? '';
 
     // Initialize timezone
     _allTimezones = TimeHelper.getAvailableTimezoneNames();
@@ -168,22 +167,20 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     occasion!.isHidden = _isHidden;
     occasion!.isPromoted = _isPromoted;
 
-    // <-- MODIFIED (Safety check, though UI logic should prevent this) -->
     final imageUrl = occasion!.data?[Tb.occasions.data_image];
     final bool hasImage = (imageUrl as String?)?.isNotEmpty ?? false;
     if (_isPromoted && !hasImage) {
       occasion!.isPromoted = false;
     }
-    // <-- END MODIFICATION -->
 
     occasion!.data ??= {};
 
     // Save Reply-To Email
     final trimmedEmail = _replyToEmailController.text.trim();
     if (trimmedEmail.isEmpty) {
-      occasion!.data!.remove(FormHelper.metaReplyTo);
+      occasion!.data!.remove(Tb.occasions.data_reply_to);
     } else {
-      occasion!.data![FormHelper.metaReplyTo] = trimmedEmail;
+      occasion!.data![Tb.occasions.data_reply_to] = trimmedEmail;
     }
 
     // Save Timezone
@@ -524,16 +521,21 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                             TextFormField(
                               controller: _replyToEmailController,
                               enabled: isEditingEnabled,
-                              decoration: InputDecoration(
-                                labelText: OccasionSettingsStrings.labelReplyToEmail,
-                                border: const OutlineInputBorder(),
-                                helperText: OccasionSettingsStrings.helperReplyToEmail,
-                                helperMaxLines: 3,
-                              ),
+                                decoration: InputDecoration(
+                                  labelText: OccasionSettingsStrings.labelReplyToEmail,
+                                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                                  hintText: (RightsService.currentUnit()?.data?[Tb.units.data_reply_to] as String?)?.isNotEmpty == true
+                                      ? "${OccasionSettingsStrings.defaultValue}: ${RightsService.currentUnit()?.data?[Tb.units.data_reply_to]}"
+                                      : null,
+                                  border: const OutlineInputBorder(),
+                                  helperText: OccasionSettingsStrings.helperReplyToEmail,
+                                  helperMaxLines: 3,
+                                ),
                               keyboardType: TextInputType.emailAddress,
-                              validator: FormBuilderValidators.compose([
-                                FormBuilderValidators.email(errorText: OccasionSettingsStrings.validationEmailInvalid),
-                              ]),
+                              validator: (val) {
+                                if (val == null || val.isEmpty) return null;
+                                return FormBuilderValidators.email(errorText: OccasionSettingsStrings.validationEmailInvalid)(val);
+                              },
                             ),
 
                             const SizedBox(height: 16),
