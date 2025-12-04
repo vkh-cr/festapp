@@ -794,6 +794,8 @@
     "numberOfResponsesTooltip": "Number of responses: {0}",
     "noFormsForEventPrompt": "There are no forms for this event. Click '{createNew}' to add one.",
     "typeHere": "Type here...",
+    "phoneFormatHint": "+420 123 456 789",
+    "phoneFormatValidation": "Invalid format. Example: +420 123 456 789",
     "noOptionsForCurrency": "No options available for the selected currency.",
     "clearSelection": "Clear selection",
     "unavailable": "Unavailable",
