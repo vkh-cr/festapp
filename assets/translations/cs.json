@@ -794,6 +794,8 @@
     "numberOfResponsesTooltip": "Počet odpovědí: {0}",
     "noFormsForEventPrompt": "Formuláře k této události nejsou k dispozici. Klikněte na '{createNew}' pro vytvoření.",
     "typeHere": "Vyplňte zde...",
+    "phoneFormatHint": "+420 123 456 789",
+    "phoneFormatValidation": "Neplatný formát. Příklad: +420 123 456 789",
     "noOptionsForCurrency": "Pro zvolenou měnu nejsou k dispozici žádné možnosti.",
     "clearSelection": "Zrušit výběr",
     "unavailable": "Nedostupné",

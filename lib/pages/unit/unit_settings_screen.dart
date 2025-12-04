@@ -157,10 +157,12 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
                     decoration: InputDecoration(
                       labelText: OccasionSettingsStrings.title,
                     ),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(
-                          errorText: OccasionSettingsStrings.titleIsRequired),
-                    ]),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return OccasionSettingsStrings.titleIsRequired;
+                      }
+                      return null;
+                    },
                     onSaved: (val) {
                       _title = val;
                     },

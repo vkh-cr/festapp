@@ -166,6 +166,9 @@ class _BlueprintTabState extends State<BlueprintTab> {
             isEditorMode: true,
             controller: _seatLayoutController,
             onSeatTap: handleSeatTap,
+            shouldShowTooltipOnTap: (model) {
+              return currentSelectionMode == selectionMode.none;
+            },
           ),
         ),
         const SizedBox(height: 16),
@@ -353,6 +356,10 @@ class _BlueprintTabState extends State<BlueprintTab> {
   /// Main Tap Handler
   void handleSeatTap(SeatModel model) {
     if (currentSelectionMode != selectionMode.createNewOrder && _isSeatOccupied(model.objectModel)) {
+      if (currentSelectionMode == selectionMode.none) {
+        // Do nothing, let the tooltip handle it (via SeatLayoutWidget)
+        return;
+      }
       if (currentSelectionMode != selectionMode.swapSeats) {
         ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
             severity: ToastSeverity.NotOk);

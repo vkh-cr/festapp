@@ -97,6 +97,8 @@ class FormStrings {
   static String get newProductTypeDefaultName => 'FormsFeature.newProductTypeDefaultName'.tr();
 
   static String get typeHere => 'FormsFeature.typeHere'.tr();
+  static String get phoneFormatHint => 'FormsFeature.phoneFormatHint'.tr();
+  static String get phoneFormatValidation => 'FormsFeature.phoneFormatValidation'.tr();
 
   // --- Strings from TicketEditorWidgets ---
   static String get noProductTypes => 'FormsFeature.noProductTypes'.tr(); // "No Product Types"
