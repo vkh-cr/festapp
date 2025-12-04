@@ -1244,5 +1244,9 @@
     "hintGeneral": "Zpráva: [Vaše zpětná vazba]",
     "sentFrom": "Odesláno z {appName}"
   },
+  "UnitSettings": {
+    "labelReplyToEmail": "Výchozí e-mail pro odpovědi",
+    "labelDefaultTimezone": "Výchozí časová zóna"
+  },
   "_": "_"
 }
