@@ -117,19 +117,25 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
             children: [
               // Background
               Positioned.fill(
-                child: Container(
-                  width: layoutWidth,
-                  height: layoutHeight,
-                  decoration: BoxDecoration(
-                    color: SeatLayoutWidget._defaultBackgroundColor,
-                    borderRadius: BorderRadius.circular(12.0),
+                child: GestureDetector(
+                  onTap: () {
+                    widget.controller.setTooltipSeat(null);
+                  },
+                  behavior: HitTestBehavior.translucent,
+                  child: Container(
+                    width: layoutWidth,
+                    height: layoutHeight,
+                    decoration: BoxDecoration(
+                      color: SeatLayoutWidget._defaultBackgroundColor,
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: backgroundSource != null && backgroundSource.isNotEmpty
+                        ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: _buildBackgroundWidget(backgroundSource, layoutWidth, layoutHeight),
+                    )
+                        : null,
                   ),
-                  child: backgroundSource != null && backgroundSource.isNotEmpty
-                      ? ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: _buildBackgroundWidget(backgroundSource, layoutWidth, layoutHeight),
-                  )
-                      : null,
                 ),
               ),
               // Seats
@@ -158,29 +164,38 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                           state: seatModel.seatState,
                           isHighlightedForSwap: seatModel.isHighlightedForSwap,
                           isHighlightedForGroup: seatModel.isHighlightedForGroup,
+                          isHighlightedForTooltip: seatModel.isHighlightedForTooltip,
                           size: seatModel.seatSize.toDouble(),
                         ),
                       )
-                          : TextTooltipWidget(
-                        triggerMode: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
-                            ? TooltipTriggerMode.tap
-                            : null,
-                        content:
-                        "${seatModel.objectModel?.blueprintTooltip(context)}",
-                        child: GestureDetector(
-                          onTap: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
-                              ? null
-                              : () {
-                                  if (widget.onSeatTap != null) {
-                                    widget.onSeatTap!(seatModel);
-                                  }
-                                },
-                          child: SeatWidgetHelper.buildSeat(
-                            context: context,
-                            state: seatModel.seatState,
-                            isHighlightedForSwap: seatModel.isHighlightedForSwap,
-                            isHighlightedForGroup: seatModel.isHighlightedForGroup,
-                            size: seatModel.seatSize.toDouble(),
+                          : Listener(
+                        onPointerUp: (_) {
+                          if (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false) {
+                            widget.controller.setTooltipSeat(seatModel);
+                          }
+                        },
+                        child: TextTooltipWidget(
+                          triggerMode: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
+                              ? TooltipTriggerMode.tap
+                              : null,
+                          content:
+                          "${seatModel.objectModel?.blueprintTooltip(context)}",
+                          child: GestureDetector(
+                            onTap: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
+                                ? null
+                                : () {
+                              if (widget.onSeatTap != null) {
+                                widget.onSeatTap!(seatModel);
+                              }
+                            },
+                            child: SeatWidgetHelper.buildSeat(
+                              context: context,
+                              state: seatModel.seatState,
+                              isHighlightedForSwap: seatModel.isHighlightedForSwap,
+                              isHighlightedForGroup: seatModel.isHighlightedForGroup,
+                              isHighlightedForTooltip: seatModel.isHighlightedForTooltip,
+                              size: seatModel.seatSize.toDouble(),
+                            ),
                           ),
                         ),
                       ),

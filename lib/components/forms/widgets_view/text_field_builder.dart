@@ -42,87 +42,11 @@ class TextFieldBuilder extends StatelessWidget {
   }
 
   Widget _buildStandardTextField(BuildContext context) {
-    FocusNode focusNode = FocusNode();
-    List<String? Function(String?)> validators = [];
-    
-    // Default prefill for phone
-    if (isPhone) {
-      var field = FormBuilder.of(context)?.fields[fieldHolder.id.toString()];
-      if (field != null && (field.value == null || field.value.toString().isEmpty)) {
-        // We can't easily set initial value here for FormBuilderTextField without controller or initialValue param
-        // But FormBuilderTextField takes initialValue.
-        // However, we are inside build.
-        // Let's use the initialValue of FormBuilderTextField if possible, but it depends on fieldHolder.
-        // Actually, we can just set it in the FormBuilderTextField's initialValue if it's not set in formHolder.
-      }
-    }
-
-    if (fieldHolder.isRequired) {
-      validators.add(FormBuilderValidators.required());
-    }
-
-    if (isEmail) {
-      validators.add(FormBuilderValidators.email(
-        errorText: FormHelper.emailInvalidMessage(),
-      ));
-    }
-
-    if (isPhone) {
-      validators.add(FormBuilderValidators.phoneNumber(
-        regex: RegExp(r'^\+?[0-9]{' + PhoneInputFormatter.kMaxPhoneNumberLength.toString() + r'}$'),
-        checkNullOrEmpty: false,
-        errorText: FormStrings.phoneFormatValidation,
-      ));
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FormBuilderTextField(
-          maxLines: null,
-          name: fieldHolder.id.toString(),
-          initialValue: isPhone ? '+420' : null,
-          focusNode: focusNode,
-          autofillHints: autofillHints,
-          autovalidateMode: isEmail || isPhone
-              ? AutovalidateMode.onUnfocus
-              : AutovalidateMode.onUserInteraction,
-          decoration: InputDecoration(
-            hintText: isPhone ? FormStrings.phoneFormatHint : null,
-            label: FormFieldBuilders.buildTitleWidget(
-              fieldHolder.title!,
-              fieldHolder.isRequired,
-              context,
-              focusNode: focusNode,
-            ),
-          ),
-          inputFormatters: isPhone ? [PhoneInputFormatter()] : null,
-          validator: validators.isNotEmpty
-              ? FormBuilderValidators.compose(validators)
-              : null,
-          onChanged: (value) {
-            // Intelligent validation: if field has error, validate on change to clear it immediately when fixed
-            var field = FormBuilder.of(context)?.fields[fieldHolder.id.toString()];
-            if (field != null && field.hasError) {
-              field.validate();
-            }
-          },
-        ),
-        if (isPhone)
-          _PhonePrefixHelpers(
-            onPrefixSelected: (prefix) {
-              // Keep focus to prevent onUnfocus validation
-              focusNode.requestFocus();
-              
-              var field = FormBuilder.of(context)?.fields[fieldHolder.id.toString()];
-              if (field != null) {
-                String current = field.value?.toString() ?? '';
-                String newText = _applyPrefix(current, prefix);
-                field.didChange(newText);
-              }
-            },
-          ),
-      ],
+    return _StandardTextField(
+      fieldHolder: fieldHolder,
+      isPhone: isPhone,
+      isEmail: isEmail,
+      autofillHints: autofillHints,
     );
   }
 
@@ -173,6 +97,131 @@ class TextFieldBuilder extends StatelessWidget {
   }
 }
 
+class _StandardTextField extends StatefulWidget {
+  final FieldHolder fieldHolder;
+  final bool isPhone;
+  final bool isEmail;
+  final Iterable<String> autofillHints;
+
+  const _StandardTextField({
+    super.key,
+    required this.fieldHolder,
+    required this.isPhone,
+    required this.isEmail,
+    this.autofillHints = const [],
+  });
+
+  @override
+  State<_StandardTextField> createState() => _StandardTextFieldState();
+}
+
+class _StandardTextFieldState extends State<_StandardTextField> {
+  final FocusNode _focusNode = FocusNode();
+  bool _showPrefixes = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (_focusNode.hasFocus) {
+      setState(() {
+        _showPrefixes = true;
+      });
+    } else {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted && !_focusNode.hasFocus) {
+          setState(() {
+            _showPrefixes = false;
+          });
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<String? Function(String?)> validators = [];
+
+    if (widget.fieldHolder.isRequired) {
+      validators.add(FormBuilderValidators.required());
+    }
+
+    if (widget.isEmail) {
+      validators.add(FormBuilderValidators.email(
+        errorText: FormHelper.emailInvalidMessage(),
+      ));
+    }
+
+    if (widget.isPhone) {
+      validators.add(FormBuilderValidators.phoneNumber(
+        regex: RegExp(r'^\+?[0-9]{' + PhoneInputFormatter.kMaxPhoneNumberLength.toString() + r'}$'),
+        checkNullOrEmpty: false,
+        errorText: FormStrings.phoneFormatValidation,
+      ));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FormBuilderTextField(
+          maxLines: null,
+          name: widget.fieldHolder.id.toString(),
+          initialValue: widget.isPhone ? '+420' : null,
+          focusNode: _focusNode,
+          autofillHints: widget.autofillHints,
+          autovalidateMode: widget.isEmail || widget.isPhone
+              ? AutovalidateMode.onUnfocus
+              : AutovalidateMode.onUserInteraction,
+          decoration: InputDecoration(
+            hintText: widget.isPhone ? FormStrings.phoneFormatHint : null,
+            label: FormFieldBuilders.buildTitleWidget(
+              widget.fieldHolder.title!,
+              widget.fieldHolder.isRequired,
+              context,
+              focusNode: _focusNode,
+            ),
+          ),
+          inputFormatters: widget.isPhone ? [PhoneInputFormatter()] : null,
+          validator: validators.isNotEmpty
+              ? FormBuilderValidators.compose(validators)
+              : null,
+          onChanged: (value) {
+            // Intelligent validation: if field has error, validate on change to clear it immediately when fixed
+            var field = FormBuilder.of(context)?.fields[widget.fieldHolder.id.toString()];
+            if (field != null && field.hasError) {
+              field.validate();
+            }
+          },
+        ),
+        if (widget.isPhone && _showPrefixes)
+          _PhonePrefixHelpers(
+            onPrefixSelected: (prefix) {
+              // Keep focus to prevent onUnfocus validation
+              _focusNode.requestFocus();
+
+              var field = FormBuilder.of(context)?.fields[widget.fieldHolder.id.toString()];
+              if (field != null) {
+                String current = field.value?.toString() ?? '';
+                String newText = _applyPrefix(current, prefix);
+                field.didChange(newText);
+              }
+            },
+          ),
+      ],
+    );
+  }
+}
+
 class _CardTextField extends StatefulWidget {
   final FormFieldState<String?> field;
   final FieldHolder fieldHolder;
@@ -195,6 +244,7 @@ class _CardTextField extends StatefulWidget {
 class _CardTextFieldState extends State<_CardTextField> {
   late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
+  bool _showPrefixes = false;
 
   @override
   void initState() {
@@ -204,10 +254,30 @@ class _CardTextFieldState extends State<_CardTextField> {
       initialValue = '+420';
     }
     _controller = TextEditingController(text: initialValue);
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  void _handleFocusChange() {
+    if (widget.isPhone) {
+      if (_focusNode.hasFocus) {
+        setState(() {
+          _showPrefixes = true;
+        });
+      } else {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (mounted && !_focusNode.hasFocus) {
+            setState(() {
+              _showPrefixes = false;
+            });
+          }
+        });
+      }
+    }
   }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -276,7 +346,7 @@ class _CardTextFieldState extends State<_CardTextField> {
               }
             },
           ),
-          if (widget.isPhone)
+          if (widget.isPhone && _showPrefixes)
             _PhonePrefixHelpers(
               onPrefixSelected: (prefix) {
                 // Keep focus to prevent onUnfocus validation

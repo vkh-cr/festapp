@@ -154,6 +154,22 @@ class SeatLayoutController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setTooltipSeat(SeatModel? model) {
+    // Clear previous tooltip highlight
+    for (final seat in seats) {
+      seat.isHighlightedForTooltip = false;
+    }
+
+    if (model != null) {
+      final seat = seats.firstWhereOrNull(
+              (s) => s.rowI == model.rowI && s.colI == model.colI);
+      if (seat != null) {
+        seat.isHighlightedForTooltip = true;
+      }
+    }
+    notifyListeners();
+  }
+
   void _fitLayout() {
     if (_layoutKey?.currentContext == null) return;
 
