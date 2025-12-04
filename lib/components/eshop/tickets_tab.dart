@@ -14,6 +14,7 @@ import 'package:fstapp/data_services_eshop/db_tickets.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/ticket_code_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/services/platform_helper.dart'; // Import PlatformHelper
 
 import 'eshop_columns.dart';
 import 'orders_strings.dart';
@@ -58,9 +59,12 @@ class _TicketsTabState extends State<TicketsTab> {
       EshopColumns.TICKET_SYMBOL,
       EshopColumns.TICKET_CREATED_AT,
       EshopColumns.TICKET_STATE,
+      if (PlatformHelper.isWeb && FeatureService.isFeatureEnabled(FeatureConstants.ticket))
+        EshopColumns.TICKET_DOWNLOAD,
       EshopColumns.TICKET_CONFIRM,
       EshopColumns.TICKET_TOTAL_PRICE,
-      EshopColumns.TICKET_SPOT,
+      if (FeatureService.isFeatureEnabled(FeatureConstants.blueprint))
+        EshopColumns.TICKET_SPOT,
       EshopColumns.TICKET_PRODUCTS_EXTENDED,
       EshopColumns.TICKET_PRODUCTS_EDIT,
       if (FeatureService.isFeatureEnabled(FeatureConstants.ticket))
@@ -100,7 +104,8 @@ class _TicketsTabState extends State<TicketsTab> {
         data: {
           EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
           EshopColumns.TICKET_PRODUCTS_EDIT: refreshData,
-          EshopColumns.TICKET_CONFIRM: refreshData
+          EshopColumns.TICKET_CONFIRM: refreshData,
+          EshopColumns.TICKET_DOWNLOAD: null,
         },
       ),
     );

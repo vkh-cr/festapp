@@ -147,6 +147,12 @@ class OrdersStrings {
   static String get gridCancelled => 'OrderGridColumns.cancelled'.tr(); // "Cancelled"
   static String get gridUsedInForms => 'OrderGridColumns.usedInForms'.tr(); // "Used in Forms"
 
+  // --- PDF Generation Strings ---
+  static String get generatingPdf => 'FeatureOrders.generatingPdf'.tr(); // "Generating PDF..."
+  static String get downloadTicket => 'FeatureOrders.downloadTicket'.tr(); // "Download Ticket"
+  static String generatingPdfFor(String customer) => 'FeatureOrders.generatingPdfFor'.tr(namedArgs: {'customer': customer}); // "Generating PDF for {customer}..."
+  static String generatingPdfForWithSpot(String customer, String spot) => 'FeatureOrders.generatingPdfForWithSpot'.tr(namedArgs: {'customer': customer, 'spot': spot}); // "Generating PDF for {customer} - {spot}..."
+
   // --- Products Dialog ---
   static String get productsUpdateSuccess => 'ProductsDialog.productsUpdateSuccess'.tr(); // "Products updated successfully."
   static String get productsUpdateFailed => 'ProductsDialog.productsUpdateFailed'.tr(); // "Failed to update products."
@@ -182,6 +188,17 @@ class OrdersStrings {
   static String get noProductChangesDetected => 'ProductsDialog.noProductChangesDetected'.tr(); // "No changes detected to be sent."
   static String get addedProductsTitle => 'ProductsDialog.addedProductsTitle'.tr(); // "Added Products:"
   static String get removedProductsTitle => 'ProductsDialog.removedProductsTitle'.tr(); // "Removed Products:"
+  static String get cancelledItemsTitle => 'ProductsDialog.cancelledItemsTitle'.tr(); // "Cancelled Items"
+  static String get newOrderTitle => 'ProductsDialog.newOrderTitle'.tr(); // "New Order"
+  static String get fullCancelLabel => 'ProductsDialog.fullCancelLabel'.tr(); // "Full Cancel of Order"
+  static String get partialCancelLabel => 'ProductsDialog.partialCancelLabel'.tr(); // "Partial Cancel / Modified"
+  static String get cancelOrderPrefix => 'ProductsDialog.cancelOrderPrefix'.tr(); // "CANCEL ORDER "
+  static String get cancelTicketPrefix => 'ProductsDialog.cancelTicketPrefix'.tr(); // "CANCEL TICKET "
+  static String get willBeRemoved => 'ProductsDialog.willBeRemoved'.tr(); // "Entire order will be removed"
+  static String get newOrderTotal => 'ProductsDialog.newOrderTotal'.tr(); // "New Order Total"
+  static String get emailHelpText => 'ProductsDialog.emailHelpText'.tr(); // "Enter the customer's email address to send the new order confirmation and payment details."
+  static String get noDetailsFound => 'ProductsDialog.noDetailsFound'.tr(); // "No details found"
+  static String get customerExample => 'ProductsDialog.customerExample'.tr(); // "customer@example.com"
   static String get changedPricesTitle => 'ProductsDialog.changedPricesTitle'.tr(); // "Changed Prices:"
   static String get emailContentIntro => 'ProductsDialog.emailContentIntro'.tr(); // "The email will include the following:"
   static String get setToZeroButton => 'ProductsDialog.setToZeroButton'.tr(); // "Set to Zero"
