@@ -187,7 +187,7 @@ class OccasionCreationHelper {
                             isPromoted: false,
                             unit: unit.id,
                             organization: unit.organization,
-                            data: { Tb.occasions.data_timezone: TimeHelper.getSystemTimezoneName() },
+                            data: { Tb.occasions.data_timezone: unit.data?[Tb.occasions.data_timezone] ?? TimeHelper.getSystemTimezoneName() },
                           );
 
                           await DbOccasions.updateOccasion(newOccasion);
@@ -210,7 +210,7 @@ class OccasionCreationHelper {
   static String _generateHtml(String? link) {
     return '''
       <p>${AdministrationStrings.eventAvailableAt}<br>
-      <a href="${AppConfig.webLink}/#/$link">${AppConfig.webLink}/#/$link</a></p>
+      <a href="${AppConfig.webLink}/$link">${AppConfig.webLink}/#/$link</a></p>
     ''';
   }
 

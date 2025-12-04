@@ -1,4 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:file_saver/file_saver.dart'; // Added for file saving
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
@@ -27,6 +29,7 @@ class EshopColumns {
   static const String TICKET_ID = "ticketId";
   static const String TICKET_SYMBOL = "ticketSymbol";
   static const String TICKET_STATE = "ticketState";
+  static const String TICKET_DOWNLOAD = "ticketDownload"; // New Constant
   static const String TICKET_NOTE = "ticketNote";
   static const String TICKET_NOTE_HIDDEN = "ticketNoteHidden";
   static const String TICKET_TOTAL_PRICE = "ticketTotalPrice";
@@ -101,6 +104,7 @@ class EshopColumns {
         renderer: (r) => DataGridHelper.idRenderer(r),
       ),
     ],
+    // ... [Other columns omitted for brevity, keeping structure] ...
     PRODUCT_IS_HIDDEN: [
       TrinaColumn(
         title: OrdersStrings.gridHide,
@@ -220,14 +224,10 @@ class EshopColumns {
       TrinaColumn(
         title: InventoryStrings.included,
         field: PRODUCT_INCLUDED_INVENTORY,
-        // The cell value for this field should be pre-populated with the searchable string
-        // using the `getInventoryDisplayValue` helper method.
         type: TrinaColumnType.text(),
         width: 350,
         enableEditingMode: false,
         renderer: (ctx) {
-          // The renderer correctly uses the reference column to get the full product model,
-          // which allows it to function independently of this cell's direct value.
           final product = ctx.row.cells[PRODUCT_MODEL_REFERENCE]?.value as ProductModel?;
           final allContexts = data[PRODUCT_INCLUDED_INVENTORY] as List<InventoryContextModel>;
 
@@ -288,6 +288,55 @@ class EshopColumns {
         renderer: (rendererContext) => _originalOrderStateRenderer(context, rendererContext, OrderModel.singleDataGridStateToColor),
         width: 140,
         textAlign: TrinaColumnTextAlign.center,
+      ),
+    ],
+    TICKET_DOWNLOAD: (Map<String, dynamic> data) => [
+      TrinaColumn(
+        title: "",
+        field: TICKET_DOWNLOAD,
+        type: TrinaColumnType.text(),
+        readOnly: true,
+        enableEditingMode: false,
+        width: 60,
+        renderer: (rendererContext) {
+          return IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: OrdersStrings.downloadTicket, // Localize tooltip if preferred
+            onPressed: () async {
+              final ticketId = rendererContext.row.cells[TICKET_ID]!.value as int;
+              final ticketSymbol = rendererContext.row.cells[TICKET_SYMBOL]?.value ?? ticketId.toString();
+
+              // 1. Extract Customer and Spot info for the title
+              final customerName = rendererContext.row.cells[ORDER_DATA]?.value?.toString() ?? "";
+              final spotName = rendererContext.row.cells[TICKET_SPOT]?.value?.toString() ?? "";
+
+              // 2. Determine the dialog title based on available data
+              String dialogTitle = OrdersStrings.generatingPdf;
+              if (customerName.isNotEmpty && spotName.isNotEmpty) {
+                dialogTitle = OrdersStrings.generatingPdfForWithSpot(customerName, spotName);
+              } else if (customerName.isNotEmpty) {
+                dialogTitle = OrdersStrings.generatingPdfFor(customerName);
+              }
+
+              // 3. Show dialog
+              final pdfBytes = await DialogHelper.showFutureProgressDialog<Uint8List?>(
+                context: context,
+                title: dialogTitle,
+                futureCallback: () => DbTickets.downloadTicketPdf(ticketId),
+              );
+
+              if (pdfBytes != null) {
+                await FileSaver.instance.saveFile(
+                  name: "ticket_$ticketSymbol",
+                  bytes: pdfBytes,
+                  mimeType: MimeType.pdf,
+                );
+              } else {
+                // Error handled in DialogHelper/DbTickets
+              }
+            },
+          );
+        },
       ),
     ],
     TICKET_TOTAL_PRICE: [

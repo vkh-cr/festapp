@@ -10,6 +10,7 @@ import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/data_services_eshop/db_spots.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -25,9 +26,12 @@ import '../seat_reservation/widgets/seat_layout_controller.dart';
 import '../seat_reservation/widgets/seat_layout_widget.dart';
 import '../seat_reservation/widgets/seat_reservation_widget.dart';
 import 'blueprint_controls_bar.dart';
+import 'blueprint_create_order_dialog.dart';
 import 'blueprint_groups_panel.dart';
 import 'blueprint_legend.dart';
-import 'blueprint_product_dialogs.dart'; // Import
+import 'blueprint_product_dialogs.dart';
+
+enum selectionMode { none, emptyArea, addBlack, addAvailable, swapSeats, createNewOrder }
 
 class BlueprintTab extends StatefulWidget {
   const BlueprintTab({super.key});
@@ -47,6 +51,9 @@ class _BlueprintTabState extends State<BlueprintTab> {
   // State for Swap Seats feature
   SeatModel? _seatToSwap1;
   SeatModel? _seatToSwap2;
+
+  // State for Create New Order feature
+  final Set<SeatModel> _selectedSeatsForOrder = {};
 
   @override
   void initState() {
@@ -127,11 +134,14 @@ class _BlueprintTabState extends State<BlueprintTab> {
     );
   }
 
-  /// Left Panel: The Legend
+  /// Left Panel: The Legend and Action Buttons
   Widget _buildLeftPanel() {
     return BlueprintLegend(
       currentSelectionMode: currentSelectionMode,
       onModeSelected: _handleModeSelected,
+      // Pass the count and the callback for the Create Order button
+      selectedCount: _selectedSeatsForOrder.length,
+      onConfirmOrder: _processNewOrder,
     );
   }
 
@@ -156,6 +166,9 @@ class _BlueprintTabState extends State<BlueprintTab> {
             isEditorMode: true,
             controller: _seatLayoutController,
             onSeatTap: handleSeatTap,
+            shouldShowTooltipOnTap: (model) {
+              return currentSelectionMode == selectionMode.none;
+            },
           ),
         ),
         const SizedBox(height: 16),
@@ -181,18 +194,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(blueprint?.title ?? CommonStrings.edit),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            tooltip: BlueprintStrings.changeTitle,
-            onPressed:
-            RightsService.canEditOccasion() ? editBlueprintTitle : null,
-          ),
-        ],
-      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -234,31 +235,57 @@ class _BlueprintTabState extends State<BlueprintTab> {
   // LOGIC & HANDLERS
   //
 
-  /// Handles group selection and toggling
   void _onGroupSelected(BlueprintGroupModel? group) {
-    // This now receives a nullable group from BlueprintGroupsPanel
-    // If the selected group is the same as the current one,
-    // the user is toggling it off (so group will be null).
     setState(() {
       currentGroup = group;
     });
-
-    // Tell the controller to update the highlights
+    _seatLayoutController.setTooltipSeat(null);
     _seatLayoutController.setHighlightedGroup(currentGroup);
   }
 
+  /// Handles mode changes. Toggles off if the same mode is clicked.
   void _handleModeSelected(selectionMode mode) {
-    if (mode == selectionMode.swapSeats) {
+    // 1. If clicking the SAME mode, toggle it OFF.
+    if (currentSelectionMode == mode) {
+      _resetAllSelections();
+      _seatLayoutController.setTooltipSeat(null);
       setState(() {
-        currentSelectionMode = selectionMode.swapSeats;
+        currentSelectionMode = selectionMode.none;
       });
-      ToastHelper.Show(context, BlueprintStrings.swapHelpSelectFirst);
-    } else {
-      _clearSwapSelection();
-      setState(() {
-        currentSelectionMode = mode;
-      });
+      return;
     }
+
+    // 2. If clicking a DIFFERENT mode, clear previous state and switch.
+    _resetAllSelections();
+    _seatLayoutController.setTooltipSeat(null);
+
+    setState(() {
+      currentSelectionMode = mode;
+    });
+
+    // Toast helpers for complex modes
+    if (mode == selectionMode.swapSeats) {
+      ToastHelper.Show(context, BlueprintStrings.swapHelpSelectFirst);
+    } else if (mode == selectionMode.createNewOrder) {
+      ToastHelper.Show(context, BlueprintStrings.createOrderHelp);
+    }
+  }
+
+  /// Clears temporary selections (Swap or Create Order) and resets visuals.
+  void _resetAllSelections() {
+    // Clear Swap Highlighting
+    if (_seatToSwap1 != null) _seatLayoutController.setSeatHighlight(_seatToSwap1!, false);
+    if (_seatToSwap2 != null) _seatLayoutController.setSeatHighlight(_seatToSwap2!, false);
+    _seatToSwap1 = null;
+    _seatToSwap2 = null;
+
+    // Clear Create Order Selections
+    for (var seat in _selectedSeatsForOrder) {
+      // Revert the visual state to the actual data state
+      final originalState = seat.objectModel?.stateEnum ?? SeatState.available;
+      _seatLayoutController.updateVisualState(seat, originalState);
+    }
+    _selectedSeatsForOrder.clear();
   }
 
   void addGroup() async {
@@ -281,25 +308,20 @@ class _BlueprintTabState extends State<BlueprintTab> {
             .sort((a, b) => Utilities.naturalCompare(a.title!, b.title!));
         currentGroup = newGroup;
       });
-      // Highlight the new group
       _seatLayoutController.setHighlightedGroup(currentGroup);
     }
   }
 
   void deleteGroup() {
     if (currentGroup == null) return;
-
-    // Check if any seat in the group is occupied
     final bool hasOccupiedSeats = currentGroup!.objects.any(_isSeatOccupied);
 
     if (hasOccupiedSeats) {
-      // If any seat is occupied, show toast and abort deletion
       ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
           severity: ToastSeverity.NotOk);
       return;
     }
 
-    // If no seats are occupied, proceed with deleting all seats and the group
     final objectsToRemove =
     List<BlueprintObjectModel>.from(currentGroup!.objects);
 
@@ -312,7 +334,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
       blueprint!.groups!.remove(currentGroup);
       currentGroup = null;
     });
-    // Clear highlights
     _seatLayoutController.setHighlightedGroup(null);
   }
 
@@ -335,22 +356,20 @@ class _BlueprintTabState extends State<BlueprintTab> {
     }
   }
 
-  void editBlueprintTitle() async {
-    final newTitle = await DialogHelper.showInputDialog(
-      context: context,
-      dialogTitle: BlueprintStrings.changeTitle,
-      labelText: BlueprintStrings.dialogTitle,
-      initialValue: blueprint?.title ?? "",
-    );
-
-    if (newTitle != null && newTitle.isNotEmpty) {
-      setState(() {
-        blueprint!.title = newTitle;
-      });
-    }
-  }
-
+  /// Main Tap Handler
   void handleSeatTap(SeatModel model) {
+    if (currentSelectionMode != selectionMode.createNewOrder && _isSeatOccupied(model.objectModel)) {
+      if (currentSelectionMode == selectionMode.none) {
+        // Do nothing, let the tooltip handle it (via SeatLayoutWidget)
+        return;
+      }
+      if (currentSelectionMode != selectionMode.swapSeats) {
+        ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
+            severity: ToastSeverity.NotOk);
+        return;
+      }
+    }
+
     switch (currentSelectionMode) {
       case selectionMode.addBlack:
         _handleAddBlack(model);
@@ -364,18 +383,68 @@ class _BlueprintTabState extends State<BlueprintTab> {
       case selectionMode.swapSeats:
         _handleSwapSeats(model);
         break;
+      case selectionMode.createNewOrder:
+        _handleCreateNewOrder(model);
+        break;
       default:
-      // Handle other cases or do nothing
-        if (_isSeatOccupied(model.objectModel)) {
-          ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
-              severity: ToastSeverity.NotOk);
-        }
         break;
     }
   }
 
+
+  void _handleCreateNewOrder(SeatModel model) {
+    // Only spots (tables/seats) can be ordered, not black areas or empty space
+    if (model.objectModel == null ||
+        model.objectModel!.type == BlueprintModel.metaTableAreaType) {
+      return;
+    }
+
+    setState(() {
+      if (_selectedSeatsForOrder.contains(model)) {
+        // Deselect
+        _selectedSeatsForOrder.remove(model);
+
+        // Restore the visual look to its actual state (available, ordered, etc.)
+        final originalState = model.objectModel?.stateEnum ?? SeatState.available;
+        _seatLayoutController.updateVisualState(model, originalState);
+
+      } else {
+        // Select
+        _selectedSeatsForOrder.add(model);
+
+        // Visually change to "Selected By Me" (Green Checkmark)
+        // using the controller's visual-only update method
+        _seatLayoutController.updateVisualState(model, SeatState.selected_by_me);
+      }
+    });
+  }
+
+  void _processNewOrder() async {
+    if (_selectedSeatsForOrder.isEmpty) return;
+
+    final spotIds = _selectedSeatsForOrder
+        .map((s) => s.objectModel?.id)
+        .whereNotNull()
+        .toList();
+
+    if (spotIds.isEmpty) return;
+
+    final dynamic result = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => BlueprintCreateOrderDialog(
+        selectedSpotIds: spotIds,
+      ),
+    );
+
+    if (result == true) {
+      ToastHelper.Show(context, BlueprintStrings.orderCreatedSuccess, severity: ToastSeverity.Ok);
+      _handleModeSelected(selectionMode.none);
+      await loadData();
+    }
+  }
+
   void _handleAddBlack(SeatModel model) {
-    // Check if the seat is occupied
     if (_isSeatOccupied(model.objectModel)) {
       ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
           severity: ToastSeverity.NotOk);
@@ -395,13 +464,12 @@ class _BlueprintTabState extends State<BlueprintTab> {
     model.objectModel =
         model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
     model.objectModel!.type = BlueprintModel.metaTableAreaType;
-    model.objectModel!.setSeatState(SeatState.black); // Use new method
+    model.objectModel!.setSeatState(SeatState.black);
     blueprint!.objects!.add(model.objectModel!);
     _seatLayoutController.addObject(model.objectModel!, isHighlighted: false);
   }
 
   void _handleAddAvailable(SeatModel model) {
-    // Check if the seat is occupied
     if (_isSeatOccupied(model.objectModel)) {
       ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
           severity: ToastSeverity.NotOk);
@@ -426,8 +494,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       blueprint!.objects!.remove(model.objectModel!);
     }
 
-    // 1. Prioritize the product assigned directly to the group.
-    // 2. Fallback to the product of the first object in the group.
+    // Inherit product from group or first available
     final groupProduct = currentGroup!.product ??
         (currentGroup!.objects.isNotEmpty
             ? currentGroup!.objects.first.product
@@ -436,18 +503,15 @@ class _BlueprintTabState extends State<BlueprintTab> {
     model.objectModel =
         model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
     model.objectModel!.type = BlueprintModel.metaSpotType;
-    model.objectModel!.setSeatState(SeatState.available); // Use new method
+    model.objectModel!.setSeatState(SeatState.available);
 
-    // 3. Final fallback to the blueprint's first available product.
     model.objectModel!.product = groupProduct ?? blueprint!.spotProducts.firstOrNull;
-
     model.objectModel!.group = currentGroup;
     model.objectModel!.title = currentGroup?.getNextBoxName().toUpperCase();
 
     currentGroup?.objects.add(model.objectModel!);
     blueprint!.objects!.add(model.objectModel!);
 
-    // Pass the highlight status
     _seatLayoutController.addObject(
         model.objectModel!,
         isHighlighted: currentGroup != null
@@ -460,7 +524,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
   void _handleEmptyArea(SeatModel model) {
     var objectToRemove = model.objectModel;
     if (objectToRemove != null) {
-      // Check if the seat is occupied
       if (_isSeatOccupied(objectToRemove)) {
         ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
             severity: ToastSeverity.NotOk);
@@ -484,7 +547,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
   void _handleSwapSeats(SeatModel model) {
     final obj = model.objectModel;
-    // Prevent swapping black or empty areas
     if (obj == null ||
         obj.stateEnum == SeatState.black ||
         obj.stateEnum == SeatState.empty) {
@@ -493,7 +555,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
       return;
     }
 
-    // Check if deselecting
     if (model == _seatToSwap1) {
       _seatLayoutController.setSeatHighlight(model, false);
       _seatToSwap1 = null;
@@ -505,7 +566,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
       return;
     }
 
-    // Check if selecting first seat
     if (_seatToSwap1 == null) {
       _seatToSwap1 = model;
       _seatLayoutController.setSeatHighlight(model, true);
@@ -514,11 +574,9 @@ class _BlueprintTabState extends State<BlueprintTab> {
       return;
     }
 
-    // Check if selecting second seat
     if (_seatToSwap2 == null) {
       _seatToSwap2 = model;
       _seatLayoutController.setSeatHighlight(model, true);
-      // Both seats selected, show confirmation
       _showSwapConfirmationDialog();
     }
   }
@@ -534,7 +592,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
     final summary2 = obj2.getSwapSummary();
     final seatName2 = obj2.toString();
 
-    // Using the new DialogHelper API structure from your file
     final confirmed = await DialogHelper.showConfirmationDialogRichText(
       context,
       BlueprintStrings.swapConfirmTitle,
@@ -551,7 +608,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
             ),
             TextSpan(text: " ($seatName1)\n"),
             const TextSpan(
-              text: " \u2195 ", // Unicode Up Down Arrow
+              text: " \u2195 ",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             TextSpan(
@@ -580,7 +637,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
     final obj1 = _seatToSwap1!.objectModel!;
     final obj2 = _seatToSwap2!.objectModel!;
 
-    // Swap the data that moves with the order
     final tempOrderProductTicket = obj1.orderProductTicket;
     final tempStateEnum = obj1.stateEnum ?? SeatState.available;
 
@@ -611,68 +667,31 @@ class _BlueprintTabState extends State<BlueprintTab> {
     _seatToSwap2 = null;
   }
 
-  //
-  // (Modified) Product Management Logic
-  //
-
-  /// Assigns a selected product to all spots in a group
   void _editGroupProduct(BlueprintGroupModel group) async {
     if (blueprint == null) return;
 
-    final bool hasOccupiedSeats = group.objects.any(_isSeatOccupied);
-    if (hasOccupiedSeats) {
-      ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
-          severity: ToastSeverity.NotOk);
-      return;
-    }
-
-    // Find the current product, prioritizing the group's own product field.
-    final currentProduct = group.product ??
-        (group.objects.isNotEmpty
-            ? group.objects.first.product
-            : null);
-
-    final selectedProduct = await showDialog<ProductModel>(
+    // Open the Unified Manager Dialog
+    await showDialog(
       context: context,
-      builder: (BuildContext dialogContext) {
-        return SelectProductDialog(
-          blueprint: blueprint!,
-          currentProductId: currentProduct?.id,
-        );
-      },
+      builder: (context) => GroupProductManagerDialog(
+        blueprint: blueprint!,
+        group: group,
+      ),
     );
 
-    if (selectedProduct != null) {
-      setState(() {
-        // Assign the product directly to the group itself.
-        group.product = selectedProduct;
-
-        // Also update all existing objects in that group to match.
-        for (var obj in group.objects) {
-          obj.product = selectedProduct;
-          obj.spotProduct = selectedProduct.id;
-        }
-      });
-      ToastHelper.Show(context, BlueprintStrings.productAssigned, severity: ToastSeverity.Ok);
-    } else {
-      setState(() {});
-    }
+    // Refresh UI after dialog closes to show changes in price/titles
+    setState(() {});
   }
-
-  //
-  // Save & Load
-  //
 
   void saveChanges() async {
     if (blueprint == null) return;
     try {
-      // Ensure blueprint model objects are in sync before saving
+      // Ensure blueprint model objects are in sync
       blueprint!.objects = _seatLayoutController.seats
           .map((s) => s.objectModel)
           .whereNotNull()
           .toList();
 
-      // Ensure products on objects are properly saved as IDs
       for(var obj in blueprint!.objects!) {
         if(obj.product != null) {
           obj.spotProduct = obj.product!.id;
@@ -689,7 +708,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   }
 
   Future<void> loadData() async {
-    _clearSwapSelection();
+    _resetAllSelections(); // Ensure clean state
     blueprint = await DbForms.getBlueprintForEdit(occasionLink!);
     if (blueprint != null) {
       _seatLayoutController.loadBlueprint(
@@ -702,5 +721,3 @@ class _BlueprintTabState extends State<BlueprintTab> {
     }
   }
 }
-
-enum selectionMode { none, emptyArea, addBlack, addAvailable, swapSeats }
