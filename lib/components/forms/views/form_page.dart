@@ -514,8 +514,8 @@ class _FormPageState extends State<FormPage> {
     dynamic previewParam = context.routeData.queryParams.get('preview', false);
     bool isPreviewParam = previewParam.toString().toLowerCase() == 'true';
     bool canPreview = RightsService.isEditorOrderView();
-    // Allow preview if specifically requested OR if user is editor and form is closed (automatic bypass)
-    bool showPreview = (isClosed && canPreview) || (canPreview && isPreviewParam);
+    // Only allow preview if specifically requested AND user is editor
+    bool showPreview = canPreview && isPreviewParam;
     bool showCountdown = isBeforeStart && (form?.enableCountdown ?? false) && !showPreview;
 
     if (_isLoading) {
