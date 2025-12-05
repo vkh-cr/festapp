@@ -60,6 +60,7 @@ class _FormPageState extends State<FormPage> {
   final ScrollController _scrollController = ScrollController();
 
   bool _isSeatReservationVisible = false;
+  bool _isOrderPreviewVisible = false;
   Completer<List<SeatModel>?>? _seatReservationCompleter;
   StreamSubscription<dynamic>? _popStateSubscription;
   bool _isClosingProgrammatically = false;
@@ -105,10 +106,21 @@ class _FormPageState extends State<FormPage> {
   /// Handles browser back/forward events
   void _handlePopState(dynamic event) {
     if (_isClosingProgrammatically) {
-      // This was a "Confirm" click from _hideSeatReservation.
+      // This was a "Confirm" click from _hideSeatReservation or _hideOrderPreview.
       // The history is popped, and the overlay is already closing.
       // We just reset the flag and do nothing.
       _isClosingProgrammatically = false;
+      return;
+    }
+
+    if (_isOrderPreviewVisible) {
+      // Browser Back clicked while Order Preview is open.
+      // URL is already popped. We just need to close the sheet and update state.
+      // We set the flag to false BEFORE popping to prevent whenComplete from triggering _hideOrderPreview.
+      setState(() {
+        _isOrderPreviewVisible = false;
+      });
+      Navigator.of(context).pop();
       return;
     }
 
@@ -170,6 +182,19 @@ class _FormPageState extends State<FormPage> {
     _seatReservationCompleter = null;
   }
 
+  void _hideOrderPreview() {
+    // This is called when we want to forcefully close the sheet and history (e.g. submit success),
+    // OR when the sheet has already closed (swipe/close button) and we just need to sync history.
+    if (!_isOrderPreviewVisible) return;
+
+    _isClosingProgrammatically = true;
+    RouterService.goBackProgrammatically();
+
+    setState(() {
+      _isOrderPreviewVisible = false;
+    });
+  }
+
   Widget _buildSeatReservationOverlay() {
     if (!_isSeatReservationVisible) return const SizedBox.shrink();
 
@@ -199,6 +224,8 @@ class _FormPageState extends State<FormPage> {
       ),
     );
   }
+
+  // _buildOrderPreviewOverlay removed as we use showModalBottomSheet
 
   void _updateTotalPrice() {
     String? currencyC;
@@ -314,7 +341,12 @@ class _FormPageState extends State<FormPage> {
     var valid = await FormHelper.saveValidateAndScroll(formHolder!);
     setState(() {});
     if (valid) {
-      showModalBottomSheet(
+      RouterService.pushOverlayState('order-preview');
+      setState(() {
+        _isOrderPreviewVisible = true;
+      });
+
+      await showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         builder: (_) {
@@ -325,10 +357,20 @@ class _FormPageState extends State<FormPage> {
               formHolder: formHolder!,
               totalPrice: _totalPrice,
               onSendPressed: _sendOrder,
+              // When user clicks Close in UI, we just pop the sheet.
+              // verification of _isOrderPreviewVisible in whenComplete will handle history sync.
+              onClose: () => Navigator.of(context).pop(),
             ),
           );
         },
-      );
+      ).whenComplete(() {
+        // If flag is still true, it means the sheet was closed via swipe or UI close button,
+        // (not by our back button handler which sets it to false first).
+        // So we need to sync history (pop the hash).
+        if (_isOrderPreviewVisible) {
+           _hideOrderPreview();
+        }
+      });
     }
   }
 
@@ -357,11 +399,15 @@ class _FormPageState extends State<FormPage> {
         orderFutureFunction: () async {
           return await DbOrders.sendTicketOrder(data);
         },
-        onResetForm: () async {
-          Navigator.of(context).pop(); // Close the FinishOrderScreen
-          _scrollToTop();
+        onOrderConfirmed: () async {
+          selectedSeats = [];
+          _formKey.currentState?.reset();
           await loadData();
           _updateTotalPrice();
+        },
+        onSuccess: () async {
+          Navigator.of(context).pop(); // Close the OrderPreview BottomSheet
+          _scrollToTop();
         },
       ),
       transitionBuilder: (context, anim1, anim2, child) {

@@ -467,7 +467,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
           child: Stack(
             children: [
               Padding(
-                padding: minimal ? const EdgeInsets.fromLTRB(4, 4, 4, 0) : const EdgeInsets.fromLTRB(12, 12, 80, 12),
+                padding: minimal ? const EdgeInsets.fromLTRB(4, 32, 4, 0) : const EdgeInsets.fromLTRB(12, 12, 80, 12),
                 child: HtmlView(
                   html: minimal 
                       ? "<div style='text-align: center;'>${(content?.isNotEmpty ?? false) ? content! : (defaultText ?? FormStrings.notSet)}</div>"
@@ -633,6 +633,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     if (_bundle == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     return Scaffold(
+      floatingActionButtonAnimator: _NoScalingAnimation(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -756,5 +757,22 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
         ),
       ),
     );
+  }
+}
+
+class _NoScalingAnimation extends FloatingActionButtonAnimator {
+  @override
+  Offset getOffset({required Offset begin, required Offset end, required double progress}) {
+    return end;
+  }
+
+  @override
+  Animation<double> getRotationAnimation({required Animation<double> parent}) {
+    return Tween<double>(begin: 1.0, end: 1.0).animate(parent);
+  }
+
+  @override
+  Animation<double> getScaleAnimation({required Animation<double> parent}) {
+    return Tween<double>(begin: 1.0, end: 1.0).animate(parent);
   }
 }
