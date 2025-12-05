@@ -22,7 +22,6 @@ import 'package:fstapp/pages/occasion/map_page.dart';
 import 'package:fstapp/pages/occasion/my_schedule_page.dart';
 import 'package:fstapp/pages/occasion/timetable_page.dart';
 import 'package:fstapp/pages/occasion/occasion_home_page.dart';
-import 'package:fstapp/pages/unit/unit_page_base.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';

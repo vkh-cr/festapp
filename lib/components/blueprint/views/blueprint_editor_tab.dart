@@ -1,16 +1,11 @@
-import 'dart:math';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/data_services_eshop/db_spots.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -31,7 +26,7 @@ import 'blueprint_groups_panel.dart';
 import 'blueprint_legend.dart';
 import 'blueprint_product_dialogs.dart';
 
-enum selectionMode { none, emptyArea, addBlack, addAvailable, swapSeats, createNewOrder }
+enum BlueprintSelectionMode { none, emptyArea, addBlack, addAvailable, swapSeats, createNewOrder }
 
 class BlueprintTab extends StatefulWidget {
   const BlueprintTab({super.key});
@@ -45,7 +40,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   BlueprintGroupModel? currentGroup;
   String? occasionLink;
 
-  selectionMode currentSelectionMode = selectionMode.none;
+  BlueprintSelectionMode currentSelectionMode = BlueprintSelectionMode.none;
   late final SeatLayoutController _seatLayoutController;
 
   // State for Swap Seats feature
@@ -167,7 +162,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
             controller: _seatLayoutController,
             onSeatTap: handleSeatTap,
             shouldShowTooltipOnTap: (model) {
-              return currentSelectionMode == selectionMode.none;
+              return currentSelectionMode == BlueprintSelectionMode.none;
             },
           ),
         ),
@@ -195,14 +190,18 @@ class _BlueprintTabState extends State<BlueprintTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth > 800) {
-              return _buildDesktopLayout();
-            } else {
-              return _buildMobileLayout();
-            }
-          },
+        child: GestureDetector(
+          onTap: () => _seatLayoutController.setTooltipSeat(null),
+          behavior: HitTestBehavior.translucent,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 800) {
+                return _buildDesktopLayout();
+              } else {
+                return _buildMobileLayout();
+              }
+            },
+          ),
         ),
       ),
       bottomNavigationBar: Container(
@@ -244,13 +243,13 @@ class _BlueprintTabState extends State<BlueprintTab> {
   }
 
   /// Handles mode changes. Toggles off if the same mode is clicked.
-  void _handleModeSelected(selectionMode mode) {
+  void _handleModeSelected(BlueprintSelectionMode mode) {
     // 1. If clicking the SAME mode, toggle it OFF.
     if (currentSelectionMode == mode) {
       _resetAllSelections();
       _seatLayoutController.setTooltipSeat(null);
       setState(() {
-        currentSelectionMode = selectionMode.none;
+        currentSelectionMode = BlueprintSelectionMode.none;
       });
       return;
     }
@@ -264,9 +263,9 @@ class _BlueprintTabState extends State<BlueprintTab> {
     });
 
     // Toast helpers for complex modes
-    if (mode == selectionMode.swapSeats) {
+    if (mode == BlueprintSelectionMode.swapSeats) {
       ToastHelper.Show(context, BlueprintStrings.swapHelpSelectFirst);
-    } else if (mode == selectionMode.createNewOrder) {
+    } else if (mode == BlueprintSelectionMode.createNewOrder) {
       ToastHelper.Show(context, BlueprintStrings.createOrderHelp);
     }
   }
@@ -358,12 +357,12 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
   /// Main Tap Handler
   void handleSeatTap(SeatModel model) {
-    if (currentSelectionMode != selectionMode.createNewOrder && _isSeatOccupied(model.objectModel)) {
-      if (currentSelectionMode == selectionMode.none) {
+    if (currentSelectionMode != BlueprintSelectionMode.createNewOrder && _isSeatOccupied(model.objectModel)) {
+      if (currentSelectionMode == BlueprintSelectionMode.none) {
         // Do nothing, let the tooltip handle it (via SeatLayoutWidget)
         return;
       }
-      if (currentSelectionMode != selectionMode.swapSeats) {
+      if (currentSelectionMode != BlueprintSelectionMode.swapSeats) {
         ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
             severity: ToastSeverity.NotOk);
         return;
@@ -371,19 +370,19 @@ class _BlueprintTabState extends State<BlueprintTab> {
     }
 
     switch (currentSelectionMode) {
-      case selectionMode.addBlack:
+      case BlueprintSelectionMode.addBlack:
         _handleAddBlack(model);
         break;
-      case selectionMode.addAvailable:
+      case BlueprintSelectionMode.addAvailable:
         _handleAddAvailable(model);
         break;
-      case selectionMode.emptyArea:
+      case BlueprintSelectionMode.emptyArea:
         _handleEmptyArea(model);
         break;
-      case selectionMode.swapSeats:
+      case BlueprintSelectionMode.swapSeats:
         _handleSwapSeats(model);
         break;
-      case selectionMode.createNewOrder:
+      case BlueprintSelectionMode.createNewOrder:
         _handleCreateNewOrder(model);
         break;
       default:
@@ -424,7 +423,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     final spotIds = _selectedSeatsForOrder
         .map((s) => s.objectModel?.id)
-        .whereNotNull()
+        .nonNulls
         .toList();
 
     if (spotIds.isEmpty) return;
@@ -439,7 +438,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     if (result == true) {
       ToastHelper.Show(context, BlueprintStrings.orderCreatedSuccess, severity: ToastSeverity.Ok);
-      _handleModeSelected(selectionMode.none);
+      _handleModeSelected(BlueprintSelectionMode.none);
       await loadData();
     }
   }
@@ -689,7 +688,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       // Ensure blueprint model objects are in sync
       blueprint!.objects = _seatLayoutController.seats
           .map((s) => s.objectModel)
-          .whereNotNull()
+          .nonNulls
           .toList();
 
       for(var obj in blueprint!.objects!) {

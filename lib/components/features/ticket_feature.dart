@@ -102,6 +102,7 @@ class TicketFeature extends Feature {
                 } catch (e) {
                   ToastHelper.Show(context, "Failed to upload image.".tr());
                 }
+                return null;
               },
               onRemove: () async {
                 final imageUrl = ticketBackground;

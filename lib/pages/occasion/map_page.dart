@@ -598,7 +598,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     if (_isShowingGroupsInEditMode) {
       _isShowingGroupsInEditMode = false;
       // Store current selected marker details to reapply focus/edit state after load
-      PlaceModel? reloadedPlaceForEdit;
       if(selectedMarker?.place.id != null) {
         // If we need to re-enter edit mode for the same item after reload:
         // This part might be complex if the item is removed or its properties change significantly.
@@ -1087,7 +1086,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
 
       if (markerToBringToTop != null) {
         _markers.removeWhere((m) => m.place.id == markerToBringToTop!.place.id);
-        _markers.add(markerToBringToTop!);
+        _markers.add(markerToBringToTop);
       }
     });
   }

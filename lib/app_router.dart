@@ -10,7 +10,7 @@ import 'package:fstapp/pages/occasion/event_edit_page.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
 import 'package:fstapp/pages/occasion/user_stay_page.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
-import 'package:fstapp/pages/unit/organization_page.dart'; // Import new page
+// Import new page
 import 'package:fstapp/pages/unit/unit_page.dart';
 import 'package:fstapp/pages/user/login_page.dart';
 import 'package:fstapp/pages/user/reset_password_page.dart';
@@ -193,7 +193,7 @@ class AppRouter extends RootStackRouter {
       SignupPage.ROUTE,
       SettingsPage.ROUTE,
       InstallPage.ROUTE,
-      UnitPage.ROUTE, // This is still "unit"
+      UnitPage.ROUTE,
       FormPage.ROUTE,
       ScanPage.ROUTE,
     ];
