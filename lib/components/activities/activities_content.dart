@@ -2302,7 +2302,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               !a.isHidden!;
           Color activityHeaderBgColor;
           Color activityHeaderTextColor;
-          Color activityHiddenOverlayColor;
           Color activityContentBgColor;
           if (isDark) {
             activityHeaderBgColor = a.isHidden!
@@ -2310,7 +2309,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 : Colors.blueGrey.shade800.withOpacity(0.7);
             activityHeaderTextColor =
             a.isHidden! ? Colors.white60 : Colors.white;
-            activityHiddenOverlayColor = Colors.grey.shade600.withOpacity(0.3);
             activityContentBgColor = isHighlighted
                 ? Theme.of(context).primaryColor.withAlpha(30)
                 : Colors.transparent;
@@ -2320,7 +2318,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 : Colors.blueGrey.shade50.withOpacity(0.7);
             activityHeaderTextColor =
             a.isHidden! ? Colors.white70 : Colors.black87;
-            activityHiddenOverlayColor = Colors.grey.shade500.withOpacity(0.3);
             activityContentBgColor = isHighlighted
                 ? Colors.lightBlue.shade50.withOpacity(0.6)
                 : Colors.transparent;
@@ -2339,9 +2336,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     bottom: 8.0,
                     right: 8.0),
                 child: Text(
-                  a.id == null
-                      ? ActivitiesComponentStrings.textNewActivityAddedDragDrop
-                      : ActivitiesComponentStrings.textDragUsersFromTopDropHere,
+                  ActivitiesComponentStrings.textDragUsersFromTopDropHere,
                   style: TextStyle(
                       fontSize: 11,
                       color: isDark ? Colors.grey[400] : Colors.grey[600],

@@ -56,7 +56,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
 
   Future<void> saveChanges() async {
     // UPDATED: Check for bundle and use bundle.form
-    if (_bundle == null || _bundle!.form.relatedFields == null) return;
+    if (_bundle == null) return;
     final form = _bundle!.form;
 
     if (form.startTime != null && form.endTime != null) {
@@ -66,12 +66,12 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
       }
     }
 
-    form.relatedFields!.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
-    for (int i = 0; i < form.relatedFields!.length; i++) {
-      form.relatedFields![i].order = i;
+    form.relatedFields.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+    for (int i = 0; i < form.relatedFields.length; i++) {
+      form.relatedFields[i].order = i;
     }
 
-    for (final field in form.relatedFields!) {
+    for (final field in form.relatedFields) {
       if (field.isTicketField == true &&
           field.type == FormHelper.fieldTypeProductType &&
           field.productType != null &&
@@ -100,7 +100,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
   }
 
   List<String> get _availableFieldTypes {
-    final existingTypes = _bundle?.form.relatedFields?.map((f) => f.type).toList() ?? [];
+    final existingTypes = _bundle?.form.relatedFields.map((f) => f.type).toList() ?? [];
     return FormHelper.fieldTypeIcons.keys.where((type) {
       if ([
         FormHelper.fieldTypeText,
@@ -345,65 +345,6 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     );
   }
 
-  Widget _buildDateTimeRow(String label, DateTime? value, Function(DateTime?) onChanged, {bool isStart = false, bool isEnd = false}) {
-    Color? statusColor;
-    if (value != null) {
-      final now = DateTime.now();
-      if (isStart && value.isAfter(now)) {
-        statusColor = Colors.orange; // Pending start
-      } else if (isEnd && value.isBefore(now)) {
-        statusColor = Colors.red; // Already ended
-      } else if (isStart && value.isBefore(now)) {
-        statusColor = Colors.green; // Started
-      } else if (isEnd && value.isAfter(now)) {
-        statusColor = Colors.green; // Active
-      }
-    }
-
-    return Container(
-      decoration: statusColor != null ? BoxDecoration(
-        border: Border.all(color: statusColor, width: 2),
-        borderRadius: BorderRadius.circular(8),
-      ) : null,
-      padding: statusColor != null ? const EdgeInsets.all(8) : EdgeInsets.zero,
-      child: Row(
-        children: [
-          Expanded(child: Text(label, style: TextStyle(fontWeight: statusColor != null ? FontWeight.bold : FontWeight.normal))),
-          TextButton(
-            onPressed: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: value ?? DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-              );
-              if (date != null) {
-                final time = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.fromDateTime(value ?? DateTime.now()),
-                );
-                if (time != null) {
-                  onChanged(DateTime(
-                    date.year,
-                    date.month,
-                    date.day,
-                    time.hour,
-                    time.minute,
-                  ));
-                }
-              }
-            },
-            child: Text(value != null ? DateFormat('dd.MM.yyyy HH:mm').format(value) : FormStrings.notSet),
-          ),
-          if (value != null)
-            IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () => onChanged(null),
-            ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAvailabilityStatusBanner(FormModel form) {
      String text;
@@ -603,18 +544,18 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
   }
 
   void _addFieldOfType(String type) {
-    if (!mounted || _bundle == null || _bundle!.form.relatedFields == null) return;
+    if (!mounted || _bundle == null) return;
     final form = _bundle!.form;
     final newField = FormFieldModel(
       type: type,
-      order: form.relatedFields!.length,
+      order: form.relatedFields.length,
       isRequired: FormHelper.isAlwaysRequired(type),
       isHidden: false,
       isTicketField: false,
     );
 
     setState(() {
-      form.relatedFields = List.from(form.relatedFields!)..add(newField);
+      form.relatedFields = List.from(form.relatedFields)..add(newField);
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

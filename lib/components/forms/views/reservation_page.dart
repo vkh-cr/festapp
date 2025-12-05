@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart'; // Added for .tr() if you use it in the strip
+// Added for .tr() if you use it in the strip
 import 'package:fstapp/components/_shared/app_panel_helper.dart';
 import 'package:fstapp/components/_shared/red_strip_widget.dart'; // <-- 1. ADDED IMPORT
 import 'package:fstapp/router_service.dart';

@@ -131,7 +131,6 @@ class _StandardTextField extends StatefulWidget {
   final Iterable<String> autofillHints;
 
   const _StandardTextField({
-    super.key,
     required this.field,
     required this.fieldHolder,
     required this.isPhone,
@@ -319,11 +318,6 @@ class _CardTextFieldState extends State<_CardTextField> {
     return TextInputType.text;
   }
 
-  String? _getPrefixFromText(String text) {
-    if (text.startsWith('+420')) return '+420';
-    if (text.startsWith('+421')) return '+421';
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {

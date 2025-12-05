@@ -28,7 +28,7 @@ class ImageArea extends StatefulWidget {
     required this.onFileSelected,
     required this.onRemove,
     this.hint,
-    this.enabled = true, // New property, defaults to enabled
+    this.enabled = true,
   });
 
   @override
@@ -37,7 +37,6 @@ class ImageArea extends StatefulWidget {
 
 class _ImageAreaState extends State<ImageArea> {
   String? _currentUrl;
-  XFile? _selectedFile;
   bool _uploading = false;
 
   @override
@@ -57,7 +56,6 @@ class _ImageAreaState extends State<ImageArea> {
 
   Future<void> _handleFileSelected(XFile file) async {
     setState(() {
-      _selectedFile = file;
       _uploading = true;
     });
     try {

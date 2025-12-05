@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/form_feature.dart';
@@ -121,10 +120,8 @@ class _OccasionCardState extends State<OccasionCard> {
         // ← cache the entire card (including its BackdropFilters)
         child: LayoutBuilder(builder: (context, constraints) {
           // Scales kept for consistency, though button is gone
-          final double widthScale =
           (constraints.maxWidth / OccasionCard.kMinCardWidth)
               .clamp(1.0, 1.5);
-          final double heightScale =
           (constraints.maxHeight / OccasionCard.kMinCardHeight)
               .clamp(1.0, 1.2);
 

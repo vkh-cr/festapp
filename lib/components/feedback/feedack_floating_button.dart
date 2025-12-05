@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/theme_config.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'feedback_strings.dart';
 

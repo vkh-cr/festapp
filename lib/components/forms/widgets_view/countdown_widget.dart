@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:fstapp/widgets/html_view.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:fstapp/components/forms/form_strings.dart';
 
 class CountdownWidget extends StatefulWidget {
@@ -66,10 +65,6 @@ class _CountdownWidgetState extends State<CountdownWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
-    final secondaryColor = theme.colorScheme.secondary;
-
     return Align(
       alignment: Alignment.topCenter,
       child: Padding(

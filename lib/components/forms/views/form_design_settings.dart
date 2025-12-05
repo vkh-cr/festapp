@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 import 'package:fstapp/widgets/html_view.dart';
 
 import '../form_strings.dart';
@@ -205,11 +203,10 @@ class _FormDesignSettingsState extends State<FormDesignSettings> {
         widget.onChanged();
       });
     } catch (e) {
-    } catch (e) {
       setState(() {
         _fontError = FormStrings.fontNotFound;
       });
-    }
+  }
   }
 
   @override
@@ -366,7 +363,7 @@ class _FormDesignSettingsState extends State<FormDesignSettings> {
                 const Divider(),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: _popularFonts.contains(widget.form.fontFamily) ? widget.form.fontFamily : null,
+                  initialValue: _popularFonts.contains(widget.form.fontFamily) ? widget.form.fontFamily : null,
                   decoration: InputDecoration(
                     labelText: FormStrings.choosePopularFonts,
                     border: const OutlineInputBorder(),

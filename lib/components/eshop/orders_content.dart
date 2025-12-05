@@ -53,7 +53,7 @@ class _OrdersContentState extends State<OrdersContent> {
 
     // Check if any field across all forms is a non-ticket 'note' field.
     final hasOrderNoteField = forms.any((form) =>
-        (form.relatedFields ?? []).any((field) =>
+        (form.relatedFields).any((field) =>
         field.type == FormHelper.fieldTypeNote && (field.isTicketField ?? false) == false
         )
     );

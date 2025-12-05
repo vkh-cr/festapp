@@ -49,7 +49,6 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
   List<dynamic> _conflicts = [];
   List<dynamic> _newItems = [];
 
-  double _sumOrig = 0;
   double _sumCur = 0;
 
   @override
@@ -85,10 +84,6 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
   }
 
   void _recalc() {
-    _sumOrig = _conflicts.fold(0.0, (sum, item) {
-      final price = (item[_kTotalPrice] as num?)?.toDouble() ?? 0.0;
-      return sum + price;
-    });
 
     _sumCur = _newItems.fold(0.0, (sum, item) {
       final price = (item[_kPrice] as num?)?.toDouble() ?? 0.0;

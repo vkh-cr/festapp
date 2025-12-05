@@ -24,7 +24,6 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/widgets/html_view.dart';
 
 import '../models/form_holder.dart';
@@ -435,18 +434,18 @@ class _FormPageState extends State<FormPage> {
     var form = this.form; // Use class member
     
     if (form != null) {
-      if (form!.fontFamily != null) {
+      if (form.fontFamily != null) {
         try {
           theme = theme.copyWith(
-            textTheme: GoogleFonts.getTextTheme(form!.fontFamily!, theme.textTheme),
+            textTheme: GoogleFonts.getTextTheme(form.fontFamily!, theme.textTheme),
           );
         } catch (e) {
           print(e);
         }
       }
 
-      int? primaryInt = form!.primaryColor;
-      int? secondaryInt = form!.secondaryColor;
+      int? primaryInt = form.primaryColor;
+      int? secondaryInt = form.secondaryColor;
 
       Color? primary = primaryInt != null ? Color(primaryInt) : null;
       Color? secondary = secondaryInt != null ? Color(secondaryInt) : null;
@@ -463,12 +462,12 @@ class _FormPageState extends State<FormPage> {
              primary = hsl.withLightness(0.75).toColor();
              // Also optionally boost saturation if it's very low, to make it pop
              if (hsl.saturation < 0.3) {
-                primary = HSLColor.fromColor(primary!).withSaturation(0.4).toColor();
+                primary = HSLColor.fromColor(primary).withSaturation(0.4).toColor();
              }
         }
         
         // Auto-calculate secondary if not provided
-        secondary ??= HSLColor.fromColor(primary!).withLightness((isDark ? 0.85 : 0.9).clamp(0.0, 1.0)).toColor();
+        secondary ??= HSLColor.fromColor(primary).withLightness((isDark ? 0.85 : 0.9).clamp(0.0, 1.0)).toColor();
 
         theme = theme.copyWith(
           primaryColor: primary,
@@ -476,13 +475,13 @@ class _FormPageState extends State<FormPage> {
           // User requested "very slightly colored" and "solid opaque" background
           // Round 12: Increased opacity to 0.12 ("even darker") for light mode.
           scaffoldBackgroundColor: Color.alphaBlend(
-              primary!.withOpacity(isDark ? 0.05 : 0.07), 
+              primary.withOpacity(isDark ? 0.05 : 0.07),
               isDark ? Colors.grey.shade900 : Colors.white
           ), 
           colorScheme: theme.colorScheme.copyWith(
             primary: primary,
             onPrimary: isDark ? Colors.black : Colors.white, // Ensure text on primary is readable
-            secondary: secondary ?? theme.colorScheme.secondary,
+            secondary: secondary,
             // Only force white surface if strictly desired, otherwise let theme decide or use a light tint
             surface: isDark ? null : Colors.white,
           ),
@@ -497,22 +496,22 @@ class _FormPageState extends State<FormPage> {
             side: BorderSide(color: isDark ? Colors.grey.shade500 : Colors.grey.shade600, width: 2),
           ),
           radioTheme: RadioThemeData(
-             fillColor: MaterialStateProperty.resolveWith<Color>((states) {
-               if (states.contains(MaterialState.selected)) {
+             fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+               if (states.contains(WidgetState.selected)) {
                  return primary!;
                }
                return isDark ? Colors.grey.shade400 : Colors.grey.shade600;
              }),
           ),
           switchTheme: SwitchThemeData(
-             thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
-               if (states.contains(MaterialState.selected)) {
+             thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+               if (states.contains(WidgetState.selected)) {
                  return primary!;
                }
                return isDark ? Colors.grey.shade400 : Colors.grey.shade200;
              }),
-             trackColor: MaterialStateProperty.resolveWith<Color>((states) {
-               if (states.contains(MaterialState.selected)) {
+             trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+               if (states.contains(WidgetState.selected)) {
                  return primary!.withOpacity(0.5);
                }
                return isDark ? Colors.grey.shade700 : Colors.grey.shade400;
@@ -542,8 +541,7 @@ class _FormPageState extends State<FormPage> {
     // Check time limits
     bool isClosed = false;
     bool isBeforeStart = false;
-    bool isAfterEnd = false;
-    
+
     if (form != null) {
       final now = DateTime.now();
       if (form!.startTime != null && now.isBefore(form!.startTime!)) {
@@ -551,7 +549,6 @@ class _FormPageState extends State<FormPage> {
         isBeforeStart = true;
       } else if (form!.endTime != null && now.isAfter(form!.endTime!)) {
         isClosed = true;
-        isAfterEnd = true;
       } else if (form!.isOpen == false) {
         isClosed = true;
       }
@@ -805,8 +802,6 @@ class _FormPageState extends State<FormPage> {
         _isLoading = false;
       });
     } catch (e) {
-      // Handle any unexpected errors
-      print("Error loading form: $e");
       setState(() {
         _isLoading = false;
         _formNotAvailable = true;

@@ -426,7 +426,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                         const SizedBox(height: 24),
 
                         DropdownButtonFormField<String>(
-                          value: _communicationTone,
+                          initialValue: _communicationTone,
                           decoration: InputDecoration(
                             labelText: FormStrings.labelCommunicationTone,
                             border: const OutlineInputBorder(),
