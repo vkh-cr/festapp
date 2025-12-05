@@ -49,10 +49,12 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
   DateTime? selectedDate;
   String? warningMessage;
   final TextEditingController _dateController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void dispose() {
     _dateController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -80,18 +82,23 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
       children: [
         FormBuilderDateTimePicker(
           controller: _dateController,
+          focusNode: _focusNode,
           name: widget.fieldHolder.id.toString(),
           inputType: InputType.date,
           initialDatePickerMode: DatePickerMode.year,
           format: dateFormat,
           fieldHintText: dateFormat.pattern,
           decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.transparent,
             label: widget.isCardDesign
                 ? null
                 : FormFieldBuilders.buildTitleWidget(
               widget.fieldHolder.title!,
               widget.fieldHolder.isRequired,
               context,
+              focusNode: _focusNode,
+              controller: _dateController,
             ),
             hintText: widget.isCardDesign ? widget.fieldHolder.title : null,
           ),

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:fstapp/components/forms/widgets_view/countdown_widget.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
@@ -27,6 +29,7 @@ import 'package:fstapp/widgets/html_view.dart';
 
 import '../models/form_holder.dart';
 import '../models/ticket_holder.dart';
+import '../form_strings.dart';
 import 'order_finish_screen.dart';
 
 @RoutePage()
@@ -269,9 +272,7 @@ class _FormPageState extends State<FormPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
-          color: Theme.of(context)
-              .primaryColor
-              .withOpacity(0.7), // Primary color background
+          color: form?.primaryColor != null ? Color(form!.primaryColor!) : Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(8.0),
           boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black26)],
         ),
@@ -317,10 +318,14 @@ class _FormPageState extends State<FormPage> {
         context: context,
         isScrollControlled: true,
         builder: (_) {
-          return OrderPreviewScreen(
-            formHolder: formHolder!,
-            totalPrice: _totalPrice,
-            onSendPressed: _sendOrder,
+          // Inherit the theme from the current context (which has the form's custom theme)
+          return Theme(
+            data: _buildFormTheme(context),
+            child: OrderPreviewScreen(
+              formHolder: formHolder!,
+              totalPrice: _totalPrice,
+              onSendPressed: _sendOrder,
+            ),
           );
         },
       );
@@ -360,9 +365,12 @@ class _FormPageState extends State<FormPage> {
         },
       ),
       transitionBuilder: (context, anim1, anim2, child) {
-        return FadeTransition(
-          opacity: anim1, // Fade animation
-          child: child,
+        return Theme(
+          data: _buildFormTheme(context),
+          child: FadeTransition(
+            opacity: anim1, // Fade animation
+            child: child,
+          ),
         );
       },
     );
@@ -372,10 +380,169 @@ class _FormPageState extends State<FormPage> {
     });
   }
 
+
+
+// ... (imports)
+
+  ThemeData _buildFormTheme(BuildContext context) {
+    var theme = Theme.of(context);
+    var form = this.form; // Use class member
+    
+    if (form != null) {
+      if (form!.fontFamily != null) {
+        try {
+          theme = theme.copyWith(
+            textTheme: GoogleFonts.getTextTheme(form!.fontFamily!, theme.textTheme),
+          );
+        } catch (e) {
+          print(e);
+        }
+      }
+
+      int? primaryInt = form!.primaryColor;
+      int? secondaryInt = form!.secondaryColor;
+
+      Color? primary = primaryInt != null ? Color(primaryInt) : null;
+      Color? secondary = secondaryInt != null ? Color(secondaryInt) : null;
+
+      // Check brightness to respect system theme (dark/light) unless we want to force something.
+      bool isDark = theme.brightness == Brightness.dark;
+
+      if (primary != null) {
+        // SMART COLOR LOGIC FOR DARK MODE
+        // Ensure the primary color is bright enough to be visible against dark background.
+        final hsl = HSLColor.fromColor(primary);
+        // Boost lightness more aggressively for dark mode to ensure visibility
+        if (isDark && hsl.lightness < 0.75) {
+             primary = hsl.withLightness(0.75).toColor();
+             // Also optionally boost saturation if it's very low, to make it pop
+             if (hsl.saturation < 0.3) {
+                primary = HSLColor.fromColor(primary!).withSaturation(0.4).toColor();
+             }
+        }
+        
+        // Auto-calculate secondary if not provided
+        secondary ??= HSLColor.fromColor(primary!).withLightness((isDark ? 0.85 : 0.9).clamp(0.0, 1.0)).toColor();
+
+        theme = theme.copyWith(
+          primaryColor: primary,
+          // Use a very subtle tint of the primary color for background in light mode
+          // User requested "very slightly colored" and "solid opaque" background
+          // Round 12: Increased opacity to 0.12 ("even darker") for light mode.
+          scaffoldBackgroundColor: Color.alphaBlend(
+              primary!.withOpacity(isDark ? 0.05 : 0.07), 
+              isDark ? Colors.grey.shade900 : Colors.white
+          ), 
+          colorScheme: theme.colorScheme.copyWith(
+            primary: primary,
+            onPrimary: isDark ? Colors.black : Colors.white, // Ensure text on primary is readable
+            secondary: secondary ?? theme.colorScheme.secondary,
+            // Only force white surface if strictly desired, otherwise let theme decide or use a light tint
+            surface: isDark ? null : Colors.white,
+          ),
+          checkboxTheme: CheckboxThemeData(
+            fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+               if (states.contains(MaterialState.selected)) {
+                 return primary!;
+               }
+               return isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+            }),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            side: BorderSide(color: isDark ? Colors.grey.shade500 : Colors.grey.shade600, width: 2),
+          ),
+          radioTheme: RadioThemeData(
+             fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+               if (states.contains(MaterialState.selected)) {
+                 return primary!;
+               }
+               return isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+             }),
+          ),
+          switchTheme: SwitchThemeData(
+             thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+               if (states.contains(MaterialState.selected)) {
+                 return primary!;
+               }
+               return isDark ? Colors.grey.shade400 : Colors.grey.shade200;
+             }),
+             trackColor: MaterialStateProperty.resolveWith<Color>((states) {
+               if (states.contains(MaterialState.selected)) {
+                 return primary!.withOpacity(0.5);
+               }
+               return isDark ? Colors.grey.shade700 : Colors.grey.shade400;
+             }),
+          ),
+          inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+             filled: true,
+             // In dark mode, white fill is bad. Use a dark surface color or transparent.
+             fillColor: isDark ? Colors.grey.shade800 : Colors.white,
+             labelStyle: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade700),
+             
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+             style: ElevatedButton.styleFrom(
+               backgroundColor: primary,
+               foregroundColor: Colors.white, // Ensure text is white on primary
+             )
+          )
+        );
+      }
+    }
+    return theme;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
+    // Check time limits
+    bool isClosed = false;
+    bool isBeforeStart = false;
+    bool isAfterEnd = false;
+    
+    if (form != null) {
+      final now = DateTime.now();
+      if (form!.startTime != null && now.isBefore(form!.startTime!)) {
+        isClosed = true;
+        isBeforeStart = true;
+      } else if (form!.endTime != null && now.isAfter(form!.endTime!)) {
+        isClosed = true;
+        isAfterEnd = true;
+      } else if (form!.isOpen == false) {
+        isClosed = true;
+      }
+    }
+    
+    dynamic previewParam = context.routeData.queryParams.get('preview', false);
+    bool isPreviewParam = previewParam.toString().toLowerCase() == 'true';
+    bool canPreview = RightsService.isEditorOrderView();
+    // Allow preview if specifically requested OR if user is editor and form is closed (automatic bypass)
+    bool showPreview = (isClosed && canPreview) || (canPreview && isPreviewParam);
+    bool showCountdown = isBeforeStart && (form?.enableCountdown ?? false) && !showPreview;
+
+    if (_isLoading) {
+       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (_formNotAvailable || (isClosed && !showPreview && !showCountdown)) {
+      return Scaffold(body: _buildFormNotAvailableMessage());
+    }
+
+    ThemeData theme = _buildFormTheme(context);
+    
+    Widget bodyContent;
+    
+    if (showCountdown) {
+      bodyContent = CountdownWidget(
+        targetTime: form!.startTime!,
+        title: form!.countdownTitle ?? FormStrings.registrationStart,
+        onFinished: () {
+          setState(() {
+            // Re-evaluate state to show form
+          });
+        },
+      );
+    } else {
+       // Main Form Content
+       bodyContent = SafeArea(
         child: Stack(
           children: [
             Align(
@@ -388,47 +555,64 @@ class _FormPageState extends State<FormPage> {
                       controller: _scrollController,
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
-                        child: _isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : _formNotAvailable
-                            ? _buildFormNotAvailableMessage()
-                            : (formHolder == null
-                            ? const Center(
-                            child: CircularProgressIndicator())
-                            : FormBuilder(
-                          key: _formKey,
-                          child: AutofillGroup(
-                            child: Column(
-                              children: [
-                                if (form!.header != null)
-                                  Column(
-                                    children: [
-                                      HtmlView(
-                                          html: form!.header!,
-                                          isSelectable: true),
-                                      const SizedBox(height: 16),
-                                    ],
-                                  ),
-                                ...FormHelper.getAllFormFields(
-                                    context, _formKey, formHolder!),
-                                const SizedBox(height: 32),
-                                ButtonsHelper.primaryButton(
-                                  context: context,
-                                  onPressed: (_isLoading ||
-                                      _totalProducts == 0)
-                                      ? null
-                                      : () => _showOrderPreview(
-                                      scrollContext),
-                                  label: "Continue".tr(),
-                                  isLoading: _isLoading,
-                                  height: 50.0,
-                                  width: 250.0,
+                        child: Column(
+                          children: [
+                            if (showPreview)
+                              Container(
+                                width: double.infinity,
+                                color: Colors.orangeAccent,
+                                padding: const EdgeInsets.all(8.0),
+                                margin: const EdgeInsets.only(bottom: 16.0),
+                                child: Text(
+                                  FormStrings.previewMode,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black),
                                 ),
-                                const SizedBox(height: 32),
-                              ],
-                            ),
-                          ),
-                        )),
+                              ),
+
+                            if (formHolder == null)
+                               const Center(child: CircularProgressIndicator())
+                            else
+                                FormBuilder(
+                                  key: _formKey,
+                                  child: Builder(
+                                    builder: (context) {
+                                      return AutofillGroup(
+                                        child: Column(
+                                          children: [
+                                            if (form!.header != null)
+                                              Column(
+                                                children: [
+                                                  HtmlView(
+                                                      html: form!.header!,
+                                                      isSelectable: true),
+                                                  const SizedBox(height: 16),
+                                                ],
+                                              ),
+                                            ...FormHelper.getAllFormFields(
+                                                context, _formKey, formHolder!),
+                                            const SizedBox(height: 32),
+                                            ButtonsHelper.primaryButton(
+                                              context: context,
+                                              onPressed: (_isLoading ||
+                                                  _totalProducts == 0)
+                                                  ? null
+                                              : () => _showOrderPreview(
+                                                  scrollContext),
+                                              label: FormStrings.buttonContinue,
+                                              isLoading: _isLoading,
+                                              height: 50.0,
+                                              width: 250.0,
+                                            ),
+                                            const SizedBox(height: 32),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  ),
+                                ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -439,18 +623,27 @@ class _FormPageState extends State<FormPage> {
             _buildPriceAndTicketInfo(),
           ],
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(bottom: 24),
-        child: Visibility(
-          visible: RightsService.isEditor(),
-          child: FloatingActionButton(
-            onPressed: () {
-              RouterService.navigateOccasion(context, ReservationsPage.ROUTE)
-                  .then((value) => loadData());
-            },
-            child: const Icon(Icons.edit),
+      );
+    }
+
+    return Theme(
+      data: theme,
+      child: Scaffold(
+        body: bodyContent,
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: Padding(
+          padding: EdgeInsets.only(bottom: 24),
+          child: Visibility(
+            visible: RightsService.isEditor(),
+            child: FloatingActionButton(
+              backgroundColor: theme.primaryColor,
+              foregroundColor: theme.colorScheme.onPrimary,
+              onPressed: () {
+                RouterService.navigateOccasion(context, ReservationsPage.ROUTE)
+                    .then((value) => loadData());
+              },
+              child: const Icon(Icons.edit),
+            ),
           ),
         ),
       ),
@@ -460,7 +653,7 @@ class _FormPageState extends State<FormPage> {
   Widget _buildFormNotAvailableMessage() {
     String notAvailableText = (form?.headerOff?.isNotEmpty ?? false)
         ? form!.headerOff!
-        : "Reservation for the selected event is currently unavailable.".tr();
+        : FormStrings.reservationUnavailableMessage;
     return Center(
       child: Container(
         padding: const EdgeInsets.all(24.0),
@@ -473,14 +666,14 @@ class _FormPageState extends State<FormPage> {
               size: 60,
             ),
             const SizedBox(height: 16),
-            const Text(
-              "Reservation Unavailable",
+            Text(
+              FormStrings.reservationUnavailable,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
-            ).tr(),
+            ),
             const SizedBox(height: 8),
             IntrinsicWidth(
               child: HtmlView(

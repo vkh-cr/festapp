@@ -2,11 +2,12 @@ import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { formatCurrency, formatDatetime, formatIBAN } from "../_shared/utilities.ts";
 import { generateFullOrder } from "../_shared/orderOverview.ts";
 import { generateQrCode } from "../_shared/qrCodePayment.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
+
 
 import {
   getEmailTemplateAndWrapper,
   supabaseAdmin,
+  createUserClient,
 } from "../_shared/supabaseUtil.ts";
 import { useFakturoid } from "./fakturoid.ts";
 import { translations } from "../_shared/translations/translations.ts";
@@ -97,10 +98,43 @@ Deno.serve(async (req) => {
     const { orderDetails } = await req.json();
     console.log("Order details:", orderDetails);
 
-    const { data: ticketOrder } = await supabaseAdmin.rpc(
-      "create_ticket_order",
-      { input_data: orderDetails },
-    );
+    const authorizationHeader = req.headers.get("Authorization");
+    let ticketOrderResponse: any;
+
+    if (authorizationHeader) {
+      console.log("Creating ticket order via User Scoped Client");
+      const userClient = createUserClient(authorizationHeader);
+      
+      const { data, error } = await userClient.rpc(
+        "create_ticket_order",
+        { input_data: orderDetails },
+      );
+       if (error) {
+        console.error("RPC Error (User Context):", error);
+        ticketOrderResponse = { code: 500, message: error.message }; 
+      } else {
+        ticketOrderResponse = data;
+      }
+    } else {
+      console.log("Creating ticket order via Admin Client");
+      const { data } = await supabaseAdmin.rpc(
+        "create_ticket_order",
+        { input_data: orderDetails },
+      );
+      ticketOrderResponse = data;
+    }
+
+    // Safety check if response is null/undefined
+    if (!ticketOrderResponse) {
+        console.error("Ticket order response is null/undefined");
+         return new Response(JSON.stringify({ error: "Failed to create ticket order (empty response)" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 500,
+        });
+    }
+
+
+    const ticketOrder = ticketOrderResponse;
 
     if (ticketOrder.code !== 200) {
       console.error("Ticket order error:", ticketOrder);
