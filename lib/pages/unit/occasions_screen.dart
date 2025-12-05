@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/_shared/admin_strings.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_models/unit_model.dart';

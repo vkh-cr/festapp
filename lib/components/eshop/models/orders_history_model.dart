@@ -448,7 +448,7 @@ class OrderHistoryModel extends ITrinaRowModel {
     if (previousHistoryRecord != null && state != previousHistoryRecord!.state) {
       final fromStateKey = previousHistoryRecord!.state ?? "";
       final toStateKey = state ?? "";
-      stateCellFormat = "${fromStateKey};${OrderModel.stateToLocale(fromStateKey)} → ${toStateKey};${OrderModel.stateToLocale(toStateKey)}";
+      stateCellFormat = "$fromStateKey;${OrderModel.stateToLocale(fromStateKey)} → $toStateKey;${OrderModel.stateToLocale(toStateKey)}";
     } else {
       final stateKey = state ?? OrderModel.orderedState;
       stateCellFormat = OrderModel.formatState(stateKey);

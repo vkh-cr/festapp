@@ -312,7 +312,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                     IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () {
-                        form.relatedFields!.remove(ptField);
+                        form.relatedFields.remove(ptField);
                         refresh();
                       },
                     ),

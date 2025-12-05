@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';

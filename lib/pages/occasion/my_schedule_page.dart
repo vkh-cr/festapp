@@ -84,8 +84,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
         }
       }
       for (var e in _data!.activities) {
-        if (e.id != null && _eventAndActivitiesDescriptions.containsKey(e.id!)) {
-          e.description = _eventAndActivitiesDescriptions[e.id!];
+        if (_eventAndActivitiesDescriptions.containsKey(e.id)) {
+          e.description = _eventAndActivitiesDescriptions[e.id];
         }
       }
     }
