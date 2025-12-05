@@ -33,7 +33,7 @@ class BirthYearFieldBuilder extends StatelessWidget {
           return NumericValidator().translatedErrorText;
         }
         final numericValue = int.parse(value);
-        final maxYear = DateTime.now().year - 12;
+        final maxYear = DateTime.now().year;
         if (numericValue < 1900 || numericValue > maxYear) {
           return RangeValidator(maxYear, 1900).translatedErrorText;
         }

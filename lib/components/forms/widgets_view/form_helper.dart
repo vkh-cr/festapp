@@ -589,6 +589,8 @@ class FormHelper {
     required bool isRequired,
   }) {
     return InputDecoration(
+      filled: true,
+      fillColor: Colors.transparent,
       border: InputBorder.none,
       label: Text.rich(
         TextSpan(

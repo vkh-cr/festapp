@@ -39,7 +39,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
   final TextEditingController _startingNumberController = TextEditingController();
   final ValueNotifier<String> _htmlNotifier = ValueNotifier<String>("");
 
-  bool _isCardDesign = false;
+
   bool _isReminderEnabled = false;
   late FormFeature _formFeature;
   String? _linkError;
@@ -104,7 +104,6 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
       _htmlNotifier.value = _generateFormHtml(_linkController.text);
       _linkController.removeListener(_updateHtml);
       _linkController.addListener(_updateHtml);
-      _isCardDesign = _form!.data?[FormModel.metaIsCardDesign] as bool? ?? false;
       _isReminderEnabled = _form!.data?[FormModel.metaIsReminderEnabled] as bool? ?? false;
 
       final vsData = _form!.data?[FormModel.metaVariableSymbol] as Map<String, dynamic>?;
@@ -158,7 +157,6 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
     _form!.title = trimmedTitle.isEmpty ? null : trimmedTitle;
     _form!.link = _linkController.text.trim();
     _form!.data ??= {};
-    _form!.data![FormModel.metaIsCardDesign] = _isCardDesign;
     _form!.data![FormModel.metaIsReminderEnabled] = _isReminderEnabled;
 
     if (_variableSymbolType == 'sequence') {
@@ -410,19 +408,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                         const Divider(),
                         const SizedBox(height: 16),
 
-                        SwitchListTile(
-                          title: Text(FormStrings.labelCardDesign),
-                          subtitle: Text(FormStrings.subtitleCardDesign),
-                          value: _isCardDesign,
-                          onChanged: RightsService.canEditOccasion()
-                              ? (value) {
-                            setState(() {
-                              _isCardDesign = value;
-                            });
-                          }
-                              : null,
-                          contentPadding: EdgeInsets.zero,
-                        ),
+
 
                         const SizedBox(height: 24),
                         const Divider(),
