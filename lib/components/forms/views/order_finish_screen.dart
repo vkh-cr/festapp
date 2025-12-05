@@ -148,7 +148,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         const SizedBox(height: 24),
         Text(
           title,
-          style: TextStyle(
+          style: Theme.of(context).textTheme.titleLarge?.copyWith( // Use Theme text style
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: _isSuccess
@@ -160,7 +160,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         const SizedBox(height: 8),
         Text(
           subtitle,
-          style: TextStyle(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith( // Use Theme text style
             fontSize: 14,
             color: ThemeConfig.blackColor(context).withOpacity(0.7),
           ),
