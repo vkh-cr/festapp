@@ -18,6 +18,7 @@ class OrderPreviewScreen extends StatefulWidget {
   final FormHolder formHolder;
   final double totalPrice;
   final VoidCallback onSendPressed;
+  final VoidCallback? onClose;
 
   static const double fontSizeFactor = 1.2;
 
@@ -26,6 +27,7 @@ class OrderPreviewScreen extends StatefulWidget {
     required this.formHolder,
     required this.totalPrice,
     required this.onSendPressed,
+    this.onClose,
   });
 
   @override
@@ -95,7 +97,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                         Center(
                           child: Text(
                             "Summary".tr(),
-                            style: StylesConfig.textStyleBig.copyWith(
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontSize: 18 * OrderPreviewScreen.fontSizeFactor,
                               fontWeight: FontWeight.bold,
                             ),
@@ -149,7 +151,11 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                 size: 24 * OrderPreviewScreen.fontSizeFactor,
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                if (widget.onClose != null) {
+                  widget.onClose!();
+                } else {
+                  Navigator.of(context).pop();
+                }
               },
               tooltip: "Close".tr(),
             ),
@@ -200,7 +206,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
           ticketHolder.tickets.length > 1
               ? "${OrdersStrings.itemSingular} $ticketIndex"
               : OrdersStrings.itemSingular,
-          style: StylesConfig.textStyleBig.copyWith(
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
             fontWeight: FontWeight.bold,
           ),
@@ -275,11 +281,16 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
           children: [
             TextSpan(
               text: "$label: ",
-              style: TextStyle(fontSize: 14 * OrderPreviewScreen.fontSizeFactor),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 14 * OrderPreviewScreen.fontSizeFactor,
+                  ) ?? TextStyle(fontSize: 14 * OrderPreviewScreen.fontSizeFactor),
             ),
             TextSpan(
               text: FormHelper.fieldTypeValue(context, value, fieldType),
-              style: TextStyle(fontSize: 14 * OrderPreviewScreen.fontSizeFactor),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 14 * OrderPreviewScreen.fontSizeFactor,
+                    fontWeight: FontWeight.bold, // Make value slightly bolder for contrast
+                  ) ?? TextStyle(fontSize: 14 * OrderPreviewScreen.fontSizeFactor, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -293,7 +304,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
         "Total Price: {price}".tr(namedArgs: {
           "price": Utilities.formatPrice(context, widget.totalPrice, currencyCode: widget.formHolder.controller!.currencyCode),
         }),
-        style: StylesConfig.textStyleBig.copyWith(
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
           fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
           fontWeight: FontWeight.bold,
         ),
