@@ -97,7 +97,7 @@ class DbOrders {
     // Basic data parsing
     final spots = GetOrdersHelper.parseSpots(json);
     final products = GetOrdersHelper.parseProducts(json);
-    final productTypes = GetOrdersHelper.parseProductTypes(json);
+    GetOrdersHelper.parseProductTypes(json);
     final tickets = GetOrdersHelper.parseTickets(json);
     final orders = GetOrdersHelper.parseOrders(json)!;
     final payments = GetOrdersHelper.parsePaymentInfo(json);

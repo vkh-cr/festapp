@@ -104,7 +104,7 @@ class _SelectProductDialogState extends State<SelectProductDialog> {
 
         } else {
           // Find the original product in the blueprint and update it
-          final originalProduct = widget.blueprint.products?.firstWhereOrNull((p) => p.id == product!.id);
+          final originalProduct = widget.blueprint.products?.firstWhereOrNull((p) => p.id == product.id);
           if (originalProduct != null) {
             originalProduct.title = newTitle;
             originalProduct.price = newPrice;

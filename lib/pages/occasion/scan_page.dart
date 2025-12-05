@@ -659,7 +659,6 @@ class _ScanPageState extends State<ScanPage> {
       case ScanState.nothing:
         return ThemeConfig.backgroundColor(context);
     }
-    return Colors.redAccent;
   }
 }
 

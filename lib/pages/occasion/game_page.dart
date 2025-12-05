@@ -71,7 +71,7 @@ class _GamePageState extends State<GamePage> {
     if (_isUserInGameGroup) {
       var userGroup = userGroups.firstWhere((g) => g.type == InformationModel.gameType);
       setState(() {
-        _groupTitle = userGroup.title ?? "Game".tr();
+        _groupTitle = userGroup.title;
       });
     }
 
