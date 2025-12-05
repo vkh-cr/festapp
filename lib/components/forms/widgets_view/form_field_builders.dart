@@ -23,22 +23,32 @@ import 'text_field_builder.dart';
 
 class FormFieldBuilders {
   static Widget buildTitleWidget(String displayTitle, bool isRequired, BuildContext context,
-      {FocusNode? focusNode, TextStyle? textStyle}) {
-    final TextStyle defaultLabelStyle = Theme.of(context).inputDecorationTheme.labelStyle ??
-        TextStyle(
-            fontSize: 16 * FormHelper.fontSizeFactor,
-            color: ThemeConfig.grey600(context),
-            fontFamily: ThemeConfig.fontFamily);
+      {FocusNode? focusNode, TextStyle? textStyle, TextEditingController? controller}) {
+    final TextStyle themeLabelStyle = Theme.of(context).inputDecorationTheme.labelStyle ??
+        TextStyle(color: ThemeConfig.grey600(context));
+    
+    final TextStyle defaultLabelStyle = themeLabelStyle.copyWith(
+        fontSize: 16 * FormHelper.fontSizeFactor,
+        fontFamily: ThemeConfig.fontFamily,
+    );
     final TextStyle effectiveBaseStyle =
     textStyle != null ? defaultLabelStyle.merge(textStyle) : defaultLabelStyle;
 
-    if (focusNode != null) {
+    if (focusNode != null || controller != null) {
+      final List<Listenable> listenables = [];
+      if (focusNode != null) listenables.add(focusNode);
+      if (controller != null) listenables.add(controller);
+
       return AnimatedBuilder(
-        animation: focusNode,
+        animation: Listenable.merge(listenables),
         builder: (context, child) {
-          final bool isFocused = focusNode.hasFocus;
+          final bool isFocused = focusNode?.hasFocus ?? false;
+          final bool hasContent = controller?.text.isNotEmpty ?? false;
+          // Color if focused OR has content (i.e., when label is floating)
+          final bool showColor = (controller != null) ? (isFocused || hasContent) : isFocused;
+
           final TextStyle effectiveStyle = effectiveBaseStyle.copyWith(
-            color: isFocused ? Theme.of(context).primaryColor : effectiveBaseStyle.color,
+            color: showColor ? Theme.of(context).primaryColor : effectiveBaseStyle.color,
           );
           final TextSpan? requiredStar = isRequired
               ? TextSpan(text: ' *', style: TextStyle(color: ThemeConfig.redColor(context)))
@@ -204,7 +214,7 @@ class FormFieldBuilders {
           readOnly: true,
           canRequestFocus: true,
           decoration: InputDecoration(
-            label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
+            label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode, controller: textController),
             suffixIcon: const Icon(Icons.event_seat),
             errorText: field.errorText,
           ),
