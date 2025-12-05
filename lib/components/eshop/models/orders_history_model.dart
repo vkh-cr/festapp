@@ -144,7 +144,7 @@ class OrderHistoryModel extends ITrinaRowModel {
     // `null == null` evaluates to true, so this correctly handles products without a price.
     for (int i = currentProdsMutable.length - 1; i >= 0; i--) {
       final currentP = currentProdsMutable[i];
-      final matchIndex = referenceProdsMutable.indexWhere((refP) => refP.product.id == currentP.product.id && refP.product.price == currentP.product.price);
+      final matchIndex = referenceProdsMutable.indexWhere((refP) => refP.product.id == currentP.product.id && refP.product.price == currentP.product.price && refP.product.spotTitle == currentP.product.spotTitle);
       if (matchIndex > -1) {
         currentProdsMutable.removeAt(i);
         referenceProdsMutable.removeAt(matchIndex);
@@ -207,7 +207,11 @@ class OrderHistoryModel extends ITrinaRowModel {
       final newPrice = toP.price != null
           ? Utilities.formatPrice(context, toP.price!, currencyCode: toP.currencyCode)
           : _noPricePlaceholder;
-      changeStrings.add("~ ${toP.title}: $oldPrice → $newPrice");
+      if (fromP.spotTitle != toP.spotTitle) {
+        changeStrings.add("~ ${toP.title}: ${fromP.spotTitle} → ${toP.spotTitle}");
+      } else {
+        changeStrings.add("~ ${toP.title}: $oldPrice → $newPrice");
+      }
     }
 
     if (changeStrings.isEmpty) {
@@ -247,7 +251,11 @@ class OrderHistoryModel extends ITrinaRowModel {
       final toP = c['to']!.product;
       final oldPrice = fromP.price != null ? Utilities.formatPrice(context, fromP.price!, currencyCode: fromP.currencyCode) : _noPricePlaceholder;
       final newPrice = toP.price != null ? Utilities.formatPrice(context, toP.price!, currencyCode: toP.currencyCode) : _noPricePlaceholder;
-      changeSpans.add(TextSpan(text: "~ ${toP.title}: $oldPrice → $newPrice", style: TextStyle(color: Colors.orange.shade700, fontWeight: FontWeight.bold)));
+      if (fromP.spotTitle != toP.spotTitle) {
+         changeSpans.add(TextSpan(text: "~ ${toP.title}: ${fromP.spotTitle} → ${toP.spotTitle}", style: TextStyle(color: Colors.orange.shade700, fontWeight: FontWeight.bold)));
+      } else {
+        changeSpans.add(TextSpan(text: "~ ${toP.title}: $oldPrice → $newPrice", style: TextStyle(color: Colors.orange.shade700, fontWeight: FontWeight.bold)));
+      }
     }
 
     if (changeSpans.isEmpty) {
@@ -309,7 +317,7 @@ class OrderHistoryModel extends ITrinaRowModel {
       for (var c in changedItems) {
         final toProduct = c['to']!.product;
         final fromProduct = c['from']!.product;
-        changeRows.add(_buildPriceChangeRow(context, toProduct.title!, fromProduct, toProduct));
+        changeRows.add(_buildChangeRow(context, toProduct.title!, fromProduct, toProduct));
       }
 
       ticketWidgets.add(_buildTicketChangeSection(context, ticketSymbol, ticketNote, changeRows));
@@ -364,8 +372,34 @@ class OrderHistoryModel extends ITrinaRowModel {
   }
 
   /// **MODIFIED HELPER**
-  /// Builds a row for a product whose price has changed. Handles null prices.
-  Widget _buildPriceChangeRow(BuildContext context, String title, OrderDataProductModel from, OrderDataProductModel to) {
+  /// Builds a row for a product whose price or spot has changed. Handles null prices.
+  Widget _buildChangeRow(BuildContext context, String title, OrderDataProductModel from, OrderDataProductModel to) {
+    if (from.spotTitle != to.spotTitle) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
+        child: Row(children: [
+          Expanded(child: Text("~ $title")),
+          Row(children: [
+            Text(
+              from.spotTitle ?? '-',
+              style: TextStyle(
+                decoration: TextDecoration.lineThrough,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
+            ),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Icon(Icons.arrow_forward, size: 16, color: Colors.orange.shade700)),
+            Text(
+              to.spotTitle ?? '-',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.orange.shade700),
+            ),
+          ]),
+        ]),
+      );
+    }
+
     final oldPriceText = from.price != null
         ? Utilities.formatPrice(context, from.price!, currencyCode: from.currencyCode)
         : _noPricePlaceholder;
