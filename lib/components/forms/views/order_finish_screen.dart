@@ -5,12 +5,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class FinishOrderScreen extends StatefulWidget {
   final Future<FunctionResponse> Function() orderFutureFunction;
-  final VoidCallback onResetForm;
+  final VoidCallback? onSuccess;
+  final VoidCallback? onOrderConfirmed;
 
   const FinishOrderScreen({
     super.key,
     required this.orderFutureFunction,
-    required this.onResetForm,
+    this.onSuccess,
+    this.onOrderConfirmed,
   });
 
   @override
@@ -55,6 +57,9 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
           0;
       _isSuccess = code == 200;
       if (code == 1017) _errorProduct = result.data["product"];
+      if (_isSuccess) {
+         widget.onOrderConfirmed?.call();
+      }
       if (_isSuccess && elapsed < 1000) {
         await Future.delayed(Duration(milliseconds: 1000 - elapsed));
       }
@@ -78,6 +83,12 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: PopScope(
+        canPop: true,
+        onPopInvoked: (didPop) {
+          if (didPop && _isSuccess) {
+            widget.onSuccess?.call();
+          }
+        },
         child: Center(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
@@ -169,7 +180,6 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         const SizedBox(height: 24),
         OutlinedButton(
           onPressed: () {
-            if (_isSuccess) widget.onResetForm();
             Navigator.of(context).pop();
           },
           style: OutlinedButton.styleFrom(

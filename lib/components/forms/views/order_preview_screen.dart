@@ -18,6 +18,7 @@ class OrderPreviewScreen extends StatefulWidget {
   final FormHolder formHolder;
   final double totalPrice;
   final VoidCallback onSendPressed;
+  final VoidCallback? onClose;
 
   static const double fontSizeFactor = 1.2;
 
@@ -26,6 +27,7 @@ class OrderPreviewScreen extends StatefulWidget {
     required this.formHolder,
     required this.totalPrice,
     required this.onSendPressed,
+    this.onClose,
   });
 
   @override
@@ -149,7 +151,11 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                 size: 24 * OrderPreviewScreen.fontSizeFactor,
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                if (widget.onClose != null) {
+                  widget.onClose!();
+                } else {
+                  Navigator.of(context).pop();
+                }
               },
               tooltip: "Close".tr(),
             ),

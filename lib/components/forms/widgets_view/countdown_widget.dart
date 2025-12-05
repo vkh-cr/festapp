@@ -114,7 +114,7 @@ class _CountdownWidgetState extends State<CountdownWidget> {
     final primary = theme.primaryColor;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
       decoration: BoxDecoration(
         // Use a very subtle tint of the primary color for background in light mode
         // User requested "very slightly colored" and "solid opaque" background

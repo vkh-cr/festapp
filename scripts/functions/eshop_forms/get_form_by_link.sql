@@ -55,6 +55,7 @@ BEGIN
             'data', f.data,
             'type', f.type,
             'title', f.title,
+            'is_open', f.is_open,
             'header', f.header,
             'header_off', f.header_off,
             'occasion', f.occasion,
