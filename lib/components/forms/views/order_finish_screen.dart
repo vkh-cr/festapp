@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fstapp/components/forms/public_order_strings.dart';
 
 class FinishOrderScreen extends StatefulWidget {
   final Future<FunctionResponse> Function() orderFutureFunction;
   final VoidCallback? onSuccess;
   final VoidCallback? onOrderConfirmed;
+  final String? tone;
+  final bool hasTickets;
 
   const FinishOrderScreen({
     super.key,
     required this.orderFutureFunction,
     this.onSuccess,
     this.onOrderConfirmed,
+    this.tone,
+    this.hasTickets = true,
   });
 
   @override
@@ -123,17 +127,15 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
   Widget _buildResult() {
     String title, subtitle;
     if (_isSuccess) {
-      title = "Your order was accepted!".tr();
-      subtitle = "Payment information has been sent to your email.".tr();
+      title = PublicOrderStrings.successTitle(widget.tone, hasTickets: widget.hasTickets);
+      subtitle = PublicOrderStrings.paymentInfo(widget.tone);
     } else if (code == 1017) {
       final prodTitle = _errorProduct?["title"] ?? "";
-      title = "The {product_title} is no longer available for order."
-          .tr(namedArgs: {"product_title": prodTitle});
-      subtitle = "Please choose a different variant.".tr();
+      title = PublicOrderStrings.productUnavailable(prodTitle);
+      subtitle = PublicOrderStrings.chooseDifferentVariant(widget.tone);
     } else {
-      title = "Order Failed".tr();
-      subtitle = "{code}: An error occurred while processing your order."
-          .tr(namedArgs: {"code": (code ?? 0).toString()});
+      title = PublicOrderStrings.orderFailed;
+      subtitle = PublicOrderStrings.orderError((code ?? 0).toString());
     }
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -189,7 +191,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
-          child: Text("Back to Form".tr()),
+          child: Text(PublicOrderStrings.backToForm),
         ),
       ],
     );
