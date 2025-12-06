@@ -9,7 +9,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
     v_occasion_id BIGINT;
-    v_form_key UUID;
+    v_form_id BIGINT;
     spotsData JSONB;
     productsData JSONB;
     productTypesData JSONB;
@@ -39,8 +39,8 @@ BEGIN
         FROM public.occasions
         WHERE link = p_occasion_link;
     ELSE
-        SELECT occasion, key
-        INTO v_occasion_id, v_form_key
+        SELECT occasion, key, id
+        INTO v_occasion_id, v_form_id
         FROM public.forms
         WHERE link = p_form_link;
     END IF;
@@ -130,24 +130,26 @@ BEGIN
     WHERE f.occasion = v_occasion_id;
 
     -- Fetch orders, conditionally filtering by form link
-    IF v_form_key IS NOT NULL THEN
+    IF v_form_id IS NOT NULL THEN
         SELECT jsonb_agg(jsonb_build_object(
             'id', o.id, 'created_at', o.created_at, 'updated_at', o.updated_at, 'price', o.price, 'state', o.state, 'currency_code', o.currency_code,
+            'form', jsonb_build_object('id', o.form),
             'data', CASE
                 WHEN (p_options->>'include_full_order_data')::BOOLEAN = TRUE THEN o.data
-                ELSE jsonb_build_object('name', o.data->>'name', 'surname', o.data->>'surname', 'email', o.data->>'email', 'form', o.data->>'form')
+                ELSE jsonb_build_object('name', o.data->>'name', 'surname', o.data->>'surname', 'email', o.data->>'email')
             END,
             'payment_info', o.payment_info, 'note_hidden', o.note_hidden
         ))
         INTO ordersData
         FROM eshop.orders o
-        WHERE o.occasion = v_occasion_id AND o.data->>'form' = v_form_key::TEXT;
+        WHERE o.occasion = v_occasion_id AND o.form = v_form_id;
     ELSE
         SELECT jsonb_agg(jsonb_build_object(
             'id', o.id, 'created_at', o.created_at, 'updated_at', o.updated_at, 'price', o.price, 'state', o.state, 'currency_code', o.currency_code,
+            'form', jsonb_build_object('id', o.form),
             'data', CASE
                 WHEN (p_options->>'include_full_order_data')::BOOLEAN = TRUE THEN o.data
-                ELSE jsonb_build_object('name', o.data->>'name', 'surname', o.data->>'surname', 'email', o.data->>'email', 'form', o.data->>'form')
+                ELSE jsonb_build_object('name', o.data->>'name', 'surname', o.data->>'surname', 'email', o.data->>'email')
             END,
             'payment_info', o.payment_info, 'note_hidden', o.note_hidden
         ))

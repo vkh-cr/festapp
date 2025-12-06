@@ -56,6 +56,7 @@ class BirthYearFieldBuilder extends StatelessWidget {
     FocusNode focusNode = FocusNode();
     return FormBuilderTextField(
       name: fieldHolder.id.toString(),
+      autofillHints: [AutofillHints.birthdayYear],
       focusNode: focusNode,
       decoration: InputDecoration(
         label: FormFieldBuilders.buildTitleWidget(
@@ -139,6 +140,7 @@ class _CardBirthYearFieldState extends State<_CardBirthYearField> {
         children: [
           TextField(
             controller: _controller,
+            autofillHints: const [AutofillHints.birthdayYear],
             maxLines: 1,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
