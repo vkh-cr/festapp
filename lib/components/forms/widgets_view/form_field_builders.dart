@@ -7,6 +7,7 @@ import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.da
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/forms/models/id_document_field_holder.dart';
+import 'package:fstapp/components/forms/public_order_strings.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
@@ -203,7 +204,7 @@ class FormFieldBuilders {
       name: fieldHolder.fieldType,
       validator: FormBuilderValidators.compose([
         if (fieldHolder.isRequired) FormBuilderValidators.required(),
-            (value) => value == null ? "Please select a seat.".tr() : null,
+            (value) => value == null ? PublicOrderStrings.selectSeat(null) : null,
       ]),
       builder: (FormFieldState<SeatModel?> field) {
         SeatModel? seat = field.value;

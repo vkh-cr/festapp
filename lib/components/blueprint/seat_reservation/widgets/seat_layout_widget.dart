@@ -107,12 +107,16 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
     // This allows the controller to get the correct viewport size.
     return Container(
       key: _layoutKey,
-      child: InteractiveViewer(
-        minScale: widget.controller.minScale,
-        maxScale: 5,
-        boundaryMargin: const EdgeInsets.all(double.infinity),
-        constrained: false,
-        transformationController: widget.controller.transformationController,
+      child: AnimatedOpacity(
+        opacity: widget.controller.isLayoutReady ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: InteractiveViewer(
+          minScale: widget.controller.minScale,
+          maxScale: 5,
+          boundaryMargin: const EdgeInsets.all(double.infinity),
+          constrained: false,
+          transformationController: widget.controller.transformationController,
         child: RepaintBoundary(
           child: Stack(
             children: [
@@ -187,6 +191,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                             }
                           },
                           child: TextTooltipWidget(
+                            fontSize: 18.0,
                             triggerMode: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
                                 ? TooltipTriggerMode.tap
                                 : null,
@@ -219,6 +224,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

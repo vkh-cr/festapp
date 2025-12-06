@@ -296,21 +296,14 @@
   "The processing has been cancelled.": "The processing has been cancelled.",
   "The processing has completed successfully.": "The processing has completed successfully.",
   "Saving changes": "Saving changes",
-  "Total Price: {price}": "Total Price: {price}",
+
   "Price": "Price",
   "Ticket": "Ticket",
   "Drop file here": "Drop file here",
   "Continue": "Continue",
   "Spot": "Spot",
-  "Back to Form": "Back to Form",
   "Close": "Close",
-  "Your order was accepted!": "Your order was accepted!",
-  "Order Failed": "Order Failed",
-  "Payment information has been sent to your email.": "Payment information has been sent to your email.",
-  "An error occurred while processing your order.": "An error occurred while processing your order.",
-  "Please select a seat.": "Please select a seat.",
-  "Summary": "Summary",
-  "Submit order": "Submit order",
+
   "It is not possible to select more tickets.": "It is not possible to select more tickets.",
   "Seat selection": "Seat selection",
   "Ticket Symbol": "Ticket Symbol",
@@ -495,8 +488,7 @@
   "Clear selection": "Clear selection",
   "Add description": "Add description",
   "Unavailable": "Unavailable",
-  "The {product_title} is no longer available for order.": "The {product_title} is no longer available for order.",
-  "Please choose a different variant.": "Please choose a different variant.",
+
   "Various settings for map inside the app.": "Various settings for map inside the app.",
   "Map Zoom": "Map Zoom",
   "Latitude": "Latitude",
@@ -1296,6 +1288,28 @@
   "UnitSettings": {
     "labelReplyToEmail": "Default reply-to email",
     "labelDefaultTimezone": "Default timezone"
+  },
+  "PublicOrder": {
+    "successTitle": "Your order was accepted!",
+    "successTitle_informal": "Your order was accepted!",
+    "successRegistrationTitle": "Your registration was accepted!",
+    "successRegistrationTitle_informal": "Your registration was accepted!",
+    "paymentInfo": "Payment information has been sent to your email.",
+    "paymentInfo_informal": "Payment information has been sent to your email.",
+    "selectSeat": "Please select a seat.",
+    "selectSeat_informal": "Please select a seat.",
+    "submitOrder": "Submit order",
+    "submitOrder_informal": "Submit order",
+    "submitRegistration": "Submit registration",
+    "submitRegistration_informal": "Submit registration",
+    "summary": "Summary",
+    "backToForm": "Back to Form",
+    "orderFailed": "Order Failed",
+    "orderError": "{code}: An error occurred while processing your order.",
+    "productUnavailable": "The {product_title} is no longer available for order.",
+    "chooseDifferentVariant": "Please choose a different variant.",
+    "chooseDifferentVariant_informal": "Please choose a different variant.",
+    "totalPrice": "Total Price: {price}"
   },
   "_":"_"
 }
