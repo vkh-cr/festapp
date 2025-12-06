@@ -58,7 +58,10 @@ BEGIN
             'is_open', f.is_open,
             'header', f.header,
             'header_off', f.header_off,
-            'occasion', f.occasion,
+            'occasion', jsonb_build_object(
+                'id', o.id,
+                'features', o.features
+            ),
             'blueprint', f.blueprint,
             'deadline_duration_seconds', f.deadline_duration_seconds,
             'account_number', ba.account_number,
@@ -118,10 +121,17 @@ BEGIN
                 WHERE ff.form = f.id AND ff.is_hidden = false
             )
         )
+                            END
+                        )
+                    ) ORDER BY COALESCE(ff."order", 0)
+                )
+            )
+        )
     )
     INTO allData
     FROM public.forms f
     LEFT JOIN eshop.bank_accounts ba ON f.bank_account = ba.id
+    LEFT JOIN public.occasions o ON f.occasion = o.id
     WHERE f.link = form_link;
 
     RETURN allData;
