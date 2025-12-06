@@ -214,7 +214,7 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
                 const SizedBox(height: 4),
                 Text(
                   OrdersStrings.emailHelpText,
-                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface),
+                  style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
                 ),
                 const SizedBox(height: 8),
                 Form(
@@ -305,15 +305,15 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text("#$orderId", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: theme.colorScheme.onSurface)), Text(customerInfo, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface), overflow: TextOverflow.ellipsis)])),
-                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [Text("-${Utilities.formatPrice(context, orderTotalRefund)}", style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 15)), Container(margin: const EdgeInsets.only(top: 2), padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: isFullyCancelled ? theme.colorScheme.error : Colors.orange, borderRadius: BorderRadius.circular(4)), child: Text(isFullyCancelled ? OrdersStrings.fullCancelLabel : OrdersStrings.partialCancelLabel, style: TextStyle(fontSize: 10, color: isFullyCancelled ? theme.colorScheme.onError : Colors.white, fontWeight: FontWeight.bold)))])
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text("#$orderId", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: theme.colorScheme.onSurface)), Text(customerInfo, style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface), overflow: TextOverflow.ellipsis)])),
+                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [Text("-${Utilities.formatPrice(context, orderTotalRefund)}", style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 15)), Container(margin: const EdgeInsets.only(top: 2), padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: isFullyCancelled ? theme.colorScheme.error : Colors.orange, borderRadius: BorderRadius.circular(4)), child: Text(isFullyCancelled ? OrdersStrings.fullCancelLabel : OrdersStrings.partialCancelLabel, style: TextStyle(fontSize: 12, color: isFullyCancelled ? theme.colorScheme.onError : Colors.white, fontWeight: FontWeight.bold)))])
               ],
             ),
             const Divider(),
             ...tickets.map((ticket) {
               final products = ticket[_kProducts] as List<dynamic>? ?? [];
               final ticketSymbol = ticket[_kTicketSymbol] ?? '';
-              return Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Icon(Icons.confirmation_number_outlined, size: 14, color: theme.colorScheme.error), const SizedBox(width: 4), Text("${OrdersStrings.ticket} $ticketSymbol", style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13))]), if (products.isEmpty) Padding(padding: const EdgeInsets.only(left: 20.0), child: Text(OrdersStrings.noDetailsFound, style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic))) else ...products.map((p) { String title = p[_kTitle] ?? ''; final spotTitle = p[_kSpotTitle]; if (spotTitle != null && spotTitle.toString().isNotEmpty) { title += " ($spotTitle)"; } return Padding(padding: const EdgeInsets.only(left: 20.0, top: 2.0), child: Row(children: [Expanded(child: Text("• $title", style: const TextStyle(fontSize: 12))), Text(Utilities.formatPrice(context, (p[_kPrice] as num?)?.toDouble() ?? 0), style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface))])); })]));
+              return Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Icon(Icons.confirmation_number_outlined, size: 14, color: theme.colorScheme.error), const SizedBox(width: 4), Text("${OrdersStrings.ticket} $ticketSymbol", style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15))]), if (products.isEmpty) Padding(padding: const EdgeInsets.only(left: 20.0), child: Text(OrdersStrings.noDetailsFound, style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic))) else ...products.map((p) { String title = p[_kTitle] ?? ''; final spotTitle = p[_kSpotTitle]; if (spotTitle != null && spotTitle.toString().isNotEmpty) { title += " ($spotTitle)"; } return Padding(padding: const EdgeInsets.only(left: 20.0, top: 2.0), child: Row(children: [Expanded(child: Text("• $title", style: const TextStyle(fontSize: 14))), Text(Utilities.formatPrice(context, (p[_kPrice] as num?)?.toDouble() ?? 0), style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface))])); })]));
             }),
           ],
         ),
@@ -333,7 +333,7 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
           children: [
             ..._newItems.map((item) {
               final price = (item[_kPrice] as num?)?.toDouble() ?? 0.0;
-              return Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Row(children: [Icon(Icons.check_circle_outline, color: theme.colorScheme.primary, size: 18), const SizedBox(width: 8), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(item[_kSpotTitle] ?? "Spot", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), Text(item[_kProductTitle] ?? "Product", style: const TextStyle(fontSize: 11))]), const Spacer(), Text("+${Utilities.formatPrice(context, price)}", style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold))]));
+              return Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Row(children: [Icon(Icons.check_circle_outline, color: theme.colorScheme.primary, size: 18), const SizedBox(width: 8), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(item[_kSpotTitle] ?? "Spot", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)), Text(item[_kProductTitle] ?? "Product", style: const TextStyle(fontSize: 13))]), const Spacer(), Text("+${Utilities.formatPrice(context, price)}", style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold))]));
             }),
             const Divider(),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(OrdersStrings.newOrderTotal, style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)), Text(Utilities.formatPrice(context, _sumCur), style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 16))]),

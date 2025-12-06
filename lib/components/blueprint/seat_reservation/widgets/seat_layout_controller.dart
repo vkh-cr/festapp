@@ -15,6 +15,7 @@ class SeatLayoutController extends ChangeNotifier {
   int seatSize = 15;
   String? backgroundSvg;
   double minScale = 1.0;
+  bool isLayoutReady = false;
   GlobalKey? _layoutKey;
 
   SeatLayoutController() {
@@ -26,6 +27,7 @@ class SeatLayoutController extends ChangeNotifier {
   }
 
   void loadBlueprint(BlueprintModel model, {int newSeatSize = 15}) {
+    isLayoutReady = false;
     rows = model.configuration?.height ?? 1;
     cols = model.configuration?.width ?? 1;
     seatSize = newSeatSize;
@@ -60,6 +62,7 @@ class SeatLayoutController extends ChangeNotifier {
   }
 
   void setConfiguration(int newRows, int newCols) {
+    isLayoutReady = false;
     rows = newRows;
     cols = newCols;
     final objects = seats
@@ -199,6 +202,8 @@ class SeatLayoutController extends ChangeNotifier {
         (widgetHeight - layoutHeight * scaleFactor) / 2,
         0,
       );
+    
+    isLayoutReady = true;
     notifyListeners();
   }
 

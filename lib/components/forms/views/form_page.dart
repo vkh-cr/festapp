@@ -19,6 +19,8 @@ import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/components/forms/views/order_preview_screen.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
+import '../../features/feature_constants.dart';
+import '../../features/feature_service.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -358,7 +360,11 @@ class _FormPageState extends State<FormPage> {
               onSendPressed: _sendOrder,
               // When user clicks Close in UI, we just pop the sheet.
               // verification of _isOrderPreviewVisible in whenComplete will handle history sync.
+
+              // verification of _isOrderPreviewVisible in whenComplete will handle history sync.
               onClose: () => Navigator.of(context).pop(),
+              tone: form!.data?[FormHelper.metaCommunicationTone],
+              hasTickets: FeatureService.isFeatureEnabled(FeatureConstants.ticket, features: form!.occasionModel?.features),
             ),
           );
         },
@@ -408,6 +414,8 @@ class _FormPageState extends State<FormPage> {
           Navigator.of(context).pop(); // Close the OrderPreview BottomSheet
           _scrollToTop();
         },
+        tone: form!.data?[FormHelper.metaCommunicationTone],
+        hasTickets: FeatureService.isFeatureEnabled(FeatureConstants.ticket, features: form!.occasionModel?.features),
       ),
       transitionBuilder: (context, anim1, anim2, child) {
         return Theme(
