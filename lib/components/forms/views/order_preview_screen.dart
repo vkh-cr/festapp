@@ -10,6 +10,8 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/forms/public_order_strings.dart';
 import '../models/form_holder.dart';
 import '../models/ticket_holder.dart';
 import '../../eshop/orders_strings.dart';
@@ -19,6 +21,8 @@ class OrderPreviewScreen extends StatefulWidget {
   final double totalPrice;
   final VoidCallback onSendPressed;
   final VoidCallback? onClose;
+  final String? tone;
+  final bool hasTickets;
 
   static const double fontSizeFactor = 1.2;
 
@@ -28,6 +32,8 @@ class OrderPreviewScreen extends StatefulWidget {
     required this.totalPrice,
     required this.onSendPressed,
     this.onClose,
+    this.tone,
+    this.hasTickets = true,
   });
 
   @override
@@ -36,6 +42,7 @@ class OrderPreviewScreen extends StatefulWidget {
 
 class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
   late ScrollController _scrollController;
+
 
   @override
   void initState() {
@@ -96,7 +103,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                         // Header
                         Center(
                           child: Text(
-                            "Summary".tr(),
+                            PublicOrderStrings.summary,
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontSize: 18 * OrderPreviewScreen.fontSizeFactor,
                               fontWeight: FontWeight.bold,
@@ -128,7 +135,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                           child: ButtonsHelper.primaryButton(
                             context: context,
                             onPressed: widget.onSendPressed,
-                            label: "Submit order".tr(),
+                            label: PublicOrderStrings.getSubmitButton(widget.hasTickets, widget.tone),
                             height: 50.0,
                             width: 250.0,
                           ),
@@ -157,7 +164,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                   Navigator.of(context).pop();
                 }
               },
-              tooltip: "Close".tr(),
+              tooltip: CommonStrings.close,
             ),
           ),
         ],
@@ -216,8 +223,15 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
         if (ticket.seat != null) {
           ticketInfoRows.add(_buildInfoRow(
             context,
-            "Spot".tr(),
+            FormHelper.spotLabel(),
             ticket.seat!.objectModel.toString(),
+          ));
+        } else if (ticket.seat == null && ticketHolder.hasSpot) {
+          // Add warning if no seat selected but spots are enabled/required
+          ticketInfoRows.add(_buildInfoRow(
+            context,
+             FormHelper.spotLabel(),
+            PublicOrderStrings.selectSeat(widget.tone),
           ));
         }
 
@@ -301,9 +315,10 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
   Widget _buildTotalPrice(BuildContext context) {
     return Center(
       child: Text(
-        "Total Price: {price}".tr(namedArgs: {
-          "price": Utilities.formatPrice(context, widget.totalPrice, currencyCode: widget.formHolder.controller!.currencyCode),
-        }),
+        PublicOrderStrings.totalPrice(
+          context,
+          Utilities.formatPrice(context, widget.totalPrice, currencyCode: widget.formHolder.controller!.currencyCode)
+        ),
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
           fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
           fontWeight: FontWeight.bold,

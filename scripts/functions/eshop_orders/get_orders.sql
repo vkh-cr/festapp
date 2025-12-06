@@ -39,7 +39,7 @@ BEGIN
         FROM public.occasions
         WHERE link = p_occasion_link;
     ELSE
-        SELECT occasion, key, id
+        SELECT occasion, id
         INTO v_occasion_id, v_form_id
         FROM public.forms
         WHERE link = p_form_link;
@@ -133,6 +133,7 @@ BEGIN
     IF v_form_id IS NOT NULL THEN
         SELECT jsonb_agg(jsonb_build_object(
             'id', o.id, 'created_at', o.created_at, 'updated_at', o.updated_at, 'price', o.price, 'state', o.state, 'currency_code', o.currency_code,
+            'form_id', o.form,
             'form', jsonb_build_object('id', o.form),
             'data', CASE
                 WHEN (p_options->>'include_full_order_data')::BOOLEAN = TRUE THEN o.data
@@ -146,6 +147,7 @@ BEGIN
     ELSE
         SELECT jsonb_agg(jsonb_build_object(
             'id', o.id, 'created_at', o.created_at, 'updated_at', o.updated_at, 'price', o.price, 'state', o.state, 'currency_code', o.currency_code,
+            'form_id', o.form,
             'form', jsonb_build_object('id', o.form),
             'data', CASE
                 WHEN (p_options->>'include_full_order_data')::BOOLEAN = TRUE THEN o.data
