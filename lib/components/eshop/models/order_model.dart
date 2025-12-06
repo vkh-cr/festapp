@@ -166,7 +166,9 @@ class OrderModel extends ITrinaRowModel {
       currencyCode: json[TbEshop.orders.currency_code],
       state: json[TbEshop.orders.state],
       formKey: orderData is Map<String, dynamic> ? orderData[TbEshop.orders.data_form] : null,
-      formId: json['form'] != null ? json['form'][Tb.forms.id] : null,
+      formId: (json['form'] != null && json['form'] is Map && json['form'][Tb.forms.id] != null)
+          ? json['form'][Tb.forms.id]
+          : (json['form_id']),
       data: orderData,
       occasion: json[TbEshop.orders.occasion],
       paymentInfo: json[TbEshop.orders.payment_info],
