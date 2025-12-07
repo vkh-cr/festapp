@@ -99,6 +99,7 @@ class CheckboxFieldBuilder {
       // The leading widget (checkbox) is disabled when needed.
       leading: Checkbox(
         value: isSelected,
+        activeColor: Theme.of(context).primaryColor,
         onChanged: isDisabled
             ? null
             : (val) {
@@ -195,6 +196,7 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
               ? FormBuilderValidators.required()
               : null,
           options: options,
+          activeColor: Theme.of(context).primaryColor,
           orientation: OptionsOrientation.vertical,
           wrapDirection: Axis.vertical,
           onChanged: (val) {

@@ -2,6 +2,7 @@ import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/components/eshop/models/bank_account_model.dart';
+import 'package:fstapp/services/time_helper.dart';
 
 /// Represents the statistics for a form's responses.
 class FormStatsModel {
@@ -60,6 +61,16 @@ class FormModel {
   static const String metaPaymentMessage = "payment_message";
   static const String metaType = "type";
   static const String metaStartingNumber = "starting_number";
+  static const String metaStartTime = "start_time";
+  static const String metaEndTime = "end_time";
+  static const String metaEnableCountdown = "enable_countdown";
+  static const String metaCountdownStyle = "countdown_style";
+  static const String metaCountdownTitle = "countdown_title";
+  static const String metaPrimaryColor = "primary_color";
+  static const String metaSecondaryColor = "secondary_color";
+  static const String metaFontFamily = "font_family";
+  static const String metaDesign = "design";
+  static const String metaSchedule = "schedule";
 
   FormModel({
     this.id,
@@ -170,8 +181,165 @@ class FormModel {
     Tb.forms.header: header,
     Tb.forms.header_off: headerOff,
     Tb.forms.link: link,
+    Tb.forms.header: header,
+    Tb.forms.header_off: headerOff,
+    Tb.forms.link: link,
     Tb.form_fields.table: relatedFields,
   };
+
+  // Helper for Design Data
+  Map<String, dynamic> get _designData {
+    data ??= {};
+    return data!.putIfAbsent(metaDesign, () => <String, dynamic>{}) as Map<String, dynamic>;
+  }
+
+  // Helper for Schedule Data
+  Map<String, dynamic> get _scheduleData {
+    data ??= {};
+    return data!.putIfAbsent(metaSchedule, () => <String, dynamic>{}) as Map<String, dynamic>;
+  }
+
+  DateTime? get startTime {
+    if (_scheduleData.containsKey(metaStartTime)) {
+      return DateTime.tryParse(_scheduleData[metaStartTime])?.toOccasionTime();
+    }
+    return null;
+  }
+
+  set startTime(DateTime? value) {
+    if (value == null) {
+      _scheduleData.remove(metaStartTime);
+    } else {
+      _scheduleData[metaStartTime] = value.toIso8601String();
+    }
+  }
+
+  DateTime? get endTime {
+    if (_scheduleData.containsKey(metaEndTime)) {
+      return DateTime.tryParse(_scheduleData[metaEndTime])?.toOccasionTime();
+    }
+    return null;
+  }
+
+  set endTime(DateTime? value) {
+    if (value == null) {
+      _scheduleData.remove(metaEndTime);
+    } else {
+      _scheduleData[metaEndTime] = value.toIso8601String();
+    }
+  }
+
+  bool get enableCountdown {
+    if (_scheduleData.containsKey(metaEnableCountdown)) {
+      return _scheduleData[metaEnableCountdown] == true;
+    }
+    return false;
+  }
+
+  set enableCountdown(bool value) {
+    _scheduleData[metaEnableCountdown] = value;
+  }
+
+  String get countdownStyle {
+    if (_designData.containsKey(metaCountdownStyle)) {
+      return _designData[metaCountdownStyle];
+    }
+    return 'normal';
+  }
+
+  set countdownStyle(String value) {
+    _designData[metaCountdownStyle] = value;
+  }
+
+  String? get countdownTitle {
+    if (_scheduleData.containsKey(metaCountdownTitle)) {
+      return _scheduleData[metaCountdownTitle];
+    }
+    return null;
+  }
+
+  set countdownTitle(String? value) {
+    if (value == null) {
+      _scheduleData.remove(metaCountdownTitle);
+    } else {
+      _scheduleData[metaCountdownTitle] = value;
+    }
+  }
+
+  int? _parseColor(dynamic value) {
+    if (value is int) return value;
+    if (value is String) {
+      if (value.startsWith('#')) {
+        String hex = value.substring(1);
+        if (hex.length == 6) {
+          hex = "FF$hex";
+        }
+        return int.tryParse(hex, radix: 16);
+      }
+      return int.tryParse(value);
+    }
+    return null;
+  }
+
+  String _colorToHex(int value) {
+    return '#${value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+  }
+
+  int? get primaryColor {
+    if (_designData.containsKey(metaPrimaryColor)) {
+      return _parseColor(_designData[metaPrimaryColor]);
+    }
+    return null;
+  }
+
+  set primaryColor(int? value) {
+    if (value == null) {
+      _designData.remove(metaPrimaryColor);
+    } else {
+      _designData[metaPrimaryColor] = _colorToHex(value);
+    }
+  }
+
+  int? get secondaryColor {
+    if (_designData.containsKey(metaSecondaryColor)) {
+      return _parseColor(_designData[metaSecondaryColor]);
+    }
+    return null;
+  }
+
+  set secondaryColor(int? value) {
+    if (value == null) {
+      _designData.remove(metaSecondaryColor);
+    } else {
+      _designData[metaSecondaryColor] = _colorToHex(value);
+    }
+  }
+
+  String? get fontFamily {
+    if (_designData.containsKey(metaFontFamily)) {
+      return _designData[metaFontFamily];
+    }
+    return null;
+  }
+
+  set fontFamily(String? value) {
+    if (value == null) {
+      _designData.remove(metaFontFamily);
+    } else {
+      _designData[metaFontFamily] = value;
+    }
+  }
+
+  bool get isCardDesign {
+    if (_designData.containsKey(metaIsCardDesign)) {
+      return _designData[metaIsCardDesign] == true;
+    }
+    return false;
+  }
+
+  set isCardDesign(bool value) {
+    _designData['is_card_design'] = value;
+  }
 
   /// Returns a list of available supported currencies.
   List<String> getSupportedCurrencies() {

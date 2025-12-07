@@ -198,7 +198,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
 
     if (controller.getNewObject != null) {
       var obj = controller.getNewObject!();
-      TrinaRow<dynamic> newRowReal = obj.toTrinaRow(context)!;
+      TrinaRow<dynamic> newRowReal = obj.toTrinaRow(context);
       for (var c in newRowReal.cells.entries) {
         newRowsGenerated[0].cells[c.key] = newRowReal.cells[c.key]!;
       }

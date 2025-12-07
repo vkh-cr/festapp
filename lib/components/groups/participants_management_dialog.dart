@@ -141,7 +141,7 @@ class _ParticipantsManagementDialogState
 
 
     return AlertDialog(
-      title: Text(GroupsStrings.dialogTitle(widget.group.title!, count)),
+      title: Text(GroupsStrings.dialogTitle(widget.group.title, count)),
       content: SizedBox(
         width: StylesConfig.formMaxWidthMid,
         height: 600,

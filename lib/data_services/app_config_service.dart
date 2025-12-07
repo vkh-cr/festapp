@@ -1,8 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/app_config.dart';
 import 'package:fstapp/services/launch_url_service.dart';
-import 'package:fstapp/services/platform_helper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 

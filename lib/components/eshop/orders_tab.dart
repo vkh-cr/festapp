@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/views/orders_history_content.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';

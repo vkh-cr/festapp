@@ -1,5 +1,4 @@
 import 'package:fstapp/components/inventory/models/spot_management_bundle.dart';
-import 'package:fstapp/components/eshop/models/spot_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbSpots {

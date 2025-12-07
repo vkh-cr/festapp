@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/eshop_columns.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
@@ -9,7 +8,6 @@ import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 
-import '../components/forms/models/id_document_data.dart';
 import '../data_services_eshop/db_orders.dart';
 
 class FormResponseModel extends ITrinaRowModel {
@@ -142,7 +140,7 @@ class FormResponseModel extends ITrinaRowModel {
 
   factory FormResponseModel.fromOrder(OrderModel order, List<FormFieldModel> allFields) {
     // Extract the order symbol. Adjust this based on how orderSymbol is defined in OrderModel.
-    String? extractedOrderSymbol = order.id?.toString();
+    order.id?.toString();
 
     var fieldsData = order.data?[FormHelper.metaFields];
 
