@@ -41,8 +41,10 @@ BEGIN
         platform_name := 'web';
     END IF;
 
-    -- We will try to find an occasion or unit in order of priority.
-    -- occasionId and default_unit are NULL by default.
+    -- =========================================================
+    -- RESOLVE CONTEXT (Occasion vs Unit)
+    -- Priority: Form/Link > Representative Occasion > Unit ID > Default Occasion
+    -- =========================================================
 
     -- 1. Try to find occasion via form_link
     IF form_link IS NOT NULL AND form_link <> '' THEN
@@ -52,9 +54,6 @@ BEGIN
         JOIN occasions ON forms.occasion = occasions.id
         WHERE forms.link = form_link
           AND occasions.organization = org_id;
-        -- Per your request, if form_link is provided but doesn't resolve,
-        -- we NO LONGER return 404. We let occasionId remain NULL
-        -- and fall through to the next checks.
     END IF;
 
     -- 2. If no occasion found yet, try via link_txt
@@ -72,9 +71,26 @@ BEGIN
                 'message', 'Occasion not found'
             );
         END IF;
+    END IF;
 
-    -- 3. If no occasion found yet, try to use unit_id
-    ELSIF occasionId IS NULL AND unit_id IS NOT NULL THEN
+    -- 3. If no specific link found, check for REPRESENTATIVE OCCASION
+    -- This now overrides unit_id logic as requested.
+    IF occasionId IS NULL THEN
+        SELECT (data->>'REPRESENTATIVE_OCCASION')::bigint
+          INTO occasionId
+        FROM organizations
+        WHERE id = org_id;
+
+        -- If found, fetch its link for consistency
+        IF occasionId IS NOT NULL THEN
+            SELECT link INTO occasion_link
+            FROM occasions
+            WHERE id = occasionId AND organization = org_id;
+        END IF;
+    END IF;
+
+    -- 4. If no occasion (and no Representative Occasion), try to use unit_id
+    IF occasionId IS NULL AND unit_id IS NOT NULL THEN
         occasionId := NULL; -- Ensure no occasion is loaded.
 
         -- 1. Try to use the provided unit_id
@@ -86,38 +102,22 @@ BEGIN
         FROM units u
         WHERE u.id = default_unit;
 
-        -- 3. (REMOVED) Fallback to first admin unit is removed.
-        --    If unit_id is invalid, unit_json will be NULL.
-
-        -- 4. Fetch the user's relationship with the determined unit (if any)
-        --    (unit_user will remain NULL if default_unit is NULL)
+        -- 3. Fetch the user's relationship with the determined unit (if any)
         SELECT *
             INTO unit_user
         FROM unit_users
         WHERE unit = default_unit
             AND "user" = current_user_id;
 
-    -- 4. If no occasion or unit context found yet, try to get default occasion
+    -- 5. If no occasion and no unit found yet, try Default Occasion
     ELSIF occasionId IS NULL THEN
-        -- No link or specific unit_id provided:
-        -- 1. Try to get the representative or default occasion
-        SELECT COALESCE(
-                 (data->>'REPRESENTATIVE_OCCASION')::bigint,
-                 (data->>'DEFAULT_OCCASION')::bigint
-               )
+        -- Try to get the DEFAULT_OCCASION (Representative was already checked in step 3)
+        SELECT (data->>'DEFAULT_OCCASION')::bigint
           INTO occasionId
         FROM organizations
         WHERE id = org_id;
 
-        IF occasionId IS NULL THEN
-            -- No default occasion found.
-            -- Per new requirements, we NO LONGER fall back to:
-            -- 1. User's first editor/admin unit
-            -- 2. Organization's DEFAULT_UNIT
-            -- 3. First open occasion
-            -- Both occasionId and default_unit will remain NULL.
-            NULL;
-        ELSE
+        IF occasionId IS NOT NULL THEN
             -- Default occasion exists; fetch its link
             SELECT link
               INTO occasion_link
@@ -126,7 +126,11 @@ BEGIN
         END IF;
     END IF;
 
-    -- Retrieve version_recommended and version_link for the specific platform, or leave as NULL if not found
+    -- =========================================================
+    -- GATHER DATA
+    -- =========================================================
+
+    -- Retrieve version_recommended and version_link
     SELECT
         item->>'prompt',
         item->>'link'
@@ -175,7 +179,7 @@ BEGIN
         -- Check if the current user has editor_view permissions on the occasion
         is_editor_view_on_occasion_bool := get_is_editor_view_on_occasion(occasionId);
 
-        -- NEW: Retrieve IS_APP_SUPPORTED from Organization data. Defaults to FALSE.
+        -- Retrieve IS_APP_SUPPORTED from Organization data. Defaults to FALSE.
         SELECT COALESCE((data->>'IS_APP_SUPPORTED')::boolean, FALSE)
           INTO is_app_supported_bool
         FROM organizations
@@ -209,9 +213,8 @@ BEGIN
               AND "user" = current_user_id;
         END IF;
     ELSE
-        -- If no occasion is set (because a default or specific unit was used), use the unit as the context
+        -- If no occasion is set (because a specific unit was used and no Rep Occasion existed), use the unit as the context
         occasion_unit := default_unit;
-        -- Here we assume no occasion means no occasion-based admin check
         is_admin_bool := false;
     END IF;
 
@@ -243,7 +246,7 @@ BEGIN
 
     -- Fetch full unit details as a JSON object
     IF occasion_unit IS NOT NULL THEN
-        SELECT json_build_object('id', u.id, 'title', u.title)
+        SELECT json_build_object('id', u.id, 'title', u.title, 'data', u.data)
           INTO unit_json
         FROM units u
         WHERE u.id = occasion_unit;

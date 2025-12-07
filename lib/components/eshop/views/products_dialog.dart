@@ -455,7 +455,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                         : isRemoved
                         ? "-${Utilities.formatPrice(context, p.price ?? 0, decimalDigits: 2)}"
                         : isPriceChanged
-                        ? "${Utilities.formatPrice(context, pCurrent!.price ?? 0, decimalDigits: 2)} (${Utilities.formatPrice(context, pOrig!.price ?? 0, decimalDigits: 2)})"
+                        ? "${Utilities.formatPrice(context, pCurrent.price ?? 0, decimalDigits: 2)} (${Utilities.formatPrice(context, pOrig.price ?? 0, decimalDigits: 2)})"
                         : Utilities.formatPrice(context, p.price ?? 0, decimalDigits: 2);
 
                     final priceColor = isAdded ? Colors.green : isRemoved ? Colors.red : isPriceChanged ? Colors.orange.shade700 : null;

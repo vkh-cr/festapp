@@ -14,6 +14,7 @@ class SeatWidgetHelper {
     required SeatState state,
     bool isHighlightedForSwap = false,
     bool isHighlightedForGroup = false,
+    bool isHighlightedForTooltip = false,
     double size = 40.0,
   }) {
     final bool hasPadding = state == SeatState.ordered ||
@@ -21,13 +22,13 @@ class SeatWidgetHelper {
         state == SeatState.selected_by_me ||
         state == SeatState.used ||
         state == SeatState.available ||
-        ((isHighlightedForSwap || isHighlightedForGroup) && state == SeatState.empty);
+        ((isHighlightedForSwap || isHighlightedForGroup || isHighlightedForTooltip) && state == SeatState.empty);
 
     // Logic to determine the border
     Border? border;
     if (isHighlightedForSwap) {
       border = Border.all(color: Colors.orange, width: 2.0);
-    } else if (isHighlightedForGroup) {
+    } else if (isHighlightedForGroup || isHighlightedForTooltip) {
       border = Border.all(
         color: Theme.of(context).colorScheme.primary,
         width: 2.0,
@@ -88,9 +89,7 @@ class SeatWidgetHelper {
         return Colors.black12;
       case SeatState.empty:
         return Colors.black.withOpacity(0);
-      default:
-        return Colors.black.withOpacity(0);
-    }
+      }
   }
 }
 

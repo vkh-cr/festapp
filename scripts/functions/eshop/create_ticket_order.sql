@@ -47,6 +47,8 @@ DECLARE
     order_note TEXT;
     ticket_note TEXT;
     reply_to TEXT;
+    is_open_val BOOLEAN;
+    is_editor BOOLEAN;
 BEGIN
     -- Wrap the entire logic in a subtransaction block to ensure that if any error occurs,
     -- all operations performed inside the block are rolled back.
@@ -57,13 +59,34 @@ BEGIN
         END IF;
 
         form_key := (input_data->>'form')::UUID;
-        SELECT id, occasion, bank_account, deadline_duration_seconds, data
-        INTO form_id, occasion_id, bank_account_id, form_deadline_duration, form_data
+        SELECT id, occasion, bank_account, deadline_duration_seconds, data, is_open
+        INTO form_id, occasion_id, bank_account_id, form_deadline_duration, form_data, is_open_val
         FROM public.forms
         WHERE key = form_key;
 
         IF occasion_id IS NULL THEN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1003, 'message', 'Form is not linked to any occasion')::TEXT;
+        END IF;
+
+        is_editor := public.get_is_editor_order_on_occasion(occasion_id);
+
+        IF NOT is_editor THEN
+            IF is_open_val IS FALSE THEN
+                 RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1021, 'message', 'Form is closed')::TEXT;
+            END IF;
+
+            -- Check for start_time and end_time constraints only if not editor
+            IF COALESCE(form_data->'schedule'->>'start_time', form_data->>'start_time') IS NOT NULL THEN
+                IF now < (COALESCE(form_data->'schedule'->>'start_time', form_data->>'start_time'))::TIMESTAMPTZ THEN
+                    RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1019, 'message', 'Form is not yet open')::TEXT;
+                END IF;
+            END IF;
+
+            IF COALESCE(form_data->'schedule'->>'end_time', form_data->>'end_time') IS NOT NULL THEN
+                IF now > (COALESCE(form_data->'schedule'->>'end_time', form_data->>'end_time'))::TIMESTAMPTZ THEN
+                    RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1020, 'message', 'Form is closed')::TEXT;
+                END IF;
+            END IF;
         END IF;
 
         -- Fetch organization, unit, and occasion title from the occasion

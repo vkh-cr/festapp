@@ -125,7 +125,7 @@ class SpotManagementViewState extends State<SpotManagementView> {
             headerChildren: [
               DataGridAction(
                 name: _clearAllTitle,
-                action: (controller, [_]) => _clearAllAssignments(controller!),
+                action: (controller, [_]) => _clearAllAssignments(controller),
                 isEnabled: () => true,
               ),
             ],
