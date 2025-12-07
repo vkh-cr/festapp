@@ -66,7 +66,7 @@ class FormHolder {
     if (ticket != null) {
       ticket.fields.addAll(ticketChildFields.map((f) => createFieldHolder(f)));
     }
-    return FormHolder(fields: otherFields, isCardDesign: formModel.data?[FormModel.metaIsCardDesign] ?? false);
+    return FormHolder(fields: otherFields, isCardDesign: formModel.isCardDesign);
   }
 
   /// Creates a [FieldHolder] instance based on the provided [FormFieldModel].

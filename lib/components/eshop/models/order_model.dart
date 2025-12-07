@@ -11,6 +11,7 @@ import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
+import 'package:fstapp/data_models/tb.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import 'order_data_ticket_model.dart';
@@ -27,6 +28,7 @@ class OrderModel extends ITrinaRowModel {
   int? occasion;
   int? paymentInfo;
   String? formKey;
+  int? formId;
   String? currencyCode;
   String? noteHidden;
 
@@ -128,6 +130,7 @@ class OrderModel extends ITrinaRowModel {
     this.occasion,
     this.paymentInfo,
     this.formKey,
+    this.formId,
     this.currencyCode,
     this.noteHidden,
     this.form,
@@ -163,6 +166,9 @@ class OrderModel extends ITrinaRowModel {
       currencyCode: json[TbEshop.orders.currency_code],
       state: json[TbEshop.orders.state],
       formKey: orderData is Map<String, dynamic> ? orderData[TbEshop.orders.data_form] : null,
+      formId: (json['form'] != null && json['form'] is Map && json['form'][Tb.forms.id] != null)
+          ? json['form'][Tb.forms.id]
+          : (json['form_id']),
       data: orderData,
       occasion: json[TbEshop.orders.occasion],
       paymentInfo: json[TbEshop.orders.payment_info],

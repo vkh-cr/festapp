@@ -35,9 +35,8 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
     super.initState();
     // Use the form from the bundle
     final topLevelFields = widget.bundle.form.relatedFields
-        ?.where((f) => f.isTicketField != true)
-        .toList() ??
-        [];
+        .where((f) => f.isTicketField != true)
+        .toList();
     if (topLevelFields.isNotEmpty) {
       selectedIndex = 0;
     }
@@ -449,7 +448,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   List<String> get _availableFieldTypes {
     final existingTypes =
-        widget.bundle.form.relatedFields?.map((f) => f.type).toList() ?? [];
+        widget.bundle.form.relatedFields.map((f) => f.type).toList();
     return FormHelper.fieldTypeIcons.keys.where((type) {
       if ([
         FormHelper.fieldTypeText,

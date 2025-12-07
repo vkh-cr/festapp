@@ -11,7 +11,6 @@ import 'package:fstapp/pages/unit/unit_settings_strings.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
-import 'package:fstapp/theme_config.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class UnitSettingsScreen extends StatefulWidget {

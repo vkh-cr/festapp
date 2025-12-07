@@ -264,18 +264,6 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
   // Determines if this operation is the Seed operation.
   bool get _isSeed => widget.fixedDirectory == "scripts/seed";
 
-  /// Extracts the project ref from the project URL.
-  String get _projectRef {
-    final url = widget.projectUrlController.text.trim();
-    try {
-      final uri = Uri.parse(url);
-      if (uri.host.endsWith(".supabase.co")) {
-        return uri.host.split('.').first;
-      }
-    } catch (_) {}
-    return url;
-  }
-
   @override
   void initState() {
     super.initState();
