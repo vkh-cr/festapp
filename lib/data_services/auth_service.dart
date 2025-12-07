@@ -4,7 +4,6 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:fstapp/data_services/db_companions.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/db_groups.dart';

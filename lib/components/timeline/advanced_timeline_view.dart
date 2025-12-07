@@ -31,7 +31,7 @@ class AdvancedTimelineView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = DefaultTabController.of(context)!;
+    final controller = DefaultTabController.of(context);
     final animation = controller.animation!;
     final todayDate = TimeHelper.now();  // changed from `final today = TimeHelper.now().day;`
 

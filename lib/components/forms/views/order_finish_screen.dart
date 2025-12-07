@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fstapp/components/forms/public_order_strings.dart';
 
 class FinishOrderScreen extends StatefulWidget {
   final Future<FunctionResponse> Function() orderFutureFunction;
-  final VoidCallback onResetForm;
+  final VoidCallback? onSuccess;
+  final VoidCallback? onOrderConfirmed;
+  final String? tone;
+  final bool hasTickets;
 
   const FinishOrderScreen({
     super.key,
     required this.orderFutureFunction,
-    required this.onResetForm,
+    this.onSuccess,
+    this.onOrderConfirmed,
+    this.tone,
+    this.hasTickets = true,
   });
 
   @override
@@ -55,6 +61,9 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
           0;
       _isSuccess = code == 200;
       if (code == 1017) _errorProduct = result.data["product"];
+      if (_isSuccess) {
+         widget.onOrderConfirmed?.call();
+      }
       if (_isSuccess && elapsed < 1000) {
         await Future.delayed(Duration(milliseconds: 1000 - elapsed));
       }
@@ -78,6 +87,12 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: PopScope(
+        canPop: true,
+        onPopInvoked: (didPop) {
+          if (didPop && _isSuccess) {
+            widget.onSuccess?.call();
+          }
+        },
         child: Center(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
@@ -112,17 +127,15 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
   Widget _buildResult() {
     String title, subtitle;
     if (_isSuccess) {
-      title = "Your order was accepted!".tr();
-      subtitle = "Payment information has been sent to your email.".tr();
+      title = PublicOrderStrings.successTitle(widget.tone, hasTickets: widget.hasTickets);
+      subtitle = PublicOrderStrings.paymentInfo(widget.tone);
     } else if (code == 1017) {
       final prodTitle = _errorProduct?["title"] ?? "";
-      title = "The {product_title} is no longer available for order."
-          .tr(namedArgs: {"product_title": prodTitle});
-      subtitle = "Please choose a different variant.".tr();
+      title = PublicOrderStrings.productUnavailable(prodTitle);
+      subtitle = PublicOrderStrings.chooseDifferentVariant(widget.tone);
     } else {
-      title = "Order Failed".tr();
-      subtitle = "{code}: An error occurred while processing your order."
-          .tr(namedArgs: {"code": (code ?? 0).toString()});
+      title = PublicOrderStrings.orderFailed;
+      subtitle = PublicOrderStrings.orderError((code ?? 0).toString());
     }
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -148,7 +161,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         const SizedBox(height: 24),
         Text(
           title,
-          style: TextStyle(
+          style: Theme.of(context).textTheme.titleLarge?.copyWith( // Use Theme text style
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: _isSuccess
@@ -160,7 +173,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         const SizedBox(height: 8),
         Text(
           subtitle,
-          style: TextStyle(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith( // Use Theme text style
             fontSize: 14,
             color: ThemeConfig.blackColor(context).withOpacity(0.7),
           ),
@@ -169,7 +182,6 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         const SizedBox(height: 24),
         OutlinedButton(
           onPressed: () {
-            if (_isSuccess) widget.onResetForm();
             Navigator.of(context).pop();
           },
           style: OutlinedButton.styleFrom(
@@ -179,7 +191,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
-          child: Text("Back to Form".tr()),
+          child: Text(PublicOrderStrings.backToForm),
         ),
       ],
     );

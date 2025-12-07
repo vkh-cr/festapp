@@ -1,4 +1,3 @@
-import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/ticket_feature.dart';
 import 'package:fstapp/data_models/game_settings_model.dart';
 import 'package:fstapp/data_models/image_model.dart';

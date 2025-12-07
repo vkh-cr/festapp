@@ -48,7 +48,7 @@ class OptionFieldHelper {
           borderRadius: BorderRadius.circular(8),
           side: BorderSide(
             color: isSelected
-                ? Theme.of(context).colorScheme.primary
+                ? Theme.of(context).primaryColor
                 : ThemeConfig.grey500(context),
             width: isSelected ? 2 : 1,
           ),

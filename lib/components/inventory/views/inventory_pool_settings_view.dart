@@ -19,7 +19,6 @@ import 'package:fstapp/data_services/db_inventory_pools.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/html_view.dart';
-import 'package:intl/intl.dart';
 
 import 'inventory_contexts_editor.dart';
 import 'inventory_strings.dart';

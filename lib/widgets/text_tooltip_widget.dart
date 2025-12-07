@@ -5,12 +5,14 @@ class TextTooltipWidget extends StatelessWidget {
   final String content;
   final Widget child;
   final TooltipTriggerMode? triggerMode;
+  final double? fontSize;
 
   const TextTooltipWidget({
     super.key,
     required this.content,
     required this.child,
     this.triggerMode,
+    this.fontSize,
   });
 
   @override
@@ -29,9 +31,9 @@ class TextTooltipWidget extends StatelessWidget {
           color: ThemeConfig.blackColor(context),
         ),
       ),
-      textStyle: TextStyle(
-        fontSize: 16.0,
-        color: ThemeConfig.blackColor(context),
+      textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+         color: ThemeConfig.blackColor(context),
+         fontSize: fontSize,
       ),
       verticalOffset: 20.0,
       child: child,

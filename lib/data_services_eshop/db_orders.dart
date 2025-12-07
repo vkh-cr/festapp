@@ -97,7 +97,7 @@ class DbOrders {
     // Basic data parsing
     final spots = GetOrdersHelper.parseSpots(json);
     final products = GetOrdersHelper.parseProducts(json);
-    final productTypes = GetOrdersHelper.parseProductTypes(json);
+    GetOrdersHelper.parseProductTypes(json);
     final tickets = GetOrdersHelper.parseTickets(json);
     final orders = GetOrdersHelper.parseOrders(json)!;
     final payments = GetOrdersHelper.parsePaymentInfo(json);
@@ -137,7 +137,10 @@ class DbOrders {
       final relatedTickets = ticketIds.map((id) => ticketMap[id]).whereType<TicketModel>().toList();
 
       order.relatedTickets = relatedTickets;
-      order.form = forms?.firstWhereOrNull((f) => f.key == order.formKey);
+      order.form = forms?.firstWhereOrNull((f) => f.id == order.formId);
+      if (order.form == null && order.formKey != null) {
+        order.form = forms?.firstWhereOrNull((f) => f.key == order.formKey);
+      }
       order.relatedHistory = historyMap[order.id];
 
       for (var ticket in relatedTickets) {
