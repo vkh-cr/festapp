@@ -6,6 +6,7 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/widgets/html_view.dart';
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class FormCreationHelper {
   static String _generateFormHtml(String? link) {
@@ -131,7 +132,7 @@ class FormCreationHelper {
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text("Storno".tr()),
+                  child: Text(CommonStrings.storno),
                 ),
                 ElevatedButton(
                   onPressed: isFormValid() && !isCreating

@@ -11,6 +11,7 @@ import 'package:fstapp/components/forms/public_order_strings.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/services.dart';
 
 import 'birth_year_field_builder.dart';
@@ -162,7 +163,7 @@ class FormFieldBuilders {
                               child: IconButton(
                                 onPressed: () => removeTicket(i),
                                 icon: Icon(Icons.delete),
-                                tooltip: "Delete".tr(),
+                                tooltip: CommonStrings.delete,
                               ),
                             ),
                           ],

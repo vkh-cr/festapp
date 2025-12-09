@@ -204,7 +204,7 @@ BEGIN
         END IF;
 
         -- If the occasion user record is not found and the user is authenticated, add the user to the occasion
-        IF occasion_user IS NULL AND current_user_id IS NOT NULL THEN
+        IF occasion_user IS NULL AND current_user_id IS NOT NULL AND is_app_supported_bool IS TRUE THEN
             PERFORM add_user_to_occasion(occasionId, current_user_id);
 
             SELECT *
