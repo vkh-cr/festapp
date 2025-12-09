@@ -23,6 +23,12 @@ BEGIN
       WHERE "user" = auth.uid()
         AND unit = unit_id
         AND (is_manager = true OR is_editor = true OR is_editor_view = true)
+  ) AND NOT EXISTS (
+      SELECT 1 FROM public.occasion_users ou
+      JOIN public.occasions o ON o.id = ou.occasion
+      WHERE o.unit = unit_id
+        AND ou."user" = auth.uid()
+        AND (ou.is_manager IS TRUE OR ou.is_editor IS TRUE OR ou.is_editor_view IS TRUE OR ou.is_editor_order IS TRUE OR ou.is_editor_order_view IS TRUE)
   ) THEN
     RAISE EXCEPTION 'Insufficient permissions for this unit' USING ERRCODE = '42501';
   END IF;
@@ -111,7 +117,22 @@ BEGIN
       GROUP BY ou.occasion
   ) AS user_stats ON o.id = user_stats.occasion
 
-  WHERE o.unit = unit_id;
+  WHERE o.unit = unit_id
+  AND (
+      EXISTS (
+          SELECT 1 FROM public.unit_users
+          WHERE "user" = auth.uid()
+            AND unit = unit_id
+            AND (is_manager = true OR is_editor = true OR is_editor_view = true)
+      )
+      OR
+      EXISTS (
+          SELECT 1 FROM public.occasion_users ou
+          WHERE ou.occasion = o.id
+            AND ou."user" = auth.uid()
+            AND (ou.is_manager IS TRUE OR ou.is_editor IS TRUE OR ou.is_editor_view IS TRUE OR ou.is_editor_order IS TRUE OR ou.is_editor_order_view IS TRUE)
+      )
+  );
 
   -- Step 4: If no occasions were found, return an empty JSON array.
   IF occasion_data IS NULL THEN

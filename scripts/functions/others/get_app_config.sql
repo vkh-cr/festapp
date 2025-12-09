@@ -30,6 +30,7 @@ DECLARE
     user_groups_json jsonb;
     is_editor_view_on_occasion_bool BOOLEAN;
     user_occasions_json jsonb;
+    user_units_json jsonb;
     current_user_id UUID := auth.uid();
 BEGIN
     -- Log the request details in log_app_config table
@@ -256,32 +257,80 @@ BEGIN
 
     -- Fetch occasions for the user based on the specified logic
     IF occasion_unit IS NOT NULL AND current_user_id IS NOT NULL THEN
-        IF is_editor_view_on_occasion_bool THEN
-            -- If user is an editor, get all occasions for the unit
-            SELECT json_agg(json_build_object('id', o.id, 'title', o.title, 'link', o.link, 'start_time', o.start_time, 'end_time', o.end_time))
+        IF is_editor_view_on_occasion_bool OR (current_user_id IS NOT NULL AND (SELECT get_is_editor_on_unit(occasion_unit))) THEN
+            -- If user is an editor or unit editor, get all occasions for the unit
+            SELECT json_agg(json_build_object('id', o.id, 'title', o.title, 'link', o.link, 'start_time', o.start_time, 'end_time', o.end_time) ORDER BY o.start_time DESC)
             INTO user_occasions_json
-            FROM public.occasions o
-            WHERE o.unit = occasion_unit;
+            FROM (
+                SELECT * FROM public.occasions
+                WHERE unit = occasion_unit
+                ORDER BY start_time DESC
+                LIMIT 100
+            ) o;
         ELSE
             -- Otherwise, get only occasions the user is explicitly on for that unit
-            SELECT json_agg(json_build_object('id', o.id, 'title', o.title, 'link', o.link, 'start_time', o.start_time, 'end_time', o.end_time))
+            -- AND where they have privileged access (manager, editor, etc.)
+            SELECT json_agg(
+                json_build_object(
+                    'id', o.id, 
+                    'title', o.title, 
+                    'link', o.link, 
+                    'start_time', o.start_time, 
+                    'end_time', o.end_time
+                ) ORDER BY o.start_time DESC
+            )
             INTO user_occasions_json
-            FROM public.occasions o
-            JOIN public.occasion_users ou ON ou.occasion = o.id
-            WHERE ou."user" = current_user_id
-            AND o.unit = occasion_unit;
+            FROM (
+                 SELECT o.*
+                 FROM public.occasions o
+                 JOIN public.occasion_users ou ON ou.occasion = o.id
+                 WHERE ou."user" = current_user_id
+                 AND o.unit = occasion_unit
+                 AND (
+                     ou.is_manager IS TRUE 
+                     OR ou.is_editor IS TRUE 
+                     OR ou.is_editor_view IS TRUE 
+                     OR ou.is_editor_order IS TRUE 
+                     OR ou.is_editor_order_view IS TRUE
+                 )
+                 ORDER BY o.start_time DESC
+                 LIMIT 100
+            ) o;
         END IF;
     END IF;
 
+    -- Fetch units for the user based on unit rights or occasion rights
+    SELECT json_agg(jsonb_build_object('id', u.id, 'title', u.title) ORDER BY u.title)
+    INTO user_units_json
+    FROM public.units u
+    WHERE (
+        EXISTS (
+            SELECT 1 
+            FROM public.unit_users uu 
+            WHERE uu.unit = u.id 
+              AND uu."user" = current_user_id 
+              AND uu.is_editor_view = TRUE
+        )
+        OR
+        EXISTS (
+            SELECT 1 
+            FROM public.occasions o
+            JOIN public.occasion_users ou ON ou.occasion = o.id
+            WHERE o.unit = u.id 
+              AND ou."user" = current_user_id
+              AND (
+                  ou.is_manager IS TRUE 
+                  OR ou.is_editor IS TRUE 
+                  OR ou.is_editor_view IS TRUE 
+                  OR ou.is_editor_order IS TRUE 
+                  OR ou.is_editor_order_view IS TRUE
+              )
+        )
+    );
+
     -- Fetch user information along with associated units and occasions
     SELECT row_to_json(ui)::jsonb || jsonb_build_object(
-            'units',
-            (
-                SELECT json_agg(jsonb_build_object('id', u.id, 'title', u.title) ORDER BY u.title)
-                FROM public.units u
-                JOIN public.unit_users uu ON uu.unit = u.id
-                WHERE uu."user" = ui.id AND uu.is_editor_view = TRUE
-            ),
+            'units', COALESCE(user_units_json, '[]'::jsonb),
             'occasions', user_occasions_json
           )
       INTO user_info_json
