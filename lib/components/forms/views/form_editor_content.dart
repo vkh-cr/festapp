@@ -150,7 +150,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                 ),
                 Switch(
                   value: form.isOpen ?? true,
-                  onChanged: RightsService.canEditOccasion()
+                  onChanged: RightsService.isOrderEditor()
                       ? (val) => setState(() {
                             form.isOpen = val;
                           })
@@ -159,7 +159,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
               ],
             ),
             const SizedBox(height: 16),
-            if (RightsService.canEditOccasion()) ...[
+            if (RightsService.canSeeReservations()) ...[
               ExpansionTile(
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: EdgeInsets.zero,
@@ -183,7 +183,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                               }
                             }
                           });
-                        }, isStart: true),
+                        }, isStart: true, enabled: RightsService.isOrderEditor()),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -195,7 +195,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                              return;
                           }
                           setState(() => form.endTime = date);
-                        }, isEnd: true, minDate: form.startTime),
+                        }, isEnd: true, minDate: form.startTime, enabled: RightsService.isOrderEditor()),
                       ),
                     ],
                   ),
@@ -211,7 +211,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                       style: TextStyle(color: form.startTime == null ? Colors.grey : null, fontSize: 12),
                     ),
                     value: form.enableCountdown,
-                    onChanged: form.startTime != null
+                    onChanged: form.startTime != null && RightsService.isOrderEditor()
                         ? (val) => setState(() => form.enableCountdown = val)
                         : null,
                   ),
@@ -233,6 +233,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                             showLabel: false,
                             minimal: true,
                             fontSize: 20,
+                            enabled: RightsService.isOrderEditor(),
                           ),
                           Transform.scale(
                             scale: 0.8,
@@ -264,6 +265,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                     helpText: FormStrings.helperClosedMessage,
                     defaultText: FormStrings.reservationUnavailableMessage,
                     showLabel: false,
+                    enabled: RightsService.isOrderEditor(),
                   ),
                 ],
               ),
@@ -274,7 +276,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     );
   }
 
-  Widget _buildDateTimeInput(String label, DateTime? value, Function(DateTime?) onChanged, {bool isStart = false, bool isEnd = false, DateTime? minDate}) {
+  Widget _buildDateTimeInput(String label, DateTime? value, Function(DateTime?) onChanged, {bool isStart = false, bool isEnd = false, DateTime? minDate, bool enabled = true}) {
     /*
     Color? statusColor;
     String statusText = "";
@@ -297,7 +299,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     */
 
     return InkWell(
-      onTap: () async {
+      onTap: !enabled ? null : () async {
         final initialDate = value ?? DateTime.now();
         final firstDate = minDate ?? DateTime(2000);
         
@@ -325,7 +327,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
           labelText: label,
           border: const OutlineInputBorder(),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          suffixIcon: value != null ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => onChanged(null)) : const Icon(Icons.calendar_today, size: 18),
+          suffixIcon: value != null && enabled ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => onChanged(null)) : const Icon(Icons.calendar_today, size: 18),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,7 +373,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
      );
   }
 
-  Widget _buildHtmlFieldPreview(String label, String? content, ValueChanged<String> onChanged, {String? defaultText, String? helpText, bool showLabel = true, bool minimal = false, double? fontSize}) {
+  Widget _buildHtmlFieldPreview(String label, String? content, ValueChanged<String> onChanged, {String? defaultText, String? helpText, bool showLabel = true, bool minimal = false, double? fontSize, bool enabled = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -429,7 +431,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                     visualDensity: VisualDensity.compact,
                     foregroundColor: Theme.of(context).primaryColor,
                   ),
-                  onPressed: () async {
+                  onPressed: !enabled ? null : () async {
                     final result = await RouterService.navigatePageInfo(
                       context,
                       HtmlEditorRoute(
@@ -601,7 +603,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
             child: const Icon(Icons.developer_mode),
           ),
           const SizedBox.square(dimension: 12),
-          if (RightsService.canEditOccasion())
+          if (RightsService.isOrderEditor())
             FloatingActionButton(
               heroTag: "addFieldFab",
               onPressed: _addNewField,
@@ -636,8 +638,9 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                       if (_bundle!.form.header?.isNotEmpty ?? false)
                         HtmlView(html: _bundle!.form.header!, isSelectable: true),
                       const SizedBox(height: 16),
-                      Center(
-                        child: ElevatedButton.icon(
+                      if (RightsService.isOrderEditor())
+                        Center(
+                          child: ElevatedButton.icon(
                           icon: const Icon(Icons.edit),
                           label: Text(FormStrings.editContent),
                           onPressed: () async {
@@ -684,13 +687,13 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
             children: [
               TextButton(
                 onPressed:
-                RightsService.canEditOccasion() ? cancelEdit : null,
+                RightsService.isOrderEditor() ? cancelEdit : null,
                 child: Text("Storno".tr()),
               ),
               const SizedBox(width: 16),
               ElevatedButton(
                 onPressed:
-                RightsService.canEditOccasion() ? saveChanges : null,
+                RightsService.isOrderEditor() ? saveChanges : null,
                 child: Text("Save changes".tr()),
               ),
             ],
