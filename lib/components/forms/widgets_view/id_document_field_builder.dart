@@ -74,6 +74,8 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
           context,
           focusNode: _idNumberFocusNode,
         ),
+        filled: true,
+        fillColor: Colors.transparent,
       ),
       validator: FormBuilderValidators.compose([
         if (widget.fieldHolder.isRequired) FormBuilderValidators.required(),
@@ -96,6 +98,8 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
             context,
           ),
           suffixIcon: const Icon(Icons.calendar_today),
+          filled: true,
+          fillColor: Colors.transparent,
         ),
         firstDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
         validator: (value) {

@@ -218,6 +218,8 @@ class FormFieldBuilders {
             label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode, controller: textController),
             suffixIcon: const Icon(Icons.event_seat),
             errorText: field.errorText,
+            filled: true,
+            fillColor: Colors.transparent,
           ),
           onTap: () async {
             await formHolder.controller!.showSeatReservation!(seat == null ? [] : [seat]);
