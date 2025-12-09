@@ -65,6 +65,8 @@ class BirthYearFieldBuilder extends StatelessWidget {
           context,
           focusNode: focusNode,
         ),
+        filled: true,
+        fillColor: Colors.transparent,
       ),
       validator: FormBuilderValidators.compose(_getValidators(fieldHolder)),
       keyboardType: TextInputType.number,
