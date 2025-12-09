@@ -1,13 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_response_model.dart';
-import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/eshop/models/bank_account_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
-import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/data_models/form_model.dart';
 
@@ -262,41 +260,13 @@ class DbForms {
   }
 
   static Future<List<FormFieldModel>> getAllFormFields(String formLink) async {
-    //todo turn into function with support for order editor view
-
-    final formResponse = await _supabase
-        .from(Tb.forms.table)
-        .select(Tb.forms.id)
-        .eq(Tb.forms.link, formLink)
-        .single();
-
-    final int formId = formResponse[Tb.forms.id] as int;
-
-    final fieldsData = await _supabase
-        .from(Tb.form_fields.table)
-        .select(
-        "${Tb.form_fields.id},"
-            "${Tb.form_fields.created_at},"
-            "${Tb.form_fields.title},"
-            "${Tb.form_fields.description},"
-            "${Tb.form_fields.data},"
-            "${Tb.form_fields.type},"
-            "${Tb.form_fields.is_required},"
-            "${Tb.form_fields.form},"
-            "${Tb.form_fields.is_hidden},"
-            "${Tb.form_fields.order},"
-            "${Tb.form_fields.product_type},"
-            "${Tb.form_fields.is_ticket_field}"
-    )
-        .eq(Tb.form_fields.form, formId)
-        .eq(Tb.form_fields.is_ticket_field, false)
-        .neq(Tb.form_fields.type, FormHelper.fieldTypeTicket)
-        .order(Tb.form_fields.order, ascending: true);
-
-    List<FormFieldModel> formFields = [];
-    formFields = List<FormFieldModel>.from(
-      fieldsData.map((x) => FormFieldModel.fromJson(x)),
+    final response = await _supabase.rpc(
+      'get_all_form_fields',
+      params: {'form_link': formLink},
     );
-    return formFields;
+
+    return List<FormFieldModel>.from(
+      (response as List).map((x) => FormFieldModel.fromJson(x)),
+    );
   }
 }

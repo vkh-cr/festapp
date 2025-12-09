@@ -464,7 +464,7 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
                         Text(
                           statusText,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: statusColor,
                           ),
@@ -528,7 +528,7 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
                       ),
                       title: Text(
                         obj.title ?? "", // Shows only Seat Title (e.g., "A1")
-                        style: const TextStyle(fontSize: 14),
+                        style: const TextStyle(fontSize: 16),
                       ),
                       subtitle: Text(
                         "$productTitle ($productPrice)",
@@ -578,7 +578,7 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
                 Expanded(
                   child: Text(
                     BlueprintStrings.occupiedWarningInline,
-                    style: TextStyle(fontSize: 11, color: warningColor.withOpacityUniversal(context, 1.0)),
+                    style: TextStyle(fontSize: 13, color: warningColor.withOpacityUniversal(context, 1.0)),
                   ),
                 ),
               ],
