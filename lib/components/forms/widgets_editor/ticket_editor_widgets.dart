@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
@@ -11,6 +10,7 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'product_type_editor.dart';
 
 class TicketEditorWidgets {
@@ -271,7 +271,7 @@ class TicketEditorWidgets {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => Navigator.of(dialogContext).pop(),
-                      child: Text("Storno").tr(), // Using FormStrings for localization
+                      child: Text(CommonStrings.storno),
                     ),
                   )
                 ],

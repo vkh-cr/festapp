@@ -15,6 +15,7 @@ import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import '../widgets_editor/form_fields_generator.dart';
 import 'package:fstapp/components/forms/widgets_view/countdown_widget.dart';
 
@@ -86,7 +87,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     try {
       await DbForms.updateForm(form);
       if (!mounted) return;
-      ToastHelper.Show(context, "${"Saved".tr()}: ${form.link}", severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, "${CommonStrings.saved}: ${form.link}", severity: ToastSeverity.Ok);
       await loadData();
       widget.onDataUpdated?.call();
     } catch (e) {
@@ -426,7 +427,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                 right: 2,
                 child: TextButton.icon(
                   icon: const Icon(Icons.edit, size: 16),
-                  label: Text("Edit".tr()),
+                  label: Text(CommonStrings.edit),
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     foregroundColor: Theme.of(context).primaryColor,
@@ -688,13 +689,13 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
               TextButton(
                 onPressed:
                 RightsService.isOrderEditor() ? cancelEdit : null,
-                child: Text("Storno".tr()),
+                child: Text(CommonStrings.storno),
               ),
               const SizedBox(width: 16),
               ElevatedButton(
                 onPressed:
                 RightsService.isOrderEditor() ? saveChanges : null,
-                child: Text("Save changes".tr()),
+                child: Text(CommonStrings.save),
               ),
             ],
           ),

@@ -4,6 +4,7 @@ import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:intl/intl.dart';
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class CreateOrCopyFormDialog extends StatefulWidget {
   final List<FormModel> existingForms;
@@ -249,7 +250,7 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text("Storno".tr()),
+          child: Text(CommonStrings.storno),
         ),
       ],
     );
