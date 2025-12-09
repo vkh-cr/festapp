@@ -191,6 +191,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                             }
                           },
                           child: TextTooltipWidget(
+                            fontSize: 18.0,
                             triggerMode: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
                                 ? TooltipTriggerMode.tap
                                 : null,
