@@ -685,7 +685,7 @@ class _FormPageState extends State<FormPage> {
         floatingActionButton: Padding(
           padding: EdgeInsets.only(bottom: 24),
           child: Visibility(
-            visible: RightsService.isEditor(),
+            visible: RightsService.canSeeReservations(),
             child: FloatingActionButton(
               backgroundColor: theme.primaryColor,
               foregroundColor: theme.colorScheme.onPrimary,
