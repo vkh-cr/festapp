@@ -228,23 +228,24 @@ class _SideMenuState extends State<SideMenu> {
                       }
                     },
                   ),
-                  _buildMenuItem(
-                    context: context,
-                    icon: Icons.people,
-                    label: "Users".tr(),
-                    isSelected: widget.currentMenu == "Users",
-                    isExpanded: _isExpanded,
-                    isHovered: _hoveredLabel == "Users".tr(),
-                    onHover: (label) => setState(() => _hoveredLabel = label),
-                    onTap: () {
-                      if (widget.unit != null) {
-                        widget.onMenuItemSelected(
-                          UnitUsersScreen(unit: widget.unit!),
-                          "Users",
-                        );
-                      }
-                    },
-                  ),
+                  if (RightsService.canSeeUnitUsers())
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.people,
+                      label: "Users".tr(),
+                      isSelected: widget.currentMenu == "Users",
+                      isExpanded: _isExpanded,
+                      isHovered: _hoveredLabel == "Users".tr(),
+                      onHover: (label) => setState(() => _hoveredLabel = label),
+                      onTap: () {
+                        if (widget.unit != null) {
+                          widget.onMenuItemSelected(
+                            UnitUsersScreen(unit: widget.unit!),
+                            "Users",
+                          );
+                        }
+                      },
+                    ),
                   if (widget.unit != null &&
                       FeatureService.isFeatureEnabled(FeatureConstants.quotes,
                           features: widget.unit!.features))
@@ -263,26 +264,27 @@ class _SideMenuState extends State<SideMenu> {
                         );
                       },
                       ),
-                    _buildMenuItem(
-                      context: context,
-                      icon: Icons.settings,
-                      label: "Settings".tr(),
-                      isSelected: widget.currentMenu == "Settings",
-                      isExpanded: _isExpanded,
-                      isHovered: _hoveredLabel == "Settings".tr(),
-                      onHover: (label) => setState(() => _hoveredLabel = label),
-                      onTap: () {
-                        if (widget.unit != null) {
-                          widget.onMenuItemSelected(
-                            UnitSettingsScreen(
-                              unit: widget.unit!,
-                              onUnitUpdated: widget.onUnitUpdated,
-                            ),
-                            "Settings",
-                          );
-                        }
-                      },
-                    ),
+                    if (RightsService.canSeeUnitUsers())
+                      _buildMenuItem(
+                        context: context,
+                        icon: Icons.settings,
+                        label: "Settings".tr(),
+                        isSelected: widget.currentMenu == "Settings",
+                        isExpanded: _isExpanded,
+                        isHovered: _hoveredLabel == "Settings".tr(),
+                        onHover: (label) => setState(() => _hoveredLabel = label),
+                        onTap: () {
+                          if (widget.unit != null) {
+                            widget.onMenuItemSelected(
+                              UnitSettingsScreen(
+                                unit: widget.unit!,
+                                onUnitUpdated: widget.onUnitUpdated,
+                              ),
+                              "Settings",
+                            );
+                          }
+                        },
+                      ),
                 ],
               ),
             ),
