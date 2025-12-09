@@ -105,6 +105,10 @@ class RightsService{
     return isEditorOrder() || isAdmin() || isUnitEditor();
   }
 
+  static bool canSeeUnitUsers() {
+    return isUnitEditor() || isUnitManager() || isAdmin();
+  }
+
   static bool canUpdateUnitUsers() {
     return isUnitManager() || isAdmin();
   }
@@ -158,6 +162,9 @@ class RightsService{
   }
 
   static bool canUserSeeUnitWorkspace() {
+    if(currentUser()?.units?.any((u) => u.id == currentUnit()?.id) ?? false) {
+      return true;
+    }
     return isUnitEditor() || isUnitManager() || isUnitEditorView();
   }
 
