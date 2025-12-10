@@ -18,7 +18,7 @@ class SynchroService {
   static OccasionSettingsModel? globalSettingsModel = OccasionSettingsModel.defaultSettings;
 
   static Future<void> refreshOfflineData() async {
-    if(AuthService.isLoggedIn()) {
+    if(AuthService.isLoggedIn() && RightsService.currentOccasionId() != null) {
       var userInfo = await AuthService.getFullUserInfo();
       await OfflineDataService.saveUserInfo(userInfo);
       var bundle = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, true);
