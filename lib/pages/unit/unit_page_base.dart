@@ -111,6 +111,8 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
   }
 
   Future<void> _handleSignIn() async {
+
+    if (RightsService.currentUnit()?.id == null) return;
     final newUnitId = RightsService.currentUnit()!.id!;
 
     await _loadDataForUnit(newUnitId);
@@ -125,7 +127,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _searchController.dispose(); // Dispose the search controller
+    _searchController.dispose();
     super.dispose();
   }
 
