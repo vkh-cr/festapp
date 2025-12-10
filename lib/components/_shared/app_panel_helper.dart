@@ -778,6 +778,9 @@ class AppPanelHelper {
                                 .findOccasionHint,
                             createNewText: AdministrationStrings
                                 .newOccasionButton,
+                            happeningNowText: "Happening Now".tr(),
+                            upcomingText: "Upcoming Events".tr(),
+                            pastText: "Past Events".tr(),
                           ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

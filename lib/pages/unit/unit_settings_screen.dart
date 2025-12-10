@@ -11,6 +11,8 @@ import 'package:fstapp/pages/unit/unit_settings_strings.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/styles/styles_config.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class UnitSettingsScreen extends StatefulWidget {
@@ -38,16 +40,28 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
   late TextEditingController _replyToEmailController;
   String? _selectedTimezone;
   List<String> _allTimezones = [];
+  String _versionInfo = "";
 
   // Constants for data keys
   // Constants for data keys
   static const String dataTimezone = "timezone";
+  static const int maxTitleLength = 30;
 
   @override
   void initState() {
     super.initState();
     _unit = widget.unit;
     _loadUnitData();
+    _loadVersionInfo();
+  }
+
+  Future<void> _loadVersionInfo() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() {
+        _versionInfo = "${packageInfo.version}+${packageInfo.buildNumber}";
+      });
+    }
   }
 
   Future<void> _loadUnitData() async {
@@ -150,22 +164,31 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
                   if (_isLoading)
                     const Center(child: CircularProgressIndicator())
                   else ...[
-                  TextFormField(
-                    initialValue: _title,
-                    enabled: _canEdit,
-                    decoration: InputDecoration(
-                      labelText: OccasionSettingsStrings.title,
+                    TextFormField(
+                      initialValue: _title,
+                      enabled: _canEdit,
+                      maxLength: maxTitleLength,
+                      buildCounter: (context, {required currentLength, required isFocused, required maxLength}) {
+                        return isFocused
+                            ? Text(
+                                '$currentLength/$maxLength',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              )
+                            : null;
+                      },
+                      decoration: InputDecoration(
+                        labelText: OccasionSettingsStrings.title,
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return OccasionSettingsStrings.titleIsRequired;
+                        }
+                        return null;
+                      },
+                      onSaved: (val) {
+                        _title = val;
+                      },
                     ),
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) {
-                        return OccasionSettingsStrings.titleIsRequired;
-                      }
-                      return null;
-                    },
-                    onSaved: (val) {
-                      _title = val;
-                    },
-                  ),
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _replyToEmailController,
@@ -312,6 +335,16 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
                       ],
                     ),
                   const SizedBox(height: 80),
+                  if (_versionInfo.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: Center(
+                        child: Text(
+                          "Version: $_versionInfo",
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ),
                   ],
                 ],
               ),

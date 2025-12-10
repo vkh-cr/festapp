@@ -210,7 +210,7 @@ class FormModel {
     if (value == null) {
       _scheduleData.remove(metaStartTime);
     } else {
-      _scheduleData[metaStartTime] = value.toIso8601String();
+      _scheduleData[metaStartTime] = value.toUtcFromOccasionTime().toIso8601String();
     }
   }
 
@@ -225,7 +225,7 @@ class FormModel {
     if (value == null) {
       _scheduleData.remove(metaEndTime);
     } else {
-      _scheduleData[metaEndTime] = value.toIso8601String();
+      _scheduleData[metaEndTime] = value.toUtcFromOccasionTime().toIso8601String();
     }
   }
 

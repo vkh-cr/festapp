@@ -160,17 +160,31 @@ class _BlueprintCreateOrderDialogState extends State<BlueprintCreateOrderDialog>
                 if (groupedConflicts.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.remove_shopping_cart, color: theme.colorScheme.error, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                            OrdersStrings.cancelledItemsTitle,
-                            style: TextStyle(
+                        Row(
+                          children: [
+                            Icon(Icons.remove_shopping_cart, color: theme.colorScheme.error, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              OrdersStrings.cancelledItemsTitle,
+                              style: TextStyle(
                                 color: theme.colorScheme.error,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16
-                            )
+                              )
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          BlueprintStrings.warningNoCancellationEmail,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                            color: theme.colorScheme.onSurface,
+                          ),
                         ),
                       ],
                     ),
