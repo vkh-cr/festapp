@@ -102,4 +102,5 @@ class BlueprintStrings {
   static String get mixedProducts => 'FeatureBlueprint.mixedProducts'.tr(); // "Mixed / Various"
   static String get toastNoTemplateProduct => 'FeatureBlueprint.toastNoTemplateProduct'.tr(); // "Cannot create product..."
   static String get uniformViewHelp => 'FeatureBlueprint.uniformViewHelp'.tr(); // "All seats share the same product..."
+  static String get warningNoCancellationEmail => 'FeatureBlueprint.warningNoCancellationEmail'.tr(); // "Note: Users will NOT receive cancellation emails for these changes."
 }

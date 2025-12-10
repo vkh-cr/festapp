@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/services/utilities_all.dart';
+import 'package:fstapp/services/responsive_service.dart';
 import 'package:intl/intl.dart';
 
 /// A custom stateful widget for the picker UI with search functionality.
@@ -172,7 +173,7 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
                     Expanded(
                       child: TextField(
                         controller: _searchController,
-                        autofocus: true,
+                        autofocus: !ResponsiveService.isMobile(context),
                         style: titleTextStyle,
                         decoration: InputDecoration(
                           hintText: widget.hintText,
@@ -201,7 +202,10 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
                     padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
                     child: Text(
                       entry,
-                      style: theme.textTheme.labelLarge?.copyWith(
+                      style: (ResponsiveService.isMobile(context)
+                          ? theme.textTheme.labelMedium
+                          : theme.textTheme.labelLarge)
+                          ?.copyWith(
                         color: theme.primaryColor,
                         fontWeight: FontWeight.bold,
                       ),
