@@ -5,7 +5,7 @@ import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_models/email_template_model.dart';
 import 'package:fstapp/data_services/db_email_templates.dart';
-import 'package:fstapp/data_services/rights_service.dart';
+
 import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
@@ -31,7 +31,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
   final _formKey = GlobalKey<FormState>();
   late String? _subject;
   late String? _htmlContent;
-  bool _isSendingTestEmail = false;
+
 
   @override
   void initState() {
@@ -59,37 +59,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
     }
   }
 
-  Future<void> _sendTestEmail() async {
-    setState(() {
-      _isSendingTestEmail = true;
-    });
 
-    // Retrieve usage details from the template.
-    final usageDetails = widget.template.getUsageDetails();
-    final subsMap = <String, String>{};
-
-    if (usageDetails['subs'] is List) {
-      for (var sub in usageDetails['subs']) {
-        if (sub is EmailTemplateSub) {
-          subsMap[sub.code] = sub.defaultValue;
-        }
-      }
-    }
-
-    try {
-      await DbEmailTemplates.sendCustomEmail(widget.template, subsMap,
-          RightsService.currentUser()!.email!);
-      ToastHelper.Show(context, "Test email sent successfully.".tr());
-    } catch (e) {
-      ToastHelper.Show(context, "Failed to send test email.".tr());
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSendingTestEmail = false;
-        });
-      }
-    }
-  }
 
   /// Builds a widget displaying the available substitutions.
   /// If [subs] is a list, each substitution is shown on its own line.
@@ -160,26 +130,8 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  // Test email button at the top.
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _isSendingTestEmail ? null : _sendTestEmail,
-                        icon: _isSendingTestEmail
-                            ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
-                            : const Icon(Icons.send),
-                        label: Text("Send Test Email".tr()),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+
+
                   // Usage details container wrapped in a SelectionArea.
                   SelectionArea(
                     child: Container(
