@@ -13,7 +13,7 @@ import 'package:fstapp/pages/unit/occasions_screen.dart';
 import 'package:fstapp/pages/unit/quotes_tab.dart';
 import 'package:fstapp/pages/unit/unit_users_screen.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:fstapp/router_service.dart';
 
 import 'package:fstapp/pages/unit/unit_settings_screen.dart';
 import 'unit_page.dart';
@@ -165,22 +165,11 @@ class SideMenu extends StatefulWidget {
 
 class _SideMenuState extends State<SideMenu> {
   bool _isExpanded = false;
-  String _versionInfo = "";
   String? _hoveredLabel;
 
   @override
   void initState() {
     super.initState();
-    _loadVersionInfo();
-  }
-
-  Future<void> _loadVersionInfo() async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    if (mounted) {
-      setState(() {
-        _versionInfo = "${packageInfo.version}+${packageInfo.buildNumber}";
-      });
-    }
   }
 
   @override
@@ -286,18 +275,6 @@ class _SideMenuState extends State<SideMenu> {
                         },
                       ),
                 ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 100),
-                opacity: _isExpanded ? 1.0 : 0.0,
-                child: Text(
-                  _versionInfo,
-                  style: const TextStyle(fontSize: 12),
-                  maxLines: 1,
-                ),
               ),
             ),
           ],
