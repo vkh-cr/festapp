@@ -9,6 +9,7 @@ import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/blueprint/views/blueprint_editor_tab.dart';
 import 'package:fstapp/components/email_templates/views/email_templates_tab.dart';
+import 'package:fstapp/components/email_templates/email_templates_strings.dart';
 import 'package:fstapp/components/forms/views/forms_tab.dart';
 import 'package:fstapp/components/eshop/views/orders_tab.dart';
 import 'package:fstapp/components/eshop/views/report_tab.dart';
@@ -52,7 +53,7 @@ class AdminTabDefinition {
   static const String orders = "Orders";
   static const String products = "Products";
   static const String report = "Report";
-  static const String emailTemplates = "Email Templates";
+  static String get emailTemplates => EmailTemplatesStrings.title;
   static const String settings = "Settings";
   static const String volunteers = "volunteers";
 
@@ -119,7 +120,7 @@ class AdminTabDefinition {
         icon: Icons.stacked_bar_chart,
         widget: ReportTab()),
     emailTemplates: AdminTabDefinition(
-        label: "Email Templates".tr(),
+        label: EmailTemplatesStrings.title,
         icon: Icons.email,
         widget: EmailTemplatesTab()),
     settings: AdminTabDefinition(

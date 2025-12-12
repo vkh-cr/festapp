@@ -11,7 +11,6 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/components/eshop/db_tickets.dart';
 import 'package:auto_route/auto_route.dart';
@@ -47,9 +46,12 @@ class _OrdersContentState extends State<OrdersContent> {
 
   Future<void> _initializeController() async {
     if (occasionLink == null) return;
-    // Fetch forms with their fields to determine which columns to show.
-    final forms = await DbForms.getAllFormsWithFieldsViaOccasionLink(occasionLink!);
+    
+    // Fetch all data in one request
+    final bundle = await DbOrders.getOrdersTabData(occasionLink: occasionLink!);
     if (!mounted) return;
+
+    final forms = bundle.forms;
 
     // Check if any field across all forms is a non-ticket 'note' field.
     final hasOrderNoteField = forms.any((form) =>
@@ -91,10 +93,17 @@ class _OrdersContentState extends State<OrdersContent> {
     }
 
     // Create the controller with the final column list
+    List<OrderModel>? firstLoadOrders = bundle.orders;
+
     final newController = SingleDataGridController<OrderModel>(
       context: context,
       loadData: () async {
-        final newBundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink!);
+        if (firstLoadOrders != null) {
+          final orders = firstLoadOrders;
+          firstLoadOrders = null; // Clear it so subsequent reloads fetch fresh data
+          return orders!;
+        }
+        final newBundle = await DbOrders.getOrdersTabData(occasionLink: occasionLink!);
         return newBundle.orders;
       },
       fromPlutoJson: OrderModel.fromPlutoJson,

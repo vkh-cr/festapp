@@ -92,8 +92,21 @@ class DbOrders {
       throw Exception("${response['code']}: ${response['message']}");
     }
 
-    final json = response["data"];
+    return _parseOrdersBundle(response["data"]);
+  }
 
+  static Future<ReservationsBundle> getOrdersTabData({
+    required String occasionLink,
+  }) async {
+    final response = await _supabase.rpc('get_orders_tab_data', params: {
+      'p_occasion_link': occasionLink,
+    });
+
+    // Response is the data object directly.
+    return _parseOrdersBundle(response);
+  }
+
+  static ReservationsBundle _parseOrdersBundle(dynamic json) {
     // Basic data parsing
     final spots = GetOrdersHelper.parseSpots(json);
     final products = GetOrdersHelper.parseProducts(json);
