@@ -10,6 +10,7 @@ import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'pluto_abstract.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
   final TrinaGridStateManager stateManager;
@@ -246,7 +247,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
         try {
           await element.deleteMethod(context);
           ToastHelper.Show(
-              context, "${"Deleted".tr()}: ${element.toBasicString()}");
+              context, "${CommonStrings.deleted}: ${element.toBasicString()}");
         } catch (e) {
           ToastHelper.Show(context, e.toString(),
               severity: ToastSeverity.NotOk);
@@ -260,7 +261,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
         try {
           await element.updateMethod(context);
           ToastHelper.Show(
-              context, "${"Saved".tr()}: ${element.toBasicString()}");
+              context, "${CommonStrings.saved}: ${element.toBasicString()}");
         } catch (e) {
           ToastHelper.Show(context, e.toString(),
               severity: ToastSeverity.NotOk);

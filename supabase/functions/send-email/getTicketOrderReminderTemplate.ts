@@ -4,6 +4,7 @@ import { generateQrCode } from "../_shared/qrCodePayment.ts";
 import { getBaseOrderData } from "./shared.ts";
 import { translations } from "../_shared/translations/translations.ts";
 import type { Tone } from "../_shared/translations/translations.ts"; // Import the Tone type
+import { generatePaymentDetails } from "../_shared/translations/payment-details.helpers.ts";
 
 /**
  * Prepares the data required for the TICKET_ORDER_REMINDER email template.
@@ -12,7 +13,7 @@ export async function getTicketOrderReminderTemplate(reqData: any, authorization
   const { orderId, requestSecret, lang = 'cs' } = reqData.data;
 
   // Select the correct language object
-  const tr = translations[lang] || translations.cs;
+  const tr = translations[lang as keyof typeof translations] || translations.cs;
   const attachments: any[] = [];
 
   // 1. Fetch and authorize base order data using the shared function
@@ -70,12 +71,32 @@ export async function getTicketOrderReminderTemplate(reqData: any, authorization
       const qrPaymentData = { amount: balance, currency_code: currency, account_number: bank_account.account_number, account_number_human_readable: bank_account.account_number_human_readable, variable_symbol: payment_info.variable_symbol };
       const qrCodeBytes = await generateQrCode(qrPaymentData, order.data, occasion.title);
       attachments.push({ filename: `qr-payment-${occasion.title}.png`, content: qrCodeBytes, contentType: "image/png", encoding: "binary" });
-  } catch (error) {
+  } catch (error: any) {
       console.error(`Could not generate QR code for order ${occasion.title}:`, error.message);
   }
 
   // 6. Prepare final data for the email client
-  const subs = { occasionTitle: occasion.title, fullOrder: generateFullOrder(order.data, order.data.tickets, occasion.features, lang), balanceReasoning: balanceReasoning };
+  const amount = formatCurrency(balance, currency);
+  const remainingTimeStr = timeDiff > 0 ? tr.days_remaining(daysDiff) : tr.days_remaining(0);
+  const deadlineStr = deadline.toLocaleDateString(lang === 'cs' ? 'cs-CZ' : 'en-US');
+
+  const paymentDetails = generatePaymentDetails({
+    accountNumber: bank_account.account_number_human_readable,
+    variableSymbol: payment_info.variable_symbol,
+    amount: amount,
+    iban: iban,
+    lang: lang as 'cs' | 'en'
+  });
+
+  const subs = {
+    occasionTitle: occasion.title,
+    fullOrder: generateFullOrder(order.data, order.data.tickets, occasion.features, lang),
+    balanceReasoning: balanceReasoning,
+    amount: amount,
+    remainingTime: remainingTimeStr,
+    deadline: deadlineStr,
+    paymentDetails: paymentDetails
+  };
   const sender = occasion.title;
   const receiver = order.data.email;
   const context = { occasion: occasion.id, organization: occasion.organization, unit: occasion.unit, orderHistoryId: latest_history_id, paymentInfoId: payment_info.id };

@@ -8,6 +8,7 @@ import 'package:trina_grid/trina_grid.dart';
 import '../models/spot_management_constants.dart';
 import 'inventory_strings.dart';
 import 'spot_management_columns.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 /// A stateful dialog that allows searching and selecting a spot for a single cell.
 class SpotSearchDialog extends StatefulWidget {
@@ -195,7 +196,7 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
         // Action: Storno (Cancel)
         TextButton(
           onPressed: () => Navigator.of(context).pop(), // Pops with null
-          child: Text('Storno'.tr()),
+          child: Text(CommonStrings.storno),
         ),
       ],
     );

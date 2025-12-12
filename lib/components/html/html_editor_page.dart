@@ -7,6 +7,7 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/html/html_editor_widget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 @RoutePage()
 class HtmlEditorPage extends StatefulWidget {
@@ -157,7 +158,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
               child: Row(
                 children: [
                   ButtonsHelper.bottomBarButton(
-                    text: "Reset".tr(),
+                    text: CommonStrings.reset,
                     onPressed: _isSaving
                         ? null
                         : () async {
@@ -165,11 +166,11 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
                     },
                   ),
                   ButtonsHelper.bottomBarButton(
-                    text: "Storno".tr(),
+                    text: CommonStrings.storno,
                     onPressed: _isSaving ? null : cancelPressed,
                   ),
                   ButtonsHelper.bottomBarButton(
-                    text: "Save".tr(),
+                    text: CommonStrings.save,
                     onPressed: _isSaving ? null : savePressed,
                   ),
                 ],
@@ -220,7 +221,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
           content: const Text("Some images are large and may slow down the app. Press OK to convert them into optimal size."),
           actions: [
             TextButton(
-              child: const Text("Ok").tr(),
+              child: Text(CommonStrings.ok),
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],

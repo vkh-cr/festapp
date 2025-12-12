@@ -1,6 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class HelpWidget extends StatelessWidget {
   final String title;
@@ -28,7 +29,7 @@ class HelpWidget extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text("Ok".tr()),
+                child: Text(CommonStrings.ok),
               ),
             ],
           ),

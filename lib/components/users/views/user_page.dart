@@ -25,6 +25,7 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
@@ -307,7 +308,7 @@ class _UserPageState extends State<UserPage> {
                   ),
 
                 const SizedBox(height: 15),
-                buildTextField("Name".tr(),
+                buildTextField(CommonStrings.name,
                     userData?.occasionUser?.data![Tb.occasion_users.data_name] ?? ""),
                 buildTextField("Surname".tr(),
                     userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
@@ -396,7 +397,7 @@ class _UserPageState extends State<UserPage> {
                         "Change Password Instructions".tr(),
                         "You'll receive an email with a link to reset your password. Do you want to proceed?"
                             .tr(),
-                        confirmButtonMessage: "Proceed".tr(),
+                        confirmButtonMessage: CommonStrings.proceed,
                       );
                       if (answer) {
                         await AuthService

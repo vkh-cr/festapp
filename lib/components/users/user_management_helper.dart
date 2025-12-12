@@ -4,6 +4,7 @@ import 'package:fstapp/components/users/occasion_user_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class UserManagementHelper{
 
@@ -18,7 +19,7 @@ class UserManagementHelper{
       throw Exception("User must be created first.");
     }
     var pw = await DialogHelper.showPasswordInputDialog(
-        context, "Password".tr(), "Insert here".tr());
+        context, CommonStrings.password, "Insert here".tr());
     if (pw == null || pw.isEmpty) {
       // User cancelled the dialog, so we can return without an error.
       // Or throw an exception if a password MUST be set.

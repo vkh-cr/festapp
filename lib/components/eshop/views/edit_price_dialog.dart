@@ -1,6 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class EditPriceDialog extends StatefulWidget {
   final double initialPrice;
@@ -101,13 +101,13 @@ class _EditPriceDialogState extends State<EditPriceDialog> {
                   ),
                   const Spacer(),
                   TextButton(
-                    child: Text("Storno".tr()),
+                    child: Text(CommonStrings.storno),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _submit,
-                    child: Text("OK".tr()),
+                    child: Text(CommonStrings.ok),
                   ),
                 ],
               ),

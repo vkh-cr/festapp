@@ -19,6 +19,8 @@ class EmailTemplatesStrings {
   static String get subFullOrder => 'EmailTemplates.subs.fullOrder'.tr();
   static String get subChangeOverview => 'EmailTemplates.subs.changeOverview'.tr();
   static String get subBalanceReasoning => 'EmailTemplates.subs.balanceReasoning'.tr();
+  static String get subPaymentDetails => 'EmailTemplates.subs.paymentDetails'.tr();
+  static String get subRemainingTime => 'EmailTemplates.subs.remainingTime'.tr();
 
   // --- Template Usage Details ---
 
@@ -49,4 +51,22 @@ class EmailTemplatesStrings {
   // TICKET_ORDER_STORNO
   static String get usageTicketOrderStornoTitle => 'EmailTemplates.usage.ticketOrderStorno_title'.tr();
   static String get usageTicketOrderStornoDescription => 'EmailTemplates.usage.ticketOrderStorno_description'.tr();
+
+  // Settings
+  static String get title => 'EmailTemplates.title'.tr();
+  static String get settingsTitle => 'EmailTemplates.settings.title'.tr();
+  static String get settingsBanner => 'EmailTemplates.settings.banner'.tr();
+  static String get settingsBannerDescriptionOccasion => 'EmailTemplates.settings.bannerDescriptionOccasion'.tr();
+  static String get settingsBannerDescriptionOrganization => 'EmailTemplates.settings.bannerDescriptionOrganization'.tr();
+  static String get settingsBannerHint => 'EmailTemplates.settings.bannerHint'.tr();
+  static String get settingsImageUploaded => 'EmailTemplates.settings.imageUploaded'.tr();
+  static String get settingsUploadFailed => 'EmailTemplates.settings.uploadFailed'.tr();
+  static String get resetToDefault => 'EmailTemplates.settings.resetToDefault'.tr();
+  static String get resetConfirmTitle => 'EmailTemplates.settings.resetConfirmTitle'.tr();
+  static String get resetConfirmContent => 'EmailTemplates.settings.resetConfirmContent'.tr();
+  static String get statusLabel => 'EmailTemplates.settings.statusLabel'.tr();
+  static String get statusOccasionOverride => 'EmailTemplates.settings.statusOccasionOverride'.tr();
+  static String get statusUnit => 'EmailTemplates.settings.statusUnit'.tr();
+  static String get statusUnitInherited => 'EmailTemplates.settings.statusUnitInherited'.tr();
+  static String get statusNoBanner => 'EmailTemplates.settings.statusNoBanner'.tr();
 }

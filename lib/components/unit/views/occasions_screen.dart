@@ -5,6 +5,8 @@ import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/widgets/header/user_header_widget.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/components/occasion/occasion_creation_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -14,7 +16,8 @@ import 'package:fstapp/components/unit/views/occasion_edit_card.dart';
 
 class OccasionsScreen extends StatefulWidget {
   final UnitModel unit;
-  const OccasionsScreen({super.key, required this.unit});
+  final List<OccasionModel>? initialOccasions;
+  const OccasionsScreen({super.key, required this.unit, this.initialOccasions});
 
   @override
   _OccasionsScreenState createState() => _OccasionsScreenState();
@@ -32,7 +35,13 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadOccasions();
+    if (widget.initialOccasions != null) {
+      _allOccasions = widget.initialOccasions!;
+      _filteredOccasions = widget.initialOccasions!;
+      _isLoading = false;
+    } else {
+      _loadOccasions();
+    }
     _searchController.addListener(_filterOccasions);
     _searchFocusNode.addListener(_onSearchFocusChange);
   }
@@ -171,7 +180,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Events".tr(),
+            CommonStrings.events,
             style: Theme.of(context)
                 .textTheme
                 .headlineMedium

@@ -12,6 +12,7 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/html/html_editor_widget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 @RoutePage()
 class NewsFormPage extends StatefulWidget {
@@ -138,7 +139,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
                 children: [
                   ButtonsHelper.bottomBarButton(
                     onPressed: _stornoPressed,
-                    text: "Storno".tr(),
+                    text: CommonStrings.storno,
                   ),
                   ButtonsHelper.bottomBarButton(
                     onPressed: _processAndSendTest,

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/components/occasion_services/service_item_model.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class ServiceDialog extends StatefulWidget {
   final String type;
@@ -96,13 +97,13 @@ class _ServiceDialogState extends State<ServiceDialog> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Edit".tr()),
+          title: Text(CommonStrings.edit),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: titleController,
-                decoration: InputDecoration(labelText: "Title".tr()),
+                decoration: InputDecoration(labelText: CommonStrings.title),
               ),
               const SizedBox(height: 10),
               TextField(
@@ -119,7 +120,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text("Storno".tr()),
+              child: Text(CommonStrings.storno),
             ),
             TextButton(
               onPressed: () async {
@@ -128,7 +129,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
                 await _updateService(item);
                 Navigator.of(context).pop();
               },
-              child: Text("Save".tr()),
+              child: Text(CommonStrings.save),
             ),
           ],
         );
@@ -150,7 +151,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
               const SizedBox(height: 20),
               TextField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: "Title".tr()),
+                decoration: InputDecoration(labelText: CommonStrings.title),
               ),
               const SizedBox(height: 10),
               Row(
@@ -227,7 +228,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text("Ok").tr(),
+          child: Text(CommonStrings.ok),
         ),
       ],
     );

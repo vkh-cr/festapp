@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/map/icon_model.dart';
@@ -16,6 +15,7 @@ import 'package:fstapp/components/html/html_view.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import '../map/place_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class DataGridHelper
 {
@@ -36,7 +36,7 @@ class DataGridHelper
         const Icon(Icons.edit),
         Padding(
           padding: const EdgeInsets.all(6),
-          child: Text("Edit".tr()),
+          child: Text(CommonStrings.edit),
         ),
       ],
     );

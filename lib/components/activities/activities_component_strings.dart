@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class ActivitiesComponentStrings {
   // General
@@ -47,7 +48,7 @@ class ActivitiesComponentStrings {
   // Activity Options
   static String get menuRename => 'ActivitiesComponentStrings.menuRename'.tr();
   static String get menuDelete => 'ActivitiesComponentStrings.menuDelete'.tr();
-  static String get menuDetails => 'Description'.tr();
+  static String get menuDetails => CommonStrings.description;
   static String get dialogRenameActivity => 'ActivitiesComponentStrings.dialogRenameActivity'.tr();
   static String get tooltipActivityOptions => 'ActivitiesComponentStrings.tooltipActivityOptions'.tr();
   static String get tooltipMarkVisible => 'ActivitiesComponentStrings.tooltipMarkVisible'.tr();
