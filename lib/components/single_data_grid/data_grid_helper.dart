@@ -1,20 +1,21 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/data_models/icon_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
+import 'package:fstapp/components/map/icon_model.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
-import 'package:fstapp/data_services/db_occasions.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/custom_three_state_checkbox.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 import 'package:trina_grid/trina_grid.dart';
+
+import '../map/place_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class DataGridHelper
 {
@@ -35,7 +36,7 @@ class DataGridHelper
         const Icon(Icons.edit),
         Padding(
           padding: const EdgeInsets.all(6),
-          child: Text("Edit".tr()),
+          child: Text(CommonStrings.edit),
         ),
       ],
     );
@@ -350,7 +351,7 @@ class DataGridHelper
       );
     }
 
-    return const Text(PlaceModel.WithouValue);
+    return const Text(PlaceModel.WithoutValue);
   }
 
   static Widget idRenderer(rendererContext) {

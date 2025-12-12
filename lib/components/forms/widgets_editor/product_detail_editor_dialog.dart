@@ -3,9 +3,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/dialogs/standard_dialog.dart';
-import 'package:fstapp/widgets/html_view.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/widgets/standard_dialog.dart';
+import 'package:fstapp/components/html/html_view.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
 
 class ProductDetailEditorDialog extends StatefulWidget {
   final ProductModel product;

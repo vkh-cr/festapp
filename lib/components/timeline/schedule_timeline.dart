@@ -2,11 +2,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
-import 'package:fstapp/dialogs/detail_dialog.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/widgets/detail_dialog.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
 class ScheduleTimeline extends StatefulWidget {

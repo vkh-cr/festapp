@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/features_strings.dart';
-import 'package:fstapp/data_services/db_users.dart';
+import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -12,6 +12,7 @@ import 'package:fstapp/components/features/import_feature.dart';
 
 import 'csv_import_helper.dart';
 import 'import_dialog_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class TicketsImportHelper {
 
@@ -95,7 +96,7 @@ class TicketsImportHelper {
         context,
         FeaturesStrings.importResultsTitle,
         message,
-        confirmButtonMessage: "Ok".tr(),
+        confirmButtonMessage: CommonStrings.ok,
       );
     } catch (e) {
       // Show an error toast if any part of the process fails.

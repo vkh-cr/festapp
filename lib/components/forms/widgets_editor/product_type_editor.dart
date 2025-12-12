@@ -1,11 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/components/forms/models/form_field_model.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 
@@ -13,6 +13,7 @@ import 'description_with_edit.dart';
 import 'form_fields_generator.dart';
 import 'ticket_editor_widgets.dart';
 import 'ticket_product_editor_row.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class ProductTypeEditorWidgets {
   /// Builds the read-only view for a product type group.
@@ -81,11 +82,11 @@ class ProductTypeEditorWidgets {
                       const SizedBox(width: 48), // Space for selection control
                       Expanded(
                         flex: 8,
-                        child: Text("Title".tr(), style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                        child: Text(CommonStrings.title, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       Expanded(
                         flex: 3,
-                        child: Text("Price".tr(), style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                        child: Text(CommonStrings.price, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       if (showCapacityColumn)
                         Expanded(
@@ -245,7 +246,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
     final group = ptField.productType!;
     group.products ??= [];
 
-    final defaultDescription = "Description".tr();
+    final defaultDescription = CommonStrings.description;
     final groupIsRequired = ptField.isRequired ?? false;
     final groupIsHidden = ptField.isHidden ?? false;
     final canSelectMany = ptField.data?[FormHelper.metaSelectionType] == FormHelper.metaSelectionTypeMany;

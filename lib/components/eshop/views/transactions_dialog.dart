@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/models/payment_info_model.dart';
 import 'package:fstapp/components/eshop/models/transaction_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
+import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/search_transactions_screen.dart';
+import 'package:fstapp/components/eshop/views/search_transactions_screen.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class TransactionsDialog extends StatefulWidget {
   final int orderId;
@@ -126,7 +127,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            tooltip: "Close".tr(),
+            tooltip: CommonStrings.close,
           ),
         ],
       ),

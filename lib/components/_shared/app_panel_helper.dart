@@ -7,14 +7,14 @@ import 'package:fstapp/components/_shared/project_picker_widget.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
-import 'package:fstapp/data_models/occasion_link_model.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
-import 'package:fstapp/data_models/unit_model.dart';
+import 'package:fstapp/components/occasion/occasion_link_model.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
+import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/forms/views/reservation_page.dart';
-import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
+import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/services/occasion_creation_helper.dart';
+import 'package:fstapp/components/occasion/occasion_creation_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/header/user_header_widget.dart';
 import 'package:fstapp/widgets/logo_widget.dart';
@@ -778,6 +778,9 @@ class AppPanelHelper {
                                 .findOccasionHint,
                             createNewText: AdministrationStrings
                                 .newOccasionButton,
+                            happeningNowText: "Happening Now".tr(),
+                            upcomingText: "Upcoming Events".tr(),
+                            pastText: "Past Events".tr(),
                           ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

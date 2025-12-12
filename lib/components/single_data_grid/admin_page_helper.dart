@@ -9,19 +9,21 @@ import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/blueprint/views/blueprint_editor_tab.dart';
 import 'package:fstapp/components/email_templates/views/email_templates_tab.dart';
+import 'package:fstapp/components/email_templates/email_templates_strings.dart';
 import 'package:fstapp/components/forms/views/forms_tab.dart';
-import 'package:fstapp/components/eshop/orders_tab.dart';
-import 'package:fstapp/components/eshop/report_tab.dart';
+import 'package:fstapp/components/eshop/views/orders_tab.dart';
+import 'package:fstapp/components/eshop/views/report_tab.dart';
 import 'package:fstapp/components/eshop/tickets_tab.dart';
 import 'package:fstapp/components/groups/game_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/information_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/places_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/schedule_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/service_tab.dart';
+import 'package:fstapp/components/information/information_tab.dart';
+import 'package:fstapp/components/map/places_tab.dart';
+import 'package:fstapp/components/schedule/schedule_tab.dart';
+import 'package:fstapp/components/occasion_services/service_tab.dart';
 import 'package:fstapp/components/groups/user_groups_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/users_tab.dart';
+import 'package:fstapp/components/users/views/users_tab.dart';
 
-import '../eshop/products_tab.dart';
+import '../eshop/views/products_tab.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class AdminTabDefinition {
   final String label;
@@ -52,7 +54,7 @@ class AdminTabDefinition {
   static const String orders = "Orders";
   static const String products = "Products";
   static const String report = "Report";
-  static const String emailTemplates = "Email Templates";
+  static String get emailTemplates => EmailTemplatesStrings.title;
   static const String settings = "Settings";
   static const String volunteers = "volunteers";
 
@@ -89,7 +91,7 @@ class AdminTabDefinition {
         icon: Icons.view_timeline,
         widget: ActivitiesContent(occasionId: RightsService.currentOccasionId()!)),
     users: AdminTabDefinition(
-        label: "Users".tr(),
+        label: CommonStrings.users,
         icon: Icons.people,
         widget: UsersTab()),
     game: AdminTabDefinition(
@@ -119,12 +121,12 @@ class AdminTabDefinition {
         icon: Icons.stacked_bar_chart,
         widget: ReportTab()),
     emailTemplates: AdminTabDefinition(
-        label: "Email Templates".tr(),
+        label: EmailTemplatesStrings.title,
         icon: Icons.email,
         widget: EmailTemplatesTab()),
     settings: AdminTabDefinition(
         isEnabled: RightsService.isUnitEditor(),
-        label: "Settings".tr(),
+        label: CommonStrings.settings,
         icon: Icons.settings,
         widget: OccasionSettingsTab()),
   };

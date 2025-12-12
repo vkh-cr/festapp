@@ -1,15 +1,15 @@
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/data_models/occasion_link_model.dart';
+import 'package:fstapp/components/occasion/occasion_link_model.dart';
 import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/data_services/db_events.dart';
-import 'package:fstapp/data_services/db_information.dart';
-import 'package:fstapp/data_services/db_inventory_pools.dart';
-import 'package:fstapp/data_services/db_news.dart';
-import 'package:fstapp/data_services/db_places.dart';
+import 'package:fstapp/components/schedule/db_events.dart';
+import 'package:fstapp/components/information/db_information.dart';
+import 'package:fstapp/components/inventory/db_inventory_pools.dart';
+import 'package:fstapp/components/news/db_news.dart';
+import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/services/link_model.dart';
+import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/services/platform_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -18,7 +18,7 @@ class SynchroService {
   static OccasionSettingsModel? globalSettingsModel = OccasionSettingsModel.defaultSettings;
 
   static Future<void> refreshOfflineData() async {
-    if(AuthService.isLoggedIn()) {
+    if(AuthService.isLoggedIn() && RightsService.currentOccasionId() != null) {
       var userInfo = await AuthService.getFullUserInfo();
       await OfflineDataService.saveUserInfo(userInfo);
       var bundle = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, true);

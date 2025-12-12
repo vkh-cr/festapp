@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/components/forms/models/field_holder.dart';
-import 'package:fstapp/components/forms/models/form_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/field_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/form_holder.dart';
 import 'package:fstapp/components/forms/widgets_view/form_field_builders.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 
 import '../form_strings.dart';

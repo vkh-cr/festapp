@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
+import '../models/form_field_model.dart';
 import '../widgets_view/form_helper.dart';
 import 'birth_date_editor.dart';
 import 'description_with_edit.dart';
@@ -196,7 +197,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
   Widget _buildFieldItemSelected(
       FormFieldModel field, List<FormFieldModel> displayList, int index) {
     final isTicket = field.type == FormHelper.fieldTypeTicket;
-    final String defaultDescription = "Description".tr();
+    final String defaultDescription = CommonStrings.description;
     final form = widget.bundle.form;
 
     return Column(

@@ -9,6 +9,7 @@ import 'package:fstapp/theme_config.dart';
 import '../form_strings.dart';
 
 import 'package:fstapp/components/forms/views/form_design_content.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class FormTab extends StatefulWidget {
   final String formLink;
@@ -52,7 +53,7 @@ class _FormTabState extends State<FormTab> with SingleTickerProviderStateMixin {
             isScrollable: true,
             tabs: [
               DataGridHelper.buildTab(context, Icons.data_object, FormStrings.tabForm),
-              DataGridHelper.buildTab(context, Icons.settings, "Settings".tr()),
+              DataGridHelper.buildTab(context, Icons.settings, CommonStrings.settings),
               DataGridHelper.buildTab(context, Icons.palette, "Design".tr()),
               DataGridHelper.buildTab(context, Icons.list, FormStrings.tabResponses),
             ],
