@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
-import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
-import 'package:fstapp/components/forms/models/id_document_field_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/id_document_field_holder.dart';
 import 'package:fstapp/components/forms/public_order_strings.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/theme_config.dart';
@@ -14,11 +14,11 @@ import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/services.dart';
 
+import '../models/holder_models/form_ticket_model.dart';
+import '../models/holder_models/ticket_holder.dart';
 import 'birth_year_field_builder.dart';
-import '../models/field_holder.dart';
-import '../models/form_holder.dart';
-import '../models/form_ticket_model.dart';
-import '../models/ticket_holder.dart';
+import '../models/holder_models/field_holder.dart';
+import '../models/holder_models/form_holder.dart';
 
 import 'id_document_field_builder.dart';
 import 'text_field_builder.dart';

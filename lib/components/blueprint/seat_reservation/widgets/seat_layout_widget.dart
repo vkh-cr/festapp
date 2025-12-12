@@ -158,7 +158,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                       left: seatModel.colI * seatModel.seatSize.toDouble(),
                       top: seatModel.rowI * seatModel.seatSize.toDouble(),
                       child: seatModel.objectModel == null
-                          ? GestureDetector(
+                          ? _TouchTapListener(
                         onTap: () {
                           if (widget.onSeatTap != null) {
                             widget.onSeatTap!(seatModel);
@@ -179,14 +179,17 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                             widget.controller.setTooltipSeat(null);
                           }
                         },
-                        child: Listener(
-                          onPointerUp: (event) {
-                            if (event.kind == PointerDeviceKind.mouse) return;
+                        child: _TouchTapListener(
+                          onTap: () {
                             if (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false) {
                               if (seatModel.isHighlightedForTooltip) {
                                 widget.controller.setTooltipSeat(null);
                               } else {
                                 widget.controller.setTooltipSeat(seatModel);
+                              }
+                            } else {
+                              if (widget.onSeatTap != null) {
+                                widget.onSeatTap!(seatModel);
                               }
                             }
                           },
@@ -197,22 +200,13 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                                 : null,
                             content:
                             "${seatModel.objectModel?.blueprintTooltip(context)}",
-                            child: GestureDetector(
-                              onTap: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
-                                  ? null
-                                  : () {
-                                if (widget.onSeatTap != null) {
-                                  widget.onSeatTap!(seatModel);
-                                }
-                              },
-                              child: SeatWidgetHelper.buildSeat(
-                                context: context,
-                                state: seatModel.seatState,
-                                isHighlightedForSwap: seatModel.isHighlightedForSwap,
-                                isHighlightedForGroup: seatModel.isHighlightedForGroup,
-                                isHighlightedForTooltip: seatModel.isHighlightedForTooltip,
-                                size: seatModel.seatSize.toDouble(),
-                              ),
+                            child: SeatWidgetHelper.buildSeat(
+                              context: context,
+                              state: seatModel.seatState,
+                              isHighlightedForSwap: seatModel.isHighlightedForSwap,
+                              isHighlightedForGroup: seatModel.isHighlightedForGroup,
+                              isHighlightedForTooltip: seatModel.isHighlightedForTooltip,
+                              size: seatModel.seatSize.toDouble(),
                             ),
                           ),
                         ),
@@ -226,6 +220,45 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
         ),
       ),
       ),
+    );
+  }
+}
+
+class _TouchTapListener extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _TouchTapListener({
+    required this.child,
+    required this.onTap,
+  });
+
+  @override
+  State<_TouchTapListener> createState() => _TouchTapListenerState();
+}
+
+class _TouchTapListenerState extends State<_TouchTapListener> {
+  Offset? _startPos;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: (event) {
+        _startPos = event.position;
+      },
+      onPointerUp: (event) {
+        if (_startPos != null) {
+          final distance = (event.position - _startPos!).distance;
+          if (distance < 20.0) {
+            widget.onTap();
+          }
+        }
+        _startPos = null;
+      },
+      onPointerCancel: (event) {
+        _startPos = null;
+      },
+      child: widget.child,
     );
   }
 }
