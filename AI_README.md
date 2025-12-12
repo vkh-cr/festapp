@@ -12,6 +12,20 @@ Festapp is a customized event management application built with:
 - **Database Logic**: Heavy usage of SQL functions defined in
   `scripts/functions`.
 
+## Data Hierarchy (Mental Model)
+
+Understanding this hierarchy is crucial for navigating the codebase:
+
+1. **Organization**: Domain Level (e.g. `vstupenky.online`). Distinct from
+   specific non-profits or units.
+
+2. **Unit**: The **Real-world Organization** (e.g. "Youth Group"). Named "Unit"
+   because "Organization" was reserved for the domain level.
+3. **Occasion**: A specific event instance (e.g., "Summer Camp 2024").
+   - Occasions belong to Units.
+
+- Features (Map, Schedule) are configured per Occasion.
+
 ## Directory Structure
 
 ### `/lib` (Flutter App)
@@ -76,6 +90,39 @@ Supabase configuration and TypeScript Edge Functions.
 - `RightsService` is the central singleton for checking what the user can do.
 - It determines the "Current Occasion" or "Current Unit".
 
+## Feature Documentation (See Local READMEs)
+
+For detailed instructions on specific features, refer to their local
+documentation:
+
+- **[Blueprint](lib/components/blueprint/README.md)**: Visual seat reservation &
+  editor.
+- **[Forms](lib/components/forms/README.md)**: Dynamic form engine.
+- **[Eshop](lib/components/eshop/README.md)**: Orders, payments, and "Split
+  Brain" SQL logic.
+- **[Inventory](lib/components/inventory/README.md)**: Capacity pools and
+  contexts.
+- **[Users](lib/components/users/README.md)**: Multi-tenancy and User/Occasion
+  linking.
+- **[Activities](lib/components/activities/README.md)**: **Volunteer
+  Management**. Staff tasks, shifts, and assignments (NOT the public program).
+- **[Occasion](lib/components/occasion/README.md)**: Core Event definition,
+  duplication, and settings.
+- **[Schedule](lib/components/schedule/README.md)**: **Public Program**. Events,
+  workshops, sign-ups, and offline sync.
+- **[Groups](lib/components/groups/README.md)**: User grouping and specialized
+  Game Team logic.
+- **[Features](lib/components/features/README.md)**: Configuration
+  system/Feature flags (configured per Occasion).
+- **[Information](lib/components/information/README.md)**: CMS pages, Game
+  logic, and Songbook (lyrics/chords).
+- **[Map](lib/components/map/README.md)**: Dual-mode rendering (Online/Offline
+  MBTiles) and Path Groups.
+- **[News](lib/components/news/README.md)**: Announcements and Notification
+  integration.
+- **[Email Templates](lib/components/email_templates/README.md)**: Template
+  management and Edge Function delivery.
+
 ### 4. Supabase Interactions
 
 - **Data Fetching**: Often done via `Supabase.instance.client` in
@@ -84,7 +131,28 @@ Supabase configuration and TypeScript Edge Functions.
   raw CRUD from the client, especially for critical flows like Order Creation.
   Look in `scripts/functions` for the implementation of these RPCs.
 
-## Important Notes for AI
+### 5. Error Handling (`ExceptionHandler`)
+
+- **Pattern**: Use `ExceptionHandler.guard()` instead of `try-catch` blocks in
+  UI code.
+- **Behavior**: Automatically catches errors, parses Supabase/Postgrest
+  exceptions, and shows a user-friendly Dialog or Toast.
+
+### 6. Email Infrastructure
+
+- **Service**: We use **MailerSend**.
+- **Logic**: `MailerSendHelper` prepares variables (including Czechoslovak name
+  declension for salutations) and triggers the send.
+
+## Context
+
+**Context**: This document is a technical companion to the main
+**[README.md](README.md)**. While the main README covers features and setup,
+this file explains the _internal architecture_ for developers and AI assistants.
+
+---
+
+## Critical Implementation Details
 
 - **Database Changes**: If you change logical flows (like ordering or
   permissions), check if a SQL function in `scripts/` needs updating.

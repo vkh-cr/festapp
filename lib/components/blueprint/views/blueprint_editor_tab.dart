@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
@@ -55,12 +57,16 @@ class _BlueprintTabState extends State<BlueprintTab> {
   bool _canScrollLeft = false;
   bool _canScrollRight = true;
 
+  Timer? _arrowFadeTimer;
+  bool _arrowsVisible = true;
+
   @override
   void initState() {
     super.initState();
     _seatLayoutController = SeatLayoutController();
     _mobileHorizontalController = ScrollController();
     _mobileHorizontalController.addListener(_updateScrollArrows);
+    _resetArrowFadeTimer();
   }
 
   @override
@@ -77,6 +83,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   void dispose() {
     _seatLayoutController.dispose();
     _mobileHorizontalController.dispose();
+    _arrowFadeTimer?.cancel();
     super.dispose();
   }
 
@@ -127,6 +134,23 @@ class _BlueprintTabState extends State<BlueprintTab> {
         _canScrollRight = canScrollRight;
       });
     }
+    _resetArrowFadeTimer();
+  }
+
+  void _resetArrowFadeTimer() {
+    _arrowFadeTimer?.cancel();
+    if (!_arrowsVisible) {
+      setState(() {
+        _arrowsVisible = true;
+      });
+    }
+    _arrowFadeTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _arrowsVisible = false;
+        });
+      }
+    });
   }
 
   Widget _buildMobileLayout(double screenWidth) {
@@ -173,81 +197,89 @@ class _BlueprintTabState extends State<BlueprintTab> {
         if (_canScrollLeft)
           Align(
             alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+            child: AnimatedOpacity(
+              opacity: _arrowsVisible ? 1.0 : 0.3,
+              duration: const Duration(milliseconds: 300),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () {
-                      final target = (_mobileHorizontalController.offset - 250.0).clamp(0.0, _mobileHorizontalController.position.maxScrollExtent);
-                      _mobileHorizontalController.animateTo(
-                        target,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
-                      );
-                    },
-                    child: const Center(
-                      child: Icon(Icons.chevron_left, size: 24, color: Colors.white),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () {
+                          final target = (_mobileHorizontalController.offset - 250.0).clamp(0.0, _mobileHorizontalController.position.maxScrollExtent);
+                          _mobileHorizontalController.animateTo(
+                            target,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        },
+                        child: const Center(
+                          child: Icon(Icons.chevron_left, size: 24, color: Colors.white),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
         if (_canScrollRight)
           Align(
             alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+            child: AnimatedOpacity(
+              opacity: _arrowsVisible ? 1.0 : 0.3,
+              duration: const Duration(milliseconds: 300),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () {
-                      final target = (_mobileHorizontalController.offset + 250.0).clamp(0.0, _mobileHorizontalController.position.maxScrollExtent);
-                      _mobileHorizontalController.animateTo(
-                        target,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
-                      );
-                    },
-                    child: const Center(
-                      child: Icon(Icons.chevron_right, size: 24, color: Colors.white),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () {
+                          final target = (_mobileHorizontalController.offset + 250.0).clamp(0.0, _mobileHorizontalController.position.maxScrollExtent);
+                          _mobileHorizontalController.animateTo(
+                            target,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        },
+                        child: const Center(
+                          child: Icon(Icons.chevron_right, size: 24, color: Colors.white),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
       ],
     );
   }

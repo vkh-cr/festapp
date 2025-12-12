@@ -14,7 +14,8 @@ import 'package:fstapp/components/unit/views/occasion_edit_card.dart';
 
 class OccasionsScreen extends StatefulWidget {
   final UnitModel unit;
-  const OccasionsScreen({super.key, required this.unit});
+  final List<OccasionModel>? initialOccasions;
+  const OccasionsScreen({super.key, required this.unit, this.initialOccasions});
 
   @override
   _OccasionsScreenState createState() => _OccasionsScreenState();
@@ -32,7 +33,13 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadOccasions();
+    if (widget.initialOccasions != null) {
+      _allOccasions = widget.initialOccasions!;
+      _filteredOccasions = widget.initialOccasions!;
+      _isLoading = false;
+    } else {
+      _loadOccasions();
+    }
     _searchController.addListener(_filterOccasions);
     _searchFocusNode.addListener(_onSearchFocusChange);
   }

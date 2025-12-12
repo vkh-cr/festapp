@@ -17,9 +17,16 @@ BEGIN
   v_org  := CASE WHEN p_data ? 'organization' THEN (p_data ->> 'organization')::bigint ELSE 1 END;
   v_code := p_data ->> 'code';
 
-  -- Check if the current user is allowed to edit this occasion.
-  IF (SELECT get_is_editor_on_occasion(v_occ)) <> TRUE AND (SELECT get_is_editor_order_on_occasion(v_occ)) <> TRUE THEN
-     RAISE EXCEPTION 'User is not editor view.';
+  -- Permission Checks
+  IF v_occ IS NOT NULL THEN
+     IF (SELECT public.get_is_editor_on_occasion(v_occ)) IS NOT TRUE 
+        AND (SELECT public.get_is_editor_order_on_occasion(v_occ)) IS NOT TRUE THEN
+        RAISE EXCEPTION 'Permission denied: User is not an editor of this occasion.';
+     END IF;
+  ELSIF v_unit IS NOT NULL THEN
+     IF (SELECT public.get_is_editor_on_unit(v_unit)) IS NOT TRUE THEN
+        RAISE EXCEPTION 'Permission denied: User is not an editor of this unit.';
+     END IF;
   END IF;
 
   -- Try to find an existing email template matching the given context and code.
