@@ -2,12 +2,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:collection/collection.dart';
+import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/services/responsive_service.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fstapp/data_models/path_group_model.dart';
-import 'package:fstapp/data_models/icon_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
+import 'package:fstapp/components/map/path_group_model.dart';
+import 'package:fstapp/components/map/icon_model.dart';
 
 class MapPageHelper {
   static double _toRadians(double deg) => deg * (pi / 180.0);

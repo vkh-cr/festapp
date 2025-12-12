@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/forms/form_strings.dart';
 

@@ -13,46 +13,60 @@ import 'package:auto_route/auto_route.dart' as _i35;
 import 'package:collection/collection.dart' as _i37;
 import 'package:flutter/foundation.dart' as _i38;
 import 'package:flutter/material.dart' as _i36;
+import 'package:fstapp/components/app_management/install_page.dart'
+    deferred as _i11;
+import 'package:fstapp/components/app_management/instance_install_page.dart'
+    deferred as _i12;
+import 'package:fstapp/components/app_management/settings_page.dart'
+    deferred as _i27;
 import 'package:fstapp/components/forms/views/form_page.dart' deferred as _i6;
 import 'package:fstapp/components/forms/views/forms_tab.dart' deferred as _i7;
 import 'package:fstapp/components/forms/views/reservation_page.dart'
     deferred as _i21;
+import 'package:fstapp/components/html/html_editor_page.dart' deferred as _i9;
+import 'package:fstapp/components/information/game/game_page.dart'
+    deferred as _i8;
+import 'package:fstapp/components/information/info_page.dart' deferred as _i10;
+import 'package:fstapp/components/information/song/song_page.dart'
+    deferred as _i29;
 import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart'
     deferred as _i13;
-import 'package:fstapp/data_models/place_model.dart' as _i39;
-import 'package:fstapp/pages/occasion/check_page.dart' deferred as _i2;
-import 'package:fstapp/pages/occasion/event_edit_page.dart' deferred as _i3;
-import 'package:fstapp/pages/occasion/event_page.dart' deferred as _i4;
-import 'package:fstapp/pages/occasion/game_page.dart' deferred as _i8;
-import 'package:fstapp/pages/occasion/info_page.dart' deferred as _i10;
-import 'package:fstapp/pages/occasion/map_page.dart' deferred as _i15;
-import 'package:fstapp/pages/occasion/my_schedule_page.dart' deferred as _i16;
-import 'package:fstapp/pages/occasion/news_form_page.dart' deferred as _i17;
-import 'package:fstapp/pages/occasion/news_page.dart' deferred as _i18;
-import 'package:fstapp/pages/occasion/occasion_home_page.dart' deferred as _i19;
-import 'package:fstapp/pages/occasion/scan_page.dart' deferred as _i23;
-import 'package:fstapp/pages/occasion/schedule_basic_page.dart'
+import 'package:fstapp/components/inventory/views/user_stay_page.dart'
+    deferred as _i34;
+import 'package:fstapp/components/map/map_page.dart' deferred as _i15;
+import 'package:fstapp/components/map/place_model.dart' as _i39;
+import 'package:fstapp/components/news/news_form_page.dart' deferred as _i17;
+import 'package:fstapp/components/news/news_page.dart' deferred as _i18;
+import 'package:fstapp/components/occasion/admin_page.dart' deferred as _i1;
+import 'package:fstapp/components/occasion/occasion_home_page.dart'
+    deferred as _i19;
+import 'package:fstapp/components/scan/check_page.dart' deferred as _i2;
+import 'package:fstapp/components/scan/scan_page.dart' deferred as _i23;
+import 'package:fstapp/components/schedule/event_edit_page.dart'
+    deferred as _i3;
+import 'package:fstapp/components/schedule/event_page.dart' deferred as _i4;
+import 'package:fstapp/components/schedule/my_schedule_page.dart'
+    deferred as _i16;
+import 'package:fstapp/components/schedule/schedule_basic_page.dart'
     deferred as _i24;
-import 'package:fstapp/pages/occasion/schedule_navigation_screen.dart'
+import 'package:fstapp/components/schedule/schedule_navigation_screen.dart'
     deferred as _i25;
-import 'package:fstapp/pages/occasion/schedule_page.dart' deferred as _i26;
-import 'package:fstapp/pages/occasion/settings_page.dart' deferred as _i27;
-import 'package:fstapp/pages/occasion/song_page.dart' deferred as _i29;
-import 'package:fstapp/pages/occasion/timetable_page.dart' deferred as _i30;
-import 'package:fstapp/pages/occasion/user_page.dart' deferred as _i33;
-import 'package:fstapp/pages/occasion/user_stay_page.dart' deferred as _i34;
-import 'package:fstapp/pages/occasionAdmin/admin_page.dart' deferred as _i1;
-import 'package:fstapp/pages/unit/organization_page.dart' deferred as _i20;
-import 'package:fstapp/pages/unit/unit_admin_page.dart' deferred as _i31;
-import 'package:fstapp/pages/unit/unit_page.dart' deferred as _i32;
-import 'package:fstapp/pages/user/forgot_password_page.dart' deferred as _i5;
-import 'package:fstapp/pages/user/login_page.dart' deferred as _i14;
-import 'package:fstapp/pages/user/reset_password_page.dart' deferred as _i22;
-import 'package:fstapp/pages/user/signup_page.dart' deferred as _i28;
-import 'package:fstapp/pages/utility/html_editor_page.dart' deferred as _i9;
-import 'package:fstapp/pages/utility/install_page.dart' deferred as _i11;
-import 'package:fstapp/pages/utility/instance_install_page.dart'
-    deferred as _i12;
+import 'package:fstapp/components/schedule/schedule_page.dart' deferred as _i26;
+import 'package:fstapp/components/schedule/timetable_page.dart'
+    deferred as _i30;
+import 'package:fstapp/components/unit/views/organization_page.dart'
+    deferred as _i20;
+import 'package:fstapp/components/unit/views/unit_admin_page.dart'
+    deferred as _i31;
+import 'package:fstapp/components/unit/views/unit_page.dart' deferred as _i32;
+import 'package:fstapp/components/users/views/forgot_password_page.dart'
+    deferred as _i5;
+import 'package:fstapp/components/users/views/login_page.dart' deferred as _i14;
+import 'package:fstapp/components/users/views/reset_password_page.dart'
+    deferred as _i22;
+import 'package:fstapp/components/users/views/signup_page.dart'
+    deferred as _i28;
+import 'package:fstapp/components/users/views/user_page.dart' deferred as _i33;
 
 /// generated route for
 /// [_i1.AdminPage]

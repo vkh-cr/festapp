@@ -1,11 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/components/forms/models/form_field_model.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 

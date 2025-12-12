@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 import '../form_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 

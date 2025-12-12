@@ -10,13 +10,13 @@ import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.da
 import 'package:fstapp/components/blueprint/seat_reservation/widgets/seat_reservation_widget.dart';
 import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/data_models/form_model.dart';
-import 'package:fstapp/data_models/form_option_model.dart';
-import 'package:fstapp/data_models/form_option_product_model.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
+import 'package:fstapp/components/forms/models/form_option_model.dart';
+import 'package:fstapp/components/forms/models/form_option_product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
-import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
+import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/components/forms/views/order_preview_screen.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import '../../features/feature_constants.dart';
@@ -26,10 +26,10 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:flutter/services.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 
-import '../models/form_holder.dart';
-import '../models/ticket_holder.dart';
+import '../models/holder_models/form_holder.dart';
+import '../models/holder_models/ticket_holder.dart';
 import '../form_strings.dart';
 import 'order_finish_screen.dart';
 

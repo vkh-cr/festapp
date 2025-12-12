@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/services/responsive_service.dart';
 import 'package:intl/intl.dart';

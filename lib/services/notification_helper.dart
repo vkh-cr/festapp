@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/pages/occasion/news_page.dart';
+import 'package:fstapp/components/news/news_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/platform_helper.dart';
