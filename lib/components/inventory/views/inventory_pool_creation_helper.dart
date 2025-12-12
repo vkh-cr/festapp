@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/inventory_pool_bundle.dart';
-import 'package:fstapp/data_services/db_inventory_pools.dart';
+import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
 

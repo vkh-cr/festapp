@@ -5,17 +5,17 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
-import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_models/user_group_info_model.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
-import 'package:fstapp/data_services/db_groups.dart';
-import 'package:fstapp/data_services/db_users.dart';
+import 'package:fstapp/database_tables/tb.dart';
+import 'package:fstapp/components/groups/user_group_info_model.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
+import 'package:fstapp/components/groups/db_groups.dart';
+import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:trina_grid/trina_grid.dart';
 
+import '../map/place_model.dart';
 import 'group_strings.dart';
 import 'participants_management_dialog.dart';
 
