@@ -12,10 +12,10 @@ class DbImages {
     await _supabase.storage.from(_bucketName).uploadBinary(path, imageData);
     if (uploadResponse.isEmpty) throw Exception('Upload failed');
     final publicUrl = _supabase.storage.from(_bucketName).getPublicUrl(path);
-    await _supabase.from(Tb.images.table).insert({
-      Tb.images.link: publicUrl,
-      Tb.images.occasion: occasion,
-      Tb.images.unit: unit,
+    await _supabase.rpc('add_image_record', params: {
+      "p_link": publicUrl,
+      "p_occasion_id": occasion,
+      "p_unit_id": unit,
     });
 
     return publicUrl;
