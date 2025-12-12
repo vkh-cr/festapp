@@ -1,6 +1,7 @@
 import 'package:fstapp/components/timeline/schedule_helper.dart';
-import 'package:fstapp/data_models/place_model.dart';
 import 'package:latlong2/latlong.dart';
+
+import 'place_model.dart';
 
 class MapPlaceModel {
   final int? id;

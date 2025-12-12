@@ -2,10 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/components/forms/models/id_document_field_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/id_document_field_holder.dart';
 import 'form_field_builders.dart';
 import 'form_helper.dart';
-import '../models/form_holder.dart';
+import '../models/holder_models/form_holder.dart';
 
 class IdDocumentFieldBuilder extends StatefulWidget {
   final IdDocumentFieldHolder fieldHolder;
@@ -74,6 +74,8 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
           context,
           focusNode: _idNumberFocusNode,
         ),
+        filled: true,
+        fillColor: Colors.transparent,
       ),
       validator: FormBuilderValidators.compose([
         if (widget.fieldHolder.isRequired) FormBuilderValidators.required(),
@@ -96,6 +98,8 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
             context,
           ),
           suffixIcon: const Icon(Icons.calendar_today),
+          filled: true,
+          fillColor: Colors.transparent,
         ),
         firstDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
         validator: (value) {

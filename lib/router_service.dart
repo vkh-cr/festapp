@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_router.gr.dart';
-import 'package:fstapp/data_models/unit_model.dart';
+import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/forms/views/reservation_page.dart';
-import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
+import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/services/js/js_interop.dart'; // Import JSInterop
 import 'dart:async';
 

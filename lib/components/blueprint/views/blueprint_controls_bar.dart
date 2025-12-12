@@ -3,9 +3,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
-import 'package:fstapp/data_services/db_images.dart';
+import 'package:fstapp/components/images/db_images.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/services/image_compression_helper.dart';
+import 'package:fstapp/components/images/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 
 import '../../_shared/common_strings.dart';

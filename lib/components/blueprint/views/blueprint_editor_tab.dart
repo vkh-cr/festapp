@@ -6,8 +6,7 @@ import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
-import 'package:fstapp/data_services_eshop/db_spots.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -15,6 +14,7 @@ import 'package:fstapp/theme_config.dart';
 import 'package:collection/collection.dart';
 
 import '../../_shared/common_strings.dart';
+import '../../eshop/db_tickets.dart';
 import '../seat_reservation/model/seat_model.dart';
 import '../seat_reservation/utils/seat_state.dart';
 import '../seat_reservation/widgets/seat_layout_controller.dart';
@@ -50,10 +50,17 @@ class _BlueprintTabState extends State<BlueprintTab> {
   // State for Create New Order feature
   final Set<SeatModel> _selectedSeatsForOrder = {};
 
+  bool _hasCenteredMobileView = false;
+  late final ScrollController _mobileHorizontalController;
+  bool _canScrollLeft = false;
+  bool _canScrollRight = true;
+
   @override
   void initState() {
     super.initState();
     _seatLayoutController = SeatLayoutController();
+    _mobileHorizontalController = ScrollController();
+    _mobileHorizontalController.addListener(_updateScrollArrows);
   }
 
   @override
@@ -69,6 +76,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   @override
   void dispose() {
     _seatLayoutController.dispose();
+    _mobileHorizontalController.dispose();
     super.dispose();
   }
 
@@ -104,28 +112,143 @@ class _BlueprintTabState extends State<BlueprintTab> {
     );
   }
 
-  Widget _buildMobileLayout() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 250,
-            padding: const EdgeInsets.all(16.0),
-            child: _buildLeftPanel(),
+  void _updateScrollArrows() {
+    if (!_mobileHorizontalController.hasClients) return;
+    final offset = _mobileHorizontalController.offset;
+    final maxScroll = _mobileHorizontalController.position.maxScrollExtent;
+
+    // Use a small threshold to avoid flickering at exact bounds
+    final canScrollLeft = offset > 10;
+    final canScrollRight = offset < maxScroll - 10;
+
+    if (canScrollLeft != _canScrollLeft || canScrollRight != _canScrollRight) {
+      setState(() {
+        _canScrollLeft = canScrollLeft;
+        _canScrollRight = canScrollRight;
+      });
+    }
+  }
+
+  Widget _buildMobileLayout(double screenWidth) {
+    if (!_hasCenteredMobileView) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (_mobileHorizontalController.hasClients) {
+          // Left panel is 250. We want to start showing from the main content.
+          // Scrolling to 250 will hide the left panel and start with the main layout.
+          _mobileHorizontalController.jumpTo(250.0);
+          // Manually trigger update after jump
+          _updateScrollArrows();
+        }
+      });
+      _hasCenteredMobileView = true;
+    }
+
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          controller: _mobileHorizontalController,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 250,
+                padding: const EdgeInsets.all(16.0),
+                child: _buildLeftPanel(),
+              ),
+              Container(
+                width: screenWidth,
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: _buildMainContent(),
+              ),
+              Container(
+                width: 250,
+                padding: const EdgeInsets.all(16.0),
+                child: _buildRightPanel(),
+              ),
+            ],
           ),
-          SizedBox(
-            width: 400,
-            child: _buildMainContent(),
+        ),
+        if (_canScrollLeft)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () {
+                      final target = (_mobileHorizontalController.offset - 250.0).clamp(0.0, _mobileHorizontalController.position.maxScrollExtent);
+                      _mobileHorizontalController.animateTo(
+                        target,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    },
+                    child: const Center(
+                      child: Icon(Icons.chevron_left, size: 24, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-          Container(
-            width: 250,
-            padding: const EdgeInsets.all(16.0),
-            child: _buildRightPanel(),
+        if (_canScrollRight)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () {
+                      final target = (_mobileHorizontalController.offset + 250.0).clamp(0.0, _mobileHorizontalController.position.maxScrollExtent);
+                      _mobileHorizontalController.animateTo(
+                        target,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    },
+                    child: const Center(
+                      child: Icon(Icons.chevron_right, size: 24, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -198,7 +321,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
               if (constraints.maxWidth > 800) {
                 return _buildDesktopLayout();
               } else {
-                return _buildMobileLayout();
+                return _buildMobileLayout(constraints.maxWidth);
               }
             },
           ),
@@ -212,12 +335,12 @@ class _BlueprintTabState extends State<BlueprintTab> {
           children: [
             TextButton(
               onPressed: RightsService.canEditOccasion()
-                  ? () => Navigator.pop(context)
+                  ? loadData
                   : null,
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
               ),
-              child: Text(CommonStrings.storno),
+              child: Text(CommonStrings.reset),
             ),
             const SizedBox(width: 16),
             ElevatedButton(
@@ -645,7 +768,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
     obj2.orderProductTicket = tempOrderProductTicket;
     obj2.setSeatState(tempStateEnum);
 
-    await DbSpots.swapSpotTickets(obj1.id!, obj2.id!);
+    await DbTickets.swapSpotTickets(obj1.id!, obj2.id!);
     ToastHelper.Show(context, BlueprintStrings.swapSuccess,
         severity: ToastSeverity.Ok);
 

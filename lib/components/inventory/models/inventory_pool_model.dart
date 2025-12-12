@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
-import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/database_tables/tb.dart';
+
+import '../../map/place_model.dart';
 
 enum InventoryPoolType {
   accommodation,
