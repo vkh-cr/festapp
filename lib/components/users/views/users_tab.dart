@@ -13,6 +13,8 @@ import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_columns.dart';
+import 'package:fstapp/components/users/views/user_page.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/users/views/users_tab_helper.dart';
 
 class UsersTab extends StatefulWidget {
@@ -102,7 +104,7 @@ class _UsersTabState extends State<UsersTab> {
         ),
         if (FeatureService.isFeatureEnabled(FeatureConstants.import))
           DataGridAction(
-            name: "Import".tr(),
+            name: CommonStrings.import,
             action: (SingleDataGridController p0, [_]) async {
               await ImportDialogHelper.import(context);
               await refreshData();

@@ -31,4 +31,18 @@ class CommonStrings {
   // --- Forms & Validation ---
   static String get fieldCannotBeEmpty => 'Common.fieldCannotBeEmpty'.tr(); // "Field cannot be empty"
   static String get invalidFormat => 'Common.invalidFormat'.tr(); // "Invalid format"
+  static String get name => 'Name'.tr(); // "Name"
+  static String get description => 'Description'.tr(); // "Description"
+  static String get content => 'Content'.tr(); // "Content"
+  static String get add => 'Add'.tr(); // "Add"
+  static String get type => 'Type'.tr(); // "Type"
+  static String get hide => 'Hide'.tr(); // "Hide"
+  static String get place => 'Place'.tr(); // "Place"
+  static String get users => 'Users'.tr(); // "Users"
+  static String get events => 'Events'.tr(); // "Events"
+  static String get start => 'Start'.tr(); // "Start"
+  static String get end => 'End'.tr(); // "End"
+  static String get cancelled => 'Cancelled'.tr(); // "Cancelled"
+  static String get import => 'Import'.tr(); // "Import"
+  static String get proceed => 'Proceed'.tr(); // "Proceed"
 }

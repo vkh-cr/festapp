@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'inventory_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class QuickSearchDialog<T> extends StatefulWidget {
   final String title;
@@ -119,7 +120,7 @@ class _QuickSearchDialogState<T> extends State<QuickSearchDialog<T>> {
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Storno'.tr()),
+          child: Text(CommonStrings.storno),
         ),
       ],
     );

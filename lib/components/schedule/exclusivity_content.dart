@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
-import 'package:fstapp/components/schedule/exclusive_group_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:trina_grid/trina_grid.dart';
+
+import 'exclusive_group_model.dart';
 
 class ExclusivityContent extends StatefulWidget {
   const ExclusivityContent({super.key});
@@ -45,13 +47,13 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
                 DataGridHelper.idRenderer(rendererContext),
           ),
           TrinaColumn(
-            title: "Name".tr(),
+            title: CommonStrings.name,
             field: Tb.exclusive_groups.title,
             type: TrinaColumnType.text(),
             width: 300,
           ),
           TrinaColumn(
-            title: "Events".tr(),
+            title: CommonStrings.events,
             field: Tb.events.table,
             type: TrinaColumnType.text(),
             width: 500,

@@ -11,6 +11,7 @@ import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class OccasionDetailDialog extends StatelessWidget {
   final OccasionModel occasion;
@@ -145,7 +146,7 @@ class OccasionDetailDialog extends StatelessWidget {
                   ),
                   splashRadius: 20,
                   onPressed: () => Navigator.of(context).pop(),
-                  tooltip: 'Close'.tr(),
+                  tooltip: CommonStrings.close,
                 ),
               ),
             ],

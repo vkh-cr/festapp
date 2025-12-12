@@ -5,6 +5,8 @@ import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/widgets/header/user_header_widget.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/components/occasion/occasion_creation_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -178,7 +180,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Events".tr(),
+            CommonStrings.events,
             style: Theme.of(context)
                 .textTheme
                 .headlineMedium
