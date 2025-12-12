@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/form_option_model.dart';
-import 'package:fstapp/data_models/form_option_product_model.dart';
+import 'package:fstapp/components/forms/models/form_option_model.dart';
+import 'package:fstapp/components/forms/models/form_option_product_model.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 
 /// A helper class to centralize all duplicated UI logic for building
 /// label styles, card layouts, etc. used by both Checkbox and Radio fields.

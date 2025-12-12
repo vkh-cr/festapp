@@ -10,9 +10,9 @@ import 'package:fstapp/components/single_data_grid/single_data_grid_controller.d
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_tickets.dart';
+import 'package:fstapp/components/eshop/db_tickets.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/services/ticket_code_helper.dart';
+import 'package:fstapp/components/eshop/ticket_code_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/platform_helper.dart'; // Import PlatformHelper
 

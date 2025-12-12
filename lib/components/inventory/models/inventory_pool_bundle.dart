@@ -1,8 +1,8 @@
 import 'package:fstapp/components/eshop/models/product_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/components/inventory/models/resource_model.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
 
+import '../../map/place_model.dart';
 import 'inventory_context_model.dart';
 import 'inventory_pool_model.dart';
 import 'product_inventory_context_model.dart';

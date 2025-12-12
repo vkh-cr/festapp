@@ -4,10 +4,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
-import 'package:fstapp/data_models/event_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/services/time_helper.dart';
+
+import '../map/place_model.dart';
 
 /// Determines available actions/state for an event.
 enum TimeBlockType {

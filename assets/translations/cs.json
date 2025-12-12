@@ -1221,7 +1221,8 @@
     "currentProductPrefix": "Aktuální: ",
     "mixedProducts": "Různé / Smíšené",
     "toastNoTemplateProduct": "Nelze vytvořit produkt: Musí existovat alespoň jeden produkt typu 'Místo', který poslouží jako šablona.",
-    "uniformViewHelp": "Všechna místa mají stejný produkt.\nZapněte přepínač pro úpravu konkrétních míst."
+    "uniformViewHelp": "Všechna místa mají stejný produkt.\nZapněte přepínač pro úpravu konkrétních míst.",
+    "warningNoCancellationEmail": "Poznámka: Uživatelé neobdrží e-mail o zrušení pro tyto změny."
   },
   "OccasionSettings": {
     "title": "Název",

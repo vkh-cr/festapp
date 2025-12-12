@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.gr.dart';
-import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/components/forms/views/form_page.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/components/html/html_view.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import '../widgets_editor/form_fields_generator.dart';
 import 'package:fstapp/components/forms/widgets_view/countdown_widget.dart';
 
@@ -86,7 +87,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     try {
       await DbForms.updateForm(form);
       if (!mounted) return;
-      ToastHelper.Show(context, "${"Saved".tr()}: ${form.link}", severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, "${CommonStrings.saved}: ${form.link}", severity: ToastSeverity.Ok);
       await loadData();
       widget.onDataUpdated?.call();
     } catch (e) {
@@ -150,7 +151,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                 ),
                 Switch(
                   value: form.isOpen ?? true,
-                  onChanged: RightsService.canEditOccasion()
+                  onChanged: RightsService.isOrderEditor()
                       ? (val) => setState(() {
                             form.isOpen = val;
                           })
@@ -159,7 +160,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
               ],
             ),
             const SizedBox(height: 16),
-            if (RightsService.canEditOccasion()) ...[
+            if (RightsService.canSeeReservations()) ...[
               ExpansionTile(
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: EdgeInsets.zero,
@@ -183,7 +184,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                               }
                             }
                           });
-                        }, isStart: true),
+                        }, isStart: true, enabled: RightsService.isOrderEditor()),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -195,7 +196,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                              return;
                           }
                           setState(() => form.endTime = date);
-                        }, isEnd: true, minDate: form.startTime),
+                        }, isEnd: true, minDate: form.startTime, enabled: RightsService.isOrderEditor()),
                       ),
                     ],
                   ),
@@ -211,7 +212,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                       style: TextStyle(color: form.startTime == null ? Colors.grey : null, fontSize: 12),
                     ),
                     value: form.enableCountdown,
-                    onChanged: form.startTime != null
+                    onChanged: form.startTime != null && RightsService.isOrderEditor()
                         ? (val) => setState(() => form.enableCountdown = val)
                         : null,
                   ),
@@ -233,6 +234,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                             showLabel: false,
                             minimal: true,
                             fontSize: 20,
+                            enabled: RightsService.isOrderEditor(),
                           ),
                           Transform.scale(
                             scale: 0.8,
@@ -264,6 +266,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                     helpText: FormStrings.helperClosedMessage,
                     defaultText: FormStrings.reservationUnavailableMessage,
                     showLabel: false,
+                    enabled: RightsService.isOrderEditor(),
                   ),
                 ],
               ),
@@ -274,7 +277,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     );
   }
 
-  Widget _buildDateTimeInput(String label, DateTime? value, Function(DateTime?) onChanged, {bool isStart = false, bool isEnd = false, DateTime? minDate}) {
+  Widget _buildDateTimeInput(String label, DateTime? value, Function(DateTime?) onChanged, {bool isStart = false, bool isEnd = false, DateTime? minDate, bool enabled = true}) {
     /*
     Color? statusColor;
     String statusText = "";
@@ -297,7 +300,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     */
 
     return InkWell(
-      onTap: () async {
+      onTap: !enabled ? null : () async {
         final initialDate = value ?? DateTime.now();
         final firstDate = minDate ?? DateTime(2000);
         
@@ -325,7 +328,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
           labelText: label,
           border: const OutlineInputBorder(),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          suffixIcon: value != null ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => onChanged(null)) : const Icon(Icons.calendar_today, size: 18),
+          suffixIcon: value != null && enabled ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => onChanged(null)) : const Icon(Icons.calendar_today, size: 18),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,7 +374,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
      );
   }
 
-  Widget _buildHtmlFieldPreview(String label, String? content, ValueChanged<String> onChanged, {String? defaultText, String? helpText, bool showLabel = true, bool minimal = false, double? fontSize}) {
+  Widget _buildHtmlFieldPreview(String label, String? content, ValueChanged<String> onChanged, {String? defaultText, String? helpText, bool showLabel = true, bool minimal = false, double? fontSize, bool enabled = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -424,12 +427,12 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                 right: 2,
                 child: TextButton.icon(
                   icon: const Icon(Icons.edit, size: 16),
-                  label: Text("Edit".tr()),
+                  label: Text(CommonStrings.edit),
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     foregroundColor: Theme.of(context).primaryColor,
                   ),
-                  onPressed: () async {
+                  onPressed: !enabled ? null : () async {
                     final result = await RouterService.navigatePageInfo(
                       context,
                       HtmlEditorRoute(
@@ -601,7 +604,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
             child: const Icon(Icons.developer_mode),
           ),
           const SizedBox.square(dimension: 12),
-          if (RightsService.canEditOccasion())
+          if (RightsService.isOrderEditor())
             FloatingActionButton(
               heroTag: "addFieldFab",
               onPressed: _addNewField,
@@ -636,8 +639,9 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                       if (_bundle!.form.header?.isNotEmpty ?? false)
                         HtmlView(html: _bundle!.form.header!, isSelectable: true),
                       const SizedBox(height: 16),
-                      Center(
-                        child: ElevatedButton.icon(
+                      if (RightsService.isOrderEditor())
+                        Center(
+                          child: ElevatedButton.icon(
                           icon: const Icon(Icons.edit),
                           label: Text(FormStrings.editContent),
                           onPressed: () async {
@@ -684,14 +688,14 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
             children: [
               TextButton(
                 onPressed:
-                RightsService.canEditOccasion() ? cancelEdit : null,
-                child: Text("Storno".tr()),
+                RightsService.isOrderEditor() ? cancelEdit : null,
+                child: Text(CommonStrings.storno),
               ),
               const SizedBox(width: 16),
               ElevatedButton(
                 onPressed:
-                RightsService.canEditOccasion() ? saveChanges : null,
-                child: Text("Save changes".tr()),
+                RightsService.isOrderEditor() ? saveChanges : null,
+                child: Text(CommonStrings.save),
               ),
             ],
           ),

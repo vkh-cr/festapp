@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 
 class RedStripWidget extends StatelessWidget {
   /// The plain text or HTML content to display.

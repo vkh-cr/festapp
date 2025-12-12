@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/forms/views/form_design_settings.dart';
-import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class FormDesignContent extends StatefulWidget {
   final String? formLink;
@@ -61,7 +62,7 @@ class _FormDesignContentState extends State<FormDesignContent> {
     try {
       await DbForms.updateForm(_form!);
       if (!mounted) return;
-      ToastHelper.Show(context, "${"Saved".tr()}: ${_form?.title ?? ""}", severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, "${CommonStrings.saved}: ${_form?.title ?? ""}", severity: ToastSeverity.Ok);
       widget.onDataUpdated?.call();
       setState(() => _hasChanges = false);
     } catch (e) {
@@ -104,7 +105,7 @@ class _FormDesignContentState extends State<FormDesignContent> {
             children: [
               TextButton(
                 onPressed: _cancelEdit,
-                child: Text("Storno".tr()),
+                child: Text(CommonStrings.storno),
               ),
               const SizedBox(width: 16),
               ElevatedButton(
