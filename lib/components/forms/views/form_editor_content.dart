@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/components/forms/views/form_page.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/components/html/html_view.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import '../widgets_editor/form_fields_generator.dart';
+import 'package:fstapp/components/forms/widgets_view/countdown_widget.dart';
 
 const double kHiddenOpacity = 0.5;
 
@@ -28,7 +30,7 @@ class FormEditorContent extends StatefulWidget {
   _FormEditorContentState createState() => _FormEditorContentState();
 }
 
-class _FormEditorContentState extends State<FormEditorContent> {
+class _FormEditorContentState extends State<FormEditorContent> with TickerProviderStateMixin {
   FormEditBundle? _bundle;
   String? _formLink;
   final ScrollController _scrollController = ScrollController();
@@ -55,15 +57,22 @@ class _FormEditorContentState extends State<FormEditorContent> {
 
   Future<void> saveChanges() async {
     // UPDATED: Check for bundle and use bundle.form
-    if (_bundle == null || _bundle!.form.relatedFields == null) return;
+    if (_bundle == null) return;
     final form = _bundle!.form;
 
-    form.relatedFields!.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
-    for (int i = 0; i < form.relatedFields!.length; i++) {
-      form.relatedFields![i].order = i;
+    if (form.startTime != null && form.endTime != null) {
+      if (form.endTime!.isBefore(form.startTime!)) {
+        ToastHelper.Show(context, "End time must be after start time.".tr(), severity: ToastSeverity.NotOk);
+        return;
+      }
     }
 
-    for (final field in form.relatedFields!) {
+    form.relatedFields.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+    for (int i = 0; i < form.relatedFields.length; i++) {
+      form.relatedFields[i].order = i;
+    }
+
+    for (final field in form.relatedFields) {
       if (field.isTicketField == true &&
           field.type == FormHelper.fieldTypeProductType &&
           field.productType != null &&
@@ -78,7 +87,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
     try {
       await DbForms.updateForm(form);
       if (!mounted) return;
-      ToastHelper.Show(context, "${"Saved".tr()}: ${form.link}", severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, "${CommonStrings.saved}: ${form.link}", severity: ToastSeverity.Ok);
       await loadData();
       widget.onDataUpdated?.call();
     } catch (e) {
@@ -92,7 +101,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   List<String> get _availableFieldTypes {
-    final existingTypes = _bundle?.form.relatedFields?.map((f) => f.type).toList() ?? [];
+    final existingTypes = _bundle?.form.relatedFields.map((f) => f.type).toList() ?? [];
     return FormHelper.fieldTypeIcons.keys.where((type) {
       if ([
         FormHelper.fieldTypeText,
@@ -108,72 +117,338 @@ class _FormEditorContentState extends State<FormEditorContent> {
   Widget _buildFormOpenToggleAndOffTextEditor() {
     if (_bundle == null) return const SizedBox.shrink();
     final form = _bundle!.form;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(FormStrings.availability, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        _buildAvailabilityStatusBanner(form),
+                        /*
+                        (form.isOpen ?? true) ? "Form is OPEN & accepting responses.".tr() : "Form is CLOSED.".tr(),
+                        style: TextStyle(
+                            color: (form.isOpen ?? true) 
+                                ? Theme.of(context).primaryColor 
+                                : ThemeConfig.redColor(context),
+                            fontWeight: FontWeight.bold
+                        ),
+                        */
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: form.isOpen ?? true,
+                  onChanged: RightsService.isOrderEditor()
+                      ? (val) => setState(() {
+                            form.isOpen = val;
+                          })
+                      : null,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (RightsService.canSeeReservations()) ...[
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: EdgeInsets.zero,
+                title: Text(FormStrings.scheduleAndLimits, style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(FormStrings.autoOpenHelp, style: Theme.of(context).textTheme.bodySmall),
+                initiallyExpanded: false,
+                shape: const Border(), // Remove default borders
+                children: [
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildDateTimeInput(FormStrings.labelStartTime, form.startTime, (date) {
+                          setState(() {
+                            form.startTime = date;
+                            if (date == null) {
+                              form.enableCountdown = false;
+                            } else {
+                              if (form.endTime == null || form.endTime!.isBefore(date)) {
+                                 form.endTime = date.add(const Duration(hours: 1));
+                              }
+                            }
+                          });
+                        }, isStart: true, enabled: RightsService.isOrderEditor()),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildDateTimeInput(FormStrings.labelEndTime, form.endTime, (date) {
+                          // Validation Logic: Prevent setting end time before start time
+                          // Note: UI picker is now also restricted, but this double check is safe.
+                          if (date != null && form.startTime != null && date.isBefore(form.startTime!)) {
+                             ToastHelper.Show(context, FormStrings.errorEndTimeBeforeStartTime, severity: ToastSeverity.NotOk);
+                             return;
+                          }
+                          setState(() => form.endTime = date);
+                        }, isEnd: true, minDate: form.startTime, enabled: RightsService.isOrderEditor()),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    secondary: const Icon(Icons.timer_outlined),
+                    title: Text(FormStrings.labelCountdownTimer, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text(
+                      form.startTime == null 
+                          ? FormStrings.requiresStartTime 
+                          : FormStrings.countdownDescription,
+                      style: TextStyle(color: form.startTime == null ? Colors.grey : null, fontSize: 12),
+                    ),
+                    value: form.enableCountdown,
+                    onChanged: form.startTime != null && RightsService.isOrderEditor()
+                        ? (val) => setState(() => form.enableCountdown = val)
+                        : null,
+                  ),
+                  if (form.enableCountdown && form.startTime != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Column(
+                        children: [
+                          _buildHtmlFieldPreview(
+                            FormStrings.labelCountdownMessage, 
+                            form.countdownTitle, 
+                            (val) => setState(() => form.countdownTitle = val),
+                            defaultText: FormStrings.registrationStart,
+                            showLabel: false,
+                            minimal: true,
+                            fontSize: 20,
+                            enabled: RightsService.isOrderEditor(),
+                          ),
+                          Transform.scale(
+                            scale: 0.8,
+                            child: CountdownWidget(
+                              targetTime: form.startTime!,
+                              onFinished: () {},
+                              title: null, 
+                              compact: true,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const Divider(height: 24),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: EdgeInsets.zero,
+                title: Text(FormStrings.labelClosedMessage, style: const TextStyle(fontWeight: FontWeight.w600)),
+                initiallyExpanded: false,
+                shape: const Border(),
+                children: [
+                  _buildHtmlFieldPreview(
+                    FormStrings.labelMessageContent,
+                    form.headerOff,
+                    (val) => setState(() => form.headerOff = val),
+                    helpText: FormStrings.helperClosedMessage,
+                    defaultText: FormStrings.reservationUnavailableMessage,
+                    showLabel: false,
+                    enabled: RightsService.isOrderEditor(),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateTimeInput(String label, DateTime? value, Function(DateTime?) onChanged, {bool isStart = false, bool isEnd = false, DateTime? minDate, bool enabled = true}) {
+    /*
+    Color? statusColor;
+    String statusText = "";
+    if (value != null) {
+      final now = DateTime.now();
+      if (isStart) {
+        if (value.isAfter(now)) {
+           statusColor = Colors.grey; statusText = "Pending";
+        } else {
+           statusColor = Theme.of(context).primaryColor; statusText = "Active";
+        }
+      } else if (isEnd) {
+         if (value.isBefore(now)) {
+            statusColor = Colors.grey; statusText = "Ended";
+         } else {
+            statusColor = Theme.of(context).primaryColor; statusText = "Active";
+         }
+      }
+    }
+    */
+
+    return InkWell(
+      onTap: !enabled ? null : () async {
+        final initialDate = value ?? DateTime.now();
+        final firstDate = minDate ?? DateTime(2000);
+        
+        // Ensure initialDate is valid (must be >= firstDate)
+        final effectiveInitialDate = initialDate.isBefore(firstDate) ? firstDate : initialDate;
+
+        final date = await showDatePicker(
+          context: context,
+          initialDate: effectiveInitialDate,
+          firstDate: firstDate,
+          lastDate: DateTime(2100),
+        );
+        if (date != null) {
+          final time = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.fromDateTime(value ?? DateTime.now()),
+          );
+          if (time != null) {
+            onChanged(DateTime( date.year, date.month, date.day, time.hour, time.minute));
+          }
+        }
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          suffixIcon: value != null && enabled ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => onChanged(null)) : const Icon(Icons.calendar_today, size: 18),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(value != null ? DateFormat('dd.MM.yyyy HH:mm').format(value) : FormStrings.notSet, style: const TextStyle(fontSize: 14)),
+            /*
+            if (statusText.isNotEmpty)
+               Padding(
+                 padding: const EdgeInsets.only(top: 2.0),
+                 child: Text(statusText, style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
+               )
+            */
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildAvailabilityStatusBanner(FormModel form) {
+     String text;
+     Color color;
+     final now = DateTime.now();
+
+     if (!(form.isOpen ?? true)) {
+       text = FormStrings.formClosedMessage;
+       color = ThemeConfig.redColor(context);
+     } else if (form.startTime != null && now.isBefore(form.startTime!)) {
+       text = FormStrings.scheduledWithTime(DateFormat('dd.MM HH:mm').format(form.startTime!));
+       color = ThemeConfig.redColor(context);
+     } else if (form.endTime != null && now.isAfter(form.endTime!)) {
+       text = FormStrings.endedWithTime(DateFormat('dd.MM HH:mm').format(form.endTime!));
+       color = ThemeConfig.redColor(context);
+     } else {
+       text = FormStrings.formOpenMessage;
+       color = Theme.of(context).primaryColor;
+     }
+
+     return Text(
+       text,
+       style: TextStyle(color: color, fontWeight: FontWeight.bold),
+     );
+  }
+
+  Widget _buildHtmlFieldPreview(String label, String? content, ValueChanged<String> onChanged, {String? defaultText, String? helpText, bool showLabel = true, bool minimal = false, double? fontSize, bool enabled = true}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (showLabel || helpText != null)
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(FormStrings.statusOpen),
-              Switch(
-                value: form.isOpen ?? true,
-                onChanged: RightsService.canEditOccasion()
-                    ? (value) {
-                  if (mounted) {
-                    setState(() {
-                      form.isOpen = value;
-                    });
-                  }
-                }
-                    : null,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (showLabel)
+                      Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    if (helpText != null)
+                      Text(helpText, style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
               ),
             ],
           ),
-          if (!(form.isOpen ?? true)) ...[
-            const SizedBox(height: 12),
-            Text(
-              FormStrings.formTurnedOff,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: ThemeConfig.redColor(context),
-                fontWeight: FontWeight.bold,
-              ),
+        if (showLabel || helpText != null) const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          decoration: minimal ? null : BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.grey.withOpacity(0.2) 
+                : Colors.grey.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white24 
+                  : Colors.grey.withOpacity(0.3)
             ),
-            const SizedBox(height: 16),
-            const Divider(
-              thickness: 1,
-              color: Colors.grey,
-            ),
-            if (form.headerOff?.isNotEmpty ?? false)
-              IntrinsicWidth(
+          ),
+          child: Stack(
+            children: [
+              Padding(
+                padding: minimal ? const EdgeInsets.fromLTRB(4, 32, 4, 0) : const EdgeInsets.fromLTRB(12, 12, 80, 12),
                 child: HtmlView(
-                  html: form.headerOff!,
+                  html: minimal 
+                      ? "<div style='text-align: center;'>${(content?.isNotEmpty ?? false) ? content! : (defaultText ?? FormStrings.notSet)}</div>"
+                      : ((content?.isNotEmpty ?? false)
+                          ? content!
+                          : '<div style="opacity: 0.7;">${defaultText ?? FormStrings.notSet}</div>'),
                   isSelectable: true,
+                  fontSize: fontSize ?? 13,
                 ),
               ),
-            const SizedBox(height: 16),
-            Center(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.edit),
-                label: Text(FormStrings.editOffText),
-                onPressed: () async {
-                  final result = await RouterService.navigatePageInfo(
-                    context,
-                    HtmlEditorRoute(
-                        content: {HtmlEditorPage.parContent: form.headerOff ?? ''},
-                        occasionId: form.occasionId),
-                  );
-                  if (result != null && mounted) {
-                    setState(() => form.headerOff = result as String);
-                  }
-                },
+              Positioned(
+                top: 2,
+                right: 2,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.edit, size: 16),
+                  label: Text(CommonStrings.edit),
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    foregroundColor: Theme.of(context).primaryColor,
+                  ),
+                  onPressed: !enabled ? null : () async {
+                    final result = await RouterService.navigatePageInfo(
+                      context,
+                      HtmlEditorRoute(
+                          content: {HtmlEditorPage.parContent: content ?? ''},
+                          occasionId: _bundle!.form.occasionId),
+                    );
+                    if (result != null && mounted) {
+                      onChanged(result as String);
+                    }
+                  },
+                ),
               ),
-            ),
-          ],
-        ],
-      ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -272,18 +547,18 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   void _addFieldOfType(String type) {
-    if (!mounted || _bundle == null || _bundle!.form.relatedFields == null) return;
+    if (!mounted || _bundle == null) return;
     final form = _bundle!.form;
     final newField = FormFieldModel(
       type: type,
-      order: form.relatedFields!.length,
+      order: form.relatedFields.length,
       isRequired: FormHelper.isAlwaysRequired(type),
       isHidden: false,
       isTicketField: false,
     );
 
     setState(() {
-      form.relatedFields = List.from(form.relatedFields!)..add(newField);
+      form.relatedFields = List.from(form.relatedFields)..add(newField);
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -299,7 +574,10 @@ class _FormEditorContentState extends State<FormEditorContent> {
 
   @override
   Widget build(BuildContext context) {
+    if (_bundle == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+
     return Scaffold(
+      floatingActionButtonAnimator: _NoScalingAnimation(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -311,10 +589,22 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 RouterService.navigate(context, "${FormPage.ROUTE}/$_formLink");
               }
             },
-            child: const Icon(Icons.remove_red_eye_rounded),
+            tooltip: FormStrings.publicView,
+            child: const Icon(Icons.remove_red_eye_outlined),
           ),
           const SizedBox.square(dimension: 12),
-          if (RightsService.canEditOccasion())
+          FloatingActionButton(
+            heroTag: "previewFormFab",
+            onPressed: () {
+              if(_formLink != null) {
+                RouterService.navigate(context, "${FormPage.ROUTE}/$_formLink?preview=true");
+              }
+            },
+            tooltip: FormStrings.editorPreview,
+            child: const Icon(Icons.developer_mode),
+          ),
+          const SizedBox.square(dimension: 12),
+          if (RightsService.isOrderEditor())
             FloatingActionButton(
               heroTag: "addFieldFab",
               onPressed: _addNewField,
@@ -349,8 +639,9 @@ class _FormEditorContentState extends State<FormEditorContent> {
                       if (_bundle!.form.header?.isNotEmpty ?? false)
                         HtmlView(html: _bundle!.form.header!, isSelectable: true),
                       const SizedBox(height: 16),
-                      Center(
-                        child: ElevatedButton.icon(
+                      if (RightsService.isOrderEditor())
+                        Center(
+                          child: ElevatedButton.icon(
                           icon: const Icon(Icons.edit),
                           label: Text(FormStrings.editContent),
                           onPressed: () async {
@@ -397,19 +688,36 @@ class _FormEditorContentState extends State<FormEditorContent> {
             children: [
               TextButton(
                 onPressed:
-                RightsService.canEditOccasion() ? cancelEdit : null,
-                child: Text("Storno".tr()),
+                RightsService.isOrderEditor() ? cancelEdit : null,
+                child: Text(CommonStrings.storno),
               ),
               const SizedBox(width: 16),
               ElevatedButton(
                 onPressed:
-                RightsService.canEditOccasion() ? saveChanges : null,
-                child: Text("Save changes".tr()),
+                RightsService.isOrderEditor() ? saveChanges : null,
+                child: Text(CommonStrings.save),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+class _NoScalingAnimation extends FloatingActionButtonAnimator {
+  @override
+  Offset getOffset({required Offset begin, required Offset end, required double progress}) {
+    return end;
+  }
+
+  @override
+  Animation<double> getRotationAnimation({required Animation<double> parent}) {
+    return Tween<double>(begin: 1.0, end: 1.0).animate(parent);
+  }
+
+  @override
+  Animation<double> getScaleAnimation({required Animation<double> parent}) {
+    return Tween<double>(begin: 1.0, end: 1.0).animate(parent);
   }
 }

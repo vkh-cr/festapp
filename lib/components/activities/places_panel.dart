@@ -1,6 +1,6 @@
 // places_panel.dart
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/components/activities/activity_model.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'activities_component_strings.dart';
 import 'activity_timeline_controller.dart';

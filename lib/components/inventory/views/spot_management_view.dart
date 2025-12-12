@@ -8,7 +8,7 @@ import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/components/eshop/models/spot_model.dart';
-import 'package:fstapp/data_services_eshop/db_spots.dart';
+import 'package:fstapp/components/inventory/db_spots.dart';
 import 'package:fstapp/components/inventory/views/spot_management_columns.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -125,7 +125,7 @@ class SpotManagementViewState extends State<SpotManagementView> {
             headerChildren: [
               DataGridAction(
                 name: _clearAllTitle,
-                action: (controller, [_]) => _clearAllAssignments(controller!),
+                action: (controller, [_]) => _clearAllAssignments(controller),
                 isEnabled: () => true,
               ),
             ],

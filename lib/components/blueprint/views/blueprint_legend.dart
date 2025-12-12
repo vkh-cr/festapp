@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
-import 'package:fstapp/theme_config.dart';
 
 import '../seat_reservation/utils/seat_state.dart';
 import '../seat_reservation/widgets/seat_reservation_widget.dart';
@@ -8,8 +7,8 @@ import '../seat_reservation/widgets/seat_widget.dart';
 import 'blueprint_editor_tab.dart';
 
 class BlueprintLegend extends StatelessWidget {
-  final selectionMode currentSelectionMode;
-  final ValueChanged<selectionMode> onModeSelected;
+  final BlueprintSelectionMode currentSelectionMode;
+  final ValueChanged<BlueprintSelectionMode> onModeSelected;
 
   // New properties for the Confirm Button
   final int selectedCount;
@@ -42,9 +41,9 @@ class BlueprintLegend extends StatelessWidget {
   }
 
   String _getHelpText() {
-    if (currentSelectionMode == selectionMode.swapSeats) {
+    if (currentSelectionMode == BlueprintSelectionMode.swapSeats) {
       return BlueprintStrings.swapHelpIntro;
-    } else if (currentSelectionMode == selectionMode.createNewOrder) {
+    } else if (currentSelectionMode == BlueprintSelectionMode.createNewOrder) {
       return BlueprintStrings.createOrderHelp;
     }
     return BlueprintStrings.legendInstruction;
@@ -59,24 +58,24 @@ class BlueprintLegend extends StatelessWidget {
           context: context,
           label: BlueprintStrings.legendBlackArea,
           state: SeatState.black,
-          isActive: currentSelectionMode == selectionMode.addBlack,
-          onTap: () => onModeSelected(selectionMode.addBlack),
+          isActive: currentSelectionMode == BlueprintSelectionMode.addBlack,
+          onTap: () => onModeSelected(BlueprintSelectionMode.addBlack),
         ),
         const SizedBox(height: 8),
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendAvailable,
           state: SeatState.available,
-          isActive: currentSelectionMode == selectionMode.addAvailable,
-          onTap: () => onModeSelected(selectionMode.addAvailable),
+          isActive: currentSelectionMode == BlueprintSelectionMode.addAvailable,
+          onTap: () => onModeSelected(BlueprintSelectionMode.addAvailable),
         ),
         const SizedBox(height: 8),
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendEmpty,
           state: SeatState.empty,
-          isActive: currentSelectionMode == selectionMode.emptyArea,
-          onTap: () => onModeSelected(selectionMode.emptyArea),
+          isActive: currentSelectionMode == BlueprintSelectionMode.emptyArea,
+          onTap: () => onModeSelected(BlueprintSelectionMode.emptyArea),
         ),
 
         const SizedBox(height: 16),
@@ -86,9 +85,9 @@ class BlueprintLegend extends StatelessWidget {
           context: context,
           label: BlueprintStrings.legendSwapSeats,
           state: SeatState.empty,
-          isActive: currentSelectionMode == selectionMode.swapSeats,
+          isActive: currentSelectionMode == BlueprintSelectionMode.swapSeats,
           forceHighlight: true, // Keeps orange border for Swap to indicate "special/warning"
-          onTap: () => onModeSelected(selectionMode.swapSeats),
+          onTap: () => onModeSelected(BlueprintSelectionMode.swapSeats),
         ),
         const SizedBox(height: 8),
 
@@ -100,15 +99,15 @@ class BlueprintLegend extends StatelessWidget {
               context: context,
               label: BlueprintStrings.legendCreateOrder,
               state: SeatState.selected_by_me,
-              isActive: currentSelectionMode == selectionMode.createNewOrder,
+              isActive: currentSelectionMode == BlueprintSelectionMode.createNewOrder,
               forceHighlight: false, // REMOVED orange border here
-              onTap: () => onModeSelected(selectionMode.createNewOrder),
+              onTap: () => onModeSelected(BlueprintSelectionMode.createNewOrder),
             ),
 
             // The Button appears here if mode is active
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
-              child: currentSelectionMode == selectionMode.createNewOrder
+              child: currentSelectionMode == BlueprintSelectionMode.createNewOrder
                   ? Padding(
                 padding: const EdgeInsets.only(top: 12.0),
                 child: SizedBox(

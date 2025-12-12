@@ -13,6 +13,7 @@ class OccasionSettingsStrings {
   ); // "Image with ratio {width} : {height}"
   static String get description => 'OccasionSettings.description'.tr(); // "Description"
   static String get editContent => 'OccasionSettings.editContent'.tr(); // "Edit content"
+  static String get defaultValue => 'default'.tr(); // "Default"
 
   // Toggles & Help
   static String get public => 'OccasionSettings.public'.tr(); // "Public"

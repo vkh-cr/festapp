@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/components/inventory/views/resource_editor_view.dart';
-import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:trina_grid/trina_grid.dart';
-import 'package:fstapp/data_services/db_inventory_pools.dart';
+import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 
 class ResourceModel implements ITrinaRowModel {
   @override

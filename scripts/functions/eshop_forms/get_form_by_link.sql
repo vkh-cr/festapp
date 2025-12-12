@@ -4,6 +4,8 @@ DECLARE
     allData JSON;
     generated_secret UUID := gen_random_uuid();
     form_exists BOOLEAN;
+    is_editor_view BOOLEAN := false;
+    occ_id BIGINT;
 BEGIN
     -- Check if the form exists
     SELECT EXISTS (
@@ -19,8 +21,12 @@ BEGIN
         );
     END IF;
 
-    -- Check if the form is open for submissions
-    IF NOT EXISTS (
+    -- Check if the form is open for submissions, or if the user is an editor
+    SELECT occasion INTO occ_id FROM public.forms WHERE link = form_link;
+    is_editor_view := public.get_is_editor_order_view_on_occasion(occ_id);
+
+
+    IF NOT is_editor_view AND NOT EXISTS (
         SELECT 1
         FROM public.forms
         WHERE link = form_link AND is_open = true
@@ -49,9 +55,13 @@ BEGIN
             'data', f.data,
             'type', f.type,
             'title', f.title,
+            'is_open', f.is_open,
             'header', f.header,
             'header_off', f.header_off,
-            'occasion', f.occasion,
+            'occasion', jsonb_build_object(
+                'id', o.id,
+                'features', o.features
+            ),
             'blueprint', f.blueprint,
             'deadline_duration_seconds', f.deadline_duration_seconds,
             'account_number', ba.account_number,
@@ -115,6 +125,7 @@ BEGIN
     INTO allData
     FROM public.forms f
     LEFT JOIN eshop.bank_accounts ba ON f.bank_account = ba.id
+    LEFT JOIN public.occasions o ON f.occasion = o.id
     WHERE f.link = form_link;
 
     RETURN allData;

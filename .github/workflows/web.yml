@@ -15,7 +15,7 @@ jobs:
       - name: Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
+          flutter-version: '3.38.4'
           channel: 'stable'
 
       # Build with base-href set to root (correct for custom domain)

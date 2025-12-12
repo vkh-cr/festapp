@@ -5,34 +5,34 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/forms/views/reservation_page.dart';
-import 'package:fstapp/pages/occasion/check_page.dart';
-import 'package:fstapp/pages/occasion/event_edit_page.dart';
-import 'package:fstapp/pages/occasion/event_page.dart';
-import 'package:fstapp/pages/occasion/user_stay_page.dart';
-import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
-import 'package:fstapp/pages/unit/organization_page.dart'; // Import new page
-import 'package:fstapp/pages/unit/unit_page.dart';
-import 'package:fstapp/pages/user/login_page.dart';
-import 'package:fstapp/pages/user/reset_password_page.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart';
-import 'package:fstapp/pages/occasion/info_page.dart';
-import 'package:fstapp/pages/utility/install_page.dart';
-import 'package:fstapp/pages/occasion/map_page.dart';
-import 'package:fstapp/pages/occasion/news_form_page.dart';
-import 'package:fstapp/pages/occasion/news_page.dart';
-import 'package:fstapp/pages/occasion/my_schedule_page.dart';
-import 'package:fstapp/pages/user/forgot_password_page.dart';
-import 'package:fstapp/pages/occasion/scan_page.dart';
-import 'package:fstapp/pages/occasion/settings_page.dart';
-import 'package:fstapp/pages/user/signup_page.dart';
-import 'package:fstapp/pages/occasion/song_page.dart';
-import 'package:fstapp/pages/occasion/timetable_page.dart';
-import 'package:fstapp/pages/occasion/user_page.dart';
+import 'package:fstapp/components/scan/check_page.dart';
+import 'package:fstapp/components/schedule/event_edit_page.dart';
+import 'package:fstapp/components/schedule/event_page.dart';
+import 'package:fstapp/components/inventory/views/user_stay_page.dart';
+import 'package:fstapp/components/occasion/admin_page.dart';
+// Import new page
+import 'package:fstapp/components/unit/views/unit_page.dart';
+import 'package:fstapp/components/users/views/login_page.dart';
+import 'package:fstapp/components/users/views/reset_password_page.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
+import 'package:fstapp/components/information/info_page.dart';
+import 'package:fstapp/components/app_management/install_page.dart';
+import 'package:fstapp/components/map/map_page.dart';
+import 'package:fstapp/components/news/news_form_page.dart';
+import 'package:fstapp/components/news/news_page.dart';
+import 'package:fstapp/components/schedule/my_schedule_page.dart';
+import 'package:fstapp/components/users/views/forgot_password_page.dart';
+import 'package:fstapp/components/scan/scan_page.dart';
+import 'package:fstapp/components/app_management/settings_page.dart';
+import 'package:fstapp/components/users/views/signup_page.dart';
+import 'package:fstapp/components/information/song/song_page.dart';
+import 'package:fstapp/components/schedule/timetable_page.dart';
+import 'package:fstapp/components/users/views/user_page.dart';
 import 'package:fstapp/components/forms/views/form_page.dart';
-import 'package:fstapp/pages/utility/instance_install_page.dart';
+import 'package:fstapp/components/app_management/instance_install_page.dart';
 
 import 'app_router.gr.dart';
-import 'pages/occasion/game_page.dart';
+import 'components/information/game/game_page.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
 class AppRouter extends RootStackRouter {
@@ -193,7 +193,7 @@ class AppRouter extends RootStackRouter {
       SignupPage.ROUTE,
       SettingsPage.ROUTE,
       InstallPage.ROUTE,
-      UnitPage.ROUTE, // This is still "unit"
+      UnitPage.ROUTE,
       FormPage.ROUTE,
       ScanPage.ROUTE,
     ];

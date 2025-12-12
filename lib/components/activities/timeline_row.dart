@@ -1,10 +1,9 @@
 // timeline_row.dart
-import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/components/activities/activity_model.dart';
 import 'constants.dart';
 
 

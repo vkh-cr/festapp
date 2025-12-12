@@ -3,13 +3,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
+import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/search_products_screen.dart';
+import 'package:fstapp/components/eshop/views/search_products_screen.dart';
 
 import '../orders_strings.dart';
 import 'edit_price_dialog.dart';
@@ -455,7 +455,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                         : isRemoved
                         ? "-${Utilities.formatPrice(context, p.price ?? 0, decimalDigits: 2)}"
                         : isPriceChanged
-                        ? "${Utilities.formatPrice(context, pCurrent!.price ?? 0, decimalDigits: 2)} (${Utilities.formatPrice(context, pOrig!.price ?? 0, decimalDigits: 2)})"
+                        ? "${Utilities.formatPrice(context, pCurrent.price ?? 0, decimalDigits: 2)} (${Utilities.formatPrice(context, pOrig.price ?? 0, decimalDigits: 2)})"
                         : Utilities.formatPrice(context, p.price ?? 0, decimalDigits: 2);
 
                     final priceColor = isAdded ? Colors.green : isRemoved ? Colors.red : isPriceChanged ? Colors.orange.shade700 : null;

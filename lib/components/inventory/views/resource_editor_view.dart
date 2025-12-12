@@ -3,7 +3,7 @@ import 'package:fstapp/components/inventory/models/resource_model.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
+import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import 'inventory_strings.dart';

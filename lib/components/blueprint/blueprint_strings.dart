@@ -85,4 +85,22 @@ class BlueprintStrings {
   static String get btnCreateOrder => 'FeatureBlueprint.btnCreateOrder'.tr(); // "Create Order"
   static String get confirmOrder => 'FeatureBlueprint.confirmOrder'.tr(); // "Confirm Order"
   static String get orderCreatedSuccess => 'FeatureBlueprint.orderCreatedSuccess'.tr(); // "Order created successfully."
+
+// --- Group/Product Manager Dialog ---
+  static String get manageGroupProducts => 'FeatureBlueprint.manageGroupProducts'.tr(); // "Manage Group Products"
+  static String get groupDefaultProduct => 'FeatureBlueprint.groupDefaultProduct'.tr(); // "Group Product"
+  static String get individualSeats => 'FeatureBlueprint.individualSeats'.tr(); // "Individual Seats"
+  static String get customizeIndividualSeats => 'FeatureBlueprint.customizeIndividualSeats'.tr(); // "Customize individual seats"
+  static String get occupiedWarningInline => 'FeatureBlueprint.occupiedWarningInline'.tr(); // "Note: Changing products here will NOT update prices for seats that are already ordered."
+  static String get customProductLabel => 'FeatureBlueprint.customProductLabel'.tr(); // "Custom"
+  static String get productAssignedToAll => 'FeatureBlueprint.productAssignedToAll'.tr(); // "Product assigned to all seats."
+
+  // Status descriptions
+  static String get statusUniform => 'FeatureBlueprint.statusUniform'.tr(); // "Applied to all seats"
+  static String get statusMixed => 'FeatureBlueprint.statusMixed'.tr(); // "Mixed products"
+  static String get currentProductPrefix => 'FeatureBlueprint.currentProductPrefix'.tr(); // "Current: "
+  static String get mixedProducts => 'FeatureBlueprint.mixedProducts'.tr(); // "Mixed / Various"
+  static String get toastNoTemplateProduct => 'FeatureBlueprint.toastNoTemplateProduct'.tr(); // "Cannot create product..."
+  static String get uniformViewHelp => 'FeatureBlueprint.uniformViewHelp'.tr(); // "All seats share the same product..."
+  static String get warningNoCancellationEmail => 'FeatureBlueprint.warningNoCancellationEmail'.tr(); // "Note: Users will NOT receive cancellation emails for these changes."
 }

@@ -48,6 +48,54 @@ class FormStrings {
   static String get labelCommunicationTone => 'FeatureFormSettings.labelCommunicationTone'.tr(); // "Tone"
   static String get toneFormal => 'FeatureFormSettings.toneFormal'.tr(); // "Formal"
   static String get toneInformal => 'FeatureFormSettings.toneInformal'.tr(); // "Informal "
+  static String get pickColor => 'FeatureFormSettings.pickColor'.tr(); // "Pick a color"
+  static String get buttonGotIt => 'FeatureFormSettings.buttonGotIt'.tr(); // "Got it"
+  static String get designPresets => 'FeatureFormSettings.designPresets'.tr(); // "Design Presets"
+  static String get more => 'FeatureFormSettings.more'.tr(); // "More"
+  static String get less => 'FeatureFormSettings.less'.tr(); // "Less"
+  static String get customColors => 'FeatureFormSettings.customColors'.tr(); // "Custom Colors"
+  static String get primaryColor => 'FeatureFormSettings.primaryColor'.tr(); // "Primary Color"
+  static String get typography => 'FeatureFormSettings.typography'.tr(); // "Typography"
+  static String get browseGoogleFonts => 'FeatureFormSettings.browseGoogleFonts'.tr(); // "Browse Google Fonts"
+  static String get currentFont => 'FeatureFormSettings.currentFont'.tr(); // "Current Font: "
+  static String get defaultFont => 'FeatureFormSettings.defaultFont'.tr(); // "Default"
+  static String get resetToDefault => 'FeatureFormSettings.resetToDefault'.tr(); // "Reset to Default"
+  static String get choosePopularFonts => 'FeatureFormSettings.choosePopularFonts'.tr(); // "Choose from Popular Fonts"
+  static String get selectFromList => 'FeatureFormSettings.selectFromList'.tr(); // "Select from list..."
+  static String get or => 'FeatureFormSettings.or'.tr(); // "OR"
+  static String get customFontNameLabel => 'FeatureFormSettings.customFontNameLabel'.tr(); // "Custom Google Font Name"
+  static String get customFontHelper => 'FeatureFormSettings.customFontHelper'.tr(); // "Paste the exact font title from Google Fonts (e.g. 'Roboto Condensed')."
+  static String get fontNotFound => 'FeatureFormSettings.fontNotFound'.tr(); // "Font not found. Please paste the exact name from fonts.google.com"
+  static String get hexCodeLabel => 'FeatureFormSettings.hexCodeLabel'.tr(); // "Hex Code"
+  static String get days => 'FeatureFormSettings.days'.tr(); // "Days"
+  static String get hours => 'FeatureFormSettings.hours'.tr(); // "Hours"
+  static String get minutes => 'FeatureFormSettings.minutes'.tr(); // "Minutes"
+  static String get seconds => 'FeatureFormSettings.seconds'.tr(); // "Seconds"
+  static String get previewMode => 'FeatureFormSettings.previewMode'.tr(); // "PREVIEW MODE"
+  static String get registrationStart => 'FeatureFormSettings.registrationStart'.tr(); // "Registration Start"
+  static String get reservationUnavailable => 'FeatureFormSettings.reservationUnavailable'.tr(); // "Reservation Unavailable"
+  static String get reservationUnavailableMessage => 'FeatureFormSettings.reservationUnavailableMessage'.tr(); // "Reservation for the selected event is currently unavailable."
+  static String get availability => 'FeatureFormSettings.availability'.tr(); // "Availability"
+  static String get formClosedMessage => 'FeatureFormSettings.formClosedMessage'.tr(); // "Form is CLOSED."
+  static String scheduledWithTime(String time) => 'FeatureFormSettings.scheduledWithTime'.tr(namedArgs: {'time': time}); // "Scheduled (Starts: {time})"
+  static String endedWithTime(String time) => 'FeatureFormSettings.endedWithTime'.tr(namedArgs: {'time': time}); // "Ended (Closed: {time})"
+  static String get formOpenMessage => 'FeatureFormSettings.formOpenMessage'.tr(); // "Form is OPEN & accepting responses."
+  static String get scheduleAndLimits => 'FeatureFormSettings.scheduleAndLimits'.tr(); // "Schedule & Limits"
+  static String get autoOpenHelp => 'FeatureFormSettings.autoOpenHelp'.tr(); // "Auto-open/close times."
+  static String get labelStartTime => 'FeatureFormSettings.labelStartTime'.tr(); // "Start Time"
+  static String get labelEndTime => 'FeatureFormSettings.labelEndTime'.tr(); // "End Time"
+  static String get errorEndTimeBeforeStartTime => 'FeatureFormSettings.errorEndTimeBeforeStartTime'.tr(); // "End time cannot be before start time."
+  static String get labelCountdownTimer => 'FeatureFormSettings.labelCountdownTimer'.tr(); // "Countdown Timer"
+  static String get requiresStartTime => 'FeatureFormSettings.requiresStartTime'.tr(); // "Requires Start Time."
+  static String get countdownDescription => 'FeatureFormSettings.countdownDescription'.tr(); // "Displayed before scheduled start time."
+  static String get labelCountdownMessage => 'FeatureFormSettings.labelCountdownMessage'.tr(); // "Countdown Message:"
+  static String get labelClosedMessage => 'FeatureFormSettings.labelClosedMessage'.tr(); // "Closed Message"
+  static String get labelMessageContent => 'FeatureFormSettings.labelMessageContent'.tr(); // "Message Content"
+  static String get helperClosedMessage => 'FeatureFormSettings.helperClosedMessage'.tr(); // "Shown when form is closed / inactive."
+  static String get notSet => 'FeatureFormSettings.notSet'.tr(); // "Not set"
+  static String get publicView => 'FeatureFormSettings.publicView'.tr(); // "Public View"
+  static String get editorPreview => 'FeatureFormSettings.editorPreview'.tr(); // "Editor Preview"
+  static String get buttonContinue => 'Continue'.tr(); // "Continue" (Global key)
 
   // --- Form Fields (General) ---
   static String get noOptionsForCurrency => 'FormsFeature.noOptionsForCurrency'.tr();
@@ -97,6 +145,8 @@ class FormStrings {
   static String get newProductTypeDefaultName => 'FormsFeature.newProductTypeDefaultName'.tr();
 
   static String get typeHere => 'FormsFeature.typeHere'.tr();
+  static String get phoneFormatHint => 'FormsFeature.phoneFormatHint'.tr();
+  static String get phoneFormatValidation => 'FormsFeature.phoneFormatValidation'.tr();
 
   // --- Strings from TicketEditorWidgets ---
   static String get noProductTypes => 'FormsFeature.noProductTypes'.tr(); // "No Product Types"
