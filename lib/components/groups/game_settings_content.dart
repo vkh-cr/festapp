@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/game_settings_model.dart';
-import 'package:fstapp/data_services/db_occasions.dart';
+import 'package:fstapp/components/information/game/game_settings_model.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 

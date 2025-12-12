@@ -7,15 +7,15 @@ import 'package:fstapp/components/features/feature_service.dart';
 // ignore: unused_import
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/dialogs/detail_dialog.dart';
+import 'package:fstapp/widgets/detail_dialog.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/services/time_helper.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'schedule_helper.dart';
 import 'advanced_timeline_controller.dart';

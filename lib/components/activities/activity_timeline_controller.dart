@@ -1,6 +1,6 @@
 // activity_timeline_controller.dart
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/components/activities/activity_model.dart';
 
 class ActivityTimelineController {
   final List<ActivityUserInfoModel> allUsers;

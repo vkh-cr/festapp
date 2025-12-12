@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/data_models/email_template_model.dart';
-import 'package:fstapp/data_services/db_email_templates.dart';
+import 'package:fstapp/components/email_templates/email_template_model.dart';
+import 'package:fstapp/components/email_templates/db_email_templates.dart';
 
-import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 
 class EmailTemplateSettingsPage extends StatefulWidget {
   final EmailTemplateModel template;

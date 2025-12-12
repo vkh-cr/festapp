@@ -6,8 +6,7 @@ import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
-import 'package:fstapp/data_services_eshop/db_spots.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -15,6 +14,7 @@ import 'package:fstapp/theme_config.dart';
 import 'package:collection/collection.dart';
 
 import '../../_shared/common_strings.dart';
+import '../../eshop/db_tickets.dart';
 import '../seat_reservation/model/seat_model.dart';
 import '../seat_reservation/utils/seat_state.dart';
 import '../seat_reservation/widgets/seat_layout_controller.dart';
@@ -768,7 +768,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
     obj2.orderProductTicket = tempOrderProductTicket;
     obj2.setSeatState(tempStateEnum);
 
-    await DbSpots.swapSpotTickets(obj1.id!, obj2.id!);
+    await DbTickets.swapSpotTickets(obj1.id!, obj2.id!);
     ToastHelper.Show(context, BlueprintStrings.swapSuccess,
         severity: ToastSeverity.Ok);
 

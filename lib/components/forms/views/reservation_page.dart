@@ -8,7 +8,7 @@ import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/pages/user/login_page.dart';
+import 'package:fstapp/components/users/views/login_page.dart';
 
 @RoutePage()
 class ReservationsPage extends StatefulWidget {
