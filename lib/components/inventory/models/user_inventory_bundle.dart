@@ -3,7 +3,8 @@ import 'package:fstapp/components/inventory/models/inventory_context_model.dart'
 import 'package:fstapp/components/inventory/models/inventory_pool_model.dart';
 import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
 import 'package:fstapp/components/inventory/models/resource_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
+
+import '../../map/place_model.dart';
 
 // An abstract interface can help ensure all models have an 'id' for serialization.
 // This is good practice but not strictly required for the solution to work.

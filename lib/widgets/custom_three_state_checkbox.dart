@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_services/db_occasions.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/theme_config.dart';
 
 class CustomThreeStateCheckbox extends StatelessWidget {

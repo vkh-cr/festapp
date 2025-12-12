@@ -3,7 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/inventory/models/inventory_pools_list_bundle.dart';
-import 'package:fstapp/data_services/db_inventory_pools.dart';
+import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 import 'package:fstapp/styles/styles_config.dart';
 
 import '../models/inventory_pool_model.dart';

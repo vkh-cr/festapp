@@ -7,11 +7,11 @@ import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
-import 'package:fstapp/data_models/form_model.dart';
-import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
+import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
-import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/database_tables/tb.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import 'order_data_ticket_model.dart';

@@ -1,4 +1,4 @@
-import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/database_tables/tb.dart';
 
 class ResourceSlotModel {
   int? id;

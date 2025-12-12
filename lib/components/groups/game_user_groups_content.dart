@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
-import 'package:fstapp/data_models/information_model.dart';
-import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_models/user_group_info_model.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
-import 'package:fstapp/data_services/db_groups.dart';
-import 'package:fstapp/data_services/db_users.dart';
+import 'package:fstapp/components/information/information_model.dart';
+import 'package:fstapp/database_tables/tb.dart';
+import 'package:fstapp/components/groups/user_group_info_model.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
+import 'package:fstapp/components/groups/db_groups.dart';
+import 'package:fstapp/components/users/db_users.dart';
 // Assuming this file exists based on your provided context
 import 'group_strings.dart';
 import 'participants_management_dialog.dart';

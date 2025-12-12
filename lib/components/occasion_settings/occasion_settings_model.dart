@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/features/feature.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
-import 'package:fstapp/data_models/service_item_model.dart';
-import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
+import 'package:fstapp/components/occasion_services/service_item_model.dart';
+import 'package:fstapp/database_tables/tb.dart';
 
 class OccasionSettingsModel {
   DateTime? eventStartTime;
