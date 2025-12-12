@@ -1,4 +1,4 @@
-import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/components/activities/activity_model.dart';
 
 class ActivityHistoryHelper {
   final List<EditDataBundle> _undoStack = [];

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/data_models/form_option_model.dart';
-import 'package:fstapp/data_models/form_option_product_model.dart';
-import 'package:fstapp/components/forms/models/id_document_data.dart';
+import 'package:fstapp/components/forms/models/form_option_model.dart';
+import 'package:fstapp/components/forms/models/form_option_product_model.dart';
+import 'package:fstapp/components/forms/models/holder_models/id_document_data.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/components/forms/widgets_view/option_field_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -12,8 +11,8 @@ import 'package:fstapp/widgets/buttons_helper.dart';
 
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/forms/public_order_strings.dart';
-import '../models/form_holder.dart';
-import '../models/ticket_holder.dart';
+import '../models/holder_models/form_holder.dart';
+import '../models/holder_models/ticket_holder.dart';
 import '../../eshop/orders_strings.dart';
 
 class OrderPreviewScreen extends StatefulWidget {

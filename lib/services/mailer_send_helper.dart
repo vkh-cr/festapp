@@ -1,4 +1,4 @@
-import 'package:fstapp/data_models/user_info_model.dart' as mailer_send_helper;
+import 'package:fstapp/components/users/user_info_model.dart' as mailer_send_helper;
 
 class MailerSendHelper{
   static Future<void> sendPassword(mailer_send_helper.UserInfoModel recipient, String password) async {
