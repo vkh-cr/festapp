@@ -2,20 +2,19 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart'; // Added for UserInventoryBundle
-import 'package:fstapp/data_models/event_model.dart';
-import 'package:fstapp/data_models/icon_model.dart';
-import 'package:fstapp/data_models/information_model.dart';
-import 'package:fstapp/data_models/news_model.dart';
+import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/map/icon_model.dart';
+import 'package:fstapp/components/information/information_model.dart';
+import 'package:fstapp/components/news/news_model.dart';
 import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
-import 'package:fstapp/data_models/path_group_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
+import 'package:fstapp/components/map/path_group_model.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/services/storage_helper.dart';
 
-// You might need to adjust the path based on your project structure.
-import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/components/activities/activity_model.dart';
 
-import '../data_models/occasion_model.dart';
+import '../components/map/place_model.dart';
+import '../components/occasion/occasion_model.dart';
 
 class OfflineDataService {
   static const String myScheduleOffline = "mySchedule";

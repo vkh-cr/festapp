@@ -1,18 +1,18 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fstapp/data_models/occasion_link_model.dart';
+import 'package:fstapp/components/occasion/occasion_link_model.dart';
 import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
-import 'package:fstapp/data_models/user_group_info_model.dart';
+import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
-import 'package:fstapp/data_models/unit_model.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
-import 'package:fstapp/data_services/app_config_service.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
+import 'package:fstapp/components/unit/unit_model.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
+import 'package:fstapp/data_services/update_service.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
-import 'package:fstapp/data_models/occasion_user_model.dart';
+import 'package:fstapp/components/users/occasion_user_model.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
-import 'package:fstapp/services/link_model.dart';
+import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -57,8 +57,8 @@ class RightsService{
 
       // Update global state from the fetched object
       RightsService.currentLink = checkedObject.occasion?.link;
-      AppConfigService.versionRecommended = checkedObject.versionRecommended;
-      AppConfigService.versionLink = checkedObject.versionLink;
+      UpdateService.versionRecommended = checkedObject.versionRecommended;
+      UpdateService.versionLink = checkedObject.versionLink;
 
       // Handle access denied or not found cases
       if(checkedObject.isAccessDenied() || checkedObject.isNotFound()){

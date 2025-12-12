@@ -3,10 +3,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
-import 'package:fstapp/data_models/email_template_model.dart';
-import 'package:fstapp/data_services/db_email_templates.dart';
+import 'package:fstapp/components/email_templates/email_template_model.dart';
+import 'package:fstapp/components/email_templates/db_email_templates.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/widgets/email_template_card.dart';
+import 'package:fstapp/components/email_templates/views/email_template_card.dart';
 
 import 'email_templates_settings_page.dart';
 

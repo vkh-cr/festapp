@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.gr.dart';
-import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/components/forms/views/form_page.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/components/html/html_view.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../form_strings.dart';
