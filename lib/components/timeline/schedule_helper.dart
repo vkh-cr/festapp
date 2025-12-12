@@ -6,6 +6,8 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/time_helper.dart';
 
 import '../map/place_model.dart';
@@ -108,7 +110,7 @@ class TimeBlockItem {
   String toString() {
     String titleStr = title;
     if (isCancelled) {
-      titleStr += " (${"Cancelled".tr()})";
+      titleStr += " (${CommonStrings.cancelled})";
     }
     return (maxParticipants == 0 ? titleStr : "$titleStr (${participants}/$maxParticipants)");
   }

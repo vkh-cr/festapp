@@ -9,6 +9,7 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/mouse_detector.dart';
 import 'package:fstapp/widgets/time_data_range_picker.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 import '../map/place_model.dart';
 
@@ -77,7 +78,7 @@ class AddNewEventDialog {
                         TextFormField(
                           initialValue: title,
                           decoration: InputDecoration(
-                            labelText: "Title".tr(),
+                            labelText: CommonStrings.title,
                             labelStyle: TextStyle(
                               color: (hasTitleBeenEdited && (title == null || title!.trim().isEmpty))
                                   ? ThemeConfig.redColor(context)
@@ -136,7 +137,7 @@ class AddNewEventDialog {
                             });
                           },
                           decoration: InputDecoration(
-                            labelText: "Place".tr(),
+                            labelText: CommonStrings.place,
                           ),
                         ),
                       ],
@@ -145,7 +146,7 @@ class AddNewEventDialog {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: Text("Storno").tr(),
+                      child: Text(CommonStrings.storno),
                     ),
                     ElevatedButton(
                       onPressed: isFormValid

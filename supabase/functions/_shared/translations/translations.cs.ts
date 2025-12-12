@@ -114,4 +114,7 @@ export const csTranslations = {
       generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'cs' }),
     ].join('');
   },
+  days_remaining: (days: number) => {
+    return `${days} ${days === 1 ? "den" : (days > 1 && days < 5) ? "dny" : "dní"}`;
+  },
 };

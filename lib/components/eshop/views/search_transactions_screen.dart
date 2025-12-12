@@ -5,6 +5,7 @@ import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'dart:async';
 
 class SearchTransactionsScreen extends StatefulWidget {
@@ -126,11 +127,11 @@ class _SearchTransactionsScreenState extends State<SearchTransactionsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text("Storno".tr()),
+            child: Text(CommonStrings.storno),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text("Add".tr()),
+            child: Text(CommonStrings.add),
           ),
         ],
       ),
@@ -162,7 +163,7 @@ class _SearchTransactionsScreenState extends State<SearchTransactionsScreen> {
             padding: const EdgeInsets.all(12.0),
             child: TextField(
               decoration: InputDecoration(
-                labelText: "Search".tr(),
+                labelText: CommonStrings.search,
                 hintText: "Search by message, account, symbol, name, or amount".tr(),
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
@@ -268,7 +269,7 @@ class _SearchTransactionsScreenState extends State<SearchTransactionsScreen> {
                             ),
                           ),
                           child: Text(
-                            "Add".tr(),
+                            CommonStrings.add,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
