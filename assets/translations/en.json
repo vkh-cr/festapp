@@ -1015,6 +1015,23 @@
       "ticketOrderPaymentReminder_description": "This template is used to remind customers about pending ticket order payments.",
       "ticketOrderStorno_title": "Order Cancellation",
       "ticketOrderStorno_description": "This template is used to notify users about ticket order cancellations."
+    },
+    "title": "Email Templates",
+    "settings": {
+      "title": "Email Settings",
+      "banner": "Email Banner",
+      "bannerDescription": "This image will be displayed at the top of all emails sent for this occasion.",
+      "bannerHint": "(Recommended ratio 3:1)",
+      "imageUploaded": "Image uploaded",
+      "uploadFailed": "Failed to upload image",
+      "resetToDefault": "Reset to Default",
+      "resetConfirmTitle": "Reset Template",
+      "resetConfirmContent": "Are you sure you want to reset this template to default? Custom content will be lost.",
+      "statusLabel": "Status: ",
+      "statusOccasionOverride": "Using Occasion Banner (Override)",
+      "statusUnit": "Using Organization Banner",
+      "statusUnitInherited": "Using Organization Banner (Inherited)",
+      "statusNoBanner": "No Banner Set"
     }
   },
   "Inventory": {

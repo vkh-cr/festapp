@@ -60,9 +60,11 @@ BEGIN
       ew.html,
       ew.created_at
     FROM public.email_wrappers ew
-    WHERE (v_unit IS NULL OR ew.unit IS NOT DISTINCT FROM v_unit OR ew.unit IS NULL)
+    WHERE (v_occ IS NULL OR ew.occasion IS NOT DISTINCT FROM v_occ OR ew.occasion IS NULL)
+      AND (v_unit IS NULL OR ew.unit IS NOT DISTINCT FROM v_unit OR ew.unit IS NULL)
       AND (v_org IS NULL OR ew.organization IS NOT DISTINCT FROM v_org OR ew.organization IS NULL)
     ORDER BY
+         CASE WHEN ew.occasion IS NOT DISTINCT FROM v_occ THEN 0 ELSE 1 END,
          CASE WHEN ew.unit IS NOT DISTINCT FROM v_unit THEN 0 ELSE 1 END,
          CASE WHEN ew.organization IS NOT DISTINCT FROM v_org THEN 0 ELSE 1 END,
          ew.id
