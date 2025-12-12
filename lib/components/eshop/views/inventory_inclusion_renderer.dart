@@ -7,6 +7,7 @@ import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/services/utilities_all.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class InventoryInclusionRenderer extends StatefulWidget {
   final TrinaColumnRendererContext rendererContext;
@@ -66,7 +67,7 @@ class _InventoryInclusionRendererState
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text("Close".tr()),
+              child: Text(CommonStrings.close),
             ),
           ],
         );

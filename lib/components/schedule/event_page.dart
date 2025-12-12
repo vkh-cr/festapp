@@ -31,6 +31,7 @@ import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/users/companion/companion_dialog.dart';
 import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/widgets/navigate_back_button.dart';
@@ -135,7 +136,7 @@ class _EventPageState extends State<EventPage> {
                           Icon(Icons.cancel_outlined, color: ThemeConfig.whiteColor(context), size: 22),
                           const SizedBox(width: 10),
                           Text(
-                            "Cancelled".tr().toUpperCase(),
+                            CommonStrings.cancelled.toUpperCase(),
                             style: TextStyle(
                               color: ThemeConfig.whiteColor(context),
                               fontWeight: FontWeight.bold,
@@ -286,7 +287,7 @@ class _EventPageState extends State<EventPage> {
                                   const Icon(Icons.place),
                                   SizedBox.fromSize(size: const Size(4.0, 4.0)),
                                   Text(
-                                    "${"Place".tr()}: ${_event?.place?.title ?? ""}",
+                                    "${CommonStrings.place}: ${_event?.place?.title ?? ""}",
                                   )
                                 ],
                               ),

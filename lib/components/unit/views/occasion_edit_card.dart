@@ -8,6 +8,8 @@ import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 
+import '../../_shared/common_strings.dart';
+
 
 class OccasionEditCard extends StatelessWidget {
   final OccasionModel occasion;
@@ -142,7 +144,7 @@ class OccasionEditCard extends StatelessWidget {
                           spacing: 12.0,
                           runSpacing: 4.0,
                           children: [
-                            _buildStat(context, icon: Icons.group_outlined, value: occasion.stats!.users.toString(), tooltip: "Users".tr()),
+                            _buildStat(context, icon: Icons.group_outlined, value: occasion.stats!.users.toString(), tooltip: CommonStrings.users),
                           ],
                         )
                       ],

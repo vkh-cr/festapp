@@ -1,7 +1,6 @@
 
 import 'dart:typed_data';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/email_templates/db_email_templates.dart';
@@ -186,8 +185,10 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
              Column(
                crossAxisAlignment: CrossAxisAlignment.start,
                children: [
-                 Text(
-                    EmailTemplatesStrings.settingsBannerDescription,
+                 SelectableText(
+                   _isOccasion 
+                     ? EmailTemplatesStrings.settingsBannerDescriptionOccasion 
+                     : EmailTemplatesStrings.settingsBannerDescriptionOrganization,
                     style: TextStyle(fontSize: 13, color: ThemeConfig.grey600(context)),
                  ),
                  const SizedBox(height: 12),

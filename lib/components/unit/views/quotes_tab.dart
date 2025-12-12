@@ -9,6 +9,8 @@ import 'package:fstapp/components/information/db_information.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:trina_grid/trina_grid.dart';
 
+import '../../_shared/common_strings.dart';
+
 class QuotesTab extends StatelessWidget {
   final int unitId;
 
@@ -55,7 +57,7 @@ class QuotesTab extends StatelessWidget {
           ),
           TrinaColumn(
             width: 150,
-            title: "Content".tr(),
+            title: CommonStrings.content,
             field: Tb.information.description,
             type: TrinaColumnType.text(),
             renderer: (rendererContext) {

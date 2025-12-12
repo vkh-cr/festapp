@@ -18,6 +18,7 @@ import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/html/html_view.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 import '../../map/place_model.dart';
 import 'inventory_contexts_editor.dart';
@@ -324,7 +325,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text("Storno".tr()),
+              child: Text(CommonStrings.storno),
             ),
             ElevatedButton(
               onPressed: () {
@@ -336,7 +337,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                 }
                 Navigator.of(dialogContext).pop(model);
               },
-              child: Text("Save".tr()),
+              child: Text(CommonStrings.save),
             ),
           ],
         );
@@ -558,7 +559,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                                 contentPadding: EdgeInsets.zero,
                                 title: Text(_bundle!.pool.place?.title ?? InventoryStrings.settingsNoPlaceAssigned),
                                 trailing: ElevatedButton(
-                                  child: Text("Edit".tr()),
+                                  child: Text(CommonStrings.edit),
                                   onPressed: _showSelectPlaceDialog,
                                 ),
                               ),
@@ -651,7 +652,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
               children: [
                 TextButton(
                   onPressed: _isSaving ? null : _cancelEdit,
-                  child: Text("Storno".tr()),
+                  child: Text(CommonStrings.storno),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton.icon(

@@ -4,6 +4,7 @@ import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/database_tables/tb.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/services/time_helper.dart';
@@ -164,7 +165,7 @@ class EventModel extends ITrinaRowModel {
   String toString() {
     String titleStr = title ?? "";
     if (isCancelled) {
-      titleStr += " (${"Cancelled".tr()})";
+      titleStr += " (${CommonStrings.cancelled})";
     }
     return (maxParticipants==null ? titleStr : "$titleStr (${currentParticipants??0}/$maxParticipants)");
   }
@@ -322,7 +323,7 @@ class EventModel extends ITrinaRowModel {
   }
 
   @override
-  String toBasicString() => "$title${isCancelled ? ' (${'Cancelled'.tr()})' : ''}";
+  String toBasicString() => "$title${isCancelled ? ' (${CommonStrings.cancelled})' : ''}";
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> eventData = data ?? {};

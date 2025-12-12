@@ -7,6 +7,7 @@ import 'package:fstapp/services/toast_helper.dart';
 
 import 'inventory_strings.dart';
 import '../models/inventory_pool_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class InventoryPoolCreationHelper {
   static Future<void> showCreatePoolDialog({
@@ -53,7 +54,7 @@ class InventoryPoolCreationHelper {
               actions: <Widget>[
                 TextButton(
                   onPressed: isCreating ? null : () => Navigator.of(dialogContext).pop(),
-                  child: Text("Storno".tr()),
+                  child: Text(CommonStrings.storno),
                 ),
                 ElevatedButton(
                   onPressed: isCreating

@@ -54,7 +54,8 @@ class EmailTemplatesStrings {
   static String get title => 'EmailTemplates.title'.tr();
   static String get settingsTitle => 'EmailTemplates.settings.title'.tr();
   static String get settingsBanner => 'EmailTemplates.settings.banner'.tr();
-  static String get settingsBannerDescription => 'EmailTemplates.settings.bannerDescription'.tr();
+  static String get settingsBannerDescriptionOccasion => 'EmailTemplates.settings.bannerDescriptionOccasion'.tr();
+  static String get settingsBannerDescriptionOrganization => 'EmailTemplates.settings.bannerDescriptionOrganization'.tr();
   static String get settingsBannerHint => 'EmailTemplates.settings.bannerHint'.tr();
   static String get settingsImageUploaded => 'EmailTemplates.settings.imageUploaded'.tr();
   static String get settingsUploadFailed => 'EmailTemplates.settings.uploadFailed'.tr();

@@ -1,8 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/components/images/zoomable_image/zoomable_image.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class DetailDialog extends StatefulWidget {
   final String title;
@@ -61,7 +62,7 @@ class _DetailDialogState extends State<DetailDialog> {
                     child: TextButton.icon(
                       onPressed: _handleEditPressed,
                       icon: const Icon(Icons.edit),
-                      label: Text('Edit'.tr()),
+                      label: Text(CommonStrings.edit),
                     ),
                   ),
 
@@ -85,7 +86,7 @@ class _DetailDialogState extends State<DetailDialog> {
       actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       actions: [
         TextButton(
-          child: Text('Close'.tr()),
+          child: Text(CommonStrings.close),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

@@ -18,6 +18,7 @@ import 'package:fstapp/components/unit/views/unit_settings_screen.dart';
 import 'package:fstapp/components/email_templates/views/email_templates_tab.dart';
 import '../../occasion/occasion_model.dart';
 import 'unit_page.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 @RoutePage()
 class UnitAdminPage extends StatefulWidget {
@@ -218,10 +219,10 @@ class _SideMenuState extends State<SideMenu> {
                   _buildMenuItem(
                     context: context,
                     icon: Icons.calendar_month,
-                    label: "Events".tr(),
+                    label: CommonStrings.events,
                     isSelected: widget.currentMenu == "Occasions",
                     isExpanded: _isExpanded,
-                    isHovered: _hoveredLabel == "Events".tr(),
+                    isHovered: _hoveredLabel == CommonStrings.events,
                     onHover: (label) => setState(() => _hoveredLabel = label),
                     onTap: () {
                       if (widget.unit != null) {
@@ -236,10 +237,10 @@ class _SideMenuState extends State<SideMenu> {
                     _buildMenuItem(
                       context: context,
                       icon: Icons.people,
-                      label: "Users".tr(),
+                      label: CommonStrings.users,
                       isSelected: widget.currentMenu == "Users",
                       isExpanded: _isExpanded,
-                      isHovered: _hoveredLabel == "Users".tr(),
+                      isHovered: _hoveredLabel == CommonStrings.users,
                       onHover: (label) => setState(() => _hoveredLabel = label),
                       onTap: () {
                         if (widget.unit != null) {
@@ -290,10 +291,10 @@ class _SideMenuState extends State<SideMenu> {
                       _buildMenuItem(
                         context: context,
                         icon: Icons.settings,
-                        label: "Settings".tr(),
+                        label: CommonStrings.settings,
                         isSelected: widget.currentMenu == "Settings",
                         isExpanded: _isExpanded,
-                        isHovered: _hoveredLabel == "Settings".tr(),
+                        isHovered: _hoveredLabel == CommonStrings.settings,
                         onHover: (label) => setState(() => _hoveredLabel = label),
                         onTap: () {
                           if (widget.unit != null) {

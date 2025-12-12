@@ -4,6 +4,7 @@ import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'product_detail_editor_dialog.dart';
 import 'ticket_editor_widgets.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class TicketProductEditorRow extends StatefulWidget {
   final ProductModel product;
@@ -129,7 +130,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                   TextField(
                     controller: _titleController,
                     decoration: InputDecoration(
-                      labelText: "Title".tr(),
+                      labelText: CommonStrings.title,
                       border: const UnderlineInputBorder(),
                       suffixIcon: (!HtmlHelper.isHtmlEmptyOrNull(
                           widget.product.description))
@@ -167,7 +168,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                     keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
-                      labelText: "Price".tr(),
+                      labelText: CommonStrings.price,
                       border: const UnderlineInputBorder(),
                     ),
                   ),

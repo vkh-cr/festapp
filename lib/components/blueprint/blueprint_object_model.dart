@@ -9,6 +9,7 @@ import 'package:fstapp/services/utilities_all.dart';
 import 'package:collection/collection.dart';
 import 'blueprint_strings.dart';
 import 'seat_reservation/utils/seat_state.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class BlueprintObjectModel {
   static const String metaX = "x";
@@ -158,7 +159,7 @@ class BlueprintObjectModel {
     }
 
     // Fallback for when no matching ticket or order product ticket is found
-    return "${product?.title} ${title ?? ""}\n${"Price".tr()}: ${Utilities.formatPrice(context, product?.price ?? 0)}";
+    return "${product?.title} ${title ?? ""}\n${CommonStrings.price}: ${Utilities.formatPrice(context, product?.price ?? 0)}";
   }
 
   String getSwapSummary() {

@@ -23,6 +23,7 @@ import 'package:fstapp/components/groups/user_groups_tab.dart';
 import 'package:fstapp/components/users/views/users_tab.dart';
 
 import '../eshop/views/products_tab.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class AdminTabDefinition {
   final String label;
@@ -90,7 +91,7 @@ class AdminTabDefinition {
         icon: Icons.view_timeline,
         widget: ActivitiesContent(occasionId: RightsService.currentOccasionId()!)),
     users: AdminTabDefinition(
-        label: "Users".tr(),
+        label: CommonStrings.users,
         icon: Icons.people,
         widget: UsersTab()),
     game: AdminTabDefinition(
@@ -125,7 +126,7 @@ class AdminTabDefinition {
         widget: EmailTemplatesTab()),
     settings: AdminTabDefinition(
         isEnabled: RightsService.isUnitEditor(),
-        label: "Settings".tr(),
+        label: CommonStrings.settings,
         icon: Icons.settings,
         widget: OccasionSettingsTab()),
   };
