@@ -10,6 +10,7 @@ import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/eshop/views/search_products_screen.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 import '../orders_strings.dart';
 import 'edit_price_dialog.dart';
@@ -197,7 +198,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
               ),
             ),
             actions: [
-              TextButton(onPressed: ()=> Navigator.of(context).pop(false), child: Text("Storno".tr())),
+              TextButton(onPressed: ()=> Navigator.of(context).pop(false), child: Text(CommonStrings.storno)),
               ElevatedButton(onPressed: ()=> Navigator.of(context).pop(true), child: Text(OrdersStrings.sendEmailButton)),
             ],
           );
@@ -514,11 +515,11 @@ class _ProductsDialogState extends State<ProductsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text("Storno".tr()),
+          child: Text(CommonStrings.storno),
         ),
         ElevatedButton(
           onPressed: _current.equals(_orig) ? null : _save,
-          child: Text("Save".tr()),
+          child: Text(CommonStrings.save),
         ),
       ],
     );

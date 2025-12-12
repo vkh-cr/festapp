@@ -14,6 +14,7 @@ import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/html/html_view.dart';
+import '../../_shared/common_strings.dart';
 import '../models/holder_models/birth_date_field_holder.dart';
 import '../models/holder_models/field_holder.dart';
 import '../models/holder_models/form_holder.dart';
@@ -68,14 +69,14 @@ class FormHelper {
 
   // Labels and messages
   static String noteLabel() => "Note".tr();
-  static String nameLabel() => "Name".tr();
+  static String nameLabel() => CommonStrings.name;
   static String surnameLabel() => "Surname".tr();
   static String cityLabel() => "City".tr();
   static String spotLabel() => "Spot".tr();
   static String emailLabel() => "E-mail".tr();
   static String phoneLabel() => "Phone".tr();
   static String addressLabel() => "Address".tr();
-  static String nationalityLabel() => "Nationality".tr(); // Added nationality label
+  static String nationalityLabel() => "Nationality".tr();
   static String sexLabel() => "I am".tr();
   static String birthYearLabel() => "Birth year".tr();
   static String birthDateLabel() => "Birth Date".tr();

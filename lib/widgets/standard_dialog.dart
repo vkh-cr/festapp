@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class StandardDialog extends StatelessWidget {
   final Widget content;
@@ -39,7 +40,7 @@ class StandardDialog extends StatelessWidget {
                   ),
                   splashRadius: 20,
                   onPressed: onClose ?? () => Navigator.of(context).pop(),
-                  tooltip: "Close".tr(),
+                  tooltip: CommonStrings.close,
                 ),
               ),
             ],

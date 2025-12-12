@@ -2,6 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/widgets/mouse_detector.dart';
 
 class TimeDateRangePicker extends StatelessWidget {
@@ -48,7 +50,7 @@ class TimeDateRangePicker extends StatelessWidget {
                     enabled: enabled, // Use isEnabled property here
                     readOnly: true,
                     decoration: InputDecoration(
-                      labelText: "Start".tr(),
+                      labelText: CommonStrings.start,
                       labelStyle: TextStyle(
                         color: isStartValid ? null : ThemeConfig.redColor(context),
                       ),
@@ -140,7 +142,7 @@ class TimeDateRangePicker extends StatelessWidget {
                     enabled: enabled, // Use isEnabled property here
                     readOnly: true,
                     decoration: InputDecoration(
-                      labelText: "End".tr(),
+                      labelText: CommonStrings.end,
                       labelStyle: TextStyle(
                         color: isEndValid ? null : ThemeConfig.redColor(context),
                       ),

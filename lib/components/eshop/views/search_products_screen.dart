@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/services/utilities_all.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class SearchProductsScreen extends StatefulWidget {
   final int ticketId;
@@ -87,7 +88,7 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
         actions: [
           TextButton(
             onPressed: _confirm,
-            child: Text("Confirm".tr(), style: const TextStyle(color: Colors.white)),
+            child: Text(CommonStrings.confirm, style: const TextStyle(color: Colors.white)),
           )
         ],
       ),
@@ -97,7 +98,7 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
             padding: const EdgeInsets.all(12),
             child: TextField(
               decoration: InputDecoration(
-                labelText: "Search".tr(),
+                labelText: CommonStrings.search,
                 hintText: "By title, type or price".tr(),
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(

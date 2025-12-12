@@ -16,6 +16,7 @@ import 'package:trina_grid/trina_grid.dart';
 
 import 'order_data_ticket_model.dart';
 import 'orders_history_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class OrderModel extends ITrinaRowModel {
   @override
@@ -63,7 +64,7 @@ class OrderModel extends ITrinaRowModel {
       case usedState:
         return 'Used'.tr();
       case stornoState:
-        return 'Storno'.tr();
+        return CommonStrings.storno;
       default:
         return state; // Return the key itself if not found
     }

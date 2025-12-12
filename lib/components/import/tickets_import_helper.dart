@@ -12,6 +12,7 @@ import 'package:fstapp/components/features/import_feature.dart';
 
 import 'csv_import_helper.dart';
 import 'import_dialog_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class TicketsImportHelper {
 
@@ -95,7 +96,7 @@ class TicketsImportHelper {
         context,
         FeaturesStrings.importResultsTitle,
         message,
-        confirmButtonMessage: "Ok".tr(),
+        confirmButtonMessage: CommonStrings.ok,
       );
     } catch (e) {
       // Show an error toast if any part of the process fails.

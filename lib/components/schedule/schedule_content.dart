@@ -23,6 +23,7 @@ import 'package:fstapp/components/images/image_area.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import '../map/place_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class ScheduleContent extends StatefulWidget {
   const ScheduleContent({super.key});
@@ -113,7 +114,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
               DataGridHelper.idRenderer(rendererContext),
         ),
         TrinaColumn(
-          title: "Hide".tr(),
+          title: CommonStrings.hide,
           field: Tb.events.is_hidden,
           type: TrinaColumnType.text(),
           applyFormatterInEditing: true,
@@ -130,7 +131,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           width: 80,
         ),
         TrinaColumn(
-          title: "Cancelled".tr(),
+          title: CommonStrings.cancelled,
           field: Tb.events.dataIsCancelled,
           type: TrinaColumnType.text(),
           applyFormatterInEditing: true,
@@ -197,7 +198,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: Text("Close".tr()),
+                          child: Text(CommonStrings.close),
                         ),
                       ],
                     ),
@@ -248,7 +249,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
             },
           ),
         TrinaColumn(
-          title: "Title".tr(),
+          title: CommonStrings.title,
           field: EventModel.titleColumn,
           type: TrinaColumnType.text(),
           width: 250,
@@ -260,7 +261,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           width: 110,
         ),
         TrinaColumn(
-          title: "Start".tr(),
+          title: CommonStrings.start,
           field: EventModel.startTimeColumn,
           type: TrinaColumnType.time(),
           width: 80,
@@ -272,7 +273,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           width: 110,
         ),
         TrinaColumn(
-          title: "End".tr(),
+          title: CommonStrings.end,
           field: EventModel.endTimeColumn,
           type: TrinaColumnType.time(),
           width: 80,
@@ -284,7 +285,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           width: 70,
         ),
         TrinaColumn(
-          title: "Place".tr(),
+          title: CommonStrings.place,
           field: EventModel.placeColumn,
           type: TrinaColumnType.select(places, itemToString: DataGridHelper.getValueFromFormatted),
           applyFormatterInEditing: true,
@@ -293,7 +294,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
         ),
         TrinaColumn(
           width: 150,
-          title: "Content".tr(),
+          title: CommonStrings.content,
           field: Tb.events.description,
           type: TrinaColumnType.text(),
           renderer: (rendererContext) {
@@ -315,7 +316,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           },
         ),
         TrinaColumn(
-          title: "Type".tr(),
+          title: CommonStrings.type,
           field: Tb.events.type,
           // Field in EventModel storing the type code
           type: TrinaColumnType.select(_eventTypeSelectOptions),

@@ -8,6 +8,7 @@ import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/information/db_information.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:trina_grid/trina_grid.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class InformationContent extends StatefulWidget {
   const InformationContent({super.key});
@@ -40,7 +41,7 @@ class _InformationContentState extends State<InformationContent> {
                 DataGridHelper.idRenderer(rendererContext),
           ),
           TrinaColumn(
-            title: "Hide".tr(),
+            title: CommonStrings.hide,
             field: Tb.information.is_hidden,
             type: TrinaColumnType.text(),
             applyFormatterInEditing: true,
@@ -50,13 +51,13 @@ class _InformationContentState extends State<InformationContent> {
                 rendererContext, Tb.information.is_hidden),
           ),
           TrinaColumn(
-            title: "Title".tr(),
+            title: CommonStrings.title,
             field: Tb.information.title,
             type: TrinaColumnType.text(),
           ),
           TrinaColumn(
             width: 150,
-            title: "Content".tr(),
+            title: CommonStrings.content,
             field: Tb.information.description,
             type: TrinaColumnType.text(),
             renderer: (rendererContext) {
@@ -80,7 +81,7 @@ class _InformationContentState extends State<InformationContent> {
             width: 100,
           ),
           TrinaColumn(
-            title: "Type".tr(),
+            title: CommonStrings.type,
             field: Tb.information.type,
             type: TrinaColumnType.text(),
           ),

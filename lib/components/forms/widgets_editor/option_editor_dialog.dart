@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:fstapp/router_service.dart';
@@ -53,7 +54,7 @@ class _OptionDetailEditorDialogState extends State<OptionDetailEditorDialog> {
           children: [
             const SizedBox(height: 32),
             Text(
-              "Description".tr(),
+              CommonStrings.description,
               style: Theme.of(context)
                   .textTheme
                   .titleLarge
