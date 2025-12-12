@@ -21,6 +21,7 @@ import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/widgets/mouse_detector.dart';
 import 'package:fstapp/widgets/time_data_range_picker.dart';
 import '../map/place_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 @RoutePage()
 class EventEditPage extends StatefulWidget {
@@ -115,7 +116,7 @@ class _EventEditPageState extends State<EventEditPage> {
     );
     if (confirmation) {
       await originalEvent!.deleteMethod(context);
-      ToastHelper.Show(context, "${"Deleted".tr()}: ${originalEvent!.title!}");
+      ToastHelper.Show(context, "${CommonStrings.deleted}: ${originalEvent!.title!}");
       RouterService.popTwo(context);
     }
   }
@@ -142,7 +143,7 @@ class _EventEditPageState extends State<EventEditPage> {
               : [];
 
         await DbEvents.updateEvent(originalEvent!);
-        ToastHelper.Show(context, "${"Saved".tr()}: ${originalEvent!.title!}");
+        ToastHelper.Show(context, "${CommonStrings.saved}: ${originalEvent!.title!}");
         Navigator.of(context).pop();
       }
     }
@@ -158,12 +159,12 @@ class _EventEditPageState extends State<EventEditPage> {
       builder: (context, mouseIsConnected) {
         return Scaffold(
           appBar: AppBar(
-            title: Text("Edit").tr(),
+            title: Text(CommonStrings.edit),
             actions: [
               if (widget.id != null)
                 IconButton(
                   icon: const Icon(Icons.delete),
-                  tooltip: "Delete".tr(),
+                  tooltip: CommonStrings.delete,
                   onPressed: deleteEvent,
                 ),
             ],
@@ -186,7 +187,7 @@ class _EventEditPageState extends State<EventEditPage> {
                         onChanged: (value) => setState(() => isHidden = value),
                       ),
                       SwitchListTile(
-                        title: Text("Cancelled".tr()),
+                        title: Text(CommonStrings.cancelled),
                         value: isCancelled ?? false,
                         onChanged: (value) => setState(() => isCancelled = value),
                         activeColor: ThemeConfig.redColor(context),
@@ -194,7 +195,7 @@ class _EventEditPageState extends State<EventEditPage> {
                       TextFormField(
                         initialValue: title,
                         decoration: InputDecoration(
-                          labelText: "Title".tr(),
+                          labelText: CommonStrings.title,
                           labelStyle: TextStyle(
                             color: (title == null || title!.trim().isEmpty)
                                 ? ThemeConfig.redColor(context)
@@ -269,7 +270,7 @@ class _EventEditPageState extends State<EventEditPage> {
                           });
                         },
                         decoration: InputDecoration(
-                          labelText: "Place".tr(),
+                          labelText: CommonStrings.place,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -296,7 +297,7 @@ class _EventEditPageState extends State<EventEditPage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        "Content".tr(),
+                        CommonStrings.content,
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
                       Center(
@@ -365,7 +366,7 @@ class _EventEditPageState extends State<EventEditPage> {
                             child: DropdownButtonFormField<String?>(
                               value: type, // Handles null for "No Type" or new event
                               decoration: InputDecoration(
-                                labelText: "Type".tr(),
+                                labelText: CommonStrings.type,
                                 border: const OutlineInputBorder(), // Consistent styling
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0), // Adjust padding
                               ),
@@ -413,7 +414,7 @@ class _EventEditPageState extends State<EventEditPage> {
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
                   ),
-                  child: Text("Storno").tr(),
+                  child: Text(CommonStrings.storno),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
@@ -428,7 +429,7 @@ class _EventEditPageState extends State<EventEditPage> {
                     disabledBackgroundColor: ThemeConfig.appBarColor().withOpacity(0.5),
                     disabledForegroundColor: ThemeConfig.grey600(context),
                   ),
-                  child: Text("Save").tr(),
+                  child: Text(CommonStrings.save),
                 ),
               ],
             ),

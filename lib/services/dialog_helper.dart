@@ -8,14 +8,13 @@ import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/app_management/language_model.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
-import 'package:fstapp/services/responsive_service.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/drop_file.dart';
 import 'package:fstapp/widgets/password_field.dart';
 import 'package:search_page/search_page.dart';
 import 'package:select_dialog/select_dialog.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class ImportDialogChoice {
   final bool fromTickets;
@@ -322,7 +321,7 @@ class DialogHelper{
       context,
       label: "Add to group".tr(),
       items: userGroups,
-      searchBoxDecoration: InputDecoration(hintText: "Search".tr()),
+      searchBoxDecoration: InputDecoration(hintText: CommonStrings.search),
       selectedValue: selectedGroup,
       itemBuilder:
           (BuildContext context, UserGroupInfoModel item, bool isSelected) {
@@ -584,7 +583,7 @@ class DialogHelper{
                                               "The processing has been cancelled.".tr(); // Update status
                                         }
                                             : null,
-                                        child: Text("Storno".tr()),
+                                        child: Text(CommonStrings.storno),
                                       ),
                                     );
                                   },
@@ -602,7 +601,7 @@ class DialogHelper{
                                           completer.complete(false); // Cancel or error result
                                         }
                                             : null,
-                                        child: Text("Ok".tr()),
+                                        child: Text(CommonStrings.ok),
                                       ),
                                     );
                                   },
@@ -690,44 +689,15 @@ class DialogHelper{
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context), // Cancel button
-              child: const Text("Storno").tr(),
+              child: Text(CommonStrings.storno),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context, controller.text.trim()); // Return the input
               },
-              child: const Text("Save").tr(),
+              child: Text(CommonStrings.save),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  static Future<T?> showCustomDialog<T>({
-    required BuildContext context,
-    required Widget child,
-    bool barrierDismissible = true,
-  }) {
-    return showDialog<T>(
-      context: context,
-      barrierDismissible: barrierDismissible,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          insetPadding:
-          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: ResponsiveService.isDesktop(context)
-                  ? StylesConfig.formMaxWidth
-                  : double.infinity,
-            ),
-            padding: const EdgeInsets.all(16.0),
-            child: child,
-          ),
         );
       },
     );

@@ -2,6 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'feature_constants.dart';
+import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'schedule_feature.dart';
 
 class FeatureMetadata {
@@ -67,7 +69,7 @@ class FeatureMetadata {
       'description': 'Allows management of activities for volunteers.'.tr(),
     },
     FeatureConstants.import: {
-      'title': 'Import'.tr(),
+      'title': CommonStrings.import,
       'description': FeaturesStrings.importFeatureDescription,
     },
   };

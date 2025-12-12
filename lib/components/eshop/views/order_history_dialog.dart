@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../models/orders_history_model.dart';
 import '../orders_strings.dart';
 import 'order_state_display.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class OrderHistoryDialog extends StatefulWidget {
   final int orderId;
@@ -125,7 +126,7 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text("Close".tr()),
+          child: Text(CommonStrings.close),
         ),
       ],
     );

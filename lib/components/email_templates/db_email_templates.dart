@@ -43,16 +43,66 @@ class DbEmailTemplates {
     return response;
   }
 
+  static Future<EmailTemplatesResponse> getEntityEmailTemplates({
+    int? unitId,
+    int? occasionId,
+  }) async {
+    final response = await _supabase.rpc("get_entity_email_templates", params: {
+      "p_entity_type": unitId != null ? "unit" : "occasion",
+      "p_entity_id": unitId ?? occasionId
+    });
+    return EmailTemplatesResponse.fromJson(response);
+  }
+
+  static Future<void> updateEntityEmailBanner({
+    int? occasionId,
+    int? unitId,
+    String? bannerUrl,
+  }) async {
+    if (occasionId != null) {
+      await _supabase.rpc('update_entity_email_banner', params: {
+        "p_entity_type": "occasion",
+        "p_entity_id": occasionId,
+        "p_banner_url": bannerUrl
+      });
+    } else if (unitId != null) {
+      await _supabase.rpc('update_entity_email_banner', params: {
+        "p_entity_type": "unit",
+        "p_entity_id": unitId,
+        "p_banner_url": bannerUrl
+      });
+    }
+  }
+
+  static Future<void> deleteEntityEmailTemplate({
+    int? occasionId,
+    int? unitId,
+    required String code,
+  }) async {
+    if (occasionId != null) {
+      await _supabase.rpc('delete_entity_email_template', params: {
+        "p_entity_type": "occasion",
+        "p_entity_id": occasionId,
+        "p_code": code
+      });
+    } else if (unitId != null) {
+      await _supabase.rpc('delete_entity_email_template', params: {
+        "p_entity_type": "unit",
+        "p_entity_id": unitId,
+        "p_code": code
+      });
+    }
+  }
 }
 
 class EmailTemplatesResponse {
-  final OccasionModel occasion;
+  final OccasionModel? occasion;
   final UnitModel unit;
   final UnitModel organization;
   final List<EmailTemplateModel> templates;
 
   EmailTemplatesResponse({
-    required this.occasion,
+    this.occasion,
     required this.unit,
     required this.organization,
     required this.templates,
@@ -60,7 +110,7 @@ class EmailTemplatesResponse {
 
   factory EmailTemplatesResponse.fromJson(Map<String, dynamic> json) {
     return EmailTemplatesResponse(
-      occasion: OccasionModel.fromJson(json['occasion']),
+      occasion: json['occasion'] != null ? OccasionModel.fromJson(json['occasion']) : null,
       unit: UnitModel.fromJson(json['unit']),
       organization: UnitModel.fromJson(json['organization']),
       templates: (json['templates'] as List)

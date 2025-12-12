@@ -8,9 +8,10 @@ import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/groups/db_groups.dart';
 import 'package:fstapp/components/users/db_users.dart';
-// Assuming this file exists based on your provided context
+
 import 'group_strings.dart';
 import 'participants_management_dialog.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -78,7 +79,7 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
               DataGridHelper.idRenderer(rendererContext),
         ),
         TrinaColumn(
-          title: "Name".tr(),
+          title: CommonStrings.name,
           field: Tb.user_group_info.title,
           type: TrinaColumnType.text(),
           width: 200,
