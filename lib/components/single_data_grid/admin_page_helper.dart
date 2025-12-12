@@ -10,18 +10,18 @@ import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/blueprint/views/blueprint_editor_tab.dart';
 import 'package:fstapp/components/email_templates/views/email_templates_tab.dart';
 import 'package:fstapp/components/forms/views/forms_tab.dart';
-import 'package:fstapp/components/eshop/orders_tab.dart';
-import 'package:fstapp/components/eshop/report_tab.dart';
+import 'package:fstapp/components/eshop/views/orders_tab.dart';
+import 'package:fstapp/components/eshop/views/report_tab.dart';
 import 'package:fstapp/components/eshop/tickets_tab.dart';
 import 'package:fstapp/components/groups/game_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/information_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/places_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/schedule_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/service_tab.dart';
+import 'package:fstapp/components/information/information_tab.dart';
+import 'package:fstapp/components/map/places_tab.dart';
+import 'package:fstapp/components/schedule/schedule_tab.dart';
+import 'package:fstapp/components/occasion_services/service_tab.dart';
 import 'package:fstapp/components/groups/user_groups_tab.dart';
-import 'package:fstapp/pages/occasionAdmin/users_tab.dart';
+import 'package:fstapp/components/users/views/users_tab.dart';
 
-import '../eshop/products_tab.dart';
+import '../eshop/views/products_tab.dart';
 
 class AdminTabDefinition {
   final String label;

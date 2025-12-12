@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
-import 'package:fstapp/data_models/user_group_info_model.dart';
-import 'package:fstapp/data_services_eshop/db_tickets.dart';
+import 'package:fstapp/components/groups/user_group_info_model.dart';
+import 'package:fstapp/components/eshop/db_tickets.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';

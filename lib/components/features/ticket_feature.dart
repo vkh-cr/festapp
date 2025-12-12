@@ -1,12 +1,12 @@
 // ticket_feature.dart
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/data_services/db_images.dart';
+import 'package:fstapp/components/images/db_images.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/services/image_compression_helper.dart';
+import 'package:fstapp/components/images/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/widgets/image_area.dart';
+import 'package:fstapp/components/images/image_area.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
 
@@ -102,6 +102,7 @@ class TicketFeature extends Feature {
                 } catch (e) {
                   ToastHelper.Show(context, "Failed to upload image.".tr());
                 }
+                return null;
               },
               onRemove: () async {
                 final imageUrl = ticketBackground;

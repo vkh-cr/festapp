@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/occasion_user_model.dart';
-import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/components/users/occasion_user_model.dart';
+import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 
