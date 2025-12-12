@@ -44,7 +44,7 @@ class UniversalHeader extends StatelessWidget {
                   curve: Curves.easeOut,
                 );
               },
-              child: LogoWidget(height: 60),
+              child: LogoWidget(height: 70),
             ),
             UserHeaderWidget(
               onSignIn: onSignIn,
