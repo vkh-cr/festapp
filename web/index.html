@@ -166,21 +166,6 @@
 </head>
 <body>
 
-<!-- Monitor visual viewport to fix virtual keyboard issues -->
-<script>
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', () => {
-      // When the keyboard appears/disappears, we can ensure the window scrolls
-      // into view or body height is adjusted. Here we just ensure we are scrolled to top
-      // which often fixes the 'gray bar' issue in Flutter web.
-       window.scrollTo(0, 0);
-       document.body.style.height = window.visualViewport.height + 'px';
-    });
-    window.visualViewport.addEventListener('scroll', () => {
-       window.scrollTo(0, 0);
-    });
-  }
-</script>
 
 <script>
   // Disable swipe back gesture globally
@@ -236,61 +221,60 @@
 </script>
 
 <style>
-  html, body {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: white;
-  }
-  .main-content {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.4s ease-out;
-  }
+    html, body {
+      background-color: white;
+      height: 100vh;
+      width: 100vw;
+      margin: 0px;
+    }
+    .main-content {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s ease-out;
+    }
 
-  svg {
-  margin-top: -170px;
-  max-width: 280px;
-  max-height: 100px;
-  position: absolute;
+    svg {
+    margin-top: -170px;
+    max-width: 280px;
+    max-height: 100px;
+    position: absolute;
+    }
+
+
+  /* HTML: <div class="loader"></div> */
+  .loader {
+    height: 50px;
+    width: 50px;
+    aspect-ratio: 1;
+    display: grid;
+    border: 4px solid #0000;
+    border-radius: 50%;
+    border-color: #ccc #0000;
+    animation: l16 1s infinite linear;
   }
-
-
-/* HTML: <div class="loader"></div> */
-.loader {
-  height: 50px;
-  width: 50px;
-  aspect-ratio: 1;
-  display: grid;
-  border: 4px solid #0000;
-  border-radius: 50%;
-  border-color: #ccc #0000;
-  animation: l16 1s infinite linear;
-}
-.loader::before,
-.loader::after {
-  content: "";
-  grid-area: 1/1;
-  margin: 2px;
-  border: inherit;
-  border-radius: 50%;
-}
-.loader::before {
-  border-color: #253759 #0000;
-  animation: inherit;
-  animation-duration: .5s;
-  animation-direction: reverse;
-}
-.loader::after {
-  margin: 8px;
-}
-@keyframes l16 {
-  100%{transform: rotate(1turn)}
-}
+  .loader::before,
+  .loader::after {
+    content: "";
+    grid-area: 1/1;
+    margin: 2px;
+    border: inherit;
+    border-radius: 50%;
+  }
+  .loader::before {
+    border-color: #253759 #0000;
+    animation: inherit;
+    animation-duration: .5s;
+    animation-direction: reverse;
+  }
+  .loader::after {
+    margin: 8px;
+  }
+  @keyframes l16 {
+    100%{transform: rotate(1turn)}
+  }
 </style>
 
   <div class="main-content" id="loader-content">
