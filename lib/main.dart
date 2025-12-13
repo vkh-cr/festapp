@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:fstapp/services/url_strategy_noop.dart' if (dart.library.html) 'package:fstapp/services/url_strategy_web.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_config.dart';
@@ -18,6 +18,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fstapp/services/time_helper.dart';
+import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/time_travel_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -43,7 +44,7 @@ Future<void> main() async {
 Future<void> initializeEverything() async {
   print('Initialization started');
 
-  usePathUrlStrategy();
+  configureUrlStrategy();
 
   WidgetsFlutterBinding.ensureInitialized();
   print('Widgets binding initialized');
@@ -117,6 +118,9 @@ Future<void> initializeEverything() async {
           onError: (e){ print('Notification helper initialization failed: $e'); });
 
   print('Initialization completed');
+
+  WebStylesHelper.setBodyBackgroundColor(ThemeConfig.appBarColor());
+  WebStylesHelper.setMetaThemeColor(ThemeConfig.seed1);
 }
 
 class MyApp extends StatefulWidget {
