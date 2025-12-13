@@ -118,147 +118,174 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
       statusText = EmailTemplatesStrings.statusNoBanner;
     }
 
-    // Professional Look:
-    // Darker borders/text.
-    // Clean Header.
-    // Status text in a "pill" or subtitle relative to context.
+    final theme = Theme.of(context);
+    const double headerHeight = 10;
 
-    return Card(
-      elevation: 0,
+    return Material(
+      clipBehavior: Clip.antiAlias,
+      elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6),
-        side: BorderSide(color: ThemeConfig.grey300(context)),
+        borderRadius: BorderRadius.circular(10.0),
       ),
-      color: Theme.of(context).cardColor,
-      margin: EdgeInsets.zero,
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          initiallyExpanded: false,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          childrenPadding: const EdgeInsets.all(16),
-          leading: _effectiveUrl != null 
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Image.network(
-                  _effectiveUrl!,
-                  width: 90,
-                  height: 30,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Icon(Icons.image, color: ThemeConfig.grey600(context)),
-                ),
-              )
-            : Icon(Icons.image, color: ThemeConfig.grey600(context)),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                EmailTemplatesStrings.settingsBanner,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold, 
-                  fontSize: 15,
-                  // Use body text color from theme
-                  color: Theme.of(context).textTheme.bodyMedium?.color
+      color: theme.cardColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+           // Upper fixed-height header with primary color.
+            Container(
+              height: headerHeight,
+              color: theme.primaryColor,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                // Use primary color with transparency for a light overlay.
+                color: theme.primaryColor.withOpacityUniversal(context, 0.1),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(10.0),
+                  bottomRight: Radius.circular(10.0),
                 ),
               ),
-              const SizedBox(height: 4),
-              // Status Pill
-              Container(
-                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: ThemeConfig.grey200(context),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  statusText,
-                  style: TextStyle(
-                    fontSize: 11, 
-                    fontWeight: FontWeight.w600,
-                    color: ThemeConfig.grey800(context)
+              child: Theme(
+                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  initiallyExpanded: _isExpanded,
+                  onExpansionChanged: (expanded) => setState(() => _isExpanded = expanded),
+                  tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  // leading property removed
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              EmailTemplatesStrings.settingsBanner,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold, 
+                                fontSize: 16,
+                                // Use body text color from theme
+                                color: ThemeConfig.blackColor(context)
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            // Status Pill
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: ThemeConfig.grey200(context),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                statusText,
+                                style: TextStyle(
+                                  fontSize: 11, 
+                                  fontWeight: FontWeight.w600,
+                                  color: ThemeConfig.grey800(context)
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      if (_effectiveUrl != null) 
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.network(
+                            _effectiveUrl!,
+                            width: 90,
+                            height: 30,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(Icons.image, color: ThemeConfig.grey600(context)),
+                          ),
+                        )
+                      else
+                        Icon(Icons.image, color: ThemeConfig.grey600(context)),
+                    ],
                   ),
+                  children: [
+                    // Content Area
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SelectableText(
+                          _isOccasion 
+                            ? EmailTemplatesStrings.settingsBannerDescriptionOccasion 
+                            : EmailTemplatesStrings.settingsBannerDescriptionOrganization,
+                          style: TextStyle(fontSize: 13, color: ThemeConfig.grey600(context)),
+                        ),
+                        const SizedBox(height: 12),
+                        if (_overrideUrl != null)
+                          AspectRatio(
+                            aspectRatio: 3,
+                            child: _isLoading 
+                              ? const Center(child: CircularProgressIndicator())
+                              : ImageArea(
+                                imageUrl: _overrideUrl,
+                                hint: EmailTemplatesStrings.settingsBannerHint,
+                                onFileSelected: (file) async {
+                                  Uint8List imageData = await file.readAsBytes();
+                                  try {
+                                    var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
+                                    final publicUrl = await DbImages.uploadImage(
+                                      compressedImageData,
+                                      _isOccasion ? _occasion!.id : null,
+                                      !_isOccasion ? _unit.id : null
+                                    );
+                                    await _updateBanner(publicUrl);
+                                    return publicUrl;
+                                  } catch (e) {
+                                      if(mounted) ToastHelper.Show(context, EmailTemplatesStrings.settingsUploadFailed, severity: ToastSeverity.NotOk);
+                                    return null;
+                                  }
+                                },
+                                onRemove: () {
+                                    if (_overrideUrl != null) {
+                                      _handleReset();
+                                    }
+                                },
+                              ),
+                          )
+                        else
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxHeight: 250),
+                            child: _isLoading 
+                              ? const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()))
+                              : ImageArea(
+                                imageUrl: _overrideUrl,
+                                hint: EmailTemplatesStrings.settingsBannerHint,
+                                onFileSelected: (file) async {
+                                  Uint8List imageData = await file.readAsBytes();
+                                  try {
+                                    var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
+                                    final publicUrl = await DbImages.uploadImage(
+                                      compressedImageData,
+                                      _isOccasion ? _occasion!.id : null,
+                                      !_isOccasion ? _unit.id : null
+                                    );
+                                    await _updateBanner(publicUrl);
+                                    return publicUrl;
+                                  } catch (e) {
+                                      if(mounted) ToastHelper.Show(context, EmailTemplatesStrings.settingsUploadFailed, severity: ToastSeverity.NotOk);
+                                    return null;
+                                  }
+                                },
+                                onRemove: () {
+                                    if (_overrideUrl != null) {
+                                      _handleReset();
+                                    }
+                                },
+                              ),
+                          ),
+                      ],
+                    )
+                  ],
                 ),
               ),
-            ],
-          ),
-          children: [
-             // Content Area
-             Column(
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 SelectableText(
-                   _isOccasion 
-                     ? EmailTemplatesStrings.settingsBannerDescriptionOccasion 
-                     : EmailTemplatesStrings.settingsBannerDescriptionOrganization,
-                    style: TextStyle(fontSize: 13, color: ThemeConfig.grey600(context)),
-                 ),
-                 const SizedBox(height: 12),
-                 if (_overrideUrl != null)
-                   AspectRatio(
-                     aspectRatio: 3,
-                     child: _isLoading 
-                      ? const Center(child: CircularProgressIndicator())
-                      : ImageArea(
-                        imageUrl: _overrideUrl,
-                        hint: EmailTemplatesStrings.settingsBannerHint,
-                        onFileSelected: (file) async {
-                          Uint8List imageData = await file.readAsBytes();
-                          try {
-                            var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
-                            final publicUrl = await DbImages.uploadImage(
-                              compressedImageData,
-                              _isOccasion ? _occasion!.id : null,
-                              !_isOccasion ? _unit.id : null
-                            );
-                            await _updateBanner(publicUrl);
-                            return publicUrl;
-                          } catch (e) {
-                             if(mounted) ToastHelper.Show(context, EmailTemplatesStrings.settingsUploadFailed, severity: ToastSeverity.NotOk);
-                            return null;
-                          }
-                        },
-                        onRemove: () {
-                           if (_overrideUrl != null) {
-                              _handleReset();
-                           }
-                        },
-                      ),
-                   )
-                 else
-                   ConstrainedBox(
-                     constraints: const BoxConstraints(maxHeight: 250),
-                     child: _isLoading 
-                      ? const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()))
-                      : ImageArea(
-                        imageUrl: _overrideUrl,
-                        hint: EmailTemplatesStrings.settingsBannerHint,
-                        onFileSelected: (file) async {
-                          Uint8List imageData = await file.readAsBytes();
-                          try {
-                            var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
-                            final publicUrl = await DbImages.uploadImage(
-                              compressedImageData,
-                              _isOccasion ? _occasion!.id : null,
-                              !_isOccasion ? _unit.id : null
-                            );
-                            await _updateBanner(publicUrl);
-                            return publicUrl;
-                          } catch (e) {
-                             if(mounted) ToastHelper.Show(context, EmailTemplatesStrings.settingsUploadFailed, severity: ToastSeverity.NotOk);
-                            return null;
-                          }
-                        },
-                        onRemove: () {
-                           if (_overrideUrl != null) {
-                              _handleReset();
-                           }
-                        },
-                      ),
-                   ),
-               ],
-             )
-          ],
-        ),
-      ),
+            ),
+        ],
+      )
     );
   }
 }
