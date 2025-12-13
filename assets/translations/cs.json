@@ -998,7 +998,9 @@
       "changeOverview": "Přehled změn v objednávce, jako jsou přidané/odebrané položky nebo změny cen.",
       "balanceReasoning": "Podrobné vysvětlení zůstatku objednávky, včetně stavu platby, dlužné částky nebo přeplatku a případných platebních pokynů.",
       "name": "Jméno",
-      "surname": "Příjmení"
+      "surname": "Příjmení",
+      "paymentDetails": "Platební údaje včetně čísla účtu, částky a variabilního symbolu",
+      "remainingTime": "Zbývající čas do splatnosti ve dnech"
     },
     "usage": {
       "resetPassword_title": "Obnovení hesla",
@@ -1021,7 +1023,7 @@
       "title": "Nastavení e-mailu",
       "banner": "Banner e-mailu",
       "bannerDescriptionOccasion": "Tento obrázek se zobrazí v záhlaví všech e-mailů odeslaných pro tuto událost.",
-      "bannerDescriptionOrganization": "Tento obrázek se zobrazí v záhlaví všech e-mailů odeslaných z této organizace, pokud není přepsán konkrétní událostí.",
+      "bannerDescriptionOrganization": "Tento obrázek se zobrazí v záhlaví všech e-mailů odeslaných z této organizace, pokud událost nemá vlastní banner.",
       "bannerHint": "(Doporučený poměr 3:1)",
       "banner_hint": "Klepněte pro nahrání nového banneru",
       "imageUploaded": "Obrázek nahrán",
@@ -1030,7 +1032,7 @@
       "resetConfirmTitle": "Obnovit šablonu",
       "resetConfirmContent": "Opravdu chcete obnovit tuto šablonu do výchozího stavu? Vlastní obsah bude ztracen.",
       "statusLabel": "Stav: ",
-      "statusOccasionOverride": "Použit banner události (Přepis)",
+      "statusOccasionOverride": "Použit banner události",
       "statusUnit": "Používá se baner organizace",
       "statusUnitInherited": "Používá se baner organizace (zděděno)",
       "statusNoBanner": "Žádný banner nenastaven"

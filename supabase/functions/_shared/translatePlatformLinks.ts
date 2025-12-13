@@ -4,16 +4,14 @@ export function translatePlatformLinks(
 ): string {
   const translations: Record<string, Record<string, string>> = {
     cs: {
-      droid: "Pro Android",
-      ios: "Pro iOS",
-      web: "Pro Web",
-      linkText: "Zde",
+      droid: "Stáhnout pro Android",
+      ios: "Stáhnout pro iOS",
+      web: "Otevřít na webu",
     },
     en: {
-      droid: "For Android",
-      ios: "For iOS",
-      web: "For Web",
-      linkText: "Here",
+      droid: "Get Android App",
+      ios: "Get iOS App",
+      web: "Open Web App",
     },
   };
 
@@ -22,12 +20,13 @@ export function translatePlatformLinks(
   return platforms
     .map(
       (platform) => `
-        <p>${t[platform.platform.toLowerCase()] || platform.platform}:
+        <p>
           <a target="_blank" rel="noopener noreferrer" href="${platform.link}">
-            ${t.linkText}
+            ${t[platform.platform.toLowerCase()] || platform.platform}
           </a>
         </p>
       `
     )
     .join("");
 }
+

@@ -3,7 +3,6 @@ CREATE OR REPLACE FUNCTION get_orders_tab_data(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
-SECURITY DEFINER
 AS $$
 DECLARE
     v_orders_data JSONB;
