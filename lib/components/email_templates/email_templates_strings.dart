@@ -19,6 +19,8 @@ class EmailTemplatesStrings {
   static String get subFullOrder => 'EmailTemplates.subs.fullOrder'.tr();
   static String get subChangeOverview => 'EmailTemplates.subs.changeOverview'.tr();
   static String get subBalanceReasoning => 'EmailTemplates.subs.balanceReasoning'.tr();
+  static String get subPaymentDetails => 'EmailTemplates.subs.paymentDetails'.tr();
+  static String get subRemainingTime => 'EmailTemplates.subs.remainingTime'.tr();
 
   // --- Template Usage Details ---
 

@@ -138,11 +138,6 @@ documentation:
 - **Behavior**: Automatically catches errors, parses Supabase/Postgrest
   exceptions, and shows a user-friendly Dialog or Toast.
 
-### 6. Email Infrastructure
-
-- **Service**: We use **MailerSend**.
-- **Logic**: `MailerSendHelper` prepares variables (including Czechoslovak name
-  declension for salutations) and triggers the send.
 
 ## Context
 

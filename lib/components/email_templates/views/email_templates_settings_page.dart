@@ -73,7 +73,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: subs.map<Widget>((sub) {
           if (sub is EmailTemplateSub) {
-            return SelectableText(
+            return Text(
               "{{${sub.code}}}: ${sub.description}",
               style: const TextStyle(fontSize: 14),
             );
@@ -82,19 +82,21 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
         }).toList(),
       );
     } else if (subs is String) {
-      return SelectableText(
+      return Text(
         subs,
         style: const TextStyle(fontSize: 14),
         maxLines: 2,
+        overflow: TextOverflow.ellipsis,
       );
     } else if (subs is Map<String, dynamic>) {
       final subsText = subs.entries
           .map((entry) => "${entry.key}: ${entry.value}".tr())
           .join("\n");
-      return SelectableText(
+      return Text(
         subsText,
         style: const TextStyle(fontSize: 14),
         maxLines: 3,
+        overflow: TextOverflow.ellipsis,
       );
     }
     return const SizedBox();

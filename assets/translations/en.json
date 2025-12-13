@@ -998,7 +998,9 @@
       "changeOverview": "An overview of changes in the order, such as added/removed items or price changes.",
       "balanceReasoning": "A detailed explanation of the order balance, including payment status, amount due or overpaid, and payment instructions if applicable.",
       "name": "Name",
-      "surname": "Surname"
+      "surname": "Surname",
+      "paymentDetails": "The payment details including account number, amount and variable symbol",
+      "remainingTime": "The remaining time until the deadline in days"
     },
     "usage": {
       "resetPassword_title": "Reset Password",
@@ -1021,7 +1023,7 @@
       "title": "Email Settings",
       "banner": "Email Banner",
       "bannerDescriptionOccasion": "This image will be displayed at the top of all emails sent for this event.",
-      "bannerDescriptionOrganization": "This image will be displayed at the top of all emails sent from this organization, unless overridden by a specific event.",
+      "bannerDescriptionOrganization": "This image will be displayed at the top of all emails sent from this organization, unless the event has its own banner.",
       "bannerHint": "(Recommended ratio 3:1)",
       "imageUploaded": "Image uploaded",
       "uploadFailed": "Failed to upload image",
@@ -1029,7 +1031,7 @@
       "resetConfirmTitle": "Reset Template",
       "resetConfirmContent": "Are you sure you want to reset this template to default? Custom content will be lost.",
       "statusLabel": "Status: ",
-      "statusOccasionOverride": "Using Occasion Banner (Override)",
+      "statusOccasionOverride": "Using Occasion Banner",
       "statusUnit": "Using Organization Banner",
       "statusUnitInherited": "Using Organization Banner (Inherited)",
       "statusNoBanner": "No Banner Set"
