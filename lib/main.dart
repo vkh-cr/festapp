@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:fstapp/services/url_strategy_noop.dart' if (dart.library.html) 'package:fstapp/services/url_strategy_web.dart';
+import 'package:fstapp/config/url_strategy_noop.dart' if (dart.library.html) 'package:fstapp/config/url_strategy_web.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_config.dart';
