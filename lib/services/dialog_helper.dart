@@ -368,7 +368,16 @@ class DialogHelper{
               color: Theme.of(context).primaryColor,
             ),
           ),
-          child: TextButton(onPressed: null, child: Text(item.name),),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+              child: Text(
+                item.name,
+                style: TextStyle(
+                  color: ThemeConfig.blackColor(context),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
         );
       },
       onChange: (selected) {
