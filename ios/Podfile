@@ -43,11 +43,5 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
-    # Fix for sqlite3 build warnings
-    if target.name == 'sqlite3'
-      target.build_configurations.each do |config|
-        config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
-      end
-    end
   end
 end
