@@ -18,6 +18,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fstapp/services/time_helper.dart';
+import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/time_travel_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -117,6 +118,9 @@ Future<void> initializeEverything() async {
           onError: (e){ print('Notification helper initialization failed: $e'); });
 
   print('Initialization completed');
+
+  WebStylesHelper.setBodyBackgroundColor(ThemeConfig.appBarColor());
+  WebStylesHelper.setMetaThemeColor(ThemeConfig.seed1);
 }
 
 class MyApp extends StatefulWidget {
