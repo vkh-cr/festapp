@@ -38,7 +38,7 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Application for events.">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -165,6 +165,22 @@
   </script>
 </head>
 <body>
+
+<!-- Monitor visual viewport to fix virtual keyboard issues -->
+<script>
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      // When the keyboard appears/disappears, we can ensure the window scrolls
+      // into view or body height is adjusted. Here we just ensure we are scrolled to top
+      // which often fixes the 'gray bar' issue in Flutter web.
+       window.scrollTo(0, 0);
+       document.body.style.height = window.visualViewport.height + 'px';
+    });
+    window.visualViewport.addEventListener('scroll', () => {
+       window.scrollTo(0, 0);
+    });
+  }
+</script>
 
 <script>
   // Disable swipe back gesture globally
