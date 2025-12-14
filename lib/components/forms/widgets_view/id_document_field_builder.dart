@@ -4,6 +4,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/components/forms/models/holder_models/id_document_field_holder.dart';
 import 'form_field_builders.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'form_helper.dart';
 import '../models/holder_models/form_holder.dart';
 
@@ -78,7 +79,7 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
         fillColor: Colors.transparent,
       ),
       validator: FormBuilderValidators.compose([
-        if (widget.fieldHolder.isRequired) FormBuilderValidators.required(),
+        if (widget.fieldHolder.isRequired) FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty),
       ]),
       valueTransformer: (value) => value?.trim(),
     );

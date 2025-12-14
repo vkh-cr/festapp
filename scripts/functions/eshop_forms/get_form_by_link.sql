@@ -35,7 +35,8 @@ BEGIN
         SELECT jsonb_build_object(
             'code', 400,
             'data', jsonb_build_object(
-                'header_off', f.header_off
+                'header_off', f.header_off,
+                'is_open', f.is_open
             )
         )
         INTO allData

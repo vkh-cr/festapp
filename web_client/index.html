@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festapp</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <!-- Supabase SDK (via CDN for simplicity without bundler, or use module resolution if npm install works) -->
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Flatpickr (Date Picker) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/cs.js"></script>
+    
+    <!-- Main Style -->
+    <link rel="stylesheet" href="/src/theme_config.css">
+    <link rel="stylesheet" href="/src/components/occasion/occasion_card.css">
+    <link rel="stylesheet" href="/src/components/users/user_header.css">
+    <link rel="stylesheet" href="/src/components/feedback/feedback_fab.css">
+    <link rel="stylesheet" href="/src/components/feedback/feedback_dialog.css">
+    <link rel="stylesheet" href="/src/components/forms/form_component.css">
+    <link rel="stylesheet" href="/src/components/forms/order_preview.css">
+    
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            const div = document.createElement('div');
+            div.style.color = 'red';
+            div.style.padding = '20px';
+            div.style.fontFamily = 'monospace';
+            div.style.whiteSpace = 'pre-wrap';
+            div.innerText = 'Global Error: ' + msg + '\n' + url + ':' + line + ':' + col + '\n' + (error ? error.stack : '');
+            document.body.prepend(div);
+            return false;
+        };
+        window.addEventListener('unhandledrejection', function(event) {
+             const div = document.createElement('div');
+            div.style.color = 'red';
+            div.style.padding = '20px';
+            div.style.fontFamily = 'monospace';
+            div.innerText = 'Unhandled Rejection: ' + event.reason;
+            document.body.prepend(div);
+        });
+    </script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header id="universal-header"></header>
+
+        <main>
+            <!-- Search -->
+            <div id="search-container" class="search-container">
+                <i class="material-icons search-icon">search</i>
+                <input type="text" id="event-search" class="search-input" placeholder="Hledat události...">
+                <i class="material-icons clear-icon" id="clear-search">close</i>
+            </div>
+
+            <!-- Content -->
+            <div id="events-grid"></div>
+        </main>
+
+        <!-- FAB -->
+        <div id="feedback-fab"></div>
+        
+        <!-- Loading overlay for Flutter transition -->
+        <div id="flutter-loader">
+             <div class="sp-loader"></div>
+        </div>
+    </div>
+
+    <!-- Application Entry (Module) -->
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

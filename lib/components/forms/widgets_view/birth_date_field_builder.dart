@@ -10,6 +10,7 @@ import 'package:fstapp/components/html/html_view.dart';
 import 'form_field_builders.dart';
 import 'form_helper.dart';
 import '../models/holder_models/form_holder.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class BirthDateFieldBuilder extends StatefulWidget {
   final BirthDateFieldHolder fieldHolder;
@@ -109,7 +110,7 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
           inputFormatters: [LocaleDateInputFormatter(dateFormat: dateFormat)],
           validator: (value) {
             if (widget.fieldHolder.isRequired && value == null) {
-              return FormBuilderValidators.required()(value);
+              return FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty)(value);
             }
             if (value != null) {
               if (effectiveMinAge == 0 || effectiveMaxAge == 0) {

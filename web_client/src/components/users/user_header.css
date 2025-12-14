@@ -1,0 +1,99 @@
+#universal-header {
+    height: var(--header-height);
+    background-color: #19243b; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--spacing-md);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    color: white;
+    transition: transform 0.3s ease-in-out;
+}
+
+.hidden-header {
+    transform: translateY(-100%);
+}
+
+.logo { 
+    height: 70px; 
+    width: 140px;
+    cursor: pointer;
+    /* pure svg, no background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.logo img { 
+    height: 100%; 
+    width: 100%; 
+    object-fit: contain;
+}
+
+.user-actions { display: flex; align-items: center; gap: var(--spacing-md); }
+
+.sign-in-btn {
+    color: white; border: 1px solid white;
+    padding: 8px 16px; border-radius: 28px;
+    background: transparent; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; gap: 8px;
+    text-decoration: none;
+}
+.sign-in-btn:hover { background: rgba(255,255,255,0.1); }
+
+.avatar-circle {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 18px; cursor: pointer;
+    border: 2px solid var(--accent-color);
+}
+.settings-icon { cursor: pointer; font-size: 28px; }
+
+/* Popover */
+.popover-menu {
+    position: absolute;
+    top: 70px; right: 16px;
+    width: 300px;
+    background: var(--card-bg); /* Use theme var */
+    /* If card-bg is dark in dark mode, text needs to be white. Inherits form body usually? */
+    color: var(--text-color);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 16px;
+    display: flex; flex-direction: column;
+    z-index: 200;
+}
+.popover-menu.hidden { display: none; }
+
+.popover-header {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 16px;
+}
+.popover-avatar { width: 60px; height: 60px; font-size: 24px; margin-bottom: 12px; }
+.popover-name { font-weight: bold; font-size: 16px; }
+.popover-email { font-size: 14px; opacity: 0.7; }
+
+.popover-section { margin-bottom: 16px; }
+.popover-section label { font-size: 14px; opacity: 0.8; display: block; margin-bottom: 8px; }
+
+.row { display: flex; justify-content: space-between; align-items: center; }
+.toggle-group { display: flex; background: #eee; border-radius: 8px; padding: 2px; }
+.toggle-group button { 
+    flex: 1; border: none; background: transparent; padding: 6px; cursor: pointer; border-radius: 6px; 
+}
+.toggle-group button.active { background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+/* Dark mode adjustments for toggle */
+body.dark-mode .toggle-group { background: #333; }
+body.dark-mode .toggle-group button.active { background: #555; color: white; }
+
+.popover-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; cursor: pointer; border-radius: 8px;
+    border-top: 1px solid #eee;
+}
+.popover-item:hover { background-color: rgba(0,0,0,0.05); }

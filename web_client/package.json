@@ -1,0 +1,19 @@
+{
+  "name": "festapp-web-client",
+  "version": "0.19.0",
+  "description": "Standalone Web Client for Festapp",
+  "type": "module",
+  "scripts": {
+    "prestart": "node scripts/sync_version.js",
+    "start": "npx http-server . -c-1 -p 8080 --proxy http://localhost:8080?",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "node-localstorage": "^3.0.5"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "jsdom": "^27.3.0"
+  }
+}
