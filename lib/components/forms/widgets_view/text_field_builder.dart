@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/components/forms/widgets_view/phone_input_formatter.dart';
 
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class TextFieldBuilder extends StatelessWidget {
   final FieldHolder fieldHolder;
@@ -45,7 +46,7 @@ class TextFieldBuilder extends StatelessWidget {
     List<String? Function(String?)> validators = [];
 
     if (fieldHolder.isRequired) {
-      validators.add(FormBuilderValidators.required());
+      validators.add(FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty));
     }
 
     if (isEmail) {
@@ -87,7 +88,7 @@ class TextFieldBuilder extends StatelessWidget {
     List<String? Function(String?)> validators = [];
 
     if (fieldHolder.isRequired) {
-      validators.add(FormBuilderValidators.required());
+      validators.add(FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty));
     }
 
     if (isEmail) {

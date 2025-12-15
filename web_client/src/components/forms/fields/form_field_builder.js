@@ -1,0 +1,136 @@
+import { TextFieldBuilder } from './text_field_builder.js';
+import { RadioFieldBuilder } from './radio_field_builder.js';
+import { CheckBoxFieldBuilder } from './check_box_field_builder.js';
+import { TicketFieldBuilder } from './ticket_field_builder.js';
+import { DateFieldBuilder } from './date_field_builder.js';
+import { IdDocumentFieldBuilder } from './id_document_field_builder.js';
+import { FormStrings } from '../form_strings.js';
+
+export class FormFieldBuilder {
+
+    static createFormField(field, formModel) {
+        // Auto-Title Logic
+        if (!field.title || field.title.trim() === '') {
+            field.title = FormFieldBuilder.getAutoTitle(field.type);
+        }
+
+        let fieldComponent = null;
+
+        switch (field.type) {
+            case 'text':
+            case 'name':
+            case 'surname':
+            case 'city':
+            case 'email':
+            case 'phone':
+            case 'birth_year':
+            case 'note':
+            case 'address': 
+            case 'nationality': 
+                fieldComponent = TextFieldBuilder.create(field, formModel);
+                break;
+            case 'id_document': 
+                fieldComponent = IdDocumentFieldBuilder.create(field, formModel);
+                break;
+            case 'sex':
+                 if (!field.options || field.options.length === 0) {
+                     field.options = [
+                         { id: 'male', title: FormStrings.maleLabel },
+                         { id: 'female', title: FormStrings.femaleLabel }
+                     ];
+                     if (!field.isRequired) {
+                         field.options.unshift({ id: '', title: FormStrings.notSpecifiedLabel });
+                     }
+                }
+                fieldComponent = RadioFieldBuilder.create(field, formModel);
+                break;
+            case 'select_one':
+                fieldComponent = RadioFieldBuilder.create(field, formModel);
+                break;
+            case 'select_many':
+                fieldComponent = CheckBoxFieldBuilder.create(field, formModel);
+                break;
+            case 'product_type':
+                 if (field.data && field.data.selection_type === 'select_many') {
+                     fieldComponent = CheckBoxFieldBuilder.create(field, formModel);
+                 } else {
+                     fieldComponent = RadioFieldBuilder.create(field, formModel);
+                 }
+                 break;
+            case 'spot':
+                // Simple fallback: If options exist, use Radio, else Text (hidden id?)
+                // Usually spots are handled via UI map, but for basic data flow:
+                if (field.options && field.options.length > 0) {
+                    fieldComponent = RadioFieldBuilder.create(field, formModel);
+                } else {
+                    fieldComponent = TextFieldBuilder.create(field, formModel);
+                }
+                break;
+            case 'ticket':
+                fieldComponent = TicketFieldBuilder.create(field, formModel);
+                break;
+            case 'birth_date':
+                fieldComponent = DateFieldBuilder.create(field, formModel);
+                break;
+            default:
+                console.warn(`Field type ${field.type} not supported yet.`);
+                if (['text', 'string'].includes(field.type)) {
+                     fieldComponent = TextFieldBuilder.create(field, formModel);
+                }
+                break;
+        }
+
+        if (!fieldComponent) return document.createElement('div');
+
+        const isCard = FormFieldBuilder.isCardDesign(formModel, field);
+        
+        if (isCard) {
+            if (fieldComponent.dataset.skipCardWrapping === 'true') {
+                return fieldComponent;
+            }
+            return FormFieldBuilder.wrapInCard(field, fieldComponent);
+        }
+        
+        return fieldComponent;
+    }
+
+    static getAutoTitle(type) {
+        switch (type) {
+            case 'name': return FormStrings.fieldName;
+            case 'surname': return FormStrings.fieldSurname;
+            case 'email': return FormStrings.fieldEmail;
+            case 'phone': return FormStrings.fieldPhone;
+            case 'city': return FormStrings.fieldCity;
+            case 'birth_year': return FormStrings.fieldBirthYear;
+            case 'birth_date': return FormStrings.fieldBirthDate;
+            case 'note': return FormStrings.fieldNote;
+            case 'address': return FormStrings.fieldAddress;
+            case 'nationality': return FormStrings.fieldNationality;
+            case 'sex': return FormStrings.sexLabel;
+
+            case 'id_document': return FormStrings.fieldIdDocument;
+            default: return '';
+        }
+    }
+
+    static isCardDesign(formModel, field) {
+        if (formModel.isCardDesign) return true;
+        if (field.description && field.description.trim().length > 0) return true;
+        
+        // Check for option descriptions in potential list fields
+        if (['select_one', 'select_many', 'sex'].includes(field.type)) {
+            if (field.options && field.options.some(opt => opt.description && opt.description.trim().length > 0)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    static wrapInCard(field, contentElement) {
+        const card = document.createElement('div');
+        card.className = 'form-field-card'; 
+        card.appendChild(contentElement);
+        return card;
+    }
+}

@@ -5,6 +5,7 @@ import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:fstapp/components/forms/models/form_option_product_model.dart'; // Importing product model.
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import '../models/holder_models/field_holder.dart';
 import '../models/holder_models/form_holder.dart';
 import 'form_helper.dart';
@@ -44,7 +45,7 @@ class CheckboxFieldBuilder {
           curve: Curves.easeInOut,
           child: FormBuilderField<List<FormOptionModel>>(
             name: fieldHolder.id.toString(),
-            validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+            validator: fieldHolder.isRequired ? FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty) : null,
             initialValue: [],
             builder: (FormFieldState<List<FormOptionModel>> field) {
               return Column(
@@ -193,7 +194,7 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
             isRequired: widget.fieldHolder.isRequired,
           ),
           validator: widget.fieldHolder.isRequired
-              ? FormBuilderValidators.required()
+              ? FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty)
               : null,
           options: options,
           activeColor: Theme.of(context).primaryColor,

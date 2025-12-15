@@ -4,6 +4,7 @@ import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/theme_config.dart';
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import '../models/holder_models/field_holder.dart';
 import '../models/holder_models/form_holder.dart';
 import 'form_helper.dart';
@@ -68,7 +69,7 @@ class RadioFieldBuilder {
         child: FormBuilderField<FormOptionModel?>(
           key: ValueKey(fieldHolder.id.toString() + optionsIn.toString()), // Add key to force rebuild
           name: fieldHolder.id.toString(),
-          validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+          validator: fieldHolder.isRequired ? FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty) : null,
           initialValue: null,
           builder: (field) {
             // Use the field's error state to update the card wrapper.
@@ -349,7 +350,7 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
             isRequired: widget.fieldHolder.isRequired,
           ),
           validator:
-          widget.fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+          widget.fieldHolder.isRequired ? FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty) : null,
           options: options,
           orientation: OptionsOrientation.vertical,
           wrapDirection: Axis.vertical,
