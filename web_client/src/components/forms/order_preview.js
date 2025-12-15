@@ -210,7 +210,14 @@ export class OrderPreview {
              
              if (ticketData.spot !== undefined) {
                  tData.hasSpot = true;
-                 tData.rows.push({ label: "Spot", value: ticketData.spot, isSpot: true });
+                 
+                 // Resolve Spot Label
+                 let spotLabel = ticketData.spotName || `Spot #${ticketData.spot}`;
+                 if (ticketData.spotPrice) {
+                     spotLabel += ` (${ticketData.spotPrice} ${totalPriceData.currency})`;
+                 }
+                 
+                 tData.rows.push({ label: OrdersStrings.gridSpot || "Spot", value: spotLabel, isSpot: true });
              }
              
              if (ticketData.fields) {

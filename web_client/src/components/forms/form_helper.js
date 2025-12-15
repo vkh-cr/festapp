@@ -139,6 +139,11 @@ export class FormHelper {
              tickets.forEach((ticket, tIdx) => {
                   totalItems++; // 1 Ticket = 1 Item
                   
+                  // Spot Price
+                  if (ticket.spotPrice) {
+                      totalPrice += ticket.spotPrice;
+                  }
+
                   if (ticket.fields && Array.isArray(ticket.fields)) {
                       ticket.fields.forEach(fObj => {
                            // Refactored to avoid double counting from multiple keys (e.g. type + product_type)

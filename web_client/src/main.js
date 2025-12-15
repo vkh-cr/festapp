@@ -1,3 +1,4 @@
+import './theme_config.css';
 import { AppConfig } from './app_config.js';
 import { SupabaseService } from './services/supabase_service.js';
 import { RouterService } from './services/router_service.js';
@@ -6,6 +7,7 @@ import { ThemeService } from './services/theme_service.js';
 import { UnitPage } from './components/unit/unit_page.js';
 import { UserHeader } from './components/users/user_header.js';
 import { FeedbackFab } from './components/feedback/feedback_fab.js';
+import { ImageLoader } from './utils/image_loader.js';
 
 class Main {
     static async init() {
@@ -15,6 +17,7 @@ class Main {
             SupabaseService.init(AppConfig.supabaseUrl, AppConfig.anonKey);
             await LocalizationService.init();
             ThemeService.init();
+            ImageLoader.init(); // Initialize Image Loader
 
             // 2. Check Routing (SPA Support)
             if (await RouterService.handleInitialLoad()) {
@@ -22,14 +25,18 @@ class Main {
                  return; 
             }
             
+            // Not a form page, show the home app
+            const app = document.getElementById('app');
+            if (app) app.style.display = 'flex';
+            
             // 3. Init UI Components
             UserHeader.init('universal-header');
-            UserHeader.init('universal-header');
-            UnitPage.init('events-grid', 'event-search');
+            const unitPage = new UnitPage('events-grid');
+            unitPage.init('event-search');
             FeedbackFab.init('feedback-fab');
     
             // 4. Initial Fetch
-            UnitPage.loadOccasions(AppConfig.organization);
+            unitPage.loadOccasions(AppConfig.organization);
             
             // Init PopState for SPA nav
             RouterService.initPopStateListener();

@@ -10,12 +10,8 @@
     top: 0;
     z-index: 100;
     color: white;
-    transition: transform 0.3s ease-in-out;
 }
 
-.hidden-header {
-    transform: translateY(-100%);
-}
 
 .logo { 
     height: 70px; 

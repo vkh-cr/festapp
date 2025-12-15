@@ -1,6 +1,6 @@
 /* Form Page Layout */
 #form-page-container {
-    padding: 0 10px 20px 10px; 
+    padding: 24px 10px 20px 10px; 
     max-width: var(--form-max-width, 600px); /* Reduced default or from var */
     margin: 0 auto;
     font-family: var(--font-family-base, inherit);
@@ -266,12 +266,24 @@ body.dark-mode .option-description {
 }
 
 .btn-remove-ticket {
-    background: none;
+    background: transparent;
     border: none;
-    color: var(--red-color);
-    font-size: calc(1.2em * var(--font-scale));
+    color: var(--text-color, #777); /* Softer default color */
+    font-size: calc(1.8em * var(--font-scale)); /* Larger icon */
     cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+.btn-remove-ticket:hover {
+    background-color: rgba(220, 53, 69, 0.1); /* Light red background on hover */
+    color: var(--red-color);
+}
+
 
 .btn-add-ticket {
     margin-bottom: 32px; /* Increased space below add button */

@@ -1,4 +1,4 @@
-import { FormPage } from '../form_page.js'; // Needed for reference or similar? No, should be independent.
+import { ColorUtils } from '../../../utils/color_utils.js';
 
 export class PriceWidget {
     constructor(formSession, container) {
@@ -47,19 +47,24 @@ export class PriceWidget {
             } else {
                 this.container.appendChild(this.element);
             }
-            
+
             // Apply Styling
             const formModel = this.session.formModel;
             const primaryColor = formModel.primaryColor || 'var(--primary-color)';
             
+            let textColor = 'white';
+            if (primaryColor.startsWith('#')) {
+                 textColor = ColorUtils.isLight(primaryColor) ? 'black' : 'white';
+            }
+
             this.element.style.cssText = `
                 position: -webkit-sticky; /* Safari */
                 position: sticky;
                 top: 16px;
-                z-index: 1000;
+                z-index: 2005; /* Above Blueprint Modal */
                 
                 background-color: ${primaryColor};
-                color: white;
+                color: ${textColor};
                 padding: 12px 16px;
                 border-radius: 8px;
                 box-shadow: 0 4px 6px rgba(0,0,0,0.3);
@@ -90,7 +95,7 @@ export class PriceWidget {
             // Let's try explicit sticky behavior.
             this.element.style.position = 'sticky';
             this.element.style.top = '16px';
-            this.element.style.zIndex = '1000';
+            this.element.style.zIndex = '2005'; /* Above Blueprint Modal */
             this.element.style.width = 'fit-content';
             this.element.style.marginLeft = 'auto'; // Right align
             this.element.style.marginRight = '16px';

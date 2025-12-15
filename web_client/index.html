@@ -18,38 +18,18 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/cs.js"></script>
     
-    <!-- Main Style -->
-    <link rel="stylesheet" href="/src/theme_config.css">
-    <link rel="stylesheet" href="/src/components/occasion/occasion_card.css">
-    <link rel="stylesheet" href="/src/components/users/user_header.css">
-    <link rel="stylesheet" href="/src/components/feedback/feedback_fab.css">
-    <link rel="stylesheet" href="/src/components/feedback/feedback_dialog.css">
-    <link rel="stylesheet" href="/src/components/forms/form_component.css">
-    <link rel="stylesheet" href="/src/components/forms/order_preview.css">
+    <!-- Main Style (Inject via JS) -->
     
     <script>
+        // Simple console logger for development; could be replaced by a proper service
         window.onerror = function(msg, url, line, col, error) {
-            const div = document.createElement('div');
-            div.style.color = 'red';
-            div.style.padding = '20px';
-            div.style.fontFamily = 'monospace';
-            div.style.whiteSpace = 'pre-wrap';
-            div.innerText = 'Global Error: ' + msg + '\n' + url + ':' + line + ':' + col + '\n' + (error ? error.stack : '');
-            document.body.prepend(div);
+            console.error('Global Error:', msg, url, line, col, error);
             return false;
         };
-        window.addEventListener('unhandledrejection', function(event) {
-             const div = document.createElement('div');
-            div.style.color = 'red';
-            div.style.padding = '20px';
-            div.style.fontFamily = 'monospace';
-            div.innerText = 'Unhandled Rejection: ' + event.reason;
-            document.body.prepend(div);
-        });
     </script>
 </head>
 <body>
-    <div id="app">
+    <div id="app" style="display: none;">
         <!-- Header -->
         <header id="universal-header"></header>
 
@@ -74,7 +54,22 @@
         </div>
     </div>
 
+    <div id="form-page-container" style="display: none;"></div>
+
     <!-- Application Entry (Module) -->
     <script type="module" src="/src/main.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>

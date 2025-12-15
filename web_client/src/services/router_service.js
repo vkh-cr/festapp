@@ -29,7 +29,11 @@ export class RouterService {
         RouterService._lastPath = path; // Update tracker
         RouterService.pushState(path);
         const { FormPage } = await import('../components/forms/form_page.js');
-        FormPage.init(link, { onBack: RouterService.goBackProgrammatically }); // SPA Navigation
+        // Instantiate using correct container (legacy id preserved)
+        // Ensure to remove old instance if tracked via singleton in FormPage (which we removed)
+        // Since we are moving to instance based, the Router should probably hold the current page reference
+        // but for now, we just create new one which cleans up previous by id.
+        new FormPage('form-page-container').init(link, { onBack: RouterService.goBackProgrammatically });
     }
 
     static navigateToLogin() {
@@ -62,7 +66,7 @@ export class RouterService {
             console.log("Detected form link:", cleanLink);
             if (cleanLink) {
                 const { FormPage } = await import('../components/forms/form_page.js');
-                FormPage.init(cleanLink, { onBack: RouterService.goBackProgrammatically });
+                new FormPage('form-page-container').init(cleanLink, { onBack: RouterService.goBackProgrammatically });
                 return true; // Handled
             }
         }
@@ -85,7 +89,7 @@ export class RouterService {
             if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {
                  const link = path.substring(RouterService.FORM_PATH_PREFIX.length).split('/')[0];
                  const { FormPage } = await import('../components/forms/form_page.js');
-                 FormPage.init(link, { onBack: RouterService.goBackProgrammatically }); 
+                 new FormPage('form-page-container').init(link, { onBack: RouterService.goBackProgrammatically }); 
             } else {
                  window.location.reload(); 
             }

@@ -14,6 +14,7 @@ export class CommonStrings {
     static get cancel() { return LocalizationService.tr('Cancel'); }
     static get reset() { return LocalizationService.tr('Reset'); }
     static get search() { return LocalizationService.tr('Search'); }
+    static get remove() { return LocalizationService.tr('Remove'); }
     
     // Nouns
     static get title() { return LocalizationService.tr('Title'); }

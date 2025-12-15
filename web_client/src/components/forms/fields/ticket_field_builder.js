@@ -3,6 +3,8 @@ import { FormStrings } from '../form_strings.js';
 import { CommonStrings } from '../../shared/common_strings.js';
 import { OrdersStrings } from '../../eshop/orders_strings.js';
 import { FormHelper } from '../form_helper.js';
+import { BlueprintSelector } from '../../blueprint/blueprint_selector.js';
+import { DbForms } from '../db_forms.js';
 
 export class TicketFieldBuilder {
     static _uniqueIndexCounter = 0;
@@ -17,41 +19,39 @@ export class TicketFieldBuilder {
         container.dataset.fieldId = field.id;
 
         const subFields = field.subFields || field.fields || (field.data && field.data.fields) || [];
-        // Check for 'spot' field to determine mode
-        // Flutter logic: if (ticket.fields.none((f) => f.fieldType == FormHelper.fieldTypeSpot)) -> Simple Mode
         const hasSpotField = subFields.some(f => f.type === 'spot');
+
+        // Blueprint Button Logic
+        if (formModel.blueprint) {
+             const blueprintBtn = document.createElement('button');
+             blueprintBtn.type = 'button';
+             blueprintBtn.className = 'btn btn-primary btn-block'; // Bootstrap classes for full width/margin
+             blueprintBtn.style.width = '100%';
+             blueprintBtn.style.marginBottom = '24px';
+             blueprintBtn.innerHTML = `<i class="material-icons" style="vertical-align: middle; margin-right: 8px;">event_seat</i> ${FormStrings.seatSelection || 'Select Seat'}`;
+             
+             blueprintBtn.onclick = () => {
+                 const selector = new BlueprintSelector();
+                 selector.open(formModel, field, () => {
+                     // Callback for update
+                     // Do NOT reload page. Just trigger update.
+                     // The optimistic update in selector might have happened.
+                     // We might want to dispatch an input event to notify listeners
+                     container.dispatchEvent(new Event('input', { bubbles: true }));
+                 });
+             };
+             
+             container.appendChild(blueprintBtn);
+        }
 
         if (!hasSpotField) {
             // --- Simple Mode (Direct Fields) ---
-            // Render subfields directly, no "Item 1", no "Add Ticket" button.
-            // Implicitly always 1 ticket (or handled by backend as flat fields mapped to ticket).
             
-            // We still need a container to hold the fields, but it should look seamless.
-            // Actually, we should just iterate subFields and append them.
-            // BUT, we need to respect the "Ticket" nesting for FormModel/Submission?
-            // "TicketFieldBuilder.create" returns a single Element.
-            
-            // Render the single implicit ticket item's fields
+            // Render subfields directly
             subFields.forEach(subDef => {
-                // We namespace IDs to ticket_0 for consistency with "Item 1" logic in submission?
-                // Flutter's simple mode: `ticket.tickets[0].ticketKey`
-                // So yes, it is effectively the first ticket.
-                // We must namespace it so `calculateTotal` and `submitOrder` can find it.
-                // The index is 0.
-                
-                // We must namespace it so `calculateTotal` and `submitOrder` can find it.
-                // The index is 0.
-                
                 const scopedDef = { ...subDef, id: FormHelper.getTicketInputName(field.id, 0, subDef.id) };
                 
-                // User Request: "is_ticket_field this field will be replace by fields that are product fields"
-                // ...
-                // "replaced by all products. so first product, then other follows."
-                
-                // Ensure options are populated if it is a product_type
-                // This logic normally belongs in Model parsing, but let's ensure it here for the builder.
                 if (scopedDef.type === 'product_type' && scopedDef.data && scopedDef.data.product_type_data && scopedDef.data.product_type_data.products) {
-                     // Map products to options if not already done
                      if (!scopedDef.options || scopedDef.options.length === 0) {
                          scopedDef.options = scopedDef.data.product_type_data.products.map(p => ({
                              id: p.id,
@@ -63,14 +63,6 @@ export class TicketFieldBuilder {
                 }
 
                 if (scopedDef.type === 'product_type') {
-                     // In Simple Mode, we probably want the label to show what it is (e.g. "Select Entry").
-                     // So I will NOT set _hideLabel here.
-                     // But wait, the previous request was specific about "Ticket Type Field".
-                     // Maybe they meant the PARENT Ticket Field?
-                     // "is_ticket_field this field will be replace by fields that are product fields."
-                     // This refers to the PARENT. 
-                     // So the PARENT label ("Tickets") is gone.
-                     // The CHILD label ("Ticket Type") should probably remain?
                      delete scopedDef._hideLabel; 
                 }
 
@@ -82,10 +74,7 @@ export class TicketFieldBuilder {
 
         } else {
             // --- Complex Mode (Seat Selection / Multiple Items) ---
-            // Keep existing logic (Item 1, Add Button, etc)
             
-            // Label
-            // Check previous logic for generic label hiding
              if (field.title && field.title !== 'Tickets' && field.title !== OrdersStrings.tickets) {
                  const label = document.createElement('label');
                  label.className = 'form-field-label';
@@ -99,76 +88,153 @@ export class TicketFieldBuilder {
                 desc.innerHTML = field.description;
                 container.appendChild(desc);
             }
-            
+
             const listContainer = document.createElement('div');
             listContainer.className = 'tickets-list';
             container.appendChild(listContainer);
             
-            // Add Button
-            const addBtn = document.createElement('button');
-            addBtn.type = 'button';
-            addBtn.className = 'btn btn-secondary btn-sm btn-add-ticket';
-            addBtn.textContent = `+ ${FormStrings.addTicket}`;
-            
-            const addTicketItem = () => {
-                // ... (Existing implementation of addTicketItem)
+            // --- Helper to Add Ticket Item ---
+            const addTicketItem = (seat = null) => {
                 const index = listContainer.children.length;
                 const ticketItem = document.createElement('div');
                 ticketItem.className = 'ticket-item';
-                // Store index for robust data reading (persists even if siblings removed)
-                // Actually, if we delete, we want to maintain the link to the input name.
-                // But wait, if we delete item 0, item 1 keeps index 1 input names? 
-                // Yes, that works if Reader reads index 1.
-                // However, we re-label visual "Item 1". 
-                // That's fine. Visual != Internal ID.
-                // To avoid ID collisions on "Add" after "Delete", we should probably use a unique counter, not length.
-                
-                // Let's use a closure counter or just Date.now() suffix? 
-                // No, simplest is to use current length but allow gaps if we used a monotonic counter.
-                // But listContainer.children.length shrinks.
-                // If I have [0, 1]. Delete 0. Layout [1]. Length 1. Next Add gets index 1.
-                // COLLISION! Old Ticket 1 has inputs `ticket_1`. New Ticket 1 has inputs `ticket_1`.
-                // WE MUST USE A MONOTONIC COUNTER.
-                
                 ticketItem.dataset.index = TicketFieldBuilder._uniqueIndexCounter++; 
                 
                 const header = document.createElement('div');
                 header.className = 'ticket-header';
+                
                 const titleSpan = document.createElement('span');
-                titleSpan.textContent = `${FormStrings.ticket} ${index + 1}`;
+                titleSpan.style.fontWeight = 'bold';
+                titleSpan.style.fontSize = '1.3rem'; 
+
+                // If it's a seat ticket, show seat name instead of "Ticket X"
+                if (seat && seat.objectModel) {
+                    titleSpan.textContent = seat.objectModel.name || `${FormStrings.ticket} ${index + 1}`;
+                } else {
+                    titleSpan.textContent = `${FormStrings.ticket} ${index + 1}`;
+                }
                 header.appendChild(titleSpan);
 
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
-                // Use only custom class for clean icon look (no btn-danger background)
                 removeBtn.className = 'btn-remove-ticket'; 
                 removeBtn.title = CommonStrings.remove;
-                removeBtn.innerHTML = '<i class="material-icons">delete_outline</i>';
+                // Use 'close' (x) icon as requested in previous tasks, ensuring consistency
+                removeBtn.innerHTML = '<i class="material-icons">close</i>';
                 
-                removeBtn.onclick = () => {
+                removeBtn.onclick = async () => {
+                    // API Deselection
+                    if (seat && container.dataset.secret) {
+                        try {
+                             DbForms.selectSpot(formModel.key, container.dataset.secret, seat.id, false)
+                                .catch(e => console.error("Deselection failed", e));
+                        } catch (e) {
+                            console.error("Deselection error", e);
+                        }
+                    }
+
                     listContainer.removeChild(ticketItem);
+                    
+                    // Always update indices
                     Array.from(listContainer.children).forEach((child, i) => {
                        const span = child.querySelector('.ticket-header span');
-                       if (span) span.textContent = `${FormStrings.ticket} ${i + 1}`;
+                       // Only update if it contains "Ticket" string to avoid overwriting custom names?
+                       // User request: "ticket numbers must be refreshed".
+                       // If we display seat name in header, we shouldn't change it to "Ticket X".
+                       // But if it IS "Ticket X", we update it.
+                       if (span && span.textContent.startsWith(FormStrings.ticket)) {
+                           span.textContent = `${FormStrings.ticket} ${i + 1}`;
+                       }
                     });
-                    // Dispatch input event to trigger price update
+                    
+                    // If seat was removed, update selectedSeats locally
+                    if (container.selectedSeats && seat) {
+                        container.selectedSeats = container.selectedSeats.filter(s => s.id !== seat.id);
+                    }
+
                     container.dispatchEvent(new Event('input', { bubbles: true }));
                 };
                 header.appendChild(removeBtn);
                 ticketItem.appendChild(header);
                 
-                // ... (subfields logic)
-                
-                // subfields logic...
                 const currentIndex = ticketItem.dataset.index;
 
-                if (subFields.length > 0) {
-                    subFields.forEach(subDef => {
+                // Sort fields to ensure Spot is first
+                const sortedSubFields = [...subFields].sort((a, b) => (a.type === 'spot' ? -1 : 1));
+
+                if (sortedSubFields.length > 0) {
+                    sortedSubFields.forEach(subDef => {
+                        // Create scoped definition
                         const scopedDef = { ...subDef, id: FormHelper.getTicketInputName(field.id, currentIndex, subDef.id) };
-                        // ... existing logic ...
-                        if (scopedDef.type === 'spot') { scopedDef.isRequired = true; }
-                        if (scopedDef.type === 'spot') { scopedDef.isRequired = true; }
-                        // if (scopedDef.type === 'product_type') { scopedDef._hideLabel = true; } // User requested to show title
+                        
+                        // --- SPOT FIELD HANDLING ---
+                        if (scopedDef.type === 'spot') { 
+                            scopedDef.isRequired = true; 
+                            
+                            // If we have a seat, we do special rendering
+                            if (seat) {
+                                // 1. Hidden Value Input
+                                
+                                let priceVal = 0;
+                                let currency = FormStrings.currencyDefault || 'CZK'; 
+                                let productTitle = '';
+                                
+                                const product = seat.productModel || (typeof seat.product === 'object' ? seat.product : null);
+                                
+                                if (product) {
+                                    productTitle = product.title || '';
+                                    if (product.price) {
+                                        priceVal = product.price;
+                                    }
+                                    if (product.currency) {
+                                        currency = product.currency;
+                                    } else if (formModel.currencyCode) {
+                                        currency = formModel.currencyCode;
+                                    }
+                                }
+
+                                const seatName = seat.title || seat.name || `Seat #${seat.id}`;
+
+                                const hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = scopedDef.id;
+                                hiddenInput.value = seat.id;
+                                hiddenInput.dataset.name = seatName; 
+                                if (priceVal > 0) hiddenInput.dataset.price = priceVal; 
+                                
+                                ticketItem.appendChild(hiddenInput);
+
+                                // 2. Visible Read-Only Input (Display) - Using DIV to allow HTML (Price Color)
+                                const displayContainer = document.createElement('div');
+                                displayContainer.className = 'form-field-container';
+                                
+                                const label = document.createElement('label');
+                                label.className = 'form-field-label';
+                                label.textContent = scopedDef.title || OrdersStrings.gridSpot || 'Spot';
+                                displayContainer.appendChild(label);
+                                
+                                // Use a DIV that looks like a readonly input to allow rich text (colored price)
+                                const displayDiv = document.createElement('div');
+                                displayDiv.className = 'form-control'; // Bootstrap rendering
+                                // Mimic read-only appearance
+                                displayDiv.style.backgroundColor = 'var(--bs-secondary-bg, #e9ecef)'; 
+                                displayDiv.style.opacity = '1';
+                                displayDiv.style.display = 'flex';
+                                displayDiv.style.alignItems = 'center';
+
+                                // Format: "ProductTitle - SpotTitle + Price Currency"
+                                // Matching Radio/Checkbox style: <span class="option-price">+Price Currency</span>
+                                const priceHtml = priceVal > 0 ? `&nbsp;<span class="option-price">+${priceVal} ${currency}</span>` : '';
+                                const prefix = productTitle ? `${productTitle} - ` : '';
+                                
+                                displayDiv.innerHTML = `<span>${prefix}${seatName}</span>${priceHtml}`;
+                                
+                                displayContainer.appendChild(displayDiv);
+                                ticketItem.appendChild(displayContainer);
+                                
+                                return; 
+                            }
+                        }
                         
                         const subComp = FormFieldBuilder.createFormField(scopedDef, formModel);
                         ticketItem.appendChild(subComp);
@@ -183,23 +249,77 @@ export class TicketFieldBuilder {
                 listContainer.appendChild(ticketItem);
             };
     
-            addBtn.onclick = () => {
+            // --- Logic Branch: Blueprint vs Manual ---
+            
+            if (hasSpotField && formModel.blueprint) {
+                // BLUEPRINT MODE
+                
+                // 1. Maintain state of selected seats on the container
+                container.selectedSeats = []; 
+                // container.dataset.secret stored via callback
+
+                // 2. Blueprint Button Logic (Override previous button)
+                const existingBtn = container.querySelector('button.btn-primary'); // The one created at top
+                if (existingBtn) {
+                    existingBtn.onclick = () => {
+                         const selector = new BlueprintSelector();
+                         // Pass current seats to selector
+                         selector.open(formModel, field, container.selectedSeats, (newSeats, secret) => {
+                             // Update UI with new seats
+                             
+                             // Store secret for removal / submission
+                             if (secret) {
+                                 container.dataset.secret = secret;
+                                 
+                                 // Add hidden input for final submission if not exists
+                                 let secretInput = container.querySelector('input[name="blueprint_secret"]');
+                                 if (!secretInput) {
+                                     secretInput = document.createElement('input');
+                                     secretInput.type = 'hidden';
+                                     secretInput.name = 'blueprint_secret';
+                                     container.appendChild(secretInput);
+                                 }
+                                 secretInput.value = secret;
+                             }
+
+                             // 1. Clear existing tickets
+                             listContainer.innerHTML = '';
+                             
+                             // 2. Update state
+                             container.selectedSeats = newSeats || [];
+                             
+                             // 3. Re-create tickets
+                             container.selectedSeats.forEach(seat => {
+                                 addTicketItem(seat);
+                             });
+                             
+                             // 4. Trigger update
+                             container.dispatchEvent(new Event('input', { bubbles: true }));
+                         });
+                    };
+                }
+                
+                // Do NOT add "Add Ticket" button
+                // Do NOT add initial ticketItem (unless we want to start empty)
+                
+            } else {
+                // MANUAL MODE (Original Behavior)
+                
+                // Add Button
+                const addBtn = document.createElement('button');
+                addBtn.type = 'button';
+                addBtn.className = 'btn btn-secondary btn-sm btn-add-ticket';
+                addBtn.textContent = `+ ${FormStrings.addTicket}`;
+                
+                addBtn.onclick = () => {
+                    addTicketItem();
+                    container.dispatchEvent(new Event('input', { bubbles: true }));
+                };
+                container.appendChild(addBtn);
+                
+                // Default 1 ticket
                 addTicketItem();
-                // Dispatch input event to trigger price update
-                container.dispatchEvent(new Event('input', { bubbles: true }));
-            };
-            container.appendChild(addBtn);
-            
-            // Initial item
-            addTicketItem();
-            // Don't dispatch for initial item to avoid double-init logic issues, 
-            // or do we? FormPage has initial render timeout.
-            
-            // Modify removeBtn in addTicketItem to dispatch too
-            // We need to intercept the removeBtn logic we just defined inside addTicketItem?
-            // Yes, I need to rewrite addTicketItem significantly to inject the dispatch, 
-            // OR I can use the trick of modifying the replacement content to include the full function.
-            // But verify scope.
+            }
     
             return container;
         }

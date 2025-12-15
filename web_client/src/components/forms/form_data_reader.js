@@ -12,9 +12,15 @@ export class FormDataReader {
         const payload = {
             fields: [],
             ticket: [],
-            [DbForms.metaSecret]: formModel.secret, 
+        [DbForms.metaSecret]: formModel.secret, 
             [DbForms.metaForm]: formModel.key
         };
+
+        // Extract Blueprint Secret (if any)
+        const blueprintSecret = formData.get('blueprint_secret');
+        if (blueprintSecret) {
+            payload['secret'] = blueprintSecret; 
+        }
 
         // --- Helper: Find Option for Meta Data (Currency, Price, etc.) ---
         const findOption = (fieldOrSub, value) => {
@@ -108,8 +114,23 @@ export class FormDataReader {
 
                     // --- Processing Logic Same as Before ---
                     if (sub.type === 'spot') {
-                        ticketObj['spot'] = parseInt(rawVals[0]);
-                    } 
+                        const val = parseInt(rawVals[0]);
+                        ticketObj['spot'] = val;
+                        
+                        // Extract Price from DOM if available
+                        // The input name is constructed as: `${field.id}_${indexKey}_${sub.id}`
+                        // (Note: `indexKey` from Object.keys might be string, but `index` in form is integer)
+                        const inputName = `${field.id}_${indexKey}_${sub.id}`;
+                        const inputEl = form.querySelector(`input[name="${inputName}"]`);
+                        if (inputEl) {
+                        if (inputEl.dataset.price) {
+                            ticketObj['spotPrice'] = parseFloat(inputEl.dataset.price);
+                        }
+                        if (inputEl.dataset.name) {
+                            ticketObj['spotName'] = inputEl.dataset.name;
+                        }
+                    }
+                }
                     else if (sub.type === 'product_type') {
                         // Product Types (always array of objects)
                         rawVals.forEach(v => {

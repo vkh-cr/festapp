@@ -46,6 +46,7 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     overflow-y: scroll;
+    min-height: 100vh;
 }
 
 a {
@@ -138,4 +139,35 @@ main {
     color: #999;
     cursor: pointer;
     display: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+/* Dark mode adjust */
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+/* Image Smooth Loading */
+img.smooth-load {
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+}
+img.smooth-load.loaded {
+    opacity: 1;
 }

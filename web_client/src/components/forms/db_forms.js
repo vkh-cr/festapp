@@ -42,4 +42,48 @@ export class DbForms {
         
         return [];
     }
+    static async getBlueprint(secret, formKey, blueprintId) {
+        const client = SupabaseService.getClient();
+        if (!client) throw new Error("Supabase client not initialized");
+
+        const { data, error } = await client.rpc('get_blueprint', {
+            my_secret: secret,
+            form_key: formKey,
+            blueprint_id: blueprintId
+        });
+
+        if (error) {
+            console.error("Error fetching blueprint:", error);
+            return null;
+        }
+
+        if (data && data.code === 200) {
+            return data.data; // Return the inner data object
+        }
+        
+        return null;
+    }
+
+    static async selectSpot(formKey, secret, spotId, selecting) {
+        const client = SupabaseService.getClient();
+        if (!client) throw new Error("Supabase client not initialized");
+
+        const { data, error } = await client.rpc('select_spot', {
+            form_key: formKey,
+            secret_id: secret,
+            spot_id: spotId,
+            selecting: selecting
+        });
+
+        if (error) {
+            console.error("Error selecting spot:", error);
+            throw new Error(error.message);
+        }
+
+        if (data && data.code !== 200) {
+            throw new Error(data.message || "Selection failed");
+        }
+        
+        return true;
+    }
 }

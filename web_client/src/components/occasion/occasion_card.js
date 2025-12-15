@@ -1,3 +1,4 @@
+import './occasion_card.css';
 import { LocalizationService } from '../../services/localization_service.js';
 import { RouterService } from '../../services/router_service.js';
 import { TimeHelper } from '../../services/time_helper.js';
@@ -52,22 +53,36 @@ export class OccasionCard {
         // Date String (Simplified for now, assumes TimeHelper exists and works)
         const dateStr = TimeHelper.getMinimalisticDateRange(new Date(occasion.start_time), new Date(occasion.end_time), LocalizationService.currentLocale);
         
-        // External Price Badge
-        let priceBadge = '';
+        const infoRow = document.createElement('div');
+        infoRow.className = 'oc-info-row';
+        infoRow.style.display = 'flex';
+        infoRow.style.justifyContent = 'space-between';
+        infoRow.style.alignItems = 'flex-start';
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'oc-info';
+
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'oc-date';
+        dateDiv.textContent = dateStr;
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'oc-title';
+        titleDiv.textContent = occasion.title || '';
+
+        infoDiv.appendChild(dateDiv);
+        infoDiv.appendChild(titleDiv);
+        infoRow.appendChild(infoDiv);
+
         const formFeature = FeatureService.getFeatureDetails(FeatureConstants.form, occasion.features);
         if (formFeature && formFeature.formExternalPrice) {
-            priceBadge = `<div class="oc-price-badge">${formFeature.formExternalPrice}</div>`;
+             const badge = document.createElement('div');
+             badge.className = 'oc-price-badge';
+             badge.textContent = formFeature.formExternalPrice;
+             infoRow.appendChild(badge);
         }
 
-        header.innerHTML = `
-            <div class="oc-info-row" style="display:flex; justify-content: space-between; align-items: flex-start;">
-                <div class="oc-info">
-                    <div class="oc-date">${dateStr}</div>
-                    <div class="oc-title">${occasion.title || ''}</div>
-                </div>
-                ${priceBadge}
-            </div>
-        `;
+        header.appendChild(infoRow);
         card.appendChild(header);
 
         return card;

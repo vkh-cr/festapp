@@ -177,6 +177,11 @@ export class FormSession extends EventTarget {
             if (vals.length > 0) {
                  if (sub.type === 'spot') {
                      ticketObj['spot'] = parseInt(vals[0]);
+                     
+                     // Extract Price (Fix for missing price on update)
+                     if (inputs.length > 0 && inputs[0].dataset.price) {
+                         ticketObj['spotPrice'] = parseFloat(inputs[0].dataset.price);
+                     }
                  } else {
                      // Find options for Price/Currency check
                      const findOption = (v) => {

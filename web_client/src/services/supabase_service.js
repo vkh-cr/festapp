@@ -1,6 +1,8 @@
+import { AppConfig } from '../app_config.js';
+
 export class SupabaseService {
     static client = null;
-    static tokenKey = 'sb-kjdpmixlnhntmxjedpxh-auth-token';
+    static tokenKey = AppConfig.Keys.auth;
 
     static init(url, key) {
         if (!window.supabase) {

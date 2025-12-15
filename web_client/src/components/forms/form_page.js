@@ -1,3 +1,7 @@
+
+import './form_component.css';
+import './order_preview.css';
+import { Component } from '../base/component.js';
 import { CommonStrings } from '../shared/common_strings.js';
 import { FormStrings } from './form_strings.js';
 import { FormHelper } from './form_helper.js';
@@ -8,7 +12,7 @@ import { OrderPreview } from './order_preview.js';
 import { DbOrders } from '../eshop/db_orders.js';
 import { RouterService } from '../../services/router_service.js';
 import { ColorUtils } from '../../utils/color_utils.js';
-import { LayoutFixer } from '../../utils/layout_fixer.js';
+// ... (content generated later)
 import { ThemeService } from '../../services/theme_service.js';
 import { FeatureService } from '../features/feature_service.js';
 import { CountdownWidget } from './widgets/countdown_widget.js';
@@ -21,92 +25,90 @@ import { CurrencySelectorWidget } from './widgets/currency_selector_widget.js';
 import { FormValidator } from './form_validator.js';
 import { FormNetwork } from './form_network.js';
 
-export class FormPage {
-    static containerId = 'form-page-container';
-    static _currentPriceWidget = null;
-    static _currentSession = null;
+export class FormPage extends Component {
+    // Keep internal session static for now if needed across hot-reloads, or instance?
+    // Instance is cleaner, but need to be careful with Router callbacks.
+    // Let's go fully instance.
+    constructor(hostId) {
+        super(hostId);
+        this.currentPriceWidget = null;
+        this.currentSession = null;
+        this.currentLink = null;
+        this.onBack = null;
+    }
 
-    static cleanup() {
-        if (FormPage._currentPriceWidget) {
-            FormPage._currentPriceWidget.destroy();
-            FormPage._currentPriceWidget = null;
+    cleanup() {
+        if (this.currentPriceWidget) {
+            this.currentPriceWidget.destroy();
+            this.currentPriceWidget = null;
         }
-        FormPage._currentSession = null;
+        this.currentSession = null;
         // Also remove legacy widget just in case
         const widget = document.getElementById('floating-price-widget');
         if (widget) widget.remove();
+        
+        // Base cleanup
+        super.clear();
     }
     // Timer removed (handled by widgets)
-    static currentLink = null;
+    // static currentLink = null; // Now instance property
+    // static onBack = null; // Callback for back navigation // Now instance property
 
-    static onBack = null; // Callback for back navigation
-
-    static async init(link, options = {}) {
+    async init(link, options = {}) {
         // Reset Ticket Counter to ensure deterministic IDs (0, 1, 2...)
         // This prevents IDs from growing indefinitely and helps debugging.
         TicketFieldBuilder.reset();
 
         // Prevent re-init if same link (e.g. hash change/back from preview)
         // Hardened Check: If container has content, we assume it's valid.
-        let container = document.getElementById(FormPage.containerId);
-        if (FormPage.currentLink === link && container && container.innerHTML.trim() !== '') {
+        // NOTE: this.host is managed by base Component
+        if (this.currentLink === link && this.host && this.host.innerHTML.trim() !== '') {
             console.log('FormPage already initialized for link (Persistent):', link);
             return;
         }
         // Check for existing instance to prevent duplicates or state leaks
-        if (options.onBack) FormPage.onBack = options.onBack;
+        if (options.onBack) this.onBack = options.onBack;
 
-        FormPage.cleanup(); // Clean previous instance if any
+        this.cleanup(); // Clean previous content
 
-        FormPage.currentLink = link;
+        this.currentLink = link;
         
         // Configuration
-        FormPage.onBack = FormPage.onBack || (() => window.history.back()); // Default fallback
+        this.onBack = this.onBack || (() => window.history.back()); // Default fallback
 
         // Standard cleanup logic
         // Widgets handle their own timers now (CountdownWidget)
         // FormPage.cleanup(); // Clean up any previous widget instances - Moved above
 
-        // Init Layout Fixer
-        LayoutFixer.init(FormPage.containerId);
 
-        // Ensure Container
-        if (!container) {
-            container = document.createElement('div');
-            container.id = FormPage.containerId;
-            // Containment for fixed children (Embedding Support)
-            container.style.transform = 'translate(0)'; 
-            document.body.appendChild(container); 
+
+        // Ensure Host
+        if (!this.host) {
+             console.error("FormPage: No host element!");
+             return;
         }
         
         // Clear previous content but DO NOT add a spinner
-        container.innerHTML = '';
-        container.style.display = 'block';
+        this.host.innerHTML = '';
+        // Containment for fixed children (Embedding Support)
+        this.host.style.transform = 'translate(0)'; 
+        this.host.style.display = 'block';
 
-        // Hide other main views
-        const eventsGrid = document.getElementById('events-grid');
-        if (eventsGrid) eventsGrid.style.display = 'none';
-        
-        const searchContainer = document.getElementById('search-container');
-        if (searchContainer) searchContainer.style.display = 'none';
-
-        const header = document.getElementById('universal-header');
-        if (header) header.style.display = 'none';
-        
-        const feedbackFab = document.getElementById('feedback-fab');
-        if (feedbackFab) feedbackFab.style.display = 'none';
+        // Hide the main application container to prevent layout shifts
+        const app = document.getElementById('app');
+        if (app) app.style.display = 'none';
 
         try {
             // 3. Fetch Data
             const formModel = await DbForms.getFormByLink(link);
             
             if (!formModel) {
-                FormPage.renderError(container, FormStrings.formNotFound);
+                this.renderError(FormStrings.formNotFound);
                 return;
             }
 
             // 4. Apply Theme
-            FormPage.applyTheme(formModel);
+            this.applyTheme(formModel);
 
             // --- Availability Check Logic ---
             // Matches Flutter logic exactly
@@ -141,8 +143,8 @@ export class FormPage {
 
             if (showCountdown) {
                  // Pass callback to reload when finished
-                 CountdownWidget.render(container, formModel, () => {
-                     FormPage.init(link);
+                 CountdownWidget.render(this.host, formModel, () => {
+                     this.init(link);
                  });
                  return;
             }
@@ -151,46 +153,46 @@ export class FormPage {
             // Flutter: if (_formNotAvailable || (isClosed && !showPreview && !showCountdown))
             // We use 'isClosed && !showPreview' because showCountdown is already handled above (returned).
             if (isClosed && !showPreview) {
-                 NotAvailableWidget.render(container, formModel);
+                 NotAvailableWidget.render(this.host, formModel);
                  return;
             }
 
             // 5. Render Form
-            FormPage.renderForm(container, formModel, showPreview);
+            this.renderForm(formModel, showPreview);
 
         } catch (e) {
             console.error(e);
-            FormPage.renderError(container, CommonStrings.error + ": " + e.message + "\n" + e.stack);
+            this.renderError(CommonStrings.error + ": " + e.message + "\n" + e.stack);
         }
     }
 
-    static renderLoading(container) {
-        container.innerHTML = `<div class="loading-spinner">${CommonStrings.loading}</div>`;
+    renderLoading() {
+        this.host.innerHTML = `<div class="loading-spinner">${CommonStrings.loading}</div>`;
     }
 
-    static renderError(container, message) {
-        container.innerHTML = `<div class="error-message">${message}</div>`;
+    renderError(message) {
+        this.host.innerHTML = `<div class="error-message">${message}</div>`;
     }
 
     // Delegated to ThemeService
-    static applyTheme(formModel) {
+    applyTheme(formModel) {
         ThemeService.applyThemeFromModel(formModel);
     }
 
-    static renderForm(container, formModel, showPreview) {
+    renderForm(formModel, showPreview) {
         // Initialize Session
         const session = new FormSession(formModel);
-        FormPage._currentSession = session;
+        this.currentSession = session;
         
         // Subscribe to Validation Changes
         session.addEventListener('validation-changed', (e) => {
-            FormValidator.renderErrors(container, e.detail);
+            FormValidator.renderErrors(this.host, e.detail);
         });
 
         // Initialize Widget (it subscribes itself)
-        FormPage._currentPriceWidget = new PriceWidget(session, container);
-        FormRenderer.render(container, formModel, showPreview, {
-            onSubmit: (form, model) => FormPage.validateAndSubmit(form, model),
+        this.currentPriceWidget = new PriceWidget(session, this.host);
+        FormRenderer.render(this.host, formModel, showPreview, {
+            onSubmit: (form, model) => this.validateAndSubmit(form, model),
             onInput: (e, form, model) => {
                 if (e.type === 'input') FormValidator.handleInputValidation(e, form, session);
                 
@@ -204,15 +206,14 @@ export class FormPage {
             }
         });
         
-        new CurrencySelectorWidget(session, container);
+        new CurrencySelectorWidget(session, this.host);
         
-        // Fix layout immediately after render to prevent visible jump
-        LayoutFixer.fixNow(FormPage.containerId);
+
         
         // Handle Currency Filtering
         session.addEventListener('state-changed', (e) => {
             const { currency, previousCurrency } = e.detail;
-            const form = container.querySelector('form'); // Live lookup
+            const form = this.host.querySelector('form'); // Live lookup
             if (!form) return;
 
             // User Request: "deselect all products if you switch the currency"
@@ -238,7 +239,7 @@ export class FormPage {
 
         session.addEventListener('state-changed', (e) => {
              const { currency } = e.detail;
-             const form = container.querySelector('form');
+             const form = this.host.querySelector('form');
              if (!form) return;
              
              const currencyChanged = lastSeenCurrency !== currency;
@@ -267,9 +268,9 @@ export class FormPage {
                      if (el.checkValidity && (el.type === 'radio' || el.type === 'checkbox')) {
                          el.checked = false;
                          // Fix: Hide "Clear Selection" button if present
-                         const container = el.closest('.form-field-container');
-                         if (container) {
-                             const clearBtn = container.querySelector('.btn-clear-selection');
+                         const fieldContainer = el.closest('.form-field-container');
+                         if (fieldContainer) {
+                             const clearBtn = fieldContainer.querySelector('.btn-clear-selection');
                              if (clearBtn) clearBtn.style.display = 'none';
                          }
                      }
@@ -280,9 +281,9 @@ export class FormPage {
                       if (el.checkValidity && (el.type === 'radio' || el.type === 'checkbox') && el.checked) {
                          el.checked = false;
                          // Same fix here
-                         const container = el.closest('.form-field-container');
-                         if (container) {
-                             const clearBtn = container.querySelector('.btn-clear-selection');
+                         const fieldContainer = el.closest('.form-field-container');
+                         if (fieldContainer) {
+                             const clearBtn = fieldContainer.querySelector('.btn-clear-selection');
                              if (clearBtn) clearBtn.style.display = 'none';
                          }
                      }
@@ -299,7 +300,7 @@ export class FormPage {
         
         // Trigger initial update for the price widget
         setTimeout(() => {
-            const form = container.querySelector('form');
+            const form = this.host.querySelector('form');
             if (form) {
                 // Initial syncing
                 // Parse the initial form state (e.g. default values) into the session
@@ -313,76 +314,64 @@ export class FormPage {
         }, 100);
     }
 
-    // --- Validation & Submit Logic (Extracted for clarity) ---
-    
+
     // --- Validation & Submit Logic ---
     
     // Delegated to FormValidator
-    static handleInputValidation(e, form) {
-         // This is now called directly via FormValidator in the renderer callback above, 
-         // but if called from elsewhere:
-         FormValidator.handleInputValidation(e, form, FormPage._currentSession);
+    handleInputValidation(e, form) {
+         FormValidator.handleInputValidation(e, form, this.currentSession);
     }
 
-    static validateAndSubmit(form, formModel) {
-        const isValid = FormValidator.validateAndShowErrors(form, formModel, FormPage._currentSession);
+    validateAndSubmit(form, formModel) {
+        const isValid = FormValidator.validateAndShowErrors(form, formModel, this.currentSession);
         if (isValid) {
-            FormPage.handlePreview(form, formModel);
+            this.handlePreview(form, formModel);
         }
     }
 
-    // _renderErrors removed (delegated to FormValidator)
-
-    
-    // ... calculateTotal, handlePreview, closePreview, submitOrder (Keep existing, assumed valid)
-    static calculateTotal(form, formModel) {
-        if (FormPage._currentSession) {
-            return FormPage._currentSession.state;
+    calculateTotal(form, formModel) {
+        if (this.currentSession) {
+            return this.currentSession.state;
         }
-        // Fallback (Should not be needed if flow is correct)
         const payload = FormDataReader.getPayload(form, formModel);
         return FormHelper.calculatePrice(payload, formModel);
     }
 
-    static handlePreview(form, formModel) {
-        // Validate form before preview? 
-        // existing code did not seem to validate strictly, 
-        // but typically check validity first.
+    handlePreview(form, formModel) {
         if (!form.reportValidity()) return;
 
         import('./order_preview.js').then(({ OrderPreview }) => {
              OrderPreview.show(form, formModel, (overlay) => {
-                 FormPage.submitOrder(form, formModel, overlay || document.body); // Fallback to body if overlay missing
+                 this.submitOrder(form, formModel, overlay || document.body); 
              });
         });
     }
     
-    static closePreview() {
-        // Correct ID: order-preview-overlay
+    closePreview() {
         const overlay = document.getElementById('order-preview-overlay');
         if (overlay) {
             overlay.classList.remove('visible');
             setTimeout(() => {
-                overlay.remove(); // Use remove() instead of display none for cleanup
+                overlay.remove(); 
             }, 300); 
         }
     }
 
-    static submitOrder(form, formModel, unusedContent) {
+    submitOrder(form, formModel, unusedContent) {
         // 1. Close Preview
         const previewOverlay = document.getElementById('order-preview-overlay');
         if (previewOverlay) {
              previewOverlay.remove();
              RouterService.goBackProgrammatically();
         } else {
-             FormPage.closePreview();
+             this.closePreview();
         }
 
         // 2. Show Loader
-        const loader = FormPage._showFullScreenLoader();
+        const loader = this.showFullScreenLoader();
         
         // 3. Prepare Data
-        const payload = FormPage._currentSession ? FormPage._currentSession.payload : FormDataReader.getPayload(form, formModel);
+        const payload = this.currentSession ? this.currentSession.payload : FormDataReader.getPayload(form, formModel);
         
         // 4. Submit via Network
         FormNetwork.submitOrder(payload).then(result => {
@@ -391,26 +380,25 @@ export class FormPage {
              
              if (result.success) {
                  // Reset Form
-                 const container = document.getElementById(FormPage.containerId);
-                 if (container) {
-                     container.innerHTML = '';
-                     FormPage.renderForm(container, formModel, false);
+                 if (this.host) {
+                     this.host.innerHTML = '';
+                     this.renderForm(formModel, false);
                  }
-                 FormPage.cleanup(); 
+                 this.cleanup(); 
                  window.scrollTo(0, 0); 
              }
              
-             FormPage._showFullScreenResult(result.success, result.data, formModel);
+             this.showFullScreenResult(result.success, result.data, formModel);
              
         }).catch(e => {
              console.error("Submit Error:", e);
              loader.remove();
              document.body.style.overflow = ''; 
-             FormPage._showFullScreenResult(false, { code: 999 }, formModel);
+             this.showFullScreenResult(false, { code: 999 }, formModel);
         });
     }
 
-    static _showFullScreenLoader() {
+    showFullScreenLoader() {
         const loader = document.createElement('div');
         loader.className = 'fullscreen-loader-overlay';
         loader.style.cssText = `
@@ -464,7 +452,7 @@ export class FormPage {
         return loader;
     }
 
-    static _showFullScreenResult(success, resultData, formModel) {
+    showFullScreenResult(success, resultData, formModel) {
         // Push State
         RouterService.pushOverlayState('order-result');
 
@@ -496,22 +484,17 @@ export class FormPage {
             
             if (success) {
                     // Reset Form State BEHIND the overlay (redundant but safe)
-                    const formContainer = document.getElementById(FormPage.containerId);
-                    if (formContainer) {
-                        formContainer.innerHTML = '';
-                        FormPage.renderForm(formContainer, formModel, false);
+                    if (this.host) {
+                        this.host.innerHTML = '';
+                        this.renderForm(formModel, false);
                     }
                     // Force remove generic widget if any
-                    FormPage.cleanup(); // Clean up the PriceWidget instance
+                    this.cleanup(); // Clean up the PriceWidget instance
                     
                     // Scroll to top immediately
                     window.scrollTo(0, 0);
             } else {
                     // Failure: Ensure widget is visible (defensive)
-                    // It might have been lost if re-init happened or total check failed.
-                    // We need the form to calculate totals properly.
-                    // The PriceWidget is now managed by FormPage._currentPriceWidget and will re-render if needed.
-                    // No explicit re-render call here, as it's tied to the session.
             }
         };
 
@@ -526,7 +509,7 @@ export class FormPage {
             OrderResult.render(container, success, resultData, formModel, () => {
                 // On Close (Button Click) -> Trigger History Back
                 // This will fire 'popstate', which calls cleanup()
-                if (FormPage.onBack) FormPage.onBack();
+                if (this.onBack) this.onBack();
             });
         });
     }

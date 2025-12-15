@@ -7,7 +7,7 @@ export class LocalizationService {
     static async init() {
         console.log('LocalizationService.init start', { default: AppConfig.defaultLanguage });
         // 1. Load preference
-        const saved = localStorage.getItem('locale');
+        const saved = localStorage.getItem(AppConfig.Keys.locale);
         console.log('LocalizationService: saved locale', saved);
         if (saved && AppConfig.supportedLanguages.includes(saved)) {
             LocalizationService.currentLocale = saved;
@@ -31,7 +31,7 @@ export class LocalizationService {
             if (!res.ok) throw new Error('Translation not found');
             LocalizationService.translations = await res.json();
             LocalizationService.currentLocale = locale;
-            localStorage.setItem('locale', locale);
+            localStorage.setItem(AppConfig.Keys.locale, locale);
             document.documentElement.lang = locale;
             console.log('LocalizationService: translations loaded and locale set to', locale);
         } catch (e) {

@@ -1,3 +1,5 @@
+import './feedback_fab.css';
+import './feedback_dialog.css';
 import { FeedbackDialog } from './feedback_dialog.js';
 import { LocalizationService } from '../../services/localization_service.js';
 import { FeedbackStrings } from './feedback_strings.js';
