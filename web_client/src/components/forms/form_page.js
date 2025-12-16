@@ -13,6 +13,7 @@ import { DbOrders } from '../eshop/db_orders.js';
 import { RouterService } from '../../services/router_service.js';
 import { RightsService } from '../../services/rights_service.js';
 import { ColorUtils } from '../../utils/color_utils.js';
+import { SeoService } from '../../services/seo_service.js';
 // ... (content generated later)
 import { ThemeService } from '../../services/theme_service.js';
 import { FeatureService } from '../features/feature_service.js';
@@ -116,6 +117,9 @@ export class FormPage extends Component {
 
             // 4. Apply Theme
             this.applyTheme(formModel);
+            
+            // 5. Update SEO
+            SeoService.updateMetaTags(formModel);
 
             // --- Availability Check Logic ---
             // Matches Flutter logic exactly

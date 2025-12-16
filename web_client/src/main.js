@@ -14,7 +14,7 @@ class Main {
         try {
             // 1. Init Core Services
             console.log(`Starting Festapp Web Client v${AppConfig.version}`);
-            SupabaseService.init(AppConfig.supabaseUrl, AppConfig.anonKey);
+            // SupabaseService is now eager loaded
             await LocalizationService.init();
             ThemeService.init();
             ImageLoader.init(); // Initialize Image Loader

@@ -10,7 +10,7 @@ export const BlueprintConfig = {
     
     // Interaction
     zoomMinScale: 0.1, // effectively calculated dynamic, but hard limit
-    zoomMaxScale: 10,
+    zoomMaxScale: 5,
     overscrollLimit: 150,
     tapThreshold: 10,
 

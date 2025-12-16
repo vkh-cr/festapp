@@ -2,12 +2,8 @@ import { AppConfig } from '../app_config.js';
 import { createClient } from '@supabase/supabase-js';
 
 export class SupabaseService {
-    static client = null;
+    static client = createClient(AppConfig.supabaseUrl, AppConfig.anonKey);
     static tokenKey = AppConfig.Keys.auth;
-
-    static init(url, key) {
-        SupabaseService.client = createClient(url, key);
-    }
 
     static getClient() {
         return SupabaseService.client;

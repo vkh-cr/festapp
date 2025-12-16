@@ -48,6 +48,14 @@ export class DateFieldBuilder {
         
         wrapper.appendChild(input);
 
+        // Date format hint
+        const hint = document.createElement('div');
+        hint.style.fontSize = '0.8rem';
+        hint.style.color = 'var(--text-color-secondary)';
+        hint.style.marginTop = '4px';
+        hint.textContent = FormStrings.birthDateFormatHint;
+        wrapper.appendChild(hint);
+
         // Age Validation Logic & Limits (Validation ONLY, no picker restriction)
         const minYear = field.data?.min_year || 0;
         const maxYear = field.data?.max_year || 0;
