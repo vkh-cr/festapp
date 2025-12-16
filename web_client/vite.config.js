@@ -33,7 +33,7 @@ export default defineConfig({
       // Using negative lookahead: ^/(?!$|\\?|index\.html|@|node_modules|src|form|favicon|sw\.js|site\.webmanifest).*
       // Note: "assets" is handled by bypass logic below, so we allow it to match regex, but bypass checks FS.
       
-      '^/(?!$|\\?|index\\.html|@|node_modules|src|form|favicon|sw\\.js|site\\.webmanifest|assets).*': {
+      '^/(?!$|\\?|index\\.html|@|node_modules|src|form|favicon|sw\\.js|site\\.webmanifest|robots\\.txt|sitemap\\.xml|assets).*': {
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
@@ -63,5 +63,8 @@ export default defineConfig({
         }
       }
     }
+  },
+  build: {
+    assetsDir: 'web-assets'
   }
 });

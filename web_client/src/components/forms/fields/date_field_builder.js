@@ -1,3 +1,6 @@
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.min.css";
+import { Czech } from "flatpickr/dist/l10n/cs.js";
 import { ThemeService } from '../../../services/theme_service.js';
 import { FormStrings } from '../form_strings.js';
 import { LocalizationService } from '../../../services/localization_service.js';
@@ -74,21 +77,19 @@ export class DateFieldBuilder {
             }
         }
 
-        // Initialize Flatpickr if available
-        if (window.flatpickr) {
-            flatpickr(input, {
+        // Initialize Flatpickr
+        flatpickr(input, {
                 dateFormat: 'Y-m-d', // Standard storage format
                 altInput: true,
                 altFormat: LocalizationService.currentLocale === 'cs' ? 'j. n. Y' : 'F j, Y', // Localized format
                 allowInput: true,
                 disableMobile: true, // Force custom picker
-                locale: LocalizationService.currentLocale, // Dynamic locale
+                locale: LocalizationService.currentLocale === 'cs' ? Czech : 'default', // Dynamic locale
                 // User requested NO limits on calendar picker itself, so we remove minDate/maxDate here
                 // minDate: minDateObj, 
                 // maxDate: maxDateObj,
                 defaultDate: input.value || undefined, 
-            });
-        }
+        });
         
         wrapper.appendChild(input); 
         container.appendChild(wrapper);

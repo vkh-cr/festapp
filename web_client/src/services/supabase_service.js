@@ -1,15 +1,11 @@
 import { AppConfig } from '../app_config.js';
+import { createClient } from '@supabase/supabase-js';
 
 export class SupabaseService {
     static client = null;
     static tokenKey = AppConfig.Keys.auth;
 
     static init(url, key) {
-        if (!window.supabase) {
-            console.error("Supabase SDK not loaded!");
-            return;
-        }
-        const { createClient } = window.supabase;
         SupabaseService.client = createClient(url, key);
     }
 
