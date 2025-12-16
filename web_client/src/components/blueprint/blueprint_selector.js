@@ -23,15 +23,24 @@ export class BlueprintSelector {
         this.renderer = null;
     }
 
-    async open(formModel, field, initialSeats, updateCallback) {
+    async open(session, field, initialSeats) {
+        // Extract from session
+        const formModel = session.formModel;
+        // --- Viewport Lock ---
+        // Removed global viewport modification which risks breaking host page
+
+
         // --- Container Setup (Full Screen) ---
         const container = document.createElement('div');
         container.className = 'blueprint-modal-container';
+        // Double enforce via inline style
+        container.style.touchAction = 'none';
         
         document.body.appendChild(container);
 
         // --- Layout Mode ---
         document.body.classList.add('blueprint-active'); 
+        document.documentElement.classList.add('blueprint-active'); 
         
         // Removed manual hack for #form-page-container and #floating-price-widget
         // Handled by CSS: body.blueprint-active ...
@@ -57,6 +66,10 @@ export class BlueprintSelector {
         const stateId = 'seat-selection';
         window.history.pushState({ overlay: stateId }, '', '#seat-selection');
 
+        // Global Event Killer removed in favor of CSS handling (touch-action: none on container)
+        // and targeted gesture handling in BlueprintRenderer/GestureController
+
+
         const popHandler = (event) => {
             // If we are popping state (back button), we clean up
             // Check if we are back to expected state or just general back
@@ -64,6 +77,9 @@ export class BlueprintSelector {
         };
 
         const cleanup = () => {
+             // Restore Viewport - not needed as we didn't touch it
+
+
              // 1. Collect selected seats before destroying if this was a valid exit?
              // Actually, popstate means CANCEL usually, or just "Close".
              // But in mobile app behavior, back button might mean "Done" if selection is immediate.
@@ -73,11 +89,13 @@ export class BlueprintSelector {
              // Logic: If user clicks Back, they might expect their selection to be saved.
              // Replicating Flutter: _hideSeatReservation completes with selectedSeats.
              
-             if (updateCallback) updateCallback(this.selectedSeats);
+             // Replicating Flutter: _hideSeatReservation completes with selectedSeats.
+             // We no longer use callback. Session events drive the UI.
 
              if (this.renderer) this.renderer.destroy();
              
              document.body.classList.remove('blueprint-active');
+             document.documentElement.classList.remove('blueprint-active');
              container.remove();
              window.removeEventListener('popstate', popHandler);
         };
@@ -89,7 +107,7 @@ export class BlueprintSelector {
         };
         
         window.addEventListener('popstate', popHandler);
-        
+
         // --- Load Data ---
         try {
             content.innerHTML = `<div class="blueprint-loading"><div class="sp-loader"></div></div>`;
@@ -109,9 +127,21 @@ export class BlueprintSelector {
                 blueprintId
             );
 
-            // --- Pre-Process Data with Initial Selection ---
-            // --- Pre-Process Data with Initial Selection ---
-            this.reservationSecret = formModel.secret; // Use form secret (User Session ID)
+            // --- Fix: Adoption of Blueprint Secret ---
+            // The backend may return a persistent secret if we sent a partial/empty one.
+            // We must adopt this secret for the session.
+            if (blueprintData && blueprintData.secret) {
+                console.log("[BlueprintSelector] ADOPTING SECRET FROM API:", blueprintData.secret);
+                formModel.secret = blueprintData.secret;
+                this.reservationSecret = blueprintData.secret;
+                
+                // Update Session Payload for submit
+                if (session && session.payload) {
+                    session.payload[DbForms.metaSecret] = blueprintData.secret;
+                }
+            } else {
+                 this.reservationSecret = formModel.secret; 
+            }
 
             if (this.selectedSeats.length > 0) {
                 this.selectedSeats.forEach(initialSeat => {
@@ -135,61 +165,77 @@ export class BlueprintSelector {
 
             // --- Render ---
             this.renderer = new BlueprintRenderer(content);
-            this.renderer.render(blueprintData, (obj) => this.handleSeatClick(obj, formModel.key, this.reservationSecret, updateCallback));
+            this.renderer.render(blueprintData, (obj) => this.handleSeatClick(obj, session));
             
         } catch (e) {
             console.error(e);
             content.innerHTML = `<div class="blueprint-error">Error: ${e.message}</div>`;
+            import('../ui/toast.js').then(({ Toast }) => {
+                new Toast(e.message, 'error').show();
+            });
         }
     }
 
-    async handleSeatClick(obj, formKey, secret, updateCallback) {
+    async handleSeatClick(obj, session) {
+        // --- Fix: Prevent Double Click / Race Conditions ---
+        if (obj.processing) {
+            console.log("Seat is processing, ignoring click");
+            return;
+        }
+
         // Optimistic UI Update
         console.log("Seat clicked", obj);
-        if (!obj || obj.state === SeatStates.TAKEN || obj.state === SeatStates.ORDERED || obj.state === SeatStates.USED || obj.state === SeatStates.BLACK) return;
-
-        const isSelecting = (obj.state !== SeatStates.SELECTED_BY_ME);
-        const oldState = obj.state;
-        const newState = isSelecting ? SeatStates.SELECTED_BY_ME : SeatStates.AVAILABLE; 
-        
-        // Update Local State (Optimistic)
-        obj.state = newState;
-        
-        if (isSelecting) {
-            this.selectedSeats.push(obj);
-        } else {
-            this.selectedSeats = this.selectedSeats.filter(s => s.id !== obj.id);
+        // STRICTER CHECK: Only allow interaction with AVAILABLE or SELECTED_BY_ME
+        if (obj.state !== SeatStates.AVAILABLE && obj.state !== SeatStates.SELECTED_BY_ME) {
+            return;
         }
 
-        this.renderer.updateSeat(obj); 
-        
-        // Trigger Callback immediately for UI responsiveness? 
-        // Or wait for API? 
-        // User wants "now the API part... select and deselect".
-        // Usually safer to wait or revert on error.
-        // Let's optimistic update UI, then call API.
-        
-        if (updateCallback) {
-            updateCallback(this.selectedSeats, this.reservationSecret);
-        }
-        
-        // API Call
+        obj.processing = true; // Lock
+
         try {
-            await DbForms.selectSpot(formKey, secret, obj.id, isSelecting);
+            const isSelecting = (obj.state !== SeatStates.SELECTED_BY_ME);
+            const oldState = obj.state;
+            const newState = isSelecting ? SeatStates.SELECTED_BY_ME : SeatStates.AVAILABLE; 
+            
+            // Update Local State (Optimistic)
+            obj.state = newState;
+            
+            if (isSelecting) {
+                this.selectedSeats.push(obj);
+            } else {
+                this.selectedSeats = this.selectedSeats.filter(s => s.id !== obj.id);
+            }
+
+            this.renderer.updateSeat(obj); 
+            
+            // API Call via Session
+            // Note: If this is the FIRST click, it might establish the secret.
+            // Rapid second clicks are now blocked by 'obj.processing'.
+            await session.toggleSpot(obj, isSelecting);
         } catch (e) {
             console.error("Spot selection failed", e);
             // Revert State
-            obj.state = oldState;
-            if (isSelecting) {
-                this.selectedSeats = this.selectedSeats.filter(s => s.id !== obj.id);
+            // We need to fetch 'oldState' logic properly or just invert current logic
+            // But we have 'oldState' var.
+            // obj.state is now dirty.
+            
+            // Re-calculate toggle intent based on what we TRIED to do.
+            const attemptsSelect = (obj.state === SeatStates.SELECTED_BY_ME);
+            
+            // Revert
+            obj.state = attemptsSelect ? SeatStates.AVAILABLE : SeatStates.SELECTED_BY_ME;
+             if (!attemptsSelect) {
+                this.selectedSeats.push(obj);
             } else {
-                 this.selectedSeats.push(obj);
+                this.selectedSeats = this.selectedSeats.filter(s => s.id !== obj.id);
             }
             this.renderer.updateSeat(obj);
-            if (updateCallback) updateCallback(this.selectedSeats, this.reservationSecret);
             
-            // Show toast or alert?
-            alert(`Selection failed: ${e.message}`);
+            import('../ui/toast.js').then(({ Toast }) => {
+                new Toast(e.message, 'error').show();
+            });
+        } finally {
+            obj.processing = false; // Unlock
         }
     }
 }

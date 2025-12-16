@@ -51,84 +51,110 @@ export class TransformController {
         return this.state;
     }
 
-    pan(rawDeltaX, rawDeltaY) {
-        const { viewportW, viewportH, contentW, contentH } = this.dims;
-        const { scale } = this.state;
-        
-        const scaledW = contentW * scale;
-        const scaledH = contentH * scale;
-
-        const touching = this._getTouchingAxis();
-        const fitScale = this.getFitScale();
-        const fitW = contentW * fitScale;
-        const fitH = contentH * fitScale;
-
-        let gapX = 0;
-        let gapY = 0;
-
-        if (touching === 'x' || touching === 'both') {
-            gapX = 0;
-            gapY = (viewportH - fitH) / 2;
-        } else {
-            gapX = (viewportW - fitW) / 2;
-            gapY = 0;
-        }
-
-        const OVERSCROLL_LIMIT = BlueprintConfig.overscrollLimit;
-
-        // X Limits
-        const minX = viewportW - scaledW - gapX;
-        const maxX = gapX;
-        const newX = this._getRubberBandedVal(rawDeltaX, minX, maxX, OVERSCROLL_LIMIT);
-
-        // Y Limits
-        const minY = viewportH - scaledH - gapY;
-        const maxY = gapY;
-        const newY = this._getRubberBandedVal(rawDeltaY, minY, maxY, OVERSCROLL_LIMIT);
-
-        this.state.x = newX;
-        this.state.y = newY;
-        
-        return this.state;
-    }
-    
-    zoom(factor, centerClientX, centerClientY, containerRect) {
-         // Calculate new scale
-         let newScale = this.state.scale * factor;
+    // Unified interaction handler to prevent state drift
+    onInteractionUpdate(deltaX, deltaY, scaleFactor, cx, cy, containerRect, allowOverscroll = true) {
+         const { contentW, contentH } = this.dims;
          
-         // Helper to get relative coords
-         const xs = (centerClientX - containerRect.left - this.state.x) / this.state.scale;
-         const ys = (centerClientY - containerRect.top - this.state.y) / this.state.scale;
-
-         // Elastic Zoom Resistance (Zoom Out)
+         // 1. Calculate Target Scale
+         let newScale = this.state.scale * scaleFactor;
+         
+         // Limits
          const fitScale = this.getFitScale();
-         if (this.state.scale < fitScale && factor < 1) {
-             // Instead of manipulating factor effectively 0.98, we can just dampen the newScale
-             // But let's stick to the logic provided:
-             // "if (this.state.scale < fitScale && factor < 1) factor = 0.98;"
-             // But wait, the original code modified 'factor'.
-             // We can do the same check here.
-             // If input factor was 0.8 (fast zoom out), and we are under limit, we clamp it to 0.98 (slow zoom out).
-             // But the original code was: "factor = delta > 0 ? 1.25 : 0.8; ... if (...) factor = 0.98;"
-             // So we should re-apply that logic or assume caller passes the raw factor and we adjust?
-             // Let's assume caller passes raw factor (e.g. 0.8) and we adjust.
-             newScale = this.state.scale * 0.98; 
+         const minScale = fitScale; // Hard floor? or Allow resistance?
+         const maxScale = fitScale * (BlueprintConfig.maxScale || 5);
+         
+         // Clamp Scale (Simple hard limits for stability first)
+         if (newScale < minScale) newScale = minScale;
+         if (newScale > maxScale) newScale = maxScale;
+         
+         // Recalculate factor based on clamped scale to ensure position math matches
+         // effectiveFactor = newScale / oldScale
+         // BUT: If we clamp, we must use the effective factor for the position update 
+         // so the zoom is consistently "around the mouse".
+         const effectiveFactor = newScale / this.state.scale;
+         
+         // 2. Calculate New Position
+         // Math:
+         // We want to translate by (deltaX, deltaY)
+         // AND scale by effectiveFactor around (cx, cy)
+         // Relative to Container (cx, cy are client coords)
+         
+         const relCx = cx - containerRect.left;
+         const relCy = cy - containerRect.top;
+         
+         // Start Position
+         const oldX = this.state.x;
+         const oldY = this.state.y;
+         
+         // Panned Position
+         const pannedX = oldX + deltaX;
+         const pannedY = oldY + deltaY;
+         
+         // Zoomed Position (around relCx, relCy)
+         // Point P in content under relCx was: P = (relCx - pannedX) / oldScale (Wait, no, we zoom implies scale change)
+         // Formula: newPos = Center - (Center - OldPos) * Factor
+         // Here "OldPos" is pannedX.
+         
+         const newX = relCx - (relCx - pannedX) * effectiveFactor;
+         const newY = relCy - (relCy - pannedY) * effectiveFactor;
+         
+         // 3. Apply Limits
+         const { viewportW, viewportH } = this.dims;
+         const scaledW = contentW * newScale;
+         const scaledH = contentH * newScale;
+         
+         // --- Consistency with onInteractionUpdate ---
+         const margin = BlueprintConfig.panMargin || 0;
+         
+         let minX, maxX, minY, maxY;
+         
+         if (scaledW < viewportW) {
+             const gapX = (viewportW - scaledW) / 2;
+             minX = gapX; 
+             maxX = gapX;
          } else {
-             newScale = this.state.scale * factor;
+             // Allow panning past edge by 'margin'
+             // Valid range: [viewportW - scaledW - margin, 0 + margin]
+             minX = viewportW - scaledW - margin;
+             maxX = margin;
+         }
+         
+         if (scaledH < viewportH) {
+             const gapY = (viewportH - scaledH) / 2;
+             minY = gapY;
+             maxY = gapY;
+         } else {
+             minY = viewportH - scaledH - margin;
+             maxY = margin;
+         }
+         
+         // Apply Rubber Banding using Config
+         // If we are at fit scale (or smaller), strictly lock position (No Pan allowed)
+         const isAtMinScale = newScale <= fitScale * 1.001;
+         
+         let constrainedX, constrainedY;
+         
+         if (allowOverscroll && !isAtMinScale) {
+             const OVERSCROLL_LIMIT = BlueprintConfig.overscrollLimit || 150;
+             constrainedX = this._getRubberBandedVal(newX, minX, maxX, OVERSCROLL_LIMIT);
+             constrainedY = this._getRubberBandedVal(newY, minY, maxY, OVERSCROLL_LIMIT);
+         } else {
+             // Strict Clamping
+             constrainedX = newX;
+             if (constrainedX < minX) constrainedX = minX;
+             if (constrainedX > maxX) constrainedX = maxX;
+             
+             constrainedY = newY;
+             if (constrainedY < minY) constrainedY = minY;
+             if (constrainedY > maxY) constrainedY = maxY;
          }
 
-         // Hard Max Limit
-         if (newScale > BlueprintConfig.zoomMaxScale) newScale = BlueprintConfig.zoomMaxScale;
-         
-         // Min Limit: Restrict to fitScale
-         const minAllowed = fitScale;
-         if (newScale < minAllowed) newScale = minAllowed;
+         this.state = {
+             x: constrainedX,
+             y: constrainedY,
+             scale: newScale
+         };
 
-         // Calculate new position (Zoom-to-mouse)
-         const newX = centerClientX - containerRect.left - xs * newScale;
-         const newY = centerClientY - containerRect.top - ys * newScale;
-
-         this.state = { x: newX, y: newY, scale: newScale };
          return this.state;
     }
 
@@ -138,52 +164,50 @@ export class TransformController {
         const fitScale = this.getFitScale();
         let targetScale = this.state.scale;
         
+        // Max limit relative to fit
+        const maxAllowed = fitScale * (BlueprintConfig.maxScale || 5);
+
         // Snap scale logic
-        if (targetScale < fitScale) targetScale = fitScale;
-        if (targetScale > BlueprintConfig.zoomMaxScale) targetScale = BlueprintConfig.zoomMaxScale;
+        if (targetScale < fitScale * 0.999) targetScale = fitScale; // Tolerance
+        if (targetScale > maxAllowed) targetScale = maxAllowed;
 
         const scaledW = contentW * targetScale;
         const scaledH = contentH * targetScale;
         
-        const touching = this._getTouchingAxis();
-        const fitW = contentW * fitScale;
-        const fitH = contentH * fitScale;
+        // --- Consistency with onInteractionUpdate ---
+        const margin = BlueprintConfig.panMargin || 0;
 
-        let gapX = 0;
-        let gapY = 0;
+        let minX, maxX, minY, maxY;
 
-        if (touching === 'x' || touching === 'both') {
-            gapX = 0; 
-            gapY = (viewportH - fitH) / 2; 
+        if (scaledW < viewportW) {
+             const gapX = (viewportW - scaledW) / 2;
+             minX = gapX;
+             maxX = gapX;
         } else {
-            gapX = (viewportW - fitW) / 2; 
-            gapY = 0; 
+             // Valid range includes margin
+             minX = viewportW - scaledW - margin;
+             maxX = margin;
+        }
+
+        if (scaledH < viewportH) {
+             const gapY = (viewportH - scaledH) / 2;
+             minY = gapY;
+             maxY = gapY;
+        } else {
+             minY = viewportH - scaledH - margin;
+             maxY = margin;
         }
 
         let targetX = this.state.x;
         let targetY = this.state.y;
-
-        // X Constraints
-        const minX = viewportW - scaledW - gapX;
-        const maxX = gapX;
         
-        if (minX > maxX) {
-             targetX = (viewportW - scaledW) / 2;
-        } else {
-             if (targetX < minX) targetX = minX;
-             if (targetX > maxX) targetX = maxX;
-        }
+        // X Constraints
+        if (targetX < minX) targetX = minX;
+        if (targetX > maxX) targetX = maxX;
 
         // Y Constraints
-        const minY = viewportH - scaledH - gapY;
-        const maxY = gapY;
-        
-        if (minY > maxY) {
-             targetY = (viewportH - scaledH) / 2;
-        } else {
-             if (targetY < minY) targetY = minY;
-             if (targetY > maxY) targetY = maxY;
-        }
+        if (targetY < minY) targetY = minY;
+        if (targetY > maxY) targetY = maxY;
         
         return { x: targetX, y: targetY, scale: targetScale };
     }

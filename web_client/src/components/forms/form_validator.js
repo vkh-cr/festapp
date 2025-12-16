@@ -11,23 +11,71 @@ export class FormValidator {
          if (!fieldName) return;
          
          const currentErrors = { ...session.state.validationErrors };
-         // If no error for this field, nothing to do (unless we want to remove invalid class just in case)
-         if (!currentErrors[fieldName] && !target.classList.contains('invalid')) return; 
+         const hadError = !!currentErrors[fieldName];
+         // Logic: If field HAD error, we must validate on input. 
+         // If field NOT had error, we usually wait for blur or submit? 
+         // User Rule: "Clear-Only Fallacy" -> "if (isValid) clearError(); else if (shouldValidate) restoreError();"
+         // shouldValidate is typically true if it HAD an error (we are correcting it).
+         
+         if (!hadError && !target.classList.contains('invalid')) return; 
 
-         let nowValid = false;
+         const isRequired = target.dataset.required === 'true';
+         let nowValid = true; // Default to valid unless proven otherwise
+         let failureReason = null;
          
          if (target.type === 'radio' || target.type === 'checkbox') {
-             const group = form.querySelectorAll(`input[name="${fieldName}"]`);
-             nowValid = Array.from(group).some(i => i.checked);
+             // For Checkbox/Radio, we need to check group if required
+             // But usually required applies to the GROUP. 
+             // If individual checkbox is required (e.g. Terms), check checked.
+             if (target.type === 'checkbox' && isRequired) {
+                 nowValid = target.checked;
+                 if (!nowValid) failureReason = FormStrings.fieldCannotBeEmpty;
+             } else if (target.type === 'radio' && isRequired) {
+                 const group = form.querySelectorAll(`input[name="${fieldName}"]`);
+                 nowValid = Array.from(group).some(i => i.checked);
+                 if (!nowValid) failureReason = FormStrings.fieldCannotBeEmpty;
+             }
          } else {
-             nowValid = target.checkValidity();
+             // Text/Select inputs
+             // Check Required
+             if (isRequired) {
+                 if (!target.value || target.value.trim() === '') {
+                     nowValid = false;
+                     failureReason = FormStrings.fieldCannotBeEmpty;
+                 }
+             }
+             
+             // Check invalid format if needed (e.g. email/tel patterns if not using native required but still using type?)
+             // Use native validity for FORMAT only, but ignore valueMissing if not checking required? 
+             // Actually, if we use type="email", browser checks format. 
+             // But we want to avoid :invalid style if possible? 
+             // Usually :invalid triggers on format too. 
+             // If we really want to process format, we can use checkValidity() but ignore valueMissing if we handled it?
+             // But checkValidity() returns false if valueMissing.
+             
+             if (nowValid && target.value) {
+                 // Only check format if we have a value
+                 if (!target.checkValidity()) {
+                      // It is invalid natively (e.g. pattern or type)
+                      // distiguish error
+                      if (target.validity.typeMismatch || target.validity.patternMismatch) {
+                          nowValid = false;
+                          failureReason = FormStrings.invalidFormat;
+                      }
+                      // we ignore valueMissing here because we checked it manually above (or didn't require it)
+                      // wait, if we used manual check for required, native checkValidity might still say valid if no required attr.
+                      // correct.
+                 }
+             }
          }
          
          console.log(`[FormValidator] Input: ${fieldName} Valid: ${nowValid}`);
 
          if (nowValid) {
-             delete currentErrors[fieldName];
-             session.setValidationErrors(currentErrors);
+             if (currentErrors[fieldName]) {
+                 delete currentErrors[fieldName];
+                 session.setValidationErrors(currentErrors);
+             }
              
              // Immediate DOM cleanup to ensure responsiveness
              target.classList.remove('invalid');
@@ -37,6 +85,33 @@ export class FormValidator {
                  if (errorDiv) errorDiv.style.display = 'none';
                  const optionsContainer = container.querySelector('.radio-options, .checkbox-options');
                  if (optionsContainer) optionsContainer.classList.remove('invalid');
+             }
+         } else {
+             // RESTORATIVE LOGIC: If it WAS invalid (or we decide strict realtime), we must SHOW error now.
+             // Usually on Input we only clear. But if we went from Invalid -> Valid -> Invalid (e.g. backspace all),
+             // we should restore the error!
+             // Check validation message
+             let message = failureReason || target.validationMessage || FormStrings.fieldCannotBeEmpty;
+             
+             // Update State
+             currentErrors[fieldName] = message;
+             session.setValidationErrors(currentErrors);
+             
+             // Immediate DOM Update (Restoration)
+             target.classList.add('invalid');
+             const container = target.closest('.form-field-container');
+             if (container) {
+                 const errorDiv = container.querySelector('.form-field-error');
+                 if (errorDiv) {
+                     errorDiv.textContent = message;
+                     errorDiv.style.display = 'block';
+                 }
+                 
+                 // Fix: Ensure options container (radios/checkboxes) gets invalid class too
+                 const optionsContainer = container.querySelector('.radio-options, .checkbox-options');
+                 if (optionsContainer) {
+                     optionsContainer.classList.add('invalid');
+                 }
              }
          }
     }
@@ -51,17 +126,38 @@ export class FormValidator {
             const elements = form.elements;
             for (let i = 0; i < elements.length; i++) {
                 const el = elements[i];
-                if (el.nodeName === 'BUTTON' || el.type === 'submit' || el.type === 'radio' || el.type === 'checkbox') continue;
+                if (el.nodeName === 'BUTTON' || el.type === 'submit') continue;
                 
                 if (errors[el.name]) continue;
 
-                if (el.validity.customError) {
-                    errors[el.name] = el.validationMessage;
-                    continue;
+                // --- Manual Required Check (replacing native input.required) ---
+                if (el.dataset.required === 'true') {
+                    let valid = true;
+                    if (el.type === 'radio') {
+                        // Check if ANY in group is checked (skip if already validated group via name)
+                         const group = form.querySelectorAll(`input[name="${el.name}"]`);
+                         valid = Array.from(group).some(i => i.checked);
+                    } else if (el.type === 'checkbox') {
+                        // Strict requirement (must be checked)
+                        valid = el.checked;
+                    } else {
+                        // Text/Select
+                        valid = el.value && el.value.trim() !== '';
+                    }
+                    
+                    if (!valid) {
+                        errors[el.name] = FormStrings.fieldCannotBeEmpty;
+                        continue; 
+                    }
                 }
 
-                if (!el.validity.valid) {
+                // Native Validity Check (Format only, ignore valueMissing if we rely on manual)
+                if (el.validity && !el.validity.valid) {
                      if (el.validity.valueMissing) {
+                        // Only add if we didn't check manual already (or if manual missed it?)
+                        // If we didn't set data-required but browser thinks it is required?
+                        // We decided to remove native required. So this shouldn't trigger for required.
+                        // But keep it as fallback.
                         errors[el.name] = FormStrings.fieldCannotBeEmpty;
                     } else if (el.validity.typeMismatch || el.validity.patternMismatch) {
                         if (el.type === 'tel') {

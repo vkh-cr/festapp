@@ -9,10 +9,11 @@ export const BlueprintConfig = {
     baseRadius: 8.0,
     
     // Interaction
-    zoomMinScale: 0.1, // effectively calculated dynamic, but hard limit
-    zoomMaxScale: 5,
+    minScale: 0.1, // effectively calculated dynamic, but hard limit
+    maxScale: 5,
     overscrollLimit: 150,
     tapThreshold: 10,
+    panMargin: 24,
 
     // Animation
     snapAnimationDuration: 300,

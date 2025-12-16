@@ -1169,6 +1169,7 @@
     "removeParticipantTooltip": "Odebrat účastníka"
   },
   "FeatureBlueprint": {
+    "maxTicketsReached": "Bylo dosaženo maximálního počtu vstupenek.",
     "changeTitle": "Změnit název",
     "legendInstruction": "Kliknutím na možnost v legendě přidáte místa.",
     "legendBlackArea": "Černá plocha",

@@ -87,9 +87,13 @@ export class ThemeService {
             document.head.appendChild(fontLink);
             root.style.setProperty('--font-family-base', `"${familyName}", sans-serif`);
             root.style.setProperty('--input-font-family', `"${familyName}", sans-serif`);
+            // Reset scale for custom fonts (usually larger inherently)
+            root.style.setProperty('--font-scale', '1');
         } else {
              root.style.setProperty('--font-family-base', 'inherit');
              root.style.setProperty('--input-font-family', 'inherit');
+             // Revert to default Futura scale (1.2 defined in CSS)
+             root.style.removeProperty('--font-scale');
         }
 
         // --- Smart Color Logic (Strict Flutter Port) ---

@@ -17,8 +17,10 @@ import { SeoService } from '../../services/seo_service.js';
 // ... (content generated later)
 import { ThemeService } from '../../services/theme_service.js';
 import { FeatureService } from '../features/feature_service.js';
-import { CountdownWidget } from './widgets/countdown_widget.js';
-import { NotAvailableWidget } from './widgets/not_available_widget.js';
+import { FormAvailabilityService } from './form_availability_service.js';
+// Widgets moved to Service
+// import { CountdownWidget } from './widgets/countdown_widget.js';
+// import { NotAvailableWidget } from './widgets/not_available_widget.js';
 import { FormRenderer } from './form_renderer.js';
 import { FormDataReader } from './form_data_reader.js';
 import { FormSession } from './form_session.js';
@@ -119,54 +121,25 @@ export class FormPage extends Component {
             this.applyTheme(formModel);
             
             // 5. Update SEO
-            SeoService.updateMetaTags(formModel);
+            SeoService.updateMetaTags(formModel, window.location.href);
+
 
             // --- Availability Check Logic ---
-            // Matches Flutter logic exactly
-            const now = new Date();
-            let isClosed = false;
-            let isBeforeStart = false;
-
-            if (formModel.startTime && now < formModel.startTime) {
-                isClosed = true;
-                isBeforeStart = true;
-            } else if (formModel.endTime && now > formModel.endTime) {
-                isClosed = true;
-            } else if (formModel.isOpen === false) {
-                 isClosed = true;
-            }
-
+            // Refactored to Service
+            const statusResult = FormAvailabilityService.getStatus(formModel);
+            
             // Check URL params/Rules for preview
             const urlParams = new URLSearchParams(window.location.search);
             const isPreviewParam = urlParams.get('preview') === 'true';
-            
-            // RightsService logic placeholder: 
-            // In Flutter: bool canPreview = RightsService.isEditorOrderView();
-            // Here: Assume if they have the link and param, they can preview (for now).
-            const canPreview = true; 
+            const canPreview = true; // Placeholder for RightsService check
             const showPreview = canPreview && isPreviewParam;
 
-            // showCountdown logic
-            // Flutter: isBeforeStart && (form?.enableCountdown ?? false) && !showPreview
-            // showCountdown logic
-            // Flutter: isBeforeStart && (form?.enableCountdown ?? false) && !showPreview
-            const showCountdown = isBeforeStart && formModel.enableCountdown && !showPreview;
+            const handled = FormAvailabilityService.renderStatus(this.host, formModel, statusResult, {
+                showPreview,
+                onReload: () => this.init(link)
+            });
 
-            if (showCountdown) {
-                 // Pass callback to reload when finished
-                 CountdownWidget.render(this.host, formModel, () => {
-                     this.init(link);
-                 });
-                 return;
-            }
-
-            // Not Available Logic
-            // Flutter: if (_formNotAvailable || (isClosed && !showPreview && !showCountdown))
-            // We use 'isClosed && !showPreview' because showCountdown is already handled above (returned).
-            if (isClosed && !showPreview) {
-                 NotAvailableWidget.render(this.host, formModel);
-                 return;
-            }
+            if (handled) return;
 
             // 5. Render Form
             this.renderForm(formModel, showPreview);
@@ -181,7 +154,7 @@ export class FormPage extends Component {
 
         } catch (e) {
             console.error(e);
-            this.renderError(CommonStrings.error + ": " + e.message + "\n" + e.stack);
+            this.renderError(e.message + "\n" + e.stack);
         }
     }
 
@@ -255,7 +228,7 @@ export class FormPage extends Component {
 
         // Initialize Widget (it subscribes itself)
         this.currentPriceWidget = new PriceWidget(session, this.host);
-        FormRenderer.render(this.host, formModel, showPreview, {
+        FormRenderer.render(this.host, session, formModel, showPreview, {
             onSubmit: (form, model) => this.validateAndSubmit(form, model),
             onInput: (e, form, model) => {
                 if (e.type === 'input') FormValidator.handleInputValidation(e, form, session);
@@ -263,7 +236,8 @@ export class FormPage extends Component {
                 // Optimized State Update
                 // If target has no name (e.g. Ticket Add/Remove button dispatch), refresh full structure
                 if (!e.target.name) {
-                    session.refreshPayload(form);
+                    // Structural change (e.g. Ticket Removed) logic is now handled by internal state methods
+                    // session.removeTicket() etc. No need to re-scrape.
                 } else {
                     session.handleInput(e, form);
                 }
@@ -356,9 +330,8 @@ export class FormPage extends Component {
 
              // If currency changed, trigger a recalculation to reflect zeroed price
              if (currencyChanged) {
-                 // The DOM has been modified (unchecked items). We MUST sync the session payload.
-                 // This will re-read the form, see that items are gone, and update the price.
-                 session.refreshPayload(form);
+                 // Update Session State (remove incompatible items)
+                 session.resetIncompatibleCurrencyFields(currency);
              }
         });
         
@@ -368,7 +341,7 @@ export class FormPage extends Component {
             if (form) {
                 // Initial syncing
                 // Parse the initial form state (e.g. default values) into the session
-                session.refreshPayload(form);
+                session.initialize(form);
                 
                 // Initial syncing
                 // If the session initialized with a currency (e.g. from logic), ensure filter runs.
@@ -424,9 +397,10 @@ export class FormPage extends Component {
              console.log('[FormPage] OrderPreview module loaded.', OrderPreview);
              try {
                  const priceData = this.calculateTotal(form, formModel);
+                 const precalculatedPayload = this.currentSession ? this.currentSession.payload : null;
                  OrderPreview.show(form, formModel, priceData, (overlay) => {
                      this.submitOrder(form, formModel, overlay || document.body); 
-                 });
+                 }, () => {}, precalculatedPayload);
              } catch (e) {
                  console.error('[FormPage] OrderPreview.show crashed:', e);
              }

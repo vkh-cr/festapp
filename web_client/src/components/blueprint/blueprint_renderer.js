@@ -9,6 +9,7 @@ import { SvgUtils } from './svg_utils.js';
 import { TooltipProvider } from './tooltip_provider.js';
 import { BlueprintDataPreparer } from './blueprint_data_preparer.js';
 import { TransformController } from './transform_controller.js';
+import { GestureController } from './gesture_controller.js';
 
 export class BlueprintRenderer {
     constructor(container) {
@@ -19,6 +20,7 @@ export class BlueprintRenderer {
             scalingMode: 'min' // Default requested by user (n. 4)
         };
         this.controller = new TransformController();
+        this.gestureController = null;
         this.seatSize = BlueprintConfig.seatSize;
         this.data = null;
         this.onSeatClick = null;
@@ -31,7 +33,7 @@ export class BlueprintRenderer {
         this.container.innerHTML = '';
         
         // Re-init container
-        this.container.className = 'blueprint-renderer-container';
+        this.container.classList.add('blueprint-renderer-container');
 
         this.transformContainer = document.createElement('div');
         this.transformContainer.className = 'blueprint-transform-container';
@@ -60,7 +62,7 @@ export class BlueprintRenderer {
 
         this.onSeatClick = onSeatClick;
         this.container.innerHTML = '';
-        this.container.className = 'blueprint-renderer-container';
+        this.container.classList.add('blueprint-renderer-container');
 
         // Transform Container
         this.transformContainer = document.createElement('div');
@@ -168,178 +170,49 @@ export class BlueprintRenderer {
     }
 
     attachEvents() {
-        // Panning (Mouse)
-        this.container.onmousedown = (e) => {
-            this.updateControllerDims();
-            
-            const fitScale = this.controller.getFitScale();
-            // 1. dont allow panning unles user zooms in first
-            if (this.controller.state.scale <= fitScale * 1.01) return;
-
-            if (this._animationFrame) {
-                cancelAnimationFrame(this._animationFrame);
-                this._animationFrame = null;
-            }
-            e.preventDefault();
-            this.state.panning = true;
-            this.state.startX = e.clientX - this.controller.state.x;
-            this.state.startY = e.clientY - this.controller.state.y;
-            this.container.style.cursor = 'grabbing';
-        };
-
-        // Fix: Use arrow functions or bind to preserve 'this' context
-        this._boundOnMouseMove = this.onMouseMove.bind(this);
-        this._boundOnMouseUp = this.onMouseUp.bind(this);
-        this._boundOnTouchStart = this.onTouchStart.bind(this);
-        this._boundOnTouchMove = this.onTouchMove.bind(this);
-        this._boundOnTouchEnd = this.onTouchEnd.bind(this);
-
-        window.addEventListener('mousemove', this._boundOnMouseMove);
-        window.addEventListener('mouseup', this._boundOnMouseUp);
-        
-        // Touch events need to be on the CONTAINER for start, but window for move/end
-        // Use passive: false to allow preventing default (scrolling)
-        this.container.addEventListener('touchstart', this._boundOnTouchStart, { passive: false });
-        window.addEventListener('touchmove', this._boundOnTouchMove, { passive: false });
-        window.addEventListener('touchend', this._boundOnTouchEnd);
-
-        // Zooming (Wheel)
-        this.container.onwheel = (e) => {
-             e.preventDefault();
-             this.updateControllerDims();
-
-             if (this._animationFrame) {
-                 cancelAnimationFrame(this._animationFrame);
-                 this._animationFrame = null;
-             }
-
-             // and when scrolling make zooming faster
-             const factor = -e.deltaY > 0 ? 1.25 : 0.8;
-             
-             this.controller.zoom(factor, e.clientX, e.clientY, this.container.getBoundingClientRect());
-             
-             this.updateTransform();
-             
-             if (this._wheelTimeout) clearTimeout(this._wheelTimeout);
-             this._wheelTimeout = setTimeout(() => this.snapBack(), 150);
-        };
+        this.gestureController = new GestureController(this.container, {
+            onPan: (dx, dy, x, y) => this.handlePan(dx, dy, x, y),
+            onZoom: (factor, x, y) => this.handleZoom(factor, x, y),
+            onPinch: (dx, dy, factor, x, y) => this.handlePinch(dx, dy, factor, x, y),
+            onTap: (x, y) => this.handleTap(x, y),
+            onInteractionStart: () => {
+                this.updateControllerDims();
+                 if (this._animationFrame) {
+                    cancelAnimationFrame(this._animationFrame);
+                    this._animationFrame = null;
+                 }
+            },
+            onInteractionEnd: () => this.snapBack()
+        });
     }
 
-    onTouchStart(e) {
-        if (e.touches.length === 2) {
-            e.preventDefault();
-            this.state.pinching = true;
-            this.state.pinchStartDist = this.getPinchDist(e);
-            return;
-        }
-
-        if (e.touches.length === 1) {
-            this.updateControllerDims();
-
-            const fitScale = this.controller.getFitScale();
-            // 1. dont allow panning unles user zooms in first
-            if (this.controller.state.scale <= fitScale * 1.01) return;
-
-            if (this._animationFrame) {
-                cancelAnimationFrame(this._animationFrame);
-                this._animationFrame = null;
-            }
-            e.preventDefault();
-            this.state.panning = true;
-            this.state.touchStartX = e.touches[0].clientX;
-            this.state.touchStartY = e.touches[0].clientY;
-            this.state.startX = e.touches[0].clientX - this.controller.state.x;
-            this.state.startY = e.touches[0].clientY - this.controller.state.y;
-        }
-    }
-    
-    // Bound functions for removal
-    onMouseMove(e) {
-        if (!this.state.panning) return;
-        e.preventDefault();
-        this.handlePan(e.clientX, e.clientY);
-    }
-
-    onMouseUp() {
-        this.state.panning = false;
-        this.container.style.cursor = 'default';
-        this.snapBack();
-    }
-
-    onTouchMove(e) {
-        if (this.state.pinching && e.touches.length === 2) {
-            e.preventDefault();
-            const newDist = this.getPinchDist(e);
-            const scaleFactor = newDist / this.state.pinchStartDist;
-            
-            // Midpoint
-            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            
-            this.controller.zoom(scaleFactor, midX, midY, this.container.getBoundingClientRect());
-            this.updateTransform();
-            
-            // Update for next frame (relative)
-            this.state.pinchStartDist = newDist; 
-            return;
-        }
-
-        if (!this.state.panning || e.touches.length !== 1) return;
-        e.preventDefault();
-        this.handlePan(e.touches[0].clientX, e.touches[0].clientY);
-    }
-    
-
-
-    handlePan(clientX, clientY) {
-        this.updateControllerDims();
-        
-        const targetX = clientX - this.state.startX;
-        const targetY = clientY - this.state.startY;
-
-        this.controller.pan(targetX, targetY);
+    handlePan(dx, dy, x, y) {
+        this.controller.onInteractionUpdate(dx, dy, 1, x, y, this.container.getBoundingClientRect());
         this.updateTransform();
     }
 
-    onTouchEnd(e) {
-        if (this.state.pinching && e.touches.length < 2) {
-            this.state.pinching = false;
-            this.snapBack();
-            return;
-        }
-        
-        this.state.panning = false;
-        
-        // Tap Detection
-        if (e && e.changedTouches && e.changedTouches.length > 0 && this.state.touchStartX !== undefined) {
-             const endX = e.changedTouches[0].clientX;
-             const endY = e.changedTouches[0].clientY;
-             const dist = Math.sqrt(Math.pow(endX - this.state.touchStartX, 2) + Math.pow(endY - this.state.touchStartY, 2));
-             
-             if (dist < BlueprintConfig.tapThreshold) {
-                 // It's a tap!
-                 const target = document.elementFromPoint(endX, endY);
-                 if (target) {
-                     const seatEl = target.closest('.blueprint-seat-container');
-                     if (seatEl && seatEl.dataset.seatId) {
-                         // Find Object
-                         // Efficient lookup: We have this.spotsMap keyed by ID, 
-                         // but we need the *object* which merges spot+other info.
-                         // But actually renderSeats iterates `objects`.
-                         // Let's rely on finding it in objects array or if spotsMap is enough.
-                         // onSeatClick expects the `obj` from `this.data.objects`.
-                         // Let's search.
-                         const seatId = seatEl.dataset.seatId;
-                         const obj = this.data.objects.find(o => String(o.id) === String(seatId));
-                         if (obj && this.onSeatClick) {
-                             this.onSeatClick(obj);
-                         }
-                     }
+    handleZoom(factor, x, y) {
+        this.controller.onInteractionUpdate(0, 0, factor, x, y, this.container.getBoundingClientRect(), false);
+        this.updateTransform();
+    }
+
+    handlePinch(dx, dy, factor, x, y) {
+        this.controller.onInteractionUpdate(dx, dy, factor, x, y, this.container.getBoundingClientRect());
+        this.updateTransform();
+    }
+
+    handleTap(x, y) {
+         const target = document.elementFromPoint(x, y);
+         if (target) {
+             const seatEl = target.closest('.blueprint-seat-container');
+             if (seatEl && seatEl.dataset.seatId) {
+                 const seatId = seatEl.dataset.seatId;
+                 const obj = this.data.objects.find(o => String(o.id) === String(seatId));
+                 if (obj && this.onSeatClick) {
+                     this.onSeatClick(obj);
                  }
              }
-        }
-        
-        this.snapBack();
+         }
     }
 
     updateTransform() {
@@ -401,13 +274,11 @@ export class BlueprintRenderer {
     }
 
     destroy() {
-        if (this._boundOnMouseMove) window.removeEventListener('mousemove', this._boundOnMouseMove);
-        if (this._boundOnMouseUp) window.removeEventListener('mouseup', this._boundOnMouseUp);
-        if (this.container && this._boundOnTouchStart) this.container.removeEventListener('touchstart', this._boundOnTouchStart);
-        if (this._boundOnTouchMove) window.removeEventListener('touchmove', this._boundOnTouchMove);
-        if (this._boundOnTouchEnd) window.removeEventListener('touchend', this._boundOnTouchEnd);
-        if (this._wheelTimeout) clearTimeout(this._wheelTimeout);
-        
+        if (this.gestureController) {
+            this.gestureController.destroy();
+            this.gestureController = null;
+        }
+
         if (this.tooltipElement) {
             this.tooltipElement.remove();
             this.tooltipElement = null;

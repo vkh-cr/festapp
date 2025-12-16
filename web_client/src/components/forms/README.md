@@ -37,3 +37,23 @@ fetches this definition and renders widgets accordingly.
   generate the HTML.
 - **Validation**: Form validation logic mirrors the Flutter app but is
   implemented in JS (often reusing the same regex or logic).
+
+## Theming & Fonts
+
+The forms support extensive theming via `ThemeService`:
+
+- **Fonts**: Defaults to **Futura** (bundled). Supports Google Fonts via
+  configuration.
+- **Font Scaling**:
+  - **Default (Futura)**: Uses a `1.2` scale factor (defined in
+    `theme_config.css`) to match design requirements.
+  - **Custom Fonts**: If a custom font is set, the scale automatically resets to
+    `1.0` to prevent layout issues.
+- **Colors**: Automatically generates a palette (primary, secondary, background,
+  surface) based on the primary color, with support for Dark Mode.
+
+## State Management
+
+- **FormSession**: The source of truth for the current user session (seats
+  selected, cart contents).
+- **FormHolder**: A container for the static form definition and helper methods.

@@ -21,9 +21,9 @@ if (typeof document !== 'undefined') {
 
 export class OrderPreview {
 
-    static show(form, formModel, priceData, onConfirm, onClose) {
+    static show(form, formModel, priceData, onConfirm, onClose, precalculatedPayload = null) {
         // 1. Calculate and Prepare Data
-        const data = OrderPreview._prepareData(form, formModel, priceData);
+        const data = OrderPreview._prepareData(form, formModel, priceData, precalculatedPayload);
         
         // 2. Render Overlay
         let overlay = document.getElementById('order-preview-overlay');
@@ -42,27 +42,36 @@ export class OrderPreview {
             if (isClosing) return;
             isClosing = true;
             
-            // Add closing classes for animation
-            overlay.classList.add('closing');
+            // If closed by drag, we handled animation manually. Don't add .closing class (which forces slideDown from 0).
+            if (overlay.dataset.closedByDrag !== 'true') {
+                overlay.classList.add('closing');
+            } else {
+                // We closed by drag. The content is already translated down.
+                // We just want to fade out the background.
+                // We can add a specialized class or just rely on the fact that overlay supports fadeOut.
+                // If we add .closing, it triggers fadeOut on overlay, AND slideDown on content.
+                // We want to suppress slideDown on content.
+                const content = overlay.querySelector('.order-preview-content');
+                if (content) {
+                     // Force animation to none so CSS keyframes don't override our manual transform
+                     content.style.animation = 'none';
+                }
+                overlay.classList.add('closing');
+            }
             
             // Remove listeners
             document.removeEventListener('keydown', escHandler);
             overlay.removeEventListener('click', backdropHandler);
-            // We don't remove popstate listener because it's global or handled by router?
-            // Actually, if we closed via button, we might need to fix History if we pushed state.
             
             // Wait for animation
             setTimeout(() => {
                 overlay.style.display = 'none';
                 overlay.classList.remove('visible', 'closing');
+                delete overlay.dataset.closedByDrag; 
                 overlay.innerHTML = ''; // Cleanup
                 document.body.style.overflow = ''; // Restore Scroll
                 if (onClose) onClose();
-                
-                // If we are closing manually (not via Back button), we should go back in history if we pushed state.
-                // But detecting "how" we closed is tricky vs "popstate" event.
-                // Simple strategy: Check prompt if we need to manage history.
-            }, 250); // Match CSS animation duration
+            }, 250); 
         };
 
         const closeBtn = overlay.querySelector('.btn-close-preview');
@@ -109,11 +118,92 @@ export class OrderPreview {
         overlay.offsetHeight; // Force reflow
         overlay.classList.add('visible');
         
+        const content = overlay.querySelector('.order-preview-content');
+        const body = overlay.querySelector('.order-preview-body');
+        
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+        let ignoreGesture = false;
+        
+        const touchStart = (e) => {
+            // Check if touch target is header or handle
+            const isHeader = e.target.closest('.order-preview-header') || e.target.closest('.order-preview-handle-bar');
+            
+            if (!isHeader) {
+                ignoreGesture = true;
+                return;
+            }
+            
+            ignoreGesture = false;
+            startY = e.touches[0].clientY;
+            isDragging = false;
+            content.style.transition = 'none'; // Disable transition during drag
+        };
+        
+        const touchMove = (e) => {
+            if (ignoreGesture) return;
+            
+            currentY = e.touches[0].clientY;
+            const deltaY = currentY - startY;
+            
+            if (deltaY > 0) {
+                 if (e.cancelable) e.preventDefault();
+                 
+                 isDragging = true;
+                 
+                 // Native feel: 1:1 tracking
+                 content.style.transform = `translateY(${deltaY}px)`;
+                 
+                 // Dynamic Backdrop Fade
+                 const height = content.clientHeight || 500;
+                 const progress = Math.min(deltaY / height, 1);
+                 const opacity = 0.5 * (1 - progress);
+                 overlay.style.backgroundColor = `rgba(0, 0, 0, ${opacity})`;
+            }
+        };
+        
+        const touchEnd = (e) => {
+            if (ignoreGesture) return;
+            if (!isDragging) return;
+            
+            const deltaY = currentY - startY;
+            
+            const threshold = 150; // Pixels to close
+            
+            if (deltaY > threshold) {
+                // Trigger Close
+                content.style.transition = 'transform 0.2s ease-out';
+                content.style.transform = 'translateY(100%)';
+                overlay.dataset.closedByDrag = 'true';
+                triggerBack();
+            } else {
+                // Snap back
+                content.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1.0)';
+                content.style.transform = '';
+                overlay.style.backgroundColor = ''; // Restore opacity
+                
+                // Cleanup transition after snap so future drags (touchstart) can set transition: none
+                setTimeout(() => {
+                   if (!isDragging && content) content.style.transition = '';
+                }, 250);
+            }
+            isDragging = false;
+        };
+        
+        // Apply listeners to the content wrapper (header + body)
+        // We might want to be careful not to block scroll on body if we are not at top.
+        // Actually best to attach to content, but check scrollTop in Move.
+        if (content) {
+            content.addEventListener('touchstart', touchStart, { passive: false });
+            content.addEventListener('touchmove', touchMove, { passive: false });
+            content.addEventListener('touchend', touchEnd);
+        }
+
         // Auto-Scroll to Bottom (User Request)
         // Ensure the body (scrollable area) is scrolled to show tickets/total/submit
         // "scrolling can be bit slower" -> Custom JS animation required as 'smooth' is browser-fixed.
         setTimeout(() => {
-             const body = overlay.querySelector('.order-preview-body');
              if (body) {
                  OrderPreview._animateScrollToBottom(body, 700); // 700ms duration (User Request)
              }
@@ -168,9 +258,9 @@ export class OrderPreview {
         animateScroll();
     }
 
-    static _prepareData(form, formModel, priceData) {
-        // Use generalized helper
-        const payload = FormDataReader.getPayload(form, formModel);
+    static _prepareData(form, formModel, priceData, precalculatedPayload) {
+        // Use passed payload (from Session) or generalized helper (Scraper)
+        const payload = precalculatedPayload || FormDataReader.getPayload(form, formModel);
         
         // We use passed pricing data to display logic properly
         const totalPriceData = priceData;
@@ -306,6 +396,9 @@ export class OrderPreview {
         // Header
         let html = `
             <div class="order-preview-content">
+                <div class="order-preview-handle-bar">
+                    <div class="order-preview-handle"></div>
+                </div>
                 <div class="order-preview-header">
                     <h2>${PublicOrderStrings.summary}</h2>
                     <button class="btn-close-preview"><i class="material-icons">close</i></button>
