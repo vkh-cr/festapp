@@ -30,7 +30,7 @@ export class IdDocumentFieldBuilder {
         idInput.name = field.id.toString();
         idInput.className = 'form-control';
         if (field.isRequired) idInput.required = true;
-        idInput.placeholder = FormStrings.fillHere;
+        idInput.placeholder = FormStrings.typeHere;
         idWrapper.appendChild(idInput);
 
         const idDesc = field.description ? document.createElement('div') : null;

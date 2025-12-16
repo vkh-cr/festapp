@@ -33,7 +33,7 @@ export default defineConfig({
       // Using negative lookahead: ^/(?!$|\\?|index\.html|@|node_modules|src|form|favicon|sw\.js|site\.webmanifest).*
       // Note: "assets" is handled by bypass logic below, so we allow it to match regex, but bypass checks FS.
       
-      '^/(?!$|\\?|index\\.html|@|node_modules|src|form|favicon|sw\\.js|site\\.webmanifest).*': {
+      '^/(?!$|\\?|index\\.html|@|node_modules|src|form|favicon|sw\\.js|site\\.webmanifest|assets).*': {
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
@@ -45,7 +45,7 @@ export default defineConfig({
         },
         bypass: (req, res, options) => {
             // Smart Asset Proxying
-            // If the request is for an asset that exists in the Web Client's local filesystem, 
+            // If the request is for an asset that exists in the Web Client's local filesystem,
             // bypass the proxy so Vite serves it.
             // Otherwise, let it pass through to Flutter.
             if (req.url.startsWith('/assets/')) {
@@ -53,7 +53,7 @@ export default defineConfig({
                 // Clean URL params if any
                 const cleanUrl = req.url.split('?')[0];
                 const localPath = path.join(__dirname, cleanUrl);
-                
+
                 if (fs.existsSync(localPath)) {
                   //  console.log('Serving local asset:', cleanUrl);
                     return req.url;

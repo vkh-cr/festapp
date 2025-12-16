@@ -38,7 +38,7 @@ export class DateFieldBuilder {
         input.name = field.id.toString();
         input.className = 'form-control flatpickr-input';
         if (field.isRequired) input.required = true;
-        input.placeholder = FormStrings.fillHere; // Or date pattern
+        input.placeholder = FormStrings.typeHere; // Or date pattern
         
         // Autocomplete
         input.autocomplete = 'off'; // Let Flatpickr handle it

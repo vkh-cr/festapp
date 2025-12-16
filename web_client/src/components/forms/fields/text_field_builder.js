@@ -10,7 +10,7 @@ export class TextFieldBuilder {
         const isHidden = field.isHidden;
         const inputType = TextFieldBuilder.getInputType(field.type);
         const inputName = field.id.toString();
-        const placeholder = FormStrings.fillHere;
+        const placeholder = FormStrings.typeHere;
         const autocomplete = TextFieldBuilder.getAutocompleteValue(field.type);
         
         container.innerHTML = html`
