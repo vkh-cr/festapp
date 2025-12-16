@@ -46,13 +46,35 @@
     /* No change needed to force center modal, user requested Bottom Sheet behavior everywhere */
 }
 
+/* Drag Handle */
+.order-preview-handle-bar {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-top: 12px;
+    padding-bottom: 4px;
+    /* Ensure it's touch-friendly */
+    cursor: grab;
+    touch-action: none; /* Prevent browser scroll/zoom */
+}
+
+.order-preview-handle {
+    width: 40px;
+    height: 4px;
+    background-color: var(--divider-color, rgba(0,0,0,0.2));
+    border-radius: 2px;
+}
+
 /* Header */
 .order-preview-header {
     padding: 16px;
     text-align: center;
     position: relative;
+    touch-action: none; /* Prevent browser scroll */
     /* Optional: border-bottom? Flutter doesn't seem to have one explicit, but useful for web. */
 }
+
+/* ... existing header styles ... */
 
 .order-preview-header h2 {
     margin: 0;
@@ -86,6 +108,9 @@
     /* Styled Scrollbar */
     scrollbar-width: thin; /* Firefox */
     scrollbar-color: rgba(0,0,0,0.2) transparent;
+    
+    /* Prevent Pull-to-Refresh/Rubber-banding on the body */
+    overscroll-behavior-y: contain; 
 }
 
 .order-preview-body::-webkit-scrollbar {

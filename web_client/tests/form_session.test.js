@@ -112,6 +112,9 @@ describe('FormSession', () => {
         listContainer.appendChild(ticketItem);
         form.appendChild(listContainer);
         
+        // Fix: State Inversion requires ticket to exist in state
+        session.addTicket(); // Initialize ticket 0
+        
         // Input inside ticket
         const input = document.createElement('input');
         // Name format: ticketId_index_subId

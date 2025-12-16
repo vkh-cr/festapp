@@ -4,18 +4,18 @@ export class SeoService {
      * Updates SEO meta tags based on the FormModel.
      * @param {FormModel} formModel 
      */
-    static updateMetaTags(formModel) {
+    static updateMetaTags(formModel, currentUrl) {
         if (!formModel) return;
 
         const title = formModel.title || 'Festapp Event';
         
         // Extract plain text description from HTML header
         let description = '';
-        let imageUrl = null;
+        let imageData = null;
 
         if (formModel.header) {
             description = this._extractTextFromHtml(formModel.header);
-            imageUrl = this._extractImageFromHtml(formModel.header);
+            imageData = this._extractImageFromHtml(formModel.header);
         }
 
         // Fallbacks
@@ -40,15 +40,28 @@ export class SeoService {
         // 3. Update OG Tags
         this._setMetaTag('property', 'og:title', title);
         this._setMetaTag('property', 'og:description', description);
-        if (imageUrl) {
-            this._setMetaTag('property', 'og:image', imageUrl);
+        
+        if (currentUrl) {
+             this._setMetaTag('property', 'og:url', currentUrl);
+             // Also update canonical if possible, though usually static
+        }
+
+        if (imageData && imageData.src) {
+            this._setMetaTag('property', 'og:image', imageData.src);
+            
+            if (imageData.width) {
+                 this._setMetaTag('property', 'og:image:width', imageData.width);
+            }
+            if (imageData.height) {
+                 this._setMetaTag('property', 'og:image:height', imageData.height);
+            }
         }
 
         // 4. Update Twitter Tags
         this._setMetaTag('property', 'twitter:title', title);
         this._setMetaTag('property', 'twitter:description', description);
-        if (imageUrl) {
-            this._setMetaTag('property', 'twitter:image', imageUrl);
+        if (imageData && imageData.src) {
+            this._setMetaTag('property', 'twitter:image', imageData.src);
         }
     }
 
@@ -56,8 +69,12 @@ export class SeoService {
         // Truncate content if too long (standard SEO practice)
         // Meta desc ~160 chars, OG desc ~200-300 chars. 
         // We'll be generous but safe to avoid massive HTML dumps being put into attribute.
-        let safeContent = content ? content.trim() : '';
-        if (safeContent.length > 300) {
+        let safeContent = content ? String(content).trim() : '';
+        // Only truncate description/title-like fields, not URLs or numbers
+        const isUrl = attrValue.includes('image') || attrValue.includes('url');
+        const isNum = attrValue.includes('width') || attrValue.includes('height');
+
+        if (!isUrl && !isNum && safeContent.length > 300) {
             safeContent = safeContent.substring(0, 297) + '...';
         }
 
@@ -84,7 +101,15 @@ export class SeoService {
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlString, 'text/html');
         const img = doc.querySelector('img');
-        return img ? img.src : null;
+        
+        if (img) {
+            return {
+                src: img.src,
+                width: img.getAttribute('width'),
+                height: img.getAttribute('height')
+            };
+        }
+        return null;
     }
 
     static _formatDate(dateObj) {

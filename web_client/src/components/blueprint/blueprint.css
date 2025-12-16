@@ -12,6 +12,7 @@
     color: var(--text-color, #000);
     animation: blueprintSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     backdrop-filter: blur(2px); /* nice glass feel if background allows */
+    touch-action: none; /* Prevent browser gestures */
 }
 
 @keyframes blueprintSlideUp {
@@ -138,6 +139,17 @@
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+    touch-action: none !important;
+}
+
+/* Add to content as well */
+.blueprint-content {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    touch-action: none !important;
 }
 
 /* Seat Visuals */
@@ -180,8 +192,15 @@
 }
 
 /* Global Overrides when Blueprint is Active */
+html.blueprint-active,
 body.blueprint-active {
     overflow: hidden;
+    touch-action: none !important; /* Global lock for Android */
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh/bounce effects */
+}
+
+body.blueprint-active * {
+    touch-action: none !important; /* Force all children to respect this */
 }
 
 body.blueprint-active #form-page-container {
@@ -190,4 +209,9 @@ body.blueprint-active #form-page-container {
 
 body.blueprint-active #floating-price-widget {
     z-index: 3000 !important;
+    position: fixed !important;
+    top: 16px !important;
+    right: 16px !important;
+    left: auto !important;
+    margin: 0 !important;
 }

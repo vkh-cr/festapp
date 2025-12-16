@@ -84,6 +84,7 @@ export class DbForms {
             throw new Error(data.message || "Selection failed");
         }
         
-        return true;
+        console.log(`[DbForms] selectSpot success. Result data:`, data.data);
+        return data.data;
     }
 }

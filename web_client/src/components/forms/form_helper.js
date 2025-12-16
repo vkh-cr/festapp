@@ -144,6 +144,8 @@ export class FormHelper {
                       totalPrice += ticket.spotPrice;
                   }
 
+                  // console.log(`[FormHelper] Calc Ticket ${tIdx}:`, ticket);
+
                   if (ticket.fields && Array.isArray(ticket.fields)) {
                       ticket.fields.forEach(fObj => {
                            // Refactored to avoid double counting from multiple keys (e.g. type + product_type)
@@ -180,12 +182,14 @@ export class FormHelper {
                                    }
                                }
 
-                               const p = findPrice(subDef, val);
-                               if (p > 0) {
-                                   // console.log(`Ticket [${tIdx}] Price: ${p}`);
-                                   totalPrice += p;
-                               }
-                           }
+                                const p = findPrice(subDef, val);
+                                if (p > 0) {
+                                    // console.log(`Ticket [${tIdx}] Price: ${p}`);
+                                    totalPrice += p;
+                                } else {
+                                    // console.log(`Ticket [${tIdx}] ${subDef.id} val=${val} price=0`);
+                                }
+                            }
                       });
                   }
              });
