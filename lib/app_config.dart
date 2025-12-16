@@ -23,6 +23,7 @@ class AppConfig {
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
   static const bool isAppSupported = false;
+  static const bool isWebclientSupported = true;
 
   static const String webLink = "https://vstupenky.online";
   static bool isProLicense = false;

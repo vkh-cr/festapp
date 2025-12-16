@@ -12,7 +12,7 @@ export class FormDataReader {
         const payload = {
             fields: [],
             ticket: [],
-        [DbForms.metaSecret]: formModel.secret, 
+            [DbForms.metaSecret]: formModel.secret, 
             [DbForms.metaForm]: formModel.key
         };
 
@@ -21,20 +21,6 @@ export class FormDataReader {
         if (blueprintSecret) {
             payload['secret'] = blueprintSecret; 
         }
-
-        // --- Helper: Find Option for Meta Data (Currency, Price, etc.) ---
-        const findOption = (fieldOrSub, value) => {
-             // 1. Product Type Products
-             if (fieldOrSub.type === 'product_type' && fieldOrSub.data && fieldOrSub.data.product_type_data && fieldOrSub.data.product_type_data.products) {
-                 return fieldOrSub.data.product_type_data.products.find(p => String(p.id) === String(value));
-             }
-             // 2. Standard Options
-             const options = fieldOrSub.options || (fieldOrSub.data && fieldOrSub.data.options) || [];
-             if (options.length > 0) {
-                 return options.find(o => String(o.id) === String(value));
-             }
-             return null;
-        };
 
         // --- 1. Standard Fields (Non-Ticket) ---
         formModel.relatedFields.forEach(field => {
@@ -54,7 +40,7 @@ export class FormDataReader {
                  
                  // Attach currency if single value (complex logic for multi-currency items is rare/unsupported on standard fields)
                  if (validVals.length === 1) {
-                      const opt = findOption(field, validVals[0]);
+                      const opt = FormDataReader._findOption(field, validVals[0]);
                       if (opt && opt.currency) fieldObj['currency_code'] = opt.currency;
                  }
 
@@ -92,15 +78,12 @@ export class FormDataReader {
             const ticketsForField = ticketData[field.id.toString()];
             if (!ticketsForField) return;
 
-            // Iterate recognized indices (sparse array safely)
-            // ticketsForField is an Array, but might have holes if IDs non-contiguous? 
-            // Actually keys matching regex index group are typically 0, 1, 2...
-            // But we used array. Let's use for..in or flat iteration.
-            
-            // Note: Use keys to handle potential sparse indices if deletion logic doesn't re-index (but it does in builder reset)
             Object.keys(ticketsForField).forEach(indexKey => {
                 const subFieldsData = ticketsForField[indexKey]; // { subId: [values] }
                 const ticketObj = { fields: [] };
+                // Preserve the original DOM index so Validator can target the correct input
+                ticketObj['_ticketIndex'] = indexKey; 
+                
                 let hasData = false;
 
                 // We need definitions to know types (spot vs standard)
@@ -118,23 +101,21 @@ export class FormDataReader {
                         ticketObj['spot'] = val;
                         
                         // Extract Price from DOM if available
-                        // The input name is constructed as: `${field.id}_${indexKey}_${sub.id}`
-                        // (Note: `indexKey` from Object.keys might be string, but `index` in form is integer)
                         const inputName = `${field.id}_${indexKey}_${sub.id}`;
                         const inputEl = form.querySelector(`input[name="${inputName}"]`);
                         if (inputEl) {
-                        if (inputEl.dataset.price) {
-                            ticketObj['spotPrice'] = parseFloat(inputEl.dataset.price);
-                        }
-                        if (inputEl.dataset.name) {
-                            ticketObj['spotName'] = inputEl.dataset.name;
+                            if (inputEl.dataset.price) {
+                                ticketObj['spotPrice'] = parseFloat(inputEl.dataset.price);
+                            }
+                            if (inputEl.dataset.name) {
+                                ticketObj['spotName'] = inputEl.dataset.name;
+                            }
                         }
                     }
-                }
                     else if (sub.type === 'product_type') {
                         // Product Types (always array of objects)
                         rawVals.forEach(v => {
-                             ticketObj.fields.push(createSubFieldObj(sub, v, findOption));
+                             ticketObj.fields.push(FormDataReader._createSubFieldObj(sub, v));
                         });
                     } 
                     else {
@@ -144,13 +125,13 @@ export class FormDataReader {
                         if (hasPrices && rawVals.length > 1) {
                             // Multiple priced items -> separate entries
                             rawVals.forEach(v => {
-                                ticketObj.fields.push(createSubFieldObj(sub, v, findOption));
+                                ticketObj.fields.push(FormDataReader._createSubFieldObj(sub, v));
                             });
                         } else {
                             // Single entry (joined or single)
                             const val = rawVals.length > 1 ? rawVals.join(' | ') : rawVals[0];
                             if (rawVals.length === 1) {
-                                ticketObj.fields.push(createSubFieldObj(sub, val, findOption));
+                                ticketObj.fields.push(FormDataReader._createSubFieldObj(sub, val));
                             } else {
                                 // Multi-value but single field entry (e.g. checkbox list without prices)
                                 let fObj = {};
@@ -178,26 +159,38 @@ export class FormDataReader {
 
         return payload;
     }
-}
 
-// Helper to construct the sub-field object
-function createSubFieldObj(sub, val, findOptionFn) {
-    let fObj = {};
-    fObj[sub.type] = val;
-    fObj['_subFieldId'] = sub.id; 
-    
-    const opt = findOptionFn(sub, val);
-    if (opt) {
-        const isProduct = sub.type === 'product_type' || (opt.price !== undefined && opt.price !== null && opt.price !== "" && !isNaN(Number(opt.price)));
-        
-        if (isProduct) {
-            fObj['product_type'] = val;
-        }
-
-        if (opt.currency) {
-            fObj['currency_code'] = opt.currency;
-        }
+    static _findOption(fieldOrSub, value) {
+         // 1. Product Type Products
+         if (fieldOrSub.type === 'product_type' && fieldOrSub.data && fieldOrSub.data.product_type_data && fieldOrSub.data.product_type_data.products) {
+             return fieldOrSub.data.product_type_data.products.find(p => String(p.id) === String(value));
+         }
+         // 2. Standard Options
+         const options = fieldOrSub.options || (fieldOrSub.data && fieldOrSub.data.options) || [];
+         if (options.length > 0) {
+             return options.find(o => String(o.id) === String(value));
+         }
+         return null;
     }
-    return fObj;
-}
 
+    static _createSubFieldObj(sub, val) {
+        let fObj = {};
+        fObj[sub.type] = val;
+        fObj['_subFieldId'] = sub.id; 
+        
+        const opt = FormDataReader._findOption(sub, val);
+        if (opt) {
+            const isProduct = sub.type === 'product_type' || (opt.price !== undefined && opt.price !== null && opt.price !== "" && !isNaN(Number(opt.price)));
+            
+            if (isProduct) {
+                fObj['product_type'] = val;
+            }
+
+            if (opt.currency) {
+                fObj['currency_code'] = opt.currency;
+            }
+        }
+        return fObj;
+    }
+
+}

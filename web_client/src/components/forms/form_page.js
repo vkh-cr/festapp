@@ -11,6 +11,7 @@ import { DbForms } from './db_forms.js';
 import { OrderPreview } from './order_preview.js';
 import { DbOrders } from '../eshop/db_orders.js';
 import { RouterService } from '../../services/router_service.js';
+import { RightsService } from '../../services/rights_service.js';
 import { ColorUtils } from '../../utils/color_utils.js';
 // ... (content generated later)
 import { ThemeService } from '../../services/theme_service.js';
@@ -46,6 +47,12 @@ export class FormPage extends Component {
         // Also remove legacy widget just in case
         const widget = document.getElementById('floating-price-widget');
         if (widget) widget.remove();
+        
+        // Remove FAB if exists
+        if (this._fabBtn) {
+            this._fabBtn.remove();
+            this._fabBtn = null;
+        }
         
         // Base cleanup
         super.clear();
@@ -159,11 +166,64 @@ export class FormPage extends Component {
 
             // 5. Render Form
             this.renderForm(formModel, showPreview);
+            
+            // 6. Update Rights & Show Edit Button
+            // Pass the form link as 'formLink' to match Flutter's behavior
+            RightsService.updateAppData({ formLink: link }).then(() => {
+                if (RightsService.canSeeReservations()) {
+                    this.renderEditButton(link);
+                }
+            });
 
         } catch (e) {
             console.error(e);
             this.renderError(CommonStrings.error + ": " + e.message + "\n" + e.stack);
         }
+    }
+
+    renderEditButton(link) {
+        // Prevent duplicates
+        if (this._fabBtn) return;
+
+        const btn = document.createElement('button');
+        // ... (rest of creation logic)
+        btn.className = 'fab-edit';
+        // Material Edit Icon
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 17l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm635-498-57-57 57 57Zm-58 58L462-200H368v-94l329-329 57 57Z"/></svg>';
+        
+        // CSS
+        btn.style.position = 'fixed';
+        btn.style.bottom = '24px';
+        btn.style.right = '24px';
+        btn.style.width = '56px';
+        btn.style.height = '56px';
+        btn.style.borderRadius = '50%';
+        btn.style.backgroundColor = 'var(--primary-color, #000)';
+        btn.style.color = '#fff';
+        btn.style.border = 'none';
+        btn.style.boxShadow = '0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)';
+        btn.style.cursor = 'pointer';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.style.zIndex = '3000';
+
+        btn.onclick = () => {
+             // Prioritize context.occasion.link (backend canonical link)
+             // Fallback to local link (form link)
+             const context = RightsService.context;
+             let occasionLink = context?.occasion?.link;
+             
+             if (!occasionLink) {
+                 occasionLink = link;
+             }
+             
+             const path = `/${occasionLink}/reservations`;
+             RouterService.navigateExternal(path);
+        };
+
+        document.body.appendChild(btn);
+        this._fabBtn = btn;
     }
 
     renderLoading() {
@@ -323,7 +383,10 @@ export class FormPage extends Component {
     }
 
     validateAndSubmit(form, formModel) {
+        console.log('[FormPage] validateAndSubmit called');
         const isValid = FormValidator.validateAndShowErrors(form, formModel, this.currentSession);
+        console.log('[FormPage] Custom Validator Result:', isValid);
+        
         if (isValid) {
             this.handlePreview(form, formModel);
         }
@@ -338,13 +401,32 @@ export class FormPage extends Component {
     }
 
     handlePreview(form, formModel) {
-        if (!form.reportValidity()) return;
+        console.log('[FormPage] handlePreview called');
+        
+        // Native Validation Check
+        if (!form.reportValidity()) {
+            console.warn('[FormPage] form.reportValidity() failed. Scanning for native invalid elements...');
+            Array.from(form.elements).forEach(el => {
+                if (el.willValidate && !el.checkValidity()) {
+                    console.warn('[FormPage] Native Invalid Element:', el.name || el.id || el.tagName, el.validationMessage, el);
+                }
+            });
+            return;
+        }
+
+        console.log('[FormPage] Native validation passed. Importing OrderPreview...');
 
         import('./order_preview.js').then(({ OrderPreview }) => {
-             OrderPreview.show(form, formModel, (overlay) => {
-                 this.submitOrder(form, formModel, overlay || document.body); 
-             });
-        });
+             console.log('[FormPage] OrderPreview module loaded.', OrderPreview);
+             try {
+                 const priceData = this.calculateTotal(form, formModel);
+                 OrderPreview.show(form, formModel, priceData, (overlay) => {
+                     this.submitOrder(form, formModel, overlay || document.body); 
+                 });
+             } catch (e) {
+                 console.error('[FormPage] OrderPreview.show crashed:', e);
+             }
+        }).catch(err => console.error('[FormPage] Failed to load OrderPreview module', err));
     }
     
     closePreview() {
@@ -379,12 +461,14 @@ export class FormPage extends Component {
              document.body.style.overflow = ''; 
              
              if (result.success) {
+                 // Clean up old widgets first
+                 this.cleanup(); 
+
                  // Reset Form
                  if (this.host) {
                      this.host.innerHTML = '';
                      this.renderForm(formModel, false);
                  }
-                 this.cleanup(); 
                  window.scrollTo(0, 0); 
              }
              
@@ -483,13 +567,14 @@ export class FormPage extends Component {
             document.body.style.overflow = ''; // Restore scroll
             
             if (success) {
-                    // Reset Form State BEHIND the overlay (redundant but safe)
+                    // Clean up old widget instance first
+                    this.cleanup(); 
+                    
+                    // Reset Form State BEHIND the overlay
                     if (this.host) {
                         this.host.innerHTML = '';
                         this.renderForm(formModel, false);
                     }
-                    // Force remove generic widget if any
-                    this.cleanup(); // Clean up the PriceWidget instance
                     
                     // Scroll to top immediately
                     window.scrollTo(0, 0);
@@ -509,7 +594,7 @@ export class FormPage extends Component {
             OrderResult.render(container, success, resultData, formModel, () => {
                 // On Close (Button Click) -> Trigger History Back
                 // This will fire 'popstate', which calls cleanup()
-                if (this.onBack) this.onBack();
+                RouterService.goBackProgrammatically();
             });
         });
     }

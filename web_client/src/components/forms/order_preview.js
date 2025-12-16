@@ -8,11 +8,22 @@ import { OrderResult } from './order_result.js';
 import { FeatureService } from '../features/feature_service.js';
 import { FormDataReader } from './form_data_reader.js';
 
+// Inject CSS
+if (typeof document !== 'undefined') {
+    const cssUrl = new URL('./order_preview.css', import.meta.url).href;
+    if (!document.querySelector(`link[href="${cssUrl}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = cssUrl;
+        document.head.appendChild(link);
+    }
+}
+
 export class OrderPreview {
 
-    static show(form, formModel, onConfirm, onClose) {
+    static show(form, formModel, priceData, onConfirm, onClose) {
         // 1. Calculate and Prepare Data
-        const data = OrderPreview._prepareData(form, formModel);
+        const data = OrderPreview._prepareData(form, formModel, priceData);
         
         // 2. Render Overlay
         let overlay = document.getElementById('order-preview-overlay');
@@ -157,12 +168,12 @@ export class OrderPreview {
         animateScroll();
     }
 
-    static _prepareData(form, formModel) {
+    static _prepareData(form, formModel, priceData) {
         // Use generalized helper
         const payload = FormDataReader.getPayload(form, formModel);
         
-        // We also need pricing to display logic properly
-        const totalPriceData = FormPage.calculateTotal(form, formModel);
+        // We use passed pricing data to display logic properly
+        const totalPriceData = priceData;
 
         const personalInfo = [];
 
