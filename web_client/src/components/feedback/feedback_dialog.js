@@ -74,6 +74,8 @@ export class FeedbackDialog {
         });
     }
 
+    static escListener = null;
+
     static show(subject, hint) {
         FeedbackDialog.init();
         const tr = LocalizationService.tr;
@@ -104,10 +106,23 @@ export class FeedbackDialog {
 
         const root = document.getElementById('feedback-dialog-root');
         root.classList.add('open');
+
+        // Close on Esc key
+        FeedbackDialog.escListener = (e) => {
+            if (e.key === 'Escape') {
+                FeedbackDialog.close();
+            }
+        };
+        document.addEventListener('keydown', FeedbackDialog.escListener);
     }
 
     static close() {
         const root = document.getElementById('feedback-dialog-root');
         if (root) root.classList.remove('open');
+        
+        if (FeedbackDialog.escListener) {
+            document.removeEventListener('keydown', FeedbackDialog.escListener);
+            FeedbackDialog.escListener = null;
+        }
     }
 }

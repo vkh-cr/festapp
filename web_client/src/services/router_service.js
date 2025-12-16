@@ -10,6 +10,10 @@ export class RouterService {
         window.open(url, '_blank');
     }
 
+    static navigateExternal(url) {
+        window.location.href = url;
+    }
+
     static navigateToOccasionApp(link) {
         // Navigate to the occasion app root (e.g. /kurin2026)
         // This will likely be handled by the server returning the app index, or 
@@ -36,8 +40,12 @@ export class RouterService {
         new FormPage('form-page-container').init(link, { onBack: RouterService.goBackProgrammatically });
     }
 
+    static getLoginUrl() {
+        return `${AppConfig.flutterAppUrl}/login`;
+    }
+
     static navigateToLogin() {
-        const url = `${AppConfig.flutterAppUrl}/login`;
+        const url = RouterService.getLoginUrl();
         console.log(`Navigating to Login: ${url}`);
         window.location.href = url;
     }
@@ -57,6 +65,15 @@ export class RouterService {
     
     // Initial Load Check
     static async handleInitialLoad() {
+        // 1. Handle legacy hash routing (e.g. /#/link -> /link)
+        if (window.location.hash && window.location.hash.startsWith('#/')) {
+            const cleanPath = window.location.hash.substring(1); // Remove '#'
+            console.log(`Redirecting legacy hash: ${window.location.href} -> ${cleanPath}`);
+            window.history.replaceState(null, '', cleanPath);
+            // Verify if we need to reload or just continue processing with new path
+            // If the path is different, we might need to let the next logic handle it.
+        }
+
         const path = window.location.pathname;
         console.log("RouterService checking path:", path);
         if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {

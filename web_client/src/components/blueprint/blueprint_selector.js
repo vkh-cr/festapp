@@ -6,12 +6,16 @@ import { BlueprintRenderer } from './blueprint_renderer.js';
 import { SeatStates } from './blueprint_config.js';
 
 // Dynamically load CSS for non-bundler environments
-const cssUrl = new URL('./blueprint.css', import.meta.url).href;
-if (!document.querySelector(`link[href="${cssUrl}"]`)) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = cssUrl;
-    document.head.appendChild(link);
+// Basic style injection
+// Only run if document is available
+if (typeof document !== 'undefined') {
+    const cssUrl = new URL('./blueprint.css', import.meta.url).href;
+    if (!document.querySelector(`link[href="${cssUrl}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = cssUrl;
+        document.head.appendChild(link);
+    }
 }
 
 export class BlueprintSelector {

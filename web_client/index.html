@@ -3,20 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Festapp</title>
+    <title>Festapp - Vstupenky.online</title>
+    <meta name="description" content="Rychlé a jednoduché založení události, prodej vstupenek a registrace. Ideální pro akce, plesy a festivaly. Vstupenky.online (Festapp.net) - nástroj pro správu vaší akce.">
+    <meta name="keywords" content="založení události, prodej vstupenek, registrace, akce, plesy, festivaly, festapp, vstupenky.online">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vstupenky.online/">
+    <meta property="og:title" content="Festapp - Vstupenky.online">
+    <meta property="og:description" content="Rychlé a jednoduché založení události, prodej vstupenek a registrace. Ideální pro akce, plesy a festivaly. Vstupenky.online (Festapp.net) - nástroj pro správu vaší akce.">
+    <meta property="og:image" content="https://vstupenky.online/og_image.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://vstupenky.online/">
+    <meta property="twitter:title" content="Festapp - Vstupenky.online">
+    <meta property="twitter:description" content="Rychlé a jednoduché založení události, prodej vstupenek a registrace. Ideální pro akce, plesy a festivaly. Vstupenky.online (Festapp.net) - nástroj pro správu vaší akce.">
+    <meta property="twitter:image" content="https://vstupenky.online/og_image.jpg">
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <!-- Supabase SDK (via CDN for simplicity without bundler, or use module resolution if npm install works) -->
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Flatpickr (Date Picker) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/cs.js"></script>
+    <link rel="manifest" href="/site.webmanifest">
+
+
     
     <!-- Main Style (Inject via JS) -->
     
@@ -31,7 +43,7 @@
 <body>
     <div id="app" style="display: none;">
         <!-- Header -->
-        <header id="universal-header"></header>
+        <user-header id="universal-header"></user-header>
 
         <main>
             <!-- Search -->

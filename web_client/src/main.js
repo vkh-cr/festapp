@@ -14,7 +14,7 @@ class Main {
         try {
             // 1. Init Core Services
             console.log(`Starting Festapp Web Client v${AppConfig.version}`);
-            SupabaseService.init(AppConfig.supabaseUrl, AppConfig.anonKey);
+            // SupabaseService is now eager loaded
             await LocalizationService.init();
             ThemeService.init();
             ImageLoader.init(); // Initialize Image Loader
@@ -30,7 +30,7 @@ class Main {
             if (app) app.style.display = 'flex';
             
             // 3. Init UI Components
-            UserHeader.init('universal-header');
+            // UserHeader is now a web component and auto-inits via tag in HTML
             const unitPage = new UnitPage('events-grid');
             unitPage.init('event-search');
             FeedbackFab.init('feedback-fab');

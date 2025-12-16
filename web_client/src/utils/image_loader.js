@@ -54,6 +54,12 @@ export class ImageLoader {
         // If explicitly requested to skip (e.g. tracking pixels or critical UI icons?)
         // For now apply to all.
         
+        // Check for high priority (LCP)
+        if (img.getAttribute('fetchpriority') === 'high') {
+             img.classList.add('loaded'); // Ensure it's marked as loaded immediately
+             return; 
+        }
+
         // Initial state: hidden
         img.classList.add('smooth-load');
 

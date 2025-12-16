@@ -3,7 +3,7 @@ import { FormStrings } from '../form_strings.js';
 import { CommonStrings } from '../../shared/common_strings.js';
 import { OrdersStrings } from '../../eshop/orders_strings.js';
 import { FormHelper } from '../form_helper.js';
-import { BlueprintSelector } from '../../blueprint/blueprint_selector.js';
+// import { BlueprintSelector } from '../../blueprint/blueprint_selector.js';
 import { DbForms } from '../db_forms.js';
 
 export class TicketFieldBuilder {
@@ -31,13 +31,15 @@ export class TicketFieldBuilder {
              blueprintBtn.innerHTML = `<i class="material-icons" style="vertical-align: middle; margin-right: 8px;">event_seat</i> ${FormStrings.seatSelection || 'Select Seat'}`;
              
              blueprintBtn.onclick = () => {
-                 const selector = new BlueprintSelector();
-                 selector.open(formModel, field, () => {
-                     // Callback for update
-                     // Do NOT reload page. Just trigger update.
-                     // The optimistic update in selector might have happened.
-                     // We might want to dispatch an input event to notify listeners
-                     container.dispatchEvent(new Event('input', { bubbles: true }));
+                 import('../../blueprint/blueprint_selector.js').then(({ BlueprintSelector }) => {
+                     const selector = new BlueprintSelector();
+                     selector.open(formModel, field, () => {
+                         // Callback for update
+                         // Do NOT reload page. Just trigger update.
+                         // The optimistic update in selector might have happened.
+                         // We might want to dispatch an input event to notify listeners
+                         container.dispatchEvent(new Event('input', { bubbles: true }));
+                     });
                  });
              };
              
@@ -262,39 +264,41 @@ export class TicketFieldBuilder {
                 const existingBtn = container.querySelector('button.btn-primary'); // The one created at top
                 if (existingBtn) {
                     existingBtn.onclick = () => {
-                         const selector = new BlueprintSelector();
-                         // Pass current seats to selector
-                         selector.open(formModel, field, container.selectedSeats, (newSeats, secret) => {
-                             // Update UI with new seats
-                             
-                             // Store secret for removal / submission
-                             if (secret) {
-                                 container.dataset.secret = secret;
+                         import('../../blueprint/blueprint_selector.js').then(({ BlueprintSelector }) => {
+                             const selector = new BlueprintSelector();
+                             // Pass current seats to selector
+                             selector.open(formModel, field, container.selectedSeats, (newSeats, secret) => {
+                                 // Update UI with new seats
                                  
-                                 // Add hidden input for final submission if not exists
-                                 let secretInput = container.querySelector('input[name="blueprint_secret"]');
-                                 if (!secretInput) {
-                                     secretInput = document.createElement('input');
-                                     secretInput.type = 'hidden';
-                                     secretInput.name = 'blueprint_secret';
-                                     container.appendChild(secretInput);
+                                 // Store secret for removal / submission
+                                 if (secret) {
+                                     container.dataset.secret = secret;
+                                     
+                                     // Add hidden input for final submission if not exists
+                                     let secretInput = container.querySelector('input[name="blueprint_secret"]');
+                                     if (!secretInput) {
+                                         secretInput = document.createElement('input');
+                                         secretInput.type = 'hidden';
+                                         secretInput.name = 'blueprint_secret';
+                                         container.appendChild(secretInput);
+                                     }
+                                     secretInput.value = secret;
                                  }
-                                 secretInput.value = secret;
-                             }
-
-                             // 1. Clear existing tickets
-                             listContainer.innerHTML = '';
-                             
-                             // 2. Update state
-                             container.selectedSeats = newSeats || [];
-                             
-                             // 3. Re-create tickets
-                             container.selectedSeats.forEach(seat => {
-                                 addTicketItem(seat);
+    
+                                 // 1. Clear existing tickets
+                                 listContainer.innerHTML = '';
+                                 
+                                 // 2. Update state
+                                 container.selectedSeats = newSeats || [];
+                                 
+                                 // 3. Re-create tickets
+                                 container.selectedSeats.forEach(seat => {
+                                     addTicketItem(seat);
+                                 });
+                                 
+                                 // 4. Trigger update
+                                 container.dispatchEvent(new Event('input', { bubbles: true }));
                              });
-                             
-                             // 4. Trigger update
-                             container.dispatchEvent(new Event('input', { bubbles: true }));
                          });
                     };
                 }

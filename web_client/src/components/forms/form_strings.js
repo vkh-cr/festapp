@@ -103,7 +103,6 @@ export class FormStrings {
 
     // --- Form Fields (General) ---
     static get noOptionsForCurrency() { return LocalizationService.tr('FormsFeature.noOptionsForCurrency'); }
-    static get fillHere() { return LocalizationService.tr('FormsFeature.typeHere'); }
     static get clearSelection() { return LocalizationService.tr('FormsFeature.clearSelection'); }
     static get unavailable() { return LocalizationService.tr('FormsFeature.unavailable'); }
     static get inWhatCurrency() { return LocalizationService.tr('FormsFeature.inWhatCurrency'); }
@@ -122,7 +121,7 @@ export class FormStrings {
     static get fieldBirthDate() { return LocalizationService.tr('Birth Date'); }
     static birthDateError(minAge, maxAge) { return LocalizationService.tr('You must be between {minAge} and {maxAge} years old.', { minAge, maxAge }); }
     static birthDateWarning(minAge, maxAge) { return LocalizationService.tr('Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old).', { minAge, maxAge }); }
-    
+    static get birthDateFormatHint() { return LocalizationService.currentLocale === 'cs' ? 'D. M. RRRR' : 'MM/DD/YYYY'; }
     static get expiryDate() { return LocalizationService.tr('Expiry Date'); }
     static get expiryDatePastError() { return LocalizationService.tr('Expiry date cannot be in the past.'); }
 

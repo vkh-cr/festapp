@@ -10,18 +10,24 @@
     display: flex;
     flex-direction: column;
     color: var(--text-color, #000);
-    animation: blueprintSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: blueprintSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    backdrop-filter: blur(2px); /* nice glass feel if background allows */
 }
 
 @keyframes blueprintSlideUp {
     from {
         opacity: 0;
-        transform: translateY(40px) scale(0.96);
+        transform: translateY(20px) scale(0.98);
     }
     to {
         opacity: 1;
         transform: translateY(0) scale(1.0);
     }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* Content Area */
@@ -44,6 +50,7 @@
 .blueprint-loading {
     font-size: 1.2rem;
     color: #666;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
 .blueprint-error {

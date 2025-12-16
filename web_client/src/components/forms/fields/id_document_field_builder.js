@@ -1,3 +1,6 @@
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.min.css";
+import { Czech } from "flatpickr/dist/l10n/cs.js";
 import { LocalizationService } from '../../../services/localization_service.js';
 import { FormStrings } from '../form_strings.js';
 import { TextFieldBuilder } from './text_field_builder.js';
@@ -30,7 +33,7 @@ export class IdDocumentFieldBuilder {
         idInput.name = field.id.toString();
         idInput.className = 'form-control';
         if (field.isRequired) idInput.required = true;
-        idInput.placeholder = FormStrings.fillHere;
+        idInput.placeholder = FormStrings.typeHere;
         idWrapper.appendChild(idInput);
 
         const idDesc = field.description ? document.createElement('div') : null;
@@ -63,42 +66,40 @@ export class IdDocumentFieldBuilder {
             errorContainer.style.display = 'none';
 
             // Flatpickr Init
-             if (window.flatpickr) {
-                const fp = flatpickr(expiryInput, {
-                    dateFormat: 'Y-m-d',
-                    altInput: true,
-                    altFormat: LocalizationService.currentLocale === 'cs' ? 'j. n. Y' : 'F j, Y',
-                    allowInput: true,
-                    minDate: 'today', // Disable past dates
-                    disableMobile: false,
-                    locale: LocalizationService.currentLocale,
-                    onChange: function(selectedDates) {
-                        validateExpiry(selectedDates[0]);
-                    }
-                });
-
-                const validateExpiry = (date) => {
-                    if (!date) {
-                        errorContainer.style.display = 'none';
-                        expiryInput.setCustomValidity("");
-                        expiryInput.classList.remove('invalid');
-                        return;
-                    }
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    if (date < today) {
-                        const msg = FormStrings.expiryDatePastError;
-                        errorContainer.textContent = msg;
-                        errorContainer.style.display = 'block';
-                        expiryInput.setCustomValidity(msg);
-                        expiryInput.classList.add('invalid');
-                    } else {
-                        errorContainer.style.display = 'none';
-                        expiryInput.setCustomValidity("");
-                        expiryInput.classList.remove('invalid');
-                    }
-                };
-            }
+            const validateExpiry = (date) => {
+                if (!date) {
+                    errorContainer.style.display = 'none';
+                    expiryInput.setCustomValidity("");
+                    expiryInput.classList.remove('invalid');
+                    return;
+                }
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (date < today) {
+                    const msg = FormStrings.expiryDatePastError;
+                    errorContainer.textContent = msg;
+                    errorContainer.style.display = 'block';
+                    expiryInput.setCustomValidity(msg);
+                    expiryInput.classList.add('invalid');
+                } else {
+                    errorContainer.style.display = 'none';
+                    expiryInput.setCustomValidity("");
+                    expiryInput.classList.remove('invalid');
+                }
+            };
+                
+            const fp = flatpickr(expiryInput, {
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: LocalizationService.currentLocale === 'cs' ? 'j. n. Y' : 'F j, Y',
+                allowInput: true,
+                minDate: 'today', // Disable past dates
+                disableMobile: false,
+                locale: LocalizationService.currentLocale === 'cs' ? Czech : 'default',
+                onChange: function(selectedDates) {
+                    validateExpiry(selectedDates[0]);
+                }
+            });
 
             expiryElements = { label: expiryLabel, wrapper: expiryWrapper, error: errorContainer };
         }

@@ -12,7 +12,7 @@ export class FormRenderer {
             <div class="form-wrapper ${formModel.isCardDesign ? 'is-card-design' : ''}">
                 ${showPreview ? html`<div style="width:100%; color:black; background:orange; padding:8px; margin-bottom:16px; text-align:center; font-weight:bold; font-size:13px;">${FormStrings.previewMode}</div>` : ''}
                 
-                ${formModel.header ? html`<div class="form-header">${unsafe(formModel.header)}</div>` : ''}
+                ${formModel.header ? html`<div class="form-header">${unsafe(this._optimizeLcp(formModel.header))}</div>` : ''}
                 
                 ${formModel.description ? html`<div class="form-description">${unsafe(formModel.description)}</div>` : ''}
 
@@ -49,6 +49,13 @@ export class FormRenderer {
         // Change event needed for some inputs (select, etc) to trigger updates immediately?
         // Usually 'input' covers value changes, but let's keep 'change' for safety/legacy.
         form.addEventListener('change', updateHandler);
+    }
+
+    static _optimizeLcp(htmlContent) {
+        if (!htmlContent) return htmlContent;
+        // Inject fetchpriority="high" into the first img tag
+        // Simple regex replace for the first occurrence
+        return htmlContent.replace(/<img\s/, '<img fetchpriority="high" ');
     }
 
     // _renderHeader helper removed as it is now inlined in render() template

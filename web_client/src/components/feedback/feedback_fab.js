@@ -79,6 +79,7 @@ export class FeedbackFab {
     }
 
     static clickOutsideListener = null;
+    static escListener = null;
 
     static toggle() {
         FeedbackFab.isOpen = !FeedbackFab.isOpen;
@@ -102,6 +103,15 @@ export class FeedbackFab {
                 };
                 document.addEventListener('click', FeedbackFab.clickOutsideListener);
             }, 0);
+
+            // Close on Esc key
+            FeedbackFab.escListener = (e) => {
+                if (e.key === 'Escape') {
+                    FeedbackFab.toggle();
+                }
+            };
+            document.addEventListener('keydown', FeedbackFab.escListener);
+
         } else {
             menu.classList.add('hidden');
             icon.innerText = 'chat_bubble';
@@ -110,6 +120,10 @@ export class FeedbackFab {
             if (FeedbackFab.clickOutsideListener) {
                 document.removeEventListener('click', FeedbackFab.clickOutsideListener);
                 FeedbackFab.clickOutsideListener = null; // Ensure listener is cleared
+            }
+            if (FeedbackFab.escListener) {
+                document.removeEventListener('keydown', FeedbackFab.escListener);
+                FeedbackFab.escListener = null;
             }
         }
     }

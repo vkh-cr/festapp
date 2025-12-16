@@ -121,4 +121,9 @@ class JSInterop {
   String getCurrentUrl() {
     return web.window.location.href;
   }
+
+  /// window.location.href = url
+  void navigateExternal(String url) {
+    web.window.location.href = url;
+  }
 }

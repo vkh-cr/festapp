@@ -226,6 +226,13 @@ export class BlueprintRenderer {
     }
 
     onTouchStart(e) {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            this.state.pinching = true;
+            this.state.pinchStartDist = this.getPinchDist(e);
+            return;
+        }
+
         if (e.touches.length === 1) {
             this.updateControllerDims();
 
@@ -260,6 +267,23 @@ export class BlueprintRenderer {
     }
 
     onTouchMove(e) {
+        if (this.state.pinching && e.touches.length === 2) {
+            e.preventDefault();
+            const newDist = this.getPinchDist(e);
+            const scaleFactor = newDist / this.state.pinchStartDist;
+            
+            // Midpoint
+            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            
+            this.controller.zoom(scaleFactor, midX, midY, this.container.getBoundingClientRect());
+            this.updateTransform();
+            
+            // Update for next frame (relative)
+            this.state.pinchStartDist = newDist; 
+            return;
+        }
+
         if (!this.state.panning || e.touches.length !== 1) return;
         e.preventDefault();
         this.handlePan(e.touches[0].clientX, e.touches[0].clientY);
@@ -278,6 +302,12 @@ export class BlueprintRenderer {
     }
 
     onTouchEnd(e) {
+        if (this.state.pinching && e.touches.length < 2) {
+            this.state.pinching = false;
+            this.snapBack();
+            return;
+        }
+        
         this.state.panning = false;
         
         // Tap Detection
@@ -478,5 +508,12 @@ export class BlueprintRenderer {
         if (rect.bottom > window.innerHeight) {
             this.tooltipElement.style.top = (e.clientY - rect.height - offset) + 'px';
         }
+    }
+
+    getPinchDist(e) {
+        return Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
     }
 }
