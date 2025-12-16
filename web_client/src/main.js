@@ -30,7 +30,7 @@ class Main {
             if (app) app.style.display = 'flex';
             
             // 3. Init UI Components
-            UserHeader.init('universal-header');
+            // UserHeader is now a web component and auto-inits via tag in HTML
             const unitPage = new UnitPage('events-grid');
             unitPage.init('event-search');
             FeedbackFab.init('feedback-fab');

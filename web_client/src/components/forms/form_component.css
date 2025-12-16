@@ -74,8 +74,9 @@
     text-align: left;
 }
 
-body.dark-mode .form-description {
-    color: #d0d0d0; /* Softer, slightly dimmed white to reduce glare */
+body.dark-mode .form-description,
+body.dark-mode .form-description *:not(a) {
+    color: #808080; /* Softer, slightly dimmed white to reduce glare */
 }
 
 /* Remove destructive empty-p hiding that was hiding content with BRs */
@@ -165,8 +166,9 @@ input:-webkit-autofill:active{
     margin-bottom: 0;
 }
 
-body.dark-mode .form-field-description {
-    color: #d0d0d0; /* Softer (was #eaeaea) as requested: "white is too bright" */
+body.dark-mode .form-field-description,
+body.dark-mode .form-field-description *:not(a) {
+    color: #808080; /* Softer (was #eaeaea) as requested: "white is too bright" */
 }
 
 /* Radios and Checkboxes */
@@ -174,6 +176,15 @@ body.dark-mode .form-field-description {
     display: flex;
     flex-direction: column;
     gap: calc(4px * var(--font-scale)); /* Reduced from 8px */
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid transparent; /* Reserve space for border */
+    transition: border-color 0.2s;
+}
+
+.radio-options.invalid, .checkbox-options.invalid {
+    border-color: var(--red-color);
+    background-color: rgba(220, 53, 69, 0.05); /* Slight red tint */
 }
 
 .form-check {
