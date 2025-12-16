@@ -34,7 +34,7 @@ body.dark-mode {
     /* --primary-color: var(--seed-2); REMOVED to allow JS custom color to pass through */
     --background-color: #232529; /* dddBackground: seed3 sat 0.08 light 0.14 */
     --surface-color: #2b2d31; /* sat 0.06 light 0.20 */
-    --text-color: #ffffff; /* Neutral White, was #cedcea (blueish) */
+    --text-color: #bdbdbd; /* Neutral White, was #cedcea (blueish) */
     --card-bg: #2b2d31; /* Fix for card background in dark mode */
     --red-color: #ff5252;
     --input-bg: var(--card-bg);

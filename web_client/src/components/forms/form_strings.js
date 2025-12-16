@@ -103,7 +103,6 @@ export class FormStrings {
 
     // --- Form Fields (General) ---
     static get noOptionsForCurrency() { return LocalizationService.tr('FormsFeature.noOptionsForCurrency'); }
-    static get fillHere() { return LocalizationService.tr('FormsFeature.typeHere'); }
     static get clearSelection() { return LocalizationService.tr('FormsFeature.clearSelection'); }
     static get unavailable() { return LocalizationService.tr('FormsFeature.unavailable'); }
     static get inWhatCurrency() { return LocalizationService.tr('FormsFeature.inWhatCurrency'); }

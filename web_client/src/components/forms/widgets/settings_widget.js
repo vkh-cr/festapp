@@ -26,9 +26,9 @@ export class SettingsWidget {
         this.renderSection({
             title: LocalizationService.tr('Appearance') || 'Vzhled', // Fallback trans
             options: [
+                { id: 'dark', label: 'Dark' },
                 { id: 'auto', label: 'Auto' },
-                { id: 'light', label: 'Light' },
-                { id: 'dark', label: 'Dark' }
+                { id: 'light', label: 'Light' }
             ],
             currentValue: ThemeService.currentMode,
             onSelect: (val) => {
