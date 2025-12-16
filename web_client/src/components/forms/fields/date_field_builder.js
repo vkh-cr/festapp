@@ -34,6 +34,12 @@ export class DateFieldBuilder {
         const wrapper = document.createElement('div');
         wrapper.className = 'input-wrapper';
 
+        // Date format hint
+        const hint = document.createElement('div');
+        hint.className = 'form-field-hint';
+        hint.textContent = FormStrings.birthDateFormatHint;
+        wrapper.appendChild(hint);
+
         // Input
         // Use text type for Flatpickr, but keep name/required
         const input = document.createElement('input');
@@ -47,14 +53,6 @@ export class DateFieldBuilder {
         input.autocomplete = 'off'; // Let Flatpickr handle it
         
         wrapper.appendChild(input);
-
-        // Date format hint
-        const hint = document.createElement('div');
-        hint.style.fontSize = '0.8rem';
-        hint.style.color = 'var(--text-color-secondary)';
-        hint.style.marginTop = '4px';
-        hint.textContent = FormStrings.birthDateFormatHint;
-        wrapper.appendChild(hint);
 
         // Age Validation Logic & Limits (Validation ONLY, no picker restriction)
         const minYear = field.data?.min_year || 0;
@@ -99,7 +97,6 @@ export class DateFieldBuilder {
                 defaultDate: input.value || undefined, 
         });
         
-        wrapper.appendChild(input); 
         container.appendChild(wrapper);
 
         // Message placeholder (for warnings/errors)
