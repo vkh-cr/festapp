@@ -195,7 +195,7 @@ body.dark-mode .preview-label {
 .preview-total-price {
     text-align: center;
     font-size: 1.2rem; /* 16 * 1.2 */
-    font-weight: bold;
+    font-weight: 600 !important;
     margin: 24px 0;
     color: var(--text-color, #000);
 }
@@ -220,7 +220,7 @@ body.dark-mode .preview-label {
     border-radius: 8px; /* Match form button radius */
     font-family: var(--font-family-base, inherit);
     font-size: calc(16px * var(--font-scale, 1));
-    font-weight: 700;
+    font-weight: 600 !important;
     cursor: pointer;
     border: none;
     text-transform: uppercase;

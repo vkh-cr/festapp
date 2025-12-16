@@ -8,7 +8,7 @@
 @font-face {
     font-family: 'Futura';
     src: url('./assets/fonts/FuturaPTMedium.ttf') format('truetype');
-    font-weight: bold;
+    font-weight: 500;
     font-style: normal;
 }
 

@@ -79,7 +79,7 @@ export class PriceWidget {
                 display: flex;
                 align-items: center;
                 font-family: var(--font-family-base);
-                font-weight: bold;
+                font-weight: 600 !important;
                 font-size: 1.1rem;
                 animation: fadeIn 0.3s ease-out;
                 cursor: pointer;
@@ -105,9 +105,9 @@ export class PriceWidget {
         }
 
         this.element.innerHTML = `
-            <span style="margin-right: 6px;">${totalItems}x</span>
+            <span style="margin-right: 6px; font-weight: 600;">${totalItems}x</span>
             <i class="material-icons" style="font-size: 24px; margin-right: 10px;">local_activity</i>
-            <span>${totalPrice} ${currency}</span>
+            <span style="font-weight: 600;">${totalPrice} ${currency}</span>
         `;
     }
 

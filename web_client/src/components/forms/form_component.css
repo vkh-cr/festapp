@@ -316,7 +316,7 @@ body.dark-mode .option-description {
     cursor: pointer;
     font-family: var(--font-family-base, inherit); /* Ensure custom font */
     font-size: calc(16px * var(--font-scale));
-    font-weight: 700; /* Bolder as per designs usually */
+    font-weight: 600 !important; /* Bit bolder (SemiBold) attempting synthesis or fallback to Bold */
     text-transform: uppercase;
     letter-spacing: 0.5px;
     transition: background-color 0.2s, filter 0.2s;
