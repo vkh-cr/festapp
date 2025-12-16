@@ -153,8 +153,11 @@ class BlueprintObjectModel {
 
         // Add ticket note if available
         var ticketNoteString = ticket.note != null && ticket.note!.isNotEmpty ? "\n${ticket.note}" : "";
+        
+        // Add hidden note if available
+        var noteHiddenString = ticket.noteHidden != null && ticket.noteHidden!.isNotEmpty ? "\n(${ticket.noteHidden})" : "";
 
-        return "${product?.title} ${title ?? ""}\n${OrdersStrings.itemSingular} ${ticket.ticketSymbol}$ticketNoteString\n$productsString$orderString";
+        return "${product?.title} ${title ?? ""}\n${OrdersStrings.itemSingular} ${ticket.ticketSymbol}$ticketNoteString$noteHiddenString\n$productsString$orderString";
       }
     }
 

@@ -4,6 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   server: {
+    host: true, // Expose to network
     port: 5173, // Default, but explicit is good
     proxy: {
       // Proxy any request that is NOT part of the web client to the Flutter app

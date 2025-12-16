@@ -11,7 +11,7 @@ export class FormDataReader {
         const formData = new FormData(form);
         const payload = {
             fields: [],
-            ticket: [],
+            ticket: [], // Will be populated by FormSession state, not here
             [DbForms.metaSecret]: formModel.secret, 
             [DbForms.metaForm]: formModel.key
         };
@@ -48,10 +48,24 @@ export class FormDataReader {
              }
         });
 
-        // --- 2. Ticket Fields (Parsing Keys) ---
-        // Strategy: Scan all FormData keys to find ticket entries: "{ticketId}_{index}_{subId}"
-        
-        // Structure: ticketData[ticketId][index][subId] = [values]
+        // --- 3. Hoist Email ---
+        const emailField = formModel.visibleFields.find(f => f.type === 'email');
+        if (emailField) {
+            const emailEntry = payload.fields.find(f => f[emailField.id.toString()] !== undefined);
+            if (emailEntry) {
+                payload['email'] = emailEntry[emailField.id.toString()];
+            }
+        }
+
+        return payload;
+    }
+
+    /**
+     * Extracts ONLY ticket data from DOM for initial hydration.
+     * Use this ONCE on load, then trust FormSession.state.
+     */
+    static getTicketDataFromDom(form, formModel) {
+        const formData = new FormData(form);
         const ticketData = {}; 
 
         for (const [key, value] of formData.entries()) {
@@ -70,6 +84,8 @@ export class FormDataReader {
                 ticketData[ticketId][index][subId].push(value);
             }
         }
+
+        const initialTickets = [];
 
         // Now iterate the model to reconstruct objects in correct order/structure
         formModel.visibleFields.forEach(field => {
@@ -143,21 +159,12 @@ export class FormDataReader {
                 });
 
                 if (hasData) {
-                    payload.ticket.push(ticketObj);
+                    initialTickets.push(ticketObj);
                 }
             });
         });
 
-        // --- 3. Hoist Email ---
-        const emailField = formModel.visibleFields.find(f => f.type === 'email');
-        if (emailField) {
-            const emailEntry = payload.fields.find(f => f[emailField.id.toString()] !== undefined);
-            if (emailEntry) {
-                payload['email'] = emailEntry[emailField.id.toString()];
-            }
-        }
-
-        return payload;
+        return initialTickets;
     }
 
     static _findOption(fieldOrSub, value) {

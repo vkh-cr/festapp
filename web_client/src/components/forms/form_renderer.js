@@ -6,7 +6,7 @@ import { html, unsafe } from '../../utils/html.js';
 
 export class FormRenderer {
     
-    static render(container, formModel, showPreview, callbacks) {
+    static render(container, session, formModel, showPreview, callbacks) {
         // Declarative Layout
         container.innerHTML = html`
             <div class="form-wrapper ${formModel.isCardDesign ? 'is-card-design' : ''}">
@@ -32,7 +32,7 @@ export class FormRenderer {
 
         // Append Fields (FormFieldBuilder still returns Nodes)
         formModel.visibleFields.forEach(field => {
-            const fieldComponent = FormFieldBuilder.createFormField(field, formModel);
+            const fieldComponent = FormFieldBuilder.createFormField(field, formModel, session);
             fieldsContainer.appendChild(fieldComponent);
         });
         

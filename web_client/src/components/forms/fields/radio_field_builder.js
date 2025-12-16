@@ -57,6 +57,14 @@ export class RadioFieldBuilder {
                     wrapper.setAttribute('data-currency', currency); // Also on wrapper for easy hiding
                 }
                 
+                // Debug Checked Logic
+                const isSelected = (field.value !== undefined && field.value !== null) && (String(opt.id) === String(field.value));
+                if (isSelected) {
+                     input.checked = true;
+                } else if (field.value !== undefined) {
+                     // ...
+                }
+                
                 if (isCardDesign) {
                     wrapper.classList.add('option-card');
                     // Full card clickability
@@ -115,10 +123,22 @@ export class RadioFieldBuilder {
             }
         });
 
+        // Show initially if value is present
+        if (field.value !== undefined && field.value !== null && field.value !== '') {
+             clearBtn.style.display = 'inline-block';
+        }
+
         clearBtn.onclick = () => {
             const radios = container.querySelectorAll(`input[type="radio"][name="${field.id}"]`);
             radios.forEach(r => r.checked = false);
             clearBtn.style.display = 'none';
+            
+            // Fix: Signal "Clear" to FormSession by making container look like an input with null value
+            // FormSession reads target.name and target.value
+            container.setAttribute('name', field.id);
+            container.name = field.id; // CRITICAL: FormPage checks e.target.name property to route to handleInput
+            container.value = null; 
+            
             container.dispatchEvent(new Event('input', { bubbles: true }));
             container.dispatchEvent(new Event('change', { bubbles: true }));
         };

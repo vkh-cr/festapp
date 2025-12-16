@@ -8,7 +8,7 @@ import { FormStrings } from '../form_strings.js';
 
 export class FormFieldBuilder {
 
-    static createFormField(field, formModel) {
+    static createFormField(field, formModel, session) {
         // Auto-Title Logic
         if (!field.title || field.title.trim() === '') {
             field.title = FormFieldBuilder.getAutoTitle(field.type);
@@ -67,7 +67,7 @@ export class FormFieldBuilder {
                 }
                 break;
             case 'ticket':
-                fieldComponent = TicketFieldBuilder.create(field, formModel);
+                fieldComponent = TicketFieldBuilder.create(field, formModel, session);
                 break;
             case 'birth_date':
                 fieldComponent = DateFieldBuilder.create(field, formModel);

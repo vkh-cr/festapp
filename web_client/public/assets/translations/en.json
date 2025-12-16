@@ -1169,6 +1169,7 @@
     "removeParticipantTooltip": "Remove participant"
   },
   "FeatureBlueprint": {
+    "maxTicketsReached": "Maximum number of tickets reached",
     "changeTitle": "Change title",
     "legendInstruction": "Click an option in the legend to add seats.",
     "legendBlackArea": "Black area",

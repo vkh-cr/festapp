@@ -4,8 +4,7 @@
     max-width: var(--form-max-width, 600px); /* Reduced default or from var */
     margin: 0 auto;
     font-family: var(--font-family-base, inherit);
-    /* Scale Base Font Size */
-    --font-scale: 1;
+    font-family: var(--font-family-base, inherit);
 }
 
 /* Hide Preact DevTools Overlay if present (causes layout issues) */
@@ -408,6 +407,7 @@ body.dark-mode .option-description {
     border: none;
     color: var(--primary-color); 
     padding: 4px 0;
+    font-family: var(--font-family-base, inherit);
     font-size: calc(0.9em * var(--font-scale));
     cursor: pointer;
     text-transform: none; 

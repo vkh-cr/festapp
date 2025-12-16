@@ -51,3 +51,12 @@ The renderer uses a "Transform Layer" approach:
    property of this container, ensuring 60fps performance even with many seats.
 3. **Updates**: Use `updateSeatsDOM()` to flip classes/styles on existing DOM
    nodes instead of `render()`.
+
+## Interaction & Zoom
+
+- **Zoom Constraints**: The view is constrained to a reasonable scale range
+  (typically `0.1x` to `5.0x`) and x-axis bounds to prevent getting lost.
+- **Gesture Control**: Handled by `TransformController` (or `GestureController`
+  refactor), supporting touch (pinch-zoom) and mouse (wheel-zoom) interactions.
+- **Tooltips**: Seats display tooltips on hover/tap. Hidden notes
+  (`ticket.noteHidden`) are displayed only if present.

@@ -23,9 +23,21 @@ export class PriceWidget {
         const { totalPrice, totalItems, currency } = state || this.session.currentState;
 
         // Logic matched from FormPage._renderFloatingPriceWidget
+        const formModel = this.session.formModel;
+        const isBlueprint = !!formModel.blueprint;
+
+        // Condition: 
+        // 1. If Non-Blueprint: Show ONLY if price > 0 (as per user request)
+        // 2. If Blueprint: Show if items > 0 or price > 0 (existing logic)
+        let shouldHide = false;
         
-        // Condition: Hide if empty (unless we want to force it, but usually not)
-        if (totalPrice <= 0 && totalItems <= 0) {
+        if (!isBlueprint) {
+            if (totalPrice <= 0) shouldHide = true;
+        } else {
+            if (totalPrice <= 0 && totalItems <= 0) shouldHide = true;
+        }
+
+        if (shouldHide) {
             if (this.element) {
                 this.element.remove();
                 this.element = null;
@@ -41,12 +53,8 @@ export class PriceWidget {
             this.element.id = 'floating-price-widget';
             this.element.className = 'floating-price-widget';
             
-            // Insert at top so it sits above content and behaves correctly with sticky
-            if (this.container.firstChild) {
-                this.container.insertBefore(this.element, this.container.firstChild);
-            } else {
-                this.container.appendChild(this.element);
-            }
+            // Attach to BODY to break out of any stacking contexts (transforms) in the app
+            document.body.appendChild(this.element);
 
             // Apply Styling
             const formModel = this.session.formModel;
@@ -58,9 +66,9 @@ export class PriceWidget {
             }
 
             this.element.style.cssText = `
-                position: -webkit-sticky; /* Safari */
-                position: sticky;
+                position: fixed; /* Always fixed as requested */
                 top: 16px;
+                right: 16px;
                 z-index: 2005; /* Above Blueprint Modal */
                 
                 background-color: ${primaryColor};
@@ -70,7 +78,6 @@ export class PriceWidget {
                 box-shadow: 0 4px 6px rgba(0,0,0,0.3);
                 display: flex;
                 align-items: center;
-                z-index: 1000;
                 font-family: var(--font-family-base);
                 font-weight: bold;
                 font-size: 1.1rem;
@@ -78,14 +85,7 @@ export class PriceWidget {
                 cursor: pointer;
             `;
             
-            // To make sticky work effectively without pushing content down too much, 
-            // we should probably insert it at the very top of the container.
-            // It is appended to 'container'.
-            if (this.container.firstChild) {
-                this.container.insertBefore(this.element, this.container.firstChild);
-            } else {
-                this.container.appendChild(this.element);
-            }
+
             // Use flexbox on container? No, container has form content.
             // Let's use absolute positioning relative to a sticky wrapper?
             // Actually, simplest 'Floating' behavior in flow:
@@ -93,12 +93,7 @@ export class PriceWidget {
             // No.
             
             // Let's try explicit sticky behavior.
-            this.element.style.position = 'sticky';
-            this.element.style.top = '16px';
-            this.element.style.zIndex = '2005'; /* Above Blueprint Modal */
-            this.element.style.width = 'fit-content';
-            this.element.style.marginLeft = 'auto'; // Right align
-            this.element.style.marginRight = '16px';
+
             
             // Note: If container has padding, sticky respects it.
             // form-page-container usually has padding.
