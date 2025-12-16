@@ -45,7 +45,16 @@ export class FormSession extends EventTarget {
         const target = e.target;
         const name = target.name;
         
-        if (!name) return; // Ignore unnamed inputs
+        if (!name) {
+             // Check if it's a structural update (e.g. from TicketFieldBuilder container)
+             // identified by dataset.fieldId
+             if (target.dataset && target.dataset.fieldId) {
+                 // Structural change -> Refresh Full Payload
+                 console.log('FormSession: Structural update detected from', target);
+                 this.refreshPayload(form);
+             }
+             return; 
+        }
         
         // 1. Check for Ticket Field (Format: ticketId_index_subId)
         // Regex: starts with digits, underscore, digits, underscore...
@@ -153,6 +162,7 @@ export class FormSession extends EventTarget {
     _readSingleTicket(ticketContainer, fieldId, domIndex) {
         // Replicates FormDataReader logic for one ticket item
         const ticketObj = { fields: [] };
+        ticketObj['_ticketIndex'] = domIndex;
         
         // We need field definition to know subfields
         const field = this.formModel.visibleFields.find(f => String(f.id) === String(fieldId));

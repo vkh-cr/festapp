@@ -23,6 +23,7 @@ class AppConfig {
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
   static const bool isAppSupported = true;
+  static const bool isWebclientSupported = true;
 
   static const String webLink = "https://live.festapp.net";
   static bool isProLicense = true;

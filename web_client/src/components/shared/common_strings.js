@@ -56,4 +56,5 @@ export class CommonStrings {
     static get appearance() { return LocalizationService.tr('Appearance'); }
     static get light() { return LocalizationService.tr('Light'); }
     static get dark() { return LocalizationService.tr('Dark'); }
+    static get admin() { return LocalizationService.tr('Admin'); }
 }
