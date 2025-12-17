@@ -31,6 +31,9 @@ describe('FormSession State Inversion', () => {
                         { id: 'sub_prod', type: 'product_type', options: [{id: 'prod_1', price: 50}] } 
                     ]
                 }
+            ],
+            relatedFields: [
+                { type: 'ticket', data: { max_tickets: 10 } }
             ]
         };
 
@@ -55,7 +58,7 @@ describe('FormSession State Inversion', () => {
         assert.strictEqual(session.state.totalItems, 1);
     });
 
-    it('should sync payload immediately when removing a ticket via state', () => {
+    it('should sync payload immediately when removing a ticket via state', async () => {
         session.addTicket({ spot: 101, spotPrice: 200 });
         session.addTicket({ spot: 102, spotPrice: 300 });
 
@@ -63,7 +66,7 @@ describe('FormSession State Inversion', () => {
         assert.strictEqual(session.state.totalPrice, 500);
 
         // Remove first one
-        session.removeTicket(0);
+        await session.removeTicket(0);
 
         assert.strictEqual(session.payload.ticket.length, 1);
         assert.strictEqual(session.payload.ticket[0].spot, 102); // Remaining should be 102
