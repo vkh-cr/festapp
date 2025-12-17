@@ -74,6 +74,7 @@ class OrdersStrings {
   static String get enterScanCode => 'Enter Scan Code'.tr(); // "Enter Scan Code"
   static String get confirmTicketAction => 'Confirm Ticket'.tr(); // "Confirm Ticket"
   static String get scanCameraInstruction => 'Point the camera at the attendee\'s code for an entry verification.'.tr(); // "Point the camera at the attendee's code for an entry verification."
+  static String get scanInstructionsAppUser => 'FeatureOrders.scanInstructionsAppUser'.tr(); // "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile."
   static String get searchAttendees => 'Search Attendees'.tr(); // "Search Attendees"
   static String get resetPasswordTitle => 'Reset Password'.tr(); // "Reset Password"
 
