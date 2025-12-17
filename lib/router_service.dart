@@ -1,5 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/foundation.dart'; // Import for kIsWeb
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/app_router.dart';
@@ -8,10 +8,10 @@ import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
-import 'package:fstapp/services/js/js_interop.dart'; // Import JSInterop
+import 'package:fstapp/services/js/js_interop.dart';
 import 'dart:async';
 
-import 'package:fstapp/components/forms/views/form_page.dart'; // Import FormPage
+import 'package:fstapp/components/forms/views/form_page.dart';
 
 class RouterService {
   static const link = "link";
