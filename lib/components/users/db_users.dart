@@ -243,12 +243,14 @@ class DbUsers {
     return [];
   }
 
-  static Future<List<UserInfoModel>> getAllUsersBasicsForUnit() async {
-    var result = await _supabase.rpc("get_all_user_basics_from_occasion_unit",
-        params: {"oc": RightsService.currentOccasionId()});
-    if(result["code"] == 200) {
-      var t = List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
-      return t;
+  static Future<List<UserInfoModel>> getAllUsersBasicsForUnit(int unitId) async {
+    // This calls the RPC "get_all_user_basics_from_occasion_unit".
+    // If the unit is not found or user is not auth, it throws a Postgres error.
+    final result = await _supabase.rpc("get_all_user_basics_from_occasion_unit",
+        params: {"p_unit_id": unitId});
+    
+    if (result is List) {
+      return List<UserInfoModel>.from(result.map((x) => UserInfoModel.fromJson(x)));
     }
     return [];
   }

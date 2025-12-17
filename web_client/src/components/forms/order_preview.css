@@ -80,7 +80,7 @@
     margin: 0;
     font-size: 1.35rem; /* 18 * 1.2 */
     font-weight: bold;
-    color: var(--text-color, #000);
+    color: var(--primary-color, #000);
 }
 
 .btn-close-preview {
@@ -188,7 +188,7 @@ body.dark-mode .preview-label {
     font-size: 1.2rem; /* 16 * 1.2 */
     font-weight: bold;
     margin-bottom: 8px;
-     color: var(--text-color, #000);
+     color: var(--primary-color, #000);
 }
 
 /* Total Price */
@@ -216,7 +216,7 @@ body.dark-mode .preview-label {
     /* Match form component .btn style exactly */
     padding: calc(12px * var(--font-scale, 1)) calc(32px * var(--font-scale, 1));
     width: 100%;
-    max-width: 250px;
+    max-width: 400px;
     border-radius: 8px; /* Match form button radius */
     font-family: var(--font-family-base, inherit);
     font-size: calc(16px * var(--font-scale, 1));
