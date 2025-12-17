@@ -44,6 +44,19 @@ class _ScanPageState extends State<ScanPage> {
 
   // To prevent multiple scans
   String? rightNowScanned;
+  bool _showHelpText = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 10), () {
+      if (mounted) {
+        setState(() {
+          _showHelpText = false;
+        });
+      }
+    });
+  }
 
   // DEFINITION: Mapping array for specific fields to show
   final Map<String, String> _specificFieldMappings = {
@@ -171,9 +184,39 @@ class _ScanPageState extends State<ScanPage> {
   Widget buildScannedUserDetails() {
     if (_scannedObject == null) {
       return Center(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
-          child: Text(OrdersStrings.scanCameraInstruction),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
+              child: Text(OrdersStrings.scanCameraInstruction),
+            ),
+            if (AppConfig.isAppSupported)
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 500),
+                opacity: _showHelpText ? 1.0 : 0.0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _showHelpText = false;
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        OrdersStrings.scanInstructionsAppUser,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: ThemeConfig.blackColor(context).withOpacity(0.7),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       );
     }

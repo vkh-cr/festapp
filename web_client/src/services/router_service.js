@@ -3,7 +3,6 @@ import { AppConfig } from '../app_config.js';
 
 export class RouterService {
     
-    static FLUTTER_BASE_URL = '/app/';
     static FORM_PATH_PREFIX = '/form/';
 
     static navigateToExternal(url) {
@@ -41,7 +40,11 @@ export class RouterService {
     }
 
     static getLoginUrl() {
-        return `${AppConfig.flutterAppUrl}/login`;
+        let baseUrl = AppConfig.flutterAppUrl || '';
+        if (baseUrl.endsWith('/')) {
+            baseUrl = baseUrl.slice(0, -1);
+        }
+        return `${baseUrl}/login`;
     }
 
     static navigateToLogin() {
@@ -65,7 +68,24 @@ export class RouterService {
     
     // Initial Load Check
     static async handleInitialLoad() {
-        // 1. Handle legacy hash routing (e.g. /#/link -> /link)
+        const path = window.location.pathname;
+        
+        // 1. Global Redirect to Flutter App (GitHub Pages 404 Fallback Support)
+        // If this is NOT a Web Client route (Home or Form), redirect to Flutter.
+        // This covers /login, /admin, /map, and any deep link.
+        const isWebClientRoute = path === '/' || path === '/index.html' || path.startsWith(RouterService.FORM_PATH_PREFIX);
+        
+        if (!isWebClientRoute) {
+             // Avoid redirect loops if we are already at the target
+             if (!path.endsWith('flutter.html')) {
+                 const redirectUrl = `${window.location.origin}/flutter.html?redirect=${encodeURIComponent(path)}`;
+                 console.log(`RouterService: Global Redirecting ${path} to Flutter App: ${redirectUrl}`);
+                 window.location.replace(redirectUrl);
+                 return true;
+             }
+        }
+
+        // 2. Handle legacy hash routing (e.g. /#/link -> /link)
         if (window.location.hash && window.location.hash.startsWith('#/')) {
             const cleanPath = window.location.hash.substring(1); // Remove '#'
             console.log(`Redirecting legacy hash: ${window.location.href} -> ${cleanPath}`);
@@ -74,7 +94,6 @@ export class RouterService {
             // If the path is different, we might need to let the next logic handle it.
         }
 
-        const path = window.location.pathname;
         console.log("RouterService checking path:", path);
         if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {
             const link = path.substring(RouterService.FORM_PATH_PREFIX.length);
@@ -87,7 +106,8 @@ export class RouterService {
                 return true; // Handled
             }
         }
-        return false; // Not handled
+
+        return false; 
     }
     
     // Listen for PopState
