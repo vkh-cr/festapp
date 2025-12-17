@@ -77,7 +77,7 @@ class UsersTabHelper {
   static Future<void> addExisting(BuildContext context,
       SingleDataGridController singleDataGrid, List<IHasId> currentUsers,
       Future<void> Function() reloadUsers) async {
-    var existing = await DbUsers.getAllUsersBasicsForUnit();
+    var existing = await DbUsers.getAllUsersBasicsForUnit(RightsService.currentUnit()!.id!);
     var nonAdded =
     existing.where((u) => !currentUsers.any((cu) => cu.id == u.id)).toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
@@ -92,7 +92,7 @@ class UsersTabHelper {
   static Future<void> addExistingToUnit(BuildContext context,
       SingleDataGridController singleDataGrid, List<ITrinaRowModel> currentUsers,
       Future<void> Function() reloadUsers, int unit) async {
-    var existing = await DbUsers.getAllUsersBasicsForUnit();
+    var existing = await DbUsers.getAllUsersBasicsForUnit(unit);
     var nonAdded =
     existing.where((u) => !currentUsers.any((cu) => cu.id == u.id)).toList();
     DialogHelper.chooseUser(context, (chosenUser) async {

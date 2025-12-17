@@ -102,6 +102,16 @@ body.dark-mode .form-description *:not(a) {
     text-align: left;
 }
 
+.form-field-hint {
+    font-size: 0.8rem;
+    color: #777;
+    margin-bottom: 4px;
+    margin-top: 0;
+}
+body.dark-mode .form-field-hint {
+    color: #b0b0b0; /* Light grey for hint in dark mode */
+}
+
 /* Inputs */
 .input-wrapper {
     position: relative;
@@ -167,7 +177,7 @@ input:-webkit-autofill:active{
 
 body.dark-mode .form-field-description,
 body.dark-mode .form-field-description *:not(a) {
-    color: #808080; /* Softer (was #eaeaea) as requested: "white is too bright" */
+    color: #DADADA; /* Lighter for better contrast as requested */
 }
 
 /* Radios and Checkboxes */

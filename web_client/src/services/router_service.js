@@ -3,7 +3,6 @@ import { AppConfig } from '../app_config.js';
 
 export class RouterService {
     
-    static FLUTTER_BASE_URL = '/app/';
     static FORM_PATH_PREFIX = '/form/';
 
     static navigateToExternal(url) {
@@ -87,7 +86,8 @@ export class RouterService {
                 return true; // Handled
             }
         }
-        return false; // Not handled
+
+        return false;
     }
     
     // Listen for PopState
