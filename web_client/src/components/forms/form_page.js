@@ -80,6 +80,7 @@ export class FormPage extends Component {
         if (options.onBack) this.onBack = options.onBack;
 
         this.cleanup(); // Clean previous content
+        window.scrollTo(0, 0);
 
         this.currentLink = link;
         
