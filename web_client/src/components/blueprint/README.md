@@ -58,5 +58,3 @@ The renderer uses a "Transform Layer" approach:
   (typically `0.1x` to `5.0x`) and x-axis bounds to prevent getting lost.
 - **Gesture Control**: Handled by `TransformController` (or `GestureController`
   refactor), supporting touch (pinch-zoom) and mouse (wheel-zoom) interactions.
-- **Tooltips**: Seats display tooltips on hover/tap. Hidden notes
-  (`ticket.noteHidden`) are displayed only if present.
