@@ -868,11 +868,11 @@
     "stornoCompletedItem": "Storno completed for {item}.",
     "stornoFailed": "Action has failed.",
     "ticketSymbol": "Ticket Symbol",
-    "applicationSymbol": "Application Symbol",
+    "applicationSymbol": "Registration Symbol",
     "tickets": "Tickets",
     "ticket": "Ticket",
-    "applications": "Applications",
-    "application": "Application",
+    "applications": "Registrations",
+    "application": "Registration",
     "ordersTab": "Orders",
     "ordersHistoryTab": "Orders History",
     "setAsUsed": "Set as used",
@@ -888,7 +888,8 @@
     "generatingPdf": "Generating Ticket",
     "downloadTicket": "Download Ticket",
     "generatingPdfFor": "Generating Ticket for {customer}",
-    "generatingPdfForWithSpot": "Generating Ticket for {customer} - {spot}"
+    "generatingPdfForWithSpot": "Generating Ticket for {customer} - {spot}",
+    "scanInstructionsAppUser": "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile."
   },
   "UserColumns": {
     "id": "Id",
