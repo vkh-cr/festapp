@@ -888,7 +888,8 @@
     "generatingPdf": "Generování Vstupenky",
     "downloadTicket": "Stáhnout vstupenku",
     "generatingPdfFor": "Generování Vstupenky pro {customer}",
-    "generatingPdfForWithSpot": "Generování Vstupenky pro {customer} - {spot}"
+    "generatingPdfForWithSpot": "Generování Vstupenky pro {customer} - {spot}",
+    "scanInstructionsAppUser": "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile."
   },
   "UserColumns": {
     "id": "Id",

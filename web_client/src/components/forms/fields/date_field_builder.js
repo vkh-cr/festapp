@@ -91,6 +91,29 @@ export class DateFieldBuilder {
                 allowInput: true,
                 disableMobile: true, // Force custom picker
                 locale: LocalizationService.currentLocale === 'cs' ? Czech : 'default', // Dynamic locale
+                parseDate: (datestr, format) => {
+                    // Custom parser to allow more flexible input (e.g. "1.1.2000" -> "1. 1. 2000")
+                    try {
+                        // 1. Try default parsing first
+                        const defaultDate = flatpickr.parseDate(datestr, format);
+                        if (defaultDate) return defaultDate;
+                    } catch (e) { }
+
+                    // 2. Try simple fallback for common formats if default failed
+                    if (datestr && typeof datestr === 'string') {
+                        // Fix common "lazy" input: "1.1.2000" -> "2000-01-01"
+                        if (datestr.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
+                            const parts = datestr.split('.');
+                            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        }
+                        // "1. 1. 2000" check handled by default parser usually, but just in case
+                        if (datestr.match(/^\d{1,2}\. \d{1,2}\. \d{4}$/)) {
+                            const parts = datestr.replace(/ /g, '').split('.');
+                            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        }
+                    }
+                    return undefined;
+                },
                 // User requested NO limits on calendar picker itself, so we remove minDate/maxDate here
                 // minDate: minDateObj, 
                 // maxDate: maxDateObj,
