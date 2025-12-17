@@ -8,20 +8,14 @@ echo "Building Flutter App..."
 # Ensure flutter is in path (Netlify specific)
 export PATH="$PATH:/opt/buildhome/flutter/bin"
 
-# Get Flutter (if not present in custom image, but usually handled by netlify.toml command)
-# However, for this script to be self-contained in the 'command', we assume environment is ready 
-# OR we do the install here if we replace the entire command.
-# The user's original command did: curl flutter | tar ...
-# We should probably replicate that setup if we are replacing the command entirely.
-
 if ! command -v flutter &> /dev/null; then
     echo "Flutter not found. Installing..."
-    curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.38.5-stable.tar.xz | tar -xJf - -C /opt/buildhome
+    curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.27.0-stable.tar.xz | tar -xJf - -C /opt/buildhome
     export PATH="/opt/buildhome/flutter/bin:$PATH"
 fi
 
 flutter precache
-flutter build web --release
+flutter build web --release --base-href /
 
 # 2. Prepare Flutter Build for Merge
 echo "Preparing Flutter build..."

@@ -3,7 +3,6 @@ import { AppConfig } from '../app_config.js';
 
 export class RouterService {
     
-    static FLUTTER_BASE_URL = '/app/';
     static FORM_PATH_PREFIX = '/form/';
 
     static navigateToExternal(url) {
@@ -65,7 +64,19 @@ export class RouterService {
     
     // Initial Load Check
     static async handleInitialLoad() {
-        // 1. Handle legacy hash routing (e.g. /#/link -> /link)
+        const path = window.location.pathname;
+        
+        // 1. Handle Legacy Flutter Routes -> Redirect to Flutter Entry Point
+        // This is primarily for GitHub Pages where fallbacks go to index.html (Web Client)
+        // instead of file-based routing like Netlify's _redirects.
+        if (path === '/login' || path === '/admin') {
+            const redirectUrl = `${window.location.origin}/flutter.html`; // Absolute to be safe
+            console.log(`RouterService: Redirecting ${path} to Flutter App: ${redirectUrl}`);
+            window.location.replace(redirectUrl);
+            return true;
+        }
+
+        // 2. Handle legacy hash routing (e.g. /#/link -> /link)
         if (window.location.hash && window.location.hash.startsWith('#/')) {
             const cleanPath = window.location.hash.substring(1); // Remove '#'
             console.log(`Redirecting legacy hash: ${window.location.href} -> ${cleanPath}`);
@@ -74,7 +85,6 @@ export class RouterService {
             // If the path is different, we might need to let the next logic handle it.
         }
 
-        const path = window.location.pathname;
         console.log("RouterService checking path:", path);
         if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {
             const link = path.substring(RouterService.FORM_PATH_PREFIX.length);
@@ -87,7 +97,8 @@ export class RouterService {
                 return true; // Handled
             }
         }
-        return false; // Not handled
+
+        return false;
     }
     
     // Listen for PopState
