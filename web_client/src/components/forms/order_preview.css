@@ -80,7 +80,12 @@
     margin: 0;
     font-size: 1.35rem; /* 18 * 1.2 */
     font-weight: bold;
-    color: var(--text-color, #000);
+    color: #000000; /* Force Black */
+}
+
+
+body.dark-mode .order-preview-header h2 {
+    color: var(--text-color, #bdbdbd);
 }
 
 .btn-close-preview {
@@ -144,18 +149,14 @@
     margin-bottom: 2px;
     font-size: 0.85rem;
     font-weight: 500;
-    color: var(--label-text-color, #666); /* Use label text color if available or grey */
-    opacity: 0.8; 
+    color: #000000 !important; /* Force Black for visibility in Light Mode */
+    opacity: 1; /* Removed opacity */
 }
 
 /* Ensure dark mode adjustment for hardcoded grey fallback */
-@media (prefers-color-scheme: dark) {
-    .preview-label {
-        color: rgba(255, 255, 255, 0.7);
-    }
-}
+
 body.dark-mode .preview-label {
-    color: rgba(255, 255, 255, 0.7); /* Explicit dark mode class support */
+    color: rgba(255, 255, 255, 0.7) !important; /* Explicit dark mode class support */
 }
 
 .preview-value {
@@ -188,7 +189,12 @@ body.dark-mode .preview-label {
     font-size: 1.2rem; /* 16 * 1.2 */
     font-weight: bold;
     margin-bottom: 8px;
-     color: var(--text-color, #000);
+    color: #000000; /* Force Black for visibility */
+}
+
+
+body.dark-mode .ticket-header-title {
+     color: var(--text-color, #bdbdbd);
 }
 
 /* Total Price */
@@ -216,7 +222,7 @@ body.dark-mode .preview-label {
     /* Match form component .btn style exactly */
     padding: calc(12px * var(--font-scale, 1)) calc(32px * var(--font-scale, 1));
     width: 100%;
-    max-width: 250px;
+    max-width: 400px;
     border-radius: 8px; /* Match form button radius */
     font-family: var(--font-family-base, inherit);
     font-size: calc(16px * var(--font-scale, 1));

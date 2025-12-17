@@ -86,12 +86,12 @@ describe('FormDataReader', () => {
         formElement.appendChild(input);
 
         const fd = new FormData(formElement);
-        const result = FormDataReader.getPayload(formElement, mockFormModel);
+        const result = FormDataReader.getTicketDataFromDom(formElement, mockFormModel);
 
-        assert.ok(result.ticket);
-        assert.equal(result.ticket.length, 1);
-        assert.equal(result.ticket[0].fields.length, 1);
-        assert.equal(result.ticket[0].fields[0]['text'], 'Guest Name');
+        assert.ok(result);
+        assert.equal(result.length, 1);
+        assert.equal(result[0].fields.length, 1);
+        assert.equal(result[0].fields[0]['text'], 'Guest Name');
     });
 
     it('should parse multiple tickets', () => {
@@ -113,14 +113,14 @@ describe('FormDataReader', () => {
         formElement.appendChild(input1);
 
         const fd = new FormData(formElement);
-        const result = FormDataReader.getPayload(formElement, mockFormModel);
+        const result = FormDataReader.getTicketDataFromDom(formElement, mockFormModel);
 
-        assert.equal(result.ticket.length, 2);
+        assert.equal(result.length, 2);
         
         // Order shouldn't be strictly guaranteed by Object.keys, but usually is for integers
         // We find by value
-        const t1 = result.ticket.find(t => t.fields[0]['text'] === 'Guest 1');
-        const t2 = result.ticket.find(t => t.fields[0]['text'] === 'Guest 2');
+        const t1 = result.find(t => t.fields[0]['text'] === 'Guest 1');
+        const t2 = result.find(t => t.fields[0]['text'] === 'Guest 2');
         
         assert.ok(t1);
         assert.ok(t2);
@@ -141,12 +141,12 @@ describe('FormDataReader', () => {
         formElement.appendChild(input);
 
         const fd = new FormData(formElement);
-        const result = FormDataReader.getPayload(formElement, mockFormModel);
+        const result = FormDataReader.getTicketDataFromDom(formElement, mockFormModel);
 
-        assert.equal(result.ticket.length, 1);
-        assert.equal(result.ticket[0].spot, 12345);
-        assert.equal(result.ticket[0].spotPrice, 500);
-        assert.equal(result.ticket[0].spotName, 'A1');
+        assert.equal(result.length, 1);
+        assert.equal(result[0].spot, 12345);
+        assert.equal(result[0].spotPrice, 500);
+        assert.equal(result[0].spotName, 'A1');
     });
 
     it('should handle product_type fields with products array', () => {
@@ -171,10 +171,10 @@ describe('FormDataReader', () => {
          formElement.appendChild(input);
 
          const fd = new FormData(formElement);
-         const result = FormDataReader.getPayload(formElement, mockFormModel);
+         const result = FormDataReader.getTicketDataFromDom(formElement, mockFormModel);
 
-         assert.equal(result.ticket.length, 1);
-         const field = result.ticket[0].fields[0];
+         assert.equal(result.length, 1);
+         const field = result[0].fields[0];
          
          // Helper adds product_type property
          assert.equal(field['product_type'], 'p1');
@@ -212,16 +212,16 @@ describe('FormDataReader', () => {
          // Verify FormData construction
          assert.equal(fd.getAll('99_0_multi_prod').length, 2);
 
-         const result = FormDataReader.getPayload(formElement, mockFormModel);
+         const result = FormDataReader.getTicketDataFromDom(formElement, mockFormModel);
          
-         assert.equal(result.ticket.length, 1);
+         assert.equal(result.length, 1);
          // Should have 2 field entries locally for product_type?
          // FormDataReader logic: "rawVals.forEach(v => ticketObj.fields.push(...) )"
          // So we expect 2 objects in fields array.
-         assert.equal(result.ticket[0].fields.length, 2);
+         assert.equal(result[0].fields.length, 2);
          
-         const p1 = result.ticket[0].fields.find(f => f.product_type === 'p1');
-         const p2 = result.ticket[0].fields.find(f => f.product_type === 'p2');
+         const p1 = result[0].fields.find(f => f.product_type === 'p1');
+         const p2 = result[0].fields.find(f => f.product_type === 'p2');
          
          assert.ok(p1);
          assert.ok(p2);
@@ -237,20 +237,8 @@ describe('FormDataReader', () => {
         formElement.appendChild(input);
 
         const fd = new FormData(formElement);
-        const result = FormDataReader.getPayload(formElement, mockFormModel);
+        const result = FormDataReader.getTicketDataFromDom(formElement, mockFormModel);
 
-        // result.ticket defaults to [] in code? 
-        // Code initializes: const ticketData = {} ... but loop only runs if field type ticket.
-        // It initializes payload.ticket but only pushes if hasData. It might not even exist if no ticket fields processed?
-        // Let's check implementation. payload.ticket = [] usually? No, "fields" is pushed to payload.ticket array? 
-        // Wait, where is payload.ticket initialized?
-        // Reading code: "const ticketData = {}; ... if (hasData) { payload.ticket.push(ticketObj); }"
-        // But what defines payload? 
-        // Code snippet seen: `return payload;` but not `const payload = ...`.
-        // Let's assume it initializes correctly (since tests will fail if not).
-        
-        // Actually, if payload.ticket isn't init, it would crash. The previous tests passed assuming it works.
-        // If length is 0, array exists.
-        assert.equal(result.ticket ? result.ticket.length : 0, 0);
+        assert.equal(result.length, 0);
     });
 });
