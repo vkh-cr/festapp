@@ -1,249 +1,247 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,B,H,I,K,L,F,M,N,C={
-dHa(){return new C.FW(null)},
-djz(d,e,f,g,h,i,j){return new C.a92(j,f,d,g,e,i,h,null)},
-FW:function FW(d){this.a=d},
-aW4:function aW4(d,e){var _=this
-_.e=_.d=$
-_.f=d
-_.r=e
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,F,E,G,H,I,B={
+eBT(){return new B.a6v(null)},
+a6v:function a6v(d){this.a=d},
+aKy:function aKy(d,e,f){var _=this
+_.f=_.e=_.d=!1
+_.r=!0
+_.w=!1
+_.x=""
+_.y=d
+_.z=e
+_.Q=f
 _.c=_.a=null},
-cvN:function cvN(d){this.a=d},
-cvM:function cvM(){},
-cvO:function cvO(d,e){this.a=d
+cZt:function cZt(d,e){this.a=d
 this.b=e},
-cvP:function cvP(d){this.a=d},
-C6:function C6(d,e){this.a=d
+cZu:function cZu(d){this.a=d},
+cZv:function cZv(d,e){this.a=d
 this.b=e},
-a92:function a92(d,e,f,g,h,i,j,k){var _=this
-_.c=d
-_.d=e
-_.e=f
-_.f=g
-_.r=h
-_.w=i
-_.x=j
-_.a=k},
-ajM:function ajM(d,e){var _=this
-_.d=d
-_.e=e
-_.f=!1
-_.r=""
-_.c=_.a=_.y=_.x=_.w=null},
-cDS:function cDS(d){this.a=d},
-cDT:function cDT(d,e){this.a=d
+cZC:function cZC(){},
+cZD:function cZD(d,e){this.a=d
 this.b=e},
-cDU:function cDU(d){this.a=d},
-cDV:function cDV(d,e){this.a=d
-this.b=e}},D,O,G,P,Q,E,R,S,T,U,V
+cZs:function cZs(d,e){this.a=d
+this.b=e},
+cZz:function cZz(){},
+cZA:function cZA(){},
+cZB:function cZB(d){this.a=d},
+cZy:function cZy(d,e){this.a=d
+this.b=e},
+cZw:function cZw(d){this.a=d},
+cZx:function cZx(d,e){this.a=d
+this.b=e},
+bNy(d){return B.exD(d)},
+exD(d){var x=0,w=A.p(y.e),v,u=2,t=[],s,r,q,p,o,n,m,l
+var $async$bNy=A.l(function(e,f){if(e===1){t.push(f)
+x=u}for(;;)switch(x){case 0:u=4
+o=y.m
+x=7
+return A.f($.eoi().bv("get_available_platforms",A.d(["organization_id",d],y.w,o),o),$async$bNy)
+case 7:s=f
+if(s==null||!y.i.b(s)){o=A.c([],y.B)
+v=o
+x=1
+break}r=s
+o=J.bzI(r,y.y)
+o=A.MV(o,new B.bNz(),o.$ti.i("E.E"),y.b)
+n=A.F(o,A.x(o).i("E.E"))
+q=n
+v=q
+x=1
+break
+u=2
+x=6
+break
+case 4:u=3
+l=t.pop()
+p=A.aj(l)
+A.cO("Failed to fetch available platforms: "+A.t(p))
+o=A.cA("Failed to fetch available platforms: "+A.t(p))
+throw A.u(o)
+x=6
+break
+case 3:x=2
+break
+case 6:case 1:return A.n(v,w)
+case 2:return A.m(t.at(-1),w)}})
+return A.o($async$bNy,w)},
+bNz:function bNz(){}},D,K,L,M,N,O,P,Q,R
 J=c[1]
 A=c[0]
-B=c[2]
-H=c[258]
-I=c[263]
-K=c[139]
-L=c[245]
-F=c[292]
-M=c[299]
-N=c[206]
-C=a.updateHolder(c[13],C)
-D=c[300]
-O=c[248]
-G=c[301]
-P=c[302]
-Q=c[244]
-E=c[273]
-R=c[179]
-S=c[169]
-T=c[164]
-U=c[180]
-V=c[171]
-C.FW.prototype={
-K(){return new C.aW4(new A.bu(new A.bZ("vkh-cr/festapp",B.ah,B.a6),$.a7()),A.b([new C.C6("1. Tables","scripts/tables"),new C.C6("2. Functions","scripts/functions"),new C.C6("3. Policies","scripts/policies"),new C.C6("4. Seed","scripts/seed")],y.D))}}
-C.aW4.prototype={
-T(){var x,w,v,u,t,s,r=this,q="https://kjdpmixlnhntmxjedpxh.supabase.co"
-r.a5()
-u=$.a7()
-r.d!==$&&A.bj()
-r.d=new A.bu(new A.bZ(q,B.ah,B.a6),u)
-x=q
-w=null
-try{v=A.dK(x,0,null)
-w="db."+J.d4H(v)}catch(t){w="invalid-supabase-host"}u=A.o(w)
-s=$.a7()
-r.e!==$&&A.bj()
-r.e=new A.bu(new A.bZ("postgresql://postgres:YOUR_PASSWORD@"+u+":5432/postgres",B.ah,B.a6),s)},
-l(){var x,w=this,v=w.d
-v===$&&A.a()
-x=v.O$=$.a7()
-v.U$=0
-v=w.e
-v===$&&A.a()
-v.O$=x
-v.U$=0
-v=w.f
-v.O$=x
-v.U$=0
-w.a8()},
-gbzG(){var x,w,v,u=this.d
-u===$&&A.a()
-x=B.d.b9(u.a.a)
-try{w=A.dK(x,0,null)
-if(B.d.jt(J.d4H(w),".supabase.co")){u=B.b.gW(J.d4H(w).split("."))
-return u}}catch(v){}return x},
-gauj(){var x=this.gbzG()
-return"supabase functions deploy notify --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy register --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-custom-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-sign-in-code --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-reset-password-link --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-ticket-order --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-tickets --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy fetch-transactions --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy instance-install --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy synchronize-orders --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy fetch-http-data --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy download-ticket --no-verify-jwt --project-ref "+x+"\n"},
-A(d){var x,w,v,u,t,s,r,q,p,o=this,n=null,m=T.iM(n,n,n,!0,!0,n,n,1,n,n,n,!1,n,!1,n,n,n,n,!0,n,n,n,n,n,D.bK9,n,n,n,1,n,!0),l=o.d
-l===$&&A.a()
-x=A.eD(n,B.aG,!1,n,!0,B.n,n,A.eP(),l,n,n,n,n,n,2,D.aDs,B.p,!0,n,!0,n,!1,n,B.az,n,n,n,n,n,n,n,n,1,n,n,!1,"\u2022",n,new C.cvN(o),n,n,n,!1,n,n,!1,n,!0,n,B.aK,n,n,n,n,n,n,n,n,n,n,n,n,!0,B.A,n,B.aM,n,n,n,n)
-w=o.e
-w===$&&A.a()
-v=A.eD(n,B.aG,!1,n,!0,B.n,n,A.eP(),w,n,n,n,n,n,2,D.aDr,B.p,!0,n,!0,n,!1,n,B.az,n,n,n,n,n,n,n,n,1,n,n,!1,"\u2022",n,n,n,n,n,!1,n,n,!1,n,!0,n,B.aK,n,n,n,n,n,n,n,n,n,n,n,n,!0,B.A,n,B.aM,n,n,n,n)
-u=o.f
-t=A.eD(n,B.aG,!1,n,!0,B.n,n,A.eP(),u,n,n,n,n,n,2,D.aDp,B.p,!0,n,!0,n,!1,n,B.az,n,n,n,n,n,n,n,n,1,n,n,!1,"\u2022",n,n,n,n,n,!1,n,n,!1,n,!0,n,B.aK,n,n,n,n,n,n,n,n,n,n,n,n,!0,B.A,n,B.aM,n,n,n,n)
-s=y.u
-r=A.iO(new A.S(B.b9,A.a8(A.b([A.ac(A.b([D.bKy,A.bI(n,n,n,n,n,n,N.G5,n,n,n,new C.cvO(o,d),n,n,n,n,n)],s),B.i,n,B.be,B.h,0,n),B.a7,A.eW(o.gauj(),n,D.bHx)],s),B.z,B.f,B.h,0,n,B.k),n),n,n,2,n,n,n)
-q=o.r
-p=A.O(q).i("G<1,S>")
-q=A.C(new A.G(q,new C.cvP(o),p),p.i("a0.E"))
-return S.eO(m,n,A.cY(A.a8(A.b([x,B.a7,v,B.a7,t,E.e0,r,E.e0,D.bKm,B.cU,A.a8(q,B.i,B.f,B.h,0,n,B.k),E.e0,D.bJV,B.cU,C.djz(!0,w,n,"migrations",l,u,"Migrations")],s),B.z,B.f,B.h,0,n,B.k),B.n,n,B.p,B.F,n,n,V.aJ,n,n,n,!1,B.C),n,n,n,n)}}
-C.C6.prototype={
-gbv(d){return this.a}}
-C.a92.prototype={
-K(){var x=$.hG().b
-x===$&&A.a()
-return new C.ajM(x,new A.bu(B.ae,$.a7()))},
-gbv(d){return this.c}}
-C.ajM.prototype={
-T(){var x,w=this
-w.a5()
-x=w.a
-if(x.e){x=x.f
-if(x==null)x=""
-w.e.sbB(0,x)}if(w.a.d==="scripts/seed"){x=$.a7()
-w.x=new A.bu(B.ae,x)
-w.y=new A.bu(B.ae,x)}},
-l(){var x=this,w=x.e,v=w.O$=$.a7()
-w.U$=0
-w=x.x
-if(w!=null){w.O$=v
-w.U$=0}w=x.y
-if(w!=null){w.O$=v
-w.U$=0}x.a8()},
-a07(){var x=0,w=A.m(y.q),v=1,u=[],t=this,s,r,q,p,o,n,m,l,k,j,i,h,g
-var $async$a07=A.i(function(d,e){if(d===1){u.push(e)
-x=v}for(;;)switch(x){case 0:j=t.a
-i=j.r.a.a
-h=j.w.a.a
-if(j.e)p=t.e.a.a
-else{j=j.d
-p=j==null?"":j}j=y.w
-o=y.b
-s=A.w(["dbConnectionString",i,"repo",h,"directory",p],j,o)
-n=t.a
-if(n.d==="scripts/seed"){m=B.d.b9(t.x.a.a)
-l=B.d.b9(t.y.a.a)
-J.bT(s,"project_url",B.d.b9(n.x.a.a))
-if(m.length!==0&&l.length!==0)J.a0Y(s,A.w(["admin_email",m,"admin_password",l],j,o))}t.q(new C.cDS(t))
+C=c[2]
+F=c[176]
+E=c[168]
+G=c[78]
+H=c[130]
+I=c[151]
+B=a.updateHolder(c[12],B)
+D=c[173]
+K=c[175]
+L=c[174]
+M=c[178]
+N=c[177]
+O=c[172]
+P=c[167]
+Q=c[163]
+R=c[148]
+B.a6v.prototype={
+L(){var x=A.c([],y.B),w=$.aa()
+return new B.aKy(x,new A.bv(C.aw,w),A.c([new A.a_5(w),new A.a_5(w),new A.a_5(w)],y.z))}}
+B.aKy.prototype={
+b_(){var x=this
+x.bJ()
+if(!x.w){x.w=!0
+x.P8()}},
+P8(){var x=0,w=A.p(y.v),v=1,u=[],t=this,s,r,q,p,o
+var $async$P8=A.l(function(d,e){if(d===1){u.push(e)
+x=v}for(;;)switch(x){case 0:t.x=$.dGw().aWk()
 v=3
-j=t.d.as
-j===$&&A.a()
 x=6
-return A.d(j.ma("instance-install",s.a!==0?B.aO.yB(s,null):null),$async$a07)
-case 6:r=e
-if(r.b!==200)t.q(new C.cDT(t,r))
-else t.q(new C.cDU(t))
+return A.f(B.bNy(1),$async$P8)
+case 6:s=e
+if(t.c!=null)t.q(new B.cZt(t,s))
 v=1
 x=5
 break
 case 3:v=2
-g=u.pop()
-q=A.ag(g)
-t.q(new C.cDV(t,q))
+o=u.pop()
+r=A.aj(o)
+A.cO("Failed to load platforms: "+A.t(r))
+p=t.c
+if(p!=null)A.aY(p,A.j("Failed to load installation options.",null,null),C.aH)
 x=5
 break
 case 2:x=1
 break
-case 5:return A.k(null,w)
-case 1:return A.j(u.at(-1),w)}})
-return A.l($async$a07,w)},
-ba3(){var x,w=null,v=this.w
-if(v==null)return B.d_
-x=this.c
-if(v){x.toString
-v=A.ay(R.jS,A.y(x).ax.a===B.r?$.a0S():$.Ap(),w,w,w)}else{x.toString
-v=A.ay(U.uK,A.y(x).ax.a===B.r?A.aM(4294922834):A.aM(4292030255),w,w,w)}return v},
-A(d){var x=this,w=null,v=y.u,u=A.ac(A.b([A.z(x.a.c,w,w,w,w,w,w,w,O.Ky,w,w,w,w,w),I.aH,x.ba3()],v),B.i,w,B.f,B.h,0,w),t=x.a
-u=A.b([u,B.fK,t.e?A.eD(w,B.aG,!1,w,!0,B.n,w,A.eP(),x.e,w,w,w,w,w,2,D.aDw,B.p,!0,w,!0,w,!1,w,B.az,w,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,B.aK,w,w,w,w,w,w,w,w,w,w,w,w,!0,B.A,w,B.aM,w,w,w,w):new A.S(B.dl,A.z("Directory: "+A.o(t.d),w,w,w,w,w,w,w,w,w,w,w,w,w),w)],v)
-if(x.a.d==="scripts/seed")B.b.E(u,A.b([B.cU,D.bJO,B.a7,D.bKf,B.a7,A.eD(w,B.aG,!1,w,!0,B.n,w,A.eP(),x.x,w,w,w,w,w,2,D.aDu,B.p,!0,w,!0,w,!1,w,B.az,w,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,B.aK,w,w,w,w,w,w,w,w,w,w,w,w,!0,B.A,w,B.aM,w,w,w,w),A.eD(w,B.aG,!1,w,!0,B.n,w,A.eP(),x.y,w,w,w,w,w,2,D.aDv,B.p,!0,w,!0,w,!1,w,B.az,w,w,w,w,w,w,w,w,1,w,w,!0,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,B.aK,w,w,w,w,w,w,w,w,w,w,w,w,!0,B.A,w,B.aM,w,w,w,w),new A.S(B.dl,A.z("Supabase Project URL: "+x.a.x.a.a,w,w,w,w,w,w,w,G.Ku,w,w,w,w,w),w)],v))
-u.push(B.a7)
-u.push(A.da(!1,D.bKj,w,w,w,w,w,w,x.f?w:x.gbHl(),w,w))
-u.push(B.a7)
-if(x.f)v=B.b_
-else{v=x.r
-v=v.length!==0?A.eW(v,w,H.oy):B.d_}u.push(v)
-return A.iO(new A.S(B.b9,A.a8(u,B.z,B.f,B.h,0,w,B.k),w),w,w,3,w,w,w)}}
-var z=a.updateTypes(["S(C6)","W<~>()"])
-C.cvN.prototype={
-$1(d){this.a.q(new C.cvM())},
-$S:4}
-C.cvM.prototype={
-$0(){},
+case 5:x=7
+return A.f(t.Zw(),$async$P8)
+case 7:if(t.c!=null)t.q(new B.cZu(t))
+return A.n(null,w)
+case 1:return A.m(u.at(-1),w)}})
+return A.o($async$P8,w)},
+Zw(){var x=0,w=A.p(y.v),v=this,u
+var $async$Zw=A.l(function(d,e){if(d===1)return A.m(e,w)
+for(;;)switch(x){case 0:u=$.Xj().b.e
+v.q(new B.cZv(v,u))
+return A.n(null,w)}})
+return A.o($async$Zw,w)},
+yV(){var x=0,w=A.p(y.v),v=this,u,t,s,r
+var $async$yV=A.l(function(d,e){if(d===1)return A.m(e,w)
+for(;;)switch(x){case 0:try{$.Xj().aRx()}catch(q){s=A.bX(v.y,new B.cZC())
+r=s==null?null:s.a
+u=r==null?A.WS().j(0):r
+v.q(new B.cZD(v,u))}x=2
+return A.f(v.Zw(),$async$yV)
+case 2:return A.n(null,w)}})
+return A.o($async$yV,w)},
+blG(d){this.q(new B.cZs(this,d))},
+A(d){var x,w,v,u,t=this,s=null,r=A.bX(t.y,new B.cZz()),q=r==null?s:r.a
+r=A.bX(t.y,new B.cZA())
+x=r==null?s:r.a
+r=E.cz(D.bLV,s)
+r=P.Lm(s,s,s,!0,!0,s,s,1,s,s,s,!1,s,!1,s,s,I.Xv(s,new B.cZB(d)),s,!0,s,s,s,s,s,r,s,s,s,1,s,!0)
+if(t.r)w=C.bh
+else{w=A.al(s,s,C.q,s,s,new A.b3(s,D.awr,s,A.aR(12),s,s,s,C.Z),s,64,s,s,s,s,s,64)
+v=y.w
+v=A.j("Install {title} to get notifications, offline functionality, and a quick launch icon.",s,A.d(["title","Festapp"],v,v))
+u=y.u
+u=A.c([A.bs(A.af(A.c([w,D.bEI,A.aJ(E.cz(A.B(v,s,s,s,s,s,s,s,A.ae(s,s,A.A(d).ax.a===C.A?$.dB():C.u,s,s,s,s,s,s,s,s,16,s,s,s,s,s,!0,s,s,s,s,s,s,s,s),s,s,s,s,s),s),1,s)],u),C.k,s,C.bu,C.j,0,s),s,s),L.oV],u)
+if(q!=null&&q.length!==0)u.push(t.aJ_(d,A.j("Install for Apple",s,s),D.aCV,q,0))
+w=A.j("Install for Android",s,s)
+u.push(t.aJ0(d,w,D.aAU,x,1,x==null||x.length===0?A.j("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",s,s):s))
+u.push(t.aJ_(d,A.j("Install for PC/Mac",s,s),D.aB7,s,2))
+w=new A.co(C.aR,s,s,new A.U(K.PX,new A.cp(new A.ah(0,720,0,1/0),A.a8(u,C.k,C.i,C.j,0,s,C.p),s),s),s)}return O.eQ(r,s,w,s,s,s,s,s)},
+aJ0(d,e,f,g,h,i){var x,w,v,u,t,s,r=this,q=null,p=g!=null&&g.length!==0,o=r.Q[h],n=r.x,m=!0
+if(!(n==="ios"&&h===0))if(!(n==="android"&&h===1))n=n==="web"&&h===2
+else n=m
+else n=m
+m=y.u
+x=A.af(A.c([A.aC(f,q,q,q,24),C.hG,A.B(e,q,q,q,q,q,q,q,C.bX,q,q,q,q,q)],m),C.k,q,C.i,C.j,0,q)
+w=A.c([],m)
+if(i!=null){v=A.A(d).ax.a===C.A?$.dB():C.u
+C.c.G(w,A.c([new A.U(C.ci,E.cz(A.B(i,q,q,q,q,q,q,q,A.ae(q,q,A.b8(204,v.E()>>>16&255,v.E()>>>8&255,v.E()&255),q,q,q,q,q,q,q,q,q,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q,q,q,q),q),q),C.h5],m))}v=p?A.j("Download App",q,q):A.j("Install Now",q,q)
+if(p)u=new B.cZw(g)
+else u=!r.d&&!r.f&&r.e?r.gajr():q
+t=!p
+if(t)s=!r.d&&!r.f&&r.e
+else s=!0
+v=A.c([H.aaq(s?C.eu:C.an,d,50,!0,v,u,C.r,250)],m)
+if(t){u=A.c([],m)
+if(r.d)u.push(new A.U(C.d7,E.cz(A.B("The app is already installed.",q,q,q,q,q,q,q,A.ae(q,q,C.eu,q,q,q,q,q,q,q,q,16,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),C.b4,q,q,q,q),q),q))
+if(r.f)u.push(new A.U(C.d7,A.a8(A.c([E.cz(D.bLU,q),C.ap,A.af(A.c([A.aJ(A.cV(q,!1,q,q,!0,r.z,C.RR,q,q,!1,q,q,q,q,q,q,1,q,q,!1,q,q,q,q,q,!0,q,q,C.N,q,q,q),1,q),F.aX,R.TE(N.GE,q,E.cz(D.bLO,q),new B.cZx(r,d),q)],m),C.k,q,C.i,C.j,0,q)],m),C.k,C.i,C.j,0,q,C.p),q))
+C.c.G(v,u)}w.push(new A.U(C.ci,A.a8(v,C.k,C.i,C.j,0,q,C.p),q))
+w.push(C.a8)
+return A.VR(w,q,o,q,n,new B.cZy(r,h),q,q,q,x,q)},
+aJ_(d,e,f,g,h){return this.aJ0(d,e,f,g,h,null)}}
+var z=a.updateTypes(["Z<~>()"])
+B.cZt.prototype={
+$0(){this.a.y=this.b},
 $S:0}
-C.cvO.prototype={
-$0(){A.ui(new A.ox(this.a.gauj()))
-this.b.af(y.v).f.Hb(D.bDG)},
+B.cZu.prototype={
+$0(){this.a.r=!1},
 $S:0}
-C.cvP.prototype={
-$1(d){var x,w=this.a,v=w.e
-v===$&&A.a()
-x=w.d
-x===$&&A.a()
-return new A.S(Q.pP,C.djz(!1,v,d.b,null,x,w.f,d.a),null)},
-$S:z+0}
-C.cDS.prototype={
+B.cZv.prototype={
+$0(){var x=this.a
+x.d=this.b
+x.e=!0},
+$S:0}
+B.cZC.prototype={
+$1(d){return d.c==="web"},
+$S:310}
+B.cZD.prototype={
 $0(){var x=this.a
 x.f=!0
-x.r=x.a.c+" operation is running..."
-x.w=null},
+x=x.z
+x.sbx(0,this.b)
+x.svV(A.fT(C.a0,0,x.a.a.length,!1))},
 $S:0}
-C.cDT.prototype={
-$0(){var x=this.a
-x.r="Error: "+A.o(this.b.a)
-x.f=x.w=!1},
+B.cZs.prototype={
+$0(){var x,w,v,u
+for(x=this.a.Q,w=this.b,v=0;v<3;++v)if(v===w){u=x[v]
+if(!u.a){u.a=!0
+u.a5()}}else{u=x[v]
+if(u.a){u.a=!1
+u.a5()}}},
 $S:0}
-C.cDU.prototype={
-$0(){var x=this.a
-x.r=x.a.c+" operation completed successfully."
-x.w=!0
-x.f=!1},
+B.cZz.prototype={
+$1(d){return d.c==="ios"},
+$S:310}
+B.cZA.prototype={
+$1(d){return d.c==="droid"},
+$S:310}
+B.cZB.prototype={
+$0(){return G.b9Q(this.a)},
 $S:0}
-C.cDV.prototype={
-$0(){var x=this.a
-x.r="Unexpected error: "+A.o(this.b)
-x.f=x.w=!1},
-$S:0};(function installTearOffs(){var x=a._instance_0u
-x(C.ajM.prototype,"gbHl","a07",1)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
-x(A.K,[C.FW,C.a92])
-x(A.N,[C.aW4,C.ajM])
-x(A.co,[C.cvN,C.cvP])
-x(A.d5,[C.cvM,C.cvO,C.cDS,C.cDT,C.cDU,C.cDV])
-w(C.C6,A.I)})()
-A.cf(b.typeUniverse,JSON.parse('{"a92":{"K":[],"e":[]},"FW":{"K":[],"e":[]},"aW4":{"N":["FW"]},"ajM":{"N":["a92"]}}'))
-var y={D:A.J("v<C6>"),u:A.J("v<e>"),w:A.J("h"),v:A.J("A6"),b:A.J("@"),q:A.J("~")};(function constants(){D.aDp=new A.pI(null,null,null,"GitHub Repository with scripts",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null)
-D.aDr=new A.pI(null,null,null,"Database Connection String",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null)
-D.aDs=new A.pI(null,null,null,"Supabase Project URL",null,null,null,null,null,null,"Enter your Supabase project URL",null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null)
-D.aDu=new A.pI(null,null,null,"Admin Email",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null)
-D.aDv=new A.pI(null,null,null,"Admin Password",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null)
-D.aDw=new A.pI(null,null,null,"Directory",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null)
-D.bKq=new A.ch("Copied to clipboard",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bDG=new K.HF(D.bKq,null,null,null,null,null,null,null,null,null,null,null,null,L.pM,!1,null,null,null,B.n,null)
-D.bHx=new A.a4(!0,null,null,"monospace",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bJO=new A.ch("Before running seed, please ensure that you have enabled:\n - Webhooks in Supabase Dashboard (Database > Webhooks)\n - moddatetime extension (Database > Extensions)\n - unaccent extension (Database > Extensions)\n - pg_cron extension (Database > Extensions)",null,M.Kz,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bJV=new A.ch("Migrations",null,F.KA,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bK9=new A.ch("Instance Installation",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bKf=new A.ch("Admin Email and Password are optional. If left blank, no new admin user will be inserted.",null,G.Ku,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bKj=new A.ch("Run Scripts",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bKm=new A.ch("Initial",null,F.KA,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bKy=new A.ch("Supabase Function Deploy Commands:",null,P.Kv,null,null,null,null,null,null,null,null,null,null,null,null)})()};
-(a=>{a["1UfAI47WmGWQ37P8CvfHx3JziFQ="]=a.current})($__dart_deferred_initializers__);
+B.cZy.prototype={
+$1(d){if(d)this.a.blG(this.b)},
+$S:8}
+B.cZw.prototype={
+$0(){$.dGw()
+b.G.window.open(this.a,"_blank")
+return null},
+$S:0}
+B.cZx.prototype={
+$0(){A.VD(new A.QV(this.a.z.a.a))
+A.aY(this.b,A.j("Copied to clipboard",null,null),C.ad)},
+$S:0}
+B.bNz.prototype={
+$1(d){return A.eey(d)},
+$S:1403};(function installTearOffs(){var x=a._instance_0u
+x(B.aKy.prototype,"gajr","yV",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B.a6v,A.N)
+x(B.aKy,A.Q)
+w(A.d7,[B.cZt,B.cZu,B.cZv,B.cZD,B.cZs,B.cZB,B.cZw,B.cZx])
+w(A.cj,[B.cZC,B.cZz,B.cZA,B.cZy,B.bNz])})()
+A.ci(b.typeUniverse,JSON.parse('{"a6v":{"N":[],"k":[]},"aKy":{"Q":["a6v"]}}'))
+var y=(function rtii(){var x=A.M
+return{z:x("z<a_5>"),B:x("z<Rh>"),u:x("z<k>"),e:x("G<Rh>"),i:x("G<@>"),y:x("D<q,@>"),b:x("Rh"),w:x("q"),m:x("@"),v:x("~")}})();(function constants(){D.ajy=new Q.aad("assets/icons/fstappicon.png",null,null)
+D.awr=new A.ab1(D.ajy,null,C.lr,C.a3,C.eT)
+D.aAU=new A.av(57477,"MaterialIcons",null,!1)
+D.aB7=new A.av(57795,"MaterialIcons",null,!1)
+D.aCV=new A.av(984254,"MaterialIcons",null,!1)
+D.bEI=new A.ao(22,null,null,null)
+D.bLO=new A.ct("Copy Link",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bLU=new A.ct("Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",null,M.L9,null,C.b4,null,null,null,null,null,null,null,null,null,null)
+D.bLV=new A.ct("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
+x($,"fVU","dGw",()=>A.c3z())
+x($,"fUu","eoi",()=>$.JZ().gm7(0))})()};
+(a=>{a["L6o1G7rocsDQ0xAYxJh5DBrZjm0="]=a.current})($__dart_deferred_initializers__);

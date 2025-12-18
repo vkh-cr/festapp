@@ -1,16 +1,16 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
-xh(d,e){return d.hI(y.b)}}
+YI(d,e){return d.hH(y.b)}}
 A=c[0]
-B=a.updateHolder(c[110],B)
+B=a.updateHolder(c[112],B)
 var z=a.updateTypes([])
-A.cf(b.typeUniverse,JSON.parse('{"XX":{"bw":[],"bt":[],"e":[]}}'))
-var y={b:A.J("XX")};(function lazyInitializers(){var x=a.lazyFinal
-x($,"ea2","Rl",()=>{var w=A.b([],A.J("v<h>"))
+A.ci(b.typeUniverse,JSON.parse('{"aoz":{"bE":[],"bz":[],"k":[]}}'))
+var y={b:A.M("aoz")};(function lazyInitializers(){var x=a.lazyFinal
+x($,"fXc","ahY",()=>{var w=A.c([],A.M("z<q>"))
 w.push("home")
 w.push("news")
 w.push("map")
 w.push("more")
 w.push("user")
 return w})})()};
-(a=>{a["HDK9psJc/Cs6e9O+ydTwFhp5Mak="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["yG+kN9bskJNhuhVNxh3hWK+FiKs="]=a.current})($__dart_deferred_initializers__);
