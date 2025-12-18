@@ -9,6 +9,7 @@ import 'package:fstapp/services/utilities_all.dart';
 import 'package:collection/collection.dart';
 import 'blueprint_strings.dart';
 import 'seat_reservation/utils/seat_state.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class BlueprintObjectModel {
   static const String metaX = "x";
@@ -152,13 +153,16 @@ class BlueprintObjectModel {
 
         // Add ticket note if available
         var ticketNoteString = ticket.note != null && ticket.note!.isNotEmpty ? "\n${ticket.note}" : "";
+        
+        // Add hidden note if available
+        var noteHiddenString = ticket.noteHidden != null && ticket.noteHidden!.isNotEmpty ? "\n(${ticket.noteHidden})" : "";
 
-        return "${product?.title} ${title ?? ""}\n${OrdersStrings.itemSingular} ${ticket.ticketSymbol}$ticketNoteString\n$productsString$orderString";
+        return "${product?.title} ${title ?? ""}\n${OrdersStrings.itemSingular} ${ticket.ticketSymbol}$ticketNoteString$noteHiddenString\n$productsString$orderString";
       }
     }
 
     // Fallback for when no matching ticket or order product ticket is found
-    return "${product?.title} ${title ?? ""}\n${"Price".tr()}: ${Utilities.formatPrice(context, product?.price ?? 0)}";
+    return "${product?.title} ${title ?? ""}\n${CommonStrings.price}: ${Utilities.formatPrice(context, product?.price ?? 0)}";
   }
 
   String getSwapSummary() {

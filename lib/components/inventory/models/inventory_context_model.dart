@@ -1,7 +1,7 @@
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/spot_model.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
-import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/database_tables/tb.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 

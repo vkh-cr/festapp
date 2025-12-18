@@ -1,8 +1,6 @@
 // timeline_painter.dart
 import 'dart:math' as math;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fstapp/services/time_helper.dart';
 
 class TimelinePainter extends CustomPainter {

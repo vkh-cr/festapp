@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/data_models/form_option_model.dart';
+import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/theme_config.dart';
 import '../form_strings.dart';
-import '../models/field_holder.dart';
-import '../models/form_holder.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import '../models/holder_models/field_holder.dart';
+import '../models/holder_models/form_holder.dart';
 import 'form_helper.dart';
 import 'option_field_helper.dart';
-import 'package:fstapp/data_models/form_option_product_model.dart';
+import 'package:fstapp/components/forms/models/form_option_product_model.dart';
 
 /// Builds a single-select field (radio). Decides whether to show
 /// a basic radio group or a card-based option list based on whether
@@ -68,7 +69,7 @@ class RadioFieldBuilder {
         child: FormBuilderField<FormOptionModel?>(
           key: ValueKey(fieldHolder.id.toString() + optionsIn.toString()), // Add key to force rebuild
           name: fieldHolder.id.toString(),
-          validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+          validator: fieldHolder.isRequired ? FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty) : null,
           initialValue: null,
           builder: (field) {
             // Use the field's error state to update the card wrapper.
@@ -349,7 +350,7 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
             isRequired: widget.fieldHolder.isRequired,
           ),
           validator:
-          widget.fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+          widget.fieldHolder.isRequired ? FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty) : null,
           options: options,
           orientation: OptionsOrientation.vertical,
           wrapDirection: Axis.vertical,

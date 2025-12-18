@@ -12,6 +12,19 @@ BEGIN
         WHERE "user" = auth.uid()
           AND unit = unit_id
           AND (is_editor = true OR is_manager = true OR is_editor_view = true)
+    ) AND NOT EXISTS (
+        SELECT 1
+        FROM occasions o
+        JOIN occasion_users ou ON ou.occasion = o.id
+        WHERE o.unit = unit_id
+          AND ou."user" = auth.uid()
+          AND (
+              ou.is_manager IS TRUE 
+              OR ou.is_editor IS TRUE 
+              OR ou.is_editor_view IS TRUE 
+              OR ou.is_editor_order IS TRUE 
+              OR ou.is_editor_order_view IS TRUE
+          )
     ) THEN
         RETURN jsonb_build_object('code', 403);
     END IF;

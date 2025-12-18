@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/widgets/text_tooltip_widget.dart';
@@ -106,12 +107,16 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
     // This allows the controller to get the correct viewport size.
     return Container(
       key: _layoutKey,
-      child: InteractiveViewer(
-        minScale: widget.controller.minScale,
-        maxScale: 5,
-        boundaryMargin: const EdgeInsets.all(double.infinity),
-        constrained: false,
-        transformationController: widget.controller.transformationController,
+      child: AnimatedOpacity(
+        opacity: widget.controller.isLayoutReady ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: InteractiveViewer(
+          minScale: widget.controller.minScale,
+          maxScale: 5,
+          boundaryMargin: const EdgeInsets.all(double.infinity),
+          constrained: false,
+          transformationController: widget.controller.transformationController,
         child: RepaintBoundary(
           child: Stack(
             children: [
@@ -153,7 +158,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                       left: seatModel.colI * seatModel.seatSize.toDouble(),
                       top: seatModel.rowI * seatModel.seatSize.toDouble(),
                       child: seatModel.objectModel == null
-                          ? GestureDetector(
+                          ? _TouchTapListener(
                         onTap: () {
                           if (widget.onSeatTap != null) {
                             widget.onSeatTap!(seatModel);
@@ -168,26 +173,33 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                           size: seatModel.seatSize.toDouble(),
                         ),
                       )
-                          : Listener(
-                        onPointerUp: (_) {
-                          if (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false) {
-                            widget.controller.setTooltipSeat(seatModel);
+                          : TapRegion(
+                        onTapOutside: (event) {
+                          if (seatModel.isHighlightedForTooltip) {
+                            widget.controller.setTooltipSeat(null);
                           }
                         },
-                        child: TextTooltipWidget(
-                          triggerMode: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
-                              ? TooltipTriggerMode.tap
-                              : null,
-                          content:
-                          "${seatModel.objectModel?.blueprintTooltip(context)}",
-                          child: GestureDetector(
-                            onTap: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
-                                ? null
-                                : () {
+                        child: _TouchTapListener(
+                          onTap: () {
+                            if (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false) {
+                              if (seatModel.isHighlightedForTooltip) {
+                                widget.controller.setTooltipSeat(null);
+                              } else {
+                                widget.controller.setTooltipSeat(seatModel);
+                              }
+                            } else {
                               if (widget.onSeatTap != null) {
                                 widget.onSeatTap!(seatModel);
                               }
-                            },
+                            }
+                          },
+                          child: TextTooltipWidget(
+                            fontSize: 18.0,
+                            triggerMode: (widget.shouldShowTooltipOnTap?.call(seatModel) ?? false)
+                                ? TooltipTriggerMode.tap
+                                : null,
+                            content:
+                            "${seatModel.objectModel?.blueprintTooltip(context)}",
                             child: SeatWidgetHelper.buildSeat(
                               context: context,
                               state: seatModel.seatState,
@@ -207,6 +219,46 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
           ),
         ),
       ),
+      ),
+    );
+  }
+}
+
+class _TouchTapListener extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _TouchTapListener({
+    required this.child,
+    required this.onTap,
+  });
+
+  @override
+  State<_TouchTapListener> createState() => _TouchTapListenerState();
+}
+
+class _TouchTapListenerState extends State<_TouchTapListener> {
+  Offset? _startPos;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: (event) {
+        _startPos = event.position;
+      },
+      onPointerUp: (event) {
+        if (_startPos != null) {
+          final distance = (event.position - _startPos!).distance;
+          if (distance < 20.0) {
+            widget.onTap();
+          }
+        }
+        _startPos = null;
+      },
+      onPointerCancel: (event) {
+        _startPos = null;
+      },
+      child: widget.child,
     );
   }
 }

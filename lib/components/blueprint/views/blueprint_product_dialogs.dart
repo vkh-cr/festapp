@@ -5,7 +5,7 @@ import 'package:fstapp/components/blueprint/blueprint_strings.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
+import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart'; // Import ThemeConfig
@@ -104,7 +104,7 @@ class _SelectProductDialogState extends State<SelectProductDialog> {
 
         } else {
           // Find the original product in the blueprint and update it
-          final originalProduct = widget.blueprint.products?.firstWhereOrNull((p) => p.id == product!.id);
+          final originalProduct = widget.blueprint.products?.firstWhereOrNull((p) => p.id == product.id);
           if (originalProduct != null) {
             originalProduct.title = newTitle;
             originalProduct.price = newPrice;
@@ -464,7 +464,7 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
                         Text(
                           statusText,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: statusColor,
                           ),
@@ -528,7 +528,7 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
                       ),
                       title: Text(
                         obj.title ?? "", // Shows only Seat Title (e.g., "A1")
-                        style: const TextStyle(fontSize: 14),
+                        style: const TextStyle(fontSize: 16),
                       ),
                       subtitle: Text(
                         "$productTitle ($productPrice)",
@@ -578,7 +578,7 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
                 Expanded(
                   child: Text(
                     BlueprintStrings.occupiedWarningInline,
-                    style: TextStyle(fontSize: 11, color: warningColor.withOpacityUniversal(context, 1.0)),
+                    style: TextStyle(fontSize: 13, color: warningColor.withOpacityUniversal(context, 1.0)),
                   ),
                 ),
               ],

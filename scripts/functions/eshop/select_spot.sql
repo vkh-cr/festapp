@@ -53,6 +53,11 @@ BEGIN
         SET secret = NULL,
             secret_expiration_time = NULL
         WHERE id = spot_id;
+
+        -- Re-fetch the spot record after potential expiration update
+        -- (This is necessary because the original spot_record might be stale,
+        -- but for the specific logic below, checking for NULL secret is sufficient.
+        -- We will rely on the check within the ELSE block.)
     END IF;
 
     -- Handle selection or deselection
@@ -70,6 +75,16 @@ BEGIN
         );
     ELSE
         -- Deselect the spot
+
+        -- CASE 1: Spot is already deselected (secret is NULL)
+        IF spot_record.secret IS NULL THEN
+            RETURN jsonb_build_object(
+                'code', 200,
+                'message', 'Spot is already deselected' -- Or 'Spot successfully deselected'
+            );
+        END IF;
+
+        -- CASE 2: Provided secret does not match the current secret
         IF spot_record.secret IS DISTINCT FROM secret_id THEN
             RETURN jsonb_build_object(
                 'code', 403,
@@ -77,6 +92,7 @@ BEGIN
             );
         END IF;
 
+        -- CASE 3: Deselect the spot
         UPDATE eshop.spots
         SET secret = NULL,
             secret_expiration_time = NULL,

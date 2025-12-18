@@ -2,13 +2,14 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/data_models/language_model.dart';
+import 'package:fstapp/components/app_management/language_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/pages/user/login_page.dart';
+import 'package:fstapp/components/users/views/login_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/responsive_service.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/material.dart';
 
 class UserHeaderWidget extends StatefulWidget {
@@ -473,7 +474,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                 color: iconColor,
                 size: 32,
               ),
-              tooltip: "Settings".tr(),
+              tooltip: CommonStrings.settings,
               onPressed: _showSettingsPopover,
             ),
           ],
@@ -514,7 +515,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                 color: iconColor,
                 size: 28,
               ),
-              tooltip: "Settings".tr(),
+              tooltip: CommonStrings.settings,
             ),
           ],
         );

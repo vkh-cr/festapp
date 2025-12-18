@@ -7,14 +7,16 @@ import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
-import 'package:fstapp/data_models/form_model.dart';
-import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
+import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
+import 'package:fstapp/database_tables/tb.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import 'order_data_ticket_model.dart';
 import 'orders_history_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class OrderModel extends ITrinaRowModel {
   @override
@@ -27,6 +29,7 @@ class OrderModel extends ITrinaRowModel {
   int? occasion;
   int? paymentInfo;
   String? formKey;
+  int? formId;
   String? currencyCode;
   String? noteHidden;
 
@@ -61,7 +64,7 @@ class OrderModel extends ITrinaRowModel {
       case usedState:
         return 'Used'.tr();
       case stornoState:
-        return 'Storno'.tr();
+        return CommonStrings.storno;
       default:
         return state; // Return the key itself if not found
     }
@@ -128,6 +131,7 @@ class OrderModel extends ITrinaRowModel {
     this.occasion,
     this.paymentInfo,
     this.formKey,
+    this.formId,
     this.currencyCode,
     this.noteHidden,
     this.form,
@@ -163,6 +167,9 @@ class OrderModel extends ITrinaRowModel {
       currencyCode: json[TbEshop.orders.currency_code],
       state: json[TbEshop.orders.state],
       formKey: orderData is Map<String, dynamic> ? orderData[TbEshop.orders.data_form] : null,
+      formId: (json['form'] != null && json['form'] is Map && json['form'][Tb.forms.id] != null)
+          ? json['form'][Tb.forms.id]
+          : (json['form_id']),
       data: orderData,
       occasion: json[TbEshop.orders.occasion],
       paymentInfo: json[TbEshop.orders.payment_info],

@@ -16,10 +16,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.17.42+231
+version: 0.19.4+243
 
 environment:
-  sdk: '>=2.19.5 <3.32.8'
+  sdk: '>=3.0.0 <3.32.8'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -43,11 +43,10 @@ dependencies:
   flutter_map_marker_popup: ^7.0.0
 #  flutter_map_marker_popup:
 #    path: ./pckgs/flutter_map_marker_popup-master
-  supabase_flutter: ^2.10.3
-  flutter_secure_storage: ^10.0.0-beta.4
+  supabase_flutter: ^2.12.0
+  flutter_secure_storage: ^10.0.0
   timelines_plus: ^1.0.8
   intl: ^0.20.2
-  search_page: ^2.3.0
   badges: ^3.1.1
   collection: ^1.18.0
   flutter_map_location_marker: ^9.1.1
@@ -97,6 +96,8 @@ dependencies:
   fwfh_cached_network_image: ^0.16.1
   multi_split_view: ^3.6.1
   timezone: ^0.10.1
+  flutter_colorpicker: ^1.1.0
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   auto_route_generator: ^10.3.0

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/components/forms/models/field_holder.dart';
-import 'package:fstapp/components/forms/models/form_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/field_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/form_holder.dart';
 import 'package:fstapp/components/forms/widgets_view/form_field_builders.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/components/forms/widgets_view/phone_input_formatter.dart';
 
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class TextFieldBuilder extends StatelessWidget {
   final FieldHolder fieldHolder;
@@ -42,19 +43,10 @@ class TextFieldBuilder extends StatelessWidget {
   }
 
   Widget _buildStandardTextField(BuildContext context) {
-    return _StandardTextField(
-      fieldHolder: fieldHolder,
-      isPhone: isPhone,
-      isEmail: isEmail,
-      autofillHints: autofillHints,
-    );
-  }
-
-  Widget _buildCardDesignTextField(BuildContext context) {
     List<String? Function(String?)> validators = [];
 
     if (fieldHolder.isRequired) {
-      validators.add(FormBuilderValidators.required());
+      validators.add(FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty));
     }
 
     if (isEmail) {
@@ -71,40 +63,76 @@ class TextFieldBuilder extends StatelessWidget {
       ));
     }
 
-    return ClipRect(
-      child: AnimatedSize(
-        alignment: Alignment.topCenter,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        child: FormBuilderField<String?>(
-          name: fieldHolder.id.toString(),
-          validator: FormBuilderValidators.compose(validators),
-          autovalidateMode: isEmail || isPhone
-              ? AutovalidateMode.onUnfocus
-              : AutovalidateMode.onUserInteraction,
-          builder: (field) {
-            return _CardTextField(
-              field: field,
-              fieldHolder: fieldHolder,
-              autofillHints: autofillHints,
-              isPhone: isPhone,
-              isEmail: isEmail,
-            );
-          },
-        ),
-      ),
+    return FormBuilderField<String?>(
+      name: fieldHolder.id.toString(),
+      initialValue: isPhone ? '+420' : null,
+      validator: validators.isNotEmpty
+          ? FormBuilderValidators.compose(validators)
+          : null,
+      autovalidateMode: isPhone
+          ? AutovalidateMode.onUnfocus
+          : AutovalidateMode.onUserInteraction,
+      builder: (field) {
+        return _StandardTextField(
+          field: field,
+          fieldHolder: fieldHolder,
+          isPhone: isPhone,
+          isEmail: isEmail,
+          autofillHints: autofillHints,
+        );
+      },
+    );
+  }
+
+  Widget _buildCardDesignTextField(BuildContext context) {
+    List<String? Function(String?)> validators = [];
+
+    if (fieldHolder.isRequired) {
+      validators.add(FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty));
+    }
+
+    if (isEmail) {
+      validators.add(FormBuilderValidators.email(
+        errorText: FormHelper.emailInvalidMessage(),
+      ));
+    }
+
+    if (isPhone) {
+      validators.add(FormBuilderValidators.phoneNumber(
+        regex: RegExp(r'^\+?[0-9]{' + PhoneInputFormatter.kMaxPhoneNumberLength.toString() + r'}$'),
+        checkNullOrEmpty: false,
+        errorText: FormStrings.phoneFormatValidation,
+      ));
+    }
+
+    return FormBuilderField<String?>(
+      name: fieldHolder.id.toString(),
+      validator: FormBuilderValidators.compose(validators),
+      autovalidateMode: isPhone
+          ? AutovalidateMode.onUnfocus
+          : AutovalidateMode.onUserInteraction,
+      builder: (field) {
+        return _CardTextField(
+          field: field,
+          fieldHolder: fieldHolder,
+          autofillHints: autofillHints,
+          isPhone: isPhone,
+          isEmail: isEmail,
+        );
+      },
     );
   }
 }
 
 class _StandardTextField extends StatefulWidget {
+  final FormFieldState<String?> field;
   final FieldHolder fieldHolder;
   final bool isPhone;
   final bool isEmail;
   final Iterable<String> autofillHints;
 
   const _StandardTextField({
-    super.key,
+    required this.field,
     required this.fieldHolder,
     required this.isPhone,
     required this.isEmail,
@@ -116,18 +144,34 @@ class _StandardTextField extends StatefulWidget {
 }
 
 class _StandardTextFieldState extends State<_StandardTextField> {
+  late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
   bool _showPrefixes = false;
 
   @override
   void initState() {
     super.initState();
+    // Initialize controller with starting value from field
+    String? initialValue = widget.field.value;
+    if (widget.isPhone && (initialValue == null || initialValue.isEmpty)) {
+      initialValue = '+420';
+    }
+    _controller = TextEditingController(text: initialValue);
     _focusNode.addListener(_handleFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant _StandardTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.field.value != null && widget.field.value != _controller.text) {
+      _controller.text = widget.field.value!;
+    }
   }
 
   @override
   void dispose() {
     _focusNode.removeListener(_handleFocusChange);
+    _controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -150,71 +194,45 @@ class _StandardTextFieldState extends State<_StandardTextField> {
 
   @override
   Widget build(BuildContext context) {
-    List<String? Function(String?)> validators = [];
-
-    if (widget.fieldHolder.isRequired) {
-      validators.add(FormBuilderValidators.required());
-    }
-
-    if (widget.isEmail) {
-      validators.add(FormBuilderValidators.email(
-        errorText: FormHelper.emailInvalidMessage(),
-      ));
-    }
-
-    if (widget.isPhone) {
-      validators.add(FormBuilderValidators.phoneNumber(
-        regex: RegExp(r'^\+?[0-9]{' + PhoneInputFormatter.kMaxPhoneNumberLength.toString() + r'}$'),
-        checkNullOrEmpty: false,
-        errorText: FormStrings.phoneFormatValidation,
-      ));
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FormBuilderTextField(
-          maxLines: null,
-          name: widget.fieldHolder.id.toString(),
-          initialValue: widget.isPhone ? '+420' : null,
+        TextField(
+          controller: _controller,
           focusNode: _focusNode,
+          maxLines: null,
           autofillHints: widget.autofillHints,
-          autovalidateMode: widget.isEmail || widget.isPhone
-              ? AutovalidateMode.onUnfocus
-              : AutovalidateMode.onUserInteraction,
-          decoration: InputDecoration(
+          inputFormatters: widget.isPhone ? [PhoneInputFormatter()] : null,
+            decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.transparent,
             hintText: widget.isPhone ? FormStrings.phoneFormatHint : null,
             label: FormFieldBuilders.buildTitleWidget(
               widget.fieldHolder.title!,
               widget.fieldHolder.isRequired,
               context,
               focusNode: _focusNode,
+              controller: _controller,
             ),
+            errorText: _focusNode.hasFocus ? null : widget.field.errorText,
           ),
-          inputFormatters: widget.isPhone ? [PhoneInputFormatter()] : null,
-          validator: validators.isNotEmpty
-              ? FormBuilderValidators.compose(validators)
-              : null,
           onChanged: (value) {
-            // Intelligent validation: if field has error, validate on change to clear it immediately when fixed
-            var field = FormBuilder.of(context)?.fields[widget.fieldHolder.id.toString()];
-            if (field != null && field.hasError) {
-              field.validate();
-            }
+            widget.field.didChange(value);
           },
         ),
         if (widget.isPhone && _showPrefixes)
           _PhonePrefixHelpers(
             onPrefixSelected: (prefix) {
-              // Keep focus to prevent onUnfocus validation
+              // Keep focus to prevent onUnfocus validation logic triggered by focus loss
               _focusNode.requestFocus();
 
-              var field = FormBuilder.of(context)?.fields[widget.fieldHolder.id.toString()];
-              if (field != null) {
-                String current = field.value?.toString() ?? '';
-                String newText = _applyPrefix(current, prefix);
-                field.didChange(newText);
-              }
+              String current = _controller.text;
+              String newText = _applyPrefix(current, prefix);
+              _controller.value = TextEditingValue(
+                text: newText,
+                selection: TextSelection.collapsed(offset: newText.length),
+              );
+              widget.field.didChange(newText);
             },
           ),
       ],
@@ -301,11 +319,6 @@ class _CardTextFieldState extends State<_CardTextField> {
     return TextInputType.text;
   }
 
-  String? _getPrefixFromText(String text) {
-    if (text.startsWith('+420')) return '+420';
-    if (text.startsWith('+421')) return '+421';
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -340,38 +353,46 @@ class _CardTextFieldState extends State<_CardTextField> {
             ),
             onChanged: (value) {
               widget.field.didChange(value.isEmpty ? null : value);
-              // Intelligent validation: if field has error, validate on change to clear it immediately when fixed
-              if (widget.field.hasError) {
-                widget.field.validate();
-              }
             },
           ),
-          if (widget.isPhone && _showPrefixes)
-            _PhonePrefixHelpers(
-              onPrefixSelected: (prefix) {
-                // Keep focus to prevent onUnfocus validation
-                _focusNode.requestFocus();
-                
-                String current = _controller.text;
-                String newText = _applyPrefix(current, prefix);
-                _controller.value = TextEditingValue(
-                  text: newText,
-                  selection: TextSelection.collapsed(offset: newText.length),
-                );
-                widget.field.didChange(newText);
-              },
-            ),
-          if (widget.field.hasError)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 2.0),
-              child: Text(
-                widget.field.errorText!,
-                style: TextStyle(
-                  color: ThemeConfig.redColor(context),
-                  fontSize: 12,
-                ),
+          ClipRect(
+            child: AnimatedSize(
+              alignment: Alignment.topCenter,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (widget.isPhone && _showPrefixes)
+                    _PhonePrefixHelpers(
+                      onPrefixSelected: (prefix) {
+                        // Keep focus to prevent onUnfocus validation
+                        _focusNode.requestFocus();
+                        
+                        String current = _controller.text;
+                        String newText = _applyPrefix(current, prefix);
+                        _controller.value = TextEditingValue(
+                          text: newText,
+                          selection: TextSelection.collapsed(offset: newText.length),
+                        );
+                        widget.field.didChange(newText);
+                      },
+                    ),
+                  if (widget.field.hasError && !_focusNode.hasFocus)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0, left: 2.0),
+                      child: Text(
+                        widget.field.errorText!,
+                        style: TextStyle(
+                          color: ThemeConfig.redColor(context),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
+          ),
         ],
       ),
     );
