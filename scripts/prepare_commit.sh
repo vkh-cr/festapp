@@ -32,6 +32,22 @@ else
     exit 1
 fi
 
+# 3. Auto-configure Domain (based on branch)
+echo ""
+echo ">>> Checking Channel Configuration..."
+CURRENT_BRANCH=$(git branch --show-current)
+
+# 3. Apply Project Configuration (Universal Config)
+echo ""
+echo ">>> Applying Project Configuration..."
+# The configure_project.sh script will read from scripts/project.conf
+if [ -f "$SCRIPT_DIR/configure_project.sh" ]; then
+    "$SCRIPT_DIR/configure_project.sh"
+else
+    echo "Error: scripts/configure_project.sh not found."
+    exit 1
+fi
+
 echo ""
 echo "=================================================="
 echo "SUCCESS: Ready for commit!"

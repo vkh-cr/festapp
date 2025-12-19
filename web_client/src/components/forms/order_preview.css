@@ -80,7 +80,7 @@
     margin: 0;
     font-size: 1.35rem; /* 18 * 1.2 */
     font-weight: bold;
-    color: var(--primary-color, #000);
+    color: #000000; /* Force Black */
 }
 
 .btn-close-preview {
@@ -144,8 +144,8 @@
     margin-bottom: 2px;
     font-size: 0.85rem;
     font-weight: 500;
-    color: var(--label-text-color, #666); /* Use label text color if available or grey */
-    opacity: 0.8; 
+    color: #000000 !important; /* Force Black for visibility */
+    opacity: 1; /* Removed opacity */
 }
 
 /* Ensure dark mode adjustment for hardcoded grey fallback */
@@ -188,7 +188,7 @@ body.dark-mode .preview-label {
     font-size: 1.2rem; /* 16 * 1.2 */
     font-weight: bold;
     margin-bottom: 8px;
-     color: var(--primary-color, #000);
+     color: #000000; /* Force Black for visibility */
 }
 
 /* Total Price */
