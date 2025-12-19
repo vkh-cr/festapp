@@ -65,9 +65,22 @@ if [ -f "$APP_CONFIG" ]; then
         sed -i '' "s|static organization = .*;|static organization = $ORGANIZATION_ID;|g" "$APP_CONFIG"
     fi
     
-    echo "✔ Updated app_config.js (Url, Key, Org)"
+    # Update Flutter App URL
+    if [ ! -z "$FLUTTER_APP_URL" ] || [ -z "${FLUTTER_APP_URL+x}" ]; then
+         # We allow empty string, so we need careful check. 
+         # But usually we just want to replace whatever is there.
+         # If FLUTTER_APP_URL is defined (even empty), we use it.
+         # But bash -z checks for empty string.
+         # Let's say if variable is set.
+         # Actually, simplifies: just replace if pattern matches.
+         # But we need to handle empty string correctly in regex replacement.
+         # Using a placeholder for empty? No, just use value.
+         sed -i '' "s|static flutterAppUrl = '.*';|static flutterAppUrl = '$FLUTTER_APP_URL';|g" "$APP_CONFIG"
+    fi
+
+    echo "✔ Updated app_config.js (Url, Key, Org, FlutterUrl)"
 else
-     echo "Warning: $APP_CONFIG not found."
+    echo "Warning: $APP_CONFIG not found."
 fi
 
 
