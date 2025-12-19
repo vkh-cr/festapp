@@ -37,14 +37,15 @@ echo ""
 echo ">>> Checking Channel Configuration..."
 CURRENT_BRANCH=$(git branch --show-current)
 
-if [[ "$CURRENT_BRANCH" == "prod/festapp" ]]; then
-    echo "Branch is prod/festapp. Setting domain to live.festapp.net..."
-    "$SCRIPT_DIR/set_domain.sh" "live.festapp.net"
-elif [[ "$CURRENT_BRANCH" == "prod/ticketonline" ]]; then
-    echo "Branch is prod/ticketonline. Setting domain to vstupenky.online..."
-    "$SCRIPT_DIR/set_domain.sh" "vstupenky.online"
+# 3. Apply Project Configuration (Universal Config)
+echo ""
+echo ">>> Applying Project Configuration..."
+# The configure_project.sh script will read from scripts/project.conf
+if [ -f "$SCRIPT_DIR/configure_project.sh" ]; then
+    "$SCRIPT_DIR/configure_project.sh"
 else
-    echo "Skipping domain auto-configuration for branch $CURRENT_BRANCH"
+    echo "Error: scripts/configure_project.sh not found."
+    exit 1
 fi
 
 echo ""
