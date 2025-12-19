@@ -1,4 +1,4 @@
-import{T as a,L as n,A as c}from"./index--_JK5mkr.js";class h{constructor(e){this.container=e,this.element=document.createElement("div"),this.element.className="settings-widget",this.render(),this.container.appendChild(this.element)}render(){this.element.innerHTML="",this.element.style.cssText=`
+import{T as a,L as n,A as c}from"./index-p82hp1Yk.js";class h{constructor(e){this.container=e,this.element=document.createElement("div"),this.element.className="settings-widget",this.render(),this.container.appendChild(this.element)}render(){this.element.innerHTML="",this.element.style.cssText=`
             display: flex;
             flex-direction: column;
             gap: 16px;
