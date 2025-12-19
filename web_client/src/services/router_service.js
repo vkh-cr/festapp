@@ -3,7 +3,6 @@ import { AppConfig } from '../app_config.js';
 
 export class RouterService {
     
-    static FLUTTER_BASE_URL = '/app/';
     static FORM_PATH_PREFIX = '/form/';
 
     static navigateToExternal(url) {
@@ -88,25 +87,7 @@ export class RouterService {
             }
         }
 
-        // 2. Check if this is the root path or index.html
-        if (path === '/' || path === '/index.html') {
-            return false; // Show Home App (Web Client)
-        }
-
-        // 3. Fallback: Redirect to Flutter App
-        // If we are here, it's a route we don't handle (e.g. /events, /admin, /login)
-        // We redirect to flutter.html, preserving the path/hash if possible.
-        // This is generic logic for Unified Build, not domain specific.
-
-        console.log(`Unknown route "${path}". Redirecting to Flutter App...`);
-        
-        // Check if we are already at flutter.html (avoid loop)
-        if (path.includes('/flutter.html')) {
-             return true; // Let browser handle it
-        }
-
-        window.location.href = `/flutter.html#${path}`;
-        return true; // We handled it (by redirecting)
+        return false;
     }
     
     // Listen for PopState

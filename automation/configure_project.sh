@@ -12,17 +12,16 @@ if [ ! -f "$CONFIG_FILE" ]; then
     exit 1
 fi
 
-# Source the config (DOMAIN, FLUTTER_ENTRY_POINT)
+# Source the config (DOMAIN)
 source "$CONFIG_FILE"
 
-if [ -z "$DOMAIN" ] || [ -z "$FLUTTER_ENTRY_POINT" ]; then
-    echo "Error: DOMAIN and FLUTTER_ENTRY_POINT must be defined in $CONFIG_FILE"
+if [ -z "$DOMAIN" ]; then
+    echo "Error: DOMAIN must be defined in $CONFIG_FILE"
     exit 1
 fi
 
 echo "Detailed Configuration:"
 echo "  - Domain: $DOMAIN"
-echo "  - app_entry: $FLUTTER_ENTRY_POINT"
 echo "  - Supabase URL: $SUPABASE_URL"
 echo "  - Organization ID: $ORGANIZATION_ID"
 
@@ -50,9 +49,7 @@ echo "✔ Updated CNAME"
 APP_CONFIG="$PROJECT_ROOT/web_client/src/app_config.js"
 if [ -f "$APP_CONFIG" ]; then
     echo "Updating $APP_CONFIG..."
-    # Update flutterAppUrl
-    sed -i '' "s|static flutterAppUrl = '.*';|static flutterAppUrl = '$FLUTTER_ENTRY_POINT';|g" "$APP_CONFIG"
-    
+
     # Update Supabase URL
     if [ ! -z "$SUPABASE_URL" ]; then
         sed -i '' "s|static supabaseUrl = '.*';|static supabaseUrl = '$SUPABASE_URL';|g" "$APP_CONFIG"
@@ -68,45 +65,12 @@ if [ -f "$APP_CONFIG" ]; then
         sed -i '' "s|static organization = .*;|static organization = $ORGANIZATION_ID;|g" "$APP_CONFIG"
     fi
     
-    echo "✔ Updated app_config.js (Url, Key, Org, flutterAppUrl)"
+    echo "✔ Updated app_config.js (Url, Key, Org)"
 else
      echo "Warning: $APP_CONFIG not found."
 fi
 
-# 5. Update router_service.js (Entry Point Fallback)
-ROUTER_SERVICE="$PROJECT_ROOT/web_client/src/services/router_service.js"
-if [ -f "$ROUTER_SERVICE" ]; then
-    echo "Updating $ROUTER_SERVICE..."
-    
-    # Update hardcoded redirects to flutter.html
-    # We replace `/flutter.html` string with the configured entry point (if different)
-    # Since we can't easily rely on valid previous state, we assume standard structure.
-    # To be safe, we'll replace the known variable strings.
-    
-    # Ideally, we should use a CONSTANT in the file, but for now we replace the string literals.
-    # This might fail if the file content drifts, but it's consistent with current method.
-    
-    # Replace strings like `window.location.href = '/flutter.html`
-    # We use a generic replacement for "/flutter.html" -> "$FLUTTER_ENTRY_POINT"
-    # But wait, if they are already the same, no change.
-    
-    # To ensure it adheres to config, we can define FLUTTER_BASE_URL class property if it exists,
-    # or just sed replace the specific lines we added.
-    
-    # Let's target the window.location.href lines and includes check.
-    # Note: escape special chars in FLUTTER_ENTRY_POINT for sed (like /)
-    SAFE_ENTRY=$(echo "$FLUTTER_ENTRY_POINT" | sed 's/\//\\\//g')
-    
-    # Update: if (path.includes('/flutter.html'))
-    sed -i '' "s/path.includes('.*')/path.includes('$SAFE_ENTRY')/" "$ROUTER_SERVICE"
-    
-    # Update: window.location.href = `/flutter.html#${path}`;
-    sed -i '' "s/window.location.href = \`.*#\${path}\`;/window.location.href = \`$SAFE_ENTRY#\${path}\`;/" "$ROUTER_SERVICE"
 
-    echo "✔ Updated router fallback"
-else
-     echo "Warning: $ROUTER_SERVICE not found."
-fi
 
 # 6. Update lib/app_config.dart (Flutter App)
 FLUTTER_CONFIG="$PROJECT_ROOT/lib/app_config.dart"
