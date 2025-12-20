@@ -2,11 +2,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
-import 'package:fstapp/data_models/information_model.dart';
+import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
-import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_services/db_information.dart';
+import 'package:fstapp/database_tables/tb.dart';
+import 'package:fstapp/components/information/db_information.dart';
 import 'package:trina_grid/trina_grid.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class GameCheckPointsContent extends StatefulWidget {
   const GameCheckPointsContent({super.key});
@@ -38,7 +39,7 @@ class _GameCheckPointsContentState extends State<GameCheckPointsContent> {
             renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
           ),
           TrinaColumn(
-            title: "Title".tr(),
+            title: CommonStrings.title,
             enableAutoEditing: true,
             field: Tb.information.title,
             type: TrinaColumnType.text(),

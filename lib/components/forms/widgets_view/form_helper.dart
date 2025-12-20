@@ -1,23 +1,24 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
-import 'package:fstapp/data_models/form_option_model.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
+import 'package:fstapp/components/forms/models/form_option_model.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/dialogs/standard_dialog.dart';
+import 'package:fstapp/widgets/standard_dialog.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
-import 'package:fstapp/components/forms/models/id_document_field_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/id_document_field_holder.dart';
 import 'package:fstapp/components/forms/widgets_view/check_box_field_builder.dart';
 import 'package:fstapp/components/forms/widgets_view/radio_field_builder.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
-import '../models/birth_date_field_holder.dart';
-import '../models/field_holder.dart';
-import '../models/form_holder.dart';
-import '../models/ticket_holder.dart';
+import 'package:fstapp/components/html/html_view.dart';
+import '../../_shared/common_strings.dart';
+import '../models/holder_models/birth_date_field_holder.dart';
+import '../models/holder_models/field_holder.dart';
+import '../models/holder_models/form_holder.dart';
+import '../models/holder_models/ticket_holder.dart';
 import 'birth_date_field_builder.dart';
 import 'form_field_builders.dart';
 import 'id_document_field_builder.dart';
@@ -68,14 +69,14 @@ class FormHelper {
 
   // Labels and messages
   static String noteLabel() => "Note".tr();
-  static String nameLabel() => "Name".tr();
+  static String nameLabel() => CommonStrings.name;
   static String surnameLabel() => "Surname".tr();
   static String cityLabel() => "City".tr();
   static String spotLabel() => "Spot".tr();
   static String emailLabel() => "E-mail".tr();
   static String phoneLabel() => "Phone".tr();
   static String addressLabel() => "Address".tr();
-  static String nationalityLabel() => "Nationality".tr(); // Added nationality label
+  static String nationalityLabel() => "Nationality".tr();
   static String sexLabel() => "I am".tr();
   static String birthYearLabel() => "Birth year".tr();
   static String birthDateLabel() => "Birth Date".tr();
@@ -589,6 +590,8 @@ class FormHelper {
     required bool isRequired,
   }) {
     return InputDecoration(
+      filled: true,
+      fillColor: Colors.transparent,
       border: InputBorder.none,
       label: Text.rich(
         TextSpan(

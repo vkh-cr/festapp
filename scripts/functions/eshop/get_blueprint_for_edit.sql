@@ -113,7 +113,8 @@ BEGIN
         'id', t.id,
         'ticket_symbol', t.ticket_symbol,
         'state', t.state,
-        'note', t.note
+        'note', t.note,
+        'note_hidden', t.note_hidden
     ))
     INTO ticketsData
     FROM eshop.tickets t
@@ -130,7 +131,7 @@ BEGIN
         'price', o.price,
         'state', o.state,
         'currency_code', o.currency_code,
-        'data', o.data
+        'data', jsonb_build_object('name', o.data->>'name', 'surname', o.data->>'surname', 'email', o.data->>'email', 'note', o.data->>'note')
     ))
     INTO ordersData
     FROM eshop.orders o

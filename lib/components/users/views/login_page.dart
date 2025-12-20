@@ -1,0 +1,202 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/router_service.dart';
+import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/components/users/views/forgot_password_page.dart';
+import 'package:fstapp/components/app_management/settings_page.dart';
+import 'package:fstapp/components/users/views/signup_page.dart';
+import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/buttons_helper.dart';
+import 'package:fstapp/widgets/internal_form_fields.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fstapp/app_config.dart';
+import 'package:fstapp/widgets/password_field.dart';
+
+@RoutePage()
+class LoginPage extends StatefulWidget {
+  static const ROUTE = "login";
+  const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  bool _isLoading = false;
+
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    if (AppConfig.isWebclientSupported) {
+      AuthService.tryAuthUser().then((isLoggedIn) {
+        if (isLoggedIn) {
+          _checkAutoRedirect();
+        }
+      });
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!AppConfig.isAppSupported) {
+        _checkAutoRedirect();
+      }
+    });
+  }
+
+  Future<void> _checkAutoRedirect() async {
+    if (AuthService.isLoggedIn() || await AuthService.tryAuthUser()) {
+      var loggedIn = await AuthService.tryAuthUser();
+      if (loggedIn) {
+        var userUnits = RightsService.currentUser()?.units;
+        if (userUnits != null && userUnits.isNotEmpty) {
+           await RouterService.navigateToUnitAdmin(context, userUnits.first);
+        } else {
+           await _refreshSignedInStatus(null);
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> actions = [
+      IconButton(
+        icon: Icon(Icons.settings),
+        onPressed: () => RouterService.navigate(context, SettingsPage.ROUTE),
+      ),
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text("Sign in").tr(),
+        leading: BackButton(
+          onPressed: () => RouterService.popOrHome(context),
+        ),
+        actions: actions,
+      ),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: AutofillGroup(
+                child: Column(
+                  children: <Widget>[
+                    const SizedBox(
+                      height: 200,
+                    ),
+                    if(RightsService.occasionLinkModel?.organization?.isRegistrationEnabled??false)
+                      Container(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("First time?".tr(), style: TextStyle(fontSize: 18)),
+                              const SizedBox(
+                                width: 16,
+                              ),
+                              TextButton(
+                                  onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
+                                  child: Text("Sign up", style: StylesConfig.normalTextStyle).tr())
+                            ]
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: InternalFormFields.email(_emailController),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 15.0, right: 15.0, top: 15, bottom: 0),
+                      child: PasswordField(label: "Password or code".tr(), controller:  _passwordController, passwordType: AutofillHints.password),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    ButtonsHelper.bigButton(
+                      context: context,
+                      label: "Sign in".tr(),
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          TextInput.finishAutofillContext();
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          await AuthService.login(AppConfig.getUserPrefix(_emailController.text), _passwordController.text)
+                              .then(_showToast)
+                              .then(_refreshSignedInStatus)
+                              .catchError(_onError);
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      },
+                      color: ThemeConfig.seed1,
+                      textColor: Colors.white,
+                      isEnabled: !_isLoading,
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.topRight,
+                        child: TextButton(
+                            onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
+                            child: Text("Forgot your password?", style: StylesConfig.normalTextStyle).tr())
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _refreshSignedInStatus(dynamic value) async {
+    var loggedIn = await AuthService.tryAuthUser();
+    if (loggedIn) {
+      var unitId = RightsService.currentUnit()?.id == 1 ? null : RightsService.currentUnit()?.id;
+      if(AppConfig.isAppSupported){
+        await RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
+      } else {
+        await RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
+      }
+
+      if (unitId == null) {
+        var userUnits = RightsService.currentUser()?.units;
+        if (userUnits != null && userUnits.isNotEmpty) {
+          await RouterService.navigateToUnitAdmin(context, userUnits.first);
+          return;
+        }
+      }
+      RouterService.popOrHome(context);
+    }
+  }
+
+  void _showToast(value) {
+    ToastHelper.Show(context, "Successful sign in!".tr());
+  }
+
+  void _onError(err) {
+    ToastHelper.Show(context, "Invalid credentials!".tr(), severity: ToastSeverity.NotOk);
+  }
+}

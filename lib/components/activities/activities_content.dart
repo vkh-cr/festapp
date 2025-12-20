@@ -6,10 +6,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_router.gr.dart';
-import 'package:fstapp/data_models/activity_model.dart';
-import 'package:fstapp/data_services/db_activities.dart';
-import 'package:fstapp/dialogs/detail_dialog.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/components/activities/activity_model.dart';
+import 'package:fstapp/components/activities/db_activities.dart';
+import 'package:fstapp/widgets/detail_dialog.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -2302,7 +2302,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               !a.isHidden!;
           Color activityHeaderBgColor;
           Color activityHeaderTextColor;
-          Color activityHiddenOverlayColor;
           Color activityContentBgColor;
           if (isDark) {
             activityHeaderBgColor = a.isHidden!
@@ -2310,7 +2309,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 : Colors.blueGrey.shade800.withOpacity(0.7);
             activityHeaderTextColor =
             a.isHidden! ? Colors.white60 : Colors.white;
-            activityHiddenOverlayColor = Colors.grey.shade600.withOpacity(0.3);
             activityContentBgColor = isHighlighted
                 ? Theme.of(context).primaryColor.withAlpha(30)
                 : Colors.transparent;
@@ -2320,7 +2318,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 : Colors.blueGrey.shade50.withOpacity(0.7);
             activityHeaderTextColor =
             a.isHidden! ? Colors.white70 : Colors.black87;
-            activityHiddenOverlayColor = Colors.grey.shade500.withOpacity(0.3);
             activityContentBgColor = isHighlighted
                 ? Colors.lightBlue.shade50.withOpacity(0.6)
                 : Colors.transparent;
@@ -2339,9 +2336,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     bottom: 8.0,
                     right: 8.0),
                 child: Text(
-                  a.id == null
-                      ? ActivitiesComponentStrings.textNewActivityAddedDragDrop
-                      : ActivitiesComponentStrings.textDragUsersFromTopDropHere,
+                  ActivitiesComponentStrings.textDragUsersFromTopDropHere,
                   style: TextStyle(
                       fontSize: 11,
                       color: isDark ? Colors.grey[400] : Colors.grey[600],

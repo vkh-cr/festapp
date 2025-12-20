@@ -44,9 +44,7 @@ BEGIN
         FROM jsonb_array_elements(occ.features) elem
         WHERE elem->>'code' = 'form'
     ) form_settings ON TRUE
-    -- Join the forms table based on the key stored in the order's data.
-    -- The text value from JSONB is now correctly cast to UUID to match the f.key column type.
-    LEFT JOIN public.forms f ON de.code = 'TICKET_ORDER_REMINDER' AND f.key = (o.data->>'form')::uuid
+    LEFT JOIN public.forms f ON de.code = 'TICKET_ORDER_REMINDER' AND f.id = o.form
   ),
   deleted_emails AS (
     -- 3. Delete all emails that failed the validation check.

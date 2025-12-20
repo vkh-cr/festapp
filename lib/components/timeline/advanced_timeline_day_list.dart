@@ -4,22 +4,24 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/activities/activities_component_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+// ignore: unused_import
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/dialogs/detail_dialog.dart';
+import 'package:fstapp/widgets/detail_dialog.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/services/time_helper.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'schedule_helper.dart';
 import 'advanced_timeline_controller.dart';
 import 'package:fstapp/app_config.dart';
 import 'schedule_timeline.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 
 class DayList extends StatelessWidget {
@@ -314,7 +316,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                   TextButton.icon(
                     onPressed: () => controller.onEditEvent?.call(context, event.id),
                     icon: Icon(Icons.edit, size: 14, color: selectedColor),
-                    label: Text('Edit'.tr(), style: TextStyle(color: selectedColor)),
+                    label: Text(CommonStrings.edit, style: TextStyle(color: selectedColor)),
                     style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
                   )
               );
@@ -411,7 +413,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
       inlineActionSection = Padding(
         padding: const EdgeInsets.only(right: 8.0),
         child: Text(
-          "Cancelled".tr().toUpperCase(),
+          CommonStrings.cancelled.toUpperCase(),
           style: TextStyle(
             fontSize: 11,
             color: ThemeConfig.redColor(context),
@@ -557,7 +559,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    "Cancelled".tr().toUpperCase(),
+                                    CommonStrings.cancelled.toUpperCase(),
                                     style: const TextStyle(
                                       color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5,
                                     ),

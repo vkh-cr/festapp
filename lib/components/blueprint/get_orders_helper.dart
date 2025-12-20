@@ -11,9 +11,9 @@ import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
-import 'package:fstapp/data_models/form_model.dart';
-import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
+import 'package:fstapp/database_tables/tb.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
 
 class GetOrdersHelper {
   static List<BlueprintGroupModel> parseGroups(Map<String, dynamic> json) {
