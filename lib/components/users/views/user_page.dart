@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart' show Uint8List;
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/inventory/views/inventory_strings.dart';
+import 'package:fstapp/components/map/map_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/database_tables/tb.dart';
@@ -30,8 +30,6 @@ import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
-import 'map_page.dart';
-import '../../inventory/views/user_stay_page.dart';
 
 @RoutePage()
 class UserPage extends StatefulWidget {
