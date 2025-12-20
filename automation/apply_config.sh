@@ -1,4 +1,13 @@
 #!/bin/bash
+# ==============================================================================
+# APPLY CONFIGURATION
+# Purpose: Reads configuration from project.conf and applies it to:
+#          - web_client/src/app_config.js (Web Client)
+#          - lib/app_config.dart (Flutter App)
+#          - web_client/index.html (Meta tags)
+#          - web_client/public/CNAME (Domain)
+# Usage: ./automation/apply_config.sh
+# ==============================================================================
 set -e
 
 # Usage: ./scripts/configure_project.sh [optional_config_path]
@@ -67,18 +76,20 @@ if [ -f "$APP_CONFIG" ]; then
     
     # Update Flutter App URL
     if [ ! -z "${FLUTTER_APP_URL+x}" ]; then
-         # We allow empty string, so we need careful check. 
-         # But usually we just want to replace whatever is there.
-         # If FLUTTER_APP_URL is defined (even empty), we use it.
-         # But bash -z checks for empty string.
-         # Let's say if variable is set.
-         # Actually, simplifies: just replace if pattern matches.
-         # But we need to handle empty string correctly in regex replacement.
-         # Using a placeholder for empty? No, just use value.
          sed -i '' "s|static flutterAppUrl = '.*';|static flutterAppUrl = '$FLUTTER_APP_URL';|g" "$APP_CONFIG"
     fi
 
-    echo "✔ Updated app_config.js (Url, Key, Org, FlutterUrl)"
+    # Update Is App Supported
+    if [ ! -z "$IS_APP_SUPPORTED" ]; then
+        sed -i '' "s|static isAppSupported = .*;|static isAppSupported = $IS_APP_SUPPORTED;|g" "$APP_CONFIG"
+    fi
+
+    # Update Web Link
+    if [ ! -z "$WEB_LINK" ]; then
+        sed -i '' "s|static webLink = \".*\";|static webLink = \"$WEB_LINK\";|g" "$APP_CONFIG"
+    fi
+
+    echo "✔ Updated app_config.js (Url, Key, Org, FlutterUrl, IsAppSupported, WebLink)"
 else
     echo "Warning: $APP_CONFIG not found."
 fi
@@ -103,6 +114,16 @@ if [ -f "$FLUTTER_CONFIG" ]; then
     # Update Organization
     if [ ! -z "$ORGANIZATION_ID" ]; then
         sed -i '' "s|static const int organization = .*;|static const int organization = $ORGANIZATION_ID;|g" "$FLUTTER_CONFIG"
+    fi
+
+    # Update Is App Supported
+    if [ ! -z "$IS_APP_SUPPORTED" ]; then
+        sed -i '' "s|static const bool isAppSupported = .*;|static const bool isAppSupported = $IS_APP_SUPPORTED;|g" "$FLUTTER_CONFIG"
+    fi
+
+    # Update Web Link
+    if [ ! -z "$WEB_LINK" ]; then
+        sed -i '' "s|static const String webLink = \".*\";|static const String webLink = \"$WEB_LINK\";|g" "$FLUTTER_CONFIG"
     fi
 
     echo "✔ Updated lib/app_config.dart"
