@@ -9,7 +9,7 @@ export class AppConfig {
     static isAllUnit = false;
     static isAppSupported = true;
     static flutterAppUrl = '';
-    static webLink = "https://live.festapp.net";
+    static webLink = "https://vstupenky.online";
     static compatibleUrls = [AppConfig.webLink];
 
 
