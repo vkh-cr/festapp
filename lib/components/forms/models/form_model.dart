@@ -164,7 +164,6 @@ class FormModel {
     Tb.forms.header_off: headerOff,
     Tb.forms.link: link,
     'fields': relatedFields,
-    // The 'stats' and 'occasionModel' objects are calculated/retrieved fields, so they're not included in toJson.
   };
 
   Map<String, dynamic> toEditedJson() => {
