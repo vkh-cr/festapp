@@ -126,9 +126,63 @@ if [ -f "$FLUTTER_CONFIG" ]; then
         sed -i '' "s|static const String webLink = \".*\";|static const String webLink = \"$WEB_LINK\";|g" "$FLUTTER_CONFIG"
     fi
 
-    echo "✔ Updated lib/app_config.dart"
+    # Theme Configuration for Flutter
+    # Convert #RRGGBB to 0xFFRRGGBB
+    if [ ! -z "$THEME_SEED_1" ]; then
+        VAL="0xFF${THEME_SEED_1:1}"
+        sed -i '' "s|static Color seed1 = const Color(.*);|static Color seed1 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+    fi
+    if [ ! -z "$THEME_SEED_2" ]; then
+        VAL="0xFF${THEME_SEED_2:1}"
+        sed -i '' "s|static Color seed2 = const Color(.*);|static Color seed2 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+    fi
+    if [ ! -z "$THEME_SEED_3" ]; then
+        VAL="0xFF${THEME_SEED_3:1}"
+        sed -i '' "s|static Color seed3 = const Color(.*);|static Color seed3 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+    fi
+     if [ ! -z "$THEME_SEED_4" ]; then
+        VAL="0xFF${THEME_SEED_4:1}"
+        sed -i '' "s|static Color seed4 = const Color(.*);|static Color seed4 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+    fi
+
+    echo "✔ Updated lib/app_config.dart (and theme colors)"
 else
     echo "Warning: $FLUTTER_CONFIG not found."
 fi
 
+# 7. Update web_client/src/theme_config.css (Web Client Theme)
+WEB_THEME="$PROJECT_ROOT/web_client/src/theme_config.css"
+if [ -f "$WEB_THEME" ]; then
+    echo "Updating $WEB_THEME..."
+
+    if [ ! -z "$THEME_SEED_1" ]; then
+        sed -i '' "s|--seed-1: .*;|--seed-1: $THEME_SEED_1;|g" "$WEB_THEME"
+    fi
+    if [ ! -z "$THEME_SEED_2" ]; then
+        sed -i '' "s|--seed-2: .*;|--seed-2: $THEME_SEED_2;|g" "$WEB_THEME"
+    fi
+    if [ ! -z "$THEME_SEED_3" ]; then
+        sed -i '' "s|--seed-3: .*;|--seed-3: $THEME_SEED_3;|g" "$WEB_THEME"
+    fi
+
+    if [ ! -z "$FORM_FONT_SCALE" ]; then
+        sed -i '' "s|--font-scale: .*;|--font-scale: $FORM_FONT_SCALE;|g" "$WEB_THEME"
+    fi
+
+    echo "✔ Updated web_client/src/theme_config.css"
+else
+    echo "Warning: $WEB_THEME not found."
+fi
+
 echo "Project configuration applied successfully."
+
+# 8. Font Configuration (Handled by configure_fonts.js)
+# We invoke the helper script to handle dynamic file detection and rewrites
+NODE_SCRIPT="$PROJECT_ROOT/automation/configure_fonts.js"
+
+if [ -f "$NODE_SCRIPT" ] && [ -d "$PROJECT_ROOT/automation/fonts" ]; then
+    echo "Running Dynamic Font Configuration..."
+    node "$NODE_SCRIPT" "$PROJECT_ROOT" "$FONT_FAMILY_BASE"
+else
+    echo "Skipping Font Configuration (Script or Fonts dir missing)"
+fi
