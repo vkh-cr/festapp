@@ -9,7 +9,7 @@ class ThemeConfig {
   static bool isDarkModeEnabled = true;
 
   // Base theme to hold common properties
-  static final fontFamily = "Cerebri";
+  static final fontFamily = "Cerebri-Sans";
   static ThemeData baseTheme() => ThemeData(
       fontFamily: fontFamily,
       useMaterial3: false,
