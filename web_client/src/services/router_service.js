@@ -40,7 +40,11 @@ export class RouterService {
     }
 
     static getLoginUrl() {
-        return `${AppConfig.flutterAppUrl}/login`;
+        let baseUrl = AppConfig.flutterAppUrl || '';
+        if (baseUrl.endsWith('/')) {
+            baseUrl = baseUrl.slice(0, -1);
+        }
+        return `${baseUrl}/login`;
     }
 
     static navigateToLogin() {
@@ -62,10 +66,18 @@ export class RouterService {
         window.history.back();
     }
     
-    // Initial Load Check
     static async handleInitialLoad() {
         const path = window.location.pathname;
         
+        // 1. GitHub Pages Support: Redirect specific Flutter routes
+        // On GitHub Pages, /login hits 404.html (Web Client). We must redirect to flutter.html.
+        if (path === '/login' || path === '/admin') {
+            const redirectUrl = `${window.location.origin}/flutter.html`;
+            console.log(`RouterService: Redirecting ${path} to Flutter App: ${redirectUrl}`);
+            window.location.replace(redirectUrl);
+            return true;
+        }
+
         // 2. Handle legacy hash routing (e.g. /#/link -> /link)
         if (window.location.hash && window.location.hash.startsWith('#/')) {
             const cleanPath = window.location.hash.substring(1); // Remove '#'
