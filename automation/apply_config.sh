@@ -171,3 +171,40 @@ else
 fi
 
 echo "Project configuration applied successfully."
+
+# 8. Font Configuration
+if [ ! -z "$FONT_FAMILY_BASE" ]; then
+    echo "Updating Font Configuration to: $FONT_FAMILY_BASE"
+    
+    # 8.1 Update lib/theme_config.dart
+    if [ -f "$FLUTTER_CONFIG" ]; then
+        sed -i '' "s|static final fontFamily = \".*\";|static final fontFamily = \"$FONT_FAMILY_BASE\";|g" "$FLUTTER_CONFIG"
+        echo "✔ Updated font family in lib/theme_config.dart"
+    fi
+
+    # 8.2 Update web_client/src/theme_config.css
+    if [ -f "$WEB_THEME" ]; then
+        # Update @font-face definitions and body style
+        sed -i '' "s|font-family: '[^']*'|font-family: '$FONT_FAMILY_BASE'|g" "$WEB_THEME"
+        echo "✔ Updated font family in web_client/src/theme_config.css"
+    fi
+
+    # 8.3 Update pubspec.yaml
+    PUBSPEC_FILE="$PROJECT_ROOT/pubspec.yaml"
+    if [ -f "$PUBSPEC_FILE" ]; then
+        # Assumes standard indentation for font family
+        sed -i '' "s|    - family: .*|    - family: $FONT_FAMILY_BASE|g" "$PUBSPEC_FILE"
+        echo "✔ Updated font family in pubspec.yaml"
+    fi
+fi
+
+# 8. Font Configuration (Handled by configure_fonts.js)
+# We invoke the helper script to handle dynamic file detection and rewrites
+NODE_SCRIPT="$PROJECT_ROOT/automation/configure_fonts.js"
+
+if [ -f "$NODE_SCRIPT" ] && [ -d "$PROJECT_ROOT/automation/fonts" ]; then
+    echo "Running Dynamic Font Configuration..."
+    node "$NODE_SCRIPT" "$PROJECT_ROOT" "$FONT_FAMILY_BASE"
+else
+    echo "Skipping Font Configuration (Script or Fonts dir missing)"
+fi
