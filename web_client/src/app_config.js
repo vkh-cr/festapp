@@ -7,7 +7,7 @@ export class AppConfig {
     static organization = 3;
     static forceOccasionLink = null;
     static isAllUnit = false;
-    static isAppSupported = true;
+    static isAppSupported = false;
     static flutterAppUrl = '';
     static webLink = "https://vstupenky.online";
     static compatibleUrls = [AppConfig.webLink];
