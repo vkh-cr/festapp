@@ -124,7 +124,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   fonts:
-    - family: Futura
+    - family: Futura PT
       fonts:
         - asset: fonts/Futura PT Book.ttf
         - asset: fonts/Futura PT Medium.ttf

@@ -20,15 +20,10 @@ echo "=================================================="
 echo "PREPARING COMMIT: Syncing Version and Translations"
 echo "=================================================="
 
-# 1. Sync Application Version (Flutter -> package.json & version.js)
-echo ""
-echo ">>> Syncing Version..."
-if [ -f "$WEB_CLIENT_SCRIPTS/sync_version.js" ]; then
-    node "$WEB_CLIENT_SCRIPTS/sync_version.js"
-else
-    echo "Error: sync_version.js not found at $WEB_CLIENT_SCRIPTS/sync_version.js"
-    exit 1
-fi
+# 1. Sync Application Version (Handled by apply_config.sh now)
+# echo ""
+# echo ">>> Syncing Version..."
+# Logic moved to automation/apply_config.sh via configure_version.js
 
 # 2. Unify Translations (Flutter <-> Web Client)
 echo ""
