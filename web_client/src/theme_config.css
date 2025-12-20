@@ -1,7 +1,7 @@
 @font-face {
     font-family: 'Futura';
     src: url('./assets/fonts/FuturaPTBook.ttf') format('truetype');
-    font-weight: normal;
+    font-weight: 400;
     font-style: normal;
 }
 
