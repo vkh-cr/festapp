@@ -102,6 +102,34 @@ body.dark-mode .form-description *:not(a) {
     text-align: left;
 }
 
+.form-description img, 
+.form-field-description img,
+.option-description img,
+.form-header img,
+.form-description video,
+.form-field-description video,
+.option-description video,
+.form-header video,
+.form-description iframe,
+.form-field-description iframe,
+.option-description iframe,
+.form-header iframe {
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain;
+    display: block;
+    margin: 8px 0;
+}
+
+/* Aggressively prevent any wrapper from exceeding width */
+.form-description *, 
+.form-field-description *,
+.option-description *,
+.form-header * {
+    max-width: 100% !important;
+    box-sizing: border-box; 
+}
+
 .form-field-hint {
     font-size: 0.8rem;
     color: #777;
