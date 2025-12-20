@@ -66,16 +66,23 @@ export class RouterService {
         window.history.back();
     }
     
+    // Initial Load Check
     static async handleInitialLoad() {
         const path = window.location.pathname;
         
-        // 1. GitHub Pages Support: Redirect specific Flutter routes
-        // On GitHub Pages, /login hits 404.html (Web Client). We must redirect to flutter.html.
-        if (path === '/login' || path === '/admin') {
-            const redirectUrl = `${window.location.origin}/flutter.html`;
-            console.log(`RouterService: Redirecting ${path} to Flutter App: ${redirectUrl}`);
-            window.location.replace(redirectUrl);
-            return true;
+        // 1. Global Redirect to Flutter App (GitHub Pages 404 Fallback Support)
+        // If this is NOT a Web Client route (Home or Form), redirect to Flutter.
+        // This covers /login, /admin, /map, and any deep link.
+        const isWebClientRoute = path === '/' || path === '/index.html' || path.startsWith(RouterService.FORM_PATH_PREFIX);
+        
+        if (!isWebClientRoute) {
+             // Avoid redirect loops if we are already at the target
+             if (!path.endsWith('flutter.html')) {
+                 const redirectUrl = `${window.location.origin}/flutter.html?redirect=${encodeURIComponent(path)}`;
+                 console.log(`RouterService: Global Redirecting ${path} to Flutter App: ${redirectUrl}`);
+                 window.location.replace(redirectUrl);
+                 return true;
+             }
         }
 
         // 2. Handle legacy hash routing (e.g. /#/link -> /link)
@@ -100,7 +107,7 @@ export class RouterService {
             }
         }
 
-        return false;
+        return false; 
     }
     
     // Listen for PopState
