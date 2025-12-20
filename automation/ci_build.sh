@@ -1,4 +1,13 @@
 #!/bin/bash
+# ==============================================================================
+# CI BUILD
+# Purpose: specialized build script for CI/CD environments (e.g. Netlify/GitHub).
+#          - Installs Flutter (if missing)
+#          - Builds Flutter App (release)
+#          - Builds Web Client
+#          - Merges Web Client into Flutter build output
+# Usage: ./automation/ci_build.sh
+# ==============================================================================
 set -e
 
 echo "Starting Unified Build Process..."
