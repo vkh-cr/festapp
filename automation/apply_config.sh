@@ -165,6 +165,10 @@ if [ -f "$WEB_THEME" ]; then
         sed -i '' "s|--seed-3: .*;|--seed-3: $THEME_SEED_3;|g" "$WEB_THEME"
     fi
 
+    if [ ! -z "$FORM_FONT_SCALE" ]; then
+        sed -i '' "s|--font-scale: .*;|--font-scale: $FORM_FONT_SCALE;|g" "$WEB_THEME"
+    fi
+
     echo "✔ Updated web_client/src/theme_config.css"
 else
     echo "Warning: $WEB_THEME not found."
