@@ -66,7 +66,7 @@ if [ -f "$APP_CONFIG" ]; then
     fi
     
     # Update Flutter App URL
-    if [ ! -z "$FLUTTER_APP_URL" ] || [ -z "${FLUTTER_APP_URL+x}" ]; then
+    if [ ! -z "${FLUTTER_APP_URL+x}" ]; then
          # We allow empty string, so we need careful check. 
          # But usually we just want to replace whatever is there.
          # If FLUTTER_APP_URL is defined (even empty), we use it.

@@ -66,16 +66,6 @@ export class RouterService {
     static async handleInitialLoad() {
         const path = window.location.pathname;
         
-        // 1. Handle Legacy Flutter Routes -> Redirect to Flutter Entry Point
-        // This is primarily for GitHub Pages where fallbacks go to index.html (Web Client)
-        // instead of file-based routing like Netlify's _redirects.
-        if (path === '/login' || path === '/admin') {
-            const redirectUrl = `${window.location.origin}/flutter.html`; // Absolute to be safe
-            console.log(`RouterService: Redirecting ${path} to Flutter App: ${redirectUrl}`);
-            window.location.replace(redirectUrl);
-            return true;
-        }
-
         // 2. Handle legacy hash routing (e.g. /#/link -> /link)
         if (window.location.hash && window.location.hash.startsWith('#/')) {
             const cleanPath = window.location.hash.substring(1); // Remove '#'
