@@ -122,12 +122,6 @@ BEGIN
                 WHERE ff.form = f.id AND ff.is_hidden = false
             )
         )
-                            END
-                        )
-                    ) ORDER BY COALESCE(ff."order", 0)
-                )
-            )
-        )
     )
     INTO allData
     FROM public.forms f
