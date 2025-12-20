@@ -4,7 +4,7 @@ const path = require('path');
 
 // Arguments: [node, script, projectRoot, fontFamilyBase]
 const projectRoot = process.argv[2];
-const fontFamilyBase = process.argv[3] || 'Futura'; // Default if not set
+let fontFamilyBase = process.argv[3] || 'Futura'; // Default
 
 if (!projectRoot) {
     console.error("Usage: node configure_fonts.js <projectRoot> [fontFamilyBase]");
@@ -16,11 +16,12 @@ const flutterFontDir = path.join(projectRoot, 'fonts');
 const webFontDir = path.join(projectRoot, 'web_client/src/assets/fonts');
 const pubspecPath = path.join(projectRoot, 'pubspec.yaml');
 const webThemePath = path.join(projectRoot, 'web_client/src/theme_config.css');
+const dartThemePath = path.join(projectRoot, 'lib/theme_config.dart');
 
 // Ensure source exists
 if (!fs.existsSync(fontSourceDir)) {
     console.error(`Font source directory not found: ${fontSourceDir}`);
-    process.exit(0); // Not an error, just nothing to do
+    process.exit(0);
 }
 
 // Ensure dests exist
@@ -30,20 +31,51 @@ if (!fs.existsSync(webFontDir)) fs.mkdirSync(webFontDir, { recursive: true });
 // 1. Scan and Classify Fonts
 const fonts = [];
 const files = fs.readdirSync(fontSourceDir);
+const validFiles = files.filter(f => f.match(/\.(ttf|otf)$/i));
 
-console.log(`Scanning fonts in ${fontSourceDir}...`);
+if (validFiles.length === 0) {
+    console.log("No fonts found in automation/fonts. Exiting.");
+    process.exit(0);
+}
 
-files.forEach(file => {
-    if (!file.match(/\.(ttf|otf)$/i)) return;
+// Auto-Detect Family Name
+function detectFamilyName(fileList) {
+    if (!fileList || fileList.length === 0) return null;
+    let common = fileList[0].replace(/\.[^/.]+$/, ""); 
+    fileList.forEach(f => {
+        const name = f.replace(/\.[^/.]+$/, "");
+        let i = 0;
+        while(i < common.length && common[i] === name[i]) i++;
+        common = common.substring(0, i);
+    });
+    common = common.replace(/[-_]$/, '');
+    if (common.length < 2) return null; 
+    return common.replace(/-/g, ' ').replace(/_/g, ' ').trim();
+}
 
+const detectedFamily = detectFamilyName(validFiles);
+if (detectedFamily && detectedFamily !== 'Futura') {
+    // If the user provided a specific env var override, maybe respect it?
+    // But typically auto-detect is preferred if files are provided.
+    // If the arg passed is "Futura" (default), we definitely override.
+    if (fontFamilyBase === 'Futura') {
+        fontFamilyBase = detectedFamily;
+        console.log(`Auto-detected Font Family: "${fontFamilyBase}"`);
+    } else {
+         console.log(`Using Configured Font Family: "${fontFamilyBase}" (Detected: ${detectedFamily})`);
+    }
+}
+
+
+console.log(`Scanning fonts...`);
+
+validFiles.forEach(file => {
     const srcPath = path.join(fontSourceDir, file);
     let weight = 400;
     let style = 'normal';
     const lowerName = file.toLowerCase();
 
-    // FILE: automation/configure_fonts.js
-
-    // Heuristic for Weight (Restored for CSS differentiation)
+    // Heuristic for Weight
     if (lowerName.includes('bold') || lowerName.includes('700')) weight = 700;
     else if (lowerName.includes('medium') || lowerName.includes('500')) weight = 500;
     else if (lowerName.includes('light') || lowerName.includes('300')) weight = 300;
@@ -52,37 +84,27 @@ files.forEach(file => {
     if (lowerName.includes('italic')) style = 'italic';
 
     // File copying prep
-    // Web handles filenames without spaces better generally, but we can match flutter for strictness or simplify.
-    // Previous logic removed spaces for web. Let's stick to that for safety in CSS urls.
+    // Remove spacess for web
     const webFilename = file.replace(/\s+/g, '');
     
     fonts.push({
-        appFilename: file, // Keep original for Flutter
+        appFilename: file, 
         webFilename: webFilename,
-        weight: weight, // This will be 400 for Medium now
+        weight: weight,
         style: style,
         srcPath: srcPath
     });
 });
 
-if (fonts.length === 0) {
-    console.log("No fonts found. Exiting.");
-    process.exit(0);
-}
-
 // 2. Clear and Copy Files
 console.log(`Found ${fonts.length} fonts. Syncing...`);
-
 fonts.forEach(font => {
-    // Flutter Copy
     fs.copyFileSync(font.srcPath, path.join(flutterFontDir, font.appFilename));
-    // Web Copy
     fs.copyFileSync(font.srcPath, path.join(webFontDir, font.webFilename));
 });
 
-
 // 3. Update pubspec.yaml
-console.log("Updating pubspec.yaml...");
+console.log(`Updating pubspec.yaml with family "${fontFamilyBase}"...`);
 if (fs.existsSync(pubspecPath)) {
     let pubspec = fs.readFileSync(pubspecPath, 'utf8');
     
@@ -90,19 +112,18 @@ if (fs.existsSync(pubspecPath)) {
     
     fonts.forEach(font => {
         newFontSection += `        - asset: fonts/${font.appFilename}\n`;
-        // REMOVED explicit weight generation for Pubspec
-        // if (font.weight !== 400) newFontSection += `          weight: ${font.weight}\n`;
+        // No explicit weight in Pubspec per request
         if (font.style !== 'normal') newFontSection += `          style: ${font.style}\n`;
     });
     
     const fontsRegex = /  fonts:\n(\s{4}- family:[\s\S]*?)(?=\n\s{2}[a-z]|\nflutter:|$)/;
     
     if (pubspec.match(fontsRegex)) {
-        pubspec = pubspec.replace(fontsRegex, newFontSection.trimEnd()); // trimEnd to avoid double newlines
+        pubspec = pubspec.replace(fontsRegex, newFontSection.trimEnd());
         fs.writeFileSync(pubspecPath, pubspec);
         console.log("✔ pubspec.yaml updated.");
     } else {
-        console.warn("⚠ Could not find '  fonts:' section in pubspec.yaml to replace. Please check indentation.");
+        console.warn("⚠ Could not find '  fonts:' section to replace.");
     }
 }
 
@@ -110,46 +131,45 @@ if (fs.existsSync(pubspecPath)) {
 console.log("Updating theme_config.css...");
 if (fs.existsSync(webThemePath)) {
     let css = fs.readFileSync(webThemePath, 'utf8');
-    
     let newCssRules = "";
     fonts.forEach(font => {
-        // We must map format('truetype') or 'opentype'.
         const ext = path.extname(font.webFilename).toLowerCase();
         const format = ext === '.otf' ? 'opentype' : 'truetype';
         
         newCssRules += `@font-face {\n`;
         newCssRules += `    font-family: '${fontFamilyBase}';\n`;
         newCssRules += `    src: url('./assets/fonts/${font.webFilename}') format('${format}');\n`;
-        // Keep weight in CSS only if it differs from normal? 
-        // User said "at other places" too, but CSS needs differentiation.
-        // However, Medium (500) was the one complained about. 
-        // Since we mapped Medium -> 400 above, it will output "font-weight: 400" (or nothing).
         newCssRules += `    font-weight: ${font.weight};\n`; 
         newCssRules += `    font-style: ${font.style};\n`;
         newCssRules += `}\n\n`;
     });
 
-    // Replace all existing @font-face blocks
-    // This regex matches any @font-face { ... } block globally
     const fontFaceRegex = /@font-face\s?\{[^}]+\}/g;
-    
-    // If we have existing rules, we replace the whole block(s) with our new set
-    // We want to insert our new rules at the top or replace existing ones.
-    
     if (css.match(fontFaceRegex)) {
-        // Remove old ones
         css = css.replace(fontFaceRegex, '');
-        // Trim leading whitespace/newlines from replacements
         css = css.replace(/^\s+/g, ''); 
-        // Prepend new rules
         css = newCssRules + css;
     } else {
-        // Just prepend
         css = newCssRules + css;
     }
-    
     fs.writeFileSync(webThemePath, css);
     console.log("✔ theme_config.css updated.");
+}
+
+// 5. Update lib/theme_config.dart
+console.log("Updating lib/theme_config.dart...");
+if (fs.existsSync(dartThemePath)) {
+    let dart = fs.readFileSync(dartThemePath, 'utf8');
+    // Regex to find: static final fontFamily = "Something";
+    const dartRegex = /static final fontFamily = ".*";/;
+    
+    if (dart.match(dartRegex)) {
+        dart = dart.replace(dartRegex, `static final fontFamily = "${fontFamilyBase}";`);
+        fs.writeFileSync(dartThemePath, dart);
+        console.log("✔ lib/theme_config.dart updated.");
+    } else {
+         console.warn("⚠ Could not find 'static final fontFamily' in theme_config.dart.");
+    }
 }
 
 console.log("Dynamic Font Configuration Complete.");
