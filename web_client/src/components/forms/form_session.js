@@ -329,8 +329,51 @@ export class FormSession extends EventTarget {
         // Never relies on DOM scraping for tickets.
         
         this.payload.ticket = this.state.tickets.map((t, i) => {
+            const rawFields = t.fields || [];
+            const processedFields = [];
+            
+            rawFields.forEach(fObj => {
+                // Check if any value in fObj contains pipe (Multi-Choice)
+                // fObj structure: { [type]: val, _subFieldId: id, ... }
+                // We know 'type' is dynamic.
+                // Robust check: Look for string with pipe
+                let hasPipe = false;
+                let pipeVal = null;
+                let pipeKey = null;
+                
+                Object.entries(fObj).forEach(([k, v]) => {
+                    if (k === '_subFieldId' || k === 'currency_code') return;
+                    if (typeof v === 'string' && v.includes(' | ')) {
+                        hasPipe = true;
+                        pipeVal = v;
+                        pipeKey = k;
+                    }
+                });
+                
+                if (hasPipe && pipeVal) {
+                    // Split and Expand
+                    const parts = pipeVal.split(' | ');
+                    parts.forEach(part => {
+                        // Clone object
+                        const newEntry = { ...fObj };
+                        // Replace pipe value with single part
+                        newEntry[pipeKey] = part;
+                        
+                        // Special handling for product_type/price overrides if needed?
+                        // If we had a combined price/currency for options, splitting might lose context?
+                        // No, 'fObj' itself usually just contains the value reference + subId.
+                        // Price lookup happens in Backend/Calc using this value.
+                        if (newEntry.product_type === pipeVal) newEntry.product_type = part; // Explicit fix for SQL
+                        
+                        processedFields.push(newEntry);
+                    });
+                } else {
+                     processedFields.push(fObj);
+                }
+            });
+
             const ticketObj = {
-                fields: t.fields || [],
+                fields: processedFields,
                 _ticketIndex: i
             };
             
@@ -449,8 +492,19 @@ export class FormSession extends EventTarget {
          // Extract Value
          let val = target.value;
          let type = target.type;
-         if (type === 'checkbox' && !target.checked) {
-             val = null; // Unchecked
+         
+         // Multi-Choice Checkbox Logic
+         if (type === 'checkbox') {
+             const name = target.name;
+             if (name) {
+                 // Gather all checked inputs for this field group
+                 const checked = form.querySelectorAll(`input[name="${name}"]:checked`);
+                 const vals = Array.from(checked).map(c => c.value);
+                 // Join with pipe for consistent storage
+                 val = vals.length > 0 ? vals.join(' | ') : null;
+             } else {
+                 if (!target.checked) val = null; 
+             }
          }
          
          // Construct Value Object

@@ -96,7 +96,7 @@ export class FormHelper {
     static calculatePrice(payload, formModel) {
         let totalPrice = 0;
         let totalItems = 0;
-        let currency = 'CZK'; // Default fallback
+        let currency = null;
 
         // Helper to find option and price
         const findPrice = (fieldOrSub, value) => {
@@ -106,12 +106,33 @@ export class FormHelper {
              }
              
              if (!options || options.length === 0) return 0;
+             if (value === null || value === undefined) return 0;
              
              const valStr = String(value);
+             
+             // Handle Multi-Choice (Pipe Separated)
+             if (valStr.includes(' | ')) {
+                 const parts = valStr.split(' | ');
+                 let sum = 0;
+                 
+                 parts.forEach(part => {
+                     const opt = options.find(o => o.id != null && String(o.id) === part);
+                     if (opt) {
+                         if (!currency && opt.currency) { 
+                             currency = opt.currency;
+                         }
+                         const p = Number(opt.price);
+                         if (!isNaN(p)) sum += p;
+                     }
+                 });
+                 return sum; 
+             }
+             
+             // Single Value
              const opt = options.find(o => o.id != null && String(o.id) === valStr);
              
              if (opt) {
-                 if (currency === 'CZK' && opt.currency) { 
+                 if (!currency && opt.currency) { 
                      currency = opt.currency;
                  }
                  const p = Number(opt.price);
@@ -215,6 +236,6 @@ export class FormHelper {
              });
         });
         
-        return { totalPrice, totalItems, currency };
+        return { totalPrice, totalItems, currency: currency || 'CZK' };
     }
 }
