@@ -2,7 +2,7 @@ import { AppConfig } from '../app_config.js';
 
 
 export class RouterService {
-    
+
     static FORM_PATH_PREFIX = '/form/';
 
     static navigateToExternal(url) {
@@ -88,8 +88,8 @@ export class RouterService {
 
         // 1. Identify Route Type
         // Web Client Routes: / (Home), /index.html, /form/...
-        const isWebClientRoute = path === '/' || 
-                                 path === '/index.html' || 
+        const isWebClientRoute = path === '/' ||
+                                 path === '/index.html' ||
                                  path.startsWith(RouterService.FORM_PATH_PREFIX);
 
         const isFlutterRoute = RouterService.flutterRoutes.some(r => path.startsWith(r));
@@ -110,7 +110,7 @@ export class RouterService {
             // Logic mirroring Flutter:
             // if (!AppConfig.isAppSupported) { return "/"; } // Handled by outer if
             // if (RightsService.useOfflineVersion) ... // Skipped for Web
-            
+
             if (currentLink) {
                  defaultLink = `/${currentLink}`;
             } else if (AppConfig.isAllUnit && currentLink) {
@@ -128,15 +128,16 @@ export class RouterService {
                  // We are on a Web Client Route (Home, Form)
                  // If we are at root /, we might want to "redirect" (SPA navigate) to the default link
                  // BUT ONLY if the default link itself is ALSO a Web Client Route.
-                 
+
                  if (path === '/') {
                      if (defaultLink !== '/') {
                          const targetIsWebClient = defaultLink.startsWith(RouterService.FORM_PATH_PREFIX);
-                         
+
                          if (targetIsWebClient) {
                              // SPA Navigate (Stay in Web Client)
                              console.log(`RouterService: SPA redirect from / to ${defaultLink}`);
                              window.history.replaceState(null, '', defaultLink);
+                             RouterService._lastPath = defaultLink; // Critical: Sync tracker to prevent re-init on popstate
                              path = defaultLink; // Update path for subsequent loading logic
                              shouldRedirectToFlutter = false;
                          } else {
@@ -157,7 +158,7 @@ export class RouterService {
                  // Unknown deep link (e.g. /my-fest) -> Redirect
                  shouldRedirectToFlutter = true;
             }
-            
+
         } else {
             // Web Client Only Mode
              if (isWebClientRoute) {
@@ -168,7 +169,8 @@ export class RouterService {
                 // Unknown route -> Home
                 console.log(`Unknown route "${path}" and App not supported. Redirecting to Home.`);
                 window.history.replaceState(null, '', '/');
-                return true; 
+                RouterService._lastPath = '/';
+                return true;
             }
         }
 
@@ -186,9 +188,11 @@ export class RouterService {
         if (!shouldRedirectToFlutter) {
              if (window.location.hash && window.location.hash.startsWith('#/')) {
                   window.history.replaceState(null, '', path);
+                  RouterService._lastPath = path; // Sync tracker
              }
              if (fullUrl.includes('https://') && window.location.pathname.startsWith('/https:')) {
                   window.history.replaceState(null, '', path);
+                  RouterService._lastPath = path; // Sync tracker
              }
         }
 
@@ -196,7 +200,7 @@ export class RouterService {
         console.log("RouterService loading component for path:", path);
         if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {
             const link = path.substring(RouterService.FORM_PATH_PREFIX.length);
-            const cleanLink = link.split('/')[0]; 
+            const cleanLink = link.split('/')[0];
             if (cleanLink) {
                 const { FormPage } = await import('../components/forms/form_page.js');
                 new FormPage('form-page-container').init(cleanLink, { onBack: RouterService.goBackProgrammatically });
@@ -225,7 +229,7 @@ export class RouterService {
                 // Ignore invalid URLs
             }
         }
-        
+
         // Handle malformed paths e.g. /https://domain.com/path
         if (path.match(/^\/https?:/)) {
              const matchedBaseInternal = AppConfig.compatibleUrls.find(u => u && path.includes(u));
@@ -234,7 +238,7 @@ export class RouterService {
                  path = path.substring(index + matchedBaseInternal.length);
              }
         }
-        
+
         // 2. Legacy Hash
         // We look for /# and take everything after it if found, effectively treating it as root
         const hashIndex = path.indexOf('/#');
@@ -250,7 +254,7 @@ export class RouterService {
 
         return path;
     }
-    
+
     // Listen for PopState
     static _lastPath = window.location.pathname;
 
@@ -260,8 +264,10 @@ export class RouterService {
             
             // Ignore hash changes (SPA overlays)
             if (path === RouterService._lastPath) {
+                console.log(`[RouterService] PopState ignored (Hash change): ${path}`);
                 return;
             }
+            console.log(`[RouterService] PopState detected change: ${RouterService._lastPath} -> ${path}`);
             RouterService._lastPath = path;
 
             if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {

@@ -21,7 +21,6 @@ BEGIN
         );
     END IF;
 
-    -- Check if the form is open for submissions, or if the user is an editor
     SELECT occasion INTO occ_id FROM public.forms WHERE link = form_link;
     is_editor_view := public.get_is_editor_order_view_on_occasion(occ_id);
 
@@ -120,12 +119,6 @@ BEGIN
                 FROM public.form_fields ff
                 LEFT JOIN eshop.product_types pt ON ff.product_type = pt.id
                 WHERE ff.form = f.id AND ff.is_hidden = false
-            )
-        )
-                            END
-                        )
-                    ) ORDER BY COALESCE(ff."order", 0)
-                )
             )
         )
     )
