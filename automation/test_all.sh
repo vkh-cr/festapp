@@ -1,4 +1,10 @@
 #!/bin/bash
+# ==============================================================================
+# TEST ALL
+# Purpose: Runs all tests for the project.
+#          Currently runs Web Client unit tests (npm test).
+# Usage: ./automation/test_all.sh
+# ==============================================================================
 
 # Exit on error
 set -e

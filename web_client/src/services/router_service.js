@@ -66,40 +66,137 @@ export class RouterService {
         window.history.back();
     }
     
+    static flutterRoutes = [
+        '/reset-password',
+        '/forgot-password',
+        '/login',
+        '/signup',
+        '/settings',
+        '/install',
+        '/unit',
+        // '/form', // Handled by Web Client
+        '/scan'
+    ];
+
     // Initial Load Check
     static async handleInitialLoad() {
-        const path = window.location.pathname;
+        let path = window.location.pathname;
+        const fullUrl = window.location.href;
 
-        // 1. Global Redirect to Flutter App (GitHub Pages 404 Fallback Support)
-        // If this is NOT a Web Client route (Home or Form), redirect to Flutter.
-        // This covers /login, /admin, /map, and any deep link.
-        const isWebClientRoute = path === '/' || path === '/index.html' || path.startsWith(RouterService.FORM_PATH_PREFIX);
+        // 0. Normalize URL
+        path = RouterService.normalizeUrl(fullUrl);
 
-        if (!isWebClientRoute) {
-             // Avoid redirect loops if we are already at the target
+        // 1. Identify Route Type
+        // Web Client Routes: / (Home), /index.html, /form/...
+        const isWebClientRoute = path === '/' ||
+                                 path === '/index.html' ||
+                                 path.startsWith(RouterService.FORM_PATH_PREFIX);
+
+        const isFlutterRoute = RouterService.flutterRoutes.some(r => path.startsWith(r));
+
+        let shouldRedirectToFlutter = false;
+        let redirectPath = path;
+
+        // 2. Data-Driven Decision Logic (Mirrors Flutter AppRouter.getDefaultLink)
+        if (AppConfig.isAppSupported) {
+            // Need to fetch data to make a decision
+            const { RightsService } = await import('./rights_service.js'); // Lazy load to avoid cycle
+            await RightsService.updateAppData();
+
+            const currentLink = RightsService.currentLink;
+            const currentUnit = RightsService.currentUnit;
+
+            let defaultLink = "/";
+            // Logic mirroring Flutter:
+            // if (!AppConfig.isAppSupported) { return "/"; } // Handled by outer if
+            // if (RightsService.useOfflineVersion) ... // Skipped for Web
+
+            if (currentLink) {
+                 defaultLink = `/${currentLink}`;
+            } else if (AppConfig.isAllUnit && currentLink) {
+                 defaultLink = `/${currentLink}`;
+            } else if (currentUnit?.id) {
+                 // return "/${UnitPage.ROUTE}/${RightsService.currentUnit()?.id}";
+                 defaultLink = `/unit/${currentUnit.id}`;
+            }
+
+            // Decision:
+            if (isFlutterRoute) {
+                // Explicit Flutter route -> Redirect
+                shouldRedirectToFlutter = true;
+            } else if (isWebClientRoute) {
+                 // We are on a Web Client Route (Home, Form)
+                 // If we are at root /, we might want to "redirect" (SPA navigate) to the default link
+                 // BUT ONLY if the default link itself is ALSO a Web Client Route.
+
+                 if (path === '/') {
+                     if (defaultLink !== '/') {
+                         const targetIsWebClient = defaultLink.startsWith(RouterService.FORM_PATH_PREFIX);
+
+                         if (targetIsWebClient) {
+                             // SPA Navigate (Stay in Web Client)
+                             console.log(`RouterService: SPA redirect from / to ${defaultLink}`);
+                             window.history.replaceState(null, '', defaultLink);
+                             path = defaultLink; // Update path for subsequent loading logic
+                             shouldRedirectToFlutter = false;
+                         } else {
+                             // Target is (likely) an Event Occasion link (e.g. /my-fest) or Unit -> Redirect to Flutter
+                             shouldRedirectToFlutter = true;
+                             redirectPath = defaultLink;
+                         }
+                     } else {
+                         // Stay at root
+                         shouldRedirectToFlutter = false;
+                     }
+                 } else {
+                     // We are at /form/xyz -> Stay.
+                     shouldRedirectToFlutter = false;
+                 }
+
+            } else {
+                 // Unknown deep link (e.g. /my-fest) -> Redirect
+                 shouldRedirectToFlutter = true;
+            }
+
+        } else {
+            // Web Client Only Mode
+             if (isWebClientRoute) {
+                shouldRedirectToFlutter = false;
+            } else if (isFlutterRoute) {
+                shouldRedirectToFlutter = true;
+            } else {
+                // Unknown route -> Home
+                console.log(`Unknown route "${path}" and App not supported. Redirecting to Home.`);
+                window.history.replaceState(null, '', '/');
+                return true;
+            }
+        }
+
+        // 3. Execute Redirect Purpose
+        if (shouldRedirectToFlutter) {
              if (!path.endsWith('flutter.html')) {
-                 const redirectUrl = `${window.location.origin}/flutter.html?redirect=${encodeURIComponent(path)}`;
+                 const redirectUrl = `${window.location.origin}/flutter.html?redirect=${encodeURIComponent(redirectPath)}`;
                  console.log(`RouterService: Global Redirecting ${path} to Flutter App: ${redirectUrl}`);
                  window.location.replace(redirectUrl);
-                 return true;
+                 return true; // Stop SPA load
              }
         }
 
-        // 2. Handle legacy hash routing (e.g. /#/link -> /link)
-        if (window.location.hash && window.location.hash.startsWith('#/')) {
-            const cleanPath = window.location.hash.substring(1); // Remove '#'
-            console.log(`Redirecting legacy hash: ${window.location.href} -> ${cleanPath}`);
-            window.history.replaceState(null, '', cleanPath);
-            // Verify if we need to reload or just continue processing with new path
-            // If the path is different, we might need to let the next logic handle it.
+        // 4. Handle normalized path updates (UX polish)
+        if (!shouldRedirectToFlutter) {
+             if (window.location.hash && window.location.hash.startsWith('#/')) {
+                  window.history.replaceState(null, '', path);
+             }
+             if (fullUrl.includes('https://') && window.location.pathname.startsWith('/https:')) {
+                  window.history.replaceState(null, '', path);
+             }
         }
 
-        console.log("RouterService checking path:", path);
+        // 5. Load Component
+        console.log("RouterService loading component for path:", path);
         if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {
             const link = path.substring(RouterService.FORM_PATH_PREFIX.length);
-            // Handle trailing slash
-            const cleanLink = link.split('/')[0]; 
-            console.log("Detected form link:", cleanLink);
+            const cleanLink = link.split('/')[0];
             if (cleanLink) {
                 const { FormPage } = await import('../components/forms/form_page.js');
                 new FormPage('form-page-container').init(cleanLink, { onBack: RouterService.goBackProgrammatically });
@@ -109,7 +206,51 @@ export class RouterService {
 
         return false;
     }
-    
+
+    static normalizeUrl(url) {
+        let path = url;
+
+        // 1. Determine base to strip (Configured URL or dynamic localhost origin)
+        const matchedBase = AppConfig.compatibleUrls.find(u => u && url.startsWith(u));
+
+        if (matchedBase) {
+            path = url.substring(matchedBase.length);
+        } else if (url.includes("localhost")) {
+            try {
+                const uri = new URL(url);
+                if (url.startsWith(uri.origin)) {
+                    path = url.substring(uri.origin.length);
+                }
+            } catch (e) {
+                // Ignore invalid URLs
+            }
+        }
+
+        // Handle malformed paths e.g. /https://domain.com/path
+        if (path.match(/^\/https?:/)) {
+             const matchedBaseInternal = AppConfig.compatibleUrls.find(u => u && path.includes(u));
+             if (matchedBaseInternal) {
+                 const index = path.indexOf(matchedBaseInternal);
+                 path = path.substring(index + matchedBaseInternal.length);
+             }
+        }
+
+        // 2. Legacy Hash
+        // We look for /# and take everything after it if found, effectively treating it as root
+        const hashIndex = path.indexOf('/#');
+        if (hashIndex !== -1) {
+             path = path.substring(hashIndex + 1); // Get '/...' part
+             path = path.replace('#', ''); // Ensure no # remains if logic differs
+        }
+
+        // 3. Ensure leading slash
+        if (!path.startsWith('/')) {
+            path = '/' + path;
+        }
+
+        return path;
+    }
+
     // Listen for PopState
     static _lastPath = window.location.pathname;
 
