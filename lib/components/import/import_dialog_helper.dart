@@ -7,6 +7,7 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/features/import_feature.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 import 'csv_import_helper.dart';
 import 'tickets_import_helper.dart';
@@ -92,7 +93,7 @@ class ImportDialogHelper {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Import".tr()),
+          title: Text(CommonStrings.import),
           content: Text(FeaturesStrings.chooseSourcePrompt),
           actions: actions,
         );

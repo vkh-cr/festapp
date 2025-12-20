@@ -1,7 +1,7 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:csv/csv.dart';
-import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_services/db_occasions.dart';
+import 'package:fstapp/database_tables/tb.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:intl/intl.dart';
 
 class ImportHelper {

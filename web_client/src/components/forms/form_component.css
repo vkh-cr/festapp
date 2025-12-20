@@ -1,0 +1,605 @@
+/* Form Page Layout */
+#form-page-container {
+    padding: 24px 10px 20px 10px; 
+    max-width: var(--form-max-width, 600px); /* Reduced default or from var */
+    margin: 0 auto;
+    font-family: var(--font-family-base, inherit);
+    font-family: var(--font-family-base, inherit);
+}
+
+/* Hide Preact DevTools Overlay if present (causes layout issues) */
+#preact-border-shadow-host {
+    display: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    position: absolute !important;
+    overflow: hidden !important;
+    z-index: -9999 !important;
+    top: -9999px !important;
+}
+
+.form-wrapper {
+    background: transparent;
+}
+
+.form-header, .form-title {
+    text-align: left;
+    margin-bottom: 0; 
+    padding-bottom: 0; /* Removed padding */
+}
+
+/* Fields - No Boxes */
+.form-field-container {
+    margin-bottom: calc(16px * var(--font-scale)); 
+    padding-bottom: 0;
+}
+.form-field-container:last-child {
+    border-bottom: none;
+}
+
+.form-field-container .form-field-label {
+    display: block;
+    margin-bottom: calc(12px * var(--font-scale)); /* Increased from 8px to match screenshot */
+    font-size: calc(16px * var(--font-scale)); /* Scaled */
+    font-weight: 500;
+    color: var(--text-color, #333); 
+}
+/* Neutralize focused label color */
+.form-field-container .form-field-label.focused {
+    color: var(--text-color, #333); 
+}
+
+.required-star {
+    color: var(--red-color);
+    margin-left: 0.3em;
+}
+
+.form-header {
+    font-size: calc(1em * var(--font-scale));
+}
+.form-header h1, .form-header h2, .form-header h3, .form-header p {
+    margin-top: 0;
+}
+.form-header > :first-child {
+    margin-top: 0 !important;
+}
+
+.form-description {
+    margin-bottom: calc(24px * var(--font-scale));
+    white-space: pre-wrap;
+    color: var(--text-color, #333);
+    font-size: calc(16px * var(--font-scale));
+    line-height: 1.5;
+    text-align: left;
+}
+
+body.dark-mode .form-description,
+body.dark-mode .form-description *:not(a) {
+    color: #808080; /* Softer, slightly dimmed white to reduce glare */
+}
+
+/* Remove destructive empty-p hiding that was hiding content with BRs */
+
+
+/* Error Message Styling */
+.form-field-error {
+    color: var(--red-color); /* Red color matching Flutter theme_config error */
+    font-size: 0.85em;
+    margin-top: 4px;
+    display: none;
+    font-weight: 500;
+}
+
+.form-control.invalid {
+    border-color: var(--red-color) !important;
+    border-bottom-width: 2px;
+}
+.form-field-description {
+    font-size: calc(0.9em * var(--font-scale)); /* Relative scale */
+    color: #333; /* Darker (was #444) for higher contrast */
+    margin-top: 0;
+    margin-bottom: calc(8px * var(--font-scale));
+    text-align: left;
+}
+
+.form-description img, 
+.form-field-description img,
+.option-description img,
+.form-header img,
+.form-description video,
+.form-field-description video,
+.option-description video,
+.form-header video,
+.form-description iframe,
+.form-field-description iframe,
+.option-description iframe,
+.form-header iframe {
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain;
+    display: block;
+    margin: 8px 0;
+}
+
+/* Aggressively prevent any wrapper from exceeding width */
+.form-description *, 
+.form-field-description *,
+.option-description *,
+.form-header * {
+    max-width: 100% !important;
+    box-sizing: border-box; 
+}
+
+.form-field-hint {
+    font-size: 0.8rem;
+    color: #777;
+    margin-bottom: 4px;
+    margin-top: 0;
+}
+body.dark-mode .form-field-hint {
+    color: #b0b0b0; /* Light grey for hint in dark mode */
+}
+
+/* Inputs */
+.input-wrapper {
+    position: relative;
+    margin-top: 4px;
+}
+
+.form-control {
+    width: 100%;
+    padding: calc(8px * var(--font-scale)) 0; 
+    border: none;
+    border-bottom: 1px solid var(--input-border, #999);
+    border-radius: 0;
+    box-sizing: border-box;
+    font-size: calc(16px * var(--font-scale)); /* Scaled */
+    font-family: var(--input-font-family, inherit);
+    background-color: transparent !important; /* Force transparent to show card color */
+    color: var(--input-text, inherit);
+    transition: border-color 0.2s;
+}
+.form-control:focus {
+    outline: none;
+    border-bottom: 2px solid var(--primary-color, #007bff);
+    background-color: transparent;
+}
+
+/* Calendar styling for dark mode */
+.form-control[type="date"] {
+    color-scheme: light; /* Default */
+}
+body.dark-mode .form-control[type="date"] {
+    color-scheme: dark;
+}
+/* Invert calendar icon in dark mode if needed or rely on color-scheme */
+body.dark-mode .form-control[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+/* Autofill Fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    /* Use the blended background color for autofill to match the page/input */
+    -webkit-box-shadow: 0 0 0 30px var(--input-bg, var(--background-color)) inset !important;
+    -webkit-text-fill-color: var(--input-text, var(--text-color)) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Card Design Wrapper - Actual Card Style */
+.form-field-card {
+    background: var(--card-bg, #ffffff);
+    border-radius: var(--radius-md);
+    padding: calc(16px * var(--font-scale)); /* Restored to 16px */
+    padding-bottom: calc(16px * var(--font-scale)); 
+    margin-bottom: calc(8px * var(--font-scale)); /* Reduced to 8px for compact look */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.form-field-card .form-field-container {
+    margin-bottom: 0;
+}
+
+body.dark-mode .form-field-description,
+body.dark-mode .form-field-description *:not(a) {
+    color: #DADADA; /* Lighter for better contrast as requested */
+}
+
+/* Radios and Checkboxes */
+.radio-options, .checkbox-options {
+    display: flex;
+    flex-direction: column;
+    gap: calc(4px * var(--font-scale)); /* Reduced from 8px */
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid transparent; /* Reserve space for border */
+    transition: border-color 0.2s;
+}
+
+.radio-options.invalid, .checkbox-options.invalid {
+    border-color: var(--red-color);
+    background-color: rgba(220, 53, 69, 0.05); /* Slight red tint */
+}
+
+.form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: calc(8px * var(--font-scale)); /* Internal gap */
+    cursor: pointer;
+    margin-bottom: 4px; /* Reduced from 8px */
+    transition: all 0.2s ease;
+}
+
+/* Card Design Modifier */
+.form-check.option-card {
+    /* Unselected: Grey 1px border */
+    border: 1px solid var(--unselected-widget-border, rgba(255, 255, 255, 0.2)); 
+    border-radius: 8px;
+    padding: 12px; /* Increased to 12px for taller look */
+    background-color: transparent; /* Match card background as requested */
+    position: relative; /* For potential pseudo-elements if needed */
+}
+
+/* Light mode override for unselected border if needed, 
+   but we rely on opacity usually. Let's make it safe. */
+body:not(.dark-mode) .form-check.option-card {
+    border-color: var(--unselected-widget-border, #ccc);
+    background-color: #fff;
+}
+
+.form-check.option-card:hover {
+    background-color: rgba(255,255,255,0.05); /* Slight hover effect */
+    filter: brightness(1.1);
+}
+
+/* Selected State for Card Design */
+.form-check.option-card:has(.form-check-input:checked) {
+    border: 1px solid var(--primary-color);
+    box-shadow: inset 0 0 0 1px var(--primary-color); /* Simulate 2px border without layout shift */
+    padding: 12px; /* Match unselected padding (12px) */
+}
+
+.form-check-input {
+    margin-top: calc(4px * var(--font-scale));
+    accent-color: var(--primary-color);
+    /* Scale logic: simple might want 1.4, card might want 1.3 to fit? 
+       User screenshot for simple shows normal/slightly large. Let's keep 1.3 for consistency. */
+    transform: scale(1.3); 
+    margin-left: 2px; 
+}
+
+.form-check-label {
+    cursor: pointer;
+    font-size: calc(16px * var(--font-scale));
+    padding-left: 4px; /* Space from larger checkbox */
+}
+
+.option-price {
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-left: 8px;
+}
+
+.option-description {
+    font-size: calc(0.85em * var(--font-scale));
+    color: #777;
+    display: block;
+    margin-top: 2px;
+}
+body.dark-mode .option-description {
+    color: #b0b0b0; /* Lighter for visibility on dark background */
+}
+
+/* Tickets */
+.tickets-list {
+    margin-bottom: 10px;
+}
+
+.ticket-item {
+    border-left: 3px solid var(--primary-color);
+    padding-left: calc(16px * var(--font-scale));
+    margin-bottom: calc(20px * var(--font-scale));
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    margin-bottom: calc(8px * var(--font-scale));
+    color: var(--primary-color);
+    font-size: calc(16px * var(--font-scale)); /* Scale header text */
+}
+
+.btn-remove-ticket {
+    background: transparent;
+    border: none;
+    color: var(--text-color, #777); /* Softer default color */
+    font-size: calc(1.8em * var(--font-scale)); /* Larger icon */
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remove-ticket:hover {
+    background-color: rgba(220, 53, 69, 0.1); /* Light red background on hover */
+    color: var(--red-color);
+}
+
+
+.btn-add-ticket {
+    margin-bottom: 32px; /* Increased space below add button */
+    display: block;
+    width: 100%;
+}
+/* If not full width, margin-bottom works if container is block. */
+
+/* Actions */
+.form-actions {
+    margin-top: calc(32px * var(--font-scale));
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.btn {
+    padding: calc(12px * var(--font-scale)) calc(32px * var(--font-scale));
+    border: none;
+    border-radius: 8px; /* Rectangular to match cards */
+    cursor: pointer;
+    font-family: var(--font-family-base, inherit); /* Ensure custom font */
+    font-size: calc(16px * var(--font-scale));
+    font-weight: 600 !important; /* Bit bolder (SemiBold) attempting synthesis or fallback to Bold */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: background-color 0.2s, filter 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color, #007bff);
+    color: var(--btn-text-color, #000000); /* Dynamic based on contrast */
+    border: none;
+}
+.btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color, #6c757d);
+    color: var(--btn-secondary-text-color, white);
+}
+
+/* Bottom Sheet Overlay */
+.overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 3000;
+}
+.overlay.visible {
+    display: flex;
+}
+
+.overlay-content {
+    background: white;
+    width: 100%;
+    max-width: var(--form-max-width, 600px); /* Match form width */
+    max-height: 80vh;
+    overflow-y: auto;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    padding: calc(24px * var(--font-scale));
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: calc(20px * var(--font-scale));
+}
+.preview-header h2 {
+    font-size: calc(1.5em * var(--font-scale));
+    margin: 0;
+}
+
+.preview-summary {
+    margin: calc(20px * var(--font-scale)) 0;
+    font-size: calc(1.1em * var(--font-scale));
+}
+
+.total-price {
+    font-weight: bold;
+    font-size: calc(1.3em * var(--font-scale));
+    color: var(--primary-color, black);
+}
+
+.preview-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: calc(24px * var(--font-scale));
+}
+.preview-actions .btn {
+    flex: 1; 
+}
+
+.btn-clear-selection {
+    display: none; /* Hidden by default */
+    margin-top: 4px;
+    background: transparent;
+    border: none;
+    color: var(--primary-color); 
+    padding: 4px 0;
+    font-family: var(--font-family-base, inherit);
+    font-size: calc(0.9em * var(--font-scale));
+    cursor: pointer;
+    text-transform: none; 
+    letter-spacing: normal;
+    font-weight: normal;
+    text-decoration: none;
+}
+
+/* Ensure consistent alignment in simple vs card */
+.form-check:not(.option-card) + .btn-clear-selection {
+     margin-left: 2px; /* Align with input if needed */
+}
+
+.btn-clear-selection:hover {
+    text-decoration: underline;
+    color: #ccc;
+    background: transparent;
+    opacity: 1;
+}
+
+/* Remove old override blocks that are no longer needed or might conflict */
+.form-field-card .btn-clear-selection {
+    margin-top: 8px;
+    /* Reset specialized card bg */
+    background-color: transparent; 
+    border-color: transparent;
+}
+
+/* Flatpickr Theme Overrides */
+.flatpickr-calendar {
+    font-family: var(--font-family-base, inherit) !important;
+    background: var(--card-bg, #fff) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    border: 1px solid var(--input-border, #ccc) !important;
+}
+
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+.flatpickr-month {
+    color: var(--text-color) !important;
+    background: transparent !important;
+    fill: var(--text-color) !important;
+}
+.flatpickr-weekdays {
+    background: transparent !important;
+}
+span.flatpickr-weekday {
+    color: var(--text-color) !important;
+    opacity: 0.8 !important;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months, 
+.flatpickr-current-month input.cur-year {
+    color: var(--text-color) !important;
+    font-family: inherit !important;
+}
+.flatpickr-day {
+    color: var(--text-color) !important;
+    font-family: inherit !important;
+}
+.flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
+    color: var(--text-color) !important;
+    opacity: 0.3 !important;
+}
+.flatpickr-day:hover, .flatpickr-day.prevMonthDay:hover, .flatpickr-day.nextMonthDay:hover, .flatpickr-day:focus, .flatpickr-day.prevMonthDay:focus, .flatpickr-day.nextMonthDay:focus {
+    background: var(--card-bg-derived, #eee) !important;
+    border-color: var(--card-bg-derived, #eee) !important;
+}
+
+/* Countdown Widget */
+.countdown-widget {
+    text-align: center;
+    padding: 24px;
+    margin-top: 60px;
+    width: 100%;
+}
+
+.countdown-title {
+    margin-bottom: 24px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: normal;
+    color: var(--text-color);
+}
+.countdown-title .form-header {
+    margin-bottom: 0;
+}
+
+.countdown-timer-row {
+     display: flex;
+     justify-content: center;
+     gap: 8px;
+     flex-wrap: wrap; /* responsive */
+}
+
+.time-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px; /* Fixed width */
+    padding: 24px 12px;
+    border-radius: 8px;
+    background-color: var(--countdown-bg, rgba(0,0,0,0.03)); 
+    border: 1px solid var(--countdown-border, rgba(0,0,0,0.1));
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.time-value {
+    font-size: 2.5rem; 
+    font-weight: bold;
+    color: var(--text-color);
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.time-label {
+    font-size: 0.8rem;
+    color: var(--label-text-color);
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+/* Not Available / Closed Widget */
+.not-available-widget {
+    text-align: center;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+}
+
+.not-available-icon {
+    font-size: 60px;
+    color: var(--text-color);
+    margin-bottom: 16px;
+}
+
+.not-available-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.not-available-message {
+    font-size: 16px;
+    color: var(--text-color);
+    max-width: 500px;
+    line-height: 1.5;
+}

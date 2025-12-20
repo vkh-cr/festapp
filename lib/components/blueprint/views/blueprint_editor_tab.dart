@@ -1,18 +1,14 @@
-import 'dart:math';
+import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
-import 'package:fstapp/data_services_eshop/db_spots.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -20,6 +16,7 @@ import 'package:fstapp/theme_config.dart';
 import 'package:collection/collection.dart';
 
 import '../../_shared/common_strings.dart';
+import '../../eshop/db_tickets.dart';
 import '../seat_reservation/model/seat_model.dart';
 import '../seat_reservation/utils/seat_state.dart';
 import '../seat_reservation/widgets/seat_layout_controller.dart';
@@ -31,7 +28,7 @@ import 'blueprint_groups_panel.dart';
 import 'blueprint_legend.dart';
 import 'blueprint_product_dialogs.dart';
 
-enum selectionMode { none, emptyArea, addBlack, addAvailable, swapSeats, createNewOrder }
+enum BlueprintSelectionMode { none, emptyArea, addBlack, addAvailable, swapSeats, createNewOrder }
 
 class BlueprintTab extends StatefulWidget {
   const BlueprintTab({super.key});
@@ -45,7 +42,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   BlueprintGroupModel? currentGroup;
   String? occasionLink;
 
-  selectionMode currentSelectionMode = selectionMode.none;
+  BlueprintSelectionMode currentSelectionMode = BlueprintSelectionMode.none;
   late final SeatLayoutController _seatLayoutController;
 
   // State for Swap Seats feature
@@ -55,10 +52,21 @@ class _BlueprintTabState extends State<BlueprintTab> {
   // State for Create New Order feature
   final Set<SeatModel> _selectedSeatsForOrder = {};
 
+  bool _hasCenteredMobileView = false;
+  late final ScrollController _mobileHorizontalController;
+  bool _canScrollLeft = false;
+  bool _canScrollRight = true;
+
+  Timer? _arrowFadeTimer;
+  bool _arrowsVisible = true;
+
   @override
   void initState() {
     super.initState();
     _seatLayoutController = SeatLayoutController();
+    _mobileHorizontalController = ScrollController();
+    _mobileHorizontalController.addListener(_updateScrollArrows);
+    _resetArrowFadeTimer();
   }
 
   @override
@@ -74,6 +82,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
   @override
   void dispose() {
     _seatLayoutController.dispose();
+    _mobileHorizontalController.dispose();
+    _arrowFadeTimer?.cancel();
     super.dispose();
   }
 
@@ -109,28 +119,168 @@ class _BlueprintTabState extends State<BlueprintTab> {
     );
   }
 
-  Widget _buildMobileLayout() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 250,
-            padding: const EdgeInsets.all(16.0),
-            child: _buildLeftPanel(),
+  void _updateScrollArrows() {
+    if (!_mobileHorizontalController.hasClients) return;
+    final offset = _mobileHorizontalController.offset;
+    final maxScroll = _mobileHorizontalController.position.maxScrollExtent;
+
+    // Use a small threshold to avoid flickering at exact bounds
+    final canScrollLeft = offset > 10;
+    final canScrollRight = offset < maxScroll - 10;
+
+    if (canScrollLeft != _canScrollLeft || canScrollRight != _canScrollRight) {
+      setState(() {
+        _canScrollLeft = canScrollLeft;
+        _canScrollRight = canScrollRight;
+      });
+    }
+    _resetArrowFadeTimer();
+  }
+
+  void _resetArrowFadeTimer() {
+    _arrowFadeTimer?.cancel();
+    if (!_arrowsVisible) {
+      setState(() {
+        _arrowsVisible = true;
+      });
+    }
+    _arrowFadeTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _arrowsVisible = false;
+        });
+      }
+    });
+  }
+
+  Widget _buildMobileLayout(double screenWidth) {
+    if (!_hasCenteredMobileView) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (_mobileHorizontalController.hasClients) {
+          // Left panel is 250. We want to start showing from the main content.
+          // Scrolling to 250 will hide the left panel and start with the main layout.
+          _mobileHorizontalController.jumpTo(250.0);
+          // Manually trigger update after jump
+          _updateScrollArrows();
+        }
+      });
+      _hasCenteredMobileView = true;
+    }
+
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          controller: _mobileHorizontalController,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 250,
+                padding: const EdgeInsets.all(16.0),
+                child: _buildLeftPanel(),
+              ),
+              Container(
+                width: screenWidth,
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: _buildMainContent(),
+              ),
+              Container(
+                width: 250,
+                padding: const EdgeInsets.all(16.0),
+                child: _buildRightPanel(),
+              ),
+            ],
           ),
-          SizedBox(
-            width: 400,
-            child: _buildMainContent(),
-          ),
-          Container(
-            width: 250,
-            padding: const EdgeInsets.all(16.0),
-            child: _buildRightPanel(),
-          ),
-        ],
-      ),
+        ),
+        if (_canScrollLeft)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: AnimatedOpacity(
+              opacity: _arrowsVisible ? 1.0 : 0.3,
+              duration: const Duration(milliseconds: 300),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () {
+                          final target = (_mobileHorizontalController.offset - 250.0).clamp(0.0, _mobileHorizontalController.position.maxScrollExtent);
+                          _mobileHorizontalController.animateTo(
+                            target,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        },
+                        child: const Center(
+                          child: Icon(Icons.chevron_left, size: 24, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        if (_canScrollRight)
+          Align(
+            alignment: Alignment.centerRight,
+            child: AnimatedOpacity(
+              opacity: _arrowsVisible ? 1.0 : 0.3,
+              duration: const Duration(milliseconds: 300),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () {
+                          final target = (_mobileHorizontalController.offset + 250.0).clamp(0.0, _mobileHorizontalController.position.maxScrollExtent);
+                          _mobileHorizontalController.animateTo(
+                            target,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        },
+                        child: const Center(
+                          child: Icon(Icons.chevron_right, size: 24, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+      ],
     );
   }
 
@@ -166,6 +316,9 @@ class _BlueprintTabState extends State<BlueprintTab> {
             isEditorMode: true,
             controller: _seatLayoutController,
             onSeatTap: handleSeatTap,
+            shouldShowTooltipOnTap: (model) {
+              return currentSelectionMode == BlueprintSelectionMode.none;
+            },
           ),
         ),
         const SizedBox(height: 16),
@@ -192,14 +345,18 @@ class _BlueprintTabState extends State<BlueprintTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth > 800) {
-              return _buildDesktopLayout();
-            } else {
-              return _buildMobileLayout();
-            }
-          },
+        child: GestureDetector(
+          onTap: () => _seatLayoutController.setTooltipSeat(null),
+          behavior: HitTestBehavior.translucent,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 800) {
+                return _buildDesktopLayout();
+              } else {
+                return _buildMobileLayout(constraints.maxWidth);
+              }
+            },
+          ),
         ),
       ),
       bottomNavigationBar: Container(
@@ -210,12 +367,12 @@ class _BlueprintTabState extends State<BlueprintTab> {
           children: [
             TextButton(
               onPressed: RightsService.canEditOccasion()
-                  ? () => Navigator.pop(context)
+                  ? loadData
                   : null,
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
               ),
-              child: Text(CommonStrings.storno),
+              child: Text(CommonStrings.reset),
             ),
             const SizedBox(width: 16),
             ElevatedButton(
@@ -236,31 +393,34 @@ class _BlueprintTabState extends State<BlueprintTab> {
     setState(() {
       currentGroup = group;
     });
+    _seatLayoutController.setTooltipSeat(null);
     _seatLayoutController.setHighlightedGroup(currentGroup);
   }
 
   /// Handles mode changes. Toggles off if the same mode is clicked.
-  void _handleModeSelected(selectionMode mode) {
+  void _handleModeSelected(BlueprintSelectionMode mode) {
     // 1. If clicking the SAME mode, toggle it OFF.
     if (currentSelectionMode == mode) {
       _resetAllSelections();
+      _seatLayoutController.setTooltipSeat(null);
       setState(() {
-        currentSelectionMode = selectionMode.none;
+        currentSelectionMode = BlueprintSelectionMode.none;
       });
       return;
     }
 
     // 2. If clicking a DIFFERENT mode, clear previous state and switch.
     _resetAllSelections();
+    _seatLayoutController.setTooltipSeat(null);
 
     setState(() {
       currentSelectionMode = mode;
     });
 
     // Toast helpers for complex modes
-    if (mode == selectionMode.swapSeats) {
+    if (mode == BlueprintSelectionMode.swapSeats) {
       ToastHelper.Show(context, BlueprintStrings.swapHelpSelectFirst);
-    } else if (mode == selectionMode.createNewOrder) {
+    } else if (mode == BlueprintSelectionMode.createNewOrder) {
       ToastHelper.Show(context, BlueprintStrings.createOrderHelp);
     }
   }
@@ -352,8 +512,12 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
   /// Main Tap Handler
   void handleSeatTap(SeatModel model) {
-    if (currentSelectionMode != selectionMode.createNewOrder && _isSeatOccupied(model.objectModel)) {
-      if (currentSelectionMode != selectionMode.swapSeats) {
+    if (currentSelectionMode != BlueprintSelectionMode.createNewOrder && _isSeatOccupied(model.objectModel)) {
+      if (currentSelectionMode == BlueprintSelectionMode.none) {
+        // Do nothing, let the tooltip handle it (via SeatLayoutWidget)
+        return;
+      }
+      if (currentSelectionMode != BlueprintSelectionMode.swapSeats) {
         ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
             severity: ToastSeverity.NotOk);
         return;
@@ -361,19 +525,19 @@ class _BlueprintTabState extends State<BlueprintTab> {
     }
 
     switch (currentSelectionMode) {
-      case selectionMode.addBlack:
+      case BlueprintSelectionMode.addBlack:
         _handleAddBlack(model);
         break;
-      case selectionMode.addAvailable:
+      case BlueprintSelectionMode.addAvailable:
         _handleAddAvailable(model);
         break;
-      case selectionMode.emptyArea:
+      case BlueprintSelectionMode.emptyArea:
         _handleEmptyArea(model);
         break;
-      case selectionMode.swapSeats:
+      case BlueprintSelectionMode.swapSeats:
         _handleSwapSeats(model);
         break;
-      case selectionMode.createNewOrder:
+      case BlueprintSelectionMode.createNewOrder:
         _handleCreateNewOrder(model);
         break;
       default:
@@ -414,7 +578,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     final spotIds = _selectedSeatsForOrder
         .map((s) => s.objectModel?.id)
-        .whereNotNull()
+        .nonNulls
         .toList();
 
     if (spotIds.isEmpty) return;
@@ -429,7 +593,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     if (result == true) {
       ToastHelper.Show(context, BlueprintStrings.orderCreatedSuccess, severity: ToastSeverity.Ok);
-      _handleModeSelected(selectionMode.none);
+      _handleModeSelected(BlueprintSelectionMode.none);
       await loadData();
     }
   }
@@ -636,7 +800,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
     obj2.orderProductTicket = tempOrderProductTicket;
     obj2.setSeatState(tempStateEnum);
 
-    await DbSpots.swapSpotTickets(obj1.id!, obj2.id!);
+    await DbTickets.swapSpotTickets(obj1.id!, obj2.id!);
     ToastHelper.Show(context, BlueprintStrings.swapSuccess,
         severity: ToastSeverity.Ok);
 
@@ -660,40 +824,17 @@ class _BlueprintTabState extends State<BlueprintTab> {
   void _editGroupProduct(BlueprintGroupModel group) async {
     if (blueprint == null) return;
 
-    final bool hasOccupiedSeats = group.objects.any(_isSeatOccupied);
-    if (hasOccupiedSeats) {
-      ToastHelper.Show(context, BlueprintStrings.toastOccupiedCannotBeChanged,
-          severity: ToastSeverity.NotOk);
-      return;
-    }
-
-    final currentProduct = group.product ??
-        (group.objects.isNotEmpty
-            ? group.objects.first.product
-            : null);
-
-    final selectedProduct = await showDialog<ProductModel>(
+    // Open the Unified Manager Dialog
+    await showDialog(
       context: context,
-      builder: (BuildContext dialogContext) {
-        return SelectProductDialog(
-          blueprint: blueprint!,
-          currentProductId: currentProduct?.id,
-        );
-      },
+      builder: (context) => GroupProductManagerDialog(
+        blueprint: blueprint!,
+        group: group,
+      ),
     );
 
-    if (selectedProduct != null) {
-      setState(() {
-        group.product = selectedProduct;
-        for (var obj in group.objects) {
-          obj.product = selectedProduct;
-          obj.spotProduct = selectedProduct.id;
-        }
-      });
-      ToastHelper.Show(context, BlueprintStrings.productAssigned, severity: ToastSeverity.Ok);
-    } else {
-      setState(() {});
-    }
+    // Refresh UI after dialog closes to show changes in price/titles
+    setState(() {});
   }
 
   void saveChanges() async {
@@ -702,7 +843,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       // Ensure blueprint model objects are in sync
       blueprint!.objects = _seatLayoutController.seats
           .map((s) => s.objectModel)
-          .whereNotNull()
+          .nonNulls
           .toList();
 
       for(var obj in blueprint!.objects!) {

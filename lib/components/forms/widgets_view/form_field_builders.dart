@@ -4,41 +4,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
-import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
-import 'package:fstapp/components/forms/models/id_document_field_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/id_document_field_holder.dart';
+import 'package:fstapp/components/forms/public_order_strings.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/services.dart';
 
+import '../models/holder_models/form_ticket_model.dart';
+import '../models/holder_models/ticket_holder.dart';
 import 'birth_year_field_builder.dart';
-import '../models/field_holder.dart';
-import '../models/form_holder.dart';
-import '../models/form_ticket_model.dart';
-import '../models/ticket_holder.dart';
+import '../models/holder_models/field_holder.dart';
+import '../models/holder_models/form_holder.dart';
 
 import 'id_document_field_builder.dart';
 import 'text_field_builder.dart';
 
 class FormFieldBuilders {
   static Widget buildTitleWidget(String displayTitle, bool isRequired, BuildContext context,
-      {FocusNode? focusNode, TextStyle? textStyle}) {
-    final TextStyle defaultLabelStyle = Theme.of(context).inputDecorationTheme.labelStyle ??
-        TextStyle(
-            fontSize: 16 * FormHelper.fontSizeFactor,
-            color: ThemeConfig.grey600(context),
-            fontFamily: ThemeConfig.fontFamily);
+      {FocusNode? focusNode, TextStyle? textStyle, TextEditingController? controller}) {
+    final TextStyle themeLabelStyle = Theme.of(context).inputDecorationTheme.labelStyle ??
+        TextStyle(color: ThemeConfig.grey600(context));
+    
+    final TextStyle defaultLabelStyle = themeLabelStyle.copyWith(
+        fontSize: 16 * FormHelper.fontSizeFactor,
+        fontFamily: ThemeConfig.fontFamily,
+    );
     final TextStyle effectiveBaseStyle =
     textStyle != null ? defaultLabelStyle.merge(textStyle) : defaultLabelStyle;
 
-    if (focusNode != null) {
+    if (focusNode != null || controller != null) {
+      final List<Listenable> listenables = [];
+      if (focusNode != null) listenables.add(focusNode);
+      if (controller != null) listenables.add(controller);
+
       return AnimatedBuilder(
-        animation: focusNode,
+        animation: Listenable.merge(listenables),
         builder: (context, child) {
-          final bool isFocused = focusNode.hasFocus;
+          final bool isFocused = focusNode?.hasFocus ?? false;
+          final bool hasContent = controller?.text.isNotEmpty ?? false;
+          // Color if focused OR has content (i.e., when label is floating)
+          final bool showColor = (controller != null) ? (isFocused || hasContent) : isFocused;
+
           final TextStyle effectiveStyle = effectiveBaseStyle.copyWith(
-            color: isFocused ? Theme.of(context).primaryColor : effectiveBaseStyle.color,
+            color: showColor ? Theme.of(context).primaryColor : effectiveBaseStyle.color,
           );
           final TextSpan? requiredStar = isRequired
               ? TextSpan(text: ' *', style: TextStyle(color: ThemeConfig.redColor(context)))
@@ -151,7 +163,7 @@ class FormFieldBuilders {
                               child: IconButton(
                                 onPressed: () => removeTicket(i),
                                 icon: Icon(Icons.delete),
-                                tooltip: "Delete".tr(),
+                                tooltip: CommonStrings.delete,
                               ),
                             ),
                           ],
@@ -192,8 +204,8 @@ class FormFieldBuilders {
     return FormBuilderField<SeatModel>(
       name: fieldHolder.fieldType,
       validator: FormBuilderValidators.compose([
-        if (fieldHolder.isRequired) FormBuilderValidators.required(),
-            (value) => value == null ? "Please select a seat.".tr() : null,
+        if (fieldHolder.isRequired) FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty),
+            (value) => value == null ? PublicOrderStrings.selectSeat(null) : null,
       ]),
       builder: (FormFieldState<SeatModel?> field) {
         SeatModel? seat = field.value;
@@ -204,9 +216,11 @@ class FormFieldBuilders {
           readOnly: true,
           canRequestFocus: true,
           decoration: InputDecoration(
-            label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
+            label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode, controller: textController),
             suffixIcon: const Icon(Icons.event_seat),
             errorText: field.errorText,
+            filled: true,
+            fillColor: Colors.transparent,
           ),
           onTap: () async {
             await formHolder.controller!.showSeatReservation!(seat == null ? [] : [seat]);

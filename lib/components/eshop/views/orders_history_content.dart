@@ -6,7 +6,7 @@ import 'package:fstapp/components/eshop/eshop_columns.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/components/eshop/db_orders.dart';
 
 import '../models/orders_history_model.dart';
 

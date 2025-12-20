@@ -6,21 +6,21 @@ import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
 import 'package:fstapp/components/inventory/models/inventory_pool_bundle.dart';
 import 'package:fstapp/components/inventory/models/inventory_pool_model.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_services/db_users.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
+import 'package:fstapp/components/users/db_users.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/data_services/db_inventory_pools.dart';
+import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
-import 'package:intl/intl.dart';
+import 'package:fstapp/components/html/html_view.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
+import '../../map/place_model.dart';
 import 'inventory_contexts_editor.dart';
 import 'inventory_strings.dart';
 import 'place_search_dialog.dart';
@@ -325,7 +325,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text("Storno".tr()),
+              child: Text(CommonStrings.storno),
             ),
             ElevatedButton(
               onPressed: () {
@@ -337,7 +337,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                 }
                 Navigator.of(dialogContext).pop(model);
               },
-              child: Text("Save".tr()),
+              child: Text(CommonStrings.save),
             ),
           ],
         );
@@ -559,7 +559,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                                 contentPadding: EdgeInsets.zero,
                                 title: Text(_bundle!.pool.place?.title ?? InventoryStrings.settingsNoPlaceAssigned),
                                 trailing: ElevatedButton(
-                                  child: Text("Edit".tr()),
+                                  child: Text(CommonStrings.edit),
                                   onPressed: _showSelectPlaceDialog,
                                 ),
                               ),
@@ -652,7 +652,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
               children: [
                 TextButton(
                   onPressed: _isSaving ? null : _cancelEdit,
-                  child: Text("Storno".tr()),
+                  child: Text(CommonStrings.storno),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton.icon(

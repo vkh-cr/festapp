@@ -6,17 +6,17 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/form_feature.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
-import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class FormSettingsContent extends StatefulWidget {
   final String? formLink;
@@ -39,7 +39,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
   final TextEditingController _startingNumberController = TextEditingController();
   final ValueNotifier<String> _htmlNotifier = ValueNotifier<String>("");
 
-  bool _isCardDesign = false;
+
   bool _isReminderEnabled = false;
   late FormFeature _formFeature;
   String? _linkError;
@@ -104,7 +104,6 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
       _htmlNotifier.value = _generateFormHtml(_linkController.text);
       _linkController.removeListener(_updateHtml);
       _linkController.addListener(_updateHtml);
-      _isCardDesign = _form!.data?[FormModel.metaIsCardDesign] as bool? ?? false;
       _isReminderEnabled = _form!.data?[FormModel.metaIsReminderEnabled] as bool? ?? false;
 
       final vsData = _form!.data?[FormModel.metaVariableSymbol] as Map<String, dynamic>?;
@@ -158,7 +157,6 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
     _form!.title = trimmedTitle.isEmpty ? null : trimmedTitle;
     _form!.link = _linkController.text.trim();
     _form!.data ??= {};
-    _form!.data![FormModel.metaIsCardDesign] = _isCardDesign;
     _form!.data![FormModel.metaIsReminderEnabled] = _isReminderEnabled;
 
     if (_variableSymbolType == 'sequence') {
@@ -189,7 +187,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
     try {
       await DbForms.updateForm(_form!);
       if (!mounted) return;
-      ToastHelper.Show(currentContext, "${"Saved".tr()}: ${_form?.title ?? ""}", severity: ToastSeverity.Ok);
+      ToastHelper.Show(currentContext, "${CommonStrings.saved}: ${_form?.title ?? ""}", severity: ToastSeverity.Ok);
       if (_formLink != _form!.link) {
         setState(() {
           _formLink = _form!.link;
@@ -216,7 +214,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
     try {
       await DbForms.deleteForm(_form!.id!);
       if (!mounted) return;
-      ToastHelper.Show(currentContext, "${"Deleted".tr()}: ${_form!.title ?? _form!.link}");
+      ToastHelper.Show(currentContext, "${CommonStrings.deleted}: ${_form!.title ?? _form!.link}");
       widget.onActionCompleted?.call();
     }
     catch (e) {
@@ -236,11 +234,11 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text("Storno".tr()),
+            child: Text(CommonStrings.storno),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text("Delete".tr(), style: TextStyle(color: ThemeConfig.redColor(context))),
+            child: Text(CommonStrings.delete, style: TextStyle(color: ThemeConfig.redColor(context))),
           ),
         ],
       ),
@@ -410,19 +408,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                         const Divider(),
                         const SizedBox(height: 16),
 
-                        SwitchListTile(
-                          title: Text(FormStrings.labelCardDesign),
-                          subtitle: Text(FormStrings.subtitleCardDesign),
-                          value: _isCardDesign,
-                          onChanged: RightsService.canEditOccasion()
-                              ? (value) {
-                            setState(() {
-                              _isCardDesign = value;
-                            });
-                          }
-                              : null,
-                          contentPadding: EdgeInsets.zero,
-                        ),
+
 
                         const SizedBox(height: 24),
                         const Divider(),
@@ -440,7 +426,7 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                         const SizedBox(height: 24),
 
                         DropdownButtonFormField<String>(
-                          value: _communicationTone,
+                          initialValue: _communicationTone,
                           decoration: InputDecoration(
                             labelText: FormStrings.labelCommunicationTone,
                             border: const OutlineInputBorder(),
@@ -496,12 +482,12 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                   children: [
                     TextButton(
                       onPressed: _cancelEdit,
-                      child: Text("Storno".tr()),
+                      child: Text(CommonStrings.storno),
                     ),
                     const SizedBox(width: 16),
                     ElevatedButton(
                       onPressed: RightsService.canEditOccasion() ? () => _saveChanges(innerContext) : null,
-                      child: Text("Save changes".tr()),
+                      child: Text(CommonStrings.save),
                     ),
                   ],
                 ),

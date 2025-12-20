@@ -5,9 +5,11 @@ import 'package:fstapp/components/forms/views/form_editor_content.dart';
 import 'package:fstapp/components/forms/views/form_responses_content.dart';
 import 'package:fstapp/components/forms/views/form_settings_content.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 
 import '../form_strings.dart';
+
+import 'package:fstapp/components/forms/views/form_design_content.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class FormTab extends StatefulWidget {
   final String formLink;
@@ -30,7 +32,7 @@ class _FormTabState extends State<FormTab> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -51,7 +53,8 @@ class _FormTabState extends State<FormTab> with SingleTickerProviderStateMixin {
             isScrollable: true,
             tabs: [
               DataGridHelper.buildTab(context, Icons.data_object, FormStrings.tabForm),
-              DataGridHelper.buildTab(context, Icons.settings, "Settings".tr()),
+              DataGridHelper.buildTab(context, Icons.settings, CommonStrings.settings),
+              DataGridHelper.buildTab(context, Icons.palette, "Design".tr()),
               DataGridHelper.buildTab(context, Icons.list, FormStrings.tabResponses),
             ],
           ),
@@ -66,6 +69,11 @@ class _FormTabState extends State<FormTab> with SingleTickerProviderStateMixin {
                 onDataUpdated: widget.onDataUpdated,
               ),
               FormSettingsContent(
+                formLink: widget.formLink,
+                onActionCompleted: widget.onActionCompleted,
+                onDataUpdated: widget.onDataUpdated,
+              ),
+              FormDesignContent(
                 formLink: widget.formLink,
                 onActionCompleted: widget.onActionCompleted,
                 onDataUpdated: widget.onDataUpdated,

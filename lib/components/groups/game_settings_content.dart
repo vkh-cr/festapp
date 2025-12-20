@@ -1,9 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/game_settings_model.dart';
-import 'package:fstapp/data_services/db_occasions.dart';
+import 'package:fstapp/components/information/game/game_settings_model.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class GameSettingsContent extends StatefulWidget {
   const GameSettingsContent({super.key});
@@ -50,7 +51,7 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
 
     final success = await DbOccasions.updateGameSettings(gameSettings);
     if (success) {
-      ToastHelper.Show(context, "Saved".tr(), severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, CommonStrings.saved, severity: ToastSeverity.Ok);
     } else {
       ToastHelper.Show(context, "Failed to save game settings.", severity: ToastSeverity.NotOk);
     }
@@ -104,7 +105,7 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
         children: [
           Row(
             children: [
-              Text("Start".tr()),
+              Text(CommonStrings.start),
               TextButton(
                 onPressed: () => _selectDateTime(context, true),
                 child: Text(_startDateTime?.toOccasionTime().toString() ?? ""),
@@ -114,7 +115,7 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
           SizedBox(height: 10),
           Row(
             children: [
-              Text("End".tr()),
+              Text(CommonStrings.end),
               TextButton(
                 onPressed: () => _selectDateTime(context, false),
                 child: Text(_endDateTime?.toOccasionTime().toString() ?? ""),
@@ -124,7 +125,7 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: saveData,
-            child: Text("Save".tr()),
+            child: Text(CommonStrings.save),
           ),
         ],
       ),

@@ -1,23 +1,23 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/data_models/occasion_user_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_models/tb.dart';
-import 'package:fstapp/data_models/user_group_info_model.dart';
-import 'package:fstapp/data_services/db_companions.dart';
-import 'package:fstapp/data_services/db_events.dart';
-import 'package:fstapp/data_services/db_groups.dart';
-import 'package:fstapp/data_services/db_occasions.dart';
-import 'package:fstapp/data_services/db_users.dart';
+import 'package:fstapp/components/users/occasion_user_model.dart';
+import 'package:fstapp/database_tables/tb.dart';
+import 'package:fstapp/components/users/companion/db_companions.dart';
+import 'package:fstapp/components/schedule/db_events.dart';
+import 'package:fstapp/components/groups/db_groups.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
+import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/services/notification_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../components/map/place_model.dart';
 
 class AuthService {
   static final _supabase = Supabase.instance.client;
@@ -30,8 +30,10 @@ class AuthService {
         .signInWithPassword(email: email, password: password);
     await _secureStorage.write(
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
-    DbEvents.synchronizeMySchedule(join: true);
-    SynchroService.refreshOfflineData();
+    if(AppConfig.isAppSupported){
+      DbEvents.synchronizeMySchedule(join: true);
+      SynchroService.refreshOfflineData();
+    }
     await NotificationHelper.login();
   }
 
