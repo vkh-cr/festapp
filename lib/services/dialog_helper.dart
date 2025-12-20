@@ -5,17 +5,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/features_strings.dart';
-import 'package:fstapp/data_models/language_model.dart';
-import 'package:fstapp/data_models/user_group_info_model.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
-import 'package:fstapp/services/responsive_service.dart';
+import 'package:fstapp/components/app_management/language_model.dart';
+import 'package:fstapp/components/groups/user_group_info_model.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/drop_file.dart';
 import 'package:fstapp/widgets/password_field.dart';
-import 'package:search_page/search_page.dart';
+import 'package:fstapp/components/dialogs/responsive_search_dialog.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:select_dialog/select_dialog.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class ImportDialogChoice {
   final bool fromTickets;
@@ -113,40 +113,53 @@ class DialogHelper{
   }
 
   static Future<void> chooseUser(BuildContext context, void Function(UserInfoModel) onPressedAction, List<UserInfoModel> allUsers, String setText) async {
-    showSearch(
-        context: context,
-        delegate: SearchPage<UserInfoModel>(
-          showItemsOnEmpty: true,
-          items: allUsers,
-          searchLabel: "Search participants".tr(),
-          suggestion: Center(
-            child: const Text(
-                "Find participants by name, surname or e-mail.").tr(),
+    showDialog(
+      context: context,
+      builder: (context) => ResponsiveSearchDialog<UserInfoModel>(
+        items: allUsers,
+        searchLabel: "Search participants".tr(),
+        filter: (person, query) {
+          final q = query.toLowerCase().withoutDiacriticalMarks;
+          return (person.name?.toLowerCase().withoutDiacriticalMarks.contains(q) ?? false) ||
+              (person.surname?.toLowerCase().withoutDiacriticalMarks.contains(q) ?? false) ||
+              (person.email?.toLowerCase().contains(q) ?? false);
+        },
+        itemBuilder: (person) => ListTile(
+          title: Text(person.name!),
+          subtitle: Text(person.surname??""),
+          trailing: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                  onPressed: () {
+                     // We need to close the dialog before the action?
+                     // Or action closes it? 
+                     // The original impl called onPressedAction(person) which might have closed it or not.
+                     // The SearchPage pushes a route.
+                     // showDialog pushes a route.
+                     // We should probably pop before action?
+                     // In original 'EventPage', calling 'onPressedAction' invokes 'signIn' then 'loadData'.
+                     // It does NOT pop the search page explicitly in the callback.
+                     // Wait, SearchPage usually returns the selected item if used with showSearch.
+                     // But here 'chooseUser' takes an 'onPressedAction'.
+                     // Inside the builder of SearchPage:
+                     // onPressed: () { onPressedAction(person); }
+                     // It didn't pop automatically unless SearchPage does it? 
+                     // SearchPage [https://pub.dev/packages/search_page] behavior:
+                     // It doesn't pop automatically on generic builder click.
+                     // But usually one uses `close(context, result)`. 
+                     // Here the user implemented a Button in the builder.
+                     // IMPORTANT: If I am in a Dialog, I should probably pop.
+                     Navigator.of(context).pop();
+                     onPressedAction(person);
+                  },
+                  child: Text(setText)),
+              Text(person.email??""),
+            ],
           ),
-          failure: Center(
-            child: const Text("No results.").tr(),
-          ),
-          filter: (person) => [
-            person.name,
-            person.surname,
-            person.email,
-          ],
-          builder: (person) => ListTile(
-            title: Text(person.name!),
-            subtitle: Text(person.surname??""),
-            trailing: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                    onPressed: () {
-                      onPressedAction(person);
-                    },
-                    child: Text(setText)),
-                Text(person.email??""),
-              ],
-            ),
-          ),
-        ));
+        ), 
+      ),
+    );
   }
 
   static Future<void> showInformationDialog(
@@ -322,7 +335,7 @@ class DialogHelper{
       context,
       label: "Add to group".tr(),
       items: userGroups,
-      searchBoxDecoration: InputDecoration(hintText: "Search".tr()),
+      searchBoxDecoration: InputDecoration(hintText: CommonStrings.search),
       selectedValue: selectedGroup,
       itemBuilder:
           (BuildContext context, UserGroupInfoModel item, bool isSelected) {
@@ -369,7 +382,16 @@ class DialogHelper{
               color: Theme.of(context).primaryColor,
             ),
           ),
-          child: TextButton(onPressed: null, child: Text(item.name),),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+              child: Text(
+                item.name,
+                style: TextStyle(
+                  color: ThemeConfig.blackColor(context),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
         );
       },
       onChange: (selected) {
@@ -584,7 +606,7 @@ class DialogHelper{
                                               "The processing has been cancelled.".tr(); // Update status
                                         }
                                             : null,
-                                        child: Text("Storno".tr()),
+                                        child: Text(CommonStrings.storno),
                                       ),
                                     );
                                   },
@@ -602,7 +624,7 @@ class DialogHelper{
                                           completer.complete(false); // Cancel or error result
                                         }
                                             : null,
-                                        child: Text("Ok".tr()),
+                                        child: Text(CommonStrings.ok),
                                       ),
                                     );
                                   },
@@ -690,44 +712,15 @@ class DialogHelper{
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context), // Cancel button
-              child: const Text("Storno").tr(),
+              child: Text(CommonStrings.storno),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context, controller.text.trim()); // Return the input
               },
-              child: const Text("Save").tr(),
+              child: Text(CommonStrings.save),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  static Future<T?> showCustomDialog<T>({
-    required BuildContext context,
-    required Widget child,
-    bool barrierDismissible = true,
-  }) {
-    return showDialog<T>(
-      context: context,
-      barrierDismissible: barrierDismissible,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          insetPadding:
-          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: ResponsiveService.isDesktop(context)
-                  ? StylesConfig.formMaxWidth
-                  : double.infinity,
-            ),
-            padding: const EdgeInsets.all(16.0),
-            child: child,
-          ),
         );
       },
     );

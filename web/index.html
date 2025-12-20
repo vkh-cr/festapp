@@ -17,6 +17,16 @@
 
 <!--    old hash compatibility-->
     <script>
+        // Check for redirect query param (Clean URL Logic)
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get('redirect');
+        if (redirect) {
+            // Immediately restore the original path
+            // This hides 'flutter.html' and tells Flutter to load this route
+            console.log('Restoring clean URL via redirect param:', redirect);
+            window.history.replaceState(null, '', redirect);
+        }
+
         if (window.location.hash) {
           var hash = window.location.hash;
 

@@ -4,7 +4,7 @@ import 'package:fstapp/components/inventory/models/product_inventory_context_mod
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
+import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:trina_grid/trina_grid.dart';
 

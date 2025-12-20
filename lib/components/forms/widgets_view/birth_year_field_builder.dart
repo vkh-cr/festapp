@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/components/forms/models/field_holder.dart';
-import 'package:fstapp/components/forms/models/form_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/field_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/form_holder.dart';
 import 'package:fstapp/components/forms/widgets_view/form_field_builders.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class BirthYearFieldBuilder extends StatelessWidget {
   final FieldHolder fieldHolder;
@@ -23,7 +24,7 @@ class BirthYearFieldBuilder extends StatelessWidget {
   /// Returns the specific validators for the Birth Year field.
   List<String? Function(String?)> _getValidators(FieldHolder fieldHolder) {
     return [
-      if (fieldHolder.isRequired) FormBuilderValidators.required(),
+      if (fieldHolder.isRequired) FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty),
           (value) {
         if (value == null || value.isEmpty) {
           // Let FormBuilderValidators.required() handle the empty case
@@ -33,7 +34,7 @@ class BirthYearFieldBuilder extends StatelessWidget {
           return NumericValidator().translatedErrorText;
         }
         final numericValue = int.parse(value);
-        final maxYear = DateTime.now().year - 12;
+        final maxYear = DateTime.now().year;
         if (numericValue < 1900 || numericValue > maxYear) {
           return RangeValidator(maxYear, 1900).translatedErrorText;
         }
@@ -56,6 +57,7 @@ class BirthYearFieldBuilder extends StatelessWidget {
     FocusNode focusNode = FocusNode();
     return FormBuilderTextField(
       name: fieldHolder.id.toString(),
+      autofillHints: [AutofillHints.birthdayYear],
       focusNode: focusNode,
       decoration: InputDecoration(
         label: FormFieldBuilders.buildTitleWidget(
@@ -64,6 +66,8 @@ class BirthYearFieldBuilder extends StatelessWidget {
           context,
           focusNode: focusNode,
         ),
+        filled: true,
+        fillColor: Colors.transparent,
       ),
       validator: FormBuilderValidators.compose(_getValidators(fieldHolder)),
       keyboardType: TextInputType.number,
@@ -139,6 +143,7 @@ class _CardBirthYearFieldState extends State<_CardBirthYearField> {
         children: [
           TextField(
             controller: _controller,
+            autofillHints: const [AutofillHints.birthdayYear],
             maxLines: 1,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(

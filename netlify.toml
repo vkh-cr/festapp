@@ -1,5 +1,5 @@
 [build]
-command = "curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.38.3-stable.tar.xz | tar -xJf - -C /opt/buildhome && PATH=/opt/buildhome/flutter/bin:$PATH flutter precache && PATH=/opt/buildhome/flutter/bin:$PATH flutter build web --release"
+command = "./automation/ci_build.sh"
 publish = "build/web"
 
 [[redirects]]
