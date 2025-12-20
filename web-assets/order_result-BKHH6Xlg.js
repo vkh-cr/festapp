@@ -1,4 +1,4 @@
-import{P as r}from"./index-seE-ZYIf.js";class g{static render(l,p,e,a,d){const n=a.communicationTone,b=a.visibleFields.some(o=>o.type==="ticket");let t,i,s="check_circle",c="success-color";if(p)t=r.successTitle(n,b),i=r.paymentInfo(n);else if(e&&e.code===1017){const o=e.product&&e.product.title||"";t=r.productUnavailable(o),i=r.chooseDifferentVariant(n),s="error",c="error-color"}else{const o=e&&e.code||0;t=r.orderFailed,i=r.orderError(o),s="error",c="error-color"}l.innerHTML=`
+import{P as r}from"./index-BEdrAdhQ.js";class g{static render(l,p,e,a,d){const n=a.communicationTone,b=a.visibleFields.some(o=>o.type==="ticket");let t,i,s="check_circle",c="success-color";if(p)t=r.successTitle(n,b),i=r.paymentInfo(n);else if(e&&e.code===1017){const o=e.product&&e.product.title||"";t=r.productUnavailable(o),i=r.chooseDifferentVariant(n),s="error",c="error-color"}else{const o=e&&e.code||0;t=r.orderFailed,i=r.orderError(o),s="error",c="error-color"}l.innerHTML=`
             <div class="result-container">
                 <div class="result-icon-wrapper ${c}">
                     <i class="material-icons result-icon">${s}</i>
