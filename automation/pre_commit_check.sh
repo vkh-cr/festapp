@@ -1,4 +1,12 @@
 #!/bin/bash
+# ==============================================================================
+# PRE-COMMIT CHECK
+# Purpose: Orchestrates pre-commit verification steps:
+#          1. Syncs version number between Flutter and Web Client
+#          2. Unifies translation files
+#          3. Applies project configuration (calls apply_config.sh)
+# Usage: ./automation/pre_commit_check.sh
+# ==============================================================================
 
 # Exit on error
 set -e
@@ -40,11 +48,11 @@ CURRENT_BRANCH=$(git branch --show-current)
 # 3. Apply Project Configuration (Universal Config)
 echo ""
 echo ">>> Applying Project Configuration..."
-# The configure_project.sh script will read from automation/project.conf
-if [ -f "$SCRIPT_DIR/configure_project.sh" ]; then
-    "$SCRIPT_DIR/configure_project.sh"
+# The apply_config.sh script will read from automation/project.conf
+if [ -f "$SCRIPT_DIR/apply_config.sh" ]; then
+    "$SCRIPT_DIR/apply_config.sh"
 else
-    echo "Error: automation/configure_project.sh not found."
+    echo "Error: automation/apply_config.sh not found."
     exit 1
 fi
 

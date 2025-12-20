@@ -74,6 +74,14 @@ export class RightsService {
         return this._context?.occasion_user;
     }
     
+    static get currentLink() {
+        return this._context?.occasion?.link;
+    }
+
+    static get currentUnit() {
+        return this._context?.unit;
+    }
+
     // --- Rights Checks (Mirrors Flutter) ---
     static canSeeReservations() {
         return this.isUnitEditorView() || this.isEditorOrderView();
