@@ -152,6 +152,15 @@ if (fs.existsSync(webThemePath)) {
     } else {
         css = newCssRules + css;
     }
+
+    // Also update body { font-family: ... }
+    const bodyFontRegex = /body\s*\{[\s\S]*?font-family:\s*['"]?([^'"]+)['"]?/;
+    if (css.match(bodyFontRegex)) {
+         css = css.replace(bodyFontRegex, (match, currentFont) => {
+             return match.replace(currentFont, fontFamilyBase);
+         });
+    }
+
     fs.writeFileSync(webThemePath, css);
     console.log("✔ theme_config.css updated.");
 }

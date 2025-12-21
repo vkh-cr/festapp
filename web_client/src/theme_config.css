@@ -58,7 +58,7 @@ body.dark-mode {
 }
 
 body {
-    font-family: 'Futura', sans-serif; /* Default font from Flutter */
+    font-family: 'Futura PT', sans-serif; /* Default font from Flutter */
     margin: 0;
     background-color: var(--background-color);
     color: var(--text-color);
