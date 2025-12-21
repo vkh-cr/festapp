@@ -96,7 +96,7 @@ fi
 
 
 
-# 6. Update lib/app_config.dart (Flutter App)
+# 5. Update lib/app_config.dart (Flutter App)
 FLUTTER_CONFIG="$PROJECT_ROOT/lib/app_config.dart"
 if [ -f "$FLUTTER_CONFIG" ]; then
     echo "Updating $FLUTTER_CONFIG..."
@@ -150,7 +150,7 @@ else
     echo "Warning: $FLUTTER_CONFIG not found."
 fi
 
-# 7. Update web_client/src/theme_config.css (Web Client Theme)
+# 6. Update web_client/src/theme_config.css (Web Client Theme)
 WEB_THEME="$PROJECT_ROOT/web_client/src/theme_config.css"
 if [ -f "$WEB_THEME" ]; then
     echo "Updating $WEB_THEME..."
@@ -164,10 +164,34 @@ if [ -f "$WEB_THEME" ]; then
     if [ ! -z "$THEME_SEED_3" ]; then
         sed -i '' "s|--seed-3: .*;|--seed-3: $THEME_SEED_3;|g" "$WEB_THEME"
     fi
-    
+
+    if [ ! -z "$FORM_FONT_SCALE" ]; then
+        sed -i '' "s|--font-scale: .*;|--font-scale: $FORM_FONT_SCALE;|g" "$WEB_THEME"
+    fi
+
     echo "✔ Updated web_client/src/theme_config.css"
 else
     echo "Warning: $WEB_THEME not found."
 fi
 
 echo "Project configuration applied successfully."
+
+# 7. Font Configuration (Handled by configure_fonts.js)
+# We invoke the helper script to handle dynamic file detection and rewrites
+NODE_SCRIPT="$PROJECT_ROOT/automation/configure_fonts.js"
+
+if [ -f "$NODE_SCRIPT" ] && [ -d "$PROJECT_ROOT/automation/fonts" ]; then
+    echo "Running Dynamic Font Configuration..."
+    node "$NODE_SCRIPT" "$PROJECT_ROOT" "$FONT_FAMILY_BASE"
+else
+    echo "Skipping Font Configuration (Script or fonts/ dir missing)"
+fi
+
+# 8. Version Configuration (Handled by configure_version.js)
+VERSION_SCRIPT="$PROJECT_ROOT/automation/configure_version.js"
+if [ -f "$VERSION_SCRIPT" ] && [ -n "$VERSION" ]; then
+    echo "Running Version Configuration ($VERSION)..."
+    node "$VERSION_SCRIPT" "$VERSION"
+else
+    echo "Skipping Version Configuration (Script missing or VERSION not set)"
+fi
