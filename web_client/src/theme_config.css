@@ -1,12 +1,12 @@
 @font-face {
-    font-family: 'Futura';
+    font-family: 'Futura PT';
     src: url('./assets/fonts/FuturaPTBook.ttf') format('truetype');
-    font-weight: normal;
+    font-weight: 400;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'Futura';
+    font-family: 'Futura PT';
     src: url('./assets/fonts/FuturaPTMedium.ttf') format('truetype');
     font-weight: 500;
     font-style: normal;

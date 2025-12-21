@@ -354,14 +354,25 @@ export class OrderPreview {
                              }
 
                              if (options) {
-                                 // Robust ID comparison
-                                 const found = options.find(o => o.id != null && String(o.id) === String(val));
-                                 if (found) {
-                                     valLabel = found.title;
-                                     if (found.price) {
-                                         // Ensure price is formatted or exists
-                                         valLabel += ` (${found.price} ${totalPriceData.currency})`;
+                                 // Helper to find title
+                                 const findTitle = (v) => {
+                                     const found = options.find(o => o.id != null && String(o.id) === String(v));
+                                     if (found) {
+                                         let title = found.title;
+                                         if (found.price) {
+                                             title += ` (${found.price} ${totalPriceData.currency})`;
+                                         }
+                                         return title;
                                      }
+                                     return v;
+                                 };
+
+                                 const valStr = String(val);
+                                 if (valStr.includes(' | ')) {
+                                     const parts = valStr.split(' | ');
+                                     valLabel = parts.map(part => findTitle(part)).join(', ');
+                                 } else {
+                                     valLabel = findTitle(val);
                                  }
                              }
                              
