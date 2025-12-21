@@ -44,7 +44,7 @@
     --radius-round: 50%;
     
     /* Font Scale (Default for Futura) */
-    --font-scale: 1.2;
+    --font-scale: 1.0;
 }
 
 body.dark-mode {
