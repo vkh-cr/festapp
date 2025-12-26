@@ -137,6 +137,7 @@ export class RouterService {
                              // SPA Navigate (Stay in Web Client)
                              console.log(`RouterService: SPA redirect from / to ${defaultLink}`);
                              window.history.replaceState(null, '', defaultLink);
+                             RouterService._lastPath = defaultLink; // Critical: Sync tracker to prevent re-init on popstate
                              path = defaultLink; // Update path for subsequent loading logic
                              shouldRedirectToFlutter = false;
                          } else {
@@ -168,6 +169,7 @@ export class RouterService {
                 // Unknown route -> Home
                 console.log(`Unknown route "${path}" and App not supported. Redirecting to Home.`);
                 window.history.replaceState(null, '', '/');
+                RouterService._lastPath = '/';
                 return true;
             }
         }
@@ -186,9 +188,11 @@ export class RouterService {
         if (!shouldRedirectToFlutter) {
              if (window.location.hash && window.location.hash.startsWith('#/')) {
                   window.history.replaceState(null, '', path);
+                  RouterService._lastPath = path; // Sync tracker
              }
              if (fullUrl.includes('https://') && window.location.pathname.startsWith('/https:')) {
                   window.history.replaceState(null, '', path);
+                  RouterService._lastPath = path; // Sync tracker
              }
         }
 
@@ -260,8 +264,10 @@ export class RouterService {
             
             // Ignore hash changes (SPA overlays)
             if (path === RouterService._lastPath) {
+                console.log(`[RouterService] PopState ignored (Hash change): ${path}`);
                 return;
             }
+            console.log(`[RouterService] PopState detected change: ${RouterService._lastPath} -> ${path}`);
             RouterService._lastPath = path;
 
             if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {

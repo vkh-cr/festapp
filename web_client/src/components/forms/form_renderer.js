@@ -41,13 +41,12 @@ export class FormRenderer {
             e.preventDefault();
             if(callbacks.onSubmit) callbacks.onSubmit(form, formModel);
         }
-        
+
         const updateHandler = (e) => {
             if(callbacks.onInput) callbacks.onInput(e, form, formModel);
         };
         form.addEventListener('input', updateHandler);
-        // Change event needed for some inputs (select, etc) to trigger updates immediately?
-        // Usually 'input' covers value changes, but let's keep 'change' for safety/legacy.
+        // Change event needed for some inputs
         form.addEventListener('change', updateHandler);
     }
 
