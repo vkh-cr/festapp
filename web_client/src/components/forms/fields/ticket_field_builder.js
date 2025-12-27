@@ -38,7 +38,16 @@ export class TicketFieldBuilder {
         container.className = 'form-field-container ticket-field';
         container.dataset.fieldId = field.id;
         
-        const subFields = field.subFields || [];
+        // Error Container for the Field Itself (e.g. "At least one ticket required")
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'form-field-error';
+        errorDiv.style.display = 'none';
+        container.appendChild(errorDiv);
+        
+        let subFields = field.subFields;
+        if (!subFields || subFields.length === 0) {
+             subFields = field.fields || (field.data && field.data.fields) || [];
+        }
 
         // Subscription for reactivity handled below
         const hasSpotField = subFields.some(f => f.type === 'spot');

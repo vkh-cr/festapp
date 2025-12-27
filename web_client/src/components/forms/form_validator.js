@@ -104,6 +104,74 @@ export class FormValidator {
     }
 
     /**
+     * Extracts values for a specific subfield from a ticket item
+     * @param {Object} ticketItem - The ticket object from payload
+     * @param {Object} subFieldDef - The subfield definition
+     * @returns {Array} Array of selected values (strings/IDs)
+     */
+    static getTicketFieldValues(ticketItem, subFieldDef) {
+        const values = [];
+        
+        // 1. Direct Field Access: Spot
+        if (subFieldDef.type === 'spot') {
+            if (ticketItem.spot) {
+                // Spot is selected
+                values.push(ticketItem.spot);
+            }
+            return values;
+        }
+        
+        // 2. Nested 'fields' array (Standard for Festapp)
+        if (ticketItem.fields) {
+            ticketItem.fields.forEach(fObj => {
+                // fObj is { key: value } or { key: value, _subFieldId: id }
+                
+                Object.keys(fObj).forEach(key => {
+                    if (key === 'currency_code' || key === 'price' || key === '_subFieldId') return;
+                    
+                    const val = fObj[key];
+                    
+                    let match = false;
+                    if (fObj['_subFieldId']) {
+                        // Strict ID match if available
+                        if (String(fObj['_subFieldId']) === String(subFieldDef.id)) {
+                             match = true;
+                        }
+                    } else {
+                        // Loose Type match ONLY if the subDef type matches the key
+                        // This corresponds to legacy or simple fields
+                        if (key === subFieldDef.type) {
+                            match = true;
+                        }
+                    }
+                    
+                    if (match) {
+                        // Ensure we don't count empty strings as values?
+                        // If val is "" or null, it shouldn't count?
+                        // But "0" should count.
+                        if (val !== null && val !== undefined && val !== '') {
+                             if (String(val).includes(' | ')) {
+                                 values.push(...String(val).split(' | '));
+                             } else {
+                                 values.push(val);
+                             }
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Log if empty (failure case)
+        /*
+        if (values.length === 0 && (subFieldDef.isRequired || subFieldDef.is_required)) {
+             console.log(`[FormValidator] Empty Match for ${subFieldDef.title} (${subFieldDef.id}). Ticket Fields:`, JSON.stringify(ticketItem.fields));
+        }
+        */
+        
+        return values;
+    }
+
+    /**
      * @returns {boolean} true if valid, false if invalid (and errors shown)
      */
     static validateAndShowErrors(form, formModel, session) {
@@ -211,6 +279,18 @@ export class FormValidator {
                           });
                     });
                     
+
+                    
+
+
+                    // Check if field itself is required (min 1 ticket)
+                    if (field.isRequired) {
+                         const hasTickets = tickets.length > 0;
+                         if (!hasTickets) {
+                             errors[field.id] = FormStrings.fieldCannotBeEmpty;
+                         }
+                    }
+
                     return; // Done with ticket field itself
                 }
 
@@ -304,6 +384,11 @@ export class FormValidator {
                      if (typeof RadioNodeList !== 'undefined' && el instanceof RadioNodeList) el = el[0];
                      input = el;
                  }
+             }
+
+             // Fallback 2: Look for container by field ID (e.g. Ticket Field)
+             if (!input) {
+                 input = container.querySelector(`[data-field-id="${fieldId}"]`);
              }
 
              if (input) {
