@@ -38,6 +38,8 @@ export class TicketFieldBuilder {
         container.className = 'form-field-container ticket-field';
         container.dataset.fieldId = field.id;
         
+        const subFields = field.subFields || [];
+
         // Subscription for reactivity handled below
         const hasSpotField = subFields.some(f => f.type === 'spot');
 
