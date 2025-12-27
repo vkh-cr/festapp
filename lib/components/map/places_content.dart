@@ -12,6 +12,9 @@ import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:trina_grid/trina_grid.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+
+import 'place_model.dart';
 
 import 'place_model.dart';
 
@@ -66,7 +69,7 @@ class _PlacesContentState extends State<PlacesContent> {
           renderer: DataGridHelper.idRenderer,
         ),
         TrinaColumn(
-          title: "Hide".tr(),
+          title: CommonStrings.hide,
           field: Tb.places.is_hidden,
           type: TrinaColumnType.text(),
           applyFormatterInEditing: true,
@@ -76,13 +79,13 @@ class _PlacesContentState extends State<PlacesContent> {
               DataGridHelper.checkBoxRenderer(ctx, Tb.places.is_hidden),
         ),
         TrinaColumn(
-          title: "Title".tr(),
+          title: CommonStrings.title,
           field: Tb.places.title,
           type: TrinaColumnType.text(),
           width: 300,
         ),
         TrinaColumn(
-          title: "Description".tr(),
+          title: CommonStrings.description,
           field: Tb.places.description,
           type: TrinaColumnType.text(),
           width: 150,
@@ -145,7 +148,7 @@ class _PlacesContentState extends State<PlacesContent> {
                   const Icon(Icons.edit),
                   Padding(
                     padding: const EdgeInsets.all(6),
-                    child: const Text("Edit").tr(),
+                    child: Text(CommonStrings.edit),
                   ),
                 ],
               ),

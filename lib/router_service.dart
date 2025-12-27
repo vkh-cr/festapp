@@ -1,5 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/foundation.dart'; // Import for kIsWeb
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/app_router.dart';
@@ -8,8 +8,10 @@ import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
-import 'package:fstapp/services/js/js_interop.dart'; // Import JSInterop
+import 'package:fstapp/services/js/js_interop.dart';
 import 'dart:async';
+
+import 'package:fstapp/components/forms/views/form_page.dart';
 
 class RouterService {
   static const link = "link";
@@ -46,7 +48,23 @@ class RouterService {
 
   static Future<T?> navigate<T extends Object?>(
       BuildContext context, String path) {
+    if (path.isEmpty) return Future.value(null);
+
+    // Clean the path if it's a full URL
+    path = normalizeUrl(path);
+
     path = fixPath(path);
+
+    if (kIsWeb && AppConfig.isWebclientSupported) {
+       // List of paths that should be handled by the web client
+       // This can be expanded. For now, we know 'form' is one.
+       // We can also potentially check against a list of known web-client routes.
+       if (path.startsWith("/${FormPage.ROUTE}/")) {
+         navigateExternal(path);
+         return Future.value(null);
+       }
+    }
+
     return context.router.pushPath(path);
   }
 
@@ -54,6 +72,38 @@ class RouterService {
     if (!path.startsWith("/")) {
       path = "/$path";
     }
+    return path;
+  }
+
+  static String normalizeUrl(String url) {
+    String path = url;
+
+    // 1. Determine base to strip (Configured URL or dynamic localhost origin)
+    final matchedBase = AppConfig.compatibleUrls().firstWhere(
+          (u) => u.isNotEmpty && url.startsWith(u),
+      orElse: () => "",
+    );
+
+    if (matchedBase.isNotEmpty) {
+      path = url.substring(matchedBase.length);
+    } else if (url.contains("localhost")) {
+      final uri = Uri.tryParse(url);
+      if (uri != null && url.startsWith(uri.origin)) {
+        path = url.substring(uri.origin.length);
+      }
+    }
+
+    // 2. Remove specific legacy hash "/#" only if it immediately follows the domain
+    // Examples:
+    // domain.com/#/path -> /path
+    // domain.com/path -> /path
+    if (path.startsWith('/#')) {
+      path = path.replaceFirst('/#', '');
+    }
+
+    // 3. Remove leading slash to get cleaner path, but fixPath adds it back if needed.
+    // We'll let fixPath handle the leading slash requirement.
+    
     return path;
   }
 
@@ -146,7 +196,15 @@ class RouterService {
 
     // Check if the current path is already the target home path
     if (context.routeData.path == targetHomePath) {
+      if (kIsWeb && AppConfig.isWebclientSupported) {
+        navigateExternal("/");
+      }
       // Already at home, so don't navigate
+      return;
+    }
+
+    if (kIsWeb && AppConfig.isWebclientSupported) {
+      navigateExternal("/");
       return;
     }
 
@@ -260,6 +318,15 @@ class RouterService {
   static void changeUrl(String newUrl) {
     if (kIsWeb) {
       _js.changeUrl(newUrl);
+    }
+  }
+
+  static void navigateExternal(String url) {
+    if (kIsWeb) {
+      _js.navigateExternal(url);
+    } else {
+      // Fallback or no-op for non-web
+      debugPrint("External navigation not supported on this platform: $url");
     }
   }
 }

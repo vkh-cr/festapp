@@ -159,6 +159,18 @@ class EmailTemplateModel {
     defaultValue: 'Your order is fully paid.',
   );
 
+  static EmailTemplateSub paymentDetailsSub = EmailTemplateSub(
+    code: 'paymentDetails',
+    description: EmailTemplatesStrings.subPaymentDetails,
+    defaultValue: 'Payment details table',
+  );
+
+  static EmailTemplateSub remainingTimeSub = EmailTemplateSub(
+    code: 'remainingTime',
+    description: EmailTemplatesStrings.subRemainingTime,
+    defaultValue: '5 days',
+  );
+
   /// Mapping of template codes to their available substitutions.
   static final Map<String, List<EmailTemplateSub>> substitutionDefinitions = {
     'RESET_PASSWORD': [
@@ -198,6 +210,10 @@ class EmailTemplateModel {
       occasionTitleSub,
       balanceReasoningSub,
       fullOrderSub,
+      amountSub,
+      deadlineSub,
+      paymentDetailsSub,
+      remainingTimeSub,
     ],
     'TICKET_ORDER_STORNO': [
       occasionTitleSub,

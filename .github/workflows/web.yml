@@ -12,19 +12,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Flutter
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.4'
+          flutter-version: '3.38.5'
           channel: 'stable'
 
-      # Build with base-href set to root (correct for custom domain)
-      - run: flutter build web --release --base-href /
+      - name: Build Flutter
+        run: |
+          flutter precache
+          flutter build web --release --base-href /
+          mv build/web/index.html build/web/flutter.html
 
-      # GitHub Pages returns 404 for direct paths (e.g. /events).
-      # We copy index.html to 404.html so GitHub serves the app
-      # instead of an error page.
-      - run: cp build/web/index.html build/web/404.html
+      - name: Build Web Client and Merge
+        run: |
+          cd web_client
+          npm install
+          npm run build
+          cp -r dist/* ../build/web/
+
+      - name: Setup SPA Fallback
+        # Copy the new index.html (Web Client) to 404.html for GitHub Pages routing
+        run: cp build/web/index.html build/web/404.html
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

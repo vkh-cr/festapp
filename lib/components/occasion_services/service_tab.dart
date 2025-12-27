@@ -12,6 +12,7 @@ import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/components/occasion_services/service_dialog.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class ServiceTab extends StatefulWidget {
   const ServiceTab({super.key});
@@ -117,7 +118,7 @@ class _ServiceTabState extends State<ServiceTab> {
           type: DbOccasions.serviceTypeAccommodation,
           title: "Accommodation".tr(),
           description: "To create accommodation, fill in the title, unique code, and the reference of the place.".tr(),
-          referenceString: "Place".tr(),
+          referenceString: CommonStrings.place,
         );
       },
     );

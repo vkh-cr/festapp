@@ -6,6 +6,7 @@ import 'package:fstapp/components/single_data_grid/single_data_grid_controller.d
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/components/map/path_group_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -64,7 +65,7 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
           renderer: DataGridHelper.idRenderer,
         ),
         TrinaColumn(
-          title: "Hide".tr(),
+          title: CommonStrings.hide,
           field: Tb.path_groups.is_hidden,
           type: TrinaColumnType.text(),
           applyFormatterInEditing: true,
@@ -74,7 +75,7 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
               DataGridHelper.checkBoxRenderer(ctx, Tb.path_groups.is_hidden),
         ),
         TrinaColumn(
-          title: "Name".tr(),
+          title: CommonStrings.name,
           field: Tb.path_groups.title,
           type: TrinaColumnType.text(),
           width: 300,

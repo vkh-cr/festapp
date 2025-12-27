@@ -113,7 +113,8 @@ BEGIN
         'id', t.id,
         'ticket_symbol', t.ticket_symbol,
         'state', t.state,
-        'note', t.note
+        'note', t.note,
+        'note_hidden', t.note_hidden
     ))
     INTO ticketsData
     FROM eshop.tickets t

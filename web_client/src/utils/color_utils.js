@@ -1,0 +1,126 @@
+export class ColorUtils {
+    /**
+     * Converts a Hex string (e.g. #RRGGBB or #RGB) to HSL object {h, s, l}
+     * h: 0-360, s: 0-1, l: 0-1
+     */
+    static hexToHsl(hex) {
+        let r = 0, g = 0, b = 0;
+        if (hex.length === 4) {
+            r = "0x" + hex[1] + hex[1];
+            g = "0x" + hex[2] + hex[2];
+            b = "0x" + hex[3] + hex[3];
+        } else if (hex.length === 7) {
+            r = "0x" + hex[1] + hex[2];
+            g = "0x" + hex[3] + hex[4];
+            b = "0x" + hex[5] + hex[6];
+        }
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        let cmin = Math.min(r, g, b),
+            cmax = Math.max(r, g, b),
+            delta = cmax - cmin,
+            h = 0,
+            s = 0,
+            l = 0;
+
+        if (delta === 0)
+            h = 0;
+        else if (cmax === r)
+            h = ((g - b) / delta) % 6;
+        else if (cmax === g)
+            h = (b - r) / delta + 2;
+        else
+            h = (r - g) / delta + 4;
+
+        h = Math.round(h * 60);
+
+        if (h < 0)
+            h += 360;
+
+        l = (cmax + cmin) / 2;
+        s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+        return { h, s, l };
+    }
+
+    /**
+     * Converts HSL object {h, s, l} to Hex string #RRGGBB
+     */
+    static hslToHex(h, s, l) {
+        let c = (1 - Math.abs(2 * l - 1)) * s,
+            x = c * (1 - Math.abs(((h / 60) % 2) - 1)),
+            m = l - c / 2,
+            r = 0,
+            g = 0,
+            b = 0;
+
+        if (0 <= h && h < 60) {
+            r = c; g = x; b = 0;
+        } else if (60 <= h && h < 120) {
+            r = x; g = c; b = 0;
+        } else if (120 <= h && h < 180) {
+            r = 0; g = c; b = x;
+        } else if (180 <= h && h < 240) {
+            r = 0; g = x; b = c;
+        } else if (240 <= h && h < 300) {
+            r = x; g = 0; b = c;
+        } else if (300 <= h && h < 360) {
+            r = c; g = 0; b = x;
+        }
+        r = Math.round((r + m) * 255).toString(16);
+        g = Math.round((g + m) * 255).toString(16);
+        b = Math.round((b + m) * 255).toString(16);
+
+        if (r.length === 1)
+            r = "0" + r;
+        if (g.length === 1)
+            g = "0" + g;
+        if (b.length === 1)
+            b = "0" + b;
+
+        return "#" + r + g + b;
+    }
+
+    /**
+     * Blends a foreground color with transparency over a background color.
+     * Returns Hex string.
+     * @param {string} fgHex Foreground color (Hex)
+     * @param {number} fgOpacity Foreground opacity 0-1
+     * @param {string} bgHex Background color (Hex) - assumed opaque
+     */
+    static alphaBlend(fgHex, fgOpacity, bgHex) {
+        // Parse FG
+        let r1 = parseInt(fgHex.substring(1, 3), 16);
+        let g1 = parseInt(fgHex.substring(3, 5), 16);
+        let b1 = parseInt(fgHex.substring(5, 7), 16);
+
+        // Parse BG
+        let r2 = parseInt(bgHex.substring(1, 3), 16);
+        let g2 = parseInt(bgHex.substring(3, 5), 16);
+        let b2 = parseInt(bgHex.substring(5, 7), 16);
+
+        // Blend: result = fg * alpha + bg * (1 - alpha)
+        let r = Math.round(r1 * fgOpacity + r2 * (1 - fgOpacity));
+        let g = Math.round(g1 * fgOpacity + g2 * (1 - fgOpacity));
+        let b = Math.round(b1 * fgOpacity + b2 * (1 - fgOpacity));
+
+        const toHex = (n) => n.toString(16).padStart(2, '0');
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+    
+    /**
+     * Determines if a color is "light" (for choosing black/white text).
+     * @param {string} hex 
+     * @returns boolean
+     */
+    static isLight(hex) {
+         let r = parseInt(hex.substring(1, 3), 16);
+         let g = parseInt(hex.substring(3, 5), 16);
+         let b = parseInt(hex.substring(5, 7), 16);
+         // Perceived brightness formula
+         // (R * 299 + G * 587 + B * 114) / 1000
+         const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+         return brightness > 125;
+    }
+}

@@ -7,6 +7,7 @@ import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/information/db_information.dart';
 import 'package:trina_grid/trina_grid.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class GameCheckPointsContent extends StatefulWidget {
   const GameCheckPointsContent({super.key});
@@ -38,7 +39,7 @@ class _GameCheckPointsContentState extends State<GameCheckPointsContent> {
             renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
           ),
           TrinaColumn(
-            title: "Title".tr(),
+            title: CommonStrings.title,
             enableAutoEditing: true,
             field: Tb.information.title,
             type: TrinaColumnType.text(),

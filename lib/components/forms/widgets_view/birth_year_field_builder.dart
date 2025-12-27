@@ -9,6 +9,7 @@ import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class BirthYearFieldBuilder extends StatelessWidget {
   final FieldHolder fieldHolder;
@@ -23,7 +24,7 @@ class BirthYearFieldBuilder extends StatelessWidget {
   /// Returns the specific validators for the Birth Year field.
   List<String? Function(String?)> _getValidators(FieldHolder fieldHolder) {
     return [
-      if (fieldHolder.isRequired) FormBuilderValidators.required(),
+      if (fieldHolder.isRequired) FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty),
           (value) {
         if (value == null || value.isEmpty) {
           // Let FormBuilderValidators.required() handle the empty case

@@ -10,6 +10,7 @@ import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/components/users/import_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class CsvImportHelper {
   static Future<void> importFromCsv(BuildContext context) async {
@@ -17,8 +18,8 @@ class CsvImportHelper {
     var file = await DialogHelper.dropFilesHere(
         context,
         FeaturesStrings.labelImportFromCsv,
-        "Import".tr(),
-        "Storno".tr()
+        CommonStrings.import,
+        CommonStrings.storno
     );
 
     if (file == null) return; // User canceled the dialog
@@ -30,8 +31,8 @@ class CsvImportHelper {
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
       FeaturesStrings.labelImportFromCsv,
-      "${"Users".tr()} (${users.length}):\n${users.map((value) => value[Tb.occasion_users.data_email]).toList().join(",\n")}",
-      confirmButtonMessage: "Proceed".tr(),
+      "${CommonStrings.users} (${users.length}):\n${users.map((value) => value[Tb.occasion_users.data_email]).toList().join(",\n")}",
+      confirmButtonMessage: CommonStrings.proceed,
     );
 
     if (!proceed) return;
@@ -95,8 +96,8 @@ class CsvImportHelper {
       "Creating users".tr(),
       "New users found. Do you want to create them?".tr() +
           "\n" +
-          "${"Users".tr()} (${toBeCreated.length}):\n${toBeCreated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
-      confirmButtonMessage: "Proceed".tr(),
+          "${CommonStrings.users} (${toBeCreated.length}):\n${toBeCreated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
+      confirmButtonMessage: CommonStrings.proceed,
     );
 
     if (!proceed) return;
@@ -122,8 +123,8 @@ class CsvImportHelper {
       "Updating users".tr(),
       "These users have some changes. Do you want to update them?".tr() +
           "\n" +
-          "${"Users".tr()} (${toBeUpdated.length}):\n${toBeUpdated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
-      confirmButtonMessage: "Proceed".tr(),
+          "${CommonStrings.users} (${toBeUpdated.length}):\n${toBeUpdated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
+      confirmButtonMessage: CommonStrings.proceed,
     );
 
     if (!proceed) return;
@@ -152,8 +153,8 @@ class CsvImportHelper {
       "Removing users".tr(),
       "These users have been removed, but they still exist in the application. Do you want to remove them?".tr() +
           "\n" +
-          "${"Users".tr()} (${toBeDeleted.length}):\n${toBeDeleted.map((u) => u.toBasicString()).join(",\n")}",
-      confirmButtonMessage: "Proceed".tr(),
+          "${CommonStrings.users} (${toBeDeleted.length}):\n${toBeDeleted.map((u) => u.toBasicString()).join(",\n")}",
+      confirmButtonMessage: CommonStrings.proceed,
     );
 
     if (!proceed) return;

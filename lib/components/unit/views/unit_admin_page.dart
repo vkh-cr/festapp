@@ -7,16 +7,18 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/data_services/update_service.dart';
-import 'package:fstapp/components/users/db_users.dart';
+import 'package:fstapp/components/unit/db_units.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/unit/views/occasions_screen.dart';
 import 'package:fstapp/components/unit/views/quotes_tab.dart';
 import 'package:fstapp/components/unit/views/unit_users_screen.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/router_service.dart';
 
 import 'package:fstapp/components/unit/views/unit_settings_screen.dart';
+import 'package:fstapp/components/email_templates/views/email_templates_tab.dart';
+import '../../occasion/occasion_model.dart';
 import 'unit_page.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 @RoutePage()
 class UnitAdminPage extends StatefulWidget {
@@ -31,6 +33,7 @@ class UnitAdminPage extends StatefulWidget {
 
 class _UnitAdminPageState extends State<UnitAdminPage> {
   UnitModel? _currentUnit;
+  List<OccasionModel>? _occasions;
   Widget _currentScreen = const Center(child: CircularProgressIndicator());
   String _currentMenu = "";
 
@@ -57,11 +60,19 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
     if (RightsService.currentUnit()?.id != widget.id! || force) {
       await RightsService.updateAppData(unitId: widget.id!, force: force);
     }
-    _currentUnit = await DbUsers.getCurrentUnit(widget.id!);
+    try {
+      final bundle = await DbUnits.getUnitEditData(widget.id!);
+      _currentUnit = bundle.unit;
+      _occasions = bundle.occasions;
+    } catch (e) {
+      // Fallback or error handling
+      print("Error loading unit edit data: $e");
+    }
+
     if (_currentUnit != null) {
       // If we are already on a screen, keep it, otherwise default to Occasions
       if (_currentMenu.isEmpty) {
-        _setCurrentScreen(OccasionsScreen(unit: _currentUnit!), "Occasions");
+        _setCurrentScreen(OccasionsScreen(unit: _currentUnit!, initialOccasions: _occasions), "Occasions");
       } else {
         // Refresh the current screen if needed, or just let the user stay where they are.
         // For Settings, we might want to re-inject the updated unit.
@@ -73,6 +84,11 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
               ),
               "Settings"
           );
+        } else if (_currentMenu == "Occasions") {
+             // Refresh occasions screen with new data if we are forcing reload
+             _setCurrentScreen(OccasionsScreen(unit: _currentUnit!, initialOccasions: _occasions), "Occasions");
+        } else if (_currentMenu == "EmailTemplates") {
+          _setCurrentScreen(EmailTemplatesTab(unitId: _currentUnit!.id!), "EmailTemplates");
         }
       }
     } else if (mounted) {
@@ -203,10 +219,10 @@ class _SideMenuState extends State<SideMenu> {
                   _buildMenuItem(
                     context: context,
                     icon: Icons.calendar_month,
-                    label: "Events".tr(),
+                    label: CommonStrings.events,
                     isSelected: widget.currentMenu == "Occasions",
                     isExpanded: _isExpanded,
-                    isHovered: _hoveredLabel == "Events".tr(),
+                    isHovered: _hoveredLabel == CommonStrings.events,
                     onHover: (label) => setState(() => _hoveredLabel = label),
                     onTap: () {
                       if (widget.unit != null) {
@@ -221,10 +237,10 @@ class _SideMenuState extends State<SideMenu> {
                     _buildMenuItem(
                       context: context,
                       icon: Icons.people,
-                      label: "Users".tr(),
+                      label: CommonStrings.users,
                       isSelected: widget.currentMenu == "Users",
                       isExpanded: _isExpanded,
-                      isHovered: _hoveredLabel == "Users".tr(),
+                      isHovered: _hoveredLabel == CommonStrings.users,
                       onHover: (label) => setState(() => _hoveredLabel = label),
                       onTap: () {
                         if (widget.unit != null) {
@@ -256,11 +272,29 @@ class _SideMenuState extends State<SideMenu> {
                     if (RightsService.canSeeUnitUsers())
                       _buildMenuItem(
                         context: context,
+                        icon: Icons.email,
+                        label: "Email Templates".tr(),
+                        isSelected: widget.currentMenu == "EmailTemplates",
+                        isExpanded: _isExpanded,
+                        isHovered: _hoveredLabel == "Email Templates".tr(),
+                        onHover: (label) => setState(() => _hoveredLabel = label),
+                        onTap: () {
+                          if (widget.unit != null) {
+                            widget.onMenuItemSelected(
+                              EmailTemplatesTab(unitId: widget.unit!.id!),
+                              "EmailTemplates",
+                            );
+                          }
+                        },
+                      ),
+                    if (RightsService.canSeeUnitUsers())
+                      _buildMenuItem(
+                        context: context,
                         icon: Icons.settings,
-                        label: "Settings".tr(),
+                        label: CommonStrings.settings,
                         isSelected: widget.currentMenu == "Settings",
                         isExpanded: _isExpanded,
-                        isHovered: _hoveredLabel == "Settings".tr(),
+                        isHovered: _hoveredLabel == CommonStrings.settings,
                         onHover: (label) => setState(() => _hoveredLabel = label),
                         onTap: () {
                           if (widget.unit != null) {

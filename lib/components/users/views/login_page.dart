@@ -33,6 +33,37 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+    if (AppConfig.isWebclientSupported) {
+      AuthService.tryAuthUser().then((isLoggedIn) {
+        if (isLoggedIn) {
+          _checkAutoRedirect();
+        }
+      });
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!AppConfig.isAppSupported) {
+        _checkAutoRedirect();
+      }
+    });
+  }
+
+  Future<void> _checkAutoRedirect() async {
+    if (AuthService.isLoggedIn() || await AuthService.tryAuthUser()) {
+      var loggedIn = await AuthService.tryAuthUser();
+      if (loggedIn) {
+        var userUnits = RightsService.currentUser()?.units;
+        if (userUnits != null && userUnits.isNotEmpty) {
+           await RouterService.navigateToUnitAdmin(context, userUnits.first);
+        } else {
+           await _refreshSignedInStatus(null);
+        }
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -145,9 +176,17 @@ class _LoginPageState extends State<LoginPage> {
     if (loggedIn) {
       var unitId = RightsService.currentUnit()?.id == 1 ? null : RightsService.currentUnit()?.id;
       if(AppConfig.isAppSupported){
-        RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
+        await RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
       } else {
         await RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
+      }
+
+      if (unitId == null) {
+        var userUnits = RightsService.currentUser()?.units;
+        if (userUnits != null && userUnits.isNotEmpty) {
+          await RouterService.navigateToUnitAdmin(context, userUnits.first);
+          return;
+        }
       }
       RouterService.popOrHome(context);
     }

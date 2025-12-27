@@ -101,4 +101,7 @@ export const enTranslations = {
       generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'en' }),
     ].join('');
   },
+  days_remaining: (days: number) => {
+    return `${days} ${days === 1 ? "day" : "days"}`;
+  },
 };

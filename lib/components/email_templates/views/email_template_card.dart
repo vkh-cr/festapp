@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/email_templates/email_template_model.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class EmailTemplateCard extends StatelessWidget {
   final EmailTemplateModel template;
@@ -100,7 +101,7 @@ class EmailTemplateCard extends StatelessWidget {
                           color: ThemeConfig.blackColor(context),
                         ),
                         label: Text(
-                          'Edit'.tr(),
+                          CommonStrings.edit,
                           style: TextStyle(
                             color: ThemeConfig.blackColor(context),
                           ),

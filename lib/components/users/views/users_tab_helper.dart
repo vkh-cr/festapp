@@ -13,6 +13,8 @@ import 'package:fstapp/components/groups/db_groups.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/widgets/buttons_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/components/users/user_management_helper.dart';
 
@@ -75,7 +77,7 @@ class UsersTabHelper {
   static Future<void> addExisting(BuildContext context,
       SingleDataGridController singleDataGrid, List<IHasId> currentUsers,
       Future<void> Function() reloadUsers) async {
-    var existing = await DbUsers.getAllUsersBasicsForUnit();
+    var existing = await DbUsers.getAllUsersBasicsForUnit(RightsService.currentUnit()!.id!);
     var nonAdded =
     existing.where((u) => !currentUsers.any((cu) => cu.id == u.id)).toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
@@ -84,13 +86,13 @@ class UsersTabHelper {
       ToastHelper.Show(context, "Updated {item}.".tr(
           namedArgs: {"item": chosenUser.toString()}));
       await reloadUsers();
-        }, nonAdded, "Add".tr());
+        }, nonAdded, CommonStrings.add);
   }
 
   static Future<void> addExistingToUnit(BuildContext context,
       SingleDataGridController singleDataGrid, List<ITrinaRowModel> currentUsers,
       Future<void> Function() reloadUsers, int unit) async {
-    var existing = await DbUsers.getAllUsersBasicsForUnit();
+    var existing = await DbUsers.getAllUsersBasicsForUnit(unit);
     var nonAdded =
     existing.where((u) => !currentUsers.any((cu) => cu.id == u.id)).toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
@@ -99,7 +101,7 @@ class UsersTabHelper {
       ToastHelper.Show(context, "Updated {item}.".tr(
           namedArgs: {"item": chosenUser.toString()}));
       await reloadUsers();
-        }, nonAdded, "Add".tr());
+        }, nonAdded, CommonStrings.add);
   }
 
   /// Invites the checked users.
