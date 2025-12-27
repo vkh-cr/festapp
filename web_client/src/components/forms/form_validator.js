@@ -13,10 +13,6 @@ export class FormValidator {
          const currentErrors = { ...session.state.validationErrors };
          const hadError = !!currentErrors[fieldName];
          // Logic: If field HAD error, we must validate on input. 
-         // If field NOT had error, we usually wait for blur or submit? 
-         // User Rule: "Clear-Only Fallacy" -> "if (isValid) clearError(); else if (shouldValidate) restoreError();"
-         // shouldValidate is typically true if it HAD an error (we are correcting it).
-         
          if (!hadError && !target.classList.contains('invalid')) return; 
 
          const isRequired = target.dataset.required === 'true';
@@ -45,14 +41,7 @@ export class FormValidator {
                  }
              }
              
-             // Check invalid format if needed (e.g. email/tel patterns if not using native required but still using type?)
-             // Use native validity for FORMAT only, but ignore valueMissing if not checking required? 
-             // Actually, if we use type="email", browser checks format. 
-             // But we want to avoid :invalid style if possible? 
-             // Usually :invalid triggers on format too. 
-             // If we really want to process format, we can use checkValidity() but ignore valueMissing if we handled it?
-             // But checkValidity() returns false if valueMissing.
-             
+             // Check invalid format if needed
              if (nowValid && target.value) {
                  // Only check format if we have a value
                  if (!target.checkValidity()) {
@@ -87,9 +76,7 @@ export class FormValidator {
                  if (optionsContainer) optionsContainer.classList.remove('invalid');
              }
          } else {
-             // RESTORATIVE LOGIC: If it WAS invalid (or we decide strict realtime), we must SHOW error now.
-             // Usually on Input we only clear. But if we went from Invalid -> Valid -> Invalid (e.g. backspace all),
-             // we should restore the error!
+
              // Check validation message
              let message = failureReason || target.validationMessage || FormStrings.fieldCannotBeEmpty;
              
@@ -194,42 +181,34 @@ export class FormValidator {
                              const isRequired = sub.isRequired !== undefined ? sub.isRequired : sub.is_required;
                              
                              if (isRequired) {
-                                  // Check if this subfield has a value in the ticketItem
-                                  // ticketItem.fields is array of { type: val, _subFieldId: id, ... }
-                                  // or { [type]: val } if legacy?
-                                  // FormSession normalizes it.
+                                  // Refactored: Centralized Value Extraction
+                                  const values = FormValidator.getTicketFieldValues(ticketItem, sub);
                                   
-                                  const valObj = ticketItem.fields.find(f => {
-                                      // Strong check via subFieldId
-                                      if (f._subFieldId) return String(f._subFieldId) === String(sub.id);
-                                      // Fallback by key
-                                      return f[sub.type] !== undefined;
-                                  });
+                                  const isSatisfied = values.length > 0;
                                   
-                                  let val = valObj ? valObj[sub.type] : null;
-                                  
-                                  // Special handling for 'spot' which is stored at root level of ticketItem
-                                  if (sub.type === 'spot' && val === null) {
-                                      val = ticketItem['spot'];
-                                  }
-                                  // Determine if satisfied
-                                  let isSatisfied = false;
-                                  if (val !== null && val !== '' && val !== undefined) {
-                                      isSatisfied = true;
-                                  }
-                                  
-                                  console.log(`[FormValidator] Ticket [${tIdx}] Subfield [${sub.id}] Type=[${sub.type}] Required=${isRequired} Val=[${val}] Satisfied=${isSatisfied}`);
-
                                   if (!isSatisfied) {
                                       // Construct error ID matching the input name: fieldId_tIdx_subId
-                                      // Use preserved _ticketIndex if available, otherwise tIdx
                                       const idxToUse = ticketItem['_ticketIndex'] !== undefined ? ticketItem['_ticketIndex'] : tIdx;
                                       const errorId = FormHelper.getTicketInputName(field.id, idxToUse, sub.id);
                                       errors[errorId] = FormStrings.fieldCannotBeEmpty;
-                                      // console.log(`[FormValidator] Adding error for ${errorId}`);
                                   }
                              }
-                         });
+                             
+                             // Max Options Validation
+                             const maxOptions = sub.maxOptions || (sub.data && sub.data.max_options);
+                             if (maxOptions && maxOptions > 0) {
+                                  // Use Helper for Count
+                                  const values = FormValidator.getTicketFieldValues(ticketItem, sub);
+                                  const selectedCount = values.length;
+
+                                  if (selectedCount > maxOptions) {
+                                            const idxToUse = ticketItem['_ticketIndex'] !== undefined ? ticketItem['_ticketIndex'] : tIdx;
+                                            const errorId = FormHelper.getTicketInputName(field.id, idxToUse, sub.id);
+                                            // Fallback string or format
+                                            errors[errorId] = (FormStrings.maxOptionsReached || "Maximum options: {0}").replace('{0}', maxOptions);
+                                       }
+                                  }
+                          });
                     });
                     
                     return; // Done with ticket field itself

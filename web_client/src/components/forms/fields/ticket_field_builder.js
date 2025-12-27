@@ -13,50 +13,52 @@ export class TicketFieldBuilder {
         TicketFieldBuilder._uniqueIndexCounter = 0;
     }
 
+    static _prepareScopedDef(scopedDef) {
+         if (scopedDef.type === 'product_type') {
+             // Map Options if needed
+             if (scopedDef.data && scopedDef.data.product_type_data && scopedDef.data.product_type_data.products) {
+                 if (!scopedDef.options || scopedDef.options.length === 0) {
+                     scopedDef.options = scopedDef.data.product_type_data.products.map(p => ({
+                         id: p.id,
+                         title: p.title,
+                         description: p.description,
+                         price: p.price,
+                         currency: p.currency
+                     }));
+                 }
+             }
+             // Ensure label is visible
+             delete scopedDef._hideLabel; 
+         }
+    }
+
     static create(field, formModel, session) {
+    
         const container = document.createElement('div');
         container.className = 'form-field-container ticket-field';
         container.dataset.fieldId = field.id;
         
-        // --- State Inversion: Sync DOM with Session State ---
-        // If session already has tickets (restored state), we should render them?
-        // Subscribe to session events for reactivity.
-        
-        const subFields = field.subFields || field.fields || (field.data && field.data.fields) || [];
+        // Subscription for reactivity handled below
         const hasSpotField = subFields.some(f => f.type === 'spot');
 
-        // Setup Reactivity: Re-render list on state change
-        // We only do this for Complex Mode? Simple mode (0) might also change if tickets cleared.
-        // Let's create a Render Function.
         
-        const updateListFromSession = () => {
-             // To be implemented inside Complex Mode helper or globally?
-             // Accessing 'listContainer' or 'container' here is fine if defined.
-        };
-
-        // Blueprint Button Logic
-        if (formModel.blueprint) {
-             const blueprintBtn = document.createElement('button');
-             blueprintBtn.type = 'button';
-             blueprintBtn.className = 'btn btn-primary btn-block'; // Bootstrap classes for full width/margin
-             blueprintBtn.style.width = '100%';
-             blueprintBtn.style.marginBottom = '24px';
-             blueprintBtn.innerHTML = `<i class="material-icons" style="vertical-align: middle; margin-right: 8px;">event_seat</i> ${FormStrings.seatSelection || 'Select Seat'}`;
-             
-             blueprintBtn.onclick = () => {
-                 import('../../blueprint/blueprint_selector.js').then(({ BlueprintSelector }) => {
-                     const selector = new BlueprintSelector();
-                     // Pass session instead of formModel. No callback relying on Session Events.
-                     selector.open(session, field, container.selectedSeats || []);
-                 });
-             };
-             
-             container.appendChild(blueprintBtn);
+        // Mode Logic
+        // Simple Mode: 1 Ticket, no Spots (just fields).
+        // Complex Mode: >1 Tickets OR Spots (Ticket List UI).
+        
+        let forceComplex = false;
+        if (session && session.maxTickets > 1) {
+             forceComplex = true;
         }
 
-        if (!hasSpotField) {
+        if (!hasSpotField && !forceComplex) {
             // --- Simple Mode (Direct Fields) ---
             
+            // 1. Ensure Session has at least 1 ticket
+            if (session && session.state.tickets.length === 0) {
+                session.addTicket(); 
+            }
+
             // Render subfields directly
             subFields.forEach((subDef, idx) => {
                 // Ensure Unique ID for Label/Input association (crucial for A11y and Validation)
@@ -69,20 +71,7 @@ export class TicketFieldBuilder {
                     // but we must ensure they process 'isRequired' correctly.
                 }
 
-                if (scopedDef.type === 'product_type' && scopedDef.data && scopedDef.data.product_type_data && scopedDef.data.product_type_data.products) {
-                     if (!scopedDef.options || scopedDef.options.length === 0) {
-                         scopedDef.options = scopedDef.data.product_type_data.products.map(p => ({
-                             id: p.id,
-                             title: p.title,
-                             description: p.description,
-                             price: p.price
-                         }));
-                     }
-                }
-
-                if (scopedDef.type === 'product_type') {
-                     delete scopedDef._hideLabel; 
-                }
+                TicketFieldBuilder._prepareScopedDef(scopedDef);
 
                 const subComp = FormFieldBuilder.createFormField(scopedDef, formModel);
                 
@@ -97,16 +86,61 @@ export class TicketFieldBuilder {
                 container.appendChild(subComp);
             });
             
-            // Register initial ticket in session if not present?
-            // Simple mode = 1 ticket always.
-            if (session && session.state.tickets.length === 0) {
-                session.addTicket(); 
+            // --- Reactivity for Simple Mode ---
+            if (session) {
+                const syncSimpleFromSession = () => {
+                     if (session.state.tickets.length === 0) return;
+                     const ticketData = session.state.tickets[0];
+                     if (!ticketData || !ticketData.fields) return;
+
+                     const inputs = container.querySelectorAll('input, select, textarea');
+                     inputs.forEach(input => {
+                         const subId = input.dataset.subId;
+                         if (!subId) return;
+
+                         // Find value in ticket fields
+                         const fieldEntry = ticketData.fields.find(f => f._subFieldId === subId);
+                         let newVal = '';
+                         if (fieldEntry) {
+                             newVal = fieldEntry.value || fieldEntry[fieldEntry.type] || '';
+                             if (fieldEntry.type === 'product_type' && fieldEntry.product_type) newVal = fieldEntry.product_type;
+                         }
+                         
+                         // Update Input if needed
+                         if (input.type === 'radio' || input.type === 'checkbox') {
+                             if (input.value === newVal || String(input.value) === String(newVal)) {
+                                 input.checked = true;
+                             } else if (input.type === 'radio') {
+                                 // For radios, only uncheck if we are strictly ensuring single selection?
+                                 // Browser handles uncheck of others. 
+                                 // But if value is explicitly null (cleared), we should uncheck everything?
+                                 // Let's rely on mapped value.
+                                 // If this specific radio matches newVal, check it.
+                                 // If newVal is undefined, maybe uncheck?
+                             }
+                         } else {
+                             if (input.value !== newVal && document.activeElement !== input) {
+                                 input.value = newVal;
+                             }
+                         }
+                     });
+                };
+                
+                // Initial Sync (to reflect defaults from addTicket)
+                // Use timeout to allow DOM paint? No, synchronous is fine properly.
+                // But addTicket might have happened just now.
+                syncSimpleFromSession();
+
+                session.addEventListener('state-changed', () => {
+                    syncSimpleFromSession();
+                });
             }
             
             return container;
 
         } else {
             // --- Complex Mode (Seat Selection / Multiple Items) ---
+
             
              if (field.title && field.title !== 'Tickets' && field.title !== OrdersStrings.tickets) {
                  const label = document.createElement('label');
@@ -195,15 +229,10 @@ export class TicketFieldBuilder {
 
                 if (sortedSubFields.length > 0) {
                     sortedSubFields.forEach(subDef => {
-                        // Create scoped definition with UNIQUE ID using list index
-                        // WARN: using 'index' passed to renderTicketItem might overlap if not managed?
-                        // Actually, 'index' comes from loop or counter.
-                        // Ideally session gives us an ID.
-                        // Create scoped definition with UNIQUE ID using list index
-                        // WARN: using 'index' passed to renderTicketItem might overlap if not managed?
-                        // Actually, 'index' comes from loop or counter.
-                        // Ideally session gives us an ID.
+                        // Create scoped definition
                         const scopedDef = { ...subDef, id: FormHelper.getTicketInputName(field.id, index, subDef.id) };
+                        
+                        TicketFieldBuilder._prepareScopedDef(scopedDef);
 
                         // --- Restore Value from Session ---
                         if (ticketData && ticketData.fields) {
@@ -220,8 +249,6 @@ export class TicketFieldBuilder {
                             }
                         }
                         
-                        // --- Validation: JS Required ---
-                        // Ensure required logic is passed down.
                         if (subDef.isRequired) scopedDef.isRequired = true;
 
                         // --- SPOT FIELD HANDLING ---
@@ -312,6 +339,80 @@ export class TicketFieldBuilder {
                      hint.textContent = "Ticket details";
                      ticketItem.appendChild(hint);
                 }
+                ticketItem.updateFromSession = (currentIndex) => {
+                    if (currentIndex !== undefined) index = currentIndex;
+                    // Check detachment again just in case
+                    if (!document.body.contains(ticketItem) && !listContainer.contains(ticketItem)) return;
+
+                    const inputs = ticketItem.querySelectorAll('input, select, textarea');
+                    if (!session || !session.state.tickets[index]) return;
+                    const ticketData = session.state.tickets[index];
+                    
+                    // Iterate DOM Inputs (Source of UI Truth) -> Sync from State
+                    inputs.forEach(input => {
+                        const subId = input.dataset.subId;
+                        if (!subId) return;
+
+                        // Find value in ticket fields
+                        // ticketData.fields is array of value objects
+                        const fieldEntry = ticketData.fields ? ticketData.fields.find(f => String(f._subFieldId) === String(subId)) : null;
+
+                        // Improved Value Resolution
+                        let val = undefined;
+                        if (fieldEntry) {
+                            val = fieldEntry.value;
+                            if (val === undefined) {
+                                // Check common keys
+                                if (fieldEntry.product_type !== undefined) val = fieldEntry.product_type;
+                                else if (fieldEntry.text !== undefined) val = fieldEntry.text;
+                                else {
+                                    // Fallback: Exclude metadata keys
+                                    val = Object.entries(fieldEntry).find(([k, v]) => 
+                                        k !== '_subFieldId' && 
+                                        k !== 'currency_code' && 
+                                        k !== 'price'
+                                    )?.[1];
+                                }
+                            }
+                        }
+                        
+                        // Don't overwrite active element to avoid cursor jumping (except checkboxes/radios where it matters less)
+                        if (document.activeElement === input && input.type !== 'checkbox' && input.type !== 'radio') return;
+
+                        // Apply Value
+                        if (input.type === 'radio') {
+                             const shouldBeChecked = val !== undefined && String(input.value) === String(val);
+                             if (input.checked !== shouldBeChecked) {
+                                 input.checked = shouldBeChecked;
+                             }
+                        } else if (input.type === 'checkbox') {
+                             // Checkbox Logic (Multiselect support)
+                             // Session value might be "101 | 102"
+                             let isChecked = false;
+                             if (val !== undefined && val !== null) {
+                                 if (val === true || val === 'true') {
+                                     isChecked = true;
+                                 } else {
+                                     const valStr = String(val);
+                                     const parts = valStr.split(' | ');
+                                     isChecked = parts.some(p => String(p) === String(input.value));
+                                 }
+                             }
+                             
+                             if (input.checked !== isChecked) {
+                                 input.checked = isChecked;
+                             }
+                        } else {
+                             // Text/Select
+                             const expected = val !== undefined ? val : '';
+                             if (String(input.value) !== String(expected)) {
+                                 input.value = expected;
+                             }
+                        }
+                    });
+                };
+
+                if (ticketItem.updateFromSession) ticketItem.updateFromSession(index);
                 listContainer.appendChild(ticketItem);
             };
     
@@ -322,15 +423,22 @@ export class TicketFieldBuilder {
                 
                 container.selectedSeats = []; 
                 
-                const existingBtn = container.querySelector('button.btn-primary');
-                if (existingBtn) {
-                    existingBtn.onclick = () => {
-                         import('../../blueprint/blueprint_selector.js').then(({ BlueprintSelector }) => {
-                             const selector = new BlueprintSelector();
-                             selector.open(session, field, container.selectedSeats || []);
-                         });
-                    };
+                let existingBtn = container.querySelector('button.btn-primary.btn-blueprint-select');
+                
+                if (!existingBtn) {
+                     existingBtn = document.createElement('button');
+                     existingBtn.type = 'button';
+                     existingBtn.className = 'btn btn-primary btn-blueprint-select w-100 d-block';
+                     existingBtn.textContent = FormStrings.seatSelection || "Select Seats";
+                     container.appendChild(existingBtn);
                 }
+
+                existingBtn.onclick = () => {
+                     import('../../blueprint/blueprint_selector.js').then(({ BlueprintSelector }) => {
+                         const selector = new BlueprintSelector();
+                         selector.open(session, field, container.selectedSeats || []);
+                     });
+                };
                 
                 // Do NOT add "Add Ticket" button in blueprint mode
                 
@@ -345,10 +453,6 @@ export class TicketFieldBuilder {
                 addBtn.onclick = () => {
                      // --- STATE INVERSION: Call Session ---
                      if (session) session.addTicket(); // Add dummy/empty ticket
-                     
-                     // Render DOM
-                     renderTicketItem(listContainer.children.length);
-                     container.dispatchEvent(new Event('input', { bubbles: true }));
                 };
                 container.appendChild(addBtn);
                 
@@ -370,6 +474,7 @@ export class TicketFieldBuilder {
     
             // --- Helper to Re-Sync List from Session (Reactivity) ---
             const syncListFromSession = () => {
+
                  const newTickets = session.state.tickets;
                  const currentItems = Array.from(listContainer.children);
 
@@ -378,9 +483,9 @@ export class TicketFieldBuilder {
                  
                  if (newTickets.length !== currentItems.length) {
                      structureChanged = true;
+                     console.log(`[TicketFieldBuilder] Structure changed (length mismatch): ${newTickets.length} vs ${currentItems.length}`);
                  } else {
                      // Check Spots (if any mismatch, we rebuild)
-                     // If we moved items, we rebuild.
                      for (let i = 0; i < newTickets.length; i++) {
                          const t = newTickets[i];
                          const item = currentItems[i];
@@ -390,67 +495,69 @@ export class TicketFieldBuilder {
                          if (t.spot) {
                              if (String(t.spot) !== String(item.dataset.seatId)) {
                                  structureChanged = true;
+
                                  break;
                              }
                          } else {
                              // If ticket has no spot, but DOM item has seatId -> Changed
                              if (item.dataset.seatId) {
                                  structureChanged = true;
+
                                  break;
                              }
                          }
                      }
                  }
 
+                 // Helper for global button visibility
+                 const updateButtonVisibility = () => {
+                     const addBtn = container.querySelector('.btn-add-ticket');
+                     if (addBtn) {
+                         // Check Limit
+                         const max = session.maxTickets || 999;
+                         if (session.state.tickets.length >= max) {
+                             addBtn.style.display = 'none';
+                         } else {
+                             addBtn.style.display = '';
+                         }
+
+                         // ONE TICKET MINIMUM RULE (Manual Mode)
+                         const removeBtns = container.querySelectorAll('.btn-remove-ticket');
+                         const count = session.state.tickets.length;
+                         removeBtns.forEach(btn => {
+                             if (count <= 1) {
+                                 btn.style.display = 'none';
+                             } else {
+                                 btn.style.display = '';
+                             }
+                         });
+                     }
+                 };
+
                  if (!structureChanged) {
                      // Structure is stable. 
-                     // iterate regular inputs and update values if needed (Programmatic updates)
-                     // BUT skip the active element to prevent fighting the user.
-                     
-                     newTickets.forEach((t, i) => {
-                         const ticketItem = currentItems[i];
-                         if (!ticketItem) return;
+                     // iterate items and call updateFromSession
 
-                         if (t.fields) {
-                             t.fields.forEach(f => {
-                                 if (!f._subFieldId) return;
-                                 // Try to find input by subId
-                                 // We rely on dataset.subId which we added in renderTicketItem
-                                 const input = ticketItem.querySelector(`[data-sub-id="${f._subFieldId}"]`);
-                                 if (input) {
-                                     // Don't touch if user is typing in it
-                                     if (document.activeElement === input) return;
-                                     
-                                     // Check value mismatch
-                                     // Handle checkbox vs value
-                                     if (input.type === 'checkbox') {
-                                         // complex value parsing or just check match?
-                                         // We don't easily know if 'val' maps to checked without checking value attr
-                                         // For now, skip checkboxes to be safe or implement later.
-                                     } else {
-                                         // Check value match
-                                         // t.fields has { [type]: val }
-                                         // construct val again?
-                                         // f is the value object: { text: "John", _subFieldId: "name" }
-                                         // We don't know the type key easily here without definition.
-                                         // But we can check values(f) excludes _subId?
-                                         const val = Object.entries(f).find(([k, v]) => k !== '_subFieldId' && k !== 'currency_code' && k !== 'product_type')?.[1];
-                                         
-                                         if (val !== undefined && String(input.value) !== String(val)) {
-                                             console.log(`[TicketFieldBuilder] Syncing value for ${f._subFieldId}: ${input.value} -> ${val}`);
-                                             input.value = val;
-                                         }
-                                     }
-                                 }
-                             });
+                     currentItems.forEach((ticketItem, i) => {
+                         if (ticketItem.updateFromSession) {
+                             ticketItem.updateFromSession(i);
+                         } else {
+                             console.warn(`[TicketFieldBuilder] Item ${i} missing updateFromSession!`);
                          }
                      });
                      
-                     return; // Skip Full Re-render
-                 }
+                     // Ensure visibility logic runs even on stable updates
+                     updateButtonVisibility();
 
-                 // Full Rebuild
-                 // console.log('[TicketFieldBuilder] Structure changed, rebuilding list.');
+                     return; // Skip Full Re-render
+                  }
+
+                  // Full Rebuild
+                  // Explicitly detach old items to prevent Ghost Listeners
+                  currentItems.forEach(item => {
+                      if (item.updateFromSession) item.updateFromSession = null;
+                      item.remove();
+                  });
                  listContainer.innerHTML = '';
                  container.selectedSeats = [];
                  
@@ -473,16 +580,29 @@ export class TicketFieldBuilder {
                  });
                  
                  container.dispatchEvent(new Event('input', { bubbles: true }));
+                 
+                 // Update Add Button Visibility
+                 updateButtonVisibility();
+
             };
 
             if (session) {
                 // Initial Sync
+
                 syncListFromSession();
                 
                 // Subscribe
-                session.addEventListener('state-changed', () => {
-                    syncListFromSession();
-                });
+                // Subscribe with cleanup
+                const stateHandler = () => syncListFromSession();
+                session.addEventListener('state-changed', stateHandler);
+                
+                // Expose destroy for Memory Management
+                container.destroy = () => {
+                     session.removeEventListener('state-changed', stateHandler);
+                };
+                
+                // Also auto-cleanup if detached (MutationObserver is overkill, but simple check in sync helps)
+                // The destroy() method is the robust way.
             }
 
             return container;
