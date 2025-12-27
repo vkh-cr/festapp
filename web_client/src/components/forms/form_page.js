@@ -8,7 +8,7 @@ import { FormHelper } from './form_helper.js';
 import { FormFieldBuilder } from './fields/form_field_builder.js';
 import { TicketFieldBuilder } from './fields/ticket_field_builder.js';
 import { DbForms } from './db_forms.js';
-import { OrderPreview } from './order_preview.js';
+
 import { DbOrders } from '../eshop/db_orders.js';
 import { RouterService } from '../../services/router_service.js';
 import { RightsService } from '../../services/rights_service.js';
@@ -383,9 +383,7 @@ export class FormPage extends Component {
     }
 
     validateAndSubmit(form, formModel) {
-        console.log('[FormPage] validateAndSubmit called');
         const isValid = FormValidator.validateAndShowErrors(form, formModel, this.currentSession);
-        console.log('[FormPage] Custom Validator Result:', isValid);
         
         if (isValid) {
             this.handlePreview(form, formModel);
@@ -400,34 +398,35 @@ export class FormPage extends Component {
         return FormHelper.calculatePrice(payload, formModel);
     }
 
+    // --- DEBUG HELPER ---
     handlePreview(form, formModel) {
-        console.log('[FormPage] handlePreview called');
-        
         // Native Validation Check
+        // Explicitly check native validity before proceeding, 
+        // as some browsers might not block onSubmit if preventDefault was called early?
+        // Actually, normally 'submit' event only fires if valid. 
+        // But we are calling this from our explicit handler.
         if (!form.reportValidity()) {
-            console.warn('[FormPage] form.reportValidity() failed. Scanning for native invalid elements...');
-            Array.from(form.elements).forEach(el => {
-                if (el.willValidate && !el.checkValidity()) {
-                    console.warn('[FormPage] Native Invalid Element:', el.name || el.id || el.tagName, el.validationMessage, el);
-                }
-            });
             return;
         }
 
-        console.log('[FormPage] Native validation passed. Importing OrderPreview...');
-
         import('./order_preview.js').then(({ OrderPreview }) => {
-             console.log('[FormPage] OrderPreview module loaded.', OrderPreview);
              try {
                  const priceData = this.calculateTotal(form, formModel);
                  const precalculatedPayload = this.currentSession ? this.currentSession.payload : null;
+                 
                  OrderPreview.show(form, formModel, priceData, (overlay) => {
+                     // On Confirm
                      this.submitOrder(form, formModel, overlay || document.body); 
-                 }, () => {}, precalculatedPayload);
+                 }, () => {
+                     // On Close
+                 }, precalculatedPayload);
+                 
              } catch (e) {
                  console.error('[FormPage] OrderPreview.show crashed:', e);
              }
-        }).catch(err => console.error('[FormPage] Failed to load OrderPreview module', err));
+        }).catch(err => {
+             console.error('[FormPage] Failed to load OrderPreview module', err);
+        });
     }
     
     closePreview() {

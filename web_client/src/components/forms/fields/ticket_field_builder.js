@@ -28,17 +28,26 @@ export class TicketFieldBuilder {
                  }
              }
              // Ensure label is visible
-             delete scopedDef._hideLabel; 
+             delete scopedDef._hideLabel;
          }
     }
 
     static create(field, formModel, session) {
-    
+
         const container = document.createElement('div');
         container.className = 'form-field-container ticket-field';
         container.dataset.fieldId = field.id;
         
-        const subFields = field.subFields || [];
+        // Error Container for the Field Itself (e.g. "At least one ticket required")
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'form-field-error';
+        errorDiv.style.display = 'none';
+        container.appendChild(errorDiv);
+
+        let subFields = field.subFields;
+        if (!subFields || subFields.length === 0) {
+             subFields = field.fields || (field.data && field.data.fields) || [];
+        }
 
         // Subscription for reactivity handled below
         const hasSpotField = subFields.some(f => f.type === 'spot');
@@ -47,7 +56,7 @@ export class TicketFieldBuilder {
         // Mode Logic
         // Simple Mode: 1 Ticket, no Spots (just fields).
         // Complex Mode: >1 Tickets OR Spots (Ticket List UI).
-        
+
         let forceComplex = false;
         if (session && session.maxTickets > 1) {
              forceComplex = true;
@@ -58,7 +67,7 @@ export class TicketFieldBuilder {
             
             // 1. Ensure Session has at least 1 ticket
             if (session && session.state.tickets.length === 0) {
-                session.addTicket(); 
+                session.addTicket();
             }
 
             // Render subfields directly
@@ -107,14 +116,14 @@ export class TicketFieldBuilder {
                              newVal = fieldEntry.value || fieldEntry[fieldEntry.type] || '';
                              if (fieldEntry.type === 'product_type' && fieldEntry.product_type) newVal = fieldEntry.product_type;
                          }
-                         
+
                          // Update Input if needed
                          if (input.type === 'radio' || input.type === 'checkbox') {
                              if (input.value === newVal || String(input.value) === String(newVal)) {
                                  input.checked = true;
                              } else if (input.type === 'radio') {
                                  // For radios, only uncheck if we are strictly ensuring single selection?
-                                 // Browser handles uncheck of others. 
+                                 // Browser handles uncheck of others.
                                  // But if value is explicitly null (cleared), we should uncheck everything?
                                  // Let's rely on mapped value.
                                  // If this specific radio matches newVal, check it.
@@ -127,7 +136,7 @@ export class TicketFieldBuilder {
                          }
                      });
                 };
-                
+
                 // Initial Sync (to reflect defaults from addTicket)
                 // Use timeout to allow DOM paint? No, synchronous is fine properly.
                 // But addTicket might have happened just now.
@@ -143,7 +152,7 @@ export class TicketFieldBuilder {
         } else {
             // --- Complex Mode (Seat Selection / Multiple Items) ---
 
-            
+
              if (field.title && field.title !== 'Tickets' && field.title !== OrdersStrings.tickets) {
                  const label = document.createElement('label');
                  label.className = 'form-field-label';
@@ -233,7 +242,7 @@ export class TicketFieldBuilder {
                     sortedSubFields.forEach(subDef => {
                         // Create scoped definition
                         const scopedDef = { ...subDef, id: FormHelper.getTicketInputName(field.id, index, subDef.id) };
-                        
+
                         TicketFieldBuilder._prepareScopedDef(scopedDef);
 
                         // --- Restore Value from Session ---
@@ -250,7 +259,7 @@ export class TicketFieldBuilder {
                                 }
                             }
                         }
-                        
+
                         if (subDef.isRequired) scopedDef.isRequired = true;
 
                         // --- SPOT FIELD HANDLING ---
@@ -349,7 +358,7 @@ export class TicketFieldBuilder {
                     const inputs = ticketItem.querySelectorAll('input, select, textarea');
                     if (!session || !session.state.tickets[index]) return;
                     const ticketData = session.state.tickets[index];
-                    
+
                     // Iterate DOM Inputs (Source of UI Truth) -> Sync from State
                     inputs.forEach(input => {
                         const subId = input.dataset.subId;
@@ -369,15 +378,15 @@ export class TicketFieldBuilder {
                                 else if (fieldEntry.text !== undefined) val = fieldEntry.text;
                                 else {
                                     // Fallback: Exclude metadata keys
-                                    val = Object.entries(fieldEntry).find(([k, v]) => 
-                                        k !== '_subFieldId' && 
-                                        k !== 'currency_code' && 
+                                    val = Object.entries(fieldEntry).find(([k, v]) =>
+                                        k !== '_subFieldId' &&
+                                        k !== 'currency_code' &&
                                         k !== 'price'
                                     )?.[1];
                                 }
                             }
                         }
-                        
+
                         // Don't overwrite active element to avoid cursor jumping (except checkboxes/radios where it matters less)
                         if (document.activeElement === input && input.type !== 'checkbox' && input.type !== 'radio') return;
 
@@ -400,7 +409,7 @@ export class TicketFieldBuilder {
                                      isChecked = parts.some(p => String(p) === String(input.value));
                                  }
                              }
-                             
+
                              if (input.checked !== isChecked) {
                                  input.checked = isChecked;
                              }
@@ -426,7 +435,7 @@ export class TicketFieldBuilder {
                 container.selectedSeats = []; 
                 
                 let existingBtn = container.querySelector('button.btn-primary.btn-blueprint-select');
-                
+
                 if (!existingBtn) {
                      existingBtn = document.createElement('button');
                      existingBtn.type = 'button';
@@ -582,7 +591,7 @@ export class TicketFieldBuilder {
                  });
                  
                  container.dispatchEvent(new Event('input', { bubbles: true }));
-                 
+
                  // Update Add Button Visibility
                  updateButtonVisibility();
 
@@ -597,12 +606,12 @@ export class TicketFieldBuilder {
                 // Subscribe with cleanup
                 const stateHandler = () => syncListFromSession();
                 session.addEventListener('state-changed', stateHandler);
-                
+
                 // Expose destroy for Memory Management
                 container.destroy = () => {
                      session.removeEventListener('state-changed', stateHandler);
                 };
-                
+
                 // Also auto-cleanup if detached (MutationObserver is overkill, but simple check in sync helps)
                 // The destroy() method is the robust way.
             }
