@@ -58,11 +58,12 @@ export class RadioFieldBuilder {
                 }
                 
                 // Debug Checked Logic
-                const isSelected = (field.value !== undefined && field.value !== null) && (String(opt.id) === String(field.value));
+                // Use the exact same value derivation as the input.value to ensure consistency
+                const optionValue = (opt.id !== undefined && opt.id !== null) ? opt.id : opt.title;
+                const isSelected = (field.value !== undefined && field.value !== null) && (String(optionValue) === String(field.value));
+                
                 if (isSelected) {
                      input.checked = true;
-                } else if (field.value !== undefined) {
-                     // ...
                 }
                 
                 if (isCardDesign) {
@@ -119,12 +120,15 @@ export class RadioFieldBuilder {
         container.addEventListener('change', (e) => {
             // Loose equality to handle numeric IDs vs string attribute
             if (e.target.name == field.id && e.target.type === 'radio') {
-                clearBtn.style.display = 'inline-block';
+                // Ensure button reflects REALITY: Check if anything is actually checked
+                // This handles cases where uncheck events are dispatched
+                const anyChecked = container.querySelector(`input[name="${field.id}"]:checked`);
+                clearBtn.style.display = anyChecked ? 'inline-block' : 'none';
             }
         });
 
-        // Show initially if value is present
-        if (field.value !== undefined && field.value !== null && field.value !== '') {
+        const initialChecked = container.querySelector('input:checked');
+        if (field.value !== undefined && field.value !== null && field.value !== '' && initialChecked) {
              clearBtn.style.display = 'inline-block';
         }
 

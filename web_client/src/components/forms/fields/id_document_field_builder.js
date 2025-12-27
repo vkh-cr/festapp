@@ -1,9 +1,10 @@
 import flatpickr from "flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
+// import 'flatpickr/dist/flatpickr.min.css'; // Commented out for Node.js test runner (JSDOM) compatibility
 import { Czech } from "flatpickr/dist/l10n/cs.js";
 import { LocalizationService } from '../../../services/localization_service.js';
 import { FormStrings } from '../form_strings.js';
 import { TextFieldBuilder } from './text_field_builder.js';
+import { CommonStrings } from '../../shared/common_strings.js';
 import { DateFieldBuilder } from './date_field_builder.js';
 import { FormFieldBuilder } from './form_field_builder.js';
 
