@@ -13,17 +13,32 @@ export class TicketFieldBuilder {
         TicketFieldBuilder._uniqueIndexCounter = 0;
     }
 
+    static _prepareScopedDef(scopedDef) {
+         if (scopedDef.type === 'product_type') {
+             // Map Options if needed
+             if (scopedDef.data && scopedDef.data.product_type_data && scopedDef.data.product_type_data.products) {
+                 if (!scopedDef.options || scopedDef.options.length === 0) {
+                     scopedDef.options = scopedDef.data.product_type_data.products.map(p => ({
+                         id: p.id,
+                         title: p.title,
+                         description: p.description,
+                         price: p.price,
+                         currency: p.currency
+                     }));
+                 }
+             }
+             // Ensure label is visible
+             delete scopedDef._hideLabel; 
+         }
+    }
+
     static create(field, formModel, session) {
     
         const container = document.createElement('div');
         container.className = 'form-field-container ticket-field';
         container.dataset.fieldId = field.id;
         
-        // --- State Inversion: Sync DOM with Session State ---
-        // If session already has tickets (restored state), we should render them?
-        // Subscribe to session events for reactivity.
-        
-        const subFields = field.subFields || field.fields || (field.data && field.data.fields) || [];
+        // Subscription for reactivity handled below
         const hasSpotField = subFields.some(f => f.type === 'spot');
 
         
@@ -56,20 +71,7 @@ export class TicketFieldBuilder {
                     // but we must ensure they process 'isRequired' correctly.
                 }
 
-                if (scopedDef.type === 'product_type' && scopedDef.data && scopedDef.data.product_type_data && scopedDef.data.product_type_data.products) {
-                     if (!scopedDef.options || scopedDef.options.length === 0) {
-                         scopedDef.options = scopedDef.data.product_type_data.products.map(p => ({
-                             id: p.id,
-                             title: p.title,
-                             description: p.description,
-                             price: p.price
-                         }));
-                     }
-                }
-
-                if (scopedDef.type === 'product_type') {
-                     delete scopedDef._hideLabel; 
-                }
+                TicketFieldBuilder._prepareScopedDef(scopedDef);
 
                 const subComp = FormFieldBuilder.createFormField(scopedDef, formModel);
                 
@@ -227,32 +229,10 @@ export class TicketFieldBuilder {
 
                 if (sortedSubFields.length > 0) {
                     sortedSubFields.forEach(subDef => {
-                        // Create scoped definition with UNIQUE ID using list index
-                        // WARN: using 'index' passed to renderTicketItem might overlap if not managed?
-                        // Actually, 'index' comes from loop or counter.
-                        // Ideally session gives us an ID.
-                        // Create scoped definition with UNIQUE ID using list index
-                        // WARN: using 'index' passed to renderTicketItem might overlap if not managed?
-                        // Actually, 'index' comes from loop or counter.
-                        // Ideally session gives us an ID.
+                        // Create scoped definition
                         const scopedDef = { ...subDef, id: FormHelper.getTicketInputName(field.id, index, subDef.id) };
                         
-                        // --- Option Mapping for Product Types (Fix for Multiselect in Complex Mode) ---
-                        if (scopedDef.type === 'product_type' && scopedDef.data && scopedDef.data.product_type_data && scopedDef.data.product_type_data.products) {
-                             if (!scopedDef.options || scopedDef.options.length === 0) {
-                                 scopedDef.options = scopedDef.data.product_type_data.products.map(p => ({
-                                     id: p.id,
-                                     title: p.title,
-                                     description: p.description,
-                                     price: p.price,
-                                     currency: p.currency
-                                 }));
-                             }
-                        }
-                        // Ensure label is shown for product types if hidden by default logic
-                        if (scopedDef.type === 'product_type') {
-                             delete scopedDef._hideLabel; 
-                        }
+                        TicketFieldBuilder._prepareScopedDef(scopedDef);
 
                         // --- Restore Value from Session ---
                         if (ticketData && ticketData.fields) {
@@ -269,8 +249,6 @@ export class TicketFieldBuilder {
                             }
                         }
                         
-                        // --- Validation: JS Required ---
-                        // Ensure required logic is passed down.
                         if (subDef.isRequired) scopedDef.isRequired = true;
 
                         // --- SPOT FIELD HANDLING ---
@@ -370,72 +348,68 @@ export class TicketFieldBuilder {
                     if (!session || !session.state.tickets[index]) return;
                     const ticketData = session.state.tickets[index];
                     
-                    if (ticketData.fields) {
-                        ticketData.fields.forEach(f => {
-                             if (!f._subFieldId) return;
-                             
-                             // Find all inputs for this subField (e.g. all radios)
-                             const matchingInputs = Array.from(inputs).filter(i => String(i.dataset.subId) === String(f._subFieldId));
-                             
-                             matchingInputs.forEach(input => {
-                                 if (document.activeElement === input) return;
+                    // Iterate DOM Inputs (Source of UI Truth) -> Sync from State
+                    inputs.forEach(input => {
+                        const subId = input.dataset.subId;
+                        if (!subId) return;
 
-                                 // Improved Value Resolution
-                                 let val = f.value;
-                                 if (val === undefined) {
-                                     // Check common keys
-                                     if (f.product_type !== undefined) val = f.product_type;
-                                     else if (f.text !== undefined) val = f.text;
-                                     else {
-                                         // Fallback: Exclude metadata keys
-                                         val = Object.entries(f).find(([k, v]) => 
-                                             k !== '_subFieldId' && 
-                                             k !== 'currency_code' && 
-                                             k !== 'price'
-                                         )?.[1];
-                                     }
-                                 }
-                                 
-                
+                        // Find value in ticket fields
+                        // ticketData.fields is array of value objects
+                        const fieldEntry = ticketData.fields ? ticketData.fields.find(f => String(f._subFieldId) === String(subId)) : null;
 
-                                 // Apply Value
-                                 if (val !== undefined) {
+                        // Improved Value Resolution
+                        let val = undefined;
+                        if (fieldEntry) {
+                            val = fieldEntry.value;
+                            if (val === undefined) {
+                                // Check common keys
+                                if (fieldEntry.product_type !== undefined) val = fieldEntry.product_type;
+                                else if (fieldEntry.text !== undefined) val = fieldEntry.text;
+                                else {
+                                    // Fallback: Exclude metadata keys
+                                    val = Object.entries(fieldEntry).find(([k, v]) => 
+                                        k !== '_subFieldId' && 
+                                        k !== 'currency_code' && 
+                                        k !== 'price'
+                                    )?.[1];
+                                }
+                            }
+                        }
+                        
+                        // Don't overwrite active element to avoid cursor jumping (except checkboxes/radios where it matters less)
+                        if (document.activeElement === input && input.type !== 'checkbox' && input.type !== 'radio') return;
 
-                                     if (input.type === 'radio') {
-                                         const shouldBeChecked = String(input.value) === String(val);
-                                         if (input.checked !== shouldBeChecked) {
-                                             input.checked = shouldBeChecked;
-                                         }
-                                     } else if (input.type === 'checkbox') {
-                                         // Checkbox Logic (Multiselect support)
-                                         // Session value might be "101 | 102"
-                                         // Input value is "101"
-                                         
-                                         let isChecked = false;
-                                         if (val === true || val === 'true') {
-                                             isChecked = true;
-                                         } else if (val) {
-                                             const valStr = String(val);
-                                             const parts = valStr.split(' | ');
-                                             isChecked = parts.some(p => String(p) === String(input.value));
-                                         }
-                                         
-                                         if (input.checked !== isChecked) {
-                                             input.checked = isChecked;
-                                         }
-                                     } else {
-                                          if (String(input.value) !== String(val)) {
-                                              input.value = val;
-                                          }
-                                     }
+                        // Apply Value
+                        if (input.type === 'radio') {
+                             const shouldBeChecked = val !== undefined && String(input.value) === String(val);
+                             if (input.checked !== shouldBeChecked) {
+                                 input.checked = shouldBeChecked;
+                             }
+                        } else if (input.type === 'checkbox') {
+                             // Checkbox Logic (Multiselect support)
+                             // Session value might be "101 | 102"
+                             let isChecked = false;
+                             if (val !== undefined && val !== null) {
+                                 if (val === true || val === 'true') {
+                                     isChecked = true;
                                  } else {
-                                     // Value is undefined (cleared?)
-                                     if (input.type === 'radio') input.checked = false;
-                                     else if (input.type !== 'checkbox') input.value = '';
+                                     const valStr = String(val);
+                                     const parts = valStr.split(' | ');
+                                     isChecked = parts.some(p => String(p) === String(input.value));
                                  }
-                             });
-                        });
-                    }
+                             }
+                             
+                             if (input.checked !== isChecked) {
+                                 input.checked = isChecked;
+                             }
+                        } else {
+                             // Text/Select
+                             const expected = val !== undefined ? val : '';
+                             if (String(input.value) !== String(expected)) {
+                                 input.value = expected;
+                             }
+                        }
+                    });
                 };
 
                 if (ticketItem.updateFromSession) ticketItem.updateFromSession(index);
@@ -512,7 +486,6 @@ export class TicketFieldBuilder {
                      console.log(`[TicketFieldBuilder] Structure changed (length mismatch): ${newTickets.length} vs ${currentItems.length}`);
                  } else {
                      // Check Spots (if any mismatch, we rebuild)
-                     // If we moved items, we rebuild.
                      for (let i = 0; i < newTickets.length; i++) {
                          const t = newTickets[i];
                          const item = currentItems[i];
@@ -619,10 +592,17 @@ export class TicketFieldBuilder {
                 syncListFromSession();
                 
                 // Subscribe
-                session.addEventListener('state-changed', () => {
-
-                    syncListFromSession();
-                });
+                // Subscribe with cleanup
+                const stateHandler = () => syncListFromSession();
+                session.addEventListener('state-changed', stateHandler);
+                
+                // Expose destroy for Memory Management
+                container.destroy = () => {
+                     session.removeEventListener('state-changed', stateHandler);
+                };
+                
+                // Also auto-cleanup if detached (MutationObserver is overkill, but simple check in sync helps)
+                // The destroy() method is the robust way.
             }
 
             return container;

@@ -49,6 +49,9 @@ export class FormSession extends EventTarget {
         
         // --- Fix: Request Serialization Queue ---
         this._spotQueue = Promise.resolve();
+
+        // Spot Model Cache (Price Robustness)
+        this.spotModels = new Map();
     }
 
     getComponentState(key) {
@@ -78,17 +81,8 @@ export class FormSession extends EventTarget {
                 }
             });
         }
-        
-        // Rebuild Payload from State
-        // (fields logic moved to _syncPayloadFromState)
-        
+
         // 2. Tickets: Sync from State (Strict Source of Truth)
-        // If state.tickets is empty but scraped has tickets (Initial Load), adopt scraped?
-        // Better: On initial load, we might need to populate state from DOM or just start empty.
-        // Let's assume on refresh, we respect the current state if populated, 
-        // OR if it's the very first load, we might want to parse?
-        // For strictly "Split Brain" prevention, we rely on State.
-        
         this._syncPayloadFromState();
         
         this._recalculate();
@@ -102,27 +96,19 @@ export class FormSession extends EventTarget {
         // 1. Check Tickets
         this.state.tickets.forEach(ticket => {
              // Check spot
-             // We don't have full spot model here easily without lookup, 
-             // but usually spot price is fixed or adaptable.
-             // If spot has specific currency, needed logic? 
-             // Ideally we just clear products.
-
              if (ticket.fields) {
                  const fieldsToRemove = [];
                  ticket.fields.forEach((valObj, idx) => {
                      let itemCurrency = valObj.currency_code;
-                     
+
                      if (!itemCurrency) {
-                         const ticketFieldDef = this.formModel.visibleFields.find(f => f.type === 'ticket') || (this.formModel.relatedFields && this.formModel.relatedFields.find(f => f.type === 'ticket'));
-                         if (ticketFieldDef) {
-                             const subFields = ticketFieldDef.subFields || ticketFieldDef.fields || (ticketFieldDef.data && ticketFieldDef.data.fields) || [];
-                             const subDef = subFields.find(s => String(s.id) === String(valObj._subFieldId));
-                             
+                         const subDef = this._getTicketSubDef(valObj._subFieldId);
+
                              if (subDef) {
                                  // Look up option (Inclusive Strategy)
                                  const val = valObj[subDef.type];
                                  let found = null;
-                                 
+
                                  if (subDef.type === 'product_type' && subDef.data && subDef.data.product_type_data) {
                                       found = subDef.data.product_type_data.products.find(p => String(p.id) === String(val));
                                  }
@@ -136,12 +122,11 @@ export class FormSession extends EventTarget {
                                      valObj.currency_code = itemCurrency;
                                  }
                              }
-                         }
                      }
-                     
+
                      // DEBUG: Trace logic
                      // console.error(`[FormSession] Check Currency: Item=${itemCurrency} New=${newCurrency}`);
-                     
+
                      if (itemCurrency && itemCurrency !== newCurrency) {
                          fieldsToRemove.push(idx);
                      }
@@ -152,8 +137,6 @@ export class FormSession extends EventTarget {
                      ticket.fields.splice(fieldsToRemove[i], 1);
                      hasChanges = true;
                  }
-                 
-                 // Auto-Select Logic REMOVED per user request.
      }
  });
 
@@ -161,13 +144,8 @@ export class FormSession extends EventTarget {
         for (const [key, val] of this.state.fields.entries()) {
              // ... standard fields auto-select logic if needed ...
              // For now, focused on Ticket Products as per user report.
-             
-             // How to know currency of a simple value?
-             // We need to look up the option again... inefficient but correct.
-             const fieldDef = this.formModel.visibleFields.find(f => String(f.id) === String(key));
-             if (fieldDef) {
-                  // Helper to find option logic repeated from _syncPayloadFromState
-                  // Refactor to helper?
+
+              if (fieldDef) {
                   const findOption = (v) => {
                      const options = fieldDef.options || (fieldDef.data && fieldDef.data.options) || [];
                      if (fieldDef.type === 'product_type' && fieldDef.data && fieldDef.data.product_type_data) {
@@ -178,10 +156,7 @@ export class FormSession extends EventTarget {
                   
                   // Handle multi-values?
                   if (typeof val === 'string' && val.includes(' | ')) {
-                      // complex... for now assume if ANY part is incompatible, we clear?
-                      // Or just clear all on currency switch as requested?
-                      // "deselect all products if you switch the currency"
-                      // Safest to just clear everything that MIGHT be currency bound.
+                      // Clear if potentially incompatible
                   } else {
                       const opt = findOption(val);
                       if (opt && opt.currency && opt.currency !== newCurrency) {
@@ -203,9 +178,6 @@ export class FormSession extends EventTarget {
 
     addTicket(ticketData = {}) {
         // Ensure structure
-        const nextIndex = this.state.tickets.length; // Use length as index or unique ID? 
-        // Ideally we need unique IDs for rendering, but array index for payload is fine if ordered.
-        // We use a simple object for now.
         // Check Limit
         if (this.state.tickets.length >= this.maxTickets) {
             console.warn("[FormSession] Max tickets reached");
@@ -222,56 +194,48 @@ export class FormSession extends EventTarget {
         // Only if adding new tickets is enabled (maxTickets > 1)
         if (this.maxTickets > 1) {
             // Find Ticket Field Definition
-            // Prefer visibleFields (UI Model) for options, fallback to relatedFields
-            let ticketFieldDef = this.formModel.visibleFields.find(f => f.type === 'ticket');
-            if (!ticketFieldDef && this.formModel.relatedFields) {
-                 ticketFieldDef = this.formModel.relatedFields.find(f => f.type === 'ticket');
-            }
-            
-            if (ticketFieldDef) {
-                const subFields = ticketFieldDef.subFields || ticketFieldDef.fields || (ticketFieldDef.data && ticketFieldDef.data.fields) || [];
-                
+            const subFields = this._getTicketSubDefs();
+
                 subFields.forEach(subDef => {
                     // Check if already has value (from ticketData)
                     if (newTicket.fields.some(f => String(f._subFieldId) === String(subDef.id))) return;
-                    
+
                     // Logic: Auto-select first valid option if available
                     // Use options or product_type_data
                     let options = subDef.options || (subDef.data && subDef.data.options) || [];
                      if (subDef.type === 'product_type' && subDef.data && subDef.data.product_type_data) {
                          options = subDef.data.product_type_data.products;
                      }
-                     
+
                      // Filter by Currency
                      const currency = this.state.currency;
                      const validOptions = options.filter(o => !o.currency || o.currency === currency);
-                     
-                     
+
+
 
                      if (validOptions.length > 0) {
                          // Select first one as default
                          const autoSelect = validOptions[0];
-                         
+
                          // Use ID if available, otherwise fallback to title (matches RadioFieldBuilder logic)
                          const autoSelectValue = (autoSelect.id !== undefined && autoSelect.id !== null) ? autoSelect.id : autoSelect.title;
-                         
-                         
+
+
 
                          const valObj = {
                              [subDef.type]: autoSelectValue,
                              _subFieldId: subDef.id,
                              currency_code: currency
                          };
-                         
+
                          if (autoSelect.price !== undefined) valObj.price = autoSelect.price;
                          if (subDef.type === 'product_type') valObj.product_type = autoSelectValue;
-                         
+
                          newTicket.fields.push(valObj);
                      }
                 });
-            }
         }
-        
+
         this.state.tickets.push(newTicket);
         this._syncPayloadFromState();
         this._recalculate();
@@ -327,6 +291,12 @@ export class FormSession extends EventTarget {
         if (value && (value.type === 'spot' || value.spot !== undefined)) {
              ticket.spot = value.value || value.spot;
              if (value.price !== undefined) ticket.spotPrice = value.price;
+             // Recover price from cache if missing
+             if (ticket.spotPrice === undefined && this.spotModels.has(String(ticket.spot))) {
+                 const cached = this.spotModels.get(String(ticket.spot));
+                 if (cached.product && cached.product.price) ticket.spotPrice = cached.product.price;
+                 else if (cached.price) ticket.spotPrice = cached.price;
+             }
              // Ensure product model/currency is tracked if needed? 
              // FormHelper.calculatePrice handles spotPrice on ticket object.
         }
@@ -369,7 +339,11 @@ export class FormSession extends EventTarget {
 
         // Enqueue the operation
         const task = async () => {
-             // 1. Apply Change Optimistically
+            // 1. Apply Change Optimistically
+            // Store Spot Model for Price Robustness
+            if (spotObj.product || spotObj.productModel || spotObj.price) {
+                 this.spotModels.set(String(spotId), spotObj);
+            }
             updateState(isSelecting);
 
             try {
@@ -379,12 +353,7 @@ export class FormSession extends EventTarget {
                  // 2. Sync with Backend
                  // ALWAYS use the latest secret from the model (which might have been updated by previous queue task)
                  const resultData = await DbForms.selectSpot(this.formModel.key, currentSecret, spotId, isSelecting);
-                 
-                 // 3. Update Secret if provided (Handover)
-                 // REMOVED: User SQL confirms select_spot does NOT return a secret.
-                 // We strictly rely on the secret established at the start (get_blueprint).
-                 // This guarantees (Select Secret) === (Deselect Secret).
-                 
+
                  return resultData;
             } catch (e) {
                  console.error("FormSession: Spot selection failed, reverting state", e);
@@ -396,19 +365,6 @@ export class FormSession extends EventTarget {
         };
 
         // Append to Queue
-        // We catch inside the chain to ensure the queue keeps moving, 
-        // but we return a promise that rejects/resolves based on OUR task for the caller.
-        
-        // This constructs a "Branch" off the main queue for the caller, but the main queue 
-        // 'this._spotQueue' MUST NOT break if 'task' fails.
-        
-        // Correct Pattern:
-        // Main Queue = Main Queue.then(() => task().catch(swallow));
-        // Caller gets: task();
-        
-        // Wait, we need to enforce ORDER.
-        // So 'task' must not start until Main Queue resolves.
-        
         const enqueuedTask = this._spotQueue.then(() => task());
         
         // Update Main Queue to wait for this new task (regardless of success/fail)
@@ -428,16 +384,24 @@ export class FormSession extends EventTarget {
             
             rawFields.forEach(fObj => {
                 // Check if any value in fObj contains pipe (Multi-Choice)
-                // fObj structure: { [type]: val, _subFieldId: id, ... }
-                // We know 'type' is dynamic.
-                // Robust check: Look for string with pipe
+                let isMultiSelect = false;
+                let subDef = null;
+
                 let hasPipe = false;
                 let pipeVal = null;
                 let pipeKey = null;
-                
+
+                subDef = this._getTicketSubDef(fObj._subFieldId);
+
+                if (subDef) {
+                    if (subDef.type === 'checkbox') isMultiSelect = true; // Convention: checkbox is multi
+                    // Add other multi-types if any
+                }
+
                 Object.entries(fObj).forEach(([k, v]) => {
                     if (k === '_subFieldId' || k === 'currency_code') return;
-                    if (typeof v === 'string' && v.includes(' | ')) {
+                    // Only check for pipe if it's a multi-select field
+                    if (isMultiSelect && typeof v === 'string' && v.includes(' | ')) {
                         hasPipe = true;
                         pipeVal = v;
                         pipeKey = k;
@@ -454,21 +418,15 @@ export class FormSession extends EventTarget {
                         newEntry[pipeKey] = part;
                         
                         // Explicit fix for SQL
-                        if (newEntry.product_type === pipeVal) newEntry.product_type = part; 
+                        if (newEntry.product_type === pipeVal) newEntry.product_type = part;
 
                         // Re-hydrate Price (Critical for Multi-Select)
                         // Because "A | B" lookup failed in handleInput, we must lookup A and B individually here.
                         try {
                             // Find Definition
-                             let ticketFieldDef = this.formModel.visibleFields.find(f => f.type === 'ticket');
-                             if (!ticketFieldDef && this.formModel.relatedFields) {
-                                  ticketFieldDef = this.formModel.relatedFields.find(f => f.type === 'ticket');
-                             }
-                             if (ticketFieldDef) {
-                                 const subFields = ticketFieldDef.subFields || ticketFieldDef.fields || (ticketFieldDef.data && ticketFieldDef.data.fields) || [];
-                                 const subDef = subFields.find(s => String(s.id) === String(fObj._subFieldId));
-                                 
-                                 if (subDef) {
+                             const subDef = this._getTicketSubDef(fObj._subFieldId);
+
+                             if (subDef) {
                                      // Find Option (Inclusive Logic)
                                      let opt = null;
                                      if (subDef.type === 'product_type' && subDef.data && subDef.data.product_type_data) {
@@ -486,7 +444,7 @@ export class FormSession extends EventTarget {
                                          newEntry.currency_code = opt.currency;
                                      }
                                  }
-                             }
+
                         } catch (e) {
                             console.warn('[FormSession] Failed to re-hydrate price for multi-select part:', part, e);
                         }
@@ -505,7 +463,14 @@ export class FormSession extends EventTarget {
             
             // Map special top-level props expected by Backend/Calc
             if (t.spot) ticketObj.spot = t.spot;
+
             if (t.spotPrice) ticketObj.spotPrice = t.spotPrice;
+            // Recover from cache if missing
+            if (ticketObj.spot && !ticketObj.spotPrice && this.spotModels.has(String(ticketObj.spot))) {
+                 const cached = this.spotModels.get(String(ticketObj.spot));
+                if (cached.product && cached.product.price) ticketObj.spotPrice = cached.product.price;
+                else if (cached.price) ticketObj.spotPrice = cached.price;
+            }
             if (t.spotName) ticketObj.spotName = t.spotName;
             
             return ticketObj;
@@ -553,16 +518,6 @@ export class FormSession extends EventTarget {
         const name = target.name || (target.getAttribute && target.getAttribute('name'));
         
         if (!name) {
-             // Check if it's a structural update (e.g. from TicketFieldBuilder container)
-             // identified by dataset.fieldId
-             if (target.dataset && target.dataset.fieldId) {
-                  // For strict state inversion, we should ideally know WHAT changed.
-                  // But for ticket Add/Remove, we use specific methods.
-                  // This is likely for legacy or dynamic field containers.
-                  
-                  // REFACTOR: We no longer rescrape on generic structural events.
-                  // Components must call addTicket/removeTicket explicitly.
-             }
              return; 
         }
         
@@ -600,11 +555,7 @@ export class FormSession extends EventTarget {
          
          // Resolve Value Object expected by updateTicket
          // We need the SubField Definition to know the Type
-         const parentField = this.formModel.visibleFields.find(f => String(f.id) === String(ticketFieldId));
-         if (!parentField) return;
-         
-         const subFields = parentField.subFields || parentField.fields || (parentField.data && parentField.data.fields) || [];
-         const subDef = subFields.find(s => String(s.id) === String(subId));
+         const subDef = this._getTicketSubDef(subId);
          
          if (!subDef) {
              console.warn(`[FormSession] subDef failed for subId ${subId}`);
@@ -637,12 +588,12 @@ export class FormSession extends EventTarget {
              const findOption = (v) => {
                  const opts = subDef.options || (subDef.data && subDef.data.options) || [];
                  let found = null;
-                 
+
                  // 1. Try Product Type Data
                  if (subDef.type === 'product_type' && subDef.data && subDef.data.product_type_data) {
                      found = subDef.data.product_type_data.products.find(p => String(p.id) === String(v));
                  }
-                 
+
                  // 2. Fallback to Standard Options (if not found above)
                  if (!found) {
                      found = opts.find(o => String(o.id) === String(v));
@@ -659,7 +610,7 @@ export class FormSession extends EventTarget {
              if (subDef.type === 'product_type') {
                  valueObj['product_type'] = val;
              }
-             
+
              // --- Price Calculation (Handle Multiselect) ---
              let totalPrice = 0;
              let currency = null;
@@ -683,7 +634,7 @@ export class FormSession extends EventTarget {
              if (currency) {
                  valueObj['currency_code'] = currency;
              }
-              
+
               // Fallback: If price/currency missing from Model, check DOM dataset (Robustness)
               // Only valid for Single Select (otherwise dataset is ambiguity of last clicked)
               if (!pricesFound && parts.length === 1 && target.dataset.price) {
@@ -702,11 +653,11 @@ export class FormSession extends EventTarget {
                         valueObj['currency_code'] = selOpt.dataset.currency;
                    }
               }
-             
+
              // Special Spot handling
               if (subDef.type === 'spot') {
                   // Ensure we grabbed the price from the option (handled above if option found)
-                  // If option NOT found (e.g. dynamic spot?), we might fail. 
+                  // If option NOT found (e.g. dynamic spot?), we might fail.
                   // But for "Variant 1", it is an option.
               }
               
@@ -817,7 +768,7 @@ export class FormSession extends EventTarget {
         // Debug Logging
         // console.log('FormSession: Recalculating with Payload:', JSON.parse(JSON.stringify(this.payload)));
         const priceData = FormHelper.calculatePrice(this.payload, this.formModel);
-        
+
         // --- Currency Persistence Logic ---
         // If calculator found a bound currency (because items were selected), use it.
         // If calculator returned null (no items selected), KEEP existing session currency.
@@ -871,6 +822,27 @@ export class FormSession extends EventTarget {
     setIsReady(ready) {
         // Force emit current state (useful for initial rendering sync)
         this.dispatchEvent(new CustomEvent('state-changed', { detail: this.state }));
+    }
+
+    // --- Refactoring Helpers ---
+
+    _getTicketFieldDef() {
+        let def = this.formModel.visibleFields.find(f => f.type === 'ticket');
+        if (!def && this.formModel.relatedFields) {
+            def = this.formModel.relatedFields.find(f => f.type === 'ticket');
+        }
+        return def;
+    }
+
+    _getTicketSubDefs() {
+        const ticketDef = this._getTicketFieldDef();
+        if (!ticketDef) return [];
+        return ticketDef.subFields || ticketDef.fields || (ticketDef.data && ticketDef.data.fields) || [];
+    }
+
+    _getTicketSubDef(subId) {
+        const subDefs = this._getTicketSubDefs();
+        return subDefs.find(s => String(s.id) === String(subId));
     }
 
     get currentState() {
