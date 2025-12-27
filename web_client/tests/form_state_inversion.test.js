@@ -54,7 +54,8 @@ describe('FormSession State Inversion', () => {
         assert.strictEqual(session.payload.ticket[0].spotPrice, 200);
         
         // Check Price immediately
-        assert.strictEqual(session.state.totalPrice, 200);
+        // console.log('DEBUG: Payload Ticket:', JSON.stringify(session.payload.ticket, null, 2));
+        assert.strictEqual(session.state.totalPrice, 250); // Spot 200 + Prod 50
         assert.strictEqual(session.state.totalItems, 1);
     });
 
@@ -63,7 +64,7 @@ describe('FormSession State Inversion', () => {
         session.addTicket({ spot: 102, spotPrice: 300 });
 
         assert.strictEqual(session.payload.ticket.length, 2);
-        assert.strictEqual(session.state.totalPrice, 500);
+        assert.strictEqual(session.state.totalPrice, 600); // (200+50) + (300+50)
 
         // Remove first one
         await session.removeTicket(0);
@@ -72,7 +73,7 @@ describe('FormSession State Inversion', () => {
         assert.strictEqual(session.payload.ticket[0].spot, 102); // Remaining should be 102
         
         // Check Price immediately
-        assert.strictEqual(session.state.totalPrice, 300);
+        assert.strictEqual(session.state.totalPrice, 350); // 300+50
     });
 
     it('should update ticket fields via updateTicket', () => {

@@ -40,9 +40,8 @@ class TicketEditorWidgets {
       children.add(const SizedBox(height: 8));
     }
 
-    // Show "Max tickets per order" only if both ticket and blueprint features are enabled.
-    if (FeatureService.isFeatureEnabled(FeatureConstants.ticket) &&
-        FeatureService.isFeatureEnabled(FeatureConstants.blueprint)) {
+    // Show "Max tickets per order" only if ticket feature be enabled.
+    if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
       children.add(_buildMaxTicketsReadOnly(context, ticketField));
       children.add(const SizedBox(height: 8));
     }
@@ -83,9 +82,8 @@ class TicketEditorWidgets {
       children.add(const SizedBox(height: 16));
     }
 
-    // Show "Max tickets per order" only if both ticket and blueprint features are enabled.
-    if (FeatureService.isFeatureEnabled(FeatureConstants.ticket) &&
-        FeatureService.isFeatureEnabled(FeatureConstants.blueprint)) {
+    // Show "Max tickets per order" only if ticket feature be enabled.
+    if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
       children.add(_buildMaxTicketsEditor(context, ticketField));
       children.add(const SizedBox(height: 24));
     }

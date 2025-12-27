@@ -113,25 +113,47 @@ export class FormDataReader {
 
                     // --- Processing Logic Same as Before ---
                     if (sub.type === 'spot') {
-                        const val = parseInt(rawVals[0]);
+                        const val = rawVals[0]; // ID is usually string or number
                         ticketObj['spot'] = val;
                         
-                        // Extract Price from DOM if available
-                        const inputName = `${field.id}_${indexKey}_${sub.id}`;
-                        const inputEl = form.querySelector(`input[name="${inputName}"]`);
-                        if (inputEl) {
-                            if (inputEl.dataset.price) {
-                                ticketObj['spotPrice'] = parseFloat(inputEl.dataset.price);
-                            }
-                            if (inputEl.dataset.name) {
-                                ticketObj['spotName'] = inputEl.dataset.name;
-                            }
+                        // Extract Price: Try Option Lookup First (Reliable for Variants)
+                        const opt = FormDataReader._findOption(sub, val);
+                        if (opt && opt.price !== undefined) {
+                            ticketObj['spotPrice'] = parseFloat(opt.price);
+                        } else {
+                            // Fallback to DOM dataset (legacy/Seat logic)
+                             const inputName = `${field.id}_${indexKey}_${sub.id}`;
+                             // For Radio, we need the CHECKED one matching value
+                             const inputEl = form.querySelector(`input[name="${inputName}"][value="${val}"]`) || 
+                                             form.querySelector(`input[name="${inputName}"]`);
+                             
+                             if (inputEl) {
+                                 if (inputEl.dataset.price) {
+                                     ticketObj['spotPrice'] = parseFloat(inputEl.dataset.price);
+                                 }
+                                 if (inputEl.dataset.name) {
+                                     ticketObj['spotName'] = inputEl.dataset.name;
+                                 }
+                             }
                         }
                     }
                     else if (sub.type === 'product_type') {
                         // Product Types (always array of objects)
                         rawVals.forEach(v => {
-                             ticketObj.fields.push(FormDataReader._createSubFieldObj(sub, v));
+                             const fObj = FormDataReader._createSubFieldObj(sub, v);
+                             
+                             // Fallback: If price missing, check DOM dataset
+                             if (fObj.price === undefined) {
+                                 const inputName = `${field.id}_${indexKey}_${sub.id}`;
+                                 const inputEl = form.querySelector(`input[name="${inputName}"][value="${v}"]`) || 
+                                                 form.querySelector(`option[value="${v}"]`); // Select?
+                                 
+                                 if (inputEl && inputEl.dataset && inputEl.dataset.price) {
+                                     fObj.price = parseFloat(inputEl.dataset.price);
+                                     if (inputEl.dataset.currency) fObj.currency_code = inputEl.dataset.currency;
+                                 }
+                             }
+                             ticketObj.fields.push(fObj);
                         });
                     } 
                     else {
@@ -168,16 +190,21 @@ export class FormDataReader {
     }
 
     static _findOption(fieldOrSub, value) {
+         let found = null;
+
          // 1. Product Type Products
          if (fieldOrSub.type === 'product_type' && fieldOrSub.data && fieldOrSub.data.product_type_data && fieldOrSub.data.product_type_data.products) {
-             return fieldOrSub.data.product_type_data.products.find(p => String(p.id) === String(value));
+              found = fieldOrSub.data.product_type_data.products.find(p => String(p.id) === String(value));
          }
-         // 2. Standard Options
-         const options = fieldOrSub.options || (fieldOrSub.data && fieldOrSub.data.options) || [];
-         if (options.length > 0) {
-             return options.find(o => String(o.id) === String(value));
+         
+         // 2. Standard Options (Fallback)
+         if (!found) {
+             const options = fieldOrSub.options || (fieldOrSub.data && fieldOrSub.data.options) || [];
+             if (options.length > 0) {
+                 found = options.find(o => String(o.id) === String(value));
+             }
          }
-         return null;
+         return found;
     }
 
     static _createSubFieldObj(sub, val) {
@@ -192,11 +219,16 @@ export class FormDataReader {
             if (isProduct) {
                 fObj['product_type'] = val;
             }
+            
+            if (opt.price !== undefined) {
+                 fObj['price'] = opt.price;
+            }
 
             if (opt.currency) {
                 fObj['currency_code'] = opt.currency;
             }
         }
+        return fObj;
         return fObj;
     }
 

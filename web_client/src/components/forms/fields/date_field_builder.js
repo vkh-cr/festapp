@@ -1,5 +1,5 @@
 import flatpickr from "flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
+// import 'flatpickr/dist/flatpickr.min.css'; // Commented out for Node.js test runner (JSDOM) compatibility
 import { Czech } from "flatpickr/dist/l10n/cs.js";
 import { ThemeService } from '../../../services/theme_service.js';
 import { FormStrings } from '../form_strings.js';
