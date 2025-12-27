@@ -36,14 +36,16 @@ export class PriceWidget {
         } else {
             if (totalPrice <= 0 && totalItems <= 0) shouldHide = true;
         }
+        
+        console.log(`[PriceWidget] Render: Price=${totalPrice} Items=${totalItems} Hide=${shouldHide} Blueprint=${isBlueprint} El=${!!this.element}`);
 
         if (shouldHide) {
-            if (this.element) {
-                this.element.remove();
-                this.element = null;
-            }
-            this.updateSubmitButton(false);
-            return;
+             if (this.element) {
+                 this.element.remove();
+                 this.element = null;
+             }
+             this.updateSubmitButton(false);
+             return;
         }
 
         this.updateSubmitButton(true);
