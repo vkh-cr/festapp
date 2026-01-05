@@ -6,11 +6,13 @@ export class RouterService {
     static FORM_PATH_PREFIX = '/form/';
 
     static navigateToExternal(url) {
-        window.open(url, '_blank');
+        const cleanUrl = url.split('?')[0];
+        window.open(cleanUrl, '_blank');
     }
 
     static navigateExternal(url) {
-        window.location.href = url;
+        const cleanUrl = url.split('?')[0];
+        window.location.href = cleanUrl;
     }
 
     static navigateToOccasionApp(link) {
@@ -18,7 +20,8 @@ export class RouterService {
         // This will likely be handled by the server returning the app index, or 
         // if this SPA handles it, we need logic for it.
         // For now, simple href is safest to ensure full load or external handling.
-        const path = `/${link}`;
+        const cleanLink = link.split('?')[0];
+        const path = `/${cleanLink}`;
         window.location.href = path; 
     }
 
@@ -28,7 +31,8 @@ export class RouterService {
     }
     
     static async navigateToForm(link) {
-        const path = `${RouterService.FORM_PATH_PREFIX}${link}`;
+        const cleanLink = link.split('?')[0];
+        const path = `${RouterService.FORM_PATH_PREFIX}${cleanLink}`;
         RouterService._lastPath = path; // Update tracker
         RouterService.pushState(path);
         const { FormPage } = await import('../components/forms/form_page.js');
@@ -186,7 +190,9 @@ export class RouterService {
 
         // 4. Handle normalized path updates (UX polish)
         if (!shouldRedirectToFlutter) {
-             if (window.location.hash && window.location.hash.startsWith('#/')) {
+             // Clean URL if it contains query parameters or hash
+             if (window.location.search || (window.location.hash && window.location.hash.startsWith('#/')) || fullUrl.includes('?')) {
+                  console.log(`[RouterService] Sanitizing URL: ${fullUrl} -> ${path}`);
                   window.history.replaceState(null, '', path);
                   RouterService._lastPath = path; // Sync tracker
              }
@@ -244,8 +250,11 @@ export class RouterService {
         const hashIndex = path.indexOf('/#');
         if (hashIndex !== -1) {
              path = path.substring(hashIndex + 1); // Get '/...' part
-             path = path.replace('#', ''); // Ensure no # remains if logic differs
+             path = path.replace('#', ''); // Ensure no # remains
         }
+        
+        // 2.5 Strip Query Parameters (Strict Sanitization)
+        path = path.split('?')[0];
 
         // 3. Ensure leading slash
         if (!path.startsWith('/')) {
