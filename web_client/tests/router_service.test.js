@@ -37,6 +37,12 @@ test('RouterService.normalizeUrl', async (t) => {
         assert.strictEqual(result, "/form/test");
     });
 
+    await t.test('should strip query params in normalizeUrl', () => {
+        const input = "https://vstupenky.online/form/test?fbclid=123";
+        const result = RouterService.normalizeUrl(input);
+        assert.strictEqual(result, "/form/test");
+    });
+
     await t.test('should handle localhost dynamic origin', () => {
         // Mocking URL behavior for localhost is tricky in node unless we pass it specifically
         // But our logic uses `new URL(url).origin`.
@@ -89,7 +95,85 @@ test('RouterService.normalizeUrl', async (t) => {
     AppConfig.compatibleUrls = originalCompatible;
 });
 
+test('RouterService.Sanitization', async (t) => {
+    // Mock window
+    global.window = {
+        location: { href: '' },
+        open: () => {},
+        history: { pushState: () => {} }
+    };
+    const { RouterService } = await import('../src/services/router_service.js');
+    
+    await t.test('should strip query params in navigateToExternal', () => {
+        let openedUrl = '';
+        global.window.open = (url) => { openedUrl = url; };
+        
+        RouterService.navigateToExternal('https://example.com?foo=bar');
+        assert.strictEqual(openedUrl, 'https://example.com');
+        
+        RouterService.navigateToExternal('https://example.com?foo=bar&baz=1');
+        assert.strictEqual(openedUrl, 'https://example.com');
+    });
+
+    await t.test('should strip query params in navigateExternal', () => {
+        let locationHref = '';
+        // Mock setter
+        Object.defineProperty(global.window.location, 'href', {
+            set: (v) => locationHref = v,
+            configurable: true
+        });
+
+        RouterService.navigateExternal('/some/path?query=1');
+        assert.strictEqual(locationHref, '/some/path');
+    });
+
+    await t.test('should strip query params in navigateToOccasionApp', () => {
+        let locationHref = '';
+        Object.defineProperty(global.window.location, 'href', {
+            set: (v) => locationHref = v,
+            configurable: true
+        });
+
+        RouterService.navigateToOccasionApp('my-event?source=fb');
+        assert.strictEqual(locationHref, '/my-event');
+    });
+    
+    await t.test('should strip query params in navigateToForm', async () => {
+        let pushedPath = '';
+        global.window.history.pushState = (state, title, url) => { pushedPath = url; };
+
+        try {
+            await RouterService.navigateToForm('my-event?param=1');
+        } catch (e) {
+            // Ignore CSS import errors and similar in Node environment
+            if (e.code !== 'ERR_UNKNOWN_FILE_EXTENSION' && !e.message.includes('css')) {
+                // If we want to be strict, we could log, but for now we expect this failure 
+                // due to FormPage import.
+            }
+        }
+        assert.strictEqual(pushedPath, '/form/my-event');
+    });
+});
+
+
 test('RouterService.handleInitialLoad', async (t) => {
+    // Reset window for this block
+    global.window = {
+        location: {
+            pathname: '/',
+            href: 'https://vstupenky.online/',
+            hash: '',
+            origin: 'https://vstupenky.online',
+            replace: () => {},
+        },
+        history: {
+            replaceState: () => {},
+            pushState: () => {}
+        },
+        addEventListener: () => {},
+        removeEventListener: () => {}
+    };
+
     // Dynamic import inside each test block if we need fresh mocks, 
     // but modules are cached. We will just use the imported classes and mock global state.
     
@@ -253,5 +337,29 @@ test('RouterService.handleInitialLoad', async (t) => {
         assert.ok(redirectUrl.includes('flutter.html'));
         assert.ok(redirectUrl.includes('redirect=%2Funit%2F123'));
     });
+
+    await t.test('should sanitize incoming URL with query params on load', async () => {
+        AppConfig.isAppSupported = false; // Web Client mode
+        
+        global.window.location.pathname = '/form/slug';
+        global.window.location.search = '?fbclid=IwAR2...';
+        global.window.location.href = 'https://vstupenky.online/form/slug?fbclid=IwAR2...';
+        
+        let replacedPath = '';
+        global.window.history.replaceState = (_, __, p) => { replacedPath = p; };
+        
+        try {
+            const handled = await RouterService.handleInitialLoad();
+            assert.strictEqual(handled, true); // Handled by Web Client (loading form)
+        } catch (e) {
+             if (e.code !== 'ERR_UNKNOWN_FILE_EXTENSION' && !e.message.includes('css')) {
+                throw e;
+            }
+            // Even if it failed to load component (css), it should have sanitized BEFORE loading
+        }
+        
+        assert.strictEqual(replacedPath, '/form/slug'); // Should receive clean path
+    });
 });
+
 
