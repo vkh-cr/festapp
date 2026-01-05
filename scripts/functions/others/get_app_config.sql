@@ -204,14 +204,17 @@ BEGIN
         END IF;
 
         -- If the occasion user record is not found and the user is authenticated, add the user to the occasion
-        IF occasion_user IS NULL AND current_user_id IS NOT NULL AND is_app_supported_bool IS TRUE THEN
-            PERFORM add_user_to_occasion(occasionId, current_user_id);
+        IF occasion_user IS NULL AND current_user_id IS NOT NULL THEN
+            IF is_app_supported_bool IS TRUE 
+               OR (unit_user.is_manager IS TRUE OR unit_user.is_editor IS TRUE OR unit_user.is_editor_view IS TRUE) THEN
+                PERFORM add_user_to_occasion(occasionId, current_user_id);
 
-            SELECT *
-              INTO occasion_user
-            FROM occasion_users
-            WHERE occasion = occasionId
-              AND "user" = current_user_id;
+                SELECT *
+                  INTO occasion_user
+                FROM occasion_users
+                WHERE occasion = occasionId
+                  AND "user" = current_user_id;
+            END IF;
         END IF;
     ELSE
         -- If no occasion is set (because a specific unit was used and no Rep Occasion existed), use the unit as the context

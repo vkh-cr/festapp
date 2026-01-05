@@ -795,7 +795,8 @@
     "changes": "Změny",
     "paidOrSent": "Zaplaceno nebo odesláno",
     "cancelled": "Stornováno",
-    "usedInForms": "Použito ve formulářích"
+    "usedInForms": "Použito ve formulářích",
+    "shortTitle": "Zkrácený název"
   },
   "FormsFeature": {
     "addTicket": "Přidat vstupenku",

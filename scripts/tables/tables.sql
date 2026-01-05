@@ -375,7 +375,6 @@ create table if not exists eshop.products (
   occasion BIGINT NULL,
   is_hidden BOOLEAN NOT NULL DEFAULT false,
   currency_code CHARACTER(3) NOT NULL DEFAULT 'CZK'::bpchar,
-  title_short TEXT NULL,
   "order" BIGINT NULL,
   maximum BIGINT NULL,
   CONSTRAINT options_pkey PRIMARY KEY (id),
