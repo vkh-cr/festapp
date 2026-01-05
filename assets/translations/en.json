@@ -795,7 +795,8 @@
     "changes": "Changes",
     "paidOrSent": "Paid or Sent",
     "cancelled": "Cancelled",
-    "usedInForms": "Used in Forms"
+    "usedInForms": "Used in Forms",
+    "shortTitle": "Short Title"
   },
   "FormsFeature": {
     "addTicket": "Add Ticket",

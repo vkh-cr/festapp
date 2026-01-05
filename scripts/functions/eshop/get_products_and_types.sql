@@ -20,7 +20,7 @@ BEGIN
            json_build_object(
              'id', p.id,
              'title', p.title,
-             'title_short', p.title_short,
+             'short_title', p.data->>'short_title',
              'product_type', p.product_type,
              'data', p.data
            )
