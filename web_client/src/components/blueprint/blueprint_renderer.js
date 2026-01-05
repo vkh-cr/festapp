@@ -24,6 +24,14 @@ export class BlueprintRenderer {
         this.seatSize = BlueprintConfig.seatSize;
         this.data = null;
         this.onSeatClick = null;
+
+        // Fix for "zoomed in" issue: ensure we fit to screen when container gets dimensions
+        this.resizeObserver = new ResizeObserver(() => {
+            if (this.data && this.contentWidth && this.contentHeight) {
+                this.fitToScreen();
+            }
+        });
+        this.resizeObserver.observe(this.container);
     }
 
     setScalingMode(mode) {
@@ -274,6 +282,11 @@ export class BlueprintRenderer {
     }
 
     destroy() {
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+            this.resizeObserver = null;
+        }
+
         if (this.gestureController) {
             this.gestureController.destroy();
             this.gestureController = null;

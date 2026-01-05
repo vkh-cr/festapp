@@ -46,6 +46,16 @@ class ProductModel extends ITrinaRowModel {
   static const String metaPaidCount = "paid_count";
   static const String metaSentCount = "sent_count";
 
+  String? get shortTitle => data?[TbEshop.products.data_short_title];
+  set shortTitle(String? value) {
+    if (data == null) data = {};
+    if (value == null || value.isEmpty) {
+      data!.remove(TbEshop.products.data_short_title);
+    } else {
+      data![TbEshop.products.data_short_title] = value;
+    }
+  }
+
 
   ProductModel({
     this.id,
@@ -107,11 +117,25 @@ class ProductModel extends ITrinaRowModel {
 
   static ProductModel fromPlutoJson(Map<String, dynamic> json) {
     var model = json[EshopColumns.PRODUCT_MODEL_REFERENCE] as ProductModel?;
+    Map<String, dynamic>? data;
+    if (model?.data != null) {
+      data = Map.from(model!.data!);
+    }
+    if (json.containsKey(EshopColumns.PRODUCT_SHORT_TITLE)) {
+      if (data == null) data = {};
+      var val = json[EshopColumns.PRODUCT_SHORT_TITLE];
+      if (val != null && val.toString().isNotEmpty) {
+        data[TbEshop.products.data_short_title] = val.toString();
+      } else {
+        data.remove(TbEshop.products.data_short_title);
+      }
+    }
 
     return ProductModel(
       id: json[EshopColumns.PRODUCT_ID] == -1 ? null : json[EshopColumns.PRODUCT_ID],
       title: json[EshopColumns.PRODUCT_TITLE],
       isHidden: json[EshopColumns.PRODUCT_IS_HIDDEN] == 'true',
+      data: data,
       description: json[EshopColumns.PRODUCT_DESCRIPTION],
       price: json[EshopColumns.PRODUCT_PRICE] != null
           ? double.tryParse(json[EshopColumns.PRODUCT_PRICE].toString())
@@ -218,6 +242,7 @@ class ProductModel extends ITrinaRowModel {
       EshopColumns.PRODUCT_ID: TrinaCell(value: id ?? 0),
       EshopColumns.PRODUCT_IS_HIDDEN: TrinaCell(value: isHidden.toString()),
       EshopColumns.PRODUCT_TITLE: TrinaCell(value: title ?? ''),
+      EshopColumns.PRODUCT_SHORT_TITLE: TrinaCell(value: shortTitle ?? ''),
       EshopColumns.PRODUCT_DESCRIPTION: TrinaCell(value: description ?? ''),
       EshopColumns.PRODUCT_PRICE: TrinaCell(
         value: price != null ? price?.toStringAsFixed(2) : '',

@@ -25,6 +25,8 @@ BEGIN
                                 opt2.id,
                                 opt2.product,
                                 s.title AS spot_title,
+                                p.data->>'short_title' AS short_title,
+                                p.title AS product_title, 
                                 (
                                     SELECT g.value->>'title'
                                     FROM jsonb_array_elements(bp.groups) AS g(value)
@@ -40,9 +42,14 @@ BEGIN
                             FROM eshop.order_product_ticket opt2
                             LEFT JOIN eshop.spots s
                                 ON s.order_product_ticket = opt2.id
+                            LEFT JOIN eshop.products p
+                                ON p.id = opt2.product
+                            LEFT JOIN eshop.product_types pt 
+                                ON pt.id = p.product_type
                             LEFT JOIN eshop.blueprints bp
                                 ON bp.id = s.blueprint
                             WHERE opt2.ticket = t.id
+                              AND NOT (pt.type = 'spot' AND s.title IS NULL)
                         ) ticket_prod
                     ) AS order_product_ticket,
 
