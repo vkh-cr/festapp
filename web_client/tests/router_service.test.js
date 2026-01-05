@@ -37,6 +37,12 @@ test('RouterService.normalizeUrl', async (t) => {
         assert.strictEqual(result, "/form/test");
     });
 
+    await t.test('should strip query params in normalizeUrl', () => {
+        const input = "https://vstupenky.online/form/test?fbclid=123";
+        const result = RouterService.normalizeUrl(input);
+        assert.strictEqual(result, "/form/test");
+    });
+
     await t.test('should handle localhost dynamic origin', () => {
         // Mocking URL behavior for localhost is tricky in node unless we pass it specifically
         // But our logic uses `new URL(url).origin`.
@@ -331,5 +337,29 @@ test('RouterService.handleInitialLoad', async (t) => {
         assert.ok(redirectUrl.includes('flutter.html'));
         assert.ok(redirectUrl.includes('redirect=%2Funit%2F123'));
     });
+
+    await t.test('should sanitize incoming URL with query params on load', async () => {
+        AppConfig.isAppSupported = false; // Web Client mode
+        
+        global.window.location.pathname = '/form/slug';
+        global.window.location.search = '?fbclid=IwAR2...';
+        global.window.location.href = 'https://vstupenky.online/form/slug?fbclid=IwAR2...';
+        
+        let replacedPath = '';
+        global.window.history.replaceState = (_, __, p) => { replacedPath = p; };
+        
+        try {
+            const handled = await RouterService.handleInitialLoad();
+            assert.strictEqual(handled, true); // Handled by Web Client (loading form)
+        } catch (e) {
+             if (e.code !== 'ERR_UNKNOWN_FILE_EXTENSION' && !e.message.includes('css')) {
+                throw e;
+            }
+            // Even if it failed to load component (css), it should have sanitized BEFORE loading
+        }
+        
+        assert.strictEqual(replacedPath, '/form/slug'); // Should receive clean path
+    });
 });
+
 
