@@ -6,11 +6,13 @@ export class RouterService {
     static FORM_PATH_PREFIX = '/form/';
 
     static navigateToExternal(url) {
-        window.open(url, '_blank');
+        const cleanUrl = url.split('?')[0];
+        window.open(cleanUrl, '_blank');
     }
 
     static navigateExternal(url) {
-        window.location.href = url;
+        const cleanUrl = url.split('?')[0];
+        window.location.href = cleanUrl;
     }
 
     static navigateToOccasionApp(link) {
@@ -18,7 +20,8 @@ export class RouterService {
         // This will likely be handled by the server returning the app index, or 
         // if this SPA handles it, we need logic for it.
         // For now, simple href is safest to ensure full load or external handling.
-        const path = `/${link}`;
+        const cleanLink = link.split('?')[0];
+        const path = `/${cleanLink}`;
         window.location.href = path; 
     }
 
@@ -28,7 +31,8 @@ export class RouterService {
     }
     
     static async navigateToForm(link) {
-        const path = `${RouterService.FORM_PATH_PREFIX}${link}`;
+        const cleanLink = link.split('?')[0];
+        const path = `${RouterService.FORM_PATH_PREFIX}${cleanLink}`;
         RouterService._lastPath = path; // Update tracker
         RouterService.pushState(path);
         const { FormPage } = await import('../components/forms/form_page.js');

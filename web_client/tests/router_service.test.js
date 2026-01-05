@@ -89,7 +89,85 @@ test('RouterService.normalizeUrl', async (t) => {
     AppConfig.compatibleUrls = originalCompatible;
 });
 
+test('RouterService.Sanitization', async (t) => {
+    // Mock window
+    global.window = {
+        location: { href: '' },
+        open: () => {},
+        history: { pushState: () => {} }
+    };
+    const { RouterService } = await import('../src/services/router_service.js');
+    
+    await t.test('should strip query params in navigateToExternal', () => {
+        let openedUrl = '';
+        global.window.open = (url) => { openedUrl = url; };
+        
+        RouterService.navigateToExternal('https://example.com?foo=bar');
+        assert.strictEqual(openedUrl, 'https://example.com');
+        
+        RouterService.navigateToExternal('https://example.com?foo=bar&baz=1');
+        assert.strictEqual(openedUrl, 'https://example.com');
+    });
+
+    await t.test('should strip query params in navigateExternal', () => {
+        let locationHref = '';
+        // Mock setter
+        Object.defineProperty(global.window.location, 'href', {
+            set: (v) => locationHref = v,
+            configurable: true
+        });
+
+        RouterService.navigateExternal('/some/path?query=1');
+        assert.strictEqual(locationHref, '/some/path');
+    });
+
+    await t.test('should strip query params in navigateToOccasionApp', () => {
+        let locationHref = '';
+        Object.defineProperty(global.window.location, 'href', {
+            set: (v) => locationHref = v,
+            configurable: true
+        });
+
+        RouterService.navigateToOccasionApp('my-event?source=fb');
+        assert.strictEqual(locationHref, '/my-event');
+    });
+    
+    await t.test('should strip query params in navigateToForm', async () => {
+        let pushedPath = '';
+        global.window.history.pushState = (state, title, url) => { pushedPath = url; };
+
+        try {
+            await RouterService.navigateToForm('my-event?param=1');
+        } catch (e) {
+            // Ignore CSS import errors and similar in Node environment
+            if (e.code !== 'ERR_UNKNOWN_FILE_EXTENSION' && !e.message.includes('css')) {
+                // If we want to be strict, we could log, but for now we expect this failure 
+                // due to FormPage import.
+            }
+        }
+        assert.strictEqual(pushedPath, '/form/my-event');
+    });
+});
+
+
 test('RouterService.handleInitialLoad', async (t) => {
+    // Reset window for this block
+    global.window = {
+        location: {
+            pathname: '/',
+            href: 'https://vstupenky.online/',
+            hash: '',
+            origin: 'https://vstupenky.online',
+            replace: () => {},
+        },
+        history: {
+            replaceState: () => {},
+            pushState: () => {}
+        },
+        addEventListener: () => {},
+        removeEventListener: () => {}
+    };
+
     // Dynamic import inside each test block if we need fresh mocks, 
     // but modules are cached. We will just use the imported classes and mock global state.
     
