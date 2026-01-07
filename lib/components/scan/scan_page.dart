@@ -36,7 +36,7 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   static const String _defaultResetPassword = "1";
-  static const bool _showResetPasswordButton = true;
+  static const bool _showResetPasswordButton = AppConfig.isAppSupported;
 
   EventModel? _event;
   TicketModel? _scannedObject;
