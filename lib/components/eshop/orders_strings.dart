@@ -77,6 +77,7 @@ class OrdersStrings {
   static String get scanInstructionsAppUser => 'FeatureOrders.scanInstructionsAppUser'.tr(); // "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile."
   static String get searchAttendees => 'Search Attendees'.tr(); // "Search Attendees"
   static String get resetPasswordTitle => 'Reset Password'.tr(); // "Reset Password"
+  static String get scanningForOccasion => 'FeatureOrders.scanningForOccasion'.tr(); // "Scanning for: "
 
   // New Migrated Strings (previously hardcoded in Czech)
   static String get bigGameLabel => 'FeatureOrders.bigGameLabel'.tr(); // "Big Game: "
@@ -85,6 +86,8 @@ class OrdersStrings {
   static String get newLoginCredentials => 'FeatureOrders.newLoginCredentials'.tr(); // "New login credentials"
   static String get errorEmailNotReturned => 'FeatureOrders.errorEmailNotReturned'.tr(); // "Error: Email was not returned."
   static String get confirmTicketFailed => 'FeatureOrders.confirmTicketFailed'.tr(); // "Failed to confirm ticket"
+
+
 
   // Specific Field Mappings (previously hardcoded)
   static String get fieldTypeParticipant => 'FeatureOrders.fieldTypeParticipant'.tr(); // "Participant Type"
