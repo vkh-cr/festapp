@@ -51,4 +51,12 @@ class FeaturesStrings {
   // New Auto Import strings
   static String get labelAutoImport => 'FeatureImport.labelAutoImport'.tr(); // "Auto-Import Users"
   static String get helperAutoImport => 'FeatureImport.helperAutoImport'.tr(); // "UUsers will automatically have an account created upon signing up through the form. Default password is '1'."
+
+  
+  // Feature Ticket
+  static String get enableManualTicketScan => 'FeatureTicket.enableManualTicketScan'.tr();
+  static String get enableManualTicketScanDescription => 'FeatureTicket.enableManualTicketScanDescription'.tr();
+  static String get selectTicket => 'FeatureTicket.selectTicket'.tr();
+  static String get unknown => 'FeatureTicket.unknown'.tr();
+  static String get noData => 'FeatureTicket.noData'.tr();
 }

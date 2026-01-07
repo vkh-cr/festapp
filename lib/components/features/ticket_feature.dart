@@ -8,6 +8,8 @@ import 'package:fstapp/components/images/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/components/images/image_area.dart';
 import 'feature.dart';
+import 'package:fstapp/components/features/features_strings.dart';
+import '../../theme_config.dart';
 import 'feature_constants.dart';
 
 /// Feature for tickets with extra UI color fields.
@@ -16,6 +18,7 @@ class TicketFeature extends Feature {
   String? ticketDarkColor;
   String? ticketBackground;
   String? ticketType;
+  bool? canScanManually;
 
   TicketFeature({
     required super.code,
@@ -26,6 +29,7 @@ class TicketFeature extends Feature {
     this.ticketDarkColor,
     this.ticketBackground,
     this.ticketType,
+    this.canScanManually,
   });
 
   factory TicketFeature.fromJson(Map<String, dynamic> json) {
@@ -36,6 +40,7 @@ class TicketFeature extends Feature {
       ticketDarkColor: json[FeatureConstants.ticketDarkColor],
       ticketBackground: json[FeatureConstants.ticketBackground],
       ticketType: json[FeatureConstants.ticketType],
+      canScanManually: json[FeatureConstants.ticketCanScanManually] ?? false,
     );
   }
 
@@ -49,6 +54,7 @@ class TicketFeature extends Feature {
     if (ticketDarkColor  != null) data[FeatureConstants.ticketDarkColor]  = ticketDarkColor!;
     if (ticketBackground != null) data[FeatureConstants.ticketBackground] = ticketBackground!;
     if (ticketType       != null) data[FeatureConstants.ticketType]       = ticketType!;
+    if (canScanManually  != null) data[FeatureConstants.ticketCanScanManually] = canScanManually!;
     return data;
   }
 
@@ -63,6 +69,14 @@ class TicketFeature extends Feature {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          CheckboxListTile(
+            value: canScanManually ?? false,
+            title: Text(FeaturesStrings.enableManualTicketScan),
+            subtitle: Text(FeaturesStrings.enableManualTicketScanDescription),
+            onChanged: (val) => setLocal(() {
+              canScanManually = val;
+            }),
+          ),
           DropdownButtonFormField<String>(
             value: ticketType ?? 'named',
             decoration: InputDecoration(labelText: 'Ticket Type'.tr()),
