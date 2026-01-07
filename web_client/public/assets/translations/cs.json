@@ -795,7 +795,8 @@
     "changes": "Změny",
     "paidOrSent": "Zaplaceno nebo odesláno",
     "cancelled": "Stornováno",
-    "usedInForms": "Použito ve formulářích"
+    "usedInForms": "Použito ve formulářích",
+    "shortTitle": "Zkrácený název"
   },
   "FormsFeature": {
     "addTicket": "Přidat vstupenku",
@@ -889,7 +890,8 @@
     "downloadTicket": "Stáhnout vstupenku",
     "generatingPdfFor": "Generování Vstupenky pro {customer}",
     "generatingPdfForWithSpot": "Generování Vstupenky pro {customer} - {spot}",
-    "scanInstructionsAppUser": "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile."
+    "scanInstructionsAppUser": "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile.",
+    "scanningForOccasion": "Skenuji pro: "
   },
   "UserColumns": {
     "id": "Id",
@@ -1337,5 +1339,12 @@
     "chooseDifferentVariant_informal": "Vyber prosím jinou variantu.",
     "totalPrice": "Celková cena: {price}"
   },
-  "_": "_"
+  "_": "_",
+  "FeatureTicket": {
+    "enableManualTicketScan": "Povolit ruční skenování vstupenek",
+    "enableManualTicketScanDescription": "Umožňuje ruční vyhledání a výběr vstupenek, pokud účastník zapomněl vstupenku.",
+    "selectTicket": "Vybrat vstupenku",
+    "unknown": "Neznámý",
+    "noData": "Žádná data"
+  }
 }
