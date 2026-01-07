@@ -95,7 +95,7 @@ dependencies:
   flutter_widget_from_html_core: ^0.17.0
   fwfh_cached_network_image: ^0.16.1
   multi_split_view: ^3.6.1
-  timezone: ^0.11.0
+  timezone: ^0.10.1
   flutter_colorpicker: ^1.1.0
   google_fonts: ^7.0.0
 
