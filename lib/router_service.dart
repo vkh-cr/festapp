@@ -12,6 +12,9 @@ import 'package:fstapp/services/js/js_interop.dart';
 import 'dart:async';
 
 import 'package:fstapp/components/forms/views/form_page.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
 
 class RouterService {
   static const link = "link";
@@ -240,8 +243,18 @@ class RouterService {
   /// The [occasionLink] can be passed directly. If not, it's extracted from
   /// the current route's parameters.
   static Future<void> navigateToOccasionAdministration(
-      BuildContext context, {String? occasionLink}) async {
-    String? resolvedLink = occasionLink;
+      BuildContext context, {String? occasionLink, OccasionModel? occasion}) async {
+    
+    // If occasion is provided, prioritize it for feature checks
+    if (occasion != null) {
+      // If Form feature is NOT enabled, force navigation to main admin page (Dashboard)
+      if (!FeatureService.isFeatureEnabled(FeatureConstants.form, features: occasion.features)) {
+        await navigateToOccasionByLink(context, occasion.link ?? occasionLink!);
+        return;
+      }
+    }
+
+    String? resolvedLink = occasionLink ?? occasion?.link;
 
     // Get the link from arguments or route parameters.
     if (resolvedLink == null || resolvedLink.isEmpty) {

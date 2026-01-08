@@ -29,11 +29,15 @@ BEGIN
         ) 
     )
     INTO result
-    FROM eshop.tickets t
-    JOIN eshop.order_product_ticket opt ON t.id = opt.ticket
-    JOIN eshop.orders o ON opt."order" = o.id
-    WHERE o.occasion = occasion_id_val
-      AND t.state != 'storno';
+    FROM (
+        SELECT DISTINCT ON (t.id) t.id, t.ticket_symbol, t.state, o.data
+        FROM eshop.tickets t
+        JOIN eshop.order_product_ticket opt ON t.id = opt.ticket
+        JOIN eshop.orders o ON opt."order" = o.id
+        WHERE o.occasion = occasion_id_val
+          AND t.state != 'storno'
+        ORDER BY t.id
+    ) t;
 
     RETURN COALESCE(result, '[]'::jsonb);
 END;
