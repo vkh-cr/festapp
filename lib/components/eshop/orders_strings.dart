@@ -74,8 +74,10 @@ class OrdersStrings {
   static String get enterScanCode => 'Enter Scan Code'.tr(); // "Enter Scan Code"
   static String get confirmTicketAction => 'Confirm Ticket'.tr(); // "Confirm Ticket"
   static String get scanCameraInstruction => 'Point the camera at the attendee\'s code for an entry verification.'.tr(); // "Point the camera at the attendee's code for an entry verification."
+  static String get scanInstructionsAppUser => 'FeatureOrders.scanInstructionsAppUser'.tr(); // "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile."
   static String get searchAttendees => 'Search Attendees'.tr(); // "Search Attendees"
   static String get resetPasswordTitle => 'Reset Password'.tr(); // "Reset Password"
+  static String get scanningForOccasion => 'FeatureOrders.scanningForOccasion'.tr(); // "Scanning for: "
 
   // New Migrated Strings (previously hardcoded in Czech)
   static String get bigGameLabel => 'FeatureOrders.bigGameLabel'.tr(); // "Big Game: "
@@ -84,6 +86,8 @@ class OrdersStrings {
   static String get newLoginCredentials => 'FeatureOrders.newLoginCredentials'.tr(); // "New login credentials"
   static String get errorEmailNotReturned => 'FeatureOrders.errorEmailNotReturned'.tr(); // "Error: Email was not returned."
   static String get confirmTicketFailed => 'FeatureOrders.confirmTicketFailed'.tr(); // "Failed to confirm ticket"
+
+
 
   // Specific Field Mappings (previously hardcoded)
   static String get fieldTypeParticipant => 'FeatureOrders.fieldTypeParticipant'.tr(); // "Participant Type"
@@ -146,6 +150,7 @@ class OrdersStrings {
   static String get gridPaidOrSent => 'OrderGridColumns.paidOrSent'.tr(); // "Paid or Sent"
   static String get gridCancelled => 'OrderGridColumns.cancelled'.tr(); // "Cancelled"
   static String get gridUsedInForms => 'OrderGridColumns.usedInForms'.tr(); // "Used in Forms"
+  static String get gridShortTitle => 'OrderGridColumns.shortTitle'.tr(); // "Short Title"
 
   // --- PDF Generation Strings ---
   static String get generatingPdf => 'FeatureOrders.generatingPdf'.tr(); // "Generating PDF..."

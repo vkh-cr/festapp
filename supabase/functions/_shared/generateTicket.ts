@@ -243,13 +243,11 @@ export async function generateTicketImage(
     );
     if (spotOrder && spotOrder.spot_group_title) {
       texts.push(`Stůl: ${truncateText(spotOrder.spot_group_title)}`);
-    } else {
-      texts.push(`Stůl: N/A`);
     }
 
     // Add Food Title.
     if (foodProduct) {
-      const foodTitle = foodProduct.title_short || foodProduct.title || "N/A";
+      const foodTitle = foodProduct.short_title || foodProduct.title || "N/A";
       texts.push(`Večeře: ${truncateText(foodTitle)}`);
     }
 

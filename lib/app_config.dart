@@ -25,6 +25,7 @@ class AppConfig {
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = true;
   static const bool isAppSupported = true;
+  static const bool isWebclientSupported = true;
 
   static const String webLink = "https://hvezdamorska.netlify.app";
   static bool isProLicense = true;

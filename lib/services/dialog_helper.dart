@@ -12,7 +12,8 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/drop_file.dart';
 import 'package:fstapp/widgets/password_field.dart';
-import 'package:search_page/search_page.dart';
+import 'package:fstapp/components/dialogs/responsive_search_dialog.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:select_dialog/select_dialog.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
@@ -112,40 +113,53 @@ class DialogHelper{
   }
 
   static Future<void> chooseUser(BuildContext context, void Function(UserInfoModel) onPressedAction, List<UserInfoModel> allUsers, String setText) async {
-    showSearch(
-        context: context,
-        delegate: SearchPage<UserInfoModel>(
-          showItemsOnEmpty: true,
-          items: allUsers,
-          searchLabel: "Search participants".tr(),
-          suggestion: Center(
-            child: const Text(
-                "Find participants by name, surname or e-mail.").tr(),
+    showDialog(
+      context: context,
+      builder: (context) => ResponsiveSearchDialog<UserInfoModel>(
+        items: allUsers,
+        searchLabel: "Search participants".tr(),
+        filter: (person, query) {
+          final q = query.toLowerCase().withoutDiacriticalMarks;
+          return (person.name?.toLowerCase().withoutDiacriticalMarks.contains(q) ?? false) ||
+              (person.surname?.toLowerCase().withoutDiacriticalMarks.contains(q) ?? false) ||
+              (person.email?.toLowerCase().contains(q) ?? false);
+        },
+        itemBuilder: (person) => ListTile(
+          title: Text(person.name!),
+          subtitle: Text(person.surname??""),
+          trailing: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                  onPressed: () {
+                     // We need to close the dialog before the action?
+                     // Or action closes it? 
+                     // The original impl called onPressedAction(person) which might have closed it or not.
+                     // The SearchPage pushes a route.
+                     // showDialog pushes a route.
+                     // We should probably pop before action?
+                     // In original 'EventPage', calling 'onPressedAction' invokes 'signIn' then 'loadData'.
+                     // It does NOT pop the search page explicitly in the callback.
+                     // Wait, SearchPage usually returns the selected item if used with showSearch.
+                     // But here 'chooseUser' takes an 'onPressedAction'.
+                     // Inside the builder of SearchPage:
+                     // onPressed: () { onPressedAction(person); }
+                     // It didn't pop automatically unless SearchPage does it? 
+                     // SearchPage [https://pub.dev/packages/search_page] behavior:
+                     // It doesn't pop automatically on generic builder click.
+                     // But usually one uses `close(context, result)`. 
+                     // Here the user implemented a Button in the builder.
+                     // IMPORTANT: If I am in a Dialog, I should probably pop.
+                     Navigator.of(context).pop();
+                     onPressedAction(person);
+                  },
+                  child: Text(setText)),
+              Text(person.email??""),
+            ],
           ),
-          failure: Center(
-            child: const Text("No results.").tr(),
-          ),
-          filter: (person) => [
-            person.name,
-            person.surname,
-            person.email,
-          ],
-          builder: (person) => ListTile(
-            title: Text(person.name!),
-            subtitle: Text(person.surname??""),
-            trailing: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                    onPressed: () {
-                      onPressedAction(person);
-                    },
-                    child: Text(setText)),
-                Text(person.email??""),
-              ],
-            ),
-          ),
-        ));
+        ), 
+      ),
+    );
   }
 
   static Future<void> showInformationDialog(

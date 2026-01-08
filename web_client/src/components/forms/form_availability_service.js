@@ -1,0 +1,69 @@
+import { CountdownWidget } from './widgets/countdown_widget.js';
+import { NotAvailableWidget } from './widgets/not_available_widget.js';
+
+export class FormAvailabilityService {
+    
+    static Status = {
+        OPEN: 'OPEN',
+        CLOSED: 'CLOSED',
+        BEFORE_START: 'BEFORE_START',
+        // SOLD_OUT: 'SOLD_OUT' // Future use
+    };
+
+    /**
+     * Determines the current status of the form based on time and settings.
+     * @param {Object} formModel 
+     * @returns {Object} { status, message, targetTime? }
+     */
+    static getStatus(formModel) {
+        const now = new Date();
+        
+        if (formModel.startTime && now < formModel.startTime) {
+            return { 
+                status: FormAvailabilityService.Status.BEFORE_START,
+                targetTime: formModel.startTime
+            };
+        } 
+        
+        if (formModel.endTime && now > formModel.endTime) {
+            return { status: FormAvailabilityService.Status.CLOSED };
+        } 
+        
+        if (formModel.isOpen === false) {
+             return { status: FormAvailabilityService.Status.CLOSED };
+        }
+
+        return { status: FormAvailabilityService.Status.OPEN };
+    }
+
+    /**
+     * Renders the appropriate UI for the current status into the container.
+     * @param {HTMLElement} container 
+     * @param {Object} formModel 
+     * @param {Object} statusResult Result from getStatus
+     * @param {Object} context Context like { showPreview: boolean, onReload: function }
+     * @returns {boolean} True if rendering handled (flow should stop), False if form should proceed (OPEN).
+     */
+    static renderStatus(container, formModel, statusResult, context = {}) {
+        const { showPreview } = context;
+        const { status } = statusResult;
+
+        // Preview Mode overrides everything
+        if (showPreview) return false;
+
+        if (status === FormAvailabilityService.Status.BEFORE_START) {
+            if (formModel.enableCountdown) {
+                CountdownWidget.render(container, formModel, context.onReload);
+                return true; // Stop flow
+            }
+            // If countdown disabled, fall through to Not Available
+        }
+
+        if (status === FormAvailabilityService.Status.CLOSED || status === FormAvailabilityService.Status.BEFORE_START) {
+            NotAvailableWidget.render(container, formModel);
+            return true; // Stop flow
+        }
+
+        return false; // OPEN
+    }
+}

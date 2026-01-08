@@ -23,7 +23,7 @@ class OrderPreviewScreen extends StatefulWidget {
   final String? tone;
   final bool hasTickets;
 
-  static const double fontSizeFactor = 1.2;
+  static const double fontSizeFactor = 1.1;
 
   const OrderPreviewScreen({
     super.key,
@@ -288,7 +288,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
 
   Widget _buildInfoRow(BuildContext context, String label, String value, [String? fieldType]) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: SelectableText.rich(
         TextSpan(
           children: [

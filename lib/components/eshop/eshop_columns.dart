@@ -47,6 +47,7 @@ class EshopColumns {
 
   static const String PRODUCT_ID = "productId";
   static const String PRODUCT_TITLE = "productTitle";
+  static const String PRODUCT_SHORT_TITLE = "productShortTitle";
   static const String PRODUCT_PRICE = "productPrice";
   static const String PRODUCT_IS_HIDDEN = "productIsHidden";
   static const String PRODUCT_TYPE = "productType";
@@ -123,6 +124,15 @@ class EshopColumns {
         field: PRODUCT_TITLE,
         type: TrinaColumnType.text(),
         width: 200,
+      ),
+    ],
+    PRODUCT_SHORT_TITLE: [
+      TrinaColumn(
+        enableAutoEditing: true,
+        title: OrdersStrings.gridShortTitle,
+        field: PRODUCT_SHORT_TITLE,
+        type: TrinaColumnType.text(),
+        width: 150,
       ),
     ],
     PRODUCT_PRICE: [
@@ -908,7 +918,7 @@ class EshopColumns {
     );
   }
 
-  static const List<String> productCategories = ["spot", "food", "others"];
+  static const List<String> productCategories = ["others"];
 
   static Map<String, TrinaCell> generateProductTypeCells(List<ProductModel> products) {
     // Get the allowed product categories.

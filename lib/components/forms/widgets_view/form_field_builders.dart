@@ -204,7 +204,7 @@ class FormFieldBuilders {
     return FormBuilderField<SeatModel>(
       name: fieldHolder.fieldType,
       validator: FormBuilderValidators.compose([
-        if (fieldHolder.isRequired) FormBuilderValidators.required(),
+        if (fieldHolder.isRequired) FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty),
             (value) => value == null ? PublicOrderStrings.selectSeat(null) : null,
       ]),
       builder: (FormFieldState<SeatModel?> field) {

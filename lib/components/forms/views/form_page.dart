@@ -12,6 +12,7 @@ import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
+import 'package:fstapp/components/forms/form_session.dart';
 import 'package:fstapp/components/forms/models/form_option_product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -47,15 +48,11 @@ class FormPage extends StatefulWidget {
 class _FormPageState extends State<FormPage> {
   bool _isLoading = false;
   bool _formNotAvailable = false;
-  double _totalPrice = 0.0;
-
-  int _totalTickets = 0;
-  int _totalProducts = 0;
 
   Map<String, dynamic>? formResult;
   FormHolder? formHolder;
   FormModel? form;
-  List<SeatModel> selectedSeats = [];
+  FormSession? formSession;
 
   final _formKey = GlobalKey<FormBuilderState>();
   final ScrollController _scrollController = ScrollController();
@@ -137,7 +134,8 @@ class _FormPageState extends State<FormPage> {
       if (_seatReservationCompleter != null &&
           !_seatReservationCompleter!.isCompleted) {
         // User wants browser back to function as a "Confirm"
-        _seatReservationCompleter!.complete(selectedSeats);
+        formSession?.confirmSeatSelection();
+        _seatReservationCompleter!.complete(formSession?.currentSeats);
       }
       _seatReservationCompleter = null;
     }
@@ -152,7 +150,13 @@ class _FormPageState extends State<FormPage> {
     // Push a new history state via RouterService
     RouterService.pushOverlayState('seat-reservation');
 
-    selectedSeats = seats;
+    formSession!.startSeatSelection();
+    // No need to updateSeats(seats) here as we are just opening it, 
+    // unless 'seats' differs from what's in ticket holder which shouldn't happen if we strictly follow ticket holder.
+    // However, if the caller passed explicit seats (like from a specific ticket edit), we might want to respect that?
+    // In `TicketFieldBuilder`, it passes `ticket.tickets.map((t) => t.seat!).toList()`.
+    // Since we are using ticket holder as truth, we should be fine.
+    
     setState(() {
       _isSeatReservationVisible = true;
     });
@@ -174,6 +178,14 @@ class _FormPageState extends State<FormPage> {
     setState(() {
       _isSeatReservationVisible = false;
     });
+    // If seats is null, it's a cancel (back button logic handles confirm via completer check above?)
+    // Wait, _hideSeatReservation is called by US manually OR by history pop?
+    // If `seats` is NOT null, it's a confirm.
+    if (seats != null) {
+       formSession!.confirmSeatSelection();
+    } else {
+       formSession!.cancelSeatSelection();
+    }
 
     // Complete the future with the result (null for cancel, list for confirm)
     if (_seatReservationCompleter != null &&
@@ -207,16 +219,10 @@ class _FormPageState extends State<FormPage> {
             secret: formHolder!.controller!.secret!,
             formDataKey: formHolder!.controller!.formKey!,
             blueprintId: formHolder!.controller!.blueprintId!,
-            selectedSeats: selectedSeats,
+            selectedSeats: formSession!.currentSeats,
             maxTickets: formHolder!.getTicket()?.maxTickets,
             onSelectionChanged: (sts) {
-              selectedSeats = sts;
-              _totalTickets = sts.length;
-              _totalPrice = 0;
-              for (var s in sts) {
-                _totalPrice += s.objectModel?.product?.price ?? 0;
-              }
-              setState(() {});
+              formSession!.updateSeats(sts);
             },
             onCloseSeatReservation:
             formHolder!.controller!.onCloseSeatReservation!,
@@ -228,71 +234,9 @@ class _FormPageState extends State<FormPage> {
 
   // _buildOrderPreviewOverlay removed as we use showModalBottomSheet
 
-  void _updateTotalPrice() {
-    String? currencyC;
-    _totalPrice = 0.0;
-    _totalTickets = 0;
-    _totalProducts = 0;
-
-    for (var field in formHolder!.fields) {
-      if (field.fieldType == FormHelper.fieldTypeProductType) {
-        var selectedOption = field.getValue(formHolder!.controller!.globalKey);
-        if (selectedOption is FormOptionProductModel) {
-          _totalPrice += selectedOption.price;
-          currencyC ??= selectedOption.currencyCode;
-        }
-      }
-
-      if (field is TicketHolder) {
-        if (_isSeatReservationVisible) {
-          _totalTickets = selectedSeats.length;
-        } else {
-          _totalTickets = field.tickets.length;
-        }
-
-        if (_isSeatReservationVisible) {
-          for (var s in selectedSeats) {
-            _totalPrice += s.objectModel!.product!.price!;
-          }
-        } else {
-          for (var s in field.tickets) {
-            if (s.seat != null) {
-              _totalProducts++;
-              _totalPrice += s.seat!.objectModel!.product!.price!;
-              currencyC ??= s.seat!.objectModel!.product!.currencyCode;
-            }
-          }
-        }
-
-        var tickets = FormHelper.getFieldData(_formKey, field) ?? [];
-
-        for (var ticketData in tickets) {
-          for (var ticketField in ticketData[FormHelper.metaFields]) {
-            for (var fValue in ticketField.values) {
-              if (fValue is FormOptionProductModel) {
-                _totalProducts++;
-                _totalPrice += fValue.price;
-                currencyC ??= fValue.currencyCode;
-              } else if (fValue is Iterable) {
-                // Convert the JSArray (or any iterable) to a Dart list and sum the prices.
-                var products = List<FormOptionProductModel>.from(fValue);
-                _totalProducts += products.length;
-                _totalPrice +=
-                    products.fold(0, (sum, product) => sum + product.price);
-                currencyC ??= products.firstOrNull?.currencyCode;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    formHolder!.controller!.currencyCode = currencyC;
-    setState(() {});
-  }
 
   Widget _buildPriceAndTicketInfo() {
-    if (_totalPrice <= 0) return SizedBox(); // Do not display if total price is 0
+    if ((formSession?.totalPrice ?? 0) <= 0) return SizedBox(); // Do not display if total price is 0
 
     return Positioned(
       top: 16,
@@ -308,7 +252,7 @@ class _FormPageState extends State<FormPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "${_totalTickets}x",
+              "${formSession?.totalTickets ?? 0}x",
               style: const TextStyle(
                 fontSize: 18, // Increased font size
                 fontWeight: FontWeight.bold,
@@ -323,7 +267,7 @@ class _FormPageState extends State<FormPage> {
             ),
             const SizedBox(width: 10), // Increased spacing
             Text(
-              Utilities.formatPrice(context, _totalPrice,
+              Utilities.formatPrice(context, formSession?.totalPrice ?? 0,
                   currencyCode: formHolder!.controller!.currencyCode),
               style: const TextStyle(
                 fontSize: 18, // Increased font size
@@ -356,7 +300,7 @@ class _FormPageState extends State<FormPage> {
             data: _buildFormTheme(context),
             child: OrderPreviewScreen(
               formHolder: formHolder!,
-              totalPrice: _totalPrice,
+              totalPrice: formSession?.totalPrice ?? 0,
               onSendPressed: _sendOrder,
               // When user clicks Close in UI, we just pop the sheet.
               // verification of _isOrderPreviewVisible in whenComplete will handle history sync.
@@ -405,10 +349,13 @@ class _FormPageState extends State<FormPage> {
           return await DbOrders.sendTicketOrder(data);
         },
         onOrderConfirmed: () async {
-          selectedSeats = [];
-          _formKey.currentState?.reset();
+          // Reset session tickets? 
+          // `_formKey.currentState?.reset()` resets the form fields.
+          // TicketHolder might need manual reset or re-loadData will handle it.
+          // formSession updateSeats([]) is effectively clearing it.
+          // But since we use TicketHolder, we should reload data.
           await loadData();
-          _updateTotalPrice();
+          formSession!.recalculateTotals();
         },
         onSuccess: () async {
           Navigator.of(context).pop(); // Close the OrderPreview BottomSheet
@@ -646,7 +593,7 @@ class _FormPageState extends State<FormPage> {
                                             ButtonsHelper.primaryButton(
                                               context: context,
                                               onPressed: (_isLoading ||
-                                                  _totalProducts == 0)
+                                                  (formSession?.totalProducts ?? 0) == 0)
                                                   ? null
                                               : () => _showOrderPreview(
                                                   scrollContext),
@@ -797,12 +744,21 @@ class _FormPageState extends State<FormPage> {
 
       formHolder = FormHolder.fromFormFieldModel(form!);
 
+      formSession = FormSession(
+        form: form!,
+        formHolder: formHolder!,
+        formKey: _formKey,
+      );
+      formSession!.addListener(() {
+        setState(() {});
+      });
+
       formHolder!.controller = FormHolderController(
           secret: form!.secret,
           blueprintId: form!.blueprint,
           globalKey: _formKey,
           formKey: form!.key!,
-          updateTotalPrice: _updateTotalPrice,
+          updateTotalPrice: formSession!.recalculateTotals,
           showSeatReservation: _showSeatReservation,
           onCloseSeatReservation: _hideSeatReservation);
 

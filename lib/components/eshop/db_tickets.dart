@@ -236,4 +236,34 @@ class DbTickets {
       },
     );
   }
+
+  static Future<Map<String, dynamic>?> getOccasionByScanCode(String scanCode) async {
+    try {
+      final response = await _supabase.rpc('get_occasion_by_scan_code', params: {
+        'scan_code': scanCode,
+      });
+      return response;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<List<TicketModel>> getAllTicketsForScan(String scanCode) async {
+    final response = await _supabase.rpc(
+      "get_all_tickets_for_scan",
+      params: {"scan_code": scanCode},
+    );
+
+    if (response is List) {
+      return response.map((json) {
+        final ticket = TicketModel.fromJson(json);
+        if (json.containsKey('related_order')) {
+          ticket.relatedOrder = OrderModel.fromJson(json['related_order']);
+        }
+        return ticket;
+      }).toList();
+    }
+
+    return [];
+  }
 }
