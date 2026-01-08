@@ -191,7 +191,7 @@ export class RouterService {
         // 4. Handle normalized path updates (UX polish)
         if (!shouldRedirectToFlutter) {
              // Clean URL if it contains query parameters or hash
-             if (window.location.search || (window.location.hash && window.location.hash.startsWith('#/')) || fullUrl.includes('?')) {
+             if (window.location.search || window.location.hash || fullUrl.includes('?')) {
                   console.log(`[RouterService] Sanitizing URL: ${fullUrl} -> ${path}`);
                   window.history.replaceState(null, '', path);
                   RouterService._lastPath = path; // Sync tracker
@@ -255,6 +255,7 @@ export class RouterService {
         
         // 2.5 Strip Query Parameters (Strict Sanitization)
         path = path.split('?')[0];
+        path = path.split('#')[0];
 
         // 3. Ensure leading slash
         if (!path.startsWith('/')) {

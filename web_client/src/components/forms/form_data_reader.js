@@ -37,12 +37,14 @@ export class FormDataReader {
                  
                  let fieldObj = {};
                  fieldObj[field.id.toString()] = val;
-                 
-                 // Attach currency if single value (complex logic for multi-currency items is rare/unsupported on standard fields)
-                 if (validVals.length === 1) {
-                      const opt = FormDataReader._findOption(field, validVals[0]);
-                      if (opt && opt.currency) fieldObj['currency_code'] = opt.currency;
-                 }
+                                  // Attach currency if single value (complex logic for multi-currency items is rare/unsupported on standard fields)
+                  if (validVals.length === 1) {
+                       const opt = FormDataReader._findOption(field, validVals[0]);
+                       if (opt) {
+                           const c = opt.currency || opt.currencyCode || opt.currency_code;
+                           if (c) fieldObj['currency_code'] = c;
+                       }
+                  }
 
                  payload.fields.push(fieldObj);
              }
@@ -150,7 +152,8 @@ export class FormDataReader {
                                  
                                  if (inputEl && inputEl.dataset && inputEl.dataset.price) {
                                      fObj.price = parseFloat(inputEl.dataset.price);
-                                     if (inputEl.dataset.currency) fObj.currency_code = inputEl.dataset.currency;
+                                     const c = inputEl.dataset.currency || inputEl.dataset.currencyCode; 
+                                     if (c) fObj.currency_code = c;
                                  }
                              }
                              ticketObj.fields.push(fObj);
@@ -224,8 +227,9 @@ export class FormDataReader {
                  fObj['price'] = opt.price;
             }
 
-            if (opt.currency) {
-                fObj['currency_code'] = opt.currency;
+            const c = opt.currency || opt.currencyCode || opt.currency_code;
+            if (c) {
+                fObj['currency_code'] = c;
             }
         }
         return fObj;
