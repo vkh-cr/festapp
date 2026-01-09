@@ -108,7 +108,7 @@ class AppPanelHelper {
         onItemSelected: (item) async {
           if (item.link != null) {
             await RouterService.navigateToOccasionAdministration(
-                originalContext, occasionLink: item.link!);
+                originalContext, occasion: item);
           }
         },
         onCreateNew: !RightsService.isUnitEditor() ? null :
@@ -123,7 +123,7 @@ class AppPanelHelper {
         onTitleTap: () async {
           if (currentOccasion.link != null) {
             await RouterService.navigateToOccasionAdministration(
-                originalContext, occasionLink: currentOccasion.link!);
+                originalContext, occasionLink: currentOccasion.link!, occasion: currentOccasion);
           }
         },
         searchHintText: AdministrationStrings.findOccasionHint,
@@ -770,7 +770,7 @@ class AppPanelHelper {
                               if (item.link != null) {
                                 await RouterService
                                     .navigateToOccasionAdministration(
-                                    context, occasionLink: item.link!);
+                                    context, occasionLink: item.link!, occasion: item);
                               }
                             },
                             onCreateNew: null,

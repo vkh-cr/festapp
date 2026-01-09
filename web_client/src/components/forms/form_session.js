@@ -117,9 +117,12 @@ export class FormSession extends EventTarget {
                                      found = options.find(o => String(o.id) === String(val));
                                  }
 
-                                 if (found && found.currency) {
-                                     itemCurrency = found.currency;
-                                     valObj.currency_code = itemCurrency;
+                                 if (found) {
+                                     const c = found.currency || found.currencyCode || found.currency_code;
+                                     if (c) {
+                                         itemCurrency = c;
+                                         valObj.currency_code = itemCurrency;
+                                     }
                                  }
                              }
                      }
@@ -144,7 +147,7 @@ export class FormSession extends EventTarget {
         for (const [key, val] of this.state.fields.entries()) {
              // ... standard fields auto-select logic if needed ...
              // For now, focused on Ticket Products as per user report.
-             
+             const fieldDef = this.formModel.visibleFields.find(f => String(f.id) === String(key));
               if (fieldDef) {
                   const findOption = (v) => {
                      const options = fieldDef.options || (fieldDef.data && fieldDef.data.options) || [];
@@ -159,9 +162,12 @@ export class FormSession extends EventTarget {
                       // Clear if potentially incompatible
                   } else {
                       const opt = findOption(val);
-                      if (opt && opt.currency && opt.currency !== newCurrency) {
-                          this.state.fields.delete(key);
-                          hasChanges = true;
+                      if (opt) {
+                          const c = opt.currency || opt.currencyCode || opt.currency_code;
+                          if (c && c !== newCurrency) {
+                              this.state.fields.delete(key);
+                              hasChanges = true;
+                          }
                       }
                   }
              }
@@ -209,7 +215,10 @@ export class FormSession extends EventTarget {
                      
                      // Filter by Currency
                      const currency = this.state.currency;
-                     const validOptions = options.filter(o => !o.currency || o.currency === currency);
+                     const validOptions = options.filter(o => {
+                         const c = o.currency || o.currencyCode || o.currency_code;
+                         return !c || c === currency;
+                     });
                      
                      
 
@@ -440,8 +449,11 @@ export class FormSession extends EventTarget {
                                      if (opt && opt.price !== undefined) {
                                          newEntry.price = parseFloat(opt.price);
                                      }
-                                     if (opt && opt.currency) {
-                                         newEntry.currency_code = opt.currency;
+                                     if (opt) {
+                                         const c = opt.currency || opt.currencyCode || opt.currency_code;
+                                         if (c) {
+                                             newEntry.currency_code = c;
+                                         }
                                      }
                                  }
 
@@ -498,8 +510,11 @@ export class FormSession extends EventTarget {
                      return options.find(o => String(o.id) === String(val));
                  };
                  const opt = findOption(value);
-                 if (opt && opt.currency) {
-                     entry['currency_code'] = opt.currency;
+                 if (opt) {
+                     const c = opt.currency || opt.currencyCode || opt.currency_code;
+                     if (c) {
+                         entry['currency_code'] = c;
+                     }
                  }
             }
             // TODO: Multi-value currency logic? (Usually ignored for Checkboxes)
@@ -624,7 +639,8 @@ export class FormSession extends EventTarget {
                          totalPrice += parseFloat(opt.price);
                          pricesFound = true;
                      }
-                     if (opt.currency) currency = opt.currency;
+                     const c = opt.currency || opt.currencyCode || opt.currency_code;
+                     if (c) currency = c;
                  }
              });
 

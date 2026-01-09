@@ -89,7 +89,19 @@ test('RouterService.normalizeUrl', async (t) => {
         const result = RouterService.normalizeUrl(input);
         assert.strictEqual(result, "/simple/path");
     });
-    
+
+    await t.test('should strip generic hash', () => {
+        const input = "/form/test#some-setting";
+        const result = RouterService.normalizeUrl(input);
+        assert.strictEqual(result, "/form/test");
+    });
+
+    await t.test('should handle user specific legacy hash case', () => {
+        const input = "https://vstupenky.online/#/form/farni-ples-2026-cernobily?fcbclick=x";
+        const result = RouterService.normalizeUrl(input);
+        assert.strictEqual(result, "/form/farni-ples-2026-cernobily");
+    });
+
     // Cleanup
     AppConfig.webLink = originalLink;
     AppConfig.compatibleUrls = originalCompatible;
@@ -103,14 +115,14 @@ test('RouterService.Sanitization', async (t) => {
         history: { pushState: () => {} }
     };
     const { RouterService } = await import('../src/services/router_service.js');
-    
+
     await t.test('should strip query params in navigateToExternal', () => {
         let openedUrl = '';
         global.window.open = (url) => { openedUrl = url; };
-        
+
         RouterService.navigateToExternal('https://example.com?foo=bar');
         assert.strictEqual(openedUrl, 'https://example.com');
-        
+
         RouterService.navigateToExternal('https://example.com?foo=bar&baz=1');
         assert.strictEqual(openedUrl, 'https://example.com');
     });
@@ -137,7 +149,7 @@ test('RouterService.Sanitization', async (t) => {
         RouterService.navigateToOccasionApp('my-event?source=fb');
         assert.strictEqual(locationHref, '/my-event');
     });
-    
+
     await t.test('should strip query params in navigateToForm', async () => {
         let pushedPath = '';
         global.window.history.pushState = (state, title, url) => { pushedPath = url; };
@@ -147,7 +159,7 @@ test('RouterService.Sanitization', async (t) => {
         } catch (e) {
             // Ignore CSS import errors and similar in Node environment
             if (e.code !== 'ERR_UNKNOWN_FILE_EXTENSION' && !e.message.includes('css')) {
-                // If we want to be strict, we could log, but for now we expect this failure 
+                // If we want to be strict, we could log, but for now we expect this failure
                 // due to FormPage import.
             }
         }
@@ -174,7 +186,7 @@ test('RouterService.handleInitialLoad', async (t) => {
         removeEventListener: () => {}
     };
 
-    // Dynamic import inside each test block if we need fresh mocks, 
+    // Dynamic import inside each test block if we need fresh mocks,
     // but modules are cached. We will just use the imported classes and mock global state.
     
     // Ensure we have the classes
@@ -340,25 +352,48 @@ test('RouterService.handleInitialLoad', async (t) => {
 
     await t.test('should sanitize incoming URL with query params on load', async () => {
         AppConfig.isAppSupported = false; // Web Client mode
-        
+
         global.window.location.pathname = '/form/slug';
         global.window.location.search = '?fbclid=IwAR2...';
         global.window.location.href = 'https://vstupenky.online/form/slug?fbclid=IwAR2...';
-        
+
         let replacedPath = '';
         global.window.history.replaceState = (_, __, p) => { replacedPath = p; };
-        
+
         try {
             const handled = await RouterService.handleInitialLoad();
             assert.strictEqual(handled, true); // Handled by Web Client (loading form)
         } catch (e) {
              if (e.code !== 'ERR_UNKNOWN_FILE_EXTENSION' && !e.message.includes('css')) {
-                throw e;
+                 throw e;
             }
             // Even if it failed to load component (css), it should have sanitized BEFORE loading
         }
-        
+
         assert.strictEqual(replacedPath, '/form/slug'); // Should receive clean path
+    });
+
+    await t.test('should strict hash from URL in handleInitialLoad', async () => {
+        // Mock Config
+        // Ideally this should be reset/handled but we are appending to the end of the block
+        // where AppConfig is already imported.
+        // We reused the imports from top of block.
+        AppConfig.isAppSupported = false;
+
+        global.window.location.pathname = '/form/slug';
+        global.window.location.hash = '#some-setting';
+        global.window.location.href = 'https://vstupenky.online/form/slug#some-setting';
+
+        let replacedPath = '';
+        global.window.history.replaceState = (_, __, p) => { replacedPath = p; };
+
+        try {
+             await RouterService.handleInitialLoad();
+        } catch (e) {
+             // ignore component load errors
+        }
+
+        assert.strictEqual(replacedPath, '/form/slug');
     });
 });
 

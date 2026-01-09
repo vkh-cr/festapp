@@ -50,7 +50,7 @@ BEGIN
             jsonb_object_agg(p.id, jsonb_build_object(
                 'id', p.id, 'title', p.title, 'description', p.description, 'price', p.price, 'data', p.data,
                 'product_type', p.product_type, 'occasion', p.occasion, 'is_hidden', p.is_hidden,
-                'currency_code', p.currency_code, 'title_short', p.title_short, 'order', p."order",
+                'currency_code', p.currency_code, 'order', p."order",
                 'maximum', p.maximum, 'is_dynamically_available', is_product_dynamically_available(p.id)
             )) AS data
         FROM eshop.products p

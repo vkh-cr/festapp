@@ -273,6 +273,44 @@ Under similar names usually available in AppStore and Google Play Store.
 
 ---
 
+---
+
+## AI Integration (MCP)
+
+This project supports the **Model Context Protocol (MCP)** to allow AI
+assistants to interact with the project environment.
+
+### Chrome Automation (Puppeteer)
+
+To enable AI agents to control a headless Chrome instance (e.g., for end-to-end
+testing or automation), use the Puppeteer MCP server:
+
+```bash
+./automation/start-mcp-puppeteer.sh
+```
+
+This script exposes Chrome Developer Tools capabilities via the MCP protocol.
+
+### Supabase Integration
+
+To enable AI agents to interact with the Supabase database and management API:
+
+**1. Postgres Database Access** Allows direct SQL queries and schema inspection.
+Requires `DATABASE_URL` in `.env.local`.
+
+```bash
+./automation/start-mcp-db.sh
+```
+
+**2. Supabase Management** Allows project management and log inspection.
+Requires `SUPABASE_ACCESS_TOKEN` in `.env.local`.
+
+```bash
+./automation/start-mcp-supabase.sh
+```
+
+---
+
 ## About
 
 The app was originally developed by a team of volunteers for

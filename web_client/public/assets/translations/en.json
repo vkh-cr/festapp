@@ -795,7 +795,8 @@
     "changes": "Changes",
     "paidOrSent": "Paid or Sent",
     "cancelled": "Cancelled",
-    "usedInForms": "Used in Forms"
+    "usedInForms": "Used in Forms",
+    "shortTitle": "Short Title"
   },
   "FormsFeature": {
     "addTicket": "Add Ticket",
@@ -889,7 +890,8 @@
     "downloadTicket": "Download Ticket",
     "generatingPdfFor": "Generating Ticket for {customer}",
     "generatingPdfForWithSpot": "Generating Ticket for {customer} - {spot}",
-    "scanInstructionsAppUser": "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile."
+    "scanInstructionsAppUser": "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile.",
+    "scanningForOccasion": "Scanning for: "
   },
   "UserColumns": {
     "id": "Id",
@@ -1337,5 +1339,12 @@
     "chooseDifferentVariant_informal": "Please choose a different variant.",
     "totalPrice": "Total Price: {price}"
   },
-  "_": "_"
+  "_": "_",
+  "FeatureTicket": {
+    "enableManualTicketScan": "Enable Manual Ticket Scan",
+    "enableManualTicketScanDescription": "Allows searching and selecting tickets manually if attendee forgot ticket.",
+    "selectTicket": "Select Ticket",
+    "unknown": "Unknown",
+    "noData": "No Data"
+  }
 }
