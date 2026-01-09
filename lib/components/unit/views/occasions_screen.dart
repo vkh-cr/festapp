@@ -13,6 +13,8 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/unit/views/occasion_edit_card.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
 
 class OccasionsScreen extends StatefulWidget {
   final UnitModel unit;
@@ -103,7 +105,8 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   }
 
   Future<void> _handleView(OccasionModel occasion) async {
-    await RouterService.navigateToOccasionAdministration(context, occasionLink: occasion.link!);
+    await RouterService.navigateToOccasionAdministration(context,
+        occasion: occasion);
   }
 
   Future<void> _handleCreateCopy(OccasionModel occasion) async {
