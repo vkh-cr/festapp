@@ -89,6 +89,18 @@ test('RouterService.normalizeUrl', async (t) => {
         const result = RouterService.normalizeUrl(input);
         assert.strictEqual(result, "/simple/path");
     });
+
+    await t.test('should strip generic hash', () => {
+        const input = "/form/test#some-setting";
+        const result = RouterService.normalizeUrl(input);
+        assert.strictEqual(result, "/form/test");
+    });
+
+    await t.test('should handle user specific legacy hash case', () => {
+        const input = "https://vstupenky.online/#/form/farni-ples-2026-cernobily";
+        const result = RouterService.normalizeUrl(input);
+        assert.strictEqual(result, "/form/farni-ples-2026-cernobily");
+    });
     
     // Cleanup
     AppConfig.webLink = originalLink;
@@ -353,12 +365,35 @@ test('RouterService.handleInitialLoad', async (t) => {
             assert.strictEqual(handled, true); // Handled by Web Client (loading form)
         } catch (e) {
              if (e.code !== 'ERR_UNKNOWN_FILE_EXTENSION' && !e.message.includes('css')) {
-                throw e;
+                 throw e;
             }
             // Even if it failed to load component (css), it should have sanitized BEFORE loading
         }
         
         assert.strictEqual(replacedPath, '/form/slug'); // Should receive clean path
+    });
+
+    await t.test('should strict hash from URL in handleInitialLoad', async () => {
+        // Mock Config
+        // Ideally this should be reset/handled but we are appending to the end of the block 
+        // where AppConfig is already imported.
+        // We reused the imports from top of block.
+        AppConfig.isAppSupported = false;
+        
+        global.window.location.pathname = '/form/slug';
+        global.window.location.hash = '#some-setting';
+        global.window.location.href = 'https://vstupenky.online/form/slug#some-setting';
+        
+        let replacedPath = '';
+        global.window.history.replaceState = (_, __, p) => { replacedPath = p; };
+        
+        try {
+             await RouterService.handleInitialLoad();
+        } catch (e) {
+             // ignore component load errors
+        }
+        
+        assert.strictEqual(replacedPath, '/form/slug');
     });
 });
 
