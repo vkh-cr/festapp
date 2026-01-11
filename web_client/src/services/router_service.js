@@ -245,15 +245,28 @@ export class RouterService {
              }
         }
 
-        // 2. Legacy Hash
-        // We look for /# and take everything after it if found, effectively treating it as root
-        const hashIndex = path.indexOf('/#');
-        if (hashIndex !== -1) {
-             path = path.substring(hashIndex + 1); // Get '/...' part
-             path = path.replace('#', ''); // Ensure no # remains
+        // 2. Identify and Extract Legacy Hash /#/ regardless of preceding query params
+        // Example: /?fbclid=123/#/form/slug  -> should extract /form/slug
+
+        // Strategy: First split by # to isolate potential legacy hash
+        const parts = path.split('#');
+        if (parts.length > 1) {
+            // Check if the part after # starts with / (Legacy Hash pattern)
+            // or if it's the specific pattern we support
+            const fragment = parts[1];
+            if (fragment.startsWith('/')) {
+                path = fragment; // Take the hash path as the new root
+            } else {
+                 // It's a normal fragment (e.g. #section), so we just want the path part before it.
+                 // BUT wait, if we had /path#section, we want /path.
+                 // If we had /?query#section, we want / (and query stripped later).
+                 path = parts[0];
+            }
         }
-        
+
         // 2.5 Strip Query Parameters (Strict Sanitization)
+        // Now that we've potentially re-rooted to the hash path, strip queries from it.
+        // Also strip queries from the original path if we didn't re-root (e.g. /path?q=1)
         path = path.split('?')[0];
         path = path.split('#')[0];
 
