@@ -19,6 +19,7 @@ class TicketFeature extends Feature {
   String? ticketBackground;
   String? ticketType;
   bool? canScanManually;
+  bool? showHiddenNote;
 
   TicketFeature({
     required super.code,
@@ -30,6 +31,7 @@ class TicketFeature extends Feature {
     this.ticketBackground,
     this.ticketType,
     this.canScanManually,
+    this.showHiddenNote,
   });
 
   factory TicketFeature.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class TicketFeature extends Feature {
       ticketBackground: json[FeatureConstants.ticketBackground],
       ticketType: json[FeatureConstants.ticketType],
       canScanManually: json[FeatureConstants.ticketCanScanManually] ?? false,
+      showHiddenNote: json[FeatureConstants.ticketShowHiddenNote] ?? false,
     );
   }
 
@@ -55,6 +58,7 @@ class TicketFeature extends Feature {
     if (ticketBackground != null) data[FeatureConstants.ticketBackground] = ticketBackground!;
     if (ticketType       != null) data[FeatureConstants.ticketType]       = ticketType!;
     if (canScanManually  != null) data[FeatureConstants.ticketCanScanManually] = canScanManually!;
+    if (showHiddenNote   != null) data[FeatureConstants.ticketShowHiddenNote]  = showHiddenNote!;
     return data;
   }
 
@@ -75,6 +79,14 @@ class TicketFeature extends Feature {
             subtitle: Text(FeaturesStrings.enableManualTicketScanDescription),
             onChanged: (val) => setLocal(() {
               canScanManually = val;
+            }),
+          ),
+          CheckboxListTile(
+            value: showHiddenNote ?? false,
+            title: Text(FeaturesStrings.labelShowHiddenNote),
+            subtitle: Text(FeaturesStrings.descriptionShowHiddenNote),
+            onChanged: (val) => setLocal(() {
+              showHiddenNote = val;
             }),
           ),
           DropdownButtonFormField<String>(

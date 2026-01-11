@@ -247,9 +247,8 @@ class RouterService {
     
     // If occasion is provided, prioritize it for feature checks
     if (occasion != null) {
-      // If Form feature is NOT enabled, force navigation to main admin page (Dashboard)
-      if (!FeatureService.isFeatureEnabled(FeatureConstants.form, features: occasion.features)) {
-        await navigateToOccasionByLink(context, occasion.link ?? occasionLink!);
+      if (FeatureService.isFeatureEnabled(FeatureConstants.form, features: occasion.features)) {
+        await navigateToOccasionReservationsByLink(context, occasion.link ?? occasionLink!);
         return;
       }
     }
