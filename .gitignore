@@ -137,4 +137,4 @@ app.*.symbols
 supabase/.env
 
 # FVM Version Cache
-.fvm/.env.local
+.fvm/
