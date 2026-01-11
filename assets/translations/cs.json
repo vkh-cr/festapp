@@ -891,7 +891,8 @@
     "generatingPdfFor": "Generování Vstupenky pro {customer}",
     "generatingPdfForWithSpot": "Generování Vstupenky pro {customer} - {spot}",
     "scanInstructionsAppUser": "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile.",
-    "scanningForOccasion": "Skenuji pro: "
+    "scanningForOccasion": "Skenuji pro: ",
+    "scanNotFound": "Neplatný kód"
   },
   "UserColumns": {
     "id": "Id",
@@ -1345,6 +1346,8 @@
     "enableManualTicketScanDescription": "Umožňuje ruční vyhledání a výběr vstupenek, pokud účastník zapomněl vstupenku.",
     "selectTicket": "Vybrat vstupenku",
     "unknown": "Neznámý",
-    "noData": "Žádná data"
+    "noData": "Žádná data",
+    "labelShowHiddenNote": "Skrytá poznámka",
+    "descriptionShowHiddenNote": "Zobrazí skrytou poznámku ve výsledku skenování."
   }
 }

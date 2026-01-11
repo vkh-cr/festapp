@@ -22,12 +22,13 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/ticket_feature.dart';
 import 'package:fstapp/components/features/feature.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 
 import '../html/html_view.dart';
 import 'ticket_search_dialog.dart';
 import 'user_search_dialog.dart';
 
-enum ScanState { valid, invalid, used, nothing, ordered }
+enum ScanState { valid, invalid, used, nothing, ordered, notFound }
 
 @RoutePage()
 class ScanPage extends StatefulWidget {
@@ -54,6 +55,9 @@ class _ScanPageState extends State<ScanPage> {
   String? _occasionTitle;
   List<Feature> _features = [];
   bool _canScanTicketsManually = false;
+  
+  // Track if we just successfully used the ticket
+  bool _justConfirmed = false;
 
   @override
   void initState() {
@@ -220,8 +224,33 @@ class _ScanPageState extends State<ScanPage> {
     return null;
   }
 
-  Widget buildScannedUserDetails() {
+  Widget buildScannedUserDetails(Color backgroundColor) {
+    // Determine text color based on background luminance
+    Color foregroundColor = ThemeConfig.textColorForBackground(backgroundColor);
+
     if (_scannedObject == null) {
+      if (_scanState == ScanState.notFound) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Icon(Icons.error_outline, size: 60, color: foregroundColor),
+              ),
+              Text(
+                OrdersStrings.scanNotFound,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: foregroundColor,
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+          ),
+        );
+      }
       return Center(
         child: Column(
           children: [
@@ -271,6 +300,8 @@ class _ScanPageState extends State<ScanPage> {
       icon = Icons.block;
     } else if (_scanState == ScanState.used) {
       icon = Icons.beenhere;
+    } else if (_scanState == ScanState.notFound) {
+      icon = Icons.error_outline;
     } else {
       return const SizedBox.shrink();
     }
@@ -287,12 +318,19 @@ class _ScanPageState extends State<ScanPage> {
       );
 
       String statusText = "";
-      Color statusColor = Colors.black;
+      // Status color matches foreground for visibility
+      Color statusColor = foregroundColor;
 
-      if (_scanState == ScanState.valid || _scanState == ScanState.used) {
-        statusText = OrdersStrings.gridPaid;
+      if (_scanState == ScanState.valid) {
+        statusText = OrderModel.stateToLocale(OrderModel.paidState);
+      } else if (_scanState == ScanState.used) {
+        // Use exact translation from OrderModel
+        statusText = OrderModel.stateToLocale(OrderModel.usedState);
       } else if (_scanState == ScanState.ordered) {
-        statusText = OrdersStrings.gridOrdered;
+        statusText = OrderModel.stateToLocale(OrderModel.orderedState);
+      } else if (_scanState == ScanState.invalid) {
+        // Use exact translation from OrderModel (likely Storno)
+        statusText = OrderModel.stateToLocale(OrderModel.stornoState);
       }
 
       if (statusText.isNotEmpty) {
@@ -301,7 +339,7 @@ class _ScanPageState extends State<ScanPage> {
           child: RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: const TextStyle(fontSize: 20, color: Colors.black),
+              style: TextStyle(fontSize: 20, color: foregroundColor),
               children: [
                 TextSpan(
                   text: "$formattedPrice  ",
@@ -351,10 +389,10 @@ class _ScanPageState extends State<ScanPage> {
                           children: [
                             Text(
                               product.title ?? "",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                                color: foregroundColor,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -363,7 +401,7 @@ class _ScanPageState extends State<ScanPage> {
                               HtmlView(
                                 html: product.description!,
                                 fontSize: 14,
-                                color: Colors.black87,
+                                color: foregroundColor.withOpacity(0.9),
                               ),
                           ],
                         ),
@@ -376,8 +414,8 @@ class _ScanPageState extends State<ScanPage> {
                 // 2. Customer data, symbol, state
                 Text(
                   "${_scannedObject!.relatedOrder!.toCustomerData()}   ${_scannedObject!.ticketSymbol}   $stateString",
-                  style: const TextStyle(
-                    color: Colors.black,
+                  style: TextStyle(
+                    color: foregroundColor,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -395,7 +433,7 @@ class _ScanPageState extends State<ScanPage> {
                       textAlign: TextAlign.center,
                       text: TextSpan(
                         style:
-                        const TextStyle(color: Colors.black, fontSize: 16),
+                        TextStyle(color: foregroundColor, fontSize: 16),
                         children: [
                           TextSpan(
                             text: OrdersStrings.bigGameLabel,
@@ -417,8 +455,8 @@ class _ScanPageState extends State<ScanPage> {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       _scannedObject!.relatedSpot!.toSpotString(),
-                      style: const TextStyle(
-                        color: Colors.black,
+                      style: TextStyle(
+                        color: foregroundColor,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -428,6 +466,57 @@ class _ScanPageState extends State<ScanPage> {
 
                 // 4. Price and Payment Status
                 priceWidget,
+
+                // DISPLAY NOTES
+                if (_scannedObject!.note != null && _scannedObject!.note!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      _scannedObject!.note!,
+                      style: TextStyle(
+                        color: foregroundColor,
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                if (_features.isNotEmpty) ...[
+                  Builder(builder: (context) {
+                    final ticketFeature = FeatureService.getFeatureDetails(
+                        FeatureConstants.ticket,
+                        features: _features) as TicketFeature?;
+                    if (ticketFeature?.showHiddenNote == true &&
+                        _scannedObject!.noteHidden != null &&
+                        _scannedObject!.noteHidden!.isNotEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              FeaturesStrings.labelShowHiddenNote,
+                              style: TextStyle(
+                                color: foregroundColor.withOpacity(0.7),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              _scannedObject!.noteHidden!,
+                              style: TextStyle(
+                                color: foregroundColor,
+                                fontSize: 16,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  }),
+                ],
 
                 // 5. Extra fields
                 if (_scannedObject!.relatedOrder != null)
@@ -444,8 +533,8 @@ class _ScanPageState extends State<ScanPage> {
                       child: RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(
-                          style: const TextStyle(
-                              color: Colors.black, fontSize: 15),
+                          style: TextStyle(
+                              color: foregroundColor, fontSize: 15),
                           children: [
                             TextSpan(
                               text: "$label: ",
@@ -464,7 +553,7 @@ class _ScanPageState extends State<ScanPage> {
           const SizedBox(height: 8),
 
           // --- ICON SECTION ---
-          Icon(icon, color: Colors.black, size: 40),
+          Icon(icon, color: foregroundColor, size: 40),
           const SizedBox(height: 16),
 
           // --- ACTION BUTTONS SECTION ---
@@ -498,7 +587,7 @@ class _ScanPageState extends State<ScanPage> {
   Widget build(BuildContext context) {
     bool canSearch = AppConfig.isAppSupported || _canScanTicketsManually;
 
-    Color backgroundColor = _scannedObject == null
+    Color backgroundColor = (_scannedObject == null && _scanState == ScanState.nothing)
         ? ThemeConfig.grey200(context)
         : getResultColor(_scanState);
 
@@ -539,7 +628,7 @@ class _ScanPageState extends State<ScanPage> {
 
 
                 // Display scanned user details
-                buildScannedUserDetails(),
+                buildScannedUserDetails(backgroundColor),
                 // Scanner view
                 Expanded(
                   child: MobileScanner(
@@ -621,6 +710,7 @@ class _ScanPageState extends State<ScanPage> {
       return;
     }
     rightNowScanned = scannedId;
+    _justConfirmed = false;
 
     _scannedObject = await DbTickets.scanTicket(scannedId, widget.scanCode!);
 
@@ -656,7 +746,12 @@ class _ScanPageState extends State<ScanPage> {
       }
     }
 
-    _scanState = ScanState.nothing;
+
+
+    // Not found in DB or null return
+    _scannedObject = null;
+    _scanState = ScanState.notFound;
+    VibrateService.vibrateNotOk();
     setState(() {});
   }
 
@@ -671,6 +766,7 @@ class _ScanPageState extends State<ScanPage> {
         _scannedObject!.state = OrderModel.usedState;
         _scannedObject!.updatedAt = DateTime.now();
         _scanState = ScanState.used;
+        _justConfirmed = true;
       });
       VibrateService.vibrateOk();
     } else {
@@ -768,8 +864,11 @@ class _ScanPageState extends State<ScanPage> {
       case ScanState.ordered:
         return Colors.orangeAccent;
       case ScanState.used:
-        return Colors.blueAccent;
+        if (_justConfirmed) return Colors.blueAccent;
+        return Colors.redAccent;
       case ScanState.invalid:
+        return Colors.redAccent;
+      case ScanState.notFound:
         return Colors.redAccent;
       case ScanState.nothing:
         return ThemeConfig.backgroundColor(context);
