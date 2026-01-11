@@ -31,6 +31,7 @@ class FeatureConstants {
   static const String ticketBackground = "background";
   static const String ticketType = "ticket_type";
   static const String ticketCanScanManually = "can_scan_manually";
+  static const String ticketShowHiddenNote = "show_hidden_note";
 
   // Extra fields for form feature
   static const String formUseExternal = "use_external_form";

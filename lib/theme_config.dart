@@ -145,6 +145,10 @@ class ThemeConfig {
   static Color htmlLinkColor(BuildContext context) => isDarkMode(context) ? seed2 : seed3;
   static Color correctGuessColor(BuildContext context) => isDarkMode(context) ? seed3 : seed4;
 
+  static Color textColorForBackground(Color background) {
+    return background.computeLuminance() > 0.5 ? Colors.black : Colors.white;
+  }
+
   // Function for eventTypeColor
   static Color eventTypeToColor(BuildContext context, String? typeCode) {
     if (typeCode == null) {

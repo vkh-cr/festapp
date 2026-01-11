@@ -891,7 +891,8 @@
     "generatingPdfFor": "Generating Ticket for {customer}",
     "generatingPdfForWithSpot": "Generating Ticket for {customer} - {spot}",
     "scanInstructionsAppUser": "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile.",
-    "scanningForOccasion": "Scanning for: "
+    "scanningForOccasion": "Scanning for: ",
+    "scanNotFound": "Invalid code"
   },
   "UserColumns": {
     "id": "Id",
@@ -1345,6 +1346,8 @@
     "enableManualTicketScanDescription": "Allows searching and selecting tickets manually if attendee forgot ticket.",
     "selectTicket": "Select Ticket",
     "unknown": "Unknown",
-    "noData": "No Data"
+    "noData": "No Data",
+    "labelShowHiddenNote": "Hidden note",
+    "descriptionShowHiddenNote": "Shows hidden note in scan result."
   }
 }

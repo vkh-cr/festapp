@@ -97,9 +97,27 @@ test('RouterService.normalizeUrl', async (t) => {
     });
 
     await t.test('should handle user specific legacy hash case', () => {
-        const input = "https://vstupenky.online/#/form/farni-ples-2026-cernobily?fcbclick=x";
+        const input = "https://vstupenky.online/#/form/farni-ples-2026-cernobily";
         const result = RouterService.normalizeUrl(input);
         assert.strictEqual(result, "/form/farni-ples-2026-cernobily");
+    });
+
+    await t.test('should handle combined legacy hash AND query params (in hash)', () => {
+        const input = "https://vstupenky.online/#/form/slug?fbclid=123&other=456";
+        const result = RouterService.normalizeUrl(input);
+        assert.strictEqual(result, "/form/slug");
+    });
+
+    await t.test('should handle combined legacy hash AND query params (before hash)', () => {
+        const input = "https://vstupenky.online/?fbclid=123#/form/slug";
+        const result = RouterService.normalizeUrl(input);
+        assert.strictEqual(result, "/form/slug");
+    });
+
+    await t.test('should handle legacy hash AND fragment', () => {
+        const input = "https://vstupenky.online/#/form/slug#section";
+        const result = RouterService.normalizeUrl(input);
+        assert.strictEqual(result, "/form/slug");
     });
 
     // Cleanup
