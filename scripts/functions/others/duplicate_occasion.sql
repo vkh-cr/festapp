@@ -196,7 +196,7 @@ BEGIN
 
   -- 5c. Products – adjust product_type via mapping.
   FOR rec IN
-    SELECT id, title, description, price, data, product_type, is_hidden, currency_code, title_short, "order"
+    SELECT id, title, description, price, data, product_type, is_hidden, currency_code, "order"
     FROM eshop.products
     WHERE occasion = oc
   LOOP
@@ -205,9 +205,9 @@ BEGIN
       WHERE t.old_id = rec.product_type;
 
     INSERT INTO eshop.products
-      (created_at, updated_at, title, description, price, data, product_type, occasion, is_hidden, currency_code, title_short, "order")
+      (created_at, updated_at, title, description, price, data, product_type, occasion, is_hidden, currency_code, "order")
     VALUES (now(), now(), rec.title, rec.description, rec.price, rec.data,
-            COALESCE(new_pt_id, rec.product_type), new_occ, rec.is_hidden, rec.currency_code, rec.title_short, rec."order")
+            COALESCE(new_pt_id, rec.product_type), new_occ, rec.is_hidden, rec.currency_code, rec."order")
     RETURNING id INTO v_new_id;
 
     INSERT INTO tmp_products (old_id, new_id)

@@ -7,6 +7,7 @@
 # Redirect specific Flutter routes to the renamed Flutter entry point
 /login   /flutter.html  200
 /admin   /flutter.html  200
+/transfer /flutter.html 200
 
 # Fallback (Flutter)
 # Any other route not matched above falls back to Flutter

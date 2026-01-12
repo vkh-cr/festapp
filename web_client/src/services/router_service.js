@@ -51,12 +51,40 @@ export class RouterService {
         return `${baseUrl}/login`;
     }
 
+    static getAdminUrl() {
+        let baseUrl = AppConfig.flutterAppUrl || '';
+        if (baseUrl.endsWith('/')) {
+            baseUrl = baseUrl.slice(0, -1);
+        }
+        return `${baseUrl}/admin`;
+    }
+
     static navigateToLogin() {
         const url = RouterService.getLoginUrl();
         console.log(`Navigating to Login: ${url}`);
         window.location.href = url;
     }
+
+    static navigateToAdmin() {
+        const url = RouterService.getAdminUrl();
+        console.log(`Navigating to Admin: ${url}`);
+        window.location.href = url;
+    }
     
+    static navigateToHandover() {
+        const url = RouterService.getHandoverUrl();
+        console.log(`Initiating Session Handover: ${url}`);
+        window.location.href = url;
+    }
+
+    static getHandoverUrl() {
+        let baseUrl = AppConfig.flutterAppUrl || '';
+        if (baseUrl.endsWith('/')) {
+            baseUrl = baseUrl.slice(0, -1);
+        }
+        return `${baseUrl}/transfer`;
+    }
+
     // History Management
     static pushState(path) {
         window.history.pushState({}, '', path);
@@ -79,7 +107,8 @@ export class RouterService {
         '/install',
         '/unit',
         // '/form', // Handled by Web Client
-        '/scan'
+        '/scan',
+        '/transfer'
     ];
 
     // Initial Load Check
@@ -180,9 +209,33 @@ export class RouterService {
 
         // 3. Execute Redirect Purpose
         if (shouldRedirectToFlutter) {
-             if (!path.endsWith('flutter.html')) {
-                 const redirectUrl = `${window.location.origin}/flutter.html?redirect=${encodeURIComponent(redirectPath)}`;
-                 console.log(`RouterService: Global Redirecting ${path} to Flutter App: ${redirectUrl}`);
+             // 1. Handover Strategy:
+             // If we are at /transfer in the Web Client, it means we need to perform the handover to Flutter.
+             // (In Production, the server handles this, but in Localhost/SPA navigation, we handle it here).
+             
+             if (!path.endsWith('auth_bridge.html')) {
+                 // Fetch session to pass fresh tokens
+                 const { SupabaseService } = await import('./supabase_service.js');
+                 const { data } = await SupabaseService.getClient().auth.getSession();
+                 let sessionFragment = '';
+                 
+                 if (data?.session) {
+                     const { access_token, refresh_token } = data.session;
+                     if (access_token && refresh_token) {
+                         sessionFragment = `#access_token=${access_token}&refresh_token=${refresh_token}&token_type=bearer&type=recovery`;
+                     }
+                 }
+
+                 let redirectUrl = `${window.location.origin}/auth_bridge.html`;
+                 if (sessionFragment) {
+                     redirectUrl += sessionFragment;
+                 }
+                 // pass the target path as a query param so auth_bridge.html can append it.
+                 // The deep link callback in Flutter will handle the session.
+                 const separator = redirectUrl.includes('#') ? '&' : '?';
+                 redirectUrl += `${separator}redirect=${encodeURIComponent(redirectPath)}`;
+
+                 console.log(`RouterService: Global Redirecting ${path} to Flutter App with Session: ${redirectUrl}`);
                  window.location.replace(redirectUrl);
                  return true; // Stop SPA load
              }
