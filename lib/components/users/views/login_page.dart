@@ -174,21 +174,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _refreshSignedInStatus(dynamic value) async {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
-      var unitId = RightsService.currentUnit()?.id == 1 ? null : RightsService.currentUnit()?.id;
-      if(AppConfig.isAppSupported){
-        await RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
-      } else {
-        await RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
-      }
-
-      if (unitId == null) {
-        var userUnits = RightsService.currentUser()?.units;
-        if (userUnits != null && userUnits.isNotEmpty) {
-          await RouterService.navigateToUnitAdmin(context, userUnits.first);
-          return;
-        }
-      }
-      RouterService.popOrHome(context);
+       await RouterService.handlePostLoginNavigation(context);
     }
   }
 

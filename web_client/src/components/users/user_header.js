@@ -132,7 +132,7 @@ export class UserHeader extends HTMLElement {
                  const adminBtn = document.createElement('button');
                  adminBtn.className = 'btn-admin';
                  adminBtn.textContent = CommonStrings.admin;
-                 adminBtn.onclick = () => RouterService.navigateToLogin(); // Redirects to flutter login/admin
+                 adminBtn.onclick = () => RouterService.navigateToHandover(); // Implicit handover to Flutter logic
                  actions.appendChild(adminBtn);
              }
 
