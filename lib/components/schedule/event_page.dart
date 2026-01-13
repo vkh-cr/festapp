@@ -253,7 +253,7 @@ class _EventPageState extends State<EventPage> {
                                             "${EventEditPage.ROUTE}/${_event!.id}")
                                             .then((value) => loadData(_event!.id!)),
                                         child:
-                                        const Text("Edit").tr())
+                                        Text(CommonStrings.edit).tr())
                                 ]),
                           ),
                         ),

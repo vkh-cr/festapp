@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart' show Uint8List;
 import 'package:flutter/material.dart';
@@ -403,7 +404,7 @@ class _UserPageState extends State<UserPage> {
                         await AuthService
                             .resetPasswordForEmail(userData!.occasionUser!.data![Tb.occasion_users.data_email])
                             .then((value) {
-                          ToastHelper.Show(context, "Password reset email has been sent.".tr());
+                          ToastHelper.Show(context, UserStrings.passwordResetSent);
                           DialogHelper.showInformationDialog(
                             context,
                             "Change Password Instructions".tr(),

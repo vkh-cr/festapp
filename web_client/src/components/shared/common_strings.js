@@ -1,60 +1,52 @@
-
 import { LocalizationService } from '../../services/localization_service.js';
 
 export class CommonStrings {
-    static get save() { return LocalizationService.tr('Save'); }
-    static get storno() { return LocalizationService.tr('Storno'); }
-    static get delete() { return LocalizationService.tr('Delete'); }
-    static get edit() { return LocalizationService.tr('Edit'); }
-    static get ok() { return LocalizationService.tr('Ok'); }
-    static get close() { return LocalizationService.tr('Close'); }
-    static get confirm() { return LocalizationService.tr('Confirm'); }
-    static get rename() { return LocalizationService.tr('Rename'); }
-    static get addNew() { return LocalizationService.tr('AddNew'); }
-    static get cancel() { return LocalizationService.tr('Cancel'); }
-    static get reset() { return LocalizationService.tr('Reset'); }
-    static get search() { return LocalizationService.tr('Search'); }
-    static get remove() { return LocalizationService.tr('Remove'); }
+    static get signIn() { return LocalizationService.tr("FeatureUser.signIn"); }
+    static get signOut() { return LocalizationService.tr("FeatureUser.signOut"); }
+    static get admin() { return LocalizationService.tr("Admin"); }
+    static get email() { return LocalizationService.tr("FeatureUser.email"); }
+    static get password() { return LocalizationService.tr("FeatureUser.password"); }
+    static get login() { return LocalizationService.tr("FeatureUser.logIn"); }
+    static get register() { return LocalizationService.tr("FeatureUser.register"); }
+    static get signUp() { return LocalizationService.tr("FeatureUser.signUp"); }
+    static get forgotPassword() { return LocalizationService.tr("FeatureUser.forgotPasswordQuestion"); }
+    static get forgotYourPassword() { return LocalizationService.tr("FeatureUser.forgotYourPassword"); }
+    static get sendResetEmail() { return LocalizationService.tr("FeatureUser.sendResetEmail"); }
+    static get iAm() { return LocalizationService.tr("FeatureUser.iAm"); }
+    static get language() { return LocalizationService.tr("Language Settings"); }
+    static get resetPassword() { return LocalizationService.tr("FeatureUser.resetPassword"); }
+    static get enterEmail() { return LocalizationService.tr("FeatureUser.enterEmailReset"); }
+    static get firstName() { return LocalizationService.tr("Name"); }
+    static get lastName() { return LocalizationService.tr("Surname"); }
+    static get confirmPassword() { return LocalizationService.tr("FeatureUser.confirmPassword"); }
+    static get back() { return LocalizationService.tr("Common.back"); }
+    static get send() { return LocalizationService.tr("Send"); }
+    static get emailRequired() { return LocalizationService.tr("FeatureUser.emailInvalid"); }
+    static get passwordRequired() { return LocalizationService.tr("FeatureUser.fillPassword"); }
+    static get passwordMismatch() { return LocalizationService.tr("FeatureUser.passwordsDoNotMatch"); }
+    static get passwordLength() { return LocalizationService.tr("FeatureUser.passwordMinLength"); }
+    static get invalidEmail() { return LocalizationService.tr("FeatureUser.emailInvalid"); }
+    static get checkEmail() { return LocalizationService.tr("FeatureUser.credentialsSent"); }
+    static get passwordResetSent() { return LocalizationService.tr("FeatureUser.passwordResetSent"); }
+    static get loading() { return LocalizationService.tr("Common.loading"); }
+    static get success() { return LocalizationService.tr("Common.success"); }
+    static get error() { return LocalizationService.tr("Common.error"); }
     
-    // Nouns
-    static get title() { return LocalizationService.tr('Title'); }
-    static get price() { return LocalizationService.tr('Price'); }
-    static get password() { return LocalizationService.tr('Password'); }
-
-    // Statuses
-    static get saved() { return LocalizationService.tr('Saved'); }
-    static get deleted() { return LocalizationService.tr('Deleted'); }
-    static get success() { return LocalizationService.tr('Success'); }
-    static get error() { return LocalizationService.tr('Error'); }
-    static get loading() { return LocalizationService.tr('Loading'); }
-    static get processing() { return LocalizationService.tr('FeatureOrders.processing'); }
-    static get settings() { return LocalizationService.tr('Settings'); }
-
-    // Forms
-    static get fieldCannotBeEmpty() { return LocalizationService.tr('Common.fieldCannotBeEmpty'); }
-    static get invalidFormat() { return LocalizationService.tr('Common.invalidFormat'); }
-    static get name() { return LocalizationService.tr('Name'); }
-    static get description() { return LocalizationService.tr('Description'); }
-    static get content() { return LocalizationService.tr('Content'); }
-    static get add() { return LocalizationService.tr('Add'); }
-    static get type() { return LocalizationService.tr('Type'); }
-    static get hide() { return LocalizationService.tr('Hide'); }
-    static get place() { return LocalizationService.tr('Place'); }
-    static get users() { return LocalizationService.tr('Users'); }
-    static get events() { return LocalizationService.tr('Events'); }
-    static get start() { return LocalizationService.tr('Start'); }
-    static get end() { return LocalizationService.tr('End'); }
-    static get cancelled() { return LocalizationService.tr('Cancelled'); }
-    static get import() { return LocalizationService.tr('Import'); }
-    static get proceed() { return LocalizationService.tr('Proceed'); }
-    static get item() { return LocalizationService.tr('Item'); }
-
-    // Auth & Settings
-    static get signIn() { return LocalizationService.tr('Sign in'); }
-    static get signOut() { return LocalizationService.tr('Sign out'); }
-    static get languageSettings() { return LocalizationService.tr('Language Settings'); }
-    static get appearance() { return LocalizationService.tr('Appearance'); }
-    static get light() { return LocalizationService.tr('Light'); }
-    static get dark() { return LocalizationService.tr('Dark'); }
-    static get admin() { return LocalizationService.tr('Admin'); }
+    // New additions
+    static get light() { return LocalizationService.tr("Light"); }
+    static get dark() { return LocalizationService.tr("Dark"); }
+    static get auto() { return LocalizationService.tr("Auto"); }
+    static get newPassword() { return LocalizationService.tr("FeatureUser.newPassword"); }
+    static get changePassword() { return LocalizationService.tr("FeatureUser.changePasswordTitle"); }
+    static get passwordChanged() { return LocalizationService.tr("FeatureUser.passwordChanged"); }
+    static get createAPassword() { return LocalizationService.tr("FeatureUser.createPasswordToContinue"); }
+    static get tokenInvalid() { return LocalizationService.tr("FeatureUser.tokenInvalid"); }
+    static get registrationFailed() { return LocalizationService.tr("FeatureUser.registrationFailed"); }
+    static get emailInUse() { return LocalizationService.tr("FeatureUser.emailInUse"); }
+    static get invalidCredentials() { return LocalizationService.tr("FeatureUser.invalidCredentials"); }
+    static get fieldRequired() { return LocalizationService.tr("Common.fieldCannotBeEmpty"); }
+    static get edit() { return LocalizationService.tr("Common.edit"); }
+    static get delete() { return LocalizationService.tr("Common.delete"); }
+    static get save() { return LocalizationService.tr("Common.save"); }
+    static get reset() { return LocalizationService.tr("Common.reset"); }
 }

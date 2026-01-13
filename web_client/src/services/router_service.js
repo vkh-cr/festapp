@@ -101,6 +101,8 @@ export class RouterService {
     static flutterRoutes = [
         '/reset-password',
         '/forgot-password',
+        '/resetPassword',
+        '/forgotPassword',
         '/login',
         '/signup',
         '/settings',
@@ -213,6 +215,33 @@ export class RouterService {
              // If we are at /transfer in the Web Client, it means we need to perform the handover to Flutter.
              // (In Production, the server handles this, but in Localhost/SPA navigation, we handle it here).
              
+             // Special Case: Reset Password via Email Link
+             // Links look like: .../resetPassword?token=...
+             if (path.startsWith('/reset-password') || fullUrl.includes('reset-password') || 
+                 path.startsWith('/resetPassword') || fullUrl.includes('resetPassword')) {
+                 
+                 // Flutter Parity: Use Regex to extract exact token string as Flutter does.
+                 // Regex: token=(?<token>[^&]+)
+                 const tokenMatch = fullUrl.match(/token=([^&]+)/);
+                 
+                 if (tokenMatch && tokenMatch[1]) {
+                     // 1. Split hash if present (Flutter's regex captures it if not & terminated, but UUIDs don't have it)
+                     // 2. Trim whitespace just in case
+                     const rawToken = tokenMatch[1].split('#')[0].trim();
+                     
+                     console.log("RouterService: Intercepted Reset Password Token:", rawToken);
+                     
+                     const { LoginModal } = await import('../components/users/login_modal.js'); 
+                     
+                     const modal = document.createElement('login-modal');
+                     document.body.appendChild(modal);
+                     // Set directly
+                     modal.resetToken = rawToken;
+                     
+                     return true; 
+                 }
+             }
+
              if (!path.endsWith('auth_bridge.html')) {
                  // Fetch session to pass fresh tokens
                  const { SupabaseService } = await import('./supabase_service.js');
@@ -244,7 +273,9 @@ export class RouterService {
         // 4. Handle normalized path updates (UX polish)
         if (!shouldRedirectToFlutter) {
              // Clean URL if it contains query parameters or hash
-             if (window.location.search || window.location.hash || fullUrl.includes('?')) {
+             const hasPreview = window.location.search && window.location.search.includes('preview=true');
+
+             if (!hasPreview && (window.location.search || window.location.hash || fullUrl.includes('?'))) {
                   console.log(`[RouterService] Sanitizing URL: ${fullUrl} -> ${path}`);
                   window.history.replaceState(null, '', path);
                   RouterService._lastPath = path; // Sync tracker

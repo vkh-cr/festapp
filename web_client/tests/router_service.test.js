@@ -413,6 +413,44 @@ test('RouterService.handleInitialLoad', async (t) => {
 
         assert.strictEqual(replacedPath, '/form/slug');
     });
+
+    await t.test('should PRESERVE preview=true query param (skip sanitization)', async () => {
+        AppConfig.isAppSupported = false;
+
+        global.window.location.pathname = '/form/slug';
+        global.window.location.search = '?preview=true';
+        global.window.location.href = 'https://vstupenky.online/form/slug?preview=true';
+
+        let replaceStateCalled = false;
+        global.window.history.replaceState = () => { replaceStateCalled = true; };
+
+        try {
+             await RouterService.handleInitialLoad();
+        } catch (e) {
+             // ignore component load errors
+        }
+
+        assert.strictEqual(replaceStateCalled, false, 'Should NOT sanitize URL if preview=true is present');
+    });
+
+    await t.test('should PRESERVE preview=true even if mixed with other params (skip sanitization)', async () => {
+        AppConfig.isAppSupported = false;
+
+        global.window.location.pathname = '/form/slug';
+        global.window.location.search = '?preview=true&fbclid=123';
+        global.window.location.href = 'https://vstupenky.online/form/slug?preview=true&fbclid=123';
+
+        let replaceStateCalled = false;
+        global.window.history.replaceState = () => { replaceStateCalled = true; };
+
+        try {
+             await RouterService.handleInitialLoad();
+        } catch (e) {
+             // ignore component load errors
+        }
+
+        assert.strictEqual(replaceStateCalled, false, 'Should NOT sanitize URL if preview=true is present mixed with others');
+    });
 });
 
 

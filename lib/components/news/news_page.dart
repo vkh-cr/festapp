@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/widgets/pop_button.dart';
 import 'package:fstapp/components/images/zoomable_image/zoomable_image.dart';
 import '../html/html_editor_page.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import '../occasion/occasion_home_page.dart';
 
 @RoutePage()
@@ -236,7 +237,7 @@ class _NewsPageState extends State<NewsPage> {
                             itemBuilder: (BuildContext context) => <PopupMenuEntry<ContextMenuChoice>>[
                               PopupMenuItem<ContextMenuChoice>(
                                 value: ContextMenuChoice.edit,
-                                child: const Text("Edit").tr(),
+                                child: Text(CommonStrings.edit).tr(),
                               ),
                               PopupMenuItem<ContextMenuChoice>(
                                 value: ContextMenuChoice.delete,

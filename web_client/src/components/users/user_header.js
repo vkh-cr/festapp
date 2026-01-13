@@ -71,8 +71,8 @@ export class UserHeader extends HTMLElement {
              if (!this.classList.contains('header-hidden')) {
                  this.classList.add('header-hidden');
                  // Also close popover if open when scrolling down (hiding)
-                 const popover = this.querySelector('#user-popover');
-                 if (popover) popover.remove();
+                 const wrapper = this.querySelector('#user-popover-wrapper');
+                 if (wrapper) wrapper.remove();
              }
         } 
         // Scroll Up -> Show
@@ -131,7 +131,7 @@ export class UserHeader extends HTMLElement {
              if (canSeeAdmin || canSeeReservations) {
                  const adminBtn = document.createElement('button');
                  adminBtn.className = 'btn-admin';
-                 adminBtn.textContent = CommonStrings.admin;
+                 adminBtn.innerHTML = `<i class="material-icons">admin_panel_settings</i><span class="admin-text">${CommonStrings.admin}</span>`;
                  adminBtn.onclick = () => RouterService.navigateToHandover(); // Implicit handover to Flutter logic
                  actions.appendChild(adminBtn);
              }
@@ -164,7 +164,10 @@ export class UserHeader extends HTMLElement {
             signInBtn.innerHTML = `<i class="material-icons">person</i><span class="sign-in-text">${CommonStrings.signIn}</span>`;
             signInBtn.onclick = (e) => {
                 e.preventDefault();
-                RouterService.navigateToLogin();
+                import('./login_modal.js').then(() => {
+                    const modal = document.createElement('login-modal');
+                    document.body.appendChild(modal);
+                });
             };
             actions.appendChild(signInBtn);
 
@@ -184,15 +187,28 @@ export class UserHeader extends HTMLElement {
     }
     
     togglePopover(target) {
-        let popover = document.getElementById('user-popover');
+        let wrapper = document.getElementById('user-popover-wrapper');
         
         // If it exists and is open, close it (toggle behavior)
-        if (popover) {
-            popover.remove();
+        if (wrapper) {
+            wrapper.remove();
             return;
         }
 
-        popover = document.createElement('div');
+        wrapper = document.createElement('div');
+        wrapper.id = 'user-popover-wrapper';
+        
+        // --- Backdrop ---
+        const backdrop = document.createElement('div');
+        backdrop.className = 'popover-backdrop';
+        // Close when clicking backdrop
+        backdrop.onclick = (e) => {
+            e.stopPropagation(); // Prevent bubbling to document
+            wrapper.remove();
+        };
+        wrapper.appendChild(backdrop);
+
+        const popover = document.createElement('div');
         popover.id = 'user-popover';
         popover.className = 'user-popover';
 
@@ -200,7 +216,7 @@ export class UserHeader extends HTMLElement {
         const closeBtn = document.createElement('i');
         closeBtn.className = 'material-icons popover-close-btn';
         closeBtn.textContent = 'close';
-        closeBtn.onclick = () => popover.remove();
+        closeBtn.onclick = () => wrapper.remove();
         popover.appendChild(closeBtn);
 
         // --- User Header Section (Avatar + Info) ---
@@ -257,16 +273,14 @@ export class UserHeader extends HTMLElement {
             const logoutRow = document.createElement('div');
             logoutRow.className = 'popover-logout-row';
             logoutRow.onclick = async () => {
-                 const { SupabaseService } = await import('../../services/supabase_service.js');
-                 await SupabaseService.signOut();
-                 popover.remove();
+                 const { AuthService } = await import('../../services/auth_service.js'); 
+                 await AuthService.logout();
+                 wrapper.remove();
              };
 
             const logoutIcon = document.createElement('i');
             logoutIcon.className = 'material-icons logout-icon';
-            logoutIcon.textContent = 'logout'; // or 'exit_to_app'
-            // The image shows an arrow pointing right out of a bracket, 'logout' usually fits or 'exit_to_app'
-            // Let's use 'logout' for now, it's standard material.
+            logoutIcon.textContent = 'logout';
             
             const logoutText = document.createElement('span');
             logoutText.textContent = CommonStrings.signOut;
@@ -278,66 +292,55 @@ export class UserHeader extends HTMLElement {
         }
         
         // Position
-        // Centered or attached? The image looks like a dialog. 
-        // User requested "popup" in "same way". Flutter creates a dialog or modal bottom sheet usually.
-        // Let's position it fixed top-right or centered if it's mobile.
-        // For now, keep it anchored to header but styled as a larger card.
-        // Position
         const rect = target.getBoundingClientRect();
         
-        // If screen is small, center it
         if (window.innerWidth < 600) {
             popover.style.position = 'fixed';
-            popover.style.top = '72px'; // Fixed distance from top (closer now)
+            popover.style.top = '72px';
             popover.style.left = '50%';
-            popover.style.transform = 'translateX(-50%)'; // Only center horizontally
+            popover.style.transform = 'translateX(-50%)'; 
             popover.style.width = '90%';
             popover.style.maxWidth = '360px';
         } else {
              // Desktop: Anchor to the target
-             // Refactored: Popover is now child of UserHeader (relative parent).
-             // However, to position it exactly under the icon (which might be anywhere if window resizes),
-             // calculating relative to the header container's right edge is safer if we want right alignment.
-             // But user says "next to setting".
-             
-             // Let's position it absolute relative to the header component (which is sticky top:0).
-             // We want it right-aligned with the target (icon or avatar).
-             
-             // Get header rect (this component)
              const headerRect = this.getBoundingClientRect();
-             // Get target rect
              const targetRect = target.getBoundingClientRect();
-             
-             // Calculate distance from right edge of header to right edge of target
              const rightOffset = headerRect.right - targetRect.right;
              
-             // Apply
              popover.style.position = 'absolute';
-             popover.style.top = 'calc(100% + 2px)';  // Raised up from 8px to 2px gap 
-             // Determine if we align center or right.
-             // If we align right edge of popover to right edge of target:
-             // popover.style.right = Math.max(0, rightOffset) + 'px';
-             
-             // But the popover is wider (340px). If we align right-to-right, it extends left.
-             // This is usually what we want for right-side menus.
-             // Let's add a small buffer if needed, or just use exact align.
-             popover.style.right = Math.max(16, rightOffset) + 'px'; // Ensure at least 16px from edge if something is weird
+             popover.style.top = 'calc(100% + 2px)'; 
+             popover.style.right = Math.max(16, rightOffset) + 'px'; 
         }
 
-        this.appendChild(popover); // NEW: Append to self
+        wrapper.appendChild(popover);
+        // ESC Key Handler
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                wrapper.remove();
+                // Listener removed automatically since wrapper is gone? No.
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
 
-        // Close on click outside
+        // Update close button to also remove listener
+        const originalRemove = wrapper.remove.bind(wrapper);
+        wrapper.remove = () => {
+             document.removeEventListener('keydown', escHandler);
+             originalRemove();
+        };
+
+        this.appendChild(wrapper);
+
+        // Global click listener to close if clicked outside (redundant with backdrop but good fallback)
         const closeHandler = (e) => {
-             // Delay check to avoid immediate trigger
-             // Check if click is outside popover AND outside the component (this)
-             // or just target?
-             if (!popover.contains(e.target) && !target.contains(e.target)) {
-                 popover.remove();
+             // If wrapper is gone, remove listener
+             if (!document.getElementById('user-popover-wrapper')) {
                  document.removeEventListener('click', closeHandler);
+                 return;
              }
         };
-        // Small delay to prevent the click that opened it from closing it immediately
-        setTimeout(() => document.addEventListener('click', closeHandler), 10);
+        // setTimeout(() => document.addEventListener('click', closeHandler), 10);
     }
 }
 
