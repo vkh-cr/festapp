@@ -1,4 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
@@ -455,7 +456,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                 size: 32,
                 color: iconColor,
               ),
-              tooltip: "Sign In".tr(),
+              tooltip: UserStrings.signIn,
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
                 await widget.onSignIn?.call();
@@ -493,7 +494,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                 Icons.person,
                 color: iconColor,
               ),
-              label: const Text("Sign in").tr(),
+              label: Text(UserStrings.signIn),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),

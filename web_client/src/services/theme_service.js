@@ -55,6 +55,17 @@ export class ThemeService {
         }
         
         ThemeService.apply();
+
+        // Critical: If we have a cached form model, we MUST re-apply it because the inline styles
+        // (root.style.setProperty) defined in applyThemeFromModel depend on isDark state.
+        // Changing the class (apply()) is not enough for the JS-calculated dynamic colors.
+        if (ThemeService._lastFormModel) {
+            ThemeService.applyThemeFromModel(ThemeService._lastFormModel);
+        } else {
+            // If no model, we should probably clear the inline styles so that CSS classes take over?
+            // For now, let's assume we want to clear key variable overrides if we switch to manual mode without a model.
+            // But realistically, _lastFormModel is populated once app loads. 
+        }
     }
 
     static get warningColor() {
@@ -75,6 +86,7 @@ export class ThemeService {
      * Replaces the old FormPage.applyTheme logic.
      */
     static applyThemeFromModel(formModel) {
+        ThemeService._lastFormModel = formModel; // Cache for re-application on mode switch
         const root = document.body;
 
         // Fonts

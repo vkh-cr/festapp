@@ -22,6 +22,7 @@ import 'advanced_timeline_controller.dart';
 import 'package:fstapp/app_config.dart';
 import 'schedule_timeline.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 
 
 class DayList extends StatelessWidget {
@@ -374,9 +375,9 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
               child: HtmlView(
                 html: '''
                                 <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
-                                  <div>${"An account is required to join this event.".tr()}</div>
+                                  <div>${UserStrings.accountRequiredToJoin}</div>
                                   <a href="${AppConfig.webLink}/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
-                                    ${"Click here to sign in.".tr()}
+                                    ${UserStrings.clickToSignIn}
                                   </a>
                                 </div>
                               ''',
