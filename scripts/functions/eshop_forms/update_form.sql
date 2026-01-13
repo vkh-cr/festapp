@@ -297,7 +297,6 @@ BEGIN
                                     currency_code,
                                     data,
                                     is_hidden,
-                                    title_short,
                                     "order",
                                     maximum
                                 )
@@ -312,7 +311,6 @@ BEGIN
                                     left(product_data->>'currency_code', 3),
                                     product_data->'data',
                                     COALESCE((product_data->>'is_hidden')::BOOLEAN, false),
-                                    product_data->>'title_short',
                                     NULLIF(product_data->>'order','')::BIGINT,
                                     NULLIF(product_data->>'maximum','')::BIGINT
                                 )
@@ -359,7 +357,6 @@ BEGIN
                                        currency_code = left(product_data->>'currency_code', 3),
                                        data = product_data->'data',
                                        is_hidden = COALESCE((product_data->>'is_hidden')::BOOLEAN, false),
-                                       title_short = product_data->>'title_short',
                                        "order" = NULLIF(product_data->>'order','')::BIGINT,
                                        maximum = NULLIF(product_data->>'maximum','')::BIGINT
                                  WHERE id = product_id

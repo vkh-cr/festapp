@@ -105,8 +105,12 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   }
 
   Future<void> _handleView(OccasionModel occasion) async {
-    await RouterService.navigateToOccasionAdministration(context,
-        occasion: occasion);
+    try {
+      if (occasion.link == null) return;
+      await RouterService.navigateToOccasionAdministration(context, occasion: occasion);
+    } catch (e) {
+      ToastHelper.Show(context, "Could not load event. Please try again.".tr());
+    }
   }
 
   Future<void> _handleCreateCopy(OccasionModel occasion) async {

@@ -38,8 +38,10 @@ class Main {
             // 4. Initial Fetch
             unitPage.loadOccasions(AppConfig.organization);
             
-            // Init PopState for SPA nav
+            // Init PopState forভাগে logic
             RouterService.initPopStateListener();
+
+
             
         } catch (e) {
             console.error("Initialization Error:", e);

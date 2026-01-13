@@ -341,4 +341,55 @@ class RouterService {
       debugPrint("External navigation not supported on this platform: $url");
     }
   }
+
+  /// Centralized logic for navigation after successful login.
+  /// Used by both [LoginPage] and [TransferPage] to ensure consistent behavior.
+  static Future<void> handlePostLoginNavigation(BuildContext context,
+      {String? fallbackPath, bool useReplacement = false}) async {
+    
+    // 1. Update App Data
+    var unitId = RightsService.currentUnit()?.id == 1 ? null : RightsService.currentUnit()?.id;
+    await RightsService.updateAppData(unitId: unitId, link: currentOccasionLink, force: true);
+
+    // 2. Check for Units (Admin flow priority)
+    // If the user has units (and isn't in Unit 1 context), they likely want their dashboard.
+    if (unitId == null) {
+      var userUnits = RightsService.currentUser()?.units;
+      if (userUnits != null && userUnits.isNotEmpty) {
+        debugPrint("[RouterService] Post-Login: User has units. Navigating to UnitAdmin.");
+        await navigateToUnitAdmin(context, userUnits.first);
+        return;
+      }
+    }
+
+    // 3. Fallback Navigation
+    // If no specific unit, go to fallback or pop/home.
+    if (fallbackPath != null && fallbackPath.isNotEmpty) {
+      // If the redirect target is explicitly "Login", but we are already logged in (post-login flow),
+      // we should NOT go to login. We should go Home instead.
+      if (fallbackPath.toLowerCase() == "/login" || fallbackPath.toLowerCase() == "login") {
+         debugPrint("[RouterService] Post-Login: Redirect was 'login', avoiding redundant loop. Going Home.");
+         await context.router.replacePath('/');
+         return;
+      }
+
+      debugPrint("[RouterService] Post-Login: Using fallback path: $fallbackPath (Replace: $useReplacement)");
+      if (useReplacement) {
+        // Fix path to ensure it starts with /
+        String target = fixPath(fallbackPath);
+        await context.router.replacePath(target);
+      } else {
+        await navigate(context, fallbackPath);
+      }
+    } else {
+      // Default behavior (pop or home)
+      debugPrint("[RouterService] Post-Login: Pop or Home");
+      if (useReplacement) {
+         // If we must replace but have no specific target, we go Home.
+         await context.router.replacePath('/');
+      } else {
+         popOrHome(context);
+      }
+    }
+  }
 }
