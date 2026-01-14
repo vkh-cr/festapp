@@ -545,13 +545,7 @@ class FormHelper {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Title for all
-            InputDecorator(
-              decoration: buildInputDecoration(
-                context: context,
-                label: fieldHolder.title ?? '',
-                isRequired: fieldHolder.isRequired,
-              ),
-            ),
+            buildLabel(context, fieldHolder.title ?? '', isRequired: fieldHolder.isRequired),
             // Optional description rendered via HtmlView if provided
             if (!HtmlHelper.isHtmlEmptyOrNull(fieldHolder.description))
               Column(

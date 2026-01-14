@@ -6,6 +6,7 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
 import 'dart:async';
 
 class SearchTransactionsScreen extends StatefulWidget {
@@ -127,7 +128,7 @@ class _SearchTransactionsScreenState extends State<SearchTransactionsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(CommonStrings.storno),
+            child: Text(CommonStrings.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -239,7 +240,7 @@ class _SearchTransactionsScreenState extends State<SearchTransactionsScreen> {
                               SizedBox(height: 4),
                               // Bank Account
                               SelectableText(
-                                '${'Bank Account'.tr()}: ${transaction.counterAccount ?? "N/A".tr()} / ${transaction.bankCode ?? "N/A".tr()} (${transaction.bankName ?? "N/A".tr()})',
+                                '${BankAccountStrings.bankAccount}: ${transaction.counterAccount ?? "N/A".tr()} / ${transaction.bankCode ?? "N/A".tr()} (${transaction.bankName ?? "N/A".tr()})',
                                 style: TextStyle(fontSize: 14),
                               ),
                               SizedBox(height: 4),

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:auto_route/auto_route.dart';
@@ -16,7 +18,10 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/html/html_view.dart';
 
 import '../form_strings.dart';
+
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/bank_accounts/bank_account_model.dart';
+import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
 
 class FormSettingsContent extends StatefulWidget {
   final String? formLink;
@@ -25,7 +30,7 @@ class FormSettingsContent extends StatefulWidget {
   const FormSettingsContent({super.key, this.formLink, this.onActionCompleted, this.onDataUpdated});
 
   @override
-  _FormSettingsContentState createState() => _FormSettingsContentState();
+  State<FormSettingsContent> createState() => _FormSettingsContentState();
 }
 
 class _FormSettingsContentState extends State<FormSettingsContent> {
@@ -244,8 +249,123 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
       ),
     );
     if (confirm == true) {
+      if (!mounted) return;
       await _deleteForm(currentContext);
     }
+  }
+
+  Set<String> _getFormCurrencies() {
+    if (_form == null) return {};
+    final currencies = <String>{};
+    for (var field in _form!.relatedFields) {
+      if (field.productType != null) {
+        for (var product in field.productType!.products ?? []) {
+          if (product.currencyCode != null && product.currencyCode!.isNotEmpty) {
+            currencies.add(product.currencyCode!);
+          }
+        }
+      }
+    }
+    return currencies;
+  }
+
+  List<BankAccountModel> _getUsedBankAccounts() {
+    if (_form == null || _form!.availableBankAccounts == null) return [];
+    
+    final usedCurrencies = _getFormCurrencies();
+    if (usedCurrencies.isEmpty) return [];
+
+    final usedAccounts = <BankAccountModel>{};
+    
+    // availableBankAccounts are sorted by priority ASC from DB
+    // For each currency, pick the first account that supports it.
+    for (final currency in usedCurrencies) {
+      for (final account in _form!.availableBankAccounts!) {
+         if (account.supportedCurrencies.contains(currency)) {
+           usedAccounts.add(account);
+           break; 
+         }
+      }
+    }
+    return usedAccounts.toList();
+  }
+
+  Widget _buildUsedBankAccounts(BuildContext context) {
+    if (_form == null) return const SizedBox.shrink();
+    
+    final usedCurrencies = _getFormCurrencies();
+    if (usedCurrencies.isEmpty) return const SizedBox.shrink();
+
+    final usedAccounts = _getUsedBankAccounts();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          BankAccountStrings.bankAccountsTitle,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 8),
+        if (usedAccounts.isEmpty)
+          Text(
+            BankAccountStrings.addInSettings,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic, color: ThemeConfig.grey600(context)),
+          )
+        else ...[
+          ...usedAccounts.map((account) {
+            return Card(
+              elevation: 0,
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: ThemeConfig.grey300(context)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      account.title ?? BankAccountStrings.bankAccount,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 2),
+                    SelectionArea(
+                      child: Text(
+                        account.accountNumberHumanReadable ?? account.accountNumber ?? '',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ),
+                    if (account.supportedCurrencies.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: account.supportedCurrencies.map((c) => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: ThemeConfig.grey200(context),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.grey.shade400),
+                          ),
+                          child: Text(c, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+                        )).toList(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          }),
+
+          const SizedBox(height: 8),
+          Text(
+            BankAccountStrings.manageInSettings,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: ThemeConfig.grey600(context)),
+          ),
+        ],
+      ],
+    );
   }
 
   @override
@@ -341,6 +461,9 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                         const SizedBox(height: 16),
                         Text(FormStrings.paymentDetailsTitle, style: Theme.of(innerContext).textTheme.titleLarge),
                         const SizedBox(height: 24),
+
+                        _buildUsedBankAccounts(innerContext),
+                        const SizedBox(height: 16),
 
                         DropdownButtonFormField<String>(
                           value: _variableSymbolType,
