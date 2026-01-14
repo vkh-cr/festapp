@@ -1378,6 +1378,7 @@
     "invalidFormat": "Invalid format",
     "back": "Back",
     "edit": "Edit",
-    "save": "Save"
+    "save": "Save",
+    "loading": "Loading..."
   }
 }

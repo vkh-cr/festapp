@@ -36,13 +36,21 @@ class _TransferPageState extends State<TransferPage> {
     debugPrint("TransferPage: Handling Session...");
 
     // 1. Check if we are already logged in (Persistence)
-    bool loggedIn = await AuthService.tryAuthUser();
+    bool loggedIn = AuthService.isLoggedIn();
+    if (!loggedIn) {
+      loggedIn = await AuthService.tryAuthUser();
+    }
     
     // 2. If not, try to use the token provided
     if (!loggedIn && widget.refresh_token != null && widget.refresh_token!.isNotEmpty) {
        try {
           debugPrint("TransferPage: Setting session from token...");
-          await Supabase.instance.client.auth.setSession(widget.refresh_token!);
+          // Ensure a clean slate before setting a new session
+          if (Supabase.instance.client.auth.currentSession != null) {
+            await Supabase.instance.client.auth.signOut();
+          }
+          await AuthService.recoverSession(widget.refresh_token!);
+          // Refreshing might be redundant if setSession succeeds, but good for consistency
           await AuthService.refreshSession();
           loggedIn = true;
        } catch (e) {
@@ -60,13 +68,14 @@ class _TransferPageState extends State<TransferPage> {
         // - Fallback to provided path (or Home)
         if (mounted) {
            try {
+             debugPrint("TransferPage: Session valid ($loggedIn). calling handlePostLoginNavigation");
              await RouterService.handlePostLoginNavigation(
                  context, 
                  fallbackPath: widget.redirect ?? "/", 
                  useReplacement: true
              );
            } catch (e) {
-             debugPrint("TransferPage: Smart nav failed (likely 'transfer' 404). Falling back to Home. Error: $e");
+             debugPrint("TransferPage: Smart nav failed. Error: $e");
              if (mounted) {
                await context.router.replacePath("/");
              }
@@ -74,6 +83,7 @@ class _TransferPageState extends State<TransferPage> {
         }
     } else {
         // 4. Failed -> Login Page
+        debugPrint("TransferPage: Session INVALID ($loggedIn). Redirecting to LoginRoute.");
         if (mounted) {
            context.router.replace(LoginRoute());
         }

@@ -1378,6 +1378,7 @@
     "invalidFormat": "Neplatný formát",
     "back": "Zpět",
     "edit": "Upravit",
-    "save": "Uložit"
+    "save": "Uložit",
+    "loading": "Načítání..."
   }
 }
