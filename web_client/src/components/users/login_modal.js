@@ -143,7 +143,7 @@ export class LoginModal extends HTMLElement {
             return `
                 <h2>${CommonStrings.signIn}</h2>
                 <form id="login-form" novalidate>
-                    ${validatedField('email', CommonStrings.email, 'email', true, 0, 'name@example.com', 'username')}
+                    ${validatedField('email', CommonStrings.email, 'email', true, 0, '', 'username')}
                     ${validatedField('password', CommonStrings.password, 'password', true, 0, '', 'current-password')}
                     <button type="submit" class="btn-primary" ${this.isLoading ? 'disabled' : ''}>
                         ${this.isLoading ? CommonStrings.loading : CommonStrings.signIn}

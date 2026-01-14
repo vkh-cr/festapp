@@ -13,6 +13,7 @@ import 'dart:async';
 
 import 'package:fstapp/components/forms/views/form_page.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
+import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 
@@ -349,7 +350,24 @@ class RouterService {
     
     // 1. Update App Data
     var unitId = RightsService.currentUnit()?.id == 1 ? null : RightsService.currentUnit()?.id;
-    await RightsService.updateAppData(unitId: unitId, link: currentOccasionLink, force: true);
+    
+    // Fix: If we don't have a current link, try to extract it from the fallback path
+    String linkToUse = currentOccasionLink;
+    if ((linkToUse.isEmpty) && fallbackPath != null && fallbackPath.isNotEmpty) {
+       try {
+         // handlePostLoginNavigation is often called with a path like "/event_name/admin"
+         // extractOccasionLink expects a full URL or a path.
+         var extracted = LinkModel.extractOccasionLink(fallbackPath);
+         if (extracted.occasionLink != null && extracted.occasionLink!.isNotEmpty) {
+           linkToUse = extracted.occasionLink!;
+           debugPrint("[RouterService] Post-Login: Extracted link '$linkToUse' from fallbackPath '$fallbackPath'");
+         }
+       } catch (e) {
+         debugPrint("[RouterService] Post-Login: Failed to extract link from fallbackPath: $e");
+       }
+    }
+
+    await RightsService.updateAppData(unitId: unitId, link: linkToUse, force: true);
 
     // 2. Check for Units (Admin flow priority)
     // If the user has units (and isn't in Unit 1 context), they likely want their dashboard.
