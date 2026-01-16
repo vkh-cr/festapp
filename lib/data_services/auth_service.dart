@@ -180,4 +180,12 @@ class AuthService {
           "password": pw,
         });
   }
+  static Future<void> recoverSession(String refreshToken) async {
+    final response = await _supabase.auth.setSession(refreshToken);
+    if (response.session != null) {
+      await _secureStorage.write(
+          key: REFRESH_TOKEN_KEY,
+          value: response.session!.refreshToken.toString());
+    }
+  }
 }

@@ -692,8 +692,5 @@ CREATE POLICY "Enable insert for editors" ON public.path_groups
   TO authenticated
   WITH CHECK (get_is_editor_on_occasion(occasion));
 
-DROP POLICY IF EXISTS "Enable delete for editors" ON public.path_groups;
-CREATE POLICY "Enable delete for editors" ON public.path_groups
-  AS PERMISSIVE FOR DELETE
   TO authenticated
   USING (get_is_editor_on_occasion(occasion));

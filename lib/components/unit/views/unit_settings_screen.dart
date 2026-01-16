@@ -13,6 +13,8 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:fstapp/components/bank_accounts/views/unit_bank_accounts_screen.dart';
+import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
 
 class UnitSettingsScreen extends StatefulWidget {
   final UnitModel unit;
@@ -332,6 +334,20 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
                           onPressed: _isSaving ? null : _saveSettings,
                         ),
                       ],
+                    ),
+                  const SizedBox(height: 24),
+                  if (_canEdit)
+                    ListTile(
+                      leading: const Icon(Icons.account_balance),
+                      title: Text(BankAccountStrings.bankAccountsTitle),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => UnitBankAccountsScreen(unitId: _unit.id!),
+                          ),
+                        );
+                      },
                     ),
                   const SizedBox(height: 80),
                   if (_versionInfo.isNotEmpty)

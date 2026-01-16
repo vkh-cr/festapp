@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/form_response_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
-import 'package:fstapp/components/eshop/models/bank_account_model.dart';
+import 'package:fstapp/components/bank_accounts/bank_account_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/eshop/db_orders.dart';

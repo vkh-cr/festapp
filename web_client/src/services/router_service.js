@@ -6,13 +6,11 @@ export class RouterService {
     static FORM_PATH_PREFIX = '/form/';
 
     static navigateToExternal(url) {
-        const cleanUrl = url.split('?')[0];
-        window.open(cleanUrl, '_blank');
+        window.open(url, '_blank');
     }
 
     static navigateExternal(url) {
-        const cleanUrl = url.split('?')[0];
-        window.location.href = cleanUrl;
+        window.location.href = url;
     }
 
     static navigateToOccasionApp(link) {
