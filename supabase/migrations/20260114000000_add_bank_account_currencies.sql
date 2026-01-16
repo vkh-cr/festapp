@@ -72,8 +72,8 @@ BEGIN
         ARRAY(
             SELECT u.name 
             FROM eshop.unit_bank_accounts uba
-            JOIN public.units u ON uba.unit_id = u.id
-            WHERE uba.bank_account_id = ba.id
+            JOIN public.units u ON uba.unit = u.id
+            WHERE uba.bank_account = ba.id
         ) as linked_units
     FROM eshop.bank_accounts ba
     JOIN eshop.bank_account_users bau ON ba.id = bau.bank_account
