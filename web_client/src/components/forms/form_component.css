@@ -368,7 +368,7 @@ body.dark-mode .option-description {
 
 .btn-primary {
     background-color: var(--primary-color, #007bff);
-    color: var(--btn-text-color, #000000); /* Dynamic based on contrast */
+    color: var(--btn-text-color, #ffffff);
     border: none;
 }
 .btn-primary:hover {

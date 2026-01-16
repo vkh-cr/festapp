@@ -3,6 +3,11 @@ RETURNS VOID AS $$
 DECLARE
     change RECORD;
 BEGIN
+    -- Security Check
+    IF auth.role() <> 'service_role' AND session_user <> 'postgres' THEN
+        RAISE EXCEPTION 'Access Denied: Service role required.';
+    END IF;
+
     FOR change IN
         SELECT *
         FROM eshop.planned_changes
