@@ -3,6 +3,11 @@ RETURNS VOID
 LANGUAGE plpgsql
 AS $func$
 BEGIN
+  -- Security Check
+  IF auth.role() <> 'service_role' AND session_user <> 'postgres' THEN
+      RAISE EXCEPTION 'Access Denied: Service role required.';
+  END IF;
+
   -- Schedule the apply_planned_changes cron job (runs every minute)
   PERFORM cron.schedule(
     'apply_planned_changes',

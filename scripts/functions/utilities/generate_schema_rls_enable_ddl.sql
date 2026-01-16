@@ -14,3 +14,7 @@ SELECT string_agg(
        ) AS ddl_all
 FROM tables;
 $$ LANGUAGE sql STABLE;
+
+-- Security Hardening
+REVOKE EXECUTE ON FUNCTION generate_schema_rls_enable_ddl(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION generate_schema_rls_enable_ddl(text) TO service_role;

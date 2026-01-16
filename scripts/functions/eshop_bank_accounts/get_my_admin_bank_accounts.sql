@@ -6,7 +6,7 @@ RETURNS TABLE (
     title text,
     type text,
     token_masked text,
-    token_valid_until timestamptz,
+    token_expiry_date timestamptz,
     supported_currencies text[],
     linked_units text[],
     last_fetch_time timestamptz
@@ -26,7 +26,7 @@ BEGIN
              WHEN length(s.secret) <= 4 THEN '************'
              ELSE '************' || right(s.secret, 4)
         END as token_masked,
-        ba.token_valid_until,
+        s.expiry_date as token_expiry_date,
         ba.supported_currencies,
         ARRAY(
             SELECT u.title 

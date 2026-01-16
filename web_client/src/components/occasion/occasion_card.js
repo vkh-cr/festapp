@@ -19,14 +19,16 @@ export class OccasionCard {
 
         // --- Click Handler (Exact Flutter Logic) ---
         card.onclick = async () => {
+             // Logic aligned with Flutter:
+             // 1. If skipDialog (Has Form + No Description) -> Execute Action immediately 
+             // 2. If Has Form + Description -> Show Dialog 
+             // 3. If No Form -> Navigate to App
              if (skipDialog) {
                  await OccasionDetailDialog.handleReserveAction(occasion);
              } else if (hasFormFeature && !isDescriptionEmpty) {
                  OccasionDetailDialog.show(occasion);
              } else if (!hasFormFeature) {
                  // Navigate to Occasion App
-                 // In Flutter: RightsService.updateAppData + RouterService.navigateOccasion
-                 // Here:
                  RouterService.navigateToOccasionApp(occasion.link);
              }
         };
