@@ -158,3 +158,7 @@ create_statements AS (
 SELECT string_agg(create_table_statement, E'\n\n') AS ddl_all
 FROM create_statements;
 $$ LANGUAGE sql STABLE;
+
+-- Security Hardening
+REVOKE EXECUTE ON FUNCTION generate_schema_ddl(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION generate_schema_ddl(text) TO service_role;

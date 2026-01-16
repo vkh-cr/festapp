@@ -26,22 +26,6 @@ user-header.header-hidden {
 /* ... skip to mobile part ... */
 
 /* Mobile: Show Sign In as just icon */
-    .sign-in-text {
-        display: none;
-    }
-    .btn-sign-in {
-        padding: 4px; /* Reduced padding for larger icon */
-        border: none;
-        border-radius: 0;
-        width: auto;
-        height: auto;
-        justify-content: center;
-    }
-    .btn-sign-in .material-icons {
-        margin: 0;
-        font-size: 28px; /* Bigger icon (matches settings) */
-    }
-}
 
 
 
@@ -57,25 +41,34 @@ user-header.header-hidden {
 .header-actions { display: flex; align-items: center; gap: var(--spacing-md); }
 
 
-.btn-sign-in {
-    color: white; 
-    /* border: 1px solid white; */ /* Removed border */
-    border: none;
-    padding: 8px; /* Reduced padding */
-    border-radius: 50%; /* Still circle for hover effect, but no visible border */
-    background: transparent; cursor: pointer;
-    /* font-size: 16px; */ /* Icon handles size */
+.btn-sign-in, .btn-admin {
+    color: white;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 20px;
+    border-radius: 28px;
+    cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-size: 15px; /* Unified font size */
+    height: 40px; /* Force consistent height */
+    box-sizing: border-box;
 }
+
 .btn-admin {
-    color: white; border: 1px solid white;
-    padding: 8px 16px; border-radius: 28px;
-    background: transparent; cursor: pointer;
-    font-size: 16px; display: flex; align-items: center; gap: 8px;
-    text-decoration: none;
+    gap: 8px;
 }
-.btn-sign-in:hover, .btn-admin:hover { background: rgba(255,255,255,0.1); }
+
+.btn-sign-in:hover, .btn-admin:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
 
 .settings-icon-btn {
     cursor: pointer;
@@ -106,26 +99,40 @@ user-header.header-hidden {
 /* Popover */
 /* Popover */
 /* Popover */
+/* Backdrop */
+.popover-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5); /* Dimming */
+    backdrop-filter: blur(4px); /* Blur effect */
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 101; /* Above header (100) */
+    cursor: default;
+}
+
 .user-popover {
     position: absolute;
     width: 340px;
-    background: var(--card-bg, #ffffff); /* Theme dependent */
-    color: var(--text-color, #000000); /* Theme dependent */
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15); /* Softer shadow */
+    background: var(--bg-color, #ffffff); /* Solid white like modal */
+    color: var(--text-color, #000000); 
+    border-radius: 12px; /* Matches modal */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2); /* Matches modal shadow */
     padding: 24px;
     display: flex; flex-direction: column;
-    z-index: 200;
+    z-index: 200; /* Above backdrop */
     box-sizing: border-box;
     font-family: inherit;
-    border: 1px solid rgba(0,0,0,0.1); /* Subtle border for light mode definition */
+    /* No border, no backdrop filter on the card itself */
 }
 /* Ensure dark mode override via body class if vars are not enough or if we want specific dark look */
 body.dark-mode .user-popover {
-    background: #383838; /* Match screenshot exact grey */
+    background: #1e1e1e; /* Matches modal dark mode */
     color: white;
-    border: none;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    border: none; /* Ensure no residual border */
 }
 
 .user-popover.hidden { display: none; }
@@ -207,7 +214,7 @@ body.dark-mode .popover-settings-container {
     opacity: 1;
 }
 body.dark-mode .popover-logout-row {
-    color: #aaa;
+    color: white;
 }
 body.dark-mode .popover-logout-row:hover {
     color: white;
@@ -240,16 +247,30 @@ body.dark-mode .popover-logout-row:hover {
         display: none;
     }
     .btn-sign-in {
-        padding: 8px; 
-        border: none; /* remove default white border if present from desktop rule */
-        border-radius: 0; /* remove circle */
-        width: auto;
-        height: auto;
+        padding: 0;
+        border-radius: 50%; /* Circle */
+        width: 40px;
+        height: 40px;
         justify-content: center;
+        /* Retain desktop background/border/blur automatically via cascade or explicit re-declare if needed. 
+           Since desktop rule is above, we just need to NOT override them with 'none'. 
+           We actually want to keep them. */
     }
     .btn-sign-in .material-icons {
         margin: 0;
-        font-size: 28px; /* Increased to match settings icon */
+        font-size: 24px; /* Standard icon size */
+    }
+
+    .btn-admin {
+        padding: 0;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        justify-content: center;
+        gap: 0;
+    }
+    .admin-text {
+        display: none;
     }
 }
 

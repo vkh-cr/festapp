@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -54,10 +55,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       await AuthService.changePassword(token!, _passwordController.text)
           .then((value) async {
         if (value["code"] == 403 || value["code"] == 404) {
-          ToastHelper.Show(context, "Token is not valid.".tr(), severity: ToastSeverity.NotOk);
+          ToastHelper.Show(context, UserStrings.tokenInvalid, severity: ToastSeverity.NotOk);
         } else if (value["code"] == 200) {
           await AuthService.login(AppConfig.getUserPrefix(value["email"]), _passwordController.text);
-          ToastHelper.Show(context, "Password has been changed.".tr());
+          ToastHelper.Show(context, UserStrings.passwordChanged);
           RouterService.goBackOrInitial(context);
         }
       }).onError((error, stackTrace) {
@@ -71,7 +72,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("New Password").tr(),
+        title: Text(UserStrings.newPassword),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrInitial(context),
         ),
@@ -90,20 +91,20 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   const SizedBox(
                     height: 16,
                   ),
-                  Text("Create a new password to continue.".tr(), style: const TextStyle(fontSize: 18),),
+                  Text(UserStrings.createAPassword, style: const TextStyle(fontSize: 18),),
                   const SizedBox(
                     height: 64,
                   ),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: PasswordField(label: "New Password".tr(), controller:  _passwordController, passwordType: AutofillHints.newPassword),),
+                      child: PasswordField(label: UserStrings.newPassword, controller:  _passwordController, passwordType: AutofillHints.newPassword),),
                   const SizedBox(
                     height: 16,
                   ),
                   ButtonsHelper.bigButton(
                     context: context,
                     onPressed: () async => _changePassword(context),
-                    label: "Change Password".tr(),
+                    label: UserStrings.changePassword,
                     color: ThemeConfig.seed1,
                     textColor: Colors.white,
                   ),

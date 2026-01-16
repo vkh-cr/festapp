@@ -87,6 +87,8 @@ class OrdersStrings {
   static String get errorEmailNotReturned => 'FeatureOrders.errorEmailNotReturned'.tr(); // "Error: Email was not returned."
   static String get confirmTicketFailed => 'FeatureOrders.confirmTicketFailed'.tr(); // "Failed to confirm ticket"
 
+  static String get scanNotFound => 'FeatureOrders.scanNotFound'.tr(); // "Invalid code" (Neplatný kód)
+
 
 
   // Specific Field Mappings (previously hardcoded)

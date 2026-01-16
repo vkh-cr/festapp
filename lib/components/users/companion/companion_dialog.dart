@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/components/users/companion/db_companions.dart';
 import 'package:fstapp/components/users/companion/companion_model.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 
@@ -135,11 +136,11 @@ class _CompanionDialogState extends State<CompanionDialog> {
                           if (!companion.isSignedIn(widget.eventId))
                             ElevatedButton(
                               onPressed: currentCanSignIn ? () => _signInCompanion(companion) : null,
-                              child: const Text("Sign in someone").tr(),
+                              child: Text(UserStrings.signIn),
                             ),
                           if (companion.isSignedIn(widget.eventId))
                             ElevatedButton(
-                              child: const Text("Sign out someone").tr(),
+                              child: Text(UserStrings.signOut),
                               onPressed: () => _signOutCompanion(companion),
                             ),
                           IconButton(

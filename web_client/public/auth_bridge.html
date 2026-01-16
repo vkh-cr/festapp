@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to App...</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            text-align: center;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="loader"></div>
+        <p>Opening App...</p>
+        <p style="font-size: 0.8em; color: #666; margin-top: 10px;">If the app doesn't open automatically, <a id="manual-link" href="#">click here</a>.</p>
+    </div>
+
+    <script>
+        // Configuration
+        // For Flutter Web served on the same origin (via proxy), we use relative path.
+        // The scheme is irrelevant/same-origin.
+        // Strategy Change: Direct Redirect
+        // If we are on localhost, we redirect directly to the Flutter port (5000).
+        // In production, we assume they are on the same domain/host.
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const FLUTTER_HOST = 'http://127.0.0.1:5000';
+        
+        // In production, we redirect to /transfer. 
+        // Thanks to _redirects rule: /transfer  /flutter.html  200
+        // The server will allow this path to load the Flutter App.
+        const CALLBACK_Path = isLocal ? `${FLUTTER_HOST}/transfer` : '/transfer';
+        // Supabase Key matching app_config.js
+        const SUPABASE_KEY = 'sb-kjdpmixlnhntmxjedpxh-auth-token'; 
+
+        function getRedirectUrl() {
+            let queryParams = '';
+
+            // 1. Priority: Check URL Hash (Passed from RouterService)
+            // RouterService passes data as #access_token=...
+            // We want to convert this to QUERY PARAMS for the deep link: ?access_token=...
+            if (window.location.hash && window.location.hash.includes('access_token')) {
+                // Remove the leading #
+                queryParams = '?' + window.location.hash.substring(1);
+            } 
+            // 2. Fallback: Check LocalStorage
+            else {
+                const sessionStr = localStorage.getItem(SUPABASE_KEY);
+                if (sessionStr) {
+                    try {
+                        const session = JSON.parse(sessionStr);
+                        if (session && session.access_token && session.refresh_token) {
+                            queryParams = `?access_token=${session.access_token}&refresh_token=${session.refresh_token}&token_type=bearer&type=recovery`;
+                        }
+                    } catch (e) {
+                        console.error("Error parsing session", e);
+                    }
+                }
+            }
+            
+            // Append redirect path if present in query params of flutter.html
+            const currentUrlParams = new URLSearchParams(window.location.search);
+            const redirectPath = currentUrlParams.get('redirect');
+            if (redirectPath) {
+                const separator = queryParams ? '&' : '?';
+                queryParams += `${separator}redirect=${encodeURIComponent(redirectPath)}`;
+            }
+
+            return `${CALLBACK_Path}${queryParams}`;
+        }
+
+        function redirect() {
+            const url = getRedirectUrl();
+            document.getElementById('manual-link').href = url;
+            
+            // Wait a brief moment to render, then redirect
+            setTimeout(() => {
+                window.location.href = url;
+            }, 500);
+        }
+
+        redirect();
+    </script>
+</body>
+</html>

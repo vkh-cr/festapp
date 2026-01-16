@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/users/views/forgot_password_page.dart';
@@ -82,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Sign in").tr(),
+        title: Text(UserStrings.signIn),
         leading: BackButton(
           onPressed: () => RouterService.popOrHome(context),
         ),
@@ -107,13 +108,13 @@ class _LoginPageState extends State<LoginPage> {
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text("First time?".tr(), style: TextStyle(fontSize: 18)),
+                              Text(UserStrings.firstTime, style: TextStyle(fontSize: 18)),
                               const SizedBox(
                                 width: 16,
                               ),
                               TextButton(
                                   onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
-                                  child: Text("Sign up", style: StylesConfig.normalTextStyle).tr())
+                                  child: Text(UserStrings.signUp, style: StylesConfig.normalTextStyle))
                             ]
                         ),
                       ),
@@ -124,14 +125,14 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 15.0, right: 15.0, top: 15, bottom: 0),
-                      child: PasswordField(label: "Password or code".tr(), controller:  _passwordController, passwordType: AutofillHints.password),
+                      child: PasswordField(label: UserStrings.passwordOrCode, controller:  _passwordController, passwordType: AutofillHints.password),
                     ),
                     const SizedBox(
                       height: 16,
                     ),
                     ButtonsHelper.bigButton(
                       context: context,
-                      label: "Sign in".tr(),
+                      label: UserStrings.signIn,
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           TextInput.finishAutofillContext();
@@ -159,7 +160,7 @@ class _LoginPageState extends State<LoginPage> {
                         alignment: Alignment.topRight,
                         child: TextButton(
                             onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
-                            child: Text("Forgot your password?", style: StylesConfig.normalTextStyle).tr())
+                            child: Text(UserStrings.forgotPassword, style: StylesConfig.normalTextStyle))
                     ),
                   ],
                 ),
@@ -174,29 +175,15 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _refreshSignedInStatus(dynamic value) async {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
-      var unitId = RightsService.currentUnit()?.id == 1 ? null : RightsService.currentUnit()?.id;
-      if(AppConfig.isAppSupported){
-        await RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
-      } else {
-        await RightsService.updateAppData(unitId: unitId, link: RouterService.currentOccasionLink, force: true);
-      }
-
-      if (unitId == null) {
-        var userUnits = RightsService.currentUser()?.units;
-        if (userUnits != null && userUnits.isNotEmpty) {
-          await RouterService.navigateToUnitAdmin(context, userUnits.first);
-          return;
-        }
-      }
-      RouterService.popOrHome(context);
+       await RouterService.handlePostLoginNavigation(context);
     }
   }
 
   void _showToast(value) {
-    ToastHelper.Show(context, "Successful sign in!".tr());
+    ToastHelper.Show(context, UserStrings.signInSuccess);
   }
 
   void _onError(err) {
-    ToastHelper.Show(context, "Invalid credentials!".tr(), severity: ToastSeverity.NotOk);
+    ToastHelper.Show(context, UserStrings.invalidCredentials, severity: ToastSeverity.NotOk);
   }
 }

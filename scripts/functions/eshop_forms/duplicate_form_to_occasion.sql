@@ -110,11 +110,11 @@ BEGIN
             FOR product_record IN
                 SELECT * FROM eshop.products WHERE product_type = form_field_record.product_type
             LOOP
-                INSERT INTO eshop.products (title, description, price, data, product_type, occasion, is_hidden, currency_code, title_short, "order", maximum)
+                INSERT INTO eshop.products (title, description, price, data, product_type, occasion, is_hidden, currency_code, "order", maximum)
                 VALUES (
                     product_record.title, product_record.description, product_record.price, product_record.data,
                     new_product_type_id, target_occasion_id, product_record.is_hidden, product_record.currency_code,
-                    product_record.title_short, product_record.order, product_record.maximum
+                    product_record.order, product_record.maximum
                 );
             END LOOP;
 
