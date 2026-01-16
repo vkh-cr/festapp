@@ -7,7 +7,7 @@ export class DbOccasions {
         const client = SupabaseService.getClient();
         if (!client) throw new Error("Supabase client not initialized");
         
-        const { data, error } = await client.rpc('get_public_occasions', {
+        const { data, error } = await client.rpc('get_available_occasions', {
             p_organization_id: organizationId,
             p_unit_id: null
         });
@@ -36,6 +36,7 @@ export class DbOccasions {
              return [];
         }
 
-        return rawOccasions.map(json => OccasionModel.fromJson(json));
+        return rawOccasions
+            .map(json => OccasionModel.fromJson(json));
     }
 }

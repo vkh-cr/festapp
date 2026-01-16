@@ -46,3 +46,7 @@ formatted_triggers AS (
 SELECT string_agg(trigger_ddl, E'\n\n') AS ddl_all
 FROM formatted_triggers;
 $$ LANGUAGE sql STABLE;
+
+-- Security Hardening
+REVOKE EXECUTE ON FUNCTION generate_schema_triggers_ddl(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION generate_schema_triggers_ddl(text) TO service_role;
