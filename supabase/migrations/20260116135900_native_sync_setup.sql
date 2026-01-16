@@ -124,8 +124,8 @@ BEGIN
                     'code', 'form', 
                     'is_enabled', true, 
                     'data', jsonb_build_object(
-                        'formUseExternal', true, 
-                        'formExternalLink', v_external_link
+                        'use_external_form', true, 
+                        'external_form_link', v_external_link
                     )
                  ));
 
