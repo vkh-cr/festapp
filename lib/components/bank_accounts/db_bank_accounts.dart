@@ -54,11 +54,11 @@ class DbBankAccounts {
     });
   }
 
-  static Future<void> updateBankAccountToken(int bankAccountId, String token, DateTime? validUntil) async {
+  static Future<void> updateBankAccountToken(int bankAccountId, String token, DateTime? expiryDate) async {
     await _supabase.rpc('update_bank_account_token', params: {
       'p_bank_account_id': bankAccountId,
       'p_token': token,
-      'p_valid_until': validUntil?.toIso8601String(),
+      'p_valid_until': expiryDate?.toIso8601String(),
     });
   }
 

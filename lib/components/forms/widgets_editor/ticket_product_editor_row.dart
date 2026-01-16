@@ -8,6 +8,7 @@ import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'description_tooltip.dart';
 
 class TicketProductEditorRow extends StatefulWidget {
   final ProductModel product;
@@ -145,8 +146,8 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                             labelText: CommonStrings.title,
                             border: const UnderlineInputBorder(),
                             suffixIcon: (!HtmlHelper.isHtmlEmptyOrNull(widget.product.description))
-                                ? Tooltip(
-                                    message: "Has description".tr(),
+                                ? DescriptionTooltip(
+                                    description: widget.product.description!,
                                     child: const Icon(Icons.description, size: 20),
                                   )
                                 : null,

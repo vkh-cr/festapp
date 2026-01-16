@@ -13,12 +13,19 @@ export class OccasionDetailDialog {
         // Create Overlay
         const overlay = document.createElement('div');
         overlay.className = 'overlay visible';
+        
+        // Lock body scroll
+        document.body.style.overflow = 'hidden';
+
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        
         overlay.style.display = 'flex';
-        overlay.style.alignItems = 'flex-start'; // Align to top
+        overlay.style.alignItems = 'center'; // Align to center vertically
         overlay.style.justifyContent = 'center'; // Center horizontally
-        overlay.style.paddingTop = '80px'; // Offset from top
-        overlay.style.paddingBottom = '40px'; // Bottom spacing
-        overlay.style.overflowY = 'auto'; // Ensure scrollable
         overlay.style.zIndex = '2000'; // High z-index
         
         // Resolve Text
@@ -125,6 +132,7 @@ export class OccasionDetailDialog {
 
         const close = () => {
              document.removeEventListener('keydown', onKeyDown);
+             document.body.style.overflow = ''; // Restore scroll
              overlay.classList.remove('visible');
              setTimeout(() => overlay.remove(), 300);
         };

@@ -4,6 +4,7 @@ import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 
 import 'option_editor_dialog.dart';
+import 'description_tooltip.dart';
 
 class SelectOneEditor {
   static Widget buildSelectOneReadOnly(BuildContext context, FormFieldModel field) {
@@ -30,8 +31,8 @@ class SelectOneEditor {
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Row(
                   children: [
-                    Tooltip(
-                      message: "Has description".tr(),
+                    DescriptionTooltip(
+                      description: option.description!,
                       child: const Icon(Icons.description, size: 16),
                     ),
                   ],
@@ -67,8 +68,8 @@ class SelectOneEditor {
                       border: const UnderlineInputBorder(),
                       suffixIcon: formOption.description != null &&
                           formOption.description!.trim().isNotEmpty
-                          ? Tooltip(
-                        message: "Has description".tr(),
+                          ? DescriptionTooltip(
+                        description: formOption.description!,
                         child: Icon(Icons.description, size: 20),
                       )
                           : null,

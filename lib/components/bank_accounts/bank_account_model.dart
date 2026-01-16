@@ -7,7 +7,7 @@ class BankAccountModel {
   final int priority;
   
   final String? tokenMasked;
-  final DateTime? tokenValidUntil;
+  final DateTime? tokenExpiryDate;
   final List<String> supportedCurrencies;
   final List<String> linkedUnits;
   final String? accountNumberHumanReadable;
@@ -21,7 +21,7 @@ class BankAccountModel {
     this.type = 'FIO',
     this.isAdmin = false,
     this.tokenMasked,
-    this.tokenValidUntil,
+    this.tokenExpiryDate,
     this.supportedCurrencies = const [],
     this.linkedUnits = const [],
     this.accountNumberHumanReadable,
@@ -37,7 +37,7 @@ class BankAccountModel {
       type: json['type'] ?? 'FIO',
       isAdmin: json['is_admin'] ?? false,
       tokenMasked: json['token_masked'],
-      tokenValidUntil: json['token_valid_until'] != null ? DateTime.parse(json['token_valid_until']) : null,
+      tokenExpiryDate: json['token_expiry_date'] != null ? DateTime.parse(json['token_expiry_date']) : null,
       supportedCurrencies: (json['supported_currencies'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
       linkedUnits: (json['linked_units'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
       accountNumberHumanReadable: json['account_number_human_readable'],
@@ -54,7 +54,7 @@ class BankAccountModel {
       'type': type,
       'is_admin': isAdmin,
       'token_masked': tokenMasked,
-      'token_valid_until': tokenValidUntil?.toIso8601String(),
+      'token_expiry_date': tokenExpiryDate?.toIso8601String(),
       'supported_currencies': supportedCurrencies,
       'account_number_human_readable': accountNumberHumanReadable,
       'last_fetch_time': lastFetchTime?.toIso8601String(),
@@ -69,7 +69,7 @@ class BankAccountModel {
     bool? isAdmin,
     int? priority,
     String? tokenMasked,
-    DateTime? tokenValidUntil,
+    DateTime? tokenExpiryDate,
     List<String>? supportedCurrencies,
     List<String>? linkedUnits,
     String? accountNumberHumanReadable,
@@ -83,7 +83,7 @@ class BankAccountModel {
       isAdmin: isAdmin ?? this.isAdmin,
       priority: priority ?? this.priority,
       tokenMasked: tokenMasked ?? this.tokenMasked,
-      tokenValidUntil: tokenValidUntil ?? this.tokenValidUntil,
+      tokenExpiryDate: tokenExpiryDate ?? this.tokenExpiryDate,
       supportedCurrencies: supportedCurrencies ?? this.supportedCurrencies,
       linkedUnits: linkedUnits ?? this.linkedUnits,
       accountNumberHumanReadable: accountNumberHumanReadable ?? this.accountNumberHumanReadable,
