@@ -252,12 +252,13 @@ export class FormSession extends EventTarget {
         this._emitStateChanged();
     }
 
-    async removeTicket(index) {
+    async removeTicket(index, skipBackendSync = false) {
         if (index >= 0 && index < this.state.tickets.length) {
             const ticket = this.state.tickets[index];
             
             // Sync with Backend: Deselect Spot if present
-            if (ticket.spot) {
+            // If skipBackendSync is true (optimistic update from toggleSpot), we rely on toggleSpot's queue.
+            if (!skipBackendSync && ticket.spot) {
                 try {
                     await DbForms.selectSpot(this.formModel.key, this.formModel.secret, ticket.spot, false);
                 } catch (e) {
@@ -341,20 +342,20 @@ export class FormSession extends EventTarget {
                  // REMOVE Ticket
                  const idx = this.state.tickets.findIndex(t => String(t.spot) === String(spotId));
                  if (idx !== -1) {
-                     this.removeTicket(idx);
+                     this.removeTicket(idx, true); // Skip internal sync, we handle it in queue
                  }
              }
         };
 
-        // Enqueue the operation
-        const task = async () => {
-            // 1. Apply Change Optimistically
-            // Store Spot Model for Price Robustness
-            if (spotObj.product || spotObj.productModel || spotObj.price) {
-                 this.spotModels.set(String(spotId), spotObj);
-            }
-            updateState(isSelecting);
+        // 1. Apply Change Optimistically (Synchronous)
+        // Store Spot Model for Price Robustness
+        if (spotObj.product || spotObj.productModel || spotObj.price) {
+             this.spotModels.set(String(spotId), spotObj);
+        }
+        updateState(isSelecting);
 
+        // Enqueue the NETWORK operation (Serialized)
+        const task = async () => {
             try {
                  const currentSecret = this.formModel.secret;
                  console.log(`[FormSession] Executing toggleSpot queue task. Spot: ${spotId}, Action: ${isSelecting ? 'Select' : 'Deselect'}, Secret: ${currentSecret}`);

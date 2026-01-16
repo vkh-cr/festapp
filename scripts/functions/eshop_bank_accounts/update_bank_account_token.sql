@@ -20,40 +20,43 @@ BEGIN
         RAISE EXCEPTION 'Permission denied: Only bank account admins can update tokens.';
     END IF;
 
-    -- Update validity date only if explicitly provided
-    IF p_valid_until IS NOT NULL THEN
-        UPDATE eshop.bank_accounts
-        SET token_valid_until = p_valid_until,
-            is_fetch_enabled = true,
-            updated_at = NOW()
-        WHERE id = p_bank_account_id;
-    END IF;
-
+    -- Update validity date only if explicitly provided along with token or just standalone?
+    -- Logic: If token is updated, invalidates expiry unless provided.
+    
     IF p_token IS NOT NULL AND p_token <> '' THEN
         IF v_secret_id IS NOT NULL THEN
             UPDATE eshop.secrets
-            SET secret = p_token, created_at = now()
+            SET secret = p_token, 
+                created_at = now(),
+                expiry_date = p_valid_until
             WHERE id = v_secret_id;
             
-            -- If token changed, we should reset valid_until unless explicit new date is provided
-            -- Here we assume if p_token is passed, we update validity too.
-            -- If p_valid_until is NULL (default), this clears it.
             UPDATE eshop.bank_accounts
-            SET token_valid_until = p_valid_until,
-                is_fetch_enabled = true,
+            SET is_fetch_enabled = true,
                 updated_at = NOW()
             WHERE id = p_bank_account_id;
         ELSE
-            INSERT INTO eshop.secrets (secret)
-            VALUES (p_token)
+            INSERT INTO eshop.secrets (secret, expiry_date)
+            VALUES (p_token, p_valid_until)
             RETURNING id INTO v_secret_id;
 
             UPDATE eshop.bank_accounts
             SET secret = v_secret_id,
-                token_valid_until = p_valid_until,
                 is_fetch_enabled = true,
                 updated_at = NOW()
             WHERE id = p_bank_account_id;
+        END IF;
+    ELSE
+        -- If only updating validity date
+        IF p_valid_until IS NOT NULL AND v_secret_id IS NOT NULL THEN
+             UPDATE eshop.secrets
+             SET expiry_date = p_valid_until
+             WHERE id = v_secret_id;
+
+             UPDATE eshop.bank_accounts
+             SET is_fetch_enabled = true,
+                 updated_at = NOW()
+             WHERE id = p_bank_account_id;
         END IF;
     END IF;
 END;

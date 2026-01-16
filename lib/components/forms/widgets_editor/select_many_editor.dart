@@ -4,6 +4,7 @@ import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 
 import 'option_editor_dialog.dart';
+import 'description_tooltip.dart';
 
 class SelectManyEditor {
   static Widget buildSelectManyReadOnly(BuildContext context, FormFieldModel field) {
@@ -26,8 +27,8 @@ class SelectManyEditor {
             if (option.description != null && option.description!.trim().isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: Tooltip(
-                  message: "Has description".tr(),
+                child: DescriptionTooltip(
+                  description: option.description!,
                   child: const Icon(Icons.description, size: 16),
                 ),
               ),
@@ -59,8 +60,8 @@ class SelectManyEditor {
                     decoration: InputDecoration(
                       border: const UnderlineInputBorder(),
                       suffixIcon: formOption.description != null && formOption.description!.trim().isNotEmpty
-                          ? Tooltip(
-                        message: "Has description".tr(),
+                          ? DescriptionTooltip(
+                        description: formOption.description!,
                         child: Icon(Icons.description, size: 20),
                       )
                           : null,

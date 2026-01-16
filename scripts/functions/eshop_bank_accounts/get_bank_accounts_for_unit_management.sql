@@ -8,7 +8,7 @@ RETURNS TABLE (
     type text,
     is_admin boolean,
     token_masked text,
-    token_valid_until timestamptz,
+    token_expiry_date timestamptz,
     supported_currencies text[],
     last_fetch_time timestamptz
 )
@@ -29,7 +29,7 @@ BEGIN
              WHEN length(s.secret) <= 4 THEN '************'
              ELSE '************' || right(s.secret, 4)
         END as token_masked,
-        ba.token_valid_until,
+        s.expiry_date as token_expiry_date,
         ba.supported_currencies,
         ba.last_fetch_time
     FROM eshop.bank_accounts ba

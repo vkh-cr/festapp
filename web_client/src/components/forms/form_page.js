@@ -39,6 +39,7 @@ export class FormPage extends Component {
         this.currentSession = null;
         this.currentLink = null;
         this.onBack = null;
+        this._previewModulePromise = null;
     }
 
     cleanup() {
@@ -47,6 +48,7 @@ export class FormPage extends Component {
             this.currentPriceWidget = null;
         }
         this.currentSession = null;
+        this._previewModulePromise = null;
         // Also remove legacy widget just in case
         const widget = document.getElementById('floating-price-widget');
         if (widget) widget.remove();
@@ -257,6 +259,7 @@ export class FormPage extends Component {
         
         new CurrencySelectorWidget(session, this.host);
         
+        
 
         
         // Handle Currency Filtering
@@ -372,6 +375,25 @@ export class FormPage extends Component {
                 session.setIsReady(true);
             }
         }, 100);
+
+        // Optimization: Prefetch OrderPreview
+        this.prefetchPreview();
+    }
+
+    prefetchPreview() {
+        if (this._previewModulePromise) return;
+
+        const fetcher = () => {
+             if (this._previewModulePromise) return;
+             console.log('[FormPage] Prefetching OrderPreview...');
+             this._previewModulePromise = import('./order_preview.js');
+        };
+
+        if (window.requestIdleCallback) {
+            window.requestIdleCallback(fetcher);
+        } else {
+            setTimeout(fetcher, 2000); // 2s delay
+        }
     }
 
 
@@ -409,7 +431,12 @@ export class FormPage extends Component {
             return;
         }
 
-        import('./order_preview.js').then(({ OrderPreview }) => {
+        // Use prefetched module if available, or fetch now
+        if (!this._previewModulePromise) {
+            this._previewModulePromise = import('./order_preview.js');
+        }
+
+        this._previewModulePromise.then(({ OrderPreview }) => {
              try {
                  const priceData = this.calculateTotal(form, formModel);
                  const precalculatedPayload = this.currentSession ? this.currentSession.payload : null;
