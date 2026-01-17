@@ -26,6 +26,7 @@ class AppConfig {
   static const bool isAllUnit = true;
   static const bool isAppSupported = true;
   static const bool isWebclientSupported = true;
+  static const bool isContractFeatureEnabled = true;
   static const bool showBankSupportRole = false;
 
   static const String webLink = "https://hvezdamorska.netlify.app";

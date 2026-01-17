@@ -138,11 +138,24 @@ class RadioFieldBuilder {
     // If disabled, update text style to use the disabled color and append "Unavailable".
     final effectiveTitle = isDisabled ? "$title (${FormStrings.unavailable})" : title;
     final isSelected = (field.value == o);
+
+    String? effectiveDescription = o.description;
+    final showSurchargeInfo = formHolder.getTicket()?.showSurchargeDescription ?? true;
+    if (showSurchargeInfo && o is FormOptionProductModel && o.data?['surcharge'] != null) {
+      final surcharge = o.data!['surcharge'];
+      if(surcharge['amount'] != null) {
+        final amount = surcharge['amount'];
+        final currency = surcharge['currency'] ?? '';
+        final surchargeText = "+ $amount $currency ${FormStrings.surchargeOnSite}";
+        effectiveDescription = "<span style='color: #666; font-weight: bold;'>$surchargeText</span>${o.description != null ? "<br>${o.description}" : ""}";
+      }
+    }
+
     final optionCard = OptionFieldHelper.buildOptionCard(
       context: context,
       isSelected: isSelected,
       title: effectiveTitle,
-      description: o.description,
+      description: effectiveDescription,
       leading: Radio<FormOptionModel>(
         value: o,
         groupValue: field.value,
@@ -328,12 +341,41 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
       );
       final title = OptionFieldHelper.buildOptionTitle(context, o);
       final effectiveTitle = isDisabled ? "$title (${FormStrings.unavailable})" : title;
+
+      Widget labelWidget = Text(
+        effectiveTitle,
+        style: style,
+      );
+
+      final showSurchargeInfo = widget.formHolder.getTicket()?.showSurchargeDescription ?? true;
+      if (showSurchargeInfo && o is FormOptionProductModel && o.data?['surcharge'] != null) {
+        final surcharge = o.data!['surcharge'];
+        if (surcharge['amount'] != null) {
+          final amount = surcharge['amount'];
+          final currency = surcharge['currency'] ?? '';
+          final surchargeText = "+ $amount $currency ${FormStrings.surchargeOnSite}";
+
+          labelWidget = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              labelWidget,
+              const SizedBox(height: 2),
+              Text(
+                  surchargeText,
+                  style: style?.copyWith(
+                      color: Colors.grey[600],
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500
+                  ) ?? TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w500)
+              ),
+            ],
+          );
+        }
+      }
+
       return FormBuilderFieldOption<FormOptionModel>(
         value: o,
-        child: Text(
-          effectiveTitle,
-          style: style,
-        ),
+        child: labelWidget,
       );
     }).toList();
 

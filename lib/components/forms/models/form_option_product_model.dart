@@ -11,6 +11,7 @@ class FormOptionProductModel extends FormOptionModel {
   final int? orderedCount;
   final String? currencyCode;
   final bool? isDynamicallyAvailable;
+  final Map<String, dynamic>? data;
 
   FormOptionProductModel(
       super.id,
@@ -20,6 +21,7 @@ class FormOptionProductModel extends FormOptionModel {
         this.orderedCount,
         this.currencyCode,
         this.isDynamicallyAvailable,
+        this.data,
         super.type,
         super.description,
       });

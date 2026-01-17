@@ -1,7 +1,8 @@
 import { PDFDocument, rgb, PageSizes, PDFFont } from "npm:pdf-lib";
 import * as fontkit from "npm:fontkit";
-import { encode as base64Encode } from "https://deno.land/std@0.170.0/encoding/base64.ts";
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { authorizeRequest, AuthError } from "../_shared/auth.ts";
+import { Buffer } from "node:buffer";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +11,7 @@ const corsHeaders = {
 
 // --- STATIC DATA (Used when not available from API) ---
 const staticOrganizerData = {
-    name: "CK Hvězda mořská s.r.o.",
+    name: "CK Hvězda Mořská s.r.o.",
     ico: "23146354",
     dic: "CZ 23146354",
     address: "Nové Sady 988/2, 602 00 Brno-střed",
@@ -20,7 +21,7 @@ const staticOrganizerData = {
 };
 const staticPaymentClause = "Platba zálohy probíhá převodem na účet, doplatek se hradí v hotovosti v eurech při příjezdu na místo ubytování.";
 const staticTermsClause = "Zákazník svým podpisem/zaplacením zálohy potvrzuje, že tato smlouva je pro něj i ostatní přihlášené osoby ZÁVAZNÁ a že mu jsou známy Všeobecné obchodní podmínky cestovní kanceláře a SOUHLASÍ s nimi. Dále souhlasí, aby veškerá korespondence byla zasílána na jeho výše uvedený email a zavazuje se svoje spolucestující včas a plně informovat. Objednavatel a jeho spolucestující též souhlasí se zpracováním jejich osobních údajů ve smyslu platných právních předpisů (GDPR).";
-const DEFAULT_FONT_URL = "https://fonts.cdnfonts.com/s/12165/Roboto-Regular.woff";
+const DEFAULT_FONT_URL = "https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf";
 const LOGO_IMAGE_URL = "https://lwfpdjxsdmkfyrzqbrlk.supabase.co/storage/v1/object/public/public-files/hvezdamorska/hvezdamorskaCKlogo.png";
 
 
@@ -62,8 +63,10 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
     const fontResponse = await fetch(DEFAULT_FONT_URL);
     if (!fontResponse.ok) throw new Error(`Font fetch failed: ${fontResponse.statusText}`);
     const fontData = await fontResponse.arrayBuffer();
+    
     font = await pdfDoc.embedFont(new Uint8Array(fontData));
-    boldFont = font;
+    boldFont = font; // Reusing regular font as bold as requested
+
   } catch (e) {
     console.error("CRITICAL: Custom font failed to load. PDF will likely have encoding errors.", e);
     throw new Error("Custom font loading failed. Cannot generate PDF.");
@@ -163,7 +166,7 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
 
   const logoAreaWidth = 170;
   const logoAreaX = width - margin - logoAreaWidth;
-  const logoDims = logoImage.scale(logoAreaWidth / logoImage.width * 0.65); // Made logo bigger
+  const logoDims = logoImage.scale(logoAreaWidth / logoImage.width * 0.90); // Made logo bigger
   page.drawImage(logoImage, {
       x: logoAreaX,
       y: orgSectionTopY - logoDims.height,
@@ -227,22 +230,25 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
   drawField(data.client.address || '', margin, clientFieldTop2, contentWidth, fieldHeight);
   rowY = clientFieldTop2 - fieldHeight - spaceBetweenRows;
 
-  const threeColWidth = (contentWidth - 2 * gap) / 3;
-  y = rowY;
-  y -= smallFontSize; drawLabel("Státní příslušnost:", margin, y); drawLabel("Číslo OP/pasu:", margin + threeColWidth + gap, y); drawLabel("Platný do:", margin + 2*threeColWidth + 2*gap, y);
-  y -= spaceBelowLabel; const clientFieldTop3 = y;
-  drawField(data.client.nationality || '', margin, clientFieldTop3, threeColWidth, fieldHeight);
-  drawField(data.client.idNumber || '', margin + threeColWidth + gap, clientFieldTop3, threeColWidth, fieldHeight);
-  drawField(data.client.idValidUntil || '', margin + 2*threeColWidth + 2*gap, clientFieldTop3, threeColWidth, fieldHeight);
-  rowY = clientFieldTop3 - fieldHeight - spaceBetweenRows;
+  // New Single Row: Nationality | Phone | Email
+  // Ratios: ~20% | ~30% | ~50%
+  const widthNat = (contentWidth - 2 * gap) * 0.20;
+  const widthPhone = (contentWidth - 2 * gap) * 0.30;
+  const widthEmail = (contentWidth - 2 * gap) * 0.50;
 
-  const twoColWidth = (contentWidth - gap) / 2;
   y = rowY;
-  y -= smallFontSize; drawLabel("Email:", margin, y); drawLabel("Tel. číslo:", margin + twoColWidth + gap, y);
-  y -= spaceBelowLabel; const clientFieldTop4 = y;
-  drawField(data.client.email || '', margin, clientFieldTop4, twoColWidth, fieldHeight);
-  drawField(data.client.phone || '', margin + twoColWidth + gap, clientFieldTop4, twoColWidth, fieldHeight);
-  y = clientFieldTop4 - fieldHeight - spaceBetweenRows;
+  y -= smallFontSize; 
+  drawLabel("Státní příslušnost:", margin, y); 
+  drawLabel("Tel. číslo:", margin + widthNat + gap, y); 
+  drawLabel("Email:", margin + widthNat + gap + widthPhone + gap, y);
+
+  y -= spaceBelowLabel; const clientFieldTop3 = y;
+  
+  drawField(data.client.nationality || '', margin, clientFieldTop3, widthNat, fieldHeight);
+  drawField(data.client.phone || '', margin + widthNat + gap, clientFieldTop3, widthPhone, fieldHeight);
+  drawField(data.client.email || '', margin + widthNat + gap + widthPhone + gap, clientFieldTop3, widthEmail, fieldHeight);
+  
+  y = clientFieldTop3 - fieldHeight - spaceBetweenRows;
   // --- END: RIGHT-ALIGNED CUSTOMER FIELDS ---
 
   y -= spaceBetweenSections;
@@ -293,7 +299,10 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
   const paymentLineHeight = regularFontSize + 3;
   const paymentValueX = paymentBlockX + 55;
 
-  page.drawText("Záloha:", { x: paymentBlockX, y: rightY, font: boldFont, size: regularFontSize, color: colorDataText });
+  const totalSurcharge = (data.calculation.doplatek?.totalAmount || 0);
+  const depositLabel = totalSurcharge > 0 ? "Záloha:" : "Cena celkem:";
+
+  page.drawText(depositLabel, { x: paymentBlockX, y: rightY, font: boldFont, size: regularFontSize, color: colorDataText });
   rightY -= paymentLineHeight;
   page.drawText("Částka:", { x: paymentBlockX + 10, y: rightY, font: font, size: smallFontSize, color: colorLabelText });
   page.drawText(data.calculation.zaloha.castka || '', { x: paymentValueX, y: rightY, font: font, size: regularFontSize, color: colorDataText });
@@ -304,16 +313,18 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
   page.drawLine({start: {x: paymentBlockX, y: rightY}, end: {x: paymentBlockX + paymentBlockWidth, y: rightY}, thickness: lineThickness, color: colorSeparatorLine});
   rightY -= (paymentLineHeight + 2);
 
-  page.drawText("Doplatek:", { x: paymentBlockX, y: rightY, font: boldFont, size: regularFontSize, color: colorDataText });
-  rightY -= paymentLineHeight;
-  page.drawText("Částka:", { x: paymentBlockX + 10, y: rightY, font: font, size: smallFontSize, color: colorLabelText });
-  page.drawText(data.calculation.doplatek.castka || '', { x: paymentValueX, y: rightY, font: font, size: regularFontSize, color: colorDataText });
-  rightY -= paymentLineHeight;
-  page.drawText("Uhradit do:", { x: paymentBlockX + 10, y: rightY, font: font, size: smallFontSize, color: colorLabelText });
-  page.drawText(data.calculation.doplatek.uhraditDo || '', { x: paymentValueX, y: rightY, font: font, size: regularFontSize, color: colorDataText });
-  rightY -= (paymentLineHeight + 4);
-  page.drawLine({start: {x: paymentBlockX, y: rightY}, end: {x: paymentBlockX + paymentBlockWidth, y: rightY}, thickness: lineThickness, color: colorSeparatorLine});
-  rightY -= (paymentLineHeight + 1);
+  if (totalSurcharge > 0) {
+      page.drawText("Doplatek:", { x: paymentBlockX, y: rightY, font: boldFont, size: regularFontSize, color: colorDataText });
+      rightY -= paymentLineHeight;
+      page.drawText("Částka:", { x: paymentBlockX + 10, y: rightY, font: font, size: smallFontSize, color: colorLabelText });
+      page.drawText(data.calculation.doplatek.castka || '', { x: paymentValueX, y: rightY, font: font, size: regularFontSize, color: colorDataText });
+      rightY -= paymentLineHeight;
+      page.drawText("Uhradit do:", { x: paymentBlockX + 10, y: rightY, font: font, size: smallFontSize, color: colorLabelText });
+      page.drawText(data.calculation.doplatek.uhraditDo || '', { x: paymentValueX, y: rightY, font: font, size: regularFontSize, color: colorDataText });
+      rightY -= (paymentLineHeight + 4);
+      page.drawLine({start: {x: paymentBlockX, y: rightY}, end: {x: paymentBlockX + paymentBlockWidth, y: rightY}, thickness: lineThickness, color: colorSeparatorLine});
+      rightY -= (paymentLineHeight + 1);
+  }
 
   page.drawText("Celkem:", { x: paymentBlockX, y: rightY, font: boldFont, size: regularFontSize, color: colorDataText });
   const totalPriceString = data.calculation.totalPriceForDisplay || '';
@@ -397,25 +408,11 @@ Deno.serve(async (req: Request) => {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    const { requestSecret, order } = await req.json();
+    const { requestSecret, order: orderInput, orderId: orderIdInput } = await req.json();
 
-    if (!requestSecret) {
-        return new Response(JSON.stringify({ error: "Request secret is required" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 401,
-        });
-    }
+    // Support both direct 'orderId' input and 'order.id' input for backward compatibility
+    const orderId = orderIdInput || orderInput?.id;
 
-    const { data: secretValid, error: secretError } = await supabaseAdmin.rpc("check_request_secret", { p_secret: requestSecret });
-    if (secretError || !secretValid) {
-        console.error("Invalid request secret", secretError);
-        return new Response(JSON.stringify({ error: "Invalid request secret" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 403,
-        });
-    }
-
-    const orderId = order?.id;
     if (!orderId) {
         throw new Error("Order ID is missing from the request");
     }
@@ -433,9 +430,15 @@ Deno.serve(async (req: Request) => {
     }
 
     const { order: rpcOrder, occasion, form_fields, payment_info } = rpcData.data;
+
+    // --- AUTHORIZATION ---
+    // Authorize using the shared helper. Supports secret (backend) or user token (frontend).
+    const authorizationHeader = req.headers.get("Authorization");
+    await authorizeRequest({ requestSecret, authorizationHeader, occasionId: occasion.id });
+    // ---------------------
+
     const orderFields = rpcOrder?.data?.fields;
 
-    const idDocumentData = findFieldDataByType(orderFields, form_fields, 'id_document') || {};
     const surname = findFieldDataByType(orderFields, form_fields, 'surname') || '';
     const name = findFieldDataByType(orderFields, form_fields, 'name') || '';
     const clientData = {
@@ -443,10 +446,8 @@ Deno.serve(async (req: Request) => {
         address: findFieldDataByType(orderFields, form_fields, 'address') || 'N/A',
         nationality: findFieldDataByType(orderFields, form_fields, 'nationality') || 'N/A',
         email: findFieldDataByType(orderFields, form_fields, 'email') || rpcOrder?.data?.email || 'N/A',
-        idNumber: idDocumentData.id_document_number || 'N/A',
         phone: findFieldDataByType(orderFields, form_fields, 'phone') || rpcOrder?.data?.phone || 'N/A',
         dob: formatDate(findFieldDataByType(orderFields, form_fields, 'birth_date')),
-        idValidUntil: formatDate(idDocumentData.id_document_expiry_date),
     };
 
     const startTime = occasion?.start_time ? new Date(occasion.start_time) : null;
@@ -460,16 +461,19 @@ Deno.serve(async (req: Request) => {
 
     const occasionDescription = occasion?.description || '';
     const transportMatch = occasionDescription.match(/Doprava (.*?)\./);
-    const departureMatch = occasionDescription.match(/Nástupní místa: (.*?)(<br>|\n)/);
+
+    const contractFeatureRaw = occasion?.features?.find((f:any) => f.code === 'contract');
+    // Only use the feature data if it is explicitly enabled
+    const contractFeature = contractFeatureRaw?.is_enabled ? contractFeatureRaw : null;
 
     const tourInfoData = {
-        tourDate: `${formatDate(occasion?.start_time)} - ${formatDate(occasion?.end_time)}`,
-        transport: transportMatch ? transportMatch[1] : "Bude upřesněno",
-        departurePoint: departureMatch ? departureMatch[1].trim() : "Bude upřesněno",
-        notes: "",
-        tourName: occasion?.title || 'N/A',
-        placeOfStay: "Medjugorje",
-        nights: nights,
+        tourDate: contractFeature?.tour_date || `${formatDate(occasion?.start_time)} - ${formatDate(occasion?.end_time)}`,
+        transport: contractFeature?.transport || transportMatch?.[1] || "Bude upřesněno",
+        departurePoint: contractFeature?.departure_point || "Podle domluvy",
+        notes: contractFeature?.notes || "",
+        tourName: contractFeature?.tour_name || occasion?.title || 'N/A',
+        placeOfStay: contractFeature?.place_of_stay || "Medjugorje",
+        nights: contractFeature?.number_of_days || nights,
     };
 
     const calculationItems = (rpcOrder?.data?.tickets?.[0]?.products || []).map((p: any) => {
@@ -492,12 +496,17 @@ Deno.serve(async (req: Request) => {
             // If the suffix is too long and leaves no meaningful space for the title (e.g., < 5 chars),
             // then we just truncate the entire combined string. This is our fallback.
             if (maxTitleLength < 5) {
-                finalDescription = fullDescription.substring(0, MAX_LENGTH - 3) + '...';
+                let raw = fullDescription.substring(0, MAX_LENGTH - 3);
+                // Trim trailing single characters (e.g. "Title A" -> "Title")
+                raw = raw.replace(/(\s\S)+$/, "").trim();
+                finalDescription = raw + '...';
             } else {
                 // Otherwise, the "smart" approach: truncate the main title and append the full suffix.
                 // This preserves the (type_title) information completely.
-                const truncatedTitle = title.substring(0, maxTitleLength - 3) + '...';
-                finalDescription = `${truncatedTitle}${suffix}`;
+                let raw = title.substring(0, maxTitleLength - 3);
+                // Trim trailing single characters
+                raw = raw.replace(/(\s\S)+$/, "").trim();
+                finalDescription = `${raw}...${suffix}`;
             }
         }
 
@@ -511,6 +520,34 @@ Deno.serve(async (req: Request) => {
     const totalFromFeatures = occasion?.features?.find((f:any) => f.code === 'form')?.external_price;
     const fallbackTotal = rpcOrder?.price != null ? `${rpcOrder.price.toLocaleString('cs-CZ')} ${rpcOrder.currency_code || 'Kč'}` : 'N/A';
 
+    // Calculate total surcharge
+    let totalSurcharge = 0;
+    let surchargeCurrency = '';
+
+    (rpcOrder?.data?.tickets || []).forEach((t: any) => {
+        (t.products || []).forEach((p: any) => {
+            // Check for surcharge in product data
+            // Structure: p.data.surcharge.amount / currency
+            const surcharge = p.data?.surcharge;
+            if (surcharge && surcharge.amount) {
+                totalSurcharge += Number(surcharge.amount);
+                if (!surchargeCurrency && surcharge.currency) {
+                    surchargeCurrency = surcharge.currency;
+                }
+            }
+        });
+    });
+
+    // If no currency found but amount > 0 (should shouldn't happen if validation works), fallback to order currency or 'EUR' as per contract defaults
+    if (totalSurcharge > 0 && !surchargeCurrency) {
+        surchargeCurrency = 'EUR'; // Defaulting to EUR as per "doplatek se hradí .. v eurech" in the static text, though dynamic is better.
+    }
+    
+    // Format surcharge string
+    const surchargeString = totalSurcharge > 0 
+        ? `${totalSurcharge.toLocaleString('cs-CZ')} ${surchargeCurrency}`
+        : "0";
+
     const calculationData = {
         items: calculationItems,
         zaloha: {
@@ -518,10 +555,13 @@ Deno.serve(async (req: Request) => {
             uhraditDo: formatDate(payment_info?.deadline),
         },
         doplatek: {
-            castka: "Dle pokynů",
-            uhraditDo: "Dle pokynů"
+            totalAmount: totalSurcharge,
+            castka: totalSurcharge > 0 ? surchargeString : "Dle pokynů", // Only used if rendered
+            uhraditDo: "Dle pokynů" // Static for now as usually paid on arrival
         },
-        totalPriceForDisplay: fallbackTotal + " + doplatek"
+        totalPriceForDisplay: totalSurcharge > 0 
+            ? fallbackTotal + " + " + surchargeString + " doplatek" 
+            : fallbackTotal
     };
 
     const dataForPdf = {
@@ -530,33 +570,38 @@ Deno.serve(async (req: Request) => {
         tourInfo: tourInfoData,
         client: clientData,
         calculation: calculationData,
-        paymentClause: staticPaymentClause,
+        paymentClause: contractFeature?.payment_info || staticPaymentClause,
         termsClause: staticTermsClause,
         signatureDate: '',
     };
 
     const pdfBytes = await generateAgreement(dataForPdf);
-    const base64PdfData = base64Encode(pdfBytes);
+    const base64Pdf = Buffer.from(pdfBytes).toString('base64');
+    
+    // Use contract number or order ID for filename
+    const filenameCode = payment_info?.variable_symbol?.toString() || orderId.toString();
 
     return new Response(
-      JSON.stringify({ data: base64PdfData, contentType: "application/pdf" }),
+      JSON.stringify({ file: base64Pdf, filename: `contract_${filenameCode}.pdf` }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       }
     );
-  } catch (error) {
-    console.error("Error generating agreement PDF:", error);
-    let errorMessage = "Failed to generate agreement PDF";
-    if (error instanceof Error) {
-        errorMessage += `: ${error.message}`;
-        if (error.stack) errorMessage += `\nStack: ${error.stack}`;
+  } catch (error: any) {
+    const isAuthError = error instanceof AuthError;
+    const status = isAuthError ? error.status : 500;
+    const message = error.message || "Unknown error";
+    
+    if (!isAuthError) {
+        console.error("Error generating agreement PDF:", error);
     }
+
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: message }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
+        status: status,
       }
     );
   }

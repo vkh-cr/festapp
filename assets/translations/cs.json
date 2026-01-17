@@ -778,7 +778,9 @@
     "paidOrSent": "Zaplaceno nebo odesláno",
     "cancelled": "Stornováno",
     "usedInForms": "Použito ve formulářích",
-    "shortTitle": "Zkrácený název"
+    "shortTitle": "Zkrácený název",
+    "surcharge": "Doplatek",
+    "surchargeOnSite": "doplatek na místě"
   },
   "FormsFeature": {
     "addTicket": "Přidat vstupenku",
@@ -830,7 +832,8 @@
     "note": "Poznámka",
     "labelMaxTicketsPerOrder": "Maximum vstupenek na objednávku:",
     "helperMaxTicketsPerOrder": "Kolik vstupenek si uživatel může koupit v jedné objednávce (výchozí: 1).",
-    "validationMaxTicketsInvalid": "Zadejte prosím platné číslo (1 nebo více)."
+    "validationMaxTicketsInvalid": "Zadejte prosím platné číslo (1 nebo více).",
+    "showSurchargeDescription": "Zobrazit popis doplatku"
   },
   "FeatureOrders": {
     "cancel": "Stornovat",
@@ -1372,6 +1375,15 @@
     "passwordNotChanged": "Heslo od {user} nebylo změněno, protože již bylo použito k přihlášení.",
     "passwordChangedWithName": "Heslo od {user} bylo změněno."
   },
+  "Common": {
+    "fieldCannotBeEmpty": "Pole nemůže být prázdné",
+    "invalidFormat": "Neplatný formát",
+    "back": "Zpět",
+    "delete": "Smazat",
+    "edit": "Upravit",
+    "save": "Uložit",
+    "loading": "Načítání..."
+  },
   "BankAccount": {
     "settingsTitle": "Nastavení bankovního účtu",
     "generalTab": "Obecné",
@@ -1419,6 +1431,10 @@
     "priorityTooltip": "Určuje pořadí účtů. Nižší čísla se zobrazují jako první.",
     "priorityHelpTitle": "Priorita",
     "priorityHelpContent": "Priorita určuje pořadí, v jakém se účty zobrazují. Můžete ji změnit přetažením účtů v seznamu.",
+    "noMoreUsersToAdd": "Žádní další uživatelé k přidání.",
+    "primaryAccountFor": "Hlavní účet pro {}",
+    "backupAccountFor": "Záložní účet pro {}",
+    "removeAccountConfirmation": "Tímto odeberete bankovní účet z této organizace.",
     "humanReadableLabel": "Lidsky čitelný formát",
     "humanReadableHelper": "Automaticky generováno z IBAN",
     "usedIn": "Použito v",
@@ -1426,19 +1442,24 @@
     "addInSettings": "Přidat nový",
     "bankAccountsTitle": "Bankovní účty",
     "lastFetchTime": "Poslední aktualizace transakcí",
-    "noMoreUsersToAdd": "Žádní další uživatelé k přidání.",
-    "primaryAccountFor": "Hlavní účet pro {}",
-    "backupAccountFor": "Záložní účet pro {}",
-    "removeAccountConfirmation": "Tímto odeberete bankovní účet z této organizace.",
-    "deleteAccountTitle": "Odstranit bankovní účet?"
+    "deleteAccountTitle": "Odstranit bankovní účet?",
+    "manageInUnitSettings": "Bankovní účty lze spravovat v nastavení organizace."
   },
-  "Common": {
-    "fieldCannotBeEmpty": "Pole nemůže být prázdné",
-    "invalidFormat": "Neplatný formát",
-    "back": "Zpět",
-    "delete": "Smazat",
-    "edit": "Upravit",
-    "save": "Uložit",
-    "loading": "Načítání..."
-  }
+  "FeatureContract": {
+    "title": "Smlouva",
+    "description": "Umožňuje nastavení smlouvy pro účastníky.",
+    "transport": "Doprava",
+    "departurePoint": "Nástupní místo",
+    "placeOfStay": "Místo pobytu",
+    "tourName": "Název zájezdu",
+    "tourDate": "Termín zájezdu",
+    "notes": "Poznámky",
+    "numberOfDays": "Počet dní",
+    "loadFromDescription": "Načíst z popisu",
+    "downloadContract": "Stáhnout smlouvu",
+    "generatingContract": "Generování smlouvy...",
+    "generatingContractFor": "Generování smlouvy pro {customer}...",
+    "paymentInfo": "Informace k platbě"
+  },
+  "surchargeOnSite": "doplatek"
 }

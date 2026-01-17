@@ -51,7 +51,9 @@
 
 .required-star {
     color: var(--red-color);
-    margin-left: 0.3em;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-left: 0.1em;
 }
 
 .form-header {

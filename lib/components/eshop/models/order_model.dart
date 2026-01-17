@@ -229,6 +229,7 @@ class OrderModel extends ITrinaRowModel {
       EshopColumns.ORDER_TRANSACTIONS: TrinaCell(value: ""),
       EshopColumns.ORDER_FORM: TrinaCell(value: form?.toString() ?? ""),
       EshopColumns.PAYMENT_INFO_REMINDER_SENT: TrinaCell(value: paymentInfoModel!.isReminderSent.toString()),
+      EshopColumns.ORDER_CONTRACT_DOWNLOAD: TrinaCell(value: ""),
     });
   }
 

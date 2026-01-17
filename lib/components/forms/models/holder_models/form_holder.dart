@@ -80,6 +80,9 @@ class FormHolder {
         maxTickets: ffm.data != null
             ? ffm.data[FormHelper.metaMaxTickets] ?? 1
             : 1,
+        showSurchargeDescription: ffm.data != null
+            ? ffm.data[TicketHolder.metaShowSurchargeDescription] ?? true
+            : true,
         fields: [],
         isRequired: true,
       );
@@ -134,7 +137,8 @@ class FormHolder {
             maximum: p.maximum,
             orderedCount: p.orderedCount,
             isDynamicallyAvailable: p.isDynamicallyAvailable,
-            type: ffm.type!,
+            data: p.data,
+            type: FormHelper.fieldTypeProductType,
             description: p.description,
           ))
               .toList(),
