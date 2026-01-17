@@ -72,6 +72,8 @@ class _OrdersContentState extends State<OrdersContent> {
         EshopColumns.TICKET_PRODUCTS,
       EshopColumns.ORDER_CREATED_AT,
       EshopColumns.ORDER_STATE,
+      if (FeatureService.isFeatureEnabled(FeatureConstants.contract))
+        EshopColumns.ORDER_CONTRACT_DOWNLOAD,
       EshopColumns.ORDER_PRICE,
       EshopColumns.PAYMENT_INFO_PAID,
       EshopColumns.PAYMENT_INFO_RETURNED,

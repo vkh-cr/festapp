@@ -120,15 +120,16 @@ export class FormHelper {
                 }
                 
                 // If the ticket has a price (or is a valid item), count it
-                // Logic: A ticket might be free (0 price). Should it count as item?
-                // Yes, usually.
-                // But previously check was `if (ticketPrice > 0)`.
-                // Let's stick to `if (ticketPrice > 0)` for now to match old behavior logic if unknown.
-                // Actually, if it's a valid ticket choice, it should count. 
-                // But for "Price Widget", we enable Submit if totalItems > 0.
+                // FIX: Count items even if price is 0 (User Request), BUT ONLY IF SELECTED.
+                // We check if there are fields or a spot.
+                const hasSelection = (t.fields && t.fields.length > 0) || t.spot || ticketPrice > 0;
+                
+                if (hasSelection) {
+                    totalItems++;
+                }
+                
                 if (ticketPrice > 0) {
                     totalPrice += ticketPrice;
-                    totalItems++;
                 }
             });
         }

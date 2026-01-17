@@ -51,22 +51,22 @@ async function handleSupabaseFunctionService(
 
         if (functionResponse.ok) {
           const attachmentData = await functionResponse.json();
-          if (attachmentData.data && attachmentData.contentType) {
-            const binaryString = atob(attachmentData.data);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-              bytes[i] = binaryString.charCodeAt(i);
-            }
-            attachments.push({
-              filename: `smlouva-${ticketOrder.order.payment_info.variable_symbol}.pdf`,
-              content: bytes,
-              contentType: attachmentData.contentType,
-              encoding: "binary",
-            });
-            console.log("Successfully added attachment from SUPABASE_FUNCTION service.");
+          if (attachmentData.file) {
+             const binaryString = atob(attachmentData.file);
+             const len = binaryString.length;
+             const bytes = new Uint8Array(len);
+             for (let i = 0; i < len; i++) {
+               bytes[i] = binaryString.charCodeAt(i);
+             }
+             attachments.push({
+               filename: attachmentData.filename || `contract-${ticketOrder.order.payment_info.variable_symbol}.pdf`,
+               content: bytes,
+               contentType: "application/pdf",
+               encoding: "binary",
+             });
+             console.log("Successfully added attachment from SUPABASE_FUNCTION service.");
           } else {
-            console.error("SUPABASE_FUNCTION service response missing data or contentType:", attachmentData);
+            console.error("SUPABASE_FUNCTION service response missing 'file' property:", attachmentData);
           }
         } else {
           const errorBody = await functionResponse.text();

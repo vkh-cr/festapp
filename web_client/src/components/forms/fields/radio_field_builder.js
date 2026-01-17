@@ -85,7 +85,7 @@ export class RadioFieldBuilder {
                 let labelContent = `<span>${opt.title || ''}</span>`;
                 if (opt.price) {
                      // Check if we should show currency code
-                     const priceDisplay = `${opt.price} ${currency || ''}`; 
+                     const priceDisplay = `${opt.price}&nbsp;${currency || ''}`; 
                      labelContent += `<span class="option-price">+${priceDisplay}</span>`; 
                 }
                 optLabel.innerHTML = labelContent;
@@ -94,10 +94,28 @@ export class RadioFieldBuilder {
                 const contentWrapper = document.createElement('div');
                 contentWrapper.appendChild(optLabel);
                 
-                if (opt.description) {
+                const surchargeData = opt.data && opt.data.surcharge;
+                const ticketField = formModel && formModel.relatedFields
+                    ? formModel.relatedFields.find(f => f.type === 'ticket')
+                    : null;
+                const showSurchargeDescription = ticketField && ticketField.data && ticketField.data.show_surcharge_description !== undefined
+                    ? ticketField.data.show_surcharge_description
+                    : true;
+
+                if (opt.description || (surchargeData && surchargeData.amount && showSurchargeDescription)) {
                     const optDesc = document.createElement('span');
                     optDesc.className = 'option-description';
-                    optDesc.innerHTML = opt.description;
+                    
+                    let descHtml = '';
+                     if (surchargeData && surchargeData.amount && showSurchargeDescription) {
+                         descHtml += `<span class="surcharge-info">+ ${surchargeData.amount}&nbsp;${surchargeData.currency || ''} ${FormStrings.surchargeOnSite}</span>`;
+                         if (opt.description) descHtml += '<br>'; // New line separation
+                     }
+                     if (opt.description) {
+                          descHtml += opt.description;
+                     }
+
+                    optDesc.innerHTML = descHtml;
                     contentWrapper.appendChild(optDesc);
                 }
 

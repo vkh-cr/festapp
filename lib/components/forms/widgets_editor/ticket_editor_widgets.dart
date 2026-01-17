@@ -11,6 +11,7 @@ import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import '../form_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/forms/models/holder_models/ticket_holder.dart';
 import 'product_type_editor.dart';
 
 class TicketEditorWidgets {
@@ -84,7 +85,7 @@ class TicketEditorWidgets {
 
     // Show "Max tickets per order" only if ticket feature be enabled.
     if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) {
-      children.add(_buildMaxTicketsEditor(context, ticketField));
+      children.add(_buildMaxTicketsEditor(context, ticketField, refresh));
       children.add(const SizedBox(height: 24));
     }
 
@@ -143,37 +144,65 @@ class TicketEditorWidgets {
   }
 
   /// Builds the editor for the "max_tickets" setting
-  static Widget _buildMaxTicketsEditor(BuildContext context, FormFieldModel ticketField) {
-    return TextFormField(
-      initialValue: _getMaxTickets(ticketField).toString(),
-      decoration: InputDecoration(
-        labelText: FormStrings.labelMaxTicketsPerOrder,
-        helperText: FormStrings.helperMaxTicketsPerOrder,
-        border: const OutlineInputBorder(),
-        isDense: true,
+  static Widget _buildMaxTicketsEditor(BuildContext context, FormFieldModel ticketField, VoidCallback refresh) {
+    bool showSurcharge = ticketField.data?[TicketHolder.metaShowSurchargeDescription] ?? true;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: _getMaxTickets(ticketField).toString(),
+              decoration: InputDecoration(
+                labelText: FormStrings.labelMaxTicketsPerOrder,
+                helperText: FormStrings.helperMaxTicketsPerOrder,
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return FormStrings.validationMaxTicketsInvalid;
+                }
+                final number = int.tryParse(value);
+                if (number == null || number < 1) {
+                  return FormStrings.validationMaxTicketsInvalid;
+                }
+                return null; // Valid
+              },
+              onChanged: (value) {
+                final number = int.tryParse(value);
+                ticketField.data ??= {};
+                if (number != null && number >= 1) {
+                  ticketField.data![FormHelper.maxTickets] = number;
+                } else {
+                  // If user clears the field or enters 0, default back to 1
+                  ticketField.data![FormHelper.maxTickets] = 1;
+                }
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'surcharge') {
+                 ticketField.data ??= {};
+                 ticketField.data![TicketHolder.metaShowSurchargeDescription] = !showSurcharge;
+                 refresh();
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              CheckedPopupMenuItem<String>(
+                value: 'surcharge',
+                checked: showSurcharge,
+                child: Text(FormStrings.showSurchargeDescription),
+              ),
+            ],
+          ),
+        ],
       ),
-      keyboardType: TextInputType.number,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return FormStrings.validationMaxTicketsInvalid;
-        }
-        final number = int.tryParse(value);
-        if (number == null || number < 1) {
-          return FormStrings.validationMaxTicketsInvalid;
-        }
-        return null; // Valid
-      },
-      onChanged: (value) {
-        final number = int.tryParse(value);
-        ticketField.data ??= {};
-        if (number != null && number >= 1) {
-          ticketField.data![FormHelper.maxTickets] = number;
-        } else {
-          // If user clears the field or enters 0, default back to 1
-          ticketField.data![FormHelper.maxTickets] = 1;
-        }
-      },
     );
   }
 
