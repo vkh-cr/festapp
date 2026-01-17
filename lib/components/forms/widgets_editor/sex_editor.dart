@@ -4,6 +4,7 @@ import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
+import 'description_tooltip.dart';
 
 class SexEditor {
   static Widget buildSexFieldReadOnly(BuildContext context, FormFieldModel field) {
@@ -27,8 +28,8 @@ class SexEditor {
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Row(
                   children: [
-                    Tooltip(
-                      message: "Has description".tr(),
+                    DescriptionTooltip(
+                      description: option.description!,
                       child: const Icon(Icons.description, size: 16),
                     ),
                   ],

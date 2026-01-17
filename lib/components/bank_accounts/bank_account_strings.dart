@@ -23,7 +23,7 @@ class BankAccountStrings {
   static String get fioTokenHint => 'BankAccount.fioTokenHint'.tr();
   static String get updateToken => 'BankAccount.updateToken'.tr();
   static String get tokenUpdated => 'BankAccount.tokenUpdated'.tr();
-  static String get tokenValidUntilLabel => 'BankAccount.tokenValidUntilLabel'.tr();
+  static String get tokenExpiryDateLabel => 'BankAccount.tokenValidUntilLabel'.tr();
   static String get tokenMaskedInfo => 'BankAccount.tokenMaskedInfo'.tr();
   static String get setDate => 'BankAccount.setDate'.tr();
   

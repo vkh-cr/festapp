@@ -37,10 +37,12 @@ export class OccasionModel {
         if (data[OccasionModel.metaFeatures] && Array.isArray(data[OccasionModel.metaFeatures])) {
             this.features = data[OccasionModel.metaFeatures].map(f => {
                 const { code, is_enabled, data, ...rest } = f;
+                // Merge 'rest' (flat properties) into 'data' to support both structures
+                const mergedData = { ...(data || {}), ...rest };
                 return {
                     code: code,
                     isEnabled: is_enabled,
-                    data: data || {}
+                    data: mergedData
                 };
             });
         } else {
