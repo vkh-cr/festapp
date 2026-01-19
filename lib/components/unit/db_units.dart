@@ -60,6 +60,15 @@ class DbUnits {
 
     return UnitEditDataBundle(unit: unit, occasions: occasions);
   }
+
+  static Future<int> createUnitAndAssignManager(String title) async {
+    final response = await _supabase.rpc("create_unit_and_assign_manager", params: {'title': title});
+    if (response['code'] == 200) {
+      return response['data']['id'];
+    } else {
+      throw Exception(response['message']);
+    }
+  }
 }
 
 class UnitEditDataBundle {

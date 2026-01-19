@@ -1443,7 +1443,14 @@
     "bankAccountsTitle": "Bankovní účty",
     "lastFetchTime": "Poslední aktualizace transakcí",
     "deleteAccountTitle": "Odstranit bankovní účet?",
-    "manageInUnitSettings": "Bankovní účty lze spravovat v nastavení organizace."
+    "manageInUnitSettings": "Bankovní účty lze spravovat v nastavení organizace.",
+    "unlink": "Odpojit",
+    "unlinkConfirmationTitle": "Odpojit bankovní účet?",
+    "unlinkConfirmationMessage": "Opravdu chcete odpojit tento bankovní účet od jednotky?",
+    "unlinkDependencyWarningTitle": "Nelze bezpečně odpojit",
+    "unlinkDependencyMessage": "Následující aktivní formuláře používají produkty závislé na měnách podporovaných tímto účtem:",
+    "unlinkAnyway": "Přesto odpojit",
+    "unlinkDependencyConsequence": "Pozor: Zákazníci NEBUDOU moci platit za objednávky v těchto měnách, dokud to nevyřešíte!"
   },
   "FeatureContract": {
     "title": "Smlouva",

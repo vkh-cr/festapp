@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/components/bank_accounts/bank_account_model.dart';
 import 'package:fstapp/components/bank_accounts/db_bank_accounts.dart';
 import 'package:fstapp/components/bank_accounts/views/bank_account_settings_screen.dart';
@@ -6,6 +8,8 @@ import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/_shared/drag_handle_dots.dart';
+import 'package:fstapp/components/html/html_view.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/services/toast_helper.dart';
 
 class UnitBankAccountsScreen extends StatefulWidget {
@@ -226,34 +230,137 @@ class _UnitBankAccountsScreenState extends State<UnitBankAccountsScreen> {
     }
   }
 
-  Future<void> _deleteAccount(BankAccountModel account) async {
+  Future<void> _unlinkAccount(BankAccountModel account) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(BankAccountStrings.deleteAccountTitle),
-        content: Text(BankAccountStrings.removeAccountConfirmation),
+        title: Text(BankAccountStrings.unlinkConfirmationTitle),
+        content: Text(BankAccountStrings.unlinkConfirmationMessage),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: Text(BankAccountStrings.cancel)),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             onPressed: () => Navigator.pop(context, true), 
-            child: Text(CommonStrings.delete)
-          ),        ],
+            child: Text(BankAccountStrings.unlink)
+          ),
+        ],
       ),
     );
 
     if (confirm == true) {
+      await _performUnlink(account, false);
+    }
+  }
+
+  Future<void> _performUnlink(BankAccountModel account, bool hard) async {
       setState(() => _isLoading = true);
       try {
-        await DbBankAccounts.linkBankAccountToUnit(widget.unitId, account.id, null);
+        await DbBankAccounts.linkBankAccountToUnit(widget.unitId, account.id, null, hard: hard);
         await _loadAccounts();
       } catch (e) {
+        if (mounted) setState(() => _isLoading = false);
+        
+        if (e is LinkDependencyException) {
+          if (mounted) _showDependencyWarning(account, e.conflicts);
+          return;
+        }
+
+        // Fallback for PostgrestException if DB layer rethrows raw error
+         if (e is PostgrestException && e.message.contains('LINK_DEPENDENCY_ERROR')) {
+             try {
+                final msg = e.message;
+                final start = msg.indexOf('{');
+                final end = msg.lastIndexOf('}');
+                if (start != -1 && end != -1) {
+                  final jsonStr = msg.substring(start, end + 1);
+                  final data = json.decode(jsonStr);
+                  if (data['code'] == 'LINK_DEPENDENCY_ERROR') {
+                     if (mounted) _showDependencyWarning(account, data['conflicts']);
+                     return;
+                  }
+                }
+             } catch (_) {
+               // ignore fallbacks failure, will show generic error
+             }
+        }
+
         if (mounted) {
-          setState(() => _isLoading = false);
           _showError('Error removing account: $e');
         }
       }
-    }
+  }
+
+  void _showDependencyWarning(BankAccountModel account, List<dynamic> conflicts) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(BankAccountStrings.unlinkDependencyWarningTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+               SelectableText(BankAccountStrings.unlinkDependencyMessage),
+               const SizedBox(height: 10),
+               SelectableText(
+                 BankAccountStrings.unlinkDependencyConsequence,
+                 style: TextStyle(fontWeight: FontWeight.bold, color: ThemeConfig.redColor(context)),
+               ),
+               const SizedBox(height: 10),
+               Container(
+                 constraints: const BoxConstraints(maxHeight: 200),
+                 child: SingleChildScrollView(
+                   child: HtmlView(
+                     isSelectable: true,
+                     html: () {
+                        // Group conflicts by Occasion
+                        final Map<String, List<dynamic>> grouped = {};
+                        for (var c in conflicts) {
+                          final occasion = c['occasion'] ?? 'Unknown Occasion';
+                          grouped.putIfAbsent(occasion, () => []).add(c);
+                        }
+
+                        // Build HTML
+                        String html = "";
+                        grouped.forEach((occasion, items) {
+                           html += "<b>$occasion</b><ul>";
+                           for (var c in items) {
+                             final title = c['form'] ?? c['link'] ?? 'Unknown Form';
+                             final currency = c['currency'];
+                             final link = c['link'];
+                             final fullUrl = link != null ? "${AppConfig.webLink}/form/$link" : null;
+                             
+                             String content = "$title ($currency)";
+                             if (fullUrl != null) {
+                                content += "<br><a href=\"$fullUrl\">$fullUrl</a>";
+                             }
+                             html += "<li>$content</li>";
+                           }
+                           html += "</ul>";
+                        });
+                        return html;
+                     }(),
+                     fontSize: 13,
+                   ),
+                 ),
+               )
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(BankAccountStrings.cancel),
+            ),
+             TextButton(
+              style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+              onPressed: () {
+                 Navigator.pop(context);
+                 _performUnlink(account, true);
+              },
+              child: Text(BankAccountStrings.unlinkAnyway),
+            ),
+          ],
+        ),
+      );
   }
 
   Future<void> _onReorder(int oldIndex, int newIndex) async {
@@ -381,8 +488,8 @@ class _UnitBankAccountsScreenState extends State<UnitBankAccountsScreen> {
                                   onPressed: () => _addOrEditAccount(account),
                                 ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () => _deleteAccount(account),
+                                    icon: const Icon(Icons.link_off),
+                                    onPressed: () => _unlinkAccount(account),
                                   ),
                                 if (canEdit)
                                   ReorderableDragStartListener(

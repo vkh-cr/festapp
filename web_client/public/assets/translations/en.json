@@ -1443,7 +1443,14 @@
     "addInSettings": "Add new",
     "bankAccountsTitle": "Bank Accounts",
     "deleteAccountTitle": "Delete Bank Account?",
-    "manageInUnitSettings": "Bank accounts can be managed in organization settings."
+    "manageInUnitSettings": "Bank accounts can be managed in organization settings.",
+    "unlink": "Unlink",
+    "unlinkConfirmationTitle": "Unlink Bank Account?",
+    "unlinkConfirmationMessage": "Are you sure you want to unlink this bank account from the unit?",
+    "unlinkDependencyWarningTitle": "Cannot Safely Unlink",
+    "unlinkDependencyMessage": "Several forms rely on this bank account for the following currencies. If you unlink it, these forms will lose support for these currencies.",
+    "unlinkAnyway": "Unlink Anyway",
+    "unlinkDependencyConsequence": "Warning: Customers will NOT be able to pay for orders in these currencies until you resolve this!"
   },
   "FeatureContract": {
     "title": "Contract",
