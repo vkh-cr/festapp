@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_app_config_v216(data_in jsonb)
+CREATE OR REPLACE FUNCTION get_app_config_v218(data_in jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
@@ -19,8 +19,6 @@ DECLARE
     unit_user unit_users%rowtype;
     is_admin_bool BOOLEAN;
     occasion_link text;
-    version_recommended text;
-    version_link text;
     occasion_unit bigint;
     bank_account_ids bigint[];
     occasion_json jsonb;
@@ -75,8 +73,7 @@ BEGIN
     END IF;
 
     -- 3. If no specific link found, check for REPRESENTATIVE OCCASION
-    -- This now overrides unit_id logic as requested.
-    IF occasionId IS NULL THEN
+    IF occasionId IS NULL AND unit_id IS NULL THEN
         SELECT (data->>'REPRESENTATIVE_OCCASION')::bigint
           INTO occasionId
         FROM organizations
@@ -94,23 +91,20 @@ BEGIN
     IF occasionId IS NULL AND unit_id IS NOT NULL THEN
         occasionId := NULL; -- Ensure no occasion is loaded.
 
-        -- 1. Try to use the provided unit_id
         default_unit := unit_id;
 
-        -- 2. Fetch unit details to check for existence
-        SELECT json_build_object('id', u.id, 'title', u.title)
+        SELECT json_build_object('id', u.id, 'title', u.title, 'data', u.data)
             INTO unit_json
         FROM units u
         WHERE u.id = default_unit;
 
-        -- 3. Fetch the user's relationship with the determined unit (if any)
         SELECT *
             INTO unit_user
         FROM unit_users
         WHERE unit = default_unit
             AND "user" = current_user_id;
 
-    -- 5. If no occasion and no unit found yet, try Default Occasion
+    -- If no occasion and no unit found yet, try Default Occasion
     ELSIF occasionId IS NULL THEN
         -- Try to get the DEFAULT_OCCASION (Representative was already checked in step 3)
         SELECT (data->>'DEFAULT_OCCASION')::bigint
@@ -130,20 +124,6 @@ BEGIN
     -- =========================================================
     -- GATHER DATA
     -- =========================================================
-
-    -- Retrieve version_recommended and version_link
-    SELECT
-        item->>'prompt',
-        item->>'link'
-    INTO
-        version_recommended,
-        version_link
-    FROM
-        public.organizations,
-        jsonb_array_elements(data->'PLATFORMS') AS item
-    WHERE
-        id = org_id AND item->>'platform' = platform_name
-    LIMIT 1;
 
     IF occasionId IS NOT NULL THEN
         -- Process occasion-related queries only if an occasion was determined
@@ -196,8 +176,6 @@ BEGIN
                     'code', 403,
                     'message', 'Access forbidden',
                     'link', occasion_link,
-                    'version_recommended', version_recommended,
-                    'version_link', version_link,
                     'unit_user', COALESCE(row_to_json(unit_user)::jsonb, NULL)
                 );
             END IF;
@@ -255,7 +233,9 @@ BEGIN
         FROM units u
         WHERE u.id = occasion_unit;
     ELSE
-        unit_json := '{}'::jsonb;
+        IF unit_json IS NULL THEN
+            unit_json := '{}'::jsonb;
+        END IF;
     END IF;
 
     -- Fetch occasions for the user based on the specified logic
@@ -311,8 +291,8 @@ BEGIN
             SELECT 1 
             FROM public.unit_users uu 
             WHERE uu.unit = u.id 
-              AND uu."user" = current_user_id 
-              AND uu.is_editor_view = TRUE
+            AND uu."user" = current_user_id 
+            AND uu.is_editor_view = TRUE
         )
         OR
         EXISTS (
@@ -320,32 +300,38 @@ BEGIN
             FROM public.occasions o
             JOIN public.occasion_users ou ON ou.occasion = o.id
             WHERE o.unit = u.id 
-              AND ou."user" = current_user_id
-              AND (
-                  ou.is_manager IS TRUE 
-                  OR ou.is_editor IS TRUE 
-                  OR ou.is_editor_view IS TRUE 
-                  OR ou.is_editor_order IS TRUE 
-                  OR ou.is_editor_order_view IS TRUE
-              )
+            AND ou."user" = current_user_id
+            AND (
+                ou.is_manager IS TRUE 
+                OR ou.is_editor IS TRUE 
+                OR ou.is_editor_view IS TRUE 
+                OR ou.is_editor_order IS TRUE 
+                OR ou.is_editor_order_view IS TRUE
+            )
         )
     );
 
     -- Fetch user information along with associated units and occasions
     SELECT row_to_json(ui)::jsonb || jsonb_build_object(
             'units', COALESCE(user_units_json, '[]'::jsonb),
-            'occasions', user_occasions_json
+            'occasions', COALESCE(user_occasions_json, '[]'::jsonb)
           )
       INTO user_info_json
     FROM public.user_info ui
     WHERE ui.id = current_user_id;
 
-    -- Fetch limited organization info
+    -- Fetch organization info
     SELECT json_build_object(
         'title', title,
         'APP_NAME', data->>'APP_NAME',
         'PLATFORMS', data->'PLATFORMS',
-        'IS_REGISTRATION_ENABLED', data->'IS_REGISTRATION_ENABLED'
+        'DEFAULT_URL', data->>'DEFAULT_URL',
+        'DEFAULT_LANGUAGE', data->>'DEFAULT_LANGUAGE',
+        'IS_REGISTRATION_ENABLED', (data->>'IS_REGISTRATION_ENABLED')::boolean,
+        'IS_UNIT_CREATION_ENABLED', (data->>'IS_UNIT_CREATION_ENABLED')::boolean,
+        'IS_APP_SUPPORTED', (data->>'IS_APP_SUPPORTED')::boolean,
+        'DEFAULT_UNIT', (data->>'DEFAULT_UNIT')::int,
+        'REPRESENTATIVE_OCCASION', (data->>'REPRESENTATIVE_OCCASION')::int
     ) INTO org_json
     FROM public.organizations
     WHERE id = org_id;
@@ -362,8 +348,6 @@ BEGIN
         'unit_user', COALESCE(row_to_json(unit_user)::jsonb, NULL),
         'occasion', COALESCE(occasion_json, '{}'::jsonb),
         'unit', COALESCE(unit_json, '{}'::jsonb),
-        'version_recommended', version_recommended,
-        'version_link', version_link,
         'bank_accounts_admin', COALESCE(bank_account_ids, '{}'),
         'user_info', COALESCE(user_info_json, '{}'::jsonb),
         'organization', COALESCE(org_json::jsonb, '{}'::jsonb),
