@@ -142,55 +142,20 @@ export class ColorUtils {
     }
     
     /**
-     * Calculates the relative luminance of a color (W3C WCAG 2.0).
-     * @param {Object} rgb {r, g, b} 0-255
-     * @returns number 0-1
-     */
-    static getRelativeLuminance(rgb) {
-        // Convert 8-bit color to sRGB sRGB = V_8bit / 255
-        // Then linearized: if V_sRGB <= 0.03928 then V = V_sRGB / 12.92 else V = ((V_sRGB + 0.055) / 1.055) ^ 2.4
-        const sRGB = [rgb.r / 255, rgb.g / 255, rgb.b / 255];
-        const linear = sRGB.map(v => {
-            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-        });
-        // L = 0.2126 * R + 0.7152 * G + 0.0722 * B
-        return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
-    }
-
-    /**
-     * Calculates the contrast ratio between two relative luminances.
-     * Ratio = (L1 + 0.05) / (L2 + 0.05) where L1 is lighter.
-     * Returns 1 to 21.
-     */
-    static getContrastRatio(lum1, lum2) {
-        const lighter = Math.max(lum1, lum2);
-        const darker = Math.min(lum1, lum2);
-        return (lighter + 0.05) / (darker + 0.05);
-    }
-
-    /**
-     * Determines if Black (#000000) provides better contrast than White (#FFFFFF).
-     * @param {string} color (Hex/RGB background)
-     * @returns boolean true if black text is better, false for white.
+     * Determines if a color is "light" (for choosing black/white text).
+     * @param {string} hex 
+     * @returns boolean
      */
     static isLight(color) {
          const rgb = ColorUtils.parseToRgb(color);
-         if (!rgb) return true; // Fallback
+         if (!rgb) return true; // Fallback to safe "light" assumption
          
-         const bgLum = ColorUtils.getRelativeLuminance(rgb);
-         const blackLum = 0.0; // Luminance of #000000
-         const whiteLum = 1.0; // Luminance of #FFFFFF
+         const { r, g, b } = rgb;
+
+         // Perceived brightness formula
+         // (R * 299 + G * 587 + B * 114) / 1000
+         const brightness = (r * 299 + g * 587 + b * 114) / 1000;
          
-         const contrastBlack = ColorUtils.getContrastRatio(bgLum, blackLum);
-         const contrastWhite = ColorUtils.getContrastRatio(bgLum, whiteLum);
-
-         // Strategy: Prefer White text if it meets the ISO/WCAG "Large Text" minimum (3.0:1).
-         // This aligns with the "pill button" aesthetic for mid-tones (e.g. olive/dark yellow).
-         if (contrastWhite >= 3.0) {
-             return false;
-         }
-
-         // Otherwise force Black if White is unreadable (< 3.0).
-         return true;
+         return brightness > 125;
     }
 }

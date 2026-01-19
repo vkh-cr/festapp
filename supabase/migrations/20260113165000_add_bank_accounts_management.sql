@@ -62,6 +62,7 @@ END;
 $$;
 
 -- Function to get bank accounts where current user is admin (for linking)
+DROP FUNCTION IF EXISTS public.get_my_admin_bank_accounts();
 CREATE OR REPLACE FUNCTION public.get_my_admin_bank_accounts()
 RETURNS TABLE (
     id bigint,
@@ -95,6 +96,7 @@ END;
 $$;
 
 -- Function to get bank accounts for a unit with details
+DROP FUNCTION IF EXISTS public.get_bank_accounts_for_unit_management(bigint);
 CREATE OR REPLACE FUNCTION public.get_bank_accounts_for_unit_management(p_unit_id bigint)
 RETURNS TABLE (
     id bigint,
