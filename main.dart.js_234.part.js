@@ -1,15 +1,7 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={amN:function amN(d,e,f){this.c=d
-this.d=e
-this.a=f}},C
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,C
 A=c[0]
-B=a.updateHolder(c[90],B)
-C=c[283]
-B.amN.prototype={
-A(d){return this.c},
-$iadV:1,
-gzm(){return this.d}}
-var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
-y(B.amN,A.ag)})()
-A.ci(b.typeUniverse,JSON.parse('{"amN":{"ag":[],"adV":[],"k":[]}}'));(function constants(){C.Km=new A.a_(1/0,40)})()};
-(a=>{a["j7ceY8RjCNJcgRGBxmbwoij/GrE="]=a.current})($__dart_deferred_initializers__);
+B=c[2]
+C=c[316]
+var z=a.updateTypes([]);(function constants(){C.Li=new A.aa(!0,B.u,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
+(a=>{a["gvK5VYv/8KxrsfU+tpa5GySC7h8="]=a.current})($__dart_deferred_initializers__);

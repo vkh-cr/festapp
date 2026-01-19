@@ -1,8 +1,8 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,B={
-ehV(d){var x=A.d(["id",d],y.g,y.b)
-return new B.beg("UnitRoute",new A.a3A(d,null),x,C.cl,null,"",null)},
-beg:function beg(d,e,f,g,h,i,j){var _=this
+eqZ(d){var x=A.d(["id",d],y.g,y.b)
+return new B.bhs("UnitRoute",new A.a6m(d,null),x,C.c7,null,"",null)},
+bhs:function bhs(d,e,f,g,h,i,j){var _=this
 _.a=d
 _.b=e
 _.c=f
@@ -12,10 +12,10 @@ _.f=i
 _.r=j}}
 A=c[0]
 C=c[2]
-B=a.updateHolder(c[122],B)
-B.beg.prototype={}
+B=a.updateHolder(c[134],B)
+B.bhs.prototype={}
 var z=a.updateTypes([]);(function inheritance(){var x=a.inherit
-x(B.beg,A.LO)})()
-A.ci(b.typeUniverse,JSON.parse('{"beg":{"LO":["a3A"]}}'))
-var y={g:A.M("q"),b:A.M("@")}};
-(a=>{a["EC4gHDsCxAp7UnHjv3BTZsrpIh8="]=a.current})($__dart_deferred_initializers__);
+x(B.bhs,A.NZ)})()
+A.cg(b.typeUniverse,JSON.parse('{"bhs":{"NZ":["a6m"]}}'))
+var y={g:A.L("q"),b:A.L("@")}};
+(a=>{a["03adBCcyoGaNTwZ4RqDPdc8Wvwk="]=a.current})($__dart_deferred_initializers__);

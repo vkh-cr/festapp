@@ -39,8 +39,8 @@
             return false;
         };
     </script>
-  <script type="module" crossorigin src="/web-assets/index-CcrWGBd4.js"></script>
-  <link rel="stylesheet" crossorigin href="/web-assets/index-HcR4OibG.css">
+  <script type="module" crossorigin src="/web-assets/index-DbFwXZiH.js"></script>
+  <link rel="stylesheet" crossorigin href="/web-assets/index-CNMjAoaq.css">
 </head>
 <body>
     <div id="app" style="display: none;">
@@ -73,14 +73,11 @@
     <!-- Application Entry (Module) -->
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('ServiceWorker registration failed: ', error);
-                    });
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                    console.log('ServiceWorker unregistered');
+                }
             });
         }
     </script>

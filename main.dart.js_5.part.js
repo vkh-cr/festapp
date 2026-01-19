@@ -1,24 +1,24 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={
-Om(d,e,f){return B.eEb(d,e,f,f.i("G<0>"))},
-eEb(d,e,f,g){var x=0,w=A.p(g),v,u=2,t=[],s,r,q,p,o,n
-var $async$Om=A.l(function(h,i){if(h===1){t.push(i)
-x=u}for(;;)switch(x){case 0:o=A.c([],f.i("z<0>"))
+R2(d,e,f){return B.eNj(d,e,f,f.i("G<0>"))},
+eNj(d,e,f,g){var x=0,w=A.p(g),v,u=2,t=[],s,r,q,p,o,n
+var $async$R2=A.l(function(h,i){if(h===1){t.push(i)
+x=u}for(;;)switch(x){case 0:o=A.c([],f.i("A<0>"))
 u=4
 x=7
-return A.f(A.a8j(d,null),$async$Om)
+return A.f(A.abc(d,null),$async$R2)
 case 7:s=i
 if(s==null){v=o
 x=1
-break}r=y.i.a(C.b8.dE(0,s))
-J.asC(o,A.aU(J.b5(r,new B.ccN(e,f),y.b),!0,f))
+break}r=y.i.a(C.ba.dA(0,s))
+J.avz(o,A.aX(J.aW(r,new B.cgI(e,f),y.b),!0,f))
 u=2
 x=6
 break
 case 4:u=3
 n=t.pop()
-q=A.aj(n)
-A.cO("Error in getAllOffline for table "+d+": "+A.t(q))
+q=A.ag(n)
+A.cI("Error in getAllOffline for table "+d+": "+A.t(q))
 x=6
 break
 case 3:x=2
@@ -28,17 +28,17 @@ x=1
 break
 case 1:return A.n(v,w)
 case 2:return A.m(t.at(-1),w)}})
-return A.o($async$Om,w)},
-ccN:function ccN(d,e){this.a=d
+return A.o($async$R2,w)},
+cgI:function cgI(d,e){this.a=d
 this.b=e}}
 J=c[1]
 A=c[0]
 C=c[2]
 B=a.updateHolder(c[154],B)
 var z=a.updateTypes([])
-B.ccN.prototype={
+B.cgI.prototype={
 $1(d){return this.a.$1(y.p.a(d))},
 $S(){return this.b.i("0(@)")}};(function inheritance(){var x=a.inherit
-x(B.ccN,A.cj)})()
-var y={i:A.M("G<@>"),p:A.M("D<q,@>"),b:A.M("@")}};
-(a=>{a["+RuEbVl5bhGDhQi9E+/zzJ/Da6s="]=a.current})($__dart_deferred_initializers__);
+x(B.cgI,A.ck)})()
+var y={i:A.L("G<@>"),p:A.L("F<q,@>"),b:A.L("@")}};
+(a=>{a["Hkb4ea/ONJIk8RjcYokJ9HMhUQo="]=a.current})($__dart_deferred_initializers__);
