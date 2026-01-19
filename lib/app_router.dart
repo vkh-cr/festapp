@@ -67,6 +67,11 @@ class AppRouter extends RootStackRouter {
         path: "/${UnitPage.ROUTE}/:id/edit",
         transitionsBuilder: TransitionsBuilders.noTransition),
 
+    CustomRoute(
+        page: OrganizationEditRoute.page,
+        path: "/organizationEdit/:id",
+        transitionsBuilder: TransitionsBuilders.noTransition),
+
     // Use UnitPage for the /unit/:id path (this was commented out)
     AutoRoute(page: UnitRoute.page, path: "/${UnitPage.ROUTE}/:id"),
 

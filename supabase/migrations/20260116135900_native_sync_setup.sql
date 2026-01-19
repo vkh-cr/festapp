@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS public.external_occasions_cache (
 );
 
 ALTER TABLE public.external_occasions_cache ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow service role full access" ON public.external_occasions_cache;
 CREATE POLICY "Allow service role full access" ON public.external_occasions_cache USING (true) WITH CHECK (true);
 
 -- 2. Configuration Table (Source Connection Details)
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS public.external_sync_sources (
 );
 
 ALTER TABLE public.external_sync_sources ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow service role full access" ON public.external_sync_sources;
 CREATE POLICY "Allow service role full access" ON public.external_sync_sources USING (true) WITH CHECK (true);
 
 -- 3. Mapping Table (Routing Rules)
@@ -47,6 +49,7 @@ CREATE TABLE IF NOT EXISTS public.external_sync_maps (
     remote_unit_id BIGINT
 );
 ALTER TABLE public.external_sync_maps ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow service role full access" ON public.external_sync_maps;
 CREATE POLICY "Allow service role full access" ON public.external_sync_maps USING (true) WITH CHECK (true);
 
 -- 4. FUNCTION: SYNC (Using pgp_sym_decrypt)

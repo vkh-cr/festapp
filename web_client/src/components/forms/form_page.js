@@ -188,8 +188,8 @@ export class FormPage extends Component {
         btn.style.width = '56px';
         btn.style.height = '56px';
         btn.style.borderRadius = '50%';
-        btn.style.backgroundColor = 'var(--primary-color, #000)';
-        btn.style.color = '#fff';
+        btn.style.backgroundColor = 'var(--fab-color, var(--primary-color, #000))';
+        btn.style.color = 'var(--fab-text-color, #fff)';
         btn.style.border = 'none';
         btn.style.boxShadow = '0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)';
         btn.style.cursor = 'pointer';

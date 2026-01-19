@@ -4,6 +4,9 @@
 DROP INDEX IF EXISTS public.idx_occasions_external_source_id;
 
 -- Create full unique index (Postgres treats (NULL, NULL) as distinct, so native occasions are fine)
+ALTER TABLE public.occasions ADD COLUMN IF NOT EXISTS external_source TEXT;
+ALTER TABLE public.occasions ADD COLUMN IF NOT EXISTS external_id BIGINT;
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_occasions_external_source_id 
 ON public.occasions (external_source, external_id);
 
