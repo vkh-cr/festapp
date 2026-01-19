@@ -1,7 +1,7 @@
 
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { FormDataReader } from '../src/components/forms/form_data_reader.js';
+import { FormDataReader } from '../../src/components/forms/form_data_reader.js';
 import { JSDOM } from 'jsdom';
 
 // Setup global JSDOM

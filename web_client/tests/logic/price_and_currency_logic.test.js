@@ -29,8 +29,8 @@ const setupDOM = () => {
 };
 
 // Imports (assumes relative path from execution)
-import { FormSession } from '../src/components/forms/form_session.js';
-import { FormHelper } from '../src/components/forms/form_helper.js';
+import { FormSession } from '../../src/components/forms/form_session.js';
+import { FormHelper } from '../../src/components/forms/form_helper.js';
 
 test('Price and Currency Logic', async (t) => {
     setupDOM();
@@ -60,6 +60,7 @@ test('Price and Currency Logic', async (t) => {
                         type: 'product_type', 
                         title: 'Product',
                         data: {
+                            selection_type: 'select_many',
                             product_type_data: {
                                 products: [
                                     { id: 'prod_1', title: 'Prod 1', price: 500, currency: 'CZK' },

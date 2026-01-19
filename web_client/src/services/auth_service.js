@@ -28,7 +28,9 @@ export class AuthService {
         // Reset Rights
         // (RightsService usually listens to auth state changes, but we force it here too)
         await RightsService.updateAppData(); 
-        window.location.reload(); 
+        
+        // Redirect to homepage/root which will handle default routing
+        window.location.href = '/';
     }
 
     static async register(data) {

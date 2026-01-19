@@ -27,7 +27,7 @@ const setupDOM = () => {
 };
 
 // Imports
-import { FormSession } from '../src/components/forms/form_session.js';
+import { FormSession } from '../../src/components/forms/form_session.js';
 
 test('Reproduce Currency Switching Bug', async (t) => {
     setupDOM();

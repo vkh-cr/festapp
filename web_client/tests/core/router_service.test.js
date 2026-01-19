@@ -21,8 +21,8 @@ test('RouterService.normalizeUrl', async (t) => {
     };
 
     // Dynamic import to ensure global.window is set before module evaluation
-    const { RouterService } = await import('../src/services/router_service.js');
-    const { AppConfig } = await import('../src/app_config.js');
+    const { RouterService } = await import('../../src/services/router_service.js');
+    const { AppConfig } = await import('../../src/app_config.js');
     
     // Setup Mock Config
     const originalLink = AppConfig.webLink;
@@ -132,7 +132,7 @@ test('RouterService.Sanitization', async (t) => {
         open: () => {},
         history: { pushState: () => {} }
     };
-    const { RouterService } = await import('../src/services/router_service.js');
+    const { RouterService } = await import('../../src/services/router_service.js');
 
     await t.test('should strip query params in navigateToExternal', () => {
         let openedUrl = '';
@@ -208,9 +208,9 @@ test('RouterService.handleInitialLoad', async (t) => {
     // but modules are cached. We will just use the imported classes and mock global state.
     
     // Ensure we have the classes
-    const { RouterService } = await import('../src/services/router_service.js');
-    const { AppConfig } = await import('../src/app_config.js');
-    const { RightsService } = await import('../src/services/rights_service.js');
+    const { RouterService } = await import('../../src/services/router_service.js');
+    const { AppConfig } = await import('../../src/app_config.js');
+    const { RightsService } = await import('../../src/services/rights_service.js');
 
     // SETUP CONFIG FOR ALL TESTS
     AppConfig.webLink = "https://vstupenky.online";

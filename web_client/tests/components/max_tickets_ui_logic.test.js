@@ -32,18 +32,18 @@ describe('Max Tickets UI Logic', () => {
         console.log('Importing components...');
         try {
             // Dynamic Import to ensure they see the globals
-            const sessionModule = await import('../src/components/forms/form_session.js');
+            const sessionModule = await import('../../src/components/forms/form_session.js');
             FormSession = sessionModule.FormSession;
             console.log('Imported FormSession');
             
-            const builderModule = await import('../src/components/forms/fields/ticket_field_builder.js');
+            const builderModule = await import('../../src/components/forms/fields/ticket_field_builder.js');
             TicketFieldBuilder = builderModule.TicketFieldBuilder;
             console.log('Imported TicketFieldBuilder');
             
-            const helperModule = await import('../src/components/forms/form_helper.js');
+            const helperModule = await import('../../src/components/forms/form_helper.js');
             FormHelper = helperModule.FormHelper;
             
-            const stringsModule = await import('../src/components/forms/form_strings.js');
+            const stringsModule = await import('../../src/components/forms/form_strings.js');
             FormStrings = stringsModule.FormStrings;
             
             // Mock LocalizationService for tests if not already handled
@@ -51,7 +51,7 @@ describe('Max Tickets UI Logic', () => {
             // Let's force FormStrings getters to return consistent values or ensure LocalizationService works.
             // For now, let's just patch the specific string we need if it fails?
             // Better: patch LocalizationService.tr to return key.
-            const locModule = await import('../src/services/localization_service.js');
+            const locModule = await import('../../src/services/localization_service.js');
             const LocalizationService = locModule.LocalizationService;
             if (!LocalizationService.tr || LocalizationService.tr.name !== 'mockTr') {
                 LocalizationService.tr = (key) => key; // Simple mock

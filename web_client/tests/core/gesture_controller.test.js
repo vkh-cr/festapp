@@ -1,7 +1,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert';
-import { GestureController } from '../src/components/blueprint/gesture_controller.js';
+import { GestureController } from '../../src/components/blueprint/gesture_controller.js';
 
 // Mock DOM
 class MockElement {

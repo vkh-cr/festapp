@@ -214,7 +214,7 @@ body.dark-mode .form-field-description *:not(a) {
 .radio-options, .checkbox-options {
     display: flex;
     flex-direction: column;
-    gap: calc(4px * var(--font-scale)); /* Reduced from 8px */
+    gap: calc(12px * var(--font-scale)); /* WIDER GAP (was 4px) for better touch targets in non-card forms */
     padding: 8px;
     border-radius: 8px;
     border: 1px solid transparent; /* Reserve space for border */

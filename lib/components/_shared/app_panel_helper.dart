@@ -15,6 +15,7 @@ import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/occasion/occasion_creation_helper.dart';
+import 'package:fstapp/components/unit/unit_creation_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/header/user_header_widget.dart';
 import 'package:fstapp/widgets/logo_widget.dart';
@@ -74,7 +75,12 @@ class AppPanelHelper {
         onItemSelected: (item) async {
           await RouterService.navigateToUnitAdmin(originalContext, item);
         },
-        onCreateNew: null,
+        onCreateNew: (RightsService.occasionLinkModel?.organization?.isUnitCreationEnabled == true) ? () async {
+          final newUnit = await UnitCreationHelper.createNewUnit(originalContext);
+          if (newUnit != null) {
+            await RouterService.navigateToUnitAdmin(originalContext, newUnit);
+          }
+        } : null,
         onTitleTap: () async =>
         await RouterService.navigateToUnitAdmin(originalContext, currentUnit),
         searchHintText: AdministrationStrings.findUnitHint,
@@ -612,6 +618,7 @@ class AppPanelHelper {
           ),
         ],
       ),
+
       actions: [
         Padding(
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
@@ -692,7 +699,7 @@ class AppPanelHelper {
             children: [
               Flexible(
                 flex: 2,
-                child: allUnits.length <= 1
+                child: (allUnits.length <= 1 && (RightsService.occasionLinkModel?.organization?.isUnitCreationEnabled != true))
                     ? TextButton(
                   style: TextButton.styleFrom(
                     foregroundColor: onAppBarColor,
@@ -725,7 +732,12 @@ class AppPanelHelper {
                           itemIdBuilder: (i) => i.id,
                           onItemSelected: (item) async =>
                           await RouterService.navigateToUnitAdmin(context, item),
-                          onCreateNew: null,
+                          onCreateNew: (RightsService.occasionLinkModel?.organization?.isUnitCreationEnabled == true) ? () async {
+                            final newUnit = await UnitCreationHelper.createNewUnit(context);
+                            if (newUnit != null) {
+                              await RouterService.navigateToUnitAdmin(context, newUnit);
+                            }
+                          } : null,
                           searchHintText: AdministrationStrings.findUnitHint,
                           createNewText: AdministrationStrings.newUnitButton,
                         ),
@@ -829,6 +841,17 @@ class AppPanelHelper {
                   onSelect: () async =>
                   await RouterService.navigateOccasion(
                       context, AdminPage.ROUTE)));
+            }
+
+            if (RightsService.isAdmin()) {
+              final orgId = RightsService.currentUnit()?.organization ?? RightsService.currentUser()?.units?.firstOrNull?.organization;
+              if (orgId != null) {
+                actions.add(_ActionMenuItem(
+                    label: "Organization Settings",
+                    icon: Icons.settings_applications,
+                    onSelect: () async =>
+                    await RouterService.navigate(context, "/organizationEdit/$orgId")));
+              }
             }
 
             // View App is always available if the app is supported

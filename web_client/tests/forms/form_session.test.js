@@ -1,7 +1,7 @@
 
 import { test, describe, it, before, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { FormSession } from '../src/components/forms/form_session.js';
+import { FormSession } from '../../src/components/forms/form_session.js';
 import { JSDOM } from 'jsdom';
 
 // Setup global JSDOM for form emulation

@@ -1,8 +1,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { OccasionModel } from '../src/components/occasion/occasion_model.js';
-import { FeatureService } from '../src/components/features/feature_service.js';
+import { OccasionModel } from '../../src/components/occasion/occasion_model.js';
+import { FeatureService } from '../../src/components/features/feature_service.js';
 
 test('OccasionModel: Parsing Logic', async (t) => {
 

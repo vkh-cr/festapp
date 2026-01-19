@@ -29,13 +29,13 @@ describe('Ghost Listener Logic', () => {
         global.NodeList = dom.window.NodeList;
         global.HTMLCollection = dom.window.HTMLCollection;
 
-        const sessionModule = await import('../src/components/forms/form_session.js');
+        const sessionModule = await import('../../src/components/forms/form_session.js');
         FormSession = sessionModule.FormSession;
         
-        const builderModule = await import('../src/components/forms/fields/ticket_field_builder.js');
+        const builderModule = await import('../../src/components/forms/fields/ticket_field_builder.js');
         TicketFieldBuilder = builderModule.TicketFieldBuilder;
         
-        const helperModule = await import('../src/components/forms/form_helper.js');
+        const helperModule = await import('../../src/components/forms/form_helper.js');
         FormHelper = helperModule.FormHelper;
     });
 

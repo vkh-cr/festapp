@@ -158,8 +158,7 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
 
     return SizedBox(
       width: 300,
-      child: SingleChildScrollView(
-        child: Column(
+      child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (widget.hintText.isNotEmpty) ...[
@@ -189,9 +188,9 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
               ),
               const Divider(height: 1),
             ],
-            ListView.builder(
+            Flexible(
+              child: ListView.builder(
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(vertical: 4),
               itemCount: _displayItems.length,
               itemBuilder: (context, index) {
@@ -240,6 +239,7 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
                 );
               },
             ),
+            ),
             if(widget.onCreateNew != null)
               Column(
                 mainAxisSize: MainAxisSize.min,
@@ -264,7 +264,6 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
               ),
           ],
         ),
-      ),
     );
   }
 }

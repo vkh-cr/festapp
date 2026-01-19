@@ -1,5 +1,5 @@
 
-import { TimeHelper } from '../src/services/time_helper.js';
+import { TimeHelper } from '../../src/services/time_helper.js';
 
 const start = new Date('2025-12-13T10:00:00');
 const end = new Date('2025-12-13T12:30:00');

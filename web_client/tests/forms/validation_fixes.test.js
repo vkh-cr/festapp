@@ -1,8 +1,8 @@
 
 import { test, describe, it, before, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { FormSession } from '../src/components/forms/form_session.js';
-import { FormValidator } from '../src/components/forms/form_validator.js';
+import { FormSession } from '../../src/components/forms/form_session.js';
+import { FormValidator } from '../../src/components/forms/form_validator.js';
 import { JSDOM } from 'jsdom';
 
 // Setup global JSDOM for form emulation
