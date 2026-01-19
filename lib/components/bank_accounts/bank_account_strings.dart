@@ -78,4 +78,12 @@ class BankAccountStrings {
   static String get removeAccountConfirmation => 'BankAccount.removeAccountConfirmation'.tr();
   static String get deleteAccountTitle => 'BankAccount.deleteAccountTitle'.tr();
   static String get manageInUnitSettings => 'BankAccount.manageInUnitSettings'.tr();
+  
+  static String get unlink => 'BankAccount.unlink'.tr();
+  static String get unlinkConfirmationTitle => 'BankAccount.unlinkConfirmationTitle'.tr();
+  static String get unlinkConfirmationMessage => 'BankAccount.unlinkConfirmationMessage'.tr();
+  static String get unlinkDependencyWarningTitle => 'BankAccount.unlinkDependencyWarningTitle'.tr();
+  static String get unlinkDependencyMessage => 'BankAccount.unlinkDependencyMessage'.tr();
+  static String get unlinkDependencyConsequence => 'BankAccount.unlinkDependencyConsequence'.tr();
+  static String get unlinkAnyway => 'BankAccount.unlinkAnyway'.tr();
 }

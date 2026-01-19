@@ -15,6 +15,7 @@ import 'package:fstapp/data_services/synchro_service.dart';
 import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fstapp/components/organization/organization_model.dart';
 
 class RightsService{
   static final _supabase = Supabase.instance.client;
@@ -190,5 +191,25 @@ class RightsService{
 
   static UserGroupInfoModel? currentUserGroup() {
     return currentUser()?.userGroups?.firstWhereOrNull((g) => g.type == null);
+  }
+
+  static void updateOrganizationLocally(OrganizationModel newOrg) {
+    var valid = occasionLinkModelNotifier.value;
+    if (valid != null) {
+      // Create shallow copy to trigger ValueNotifier
+      occasionLinkModelNotifier.value = OccasionLinkModel(
+        code: valid.code,
+        userInfo: valid.userInfo,
+        occasionUser: valid.occasionUser,
+        unitUser: valid.unitUser,
+        bankAccountsAdmin: valid.bankAccountsAdmin,
+        occasion: valid.occasion,
+        unit: valid.unit,
+        isAdmin: valid.isAdmin,
+        versionRecommended: valid.versionRecommended,
+        versionLink: valid.versionLink,
+        organization: newOrg,
+      );
+    }
   }
 }

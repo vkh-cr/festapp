@@ -61,6 +61,10 @@ export class IdDocumentFieldBuilder {
             // Use Constant
             expiryInput.name = field.id.toString() + IdDocumentConstants.EXPIRY_SUFFIX;
             expiryInput.className = 'form-control flatpickr-input';
+            if (field.isRequired) {
+                expiryInput.required = true;
+                expiryInput.dataset.required = 'true';
+            }
             expiryInput.placeholder = LocalizationService.currentLocale === 'cs' ? 'D. M. RRRR' : 'YYYY-MM-DD';
             expiryInput.autocomplete = 'off'; // Let Flatpickr handle it
             expiryWrapper.appendChild(expiryInput);
