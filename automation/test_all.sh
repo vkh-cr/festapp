@@ -32,6 +32,16 @@ else
     exit 1
 fi
 
+# 2. Run Database Tests
+echo ""
+echo ">>> Database Tests..."
+DB_TEST_RUNNER="$PROJECT_ROOT/web_client/scripts/run_db_tests.js"
+if [ -f "$DB_TEST_RUNNER" ]; then
+    node "$DB_TEST_RUNNER"
+else
+    echo "WARNING: DB Test Runner not found at $DB_TEST_RUNNER. Skipping."
+fi
+
 echo ""
 echo "=================================================="
 echo "SUCCESS: All tests passed!"
