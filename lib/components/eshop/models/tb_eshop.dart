@@ -43,6 +43,7 @@ class ProductsTb {
   String get order => "order";
   String get maximum => "maximum";
   String get data_short_title => "short_title";
+  String get data_surcharge => "surcharge";
 }
 
 class OrderProductTicketTb {

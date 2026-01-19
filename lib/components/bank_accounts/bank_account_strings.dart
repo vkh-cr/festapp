@@ -77,4 +77,5 @@ class BankAccountStrings {
   static String backupAccountFor(String currency) => 'BankAccount.backupAccountFor'.tr(args: [currency]);
   static String get removeAccountConfirmation => 'BankAccount.removeAccountConfirmation'.tr();
   static String get deleteAccountTitle => 'BankAccount.deleteAccountTitle'.tr();
+  static String get manageInUnitSettings => 'BankAccount.manageInUnitSettings'.tr();
 }

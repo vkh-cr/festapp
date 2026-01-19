@@ -46,6 +46,7 @@ class ProductModel extends ITrinaRowModel {
   static const String metaPaidCount = "paid_count";
   static const String metaSentCount = "sent_count";
 
+
   String? get shortTitle => data?[TbEshop.products.data_short_title];
   set shortTitle(String? value) {
     if (data == null) data = {};
@@ -53,6 +54,56 @@ class ProductModel extends ITrinaRowModel {
       data!.remove(TbEshop.products.data_short_title);
     } else {
       data![TbEshop.products.data_short_title] = value;
+    }
+  }
+
+  Map<String, dynamic> get _surchargeMap {
+    if (data != null && data![TbEshop.products.data_surcharge] is Map) {
+      return Map<String, dynamic>.from(data![TbEshop.products.data_surcharge]);
+    }
+    return {};
+  }
+
+  double? get surchargeAmount {
+    var val = _surchargeMap['amount'];
+    if (val is num) return val.toDouble();
+    if (val is String) return double.tryParse(val);
+    return null;
+  }
+
+  set surchargeAmount(double? value) {
+    if (data == null) data = {};
+    if (data![TbEshop.products.data_surcharge] is! Map) {
+      data![TbEshop.products.data_surcharge] = {};
+    }
+    var map = data![TbEshop.products.data_surcharge] as Map;
+    if (value == null) {
+      map.remove('amount');
+    } else {
+      map['amount'] = value;
+    }
+    if (map.isEmpty) {
+      data!.remove(TbEshop.products.data_surcharge);
+    }
+  }
+
+  String? get surchargeCurrency {
+    return _surchargeMap['currency']?.toString();
+  }
+
+  set surchargeCurrency(String? value) {
+    if (data == null) data = {};
+    if (data![TbEshop.products.data_surcharge] is! Map) {
+      data![TbEshop.products.data_surcharge] = {};
+    }
+    var map = data![TbEshop.products.data_surcharge] as Map;
+    if (value == null || value.isEmpty) {
+      map.remove('currency');
+    } else {
+      map['currency'] = value;
+    }
+    if (map.isEmpty) {
+      data!.remove(TbEshop.products.data_surcharge);
     }
   }
 
@@ -128,6 +179,48 @@ class ProductModel extends ITrinaRowModel {
         data[TbEshop.products.data_short_title] = val.toString();
       } else {
         data.remove(TbEshop.products.data_short_title);
+      }
+    }
+
+    // Handle Surcharge combined field from Grid
+    if (json.containsKey(EshopColumns.PRODUCT_SURCHARGE)) {
+      if (data == null) data = {};
+      var surchargeMap = data[TbEshop.products.data_surcharge] is Map
+          ? Map<String, dynamic>.from(data[TbEshop.products.data_surcharge])
+          : <String, dynamic>{};
+
+      var val = json[EshopColumns.PRODUCT_SURCHARGE];
+      if (val != null && val.toString().isNotEmpty) {
+        // Expected format: "100.00 CZK" or just "100"
+        String raw = val.toString().trim();
+        List<String> parts = raw.split(" ");
+        if (parts.isNotEmpty) {
+           double? amount = double.tryParse(parts[0]);
+           if (amount != null) {
+             surchargeMap['amount'] = amount;
+           }
+           if (parts.length > 1) {
+             surchargeMap['currency'] = parts.sublist(1).join(" ");
+           } else {
+              // If only amount is present, decide whether to clear currency or keep existing.
+              // Logic: grid edit overtakes. If currency missing in string, maybe it was deleted?
+              // But parsing "100" usually implies amount.
+              // Let's assume if currency is unspecified in string, we remove it to be safe/explicit,
+              // or we rely on the dialog to always return fully formed string.
+              // Given the dialog implementation will likely force format, we can be flexible here.
+              // Let's remove currency if not strictly in the string to allow clearing it via text edit if somehow possible.
+              surchargeMap.remove('currency');
+           }
+        }
+      } else {
+         surchargeMap.remove('amount');
+         surchargeMap.remove('currency');
+      }
+      
+      if (surchargeMap.isNotEmpty) {
+        data[TbEshop.products.data_surcharge] = surchargeMap;
+      } else {
+        data.remove(TbEshop.products.data_surcharge);
       }
     }
 
@@ -248,6 +341,8 @@ class ProductModel extends ITrinaRowModel {
         value: price != null ? price?.toStringAsFixed(2) : '',
       ),
       EshopColumns.PRODUCT_CURRENCY_CODE: TrinaCell(value: currencyCode ?? ''),
+      EshopColumns.PRODUCT_CURRENCY_CODE: TrinaCell(value: currencyCode ?? ''),
+      EshopColumns.PRODUCT_SURCHARGE: TrinaCell(value: (surchargeAmount != null ? "${surchargeAmount} ${surchargeCurrency ?? ''}" : "").trim()),
       EshopColumns.PRODUCT_TYPE: TrinaCell(value: productType?.title ?? ''),
       EshopColumns.PRODUCT_ORDER: TrinaCell(value: order ?? 0),
       EshopColumns.PRODUCT_MAXIMUM: TrinaCell(value: maximum ?? 0),

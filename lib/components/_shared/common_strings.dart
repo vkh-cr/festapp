@@ -19,6 +19,8 @@ class CommonStrings {
   // --- Common Nouns & Labels ---
   static String get title => 'Title'.tr(); // "Title"
   static String get price => 'Price'.tr(); // "Price"
+  static String get amount => 'Amount'.tr(); // "Amount" -- NEW
+  static String get currency => 'Currency'.tr(); // "Currency" -- NEW
   static String get password => 'FeatureUser.password'.tr(); // "Password" (Moved to FeatureUser, but widely used? UserStrings has it too?)
 
   // --- Common Statuses & Feedback ---

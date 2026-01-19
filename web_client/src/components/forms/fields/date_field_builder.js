@@ -116,7 +116,7 @@ export class DateFieldBuilder {
                 },
                 // User requested NO limits on calendar picker itself, so we remove minDate/maxDate here
                 // minDate: minDateObj, 
-                // maxDate: maxDateObj,
+                maxDate: maxDateObj || 'today',
                 defaultDate: input.value || undefined, 
         });
         

@@ -241,4 +241,31 @@ describe('FormDataReader', () => {
 
         assert.equal(result.length, 0);
     });
+    it('should correctly structure id_document fields with nested number and expiry', () => {
+        // Setup ID Document Field
+        mockFormModel.relatedFields.push({ id: '583', type: 'id_document' });
+        
+        // Setup ID Input (Standard logic)
+        const idInput = document.createElement('input');
+        idInput.name = '583';
+        idInput.value = '209729950';
+        formElement.appendChild(idInput);
+
+        // Setup Expiry Input (Web Client specific naming)
+        const expiryInput = document.createElement('input');
+        expiryInput.name = '583_expiry';
+        expiryInput.value = '2028-06-28T00:00:00.000';
+        formElement.appendChild(expiryInput);
+
+        // Execute
+        const result = FormDataReader.getPayload(formElement, mockFormModel);
+        
+        const fieldEntry = result.fields.find(f => f['583'] !== undefined);
+        assert.ok(fieldEntry);
+        
+        assert.deepStrictEqual(fieldEntry['583'], {
+             "id_document_number": "209729950",
+             "id_document_expiry_date": "2028-06-28T00:00:00.000"
+        });
+    });
 });

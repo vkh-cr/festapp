@@ -1,22 +1,59 @@
 export class ColorUtils {
     /**
+     * Parses a color string (Hex, RGB, RGBA) into {r, g, b}
+     * Returns null if invalid.
+     */
+    static parseToRgb(color) {
+        if (!color) return null;
+
+        let r = 0, g = 0, b = 0;
+
+        // Handle Hex
+        if (color.startsWith('#')) {
+            const cleanHex = color.substring(1);
+            if (cleanHex.length === 3) {
+                r = parseInt(cleanHex[0] + cleanHex[0], 16);
+                g = parseInt(cleanHex[1] + cleanHex[1], 16);
+                b = parseInt(cleanHex[2] + cleanHex[2], 16);
+            } else if (cleanHex.length === 6) {
+                r = parseInt(cleanHex.substring(0, 2), 16);
+                g = parseInt(cleanHex.substring(2, 4), 16);
+                b = parseInt(cleanHex.substring(4, 6), 16);
+            } else {
+                return null;
+            }
+        }
+        // Handle RGB / RGBA
+        else if (color.startsWith('rgb')) {
+            const values = color.match(/\d+/g);
+            if (values && values.length >= 3) {
+                r = parseInt(values[0]);
+                g = parseInt(values[1]);
+                b = parseInt(values[2]);
+            } else {
+                return null;
+            }
+        } else {
+             return null;
+        }
+
+        return { r, g, b };
+    }
+
+    /**
      * Converts a Hex string (e.g. #RRGGBB or #RGB) to HSL object {h, s, l}
      * h: 0-360, s: 0-1, l: 0-1
      */
     static hexToHsl(hex) {
-        let r = 0, g = 0, b = 0;
-        if (hex.length === 4) {
-            r = "0x" + hex[1] + hex[1];
-            g = "0x" + hex[2] + hex[2];
-            b = "0x" + hex[3] + hex[3];
-        } else if (hex.length === 7) {
-            r = "0x" + hex[1] + hex[2];
-            g = "0x" + hex[3] + hex[4];
-            b = "0x" + hex[5] + hex[6];
-        }
+        // Use the new parser, even though method is named hexToHsl
+        const rgb = ColorUtils.parseToRgb(hex);
+        if (!rgb) return { h: 0, s: 0, l: 0 }; // Fallback
+
+        let { r, g, b } = rgb;
         r /= 255;
         g /= 255;
         b /= 255;
+        
         let cmin = Math.min(r, g, b),
             cmax = Math.max(r, g, b),
             delta = cmax - cmin,
@@ -90,54 +127,70 @@ export class ColorUtils {
      * @param {string} bgHex Background color (Hex) - assumed opaque
      */
     static alphaBlend(fgHex, fgOpacity, bgHex) {
-        // Parse FG
-        let r1 = parseInt(fgHex.substring(1, 3), 16);
-        let g1 = parseInt(fgHex.substring(3, 5), 16);
-        let b1 = parseInt(fgHex.substring(5, 7), 16);
+        const fg = ColorUtils.parseToRgb(fgHex);
+        const bg = ColorUtils.parseToRgb(bgHex);
 
-        // Parse BG
-        let r2 = parseInt(bgHex.substring(1, 3), 16);
-        let g2 = parseInt(bgHex.substring(3, 5), 16);
-        let b2 = parseInt(bgHex.substring(5, 7), 16);
+        if (!fg || !bg) return bgHex || '#000000'; // Fallback
 
         // Blend: result = fg * alpha + bg * (1 - alpha)
-        let r = Math.round(r1 * fgOpacity + r2 * (1 - fgOpacity));
-        let g = Math.round(g1 * fgOpacity + g2 * (1 - fgOpacity));
-        let b = Math.round(b1 * fgOpacity + b2 * (1 - fgOpacity));
+        let r = Math.round(fg.r * fgOpacity + bg.r * (1 - fgOpacity));
+        let g = Math.round(fg.g * fgOpacity + bg.g * (1 - fgOpacity));
+        let b = Math.round(fg.b * fgOpacity + bg.b * (1 - fgOpacity));
 
         const toHex = (n) => n.toString(16).padStart(2, '0');
         return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
     }
     
     /**
-     * Determines if a color is "light" (for choosing black/white text).
-     * @param {string} hex 
-     * @returns boolean
+     * Calculates the relative luminance of a color (W3C WCAG 2.0).
+     * @param {Object} rgb {r, g, b} 0-255
+     * @returns number 0-1
      */
-    static isLight(hex) {
-         if (!hex) return true;
-         
-         let r = 0, g = 0, b = 0;
-         // Clean hex (remove # if present) - although we assume it starts with # based on usage
-         const cleanHex = hex.startsWith('#') ? hex.substring(1) : hex;
+    static getRelativeLuminance(rgb) {
+        // Convert 8-bit color to sRGB sRGB = V_8bit / 255
+        // Then linearized: if V_sRGB <= 0.03928 then V = V_sRGB / 12.92 else V = ((V_sRGB + 0.055) / 1.055) ^ 2.4
+        const sRGB = [rgb.r / 255, rgb.g / 255, rgb.b / 255];
+        const linear = sRGB.map(v => {
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        // L = 0.2126 * R + 0.7152 * G + 0.0722 * B
+        return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+    }
 
-         if (cleanHex.length === 3) {
-            r = parseInt(cleanHex[0] + cleanHex[0], 16);
-            g = parseInt(cleanHex[1] + cleanHex[1], 16);
-            b = parseInt(cleanHex[2] + cleanHex[2], 16);
-         } else if (cleanHex.length === 6) {
-            r = parseInt(cleanHex.substring(0, 2), 16);
-            g = parseInt(cleanHex.substring(2, 4), 16);
-            b = parseInt(cleanHex.substring(4, 6), 16);
-         } else {
-             // Fallback for invalid hex (assume white/light)
-             return true; 
+    /**
+     * Calculates the contrast ratio between two relative luminances.
+     * Ratio = (L1 + 0.05) / (L2 + 0.05) where L1 is lighter.
+     * Returns 1 to 21.
+     */
+    static getContrastRatio(lum1, lum2) {
+        const lighter = Math.max(lum1, lum2);
+        const darker = Math.min(lum1, lum2);
+        return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    /**
+     * Determines if Black (#000000) provides better contrast than White (#FFFFFF).
+     * @param {string} color (Hex/RGB background)
+     * @returns boolean true if black text is better, false for white.
+     */
+    static isLight(color) {
+         const rgb = ColorUtils.parseToRgb(color);
+         if (!rgb) return true; // Fallback
+         
+         const bgLum = ColorUtils.getRelativeLuminance(rgb);
+         const blackLum = 0.0; // Luminance of #000000
+         const whiteLum = 1.0; // Luminance of #FFFFFF
+         
+         const contrastBlack = ColorUtils.getContrastRatio(bgLum, blackLum);
+         const contrastWhite = ColorUtils.getContrastRatio(bgLum, whiteLum);
+
+         // Strategy: Prefer White text if it meets the ISO/WCAG "Large Text" minimum (3.0:1).
+         // This aligns with the "pill button" aesthetic for mid-tones (e.g. olive/dark yellow).
+         if (contrastWhite >= 3.0) {
+             return false;
          }
 
-         // Perceived brightness formula
-         // (R * 299 + G * 587 + B * 114) / 1000
-         const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-         
-         return brightness > 125;
+         // Otherwise force Black if White is unreadable (< 3.0).
+         return true;
     }
 }

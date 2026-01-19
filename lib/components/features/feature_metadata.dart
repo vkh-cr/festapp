@@ -72,6 +72,10 @@ class FeatureMetadata {
       'title': CommonStrings.import,
       'description': FeaturesStrings.importFeatureDescription,
     },
+    FeatureConstants.contract: {
+      'title': 'FeatureContract.title'.tr(),
+      'description': 'FeatureContract.description'.tr(),
+    },
   };
 
   /// Returns the translated title for the given feature code.

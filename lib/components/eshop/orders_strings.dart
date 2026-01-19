@@ -153,6 +153,7 @@ class OrdersStrings {
   static String get gridCancelled => 'OrderGridColumns.cancelled'.tr(); // "Cancelled"
   static String get gridUsedInForms => 'OrderGridColumns.usedInForms'.tr(); // "Used in Forms"
   static String get gridShortTitle => 'OrderGridColumns.shortTitle'.tr(); // "Short Title"
+  static String get gridSurcharge => 'OrderGridColumns.surcharge'.tr();
 
   // --- PDF Generation Strings ---
   static String get generatingPdf => 'FeatureOrders.generatingPdf'.tr(); // "Generating PDF..."
