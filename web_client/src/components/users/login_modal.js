@@ -415,12 +415,13 @@ export class LoginModal extends HTMLElement {
 
         this._setLoading(true);
         try {
+            // Match Flutter's logic: Flat structure with 'name' and 'surname'
             const data = {
                 email,
-                data: {
-                    firstName,
-                    lastName
-                }
+                name: firstName,
+                surname: lastName,
+                // Add language if available
+                lang: 'cs' // Defaulting to cs as per project context, or derive from LocalizationService
             };
             await AuthService.register(data);
             this._stickyToast = ToastHelper.showSuccess(`${CommonStrings.checkEmail} ${email}`, 0); // 0 = sticky/persistent

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/components/bank_accounts/bank_account_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -67,11 +69,38 @@ class DbBankAccounts {
     return (response as List).map((e) => BankAccountModel.fromJson(e)).toList();
   }
 
-  static Future<void> linkBankAccountToUnit(int unitId, int bankAccountId, int? priority) async {
-    await _supabase.rpc('link_bank_account_to_unit', params: {
-      'p_unit_id': unitId,
-      'p_bank_account_id': bankAccountId,
-      'p_priority': priority,
-    });
+  static Future<void> linkBankAccountToUnit(int unitId, int bankAccountId, int? priority, {bool hard = false}) async {
+    try {
+      await _supabase.rpc('link_bank_account_to_unit', params: {
+        'p_unit_id': unitId,
+        'p_bank_account_id': bankAccountId,
+        'p_priority': priority,
+        'p_hard': hard,
+      });
+    } on PostgrestException catch (e) {
+      if (e.message.contains('LINK_DEPENDENCY_ERROR')) {
+        try {
+          // Extract JSON part if mixed with other text or just parse message
+          final msg = e.message;
+          final start = msg.indexOf('{');
+          final end = msg.lastIndexOf('}');
+          if (start != -1 && end != -1) {
+            final jsonStr = msg.substring(start, end + 1);
+            final data = json.decode(jsonStr);
+            if (data['code'] == 'LINK_DEPENDENCY_ERROR') {
+              throw LinkDependencyException(data['conflicts']);
+            }
+          }
+        } catch (parsingError) {
+          debugPrint("Error parsing dependency error: $parsingError");
+        }
+      }
+      rethrow;
+    }
   }
+}
+
+class LinkDependencyException implements Exception {
+  final List<dynamic> conflicts;
+  LinkDependencyException(this.conflicts);
 }

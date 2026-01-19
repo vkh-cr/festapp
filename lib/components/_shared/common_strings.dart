@@ -11,6 +11,7 @@ class CommonStrings {
   static String get confirm => 'Confirm'.tr(); // "Confirm"
   static String get rename => 'Rename'.tr(); // "Rename"
   static String get addNew => 'AddNew'.tr(); // "Add new"
+  static String get create => 'Create'.tr(); // "Create"
   static String get cancel => 'Cancel'.tr(); // "Cancel"
   static String get reset => 'Common.reset'.tr(); // "Reset"
   static String get search => 'Search'.tr(); // "Search"

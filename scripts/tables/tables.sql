@@ -140,6 +140,8 @@ create table if not exists public.occasions (
   description text null,
   is_promoted boolean not null default false,
   is_order_synchronization_enabled boolean not null default true,
+  external_source text null,
+  external_id bigint null,
   constraint occasions_pkey primary key (id),
   constraint occasions_occasion_hidden_fkey foreign KEY (occasion_hidden) references occasions_hidden (id),
   constraint occasions_unit_fkey foreign KEY (unit) references units (id),
