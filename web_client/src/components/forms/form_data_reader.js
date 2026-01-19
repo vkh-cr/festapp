@@ -1,4 +1,5 @@
 import { DbForms } from './db_forms.js';
+import { IdDocumentConstants } from './constants/id_document_constants.js';
 
 export class FormDataReader {
 
@@ -25,6 +26,25 @@ export class FormDataReader {
         // --- 1. Standard Fields (Non-Ticket) ---
         formModel.relatedFields.forEach(field => {
              if (field.type === 'ticket') return;
+
+             // Special Handling for ID Document (Nested Object)
+             if (field.type === 'id_document') {
+                 const idVal = formData.get(field.id.toString());
+                 // Only add if ID number is present (required or optional but filled)
+                 if (idVal && idVal.trim() !== '') {
+                     const expiryVal = formData.get(field.id.toString() + IdDocumentConstants.EXPIRY_SUFFIX);
+                     
+                     const idData = {
+                         "id_document_number": idVal,
+                         "id_document_expiry_date": (expiryVal && expiryVal.trim() !== '') ? expiryVal : null
+                     };
+
+                     let fieldObj = {};
+                     fieldObj[field.id.toString()] = idData;
+                     payload.fields.push(fieldObj);
+                 }
+                 return; // Done with this field
+             }
              
              // Check if data exists in FormData
              const vals = formData.getAll(field.id.toString());

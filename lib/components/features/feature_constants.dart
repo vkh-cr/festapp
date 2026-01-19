@@ -23,7 +23,18 @@ class FeatureConstants {
   static const String workshops = "workshops";
   static const String volunteers = "volunteers";
   static const String schedule = "schedule";
+  static const String contract = "contract";
   static const String import = "import"; // New feature
+
+  // Contract Feature
+  static const String contractTransport = "transport";
+  static const String contractDeparturePoint = "departure_point";
+  static const String contractPlaceOfStay = "place_of_stay";
+  static const String contractTourName = "tour_name";
+  static const String contractTourDate = "tour_date";
+  static const String contractNotes = "notes";
+  static const String contractNumberOfDays = "number_of_days";
+  static const String contractPaymentInfo = "payment_info";
 
   // Extra fields for ticket feature
   static const String ticketLightColor = "lightColor";

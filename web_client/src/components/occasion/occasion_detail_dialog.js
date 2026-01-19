@@ -13,12 +13,19 @@ export class OccasionDetailDialog {
         // Create Overlay
         const overlay = document.createElement('div');
         overlay.className = 'overlay visible';
+        
+        // Lock body scroll
+        document.body.style.overflow = 'hidden';
+
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        
         overlay.style.display = 'flex';
-        overlay.style.alignItems = 'flex-start'; // Align to top
+        overlay.style.alignItems = 'center'; // Align to center vertically
         overlay.style.justifyContent = 'center'; // Center horizontally
-        overlay.style.paddingTop = '80px'; // Offset from top
-        overlay.style.paddingBottom = '40px'; // Bottom spacing
-        overlay.style.overflowY = 'auto'; // Ensure scrollable
         overlay.style.zIndex = '2000'; // High z-index
         
         // Resolve Text
@@ -125,6 +132,7 @@ export class OccasionDetailDialog {
 
         const close = () => {
              document.removeEventListener('keydown', onKeyDown);
+             document.body.style.overflow = ''; // Restore scroll
              overlay.classList.remove('visible');
              setTimeout(() => overlay.remove(), 300);
         };
@@ -146,8 +154,9 @@ export class OccasionDetailDialog {
         const formFeature = FeatureService.getFeatureDetails(FeatureConstants.form, occasion.features);
         
         if (formFeature) {
-             if (formFeature.formUseExternal === true) {
-                 const externalUrl = formFeature.formExternalLink;
+             // Check for external form usage (Standard: use_external_form)
+             if (formFeature.use_external_form === true) {
+                 const externalUrl = formFeature.external_form_link;
                  if (externalUrl && externalUrl.length > 0) {
                      RouterService.navigateToExternal(externalUrl);
                      return;
@@ -156,18 +165,7 @@ export class OccasionDetailDialog {
         }
         
         // Fallback to internal form
-        // Link: occasion.form.link  (Assuming deep structure matches)
-        // Check structure from DB: occasion object has `form` object?
-        // DbOccasions returns data.occasion.
-        // We should check if `occasion.form` exists or if we need to derive it.
-        // In Flutter: occasion.form!.link!
-        // We'll try to access occasion.form.link.
-        
-        const link = occasion.form ? occasion.form.link : occasion.link; // Fallback to occasion link if form link missing?
-        
-        // Wait, if "form" feature is present but "form" object is missing on occasion, that's an issue.
-        // DbOccasionsRPC likely joins the form.
-        // If not, we might be pointing to /form/:occasionLink.
+        const link = occasion.form ? occasion.form.link : occasion.link;
         
         if (link) {
             RouterService.navigateToForm(link);

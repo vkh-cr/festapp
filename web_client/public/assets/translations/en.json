@@ -778,7 +778,9 @@
     "paidOrSent": "Paid or Sent",
     "cancelled": "Cancelled",
     "usedInForms": "Used in Forms",
-    "shortTitle": "Short Title"
+    "shortTitle": "Short Title",
+    "surcharge": "Surcharge",
+    "surchargeOnSite": "surcharge on site"
   },
   "FormsFeature": {
     "addTicket": "Add Ticket",
@@ -830,7 +832,8 @@
     "note": "Note",
     "labelMaxTicketsPerOrder": "Max tickets per order:",
     "helperMaxTicketsPerOrder": "How many tickets a user can buy in a single order (default: 1).",
-    "validationMaxTicketsInvalid": "Please enter a valid number (1 or more)."
+    "validationMaxTicketsInvalid": "Please enter a valid number (1 or more).",
+    "showSurchargeDescription": "Show surcharge description"
   },
   "FeatureOrders": {
     "cancel": "Cancel",
@@ -1428,7 +1431,7 @@
     "priority": "Priority",
     "priorityTooltip": "Determines the order of accounts. Lower numbers appear first.",
     "priorityHelpTitle": "Priority",
-    "priorityHelpContent": "Priority determines the order in which accounts are displayed. You can reorder them by dragging.",
+    "priorityHelpContent": "Priority determines the order in which accounts are displayed. You can change it by dragging and dropping accounts in the list.",
     "noMoreUsersToAdd": "No more users to add.",
     "primaryAccountFor": "Primary account for {}",
     "backupAccountFor": "Backup account for {}",
@@ -1436,9 +1439,27 @@
     "humanReadableLabel": "Human Readable Format",
     "humanReadableHelper": "Auto-generated from IBAN",
     "usedIn": "Used in",
-    "manageInSettings": "You can manage accounts in organization settings.",
-    "addInSettings": "You can add accounts in organization settings.",
+    "manageInSettings": "Manage Bank Accounts",
+    "addInSettings": "Add new",
     "bankAccountsTitle": "Bank Accounts",
-    "deleteAccountTitle": "Delete Bank Account?"
-  }
+    "deleteAccountTitle": "Delete Bank Account?",
+    "manageInUnitSettings": "Bank accounts can be managed in organization settings."
+  },
+  "FeatureContract": {
+    "title": "Contract",
+    "description": "Allows contract configuration for participants.",
+    "transport": "Transport",
+    "departurePoint": "Departure Point",
+    "placeOfStay": "Place of Stay",
+    "tourName": "Tour Name",
+    "tourDate": "Tour Date",
+    "notes": "Notes",
+    "numberOfDays": "Number of Days",
+    "loadFromDescription": "Load from Description",
+    "downloadContract": "Download Contract",
+    "generatingContract": "Generating Contract...",
+    "generatingContractFor": "Generating Contract for {customer}...",
+    "paymentInfo": "Payment Info"
+  },
+  "surchargeOnSite": "surcharge"
 }

@@ -26,15 +26,13 @@ export class PriceWidget {
         const formModel = this.session.formModel;
         const isBlueprint = !!formModel.blueprint;
 
-        // Condition: 
-        // 1. If Non-Blueprint: Show ONLY if price > 0 (as per user request)
-        // 2. If Blueprint: Show if items > 0 or price > 0 (existing logic)
+        // Condition:
+        // Unified Logic: Show if EITHER price > 0 OR items > 0
+        // This supports free products (items > 0, price = 0)
         let shouldHide = false;
         
-        if (!isBlueprint) {
-            if (totalPrice <= 0) shouldHide = true;
-        } else {
-            if (totalPrice <= 0 && totalItems <= 0) shouldHide = true;
+        if (totalPrice <= 0 && totalItems <= 0) {
+            shouldHide = true;
         }
         
         console.log(`[PriceWidget] Render: Price=${totalPrice} Items=${totalItems} Hide=${shouldHide} Blueprint=${isBlueprint} El=${!!this.element}`);
@@ -62,10 +60,9 @@ export class PriceWidget {
             const formModel = this.session.formModel;
             const primaryColor = formModel.primaryColor || 'var(--primary-color)';
             
-            let textColor = 'white';
-            if (primaryColor.startsWith('#')) {
-                 textColor = ColorUtils.isLight(primaryColor) ? 'black' : 'white';
-            }
+            // Resolve CSS variable if needed
+            const resolvedColor = this._resolveColor(primaryColor);
+            const textColor = ColorUtils.isLight(resolvedColor) ? 'black' : 'white';
 
             this.element.style.cssText = `
                 position: fixed; /* Always fixed as requested */
@@ -143,5 +140,20 @@ export class PriceWidget {
     destroy() {
         this.session.removeEventListener('state-changed', this._onStateChange);
         if (this.element) this.element.remove();
+    }
+
+    _resolveColor(colorString) {
+        if (!colorString) return null;
+        if (colorString.startsWith('var(--')) {
+            try {
+                const varName = colorString.match(/var\(([^)]+)\)/)[1];
+                // We resolve against documentElement as that's where global vars usually live
+                const resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+                return resolved || colorString; 
+            } catch (e) {
+                return colorString;
+            }
+        }
+        return colorString;
     }
 }

@@ -68,7 +68,8 @@ BEGIN
   LEFT JOIN public.external_occasions_cache c ON o.link = c.link
   WHERE 
     -- Organization Filter
-    o.organization = p_organization_id
+    -- Organization Filter: Match Org ID OR Include ALL External Occasions
+    (o.organization = p_organization_id OR c.source_name IS NOT NULL)
     -- Unit Filter (Optional)
     AND (p_unit_id IS NULL OR o.unit = p_unit_id)
     -- Visibility Rules

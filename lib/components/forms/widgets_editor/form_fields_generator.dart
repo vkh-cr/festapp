@@ -15,6 +15,8 @@ import 'ticket_editor_widgets.dart';
 import 'select_one_editor.dart';
 import 'select_many_editor.dart';
 import 'id_document_editor.dart';
+import '../form_strings.dart';
+import 'package:fstapp/components/forms/models/holder_models/ticket_holder.dart';
 
 // Define kHiddenOpacity if it's not globally available from form_editor_content.dart
 const double kHiddenOpacity = 0.5;
@@ -350,25 +352,45 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                 ),
               ],
             ),
-            if (!isTicket)
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == "add_description") {
-                    setState(() {
-                      if (HtmlHelper.isHtmlEmptyOrNull(field.description)) {
-                        field.description = defaultDescription;
-                      }
-                    });
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem<String>(
-                    value: "add_description",
-                    child: Text("Add description".tr()),
-                  ),
-                ],
-                icon: const Icon(Icons.more_vert),
-              ),
+            // Popup Menu (Description & Surcharge)
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == "add_description") {
+                  setState(() {
+                    if (HtmlHelper.isHtmlEmptyOrNull(field.description)) {
+                      field.description = defaultDescription;
+                    }
+                  });
+                } else if (value == "show_surcharge_description") {
+                  setState(() {
+                    field.data ??= {};
+                    var current = field.data![TicketHolder.metaShowSurchargeDescription] ?? true;
+                    field.data![TicketHolder.metaShowSurchargeDescription] = !current;
+                  });
+                }
+              },
+              itemBuilder: (context) {
+                List<PopupMenuEntry<String>> items = [];
+                // Add Description Option
+                items.add(PopupMenuItem<String>(
+                  value: "add_description",
+                  child: Text("Add description".tr()),
+                ));
+
+                // Ticket Specific Options
+                if (isTicket) {
+                  bool showSurcharge = field.data?[TicketHolder.metaShowSurchargeDescription] ?? true;
+                  items.add(const PopupMenuDivider());
+                  items.add(CheckedPopupMenuItem<String>(
+                    value: "show_surcharge_description",
+                    checked: showSurcharge,
+                    child: Text(FormStrings.showSurchargeDescription),
+                  ));
+                }
+                return items;
+              },
+              icon: const Icon(Icons.more_vert),
+            ),
             if (field.id == null)
               IconButton(
                 icon: Icon(Icons.delete,

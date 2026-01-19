@@ -13,6 +13,7 @@ import 'map_feature.dart';
 import 'schedule_feature.dart';
 import 'ticket_feature.dart';
 import 'workshop_feature.dart';
+import 'contract_feature.dart';
 
 class FeatureService {
   /// A static list of feature codes that are only available when [AppConfig.isAppSupported] is true.
@@ -73,6 +74,7 @@ class FeatureService {
         CompanionsFeature(code: FeatureConstants.companions, isEnabled: false, companionsMax: 1),
         ScheduleFeature(code: ScheduleFeature.metaSchedule, isEnabled: true, scheduleType: 'basic'),
         ImportFeature(code: FeatureConstants.import, isEnabled: true),
+        ContractFeature(code: FeatureConstants.contract, isEnabled: false),
       ],
     ];
   }

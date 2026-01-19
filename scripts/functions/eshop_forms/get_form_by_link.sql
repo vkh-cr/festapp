@@ -96,6 +96,7 @@ BEGIN
                                                     'description', p.description,
                                                     'price', p.price,
                                                     'currency_code', p.currency_code,
+                                                    'data', p.data,
                                                     'order', p."order",
                                                     'ordered_count', (
                                                         SELECT count(*)

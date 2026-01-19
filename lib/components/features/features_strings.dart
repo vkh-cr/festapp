@@ -53,6 +53,20 @@ class FeaturesStrings {
   static String get helperAutoImport => 'FeatureImport.helperAutoImport'.tr(); // "UUsers will automatically have an account created upon signing up through the form. Default password is '1'."
 
   
+  // Feature Contract
+  static String get contractTransport => 'FeatureContract.transport'.tr();
+  static String get contractDeparturePoint => 'FeatureContract.departurePoint'.tr();
+  static String get contractPlaceOfStay => 'FeatureContract.placeOfStay'.tr();
+  static String get contractTourName => 'FeatureContract.tourName'.tr();
+  static String get contractTourDate => 'FeatureContract.tourDate'.tr();
+  static String get contractNotes => 'FeatureContract.notes'.tr();
+  static String get contractNumberOfDays => 'FeatureContract.numberOfDays'.tr();
+  static String get contractPaymentInfo => 'FeatureContract.paymentInfo'.tr();
+  static String get contractLoadFromDescription => 'FeatureContract.loadFromDescription'.tr();
+  static String get downloadContract => 'FeatureContract.downloadContract'.tr();
+  static String get generatingContract => 'FeatureContract.generatingContract'.tr();
+  static String generatingContractFor(String customer) => 'FeatureContract.generatingContractFor'.tr(namedArgs: {'customer': customer});
+
   // Feature Ticket
   static String get enableManualTicketScan => 'FeatureTicket.enableManualTicketScan'.tr();
   static String get enableManualTicketScanDescription => 'FeatureTicket.enableManualTicketScanDescription'.tr();

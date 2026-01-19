@@ -294,6 +294,7 @@ create table if not exists eshop.unit_bank_accounts (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   unit BIGINT NOT NULL,
   bank_account BIGINT NOT NULL,
+  priority INT NOT NULL DEFAULT 0,
   CONSTRAINT unit_bank_accounts_bank_account_fkey FOREIGN KEY (bank_account) REFERENCES eshop.bank_accounts (id),
   CONSTRAINT unit_bank_accounts_unit_fkey FOREIGN KEY (unit) REFERENCES public.units (id),
   CONSTRAINT unit_bank_accounts_pkey PRIMARY KEY (id)

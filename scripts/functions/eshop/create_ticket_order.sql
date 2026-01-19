@@ -309,7 +309,8 @@ BEGIN
                     'price', product_data.price,
                     'currency_code', product_data.currency_code,
                     'spot_title', CASE WHEN spot_id IS NOT NULL AND product_id = spot_product.id THEN spot_product.spot_title ELSE NULL END,
-                    'description', CASE WHEN spot_id IS NOT NULL AND product_id = spot_product.id THEN spot_product.description ELSE NULL END
+                    'description', CASE WHEN spot_id IS NOT NULL AND product_id = spot_product.id THEN spot_product.description ELSE NULL END,
+                    'data', product_data.data
                 ));
 
                 -- Accumulate the product price into the order total

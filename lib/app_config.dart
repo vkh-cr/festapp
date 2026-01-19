@@ -24,6 +24,7 @@ class AppConfig {
   static const bool isAllUnit = false;
   static const bool isAppSupported = false;
   static const bool isWebclientSupported = true;
+  static const bool isContractFeatureEnabled = false;
   static const bool showBankSupportRole = false;
 
   static const String webLink = "https://rezervace.farnostopava.cz";

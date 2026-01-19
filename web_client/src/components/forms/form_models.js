@@ -16,6 +16,7 @@ export class FormOptionModel {
     static metaOptionsPrice = 'price';
     static metaOptionsPrice = 'price';
     static metaCurrency = 'currency_code';
+    static metaData = 'data';
 
     constructor(data = {}) {
         this.title = data[FormOptionModel.metaValue] || '';
@@ -24,6 +25,7 @@ export class FormOptionModel {
         this.id = data[FormOptionModel.metaOptionsId] || null;
         this.price = data[FormOptionModel.metaOptionsPrice] || 0;
         this.currency = data[FormOptionModel.metaCurrency];
+        this.data = data[FormOptionModel.metaData] || null;
     }
 }
 
@@ -71,7 +73,8 @@ export class FormFieldModel {
                  [FormOptionModel.metaDescription]: p.description,
                  [FormOptionModel.metaOptionsId]: p.id,
                  [FormOptionModel.metaOptionsPrice]: p.price,
-                 [FormOptionModel.metaCurrency]: p.currency_code
+                 [FormOptionModel.metaCurrency]: p.currency_code,
+                 [FormOptionModel.metaData]: p.data
              }));
         } else if (this.type === 'product_type' && data.product_type_data && data.product_type_data.products) {
             // Fallback for raw data structure if 'this.data' wasn't fully set?
@@ -82,7 +85,8 @@ export class FormFieldModel {
                  [FormOptionModel.metaDescription]: p.description,
                  [FormOptionModel.metaOptionsId]: p.id,
                  [FormOptionModel.metaOptionsPrice]: p.price,
-                 [FormOptionModel.metaCurrency]: p.currency_code
+                 [FormOptionModel.metaCurrency]: p.currency_code,
+                 [FormOptionModel.metaData]: p.data
              }));
         }
     }

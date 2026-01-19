@@ -23,7 +23,8 @@ export class TicketFieldBuilder {
                          title: p.title,
                          description: p.description,
                          price: p.price,
-                         currency: p.currency
+                         currency: p.currency,
+                         data: p.data
                      }));
                  }
              }

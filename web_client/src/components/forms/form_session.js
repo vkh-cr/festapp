@@ -3,6 +3,7 @@ import { FormDataReader } from './form_data_reader.js';
 import { DbForms } from './db_forms.js';
 import { FormStrings } from './form_strings.js';
 import { BlueprintStrings } from '../blueprint/blueprint_strings.js';
+import { FieldInputHandlerFactory } from './handlers/field_input_handler_factory.js';
 
 export class FormSession extends EventTarget {
 
@@ -127,9 +128,6 @@ export class FormSession extends EventTarget {
                              }
                      }
                      
-                     // DEBUG: Trace logic
-                     // console.error(`[FormSession] Check Currency: Item=${itemCurrency} New=${newCurrency}`);
-                     
                      if (itemCurrency && itemCurrency !== newCurrency) {
                          fieldsToRemove.push(idx);
                      }
@@ -252,12 +250,13 @@ export class FormSession extends EventTarget {
         this._emitStateChanged();
     }
 
-    async removeTicket(index) {
+    async removeTicket(index, skipBackendSync = false) {
         if (index >= 0 && index < this.state.tickets.length) {
             const ticket = this.state.tickets[index];
             
             // Sync with Backend: Deselect Spot if present
-            if (ticket.spot) {
+            // If skipBackendSync is true (optimistic update from toggleSpot), we rely on toggleSpot's queue.
+            if (!skipBackendSync && ticket.spot) {
                 try {
                     await DbForms.selectSpot(this.formModel.key, this.formModel.secret, ticket.spot, false);
                 } catch (e) {
@@ -341,20 +340,20 @@ export class FormSession extends EventTarget {
                  // REMOVE Ticket
                  const idx = this.state.tickets.findIndex(t => String(t.spot) === String(spotId));
                  if (idx !== -1) {
-                     this.removeTicket(idx);
+                     this.removeTicket(idx, true); // Skip internal sync, we handle it in queue
                  }
              }
         };
 
-        // Enqueue the operation
-        const task = async () => {
-            // 1. Apply Change Optimistically
-            // Store Spot Model for Price Robustness
-            if (spotObj.product || spotObj.productModel || spotObj.price) {
-                 this.spotModels.set(String(spotId), spotObj);
-            }
-            updateState(isSelecting);
+        // 1. Apply Change Optimistically (Synchronous)
+        // Store Spot Model for Price Robustness
+        if (spotObj.product || spotObj.productModel || spotObj.price) {
+             this.spotModels.set(String(spotId), spotObj);
+        }
+        updateState(isSelecting);
 
+        // Enqueue the NETWORK operation (Serialized)
+        const task = async () => {
             try {
                  const currentSecret = this.formModel.secret;
                  console.log(`[FormSession] Executing toggleSpot queue task. Spot: ${spotId}, Action: ${isSelecting ? 'Select' : 'Deselect'}, Secret: ${currentSecret}`);
@@ -488,8 +487,6 @@ export class FormSession extends EventTarget {
             return ticketObj;
         });
         
-        // console.log('FormSession: Synced Payload from State:', this.payload.ticket);
-
         // --- Standard Fields Sync ---
         this.payload.fields = [];
         for (const [fieldId, value] of this.state.fields.entries()) {
@@ -533,30 +530,34 @@ export class FormSession extends EventTarget {
         const name = target.name || (target.getAttribute && target.getAttribute('name'));
         
         if (!name) {
-             return; 
+                return; 
         }
         
-        // 1. Check for Structured Data Attributes (Robust)
+        // 1. Check for Structured Data Attributes (Ticket Fields)
         if (target.dataset.ticketId && target.dataset.index !== undefined && target.dataset.subId) {
-             const ticketId = target.dataset.ticketId;
-             const index = parseInt(target.dataset.index, 10);
-             const subId = target.dataset.subId;
-             
-             // Directly call refactored handler with pre-parsed data
-             this._handleTicketInputRefactored(target, form, [null, ticketId, index, subId]); // Mock match array
-             return;
+                const ticketId = target.dataset.ticketId;
+                const index = parseInt(target.dataset.index, 10);
+                const subId = target.dataset.subId;
+                
+                // Directly call refactored handler with pre-parsed data
+                this._handleTicketInputRefactored(target, form, [null, ticketId, index, subId]); // Mock match array
+                return;
         }
 
-        // 2. Fallback: Regex Parsing (Legacy support)
+        // 2. Fallback: Regex Parsing (Legacy support for tickets)
         // Format: ticketId_index_subId
-        // Regex: starts with digits, underscore, digits, underscore...
         const ticketMatch = name.match(/^(\d+)_(\d+)_(.+)$/);
         
         if (ticketMatch) {
-            // New Logic: parse input and call updateTicket instead of _handleTicketInput logic
             this._handleTicketInputRefactored(target, form, ticketMatch);
         } else {
-            this._handleStandardInput(target, form, name);
+                // 3. Delegate to Factory for Standard/Complex Fields
+                const { handler, fieldId, context } = FieldInputHandlerFactory.getHandler(this.formModel, target, name);
+                if (handler) {
+                    handler.handle(this, target, form, fieldId, context);
+                } else {
+                    console.warn(`[FormSession] No handler found for input ${name}`);
+                }
         }
     }
     
@@ -694,38 +695,6 @@ export class FormSession extends EventTarget {
 
         // 2. Hydrate/Refresh Standard Fields & Calc
         this.refreshPayload(form);
-    }
-
-    _handleStandardInput(target, form, fieldId) {
-        // Find field definition
-        const field = this.formModel.visibleFields.find(f => String(f.id) === fieldId);
-        if (!field) return; 
-
-        // Get value(s)
-        let val = target.value;
-        const type = target.type;
-        
-        // For Checkboxes/SelectMany, we must read the group state
-        // DOM READ: We still read DOM for multi-inputs because handling array state 
-        // purely from single event is complex without React.
-        if (type === 'checkbox' || field.type === 'select_many') {
-            const checked = form.querySelectorAll(`input[name="${fieldId}"]:checked`);
-            const vals = Array.from(checked).map(c => c.value);
-            val = vals.length > 1 ? vals.join(' | ') : (vals[0] || '');
-            
-            if (vals.length === 0) val = null;
-        }
-
-        // UPDATE STATE
-        if (val) {
-            this.state.fields.set(String(fieldId), val);
-        } else {
-            this.state.fields.delete(String(fieldId));
-        }
-
-        // SYNC & CALC
-        this._syncPayloadFromState();
-        this._recalculate();
     }
 
     _handleStandardInput_LEGACY(target, form, fieldId) {

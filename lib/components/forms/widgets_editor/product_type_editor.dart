@@ -14,6 +14,7 @@ import 'form_fields_generator.dart';
 import 'ticket_editor_widgets.dart';
 import 'ticket_product_editor_row.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'description_tooltip.dart';
 
 class ProductTypeEditorWidgets {
   /// Builds the read-only view for a product type group.
@@ -63,8 +64,8 @@ class ProductTypeEditorWidgets {
                   if (!HtmlHelper.isHtmlEmptyOrNull(ptField.productType?.description))
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0, right: 4.0),
-                      child: Tooltip(
-                        message: "Has description".tr(),
+                      child: DescriptionTooltip(
+                        description: ptField.productType!.description!,
                         child: const Icon(Icons.description, size: 16),
                       ),
                     ),
@@ -137,8 +138,8 @@ class ProductTypeEditorWidgets {
                                   if (!HtmlHelper.isHtmlEmptyOrNull(product.description))
                                     Padding(
                                       padding: const EdgeInsets.only(left: 8.0, right: 4.0),
-                                      child: Tooltip(
-                                        message: "Has description".tr(),
+                                      child: DescriptionTooltip(
+                                        description: product.description!,
                                         child: const Icon(Icons.description, size: 16),
                                       ),
                                     ),

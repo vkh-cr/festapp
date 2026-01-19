@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:collection/collection.dart';
+
 import 'package:fstapp/components/blueprint/get_orders_helper.dart';
 import 'package:fstapp/components/eshop/models/orders_history_model.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
@@ -299,6 +302,24 @@ class DbOrders {
       return response;
     } catch (e) {
       print("Unexpected error in sendTicketsToEmail: $e");
+      rethrow;
+    }
+  }
+
+  static Future<Uint8List?> downloadContractPdf(int orderId) async {
+    try {
+      final response = await _supabase.functions.invoke(
+          "generate-hvezdamorska-agreement",
+          body: {"orderId": orderId});
+
+      final String? base64Str = response.data['file'];
+
+      if (base64Str != null) {
+        return base64Decode(base64Str);
+      }
+      return null;
+    } catch (e) {
+      print("Error downloading contract: $e");
       rethrow;
     }
   }

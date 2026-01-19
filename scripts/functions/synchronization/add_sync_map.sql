@@ -17,10 +17,24 @@ BEGIN
         RAISE EXCEPTION 'Access Denied: Service role required.';
     END IF;
 
+    -- Soft Duplicate Check (No DB constraint required)
+    IF EXISTS (
+        SELECT 1 FROM public.external_sync_maps
+        WHERE source_name = p_source_name
+          AND target_org_id = p_target_org_id
+          AND target_unit_id = p_target_unit_id
+          AND remote_link_base = p_remote_link_base
+          AND remote_org_id IS NOT DISTINCT FROM p_remote_org_id
+          AND remote_unit_id IS NOT DISTINCT FROM p_remote_unit_id
+    ) THEN
+        RETURN 'Map already exists (skipped).';
+    END IF;
+
     INSERT INTO public.external_sync_maps 
     (source_name, target_org_id, target_unit_id, remote_link_base, remote_org_id, remote_unit_id)
     VALUES 
     (p_source_name, p_target_org_id, p_target_unit_id, p_remote_link_base, p_remote_org_id, p_remote_unit_id);
+    
     RETURN 'Map added.';
 END;
 $$;

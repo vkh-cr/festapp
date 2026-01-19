@@ -39,7 +39,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
   late TextEditingController _humanReadableController;
   late TextEditingController _tokenController;
   late TextEditingController _priorityController;
-  DateTime? _validUntil;
+  DateTime? _expiryDate;
   
   late BankAccountModel _account;
   String _selectedType = 'FIO';
@@ -62,7 +62,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
     _priorityController = TextEditingController(text: _account.priority.toString());
     _supportedCurrencies = List.from(_account.supportedCurrencies);
     _tokenController = TextEditingController(); 
-    _validUntil = _account.tokenValidUntil;
+    _expiryDate = _account.tokenExpiryDate;
     
     _numberController.addListener(_updateHumanReadable);
     _updateHumanReadable(); // Initial check if empty but number exists
@@ -162,7 +162,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
         accountNumberHumanReadable: _humanReadableController.text.isEmpty ? null : _humanReadableController.text,
         tokenMasked: _account.tokenMasked, // Preserve masking state
         lastFetchTime: _account.lastFetchTime,
-        tokenValidUntil: _account.tokenValidUntil
+        tokenExpiryDate: _account.tokenExpiryDate
       );
       final newId = await DbBankAccounts.updateBankAccount(updatedAccount, unitId: widget.unitId);
       final savedAccount = updatedAccount.copyWith(id: newId);
@@ -198,7 +198,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
   Future<void> _saveToken() async {
     setState(() => _isSaving = true);
     try {
-      await DbBankAccounts.updateBankAccountToken(_account.id, _tokenController.text, _validUntil);
+      await DbBankAccounts.updateBankAccountToken(_account.id, _tokenController.text, _expiryDate);
       if (!mounted) return;
       
       // Update local masking to reflect change immediately
@@ -598,9 +598,9 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
             readOnly: widget.readOnly,
             obscureText: !_isTokenTokenVisible,
             onChanged: (value) {
-              if (_validUntil != null) {
+              if (_expiryDate != null) {
                 setState(() {
-                  _validUntil = null;
+                  _expiryDate = null;
                 });
               }
             },
@@ -623,22 +623,22 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
             onTap: widget.readOnly ? null : () async {
               final picked = await showDatePicker(
                 context: context,
-                initialDate: _validUntil ?? DateTime.now(),
+                initialDate: _expiryDate ?? DateTime.now(),
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2100),
               );
               if (picked != null) {
-                setState(() => _validUntil = picked);
+                setState(() => _expiryDate = picked);
               }
             },
             child: InputDecorator(
               decoration: InputDecoration(
-                labelText: BankAccountStrings.tokenValidUntilLabel,
+                labelText: BankAccountStrings.tokenExpiryDateLabel,
                 suffixIcon: const Icon(Icons.calendar_today),
               ),
               child: Text(
-                _validUntil != null 
-                  ? DateFormat.yMd(context.locale.toString()).format(_validUntil!) 
+                _expiryDate != null 
+                  ? DateFormat.yMd(context.locale.toString()).format(_expiryDate!) 
                   : BankAccountStrings.setDate,
               ),
             ),
