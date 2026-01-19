@@ -4,6 +4,7 @@ import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/forms/models/holder_models/form_holder.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,7 @@ class _SignupPageState extends State<SignupPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Sign up").tr(),
+        title: Text(UserStrings.signUp),
         leading: BackButton(
           onPressed: () => RouterService.popOrHome(context),
         ),
@@ -75,7 +76,7 @@ class _SignupPageState extends State<SignupPage> {
                       children: [
                         TextSpan(
                           style: TextStyle(fontSize: 18, color: ThemeConfig.blackColor(context)),
-                          text: "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.".tr(namedArgs: {"email": fieldsData?["email"]}),
+                          text: UserStrings.credentialsSentLong(fieldsData?["email"]?.toString() ?? ""),
                         ),
                         const WidgetSpan(
                           child: Padding(
@@ -107,25 +108,25 @@ class _SignupPageState extends State<SignupPage> {
                             fieldsData![AuthService.metaLang] = EasyLocalization.of(context)?.locale.toString();
                             var resp = await AuthService.register(fieldsData!);
                             if (resp["code"] == 200) {
-                              ToastHelper.Show(context, "Registration is almost complete!".tr());
+                              ToastHelper.Show(context, UserStrings.registrationAlmostComplete);
                               setState(() {
                                 _isRegistrationSuccess = true;
                               });
                             } else if (resp["code"] == 409) {
                               ToastHelper.Show(
                                   context,
-                                  "Registration failed: Email {email} is already in use.".tr(namedArgs: {"email": resp["email"]}),
+                                  UserStrings.emailInUse(resp["email"]),
                                   severity: ToastSeverity.NotOk
                               );
                             } else {
-                              ToastHelper.Show(context, "Registration has failed.".tr(), severity: ToastSeverity.NotOk);
+                              ToastHelper.Show(context, UserStrings.registrationFailed, severity: ToastSeverity.NotOk);
                             }
                             setState(() {
                               _isLoading = false;
                             });
                           }
                         },
-                        label: "Sign up".tr(),
+                        label: UserStrings.signUp,
                         color: ThemeConfig.seed1,
                         textColor: Colors.white,
                         isEnabled: !_isLoading,

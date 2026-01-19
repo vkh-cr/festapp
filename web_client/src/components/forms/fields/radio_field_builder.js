@@ -58,11 +58,12 @@ export class RadioFieldBuilder {
                 }
                 
                 // Debug Checked Logic
-                const isSelected = (field.value !== undefined && field.value !== null) && (String(opt.id) === String(field.value));
+                // Use the exact same value derivation as the input.value to ensure consistency
+                const optionValue = (opt.id !== undefined && opt.id !== null) ? opt.id : opt.title;
+                const isSelected = (field.value !== undefined && field.value !== null) && (String(optionValue) === String(field.value));
+                
                 if (isSelected) {
                      input.checked = true;
-                } else if (field.value !== undefined) {
-                     // ...
                 }
                 
                 if (isCardDesign) {
@@ -84,7 +85,7 @@ export class RadioFieldBuilder {
                 let labelContent = `<span>${opt.title || ''}</span>`;
                 if (opt.price) {
                      // Check if we should show currency code
-                     const priceDisplay = `${opt.price} ${currency || ''}`; 
+                     const priceDisplay = `${opt.price}&nbsp;${currency || ''}`; 
                      labelContent += `<span class="option-price">+${priceDisplay}</span>`; 
                 }
                 optLabel.innerHTML = labelContent;
@@ -93,10 +94,28 @@ export class RadioFieldBuilder {
                 const contentWrapper = document.createElement('div');
                 contentWrapper.appendChild(optLabel);
                 
-                if (opt.description) {
+                const surchargeData = opt.data && opt.data.surcharge;
+                const ticketField = formModel && formModel.relatedFields
+                    ? formModel.relatedFields.find(f => f.type === 'ticket')
+                    : null;
+                const showSurchargeDescription = ticketField && ticketField.data && ticketField.data.show_surcharge_description !== undefined
+                    ? ticketField.data.show_surcharge_description
+                    : true;
+
+                if (opt.description || (surchargeData && surchargeData.amount && showSurchargeDescription)) {
                     const optDesc = document.createElement('span');
                     optDesc.className = 'option-description';
-                    optDesc.innerHTML = opt.description;
+                    
+                    let descHtml = '';
+                     if (surchargeData && surchargeData.amount && showSurchargeDescription) {
+                         descHtml += `<span class="surcharge-info">+ ${surchargeData.amount}&nbsp;${surchargeData.currency || ''} ${FormStrings.surchargeOnSite}</span>`;
+                         if (opt.description) descHtml += '<br>'; // New line separation
+                     }
+                     if (opt.description) {
+                          descHtml += opt.description;
+                     }
+
+                    optDesc.innerHTML = descHtml;
                     contentWrapper.appendChild(optDesc);
                 }
 
@@ -119,12 +138,15 @@ export class RadioFieldBuilder {
         container.addEventListener('change', (e) => {
             // Loose equality to handle numeric IDs vs string attribute
             if (e.target.name == field.id && e.target.type === 'radio') {
-                clearBtn.style.display = 'inline-block';
+                // Ensure button reflects REALITY: Check if anything is actually checked
+                // This handles cases where uncheck events are dispatched
+                const anyChecked = container.querySelector(`input[name="${field.id}"]:checked`);
+                clearBtn.style.display = anyChecked ? 'inline-block' : 'none';
             }
         });
 
-        // Show initially if value is present
-        if (field.value !== undefined && field.value !== null && field.value !== '') {
+        const initialChecked = container.querySelector('input:checked');
+        if (field.value !== undefined && field.value !== null && field.value !== '' && initialChecked) {
              clearBtn.style.display = 'inline-block';
         }
 

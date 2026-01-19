@@ -1,11 +1,13 @@
 import flatpickr from "flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
+// import 'flatpickr/dist/flatpickr.min.css'; // Commented out for Node.js test runner (JSDOM) compatibility
 import { Czech } from "flatpickr/dist/l10n/cs.js";
 import { LocalizationService } from '../../../services/localization_service.js';
 import { FormStrings } from '../form_strings.js';
 import { TextFieldBuilder } from './text_field_builder.js';
+import { CommonStrings } from '../../shared/common_strings.js';
 import { DateFieldBuilder } from './date_field_builder.js';
 import { FormFieldBuilder } from './form_field_builder.js';
+import { IdDocumentConstants } from '../constants/id_document_constants.js';
 
 export class IdDocumentFieldBuilder {
     static create(field, formModel) {
@@ -56,9 +58,15 @@ export class IdDocumentFieldBuilder {
             expiryWrapper.className = 'input-wrapper';
             const expiryInput = document.createElement('input');
             expiryInput.type = 'text';
-            expiryInput.name = field.id.toString() + '_expiry';
+            // Use Constant
+            expiryInput.name = field.id.toString() + IdDocumentConstants.EXPIRY_SUFFIX;
             expiryInput.className = 'form-control flatpickr-input';
+            if (field.isRequired) {
+                expiryInput.required = true;
+                expiryInput.dataset.required = 'true';
+            }
             expiryInput.placeholder = LocalizationService.currentLocale === 'cs' ? 'D. M. RRRR' : 'YYYY-MM-DD';
+            expiryInput.autocomplete = 'off'; // Let Flatpickr handle it
             expiryWrapper.appendChild(expiryInput);
 
             const errorContainer = document.createElement('div');
@@ -88,14 +96,37 @@ export class IdDocumentFieldBuilder {
                 }
             };
                 
-            const fp = flatpickr(expiryInput, {
+            flatpickr(expiryInput, {
                 dateFormat: 'Y-m-d',
                 altInput: true,
                 altFormat: LocalizationService.currentLocale === 'cs' ? 'j. n. Y' : 'F j, Y',
                 allowInput: true,
-                minDate: 'today', // Disable past dates
-                disableMobile: false,
+                minDate: 'today',
+                disableMobile: true, // Force custom picker (User Requirement: Same as Birthdate)
                 locale: LocalizationService.currentLocale === 'cs' ? Czech : 'default',
+                parseDate: (datestr, format) => {
+                    // Custom parser to allow more flexible input (e.g. "1.1.2000" -> "1. 1. 2000")
+                    try {
+                        // 1. Try default parsing first
+                        const defaultDate = flatpickr.parseDate(datestr, format);
+                        if (defaultDate) return defaultDate;
+                    } catch (e) { }
+
+                    // 2. Try simple fallback for common formats if default failed
+                    if (datestr && typeof datestr === 'string') {
+                         // Fix common "lazy" input: "1.1.2000" -> "2000-01-01"
+                        if (datestr.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
+                            const parts = datestr.split('.');
+                            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        }
+                        // "1. 1. 2000" check handled by default parser usually, but just in case
+                        if (datestr.match(/^\d{1,2}\. \d{1,2}\. \d{4}$/)) {
+                            const parts = datestr.replace(/ /g, '').split('.');
+                            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        }
+                    }
+                    return undefined;
+                },
                 onChange: function(selectedDates) {
                     validateExpiry(selectedDates[0]);
                 }

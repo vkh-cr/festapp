@@ -12,6 +12,7 @@ import 'package:fstapp/components/eshop/views/products_dialog.dart';
 import 'package:fstapp/components/eshop/views/transactions_dialog.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/components/eshop/db_tickets.dart';
+import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
@@ -22,6 +23,9 @@ import 'models/orders_history_model.dart';
 import 'orders_strings.dart';
 import 'views/order_history_dialog.dart';
 import 'views/order_state_display.dart';
+import 'package:fstapp/components/features/features_strings.dart';
+import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class EshopColumns {
   // Column identifier constants
@@ -47,6 +51,7 @@ class EshopColumns {
 
   static const String PRODUCT_ID = "productId";
   static const String PRODUCT_TITLE = "productTitle";
+  static const String PRODUCT_SHORT_TITLE = "productShortTitle";
   static const String PRODUCT_PRICE = "productPrice";
   static const String PRODUCT_IS_HIDDEN = "productIsHidden";
   static const String PRODUCT_TYPE = "productType";
@@ -59,6 +64,8 @@ class EshopColumns {
   static const String PRODUCT_INCLUDED_INVENTORY = "productIncludedInventory";
   static const String PRODUCT_MODEL_REFERENCE = "productModelReference";
   static const String PRODUCT_USED_IN_FORMS = "productUsedInForms";
+  static const String PRODUCT_SURCHARGE = "productSurcharge";
+
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
@@ -77,6 +84,7 @@ class EshopColumns {
   static const String ORDER_TRANSACTIONS = "orderTransactions";
 
   static const String ORDER_FORM = "orderForm";
+  static const String ORDER_CONTRACT_DOWNLOAD = "orderContractDownload";
 
   static const String RESPONSES = "responses";
 
@@ -123,6 +131,15 @@ class EshopColumns {
         field: PRODUCT_TITLE,
         type: TrinaColumnType.text(),
         width: 200,
+      ),
+    ],
+    PRODUCT_SHORT_TITLE: [
+      TrinaColumn(
+        enableAutoEditing: true,
+        title: OrdersStrings.gridShortTitle,
+        field: PRODUCT_SHORT_TITLE,
+        type: TrinaColumnType.text(),
+        width: 150,
       ),
     ],
     PRODUCT_PRICE: [
@@ -198,6 +215,39 @@ class EshopColumns {
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.center,
         width: 80,
+      ),
+    ],
+    PRODUCT_SURCHARGE: [
+      TrinaColumn(
+        enableAutoEditing: false, 
+        title: OrdersStrings.gridSurcharge,
+        field: PRODUCT_SURCHARGE,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
+        width: 150,
+        renderer: (ctx) {
+          final currentValue = ctx.cell.value?.toString() ?? "";
+          return Center(
+            child: InkWell(
+              onTap: () async {
+                final newValue = await _showSurchargeDialog(context, currentValue);
+                if (newValue != null) {
+                   ctx.stateManager.changeCellValue(ctx.cell, newValue, force: true);
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                child: Text(
+                  currentValue.isEmpty ? CommonStrings.edit : currentValue,
+                  style: TextStyle(
+                    color: currentValue.isEmpty ? Colors.grey : null,
+                    decoration: currentValue.isEmpty ? TextDecoration.underline : null,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     ],
     PRODUCT_DESCRIPTION: (Map<String, dynamic> data) => [
@@ -530,6 +580,47 @@ class EshopColumns {
                 ),
               ],
             ),
+          );
+        },
+      ),
+    ],
+    ORDER_CONTRACT_DOWNLOAD: (Map<String, dynamic> data) => [
+      TrinaColumn(
+        title: "",
+        field: ORDER_CONTRACT_DOWNLOAD,
+        type: TrinaColumnType.text(),
+        readOnly: true,
+        enableEditingMode: false,
+        width: 60,
+        renderer: (rendererContext) {
+          return IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: FeaturesStrings.downloadContract,
+            onPressed: () async {
+              final orderId = rendererContext.row.cells[ORDER_ID]!.value as int;
+              final orderSymbol = rendererContext.row.cells[ORDER_SYMBOL]?.value ?? orderId.toString();
+
+              final customerName = rendererContext.row.cells[ORDER_DATA]?.value?.toString() ?? "";
+              
+              String dialogTitle = FeaturesStrings.generatingContract;
+              if (customerName.isNotEmpty) {
+                 dialogTitle = FeaturesStrings.generatingContractFor(customerName);
+              }
+
+              final pdfBytes = await DialogHelper.showFutureProgressDialog<Uint8List?>(
+                context: context,
+                title: dialogTitle,
+                futureCallback: () => DbOrders.downloadContractPdf(orderId),
+              );
+
+              if (pdfBytes != null) {
+                await FileSaver.instance.saveFile(
+                  name: "contract_$orderSymbol",
+                  bytes: pdfBytes,
+                  mimeType: MimeType.pdf,
+                );
+              }
+            },
           );
         },
       ),
@@ -948,6 +1039,92 @@ class EshopColumns {
     return showDialog<bool>(
       context: context,
       builder: (_) => ProductsDialog(ticketId: ticketId),
+    );
+  }
+  static Future<String?> _showSurchargeDialog(BuildContext context, String? currentValue) async {
+    // currentValue likely "100.0 CZK" or "100"
+    String initialAmount = "";
+    String initialCurrency = "CZK"; // Default
+    
+    if (currentValue != null && currentValue.isNotEmpty) {
+      List<String> parts = currentValue.split(" ");
+      if (parts.isNotEmpty) {
+        initialAmount = parts[0];
+      }
+      if (parts.length > 1) {
+        initialCurrency = parts.sublist(1).join(" ");
+      }
+    }
+    
+    final amountController = TextEditingController(text: initialAmount);
+    final currencyController = TextEditingController(text: initialCurrency);
+
+    final supportedCurrencies = ['CZK', 'EUR'];
+    
+    return await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(OrdersStrings.gridSurcharge),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: amountController,
+              decoration: InputDecoration(
+                labelText: CommonStrings.amount, 
+                hintText: "0.00",
+              ),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+            const SizedBox(height: 16),
+            Text(CommonStrings.currency), 
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: supportedCurrencies.map((c) => ActionChip(
+                label: Text(c),
+                onPressed: () {
+                  currencyController.text = c;
+                },
+              )).toList(),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: currencyController,
+              decoration: InputDecoration(
+                labelText: BankAccountStrings.currencyCodeLabel,
+              ),
+              textCapitalization: TextCapitalization.characters,
+              maxLength: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: Text(BankAccountStrings.cancel)
+          ),
+          ElevatedButton(
+            onPressed: () {
+               final amount = amountController.text.trim();
+               final currency = currencyController.text.trim().toUpperCase();
+               
+               if (amount.isEmpty) {
+                 // Clear value if amount empty?
+                 Navigator.pop(context, "");
+               } else {
+                 if (currency.isNotEmpty) {
+                   Navigator.pop(context, "$amount $currency");
+                 } else {
+                    Navigator.pop(context, amount);
+                 }
+               }
+            },
+            child: Text(BankAccountStrings.save), 
+          ),
+        ],
+      ),
     );
   }
 }

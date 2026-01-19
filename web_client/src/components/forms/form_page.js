@@ -8,7 +8,7 @@ import { FormHelper } from './form_helper.js';
 import { FormFieldBuilder } from './fields/form_field_builder.js';
 import { TicketFieldBuilder } from './fields/ticket_field_builder.js';
 import { DbForms } from './db_forms.js';
-import { OrderPreview } from './order_preview.js';
+
 import { DbOrders } from '../eshop/db_orders.js';
 import { RouterService } from '../../services/router_service.js';
 import { RightsService } from '../../services/rights_service.js';
@@ -39,6 +39,7 @@ export class FormPage extends Component {
         this.currentSession = null;
         this.currentLink = null;
         this.onBack = null;
+        this._previewModulePromise = null;
     }
 
     cleanup() {
@@ -47,6 +48,7 @@ export class FormPage extends Component {
             this.currentPriceWidget = null;
         }
         this.currentSession = null;
+        this._previewModulePromise = null;
         // Also remove legacy widget just in case
         const widget = document.getElementById('floating-price-widget');
         if (widget) widget.remove();
@@ -57,6 +59,16 @@ export class FormPage extends Component {
             this._fabBtn = null;
         }
         
+        // Explicitly destroy Ticket Fields to remove listeners
+        if (this.host) {
+             const ticketFields = this.host.querySelectorAll('.ticket-field');
+             ticketFields.forEach(field => {
+                 if (typeof field.destroy === 'function') {
+                     field.destroy();
+                 }
+             });
+        }
+
         // Base cleanup
         super.clear();
     }
@@ -176,8 +188,8 @@ export class FormPage extends Component {
         btn.style.width = '56px';
         btn.style.height = '56px';
         btn.style.borderRadius = '50%';
-        btn.style.backgroundColor = 'var(--primary-color, #000)';
-        btn.style.color = '#fff';
+        btn.style.backgroundColor = 'var(--fab-color, var(--primary-color, #000))';
+        btn.style.color = 'var(--fab-text-color, #fff)';
         btn.style.border = 'none';
         btn.style.boxShadow = '0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)';
         btn.style.cursor = 'pointer';
@@ -247,6 +259,7 @@ export class FormPage extends Component {
         
         new CurrencySelectorWidget(session, this.host);
         
+        
 
         
         // Handle Currency Filtering
@@ -283,55 +296,67 @@ export class FormPage extends Component {
              
              const currencyChanged = lastSeenCurrency !== currency;
              lastSeenCurrency = currency;
+             
+             // 1. Sync Standard Fields from Session (Replaces manual unchecking)
+             // Iterate all standard inputs and match against session state
+             const allInputs = form.querySelectorAll('input, select, textarea');
+             allInputs.forEach(input => {
+                 if (input.dataset.ticketId) return; // Skip ticket fields (handled by TicketFieldBuilder)
+                 if (input.type === 'submit' || input.type === 'button' || input.type === 'hidden') return;
+                 if (!input.name) return;
+                 
+                 const val = session.state.fields.get(input.name);
+                 
+                 // Apply Logic (Standard)
+                 if (input.type === 'radio') {
+                     const shouldCheck = val !== undefined && String(input.value) === String(val);
+                     if (input.checked !== shouldCheck) input.checked = shouldCheck;
+                 } else if (input.type === 'checkbox') {
+                      let isChecked = false;
+                      if (val !== undefined) {
+                          if (val === true || val === 'true') isChecked = true;
+                          else isChecked = String(val).split(' | ').includes(input.value);
+                      }
+                      if (input.checked !== isChecked) input.checked = isChecked;
+                 } else {
+                     const expected = val !== undefined ? val : '';
+                     if (String(input.value) !== String(expected)) {
+                         input.value = expected;
+                     }
+                 }
+                 
+                 // Update "Clear Selection" Button Visibility
+                 // This effectively handles "Reactive UI" for standard fields
+                 const container = input.closest('.form-field-container');
+                 if (container) {
+                     const clearBtn = container.querySelector('.btn-clear-selection');
+                     if (clearBtn) {
+                         const anyChecked = container.querySelector('input:checked');
+                         clearBtn.style.display = anyChecked ? 'inline-block' : 'none';
+                     }
+                 }
+             });
 
+             // 2. Visibility Logic (CSS)
              const allCurrencyElements = form.querySelectorAll('[data-currency]');
              
              allCurrencyElements.forEach(el => {
                 const itemCurrency = el.getAttribute('data-currency');
                 
-                // Visibility Logic
+                // Only toggle container-like elements, not inputs themselves (inputs are data-driven)
                 if (el.classList.contains('form-check') || el.classList.contains('dropdown-item') || el.classList.contains('option-card')) {
-                     if (itemCurrency !== currency) {
+                     if (itemCurrency && itemCurrency !== currency) {
                          el.style.display = 'none';
                      } else {
                          el.style.display = ''; 
                      }
                 }
-
-                // Deselection Logic
-                // If currency changed, we deselect EVERYTHING (as requested "deselect all products").
-                // OR we strictly deselect invalid currency items?
-                // Request: "deselect all products if you switch the currency"
-                // This implies a reset.
-                if (currencyChanged && el.tagName === 'INPUT') {
-                     if (el.checkValidity && (el.type === 'radio' || el.type === 'checkbox')) {
-                         el.checked = false;
-                         // Fix: Hide "Clear Selection" button if present
-                         const fieldContainer = el.closest('.form-field-container');
-                         if (fieldContainer) {
-                             const clearBtn = fieldContainer.querySelector('.btn-clear-selection');
-                             if (clearBtn) clearBtn.style.display = 'none';
-                         }
-                     }
-                }
-                
-                // Also ensure invalid currency items are unchecked even if currency didn't change (sanity check)
-                if (el.tagName === 'INPUT' && itemCurrency !== currency) {
-                      if (el.checkValidity && (el.type === 'radio' || el.type === 'checkbox') && el.checked) {
-                         el.checked = false;
-                         // Same fix here
-                         const fieldContainer = el.closest('.form-field-container');
-                         if (fieldContainer) {
-                             const clearBtn = fieldContainer.querySelector('.btn-clear-selection');
-                             if (clearBtn) clearBtn.style.display = 'none';
-                         }
-                     }
-                }
              });
 
-             // If currency changed, trigger a recalculation to reflect zeroed price
+             // 3. Trigger Session Cleanup
+             // If currency changed, we command session to drop invalid values.
+             // This modifies state -> triggers 'state-changed' again -> runs Sync above -> Unchecks inputs.
              if (currencyChanged) {
-                 // Update Session State (remove incompatible items)
                  session.resetIncompatibleCurrencyFields(currency);
              }
         });
@@ -350,6 +375,25 @@ export class FormPage extends Component {
                 session.setIsReady(true);
             }
         }, 100);
+
+        // Optimization: Prefetch OrderPreview
+        this.prefetchPreview();
+    }
+
+    prefetchPreview() {
+        if (this._previewModulePromise) return;
+
+        const fetcher = () => {
+             if (this._previewModulePromise) return;
+             console.log('[FormPage] Prefetching OrderPreview...');
+             this._previewModulePromise = import('./order_preview.js');
+        };
+
+        if (window.requestIdleCallback) {
+            window.requestIdleCallback(fetcher);
+        } else {
+            setTimeout(fetcher, 2000); // 2s delay
+        }
     }
 
 
@@ -361,9 +405,7 @@ export class FormPage extends Component {
     }
 
     validateAndSubmit(form, formModel) {
-        console.log('[FormPage] validateAndSubmit called');
         const isValid = FormValidator.validateAndShowErrors(form, formModel, this.currentSession);
-        console.log('[FormPage] Custom Validator Result:', isValid);
         
         if (isValid) {
             this.handlePreview(form, formModel);
@@ -378,34 +420,40 @@ export class FormPage extends Component {
         return FormHelper.calculatePrice(payload, formModel);
     }
 
+    // --- DEBUG HELPER ---
     handlePreview(form, formModel) {
-        console.log('[FormPage] handlePreview called');
-        
         // Native Validation Check
+        // Explicitly check native validity before proceeding, 
+        // as some browsers might not block onSubmit if preventDefault was called early?
+        // Actually, normally 'submit' event only fires if valid. 
+        // But we are calling this from our explicit handler.
         if (!form.reportValidity()) {
-            console.warn('[FormPage] form.reportValidity() failed. Scanning for native invalid elements...');
-            Array.from(form.elements).forEach(el => {
-                if (el.willValidate && !el.checkValidity()) {
-                    console.warn('[FormPage] Native Invalid Element:', el.name || el.id || el.tagName, el.validationMessage, el);
-                }
-            });
             return;
         }
 
-        console.log('[FormPage] Native validation passed. Importing OrderPreview...');
+        // Use prefetched module if available, or fetch now
+        if (!this._previewModulePromise) {
+            this._previewModulePromise = import('./order_preview.js');
+        }
 
-        import('./order_preview.js').then(({ OrderPreview }) => {
-             console.log('[FormPage] OrderPreview module loaded.', OrderPreview);
+        this._previewModulePromise.then(({ OrderPreview }) => {
              try {
                  const priceData = this.calculateTotal(form, formModel);
                  const precalculatedPayload = this.currentSession ? this.currentSession.payload : null;
+                 
                  OrderPreview.show(form, formModel, priceData, (overlay) => {
+                     // On Confirm
                      this.submitOrder(form, formModel, overlay || document.body); 
-                 }, () => {}, precalculatedPayload);
+                 }, () => {
+                     // On Close
+                 }, precalculatedPayload);
+                 
              } catch (e) {
                  console.error('[FormPage] OrderPreview.show crashed:', e);
              }
-        }).catch(err => console.error('[FormPage] Failed to load OrderPreview module', err));
+        }).catch(err => {
+             console.error('[FormPage] Failed to load OrderPreview module', err);
+        });
     }
     
     closePreview() {

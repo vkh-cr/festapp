@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/import/import_dialog_helper.dart';
 import 'package:fstapp/components/single_data_grid/i_has_id.dart';
@@ -46,7 +47,7 @@ class UsersTabHelper {
     for (var u in users) {
       try {
         await UserManagementHelper.unsafeChangeUserPassword(context, u);
-        ToastHelper.Show(context, "Password has been changed.".tr());
+        ToastHelper.Show(context, UserStrings.passwordChanged);
       } catch (e) {
         String errorMessage = "Failed for user ${u.data?[Tb.occasion_users.data_email] ?? '[no email]'}: ${e.toString()}".tr();
         ToastHelper.Show(context, errorMessage, severity: ToastSeverity.NotOk);

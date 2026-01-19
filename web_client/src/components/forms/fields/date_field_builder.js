@@ -1,5 +1,5 @@
 import flatpickr from "flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
+// import 'flatpickr/dist/flatpickr.min.css'; // Commented out for Node.js test runner (JSDOM) compatibility
 import { Czech } from "flatpickr/dist/l10n/cs.js";
 import { ThemeService } from '../../../services/theme_service.js';
 import { FormStrings } from '../form_strings.js';
@@ -116,7 +116,7 @@ export class DateFieldBuilder {
                 },
                 // User requested NO limits on calendar picker itself, so we remove minDate/maxDate here
                 // minDate: minDateObj, 
-                // maxDate: maxDateObj,
+                maxDate: maxDateObj || 'today',
                 defaultDate: input.value || undefined, 
         });
         

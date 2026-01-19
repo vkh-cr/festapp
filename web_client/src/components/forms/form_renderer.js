@@ -39,15 +39,32 @@ export class FormRenderer {
         // Bind Callbacks
         form.onsubmit = (e) => {
             e.preventDefault();
+            console.log('[FormRenderer] onsubmit triggered'); 
             if(callbacks.onSubmit) callbacks.onSubmit(form, formModel);
         }
-        
+
+        // BACKUP: Explicit Click Listener
+        // Some mobile browsers or specific states might not fire 'submit' if 'novalidate' is weirdly handled
+        // or if something else intercepts.
+        const submitBtn = form.querySelector('.btn-submit');
+        if (submitBtn) {
+            submitBtn.onclick = (e) => {
+                 // If default submit fires, this runs first. 
+                 // We prevent default here too to specific double-submit if both fire?
+                 // Actually, if we prevent default on click, submit event might not fire for button?
+                 // Let's just monitor. If 'submit' doesn't fire, we manually fire it?
+                 // No, safer is: Click -> Prevent Default -> Call Submit Logic directly.
+                 e.preventDefault();
+                 console.log('[FormRenderer] Submit Clicked (Manual Trigger)');
+                 if(callbacks.onSubmit) callbacks.onSubmit(form, formModel);
+            };
+        }
+
         const updateHandler = (e) => {
             if(callbacks.onInput) callbacks.onInput(e, form, formModel);
         };
         form.addEventListener('input', updateHandler);
-        // Change event needed for some inputs (select, etc) to trigger updates immediately?
-        // Usually 'input' covers value changes, but let's keep 'change' for safety/legacy.
+        // Change event needed for some inputs
         form.addEventListener('change', updateHandler);
     }
 

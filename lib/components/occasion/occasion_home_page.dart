@@ -12,6 +12,7 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/update_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/news/db_news.dart';
 import 'package:fstapp/components/users/views/login_page.dart';
 import 'package:fstapp/services/notification_helper.dart';
@@ -134,7 +135,7 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
                     icon: tab.buildIcon(listenableContext, _messageCount, messageCountString),
                     activeIcon: tab.buildActiveIcon(listenableContext, _messageCount, messageCountString),
                     label: key == OccasionTab.user
-                        ? (occasionLinkModel?.userInfo?.name ?? "Sign in".tr())
+                        ? (occasionLinkModel?.userInfo?.name ?? UserStrings.signIn)
                         : tab.label,
                   );
                 }).toList(),

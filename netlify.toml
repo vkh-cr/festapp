@@ -1,5 +1,5 @@
 [build]
-command = "./automation/build_netlify.sh"
+command = "./automation/ci_build.sh"
 publish = "build/web"
 
 [[redirects]]

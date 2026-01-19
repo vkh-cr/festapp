@@ -1,12 +1,13 @@
 import { CommonStrings } from '../shared/common_strings.js';
 import { FormStrings } from './form_strings.js';
 import { OrdersStrings } from '../eshop/orders_strings.js'; 
-import { FormPage } from './form_page.js';
+
 import { RouterService } from '../../services/router_service.js';
 import { PublicOrderStrings } from './public_order_strings.js';
 import { OrderResult } from './order_result.js';
 import { FeatureService } from '../features/feature_service.js';
 import { FormDataReader } from './form_data_reader.js';
+import { FieldPreviewFactory } from './previews/field_preview_factory.js';
 
 // Inject CSS
 if (typeof document !== 'undefined') {
@@ -276,16 +277,9 @@ export class OrderPreview {
                  // Find field definition
                  const field = formModel.relatedFields.find(f => String(f.id) === key);
                  if (field && field.type !== 'ticket') {
-                     // Resolve Label
-                      let finalVal = val;
-                      if (field.options) {
-                          const foundOpt = field.options.find(o => o.id != null && String(o.id) === String(val));
-                          if (foundOpt) finalVal = foundOpt.title;
-                      }
-                      // Handle " | " for multi-selects? The reader returns joined string.
-                      // If so, we might want to split and resolve each?
-                      // For now, assuming simple resolution or raw string.
-
+                      const finalVal = FieldPreviewFactory.format(field, val, { 
+                          currency: totalPriceData.currency 
+                      });
                       personalInfo.push({ label: field.title, value: finalVal });
                  }
             });
@@ -297,7 +291,7 @@ export class OrderPreview {
         const tickets = [];
         const payloadTickets = payload.ticket || [];
         
-        // Helper to resolve subfield label/value
+        // Helper to get definition
         const allSubFields = [];
         formModel.visibleFields.forEach(f => {
             if (f.type === 'ticket') {
@@ -335,38 +329,14 @@ export class OrderPreview {
                           }
                           
                           // Prevent duplicates: Only process the key that matches the definition type
-                          // processing 'product_type' key when real type is 'custom' causes double entry
-                          // processing '_subFieldId' key causes garbage entry
                           if (subDef && key !== subDef.type) return;
 
                           if (subDef) {
-                              // Resolve Value (Product Title etc)
-                             let valLabel = val;
-                             // Prioritize processed options from FormModel which includes Product Type mapping
-                             let options = subDef.options;
-                             
-                             // Fallback to raw data if options empty (e.g. if FormModel construct failed to map?)
-                             if (!options || options.length === 0) {
-                                 options = subDef.data && subDef.data.options;
-                                 if (subDef.type === 'product_type' && subDef.data && subDef.data.product_type_data) {
-                                     options = subDef.data.product_type_data.products;
-                                 }
-                             }
-
-                             if (options) {
-                                 // Robust ID comparison
-                                 const found = options.find(o => o.id != null && String(o.id) === String(val));
-                                 if (found) {
-                                     valLabel = found.title;
-                                     if (found.price) {
-                                         // Ensure price is formatted or exists
-                                         valLabel += ` (${found.price} ${totalPriceData.currency})`;
-                                     }
-                                 }
-                             }
-                             
-                             tData.rows.push({ label: subDef.title, value: valLabel });
-                         }
+                              const valLabel = FieldPreviewFactory.format(subDef, val, { 
+                                  currency: totalPriceData.currency 
+                              });
+                              tData.rows.push({ label: subDef.title, value: valLabel });
+                          }
                      });
                  });
              }

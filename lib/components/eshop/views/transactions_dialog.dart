@@ -11,6 +11,7 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/eshop/views/search_transactions_screen.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
 
 class TransactionsDialog extends StatefulWidget {
   final int orderId;
@@ -376,7 +377,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
 
                               // Bank Account formatted as account/bankcode (bank name)
                               _buildInfoRow(
-                                title: 'Bank Account'.tr(),
+                                title: BankAccountStrings.bankAccount,
                                 value:
                                 '${transaction.counterAccount ?? "N/A".tr()} / ${transaction.bankCode ?? "N/A".tr()} (${transaction.bankName ?? "N/A".tr()})',
                               ),

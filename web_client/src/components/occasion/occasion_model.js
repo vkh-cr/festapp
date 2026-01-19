@@ -25,6 +25,8 @@ export class OccasionModel {
         this.end_time = data[OccasionModel.metaEndTime] ? new Date(data[OccasionModel.metaEndTime]) : null;
         this.is_open = data[OccasionModel.metaIsOpen];
         this.is_hidden = data[OccasionModel.metaIsHidden];
+        // Ensure is_promoted is mapped
+        this.is_promoted = data['is_promoted'] || false; 
         this.data = data[OccasionModel.metaData] || {};
         this.organization = data[OccasionModel.metaOrganization];
         this.unit = data[OccasionModel.metaUnit];
@@ -33,11 +35,16 @@ export class OccasionModel {
         // Parse Features
         this.features = [];
         if (data[OccasionModel.metaFeatures] && Array.isArray(data[OccasionModel.metaFeatures])) {
-            this.features = data[OccasionModel.metaFeatures].map(f => ({
-                code: f.code,
-                isEnabled: f.is_enabled, // DB usually sends snake_case or whatever the view returns
-                data: f.data
-            }));
+            this.features = data[OccasionModel.metaFeatures].map(f => {
+                const { code, is_enabled, data, ...rest } = f;
+                // Merge 'rest' (flat properties) into 'data' to support both structures
+                const mergedData = { ...(data || {}), ...rest };
+                return {
+                    code: code,
+                    isEnabled: is_enabled,
+                    data: mergedData
+                };
+            });
         } else {
              // If features are not present or null, initialize empty
              this.features = [];

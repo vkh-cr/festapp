@@ -13,6 +13,7 @@ import 'package:fstapp/components/occasion/admin_page.dart';
 // Import new page
 import 'package:fstapp/components/unit/views/unit_page.dart';
 import 'package:fstapp/components/users/views/login_page.dart';
+import 'package:fstapp/components/users/views/transfer_page.dart';
 import 'package:fstapp/components/users/views/reset_password_page.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/components/information/info_page.dart';
@@ -57,12 +58,18 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SignupRoute.page, path: sl(SignupPage.ROUTE)),
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
+    AutoRoute(page: TransferRoute.page, path: "/${TransferPage.ROUTE}"),
     AutoRoute(
         page: InstanceInstallRoute.page,
         path: sl(InstanceInstallPage.ROUTE)),
     CustomRoute(
         page: UnitAdminRoute.page,
         path: "/${UnitPage.ROUTE}/:id/edit",
+        transitionsBuilder: TransitionsBuilders.noTransition),
+
+    CustomRoute(
+        page: OrganizationEditRoute.page,
+        path: "/organizationEdit/:id",
         transitionsBuilder: TransitionsBuilders.noTransition),
 
     // Use UnitPage for the /unit/:id path (this was commented out)
@@ -196,6 +203,7 @@ class AppRouter extends RootStackRouter {
       UnitPage.ROUTE,
       FormPage.ROUTE,
       ScanPage.ROUTE,
+      TransferPage.ROUTE,
     ];
   }
 }

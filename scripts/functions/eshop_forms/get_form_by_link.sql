@@ -21,7 +21,6 @@ BEGIN
         );
     END IF;
 
-    -- Check if the form is open for submissions, or if the user is an editor
     SELECT occasion INTO occ_id FROM public.forms WHERE link = form_link;
     is_editor_view := public.get_is_editor_order_view_on_occasion(occ_id);
 
@@ -97,6 +96,7 @@ BEGIN
                                                     'description', p.description,
                                                     'price', p.price,
                                                     'currency_code', p.currency_code,
+                                                    'data', p.data,
                                                     'order', p."order",
                                                     'ordered_count', (
                                                         SELECT count(*)

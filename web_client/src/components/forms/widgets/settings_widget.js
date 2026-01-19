@@ -26,9 +26,9 @@ export class SettingsWidget {
         this.renderSection({
             title: LocalizationService.tr('Appearance') || 'Vzhled', // Fallback trans
             options: [
-                { id: 'dark', label: 'Dark' },
-                { id: 'auto', label: 'Auto' },
-                { id: 'light', label: 'Light' }
+                { id: 'dark', label: CommonStrings.dark },
+                { id: 'auto', label: CommonStrings.auto },
+                { id: 'light', label: CommonStrings.light }
             ],
             currentValue: ThemeService.currentMode,
             onSelect: (val) => {
@@ -39,7 +39,7 @@ export class SettingsWidget {
 
         // Language Section
         this.renderSection({
-            title: LocalizationService.tr('Language') || 'Jazyk', // Fallback trans
+            title: CommonStrings.language,
             options: AppConfig.supportedLanguages.map(lang => ({
                 id: lang,
                 label: lang === 'cs' ? 'Čeština' : 'English'
@@ -59,8 +59,8 @@ export class SettingsWidget {
             const versionEl = document.createElement('div');
             versionEl.style.cssText = `
                 font-size: 11px;
-                color: var(--text-color, inherit);
-                opacity: 0.5;
+                color: inherit;
+                opacity: 0.7; /* Increased from 0.5 for better visibility */
                 text-align: center;
                 margin-top: 8px;
             `;
@@ -74,7 +74,7 @@ export class SettingsWidget {
         section.style.cssText = `
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            width: 100%;
         `;
 
         const label = document.createElement('div');
@@ -82,8 +82,7 @@ export class SettingsWidget {
         label.textContent = title;
         label.style.cssText = `
             font-size: 14px;
-            color: var(--text-color, inherit);
-            opacity: 0.8;
+            color: inherit;
             margin-bottom: 8px;
             font-weight: 500;
         `;
@@ -93,7 +92,8 @@ export class SettingsWidget {
         const group = document.createElement('div');
         group.className = 'segmented-control';
         group.style.cssText = `
-            display: inline-flex;
+            display: flex;
+            width: 100%;
             background-color: var(--unselected-widget-fill, rgba(0,0,0,0.05));
             border-radius: 8px;
             overflow: hidden;
@@ -115,7 +115,7 @@ export class SettingsWidget {
                 cursor: pointer;
                 transition: background-color 0.2s, color 0.2s;
                 min-width: 70px;
-                color: var(--text-color);
+                color: inherit;
                 background-color: transparent;
                 border-radius: 0;
                 flex: 1;
@@ -131,7 +131,9 @@ export class SettingsWidget {
                 btn.style.backgroundColor = 'var(--primary-color, #4465A6)';
                 btn.style.color = '#ffffff';
             } else {
-                btn.style.opacity = '0.7';
+                // Inactive State: Remove opacity for better contrast
+                btn.style.opacity = '1';
+                btn.style.color = 'inherit';
             }
             
             // Hover effect for non-active

@@ -96,125 +96,45 @@ export class FormHelper {
     static calculatePrice(payload, formModel) {
         let totalPrice = 0;
         let totalItems = 0;
-        let currency = 'CZK'; // Default fallback
+        let currency = null;
 
-        // Helper to find option and price
-        const findPrice = (fieldOrSub, value) => {
-             let options = fieldOrSub.options || (fieldOrSub.data && fieldOrSub.data.options) || [];
-             if (fieldOrSub.type === 'product_type' && fieldOrSub.data && fieldOrSub.data.product_type_data && fieldOrSub.data.product_type_data.products) {
-                  options = fieldOrSub.data.product_type_data.products;
-             }
-             
-             if (!options || options.length === 0) return 0;
-             
-             const valStr = String(value);
-             const opt = options.find(o => o.id != null && String(o.id) === valStr);
-             
-             if (opt) {
-                 if (currency === 'CZK' && opt.currency) { 
-                     currency = opt.currency;
-                 }
-                 const p = Number(opt.price);
-                 return isNaN(p) ? 0 : p;
-             }
-             return 0;
-        };
-
-        // 1. Process Tickets
-        // Payload.ticket is array of ticket objects (standardized)
-        const tickets = payload.ticket || [];
-        
-        if (tickets.length > 0) {
-             // Gather ALL ticket subfields definitions once to find prices
-             // Flatten all ticket fields' subfields into one list/map
-             const allSubFields = [];
-             formModel.visibleFields.forEach(f => {
-                 if (f.type === 'ticket') {
-                     const subs = f.subFields || f.fields || (f.data && f.data.fields) || [];
-                     allSubFields.push(...subs);
-                 }
-             });
-
-             // Iterate tickets ONCE
-             tickets.forEach((ticket, tIdx) => {
-                  totalItems++; // 1 Ticket = 1 Item
-                  
-                  // Spot Price
-                  if (ticket.spotPrice) {
-                      totalPrice += ticket.spotPrice;
-                  }
-
-                  // console.log(`[FormHelper] Calc Ticket ${tIdx}:`, ticket);
-
-                  if (ticket.fields && Array.isArray(ticket.fields)) {
-                      ticket.fields.forEach(fObj => {
-                           // Refactored to avoid double counting from multiple keys (e.g. type + product_type)
-                           // We process the Object as ONE entry.
-                           
-                           let subDef = null;
-                           let val = null;
-
-                           // 1. Find Definition
-                           if (fObj['_subFieldId']) {
-                               subDef = allSubFields.find(s => String(s.id) === String(fObj['_subFieldId']));
-                           } else {
-                               // Fallback: Try to infer from keys (Legacy/Unreliable)
-                               const keys = Object.keys(fObj).filter(k => k !== 'currency_code' && k !== '_subFieldId');
-                               if (keys.length > 0) {
-                                   const key = keys[0]; // Pick first candidate
-                                   subDef = allSubFields.find(s => s.type === key);
-                                   val = fObj[key];
-                               }
-                           }
-
-                           // 2. Calculate Price
-                           if (subDef) {
-                               // If val not resolved by fallback, get it from type
-                               if (val === null) {
-                                   val = fObj[subDef.type];
-                                   // Double check: if subDef.type is 'product_type' but key was distinct?
-                                   // The Reader puts value into [sub.type].
-                                   // If sub.type mismatch? (Should not happen if Reader is consistent)
-                                   if (val === undefined) {
-                                        // Try finding any value
-                                        const keys = Object.keys(fObj).filter(k => k !== 'currency_code' && k !== '_subFieldId');
-                                        if (keys.length > 0) val = fObj[keys[0]];
-                                   }
-                               }
-
-                                const p = findPrice(subDef, val);
-                                if (p > 0) {
-                                    // console.log(`Ticket [${tIdx}] Price: ${p}`);
-                                    totalPrice += p;
-                                } else {
-                                    // console.log(`Ticket [${tIdx}] ${subDef.id} val=${val} price=0`);
-                                }
-                            }
-                      });
-                  }
-             });
+        if (payload.ticket && payload.ticket.length > 0) {
+            payload.ticket.forEach(t => {
+                let ticketPrice = 0;
+                
+                // Spot Logic
+                if (t.spotPrice) {
+                    ticketPrice += parseFloat(t.spotPrice);
+                }
+                
+                // Fields Logic
+                if (t.fields) {
+                    t.fields.forEach(f => {
+                         // Use price on object if available (set by FormSession lookup)
+                         if (f.price !== undefined) {
+                             ticketPrice += parseFloat(f.price);
+                         } 
+                         
+                         if (f.currency_code) currency = f.currency_code;
+                    });
+                }
+                
+                // If the ticket has a price (or is a valid item), count it
+                // FIX: Count items even if price is 0 (User Request), BUT ONLY IF SELECTED.
+                // We check if there are fields or a spot.
+                const hasSelection = (t.fields && t.fields.length > 0) || t.spot || ticketPrice > 0;
+                
+                if (hasSelection) {
+                    totalItems++;
+                }
+                
+                if (ticketPrice > 0) {
+                    totalPrice += ticketPrice;
+                }
+            });
         }
 
-
-        // 2. Regular Fields
-        // Payload.fields is array of { ID: val }
-        const pFields = payload.fields || [];
-        pFields.forEach(fObj => {
-             Object.keys(fObj).forEach(key => {
-                  if (key === 'currency_code') return;
-                  const val = fObj[key];
-                  // Find field def by ID
-                  const field = formModel.visibleFields.find(f => String(f.id) === key);
-                  if (field) {
-                      const price = findPrice(field, val);
-                      if (price > 0) {
-                          totalPrice += price;
-                          totalItems++;
-                      }
-                  }
-             });
-        });
-        
         return { totalPrice, totalItems, currency };
     }
+
 }

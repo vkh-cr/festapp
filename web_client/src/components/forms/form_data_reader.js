@@ -1,4 +1,5 @@
 import { DbForms } from './db_forms.js';
+import { IdDocumentConstants } from './constants/id_document_constants.js';
 
 export class FormDataReader {
 
@@ -25,6 +26,25 @@ export class FormDataReader {
         // --- 1. Standard Fields (Non-Ticket) ---
         formModel.relatedFields.forEach(field => {
              if (field.type === 'ticket') return;
+
+             // Special Handling for ID Document (Nested Object)
+             if (field.type === 'id_document') {
+                 const idVal = formData.get(field.id.toString());
+                 // Only add if ID number is present (required or optional but filled)
+                 if (idVal && idVal.trim() !== '') {
+                     const expiryVal = formData.get(field.id.toString() + IdDocumentConstants.EXPIRY_SUFFIX);
+                     
+                     const idData = {
+                         "id_document_number": idVal,
+                         "id_document_expiry_date": (expiryVal && expiryVal.trim() !== '') ? expiryVal : null
+                     };
+
+                     let fieldObj = {};
+                     fieldObj[field.id.toString()] = idData;
+                     payload.fields.push(fieldObj);
+                 }
+                 return; // Done with this field
+             }
              
              // Check if data exists in FormData
              const vals = formData.getAll(field.id.toString());
@@ -37,12 +57,14 @@ export class FormDataReader {
                  
                  let fieldObj = {};
                  fieldObj[field.id.toString()] = val;
-                 
-                 // Attach currency if single value (complex logic for multi-currency items is rare/unsupported on standard fields)
-                 if (validVals.length === 1) {
-                      const opt = FormDataReader._findOption(field, validVals[0]);
-                      if (opt && opt.currency) fieldObj['currency_code'] = opt.currency;
-                 }
+                                  // Attach currency if single value (complex logic for multi-currency items is rare/unsupported on standard fields)
+                  if (validVals.length === 1) {
+                       const opt = FormDataReader._findOption(field, validVals[0]);
+                       if (opt) {
+                           const c = opt.currency || opt.currencyCode || opt.currency_code;
+                           if (c) fieldObj['currency_code'] = c;
+                       }
+                  }
 
                  payload.fields.push(fieldObj);
              }
@@ -113,25 +135,48 @@ export class FormDataReader {
 
                     // --- Processing Logic Same as Before ---
                     if (sub.type === 'spot') {
-                        const val = parseInt(rawVals[0]);
+                        const val = rawVals[0]; // ID is usually string or number
                         ticketObj['spot'] = val;
                         
-                        // Extract Price from DOM if available
-                        const inputName = `${field.id}_${indexKey}_${sub.id}`;
-                        const inputEl = form.querySelector(`input[name="${inputName}"]`);
-                        if (inputEl) {
-                            if (inputEl.dataset.price) {
-                                ticketObj['spotPrice'] = parseFloat(inputEl.dataset.price);
-                            }
-                            if (inputEl.dataset.name) {
-                                ticketObj['spotName'] = inputEl.dataset.name;
-                            }
+                        // Extract Price: Try Option Lookup First (Reliable for Variants)
+                        const opt = FormDataReader._findOption(sub, val);
+                        if (opt && opt.price !== undefined) {
+                            ticketObj['spotPrice'] = parseFloat(opt.price);
+                        } else {
+                            // Fallback to DOM dataset (legacy/Seat logic)
+                             const inputName = `${field.id}_${indexKey}_${sub.id}`;
+                             // For Radio, we need the CHECKED one matching value
+                             const inputEl = form.querySelector(`input[name="${inputName}"][value="${val}"]`) || 
+                                             form.querySelector(`input[name="${inputName}"]`);
+                             
+                             if (inputEl) {
+                                 if (inputEl.dataset.price) {
+                                     ticketObj['spotPrice'] = parseFloat(inputEl.dataset.price);
+                                 }
+                                 if (inputEl.dataset.name) {
+                                     ticketObj['spotName'] = inputEl.dataset.name;
+                                 }
+                             }
                         }
                     }
                     else if (sub.type === 'product_type') {
                         // Product Types (always array of objects)
                         rawVals.forEach(v => {
-                             ticketObj.fields.push(FormDataReader._createSubFieldObj(sub, v));
+                             const fObj = FormDataReader._createSubFieldObj(sub, v);
+                             
+                             // Fallback: If price missing, check DOM dataset
+                             if (fObj.price === undefined) {
+                                 const inputName = `${field.id}_${indexKey}_${sub.id}`;
+                                 const inputEl = form.querySelector(`input[name="${inputName}"][value="${v}"]`) || 
+                                                 form.querySelector(`option[value="${v}"]`); // Select?
+                                 
+                                 if (inputEl && inputEl.dataset && inputEl.dataset.price) {
+                                     fObj.price = parseFloat(inputEl.dataset.price);
+                                     const c = inputEl.dataset.currency || inputEl.dataset.currencyCode; 
+                                     if (c) fObj.currency_code = c;
+                                 }
+                             }
+                             ticketObj.fields.push(fObj);
                         });
                     } 
                     else {
@@ -168,16 +213,21 @@ export class FormDataReader {
     }
 
     static _findOption(fieldOrSub, value) {
+         let found = null;
+
          // 1. Product Type Products
          if (fieldOrSub.type === 'product_type' && fieldOrSub.data && fieldOrSub.data.product_type_data && fieldOrSub.data.product_type_data.products) {
-             return fieldOrSub.data.product_type_data.products.find(p => String(p.id) === String(value));
+              found = fieldOrSub.data.product_type_data.products.find(p => String(p.id) === String(value));
          }
-         // 2. Standard Options
-         const options = fieldOrSub.options || (fieldOrSub.data && fieldOrSub.data.options) || [];
-         if (options.length > 0) {
-             return options.find(o => String(o.id) === String(value));
+         
+         // 2. Standard Options (Fallback)
+         if (!found) {
+             const options = fieldOrSub.options || (fieldOrSub.data && fieldOrSub.data.options) || [];
+             if (options.length > 0) {
+                 found = options.find(o => String(o.id) === String(value));
+             }
          }
-         return null;
+         return found;
     }
 
     static _createSubFieldObj(sub, val) {
@@ -192,11 +242,17 @@ export class FormDataReader {
             if (isProduct) {
                 fObj['product_type'] = val;
             }
+            
+            if (opt.price !== undefined) {
+                 fObj['price'] = opt.price;
+            }
 
-            if (opt.currency) {
-                fObj['currency_code'] = opt.currency;
+            const c = opt.currency || opt.currencyCode || opt.currency_code;
+            if (c) {
+                fObj['currency_code'] = c;
             }
         }
+        return fObj;
         return fObj;
     }
 

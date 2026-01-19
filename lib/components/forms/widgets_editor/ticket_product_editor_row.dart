@@ -5,6 +5,10 @@ import 'package:fstapp/components/html/html_helper.dart';
 import 'product_detail_editor_dialog.dart';
 import 'ticket_editor_widgets.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'description_tooltip.dart';
 
 class TicketProductEditorRow extends StatefulWidget {
   final ProductModel product;
@@ -24,6 +28,7 @@ class TicketProductEditorRow extends StatefulWidget {
 
 class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
   late TextEditingController _titleController;
+  late TextEditingController _shortTitleController;
   late TextEditingController _priceController;
   late String selectedCurrency;
 
@@ -35,6 +40,10 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
         TextEditingController(text: (widget.product.price ?? 0).toString());
      _titleController.addListener(() {
       widget.product.title = _titleController.text;
+    });
+    _shortTitleController = TextEditingController(text: widget.product.shortTitle ?? "");
+    _shortTitleController.addListener(() {
+      widget.product.shortTitle = _shortTitleController.text;
     });
     _priceController.addListener(() {
       final text = _priceController.text.replaceAll(RegExp(r'\s+'), '');
@@ -54,6 +63,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
   @override
   void dispose() {
     _titleController.dispose();
+    _shortTitleController.dispose();
     _priceController.dispose();
     super.dispose();
   }
@@ -127,19 +137,36 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      labelText: CommonStrings.title,
-                      border: const UnderlineInputBorder(),
-                      suffixIcon: (!HtmlHelper.isHtmlEmptyOrNull(
-                          widget.product.description))
-                          ? Tooltip(
-                        message: "Has description".tr(),
-                        child: const Icon(Icons.description, size: 20),
-                      )
-                          : null,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _titleController,
+                          decoration: InputDecoration(
+                            labelText: CommonStrings.title,
+                            border: const UnderlineInputBorder(),
+                            suffixIcon: (!HtmlHelper.isHtmlEmptyOrNull(widget.product.description))
+                                ? DescriptionTooltip(
+                                    description: widget.product.description!,
+                                    child: const Icon(Icons.description, size: 20),
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+                      if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) ...[
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _shortTitleController,
+                            decoration: InputDecoration(
+                              labelText: OrdersStrings.gridShortTitle,
+                              border: const UnderlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Row(

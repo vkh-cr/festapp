@@ -2,7 +2,7 @@ import { AppConfig } from '../app_config.js';
 
 
 export class RouterService {
-    
+
     static FORM_PATH_PREFIX = '/form/';
 
     static navigateToExternal(url) {
@@ -18,7 +18,8 @@ export class RouterService {
         // This will likely be handled by the server returning the app index, or 
         // if this SPA handles it, we need logic for it.
         // For now, simple href is safest to ensure full load or external handling.
-        const path = `/${link}`;
+        const cleanLink = link.split('?')[0];
+        const path = `/${cleanLink}`;
         window.location.href = path; 
     }
 
@@ -28,7 +29,8 @@ export class RouterService {
     }
     
     static async navigateToForm(link) {
-        const path = `${RouterService.FORM_PATH_PREFIX}${link}`;
+        const cleanLink = link.split('?')[0];
+        const path = `${RouterService.FORM_PATH_PREFIX}${cleanLink}`;
         RouterService._lastPath = path; // Update tracker
         RouterService.pushState(path);
         const { FormPage } = await import('../components/forms/form_page.js');
@@ -47,12 +49,40 @@ export class RouterService {
         return `${baseUrl}/login`;
     }
 
+    static getAdminUrl() {
+        let baseUrl = AppConfig.flutterAppUrl || '';
+        if (baseUrl.endsWith('/')) {
+            baseUrl = baseUrl.slice(0, -1);
+        }
+        return `${baseUrl}/admin`;
+    }
+
     static navigateToLogin() {
         const url = RouterService.getLoginUrl();
         console.log(`Navigating to Login: ${url}`);
         window.location.href = url;
     }
+
+    static navigateToAdmin() {
+        const url = RouterService.getAdminUrl();
+        console.log(`Navigating to Admin: ${url}`);
+        window.location.href = url;
+    }
     
+    static navigateToHandover() {
+        const url = RouterService.getHandoverUrl();
+        console.log(`Initiating Session Handover: ${url}`);
+        window.location.href = url;
+    }
+
+    static getHandoverUrl() {
+        let baseUrl = AppConfig.flutterAppUrl || '';
+        if (baseUrl.endsWith('/')) {
+            baseUrl = baseUrl.slice(0, -1);
+        }
+        return `${baseUrl}/transfer`;
+    }
+
     // History Management
     static pushState(path) {
         window.history.pushState({}, '', path);
@@ -69,13 +99,16 @@ export class RouterService {
     static flutterRoutes = [
         '/reset-password',
         '/forgot-password',
+        '/resetPassword',
+        '/forgotPassword',
         '/login',
         '/signup',
         '/settings',
         '/install',
         '/unit',
         // '/form', // Handled by Web Client
-        '/scan'
+        '/scan',
+        '/transfer'
     ];
 
     // Initial Load Check
@@ -88,8 +121,8 @@ export class RouterService {
 
         // 1. Identify Route Type
         // Web Client Routes: / (Home), /index.html, /form/...
-        const isWebClientRoute = path === '/' || 
-                                 path === '/index.html' || 
+        const isWebClientRoute = path === '/' ||
+                                 path === '/index.html' ||
                                  path.startsWith(RouterService.FORM_PATH_PREFIX);
 
         const isFlutterRoute = RouterService.flutterRoutes.some(r => path.startsWith(r));
@@ -110,7 +143,7 @@ export class RouterService {
             // Logic mirroring Flutter:
             // if (!AppConfig.isAppSupported) { return "/"; } // Handled by outer if
             // if (RightsService.useOfflineVersion) ... // Skipped for Web
-            
+
             if (currentLink) {
                  defaultLink = `/${currentLink}`;
             } else if (AppConfig.isAllUnit && currentLink) {
@@ -128,15 +161,16 @@ export class RouterService {
                  // We are on a Web Client Route (Home, Form)
                  // If we are at root /, we might want to "redirect" (SPA navigate) to the default link
                  // BUT ONLY if the default link itself is ALSO a Web Client Route.
-                 
+
                  if (path === '/') {
                      if (defaultLink !== '/') {
                          const targetIsWebClient = defaultLink.startsWith(RouterService.FORM_PATH_PREFIX);
-                         
+
                          if (targetIsWebClient) {
                              // SPA Navigate (Stay in Web Client)
                              console.log(`RouterService: SPA redirect from / to ${defaultLink}`);
                              window.history.replaceState(null, '', defaultLink);
+                             RouterService._lastPath = defaultLink; // Critical: Sync tracker to prevent re-init on popstate
                              path = defaultLink; // Update path for subsequent loading logic
                              shouldRedirectToFlutter = false;
                          } else {
@@ -157,7 +191,7 @@ export class RouterService {
                  // Unknown deep link (e.g. /my-fest) -> Redirect
                  shouldRedirectToFlutter = true;
             }
-            
+
         } else {
             // Web Client Only Mode
              if (isWebClientRoute) {
@@ -168,15 +202,67 @@ export class RouterService {
                 // Unknown route -> Home
                 console.log(`Unknown route "${path}" and App not supported. Redirecting to Home.`);
                 window.history.replaceState(null, '', '/');
-                return true; 
+                RouterService._lastPath = '/';
+                return true;
             }
         }
 
         // 3. Execute Redirect Purpose
         if (shouldRedirectToFlutter) {
-             if (!path.endsWith('flutter.html')) {
-                 const redirectUrl = `${window.location.origin}/flutter.html?redirect=${encodeURIComponent(redirectPath)}`;
-                 console.log(`RouterService: Global Redirecting ${path} to Flutter App: ${redirectUrl}`);
+             // 1. Handover Strategy:
+             // If we are at /transfer in the Web Client, it means we need to perform the handover to Flutter.
+             // (In Production, the server handles this, but in Localhost/SPA navigation, we handle it here).
+             
+             // Special Case: Reset Password via Email Link
+             // Links look like: .../resetPassword?token=...
+             if (path.startsWith('/reset-password') || fullUrl.includes('reset-password') || 
+                 path.startsWith('/resetPassword') || fullUrl.includes('resetPassword')) {
+                 
+                 // Flutter Parity: Use Regex to extract exact token string as Flutter does.
+                 // Regex: token=(?<token>[^&]+)
+                 const tokenMatch = fullUrl.match(/token=([^&]+)/);
+                 
+                 if (tokenMatch && tokenMatch[1]) {
+                     // 1. Split hash if present (Flutter's regex captures it if not & terminated, but UUIDs don't have it)
+                     // 2. Trim whitespace just in case
+                     const rawToken = tokenMatch[1].split('#')[0].trim();
+                     
+                     console.log("RouterService: Intercepted Reset Password Token:", rawToken);
+                     
+                     const { LoginModal } = await import('../components/users/login_modal.js'); 
+                     
+                     const modal = document.createElement('login-modal');
+                     document.body.appendChild(modal);
+                     // Set directly
+                     modal.resetToken = rawToken;
+                     
+                     return true; 
+                 }
+             }
+
+             if (!path.endsWith('auth_bridge.html')) {
+                 // Fetch session to pass fresh tokens
+                 const { SupabaseService } = await import('./supabase_service.js');
+                 const { data } = await SupabaseService.getClient().auth.getSession();
+                 let sessionFragment = '';
+                 
+                 if (data?.session) {
+                     const { access_token, refresh_token } = data.session;
+                     if (access_token && refresh_token) {
+                         sessionFragment = `#access_token=${access_token}&refresh_token=${refresh_token}&token_type=bearer&type=recovery`;
+                     }
+                 }
+
+                 let redirectUrl = `${window.location.origin}/auth_bridge.html`;
+                 if (sessionFragment) {
+                     redirectUrl += sessionFragment;
+                 }
+                 // pass the target path as a query param so auth_bridge.html can append it.
+                 // The deep link callback in Flutter will handle the session.
+                 const separator = redirectUrl.includes('#') ? '&' : '?';
+                 redirectUrl += `${separator}redirect=${encodeURIComponent(redirectPath)}`;
+
+                 console.log(`RouterService: Global Redirecting ${path} to Flutter App with Session: ${redirectUrl}`);
                  window.location.replace(redirectUrl);
                  return true; // Stop SPA load
              }
@@ -184,11 +270,17 @@ export class RouterService {
 
         // 4. Handle normalized path updates (UX polish)
         if (!shouldRedirectToFlutter) {
-             if (window.location.hash && window.location.hash.startsWith('#/')) {
+             // Clean URL if it contains query parameters or hash
+             const hasPreview = window.location.search && window.location.search.includes('preview=true');
+
+             if (!hasPreview && (window.location.search || window.location.hash || fullUrl.includes('?'))) {
+                  console.log(`[RouterService] Sanitizing URL: ${fullUrl} -> ${path}`);
                   window.history.replaceState(null, '', path);
+                  RouterService._lastPath = path; // Sync tracker
              }
              if (fullUrl.includes('https://') && window.location.pathname.startsWith('/https:')) {
                   window.history.replaceState(null, '', path);
+                  RouterService._lastPath = path; // Sync tracker
              }
         }
 
@@ -196,7 +288,7 @@ export class RouterService {
         console.log("RouterService loading component for path:", path);
         if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {
             const link = path.substring(RouterService.FORM_PATH_PREFIX.length);
-            const cleanLink = link.split('/')[0]; 
+            const cleanLink = link.split('/')[0];
             if (cleanLink) {
                 const { FormPage } = await import('../components/forms/form_page.js');
                 new FormPage('form-page-container').init(cleanLink, { onBack: RouterService.goBackProgrammatically });
@@ -225,7 +317,7 @@ export class RouterService {
                 // Ignore invalid URLs
             }
         }
-        
+
         // Handle malformed paths e.g. /https://domain.com/path
         if (path.match(/^\/https?:/)) {
              const matchedBaseInternal = AppConfig.compatibleUrls.find(u => u && path.includes(u));
@@ -234,14 +326,30 @@ export class RouterService {
                  path = path.substring(index + matchedBaseInternal.length);
              }
         }
-        
-        // 2. Legacy Hash
-        // We look for /# and take everything after it if found, effectively treating it as root
-        const hashIndex = path.indexOf('/#');
-        if (hashIndex !== -1) {
-             path = path.substring(hashIndex + 1); // Get '/...' part
-             path = path.replace('#', ''); // Ensure no # remains if logic differs
+
+        // 2. Identify and Extract Legacy Hash /#/ regardless of preceding query params
+        // Example: /?fbclid=123/#/form/slug  -> should extract /form/slug
+
+        // Strategy: First split by # to isolate potential legacy hash
+        const parts = path.split('#');
+        if (parts.length > 1) {
+            // Check if the part after # starts with / (Legacy Hash pattern)
+            // or if it's the specific pattern we support
+            const fragment = parts[1];
+            if (fragment.startsWith('/')) {
+                path = fragment; // Take the hash path as the new root
+            } else {
+                 // It's a normal fragment (e.g. #section), so we just want the path part before it.
+                 // BUT wait, if we had /path#section, we want /path.
+                 // If we had /?query#section, we want / (and query stripped later).
+                 path = parts[0];
+            }
         }
+
+        // 2.5 Strip Query Parameters (Strict Sanitization)
+        // Now that we've potentially re-rooted to the hash path, strip queries from it.
+        // Also strip queries from the original path if we didn't re-root (e.g. /path?q=1)
+        path = path.split('?')[0];
 
         // 3. Ensure leading slash
         if (!path.startsWith('/')) {
@@ -250,7 +358,7 @@ export class RouterService {
 
         return path;
     }
-    
+
     // Listen for PopState
     static _lastPath = window.location.pathname;
 
@@ -260,8 +368,10 @@ export class RouterService {
             
             // Ignore hash changes (SPA overlays)
             if (path === RouterService._lastPath) {
+                console.log(`[RouterService] PopState ignored (Hash change): ${path}`);
                 return;
             }
+            console.log(`[RouterService] PopState detected change: ${RouterService._lastPath} -> ${path}`);
             RouterService._lastPath = path;
 
             if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {

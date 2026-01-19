@@ -10,6 +10,7 @@ import '../models/holder_models/field_holder.dart';
 import '../models/holder_models/form_holder.dart';
 import 'form_helper.dart';
 import 'option_field_helper.dart';
+import '../form_strings.dart';
 
 class CheckboxFieldBuilder {
   static Widget buildSelectManyField(
@@ -92,11 +93,23 @@ class CheckboxFieldBuilder {
     isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
     final isSelected = field.value?.contains(o) ?? false;
 
+    String? effectiveDescription = o.description;
+    final showSurchargeInfo = formHolder.getTicket()?.showSurchargeDescription ?? true;
+    if (showSurchargeInfo && o is FormOptionProductModel && o.data?['surcharge'] != null) {
+      final surcharge = o.data!['surcharge'];
+      if(surcharge['amount'] != null) {
+        final amount = surcharge['amount'];
+        final currency = surcharge['currency'] ?? '';
+        final surchargeText = "+ $amount $currency ${FormStrings.surchargeOnSite}";
+        effectiveDescription = "<span style='color: #666; font-weight: bold;'>$surchargeText</span>${o.description != null ? "<br>${o.description}" : ""}";
+      }
+    }
+
     Widget optionCard = OptionFieldHelper.buildOptionCard(
       context: context,
       isSelected: isSelected,
       title: effectiveTitle,
-      description: o.description,
+      description: effectiveDescription,
       // The leading widget (checkbox) is disabled when needed.
       leading: Checkbox(
         value: isSelected,
@@ -171,14 +184,45 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
       final originalTitle = OptionFieldHelper.buildOptionTitle(context, o);
       final effectiveTitle =
       isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
+
+      final style = OptionFieldHelper.optionTitleTextStyle().copyWith(
+        color: isDisabled ? Theme.of(context).disabledColor : null,
+      );
+
+      Widget labelWidget = Text(
+        effectiveTitle,
+        style: style,
+      );
+
+      final showSurchargeInfo = widget.formHolder.getTicket()?.showSurchargeDescription ?? true;
+      if (showSurchargeInfo && o is FormOptionProductModel && o.data?['surcharge'] != null) {
+        final surcharge = o.data!['surcharge'];
+        if (surcharge['amount'] != null) {
+          final amount = surcharge['amount'];
+          final currency = surcharge['currency'] ?? '';
+          final surchargeText = "+ $amount $currency ${FormStrings.surchargeOnSite}";
+
+          labelWidget = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              labelWidget,
+              const SizedBox(height: 2),
+              Text(
+                  surchargeText,
+                  style: style?.copyWith(
+                      color: Colors.grey[600],
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500
+                  ) ?? TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w500)
+              ),
+            ],
+          );
+        }
+      }
+
       return FormBuilderFieldOption<FormOptionModel>(
         value: o,
-        child: Text(
-          effectiveTitle,
-          style: OptionFieldHelper.optionTitleTextStyle().copyWith(
-            color: isDisabled ? Theme.of(context).disabledColor : null,
-          ),
-        ),
+        child: labelWidget,
       );
     }).toList();
 

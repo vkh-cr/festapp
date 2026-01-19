@@ -132,6 +132,36 @@ serverless platform. It includes:
 
 ---
 
+## Configuration
+
+The project uses a **centralized configuration system** driven by
+`automation/project.conf`. This file is the single source of truth for:
+
+- **Deployment**: Domain settings (`DOMAIN`, `CNAME`).
+- **Application**: Supabase credentials (`SUPABASE_URL`, `ANON_KEY`),
+  Organization ID, and integration links.
+- **Theme**: Brand colors (`THEME_SEED_1`...`4`) which are automatically applied
+  to both Flutter (`app_config.dart`) and Web Client (`theme_config.css`).
+- **Fonts**: Font family configuration (`FONT_FAMILY_BASE`) and form scaling.
+- **Version**: Application version (`VERSION`), propagating to `pubspec.yaml`,
+  `package.json`, and the app.
+
+### Applying Configuration
+
+After editing `automation/project.conf`, apply changes by running:
+
+```bash
+./automation/apply_config.sh
+```
+
+This script automatically:
+
+1. Updates all relevant configuration files.
+2. Auto-detects and installs fonts from `automation/fonts/`.
+3. Synchronizes version numbers.
+
+---
+
 ## Setup
 
 For a helpful step-by-step guide on creating your own app, see
@@ -240,6 +270,44 @@ Under similar names usually available in AppStore and Google Play Store.
 - Full support for URLs (ability to link to pages in the web version of the
   application).
 - Ukrainian language added among the languages.
+
+---
+
+---
+
+## AI Integration (MCP)
+
+This project supports the **Model Context Protocol (MCP)** to allow AI
+assistants to interact with the project environment.
+
+### Chrome Automation (Puppeteer)
+
+To enable AI agents to control a headless Chrome instance (e.g., for end-to-end
+testing or automation), use the Puppeteer MCP server:
+
+```bash
+./automation/start-mcp-puppeteer.sh
+```
+
+This script exposes Chrome Developer Tools capabilities via the MCP protocol.
+
+### Supabase Integration
+
+To enable AI agents to interact with the Supabase database and management API:
+
+**1. Postgres Database Access** Allows direct SQL queries and schema inspection.
+Requires `DATABASE_URL` in `.env.local`.
+
+```bash
+./automation/start-mcp-db.sh
+```
+
+**2. Supabase Management** Allows project management and log inspection.
+Requires `SUPABASE_ACCESS_TOKEN` in `.env.local`.
+
+```bash
+./automation/start-mcp-supabase.sh
+```
 
 ---
 

@@ -46,7 +46,7 @@ export class CurrencySelectorWidget {
         title.textContent = FormStrings.currencySelectLabel;
         title.style.cssText = `
             font-size: 14px;
-            color: var(--text-color, #fff); /* Fallback to white for dark theme */
+            color: var(--text-color, #000); /* Fallback to black for light theme */
             margin-bottom: 8px;
             opacity: 0.8;
             font-weight: 500;
@@ -58,10 +58,10 @@ export class CurrencySelectorWidget {
         btnGroup.className = 'currency-btn-group';
         btnGroup.style.cssText = `
             display: inline-flex;
-            background-color: rgba(255, 255, 255, 0.05); /* Very slight background for group */
+            background-color: var(--surface-color, rgba(255, 255, 255, 0.05)); 
             border-radius: 8px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.1));
         `;
 
         availableCurrencies.forEach((code, index) => {
@@ -82,7 +82,8 @@ export class CurrencySelectorWidget {
                 transition: background-color 0.2s, color 0.2s;
                 min-width: 80px;
                 background-color: transparent;
-                color: rgba(255, 255, 255, 0.6);
+                color: var(--text-color, #000);
+                opacity: 0.6;
                 border-radius: 0; /* Explicitly no radius for segmented look */
                 flex: 1; /* Stretch to fill */
             `;
@@ -91,7 +92,7 @@ export class CurrencySelectorWidget {
             if (index > 0) {
                 // Use a pseudo-element or actual border. 
                 // Actual border on the left of item works if radius is 0.
-                btn.style.borderLeft = '1px solid rgba(255, 255, 255, 0.1)';
+                btn.style.borderLeft = '1px solid var(--divider-color, rgba(0, 0, 0, 0.1))';
             }
 
             if (isSelected) {
@@ -169,6 +170,7 @@ export class CurrencySelectorWidget {
         // Assuming primary color variable is available.
         btn.style.backgroundColor = 'var(--primary-color, #6200EE)'; 
         btn.style.color = '#fff'; 
+        btn.style.opacity = '1';
         // If the primary color is very bright, text might need to be dark, but screenshot shows light text on dark rect.
         // Let's assume standard behavior: Primary background, White text.
         // Or slightly transparent primary.

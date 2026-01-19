@@ -9,7 +9,7 @@ class ThemeConfig {
   static bool isDarkModeEnabled = true;
 
   // Base theme to hold common properties
-  static final fontFamily = "Futura";
+  static final fontFamily = "Futura PT";
   static ThemeData baseTheme() => ThemeData(
       fontFamily: fontFamily,
       useMaterial3: false,
@@ -144,6 +144,10 @@ class ThemeConfig {
   static Color defaultHtmlViewColor(BuildContext context) => blackColor(context);
   static Color htmlLinkColor(BuildContext context) => isDarkMode(context) ? seed2 : seed3;
   static Color correctGuessColor(BuildContext context) => isDarkMode(context) ? seed3 : seed4;
+
+  static Color textColorForBackground(Color background) {
+    return background.computeLuminance() > 0.5 ? Colors.black : Colors.white;
+  }
 
   // Function for eventTypeColor
   static Color eventTypeToColor(BuildContext context, String? typeCode) {

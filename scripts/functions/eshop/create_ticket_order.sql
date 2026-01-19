@@ -309,7 +309,8 @@ BEGIN
                     'price', product_data.price,
                     'currency_code', product_data.currency_code,
                     'spot_title', CASE WHEN spot_id IS NOT NULL AND product_id = spot_product.id THEN spot_product.spot_title ELSE NULL END,
-                    'description', CASE WHEN spot_id IS NOT NULL AND product_id = spot_product.id THEN spot_product.description ELSE NULL END
+                    'description', CASE WHEN spot_id IS NOT NULL AND product_id = spot_product.id THEN spot_product.description ELSE NULL END,
+                    'data', product_data.data
                 ));
 
                 -- Accumulate the product price into the order total
@@ -352,7 +353,7 @@ BEGIN
             JOIN eshop.bank_accounts ba ON uba.bank_account = ba.id
             WHERE uba.unit = (SELECT unit FROM public.occasions WHERE id = occasion_id)
               AND ba.supported_currencies @> ARRAY[first_currency_code]
-            ORDER BY ba.id
+            ORDER BY uba.priority ASC, ba.id ASC
             LIMIT 1;
             IF bank_account_id IS NULL THEN
                 RAISE EXCEPTION '%', JSONB_BUILD_OBJECT(

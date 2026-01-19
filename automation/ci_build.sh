@@ -19,7 +19,7 @@ export PATH="$PATH:/opt/buildhome/flutter/bin"
 
 if ! command -v flutter &> /dev/null; then
     echo "Flutter not found. Installing..."
-    curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.27.0-stable.tar.xz | tar -xJf - -C /opt/buildhome
+    curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.38.7-stable.tar.xz | tar -xJf - -C /opt/buildhome
     export PATH="/opt/buildhome/flutter/bin:$PATH"
 fi
 

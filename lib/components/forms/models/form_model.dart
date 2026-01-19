@@ -1,7 +1,7 @@
 import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
-import 'package:fstapp/components/eshop/models/bank_account_model.dart';
+import 'package:fstapp/components/bank_accounts/bank_account_model.dart';
 import 'package:fstapp/services/time_helper.dart';
 
 /// Represents the statistics for a form's responses.

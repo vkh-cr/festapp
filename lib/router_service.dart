@@ -12,6 +12,10 @@ import 'package:fstapp/services/js/js_interop.dart';
 import 'dart:async';
 
 import 'package:fstapp/components/forms/views/form_page.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
+import 'package:fstapp/components/occasion/link_model.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
 
 class RouterService {
   static const link = "link";
@@ -240,8 +244,17 @@ class RouterService {
   /// The [occasionLink] can be passed directly. If not, it's extracted from
   /// the current route's parameters.
   static Future<void> navigateToOccasionAdministration(
-      BuildContext context, {String? occasionLink}) async {
-    String? resolvedLink = occasionLink;
+      BuildContext context, {String? occasionLink, OccasionModel? occasion}) async {
+
+    // If occasion is provided, prioritize it for feature checks
+    if (occasion != null) {
+      if (FeatureService.isFeatureEnabled(FeatureConstants.form, features: occasion.features)) {
+        await navigateToOccasionReservationsByLink(context, occasion.link ?? occasionLink!);
+        return;
+      }
+    }
+
+    String? resolvedLink = occasionLink ?? occasion?.link;
 
     // Get the link from arguments or route parameters.
     if (resolvedLink == null || resolvedLink.isEmpty) {
@@ -327,6 +340,74 @@ class RouterService {
     } else {
       // Fallback or no-op for non-web
       debugPrint("External navigation not supported on this platform: $url");
+    }
+  }
+
+  /// Centralized logic for navigation after successful login.
+  /// Used by both [LoginPage] and [TransferPage] to ensure consistent behavior.
+  static Future<void> handlePostLoginNavigation(BuildContext context,
+      {String? fallbackPath, bool useReplacement = false}) async {
+
+    // 1. Update App Data
+    var unitId = RightsService.currentUnit()?.id == 1 ? null : RightsService.currentUnit()?.id;
+
+    // Fix: If we don't have a current link, try to extract it from the fallback path
+    String linkToUse = currentOccasionLink;
+    if ((linkToUse.isEmpty) && fallbackPath != null && fallbackPath.isNotEmpty) {
+       try {
+         // handlePostLoginNavigation is often called with a path like "/event_name/admin"
+         // extractOccasionLink expects a full URL or a path.
+         var extracted = LinkModel.extractOccasionLink(fallbackPath);
+         if (extracted.occasionLink != null && extracted.occasionLink!.isNotEmpty) {
+           linkToUse = extracted.occasionLink!;
+           debugPrint("[RouterService] Post-Login: Extracted link '$linkToUse' from fallbackPath '$fallbackPath'");
+         }
+       } catch (e) {
+         debugPrint("[RouterService] Post-Login: Failed to extract link from fallbackPath: $e");
+       }
+    }
+
+    await RightsService.updateAppData(unitId: unitId, link: linkToUse, force: true);
+
+    // 2. Check for Units (Admin flow priority)
+    // If the user has units (and isn't in Unit 1 context), they likely want their dashboard.
+    if (unitId == null) {
+      var userUnits = RightsService.currentUser()?.units;
+      if (userUnits != null && userUnits.isNotEmpty) {
+        debugPrint("[RouterService] Post-Login: User has units. Navigating to UnitAdmin.");
+        await navigateToUnitAdmin(context, userUnits.first);
+        return;
+      }
+    }
+
+    // 3. Fallback Navigation
+    // If no specific unit, go to fallback or pop/home.
+    if (fallbackPath != null && fallbackPath.isNotEmpty) {
+      // If the redirect target is explicitly "Login", but we are already logged in (post-login flow),
+      // we should NOT go to login. We should go Home instead.
+      if (fallbackPath.toLowerCase() == "/login" || fallbackPath.toLowerCase() == "login") {
+         debugPrint("[RouterService] Post-Login: Redirect was 'login', avoiding redundant loop. Going Home.");
+         await context.router.replacePath('/');
+         return;
+      }
+
+      debugPrint("[RouterService] Post-Login: Using fallback path: $fallbackPath (Replace: $useReplacement)");
+      if (useReplacement) {
+        // Fix path to ensure it starts with /
+        String target = fixPath(fallbackPath);
+        await context.router.replacePath(target);
+      } else {
+        await navigate(context, fallbackPath);
+      }
+    } else {
+      // Default behavior (pop or home)
+      debugPrint("[RouterService] Post-Login: Pop or Home");
+      if (useReplacement) {
+         // If we must replace but have no specific target, we go Home.
+         await context.router.replacePath('/');
+      } else {
+         popOrHome(context);
+      }
     }
   }
 }

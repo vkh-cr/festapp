@@ -1,5 +1,6 @@
 import { LocalizationService } from '../../services/localization_service.js';
 import { RouterService } from '../../services/router_service.js';
+import { ThemeService } from '../../services/theme_service.js';
 import { TimeHelper } from '../../services/time_helper.js';
 import { FeatureService } from '../features/feature_service.js';
 import { FeatureConstants } from '../features/feature_constants.js';
@@ -12,7 +13,19 @@ export class OccasionDetailDialog {
         // Create Overlay
         const overlay = document.createElement('div');
         overlay.className = 'overlay visible';
+        
+        // Lock body scroll
+        document.body.style.overflow = 'hidden';
+
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        
         overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center'; // Align to center vertically
+        overlay.style.justifyContent = 'center'; // Center horizontally
         overlay.style.zIndex = '2000'; // High z-index
         
         // Resolve Text
@@ -22,33 +35,87 @@ export class OccasionDetailDialog {
         
         // Feature Details for Button Title
         const formFeature = FeatureService.getFeatureDetails(FeatureConstants.form, occasion.features);
-        let reserveTitle = "Reserve a spot"; // Default hardcoded or translation key needed?
-        // Flutter: "Reserve a spot".tr()
-        // We need LocalizationService translation for "Reserve a spot".
-        // Assuming "reserveSpot" key or similar exists, or hardcoding fallback.
-        // Let's see if we have access to a string dictionary.
-        // LocalizationService.getString('reserve_spot')?
-        // Flutter uses .tr().
-        // JS: LocalizationService.translate('reserve_spot') ?? "Reserve a spot"
-        // Since I don't know the key, I'll use the english string or a placeholder.
+        let reserveTitle = LocalizationService.tr("Reserve a spot");
         if (formFeature && formFeature.reserveButtonTitle) {
             reserveTitle = formFeature.reserveButtonTitle;
         }
 
+        let btnStyle = 'width: 100%; padding: 12px;';
+        if (formFeature && formFeature.primaryColor) {
+             let bgColor = formFeature.primaryColor.trim();
+             if (!bgColor.startsWith('#')) bgColor = '#' + bgColor;
+             const textColor = ThemeService.getBestTextColor(bgColor);
+             btnStyle += ` background-color: ${bgColor} !important; color: ${textColor} !important; border: none;`;
+        }
+
         overlay.innerHTML = `
-            <div class="overlay-content dialog-content" style="max-width: 600px; width: 90%; padding: 24px; border-radius: 12px; background: var(--card-bg, white); position: relative;">
-                <button class="close-btn" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
-                
-                <h2 style="margin-top: 16px; margin-bottom: 8px; font-size: 20px; font-weight: 600;">${title}</h2>
-                <div style="color: var(--text-secondary, #666); margin-bottom: 16px;">${dateStr}</div>
-                
-                <hr style="border: 0; border-top: 0.5px solid #ccc; margin-bottom: 16px;">
-                
-                <div class="dialog-description" style="margin-bottom: 24px; line-height: 1.5;">
-                    ${description}
+            <div class="overlay-content dialog-content" style="
+                max-width: 600px;
+                width: 90%;
+                max-height: 90vh;
+                display: flex;
+                flex-direction: column;
+                border-radius: 12px;
+                background: var(--card-bg, white);
+                position: relative;
+                color: var(--text-color, #000);
+            ">
+                <!-- Sticky Header -->
+                <div style="
+                    padding: 24px 24px 16px 24px;
+                    border-bottom: 1px solid var(--divider-color, #e0e0e0);
+                    flex-shrink: 0;
+                    position: relative;
+                    background: var(--card-bg, white);
+                    border-radius: 12px 12px 0 0;
+                ">
+                    <button class="close-btn" style="
+                        position: absolute;
+                        top: 16px;
+                        right: 16px;
+                        background: none;
+                        border: none;
+                        font-size: 28px;
+                        cursor: pointer;
+                        color: var(--text-color, inherit);
+                        line-height: 1;
+                        padding: 4px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    ">&times;</button>
+                    
+                    <h2 style="
+                        margin: 0 0 8px 0;
+                        font-size: 20px;
+                        font-weight: 600;
+                        padding-right: 32px;
+                        color: var(--text-color, #000);
+                    ">${title}</h2>
+                    
+                    <div style="
+                        color: var(--text-color, #666);
+                        font-size: 14px;
+                        opacity: 0.7;
+                    ">${dateStr}</div>
                 </div>
                 
-                <button class="btn btn-primary btn-reserve" style="width: 100%; padding: 12px;">${reserveTitle}</button>
+                <!-- Scrollable Body -->
+                <div style="
+                    padding: 24px;
+                    overflow-y: auto;
+                    flex-grow: 1;
+                ">
+                    <div class="dialog-description" style="
+                        margin-bottom: 24px;
+                        line-height: 1.6;
+                        color: var(--text-color, inherit);
+                    ">
+                        ${description}
+                    </div>
+                    
+                    <button class="btn btn-primary btn-reserve" style="${btnStyle}">${reserveTitle}</button>
+                </div>
             </div>
         `;
 
@@ -58,7 +125,14 @@ export class OccasionDetailDialog {
         const closeBtn = overlay.querySelector('.close-btn');
         const reserveBtn = overlay.querySelector('.btn-reserve');
 
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape') close();
+        };
+        document.addEventListener('keydown', onKeyDown);
+
         const close = () => {
+             document.removeEventListener('keydown', onKeyDown);
+             document.body.style.overflow = ''; // Restore scroll
              overlay.classList.remove('visible');
              setTimeout(() => overlay.remove(), 300);
         };
@@ -80,8 +154,9 @@ export class OccasionDetailDialog {
         const formFeature = FeatureService.getFeatureDetails(FeatureConstants.form, occasion.features);
         
         if (formFeature) {
-             if (formFeature.formUseExternal === true) {
-                 const externalUrl = formFeature.formExternalLink;
+             // Check for external form usage (Standard: use_external_form)
+             if (formFeature.use_external_form === true) {
+                 const externalUrl = formFeature.external_form_link;
                  if (externalUrl && externalUrl.length > 0) {
                      RouterService.navigateToExternal(externalUrl);
                      return;
@@ -90,18 +165,7 @@ export class OccasionDetailDialog {
         }
         
         // Fallback to internal form
-        // Link: occasion.form.link  (Assuming deep structure matches)
-        // Check structure from DB: occasion object has `form` object?
-        // DbOccasions returns data.occasion.
-        // We should check if `occasion.form` exists or if we need to derive it.
-        // In Flutter: occasion.form!.link!
-        // We'll try to access occasion.form.link.
-        
-        const link = occasion.form ? occasion.form.link : occasion.link; // Fallback to occasion link if form link missing?
-        
-        // Wait, if "form" feature is present but "form" object is missing on occasion, that's an issue.
-        // DbOccasionsRPC likely joins the form.
-        // If not, we might be pointing to /form/:occasionLink.
+        const link = occasion.form ? occasion.form.link : occasion.link;
         
         if (link) {
             RouterService.navigateToForm(link);

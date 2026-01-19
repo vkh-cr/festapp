@@ -189,10 +189,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     // 5. Persist the changes to the database.
     await DbOccasions.updateOccasion(occasion!);
 
-    final newLink = occasion!.link;
-
     // 6. Check if the component is still mounted and the new link is valid.
-    if (mounted && newLink != null) {
+    if (mounted && occasion!.link != null) {
       // Show a success message.
       ToastHelper.Show(context, "${CommonStrings.saved}: ${occasion!.title!}");
 
@@ -203,7 +201,7 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
       // itself has been changed.
       await RouterService.navigateToOccasionAdministration(
         context,
-        occasionLink: newLink,
+        occasion: occasion!,
       );
     }
 

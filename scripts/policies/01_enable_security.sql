@@ -37,6 +37,10 @@ ALTER TABLE public.request_secrets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.path_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.queue_emails ENABLE ROW LEVEL SECURITY;
 
+ALTER TABLE public.external_occasions_cache ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.external_sync_sources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.external_sync_maps ENABLE ROW LEVEL SECURITY;
+
 ALTER TABLE public.activities    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_assignment_places  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_assignment_events  ENABLE ROW LEVEL SECURITY;

@@ -13,10 +13,6 @@ export class FormValidator {
          const currentErrors = { ...session.state.validationErrors };
          const hadError = !!currentErrors[fieldName];
          // Logic: If field HAD error, we must validate on input. 
-         // If field NOT had error, we usually wait for blur or submit? 
-         // User Rule: "Clear-Only Fallacy" -> "if (isValid) clearError(); else if (shouldValidate) restoreError();"
-         // shouldValidate is typically true if it HAD an error (we are correcting it).
-         
          if (!hadError && !target.classList.contains('invalid')) return; 
 
          const isRequired = target.dataset.required === 'true';
@@ -45,14 +41,7 @@ export class FormValidator {
                  }
              }
              
-             // Check invalid format if needed (e.g. email/tel patterns if not using native required but still using type?)
-             // Use native validity for FORMAT only, but ignore valueMissing if not checking required? 
-             // Actually, if we use type="email", browser checks format. 
-             // But we want to avoid :invalid style if possible? 
-             // Usually :invalid triggers on format too. 
-             // If we really want to process format, we can use checkValidity() but ignore valueMissing if we handled it?
-             // But checkValidity() returns false if valueMissing.
-             
+             // Check invalid format if needed
              if (nowValid && target.value) {
                  // Only check format if we have a value
                  if (!target.checkValidity()) {
@@ -87,9 +76,7 @@ export class FormValidator {
                  if (optionsContainer) optionsContainer.classList.remove('invalid');
              }
          } else {
-             // RESTORATIVE LOGIC: If it WAS invalid (or we decide strict realtime), we must SHOW error now.
-             // Usually on Input we only clear. But if we went from Invalid -> Valid -> Invalid (e.g. backspace all),
-             // we should restore the error!
+
              // Check validation message
              let message = failureReason || target.validationMessage || FormStrings.fieldCannotBeEmpty;
              
@@ -114,6 +101,74 @@ export class FormValidator {
                  }
              }
          }
+    }
+
+    /**
+     * Extracts values for a specific subfield from a ticket item
+     * @param {Object} ticketItem - The ticket object from payload
+     * @param {Object} subFieldDef - The subfield definition
+     * @returns {Array} Array of selected values (strings/IDs)
+     */
+    static getTicketFieldValues(ticketItem, subFieldDef) {
+        const values = [];
+        
+        // 1. Direct Field Access: Spot
+        if (subFieldDef.type === 'spot') {
+            if (ticketItem.spot) {
+                // Spot is selected
+                values.push(ticketItem.spot);
+            }
+            return values;
+        }
+        
+        // 2. Nested 'fields' array (Standard for Festapp)
+        if (ticketItem.fields) {
+            ticketItem.fields.forEach(fObj => {
+                // fObj is { key: value } or { key: value, _subFieldId: id }
+                
+                Object.keys(fObj).forEach(key => {
+                    if (key === 'currency_code' || key === 'price' || key === '_subFieldId') return;
+                    
+                    const val = fObj[key];
+                    
+                    let match = false;
+                    if (fObj['_subFieldId']) {
+                        // Strict ID match if available
+                        if (String(fObj['_subFieldId']) === String(subFieldDef.id)) {
+                             match = true;
+                        }
+                    } else {
+                        // Loose Type match ONLY if the subDef type matches the key
+                        // This corresponds to legacy or simple fields
+                        if (key === subFieldDef.type) {
+                            match = true;
+                        }
+                    }
+                    
+                    if (match) {
+                        // Ensure we don't count empty strings as values?
+                        // If val is "" or null, it shouldn't count?
+                        // But "0" should count.
+                        if (val !== null && val !== undefined && val !== '') {
+                             if (String(val).includes(' | ')) {
+                                 values.push(...String(val).split(' | '));
+                             } else {
+                                 values.push(val);
+                             }
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Log if empty (failure case)
+        /*
+        if (values.length === 0 && (subFieldDef.isRequired || subFieldDef.is_required)) {
+             console.log(`[FormValidator] Empty Match for ${subFieldDef.title} (${subFieldDef.id}). Ticket Fields:`, JSON.stringify(ticketItem.fields));
+        }
+        */
+        
+        return values;
     }
 
     /**
@@ -194,44 +249,48 @@ export class FormValidator {
                              const isRequired = sub.isRequired !== undefined ? sub.isRequired : sub.is_required;
                              
                              if (isRequired) {
-                                  // Check if this subfield has a value in the ticketItem
-                                  // ticketItem.fields is array of { type: val, _subFieldId: id, ... }
-                                  // or { [type]: val } if legacy?
-                                  // FormSession normalizes it.
+                                  // Refactored: Centralized Value Extraction
+                                  const values = FormValidator.getTicketFieldValues(ticketItem, sub);
                                   
-                                  const valObj = ticketItem.fields.find(f => {
-                                      // Strong check via subFieldId
-                                      if (f._subFieldId) return String(f._subFieldId) === String(sub.id);
-                                      // Fallback by key
-                                      return f[sub.type] !== undefined;
-                                  });
+                                  const isSatisfied = values.length > 0;
                                   
-                                  let val = valObj ? valObj[sub.type] : null;
-                                  
-                                  // Special handling for 'spot' which is stored at root level of ticketItem
-                                  if (sub.type === 'spot' && val === null) {
-                                      val = ticketItem['spot'];
-                                  }
-                                  // Determine if satisfied
-                                  let isSatisfied = false;
-                                  if (val !== null && val !== '' && val !== undefined) {
-                                      isSatisfied = true;
-                                  }
-                                  
-                                  console.log(`[FormValidator] Ticket [${tIdx}] Subfield [${sub.id}] Type=[${sub.type}] Required=${isRequired} Val=[${val}] Satisfied=${isSatisfied}`);
-
                                   if (!isSatisfied) {
                                       // Construct error ID matching the input name: fieldId_tIdx_subId
-                                      // Use preserved _ticketIndex if available, otherwise tIdx
                                       const idxToUse = ticketItem['_ticketIndex'] !== undefined ? ticketItem['_ticketIndex'] : tIdx;
                                       const errorId = FormHelper.getTicketInputName(field.id, idxToUse, sub.id);
                                       errors[errorId] = FormStrings.fieldCannotBeEmpty;
-                                      // console.log(`[FormValidator] Adding error for ${errorId}`);
                                   }
                              }
-                         });
+                             
+                             // Max Options Validation
+                             const maxOptions = sub.maxOptions || (sub.data && sub.data.max_options);
+                             if (maxOptions && maxOptions > 0) {
+                                  // Use Helper for Count
+                                  const values = FormValidator.getTicketFieldValues(ticketItem, sub);
+                                  const selectedCount = values.length;
+
+                                  if (selectedCount > maxOptions) {
+                                            const idxToUse = ticketItem['_ticketIndex'] !== undefined ? ticketItem['_ticketIndex'] : tIdx;
+                                            const errorId = FormHelper.getTicketInputName(field.id, idxToUse, sub.id);
+                                            // Fallback string or format
+                                            errors[errorId] = (FormStrings.maxOptionsReached || "Maximum options: {0}").replace('{0}', maxOptions);
+                                       }
+                                  }
+                          });
                     });
                     
+
+                    
+
+
+                    // Check if field itself is required (min 1 ticket)
+                    if (field.isRequired) {
+                         const hasTickets = tickets.length > 0;
+                         if (!hasTickets) {
+                             errors[field.id] = FormStrings.fieldCannotBeEmpty;
+                         }
+                    }
+
                     return; // Done with ticket field itself
                 }
 
@@ -325,6 +384,11 @@ export class FormValidator {
                      if (typeof RadioNodeList !== 'undefined' && el instanceof RadioNodeList) el = el[0];
                      input = el;
                  }
+             }
+
+             // Fallback 2: Look for container by field ID (e.g. Ticket Field)
+             if (!input) {
+                 input = container.querySelector(`[data-field-id="${fieldId}"]`);
              }
 
              if (input) {

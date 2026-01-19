@@ -102,6 +102,7 @@ class FormStrings {
   static String get clearSelection => 'FormsFeature.clearSelection'.tr();
   static String get unavailable => 'FormsFeature.unavailable'.tr();
   static String get inWhatCurrency => 'FormsFeature.inWhatCurrency'.tr();
+  static String get surchargeOnSite => 'surchargeOnSite'.tr();
 
 
 // --- FormsTab (Main Grid View) ---
@@ -157,6 +158,7 @@ class FormStrings {
   static String get labelMaxTicketsPerOrder => 'FormsFeature.labelMaxTicketsPerOrder'.tr(); // "Max tickets per order:"
   static String get helperMaxTicketsPerOrder => 'FormsFeature.helperMaxTicketsPerOrder'.tr(); // "How many tickets a user can buy in a single order (default: 1)."
   static String get validationMaxTicketsInvalid => 'FormsFeature.validationMaxTicketsInvalid'.tr(); // "Please enter a valid number (1 or more)."
+  static String get showSurchargeDescription => 'FormsFeature.showSurchargeDescription'.tr();
 
 // --- Create/Copy Dialog (_CreateOrCopyFormDialog) ---
   static String get createFormTitle => 'FormsFeature.createFormTitle'.tr(); // "Create a Form"

@@ -9,6 +9,7 @@ import 'map_feature.dart';
 import 'schedule_feature.dart';
 import 'ticket_feature.dart';
 import 'workshop_feature.dart';
+import 'contract_feature.dart';
 
 /// Base abstract class for all features.
 abstract class Feature {
@@ -48,6 +49,8 @@ abstract class Feature {
         return WorkshopsFeature.fromJson(json);
       case FeatureConstants.import:
         return ImportFeature.fromJson(json);
+      case FeatureConstants.contract:
+        return ContractFeature.fromJson(json);
       default:
         return SimpleFeature.fromJson(json);
     }
