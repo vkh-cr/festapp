@@ -16,6 +16,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION assert_equals(actual anyelement, expected anyelement, message text) RETURNS void AS $$
+BEGIN
+    PERFORM assert_eq(actual, expected, message);
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION assert_not_null(actual anyelement, message text) RETURNS void AS $$
 BEGIN
     IF actual IS NULL THEN

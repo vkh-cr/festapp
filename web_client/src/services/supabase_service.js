@@ -2,11 +2,14 @@ import { AppConfig } from '../app_config.js';
 import { createClient } from '@supabase/supabase-js';
 
 export class SupabaseService {
-    static client = createClient(AppConfig.supabaseUrl, AppConfig.anonKey);
+    static _client = null;
     static tokenKey = AppConfig.Keys.auth;
 
     static getClient() {
-        return SupabaseService.client;
+        if (!SupabaseService._client) {
+            SupabaseService._client = createClient(AppConfig.supabaseUrl, AppConfig.anonKey);
+        }
+        return SupabaseService._client;
     }
 
     // --- Data ---
@@ -29,7 +32,7 @@ export class SupabaseService {
 
     static async validateSession() {
         // Background check
-        const { data, error } = await SupabaseService.client.auth.getSession();
+        const { data, error } = await SupabaseService.getClient().auth.getSession();
         if (error || !data.session) {
             // Invalid, clear local
             localStorage.removeItem(SupabaseService.tokenKey);
@@ -39,7 +42,7 @@ export class SupabaseService {
     }
 
     static async signOut() {
-        await SupabaseService.client.auth.signOut();
+        await SupabaseService.getClient().auth.signOut();
         localStorage.removeItem(SupabaseService.tokenKey);
         window.location.reload();
     }

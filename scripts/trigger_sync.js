@@ -1,4 +1,16 @@
 
+/**
+ * @file scripts/trigger_sync.js
+ * @description A utility to manually trigger an external database sync using `dblink`.
+ * 
+ * Purpose:
+ * Connects to the local database configured in `.env.local` and invokes the PostgreSQL function
+ * `public.sync_source_via_dblink('vstupenky_remote')`.
+ * 
+ * Use Case:
+ * Use this to force-refresh data from the 'vstupenky_remote' source without waiting for a scheduled cron job.
+ * Useful during development or immediately after updating external source configuration.
+ */
 const fs = require('fs');
 const path = require('path');
 const { Client } = require('pg');

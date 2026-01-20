@@ -33,7 +33,17 @@ export class UnitPage extends Component {
         try {
             const occasions = await DbOccasions.getPublicOccasions(orgId);
             this.allOccasions = occasions || [];
+            this.allOccasions = occasions || [];
             this.render(this.allOccasions);
+
+            // Check for search query param (?q=...)
+            const params = new URLSearchParams(window.location.search);
+            const query = params.get('q');
+            if (query && this.searchInput) {
+                console.log('UnitPage: Auto-filtering for query:', query);
+                this.searchInput.value = query;
+                this.filter(query);
+            }
         } catch (e) {
             console.error("UnitPage.loadOccasions failed:", e);
             if (this.host) {

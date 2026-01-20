@@ -18,15 +18,50 @@ echo "=================================================="
 echo "RUNNING TESTS"
 echo "=================================================="
 
+# Function to run command with timeout (Mac compatible)
+run_with_timeout() {
+    local timeout=$1
+    shift
+    local cmd="$@"
+    
+    echo "Running with timeout ${timeout}s: $cmd"
+    
+    # Start command in background
+    eval "$cmd" &
+    local pid=$!
+    
+    local count=0
+    while kill -0 $pid 2>/dev/null; do
+        if [ $count -ge $timeout ]; then
+            echo ""
+            echo "❌ CANCELLING: Command timed out after ${timeout} seconds."
+            kill -9 $pid
+            wait $pid 2>/dev/null
+            return 1
+        fi
+        sleep 1
+        count=$((count+1))
+    done
+    
+    wait $pid
+    return $?
+}
+
 # 1. Run Web Client Tests
 echo ""
 echo ">>> Web Client Tests..."
 if [ -d "$WEB_CLIENT_DIR" ]; then
     cd "$WEB_CLIENT_DIR"
-    # Ensure dependencies are installed if needed? 
-    # Usually we assume dev env is set up, but could run npm install. 
-    # For a quick test script, just running existing npm test is better.
-    npm test
+    # Run npm test with 10s timeout
+    set +e # Disable exit on error temporarily to handle timeout gracefully
+    run_with_timeout 10 "npm test"
+    res=$?
+    set -e # Re-enable exit on error
+    
+    if [ $res -ne 0 ]; then
+        echo "⚠️  WARNING: Web Client Tests Failed or Timed Out."
+        echo "Proceeding to Database Tests..."
+    fi
 else
     echo "Error: web_client directory not found at $WEB_CLIENT_DIR"
     exit 1

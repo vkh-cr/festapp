@@ -10,8 +10,8 @@ const __dirname = path.dirname(__filename);
 
 // Default location for assertions helper
 const PROJECT_ROOT = path.resolve(__dirname, '../../');
-const ASSERTIONS_FILE = path.join(PROJECT_ROOT, 'scripts/tests/helpers/assertions.sql');
-const TESTS_DIR = path.join(PROJECT_ROOT, 'scripts/tests');
+const ASSERTIONS_FILE = path.join(PROJECT_ROOT, 'database/tests/helpers/assertions.sql');
+const TESTS_DIR = path.join(PROJECT_ROOT, 'database/tests');
 
 // Load environment variables if .env.local exists (for local running)
 const envLocalPath = path.join(PROJECT_ROOT, '.env.local');

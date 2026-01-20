@@ -38,30 +38,18 @@ class DbOrganizations {
           .select()
           .eq('id', organizationId)
           .single();
-      return OrganizationModel.fromJson(response); // Removed ['data'] as select() returns flat map usually, wait. view_file showed response['data']?
-      // Wait, let's look at view_file for DbOrganizations again.
-      // Line 41: return OrganizationModel.fromJson(response['data']);
-      // This implies the table structure or response structure is separate.
-      // But OrganizationModel.fromJson expects the map itself.
-      // If response['data'] is passed, then 'data' column content is passed.
-      // OrganizationsTb says: id, title, data.
-      // If select() is used, it returns {id: ..., title: ..., data: {...}}
-      // OrganizationModel.fromJson takes that map.
-      // Wait, OrganizationModel fields are 'title', 'APP_NAME' etc.
-      // 'title' is at top level of table? Or in data?
-      // line 63: currentData = existing['data'] ?? {};
-      // line 73: 'title': organization.title
-      // So 'title' is a column. 'APP_NAME' is in 'data'.
-      // OrganizationModel.fromJson handles 'title' from json['title'].
-      // And 'APP_NAME' from json['APP_NAME'].
-      // If we pass the whole row {id, title, data: {APP_NAME...}}, 
-      // json['title'] works. json['APP_NAME'] will be null because it's inside data.
-      // So OrganizationModel.fromJson needs to support a flattened structure or we flatten it here.
-      // The previous code `return OrganizationModel.fromJson(response['data']);` suggests that ONLY `data` content was being passed?
-      // But title is outside.
-      // Let's look at `OrganizationModel.fromJson` again.
+      return OrganizationModel.fromJson(response); 
     } catch (e) {
       print("Failed to fetch organization: $e");
+      return null;
+    }
+  }
+
+  static Future<int?> getMyAdminOrganizationId() async {
+    try {
+      return await _supabase.rpc('get_my_admin_organization_id');
+    } catch (e) {
+      print("Failed to fetch my admin organization id: $e");
       return null;
     }
   }
