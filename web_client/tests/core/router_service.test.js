@@ -55,27 +55,7 @@ test('RouterService.normalizeUrl', async (t) => {
         // Case: /https://vstupenky.online/form/test
         const input = "/https://vstupenky.online/form/test";
         const result = RouterService.normalizeUrl(input);
-        // The logic I implemented:
-        // is matchedBase? No, starts with slash.
-        // is localhost? No.
-        // startsWith /https: ? Yes.
-        // This part was actually commented out in my implementation plan details but let's see what I wrote.
-        // I wrote: "if (path.startsWith('/https:') || path.startsWith('/http:')) ..." in the code block I applied.
-        // Wait, I see I wrote "const matchedBaseAsPath..." but didn't finish the block in the replace_file_content call?
-        // Let me check what I actually applied.
-        
-        // Actually, looking at the previous tool output for replace_file_content:
-        /*
-        if (path.startsWith('/https:') || path.startsWith('/http:')) {
-             const matchedBaseAsPath = `/${matchedBase.replace(/^https?:\/\//, '')}`;
-             // This is getting complicated ...
-             // Let's stick to the simpler Logic:
-             // If the path *contains* the domain, strip it.
-             ...
-        }
-        */
-        // I seemingly left comments and empty logic blocks in the applied code! 
-        // This is bad. I need to fix the implementation.
+        assert.strictEqual(result, "/form/test");
     });
 
     await t.test('should handle legacy hash', () => {
@@ -134,18 +114,18 @@ test('RouterService.Sanitization', async (t) => {
     };
     const { RouterService } = await import('../../src/services/router_service.js');
 
-    await t.test('should strip query params in navigateToExternal', () => {
+    await t.test('should PRESERVE query params in navigateToExternal', () => {
         let openedUrl = '';
         global.window.open = (url) => { openedUrl = url; };
 
         RouterService.navigateToExternal('https://example.com?foo=bar');
-        assert.strictEqual(openedUrl, 'https://example.com');
+        assert.strictEqual(openedUrl, 'https://example.com?foo=bar');
 
         RouterService.navigateToExternal('https://example.com?foo=bar&baz=1');
-        assert.strictEqual(openedUrl, 'https://example.com');
+        assert.strictEqual(openedUrl, 'https://example.com?foo=bar&baz=1');
     });
 
-    await t.test('should strip query params in navigateExternal', () => {
+    await t.test('should PRESERVE query params in navigateExternal', () => {
         let locationHref = '';
         // Mock setter
         Object.defineProperty(global.window.location, 'href', {
@@ -154,7 +134,7 @@ test('RouterService.Sanitization', async (t) => {
         });
 
         RouterService.navigateExternal('/some/path?query=1');
-        assert.strictEqual(locationHref, '/some/path');
+        assert.strictEqual(locationHref, '/some/path?query=1');
     });
 
     await t.test('should strip query params in navigateToOccasionApp', () => {
@@ -242,7 +222,7 @@ test('RouterService.handleInitialLoad', async (t) => {
         const handled = await RouterService.handleInitialLoad();
         
         assert.strictEqual(handled, true);
-        assert.ok(redirectUrl.includes('flutter.html'));
+        assert.ok(redirectUrl.includes('auth_bridge.html'));
         assert.ok(redirectUrl.includes('redirect=%2Flogin'));
     });
 
@@ -289,7 +269,7 @@ test('RouterService.handleInitialLoad', async (t) => {
         const handled = await RouterService.handleInitialLoad();
 
         assert.strictEqual(handled, true);
-        assert.ok(redirectUrl.includes('flutter.html'));
+        assert.ok(redirectUrl.includes('auth_bridge.html'));
         assert.ok(redirectUrl.includes('redirect=%2Fconference2024')); 
 
         // Cleanup
@@ -316,7 +296,7 @@ test('RouterService.handleInitialLoad', async (t) => {
 
         // Occasion Link is NOT a Web Client route -> Redirect to Flutter
         assert.strictEqual(handled, true);
-        assert.ok(redirectUrl.includes('flutter.html'));
+        assert.ok(redirectUrl.includes('auth_bridge.html'));
         assert.ok(redirectUrl.includes('redirect=%2Fmy-occasion')); 
 
         // Cleanup
@@ -343,7 +323,7 @@ test('RouterService.handleInitialLoad', async (t) => {
         const handled = await RouterService.handleInitialLoad();
 
         assert.strictEqual(handled, true);
-        assert.ok(redirectUrl.includes('flutter.html'));
+        assert.ok(redirectUrl.includes('auth_bridge.html'));
         assert.ok(redirectUrl.includes('redirect=%2Funit%2F123')); // defaultLink is /unit/123
 
         // Cleanup
@@ -364,7 +344,7 @@ test('RouterService.handleInitialLoad', async (t) => {
         const handled = await RouterService.handleInitialLoad();
         
         assert.strictEqual(handled, true);
-        assert.ok(redirectUrl.includes('flutter.html'));
+        assert.ok(redirectUrl.includes('auth_bridge.html'));
         assert.ok(redirectUrl.includes('redirect=%2Funit%2F123'));
     });
 

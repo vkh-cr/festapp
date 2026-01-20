@@ -138,3 +138,8 @@ supabase/.env
 
 # FVM Version Cache
 .fvm/
+# Local Netlify folder
+.netlify
+
+# Local Env Files
+**/.env.local

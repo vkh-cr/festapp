@@ -12,6 +12,7 @@ import 'package:fstapp/components/inventory/views/user_stay_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 // Import new page
 import 'package:fstapp/components/unit/views/unit_page.dart';
+import 'package:fstapp/components/organization/views/organization_edit_redirect_page.dart';
 import 'package:fstapp/components/users/views/login_page.dart';
 import 'package:fstapp/components/users/views/transfer_page.dart';
 import 'package:fstapp/components/users/views/reset_password_page.dart';
@@ -70,6 +71,11 @@ class AppRouter extends RootStackRouter {
     CustomRoute(
         page: OrganizationEditRoute.page,
         path: "/organizationEdit/:id",
+        transitionsBuilder: TransitionsBuilders.noTransition),
+
+    CustomRoute(
+        page: OrganizationEditRedirectRoute.page,
+        path: "/organizationEdit",
         transitionsBuilder: TransitionsBuilders.noTransition),
 
     // Use UnitPage for the /unit/:id path (this was commented out)

@@ -3,8 +3,12 @@ import { AuthService } from '../../services/auth_service.js';
 import { CommonStrings } from '../shared/common_strings.js';
 import { ToastHelper } from '../ui/toast.js';
 import { Modal } from '../ui/modal.js';
+import { RightsService } from '../../services/rights_service.js';
 import { AppConfig } from '../../app_config.js';
-import './login_modal.css';
+import { SHARED_MODAL_STYLES } from '../shared/modal_styles.js';
+// import './login_modal.css'; // Removed in favor of inline styles for test compatibility
+
+const LOGIN_MODAL_STYLES = SHARED_MODAL_STYLES;
 
 export class LoginModal extends HTMLElement {
     constructor() {
@@ -19,6 +23,16 @@ export class LoginModal extends HTMLElement {
         this._togglePasswordVisibility = this._togglePasswordVisibility.bind(this);
         this._handleLogin = this._handleLogin.bind(this);
         this._handleRegister = this._handleRegister.bind(this);
+    }
+
+    _isRegistrationEnabled() {
+        const orgSettings = RightsService.context?.organization;
+        console.log('DEBUG: LoginModal _isRegistrationEnabled config:', JSON.stringify(orgSettings));
+        // Check exact boolean false to disable, otherwise default directly to enabled (legacy/fallback)
+        if (orgSettings && typeof orgSettings.IS_REGISTRATION_ENABLED === 'boolean') {
+            return orgSettings.IS_REGISTRATION_ENABLED;
+        }
+        return true; 
     }
 
     set resetToken(token) {
@@ -47,7 +61,7 @@ export class LoginModal extends HTMLElement {
     }
 
     _render() {
-        this.innerHTML = '';
+        this.innerHTML = `<style>${LOGIN_MODAL_STYLES}</style>`;
         
         this.modal = document.createElement('app-modal');
         // Create container programmatically to ensure we have a reference and it's attached correctly
@@ -150,8 +164,10 @@ export class LoginModal extends HTMLElement {
                     </button>
                     <div class="auth-links">
                         <button type="button" class="btn-link" id="link-forgot">${CommonStrings.forgotPassword}</button>
+                        ${this._isRegistrationEnabled() ? `
                         <span>|</span>
                         <button type="button" class="btn-link" id="link-register">${CommonStrings.signUp}</button>
+                        ` : ''}
                     </div>
                 </form>
             `;
@@ -219,8 +235,11 @@ export class LoginModal extends HTMLElement {
 
         if (this.currentView === 'login') {
             attach('#login-form', this._handleLogin, 'submit');
-            attach('#link-register', (e) => { e.preventDefault(); this._setView('register'); });
             attach('#link-forgot', (e) => { e.preventDefault(); this._setView('forgot'); });
+            
+            if (this._isRegistrationEnabled()) {
+                attach('#link-register', (e) => { e.preventDefault(); this._setView('register'); });
+            }
         } 
         else if (this.currentView === 'register') {
             attach('#register-form', this._handleRegister, 'submit');

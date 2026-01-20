@@ -4,6 +4,8 @@ import './user_header.css';
 import { RightsService } from '../../services/rights_service.js';
 import { SupabaseService } from '../../services/supabase_service.js';
 
+import { SHARED_MODAL_STYLES } from '../shared/modal_styles.js';
+
 export class UserHeader extends HTMLElement {
     constructor() {
         super();
@@ -106,6 +108,20 @@ export class UserHeader extends HTMLElement {
              RouterService.navigateExternal("/");
         };
         container.appendChild(logo);
+
+        // SEO: Hidden H1
+        const h1 = document.createElement('h1');
+        h1.textContent = 'Vstupenky.online';
+        h1.style.position = 'absolute';
+        h1.style.width = '1px';
+        h1.style.height = '1px';
+        h1.style.padding = '0';
+        h1.style.margin = '-1px';
+        h1.style.overflow = 'hidden';
+        h1.style.clip = 'rect(0, 0, 0, 0)';
+        h1.style.whiteSpace = 'nowrap';
+        h1.style.border = '0';
+        container.appendChild(h1);
 
         // ... existing actions ...
 
@@ -329,6 +345,11 @@ export class UserHeader extends HTMLElement {
              document.removeEventListener('keydown', escHandler);
              originalRemove();
         };
+
+        // Inject Shared Styles
+        const style = document.createElement('style');
+        style.textContent = SHARED_MODAL_STYLES;
+        wrapper.appendChild(style);
 
         this.appendChild(wrapper);
 

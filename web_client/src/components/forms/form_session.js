@@ -402,8 +402,8 @@ export class FormSession extends EventTarget {
                 subDef = this._getTicketSubDef(fObj._subFieldId);
 
                 if (subDef) {
-                    if (subDef.type === 'checkbox') isMultiSelect = true; // Convention: checkbox is multi
-                    // Add other multi-types if any
+                    if (subDef.type === 'checkbox') isMultiSelect = true;
+                    if (subDef.data && subDef.data.selection_type === 'select_many') isMultiSelect = true;
                 }
 
                 Object.entries(fObj).forEach(([k, v]) => {

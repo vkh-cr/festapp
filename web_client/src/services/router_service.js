@@ -272,8 +272,9 @@ export class RouterService {
         if (!shouldRedirectToFlutter) {
              // Clean URL if it contains query parameters or hash
              const hasPreview = window.location.search && window.location.search.includes('preview=true');
+             const hasSearch = window.location.search && (window.location.search.includes('?q=') || window.location.search.includes('&q='));
 
-             if (!hasPreview && (window.location.search || window.location.hash || fullUrl.includes('?'))) {
+             if (!hasPreview && !hasSearch && (window.location.search || window.location.hash || fullUrl.includes('?'))) {
                   console.log(`[RouterService] Sanitizing URL: ${fullUrl} -> ${path}`);
                   window.history.replaceState(null, '', path);
                   RouterService._lastPath = path; // Sync tracker

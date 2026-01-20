@@ -1,4 +1,4 @@
-import './modal.css';
+
 
 export class Modal extends HTMLElement {
     constructor() {

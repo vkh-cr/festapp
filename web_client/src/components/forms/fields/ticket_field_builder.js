@@ -1,4 +1,4 @@
-import { FormFieldBuilder } from './form_field_builder.js';
+import * as FormFieldBuilderModule from './form_field_builder.js';
 import { FormStrings } from '../form_strings.js';
 import { CommonStrings } from '../../shared/common_strings.js';
 import { OrdersStrings } from '../../eshop/orders_strings.js';
@@ -85,7 +85,17 @@ export class TicketFieldBuilder {
 
                 TicketFieldBuilder._prepareScopedDef(scopedDef);
 
+                TicketFieldBuilder._prepareScopedDef(scopedDef);
+                
+                // Resolve module cycle by accessing namespace at runtime
+                const FormFieldBuilder = FormFieldBuilderModule.FormFieldBuilder; 
+                if (!FormFieldBuilder) {
+                     console.error("TicketFieldBuilder: FormFieldBuilder is undefined! Module keys:", Object.keys(FormFieldBuilderModule));
+                } else {
+                     console.log("TicketFieldBuilder: FormFieldBuilder resolved.", typeof FormFieldBuilder);
+                }
                 const subComp = FormFieldBuilder.createFormField(scopedDef, formModel);
+
                 
                 // --- Robustness: Attach Data Attributes ---
                 const inputs = subComp.querySelectorAll('input, select, textarea');
@@ -327,6 +337,8 @@ export class TicketFieldBuilder {
                             }
                         }
                         
+                        // Resolve module cycle by accessing namespace at runtime
+                        const FormFieldBuilder = FormFieldBuilderModule.FormFieldBuilder;
                         const subComp = FormFieldBuilder.createFormField(scopedDef, formModel);
                         
                         // --- Robustness: Attach Data Attributes ---
