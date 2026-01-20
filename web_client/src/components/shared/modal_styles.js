@@ -1,4 +1,4 @@
-
+export const SHARED_MODAL_STYLES = `
 .auth-container {
     padding: 20px;
     display: flex;
@@ -245,3 +245,69 @@ input.invalid {
 .form-field-container .form-group {
     margin-bottom: 0;
 }
+
+/* User Settings / Segmented Controls */
+.settings-widget {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.settings-label {
+    font-size: 14px;
+    color: inherit;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.segmented-control {
+    display: flex;
+    width: 100%;
+    background-color: var(--unselected-widget-fill, rgba(0,0,0,0.05));
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--input-border, rgba(0,0,0,0.1));
+}
+
+.segmented-btn {
+    border: none;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    min-width: 70px;
+    color: inherit;
+    background-color: transparent;
+    border-radius: 0;
+    flex: 1;
+}
+
+.segmented-btn:not(:first-child) {
+    border-left: 1px solid var(--input-border, rgba(0,0,0,0.1));
+}
+
+.segmented-btn.active {
+    background-color: var(--primary-color, #4465A6);
+    color: #ffffff;
+}
+
+.segmented-btn:not(.active):hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.version-info {
+    font-size: 11px;
+    color: inherit;
+    opacity: 0.7;
+    text-align: center;
+    margin-top: 8px;
+}
+`;

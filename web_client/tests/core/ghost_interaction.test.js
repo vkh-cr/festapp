@@ -39,6 +39,10 @@ describe('Ghost Listener Logic', () => {
         FormHelper = helperModule.FormHelper;
     });
 
+    after(() => {
+        if (global.window) global.window.close();
+    });
+
     it('should NOT update removed DOM nodes when Session State changes', async (t) => {
 
          

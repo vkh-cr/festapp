@@ -115,6 +115,7 @@ export class BlueprintRenderer {
         } else if (bgSource.startsWith('http')) {
             const img = document.createElement('img');
             img.src = bgSource;
+            img.alt = 'Blueprint Background';
             img.className = 'blueprint-bg-img';
             bgContainer.appendChild(img);
         }

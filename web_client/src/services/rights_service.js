@@ -40,13 +40,13 @@ export class RightsService {
                 });
             }
 
-            const { data, error } = await client.rpc('get_app_config_v216', {
+            const { data, error } = await client.rpc('get_app_config_v218', {
                 data_in: {
                     link: link, // Can be null
                     form_link: formLink, // Can be null
                     unit_id: unitId,
                     organization: AppConfig.organization || 'festapp', 
-                    platform: 'web'
+                    platform: { platform: 'web' }
                 }
             });
 
