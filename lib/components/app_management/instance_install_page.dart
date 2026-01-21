@@ -58,10 +58,10 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
 
   // Define the list of operations for the Initial section.
   final List<OperationSectionData> _initialOperations = [
-    OperationSectionData(title: "1. Tables", fixedDirectory: "scripts/tables"),
-    OperationSectionData(title: "2. Functions", fixedDirectory: "scripts/functions"),
-    OperationSectionData(title: "3. Policies", fixedDirectory: "scripts/policies"),
-    OperationSectionData(title: "4. Seed", fixedDirectory: "scripts/seed"),
+    OperationSectionData(title: "1. Tables", fixedDirectory: "database/tables"),
+    OperationSectionData(title: "2. Functions", fixedDirectory: "database/functions"),
+    OperationSectionData(title: "3. Policies", fixedDirectory: "database/policies"),
+    OperationSectionData(title: "4. Seed", fixedDirectory: "database/seed"),
   ];
 
   /// Helper getter that extracts the project ref from the project URL.
@@ -262,7 +262,7 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
   TextEditingController? _adminPasswordController;
 
   // Determines if this operation is the Seed operation.
-  bool get _isSeed => widget.fixedDirectory == "scripts/seed";
+  bool get _isSeed => widget.fixedDirectory == "database/seed";
 
   @override
   void initState() {

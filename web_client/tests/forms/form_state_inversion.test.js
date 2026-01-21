@@ -1,7 +1,8 @@
 
-import { test, describe, it, before, beforeEach } from 'node:test';
+import { test, describe, it, before, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import { FormSession } from '../../src/components/forms/form_session.js';
+import { DbForms } from '../../src/components/forms/db_forms.js';
 import { JSDOM } from 'jsdom';
 
 // Setup global JSDOM
@@ -12,9 +13,19 @@ global.window = dom.window;
 global.document = dom.window.document;
 global.HTMLElement = dom.window.HTMLElement;
 
+// Mock DbForms.selectSpot to prevent network calls
+DbForms.selectSpot = async (formKey, secret, spotId, selecting) => {
+    // Return mock success
+    return { status: 'mocked', spot_id: spotId };
+};
+
 describe('FormSession State Inversion', () => {
     let session;
     let mockFormModel;
+
+    after(() => {
+        if (global.window) global.window.close();
+    });
 
     beforeEach(() => {
         document.body.innerHTML = '<form id="test-form"></form>';

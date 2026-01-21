@@ -1,11 +1,11 @@
 {
   "name": "festapp-web-client",
-  "version": "0.19.18",
+  "version": "0.19.19",
   "description": "Standalone Web Client for Festapp",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/update_sitemap.js && vite build",
     "preview": "vite preview",
     "prestart": "node scripts/sync_version.js",
     "start": "npm run dev",
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "jsdom": "^27.3.0",
+    "netlify-cli": "^23.13.4",
     "vite": "^7.3.0"
   }
 }

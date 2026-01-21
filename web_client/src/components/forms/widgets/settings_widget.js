@@ -8,6 +8,7 @@ export class SettingsWidget {
         this.container = container;
         this.element = document.createElement('div');
         this.element.className = 'settings-widget';
+        // Note: Styles are injected by the parent (UserHeader) or global shared styles
         
         this.render();
         this.container.appendChild(this.element);
@@ -15,13 +16,7 @@ export class SettingsWidget {
 
     render() {
         this.element.innerHTML = '';
-        this.element.style.cssText = `
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            width: 100%;
-        `;
-
+        
         // Theme Section
         this.renderSection({
             title: LocalizationService.tr('Appearance') || 'Vzhled', // Fallback trans
@@ -48,8 +43,6 @@ export class SettingsWidget {
             onSelect: (val) => {
                 if (val !== LocalizationService.currentLocale) {
                      LocalizationService.setLocale(val);
-                     // Reload is handled by service, but if not:
-                     // window.location.reload(); 
                 }
             }
         });
@@ -57,13 +50,7 @@ export class SettingsWidget {
         // Version
         if (AppConfig.version) {
             const versionEl = document.createElement('div');
-            versionEl.style.cssText = `
-                font-size: 11px;
-                color: inherit;
-                opacity: 0.7; /* Increased from 0.5 for better visibility */
-                text-align: center;
-                margin-top: 8px;
-            `;
+            versionEl.className = 'version-info';
             versionEl.textContent = `v${AppConfig.version}`;
             this.element.appendChild(versionEl);
         }
@@ -71,77 +58,25 @@ export class SettingsWidget {
 
     renderSection({ title, options, currentValue, onSelect }) {
         const section = document.createElement('div');
-        section.style.cssText = `
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        `;
+        section.className = 'settings-section';
 
         const label = document.createElement('div');
         label.className = 'settings-label';
         label.textContent = title;
-        label.style.cssText = `
-            font-size: 14px;
-            color: inherit;
-            margin-bottom: 8px;
-            font-weight: 500;
-        `;
         section.appendChild(label);
 
         // Segmented Control Group
         const group = document.createElement('div');
         group.className = 'segmented-control';
-        group.style.cssText = `
-            display: flex;
-            width: 100%;
-            background-color: var(--unselected-widget-fill, rgba(0,0,0,0.05));
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--input-border, rgba(0,0,0,0.1));
-        `;
 
-        options.forEach((opt, index) => {
+        options.forEach((opt) => {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.textContent = opt.label;
             
             const isActive = opt.id === currentValue;
+            btn.className = `segmented-btn ${isActive ? 'active' : ''}`;
             
-            btn.style.cssText = `
-                border: none;
-                padding: 8px 16px;
-                font-size: 13px;
-                font-weight: 500;
-                cursor: pointer;
-                transition: background-color 0.2s, color 0.2s;
-                min-width: 70px;
-                color: inherit;
-                background-color: transparent;
-                border-radius: 0;
-                flex: 1;
-            `;
-
-            if (index > 0) {
-                 btn.style.borderLeft = '1px solid var(--input-border, rgba(0,0,0,0.1))';
-            }
-
-            if (isActive) {
-                // Active State
-                // Use primary color or a distinct active state
-                btn.style.backgroundColor = 'var(--primary-color, #4465A6)';
-                btn.style.color = '#ffffff';
-            } else {
-                // Inactive State: Remove opacity for better contrast
-                btn.style.opacity = '1';
-                btn.style.color = 'inherit';
-            }
-            
-            // Hover effect for non-active
-            if (!isActive) {
-                btn.onmouseenter = () => btn.style.backgroundColor = 'rgba(0,0,0,0.05)';
-                btn.onmouseleave = () => btn.style.backgroundColor = 'transparent';
-            }
-
             btn.onclick = () => onSelect(opt.id);
             
             group.appendChild(btn);

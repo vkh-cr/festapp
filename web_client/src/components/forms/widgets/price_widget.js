@@ -57,8 +57,9 @@ export class PriceWidget {
             document.body.appendChild(this.element);
 
             // Apply Styling
-            const formModel = this.session.formModel;
-            const primaryColor = formModel.primaryColor || 'var(--primary-color)';
+            // We use the CSS variable as the source of truth because ThemeService might have 
+            // adjusted it (e.g. for Dark Mode contrast)
+            const primaryColor = 'var(--primary-color)';
             
             // Resolve CSS variable if needed
             const resolvedColor = this._resolveColor(primaryColor);
@@ -147,8 +148,8 @@ export class PriceWidget {
         if (colorString.startsWith('var(--')) {
             try {
                 const varName = colorString.match(/var\(([^)]+)\)/)[1];
-                // We resolve against documentElement as that's where global vars usually live
-                const resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+                // We resolve against document.body as ThemeService sets overrides there
+                const resolved = getComputedStyle(document.body).getPropertyValue(varName).trim();
                 return resolved || colorString; 
             } catch (e) {
                 return colorString;

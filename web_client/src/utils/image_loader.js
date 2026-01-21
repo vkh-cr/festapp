@@ -42,6 +42,12 @@ export class ImageLoader {
         // Mark as handled
         img.dataset.smoothLoaded = 'true';
 
+        // Accessibility: Enforce alt attribute
+        if (!img.hasAttribute('alt')) {
+            console.warn('ImageLoader: Image missing alt attribute, adding empty alt="" for decoration.', img);
+            img.setAttribute('alt', '');
+        }
+
         // Helper to reveal
         const reveal = () => {
             // Force reflow/paint before adding class to ensure transition triggers if needed?

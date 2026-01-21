@@ -45,6 +45,10 @@ describe('Multiselect Price Logic', () => {
         FormHelper = helperModule.FormHelper;
     });
 
+    after(() => {
+        if (global.window) global.window.close();
+    });
+
     it('should calculate TOTAL price for multiselect product fields', async (t) => {
          const ticketFieldDef = {
              id: 'ticket',
