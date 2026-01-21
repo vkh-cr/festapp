@@ -103,13 +103,18 @@ class _OccasionCardState extends State<OccasionCard> {
           builder: (context) => OccasionDetailDialog(occasion: widget.occasion),
         );
       } else if (!_hasFormFeature) {
-        try {
-          await RightsService.updateAppData(
-              link: widget.occasion.link, force: true);
-        } catch (e) {
-          // ignore
+        // Safe navigation for admins to avoid infinite loops
+        if (RightsService.canEditOccasion()) {
+           await RouterService.navigateToOccasionByLink(context, widget.occasion.link!);
+        } else {
+           try {
+            await RightsService.updateAppData(
+                link: widget.occasion.link, force: true);
+          } catch (e) {
+            // ignore
+          }
+          await RouterService.navigateOccasion(context, "");
         }
-        await RouterService.navigateOccasion(context, "");
       }
     }
 

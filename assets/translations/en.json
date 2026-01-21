@@ -970,7 +970,8 @@
     "newOrderTotal": "New Order Total",
     "emailHelpText": "Enter the customer's email address to send the new order confirmation and payment details.",
     "noDetailsFound": "No details found",
-    "customerExample": "customer@example.com"
+    "customerExample": "customer@example.com",
+    "globalChangesNote": "Email includes changes from all tickets in this order."
   },
   "EmailTemplates": {
     "subs": {
@@ -1300,8 +1301,12 @@
     "sentFrom": "Sent from {appName}"
   },
   "UnitSettings": {
-    "labelReplyToEmail": "Default reply-to email",
-    "labelDefaultTimezone": "Default timezone"
+    "labelReplyToEmail": "Reply-To Email",
+    "labelDefaultTimezone": "Default Timezone",
+    "deleteUnit": "Delete Organization",
+    "deleteUnitConfirmation": "Are you sure you want to delete this organization? All data including events will be lost.",
+    "cannotDeleteUnitWithOccasions": "Cannot delete organization that has events.",
+    "cannotDeleteLastUnit": "Cannot delete your last organization."
   },
   "PublicOrder": {
     "successTitle": "Your order was accepted!",

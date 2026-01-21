@@ -213,6 +213,8 @@ class OrdersStrings {
   static String get sendUpdateItemChanges => 'ProductsDialog.sendUpdateItemChanges'.tr(); // "Overview of product changes"
   static String get priceValidationNegative => 'ProductsDialog.priceValidationNegative'.tr(); // "Price cannot be negative."
   static String get totalPriceChange => 'ProductsDialog.totalPriceChange'.tr(); // "Total Price Change"
+  static String get globalChangesNote => 'ProductsDialog.globalChangesNote'.tr(); // "Note: This includes changes from all tickets in this order."
+
 
   // --- Order History ---
   static String get noHistoryFound => 'OrderHistory.noHistoryFound'.tr(); // "No history found"

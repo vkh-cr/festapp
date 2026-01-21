@@ -1,10 +1,19 @@
 import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fstapp/database_tables/tb.dart';
 
 import '../occasion/occasion_model.dart';
 
 class DbUnits {
   static final _supabase = Supabase.instance.client;
+
+  static Future<bool> hasOccasions(int unitId) async {
+    final count = await _supabase
+        .from(Tb.occasions.table)
+        .count(CountOption.exact)
+        .eq(Tb.occasions.unit, unitId);
+    return count > 0;
+  }
 
   /// Fetches a unit and its public occasions, or all occasions for an organization.
   ///
@@ -68,6 +77,10 @@ class DbUnits {
     } else {
       throw Exception(response['message']);
     }
+  }
+
+  static Future<void> deleteUnit(int unitId) async {
+    await _supabase.rpc("delete_unit", params: {'p_unit_id': unitId});
   }
 }
 

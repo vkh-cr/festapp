@@ -39,7 +39,21 @@ class RightsService{
 
   static Future<bool> updateAppData({int? unitId, String? link, bool force = false, bool refreshOffline = AppConfig.isAppSupported, String? formLink}) async {
     // Check if an update is needed
-    if (occasionLinkModelNotifier.value?.occasion?.id == null || link != currentLink || force) {
+    // Logic: If force is true, update.
+    // If unitId is specified (Unit Admin mode), only update if we aren't already on that unit.
+    // Otherwise (Occasion mode), update if we don't have an occasion or the link changed.
+    bool needsUpdate = force;
+    if (!needsUpdate) {
+      if (unitId != null) {
+        if (occasionLinkModelNotifier.value?.unit?.id != unitId) {
+          needsUpdate = true;
+        }
+      } else if (occasionLinkModelNotifier.value?.occasion?.id == null || link != currentLink) {
+        needsUpdate = true;
+      }
+    }
+
+    if (needsUpdate) {
       LinkModel model = LinkModel(occasionLink: link, unitId: unitId, formLink: formLink);
       if(unitId == null){
         var occasionLink = link ?? RouterService.currentOccasionLink;

@@ -37,15 +37,31 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialOccasions != null) {
+    _initializeOccasions();
+    _searchController.addListener(_filterOccasions);
+    _searchFocusNode.addListener(_onSearchFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant OccasionsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialOccasions != oldWidget.initialOccasions) {
+      _initializeOccasions();
+    }
+  }
+
+  void _initializeOccasions() {
+     if (widget.initialOccasions != null) {
       _allOccasions = widget.initialOccasions!;
       _filteredOccasions = widget.initialOccasions!;
       _isLoading = false;
+      // Re-apply filter if search was active
+      if (_searchController.text.isNotEmpty) {
+        _filterOccasions();
+      }
     } else {
       _loadOccasions();
     }
-    _searchController.addListener(_filterOccasions);
-    _searchFocusNode.addListener(_onSearchFocusChange);
   }
 
   @override

@@ -226,7 +226,11 @@ class EshopColumns {
         textAlign: TrinaColumnTextAlign.end,
         width: 150,
         renderer: (ctx) {
-          final currentValue = ctx.cell.value?.toString() ?? "";
+          String currentValue = ctx.cell.value?.toString() ?? "";
+          if (currentValue.startsWith("0 ") || currentValue == "0") {
+             currentValue = "";
+          }
+          
           return Center(
             child: InkWell(
               onTap: () async {
