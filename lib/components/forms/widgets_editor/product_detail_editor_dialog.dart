@@ -6,6 +6,9 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/widgets/standard_dialog.dart';
 import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 
 class ProductDetailEditorDialog extends StatefulWidget {
   final ProductModel product;
@@ -18,6 +21,7 @@ class ProductDetailEditorDialog extends StatefulWidget {
 class _ProductDetailEditorDialogState extends State<ProductDetailEditorDialog> {
   late String _description;
   late TextEditingController _quantityController;
+  late TextEditingController _shortTitleController;
 
   @override
   void initState() {
@@ -27,11 +31,16 @@ class _ProductDetailEditorDialogState extends State<ProductDetailEditorDialog> {
     _quantityController.addListener(() {
       widget.product.maximum = int.tryParse(_quantityController.text) ?? 0;
     });
+    _shortTitleController = TextEditingController(text: widget.product.shortTitle ?? "");
+    _shortTitleController.addListener(() {
+      widget.product.shortTitle = _shortTitleController.text;
+    });
   }
 
   @override
   void dispose() {
     _quantityController.dispose();
+    _shortTitleController.dispose();
     super.dispose();
   }
 
@@ -65,6 +74,16 @@ class _ProductDetailEditorDialogState extends State<ProductDetailEditorDialog> {
                   .titleLarge
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
+            if (FeatureService.isFeatureEnabled(FeatureConstants.ticket)) ...[
+              const SizedBox(height: 16),
+              TextField(
+                controller: _shortTitleController,
+                decoration: InputDecoration(
+                  labelText: OrdersStrings.gridShortTitle,
+                  border: const UnderlineInputBorder(),
+                ),
+              ),
+            ],
             const SizedBox(height: 8),
             // Editable Product Quantity with helper text
             TextField(

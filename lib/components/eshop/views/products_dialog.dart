@@ -13,6 +13,7 @@ import 'package:fstapp/components/eshop/views/search_products_screen.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
 import '../orders_strings.dart';
+import '../logic/order_calc_helper.dart';
 import 'edit_price_dialog.dart';
 
 class ProductsDialog extends StatefulWidget {
@@ -135,34 +136,30 @@ class _ProductsDialogState extends State<ProductsDialog> {
     final payment = _bundle?.paymentInfo;
     if (order == null || payment == null) return;
 
-    final referenceOrderData = _bundle?.referenceOrder?.data;
-    List<ProductModel> referenceProducts = [];
-    if(referenceOrderData != null) {
-      final ticketInHistory = (referenceOrderData["tickets"] as List?)
-          ?.firstWhereOrNull((t) => (t["id"] as int?) == widget.ticketId);
-      if (ticketInHistory != null && ticketInHistory["products"] != null) {
-        referenceProducts = (ticketInHistory["products"] as List)
-            .map((p) => ProductModel.fromJson(p as Map<String, dynamic>))
-            .toList();
-      }
-    }
+    final helperResult = OrderCalcHelper.calculateGlobalOrderChanges(
+      referenceOrder: _bundle?.referenceOrder,
+      currentOrder: _bundle?.order,
+      currentTicketId: widget.ticketId,
+      currentTicketProducts: _current,
+    );
 
-    final currentProducts = _current;
-    final added = currentProducts.where((p) => !referenceProducts.any((o) => o.id == p.id)).toList();
-    final removed = referenceProducts.where((p) => !currentProducts.any((c) => c.id == p.id)).toList();
-    final changed = <Map<String, ProductModel>>[];
-    for (var currentP in currentProducts) {
-      final refP = referenceProducts.firstWhereOrNull((p) => p.id == currentP.id);
-      if (refP != null && currentP.price != refP.price) {
-        changed.add({'from': refP, 'to': currentP});
-      }
-    }
-
-    final referenceTotal = referenceProducts.fold<double>(0.0, (sum, item) => sum + (item.price ?? 0));
-    final currentTotal = _sumCur;
+    final added = helperResult.added;
+    final removed = helperResult.removed;
+    final changed = helperResult.changed;
+    final referenceTotal = helperResult.referenceTotal;
+    final currentTotal = helperResult.currentTotal;
 
     final totalPaid = payment.paid ?? 0;
     final orderPrice = order.price ?? 0;
+    // Note: The balance calculation logic in the dialog display remains local to what the user sees as "order price"
+    // However, for the email preview, we should probably rely on the helper's currentTotal if we want to show the specific difference.
+    // The original code used: final balance = orderPrice - totalPaid;
+    // But 'orderPrice' from _bundle.order might be stale if we just changed products locally and haven't saved to DB yet?
+    // Actually, _bundle.order is the DB state. _current contains the local mutations.
+    // The 'orderPrice' in the bundle is the price BEFORE the current unsaved edits.
+    // If we want to show the PREDICTED balance, we should use currentTotal.
+    // Let's stick to the original logic for balance for now to avoid side effects,
+    // as the specific user request was about the *list of products* not showing correctly.
     final balance = orderPrice - totalPaid;
 
     final confirmed = await showDialog<bool>(
@@ -188,6 +185,23 @@ class _ProductsDialogState extends State<ProductsDialog> {
                     referenceTotal: referenceTotal,
                     currentTotal: currentTotal,
                   ),
+                  // Only show the note if there are changes from other tickets
+                  if (helperResult.hasChangesFromOtherTickets)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, size: 16, color: Colors.orange.shade800),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              OrdersStrings.globalChangesNote,
+                              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.orange.shade900, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   _buildConfirmationListItem(Icons.credit_card, OrdersStrings.sendUpdateItemStatus),
                   if (balance < 0)
                     _buildConfirmationListItem(Icons.undo_outlined, OrdersStrings.sendUpdateItemRefund),

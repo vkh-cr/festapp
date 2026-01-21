@@ -66,9 +66,12 @@ class ProductModel extends ITrinaRowModel {
 
   double? get surchargeAmount {
     var val = _surchargeMap['amount'];
-    if (val is num) return val.toDouble();
-    if (val is String) return double.tryParse(val);
-    return null;
+    double? result;
+    if (val is num) result = val.toDouble();
+    if (val is String) result = double.tryParse(val);
+    
+    if (result == 0) return null;
+    return result;
   }
 
   set surchargeAmount(double? value) {
@@ -77,12 +80,12 @@ class ProductModel extends ITrinaRowModel {
       data![TbEshop.products.data_surcharge] = {};
     }
     var map = data![TbEshop.products.data_surcharge] as Map;
-    if (value == null) {
+    if (value == null || value == 0) {
       map.remove('amount');
     } else {
       map['amount'] = value;
     }
-    if (map.isEmpty) {
+    if (!map.containsKey('amount')) {
       data!.remove(TbEshop.products.data_surcharge);
     }
   }
@@ -102,7 +105,8 @@ class ProductModel extends ITrinaRowModel {
     } else {
       map['currency'] = value;
     }
-    if (map.isEmpty) {
+    
+    if (map.isEmpty || !map.containsKey('amount')) {
       data!.remove(TbEshop.products.data_surcharge);
     }
   }
@@ -136,6 +140,29 @@ class ProductModel extends ITrinaRowModel {
         formIds = formIds ?? [];
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic>? data = json[TbEshop.products.data];
+
+    if (data != null && data[TbEshop.products.data_surcharge] is Map) {
+      var map = data[TbEshop.products.data_surcharge] as Map;
+      var amount = map['amount'];
+      bool shouldRemove = false;
+      if (amount == null) {
+        shouldRemove = true;
+      } else if (amount is num && amount == 0) {
+        shouldRemove = true;
+      } else if (amount is String) {
+        if (double.tryParse(amount) == 0) shouldRemove = true;
+      }
+      
+      if (shouldRemove) {
+        // Create a copy of data to avoid mutating the original JSON map if it's reused
+        // although usually json decode produces fresh maps. 
+        // Better safe:
+        data = Map<String, dynamic>.from(data);
+        data.remove(TbEshop.products.data_surcharge);
+      }
+    }
+
     return ProductModel(
       id: json[TbEshop.products.id],
       createdAt: json[TbEshop.products.created_at] != null
@@ -151,7 +178,7 @@ class ProductModel extends ITrinaRowModel {
           ? double.tryParse(json[TbEshop.products.price].toString())
           : null,
       currencyCode: json[TbEshop.products.currency_code],
-      data: json[TbEshop.products.data],
+      data: data,
       productTypeId: json[TbEshop.products.product_type],
       occasion: json[TbEshop.products.occasion],
       productTypeString: json[metaTypeField],
@@ -196,19 +223,15 @@ class ProductModel extends ITrinaRowModel {
         List<String> parts = raw.split(" ");
         if (parts.isNotEmpty) {
            double? amount = double.tryParse(parts[0]);
-           if (amount != null) {
+           if (amount != null && amount != 0) {
              surchargeMap['amount'] = amount;
+           } else {
+             surchargeMap.remove('amount');
            }
+           
            if (parts.length > 1) {
              surchargeMap['currency'] = parts.sublist(1).join(" ");
            } else {
-              // If only amount is present, decide whether to clear currency or keep existing.
-              // Logic: grid edit overtakes. If currency missing in string, maybe it was deleted?
-              // But parsing "100" usually implies amount.
-              // Let's assume if currency is unspecified in string, we remove it to be safe/explicit,
-              // or we rely on the dialog to always return fully formed string.
-              // Given the dialog implementation will likely force format, we can be flexible here.
-              // Let's remove currency if not strictly in the string to allow clearing it via text edit if somehow possible.
               surchargeMap.remove('currency');
            }
         }
@@ -217,7 +240,7 @@ class ProductModel extends ITrinaRowModel {
          surchargeMap.remove('currency');
       }
       
-      if (surchargeMap.isNotEmpty) {
+      if (surchargeMap.containsKey('amount')) {
         data[TbEshop.products.data_surcharge] = surchargeMap;
       } else {
         data.remove(TbEshop.products.data_surcharge);

@@ -147,3 +147,38 @@ BEGIN
     );
 END;
 $$;
+
+create or replace function delete_unit(p_unit_id bigint)
+returns void
+language plpgsql
+security definer
+as $$
+declare
+    v_manager_count int;
+    v_occasion_count int;
+begin
+    -- 1. Check if user is manager
+    perform check_is_manager_on_unit(p_unit_id);
+
+    -- 2. Check if unit has no occasions
+    select count(*) into v_occasion_count from occasions where unit = p_unit_id;
+    if v_occasion_count > 0 then
+        raise exception 'UNIT_HAS_OCCASIONS';
+    end if;
+
+    -- 3. Check if user has other managed units
+    select count(*) into v_manager_count
+    from unit_users
+    where "user" = auth.uid() and is_manager = true;
+
+    if v_manager_count <= 1 then
+        raise exception 'CANNOT_DELETE_LAST_UNIT';
+    end if;
+
+    -- 4. Delete dependent unit_users (Cascade manually if not set on FK)
+    delete from unit_users where unit = p_unit_id;
+
+    -- 5. Delete the unit
+    delete from units where id = p_unit_id;
+end;
+$$;

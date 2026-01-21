@@ -47,6 +47,24 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    RightsService.occasionLinkModelNotifier.addListener(_onRightsChanged);
+  }
+
+  @override
+  void dispose() {
+    RightsService.occasionLinkModelNotifier.removeListener(_onRightsChanged);
+    super.dispose();
+  }
+
+  void _onRightsChanged() {
+    if (RightsService.currentUnit()?.id == widget.id) {
+      _loadOrganization(force: false);
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (widget.id == null && context.routeData.hasPendingChildren) {
