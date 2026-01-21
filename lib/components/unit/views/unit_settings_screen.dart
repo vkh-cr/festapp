@@ -15,6 +15,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:fstapp/components/bank_accounts/views/unit_bank_accounts_screen.dart';
 import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/router_service.dart';
 
 class UnitSettingsScreen extends StatefulWidget {
   final UnitModel unit;
@@ -44,9 +46,11 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
   String _versionInfo = "";
 
   // Constants for data keys
-  // Constants for data keys
   static const String dataTimezone = "timezone";
   static const int maxTitleLength = 30;
+
+  bool _canDeleteUnit = true;
+  String? _deleteDisabledMessage;
 
   @override
   void initState() {
@@ -54,6 +58,45 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
     _unit = widget.unit;
     _loadUnitData();
     _loadVersionInfo();
+    RightsService.occasionLinkModelNotifier.addListener(_onRightsChanged);
+  }
+
+  @override
+  void dispose() {
+    RightsService.occasionLinkModelNotifier.removeListener(_onRightsChanged);
+    _replyToEmailController.dispose();
+    super.dispose();
+  }
+
+  void _onRightsChanged() {
+    if (RightsService.currentUnit()?.id == widget.unit.id) {
+      _checkDeleteConstraints();
+    }
+  }
+
+  Future<void> _checkDeleteConstraints() async {
+    try {
+      // Check deletion limits
+      bool hasOccasions = await DbUnits.hasOccasions(widget.unit.id!);
+      bool isLastUnit = (RightsService.currentUser()?.units?.length ?? 0) <= 1;
+
+      if (mounted) {
+        setState(() {
+          if (hasOccasions) {
+            _canDeleteUnit = false;
+            _deleteDisabledMessage = UnitSettingsStrings.cannotDeleteUnitWithOccasions;
+          } else if (isLastUnit) {
+            _canDeleteUnit = false;
+            _deleteDisabledMessage = UnitSettingsStrings.cannotDeleteLastUnit;
+          } else {
+            _canDeleteUnit = true;
+            _deleteDisabledMessage = null;
+          }
+        });
+      }
+    } catch (e) {
+      print("Error checking delete constraints: $e");
+    }
   }
 
   Future<void> _loadVersionInfo() async {
@@ -74,6 +117,9 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
       if (freshUnit != null) {
         _unit = freshUnit;
       }
+      
+      await _checkDeleteConstraints();
+
     } catch (e) {
       print("Error loading unit data: $e");
     } finally {
@@ -85,6 +131,8 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
       }
     }
   }
+// ... (existing code omitted) ...
+
 
   void _initializeFormState() {
     _title = _unit.title;
@@ -101,12 +149,6 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
           ? "Europe/Prague"
           : _allTimezones.first;
     }
-  }
-
-  @override
-  void dispose() {
-    _replyToEmailController.dispose();
-    super.dispose();
   }
 
   Future<void> _saveSettings() async {
@@ -144,6 +186,54 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
           _isSaving = false;
         });
       }
+    }
+  }
+
+  Future<void> _deleteUnit() async {
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(UnitSettingsStrings.deleteUnit),
+        content: Text(UnitSettingsStrings.deleteUnitConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(CommonStrings.storno),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(CommonStrings.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await DbUnits.deleteUnit(_unit.id!);
+      
+      if (mounted) {
+        // Filter out the deleted unit from the local list
+        var allUnits = RightsService.currentUser()?.units ?? [];
+        var remainingUnits = allUnits.where((u) => u.id != _unit.id).toList();
+
+        if (remainingUnits.isNotEmpty) {
+           // Switch to the first available unit
+           await RouterService.navigateToUnitAdmin(context, remainingUnits.first);
+        } else {
+           // No units left, go home
+           await RouterService.navigateHome(context);
+        }
+      }
+    } catch (e) {
+      String message = e.toString();
+      if (message.contains('UNIT_HAS_OCCASIONS')) {
+        message = UnitSettingsStrings.cannotDeleteUnitWithOccasions;
+      } else if (message.contains('CANNOT_DELETE_LAST_UNIT')) {
+        message = UnitSettingsStrings.cannotDeleteLastUnit;
+      }
+      ToastHelper.Show(context, message, severity: ToastSeverity.NotOk);
     }
   }
 
@@ -336,6 +426,7 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
                       ],
                     ),
                   const SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   if (_canEdit)
                     ListTile(
                       leading: const Icon(Icons.account_balance),
@@ -349,7 +440,25 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
                         );
                       },
                     ),
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 48),
+                  if (_canEdit)
+                    Center(
+                      child: Tooltip(
+                        message: _deleteDisabledMessage ?? "",
+                        child: TextButton(
+                          onPressed: _canDeleteUnit ? _deleteUnit : null,
+                          child: Text(
+                            UnitSettingsStrings.deleteUnit,
+                            style: TextStyle(
+                              color: _canDeleteUnit 
+                                  ? ThemeConfig.redColor(context) 
+                                  : Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 24),
                   if (_versionInfo.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 24.0),

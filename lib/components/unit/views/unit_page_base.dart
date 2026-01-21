@@ -81,8 +81,9 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
     // **CHANGED**: Added mounted check before using context
     if (!mounted) return;
 
-    if (widget.id != null) {
-      RouterService.goToUnit(context, RightsService.currentUnit()!.id!);
+    final currentId = RightsService.currentUnit()?.id;
+    if (widget.id != null && currentId != null && widget.id != currentId) {
+      RouterService.goToUnit(context, currentId);
     }
 
     _currentUnitId = RightsService.currentUnit()?.id;

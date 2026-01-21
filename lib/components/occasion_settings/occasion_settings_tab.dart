@@ -214,6 +214,7 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
   Future<void> _deleteOccasion() async {
     try {
       await DbOccasions.deleteOccasion(occasion!.id!);
+      await RightsService.updateAppData(force: true);
       ToastHelper.Show(context, "${CommonStrings.deleted}: ${occasion!.title!}");
       Navigator.of(context).pop();
     } catch (e) {

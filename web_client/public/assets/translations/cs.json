@@ -970,7 +970,8 @@
     "newOrderTotal": "Celkem za novou objednávku",
     "emailHelpText": "Zadejte e-mailovou adresu zákazníka pro zaslání potvrzení nové objednávky a platebních údajů.",
     "noDetailsFound": "Podrobnosti nenalezeny",
-    "customerExample": "zakaznik@priklad.cz"
+    "customerExample": "zakaznik@priklad.cz",
+    "globalChangesNote": "E-mail zahrnuje změny ze všech vstupenek v této objednávce."
   },
   "EmailTemplates": {
     "subs": {
@@ -1301,7 +1302,11 @@
   },
   "UnitSettings": {
     "labelReplyToEmail": "Výchozí e-mail pro odpovědi",
-    "labelDefaultTimezone": "Výchozí časová zóna"
+    "labelDefaultTimezone": "Výchozí časová zóna",
+    "deleteUnit": "Smazat organizaci",
+    "deleteUnitConfirmation": "Opravdu chcete smazat tuto organizaci? Všechna data včetně událostí budou ztracena.",
+    "cannotDeleteUnitWithOccasions": "Nelze smazat organizaci, která má události.",
+    "cannotDeleteLastUnit": "Nelze smazat vaši poslední organizaci."
   },
   "PublicOrder": {
     "successTitle": "Vaše objednávka byla přijata!",
