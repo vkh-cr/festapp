@@ -206,6 +206,7 @@ class OrderModel extends ITrinaRowModel {
       EshopColumns.ORDER_STATE: TrinaCell(value: OrderModel.formatState(state ?? orderedState)),
       EshopColumns.PAYMENT_INFO_AMOUNT: TrinaCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!, currencyCode: paymentInfoModel!.currencyCode) : ""),
       EshopColumns.PAYMENT_INFO_PAID: TrinaCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!, currencyCode: paymentInfoModel!.currencyCode) : ""),
+      EshopColumns.PAYMENT_INFO_ID: TrinaCell(value: paymentInfo ?? 0),
       EshopColumns.PAYMENT_INFO_RETURNED: TrinaCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!, currencyCode: paymentInfoModel!.currencyCode) : ""),
       EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL: TrinaCell(value: paymentInfoModel?.variableSymbol ?? 0),
       EshopColumns.PAYMENT_INFO_DEADLINE: TrinaCell(

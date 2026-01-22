@@ -12,6 +12,8 @@ import 'package:fstapp/services/responsive_service.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/app_router.gr.dart';
 
 class UserHeaderWidget extends StatefulWidget {
   final Color? appBarIconColor;
@@ -21,7 +23,7 @@ class UserHeaderWidget extends StatefulWidget {
       {super.key, this.appBarIconColor, this.onSignIn, this.onAdminPressed});
 
   @override
-  _UserHeaderWidgetState createState() => _UserHeaderWidgetState();
+  State<UserHeaderWidget> createState() => _UserHeaderWidgetState();
 }
 
 class _UserHeaderWidgetState extends State<UserHeaderWidget> {
@@ -151,7 +153,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
   }
 
   /// Common popover wrapper that applies constraints, decoration and places a cross button.
-  Widget _buildPopoverWrapper(Widget content) {
+  Widget _buildPopoverWrapper(Widget content, {Widget? topLeftWidget}) {
     // Use a Builder so that we always have the current Theme.
     return Builder(
       builder: (context) {
@@ -182,6 +184,12 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                   hoverColor: Colors.transparent,
                 ),
               ),
+              if (topLeftWidget != null)
+                Positioned(
+                  top: 4,
+                  left: 4,
+                  child: topLeftWidget,
+                ),
             ],
           ),
         );
@@ -297,14 +305,32 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                             color: ThemeConfig.blackColor(context)),
                       ).tr(),
                       onTap: () async {
+                        final unitId = RightsService.currentUnit()?.id;
                         Navigator.pop(context);
                         await AuthService.logout();
-                        if (mounted) setState(() {});
-                        await RouterService.goToUnit(context, RightsService.currentUnit()!.id!);
+                        if (context.mounted && unitId != null) {
+                          setState(() {});
+                          await RouterService.goToUnit(context, unitId);
+                        }
                       },
                     ),
                   ],
                 ),
+                topLeftWidget: RightsService.isAdmin()
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.business,
+                          size: 24, // Slightly smaller than close button (28)
+                          color: ThemeConfig.blackColor(context),
+                        ),
+                        tooltip: "Platform Settings",
+                        onPressed: () {
+                          Navigator.pop(context);
+                          context.router
+                              .push(const OrganizationEditRedirectRoute());
+                        },
+                      )
+                    : null,
               );
             },
           ),

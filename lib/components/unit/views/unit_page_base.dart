@@ -17,7 +17,6 @@ import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/unit/views/occasion_card.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/router_service.dart';
 import 'package:fstapp/widgets/header/universal_header.dart';
 
 const double kVerticalPadding = 32.0;

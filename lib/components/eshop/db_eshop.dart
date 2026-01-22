@@ -12,6 +12,7 @@ import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/components/eshop/models/transaction_model.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../inventory/models/product_inventory_context_model.dart';
@@ -139,6 +140,23 @@ class DbEshop {
     try {
       await _supabase.rpc(
         'remove_transaction_from_payment_info_ws',
+        params: {
+          'p_transaction_id': transactionId,
+          'p_payment_info_id': paymentInfoId,
+        },
+      );
+    } catch (e) {
+      ToastHelper.Show(context, e.toString());
+      rethrow;
+    }
+  }
+
+  /// Deletes a manual transaction completely from the database using RPC.
+  static Future<void> deleteManualTransactionWithSecurity(
+      BuildContext context, int transactionId, int paymentInfoId) async {
+    try {
+      await _supabase.rpc(
+        'delete_manual_transaction_ws',
         params: {
           'p_transaction_id': transactionId,
           'p_payment_info_id': paymentInfoId,
@@ -327,14 +345,29 @@ class GetTransactionsForOrderResponse {
   });
 
   factory GetTransactionsForOrderResponse.fromJson(Map<String, dynamic> json) {
+    // Parse users
+    final users = json['users'] != null
+        ? List<UserInfoModel>.from((json['users'] as List).map((x) => UserInfoModel.fromJson(x)))
+        : <UserInfoModel>[];
+    
+    // Create user map
+    final userMap = {for (var u in users) u.id: u};
+
+    final transactions = json['transactions'] != null
+        ? List<TransactionModel>.from(
+            json['transactions'].map((x) => TransactionModel.fromJson(x)))
+        : <TransactionModel>[];
+    
+    // Link users
+    for (var t in transactions) {
+      t.createdBy = userMap[t.createdById];
+    }
+
     return GetTransactionsForOrderResponse(
       paymentInfo: json['payment_info'] != null
           ? PaymentInfoModel.fromJson(json['payment_info'])
           : null,
-      transactions: json['transactions'] != null
-          ? List<TransactionModel>.from(
-          json['transactions'].map((x) => TransactionModel.fromJson(x)))
-          : [],
+      transactions: transactions,
     );
   }
 }

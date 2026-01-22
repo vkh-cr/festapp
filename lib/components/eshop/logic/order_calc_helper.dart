@@ -19,6 +19,25 @@ class OrderCalcHelper {
     required this.hasChangesFromOtherTickets,
   });
 
+  static List<ProductModel> _parseProducts(List<dynamic> rawProducts) {
+    return rawProducts.map((p) {
+      if (p is! Map<String, dynamic>) return null;
+      // Check if it looks like a simplified order data product
+      // It usually hash 'id', 'price', 'title', 'type' directly, not in 'data' map
+      // ProductModel.fromJson expects 'created_at', 'price', etc. from DB columns, 
+      // but 'data' field for dynamic stuff.
+      
+      // Let's manually construct ProductModel from this simplified JSON
+      return ProductModel(
+        id: p['id'],
+        title: p['title'],
+        price: p['price'] is num ? (p['price'] as num).toDouble() : double.tryParse(p['price'].toString()),
+        productTypeTitleString: p['type_title'],
+        data: {},
+      );
+    }).whereType<ProductModel>().toList();
+  }
+
   static OrderCalcHelper calculateGlobalOrderChanges({
     required OrderModel? referenceOrder,
     required OrderModel? currentOrder,
@@ -32,9 +51,7 @@ class OrderCalcHelper {
       final tickets = refData["tickets"] as List;
       for (var t in tickets) {
         if (t is Map && t["products"] is List) {
-          referenceProducts.addAll((t["products"] as List)
-              .map((p) => p is Map<String, dynamic> ? ProductModel.fromJson(p) : null)
-              .whereType<ProductModel>()); // Filter out nulls if any
+          referenceProducts.addAll(_parseProducts(t["products"]));
         }
       }
     }
@@ -53,29 +70,63 @@ class OrderCalcHelper {
         } else {
           // Use the saved state for other tickets
           if (t["products"] is List) {
-            currentAllProducts.addAll((t["products"] as List)
-                .map((p) => p is Map<String, dynamic> ? ProductModel.fromJson(p) : null)
-                .whereType<ProductModel>());
+            currentAllProducts.addAll(_parseProducts(t["products"]));
           }
         }
       }
     }
 
     // Now calculate diff between referenceProducts and currentAllProducts
-    final added = currentAllProducts.where((p) => !referenceProducts.any((o) => o.id == p.id)).toList();
-    final removed = referenceProducts.where((p) => !currentAllProducts.any((c) => c.id == p.id)).toList();
+    // We use "bag difference" logic to handle multiple instances of the same product ID.
+    
+    final referenceProdsMutable = [...referenceProducts];
+    final currentProdsMutable = [...currentAllProducts];
+    
+    final added = <ProductModel>[];
+    final removed = <ProductModel>[];
     final changed = <Map<String, ProductModel>>[];
 
-    for (var currentP in currentAllProducts) {
-      final refP = referenceProducts.firstWhereOrNull((p) => p.id == currentP.id);
-      if (refP != null && currentP.price != refP.price) {
-        changed.add({'from': refP, 'to': currentP});
+    // 1. Find exact matches (id and content invariant) and remove them from both
+    for (int i = currentProdsMutable.length - 1; i >= 0; i--) {
+      final currentP = currentProdsMutable[i];
+      // Find a reference product that exactly matches ID and price/title
+      final matchIndex = referenceProdsMutable.indexWhere((refP) => 
+          refP.id == currentP.id && 
+          _isPriceEqual(refP.price, currentP.price) &&
+          refP.title == currentP.title
+      );
+      
+      if (matchIndex > -1) {
+        // Exact match found, so it's unchanged. Remove from both bags.
+        currentProdsMutable.removeAt(i);
+        referenceProdsMutable.removeAt(matchIndex);
       }
     }
 
+    // 2. Find changed matches (same ID, different content)
+    for (int i = currentProdsMutable.length - 1; i >= 0; i--) {
+       final currentP = currentProdsMutable[i];
+       // Find a reference product with same ID (we know it's different content now because exact matches are gone)
+       final matchIndex = referenceProdsMutable.indexWhere((refP) => refP.id == currentP.id);
+       
+       if (matchIndex > -1) {
+         final refP = referenceProdsMutable[matchIndex];
+         changed.add({'from': refP, 'to': currentP});
+         
+         currentProdsMutable.removeAt(i);
+         referenceProdsMutable.removeAt(matchIndex);
+       }
+    }
+
+    // 3. Remaining in current are Added
+    added.addAll(currentProdsMutable);
+    
+    // 4. Remaining in reference are Removed
+    removed.addAll(referenceProdsMutable);
+
     final referenceTotal = referenceProducts.fold<double>(0.0, (sum, item) => sum + (item.price ?? 0));
     final currentTotal = currentAllProducts.fold<double>(0.0, (sum, item) => sum + (item.price ?? 0));
-
+    
     // Check for changes in other tickets
     bool hasChangesFromOtherTickets = false;
 
@@ -118,13 +169,10 @@ class OrderCalcHelper {
     final ticket = (order.data!["tickets"] as List).firstWhereOrNull((t) => t is Map && t["id"] == ticketId);
     if (ticket == null || ticket["products"] is! List) return [];
     
-    return (ticket["products"] as List)
-        .map((p) => p is Map<String, dynamic> ? ProductModel.fromJson(p) : null)
-        .whereType<ProductModel>()
-        .toList();
+    return _parseProducts(ticket["products"]);
   }
 
-  static bool _hasDiiference(List<ProductModel> list1, List<ProductModel> list2) {
+    static bool _hasDiiference(List<ProductModel> list1, List<ProductModel> list2) { // Keeping typo for now to avoid large refactor
     final added = list2.where((p) => !list1.any((o) => o.id == p.id)).isNotEmpty;
     if (added) return true;
     
@@ -133,9 +181,15 @@ class OrderCalcHelper {
 
     for (var p2 in list2) {
       final p1 = list1.firstWhereOrNull((p) => p.id == p2.id);
-      if (p1 != null && p1.price != p2.price) return true;
+      if (p1 != null && (!_isPriceEqual(p1.price, p2.price) || p1.title != p2.title)) return true;
     }
     
     return false;
+  }
+
+  static bool _isPriceEqual(double? p1, double? p2) {
+    if (p1 == null && p2 == null) return true;
+    if (p1 == null || p2 == null) return false;
+    return (p1 - p2).abs() < 0.001;
   }
 }

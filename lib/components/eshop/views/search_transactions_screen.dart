@@ -7,6 +7,7 @@ import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'dart:async';
 
 class SearchTransactionsScreen extends StatefulWidget {
@@ -219,8 +220,22 @@ class _SearchTransactionsScreenState extends State<SearchTransactionsScreen> {
                                       fontSize: 16,
                                     ),
                                   ),
-                                  // Counter Account Name
-                                  if (counterAccountName.isNotEmpty)
+                                  // Counter Account Name or Cash Indicator
+                                  if (transaction.transactionType == 'manual')
+                                    Row(
+                                      children: [
+                                        Icon(Icons.payments, size: 18, color: Colors.grey[700]),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          OrdersStrings.transactionTypeCash,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  else if (counterAccountName.isNotEmpty)
                                     SelectableText(
                                       counterAccountName,
                                       style: TextStyle(

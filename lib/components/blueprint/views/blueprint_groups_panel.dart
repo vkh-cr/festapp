@@ -14,8 +14,7 @@ class BlueprintGroupsPanel extends StatelessWidget {
   final ValueChanged<BlueprintGroupModel?> onGroupSelected;
   final VoidCallback? onAddGroup;
   final VoidCallback? onDeleteGroup;
-  final VoidCallback? onRenameGroup;
-  final ValueChanged<BlueprintGroupModel>? onEditGroupProduct; // Handles the Unified Dialog
+  final ValueChanged<BlueprintGroupModel>? onEditGroupProduct;
   final bool canEdit;
 
   const BlueprintGroupsPanel({
@@ -25,7 +24,6 @@ class BlueprintGroupsPanel extends StatelessWidget {
     required this.onGroupSelected,
     this.onAddGroup,
     this.onDeleteGroup,
-    this.onRenameGroup,
     this.onEditGroupProduct,
     required this.canEdit,
   });
@@ -60,11 +58,6 @@ class BlueprintGroupsPanel extends StatelessWidget {
                   icon: const Icon(Icons.delete),
                   tooltip: CommonStrings.delete,
                   onPressed: canEdit ? onDeleteGroup : null,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  tooltip: CommonStrings.rename,
-                  onPressed: canEdit ? onRenameGroup : null,
                 ),
               ],
             ),

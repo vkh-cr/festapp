@@ -13,6 +13,8 @@ import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/components/eshop/db_tickets.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -32,6 +34,7 @@ class OrdersContent extends StatefulWidget {
 class _OrdersContentState extends State<OrdersContent> {
   String? occasionLink;
   SingleDataGridController<OrderModel>? controller;
+  int? unitId;
 
   @override
   void didChangeDependencies() {
@@ -48,7 +51,15 @@ class _OrdersContentState extends State<OrdersContent> {
     if (occasionLink == null) return;
     
     // Fetch all data in one request
-    final bundle = await DbOrders.getOrdersTabData(occasionLink: occasionLink!);
+    var futures = await Future.wait([
+      DbOrders.getOrdersTabData(occasionLink: occasionLink!),
+      DbOccasions.getOccasionByLink(occasionLink!),
+    ]);
+
+    final bundle = futures[0] as ReservationsBundle;
+    final occasion = futures[1] as OccasionModel;
+    unitId = occasion.unit;
+
     if (!mounted) return;
 
     final forms = bundle.forms;
@@ -134,7 +145,11 @@ class _OrdersContentState extends State<OrdersContent> {
           isEnabled: RightsService.isOrderEditor,
         ),
       ],
-      columns: EshopColumns.generateColumns(context, columnIdentifiers, data: { EshopColumns.ORDER_TRANSACTIONS: refreshData }),
+      columns: EshopColumns.generateColumns(context, columnIdentifiers, data: { 
+        EshopColumns.ORDER_TRANSACTIONS: refreshData,
+        EshopColumns.PAYMENT_INFO_PAID: refreshData,
+        "unitId": unitId,
+      }),
     );
 
     if(mounted) {

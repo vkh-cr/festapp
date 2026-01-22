@@ -877,7 +877,27 @@
     "generatingPdfForWithSpot": "Generating Ticket for {customer} - {spot}",
     "scanInstructionsAppUser": "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile.",
     "scanningForOccasion": "Scanning for: ",
-    "scanNotFound": "Invalid code"
+    "scanNotFound": "Invalid code",
+    "addPayment": "Add Payment",
+    "addCashPaymentTitle": "Add Cash Payment",
+    "transactionTypeCash": "Cash",
+    "transactionTypeManual": "Manual",
+    "deleteCashTransactionConfirmation": "Are you sure you want to delete this cash payment? This will permanently remove it.",
+    "enterCashAmountDescription": "Enter the amount you received in cash.",
+    "acceptedBy": "Entered by",
+    "variableSymbol": "Variable symbol",
+    "messageForRecipient": "Message for Recipient",
+    "amount": "Amount",
+    "paid": "Paid",
+    "returned": "Returned",
+    "date": "Date",
+    "noTransactionsFound": "No transactions found.",
+    "findAndLinkTransaction": "Find and link a transaction",
+    "unlinkTransactionConfirmation": "Are you sure you want to unlink this transaction?",
+    "confirmRemoval": "Confirm removal",
+    "removeTransactionSuccess": "Removed {item}.",
+    "removeTooltip": "Remove",
+    "transactionsForOrder": "Transactions for order {order}."
   },
   "UserColumns": {
     "id": "Id",
@@ -1387,7 +1407,9 @@
     "delete": "Delete",
     "edit": "Edit",
     "save": "Save",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "reset": "Reset",
+    "amountCannotBeZero": "Amount cannot be 0"
   },
   "BankAccount": {
     "settingsTitle": "Bank Account Settings",
@@ -1433,7 +1455,7 @@
     "supportedCurrencies": "Supported Currencies",
     "addCurrency": "Add Currency",
     "invalidCurrencyCode": "Invalid Code (3 chars)",
-    "priority": "Priority",
+    "priority": "Organization Priority",
     "priorityTooltip": "Determines the order of accounts. Lower numbers appear first.",
     "priorityHelpTitle": "Priority",
     "priorityHelpContent": "Priority determines the order in which accounts are displayed. You can change it by dragging and dropping accounts in the list.",

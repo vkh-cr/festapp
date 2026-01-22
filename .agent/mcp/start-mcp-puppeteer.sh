@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Navigate to the project root
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 # Load environment variables from .env.local if it exists
 if [ -f .env.local ]; then

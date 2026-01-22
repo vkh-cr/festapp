@@ -51,6 +51,8 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
 
   final _formKey = GlobalKey<FormState>();
 
+  bool get _isReadOnly => widget.readOnly || _account.type == 'CASH';
+
   @override
   void initState() {
     super.initState();
@@ -463,9 +465,9 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
         key: _formKey,
         child: Column(
           children: [
-             widget.readOnly 
+             _isReadOnly 
                ? TextFormField(
-                   initialValue: _selectedType == 'General' ? BankAccountStrings.typeGeneral : BankAccountStrings.typeFio,
+                   initialValue: _selectedType == 'CASH' ? 'CASH' : (_selectedType == 'General' ? BankAccountStrings.typeGeneral : BankAccountStrings.typeFio),
                    decoration: InputDecoration(labelText: BankAccountStrings.typeLabel),
                    readOnly: true,
                  )
@@ -490,14 +492,14 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
             TextFormField(
               controller: _titleController,
               decoration: InputDecoration(labelText: BankAccountStrings.titleLabel),
-              readOnly: widget.readOnly,
+              readOnly: _isReadOnly,
               validator: (v) => v!.isEmpty ? CommonStrings.fieldCannotBeEmpty : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _numberController,
               decoration: InputDecoration(labelText: BankAccountStrings.accountNumberLabel),
-              readOnly: widget.readOnly,
+              readOnly: _isReadOnly,
               validator: (v) => v!.isEmpty ? CommonStrings.fieldCannotBeEmpty : null,
             ),
             const SizedBox(height: 16),
@@ -550,9 +552,9 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
                     children: [
                       ..._supportedCurrencies.map((c) => Chip(
                         label: Text(c),
-                        onDeleted: widget.readOnly ? null : () => setState(() => _supportedCurrencies.remove(c)),
+                        onDeleted: _isReadOnly ? null : () => setState(() => _supportedCurrencies.remove(c)),
                       )),
-                      if (!widget.readOnly)
+                      if (!_isReadOnly)
                         ActionChip(
                           avatar: const Icon(Icons.add, size: 16),
                           label: Text(BankAccountStrings.addCurrency),
@@ -564,7 +566,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
               ),
             ),
             const SizedBox(height: 24),
-            if (!widget.readOnly)
+            if (!_isReadOnly)
               ElevatedButton(
                 onPressed: _isSaving ? null : _saveGeneralInfo,
                 child: _isSaving ? const CircularProgressIndicator() : Text(BankAccountStrings.saveChanges),
@@ -595,7 +597,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
           
           TextFormField(
             controller: _tokenController,
-            readOnly: widget.readOnly,
+            readOnly: _isReadOnly,
             obscureText: !_isTokenTokenVisible,
             onChanged: (value) {
               if (_expiryDate != null) {
@@ -620,7 +622,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
           ),
           const SizedBox(height: 16),
           InkWell(
-            onTap: widget.readOnly ? null : () async {
+            onTap: _isReadOnly ? null : () async {
               final picked = await showDatePicker(
                 context: context,
                 initialDate: _expiryDate ?? DateTime.now(),
@@ -644,7 +646,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
             ),
           ),
           const SizedBox(height: 24),
-          if (!widget.readOnly)
+          if (!_isReadOnly)
             Center(
               child: ElevatedButton(
                 onPressed: _isSaving ? null : _saveToken,
@@ -670,7 +672,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
     
     return Column(
       children: [
-        if (!widget.readOnly)
+        if (!_isReadOnly)
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton.icon(
@@ -714,7 +716,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
                       ),
                   ],
                 ),
-                trailing: widget.readOnly ? null : Row(
+                trailing: _isReadOnly ? null : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(icon: const Icon(Icons.edit), onPressed: () => _editUser(user)),

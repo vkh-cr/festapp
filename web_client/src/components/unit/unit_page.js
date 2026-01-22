@@ -33,7 +33,6 @@ export class UnitPage extends Component {
         try {
             const occasions = await DbOccasions.getPublicOccasions(orgId);
             this.allOccasions = occasions || [];
-            this.allOccasions = occasions || [];
             this.render(this.allOccasions);
 
             // Check for search query param (?q=...)
@@ -48,31 +47,6 @@ export class UnitPage extends Component {
             console.error("UnitPage.loadOccasions failed:", e);
             if (this.host) {
                 this.host.innerHTML = `<p style="text-align:center; color:red">Failed to load events: ${e.message}</p>`;
-            }
-        }
-    }
-
-    async deleteUnit() {
-        if (!confirm(UnitStrings.deleteUnitConfirmation)) return;
-        
-        try {
-            const currentUnit = RightsService.currentUnit;
-            if (this.allOccasions.length > 0) {
-                 alert(UnitStrings.cannotDeleteUnitWithOccasions);
-                 return;
-            }
-
-            await DbUnits.deleteUnit(currentUnit.id);
-            // Redirect to home or another suitable page
-            RouterService.navigateToHome();
-        } catch (e) {
-            console.error(e);
-            if (e.message && e.message.includes('CANNOT_DELETE_LAST_UNIT')) {
-                alert(UnitStrings.cannotDeleteLastUnit);
-            } else if (e.message && e.message.includes('UNIT_HAS_OCCASIONS')) {
-                alert(UnitStrings.cannotDeleteUnitWithOccasions);
-            } else {
-                alert(UnitStrings.error + ": " + e.message);
             }
         }
     }
@@ -113,8 +87,6 @@ export class UnitPage extends Component {
         if (present.length) this.renderSection(UnitStrings.happeningNow, present, true);
         if (upcoming.length) this.renderSection(UnitStrings.upcomingEvents, upcoming);
         if (past.length) this.renderSection(UnitStrings.pastEvents, past, false, true);
-
-        this.renderDeleteButton();
     }
 
     renderSection(title, list, isPresent = false, isPast = false) {

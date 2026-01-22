@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Navigate to the project root
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 # Check for fvm
 if ! command -v fvm &> /dev/null; then

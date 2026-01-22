@@ -5,6 +5,8 @@ import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:intl/intl.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
 
 class TransactionModel extends ITrinaRowModel {
   @override
@@ -29,6 +31,9 @@ class TransactionModel extends ITrinaRowModel {
   DateTime? createdAt;
   String? messageForRecipient;
   String? counterAccountName;
+  String? createdById;
+  String? createdByName;
+  UserInfoModel? createdBy;
 
   // Relationships (if any)
   // For example, you might have related BankAccountModel or PaymentInfoModel
@@ -61,6 +66,9 @@ class TransactionModel extends ITrinaRowModel {
     this.createdAt,
     this.messageForRecipient,
     this.counterAccountName,
+    this.createdById,
+    this.createdByName,
+    this.createdBy,
     // this.relatedBankAccount,
     // this.relatedPaymentInfo,
   });
@@ -93,6 +101,8 @@ class TransactionModel extends ITrinaRowModel {
           : null,
       messageForRecipient: json[TbEshop.transactions.message_for_recipient],
       counterAccountName: json[TbEshop.transactions.counter_account_name],
+      createdById: json['created_by'],
+      createdByName: json['createdByName'],
       // relatedBankAccount: json[TbEshop.transactions.bank_account_id] != null
       //     ? BankAccountModel.fromJson(jsonRelatedBankAccount)
       //     : null,
@@ -129,7 +139,7 @@ class TransactionModel extends ITrinaRowModel {
       TbEshop.transactions.user_identification:
       TrinaCell(value: userIdentification ?? ""),
       TbEshop.transactions.transaction_type:
-      TrinaCell(value: transactionType ?? ""),
+      TrinaCell(value: transactionType == 'manual' ? OrdersStrings.transactionTypeCash : (transactionType ?? "")),
       TbEshop.transactions.performed_by:
       TrinaCell(value: performedBy ?? ""),
       TbEshop.transactions.comment:

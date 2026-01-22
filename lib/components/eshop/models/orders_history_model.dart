@@ -319,8 +319,11 @@ class OrderHistoryModel extends ITrinaRowModel {
         final fromProduct = c['from']!.product;
         changeRows.add(_buildChangeRow(context, toProduct.title!, fromProduct, toProduct));
       }
-
-      ticketWidgets.add(_buildTicketChangeSection(context, ticketSymbol, ticketNote, changeRows));
+      
+      // Only add section if there are actual changes for this ticket
+      if (changeRows.isNotEmpty) {
+        ticketWidgets.add(_buildTicketChangeSection(context, ticketSymbol ?? '?', ticketNote, changeRows));
+      }
     }
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: ticketWidgets);

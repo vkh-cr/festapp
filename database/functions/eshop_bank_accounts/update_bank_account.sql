@@ -15,6 +15,11 @@ DECLARE
     v_id bigint;
     v_account_number text;
 BEGIN
+    -- Prevent manual manipulation of CASH accounts
+    IF p_type = 'CASH' THEN
+        RAISE EXCEPTION 'CASH_ACCOUNT_MANUAL_UPDATE_FORBIDDEN';
+    END IF;
+
     -- Input normalization
     v_account_number := TRIM(p_account_number);
 

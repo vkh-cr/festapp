@@ -364,7 +364,6 @@ class ProductModel extends ITrinaRowModel {
         value: price != null ? price?.toStringAsFixed(2) : '',
       ),
       EshopColumns.PRODUCT_CURRENCY_CODE: TrinaCell(value: currencyCode ?? ''),
-      EshopColumns.PRODUCT_CURRENCY_CODE: TrinaCell(value: currencyCode ?? ''),
       EshopColumns.PRODUCT_SURCHARGE: TrinaCell(value: (surchargeAmount != null ? "${surchargeAmount} ${surchargeCurrency ?? ''}" : "").trim()),
       EshopColumns.PRODUCT_TYPE: TrinaCell(value: productType?.title ?? ''),
       EshopColumns.PRODUCT_ORDER: TrinaCell(value: order ?? 0),

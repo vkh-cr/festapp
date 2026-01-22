@@ -53,7 +53,7 @@ class BankAccountStrings {
   static String get errorRemovingUser => 'BankAccount.errorRemovingUser'.tr();
   static String get priority => 'BankAccount.priority'.tr();
   static String get priorityTooltip => 'BankAccount.priorityTooltip'.tr();
-  static String get priorityHelpTitle => 'BankAccount.priorityHelpTitle'.tr();
+  static String get priorityHelpTitle => priority;
   static String get priorityHelpContent => 'BankAccount.priorityHelpContent'.tr();
   static String get bankAccount => 'BankAccount.bankAccount'.tr();
   static String get supportedCurrencies => 'BankAccount.supportedCurrencies'.tr();

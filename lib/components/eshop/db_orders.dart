@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'dart:typed_data';
 import 'package:collection/collection.dart';
 
@@ -320,6 +321,37 @@ class DbOrders {
       return null;
     } catch (e) {
       print("Error downloading contract: $e");
+      rethrow;
+    }
+  }
+
+  static Future<void> insertManualTransaction({
+    required double amount,
+    required String currency,
+    required int unitId,
+    required String? variableSymbol,
+    required DateTime date,
+    String? note,
+    int? paymentInfoId,
+  }) async {
+    final params = {
+      'p_amount': amount,
+      'p_currency': currency,
+      'p_unit_id': unitId,
+      'p_variable_symbol': variableSymbol,
+      'p_date': date.toIso8601String(),
+      'p_note': note,
+      'p_payment_info_id': paymentInfoId,
+    };
+    debugPrint('Calling insert_manual_transaction with params: $params');
+    try {
+      await _supabase.rpc(
+        'insert_manual_transaction',
+        params: params,
+      );
+      debugPrint('insert_manual_transaction success');
+    } catch (e) {
+      debugPrint('insert_manual_transaction failed: $e');
       rethrow;
     }
   }

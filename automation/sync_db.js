@@ -15,8 +15,19 @@
 const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
+// Try to load dotenv, but don't fail if missing/env is already set
+try {
+    require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
+} catch (e) {
+    // ignore
+}
 
-const connectionString = 'postgresql://postgres.lwfpdjxsdmkfyrzqbrlk:[REDACTED]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres';
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+    console.error("❌ DATABASE_URL is not defined in environment or .env.local");
+    process.exit(1);
+}
 
 const MIGRATIONS_DIR = path.join(__dirname, '../supabase/migrations');
 
@@ -25,7 +36,7 @@ async function sync() {
     
     try {
         await client.connect();
-        console.log("Connected to DB: lwfpdjxsdmkfyrzqbrlk");
+        console.log(`Connected to DB: ${client.connectionParameters.host || 'unknown host'}`);
 
         // 1. Ensure migrations table exists
         await client.query(`

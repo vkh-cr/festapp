@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
@@ -298,37 +297,78 @@ class _ProductsDialogState extends State<ProductsDialog> {
                           ...changed.map((c) {
                             final from = c['from']!;
                             final to = c['to']!;
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 8.0, top: 4.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(child: Text("• ${to.title}: ")),
-                                  Text.rich(
-                                    TextSpan(
-                                      style: DefaultTextStyle.of(context).style,
-                                      children: [
+                            
+                            final List<Widget> changesWidgets = [];
+
+                            if (from.title != to.title) {
+                               changesWidgets.add(Padding(
+                                  padding: const EdgeInsets.only(left: 8.0, top: 4.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(child: Text("• ${to.title}: ")),
+                                      Text.rich(
                                         TextSpan(
-                                          text: Utilities.formatPrice(context, from.price!),
-                                          style: TextStyle(decoration: TextDecoration.lineThrough, color: theme.textTheme.bodySmall?.color),
+                                          style: DefaultTextStyle.of(context).style,
+                                          children: [
+                                            TextSpan(
+                                              text: from.title!,
+                                              style: TextStyle(decoration: TextDecoration.lineThrough, color: theme.textTheme.bodySmall?.color),
+                                            ),
+                                            WidgetSpan(
+                                              child: Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                                child: Icon(Icons.arrow_forward, size: 16, color: theme.colorScheme.primary),
+                                              ),
+                                              alignment: PlaceholderAlignment.middle,
+                                            ),
+                                            TextSpan(
+                                              text: to.title!,
+                                              style: const TextStyle(fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
                                         ),
-                                        WidgetSpan(
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                                            child: Icon(Icons.arrow_forward, size: 16, color: theme.colorScheme.primary),
-                                          ),
-                                          alignment: PlaceholderAlignment.middle,
-                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ));
+                            }
+
+                            if ((from.price ?? 0) != (to.price ?? 0)) {
+                               changesWidgets.add(Padding(
+                                  padding: const EdgeInsets.only(left: 8.0, top: 4.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(child: Text("• ${to.title}: ")),
+                                      Text.rich(
                                         TextSpan(
-                                          text: Utilities.formatPrice(context, to.price!),
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                          style: DefaultTextStyle.of(context).style,
+                                          children: [
+                                            TextSpan(
+                                              text: Utilities.formatPrice(context, from.price!),
+                                              style: TextStyle(decoration: TextDecoration.lineThrough, color: theme.textTheme.bodySmall?.color),
+                                            ),
+                                            WidgetSpan(
+                                              child: Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                                child: Icon(Icons.arrow_forward, size: 16, color: theme.colorScheme.primary),
+                                              ),
+                                              alignment: PlaceholderAlignment.middle,
+                                            ),
+                                            TextSpan(
+                                              text: Utilities.formatPrice(context, to.price!),
+                                              style: const TextStyle(fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            );
+                                      )
+                                    ],
+                                  ),
+                                ));
+                            }
+                            
+                            return Column(children: changesWidgets);
                           }),
                           const SizedBox(height: 12),
                         ],

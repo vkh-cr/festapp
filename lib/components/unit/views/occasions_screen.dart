@@ -5,7 +5,6 @@ import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/widgets/header/user_header_widget.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/components/occasion/occasion_creation_helper.dart';
@@ -13,8 +12,6 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/unit/views/occasion_edit_card.dart';
-import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/components/features/feature_constants.dart';
 
 class OccasionsScreen extends StatefulWidget {
   final UnitModel unit;

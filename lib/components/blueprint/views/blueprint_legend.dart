@@ -13,6 +13,7 @@ class BlueprintLegend extends StatelessWidget {
   // New properties for the Confirm Button
   final int selectedCount;
   final VoidCallback? onConfirmOrder;
+  final Map<SeatState, int> stateCounts;
 
   const BlueprintLegend({
     super.key,
@@ -20,6 +21,7 @@ class BlueprintLegend extends StatelessWidget {
     required this.onModeSelected,
     this.selectedCount = 0,
     this.onConfirmOrder,
+    this.stateCounts = const {},
   });
 
   @override
@@ -68,6 +70,7 @@ class BlueprintLegend extends StatelessWidget {
           state: SeatState.available,
           isActive: currentSelectionMode == BlueprintSelectionMode.addAvailable,
           onTap: () => onModeSelected(BlueprintSelectionMode.addAvailable),
+          count: stateCounts[SeatState.available],
         ),
         const SizedBox(height: 8),
         _buildLegendItem(
@@ -76,6 +79,7 @@ class BlueprintLegend extends StatelessWidget {
           state: SeatState.empty,
           isActive: currentSelectionMode == BlueprintSelectionMode.emptyArea,
           onTap: () => onModeSelected(BlueprintSelectionMode.emptyArea),
+          drawBorder: true,
         ),
 
         const SizedBox(height: 16),
@@ -151,6 +155,7 @@ class BlueprintLegend extends StatelessWidget {
           state: SeatState.used,
           isActive: false,
           grayedOut: true,
+          count: stateCounts[SeatState.used],
         ),
         const SizedBox(height: 8),
         _buildLegendItem(
@@ -159,6 +164,7 @@ class BlueprintLegend extends StatelessWidget {
           state: SeatState.ordered,
           isActive: false,
           grayedOut: true,
+          count: stateCounts[SeatState.ordered],
         )
       ],
     );
@@ -172,6 +178,8 @@ class BlueprintLegend extends StatelessWidget {
     VoidCallback? onTap,
     bool grayedOut = false,
     bool forceHighlight = false,
+    int? count,
+    bool drawBorder = false,
   }) {
     return MouseRegion(
       cursor:
@@ -179,7 +187,7 @@ class BlueprintLegend extends StatelessWidget {
       child: GestureDetector(
         onTap: grayedOut ? null : onTap,
         child: Opacity(
-          opacity: grayedOut ? 0.8 : 1.0,
+          opacity: 1.0,
           child: Container(
             decoration: BoxDecoration(
               color: isActive ? Theme.of(context).colorScheme.primary.withOpacity(0.05) : null,
@@ -195,17 +203,24 @@ class BlueprintLegend extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SeatWidgetHelper.buildSeat(
-                  context: context,
-                  state: state,
-                  isHighlightedForSwap: forceHighlight,
-                  size: SeatReservationWidget.boxSize.toDouble(),
+                Container(
+                  decoration: drawBorder
+                      ? BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade400),
+                          borderRadius: BorderRadius.circular(4),
+                        )
+                      : null,
+                  child: SeatWidgetHelper.buildSeat(
+                    context: context,
+                    state: state,
+                    isHighlightedForSwap: forceHighlight,
+                    size: SeatReservationWidget.boxSize.toDouble() * (drawBorder ? 0.7 : 1.0),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  label,
+                  count != null ? "$label ($count)" : label,
                   style: TextStyle(
-                    color: grayedOut ? Colors.grey : null,
                     fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),

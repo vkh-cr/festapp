@@ -286,12 +286,24 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
   /// Left Panel: The Legend and Action Buttons
   Widget _buildLeftPanel() {
+    final Map<SeatState, int> stateCounts = {};
+    if (blueprint?.objects != null) {
+      for (var obj in blueprint!.objects!) {
+        // Only count actual spots, not potential auxiliary objects if any
+        if (obj.type == BlueprintModel.metaSpotType) {
+           final state = obj.stateEnum ?? SeatState.available;
+           stateCounts[state] = (stateCounts[state] ?? 0) + 1;
+        }
+      }
+    }
+
     return BlueprintLegend(
       currentSelectionMode: currentSelectionMode,
       onModeSelected: _handleModeSelected,
       // Pass the count and the callback for the Create Order button
       selectedCount: _selectedSeatsForOrder.length,
       onConfirmOrder: _processNewOrder,
+      stateCounts: stateCounts,
     );
   }
 
@@ -336,7 +348,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
       onGroupSelected: _onGroupSelected,
       onAddGroup: canEdit ? addGroup : null,
       onDeleteGroup: canEdit ? deleteGroup : null,
-      onRenameGroup: canEdit ? renameGroup : null,
       onEditGroupProduct: canEdit ? _editGroupProduct : null,
     );
   }
@@ -491,24 +502,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
     _seatLayoutController.setHighlightedGroup(null);
   }
 
-  void renameGroup() async {
-    if (currentGroup == null) return;
 
-    final newTitle = await DialogHelper.showInputDialog(
-      context: context,
-      dialogTitle: CommonStrings.rename,
-      labelText: BlueprintStrings.dialogTitle,
-      initialValue: currentGroup!.title,
-    );
-
-    if (newTitle != null && newTitle.isNotEmpty) {
-      setState(() {
-        currentGroup!.title = newTitle;
-        blueprint!.groups!
-            .sort((a, b) => Utilities.naturalCompare(a.title!, b.title!));
-      });
-    }
-  }
 
   /// Main Tap Handler
   void handleSeatTap(SeatModel model) {
@@ -673,6 +667,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     ToastHelper.Show(
         context, "${BlueprintStrings.toastSpotAdded} ${model.objectModel!.title}");
+    setState(() {});
   }
 
   void _handleEmptyArea(SeatModel model) {
@@ -696,6 +691,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       _seatLayoutController.removeObject(objectToRemove);
       model.objectModel = null;
       model.seatState = SeatState.empty;
+      setState(() {});
     }
   }
 

@@ -114,21 +114,35 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
       // Deselect
       model.seatState = SeatState.available; // Optimistic update
       _seatLayoutController.updateSeat(model, SeatState.available);
+      
+      // Optimistic list update
+      widget.selectedSeats.remove(model);
+      widget.onSelectionChanged?.call(widget.selectedSeats);
       setState(() {});
 
-      if (await DbOrders.selectSpot(
-        context,
-        widget.formDataKey,
-        widget.secret,
-        model.objectModel!.id!,
-        false,
-      )) {
+      bool success = false;
+      try{
+        success = await DbOrders.selectSpot(
+          context,
+          widget.formDataKey,
+          widget.secret,
+          model.objectModel!.id!,
+          false,
+        );
+      } catch(e){
+        success = false;
+      }
+
+      if (success) {
         model.objectModel!.stateEnum = SeatState.available;
-        widget.selectedSeats.remove(model);
       } else {
         // Revert
         model.seatState = SeatState.selected_by_me;
         _seatLayoutController.updateSeat(model, SeatState.selected_by_me);
+        
+        // Revert list update
+        widget.selectedSeats.add(model);
+        widget.onSelectionChanged?.call(widget.selectedSeats);
       }
     } else if (model.seatState == SeatState.available) {
       // Select
@@ -138,24 +152,38 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
       }
       model.seatState = SeatState.selected_by_me; // Optimistic update
       _seatLayoutController.updateSeat(model, SeatState.selected_by_me);
+
+      // Optimistic list update
+      widget.selectedSeats.add(model);
+      widget.onSelectionChanged?.call(widget.selectedSeats);
       setState(() {});
 
-      if (await DbOrders.selectSpot(
-        context,
-        widget.formDataKey,
-        widget.secret,
-        model.objectModel!.id!,
-        true,
-      )) {
-        widget.selectedSeats.add(model);
+      bool success = false;
+      try{
+        success = await DbOrders.selectSpot(
+          context,
+          widget.formDataKey,
+          widget.secret,
+          model.objectModel!.id!,
+          true,
+        );
+      } catch (e){
+        success = false;
+      }
+
+      if (success) {
         model.objectModel!.stateEnum = SeatState.selected_by_me;
       } else {
         // Revert
         model.seatState = SeatState.available;
         _seatLayoutController.updateSeat(model, SeatState.available);
+
+        // Revert list update
+        widget.selectedSeats.remove(model);
+        widget.onSelectionChanged?.call(widget.selectedSeats);
       }
     }
-    widget.onSelectionChanged?.call(widget.selectedSeats);
+    // We already called onSelectionChanged optimistically, so no need to call it here at the end unconditionally
   }
 
   /// Loads Blueprint Data

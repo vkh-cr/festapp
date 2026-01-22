@@ -26,6 +26,7 @@ import 'views/order_state_display.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'views/add_cash_payment_dialog.dart';
 
 class EshopColumns {
   // Column identifier constants
@@ -69,6 +70,7 @@ class EshopColumns {
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
+  static const String PAYMENT_INFO_ID = "paymentInfoId";
   static const String PAYMENT_INFO_RETURNED = "paymentInfoReturned";
   static const String PAYMENT_INFO_VARIABLE_SYMBOL = "paymentInfoVariableSymbol";
   static const String PAYMENT_INFO_DEADLINE = "orderDataDeadline";
@@ -640,7 +642,8 @@ class EshopColumns {
           return ElevatedButton(
             onPressed: () async {
               var id = rendererContext.row.cells[ORDER_ID]!.value;
-              await _showOrderTransactions(context, id);
+              var unitId = data["unitId"] as int?;
+              await _showOrderTransactions(context, id, unitId: unitId);
               var transactionsAfterFunction = data[ORDER_TRANSACTIONS];
               if(transactionsAfterFunction is Future<void> Function()?) {
                 transactionsAfterFunction?.call();
@@ -749,7 +752,18 @@ class EshopColumns {
         width: 80,
       ),
     ],
-    PAYMENT_INFO_PAID: [
+    PAYMENT_INFO_ID: [
+      TrinaColumn(
+        hide: true,
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Payment Info ID",
+        field: PAYMENT_INFO_ID,
+        type: TrinaColumnType.number(defaultValue: 0),
+        width: 50,
+      ),
+    ],
+    PAYMENT_INFO_PAID: (Map<String, dynamic> data) => [
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
@@ -757,7 +771,64 @@ class EshopColumns {
         field: PAYMENT_INFO_PAID,
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
-        width: 80,
+        width: 150, // Slightly wider for button
+        renderer: (ctx) {
+          final val = ctx.cell.value?.toString() ?? "";
+          return Row(
+            children: [
+              InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () async {
+                   int? unitId = data?["unitId"] as int?;
+                   if (unitId == null) {
+                     ToastHelper.Show(context, "Unit ID not found.", severity: ToastSeverity.NotOk);
+                     return;
+                   }
+
+                   // Resolve currency from Order Price column (e.g. "100 CZK")
+                   String currency = "CZK";
+                   String? priceString = ctx.row.cells[EshopColumns.ORDER_PRICE]?.value?.toString();
+                   if (priceString != null && priceString.isNotEmpty) {
+                      var parts = priceString.trim().split(" ");
+                      if (parts.length > 1) {
+                        currency = parts.last;
+                      }
+                   }
+
+                   String variableSymbol = ctx.row.cells[EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL]?.value?.toString() ?? "";
+
+                   final changed = await showDialog(
+                     context: context,
+                     builder: (context) {
+                       int? paymentInfoId = ctx.row.cells[EshopColumns.PAYMENT_INFO_ID]?.value as int?;
+                       if(paymentInfoId == null || paymentInfoId == 0) return Container(); // Should not happen
+
+                       return AddCashPaymentDialog(
+                         unitId: unitId,
+                         currency: currency,
+                         variableSymbol: variableSymbol,
+                         paymentInfoId: paymentInfoId,
+                       );
+                     },
+                   );
+                   if (changed == true) {
+                      var refresh = data[EshopColumns.PAYMENT_INFO_PAID];
+                      if (refresh is Future<void> Function()?) {
+                        refresh?.call();
+                      }
+                   }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: const Icon(Icons.add_circle_outline, size: 18, color: Colors.grey),
+                ),
+              ),
+              Expanded(
+                child: Text(val, textAlign: TextAlign.end),
+              ),
+            ],
+          );
+        },
       ),
     ],
     PAYMENT_INFO_RETURNED: [
@@ -992,12 +1063,13 @@ class EshopColumns {
   }
 
   /// Shows the order transactions in a dialog.
-  static Future<void> _showOrderTransactions(BuildContext context, int orderId) async {
+  static Future<void> _showOrderTransactions(BuildContext context, int orderId, {int? unitId}) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return TransactionsDialog(
           orderId: orderId,
+          unitId: unitId,
         );
       },
     );

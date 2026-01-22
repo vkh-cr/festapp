@@ -284,9 +284,12 @@ create table if not exists eshop.transactions (
   bank_account_id BIGINT NOT NULL,
   payment_info BIGINT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  created_by UUID NULL,
+  sender_name TEXT NULL,
   message_for_recipient TEXT NULL,
   counter_account_name CHARACTER VARYING(255) NULL,
   CONSTRAINT transactions_pkey PRIMARY KEY (id),
+  CONSTRAINT transactions_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_info (id),
   CONSTRAINT transactions_bank_account_fkey FOREIGN KEY (bank_account_id) REFERENCES eshop.bank_accounts (id) ON DELETE CASCADE,
   CONSTRAINT transactions_payment_info_fkey FOREIGN KEY (payment_info) REFERENCES eshop.payment_info (id)
 ) TABLESPACE pg_default;

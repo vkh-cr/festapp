@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/models/payment_info_model.dart';
 import 'package:fstapp/components/eshop/models/transaction_model.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -12,13 +13,16 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/eshop/views/search_transactions_screen.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
+import 'add_cash_payment_dialog.dart';
 
 class TransactionsDialog extends StatefulWidget {
   final int orderId;
+  final int? unitId;
 
   const TransactionsDialog({
     super.key,
     required this.orderId,
+    this.unitId,
   });
 
   @override
@@ -77,24 +81,64 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
     }
   }
 
+  /// Shows the dialog to add a cash payment directly.
+  void _addCashPayment() async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) => AddCashPaymentDialog(
+        unitId: widget.unitId ?? RightsService.currentUnit()!.id!,
+        currency: _payment!.currencyCode!,
+        variableSymbol: _payment!.variableSymbol?.toString() ?? "",
+        paymentInfoId: _payment!.id!,
+      ),
+    );
+
+    if (result == true) {
+      _fetchTransactions();
+    }
+  }
+
+  // NOTE: I am assuming _addTransaction is called via search. The user wants to add CASH.
+  // Wait, I need to check where AddCashPaymentDialog is actually instantiated.
+  // It is instantiated in `SearchTransactionsScreen` OR `TransactionsDialog`?
+  // Let me check SearchTransactionsScreen. 
+  // Ah, the user flow is `Add Payment` -> `Cash`.
+  // I need to find where `AddCashPaymentDialog` is used.
+  // Based on my view_file of `TransactionsDialog.dart` earlier, there is NO usage of `AddCashPaymentDialog`.
+  // It must be in `SearchTransactionsScreen`!
+  // I must check `SearchTransactionsScreen.dart`.
+
   /// Removes a transaction after user confirmation.
   void _removeTransaction(TransactionModel transaction) async {
+    final isManual = transaction.transactionType == 'manual';
+    final confirmMessage = isManual 
+        ? OrdersStrings.deleteCashTransactionConfirmation 
+        : OrdersStrings.unlinkTransactionConfirmation;
+        
     final confirm = await DialogHelper.showConfirmationDialog(
       context,
-      "Confirm removal".tr(),
-      "Are you sure you want to unlink this transaction?".tr(),
+      OrdersStrings.confirmRemoval,
+      confirmMessage,
     );
 
     // If user confirmed, proceed to remove the transaction
     if (confirm == true) {
-      await DbEshop.removeTransactionFromPaymentInfoWithSecurity(
-        context,
-        transaction.id!,
-        _payment!.id!,
-      );
+      if (isManual) {
+        await DbEshop.deleteManualTransactionWithSecurity(
+          context,
+          transaction.id!,
+          _payment!.id!,
+        );
+      } else {
+        await DbEshop.removeTransactionFromPaymentInfoWithSecurity(
+          context,
+          transaction.id!,
+          _payment!.id!,
+        );
+      }
       ToastHelper.Show(
         context,
-        "Removed {item}.".tr(namedArgs: {"item": transaction.toBasicString()}),
+        OrdersStrings.removeTransactionSuccess(transaction.toBasicString()),
       );
       _fetchTransactions();
     }
@@ -119,7 +163,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
         children: [
           Expanded(
             child: Text(
-              "Transactions for order {order}.".tr(namedArgs: {"order": widget.orderId.toString()}),
+              OrdersStrings.transactionsForOrder(widget.orderId.toString()),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -147,7 +191,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
               child: Row(
                 children: [
                   Text(
-                    "${"Variable symbol".tr()}: ",
+                    "${OrdersStrings.variableSymbol}: ",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -182,7 +226,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Amount".tr(),
+                          OrdersStrings.amount,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -209,7 +253,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Paid".tr(),
+                          OrdersStrings.paid,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -236,7 +280,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Returned".tr(),
+                          OrdersStrings.returned,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -265,7 +309,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
 
           // Transactions List
           if (_transactions.isEmpty)
-            Text("No transactions found.".tr())
+            Text(OrdersStrings.noTransactionsFound)
           else
             Flexible(
               child: ConstrainedBox(
@@ -321,8 +365,22 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                                 fontSize: 16,
                                               ),
                                             ),
-                                            // Counter Account Name
-                                            if (counterAccountName.isNotEmpty)
+                                            // Counter Account Name or Cash Indicator
+                                            if (transaction.transactionType == 'manual')
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.payments, size: 18, color: Colors.grey[700]),
+                                                  SizedBox(width: 8),
+                                                  Text(
+                                                    OrdersStrings.transactionTypeCash,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            else if (counterAccountName.isNotEmpty)
                                               SelectableText(
                                                 counterAccountName,
                                                 style: TextStyle(
@@ -341,7 +399,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                   if (_isBankAdmin())
                                     IconButton(
                                       icon: Icon(Icons.delete),
-                                      tooltip: "Remove".tr(),
+                                      tooltip: OrdersStrings.removeTransactionTooltip,
                                       onPressed: () =>
                                           _removeTransaction(transaction),
                                     ),
@@ -351,7 +409,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                               // Additional transaction details
                               // Date
                               _buildInfoRow(
-                                title: 'Date'.tr(),
+                                title: OrdersStrings.date,
                                 value: transaction.date != null
                                     ? DateFormat.yMMMd(
                                     context.locale.languageCode)
@@ -362,7 +420,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
 
                               // Amount and Currency
                               _buildInfoRow(
-                                title: 'Amount'.tr(),
+                                title: OrdersStrings.amount,
                                 value: transaction.amount != null
                                     ? Utilities.formatPrice(
                                   context,
@@ -375,32 +433,53 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                               ),
                               SizedBox(height: 5),
 
-                              // Bank Account formatted as account/bankcode (bank name)
-                              _buildInfoRow(
-                                title: BankAccountStrings.bankAccount,
-                                value:
-                                '${transaction.counterAccount ?? "N/A".tr()} / ${transaction.bankCode ?? "N/A".tr()} (${transaction.bankName ?? "N/A".tr()})',
-                              ),
-                              SizedBox(height: 5),
+                              // Bank Account
+                              if (transaction.transactionType != 'manual') ...[
+                                _buildInfoRow(
+                                  title: BankAccountStrings.bankAccount,
+                                  value:
+                                  '${transaction.counterAccount ?? "N/A".tr()} / ${transaction.bankCode ?? "N/A".tr()} (${transaction.bankName ?? "N/A".tr()})',
+                                ),
+                                SizedBox(height: 5),
+                              ],
 
-                              // Variable Symbol
-                              if (transaction.vs != null &&
+                              // Variable Symbol (Hide if manual or empty)
+                              if (transaction.transactionType != 'manual' && 
+                                  transaction.vs != null &&
                                   transaction.vs!.isNotEmpty)
                                 _buildInfoRow(
-                                  title: 'Variable symbol'.tr(),
+                                  title: OrdersStrings.variableSymbol,
                                   value: transaction.vs!,
                                 ),
-                              if (transaction.vs != null &&
+                              if (transaction.transactionType != 'manual' && 
+                                  transaction.vs != null &&
                                   transaction.vs!.isNotEmpty)
                                 SizedBox(height: 5),
 
-                              // Message for Recipient
+                              // Comment (Note)
+                              if (transaction.transactionType == 'manual' &&
+                                  transaction.comment != null &&
+                                  transaction.comment!.isNotEmpty)
+                                _buildInfoRow(
+                                  title: CommonStrings.note,
+                                  value: transaction.comment!,
+                                ),
+                              
+                              // Message for Recipient (Backwards compatibility)
                               if (transaction.messageForRecipient != null &&
                                   transaction.messageForRecipient!.isNotEmpty)
                                 _buildInfoRow(
-                                  title: 'Message for Recipient'.tr(),
-                                  value: transaction.messageForRecipient!,
-                                ),
+                                    title: OrdersStrings.messageForRecipient,
+                                    value: transaction.messageForRecipient!,
+                                  ),
+
+                                // Created By (for manual transactions)
+
+                                if (transaction.transactionType == 'manual' && transaction.createdByName != null)
+                                  _buildInfoRow(
+                                    title: OrdersStrings.acceptedBy,
+                                    value: transaction.createdByName!,
+                                  ),
                             ],
                           ),
                         ),
@@ -413,16 +492,32 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
 
           // trimmed spacer so button sits up higher
           SizedBox(height: 8),
-          if (_isBankAdmin())
-            ElevatedButton(
-              onPressed: _addTransaction,
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                ElevatedButton(
+                  onPressed: _addTransaction,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(OrdersStrings.findAndLinkTransaction),
                 ),
-              ),
-              child: Text("Find and link a transaction".tr()),
+                ElevatedButton(
+                  onPressed: _addCashPayment,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(OrdersStrings.addCashPaymentTitle),
+                ),
+              ],
             ),
         ],
       ),

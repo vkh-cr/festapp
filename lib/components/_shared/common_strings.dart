@@ -22,6 +22,8 @@ class CommonStrings {
   static String get price => 'Price'.tr(); // "Price"
   static String get amount => 'Amount'.tr(); // "Amount" -- NEW
   static String get currency => 'Currency'.tr(); // "Currency" -- NEW
+  static String get date => 'Date'.tr(); // "Date"
+  static String get note => 'Note'.tr(); // "Note"
   static String get password => 'FeatureUser.password'.tr(); // "Password" (Moved to FeatureUser, but widely used? UserStrings has it too?)
 
   // --- Common Statuses & Feedback ---
@@ -31,6 +33,7 @@ class CommonStrings {
   static String get error => 'Common.error'.tr(); // Map "Error" getter to "An error occurred" or keep separate? I'll map to Common.error for now as it's the generic error string I have.
   static String get loading => 'Common.loading'.tr(); // "Loading..."
   static String get settings => 'Settings'.tr(); // "Settings"
+  static String get advancedSettings => 'Advanced Settings'.tr();
 
   // --- Forms & Validation ---
   static String get fieldCannotBeEmpty => 'Common.fieldCannotBeEmpty'.tr(); // "Field cannot be empty"
