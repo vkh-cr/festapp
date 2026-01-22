@@ -110,7 +110,7 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
           field: Tb.path_groups.icon,
           applyFormatterInEditing: true,
           formatter: (d) =>
-          svgIcons.firstWhereOrNull((i) => i.id == d)?.link ?? "",
+              svgIcons.firstWhereOrNull((i) => i.id == d)?.link ?? "",
           type: TrinaColumnType.select(
             mapIcons,
             menuItemBuilder: (icon) =>

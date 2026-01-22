@@ -40,8 +40,9 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final list = await DbEshop.getProductsForTicketAllAvailable(widget.ticketId) ?? [];
-    _all  = list;
+    final list =
+        await DbEshop.getProductsForTicketAllAvailable(widget.ticketId) ?? [];
+    _all = list;
     _filt = list;
     setState(() => _loading = false);
   }
@@ -52,11 +53,16 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
       final normalizedQuery = Utilities.removeDiacritics(q.toLowerCase());
       setState(() {
         _filt = _all.where((p) {
-          final normalizedTitle = Utilities.removeDiacritics(p.title?.toLowerCase() ?? "");
-          final normalizedType  = Utilities.removeDiacritics(p.productTypeTitleString?.toLowerCase() ?? "");
-          final inPrice = p.price?.toString().contains(normalizedQuery) ?? false; // Price conversion is tricky for diacritics, keeping original logic here.
+          final normalizedTitle =
+              Utilities.removeDiacritics(p.title?.toLowerCase() ?? "");
+          final normalizedType = Utilities.removeDiacritics(
+              p.productTypeTitleString?.toLowerCase() ?? "");
+          final inPrice = p.price?.toString().contains(normalizedQuery) ??
+              false; // Price conversion is tricky for diacritics, keeping original logic here.
 
-          return normalizedTitle.contains(normalizedQuery) || normalizedType.contains(normalizedQuery) || inPrice;
+          return normalizedTitle.contains(normalizedQuery) ||
+              normalizedType.contains(normalizedQuery) ||
+              inPrice;
         }).toList();
       });
     });
@@ -74,9 +80,9 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
 
   void _confirm() {
     final picked = _all.where((p) => _sel.contains(p.id)).toList();
-    final newOnes = picked.where(
-            (p) => !widget.alreadySelected.any((o) => o.id == p.id)
-    ).toList();
+    final newOnes = picked
+        .where((p) => !widget.alreadySelected.any((o) => o.id == p.id))
+        .toList();
     Navigator.of(context).pop(newOnes);
   }
 
@@ -88,7 +94,8 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
         actions: [
           TextButton(
             onPressed: _confirm,
-            child: Text(CommonStrings.confirm, style: const TextStyle(color: Colors.white)),
+            child: Text(CommonStrings.confirm,
+                style: const TextStyle(color: Colors.white)),
           )
         ],
       ),
@@ -101,40 +108,38 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
                 labelText: CommonStrings.search,
                 hintText: "By title, type or price".tr(),
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8)
-                ),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
               onChanged: _search,
             ),
           ),
-
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _filt.isEmpty
-                ? Center(child: Text("No products found.".tr()))
-                : ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: _filt.length,
-              separatorBuilder: (_, __) => const Divider(height: 0),
-              itemBuilder: (_, i) {
-                final p = _filt[i];
-                return CheckboxListTile(
-                  controlAffinity: ListTileControlAffinity.leading,
-                  value: _sel.contains(p.id),
-                  onChanged: (_) => _toggle(p.id!),
-                  title: Text(p.title ?? ""),
-                  subtitle: Text(p.productTypeTitleString ?? ""),
-                  secondary: Text(
-                    Utilities.formatPrice(
-                        context, p.price ?? 0, decimalDigits: 2
-                    ),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                );
-              },
-            ),
+                    ? Center(child: Text("No products found.".tr()))
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        itemCount: _filt.length,
+                        separatorBuilder: (_, __) => const Divider(height: 0),
+                        itemBuilder: (_, i) {
+                          final p = _filt[i];
+                          return CheckboxListTile(
+                            controlAffinity: ListTileControlAffinity.leading,
+                            value: _sel.contains(p.id),
+                            onChanged: (_) => _toggle(p.id!),
+                            title: Text(p.title ?? ""),
+                            subtitle: Text(p.productTypeTitleString ?? ""),
+                            secondary: Text(
+                              Utilities.formatPrice(context, p.price ?? 0,
+                                  decimalDigits: 2),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),

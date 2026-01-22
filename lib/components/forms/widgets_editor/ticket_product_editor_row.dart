@@ -34,7 +34,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
     _titleController = TextEditingController(text: widget.product.title ?? "");
     _priceController =
         TextEditingController(text: (widget.product.price ?? 0).toString());
-     _titleController.addListener(() {
+    _titleController.addListener(() {
       widget.product.title = _titleController.text;
     });
     _priceController.addListener(() {
@@ -113,8 +113,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveOpacity =
-    (widget.product.isHidden ?? false) ? 0.5 : 1.0;
+    final effectiveOpacity = (widget.product.isHidden ?? false) ? 0.5 : 1.0;
     return Opacity(
       opacity: effectiveOpacity,
       child: Padding(
@@ -133,7 +132,8 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                     decoration: InputDecoration(
                       labelText: CommonStrings.title,
                       border: const UnderlineInputBorder(),
-                      suffixIcon: (!HtmlHelper.isHtmlEmptyOrNull(widget.product.description))
+                      suffixIcon: (!HtmlHelper.isHtmlEmptyOrNull(
+                              widget.product.description))
                           ? DescriptionTooltip(
                               description: widget.product.description!,
                               child: const Icon(Icons.description, size: 20),
@@ -149,7 +149,8 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                       const SizedBox(width: 4),
                       SelectableText(
                         TicketEditorWidgets.formatOrderedCount(
-                            widget.product.orderedCount, widget.product.maximum),
+                            widget.product.orderedCount,
+                            widget.product.maximum),
                       ),
                     ],
                   ),
@@ -166,7 +167,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                   TextField(
                     controller: _priceController,
                     keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                        const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
                       labelText: CommonStrings.price,
                       border: const UnderlineInputBorder(),
@@ -187,8 +188,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
             // Right column: Visibility switch.
             Column(
               children: [
-                Text("Show".tr(),
-                    style: Theme.of(context).textTheme.bodySmall),
+                Text("Show".tr(), style: Theme.of(context).textTheme.bodySmall),
                 Switch(
                   value: !(widget.product.isHidden ?? false),
                   onChanged: (val) {
@@ -212,8 +212,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                   });
                 }
               },
-              itemBuilder: (BuildContext context) =>
-              <PopupMenuEntry<String>>[
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
                   value: 'additional_settings',
                   child: Text("Additional Settings".tr()),

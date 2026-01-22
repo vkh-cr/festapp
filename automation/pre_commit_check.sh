@@ -45,10 +45,6 @@ echo ""
 echo ">>> Applying Project Configuration..."
 
 # The configure_project.sh script will read from scripts/project.conf
-if [ -f "$SCRIPT_DIR/configure_project.sh" ]; then
-    "$SCRIPT_DIR/configure_project.sh"
-else
-    echo "Error: scripts/configure_project.sh not found."
 
 # The apply_config.sh script will read from automation/project.conf
 if [ -f "$SCRIPT_DIR/apply_config.sh" ]; then

@@ -12,10 +12,12 @@ class OptionDetailEditorDialog extends StatefulWidget {
   final FormOptionModel option;
   final int? occasionId;
 
-  const OptionDetailEditorDialog({super.key, required this.option, this.occasionId});
+  const OptionDetailEditorDialog(
+      {super.key, required this.option, this.occasionId});
 
   @override
-  _OptionDetailEditorDialogState createState() => _OptionDetailEditorDialogState();
+  _OptionDetailEditorDialogState createState() =>
+      _OptionDetailEditorDialogState();
 }
 
 class _OptionDetailEditorDialogState extends State<OptionDetailEditorDialog> {
@@ -31,8 +33,8 @@ class _OptionDetailEditorDialogState extends State<OptionDetailEditorDialog> {
     RouterService.navigatePageInfo(
       context,
       HtmlEditorRoute(
-          content: {HtmlEditorPage.parContent: _description},
-          occasionId: widget.occasionId,
+        content: {HtmlEditorPage.parContent: _description},
+        occasionId: widget.occasionId,
       ),
     ).then((value) {
       if (value != null) {

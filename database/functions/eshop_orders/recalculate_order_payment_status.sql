@@ -1,0 +1,50 @@
+CREATE OR REPLACE FUNCTION public.recalculate_order_payment_status(p_order_id bigint)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_payment_info_id bigint;
+    v_paid numeric;
+    v_price numeric;
+    v_state text;
+BEGIN
+    -- Get Order Details
+    SELECT payment_info, price, state INTO v_payment_info_id, v_price, v_state
+    FROM eshop.orders
+    WHERE id = p_order_id;
+
+    IF v_payment_info_id IS NULL THEN
+        RETURN;
+    END IF;
+
+    -- Get Paid Amount from Payment Info
+    SELECT paid INTO v_paid
+    FROM eshop.payment_info
+    WHERE id = v_payment_info_id;
+
+    -- Update Logic
+    IF COALESCE(v_paid, 0) >= v_price THEN
+        -- Fully Paid -> Move to Paid
+        IF v_state != 'paid' AND (v_state = 'ordered' OR v_state = 'created' OR v_state = 'expired') THEN
+             PERFORM public.update_order_and_tickets_to_paid(p_order_id);
+        END IF;
+    ELSE
+        -- Underpaid -> Revert to Ordered (if currently Paid)
+        IF v_state = 'paid' THEN
+            -- Revert Order
+            UPDATE eshop.orders
+            SET state = 'ordered', updated_at = now()
+            WHERE id = p_order_id;
+            
+            -- Revert Tickets (only those that are 'paid')
+            UPDATE eshop.tickets
+            SET state = 'ordered', updated_at = now() -- Reverted to 'ordered' as 'valid' is not a supported state
+
+            FROM eshop.order_product_ticket
+            WHERE eshop.order_product_ticket.ticket = eshop.tickets.id
+            AND eshop.order_product_ticket."order" = p_order_id
+            AND eshop.tickets.state = 'paid';
+        END IF;
+    END IF;
+END;
+$$;

@@ -38,13 +38,13 @@ class RouterService {
     return context.router.pushPath(getCurrentLink() + path);
   }
 
-  static Future<T?> navigateOccasionNoContext<T extends Object?>(
-      String path) {
+  static Future<T?> navigateOccasionNoContext<T extends Object?>(String path) {
     return router.pushPath(getCurrentLink() + path);
   }
 
   static Future<T?> changeOnOccasion<T extends Object?>(
-      BuildContext context, String path, {Object? extra}) {
+      BuildContext context, String path,
+      {Object? extra}) {
     return context.router.push(
       PageRouteInfo<void>(getCurrentLink() + path, args: extra),
     );
@@ -60,13 +60,13 @@ class RouterService {
     path = fixPath(path);
 
     if (kIsWeb && AppConfig.isWebclientSupported) {
-       // List of paths that should be handled by the web client
-       // This can be expanded. For now, we know 'form' is one.
-       // We can also potentially check against a list of known web-client routes.
-       if (path.startsWith("/${FormPage.ROUTE}/")) {
-         navigateExternal(path);
-         return Future.value(null);
-       }
+      // List of paths that should be handled by the web client
+      // This can be expanded. For now, we know 'form' is one.
+    // Check against list of known web-client routes
+      if (path.startsWith("/${FormPage.ROUTE}/")) {
+        navigateExternal(path);
+        return Future.value(null);
+      }
     }
 
     return context.router.pushPath(path);
@@ -84,7 +84,7 @@ class RouterService {
 
     // 1. Determine base to strip (Configured URL or dynamic localhost origin)
     final matchedBase = AppConfig.compatibleUrls().firstWhere(
-          (u) => u.isNotEmpty && url.startsWith(u),
+      (u) => u.isNotEmpty && url.startsWith(u),
       orElse: () => "",
     );
 
@@ -107,7 +107,7 @@ class RouterService {
 
     // 3. Remove leading slash to get cleaner path, but fixPath adds it back if needed.
     // We'll let fixPath handle the leading slash requirement.
-    
+
     return path;
   }
 
@@ -179,7 +179,9 @@ class RouterService {
   static final router = AppRouter();
 
   static void popTwo(BuildContext context) {
-    Navigator.of(context)..pop()..pop();
+    Navigator.of(context)
+      ..pop()
+      ..pop();
   }
 
   /// Navigates to a specific unit's edit page after updating app data.
@@ -243,13 +245,14 @@ class RouterService {
   ///
   /// The [occasionLink] can be passed directly. If not, it's extracted from
   /// the current route's parameters.
-  static Future<void> navigateToOccasionAdministration(
-      BuildContext context, {String? occasionLink, OccasionModel? occasion}) async {
-    
+  static Future<void> navigateToOccasionAdministration(BuildContext context,
+      {String? occasionLink, OccasionModel? occasion}) async {
     // If occasion is provided, prioritize it for feature checks
     if (occasion != null) {
-      if (FeatureService.isFeatureEnabled(FeatureConstants.form, features: occasion.features)) {
-        await navigateToOccasionReservationsByLink(context, occasion.link ?? occasionLink!);
+      if (FeatureService.isFeatureEnabled(FeatureConstants.form,
+          features: occasion.features)) {
+        await navigateToOccasionReservationsByLink(
+            context, occasion.link ?? occasionLink!);
         return;
       }
     }
@@ -347,34 +350,42 @@ class RouterService {
   /// Used by both [LoginPage] and [TransferPage] to ensure consistent behavior.
   static Future<void> handlePostLoginNavigation(BuildContext context,
       {String? fallbackPath, bool useReplacement = false}) async {
-    
     // 1. Update App Data
-    var unitId = RightsService.currentUnit()?.id == 1 ? null : RightsService.currentUnit()?.id;
-    
-    // Fix: If we don't have a current link, try to extract it from the fallback path
+    var unitId = RightsService.currentUnit()?.id == 1
+        ? null
+        : RightsService.currentUnit()?.id;
+
+    // If no current link, try to extract it from the fallback path
     String linkToUse = currentOccasionLink;
-    if ((linkToUse.isEmpty) && fallbackPath != null && fallbackPath.isNotEmpty) {
-       try {
-         // handlePostLoginNavigation is often called with a path like "/event_name/admin"
-         // extractOccasionLink expects a full URL or a path.
-         var extracted = LinkModel.extractOccasionLink(fallbackPath);
-         if (extracted.occasionLink != null && extracted.occasionLink!.isNotEmpty) {
-           linkToUse = extracted.occasionLink!;
-           debugPrint("[RouterService] Post-Login: Extracted link '$linkToUse' from fallbackPath '$fallbackPath'");
-         }
-       } catch (e) {
-         debugPrint("[RouterService] Post-Login: Failed to extract link from fallbackPath: $e");
-       }
+    if ((linkToUse.isEmpty) &&
+        fallbackPath != null &&
+        fallbackPath.isNotEmpty) {
+      try {
+        // handlePostLoginNavigation is often called with a path like "/event_name/admin"
+        // extractOccasionLink expects a full URL or a path.
+        var extracted = LinkModel.extractOccasionLink(fallbackPath);
+        if (extracted.occasionLink != null &&
+            extracted.occasionLink!.isNotEmpty) {
+          linkToUse = extracted.occasionLink!;
+          debugPrint(
+              "[RouterService] Post-Login: Extracted link '$linkToUse' from fallbackPath '$fallbackPath'");
+        }
+      } catch (e) {
+        debugPrint(
+            "[RouterService] Post-Login: Failed to extract link from fallbackPath: $e");
+      }
     }
 
-    await RightsService.updateAppData(unitId: unitId, link: linkToUse, force: true);
+    await RightsService.updateAppData(
+        unitId: unitId, link: linkToUse, force: true);
 
     // 2. Check for Units (Admin flow priority)
     // If the user has units (and isn't in Unit 1 context), they likely want their dashboard.
     if (unitId == null) {
       var userUnits = RightsService.currentUser()?.units;
       if (userUnits != null && userUnits.isNotEmpty) {
-        debugPrint("[RouterService] Post-Login: User has units. Navigating to UnitAdmin.");
+        debugPrint(
+            "[RouterService] Post-Login: User has units. Navigating to UnitAdmin.");
         await navigateToUnitAdmin(context, userUnits.first);
         return;
       }
@@ -385,13 +396,16 @@ class RouterService {
     if (fallbackPath != null && fallbackPath.isNotEmpty) {
       // If the redirect target is explicitly "Login", but we are already logged in (post-login flow),
       // we should NOT go to login. We should go Home instead.
-      if (fallbackPath.toLowerCase() == "/login" || fallbackPath.toLowerCase() == "login") {
-         debugPrint("[RouterService] Post-Login: Redirect was 'login', avoiding redundant loop. Going Home.");
-         await context.router.replacePath('/');
-         return;
+      if (fallbackPath.toLowerCase() == "/login" ||
+          fallbackPath.toLowerCase() == "login") {
+        debugPrint(
+            "[RouterService] Post-Login: Redirect was 'login', avoiding redundant loop. Going Home.");
+        await context.router.replacePath('/');
+        return;
       }
 
-      debugPrint("[RouterService] Post-Login: Using fallback path: $fallbackPath (Replace: $useReplacement)");
+      debugPrint(
+          "[RouterService] Post-Login: Using fallback path: $fallbackPath (Replace: $useReplacement)");
       if (useReplacement) {
         // Fix path to ensure it starts with /
         String target = fixPath(fallbackPath);
@@ -403,10 +417,10 @@ class RouterService {
       // Default behavior (pop or home)
       debugPrint("[RouterService] Post-Login: Pop or Home");
       if (useReplacement) {
-         // If we must replace but have no specific target, we go Home.
-         await context.router.replacePath('/');
+        // If we must replace but have no specific target, we go Home.
+        await context.router.replacePath('/');
       } else {
-         popOrHome(context);
+        popOrHome(context);
       }
     }
   }

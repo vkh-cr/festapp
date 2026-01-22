@@ -49,4 +49,5 @@ export class CommonStrings {
     static get delete() { return LocalizationService.tr("Common.delete"); }
     static get save() { return LocalizationService.tr("Common.save"); }
     static get reset() { return LocalizationService.tr("Common.reset"); }
+    static get processing() { return LocalizationService.tr("Processing..."); }
 }

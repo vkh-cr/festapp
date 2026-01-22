@@ -35,7 +35,8 @@ class _FormDesignContentState extends State<FormDesignContent> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newFormLink = widget.formLink ?? context.routeData.params.getString("formLink");
+    final newFormLink =
+        widget.formLink ?? context.routeData.params.getString("formLink");
     if (newFormLink != _formLink) {
       _formLink = newFormLink;
       _loadData();
@@ -62,12 +63,14 @@ class _FormDesignContentState extends State<FormDesignContent> {
     try {
       await DbForms.updateForm(_form!);
       if (!mounted) return;
-      ToastHelper.Show(context, "${CommonStrings.saved}: ${_form?.title ?? ""}", severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, "${CommonStrings.saved}: ${_form?.title ?? ""}",
+          severity: ToastSeverity.Ok);
       widget.onDataUpdated?.call();
       setState(() => _hasChanges = false);
     } catch (e) {
       if (!mounted) return;
-      ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""), severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""),
+          severity: ToastSeverity.NotOk);
     }
   }
 
@@ -93,8 +96,7 @@ class _FormDesignContentState extends State<FormDesignContent> {
             child: FormDesignSettings(
               form: _form!,
               onChanged: () => setState(() => _hasChanges = true),
-            )
-        ),
+            )),
       ),
       bottomNavigationBar: Container(
         color: ThemeConfig.appBarColor(),
@@ -109,7 +111,9 @@ class _FormDesignContentState extends State<FormDesignContent> {
               ),
               const SizedBox(width: 16),
               ElevatedButton(
-                onPressed: (RightsService.canEditOccasion() && _hasChanges) ? _saveChanges : null,
+                onPressed: (RightsService.canEditOccasion() && _hasChanges)
+                    ? _saveChanges
+                    : null,
                 child: Text("Save changes".tr()),
               ),
             ],

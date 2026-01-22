@@ -21,7 +21,7 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
   late final TextEditingController _dbController;
 
   final TextEditingController _repoController =
-  TextEditingController(text: 'vkh-cr/festapp');
+      TextEditingController(text: 'vkh-cr/festapp');
 
   @override
   void initState() {
@@ -59,8 +59,10 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
   // Define the list of operations for the Initial section.
   final List<OperationSectionData> _initialOperations = [
     OperationSectionData(title: "1. Tables", fixedDirectory: "database/tables"),
-    OperationSectionData(title: "2. Functions", fixedDirectory: "database/functions"),
-    OperationSectionData(title: "3. Policies", fixedDirectory: "database/policies"),
+    OperationSectionData(
+        title: "2. Functions", fixedDirectory: "database/functions"),
+    OperationSectionData(
+        title: "3. Policies", fixedDirectory: "database/policies"),
     OperationSectionData(title: "4. Seed", fixedDirectory: "database/seed"),
   ];
 
@@ -384,22 +386,22 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
             // Otherwise, show the fixed directory text (which is not editable).
             widget.customDirectory
                 ? TextField(
-              controller: _customDirController,
-              decoration: const InputDecoration(labelText: 'Directory'),
-            )
+                    controller: _customDirController,
+                    decoration: const InputDecoration(labelText: 'Directory'),
+                  )
                 : Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text("Directory: ${widget.fixedDirectory}"),
-            ),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text("Directory: ${widget.fixedDirectory}"),
+                  ),
             // If this is the seed section, show a note and extra fields.
             if (_isSeed) ...[
               const Divider(),
               const Text(
                 "Before running seed, please ensure that you have enabled:\n"
-                    " - Webhooks in Supabase Dashboard (Database > Webhooks)\n"
-                    " - moddatetime extension (Database > Extensions)\n"
-                    " - unaccent extension (Database > Extensions)\n"
-                    " - pg_cron extension (Database > Extensions)",
+                " - Webhooks in Supabase Dashboard (Database > Webhooks)\n"
+                " - moddatetime extension (Database > Extensions)\n"
+                " - unaccent extension (Database > Extensions)\n"
+                " - pg_cron extension (Database > Extensions)",
                 style: TextStyle(color: Colors.red),
               ),
               const SizedBox(height: 8),
@@ -436,11 +438,11 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _statusMessage.isNotEmpty
-                ? SelectableText(
-              _statusMessage,
-              style: const TextStyle(fontSize: 16),
-            )
-                : const SizedBox(),
+                    ? SelectableText(
+                        _statusMessage,
+                        style: const TextStyle(fontSize: 16),
+                      )
+                    : const SizedBox(),
           ],
         ),
       ),

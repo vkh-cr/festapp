@@ -92,8 +92,8 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
     if (_events.isEmpty) {
       final offline = await OfflineDataService.getAllEvents();
       await OfflineDataService.updateEventsWithGroupName(offline);
-      await loadPlacesForEvents(offline,
-              (ids) async => (await OfflineDataService.getAllPlaces()));
+      await loadPlacesForEvents(
+          offline, (ids) async => (await OfflineDataService.getAllPlaces()));
 
       if (AuthService.isLoggedIn()) {
         var userInfo = await OfflineDataService.getUserInfo();
@@ -156,7 +156,6 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
     }
   }
 
-
   Future<void> loadPlacesForEvents(List<EventModel> events,
       Future<List<PlaceModel>> Function(List<int>) fetchPlaces) async {
     var placeIds = events
@@ -165,7 +164,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
         .cast<int>()
         .toSet()
         .toList();
-    if(placeIds.isEmpty) return;
+    if (placeIds.isEmpty) return;
     var places = await fetchPlaces(placeIds);
     var placesById = {for (var place in places) place.id: place};
 
@@ -211,7 +210,8 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                     children: <Widget>[
                       GestureDetector(
                         onTap: () async {
-                          RouterService.navigate(context, "${UnitPage.ROUTE}/${RightsService.currentUnit()!.id!}");
+                          RouterService.navigate(context,
+                              "${UnitPage.ROUTE}/${RightsService.currentUnit()!.id!}");
                         },
                         onDoubleTap: () async {
                           var packageInfo = await PackageInfo.fromPlatform();
@@ -224,30 +224,42 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: LogoWidget(width: 120,),
+                          child: LogoWidget(
+                            width: 120,
+                          ),
                         ),
                       ),
                       const Spacer(),
-                      if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
-                        Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-                          CircularButton(
-                            onPressed: _mySchedulePressed,
-                            backgroundColor: ThemeConfig.profileButtonColor(context),
-                            child: Icon(Icons.favorite,
-                                color: ThemeConfig.profileButtonTextColor(context)),
-                          ),
-                          Text("My schedule".tr()),
-                        ]),
-                      if(FeatureService.isFeatureEnabled(FeatureConstants.timetable))
-                        Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-                          CircularButton(
-                            onPressed: _schedulePressed,
-                            backgroundColor: ThemeConfig.profileButtonColor(context),
-                            child: Icon(Icons.calendar_month,
-                                color: ThemeConfig.profileButtonTextColor(context)),
-                          ),
-                          Text("Schedule".tr()),
-                        ]),
+                      if (FeatureService.isFeatureEnabled(
+                          FeatureConstants.mySchedule))
+                        Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              CircularButton(
+                                onPressed: _mySchedulePressed,
+                                backgroundColor:
+                                    ThemeConfig.profileButtonColor(context),
+                                child: Icon(Icons.favorite,
+                                    color: ThemeConfig.profileButtonTextColor(
+                                        context)),
+                              ),
+                              Text("My schedule".tr()),
+                            ]),
+                      if (FeatureService.isFeatureEnabled(
+                          FeatureConstants.timetable))
+                        Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              CircularButton(
+                                onPressed: _schedulePressed,
+                                backgroundColor:
+                                    ThemeConfig.profileButtonColor(context),
+                                child: Icon(Icons.calendar_month,
+                                    color: ThemeConfig.profileButtonTextColor(
+                                        context)),
+                              ),
+                              Text("Schedule".tr()),
+                            ]),
                     ]),
               ),
             ),

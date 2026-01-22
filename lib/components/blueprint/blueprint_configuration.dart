@@ -15,11 +15,11 @@ class BlueprintConfiguration {
   }
 
   Map<String, dynamic> toJson() => {
-    metaDimensions: {
-      metaWidth: width,
-      metaHeight: height,
-    },
-  };
+        metaDimensions: {
+          metaWidth: width,
+          metaHeight: height,
+        },
+      };
 
   BlueprintConfiguration({
     this.width,

@@ -41,17 +41,20 @@ class _TicketSearchDialogState extends State<TicketSearchDialog> {
       final normalizedQuery = Utilities.removeDiacritics(query.toLowerCase());
       setState(() {
         _filteredTickets = widget.allTickets.where((ticket) {
-          final symbol = Utilities.removeDiacritics((ticket.ticketSymbol ?? "").toLowerCase());
-          
+          final symbol = Utilities.removeDiacritics(
+              (ticket.ticketSymbol ?? "").toLowerCase());
+
           String holderName = "";
           String email = "";
-          
+
           if (ticket.relatedOrder?.data != null) {
-             final data = ticket.relatedOrder!.data!;
-             final name = data['name'] ?? "";
-             final surname = data['surname'] ?? "";
-             holderName = Utilities.removeDiacritics("$name $surname".trim().toLowerCase());
-             email = Utilities.removeDiacritics((data['email'] ?? "").toLowerCase());
+            final data = ticket.relatedOrder!.data!;
+            final name = data['name'] ?? "";
+            final surname = data['surname'] ?? "";
+            holderName = Utilities.removeDiacritics(
+                "$name $surname".trim().toLowerCase());
+            email =
+                Utilities.removeDiacritics((data['email'] ?? "").toLowerCase());
           }
 
           return symbol.contains(normalizedQuery) ||
@@ -94,7 +97,9 @@ class _TicketSearchDialogState extends State<TicketSearchDialog> {
                       ticket.ticketSymbol ?? FeaturesStrings.unknown,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text(orderData.isNotEmpty ? orderData : FeaturesStrings.noData),
+                    subtitle: Text(orderData.isNotEmpty
+                        ? orderData
+                        : FeaturesStrings.noData),
                     onTap: () {
                       Navigator.of(context).pop(ticket);
                     },

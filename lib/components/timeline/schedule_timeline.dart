@@ -14,22 +14,23 @@ class ScheduleTimeline extends StatefulWidget {
   final List<TimeBlockGroup> eventGroups;
   final double? nodePosition;
   final Widget? emptyContent;
-  final Function(BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEventId)? onAddNewEvent;
+  final Function(
+          BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEventId)?
+      onAddNewEvent;
   final bool Function()? showAddNewEventButton;
   final TimeBlockItem? parentEvent;
   final bool isGroupTitleShown;
 
-  const ScheduleTimeline({
-    super.key,
-    required this.eventGroups,
-    this.onEventPressed,
-    this.nodePosition = 0.24,
-    this.emptyContent,
-    this.onAddNewEvent,
-    this.showAddNewEventButton,
-    this.parentEvent,
-    this.isGroupTitleShown = true
-  });
+  const ScheduleTimeline(
+      {super.key,
+      required this.eventGroups,
+      this.onEventPressed,
+      this.nodePosition = 0.24,
+      this.emptyContent,
+      this.onAddNewEvent,
+      this.showAddNewEventButton,
+      this.parentEvent,
+      this.isGroupTitleShown = true});
 
   @override
   _ScheduleTimelineState createState() => _ScheduleTimelineState();
@@ -43,7 +44,8 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
     }
 
     List<Widget> children = [];
-    bool firstVisibleGroupTitleRendered = false; // Flag to track the first visible title
+    bool firstVisibleGroupTitleRendered =
+        false; // Flag to track the first visible title
 
     for (var group in widget.eventGroups) {
       var timeLineItems = group.events.toList();
@@ -68,7 +70,10 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
 
             String longestLeftText = group.events
                 .map((e) => e.data['leftText'] as String? ?? '')
-                .fold('', (prev, element) => element.length > prev.length ? element : prev);
+                .fold(
+                    '',
+                    (prev, element) =>
+                        element.length > prev.length ? element : prev);
 
             if (longestLeftText.isNotEmpty) {
               final style = StylesConfig.timeLineSmallTextStyle.copyWith(
@@ -80,13 +85,15 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
                 textDirection: Directionality.of(context),
               )..layout(minWidth: 0, maxWidth: double.infinity);
 
-              const double rightPadding = 8.0; // from EdgeInsets.all(8.0) in oppositeContentsBuilder
+              const double rightPadding =
+                  8.0; // from EdgeInsets.all(8.0) in oppositeContentsBuilder
               shift = textPainter.width + rightPadding;
             }
 
             return Padding(
               padding: EdgeInsets.only(
-                left: constraints.maxWidth * (widget.nodePosition ?? 0.24) - shift,
+                left: constraints.maxWidth * (widget.nodePosition ?? 0.24) -
+                    shift,
                 top: titlePadding.top,
                 bottom: titlePadding.bottom,
               ),
@@ -108,7 +115,8 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             padding: const EdgeInsets.symmetric(vertical: 28.0),
             child: TextButton.icon(
               onPressed: () {
-                widget.onAddNewEvent?.call(context, widget.eventGroups, widget.parentEvent);
+                widget.onAddNewEvent
+                    ?.call(context, widget.eventGroups, widget.parentEvent);
               },
               icon: const Icon(
                 Icons.add_circle_outline,
@@ -117,7 +125,8 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
               label: const Text("Add To Schedule").tr(),
               style: TextButton.styleFrom(
                 foregroundColor: ThemeConfig.timelineAddNewEventColor(context),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
             ),
           ),
@@ -172,21 +181,24 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             );
           }
           return TextButton(
-            onPressed: widget.onEventPressed == null && !event.isActivity ? null : () {
-              if (event.isActivity) {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return DetailDialog(
-                      title: "${event.title} ${event.durationTimeString()}",
-                      customContentWidget: activityContent(event),
-                    );
+            onPressed: widget.onEventPressed == null && !event.isActivity
+                ? null
+                : () {
+                    if (event.isActivity) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return DetailDialog(
+                            title:
+                                "${event.title} ${event.durationTimeString()}",
+                            customContentWidget: activityContent(event),
+                          );
+                        },
+                      );
+                    } else {
+                      widget.onEventPressed?.call(event.id);
+                    }
                   },
-                );
-              } else {
-                widget.onEventPressed?.call(event.id);
-              }
-            },
             style: TextButton.styleFrom(
               disabledForegroundColor: ThemeConfig.blackColor(context),
               foregroundColor: ThemeConfig.timelineTextColor(context),
@@ -237,9 +249,13 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: ScheduleTimeline(
-              eventGroups: TimeBlockHelper.splitTimeBlockByPlace(event.children!),
+              eventGroups:
+                  TimeBlockHelper.splitTimeBlockByPlace(event.children!),
               onEventPressed: widget.onEventPressed,
-              showAddNewEventButton: () {return ((widget.showAddNewEventButton?.call() ?? false) && !event.isActivity);},
+              showAddNewEventButton: () {
+                return ((widget.showAddNewEventButton?.call() ?? false) &&
+                    !event.isActivity);
+              },
               onAddNewEvent: widget.onAddNewEvent,
               parentEvent: event,
               nodePosition: StylesConfig.scheduleTimelineNodePosition,

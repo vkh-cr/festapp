@@ -39,18 +39,24 @@ class OccasionSettingsModel {
   /// instance to a new [OccasionSettingsModel] instance.
   factory OccasionSettingsModel.fromOccasion(OccasionModel occasion) {
     final dataPart = occasion.data ?? <String, dynamic>{};
-    final servicesPart = dataPart[Tb.occasions.services] as Map<String, dynamic>?;
-    final gameSettings = dataPart[Tb.occasions.data_game] as Map<String, dynamic>? ?? <String, dynamic>{};
+    final servicesPart =
+        dataPart[Tb.occasions.services] as Map<String, dynamic>?;
+    final gameSettings =
+        dataPart[Tb.occasions.data_game] as Map<String, dynamic>? ??
+            <String, dynamic>{};
 
-    final gameStartString = gameSettings[Tb.occasions.data_game_start] as String?;
+    final gameStartString =
+        gameSettings[Tb.occasions.data_game_start] as String?;
     final gameEndString = gameSettings[Tb.occasions.data_game_end] as String?;
 
     return OccasionSettingsModel(
       eventStartTime: occasion.startTime,
       eventEndTime: occasion.endTime,
       services: servicesPart,
-      gameStartTime: gameStartString != null ? DateTime.tryParse(gameStartString) : null,
-      gameEndTime: gameEndString != null ? DateTime.tryParse(gameEndString) : null,
+      gameStartTime:
+          gameStartString != null ? DateTime.tryParse(gameStartString) : null,
+      gameEndTime:
+          gameEndString != null ? DateTime.tryParse(gameEndString) : null,
       features: occasion.features,
       data: occasion.data,
       isHidden: occasion.isHidden,
@@ -69,7 +75,8 @@ class OccasionSettingsModel {
       return defaultSettings;
     }
 
-    var gameSettings = dataPart[Tb.occasions.data_game] as Map<String, dynamic>? ?? {};
+    var gameSettings =
+        dataPart[Tb.occasions.data_game] as Map<String, dynamic>? ?? {};
     var hiddenFlag = dataPart[Tb.occasions.is_hidden] as bool?;
 
     return OccasionSettingsModel(
@@ -93,29 +100,28 @@ class OccasionSettingsModel {
   }
 
   Map<String, dynamic> toJson() => {
-    Tb.occasions.services: services,
-    Tb.occasions.features: features
-        ?.map((f) => f.toJson())
-        .toList(),
-    Tb.occasions.is_hidden: isHidden,
-    Tb.occasions.data: {
-      Tb.occasions.data_game: {
-        Tb.occasions.data_game_start: gameStartTime?.toIso8601String(),
-        Tb.occasions.data_game_end: gameEndTime?.toIso8601String(),
-      },
-    }
-  };
+        Tb.occasions.services: services,
+        Tb.occasions.features: features?.map((f) => f.toJson()).toList(),
+        Tb.occasions.is_hidden: isHidden,
+        Tb.occasions.data: {
+          Tb.occasions.data_game: {
+            Tb.occasions.data_game_start: gameStartTime?.toIso8601String(),
+            Tb.occasions.data_game_end: gameEndTime?.toIso8601String(),
+          },
+        }
+      };
 
-  static OccasionSettingsModel defaultSettings = OccasionSettingsModel(
-  );
+  static OccasionSettingsModel defaultSettings = OccasionSettingsModel();
 
-  ServiceItemModel? getReferenceToService(String serviceType, Map<String, dynamic>? userServices) {
+  ServiceItemModel? getReferenceToService(
+      String serviceType, Map<String, dynamic>? userServices) {
     // Retrieve the list of services for the specified service type
     var servs = services?[serviceType] ?? [];
 
     var serviceRecords = userServices?[serviceType] as Map? ?? {};
-    var userCode = serviceRecords.keys.firstWhereOrNull((key) => key.isNotEmpty);
-    if(userCode == null) {
+    var userCode =
+        serviceRecords.keys.firstWhereOrNull((key) => key.isNotEmpty);
+    if (userCode == null) {
       return null;
     }
     for (var service in servs) {

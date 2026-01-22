@@ -1,7 +1,8 @@
 class TbEshop {
   static ProductTypesTb product_types = const ProductTypesTb();
   static ProductsTb products = const ProductsTb();
-  static OrderProductTicketTb order_product_ticket = const OrderProductTicketTb();
+  static OrderProductTicketTb order_product_ticket =
+      const OrderProductTicketTb();
   static OrdersTb orders = const OrdersTb();
   static OrdersHistoryTb orders_history = const OrdersHistoryTb();
   static TicketsTb tickets = const TicketsTb();
@@ -10,7 +11,8 @@ class TbEshop {
   static PaymentInfoTb payment_info = const PaymentInfoTb();
   static TransactionsTb transactions = const TransactionsTb();
   static BankAccountsTb bank_accounts = const BankAccountsTb();
-  static ProductInventoryContextsTb product_inventory_contexts = const ProductInventoryContextsTb();
+  static ProductInventoryContextsTb product_inventory_contexts =
+      const ProductInventoryContextsTb();
 }
 
 class ProductTypesTb {

@@ -40,7 +40,8 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
       // Get all possible state labels to find the longest one, which ensures
       // all tags have a consistent and sufficient width.
       final allStateLabels = OrderModel.orderStates
-          .map((key) => OrderModel.statesDataGridToUpper(OrderModel.statesDataGridToUpper(key)))
+          .map((key) => OrderModel.statesDataGridToUpper(
+              OrderModel.statesDataGridToUpper(key)))
           .toList();
 
       _optimalTagWidth = OrderStateDisplay.calculateOptimalWidth(
@@ -71,8 +72,13 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
 
       if (history.isNotEmpty) {
         final latestHistoryRecord = history.last;
-        if (order.updatedAt != null && order.updatedAt!.difference(latestHistoryRecord.createdAt!).inSeconds > 5) {
-          if (order.state != latestHistoryRecord.state || order.price != latestHistoryRecord.price) {
+        if (order.updatedAt != null &&
+            order.updatedAt!
+                    .difference(latestHistoryRecord.createdAt!)
+                    .inSeconds >
+                5) {
+          if (order.state != latestHistoryRecord.state ||
+              order.price != latestHistoryRecord.price) {
             allHistoryItems.add(OrderHistoryModel.fromOrderModel(order));
           }
         }
@@ -103,25 +109,26 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: SelectableText("${OrdersStrings.gridHistory} #${widget.orderId} - $_customerName"),
+      title: SelectableText(
+          "${OrdersStrings.gridHistory} #${widget.orderId} - $_customerName"),
       content: SizedBox(
         width: 600,
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _processedHistory.isEmpty
-            ? Center(child: SelectableText(OrdersStrings.noHistoryFound))
-            : SelectableRegion(
-          focusNode: _focusNode,
-          selectionControls: MaterialTextSelectionControls(),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: _processedHistory.length,
-            itemBuilder: (context, index) {
-              final item = _processedHistory[index];
-              return _buildHistoryEntry(item);
-            },
-          ),
-        ),
+                ? Center(child: SelectableText(OrdersStrings.noHistoryFound))
+                : SelectableRegion(
+                    focusNode: _focusNode,
+                    selectionControls: MaterialTextSelectionControls(),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _processedHistory.length,
+                      itemBuilder: (context, index) {
+                        final item = _processedHistory[index];
+                        return _buildHistoryEntry(item);
+                      },
+                    ),
+                  ),
       ),
       actions: [
         TextButton(
@@ -135,15 +142,18 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
   Widget _buildHistoryEntry(OrderHistoryModel item) {
     final theme = Theme.of(context);
     final date = item.createdAt != null
-        ? DateFormat('yyyy-MM-dd HH:mm:ss').format(item.createdAt!.toOccasionTime())
+        ? DateFormat('yyyy-MM-dd HH:mm:ss')
+            .format(item.createdAt!.toOccasionTime())
         : OrdersStrings.currentState;
 
-    final changedBy = item.createdBy?.toFullNameString() ?? OrdersStrings.systemUser;
+    final changedBy =
+        item.createdBy?.toFullNameString() ?? OrdersStrings.systemUser;
     final trinaRow = item.toTrinaRow(context);
     final stateCellFormat = trinaRow.cells[EshopColumns.HISTORY_STATE]!.value;
 
     final previousRecord = item.previousHistoryRecord;
-    final priceHasChanged = previousRecord != null && item.price != previousRecord.price;
+    final priceHasChanged =
+        previousRecord != null && item.price != previousRecord.price;
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -164,7 +174,8 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
                 Text(date, style: theme.textTheme.titleMedium),
                 Row(
                   children: [
-                    Icon(Icons.person_outline, size: 14, color: theme.textTheme.bodySmall?.color),
+                    Icon(Icons.person_outline,
+                        size: 14, color: theme.textTheme.bodySmall?.color),
                     const SizedBox(width: 4),
                     Text(changedBy, style: theme.textTheme.bodySmall),
                   ],
@@ -182,8 +193,7 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
                     stateTagWidth: _optimalTagWidth,
                     enableWrapping: true,
                   ),
-                )
-            ),
+                )),
             const SizedBox(height: 12),
             _buildInfoRow(
               OrdersStrings.changes,
@@ -196,27 +206,33 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text("${OrdersStrings.totalPrice}: ", style: theme.textTheme.labelLarge),
+                  Text("${OrdersStrings.totalPrice}: ",
+                      style: theme.textTheme.labelLarge),
                   if (priceHasChanged)
                     Row(
                       children: [
                         Text(
-                          Utilities.formatPrice(context, previousRecord.price!, currencyCode: previousRecord.currencyCode),
-                          style: TextStyle(decoration: TextDecoration.lineThrough, color: theme.textTheme.bodySmall?.color),
+                          Utilities.formatPrice(context, previousRecord.price!,
+                              currencyCode: previousRecord.currencyCode),
+                          style: TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              color: theme.textTheme.bodySmall?.color),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           child: Icon(Icons.arrow_forward, size: 16),
                         ),
                         Text(
-                          Utilities.formatPrice(context, item.price!, currencyCode: item.currencyCode),
+                          Utilities.formatPrice(context, item.price!,
+                              currencyCode: item.currencyCode),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
                     )
                   else
                     Text(
-                      Utilities.formatPrice(context, item.price!, currencyCode: item.currencyCode),
+                      Utilities.formatPrice(context, item.price!,
+                          currencyCode: item.currencyCode),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                 ],
@@ -228,11 +244,13 @@ class _OrderHistoryDialogState extends State<OrderHistoryDialog> {
     );
   }
 
-  Widget _buildInfoRow(String label, Widget valueWidget, {bool alignTop = false}) {
+  Widget _buildInfoRow(String label, Widget valueWidget,
+      {bool alignTop = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
-        crossAxisAlignment: alignTop ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            alignTop ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 80,

@@ -98,16 +98,6 @@ BEGIN
         IF organization_id IS NULL THEN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1005, 'message', 'No organization found for the occasion')::TEXT;
         END IF;
-        /* Original bank account selection removed.
-        SELECT bank_accounts.account_number, bank_accounts.account_number_human_readable
-        INTO account_number, account_number_human_readable
-        FROM eshop.bank_accounts
-        WHERE id = bank_account_id;
-
-        IF account_number IS NULL THEN
-            RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1006, 'message', 'No account number found for the bank account')::TEXT;
-        END IF;
-        */
 
         IF input_data ? 'fields' THEN
             DECLARE
@@ -402,22 +392,22 @@ BEGIN
         -- Apply inventory allocations. This will raise an overbooking error if spots are unavailable.
         PERFORM apply_allocations(order_id);
 
-        -- either flag as 'ordered' or, if free, mark paid via your function
-        IF calculated_price = 0 THEN
-          PERFORM update_order_and_tickets_to_paid(order_id);
-        ELSE
-          UPDATE eshop.orders
-          SET state      = 'ordered'
-          WHERE id = order_id;
+        -- Always mark as 'ordered' initially to satisfy state requirements
+        UPDATE eshop.orders
+        SET state      = 'ordered'
+        WHERE id = order_id;
 
-          -- Calculate deadline if deadline duration is provided and then call the function
-          IF form_deadline_duration IS NOT NULL THEN
-              deadline := now + make_interval(secs => form_deadline_duration);
-              PERFORM public.set_payment_deadline(payment_info_id, deadline);
-          ELSE
-              deadline := NULL;
-          END IF;
+        -- Calculate deadline if deadline duration is provided
+        IF form_deadline_duration IS NOT NULL THEN
+             deadline := now + make_interval(secs => form_deadline_duration);
+             PERFORM public.set_payment_deadline(payment_info_id, deadline);
+        ELSE
+             deadline := NULL;
         END IF;
+
+        -- Check via Unified Helper if order is already paid (e.g. price is 0)
+        PERFORM public.recalculate_order_payment_status(order_id);
+
 
         -- Log the order to orders_history with details
         INSERT INTO eshop.orders_history (created_at, data, "order", state, price, currency_code)
@@ -477,3 +467,5 @@ BEGIN
     RETURN result;
 END;
 $$;
+
+NOTIFY pgrst, 'reload schema';

@@ -6,7 +6,8 @@ import 'package:fstapp/components/occasion/admin_page.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
-  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
+  static const String anonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
   static const String appName = 'Vstupenky.online';
   static String mapTitle = "Map".tr();
   static const bool showPWAInstallOption = true;
@@ -40,38 +41,35 @@ class AppConfig {
   static const String feedbackEmail = "info@festapp.net";
 
   static bool isNotificationsCurrentlySupported() {
-    if(kIsWeb) {
+    if (kIsWeb) {
       return isNotificationsSupported && isWebNotificationsSupported;
     }
     return isNotificationsSupported;
   }
 
   static List<LanguageModel> availableLanguages() => [
-    LanguageModel(const Locale("cs"), "Čeština"),
-    LanguageModel(const Locale("en"), "English"),
-    // LanguageModel(const Locale("sk"), "Slovenčina"),
-    // LanguageModel(const Locale("pl"), "Polski"),
-    // LanguageModel(const Locale("de"), "Deutsch"),
-    // LanguageModel(const Locale("uk"), "українська"),
-  ];
-
+        LanguageModel(const Locale("cs"), "Čeština"),
+        LanguageModel(const Locale("en"), "English"),
+        // LanguageModel(const Locale("sk"), "Slovenčina"),
+        // LanguageModel(const Locale("pl"), "Polski"),
+        // LanguageModel(const Locale("de"), "Deutsch"),
+        // LanguageModel(const Locale("uk"), "українська"),
+      ];
 
   /// This is the single definition place for the prefix structure.
   /// It combines the organization ID and the separator (e.g., "2+").
   static String get _prefixBase => "$organization+";
 
-  static String getUserPrefix(String email){
+  static String getUserPrefix(String email) {
     return "$_prefixBase$email";
   }
 
-  static String removeUserPrefix(String emailWithPrefix){
+  static String removeUserPrefix(String emailWithPrefix) {
     if (emailWithPrefix.startsWith(_prefixBase)) {
       return emailWithPrefix.substring(_prefixBase.length);
     }
     return emailWithPrefix;
   }
 
-  static List<String> compatibleUrls() => [
-    AppConfig.webLink
-  ];
+  static List<String> compatibleUrls() => [AppConfig.webLink];
 }

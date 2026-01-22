@@ -35,17 +35,15 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
   Future<void> loadData() async {
     if (_formLink == null) return;
     var ff = await DbForms.getAllFormFields(_formLink!);
-    if(mounted) {
+    if (mounted) {
       setState(() {
         formFieldModels = ff;
         controller = SingleDataGridController<FormResponseModel>(
           context: context,
           loadData: () => DbForms.getAllResponses(_formLink!),
-
           fromPlutoJson: (Map<String, dynamic> json) {
             return FormResponseModel.fromPlutoJson(json, formFieldModels ?? []);
           },
-
           firstColumnType: DataGridFirstColumn.none,
           idColumn: TbEshop.orders.id,
           actionsExtended: DataGridActionsController(
@@ -58,10 +56,12 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
             columnIdentifiers,
             data: {
               EshopColumns.RESPONSES: formFieldModels,
-              EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
+              EshopColumns.TICKET_PRODUCTS_EXTENDED:
+                  EshopColumns.productCategories,
             },
           ),
-          exportOptions: ExportOptions(fileName: "${_formLink ?? ""}-responses"),
+          exportOptions:
+              ExportOptions(fileName: "${_formLink ?? ""}-responses"),
         );
       });
     }

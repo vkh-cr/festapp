@@ -17,7 +17,6 @@ class AppError {
   });
 }
 
-
 class ExceptionHandler {
   /// **NEW:** Executes an async function and handles any exceptions that occur.
   ///
@@ -27,11 +26,11 @@ class ExceptionHandler {
   /// This is useful for data grids that need to know the operation failed.
   /// - Returns the result of [futureFunction] on success, or `null` on a handled error.
   static Future<T?> guard<T>(
-      BuildContext context, {
-        required Future<T> Function() futureFunction,
-        String? defaultErrorMessage,
-        bool rethrowError = false,
-      }) async {
+    BuildContext context, {
+    required Future<T> Function() futureFunction,
+    String? defaultErrorMessage,
+    bool rethrowError = false,
+  }) async {
     try {
       return await futureFunction();
     } catch (e) {
@@ -52,11 +51,11 @@ class ExceptionHandler {
 
   /// Returns `true` on success and `false` on a handled failure.
   static Future<bool> guardVoid(
-      BuildContext context, {
-        required Future<void> Function() futureFunction,
-        String? defaultErrorMessage,
-        bool rethrowError = false,
-      }) async {
+    BuildContext context, {
+    required Future<void> Function() futureFunction,
+    String? defaultErrorMessage,
+    bool rethrowError = false,
+  }) async {
     try {
       await futureFunction();
       return true;
@@ -77,18 +76,19 @@ class ExceptionHandler {
   /// Handles an error by showing a user-friendly UI.
   /// Returns a Future that completes when the UI (e.g., dialog) is dismissed.
   static Future<void> handle(
-      BuildContext context, {
-        required Object error,
-        String? defaultMessage,
-        bool showAsDialog = false,
-      }) async {
+    BuildContext context, {
+    required Object error,
+    String? defaultMessage,
+    bool showAsDialog = false,
+  }) async {
     final AppError? appError = _parsePostgrestException(error);
 
     if (appError != null) {
       if (showAsDialog) {
         await _showErrorDialog(context, appError);
       } else {
-        ToastHelper.Show(context, appError.message, severity: ToastSeverity.NotOk);
+        ToastHelper.Show(context, appError.message,
+            severity: ToastSeverity.NotOk);
       }
     } else {
       final message = defaultMessage ?? "An unexpected error occurred.".tr();
@@ -108,8 +108,8 @@ class ExceptionHandler {
       final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
       return AppError(
         code: jsonMap['code'] ?? 'N/A',
-        message:
-        jsonMap['message'] as String? ?? 'An unknown database error occurred.'.tr(),
+        message: jsonMap['message'] as String? ??
+            'An unknown database error occurred.'.tr(),
         rawJson: jsonString,
       );
     } catch (e) {
@@ -117,7 +117,8 @@ class ExceptionHandler {
     }
   }
 
-  static Future<void> _showErrorDialog(BuildContext context, AppError appError) {
+  static Future<void> _showErrorDialog(
+      BuildContext context, AppError appError) {
     return showDialog(
       context: context,
       builder: (ctx) {
@@ -138,11 +139,12 @@ class ExceptionHandler {
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.all(8),
-                  color: theme.colorScheme.surfaceVariant,
+                  color: theme.colorScheme.surfaceContainerHighest,
                   child: SelectableText(
                     const JsonEncoder.withIndent('  ')
                         .convert(jsonDecode(appError.rawJson)),
-                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                    style:
+                        const TextStyle(fontFamily: 'monospace', fontSize: 12),
                   ),
                 ),
               ],

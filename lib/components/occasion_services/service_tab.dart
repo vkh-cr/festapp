@@ -48,7 +48,8 @@ class _ServiceTabState extends State<ServiceTab> {
   /// Loads service data for food and accommodation and updates the grid.
   Future<void> loadData() async {
     var af = await DbOccasions.getAllServices(DbOccasions.serviceTypeFood);
-    var aa = await DbOccasions.getAllServices(DbOccasions.serviceTypeAccommodation);
+    var aa =
+        await DbOccasions.getAllServices(DbOccasions.serviceTypeAccommodation);
 
     setState(() {
       allFood = af;
@@ -89,7 +90,8 @@ class _ServiceTabState extends State<ServiceTab> {
       headerChildren: [
         DataGridAction(
           name: "Accommodation settings".tr(),
-          action: (SingleDataGridController p0, [_]) => _accommodationDefinition(p0),
+          action: (SingleDataGridController p0, [_]) =>
+              _accommodationDefinition(p0),
           isEnabled: RightsService.isManager,
         ),
         DataGridAction(
@@ -110,14 +112,17 @@ class _ServiceTabState extends State<ServiceTab> {
     return SingleTableDataGrid<OccasionUserModel>(_controller!);
   }
 
-  _accommodationDefinition(SingleDataGridController<ITrinaRowModel> controller) async {
+  Future<void> _accommodationDefinition(
+      SingleDataGridController<ITrinaRowModel> controller) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return ServiceDialog(
           type: DbOccasions.serviceTypeAccommodation,
           title: "Accommodation".tr(),
-          description: "To create accommodation, fill in the title, unique code, and the reference of the place.".tr(),
+          description:
+              "To create accommodation, fill in the title, unique code, and the reference of the place."
+                  .tr(),
           referenceString: CommonStrings.place,
         );
       },
@@ -127,14 +132,17 @@ class _ServiceTabState extends State<ServiceTab> {
     await loadData();
   }
 
-  _foodDefinition(SingleDataGridController<ITrinaRowModel> controller) async {
+  Future<void> _foodDefinition(
+      SingleDataGridController<ITrinaRowModel> controller) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return ServiceDialog(
           type: DbOccasions.serviceTypeFood,
           title: "Food".tr(),
-          description: "To create food, fill in the title, unique code, and the reference of the event.".tr(),
+          description:
+              "To create food, fill in the title, unique code, and the reference of the event."
+                  .tr(),
           referenceString: "Event".tr(),
         );
       },

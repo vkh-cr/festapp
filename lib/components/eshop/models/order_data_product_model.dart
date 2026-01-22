@@ -21,7 +21,9 @@ class OrderDataProductModel {
     return OrderDataProductModel(
       id: json['id'],
       type: json['type'],
-      price: json['price'] != null ? double.tryParse(json['price'].toString()) : null,
+      price: json['price'] != null
+          ? double.tryParse(json['price'].toString())
+          : null,
       title: json['title'],
       typeTitle: json['type_title'],
       spotTitle: json['spot_title'],

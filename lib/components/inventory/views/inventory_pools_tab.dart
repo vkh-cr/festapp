@@ -30,7 +30,8 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newOccasionLink = context.routeData.params.get(AppRouter.linkFormatted, null);
+    final newOccasionLink =
+        context.routeData.params.get(AppRouter.linkFormatted, null);
 
     if (newOccasionLink != null && newOccasionLink != _previousOccasionLink) {
       _previousOccasionLink = newOccasionLink;
@@ -38,10 +39,12 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
     }
   }
 
-  Future<void> loadData(String occasionLink, {bool isRefresh = false, int? newSelectedGroupId}) async {
+  Future<void> loadData(String occasionLink,
+      {bool isRefresh = false, int? newSelectedGroupId}) async {
     if (!mounted) return;
 
-    final int? selectedGroupId = newSelectedGroupId ?? (isRefresh ? _selectedCapacityGroup?.id : null);
+    final int? selectedGroupId =
+        newSelectedGroupId ?? (isRefresh ? _selectedCapacityGroup?.id : null);
 
     setState(() {
       _isLoading = true;
@@ -51,31 +54,36 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
     });
 
     try {
-      final newBundle = await DbInventoryPools.getInventoryPoolsByOccasionLink(occasionLink);
+      final newBundle =
+          await DbInventoryPools.getInventoryPoolsByOccasionLink(occasionLink);
       _bundle = newBundle; // Assign new data
 
       if (_bundle != null) {
         // Link objects for easier access
-        _bundle!.inventoryContexts.forEach((context) {
-          context.inventoryPool = _bundle!.pools.firstWhereOrNull((group) => group.id == context.inventoryPoolId);
-        });
-        _bundle!.spots.forEach((spot) {
-          spot.inventoryContext = _bundle!.inventoryContexts.firstWhereOrNull((context) => context.id == spot.inventoryContextId);
-        });
+        for (var context in _bundle!.inventoryContexts) {
+          context.inventoryPool = _bundle!.pools
+              .firstWhereOrNull((group) => group.id == context.inventoryPoolId);
+        }
+        for (var spot in _bundle!.spots) {
+          spot.inventoryContext = _bundle!.inventoryContexts.firstWhereOrNull(
+              (context) => context.id == spot.inventoryContextId);
+        }
 
         // After data is loaded, find and set the selected group based on the determined ID.
         if (selectedGroupId != null) {
-          _selectedCapacityGroup = _bundle!.pools.firstWhereOrNull((g) => g.id == selectedGroupId);
+          _selectedCapacityGroup =
+              _bundle!.pools.firstWhereOrNull((g) => g.id == selectedGroupId);
         } else if (!isRefresh && _bundle!.pools.length == 1) {
           _selectedCapacityGroup = _bundle!.pools.first;
         }
       }
     } catch (e, s) {
-      print("Error fetching capacity groups bundle: $e");
-      print("Stack trace: $s");
+      // Error fetching capacity groups bundle
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(InventoryStrings.tabErrorRefresh), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text(InventoryStrings.tabErrorRefresh),
+              backgroundColor: Colors.red),
         );
       }
       // On error, do not clear the bundle to avoid a full UI reset
@@ -146,11 +154,15 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.inventory_2_outlined, size: 20, color: onAppBarColor),
+                Icon(Icons.inventory_2_outlined,
+                    size: 20, color: onAppBarColor),
                 const SizedBox(width: 6),
                 Text(
                   InventoryStrings.tabTitle,
-                  style: TextStyle(fontSize: 16, color: onAppBarColor, fontWeight: FontWeight.normal),
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: onAppBarColor,
+                      fontWeight: FontWeight.normal),
                 ),
               ],
             ),
@@ -160,7 +172,8 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Text(
                 "/",
-                style: TextStyle(fontSize: 14, color: onAppBarColor.withOpacity(0.4)),
+                style: TextStyle(
+                    fontSize: 14, color: onAppBarColor.withOpacity(0.4)),
               ),
             ),
             _buildGroupSelector(),
@@ -171,11 +184,13 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
   }
 
   Widget _buildGroupSelector() {
-    final onAppBarColor = Theme.of(context).appBarTheme.foregroundColor ?? Colors.white;
+    final onAppBarColor =
+        Theme.of(context).appBarTheme.foregroundColor ?? Colors.white;
     if (_bundle == null || _bundle!.pools.length <= 1) {
       return Text(
         _selectedCapacityGroup?.title ?? InventoryStrings.tabUnnamedGroup,
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: onAppBarColor),
+        style: TextStyle(
+            fontSize: 16, fontWeight: FontWeight.bold, color: onAppBarColor),
       );
     }
 
@@ -191,7 +206,8 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
               children: [
                 Text(group.title ?? InventoryStrings.tabUnnamedGroup),
                 if (isSelected)
-                  Icon(Icons.check, color: Theme.of(context).colorScheme.primary),
+                  Icon(Icons.check,
+                      color: Theme.of(context).colorScheme.primary),
               ],
             ),
           );
@@ -205,12 +221,16 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
           children: [
             Text(
               _selectedCapacityGroup?.title ?? InventoryStrings.tabUnnamedGroup,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: onAppBarColor),
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                  color: onAppBarColor),
             ),
             const SizedBox(width: 8),
             Transform.scale(
               scaleY: 0.8,
-              child: Icon(Icons.unfold_more_rounded, size: 20, color: onAppBarColor.withOpacity(0.7)),
+              child: Icon(Icons.unfold_more_rounded,
+                  size: 20, color: onAppBarColor.withOpacity(0.7)),
             ),
           ],
         ),
@@ -237,11 +257,15 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
                 crossAxisSpacing: 16,
               ),
               delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                (context, index) {
                   final group = _bundle!.pools[index];
-                  final groupContexts = _bundle!.inventoryContexts.where((c) => c.inventoryPoolId == group.id).toList();
+                  final groupContexts = _bundle!.inventoryContexts
+                      .where((c) => c.inventoryPoolId == group.id)
+                      .toList();
                   final contextIds = groupContexts.map((c) => c.id).toSet();
-                  final groupSpots = _bundle!.spots.where((s) => contextIds.contains(s.inventoryContextId)).toList();
+                  final groupSpots = _bundle!.spots
+                      .where((s) => contextIds.contains(s.inventoryContextId))
+                      .toList();
 
                   return InventoryPoolCard(
                     pool: group,
@@ -279,7 +303,8 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(StylesConfig.commonRoundness),
+                  borderRadius:
+                      BorderRadius.circular(StylesConfig.commonRoundness),
                 ),
               ),
             ),
@@ -290,15 +315,15 @@ class _InventoryPoolsTabState extends State<InventoryPoolsTab> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _selectedCapacityGroup == null
-          ? _buildGroupsGrid()
-          : InventoryPoolDetailView(
-        key: ValueKey(_selectedCapacityGroup!.id),
-        poolId: _selectedCapacityGroup!.id!,
-        // MODIFIED: Use the "go home" function for actions that complete a flow, like deletion
-        onDeleteCompleted: _navigateHomeAndRefresh,
-        // MODIFIED: Use the new "stay here and refresh" function for data updates
-        onDataUpdated: _refreshDataForCurrentGroup,
-      ),
+              ? _buildGroupsGrid()
+              : InventoryPoolDetailView(
+                  key: ValueKey(_selectedCapacityGroup!.id),
+                  poolId: _selectedCapacityGroup!.id!,
+                  // MODIFIED: Use the "go home" function for actions that complete a flow, like deletion
+                  onDeleteCompleted: _navigateHomeAndRefresh,
+                  // MODIFIED: Use the new "stay here and refresh" function for data updates
+                  onDataUpdated: _refreshDataForCurrentGroup,
+                ),
     );
   }
 }

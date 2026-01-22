@@ -41,10 +41,12 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> loadSettings() async {
     bool isEnabled = await NotificationHelper.isNotificationOnOff();
     Locale currentLocale = context.locale;
-    LanguageModel? currentLanguage = AppConfig.availableLanguages().firstWhere((language) => language.locale.languageCode == currentLocale.languageCode);
+    LanguageModel? currentLanguage = AppConfig.availableLanguages().firstWhere(
+        (language) =>
+            language.locale.languageCode == currentLocale.languageCode);
     bool isAppInstalled = PlatformHelper.isPwaInstalledOrNative();
     var themeMode = await AdaptiveTheme.getThemeMode();
-    setState(()  {
+    setState(() {
       _themeMode = themeMode;
       _notificationsEnabled = isEnabled;
       _currentLanguage = currentLanguage;
@@ -64,7 +66,8 @@ class _SettingsPageState extends State<SettingsPage> {
     await loadSettings();
   }
 
-  bool get _canInstallPWA => !_isAppInstalled && _isPlatformSupported && _isPromptEnabled;
+  bool get _canInstallPWA =>
+      !_isAppInstalled && _isPlatformSupported && _isPromptEnabled;
 
   void _setThemeMode(AdaptiveThemeMode mode) {
     setState(() {
@@ -77,7 +80,9 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Settings", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
+        title: Text("Settings",
+                style: TextStyle(color: ThemeConfig.appBarColorNegative()))
+            .tr(),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrInitial(context),
           color: ThemeConfig.appBarColorNegative(),
@@ -93,13 +98,17 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (AppConfig.availableLanguages().length > 1) ...[
-                  const Text("Language Settings", style: TextStyle(fontSize: 20)).tr(),
+                  const Text("Language Settings",
+                          style: TextStyle(fontSize: 20))
+                      .tr(),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Current Language: {language}".tr(namedArgs: {"language":_currentLanguage?.name ?? '---'}),
+                        "Current Language: {language}".tr(namedArgs: {
+                          "language": _currentLanguage?.name ?? '---'
+                        }),
                         style: const TextStyle(fontSize: 16),
                       ),
                       IconButton(
@@ -114,18 +123,23 @@ class _SettingsPageState extends State<SettingsPage> {
                   const SizedBox(height: 24),
                 ],
                 if (AppConfig.isNotificationsCurrentlySupported()) ...[
-                  const Text("Notification Settings", style: TextStyle(fontSize: 20)).tr(),
+                  const Text("Notification Settings",
+                          style: TextStyle(fontSize: 20))
+                      .tr(),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Enable Notifications", style: TextStyle(fontSize: 16)).tr(),
+                      const Text("Enable Notifications",
+                              style: TextStyle(fontSize: 16))
+                          .tr(),
                       Switch(
                         value: _notificationsEnabled,
                         onChanged: (value) async {
                           bool success;
                           if (value) {
-                            success = await NotificationHelper.turnNotificationOn();
+                            success =
+                                await NotificationHelper.turnNotificationOn();
                           } else {
                             await NotificationHelper.turnNotificationOff();
                             success = true;
@@ -148,48 +162,50 @@ class _SettingsPageState extends State<SettingsPage> {
                         style: TextStyle(color: ThemeConfig.redColor(context)),
                         textAlign: TextAlign.center,
                       ).tr(),
-                    ),],
-                const SizedBox(height: 24),
-                if(ThemeConfig.isDarkModeEnabled)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Appearance", style: TextStyle(fontSize: 20)).tr(),
-                    const SizedBox(height: 16),
-                    ToggleButtons(
-                      isSelected: [
-                        _themeMode == AdaptiveThemeMode.dark,
-                        _themeMode == AdaptiveThemeMode.system,
-                        _themeMode == AdaptiveThemeMode.light,
-                      ],
-                      onPressed: (int index) {
-                        if (index == 0) {
-                          _setThemeMode(AdaptiveThemeMode.dark);
-                        } else if (index == 1) {
-                          _setThemeMode(AdaptiveThemeMode.system);
-                        } else if (index == 2) {
-                          _setThemeMode(AdaptiveThemeMode.light);
-                        }
-                      },
-                      borderRadius: BorderRadius.circular(8.0),
-                      children:  [
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12.0),
-                          child: const Text("Dark").tr(),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12.0),
-                          child: Text("Auto").tr(),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12.0),
-                          child: Text("Light").tr(),
-                        ),
-                      ],
                     ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+                ],
+                const SizedBox(height: 24),
+                if (ThemeConfig.isDarkModeEnabled)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Appearance", style: TextStyle(fontSize: 20))
+                          .tr(),
+                      const SizedBox(height: 16),
+                      ToggleButtons(
+                        isSelected: [
+                          _themeMode == AdaptiveThemeMode.dark,
+                          _themeMode == AdaptiveThemeMode.system,
+                          _themeMode == AdaptiveThemeMode.light,
+                        ],
+                        onPressed: (int index) {
+                          if (index == 0) {
+                            _setThemeMode(AdaptiveThemeMode.dark);
+                          } else if (index == 1) {
+                            _setThemeMode(AdaptiveThemeMode.system);
+                          } else if (index == 2) {
+                            _setThemeMode(AdaptiveThemeMode.light);
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(8.0),
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12.0),
+                            child: const Text("Dark").tr(),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Text("Auto").tr(),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Text("Light").tr(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
                 if (kIsWeb) // Only show if running on web
                   Center(
                     child: Column(
@@ -197,8 +213,11 @@ class _SettingsPageState extends State<SettingsPage> {
                         ButtonsHelper.bigButton(
                           context: context,
                           label: "Install App".tr(),
-                          onPressed: _canInstallPWA ? handleInstallButtonPress : null,
-                          color: _canInstallPWA ? ThemeConfig.blackColor(context) : Colors.grey,
+                          onPressed:
+                              _canInstallPWA ? handleInstallButtonPress : null,
+                          color: _canInstallPWA
+                              ? ThemeConfig.blackColor(context)
+                              : Colors.grey,
                           textColor: ThemeConfig.whiteColor(context),
                         ),
                         if (!_isPlatformSupported)
@@ -206,7 +225,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
                               "This platform or browser does not support the PWA install prompt or the app is already installed.",
-                              style: TextStyle(color: ThemeConfig.redColor(context)),
+                              style: TextStyle(
+                                  color: ThemeConfig.redColor(context)),
                               textAlign: TextAlign.center,
                             ).tr(),
                           ),
@@ -215,7 +235,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
                               "The app is already installed.",
-                              style: TextStyle(fontSize: 16, color: ThemeConfig.blackColor(context)),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: ThemeConfig.blackColor(context)),
                               textAlign: TextAlign.center,
                             ).tr(),
                           ),

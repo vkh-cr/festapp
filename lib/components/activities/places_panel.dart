@@ -9,20 +9,24 @@ class PlacesPanel extends StatelessWidget {
   final ActivityTimelineController controller;
 
   const PlacesPanel({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final normalizedFilter = Utilities.removeDiacritics(controller.placeFilter.toLowerCase());
+    final normalizedFilter =
+        Utilities.removeDiacritics(controller.placeFilter.toLowerCase());
     final filtered = controller.allPlaces
-        .where((p) => Utilities.removeDiacritics((p.title ?? "").toLowerCase()).contains(normalizedFilter))
+        .where((p) => Utilities.removeDiacritics((p.title ?? "").toLowerCase())
+            .contains(normalizedFilter))
         .toList();
     final hintColor = controller.hintColor;
     final textColor = controller.textColor;
-    final chipBgColor = controller.isDark ? Colors.blueGrey[700] : Colors.blueGrey[100];
-    final chipTextColor = controller.isDark ? Colors.white.withOpacity(0.9) : Colors.black87;
+    final chipBgColor =
+        controller.isDark ? Colors.blueGrey[700] : Colors.blueGrey[100];
+    final chipTextColor =
+        controller.isDark ? Colors.white.withOpacity(0.9) : Colors.black87;
 
     return Container(
       padding: const EdgeInsets.all(2),
@@ -41,7 +45,8 @@ class PlacesPanel extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 8, right: 4),
                 child: Icon(Icons.search, size: 14, color: hintColor),
               ),
-              prefixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+              prefixIconConstraints:
+                  const BoxConstraints(minWidth: 24, minHeight: 24),
               contentPadding: const EdgeInsets.symmetric(vertical: 6),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -66,7 +71,8 @@ class PlacesPanel extends StatelessWidget {
                     elevation: 3.0,
                     color: Colors.transparent,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
                         color: chipBgColor?.withOpacity(0.85),
                         borderRadius: BorderRadius.circular(14),
@@ -79,7 +85,9 @@ class PlacesPanel extends StatelessWidget {
                   ),
                   child: Chip(
                     backgroundColor: chipBgColor,
-                    label: Text(p.title ?? ActivitiesComponentStrings.textUnnamedPlace, style: TextStyle(fontSize: 11, color: chipTextColor)),
+                    label: Text(
+                        p.title ?? ActivitiesComponentStrings.textUnnamedPlace,
+                        style: TextStyle(fontSize: 11, color: chipTextColor)),
                     padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),

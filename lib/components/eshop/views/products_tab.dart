@@ -30,9 +30,9 @@ class _ProductsTabState extends State<ProductsTab> {
     EshopColumns.PRODUCT_ID,
     EshopColumns.PRODUCT_TYPE,
     EshopColumns.PRODUCT_TITLE,
-    if(FeatureService.isFeatureEnabled(FeatureConstants.ticket))
+    if (FeatureService.isFeatureEnabled(FeatureConstants.ticket))
       EshopColumns.PRODUCT_SHORT_TITLE,
-    if(FeatureService.isFeatureEnabled(FeatureConstants.services))
+    if (FeatureService.isFeatureEnabled(FeatureConstants.services))
       EshopColumns.PRODUCT_INCLUDED_INVENTORY,
     EshopColumns.PRODUCT_DESCRIPTION,
     EshopColumns.PRODUCT_IS_HIDDEN,
@@ -49,7 +49,8 @@ class _ProductsTabState extends State<ProductsTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newOccasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
+    final newOccasionLink =
+        context.routeData.params.getString(AppRouter.linkFormatted);
     // Initialize only once when the link is available
     if (_occasionLink == null) {
       _occasionLink = newOccasionLink;
@@ -67,13 +68,15 @@ class _ProductsTabState extends State<ProductsTab> {
       return;
     }
 
-    final initialBundle = await DbEshop.getProductsAndTypesForOccasion(_occasionLink!);
+    final initialBundle =
+        await DbEshop.getProductsAndTypesForOccasion(_occasionLink!);
     if (!mounted) return;
 
     final newController = SingleDataGridController<ProductModel>(
       context: context,
       loadData: () async {
-        final newBundle = await DbEshop.getProductsAndTypesForOccasion(_occasionLink!);
+        final newBundle =
+            await DbEshop.getProductsAndTypesForOccasion(_occasionLink!);
         return newBundle.products;
       },
       fromPlutoJson: ProductModel.fromPlutoJson,
@@ -89,7 +92,8 @@ class _ProductsTabState extends State<ProductsTab> {
         data: {
           EshopColumns.PRODUCT_DESCRIPTION: RightsService.currentOccasionId(),
           // Use the dependencies from the initial fetch
-          EshopColumns.PRODUCT_INCLUDED_INVENTORY: initialBundle.inventoryContexts,
+          EshopColumns.PRODUCT_INCLUDED_INVENTORY:
+              initialBundle.inventoryContexts,
           EshopColumns.PRODUCT_USED_IN_FORMS: initialBundle.forms,
         },
       ),

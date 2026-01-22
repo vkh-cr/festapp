@@ -5,6 +5,8 @@
 -- 3. get_app_config_v217 with fixed unit switching logic
 -- 4. Fix for duplicate create_user_from_registration function
 
+DROP FUNCTION IF EXISTS create_user_from_registration(bigint, text, text, jsonb, text);
+
 -- 1. create_user_from_registration with localized default
 CREATE OR REPLACE FUNCTION create_user_from_registration(
     org bigint, 
@@ -66,6 +68,7 @@ $$;
 DROP FUNCTION IF EXISTS create_user_from_registration(bigint, text, text, jsonb);
 
 -- 2. create_unit_and_assign_manager (Manual Creation)
+DROP FUNCTION IF EXISTS create_unit_and_assign_manager(text);
 CREATE OR REPLACE FUNCTION create_unit_and_assign_manager(
   title text
 ) RETURNS jsonb
@@ -132,6 +135,8 @@ $$ LANGUAGE plpgsql;
 
 -- 3. Organization Admin RPCs
 
+DROP FUNCTION IF EXISTS check_is_admin_of_organization(bigint);
+
 CREATE OR REPLACE FUNCTION check_is_admin_of_organization(organization_id bigint)
 RETURNS boolean
 LANGUAGE plpgsql
@@ -149,6 +154,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS get_organization_admin(bigint);
 CREATE OR REPLACE FUNCTION get_organization_admin(organization_id bigint)
 RETURNS SETOF organizations
 LANGUAGE plpgsql
@@ -173,6 +179,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS update_organization_admin(bigint, text, jsonb);
 CREATE OR REPLACE FUNCTION update_organization_admin(
   organization_id bigint,
   title text,
@@ -207,6 +214,8 @@ END;
 $$;
 
 -- 4. get_app_config_v217 (FIXED logic)
+
+DROP FUNCTION IF EXISTS get_app_config_v217(jsonb);
 
 CREATE OR REPLACE FUNCTION get_app_config_v217(
     data_in jsonb

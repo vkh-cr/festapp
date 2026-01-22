@@ -7,13 +7,15 @@ DO $$ BEGIN RAISE NOTICE 'Running v2 FINAL CHECK (Fixes Applied)'; END $$;
 
 -- 1. Create Organization
 INSERT INTO public.organizations (id, title, data)
-VALUES (999, 'Test Organization', '{"IS_UNIT_CREATION_ENABLED": true, "DEFAULT_OCCASION": 9991, "REPRESENTATIVE_OCCASION": 9992, "IS_APP_SUPPORTED": false}'::jsonb);
+VALUES (999, 'Test Organization', '{"IS_UNIT_CREATION_ENABLED": true, "DEFAULT_OCCASION": 9991, "REPRESENTATIVE_OCCASION": 9992, "IS_APP_SUPPORTED": false}'::jsonb)
+ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data;
 
 -- 2. Create Units
 INSERT INTO public.units (id, title, organization, data)
 VALUES 
     (8881, 'Test Unit 1', 999, '{}'::jsonb),
-    (8882, 'Test Unit 2', 999, '{}'::jsonb);
+    (8882, 'Test Unit 2', 999, '{}'::jsonb)
+ON CONFLICT (id) DO NOTHING;
 
 -- 3. Create Occasions
 INSERT INTO public.occasions (id, title, link, organization, unit, is_open, start_time, end_time)
@@ -21,11 +23,13 @@ VALUES
     (9991, 'Default Occasion', 'default_occ', 999, 8881, true, now(), now() + interval '1 day'),
     (9992, 'Representative Occasion', 'rep_occ', 999, 8881, true, now(), now() + interval '1 day'),
     (9993, 'Specific Occasion', 'specific_occ', 999, 8882, true, now(), now() + interval '1 day'),
-    (9994, 'Closed Occasion', 'closed_occ', 999, 8881, false, now(), now() + interval '1 day');
+    (9994, 'Closed Occasion', 'closed_occ', 999, 8881, false, now(), now() + interval '1 day')
+ON CONFLICT (id) DO UPDATE SET link = EXCLUDED.link;
 
 -- 4. Create Form linked to Specific Occasion
 INSERT INTO public.forms (id, title, occasion, link, is_open)
-VALUES (7771, 'Test Form', 9993, 'test_form_link', true);
+VALUES (7771, 'Test Form', 9993, 'test_form_link', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- 5. Create Test Users
 SELECT create_user_for_test('testuser', 'testuser@example.com');

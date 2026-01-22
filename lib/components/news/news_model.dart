@@ -19,22 +19,22 @@ class NewsModel {
     required this.views,
   });
 
-  Map toJson() =>
-  {
-    Tb.news.id: id,
-    Tb.news.created_at: createdAt?.toIso8601String(),
-    Tb.news.created_by: createdBy,
-    viewsColumn: views,
-    Tb.news.message: message,
-  };
+  Map toJson() => {
+        Tb.news.id: id,
+        Tb.news.created_at: createdAt?.toIso8601String(),
+        Tb.news.created_by: createdBy,
+        viewsColumn: views,
+        Tb.news.message: message,
+      };
 
   factory NewsModel.fromJson(Map<String, dynamic> json) {
     return NewsModel(
-      id: json[Tb.news.id],
-      createdAt: json.containsKey(Tb.news.created_at) ? DateTime.parse(json[Tb.news.created_at]) : null,
-      message: json[Tb.news.message],
-      createdBy: json[Tb.user_info.name],
-      views: json[NewsModel.viewsColumn]
-    );
+        id: json[Tb.news.id],
+        createdAt: json.containsKey(Tb.news.created_at)
+            ? DateTime.parse(json[Tb.news.created_at])
+            : null,
+        message: json[Tb.news.message],
+        createdBy: json[Tb.user_info.name],
+        views: json[NewsModel.viewsColumn]);
   }
 }

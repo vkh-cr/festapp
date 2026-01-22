@@ -15,10 +15,8 @@ import '../map/place_model.dart';
 
 class AddNewEventDialog {
   static Future<void> showAddEventDialog(
-      BuildContext context,
-      List<TimeBlockGroup> timelineItems,
-      [TimeBlockItem? parentEvent]
-      ) async {
+      BuildContext context, List<TimeBlockGroup> timelineItems,
+      [TimeBlockItem? parentEvent]) async {
     final formKey = GlobalKey<FormState>();
     String? title;
     DateTime? startDate;
@@ -31,8 +29,10 @@ class AddNewEventDialog {
     bool isFormValid = false;
     bool hasTitleBeenEdited = false;
 
-    minDate = SynchroService.globalSettingsModel!.eventStartTime!.add(Duration(days: -eventDayRangeTolerance));
-    maxDate = SynchroService.globalSettingsModel!.eventEndTime!.add(Duration(days: eventDayRangeTolerance));
+    minDate = SynchroService.globalSettingsModel!.eventStartTime!
+        .add(Duration(days: -eventDayRangeTolerance));
+    maxDate = SynchroService.globalSettingsModel!.eventEndTime!
+        .add(Duration(days: eventDayRangeTolerance));
 
     // Determine default values
     final lastEventGroup = timelineItems.isNotEmpty ? timelineItems.last : null;
@@ -40,8 +40,11 @@ class AddNewEventDialog {
         .sorted((a, b) => a.startTime.compareTo(b.startTime))
         .lastOrNull;
 
-    final defaultStartTime = parentEvent?.startTime ?? lastEvent?.endTime ?? SynchroService.globalSettingsModel!.eventStartTime!;
-    final defaultEndTime = parentEvent?.endTime ?? defaultStartTime.add(Duration(hours: 1));
+    final defaultStartTime = parentEvent?.startTime ??
+        lastEvent?.endTime ??
+        SynchroService.globalSettingsModel!.eventStartTime!;
+    final defaultEndTime =
+        parentEvent?.endTime ?? defaultStartTime.add(Duration(hours: 1));
     final defaultPlaceId = lastEvent?.timeBlockPlace?.id;
 
     // Initialize defaults
@@ -80,7 +83,8 @@ class AddNewEventDialog {
                           decoration: InputDecoration(
                             labelText: CommonStrings.title,
                             labelStyle: TextStyle(
-                              color: (hasTitleBeenEdited && (title == null || title!.trim().isEmpty))
+                              color: (hasTitleBeenEdited &&
+                                      (title == null || title!.trim().isEmpty))
                                   ? ThemeConfig.redColor(context)
                                   : null,
                             ),
@@ -117,7 +121,8 @@ class AddNewEventDialog {
                         const SizedBox(height: 16),
                         // Place selection
                         DropdownButtonFormField<PlaceModel?>(
-                          value: places?.firstWhereOrNull((p) => p.id == placeId),
+                          initialValue:
+                              places?.firstWhereOrNull((p) => p.id == placeId),
                           items: [
                             DropdownMenuItem<PlaceModel?>(
                               value: null,
@@ -151,25 +156,26 @@ class AddNewEventDialog {
                     ElevatedButton(
                       onPressed: isFormValid
                           ? () async {
-                        if (formKey.currentState!.validate()) {
-                          formKey.currentState!.save();
-                          final newEvent = EventModel(
-                            title: title,
-                            place: places?.firstWhereOrNull(
-                                    (place) => place.id == placeId),
-                            startTime: startDate!,
-                            endTime: endDate!,
-                            isHidden: false,
-                            splitForMenWomen: false,
-                            isSignedIn: false,
-                            isGroupEvent: false,
-                            parentEventIds:
-                            parentEvent != null ? [parentEvent.id] : null,
-                          );
-                          await DbEvents.updateEvent(newEvent);
-                          Navigator.of(context).pop();
-                        }
-                      }
+                              if (formKey.currentState!.validate()) {
+                                formKey.currentState!.save();
+                                final newEvent = EventModel(
+                                  title: title,
+                                  place: places?.firstWhereOrNull(
+                                      (place) => place.id == placeId),
+                                  startTime: startDate!,
+                                  endTime: endDate!,
+                                  isHidden: false,
+                                  splitForMenWomen: false,
+                                  isSignedIn: false,
+                                  isGroupEvent: false,
+                                  parentEventIds: parentEvent != null
+                                      ? [parentEvent.id]
+                                      : null,
+                                );
+                                await DbEvents.updateEvent(newEvent);
+                                Navigator.of(context).pop();
+                              }
+                            }
                           : null,
                       child: Text("Add").tr(),
                     ),

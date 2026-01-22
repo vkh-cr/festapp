@@ -52,7 +52,9 @@ class FormFieldModel extends ITrinaRowModel {
     var type = json[Tb.form_fields.type];
     var data = json[Tb.form_fields.data];
     List<FormOptionModel> options = [];
-    if ((type == FormHelper.fieldTypeSelectOne || type == FormHelper.fieldTypeSelectMany) && data is Map) {
+    if ((type == FormHelper.fieldTypeSelectOne ||
+            type == FormHelper.fieldTypeSelectMany) &&
+        data is Map) {
       options = data[FormHelper.metaOptions].map<FormOptionModel>((e) {
         return FormOptionModel.fromJson(e);
       }).toList();
@@ -75,8 +77,7 @@ class FormFieldModel extends ITrinaRowModel {
         productType: json[Tb.form_fields.product_type_data] != null
             ? ProductTypeModel.fromJson(json[Tb.form_fields.product_type_data])
             : null,
-        options: options
-    );
+        options: options);
   }
 
   Map<String, dynamic> toJson() {
@@ -85,7 +86,8 @@ class FormFieldModel extends ITrinaRowModel {
     if (options.isNotEmpty) {
       jsonData[FormHelper.metaOptions] = options.map((option) {
         final optionData = {FormOptionModel.metaValue: option.title};
-        if (option.description != null && option.description!.trim().isNotEmpty) {
+        if (option.description != null &&
+            option.description!.trim().isNotEmpty) {
           optionData[FormOptionModel.metaDescription] = option.description!;
         }
         return optionData;
@@ -119,7 +121,8 @@ class FormFieldModel extends ITrinaRowModel {
       Tb.form_fields.type: TrinaCell(value: type ?? ""),
       metaRequired: TrinaCell(value: isRequired.toString()),
       metaHidden: TrinaCell(value: isHidden.toString()),
-      Tb.form_fields.is_ticket_field: TrinaCell(value: isTicketField.toString()),
+      Tb.form_fields.is_ticket_field:
+          TrinaCell(value: isTicketField.toString()),
       Tb.form_fields.order: TrinaCell(value: order ?? 0),
     });
   }
@@ -133,12 +136,10 @@ class FormFieldModel extends ITrinaRowModel {
   }
 
   @override
-  Future<void> deleteMethod(BuildContext context) async {
-  }
+  Future<void> deleteMethod(BuildContext context) async {}
 
   @override
-  Future<void> updateMethod(BuildContext context) async {
-  }
+  Future<void> updateMethod(BuildContext context) async {}
 
   @override
   String toBasicString() => title ?? id.toString();

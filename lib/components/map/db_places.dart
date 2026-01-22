@@ -18,7 +18,7 @@ class DbPlaces {
         .eq(Tb.places.is_hidden, false)
         .eq(Tb.places.occasion, RightsService.currentOccasionId()!);
     var toReturn =
-    List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+        List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces();
     return toReturn;
   }
@@ -29,7 +29,7 @@ class DbPlaces {
         .select()
         .eq(Tb.places.occasion, RightsService.currentOccasionId()!);
     var toReturn =
-    List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+        List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces();
     return toReturn;
   }
@@ -40,7 +40,7 @@ class DbPlaces {
         .select()
         .inFilter(Tb.places.id, ids);
     var toReturn =
-    List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+        List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces();
     return toReturn;
   }
@@ -91,8 +91,7 @@ class DbPlaces {
     return PlaceModel.fromJson(data);
   }
 
-  static Future<void> saveLocation(
-      int placeId, double lat, double lng) async {
+  static Future<void> saveLocation(int placeId, double lat, double lng) async {
     if (!(RightsService.isEditor() ||
         (RightsService.isGroupAdmin() &&
             RightsService.currentUserGroup()!.place!.id == placeId))) {
@@ -109,18 +108,16 @@ class DbPlaces {
   static Future<List<PathGroupsModel>> getAllPathGroups() async {
     final data = await _supabase
         .from(Tb.path_groups.table)
-        .select(
-        '${Tb.path_groups.id},'
+        .select('${Tb.path_groups.id},'
             '${Tb.path_groups.title},'
             '${Tb.path_groups.order},'
             '${Tb.path_groups.is_hidden},'
             '${Tb.path_groups.data},'
             '${Tb.path_groups.path_data},'
-            '${Tb.path_groups.icon}'
-    )
+            '${Tb.path_groups.icon}')
         .eq(Tb.path_groups.occasion, RightsService.currentOccasionId()!);
 
-    var toReturn =  (data as List<dynamic>)
+    var toReturn = (data as List<dynamic>)
         .map((x) => PathGroupsModel.fromJson(x as Map<String, dynamic>))
         .toList();
     toReturn.sortPathGroups();
@@ -132,9 +129,9 @@ class DbPlaces {
   static Future<void> updatePathGroup(PathGroupsModel model) async {
     // build our upsert object
     final upsertObj = <String, dynamic>{
-      Tb.path_groups.title:    model.title,
-      Tb.path_groups.order:     model.order,
-      Tb.path_groups.data:     model.data,
+      Tb.path_groups.title: model.title,
+      Tb.path_groups.order: model.order,
+      Tb.path_groups.data: model.data,
       Tb.path_groups.is_hidden: model.isHidden,
       Tb.path_groups.path_data: model.pathData,
       Tb.path_groups.icon: model.icon,
@@ -162,8 +159,8 @@ class DbPlaces {
 
     // refresh local model if needed
     final updated = PathGroupsModel.fromJson(pgData as Map<String, dynamic>);
-    model.id       = updated.id;
-    model.data     = updated.data;
+    model.id = updated.id;
+    model.data = updated.data;
     model.pathData = updated.pathData;
     // (and any other fields you want to keep in sync)
   }

@@ -27,9 +27,7 @@ class InventoryPoolsListBundle {
       inventoryContexts: (json['inventory_contexts'] as List)
           .map((c) => InventoryContextModel.fromJson(c))
           .toList(),
-      spots: (json['spots'] as List)
-          .map((s) => SpotModel.fromJson(s))
-          .toList(),
+      spots: (json['spots'] as List).map((s) => SpotModel.fromJson(s)).toList(),
     );
   }
 }

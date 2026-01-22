@@ -13,7 +13,8 @@ class FormOptionModel {
   String? description;
   final String id;
 
-  FormOptionModel(this.id, this.title, {this.type = FormHelper.fieldTypeSelectOne, this.description});
+  FormOptionModel(this.id, this.title,
+      {this.type = FormHelper.fieldTypeSelectOne, this.description});
 
   @override
   String toString() => title;
@@ -21,21 +22,20 @@ class FormOptionModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is FormOptionModel &&
-              runtimeType == other.runtimeType &&
-              id == other.id;
+      other is FormOptionModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
 
   @override
   int get hashCode => id.hashCode;
 
   factory FormOptionModel.fromJson(Map<String, dynamic> json) {
-    return FormOptionModel(
-      json[metaValue]!, json[metaValue]!, description: json[metaDescription]
-    );
+    return FormOptionModel(json[metaValue]!, json[metaValue]!,
+        description: json[metaDescription]);
   }
 
   dynamic toJson() {
-    if(type == FormHelper.fieldTypeSelectOne){
+    if (type == FormHelper.fieldTypeSelectOne) {
       return title;
     }
     return id;

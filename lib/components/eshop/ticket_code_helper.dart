@@ -16,18 +16,15 @@ class TicketCodeHelper {
     return String.fromCharCodes(
       Iterable.generate(
         length,
-            (_) => chars.codeUnitAt(rnd.nextInt(chars.length)),
+        (_) => chars.codeUnitAt(rnd.nextInt(chars.length)),
       ),
     );
   }
 
   static Future<bool> showScanTicketCode(
-      BuildContext context,
-      String titleMessage,
-      String formLink) async {
-
+      BuildContext context, String titleMessage, String formLink) async {
     String? getCode = await DbTickets.getScanCode(formLink);
-    if(getCode == null){
+    if (getCode == null) {
       getCode = generateRandomCode(5);
       await DbTickets.updateScanCode(formLink, getCode);
     }
@@ -48,15 +45,16 @@ class TicketCodeHelper {
               bool confirm = await DialogHelper.showConfirmationDialog(
                   context,
                   titleMessage,
-                  "By generating a new code, the old one will be replaced and will no longer work.".tr()
-              );
+                  "By generating a new code, the old one will be replaced and will no longer work."
+                      .tr());
               if (confirm) {
                 String newCode = generateRandomCode(5);
                 await DbTickets.updateScanCode(formLink, newCode);
                 setState(() {
                   generatedCode = newCode;
                   fullLink = "$linkBase$newCode";
-                  htmlLink = '<a href="$fullLink">$fullLink</a>'; // Update htmlLink
+                  htmlLink =
+                      '<a href="$fullLink">$fullLink</a>'; // Update htmlLink
                 });
               }
             }
@@ -100,7 +98,8 @@ class TicketCodeHelper {
                         children: [
                           Expanded(
                             child: HtmlView(
-                              html: htmlLink, // Use htmlLink instead of fullLink
+                              html:
+                                  htmlLink, // Use htmlLink instead of fullLink
                               fontSize: 14,
                               isSelectable: true,
                             ),
@@ -108,9 +107,8 @@ class TicketCodeHelper {
                           IconButton(
                             icon: Icon(Icons.copy),
                             tooltip: 'Copy Link'.tr(),
-                            onPressed: fullLink.isNotEmpty
-                                ? handleCopyLink
-                                : null,
+                            onPressed:
+                                fullLink.isNotEmpty ? handleCopyLink : null,
                           ),
                         ],
                       ),
@@ -119,9 +117,7 @@ class TicketCodeHelper {
                         children: [
                           Expanded(
                             child: SelectableText(
-                              generatedCode.isNotEmpty
-                                  ? generatedCode
-                                  : '',
+                              generatedCode.isNotEmpty ? generatedCode : '',
                               style: TextStyle(fontSize: 16),
                             ),
                           ),

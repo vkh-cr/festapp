@@ -45,11 +45,11 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   void _showFullScreenDialog(
-      BuildContext context,
-      String name,
-      String eventName,
-      String id,
-      ) {
+    BuildContext context,
+    String name,
+    String eventName,
+    String id,
+  ) {
     final ScreenshotController screenshotController = ScreenshotController();
 
     showDialog(
@@ -72,7 +72,8 @@ class _UserPageState extends State<UserPage> {
                 padding: const EdgeInsets.all(6.0),
                 child: IconButton(
                   onPressed: () async {
-                    final Uint8List? captured = await screenshotController.capture();
+                    final Uint8List? captured =
+                        await screenshotController.capture();
                     if (captured == null) return;
                     await FileSaver.instance.saveFile(
                       name: name,
@@ -106,7 +107,8 @@ class _UserPageState extends State<UserPage> {
                       "[$eventName]",
                       style: const TextStyle(
                           color: Colors.black,
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
                     QrImageView(
@@ -140,7 +142,10 @@ class _UserPageState extends State<UserPage> {
   Widget build(BuildContext context) {
     List<Widget> actions = [
       IconButton(
-        icon: Icon(Icons.settings, color: ThemeConfig.appBarColorNegative(),),
+        icon: Icon(
+          Icons.settings,
+          color: ThemeConfig.appBarColorNegative(),
+        ),
         onPressed: () => RouterService.navigate(context, SettingsPage.ROUTE),
       ),
     ];
@@ -148,7 +153,9 @@ class _UserPageState extends State<UserPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Profile", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
+        title: Text("Profile",
+                style: TextStyle(color: ThemeConfig.appBarColorNegative()))
+            .tr(),
         leading: BackButton(
           color: ThemeConfig.appBarColorNegative(),
           onPressed: () => RouterService.popOrHome(context),
@@ -163,7 +170,6 @@ class _UserPageState extends State<UserPage> {
             child: Column(
               children: <Widget>[
                 const SizedBox(height: 15),
-
                 if (FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -171,7 +177,8 @@ class _UserPageState extends State<UserPage> {
                       context: context,
                       onPressed: () => _showFullScreenDialog(
                         context,
-                        userData?.occasionUser!.data![Tb.occasion_users.data_name],
+                        userData
+                            ?.occasionUser!.data![Tb.occasion_users.data_name],
                         AppConfig.appName,
                         userData?.occasionUser!.user ?? "",
                       ),
@@ -179,14 +186,15 @@ class _UserPageState extends State<UserPage> {
                       label: "Show my code".tr(),
                     ),
                   ),
-
-                if (FeatureService.isFeatureEnabled(FeatureConstants.companions) &&
+                if (FeatureService.isFeatureEnabled(
+                        FeatureConstants.companions) &&
                     (userData?.companions?.isNotEmpty ?? false))
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(color: Theme.of(context).dividerColor),
+                        bottom:
+                            BorderSide(color: Theme.of(context).dividerColor),
                       ),
                     ),
                     child: ListView.builder(
@@ -222,16 +230,21 @@ class _UserPageState extends State<UserPage> {
                                     companion!.name,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).colorScheme.onSurface,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
                                     ),
                                   ),
                                   subtitle: Text(
-                                    "Signed in events: {count}"
-                                        .tr(namedArgs: {
-                                      "count": companion.schedule?.length.toString() ?? "0"
+                                    "Signed in events: {count}".tr(namedArgs: {
+                                      "count": companion.schedule?.length
+                                              .toString() ??
+                                          "0"
                                     }),
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onSurface,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
                                       fontSize: 13,
                                     ),
                                   ),
@@ -246,7 +259,8 @@ class _UserPageState extends State<UserPage> {
                                     icon: Icons.qr_code,
                                     label: "Show Code".tr(),
                                   ),
-                                  expandedCrossAxisAlignment: CrossAxisAlignment.center,
+                                  expandedCrossAxisAlignment:
+                                      CrossAxisAlignment.center,
                                   children: [
                                     const SizedBox(height: 36),
                                     ConstrainedBox(
@@ -254,7 +268,8 @@ class _UserPageState extends State<UserPage> {
                                         maxWidth: 600,
                                       ),
                                       child: ScheduleTimeline(
-                                        eventGroups: TimeBlockHelper.splitTimeBlocksByDay(
+                                        eventGroups: TimeBlockHelper
+                                            .splitTimeBlocksByDay(
                                           companion.timeBlocks,
                                           context,
                                         ),
@@ -270,7 +285,8 @@ class _UserPageState extends State<UserPage> {
                                           child: Text(
                                             "Companion's events will appear here.",
                                             style: TextStyle(
-                                              color: ThemeConfig.grey600(context),
+                                              color:
+                                                  ThemeConfig.grey600(context),
                                             ),
                                           ).tr(),
                                         ),
@@ -278,20 +294,22 @@ class _UserPageState extends State<UserPage> {
                                     ),
                                     const SizedBox(height: 48),
                                     Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         TextButton(
                                           onPressed: () async {
-                                            var answer =
-                                            await DialogHelper.showConfirmationDialog(
-                                                context,
-                                                "Delete companion".tr(),
-                                                "By deleting your companion you will also sign him/her out of all signed in sessions."
-                                                    .tr());
+                                            var answer = await DialogHelper
+                                                .showConfirmationDialog(
+                                                    context,
+                                                    "Delete companion".tr(),
+                                                    "By deleting your companion you will also sign him/her out of all signed in sessions."
+                                                        .tr());
                                             if (!answer) {
                                               return;
                                             }
-                                            await DbCompanions.delete(companion);
+                                            await DbCompanions.delete(
+                                                companion);
                                             await loadData();
                                           },
                                           child: Text("Delete companion").tr(),
@@ -307,17 +325,27 @@ class _UserPageState extends State<UserPage> {
                       },
                     ),
                   ),
-
                 const SizedBox(height: 15),
-                buildTextField(CommonStrings.name,
-                    userData?.occasionUser?.data![Tb.occasion_users.data_name] ?? ""),
-                buildTextField("Surname".tr(),
-                    userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
-                buildTextField("E-mail".tr(),
-                    userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
-                buildTextField("I am".tr(),
-                    UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
-                if(FeatureService.isFeatureEnabled(FeatureConstants.services))
+                buildTextField(
+                    CommonStrings.name,
+                    userData?.occasionUser
+                            ?.data![Tb.occasion_users.data_name] ??
+                        ""),
+                buildTextField(
+                    "Surname".tr(),
+                    userData?.occasionUser
+                            ?.data![Tb.occasion_users.data_surname] ??
+                        ""),
+                buildTextField(
+                    "E-mail".tr(),
+                    userData?.occasionUser
+                            ?.data![Tb.occasion_users.data_email] ??
+                        ""),
+                buildTextField(
+                    "I am".tr(),
+                    UserInfoModel.sexToLocale(userData
+                        ?.occasionUser?.data![Tb.occasion_users.data_sex])),
+                if (FeatureService.isFeatureEnabled(FeatureConstants.services))
                   Padding(
                     padding: const EdgeInsets.all(12),
                     child: Column(
@@ -356,17 +384,23 @@ class _UserPageState extends State<UserPage> {
                         // ),
                         // const SizedBox(height: 16),
                         ListTile(
-                          tileColor: ThemeConfig.qrButtonColor(context), // Added this line
-                          leading: Icon(Icons.hotel, color: Theme.of(context).colorScheme.primary),
-                          title: Text(InventoryStrings.userStayLinkTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          tileColor: ThemeConfig.qrButtonColor(
+                              context), // Added this line
+                          leading: Icon(Icons.hotel,
+                              color: Theme.of(context).colorScheme.primary),
+                          title: Text(InventoryStrings.userStayLinkTitle,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text(InventoryStrings.userStayLinkSubtitle),
-                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                          trailing:
+                              const Icon(Icons.arrow_forward_ios, size: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             // The side border has been removed to allow the background color to fill the shape fully without a separate outline.
                             // If you still want a border, you can keep the 'side' property.
                           ),
-                          onTap: () => RouterService.navigateOccasion(context, UserStayPage.ROUTE),
+                          onTap: () => RouterService.navigateOccasion(
+                              context, UserStayPage.ROUTE),
                         ),
                       ],
                     ),
@@ -401,16 +435,19 @@ class _UserPageState extends State<UserPage> {
                         confirmButtonMessage: CommonStrings.proceed,
                       );
                       if (answer) {
-                        await AuthService
-                            .resetPasswordForEmail(userData!.occasionUser!.data![Tb.occasion_users.data_email])
+                        await AuthService.resetPasswordForEmail(userData!
+                                .occasionUser!
+                                .data![Tb.occasion_users.data_email])
                             .then((value) {
-                          ToastHelper.Show(context, UserStrings.passwordResetSent);
+                          ToastHelper.Show(
+                              context, UserStrings.passwordResetSent);
                           DialogHelper.showInformationDialog(
                             context,
                             "Change Password Instructions".tr(),
                             "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
                                 .tr(namedArgs: {
-                              "email": userData!.occasionUser!.data![Tb.occasion_users.data_email]
+                              "email": userData!.occasionUser!
+                                  .data![Tb.occasion_users.data_email]
                             }),
                           );
                         });
@@ -418,7 +455,8 @@ class _UserPageState extends State<UserPage> {
                     },
                     child: Text(
                       "Change password".tr(),
-                      style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
+                      style: TextStyle(
+                          fontSize: StylesConfig.normalClickableFontSize),
                     ).tr(),
                   ),
                 ),
@@ -434,7 +472,8 @@ class _UserPageState extends State<UserPage> {
                     ),
                     child: Text(
                       "Delete account".tr(),
-                      style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
+                      style: TextStyle(
+                          fontSize: StylesConfig.normalClickableFontSize),
                     ).tr(),
                   ),
                 )
@@ -482,7 +521,8 @@ class _UserPageState extends State<UserPage> {
   }
 
   void _redirectToAdminPage() {
-    RouterService.navigateOccasion(context, AdminPage.ROUTE).then((value) => loadData());
+    RouterService.navigateOccasion(context, AdminPage.ROUTE)
+        .then((value) => loadData());
   }
 
   Future<void> loadData() async {
@@ -505,14 +545,16 @@ class _UserPageState extends State<UserPage> {
 
   Future<void> addOfflineEventsToCompanions(UserInfoModel? userInfo) async {
     var events = await OfflineDataService.getAllEvents();
-    userInfo?.companions?.forEach(
-            (c) {
-          for (var ei in c.eventIds) {
-            var match = events.firstWhereOrNull((e) => e.id == ei);
-            if (match != null) {c.schedule!.add(match);}
-          }
-          c.timeBlocks.addAll(c.schedule!.map((e) => TimeBlockItem.forCompanion(e)));
-        });
+    userInfo?.companions?.forEach((c) {
+      for (var ei in c.eventIds) {
+        var match = events.firstWhereOrNull((e) => e.id == ei);
+        if (match != null) {
+          c.schedule!.add(match);
+        }
+      }
+      c.timeBlocks
+          .addAll(c.schedule!.map((e) => TimeBlockItem.forCompanion(e)));
+    });
   }
 }
 

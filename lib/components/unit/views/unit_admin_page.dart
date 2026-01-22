@@ -90,23 +90,26 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
     if (_currentUnit != null) {
       // If we are already on a screen, keep it, otherwise default to Occasions
       if (_currentMenu.isEmpty) {
-        _setCurrentScreen(OccasionsScreen(unit: _currentUnit!, initialOccasions: _occasions), "Occasions");
+        _setCurrentScreen(
+            OccasionsScreen(unit: _currentUnit!, initialOccasions: _occasions),
+            "Occasions");
       } else {
         // Refresh the current screen if needed, or just let the user stay where they are.
         // For Settings, we might want to re-inject the updated unit.
         if (_currentMenu == "Settings") {
           _setCurrentScreen(
               UnitSettingsScreen(
-                  unit: _currentUnit!,
-                  onUnitUpdated: _handleUnitUpdate
-              ),
-              "Settings"
-          );
+                  unit: _currentUnit!, onUnitUpdated: _handleUnitUpdate),
+              "Settings");
         } else if (_currentMenu == "Occasions") {
-             // Refresh occasions screen with new data if we are forcing reload
-             _setCurrentScreen(OccasionsScreen(unit: _currentUnit!, initialOccasions: _occasions), "Occasions");
+          // Refresh occasions screen with new data if we are forcing reload
+          _setCurrentScreen(
+              OccasionsScreen(
+                  unit: _currentUnit!, initialOccasions: _occasions),
+              "Occasions");
         } else if (_currentMenu == "EmailTemplates") {
-          _setCurrentScreen(EmailTemplatesTab(unitId: _currentUnit!.id!), "EmailTemplates");
+          _setCurrentScreen(
+              EmailTemplatesTab(unitId: _currentUnit!.id!), "EmailTemplates");
         }
       }
     } else if (mounted) {
@@ -126,8 +129,7 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
       children: [
         SafeArea(
           bottom: false,
-          child: RedStripWidget(
-          ),
+          child: RedStripWidget(),
         ),
         Expanded(
           child: Scaffold(
@@ -143,28 +145,29 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
                         // Conditionally apply the width constraint ONLY for the "Occasions" screen.
                         child: (_currentMenu == "Occasions")
                             ? Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                                maxWidth: UnitAdminPage.contentMaxWidth),
-                            child: _currentScreen,
-                          ),
-                        )
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                      maxWidth: UnitAdminPage.contentMaxWidth),
+                                  child: _currentScreen,
+                                ),
+                              )
                             : _currentScreen, // Other screens take the full available width.
                       ),
                     ],
                   ),
-                    SideMenu(
-                      onMenuItemSelected: _setCurrentScreen,
-                      unit: _currentUnit,
-                      currentMenu: _currentMenu,
-                      onUnitUpdated: _handleUnitUpdate,
-                    ),
+                  SideMenu(
+                    onMenuItemSelected: _setCurrentScreen,
+                    unit: _currentUnit,
+                    currentMenu: _currentMenu,
+                    onUnitUpdated: _handleUnitUpdate,
+                  ),
                 ],
               ),
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () {
-                RouterService.navigate(context, "${UnitPage.ROUTE}/${widget.id}")
+                RouterService.navigate(
+                        context, "${UnitPage.ROUTE}/${widget.id}")
                     .then((_) => _loadOrganization());
               },
               child: const Icon(Icons.remove_red_eye_rounded),
@@ -286,46 +289,46 @@ class _SideMenuState extends State<SideMenu> {
                           "Quotes",
                         );
                       },
-                      ),
-                    if (RightsService.canSeeUnitUsers())
-                      _buildMenuItem(
-                        context: context,
-                        icon: Icons.email,
-                        label: "Email Templates".tr(),
-                        isSelected: widget.currentMenu == "EmailTemplates",
-                        isExpanded: _isExpanded,
-                        isHovered: _hoveredLabel == "Email Templates".tr(),
-                        onHover: (label) => setState(() => _hoveredLabel = label),
-                        onTap: () {
-                          if (widget.unit != null) {
-                            widget.onMenuItemSelected(
-                              EmailTemplatesTab(unitId: widget.unit!.id!),
-                              "EmailTemplates",
-                            );
-                          }
-                        },
-                      ),
-                    if (RightsService.canSeeUnitUsers())
-                      _buildMenuItem(
-                        context: context,
-                        icon: Icons.settings,
-                        label: CommonStrings.settings,
-                        isSelected: widget.currentMenu == "Settings",
-                        isExpanded: _isExpanded,
-                        isHovered: _hoveredLabel == CommonStrings.settings,
-                        onHover: (label) => setState(() => _hoveredLabel = label),
-                        onTap: () {
-                          if (widget.unit != null) {
-                            widget.onMenuItemSelected(
-                              UnitSettingsScreen(
-                                unit: widget.unit!,
-                                onUnitUpdated: widget.onUnitUpdated,
-                              ),
-                              "Settings",
-                            );
-                          }
-                        },
-                      ),
+                    ),
+                  if (RightsService.canSeeUnitUsers())
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.email,
+                      label: "Email Templates".tr(),
+                      isSelected: widget.currentMenu == "EmailTemplates",
+                      isExpanded: _isExpanded,
+                      isHovered: _hoveredLabel == "Email Templates".tr(),
+                      onHover: (label) => setState(() => _hoveredLabel = label),
+                      onTap: () {
+                        if (widget.unit != null) {
+                          widget.onMenuItemSelected(
+                            EmailTemplatesTab(unitId: widget.unit!.id!),
+                            "EmailTemplates",
+                          );
+                        }
+                      },
+                    ),
+                  if (RightsService.canSeeUnitUsers())
+                    _buildMenuItem(
+                      context: context,
+                      icon: Icons.settings,
+                      label: CommonStrings.settings,
+                      isSelected: widget.currentMenu == "Settings",
+                      isExpanded: _isExpanded,
+                      isHovered: _hoveredLabel == CommonStrings.settings,
+                      onHover: (label) => setState(() => _hoveredLabel = label),
+                      onTap: () {
+                        if (widget.unit != null) {
+                          widget.onMenuItemSelected(
+                            UnitSettingsScreen(
+                              unit: widget.unit!,
+                              onUnitUpdated: widget.onUnitUpdated,
+                            ),
+                            "Settings",
+                          );
+                        }
+                      },
+                    ),
                 ],
               ),
             ),
@@ -375,7 +378,8 @@ class _SideMenuState extends State<SideMenu> {
           child: Row(
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: iconHorizontalPadding),
+                padding:
+                    EdgeInsets.symmetric(horizontal: iconHorizontalPadding),
                 child: Icon(icon, size: iconSize),
               ),
               Expanded(
@@ -387,7 +391,7 @@ class _SideMenuState extends State<SideMenu> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight:
-                      isSelected ? FontWeight.bold : FontWeight.normal,
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                     softWrap: false,
                     overflow: TextOverflow.clip,

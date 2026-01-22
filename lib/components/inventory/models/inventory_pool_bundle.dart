@@ -28,7 +28,8 @@ class InventoryPoolBundle {
 
   factory InventoryPoolBundle.fromJson(Map<String, dynamic> json) {
     // Helper to safely parse lists from JSON.
-    List<T>? parseList<T>(String key, T Function(Map<String, dynamic>) fromJson) {
+    List<T>? parseList<T>(
+        String key, T Function(Map<String, dynamic>) fromJson) {
       if (json[key] is! List) return null;
       return (json[key] as List)
           .map((item) => fromJson(item as Map<String, dynamic>))
@@ -36,13 +37,16 @@ class InventoryPoolBundle {
     }
 
     // 1. Parse all relevant lists from the JSON bundle.
-    final List<InventoryContextModel>? contexts = parseList('contexts', (c) => InventoryContextModel.fromJson(c));
-    final List<ProductModel>? products = parseList('products', (p) => ProductModel.fromJson(p));
-    final List<ProductInventoryContextModel>? productContextLinks = parseList('product_inventory_contexts', (pic) => ProductInventoryContextModel.fromJson(pic));
+    final List<InventoryContextModel>? contexts =
+        parseList('contexts', (c) => InventoryContextModel.fromJson(c));
+    final List<ProductModel>? products =
+        parseList('products', (p) => ProductModel.fromJson(p));
+    final List<ProductInventoryContextModel>? productContextLinks = parseList(
+        'product_inventory_contexts',
+        (pic) => ProductInventoryContextModel.fromJson(pic));
 
     // 2. Perform the "joins" in memory if all data is available.
     if (products != null && contexts != null && productContextLinks != null) {
-
       // Create a map for efficient product lookup using a standard for loop.
       final Map<int, ProductModel> productMap = {};
       for (final product in products) {
@@ -73,7 +77,9 @@ class InventoryPoolBundle {
     // 3. Return the fully constructed and linked bundle.
     return InventoryPoolBundle(
       pool: InventoryPoolModel.fromJson(json['pool']),
-      occasion: json['occasion'] != null ? OccasionModel.fromJson(json['occasion']) : null,
+      occasion: json['occasion'] != null
+          ? OccasionModel.fromJson(json['occasion'])
+          : null,
       resources: parseList('resources', (r) => ResourceModel.fromJson(r)),
       places: parseList('places', (p) => PlaceModel.fromJson(p)),
       contexts: contexts,

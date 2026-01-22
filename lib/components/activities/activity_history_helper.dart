@@ -2,7 +2,7 @@ import 'package:fstapp/components/activities/activity_model.dart';
 
 class ActivityHistoryHelper {
   final List<EditDataBundle> _undoStack = [];
-  List<EditDataBundle> _redoStack = [];
+  final List<EditDataBundle> _redoStack = [];
 
   /// Creates a deep copy of the bundle by serializing and deserializing it.
   /// This ensures that history states are independent.

@@ -66,8 +66,10 @@ class _NewsFormPageState extends State<NewsFormPage> {
         "content": htmlContent,
         "heading": _formKey.currentState?.fields["heading"]!.value,
         "heading_default": _currentUser!.name,
-        "with_notification": _formKey.currentState?.fields["with_notification"]!.value,
-        if (isTest || AppConfig.isPublicNotificationSendingDisabled) "to": [AuthService.currentUserId()],
+        "with_notification":
+            _formKey.currentState?.fields["with_notification"]!.value,
+        if (isTest || AppConfig.isPublicNotificationSendingDisabled)
+          "to": [AuthService.currentUserId()],
         if (isTest) "add_to_news": false,
       };
       Navigator.pop(context, toReturn);

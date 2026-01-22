@@ -21,8 +21,10 @@ class InformationModel extends ITrinaRowModel {
   int? order;
   int? unit;
   Map<String, dynamic>? data;
-  int getOrder()  => order ?? 0;
-  DateTime getDateTime()  => data?[Tb.information.data_date] != null ? DateTime.parse(data?[Tb.information.data_date]) : DateTime.fromMillisecondsSinceEpoch(0);
+  int getOrder() => order ?? 0;
+  DateTime getDateTime() => data?[Tb.information.data_date] != null
+      ? DateTime.parse(data?[Tb.information.data_date])
+      : DateTime.fromMillisecondsSinceEpoch(0);
 
   bool isExpanded = false;
 
@@ -34,24 +36,26 @@ class InformationModel extends ITrinaRowModel {
         title: json[Tb.information.title],
         description: json[Tb.information.description],
         type: json[Tb.information.type],
-        isHidden: json[Tb.information.is_hidden]??false,
-        order: json[Tb.information.order]??0,
+        isHidden: json[Tb.information.is_hidden] ?? false,
+        order: json[Tb.information.order] ?? 0,
         unit: json[Tb.information.unit],
-        updatedAt: json[Tb.occasions.updated_at]!=null ? DateTime.parse(json[Tb.occasions.updated_at]):null,
+        updatedAt: json[Tb.occasions.updated_at] != null
+            ? DateTime.parse(json[Tb.occasions.updated_at])
+            : null,
         data: json[Tb.information.data],
-        informationHidden: json[Tb.information_hidden.table] != null ?
-        InformationHiddenModel(
-            id: json[Tb.information_hidden.table][Tb.information_hidden.id],
-            data: json[Tb.information_hidden.table][Tb.information_hidden.data]) : null
-    );
+        informationHidden: json[Tb.information_hidden.table] != null
+            ? InformationHiddenModel(
+                id: json[Tb.information_hidden.table][Tb.information_hidden.id],
+                data: json[Tb.information_hidden.table]
+                    [Tb.information_hidden.data])
+            : null);
   }
 
   factory InformationModel.newRow(int unitId) {
     return InformationModel(unit: unitId);
   }
 
-  Map toJson() =>
-      {
+  Map toJson() => {
         Tb.information.id: id,
         Tb.information.title: title,
         Tb.information.description: description,
@@ -85,15 +89,18 @@ class InformationModel extends ITrinaRowModel {
         isHidden: json[Tb.information.is_hidden] == "true" ? true : false,
         order: json[Tb.information.order],
         unit: json[Tb.information.unit],
-        informationHidden: json[Tb.information.data_correct] != null ?
-        InformationHiddenModel(
-            data: {Tb.information.data_correct : json[Tb.information.data_correct]},
-            id: json[Tb.information.data_correct_reference]) : null
-    );
+        informationHidden: json[Tb.information.data_correct] != null
+            ? InformationHiddenModel(data: {
+                Tb.information.data_correct: json[Tb.information.data_correct]
+              }, id: json[Tb.information.data_correct_reference])
+            : null);
   }
 
-  static InformationModel fromPlutoJsonType(Map<String, dynamic> json, String type) {
-    var quoteDate = type == quoteType && json[Tb.information.data_date] != null ? DateFormat("yyyy-MM-dd").parse(json[Tb.information.data_date]) : null;
+  static InformationModel fromPlutoJsonType(
+      Map<String, dynamic> json, String type) {
+    var quoteDate = type == quoteType && json[Tb.information.data_date] != null
+        ? DateFormat("yyyy-MM-dd").parse(json[Tb.information.data_date])
+        : null;
     return InformationModel(
       id: json[Tb.information.id] == -1 ? null : json[Tb.information.id],
       title: json[Tb.information.title],
@@ -102,7 +109,9 @@ class InformationModel extends ITrinaRowModel {
       isHidden: json[Tb.information.is_hidden] == "true" ? true : false,
       order: json[Tb.information.order],
       unit: json[Tb.information.unit],
-      data: quoteDate != null ? { Tb.information.data_date : quoteDate.toIso8601String() } : null,
+      data: quoteDate != null
+          ? {Tb.information.data_date: quoteDate.toIso8601String()}
+          : null,
     );
   }
 
@@ -116,11 +125,15 @@ class InformationModel extends ITrinaRowModel {
       Tb.information.is_hidden: TrinaCell(value: isHidden.toString()),
       Tb.information.order: TrinaCell(value: order),
       Tb.information.unit: TrinaCell(value: unit),
-      Tb.information.data_correct: TrinaCell(value: informationHidden?.data?[Tb.information.data_correct] ?? ""),
-      Tb.information.data_correct_reference: TrinaCell(value: informationHidden?.id),
-      Tb.information.data_date: TrinaCell(value:
-        data?[Tb.information.data_date] != null ?
-        DateFormat('yyyy-MM-dd').format(DateTime.parse(data?[Tb.information.data_date])) : DateTime.now()),
+      Tb.information.data_correct: TrinaCell(
+          value: informationHidden?.data?[Tb.information.data_correct] ?? ""),
+      Tb.information.data_correct_reference:
+          TrinaCell(value: informationHidden?.id),
+      Tb.information.data_date: TrinaCell(
+          value: data?[Tb.information.data_date] != null
+              ? DateFormat('yyyy-MM-dd')
+                  .format(DateTime.parse(data?[Tb.information.data_date]))
+              : DateTime.now()),
     });
   }
 
@@ -136,26 +149,28 @@ class InformationModel extends ITrinaRowModel {
 
   @override
   String toBasicString() {
-    if(data?[Tb.information.data_date] != null) {
-      return DateFormat.yMMMd('en').format(DateTime.parse(data?[Tb.information.data_date])).toString();
+    if (data?[Tb.information.data_date] != null) {
+      return DateFormat.yMMMd('en')
+          .format(DateTime.parse(data?[Tb.information.data_date]))
+          .toString();
     }
-    return title??id.toString();
+    return title ?? id.toString();
   }
 
-  InformationModel({
-    this.id,
-    this.updatedAt,
-    this.title,
-    this.description,
-    this.type,
-    this.isHidden,
-    this.order,
-    this.unit,
-    this.informationHidden,
-    this.data});
+  InformationModel(
+      {this.id,
+      this.updatedAt,
+      this.title,
+      this.description,
+      this.type,
+      this.isHidden,
+      this.order,
+      this.unit,
+      this.informationHidden,
+      this.data});
 }
 
-class InformationHiddenModel{
+class InformationHiddenModel {
   int? id;
   Map<String, dynamic>? data;
 

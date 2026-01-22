@@ -82,7 +82,7 @@ class _SongbookPageState extends State<SongbookPage> {
                         isDarkMode = value;
                       });
                     },
-                    activeColor: Colors.grey[600],
+                    activeThumbColor: Colors.grey[600],
                     inactiveThumbColor: Colors.grey[400],
                     inactiveTrackColor: Colors.grey[300],
                     activeTrackColor: Colors.grey[600],

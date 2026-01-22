@@ -53,7 +53,6 @@ class FeatureConstants {
   static const String reminderIntervalSeconds = "reminder_interval_seconds";
   static const String deadlineDurationSeconds = "deadline_duration_seconds";
 
-
   // Extra field for companions feature
   static const String companionsMax = "max_companions";
 

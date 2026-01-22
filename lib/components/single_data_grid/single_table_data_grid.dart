@@ -83,18 +83,18 @@ class _SingleTableDataGridState<T extends ITrinaRowModel>
           setState(() {});
         },
         rowColorCallback: (rowContext) {
-          var row = widget.controller.deletedRows.firstWhereOrNull(
-                  (element) => element.key == rowContext.row.key);
+          var row = widget.controller.deletedRows
+              .firstWhereOrNull((element) => element.key == rowContext.row.key);
           if (row != null) {
             return Colors.redAccent.withOpacity(0.3);
           }
-          row = widget.controller.updatedRows.firstWhereOrNull(
-                  (element) => element.key == rowContext.row.key);
+          row = widget.controller.updatedRows
+              .firstWhereOrNull((element) => element.key == rowContext.row.key);
           if (row != null) {
             return Colors.orangeAccent.withOpacity(0.3);
           }
-          row = widget.controller.newRows.firstWhereOrNull(
-                  (element) => element.key == rowContext.row.key);
+          row = widget.controller.newRows
+              .firstWhereOrNull((element) => element.key == rowContext.row.key);
           if (row != null) {
             return Colors.orangeAccent.withOpacity(0.3);
           }

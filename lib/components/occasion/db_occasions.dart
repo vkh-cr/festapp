@@ -51,7 +51,8 @@ class DbOccasions {
     return result["code"] == 200;
   }
 
-  static Future<bool> deleteService(String type, ServiceItemModel item, [bool force = false]) async {
+  static Future<bool> deleteService(String type, ServiceItemModel item,
+      [bool force = false]) async {
     var result = await _supabase.rpc("delete_service_item", params: {
       'oc': RightsService.currentOccasionId(),
       'code': item.code,
@@ -92,7 +93,11 @@ class DbOccasions {
   }
 
   static Future<OccasionModel> getOccasion(int oc) async {
-    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.id, oc).single();
+    var data = await _supabase
+        .from(Tb.occasions.table)
+        .select()
+        .eq(Tb.occasions.id, oc)
+        .single();
     return OccasionModel.fromJson(data);
   }
 
@@ -109,41 +114,39 @@ class DbOccasions {
   }
 
   static Future<List<OccasionModel>> getAllOccasionsForEdit(int unitId) async {
-    var data = await _supabase.rpc("get_all_occasions_for_edit_v212",
-        params:
-        {
-          "unit_id": unitId,
-        });
+    var data = await _supabase.rpc("get_all_occasions_for_edit_v212", params: {
+      "unit_id": unitId,
+    });
     return List<OccasionModel>.from(data.map((x) => OccasionModel.fromJson(x)));
   }
 
   static Future<void> updateOccasion(OccasionModel occasionModel) async {
     final Map<String, dynamic> occasionJson = occasionModel.toJson();
-    await _supabase.rpc("update_occasion_203",
-        params: {
-          "input_data": occasionJson,
-        });
+    await _supabase.rpc("update_occasion_203", params: {
+      "input_data": occasionJson,
+    });
   }
 
   static Future<void> duplicateOccasion(int oc, int? unit) async {
-
-    var ocId = await _supabase.rpc("duplicate_occasion",
-        params:
-        {
-          "oc": oc,
-        });
+    var ocId = await _supabase.rpc("duplicate_occasion", params: {
+      "oc": oc,
+    });
 
     var occasion = await getOccasion(ocId);
 
-    var ticketDetails = FeatureService.getFeatureDetails(FeatureConstants.ticket, features: occasion.features);
-    if (ticketDetails is TicketFeature && ticketDetails.ticketBackground != null && ticketDetails.ticketBackground!.isNotEmpty) {
-      var cpy = await DbImages.createCopyOfImage(ticketDetails.ticketBackground!, ocId, unit);
+    var ticketDetails = FeatureService.getFeatureDetails(
+        FeatureConstants.ticket,
+        features: occasion.features);
+    if (ticketDetails is TicketFeature &&
+        ticketDetails.ticketBackground != null &&
+        ticketDetails.ticketBackground!.isNotEmpty) {
+      var cpy = await DbImages.createCopyOfImage(
+          ticketDetails.ticketBackground!, ocId, unit);
       ticketDetails.ticketBackground = cpy;
     }
 
     var ocImage = occasion.data?["image"];
-    if(ocImage != null)
-    {
+    if (ocImage != null) {
       var cpy = await DbImages.createCopyOfImage(ocImage, ocId, unit);
       occasion.data!["image"] = cpy;
     }
@@ -159,7 +162,8 @@ class DbOccasions {
         .select()
         .isFilter(Tb.images.occasion, null)
         .isFilter(Tb.images.unit, null);
-    final orphanImages = List<ImageModel>.from(data.map((x) => ImageModel.fromJson(x)));
+    final orphanImages =
+        List<ImageModel>.from(data.map((x) => ImageModel.fromJson(x)));
 
     for (var img in orphanImages) {
       await DbImages.removeImage(img.link!);
@@ -171,5 +175,4 @@ class DbOccasions {
         .isFilter(Tb.images.occasion, null)
         .isFilter(Tb.images.unit, null);
   }
-
 }

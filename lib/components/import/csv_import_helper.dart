@@ -19,14 +19,19 @@ class CsvImportHelper {
         context,
         FeaturesStrings.labelImportFromCsv,
         CommonStrings.import,
-        CommonStrings.storno
-    );
+        CommonStrings.storno);
 
     if (file == null) return; // User canceled the dialog
 
     var users = await ImportHelper.getUsersFromFile(file);
-    var addOrUpdateUsers = users.where((element) => element[Tb.occasion_users.data_text4]?.toLowerCase() != "storno").toList();
-    var deleteUsers = users.where((element) => element[Tb.occasion_users.data_text4]?.toLowerCase() == "storno").toList();
+    var addOrUpdateUsers = users
+        .where((element) =>
+            element[Tb.occasion_users.data_text4]?.toLowerCase() != "storno")
+        .toList();
+    var deleteUsers = users
+        .where((element) =>
+            element[Tb.occasion_users.data_text4]?.toLowerCase() == "storno")
+        .toList();
 
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
@@ -40,7 +45,8 @@ class CsvImportHelper {
     var existingUsers = await DbUsers.getOccasionUsers();
     var toBeCreated = _getUsersToBeCreated(addOrUpdateUsers, existingUsers);
     var toBeUpdated = _getUsersToBeUpdated(addOrUpdateUsers, existingUsers);
-    var toBeDeleted = _getUsersToBeDeleted(deleteUsers, addOrUpdateUsers, existingUsers);
+    var toBeDeleted =
+        _getUsersToBeDeleted(deleteUsers, addOrUpdateUsers, existingUsers);
 
     await _handleCreateUsers(context, toBeCreated);
     await _handleUpdateUsers(context, toBeUpdated, existingUsers);
@@ -49,22 +55,26 @@ class CsvImportHelper {
 
   // Helper to get users to be created
   static List<Map<String, dynamic>> _getUsersToBeCreated(
-      Iterable<Map<String, dynamic>> users, List<OccasionUserModel> existingUsers) {
+      Iterable<Map<String, dynamic>> users,
+      List<OccasionUserModel> existingUsers) {
     return users.where((u) {
       return existingUsers.firstWhereOrNull(
-            (e) => e.data?[Tb.occasion_users.data_email]?.toLowerCase() ==
-            u[Tb.occasion_users.data_email]?.toLowerCase(),
-      ) ==
+            (e) =>
+                e.data?[Tb.occasion_users.data_email]?.toLowerCase() ==
+                u[Tb.occasion_users.data_email]?.toLowerCase(),
+          ) ==
           null;
     }).toList();
   }
 
   // Helper to get users to be updated
   static List<Map<String, dynamic>> _getUsersToBeUpdated(
-      Iterable<Map<String, dynamic>> users, List<OccasionUserModel> existingUsers) {
+      Iterable<Map<String, dynamic>> users,
+      List<OccasionUserModel> existingUsers) {
     return users.where((u) {
       var existing = existingUsers.firstWhereOrNull(
-            (e) => e.data?[Tb.occasion_users.data_email]?.toLowerCase() ==
+        (e) =>
+            e.data?[Tb.occasion_users.data_email]?.toLowerCase() ==
             u[Tb.occasion_users.data_email]?.toLowerCase(),
       );
       return existing != null && !existing.importedEquals(u);
@@ -76,27 +86,33 @@ class CsvImportHelper {
       Iterable<Map<String, dynamic>> deleteUsers,
       Iterable<Map<String, dynamic>> addOrUpdateUsers,
       List<OccasionUserModel> existingUsers) {
-    return deleteUsers.map((u) {
-      var existing = existingUsers.firstWhereOrNull(
-            (e) => e.data?[Tb.occasion_users.data_email] == u[Tb.occasion_users.data_email],
-      );
-      var duplicated = addOrUpdateUsers.firstWhereOrNull(
-            (e) => e[Tb.occasion_users.data_email] == u[Tb.occasion_users.data_email],
-      );
-      return (existing != null && duplicated == null) ? existing : null;
-    }).whereNotNull().toList();
+    return deleteUsers
+        .map((u) {
+          var existing = existingUsers.firstWhereOrNull(
+            (e) =>
+                e.data?[Tb.occasion_users.data_email] ==
+                u[Tb.occasion_users.data_email],
+          );
+          var duplicated = addOrUpdateUsers.firstWhereOrNull(
+            (e) =>
+                e[Tb.occasion_users.data_email] ==
+                u[Tb.occasion_users.data_email],
+          );
+          return (existing != null && duplicated == null) ? existing : null;
+        })
+        .whereNotNull()
+        .toList();
   }
 
   // Handle creating users with progress dialog
-  static Future<void> _handleCreateUsers(BuildContext context, List<Map<String, dynamic>> toBeCreated) async {
+  static Future<void> _handleCreateUsers(
+      BuildContext context, List<Map<String, dynamic>> toBeCreated) async {
     if (toBeCreated.isEmpty) return;
 
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
       "Creating users".tr(),
-      "New users found. Do you want to create them?".tr() +
-          "\n" +
-          "${CommonStrings.users} (${toBeCreated.length}):\n${toBeCreated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
+      "${"New users found. Do you want to create them?".tr()}\n${CommonStrings.users} (${toBeCreated.length}):\n${toBeCreated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
       confirmButtonMessage: CommonStrings.proceed,
     );
 
@@ -106,24 +122,30 @@ class CsvImportHelper {
       context,
       "Creating users".tr(),
       toBeCreated.length,
-      futures: toBeCreated.map((u) => () async {
-        await DbUsers.updateOccasionUser(OccasionUserModel.fromImportedJson(u));
-        ToastHelper.Show(context, "Created {item}.".tr(namedArgs: {"item": u[Tb.occasion_users.data_email]}));
-      }).toList(),
+      futures: toBeCreated
+          .map((u) => () async {
+                await DbUsers.updateOccasionUser(
+                    OccasionUserModel.fromImportedJson(u));
+                ToastHelper.Show(
+                    context,
+                    "Created {item}.".tr(
+                        namedArgs: {"item": u[Tb.occasion_users.data_email]}));
+              })
+          .toList(),
     );
   }
 
   // Handle updating users with progress dialog
   static Future<void> _handleUpdateUsers(
-      BuildContext context, List<Map<String, dynamic>> toBeUpdated, List<OccasionUserModel> existingUsers) async {
+      BuildContext context,
+      List<Map<String, dynamic>> toBeUpdated,
+      List<OccasionUserModel> existingUsers) async {
     if (toBeUpdated.isEmpty) return;
 
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
       "Updating users".tr(),
-      "These users have some changes. Do you want to update them?".tr() +
-          "\n" +
-          "${CommonStrings.users} (${toBeUpdated.length}):\n${toBeUpdated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
+      "${"These users have some changes. Do you want to update them?".tr()}\n${CommonStrings.users} (${toBeUpdated.length}):\n${toBeUpdated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
       confirmButtonMessage: CommonStrings.proceed,
     );
 
@@ -133,27 +155,34 @@ class CsvImportHelper {
       context,
       "Updating users".tr(),
       toBeUpdated.length,
-      futures: toBeUpdated.map((u) => () async {
-        var existing = existingUsers.firstWhere(
-              (e) => e.data?[Tb.occasion_users.data_email] == u[Tb.occasion_users.data_email],
-        );
-        var fromExisting = OccasionUserModel.fromImportedJson(u, existing);
-        await DbUsers.updateExistingImportedOccasionUser(fromExisting);
-        ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item": u[Tb.occasion_users.data_email]}));
-      }).toList(),
+      futures: toBeUpdated
+          .map((u) => () async {
+                var existing = existingUsers.firstWhere(
+                  (e) =>
+                      e.data?[Tb.occasion_users.data_email] ==
+                      u[Tb.occasion_users.data_email],
+                );
+                var fromExisting =
+                    OccasionUserModel.fromImportedJson(u, existing);
+                await DbUsers.updateExistingImportedOccasionUser(fromExisting);
+                ToastHelper.Show(
+                    context,
+                    "Updated {item}.".tr(
+                        namedArgs: {"item": u[Tb.occasion_users.data_email]}));
+              })
+          .toList(),
     );
   }
 
   // Handle deleting users with progress dialog
-  static Future<void> _handleDeleteUsers(BuildContext context, List<OccasionUserModel> toBeDeleted) async {
+  static Future<void> _handleDeleteUsers(
+      BuildContext context, List<OccasionUserModel> toBeDeleted) async {
     if (toBeDeleted.isEmpty) return;
 
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
       "Removing users".tr(),
-      "These users have been removed, but they still exist in the application. Do you want to remove them?".tr() +
-          "\n" +
-          "${CommonStrings.users} (${toBeDeleted.length}):\n${toBeDeleted.map((u) => u.toBasicString()).join(",\n")}",
+      "${"These users have been removed, but they still exist in the application. Do you want to remove them?".tr()}\n${CommonStrings.users} (${toBeDeleted.length}):\n${toBeDeleted.map((u) => u.toBasicString()).join(",\n")}",
       confirmButtonMessage: CommonStrings.proceed,
     );
 
@@ -163,10 +192,16 @@ class CsvImportHelper {
       context,
       "Removing users".tr(),
       toBeDeleted.length,
-      futures: toBeDeleted.map((existing) => ()  async {
-        await DbUsers.deleteOccasionUser(existing.user!, existing.occasion!);
-        ToastHelper.Show(context, "Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
-      }).toList(),
+      futures: toBeDeleted
+          .map((existing) => () async {
+                await DbUsers.deleteOccasionUser(
+                    existing.user!, existing.occasion!);
+                ToastHelper.Show(
+                    context,
+                    "Removed {item}."
+                        .tr(namedArgs: {"item": existing.toBasicString()}));
+              })
+          .toList(),
     );
   }
 }

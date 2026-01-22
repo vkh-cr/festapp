@@ -155,7 +155,8 @@ Future<String> _cachedGet(String url) async {
   final directory = await getApplicationDocumentsDirectory();
   String fileName = Uri.parse(url).pathSegments.last;
   String filePath = "${directory.path}/$fileName";
-  final file = await OfflineMapHelper.getOrDownloadFile(url, filePath, (progress) {});
+  final file =
+      await OfflineMapHelper.getOrDownloadFile(url, filePath, (progress) {});
   if (file != null) {
     return await file.readAsString();
   }
@@ -168,7 +169,8 @@ Future<Uint8List> _cachedLoadBinary(String url) async {
   final directory = await getApplicationDocumentsDirectory();
   String fileName = Uri.parse(url).pathSegments.last;
   String filePath = "${directory.path}/$fileName";
-  final file = await OfflineMapHelper.getOrDownloadFile(url, filePath, (progress) {});
+  final file =
+      await OfflineMapHelper.getOrDownloadFile(url, filePath, (progress) {});
   if (file != null) {
     return await file.readAsBytes();
   }
@@ -208,9 +210,9 @@ class StyleUriMapper {
       String spriteUri, Map<String, String> parameters, String suffix) {
     return SpriteUri(
         json:
-        '$spriteUri$suffix.json?secure&${parameters.entries.map((e) => '${e.key}=${Uri.encodeQueryComponent(e.value)}').join('&')}',
+            '$spriteUri$suffix.json?secure&${parameters.entries.map((e) => '${e.key}=${Uri.encodeQueryComponent(e.value)}').join('&')}',
         image:
-        '$spriteUri$suffix.png?secure&${parameters.entries.map((e) => '${e.key}=${Uri.encodeQueryComponent(e.value)}').join('&')}');
+            '$spriteUri$suffix.png?secure&${parameters.entries.map((e) => '${e.key}=${Uri.encodeQueryComponent(e.value)}').join('&')}');
   }
 }
 

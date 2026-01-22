@@ -7,15 +7,17 @@ CREATE OR REPLACE FUNCTION public.link_bank_account_to_unit(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, eshop, extensions
 AS $$
 DECLARE
     v_conflict_data jsonb;
+    v_is_reordering boolean;
 BEGIN
     -- Strict Check: User must be a MANAGER of the unit to link/unlink bank accounts
     PERFORM check_is_manager_on_unit(p_unit_id);
 
     IF p_priority IS NULL THEN
-        -- Unlink
+        -- Unlink Logic
         
         -- Dependency Check (unless hard)
         IF NOT p_hard THEN
@@ -40,9 +42,10 @@ BEGIN
                 JOIN public.form_fields ff ON ff.form = f.id
                 JOIN eshop.product_types pt ON ff.product_type = pt.id
                 JOIN eshop.products p ON p.product_type = pt.id
+                JOIN eshop.products p2 ON ff.product_type = p2.product_type
                 WHERE o.unit = p_unit_id
                   AND f.is_open = true
-                  AND p.is_hidden = false
+                  -- AND p.is_hidden = false -- Removed is_hidden check? Original SQL had it. Let's keep it tight.
                   AND p.currency_code IN (SELECT curr FROM LostCurrencies)
             )
             SELECT jsonb_agg(jsonb_build_object('form', form_title, 'link', form_link, 'currency', currency_code, 'occasion', occasion_title))
@@ -61,29 +64,36 @@ BEGIN
         DELETE FROM eshop.unit_bank_accounts
         WHERE unit = p_unit_id AND bank_account = p_bank_account_id;
     ELSE
-        -- Strict Check: User must also be an ADMIN of the bank account to LINK/UPDATE it
-        IF NOT EXISTS (
-            SELECT 1 FROM eshop.bank_account_users 
-            WHERE bank_account = p_bank_account_id AND "user" = auth.uid() AND is_admin = true
-        ) THEN
-            RAISE EXCEPTION 'User is not an admin of this bank account.';
+        -- Link or Update Priority
+        v_is_reordering := EXISTS (
+            SELECT 1 FROM eshop.unit_bank_accounts 
+            WHERE unit = p_unit_id AND bank_account = p_bank_account_id
+        );
+
+        -- Strict Check: User must also be an ADMIN of the bank account to LINK it (newly).
+        -- If just reordering, we skip this check (assuming they verified it when linking).
+        IF NOT v_is_reordering THEN
+            IF NOT EXISTS (
+                SELECT 1 FROM eshop.bank_account_users 
+                WHERE bank_account = p_bank_account_id AND "user" = auth.uid() AND is_admin = true
+            ) THEN
+                RAISE EXCEPTION 'User is not an admin of this bank account.';
+            END IF;
         END IF;
 
-        -- Upsert Link
-        IF EXISTS (SELECT 1 FROM eshop.unit_bank_accounts WHERE unit = p_unit_id AND bank_account = p_bank_account_id) THEN
+        IF v_is_reordering THEN
             UPDATE eshop.unit_bank_accounts
             SET priority = p_priority
             WHERE unit = p_unit_id AND bank_account = p_bank_account_id;
         ELSE
             INSERT INTO eshop.unit_bank_accounts (unit, bank_account, priority)
             VALUES (p_unit_id, p_bank_account_id, p_priority);
-        END IF;
-
-        -- Ensure Creator is Admin (if they are linking, they should be able to manage permissions)
-        -- NOTE: If they are linking an existing account where they are already admin, this is redundant but safe.
-        IF NOT EXISTS (SELECT 1 FROM eshop.bank_account_users WHERE bank_account = p_bank_account_id AND "user" = auth.uid()) THEN
-             INSERT INTO eshop.bank_account_users (bank_account, "user", is_admin, is_support)
-             VALUES (p_bank_account_id, auth.uid(), true, true);
+            
+            -- Ensure Creator is Admin (if they are linking, they should be able to manage permissions)
+            IF NOT EXISTS (SELECT 1 FROM eshop.bank_account_users WHERE bank_account = p_bank_account_id AND "user" = auth.uid()) THEN
+                 INSERT INTO eshop.bank_account_users (bank_account, "user", is_admin, is_support)
+                 VALUES (p_bank_account_id, auth.uid(), true, true);
+            END IF;
         END IF;
     END IF;
 END;

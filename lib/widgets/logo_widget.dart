@@ -25,23 +25,24 @@ class LogoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // Determine the asset path based on the current theme or forceDark flag.
     // Change these asset paths to match your actual file names.
-    final String logoAsset = ThemeConfig.isDarkMode(context) || forceDark == true
-        ? 'assets/icons/fstapplogo.dark.svg'
-        : 'assets/icons/fstapplogo.svg';
+    final String logoAsset =
+        ThemeConfig.isDarkMode(context) || forceDark == true
+            ? 'assets/icons/fstapplogo.dark.svg'
+            : 'assets/icons/fstapplogo.svg';
 
     // If the asset file is an SVG, use SvgPicture; otherwise, use Image.
     final Widget logo = logoAsset.toLowerCase().endsWith('.svg')
         ? SvgPicture.asset(
-      logoAsset,
-      height: height,
-      width: width,
-      semanticsLabel: 'Festapp logo',
-    )
+            logoAsset,
+            height: height,
+            width: width,
+            semanticsLabel: 'Festapp logo',
+          )
         : Image.asset(
-      logoAsset,
-      height: height,
-      width: width,
-    );
+            logoAsset,
+            height: height,
+            width: width,
+          );
 
     return InkWell(
       onTap: onTap,

@@ -64,7 +64,9 @@ class NotificationHelper {
     await NotificationHelper.login();
   }
 
-  static notification_helper.Future<void> checkForNotificationPermission(BuildContext context, [bool forceAsk = false]) async {
+  static notification_helper.Future<void> checkForNotificationPermission(
+      BuildContext context,
+      [bool forceAsk = false]) async {
     if (!PlatformHelper.isPwaInstalledOrNative() && !forceAsk) {
       return;
     }
@@ -73,7 +75,8 @@ class NotificationHelper {
       var wasAsked = await StorageHelper.get(notificationAllowedAsked);
       if (wasAsked == null && !_isNotificationDialogShown) {
         _isNotificationDialogShown = true;
-        var dialogResult = await DialogHelper.showNotificationPermissionDialog(context);
+        var dialogResult =
+            await DialogHelper.showNotificationPermissionDialog(context);
         _isNotificationDialogShown = false;
 
         // save default so user don't get ask again, even if later code fails
@@ -84,7 +87,8 @@ class NotificationHelper {
           return;
         }
         var requestResult = await requestNotificationPermission();
-        await StorageHelper.set(notificationAllowedAsked, requestResult.toString());
+        await StorageHelper.set(
+            notificationAllowedAsked, requestResult.toString());
         if (requestResult) {
           ToastHelper.Show(context, "Notifications have been allowed.".tr());
         } else {
@@ -99,7 +103,8 @@ class NotificationHelper {
     if (!currentPermission) {
       currentPermission = await requestNotificationPermission();
     }
-    await StorageHelper.set(notificationAllowedAsked, currentPermission.toString());
+    await StorageHelper.set(
+        notificationAllowedAsked, currentPermission.toString());
     if (currentPermission) {
       await optInNotifications();
       await NotificationHelper.login();
@@ -112,15 +117,19 @@ class NotificationHelper {
     await optOutNotifications();
   }
 
-  static notification_helper.Future<bool> requestNotificationPermission() async {
+  static notification_helper.Future<bool>
+      requestNotificationPermission() async {
     if (kIsWeb) {
-      return await jsInterop.callFutureBoolMethod('requestNotificationPermission', []);
+      return await jsInterop
+          .callFutureBoolMethod('requestNotificationPermission', []);
     }
     return await OneSignal.Notifications.requestPermission(false);
   }
 
   static notification_helper.Future<void> login() async {
-    if (!AppConfig.isNotificationsCurrentlySupported() || !getNotificationPermission() || !AuthService.isLoggedIn()) {
+    if (!AppConfig.isNotificationsCurrentlySupported() ||
+        !getNotificationPermission() ||
+        !AuthService.isLoggedIn()) {
       return;
     }
 
@@ -133,7 +142,8 @@ class NotificationHelper {
   }
 
   static notification_helper.Future<void> logout() async {
-    if (!AppConfig.isNotificationsCurrentlySupported() || !AuthService.isLoggedIn()) {
+    if (!AppConfig.isNotificationsCurrentlySupported() ||
+        !AuthService.isLoggedIn()) {
       return;
     }
     if (kIsWeb) {

@@ -27,7 +27,8 @@ class ImportFeature extends Feature {
   factory ImportFeature.fromJson(Map<String, dynamic> json) {
     return ImportFeature(
       code: json[FeatureConstants.metaCode] ?? FeatureConstants.import,
-      isEnabled: json[FeatureConstants.metaIsEnabled] ?? true, // Enabled by default
+      isEnabled:
+          json[FeatureConstants.metaIsEnabled] ?? true, // Enabled by default
       title: json[FeatureConstants.metaTitle],
       description: json[FeatureConstants.metaDescription],
       importFromCsv: json[metaImportFromCsv] ?? false,
@@ -122,11 +123,11 @@ class _ImportFeatureFormState extends State<_ImportFeatureForm> {
                 // This creates a disabled (greyed out) UI state.
                 onChanged: _importFromTickets
                     ? (bool value) {
-                  setState(() {
-                    _autoImport = value;
-                    widget.feature.autoImport = value;
-                  });
-                }
+                        setState(() {
+                          _autoImport = value;
+                          widget.feature.autoImport = value;
+                        });
+                      }
                     : null,
               ),
             ],

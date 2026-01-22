@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
 
 import 'package:fstapp/components/blueprint/get_orders_helper.dart';
@@ -33,8 +33,10 @@ class OrderHistoryBundle {
 class DbOrders {
   static final _supabase = Supabase.instance.client;
 
-  static Future<FunctionResponse> sendTicketOrder(Map<String, dynamic> data) async {
-    return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": data});
+  static Future<FunctionResponse> sendTicketOrder(
+      Map<String, dynamic> data) async {
+    return await _supabase.functions
+        .invoke("send-ticket-order", body: {"orderDetails": data});
   }
 
   static Future<void> stornoOrder(int id) async {
@@ -48,7 +50,8 @@ class DbOrders {
     await sendStornoTicketOrderEmail(orderId: id);
   }
 
-  static Future<bool> selectSpot(context, String formKey, String secret, int spotId, bool selecting) async {
+  static Future<bool> selectSpot(context, String formKey, String secret,
+      int spotId, bool selecting) async {
     final response = await _supabase.rpc(
       'select_spot',
       params: {
@@ -63,7 +66,8 @@ class DbOrders {
     var message = response["message"];
 
     if (code != 200) {
-      ToastHelper.Show(context, message.toString(), severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, message.toString(),
+          severity: ToastSeverity.NotOk);
       return false;
     }
     return true;
@@ -76,7 +80,8 @@ class DbOrders {
     bool includeSpots = false,
     bool includeOrdersHistory = false,
   }) async {
-    assert(occasionLink != null || formLink != null, 'Either occasionLink or formLink must be provided.');
+    assert(occasionLink != null || formLink != null,
+        'Either occasionLink or formLink must be provided.');
 
     final options = <String, bool>{};
     if (includeOrderDetails) options['include_full_order_data'] = true;
@@ -123,11 +128,11 @@ class DbOrders {
     final users = GetOrdersHelper.parseUsers(json);
 
     // Create lookup maps for efficient linking
-    final ticketMap = { for (var t in tickets!) t.id: t };
-    final productMap = { for (var p in products!) p.id: p };
-    final paymentMap = { for (var p in payments!) p.id: p };
-    final spotByOptId = { for (var s in spots!) s.orderProductTicket: s };
-    final userMap = { for (var u in users!) u.id: u };
+    final ticketMap = {for (var t in tickets!) t.id: t};
+    final productMap = {for (var p in products!) p.id: p};
+    final paymentMap = {for (var p in payments!) p.id: p};
+    final spotByOptId = {for (var s in spots!) s.orderProductTicket: s};
+    final userMap = {for (var u in users!) u.id: u};
 
     // Link users to history records
     if (ordersHistory != null) {
@@ -150,7 +155,10 @@ class DbOrders {
     for (var order in orders) {
       final orderOpts = orderToOpt[order.id] ?? [];
       final ticketIds = orderOpts.map((opt) => opt.ticketId).toSet();
-      final relatedTickets = ticketIds.map((id) => ticketMap[id]).whereType<TicketModel>().toList();
+      final relatedTickets = ticketIds
+          .map((id) => ticketMap[id])
+          .whereType<TicketModel>()
+          .toList();
 
       order.relatedTickets = relatedTickets;
       order.form = forms?.firstWhereOrNull((f) => f.id == order.formId);
@@ -168,12 +176,17 @@ class DbOrders {
           }
         }
         final productIds = ticketOpts.map((opt) => opt.productId).toSet();
-        ticket.relatedProducts = productIds.map((pid) => productMap[pid]).whereType<ProductModel>().toList();
+        ticket.relatedProducts = productIds
+            .map((pid) => productMap[pid])
+            .whereType<ProductModel>()
+            .toList();
         ticket.relatedOrder = order;
       }
 
       final ticketIdsForOrder = relatedTickets.map((t) => t.id).toSet();
-      order.relatedSpots = spots.where((s) => ticketIdsForOrder.contains(s.orderProductTicket)).toList();
+      order.relatedSpots = spots
+          .where((s) => ticketIdsForOrder.contains(s.orderProductTicket))
+          .toList();
 
       final orderProductIds = <int>{};
       for (var ticket in relatedTickets) {
@@ -181,12 +194,14 @@ class DbOrders {
           orderProductIds.addAll(ticket.relatedProducts!.map((p) => p.id!));
         }
       }
-      order.relatedProducts = products.where((p) => orderProductIds.contains(p.id)).toList();
+      order.relatedProducts =
+          products.where((p) => orderProductIds.contains(p.id)).toList();
       order.paymentInfoModel = paymentMap[order.paymentInfo];
 
       if (order.isExpired()) {
         order.state = OrderModel.expiredState;
-        for(var t in order.relatedTickets!.where((t)=>t.state == OrderModel.orderedState)){
+        for (var t in order.relatedTickets!
+            .where((t) => t.state == OrderModel.orderedState)) {
           t.state = order.state;
         }
       }
@@ -209,10 +224,7 @@ class DbOrders {
   static Future<void> updateOrderResponses(FormResponseModel responses) async {
     await _supabase.rpc(
       'update_order_responses',
-      params: {
-        'p_order_id': responses.id,
-        'responses': responses.fields
-      },
+      params: {'p_order_id': responses.id, 'responses': responses.fields},
     );
   }
 
@@ -227,7 +239,8 @@ class DbOrders {
     );
   }
 
-  static Future<void> updateOrderNoteHidden(int orderId, String newNoteHidden) async {
+  static Future<void> updateOrderNoteHidden(
+      int orderId, String newNoteHidden) async {
     var response = await _supabase.rpc(
       "update_order_note_hidden",
       params: {
@@ -249,7 +262,8 @@ class DbOrders {
     );
 
     if (response["code"] != 200) {
-      throw Exception("Failed to update order and tickets to 'paid'. Error: ${response['message']}");
+      throw Exception(
+          "Failed to update order and tickets to 'paid'. Error: ${response['message']}");
     }
   }
 
@@ -269,9 +283,8 @@ class DbOrders {
     final history = (json['history'] as List)
         .map((h) => OrderHistoryModel.fromJson(h))
         .toList();
-    final users = (json['users'] as List)
-        .map((u) => UserInfoModel.fromJson(u))
-        .toList();
+    final users =
+        (json['users'] as List).map((u) => UserInfoModel.fromJson(u)).toList();
 
     // Link users to history items
     final userMap = {for (var u in users) u.id: u};
@@ -290,7 +303,7 @@ class DbOrders {
   }) async {
     final body = {
       "code": "TICKET_ORDER_STORNO",
-      "data": { "orderId": orderId },
+      "data": {"orderId": orderId},
     };
 
     try {
@@ -301,7 +314,7 @@ class DbOrders {
 
       return response;
     } catch (e) {
-      print("Unexpected error in sendTicketsToEmail: $e");
+      // Unexpected error in sendTicketsToEmail
       rethrow;
     }
   }
@@ -319,7 +332,38 @@ class DbOrders {
       }
       return null;
     } catch (e) {
-      print("Error downloading contract: $e");
+      // Error downloading contract
+      rethrow;
+    }
+  }
+
+  static Future<void> insertManualTransaction({
+    required double amount,
+    required String currency,
+    required int unitId,
+    required String? variableSymbol,
+    required DateTime date,
+    String? note,
+    int? paymentInfoId,
+  }) async {
+    final params = {
+      'p_amount': amount,
+      'p_currency': currency,
+      'p_unit_id': unitId,
+      'p_variable_symbol': variableSymbol,
+      'p_date': date.toIso8601String(),
+      'p_note': note,
+      'p_payment_info_id': paymentInfoId,
+    };
+
+    try {
+      await _supabase.rpc(
+        'insert_manual_transaction',
+        params: params,
+      );
+
+    } catch (e) {
+
       rethrow;
     }
   }

@@ -10,7 +10,8 @@ class TicketHolder extends FieldHolder {
   static const String metaFields = "fields";
   static const String metaTicket = "ticket";
   static const String metaMaxTickets = "max_tickets";
-  static const String metaShowSurchargeDescription = "show_surcharge_description";
+  static const String metaShowSurchargeDescription =
+      "show_surcharge_description";
 
   List<FormTicketModel> tickets = [];
 
@@ -67,6 +68,7 @@ class TicketHolder extends FieldHolder {
     // Replace the old tickets with the updated list.
     tickets = updatedTickets;
   }
+
   // Helper getter to check if any of the fields is a "spot".
   // Using string literal "spot" to avoid circular dependency with FormHelper.
   bool get hasSpot => fields.any((element) => element.fieldType == 'spot');

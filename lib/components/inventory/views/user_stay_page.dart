@@ -89,14 +89,15 @@ class _UserStayPageState extends State<UserStayPage> {
 
     final grouped = groupBy<InventoryContextModel, InventoryPoolType>(
       userContexts,
-          (context) => context.inventoryPool!.type,
+      (context) => context.inventoryPool!.type,
     );
 
     final descriptions = <InventoryPoolType, String?>{};
     grouped.forEach((type, contexts) {
       // Sort contexts within each group by date and order
       contexts.sort((a, b) {
-        int dateCompare = (a.blockDate ?? DateTime(0)).compareTo(b.blockDate ?? DateTime(0));
+        int dateCompare =
+            (a.blockDate ?? DateTime(0)).compareTo(b.blockDate ?? DateTime(0));
         if (dateCompare != 0) return dateCompare;
         return (a.order ?? 0).compareTo(b.order ?? 0);
       });
@@ -122,7 +123,8 @@ class _UserStayPageState extends State<UserStayPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(InventoryStrings.userStayTitle, style: TextStyle(color: ThemeConfig.appBarColorNegative())),
+        title: Text(InventoryStrings.userStayTitle,
+            style: TextStyle(color: ThemeConfig.appBarColorNegative())),
         leading: BackButton(
           color: ThemeConfig.appBarColorNegative(),
           onPressed: () => RouterService.goBack(context),
@@ -160,7 +162,9 @@ class _UserStayPageState extends State<UserStayPage> {
         final type = sortedTypes[index];
         final contextsForType = _groupedContexts[type]!;
         final description = _typeDescriptions[type];
-        final pool = contextsForType.isNotEmpty ? contextsForType.first.inventoryPool : null;
+        final pool = contextsForType.isNotEmpty
+            ? contextsForType.first.inventoryPool
+            : null;
         if (pool == null) return const SizedBox.shrink();
 
         final titleText = pool.title ?? type.displayName;
@@ -184,12 +188,14 @@ class _UserStayPageState extends State<UserStayPage> {
                       Text(
                         titleText,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       if (pool.place != null)
                         ActionChip(
-                          avatar: Icon(Icons.place_outlined, size: 18, color: Theme.of(context).colorScheme.secondary),
+                          avatar: Icon(Icons.place_outlined,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.secondary),
                           label: Text(pool.place!.title!),
                           onPressed: () {
                             RouterService.navigateOccasion(
@@ -197,8 +203,11 @@ class _UserStayPageState extends State<UserStayPage> {
                               "${MapPage.ROUTE}/${pool.place!.id}",
                             );
                           },
-                          shape: StadiumBorder(side: BorderSide(color: Theme.of(context).dividerColor)),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          shape: StadiumBorder(
+                              side: BorderSide(
+                                  color: Theme.of(context).dividerColor)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           backgroundColor: Colors.transparent,
                           labelStyle: Theme.of(context).textTheme.bodyMedium,
                         ),
@@ -207,7 +216,10 @@ class _UserStayPageState extends State<UserStayPage> {
                   // The description is added conditionally to the same Column.
                   if (description != null) ...[
                     const SizedBox(height: 12.0),
-                    HtmlView(html: description, isSelectable: true,),
+                    HtmlView(
+                      html: description,
+                      isSelectable: true,
+                    ),
                     const SizedBox(height: 12.0),
                   ]
                 ],
@@ -220,7 +232,8 @@ class _UserStayPageState extends State<UserStayPage> {
                 spacing: 12.0,
                 runSpacing: 12.0,
                 children: contextsForType
-                    .map((contextModel) => _buildContextCard(contextModel, type))
+                    .map(
+                        (contextModel) => _buildContextCard(contextModel, type))
                     .toList(),
               ),
             ),
@@ -231,9 +244,11 @@ class _UserStayPageState extends State<UserStayPage> {
     );
   }
 
-  Widget _buildContextCard(InventoryContextModel contextModel, InventoryPoolType type) {
+  Widget _buildContextCard(
+      InventoryContextModel contextModel, InventoryPoolType type) {
     final spots = contextModel.spots ?? [];
-    final cardWidth = MediaQuery.of(context).size.width > 480 ? 320.0 : double.infinity;
+    final cardWidth =
+        MediaQuery.of(context).size.width > 480 ? 320.0 : double.infinity;
     final theme = Theme.of(context);
 
     return Card(
@@ -263,12 +278,15 @@ class _UserStayPageState extends State<UserStayPage> {
                 ],
               ),
             ),
-            if (spots.isNotEmpty) const Divider(height: 1, indent: 16, endIndent: 16),
+            if (spots.isNotEmpty)
+              const Divider(height: 1, indent: 16, endIndent: 16),
             if (spots.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 1.0, vertical: 4.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 1.0, vertical: 4.0),
                 child: Column(
-                  children: spots.map((spot) => _buildSpotTile(spot, type)).toList(),
+                  children:
+                      spots.map((spot) => _buildSpotTile(spot, type)).toList(),
                 ),
               )
           ],
@@ -278,7 +296,8 @@ class _UserStayPageState extends State<UserStayPage> {
   }
 
   Widget _buildSpotTile(SpotModel spot, InventoryPoolType type) {
-    final resourceTitle = spot.resource?.title ?? InventoryStrings.userStayUnassignedRoom;
+    final resourceTitle =
+        spot.resource?.title ?? InventoryStrings.userStayUnassignedRoom;
     final spotTitle = spot.title;
     final hasSpotTitle = spotTitle != null && spotTitle.isNotEmpty;
     final theme = Theme.of(context);
@@ -298,15 +317,13 @@ class _UserStayPageState extends State<UserStayPage> {
               children: [
                 Text(
                   resourceTitle,
-                  style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.bodyLarge
+                      ?.copyWith(fontWeight: FontWeight.w600),
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (hasSpotTitle)
-                // No need for extra padding here, alignment is handled by the Column.
-                  Text(
-                      spotTitle,
-                      style: theme.textTheme.bodyMedium
-                  ),
+                  // No need for extra padding here, alignment is handled by the Column.
+                  Text(spotTitle, style: theme.textTheme.bodyMedium),
               ],
             ),
           ),
@@ -316,6 +333,7 @@ class _UserStayPageState extends State<UserStayPage> {
       subtitle: null,
     );
   }
+
   Widget _buildEmptyState() {
     return Center(
       child: Padding(

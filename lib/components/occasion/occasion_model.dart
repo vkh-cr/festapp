@@ -24,7 +24,13 @@ class StatsModel {
   });
 
   /// A helper getter to easily check if all stats are zero.
-  bool get areAllZero => total == 0 && paidOrSent == 0 && used == 0 && ordered == 0 && storno == 0 && users == 0;
+  bool get areAllZero =>
+      total == 0 &&
+      paidOrSent == 0 &&
+      used == 0 &&
+      ordered == 0 &&
+      storno == 0 &&
+      users == 0;
 
   factory StatsModel.fromJson(Map<String, dynamic> json) {
     return StatsModel(
@@ -48,7 +54,6 @@ class StatsModel {
     };
   }
 }
-
 
 class OccasionModel {
   static const String occasionsOffline = "occasionsOffline";
@@ -109,10 +114,12 @@ class OccasionModel {
           ? DateTime.parse(json[Tb.occasions.updated_at])
           : null,
       startTime: json[Tb.occasions.start_time] != null
-          ? DateTime.parse(json[Tb.occasions.start_time]).toOccasionTime(data[Tb.occasions.data_timezone])
+          ? DateTime.parse(json[Tb.occasions.start_time])
+              .toOccasionTime(data[Tb.occasions.data_timezone])
           : null,
       endTime: json[Tb.occasions.end_time] != null
-          ? DateTime.parse(json[Tb.occasions.end_time]).toOccasionTime(data[Tb.occasions.data_timezone])
+          ? DateTime.parse(json[Tb.occasions.end_time])
+              .toOccasionTime(data[Tb.occasions.data_timezone])
           : null,
       isOpen: json[Tb.occasions.is_open] ?? false,
       isHidden: json[Tb.occasions.is_hidden] ?? false,
@@ -126,14 +133,15 @@ class OccasionModel {
       // Assign the extracted services map to the dedicated field
       services: servicesData is Map<String, dynamic>
           ? servicesData
-          : (servicesData is Map ? Map<String, dynamic>.from(servicesData) : null),
+          : (servicesData is Map
+              ? Map<String, dynamic>.from(servicesData)
+              : null),
 
       organization: json[Tb.occasions.organization],
       unit: json[Tb.occasions.unit],
       form: json["form"] != null ? FormModel.fromJson(json["form"]) : null,
       features: json[Tb.occasions.features] is List
-          ? List<Feature>.from(
-          (json[Tb.occasions.features] as List)
+          ? List<Feature>.from((json[Tb.occasions.features] as List)
               .map((featureJson) => Feature.fromJson(featureJson)))
           : [],
       stats: json['stats'] != null ? StatsModel.fromJson(json['stats']) : null,
@@ -143,8 +151,12 @@ class OccasionModel {
   Map<String, dynamic> toJson() {
     return {
       Tb.occasions.id: id,
-      Tb.occasions.start_time: startTime?.toUtcFromOccasionTime(data?[Tb.occasions.data_timezone]).toIso8601String(),
-      Tb.occasions.end_time: endTime?.toUtcFromOccasionTime(data?[Tb.occasions.data_timezone]).toIso8601String(),
+      Tb.occasions.start_time: startTime
+          ?.toUtcFromOccasionTime(data?[Tb.occasions.data_timezone])
+          .toIso8601String(),
+      Tb.occasions.end_time: endTime
+          ?.toUtcFromOccasionTime(data?[Tb.occasions.data_timezone])
+          .toIso8601String(),
       Tb.occasions.is_open: isOpen,
       Tb.occasions.is_hidden: isHidden,
       Tb.occasions.is_promoted: isPromoted,
@@ -164,14 +176,16 @@ class OccasionModel {
   /// Gets a reference to a specific service item based on user's data.
   ///
   /// This method now uses the top-level [services] field.
-  ServiceItemModel? getReferenceToService(String serviceType, Map<String, dynamic>? userServices) {
+  ServiceItemModel? getReferenceToService(
+      String serviceType, Map<String, dynamic>? userServices) {
     // Retrieve the list of services for the specified service type
     // This now uses the 'services' field
     var servs = services?[serviceType] ?? [];
 
     var serviceRecords = userServices?[serviceType] as Map? ?? {};
-    var userCode = serviceRecords.keys.firstWhereOrNull((key) => key.isNotEmpty);
-    if(userCode == null) {
+    var userCode =
+        serviceRecords.keys.firstWhereOrNull((key) => key.isNotEmpty);
+    if (userCode == null) {
       return null;
     }
     for (var service in servs) {

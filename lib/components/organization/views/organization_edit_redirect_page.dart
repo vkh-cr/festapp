@@ -10,10 +10,12 @@ class OrganizationEditRedirectPage extends StatefulWidget {
   const OrganizationEditRedirectPage({super.key});
 
   @override
-  State<OrganizationEditRedirectPage> createState() => _OrganizationEditRedirectPageState();
+  State<OrganizationEditRedirectPage> createState() =>
+      _OrganizationEditRedirectPageState();
 }
 
-class _OrganizationEditRedirectPageState extends State<OrganizationEditRedirectPage> {
+class _OrganizationEditRedirectPageState
+    extends State<OrganizationEditRedirectPage> {
   String? _error;
 
   @override

@@ -38,7 +38,8 @@ class _NewsPageState extends State<NewsPage> {
   void initState() {
     super.initState();
     context.tabsRouter.addListener(() async {
-      if (context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.news)) {
+      if (context.tabsRouter.activeIndex ==
+          OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.news)) {
         _checkAsRead();
         loadData();
       }
@@ -53,7 +54,9 @@ class _NewsPageState extends State<NewsPage> {
 
   Future<void> _checkAsRead() async {
     if (ModalRoute.of(context)?.isCurrent == true && !_isSetAsReadCalled) {
-      if (AuthService.isLoggedIn() && newsMessages.isNotEmpty && newsMessages.first.isRead == false) {
+      if (AuthService.isLoggedIn() &&
+          newsMessages.isNotEmpty &&
+          newsMessages.first.isRead == false) {
         await DbNews.setMessagesAsRead(newsMessages.first.id);
         widget.onSetAsRead?.call();
         _isSetAsReadCalled = true;
@@ -62,7 +65,8 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   void _showMessageDialog(BuildContext context) {
-    RouterService.navigateOccasion(context, NewsFormPage.ROUTE).then((value) async {
+    RouterService.navigateOccasion(context, NewsFormPage.ROUTE)
+        .then((value) async {
       if (value != null) {
         var data = value as Map<String, dynamic>;
         bool addToNews = data["add_to_news"] ?? true;
@@ -72,7 +76,8 @@ class _NewsPageState extends State<NewsPage> {
         var heading = data["heading"];
         String headingDefault = data["heading_default"]!;
 
-        await DbNews.insertNewsMessage(context, heading, headingDefault, message, addToNews, withNotification, to);
+        await DbNews.insertNewsMessage(context, heading, headingDefault,
+            message, addToNews, withNotification, to);
 
         if (addToNews) {
           await loadData();
@@ -107,7 +112,9 @@ class _NewsPageState extends State<NewsPage> {
     return Scaffold(
       backgroundColor: ThemeConfig.newsPageColor(context),
       appBar: AppBar(
-        title: Text("News", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
+        title: Text("News",
+                style: TextStyle(color: ThemeConfig.appBarColorNegative()))
+            .tr(),
         leading: PopButton(),
       ),
       body: Align(
@@ -116,142 +123,167 @@ class _NewsPageState extends State<NewsPage> {
           constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: newsMessages.isEmpty
               ? Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.article_outlined,
-                  size: 64,
-                  color: Theme.of(context).disabledColor,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  tr('No news messages yet'),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          )
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.article_outlined,
+                        size: 64,
+                        color: Theme.of(context).disabledColor,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        tr('No news messages yet'),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                )
               : PinchScrollView(
-            builder: (onPinchStart, onPinchEnd) => Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var i = 0; i < newsMessages.length; i++) ...[
-                  if (i != 0) const Divider(),
-                  Builder(builder: (context) {
-                    final message = newsMessages[i];
-                    final previous = i > 0 ? newsMessages[i - 1] : null;
-                    final isSameDay = previous != null &&
-                        message.createdAt!.year == previous.createdAt!.year &&
-                        message.createdAt!.month == previous.createdAt!.month &&
-                        message.createdAt!.day == previous.createdAt!.day;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (i == 0 || !isSameDay)
-                          Container(
-                            padding: const EdgeInsets.only(top: 8.0, right: 16.0, left: 16.0),
-                            alignment: Alignment.topRight,
-                            child: Text(
-                              DateFormat("EEEE d.M.y", context.locale.languageCode)
-                                  .format(message.createdAt!),
-                              style: message.isRead ? readTextStyle() : unReadTextStyle(),
-                            ),
-                          ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            message.createdBy ?? "",
-                            style: message.isRead ? readTextStyle() : unReadTextStyle(),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(StylesConfig.newsItemRoundness),
-                              color: Theme.of(context).colorScheme.surface,
-                            ),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: HtmlView(
-                                    html: message.message!,
-                                    isSelectable: true,
-                                    twoFingersOn: onPinchStart,
-                                    twoFingersOff: onPinchEnd,
+                  builder: (onPinchStart, onPinchEnd) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < newsMessages.length; i++) ...[
+                        if (i != 0) const Divider(),
+                        Builder(builder: (context) {
+                          final message = newsMessages[i];
+                          final previous = i > 0 ? newsMessages[i - 1] : null;
+                          final isSameDay = previous != null &&
+                              message.createdAt!.year ==
+                                  previous.createdAt!.year &&
+                              message.createdAt!.month ==
+                                  previous.createdAt!.month &&
+                              message.createdAt!.day == previous.createdAt!.day;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (i == 0 || !isSameDay)
+                                Container(
+                                  padding: const EdgeInsets.only(
+                                      top: 8.0, right: 16.0, left: 16.0),
+                                  alignment: Alignment.topRight,
+                                  child: Text(
+                                    DateFormat("EEEE d.M.y",
+                                            context.locale.languageCode)
+                                        .format(message.createdAt!),
+                                    style: message.isRead
+                                        ? readTextStyle()
+                                        : unReadTextStyle(),
                                   ),
                                 ),
-                                Visibility(
-                                  visible: AuthService.isLoggedIn(),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Icon(Icons.remove_red_eye, size: 16, color: Theme.of(context).disabledColor),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          message.views.toString(),
-                                          style: TextStyle(
-                                            color: Theme.of(context).disabledColor,
-                                            fontWeight: FontWeight.bold,
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                child: Text(
+                                  message.createdBy ?? "",
+                                  style: message.isRead
+                                      ? readTextStyle()
+                                      : unReadTextStyle(),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 6, horizontal: 12),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(
+                                        StylesConfig.newsItemRoundness),
+                                    color:
+                                        Theme.of(context).colorScheme.surface,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: HtmlView(
+                                          html: message.message!,
+                                          isSelectable: true,
+                                          twoFingersOn: onPinchStart,
+                                          twoFingersOff: onPinchEnd,
+                                        ),
+                                      ),
+                                      Visibility(
+                                        visible: AuthService.isLoggedIn(),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Icon(Icons.remove_red_eye,
+                                                  size: 16,
+                                                  color: Theme.of(context)
+                                                      .disabledColor),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                message.views.toString(),
+                                                style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .disabledColor,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                            ],
                                           ),
                                         ),
-                                        const SizedBox(width: 10),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        if (RightsService.isEditor())
-                          PopupMenuButton<ContextMenuChoice>(
-                            onSelected: (choice) async {
-                              if (choice == ContextMenuChoice.delete) {
-                                await DbNews.deleteNewsMessage(message);
-                                ToastHelper.Show(context, "Message has been removed.".tr());
-                              } else {
-                                await RouterService.navigatePageInfo(
-                                  context,
-                                  HtmlEditorRoute(
-                                    content: {HtmlEditorPage.parContent: message.message},
-                                    occasionId: RightsService.currentOccasionId(),
-                                  ),
-                                ).then((value) async {
-                                  if (value != null) {
-                                    var newMessage = value as String;
-                                    message.message = newMessage;
-                                    await DbNews.updateNewsMessage(message);
-                                    ToastHelper.Show(context, "Message has been changed.".tr());
-                                  }
-                                });
-                              }
-                              await loadData();
-                            },
-                            icon: const Icon(Icons.more_horiz),
-                            itemBuilder: (BuildContext context) => <PopupMenuEntry<ContextMenuChoice>>[
-                              PopupMenuItem<ContextMenuChoice>(
-                                value: ContextMenuChoice.edit,
-                                child: Text(CommonStrings.edit).tr(),
                               ),
-                              PopupMenuItem<ContextMenuChoice>(
-                                value: ContextMenuChoice.delete,
-                                child: const Text("Delete").tr(),
-                              )
+                              if (RightsService.isEditor())
+                                PopupMenuButton<ContextMenuChoice>(
+                                  onSelected: (choice) async {
+                                    if (choice == ContextMenuChoice.delete) {
+                                      await DbNews.deleteNewsMessage(message);
+                                      ToastHelper.Show(context,
+                                          "Message has been removed.".tr());
+                                    } else {
+                                      await RouterService.navigatePageInfo(
+                                        context,
+                                        HtmlEditorRoute(
+                                          content: {
+                                            HtmlEditorPage.parContent:
+                                                message.message
+                                          },
+                                          occasionId:
+                                              RightsService.currentOccasionId(),
+                                        ),
+                                      ).then((value) async {
+                                        if (value != null) {
+                                          var newMessage = value as String;
+                                          message.message = newMessage;
+                                          await DbNews.updateNewsMessage(
+                                              message);
+                                          ToastHelper.Show(context,
+                                              "Message has been changed.".tr());
+                                        }
+                                      });
+                                    }
+                                    await loadData();
+                                  },
+                                  icon: const Icon(Icons.more_horiz),
+                                  itemBuilder: (BuildContext context) =>
+                                      <PopupMenuEntry<ContextMenuChoice>>[
+                                    PopupMenuItem<ContextMenuChoice>(
+                                      value: ContextMenuChoice.edit,
+                                      child: Text(CommonStrings.edit).tr(),
+                                    ),
+                                    PopupMenuItem<ContextMenuChoice>(
+                                      value: ContextMenuChoice.delete,
+                                      child: const Text("Delete").tr(),
+                                    )
+                                  ],
+                                ),
                             ],
-                          ),
+                          );
+                        }),
                       ],
-                    );
-                  }),
-                ],
-              ],
-            ),
-          ),
+                    ],
+                  ),
+                ),
         ),
       ),
       floatingActionButton: Visibility(
@@ -265,7 +297,8 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   TextStyle unReadTextStyle() => TextStyle(fontWeight: FontWeight.bold);
-  TextStyle readTextStyle() => TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).hintColor);
+  TextStyle readTextStyle() => TextStyle(
+      fontWeight: FontWeight.bold, color: Theme.of(context).hintColor);
 }
 
 enum ContextMenuChoice { delete, edit }

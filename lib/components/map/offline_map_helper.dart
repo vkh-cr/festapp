@@ -43,7 +43,8 @@ class OfflineMapHelper {
 
   /// Computes the local file path for the offline MBTiles package,
   /// deleting any old .mbtiles files not matching the current file name.
-  static Future<String> getOfflinePackagePath(String offlineMapPackageURL) async {
+  static Future<String> getOfflinePackagePath(
+      String offlineMapPackageURL) async {
     final directory = await getApplicationDocumentsDirectory();
     String fileName = Uri.parse(offlineMapPackageURL).pathSegments.last;
     String filePath = "${directory.path}/$fileName";
@@ -125,20 +126,20 @@ class OfflineMapHelper {
   }
 
   /// Retrieves (or downloads if available) the offline MBTiles package.
-  static Future<File?> getOfflineMapPackage(
-      String offlineMapPackageURL, String filePath, Function(double) onProgress) async {
+  static Future<File?> getOfflineMapPackage(String offlineMapPackageURL,
+      String filePath, Function(double) onProgress) async {
     return await getOrDownloadFile(offlineMapPackageURL, filePath, onProgress);
   }
 
   /// Retrieves (or downloads if available) the sprite JSON file.
-  static Future<File?> getSpriteJson(
-      String spriteJsonUrl, String filePath, Function(double) onProgress) async {
+  static Future<File?> getSpriteJson(String spriteJsonUrl, String filePath,
+      Function(double) onProgress) async {
     return await getOrDownloadFile(spriteJsonUrl, filePath, onProgress);
   }
 
   /// Retrieves (or downloads if available) the sprite image file.
-  static Future<File?> getSpriteImage(
-      String spriteImageUrl, String filePath, Function(double) onProgress) async {
+  static Future<File?> getSpriteImage(String spriteImageUrl, String filePath,
+      Function(double) onProgress) async {
     return await getOrDownloadFile(spriteImageUrl, filePath, onProgress);
   }
 

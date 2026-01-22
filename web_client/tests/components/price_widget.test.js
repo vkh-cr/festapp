@@ -2,6 +2,7 @@
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert';
 import { PriceWidget } from '../../src/components/forms/widgets/price_widget.js';
+import { formatPrice } from '../../src/utils/formatters.js';
 
 // --- MOCK DOM ENVIROMENT ---
 if (typeof document === 'undefined') {
@@ -140,7 +141,11 @@ describe('PriceWidget Logic', () => {
 
         // Verify Content
         assert.ok(widget.element.innerHTML.includes('1x'), 'Should display item count');
-        assert.ok(widget.element.innerHTML.includes('0 CZK'), 'Should display zero price');
+        const expectedPrice = formatPrice(0, 'CZK', 0, 'cs-CZ').replace(/\u00A0/g, ' '); // Normalize NBSP
+        
+        // Easier: Check that the string is present, normalizing spaces
+        const widgetHtml = widget.element.innerHTML.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' ');
+        assert.ok(widgetHtml.includes(expectedPrice), `Should display zero price (Expected: ${expectedPrice}, Got: ${widgetHtml})`);
     });
 
     it('should be VISIBLE and ENABLE submit button when price > 0 (Standard)', () => {

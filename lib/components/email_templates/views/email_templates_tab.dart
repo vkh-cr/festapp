@@ -1,4 +1,3 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -28,17 +27,23 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (widget.unitId == null && occasionLink == null && context.routeData.params.isNotEmpty) {
-      occasionLink = context.routeData.params.get(AppRouter.linkFormatted, null);
+    if (widget.unitId == null &&
+        occasionLink == null &&
+        context.routeData.params.isNotEmpty) {
+      occasionLink =
+          context.routeData.params.get(AppRouter.linkFormatted, null);
     }
     loadData();
   }
 
   Future<void> loadData() async {
     if (widget.unitId != null) {
-      emailTemplatesResponse = await DbEmailTemplates.getEntityEmailTemplates(unitId: widget.unitId!);
+      emailTemplatesResponse = await DbEmailTemplates.getEntityEmailTemplates(
+          unitId: widget.unitId!);
     } else if (occasionLink != null) {
-      emailTemplatesResponse = await DbEmailTemplates.getAllEmailTemplatesViaOccasionLink(occasionLink!);
+      emailTemplatesResponse =
+          await DbEmailTemplates.getAllEmailTemplatesViaOccasionLink(
+              occasionLink!);
     }
 
     if (emailTemplatesResponse != null) {
@@ -50,7 +55,10 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
   Future<void> _handleEdit(EmailTemplateModel template) async {
     await showDialog(
       context: context,
-      builder: (context) => EmailTemplateSettingsPage(template: template, emailTemplatesResponse: emailTemplatesResponse!,),
+      builder: (context) => EmailTemplateSettingsPage(
+        template: template,
+        emailTemplatesResponse: emailTemplatesResponse!,
+      ),
     );
     await loadData();
   }
@@ -67,7 +75,7 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
       return 'default'.tr();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,12 +95,15 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
                   Container(
                     width: 350,
                     decoration: BoxDecoration(
-                      border: Border(left: BorderSide(color: ThemeConfig.grey300(context))),
+                      border: Border(
+                          left:
+                              BorderSide(color: ThemeConfig.grey300(context))),
                     ),
                     child: ListView(
                       padding: const EdgeInsets.all(16.0),
                       children: [
-                        EmailBannerSettingsCard(response: emailTemplatesResponse!),
+                        EmailBannerSettingsCard(
+                            response: emailTemplatesResponse!),
                       ],
                     ),
                   ),
@@ -120,7 +131,8 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
                 children: [
                   Text(
                     EmailTemplatesStrings.title,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   if (isMobile && emailTemplatesResponse != null) ...[
                     const SizedBox(height: 16),

@@ -29,14 +29,17 @@ class HtmlHelper {
 
     for (var image in images) {
       String? src = image.attributes['src'];
-      if (src != null && (src.startsWith(jpegBase64Prefix) || src.startsWith(pngBase64Prefix))) {
+      if (src != null &&
+          (src.startsWith(jpegBase64Prefix) ||
+              src.startsWith(pngBase64Prefix))) {
         String base64Data = src.contains(jpegBase64Prefix)
             ? src.replaceFirst(jpegBase64Prefix, '')
             : src.replaceFirst(pngBase64Prefix, '');
 
         // Calculate the approximate size of the base64 data in bytes
         int base64Length = base64Data.length;
-        int imageSizeInBytes = (base64Length * 3) ~/ 4; // ~75% of base64 string length
+        int imageSizeInBytes =
+            (base64Length * 3) ~/ 4; // ~75% of base64 string length
 
         if (imageSizeInBytes > maxImageSize) {
           Uint8List imageData = base64.decode(base64Data);
@@ -69,8 +72,8 @@ class HtmlHelper {
     return document.outerHtml;
   }
 
-  static Future<String> compressImage(
-      String htmlText, String imageSrc, void Function() onImageProcessed) async {
+  static Future<String> compressImage(String htmlText, String imageSrc,
+      void Function() onImageProcessed) async {
     final document = html_parser.parse(htmlText);
     final image = document.querySelector('img[src="$imageSrc"]');
 
@@ -84,13 +87,15 @@ class HtmlHelper {
       Uint8List compressedData;
 
       if (imageSrc.startsWith(jpegBase64Prefix)) {
-        compressedData = await ImageCompressionHelper.compressJpeg(imageData, jpegThreshold);
+        compressedData =
+            await ImageCompressionHelper.compressJpeg(imageData, jpegThreshold);
         String compressedBase64 = base64.encode(compressedData);
         image.attributes['src'] = '$jpegBase64Prefix$compressedBase64';
       } else if (imageSrc.startsWith(pngBase64Prefix)) {
         img.Image? originalImage = img.decodeImage(imageData);
         if (originalImage != null) {
-          compressedData = await ImageCompressionHelper.compressPng(imageData, pngThreshold);
+          compressedData =
+              await ImageCompressionHelper.compressPng(imageData, pngThreshold);
           String compressedBase64 = base64.encode(compressedData);
           image.attributes['src'] = '$pngBase64Prefix$compressedBase64';
         }
@@ -104,17 +109,21 @@ class HtmlHelper {
   }
 
   static String removeColor(String htmlText) {
-    RegExp regExp = RegExp(r'(background-color|color)\s*:\s*[^;]+;?\s*', caseSensitive: false);
+    RegExp regExp = RegExp(r'(background-color|color)\s*:\s*[^;]+;?\s*',
+        caseSensitive: false);
     String cleanedHtmlString = htmlText.replaceAll(regExp, '');
     return cleanedHtmlString;
   }
 
   static String detectAndReplaceLinks(String htmlText) {
-    final emailRegex = RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b');
-    final urlRegex = RegExp(r'\b((http|https)://|www\.)[^\s/$.?#].\S*', caseSensitive: false);
+    final emailRegex =
+        RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b');
+    final urlRegex = RegExp(r'\b((http|https)://|www\.)[^\s/$.?#].\S*',
+        caseSensitive: false);
 
     // Updated phoneRegex to ensure there must be spaces or other separators between digit groups
-    final phoneRegex = RegExp(r'\b(\+?[0-9]{1,4}[-.\s]+)?(\(?\d{2,3}\)?[-.\s]+)?\d{3}[-.\s]+\d{3}[-.\s]+\d{3,4}\b');
+    final phoneRegex = RegExp(
+        r'\b(\+?[0-9]{1,4}[-.\s]+)?(\(?\d{2,3}\)?[-.\s]+)?\d{3}[-.\s]+\d{3}[-.\s]+\d{3,4}\b');
 
     final document = html_parser.parse(htmlText);
 
@@ -132,12 +141,12 @@ class HtmlHelper {
       var hrefValue = matchedText;
 
       if (hrefPrefix.isEmpty && matchedText.startsWith('www.')) {
-        hrefValue = 'https://$matchedText';  // Add https:// to href only
+        hrefValue = 'https://$matchedText'; // Add https:// to href only
       }
 
       final anchor = Element.tag('a')
         ..attributes['href'] = '$hrefPrefix$hrefValue'
-        ..text = matchedText;  // Keep the original text
+        ..text = matchedText; // Keep the original text
       newNodes.add(anchor);
 
       lastIndex = match.end;
@@ -194,26 +203,24 @@ class HtmlHelper {
 
   static String stripHtml(String htmlText) {
     return htmlText.replaceAll(
-        RegExp(r'<(?!img\b)[^>]*>', caseSensitive: false),
-        ''
-    );
+        RegExp(r'<(?!img\b)[^>]*>', caseSensitive: false), '');
   }
 
   static bool isHtmlEmptyOrNull(String? htmlText) {
-    if(htmlText == null) {
+    if (htmlText == null) {
       return true;
     }
 
-    return htmlText.replaceAll(
-        RegExp(r'<(?!img\b)[^>]*>', caseSensitive: false),
-        ''
-    ).trim().isEmpty;
+    return htmlText
+        .replaceAll(RegExp(r'<(?!img\b)[^>]*>', caseSensitive: false), '')
+        .trim()
+        .isEmpty;
   }
 
   /// Returns true if the HTML content is “long” (text length exceeds threshold)
   /// or contains at least one <img> tag, indicating it should be shown in a popup.
   static bool isHtmlLong(String? htmlText, {int lengthThreshold = 500}) {
-    if(htmlText == null) {
+    if (htmlText == null) {
       return false;
     }
     // Quick check for any <img> tags
@@ -241,21 +248,21 @@ class HtmlHelper {
     return result;
   }
 
-
   static Future<String> storeImagesToOccasion(
-      String oldHtml,
-      String newHtml,
-      int occasionId,
-      { int? maxWidth,
-        int maxBytes = AppConfig.imagesMaxBytes }) async {
+      String oldHtml, String newHtml, int occasionId,
+      {int? maxWidth, int maxBytes = AppConfig.imagesMaxBytes}) async {
     // Parse the old and new HTML documents.
     final oldDocument = html_parser.parse(oldHtml);
     final newDocument = html_parser.parse(newHtml);
 
     // Collect image src values from the old HTML.
-    oldDocument.getElementsByTagName('img')
+    oldDocument
+        .getElementsByTagName('img')
         .map((img) => img.attributes['src'] ?? '')
-        .where((src) => src.isNotEmpty && !(src.startsWith(jpegBase64Prefix) || src.startsWith(pngBase64Prefix)))
+        .where((src) =>
+            src.isNotEmpty &&
+            !(src.startsWith(jpegBase64Prefix) ||
+                src.startsWith(pngBase64Prefix)))
         .toList();
 
     // Process each image in the new HTML.
@@ -264,7 +271,8 @@ class HtmlHelper {
       String? src = image.attributes['src'];
       if (src == null || src.isEmpty) continue;
 
-      bool isBase64 = src.startsWith(jpegBase64Prefix) || src.startsWith(pngBase64Prefix);
+      bool isBase64 =
+          src.startsWith(jpegBase64Prefix) || src.startsWith(pngBase64Prefix);
 
       // For non-base64 images, check if it has already been uploaded.
       bool alreadyUploaded = false;
@@ -292,16 +300,19 @@ class HtmlHelper {
       // Only use resize parameter if the image is bigger than given width.
       Uint8List compressedImageData;
 
-      if(imageData.lengthInBytes > maxBytes) {
+      if (imageData.lengthInBytes > maxBytes) {
         var decodedImage = img.decodeImage(imageData);
         if (decodedImage != null) {
           // Determine the target width: use maxWidth if the image is too wide,
           // otherwise keep the original width.
-          int targetWidth = maxWidth != null && decodedImage.width > maxWidth ? maxWidth : decodedImage.width;
+          int targetWidth = maxWidth != null && decodedImage.width > maxWidth
+              ? maxWidth
+              : decodedImage.width;
           // Calculate the scaling factor.
           double scale = targetWidth / decodedImage.width;
           // Estimate the new file size at 100% quality after scaling.
-          int estimatedSizeQuality100 = (decodedImage.lengthInBytes * scale * scale).floor();
+          int estimatedSizeQuality100 =
+              (decodedImage.lengthInBytes * scale * scale).floor();
 
           int dynamicQuality = 100;
           if (estimatedSizeQuality100 > maxBytes) {
@@ -325,7 +336,8 @@ class HtmlHelper {
       }
 
       // Upload the compressed image and get the public URL.
-      final publicUrl = await DbImages.uploadImage(compressedImageData, occasionId, null);
+      final publicUrl =
+          await DbImages.uploadImage(compressedImageData, occasionId, null);
       // Update the image tag's src attribute.
       image.attributes['src'] = publicUrl;
     }

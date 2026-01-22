@@ -24,13 +24,13 @@ class MapPlaceModel {
 
   factory MapPlaceModel.fromPlaceModel(PlaceModel place) {
     return MapPlaceModel(
-      id: place.id,
-      title: place.title!,
-      description: place.description,
-      type: place.type,
-      latLng: LatLng(place.getLat(), place.getLng()),
-      icon: place.icon,
-      events: List<TimeBlockItem>.from(place.events.map((e) => TimeBlockItem.fromEventModelAsChild(e)))
-    );
+        id: place.id,
+        title: place.title!,
+        description: place.description,
+        type: place.type,
+        latLng: LatLng(place.getLat(), place.getLng()),
+        icon: place.icon,
+        events: List<TimeBlockItem>.from(
+            place.events.map((e) => TimeBlockItem.fromEventModelAsChild(e))));
   }
 }

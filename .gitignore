@@ -143,3 +143,14 @@ supabase/.env
 
 # Local Env Files
 **/.env.local
+
+# Agent Skills
+.agent/skills/skills/*
+!.agent/skills/skills/project-workflows/
+
+# Broader Agent Skills Ignore
+.agent/skills/*
+!.agent/skills/skills/
+.agent/skills/skills/*
+!.agent/skills/skills/project-workflows/
+.set_appstore_env.sh

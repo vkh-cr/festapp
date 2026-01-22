@@ -39,11 +39,13 @@ class UnitUserModel extends ITrinaRowModel {
       sex: json[Tb.occasion_users.data_sex]?.toString().trim(),
       emailReadonly: json[Tb.user_info.email_readonly]?.toString().trim(),
       isManager: json[Tb.occasion_users.is_manager] == true ||
-          json[Tb.occasion_users.is_manager]?.toString().toLowerCase() == 'true',
+          json[Tb.occasion_users.is_manager]?.toString().toLowerCase() ==
+              'true',
       isEditor: json[Tb.occasion_users.is_editor] == true ||
           json[Tb.occasion_users.is_editor]?.toString().toLowerCase() == 'true',
       isEditorView: json[Tb.occasion_users.is_editor_view] == true ||
-          json[Tb.occasion_users.is_editor_view]?.toString().toLowerCase() == 'true',
+          json[Tb.occasion_users.is_editor_view]?.toString().toLowerCase() ==
+              'true',
       data: json[Tb.occasion_users.data] is Map<String, dynamic>
           ? Map<String, dynamic>.from(json[Tb.occasion_users.data])
           : {},
@@ -81,25 +83,25 @@ class UnitUserModel extends ITrinaRowModel {
         emailReadonly: json[UserColumns.EMAIL],
         isManager: json[UserColumns.UNIT_MANAGER] == "true" ? true : false,
         isEditor: json[UserColumns.UNIT_EDITOR] == "true" ? true : false,
-        isEditorView: json[UserColumns.UNIT_EDITOR_VIEW] == "true" ? true : false,
+        isEditorView:
+            json[UserColumns.UNIT_EDITOR_VIEW] == "true" ? true : false,
         // The 'data' field is not represented in UserColumns or created in toTrinaRow.
         // It is omitted here as it cannot be mapped from the grid data.
-        data: json[Tb.occasion_users.data]
-    );
+        data: json[Tb.occasion_users.data]);
   }
 
   Map toJson() => {
-    Tb.unit_users.user: user,
-    Tb.unit_users.unit: unit,
-    Tb.user_info.name: name,
-    Tb.user_info.surname: surname,
-    Tb.user_info.sex: sex,
-    Tb.occasion_users.data_email: emailReadonly,
-    Tb.unit_users.is_manager: isManager,
-    Tb.unit_users.is_editor: isEditor,
-    Tb.unit_users.is_editor_view: isEditorView,
-    Tb.unit_users.data: data,
-  };
+        Tb.unit_users.user: user,
+        Tb.unit_users.unit: unit,
+        Tb.user_info.name: name,
+        Tb.user_info.surname: surname,
+        Tb.user_info.sex: sex,
+        Tb.occasion_users.data_email: emailReadonly,
+        Tb.unit_users.is_manager: isManager,
+        Tb.unit_users.is_editor: isEditor,
+        Tb.unit_users.is_editor_view: isEditorView,
+        Tb.unit_users.data: data,
+      };
 
   @override
   Future<void> deleteMethod(BuildContext context) async {

@@ -49,7 +49,14 @@ class OrderModel extends ITrinaRowModel {
   static const String sentState = "sent";
   static const String usedState = "used";
   static const String stornoState = "storno";
-  static const orderStates = [expiredState, orderedState, paidState, sentState, usedState, stornoState];
+  static const orderStates = [
+    expiredState,
+    orderedState,
+    paidState,
+    sentState,
+    usedState,
+    stornoState
+  ];
 
   static String stateToLocale(String? state) {
     if (state == null || state.isEmpty) return "Not Set".tr();
@@ -84,12 +91,16 @@ class OrderModel extends ITrinaRowModel {
   }
 
   bool isExpired() {
-    if (state != orderedState || paymentInfoModel == null || paymentInfoModel!.deadline == null) {
+    if (state != orderedState ||
+        paymentInfoModel == null ||
+        paymentInfoModel!.deadline == null) {
       return false;
     }
     // Create date-only objects for now and for the deadline.
-    final nowDate = DateTime(TimeHelper.now().year, TimeHelper.now().month, TimeHelper.now().day);
-    final deadlineDate = DateTime(paymentInfoModel!.deadline!.year, paymentInfoModel!.deadline!.month, paymentInfoModel!.deadline!.day);
+    final nowDate = DateTime(
+        TimeHelper.now().year, TimeHelper.now().month, TimeHelper.now().day);
+    final deadlineDate = DateTime(paymentInfoModel!.deadline!.year,
+        paymentInfoModel!.deadline!.month, paymentInfoModel!.deadline!.day);
     return nowDate.isAfter(deadlineDate);
   }
 
@@ -111,7 +122,8 @@ class OrderModel extends ITrinaRowModel {
         color = Colors.blue[600]!; // A darker shade of grey for used
         break;
       case stornoState:
-        color = Colors.grey[700]!; // A lighter shade of green for canceled (storno)
+        color =
+            Colors.grey[700]!; // A lighter shade of green for canceled (storno)
         break;
       default:
         color = Colors.black; // Black for unknown states
@@ -166,8 +178,12 @@ class OrderModel extends ITrinaRowModel {
           : null,
       currencyCode: json[TbEshop.orders.currency_code],
       state: json[TbEshop.orders.state],
-      formKey: orderData is Map<String, dynamic> ? orderData[TbEshop.orders.data_form] : null,
-      formId: (json['form'] != null && json['form'] is Map && json['form'][Tb.forms.id] != null)
+      formKey: orderData is Map<String, dynamic>
+          ? orderData[TbEshop.orders.data_form]
+          : null,
+      formId: (json['form'] != null &&
+              json['form'] is Map &&
+              json['form'][Tb.forms.id] != null)
           ? json['form'][Tb.forms.id]
           : (json['form_id']),
       data: orderData,
@@ -180,34 +196,55 @@ class OrderModel extends ITrinaRowModel {
 
   static OrderModel fromPlutoJson(Map<String, dynamic> json) {
     return OrderModel(
-        id: json[EshopColumns.ORDER_ID] == -1 ? null : json[EshopColumns.ORDER_ID],
+        id: json[EshopColumns.ORDER_ID] == -1
+            ? null
+            : json[EshopColumns.ORDER_ID],
         noteHidden: json[EshopColumns.ORDER_NOTE_HIDDEN]);
   }
 
   Map<String, dynamic> toJson() => {
-    TbEshop.orders.id: id,
-    TbEshop.orders.created_at: createdAt?.toIso8601String(),
-    TbEshop.orders.updated_at: updatedAt?.toIso8601String(),
-    TbEshop.orders.price: price,
-    TbEshop.orders.state: state,
-    TbEshop.orders.data: data,
-    TbEshop.orders.occasion: occasion,
-    TbEshop.orders.payment_info: paymentInfo,
-    TbEshop.orders.currency_code: currencyCode,
-    TbEshop.orders.note_hidden: noteHidden,
-  };
+        TbEshop.orders.id: id,
+        TbEshop.orders.created_at: createdAt?.toIso8601String(),
+        TbEshop.orders.updated_at: updatedAt?.toIso8601String(),
+        TbEshop.orders.price: price,
+        TbEshop.orders.state: state,
+        TbEshop.orders.data: data,
+        TbEshop.orders.occasion: occasion,
+        TbEshop.orders.payment_info: paymentInfo,
+        TbEshop.orders.currency_code: currencyCode,
+        TbEshop.orders.note_hidden: noteHidden,
+      };
 
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
       EshopColumns.ORDER_ID: TrinaCell(value: id ?? 0),
       EshopColumns.ORDER_SYMBOL: TrinaCell(value: id ?? 0),
-      EshopColumns.ORDER_PRICE: TrinaCell(value: price != null ? Utilities.formatPrice(context, price!, currencyCode: currencyCode) : ""),
-      EshopColumns.ORDER_STATE: TrinaCell(value: OrderModel.formatState(state ?? orderedState)),
-      EshopColumns.PAYMENT_INFO_AMOUNT: TrinaCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!, currencyCode: paymentInfoModel!.currencyCode) : ""),
-      EshopColumns.PAYMENT_INFO_PAID: TrinaCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!, currencyCode: paymentInfoModel!.currencyCode) : ""),
-      EshopColumns.PAYMENT_INFO_RETURNED: TrinaCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!, currencyCode: paymentInfoModel!.currencyCode) : ""),
-      EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL: TrinaCell(value: paymentInfoModel?.variableSymbol ?? 0),
+      EshopColumns.ORDER_PRICE: TrinaCell(
+          value: price != null
+              ? Utilities.formatPrice(context, price!,
+                  currencyCode: currencyCode)
+              : ""),
+      EshopColumns.ORDER_STATE:
+          TrinaCell(value: OrderModel.formatState(state ?? orderedState)),
+      EshopColumns.PAYMENT_INFO_AMOUNT: TrinaCell(
+          value: paymentInfoModel?.amount != null
+              ? Utilities.formatPrice(context, paymentInfoModel!.amount!,
+                  currencyCode: paymentInfoModel!.currencyCode)
+              : ""),
+      EshopColumns.PAYMENT_INFO_PAID: TrinaCell(
+          value: paymentInfoModel?.paid != null
+              ? Utilities.formatPrice(context, paymentInfoModel!.paid!,
+                  currencyCode: paymentInfoModel!.currencyCode)
+              : ""),
+      EshopColumns.PAYMENT_INFO_ID: TrinaCell(value: paymentInfo ?? 0),
+      EshopColumns.PAYMENT_INFO_RETURNED: TrinaCell(
+          value: paymentInfoModel?.returned != null
+              ? Utilities.formatPrice(context, paymentInfoModel!.returned!,
+                  currencyCode: paymentInfoModel!.currencyCode)
+              : ""),
+      EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL:
+          TrinaCell(value: paymentInfoModel?.variableSymbol ?? 0),
       EshopColumns.PAYMENT_INFO_DEADLINE: TrinaCell(
         value: paymentInfoModel?.deadline != null
             ? DateFormat('yyyy-MM-dd').format(paymentInfoModel!.deadline!)
@@ -218,17 +255,19 @@ class OrderModel extends ITrinaRowModel {
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
       EshopColumns.ORDER_DATA: TrinaCell(value: toCustomerData()),
-      EshopColumns.ORDER_EMAIL: TrinaCell(value: data?[TbEshop.orders.data_email]),
+      EshopColumns.ORDER_EMAIL:
+          TrinaCell(value: data?[TbEshop.orders.data_email]),
       EshopColumns.TICKET_PRODUCTS: TrinaCell(
           value: relatedProducts != null
-              ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
+              ? relatedProducts!.map((p) => p.toBasicString()).join(" | ")
               : ""),
       EshopColumns.ORDER_DATA_NOTE: TrinaCell(value: toCustomerNote()),
       EshopColumns.ORDER_NOTE_HIDDEN: TrinaCell(value: noteHidden ?? ""),
       EshopColumns.ORDER_HISTORY: TrinaCell(value: ""),
       EshopColumns.ORDER_TRANSACTIONS: TrinaCell(value: ""),
       EshopColumns.ORDER_FORM: TrinaCell(value: form?.toString() ?? ""),
-      EshopColumns.PAYMENT_INFO_REMINDER_SENT: TrinaCell(value: paymentInfoModel!.isReminderSent.toString()),
+      EshopColumns.PAYMENT_INFO_REMINDER_SENT:
+          TrinaCell(value: paymentInfoModel!.isReminderSent.toString()),
       EshopColumns.ORDER_CONTRACT_DOWNLOAD: TrinaCell(value: ""),
     });
   }
