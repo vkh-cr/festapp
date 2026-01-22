@@ -243,31 +243,36 @@ class EmailTemplateModel {
       case 'TICKET_ORDER_CONFIRMATION':
         return {
           'title': EmailTemplatesStrings.usageTicketOrderConfirmationTitle,
-          'description': EmailTemplatesStrings.usageTicketOrderConfirmationDescription,
+          'description':
+              EmailTemplatesStrings.usageTicketOrderConfirmationDescription,
           'subs': substitutionDefinitions['TICKET_ORDER_CONFIRMATION'] ?? [],
         };
       case 'TICKET_ORDER_UPDATE':
         return {
           'title': EmailTemplatesStrings.usageTicketOrderUpdateTitle,
-          'description': EmailTemplatesStrings.usageTicketOrderUpdateDescription,
+          'description':
+              EmailTemplatesStrings.usageTicketOrderUpdateDescription,
           'subs': substitutionDefinitions['TICKET_ORDER_UPDATE'] ?? [],
         };
       case 'TICKET_ORDER_PAYMENT_DONE':
         return {
           'title': EmailTemplatesStrings.usageTicketOrderPaymentDoneTitle,
-          'description': EmailTemplatesStrings.usageTicketOrderPaymentDoneDescription,
+          'description':
+              EmailTemplatesStrings.usageTicketOrderPaymentDoneDescription,
           'subs': substitutionDefinitions['TICKET_ORDER_PAYMENT_DONE'] ?? [],
         };
       case 'TICKET_ORDER_REMINDER':
         return {
           'title': EmailTemplatesStrings.usageTicketOrderPaymentReminderTitle,
-          'description': EmailTemplatesStrings.usageTicketOrderPaymentReminderDescription,
+          'description':
+              EmailTemplatesStrings.usageTicketOrderPaymentReminderDescription,
           'subs': substitutionDefinitions['TICKET_ORDER_REMINDER'] ?? [],
         };
       case 'TICKET_ORDER_STORNO':
         return {
           'title': EmailTemplatesStrings.usageTicketOrderStornoTitle,
-          'description': EmailTemplatesStrings.usageTicketOrderStornoDescription,
+          'description':
+              EmailTemplatesStrings.usageTicketOrderStornoDescription,
           'subs': substitutionDefinitions['TICKET_ORDER_STORNO'] ?? [],
         };
       default:

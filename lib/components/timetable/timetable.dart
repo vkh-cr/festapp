@@ -13,13 +13,12 @@ import 'timetable_controller.dart';
 class Timetable extends StatefulWidget {
   final TimetableController controller;
 
-  const Timetable({
-    super.key,
-    required this.items,
-    required this.timetablePlaces,
-    this.occasionEnd,
-    required this.controller
-  });
+  const Timetable(
+      {super.key,
+      required this.items,
+      required this.timetablePlaces,
+      this.occasionEnd,
+      required this.controller});
 
   final DateTime? occasionEnd;
   final List<TimeBlockItem> items;
@@ -30,7 +29,6 @@ class Timetable extends StatefulWidget {
 }
 
 class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
-
   final int animationDuration = 1000;
   final double velocityAnimationSpeed = 0.5;
   final double globalMinimalScale = 0.2;
@@ -83,50 +81,56 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
     // Calculate the position of the current time
     if (now.isAfter(startTime!) && now.isBefore(endTime!)) {
-      var current = TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() * currentScale;
+      var current = TimeHelper.differenceInHours(startTime!, now) *
+          widget.controller.pixelsInHour() *
+          currentScale;
       setOffsetFromTime(current);
     } else {
-        setOffsetFromTime((defaultTime - startTime!.hourInDouble) * widget.controller.pixelsInHour() * currentScale);
+      setOffsetFromTime((defaultTime - startTime!.hourInDouble) *
+          widget.controller.pixelsInHour() *
+          currentScale);
     }
   }
 
   void setOffsetFromTime(double currentTimePosition, [bool animate = false]) {
     Offset initialOffset;
-    if(widget.controller.isTimeHorizontal){
+    if (widget.controller.isTimeHorizontal) {
       double initialXOffset = constraints!.maxWidth / 2 - currentTimePosition;
       initialOffset = constrainNewOffset(initialXOffset, 0, currentScale);
     } else {
-      double initialYOffset = constraints!.maxHeight / 2 - currentTimePosition - (widget.controller.horizontalAxisSpaceHeight() * currentScale);
+      double initialYOffset = constraints!.maxHeight / 2 -
+          currentTimePosition -
+          (widget.controller.horizontalAxisSpaceHeight() * currentScale);
       initialOffset = constrainNewOffset(0, initialYOffset, currentScale);
     }
 
-
-    if(animate) {
+    if (animate) {
       animateToOffset(currentOffset, initialOffset);
     } else {
       setOffset(initialOffset, currentScale);
     }
   }
 
+  double getTimetableHeight() => widget.controller.isTimeHorizontal
+      ? usedPlaces.length *
+              (widget.controller.verticalAxisTitleHeight() +
+                  widget.controller.itemStaticDimension()) +
+          widget.controller.horizontalAxisSpaceHeight()
+      : (hourCount ?? 24) * widget.controller.pixelsInHour() +
+          widget.controller.horizontalAxisSpaceHeight();
 
-
-  double getTimetableHeight() =>
-      widget.controller.isTimeHorizontal ?
-      usedPlaces.length * (widget.controller.verticalAxisTitleHeight() + widget.controller.itemStaticDimension()) +
-          widget.controller.horizontalAxisSpaceHeight() :
-      (hourCount ?? 24) * widget.controller.pixelsInHour() + widget.controller.horizontalAxisSpaceHeight();
-
-  double getTimetableWidth() =>
-      widget.controller.isTimeHorizontal ?
-      (hourCount ?? 24) * widget.controller.pixelsInHour() :
-      usedPlaces.length * (widget.controller.itemStaticDimension()) +
+  double getTimetableWidth() => widget.controller.isTimeHorizontal
+      ? (hourCount ?? 24) * widget.controller.pixelsInHour()
+      : usedPlaces.length * (widget.controller.itemStaticDimension()) +
           widget.controller.verticalAxisSpace();
 
   double getWindowWidth(BuildContext context) {
     return MediaQuery.of(context).size.width;
   }
 
-  double getMaxWidth() => getWindowWidth(context) > getTimetableWidth() ? getWindowWidth(context) : getTimetableWidth();
+  double getMaxWidth() => getWindowWidth(context) > getTimetableWidth()
+      ? getWindowWidth(context)
+      : getTimetableWidth();
 
   late AnimationController _animationController;
   late Animation<double> animationX =
@@ -151,7 +155,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     rebuildTimetable();
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      if(initial) {
+      if (initial) {
         initial = false;
         setNowTime();
       }
@@ -160,14 +164,17 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
   void rebuildTimetable() {
     usedItems = <TimeBlockItem>[];
-    for(var item in widget.items) {
-      if(widget.timetablePlaces.map((e) => e.id).contains(item.timeBlockPlace?.id)) {
+    for (var item in widget.items) {
+      if (widget.timetablePlaces
+          .map((e) => e.id)
+          .contains(item.timeBlockPlace?.id)) {
         //remove invalid items
-        if(item.endTime.isBefore(item.startTime)) {
+        if (item.endTime.isBefore(item.startTime)) {
           continue;
         }
 
-        if(item.duration().inMinutes<widget.controller.minimalDurationMinutes()){
+        if (item.duration().inMinutes <
+            widget.controller.minimalDurationMinutes()) {
           continue;
         }
         usedItems.add(item);
@@ -184,30 +191,29 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     });
 
     usedPlaces = <TimeBlockPlace>[];
-    for(var item in widget.timetablePlaces) {
-      if(usedItems.map((e) => e.timeBlockPlace?.id).contains(item.id)) {
+    for (var item in widget.timetablePlaces) {
+      if (usedItems.map((e) => e.timeBlockPlace?.id).contains(item.id)) {
         usedPlaces.add(item);
       }
     }
 
     var firstEvent = usedItems.reduce((current, next) =>
-    current.startTime.compareTo(next.startTime) < 0 ? current : next);
+        current.startTime.compareTo(next.startTime) < 0 ? current : next);
 
     var lastEvent = usedItems.reduce((current, next) =>
-    current.endTime.compareTo(next.endTime) > 0 ? current : next);
+        current.endTime.compareTo(next.endTime) > 0 ? current : next);
 
-    var range = DateTimeRange(start: firstEvent.startTime, end: lastEvent.endTime);
+    var range =
+        DateTimeRange(start: firstEvent.startTime, end: lastEvent.endTime);
     if (range.duration.inHours > 48) {
       throw Exception("Events range cannot exceed 48 hours.");
     }
 
     // Round down start; if exact on the hour, go back one hour
-    final adjustedStart = firstEvent.startTime
-        .roundDown()
-        .subtract(firstEvent.startTime.isAtSameMomentAs(
-        firstEvent.startTime.roundDown())
-        ? const Duration(hours: 1)
-        : Duration.zero);
+    final adjustedStart = firstEvent.startTime.roundDown().subtract(
+        firstEvent.startTime.isAtSameMomentAs(firstEvent.startTime.roundDown())
+            ? const Duration(hours: 1)
+            : Duration.zero);
 
     // Round up end
     final adjustedEnd = lastEvent.endTime.roundUp();
@@ -241,10 +247,12 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       endTime: endTime!,
       hourCount: hourCount!,
       controller: widget.controller,
-      basicStrings: widget.controller.isTimeHorizontal ? null : usedPlaces.map((p)=>p.title).toList(),
+      basicStrings: widget.controller.isTimeHorizontal
+          ? null
+          : usedPlaces.map((p) => p.title).toList(),
     );
 
-    if(!initial){
+    if (!initial) {
       timeNow = IgnorePointer(child: buildTimeNow());
     }
   }
@@ -257,7 +265,9 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.timetablePlaces.isEmpty || widget.timetablePlaces.isEmpty || widget.items.isEmpty) {
+    if (widget.timetablePlaces.isEmpty ||
+        widget.timetablePlaces.isEmpty ||
+        widget.items.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -271,7 +281,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         transformHitTests: true,
         transform: matrixTimetable,
         child: Stack(
-          children: [allItems, timeNow??SizedBox.shrink()],
+          children: [allItems, timeNow ?? SizedBox.shrink()],
         ),
       );
       List<Widget> stackChildren = [timetableItems];
@@ -279,8 +289,9 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       var verticalTitles = Transform(
         transform: matrixVerticalTitles,
         child: Stack(
-          children: widget.controller.isTimeHorizontal ?
-          generateVerticalPlaces() : generateVerticalTime(),
+          children: widget.controller.isTimeHorizontal
+              ? generateVerticalPlaces()
+              : generateVerticalTime(),
         ),
       );
       stackChildren.add(verticalTitles);
@@ -295,10 +306,13 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         onPointerSignal: (PointerSignalEvent event) {
           if (event is PointerScrollEvent) {
             _animationController.stop();
-           var xOffset = matrixTimetable.row0.a;
-           var yOffset = matrixTimetable.row1.a;
+            var xOffset = matrixTimetable.row0.a;
+            var yOffset = matrixTimetable.row1.a;
 
-            var constrainedDelta = constrainNewOffset(xOffset-event.scrollDelta.dx, yOffset-event.scrollDelta.dy, currentScale);
+            var constrainedDelta = constrainNewOffset(
+                xOffset - event.scrollDelta.dx,
+                yOffset - event.scrollDelta.dy,
+                currentScale);
             setOffset(constrainedDelta, currentScale);
 
             // animationY = Tween<double>(begin: yOffset, end: constrained.dy).animate(
@@ -333,35 +347,41 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     });
   }
 
-  List<Widget> generateVerticalPlaces(){
+  List<Widget> generateVerticalPlaces() {
     return List<Widget>.generate(
         usedPlaces.length,
-            (i) => Padding(
-          padding: EdgeInsets.fromLTRB(
-              0,
-              i * (widget.controller.itemStaticDimension() + widget.controller.verticalAxisTitleHeight()) + widget.controller.horizontalAxisSpaceHeight(),
-              0,
-              0),
-          child: Container(
-            height: widget.controller.verticalAxisTitleHeight(),
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                usedPlaces[i].title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+        (i) => Padding(
+              padding: EdgeInsets.fromLTRB(
+                  0,
+                  i *
+                          (widget.controller.itemStaticDimension() +
+                              widget.controller.verticalAxisTitleHeight()) +
+                      widget.controller.horizontalAxisSpaceHeight(),
+                  0,
+                  0),
+              child: Container(
+                height: widget.controller.verticalAxisTitleHeight(),
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    usedPlaces[i].title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ));
+            ));
   }
 
   List<Widget> generateVerticalTime() {
     List<Widget> widgets = [];
 
     // Calculate positioning and dimensions for the background
-    final double backgroundTopOffset = widget.controller.horizontalAxisSpaceHeight();
-    final double backgroundHeight = (hourCount! * widget.controller.pixelsInHour()) + widget.controller.verticalAxisTitleHeight();
+    final double backgroundTopOffset =
+        widget.controller.horizontalAxisSpaceHeight();
+    final double backgroundHeight =
+        (hourCount! * widget.controller.pixelsInHour()) +
+            widget.controller.verticalAxisTitleHeight();
 
     // Add the background widget as the first element.
     // It will be drawn first in the Stack, appearing behind other elements.
@@ -369,11 +389,13 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       Positioned(
         top: backgroundTopOffset,
         left: 0,
-        right: 0, // Makes the background take the full available width of its parent Stack
+        right:
+            0, // Makes the background take the full available width of its parent Stack
         height: backgroundHeight,
         child: Container(
           // Use a solid color for the background
-          color: ThemeConfig.backgroundColor(context), // Example: Use primaryContainer color from theme.
+          color: ThemeConfig.backgroundColor(
+              context), // Example: Use primaryContainer color from theme.
           // You can replace this with any specific Color like 'Colors.grey[200]' or a custom color.
         ),
       ),
@@ -382,7 +404,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     // Generate the time label widgets and add them to the list
     widgets.addAll(List<Widget>.generate(
       hourCount! + 1,
-          (i) {
+      (i) {
         var hour = startTime!.hour + i;
         if (hour > 23) {
           hour -= 24;
@@ -390,7 +412,8 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         return Padding(
           padding: EdgeInsets.fromLTRB(
               0,
-              i * widget.controller.pixelsInHour() + widget.controller.horizontalAxisSpaceHeight(),
+              i * widget.controller.pixelsInHour() +
+                  widget.controller.horizontalAxisSpaceHeight(),
               0,
               0),
           child: Container(
@@ -412,27 +435,35 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   void updateScaleLimits() {
-    minScale = (constraints!.maxHeight / getTimetableHeight()).clamp(globalMinimalScale, globalMaximalScale);
+    minScale = (constraints!.maxHeight / getTimetableHeight())
+        .clamp(globalMinimalScale, globalMaximalScale);
     currentScale = currentScale.clamp(minScale, 1.0);
   }
 
   Widget buildTimeNow() {
     var now = TimeHelper.now();
     Widget container;
-    if(widget.occasionEnd != null && now.isAfter(widget.occasionEnd!)) {
+    if (widget.occasionEnd != null && now.isAfter(widget.occasionEnd!)) {
       container = const SizedBox.shrink();
     } else if (now.isAfter(endTime!)) {
       container = Container(
         width: getTimetableWidth(),
         height: getTimetableHeight(),
-        color: ThemeConfig.blackColor(context).withValues(alpha: ThemeConfig.timetableTimeSplitOpacity),
+        color: ThemeConfig.blackColor(context)
+            .withValues(alpha: ThemeConfig.timetableTimeSplitOpacity),
       );
     } else if (now.isAfter(startTime!) && now.isBefore(endTime!)) {
-      var diffLength = TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour();
+      var diffLength = TimeHelper.differenceInHours(startTime!, now) *
+          widget.controller.pixelsInHour();
       container = Container(
-        width: widget.controller.isTimeHorizontal ? diffLength : getTimetableWidth(),
-        height: widget.controller.isTimeHorizontal ? getTimetableHeight() : diffLength + widget.controller.horizontalAxisSpaceHeight(),
-        color: ThemeConfig.blackColor(context).withValues(alpha: ThemeConfig.timetableTimeSplitOpacity),
+        width: widget.controller.isTimeHorizontal
+            ? diffLength
+            : getTimetableWidth(),
+        height: widget.controller.isTimeHorizontal
+            ? getTimetableHeight()
+            : diffLength + widget.controller.horizontalAxisSpaceHeight(),
+        color: ThemeConfig.blackColor(context)
+            .withValues(alpha: ThemeConfig.timetableTimeSplitOpacity),
       );
     } else {
       container = const SizedBox.shrink();
@@ -446,42 +477,49 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         ),
         container,
         if (now.isAfter(startTime!) && now.isBefore(endTime!))
-              Positioned(
-                left:  widget.controller.isTimeHorizontal ?
-                TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() :
-                0,
-                top: widget.controller.isTimeHorizontal ?
-                0 :
-                TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() + widget.controller.horizontalAxisSpaceHeight(),
-                child: Container(
-                  width: widget.controller.isTimeHorizontal ? 2 : getTimetableWidth(),
-                  height: widget.controller.isTimeHorizontal ? getTimetableHeight() : 2,
-                  decoration: BoxDecoration(
-                    color: ThemeConfig.timetableTimeSplitColor(context),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
+          Positioned(
+            left: widget.controller.isTimeHorizontal
+                ? TimeHelper.differenceInHours(startTime!, now) *
+                    widget.controller.pixelsInHour()
+                : 0,
+            top: widget.controller.isTimeHorizontal
+                ? 0
+                : TimeHelper.differenceInHours(startTime!, now) *
+                        widget.controller.pixelsInHour() +
+                    widget.controller.horizontalAxisSpaceHeight(),
+            child: Container(
+              width:
+                  widget.controller.isTimeHorizontal ? 2 : getTimetableWidth(),
+              height:
+                  widget.controller.isTimeHorizontal ? getTimetableHeight() : 2,
+              decoration: BoxDecoration(
+                color: ThemeConfig.timetableTimeSplitColor(context),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
                   ),
-                ),
+                ],
               ),
-              if(!widget.controller.isTimeHorizontal)
-                Positioned(
-                    left: 10,
-                    top: widget.controller.isTimeHorizontal ?
-                    0 :
-                    TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() + widget.controller.horizontalAxisSpaceHeight() - 12,
-                    child: TimetableHelper.showTime(context, now, widget.controller)
-                )
+            ),
+          ),
+        if (!widget.controller.isTimeHorizontal)
+          Positioned(
+              left: 10,
+              top: widget.controller.isTimeHorizontal
+                  ? 0
+                  : TimeHelper.differenceInHours(startTime!, now) *
+                          widget.controller.pixelsInHour() +
+                      widget.controller.horizontalAxisSpaceHeight() -
+                      12,
+              child: TimetableHelper.showTime(context, now, widget.controller))
       ],
     );
   }
 
   Future<void> addToMyProgram(TimeBlockItem item) async {
-    if(!await DbEvents.addToMySchedule(context, item.id)) {
+    if (!await DbEvents.addToMySchedule(context, item.id)) {
       return;
     }
     setState(() {
@@ -539,21 +577,25 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
   void onScaleEnded(ScaleEndDetails details) {
     var velocity = details.velocity;
-    if(velocity.pixelsPerSecond.dx == 0 && velocity.pixelsPerSecond.dy == 0){
+    if (velocity.pixelsPerSecond.dx == 0 && velocity.pixelsPerSecond.dy == 0) {
       return;
     }
 
     var start = Offset(matrixTimetable.row0.a, matrixTimetable.row1.a);
-    var end = constrainNewOffset(start.dx+
-        velocity.pixelsPerSecond.dx*velocityAnimationSpeed, start.dy+velocity.pixelsPerSecond.dy*velocityAnimationSpeed, currentScale);
+    var end = constrainNewOffset(
+        start.dx + velocity.pixelsPerSecond.dx * velocityAnimationSpeed,
+        start.dy + velocity.pixelsPerSecond.dy * velocityAnimationSpeed,
+        currentScale);
     animateToOffset(start, end);
   }
 
   void animateToOffset(Offset start, Offset end) {
     animationY = Tween<double>(begin: start.dy, end: end.dy).animate(
-        CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
+        CurvedAnimation(
+            parent: _animationController, curve: Curves.easeOutQuad));
     animationX = Tween<double>(begin: start.dx, end: end.dx).animate(
-        CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
+        CurvedAnimation(
+            parent: _animationController, curve: Curves.easeOutQuad));
 
     _animationController.duration = Duration(milliseconds: animationDuration);
     _animationController.reset();
@@ -568,10 +610,13 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     Offset countedOffset = details.focalPointDelta;
     Offset localPoint = details.localFocalPoint;
     double scaleDelta = details.scale;
-    Offset currentTimetableOffset = Offset(matrixTimetable.row0.a, matrixTimetable.row1.a);
+    Offset currentTimetableOffset =
+        Offset(matrixTimetable.row0.a, matrixTimetable.row1.a);
 
     // Compute new scale
-    double newScale = ((1 - ((1 - scaleDelta) * scaleSlowDownPercentage)) * currentScale).clamp(minScale, 1.0);
+    double newScale =
+        ((1 - ((1 - scaleDelta) * scaleSlowDownPercentage)) * currentScale)
+            .clamp(minScale, 1.0);
 
     // Calculate focal point relative to the timetable
     Offset focalPoint = (localPoint - currentTimetableOffset) / currentScale;
@@ -580,7 +625,8 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     Offset newOffset = localPoint - focalPoint * newScale + countedOffset;
 
     // Constrain the new offset to ensure the timetable stays within bounds
-    Offset constrainedOffset = constrainNewOffset(newOffset.dx, newOffset.dy, newScale);
+    Offset constrainedOffset =
+        constrainNewOffset(newOffset.dx, newOffset.dy, newScale);
 
     // Update the current scale and offset
     currentScale = newScale;

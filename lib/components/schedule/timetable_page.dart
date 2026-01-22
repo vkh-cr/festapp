@@ -50,13 +50,15 @@ class _TimetablePageState extends State<TimetablePage>
     });
 
     _tabsRouterListener = () async {
-      if (mounted && context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.timetable)) {
+      if (mounted &&
+          context.tabsRouter.activeIndex ==
+              OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.timetable)) {
         await loadData();
       }
     };
 
     final tabsRouter = context.findAncestorStateOfType<AutoTabsRouterState>();
-    if(tabsRouter != null) {
+    if (tabsRouter != null) {
       context.tabsRouter.addListener(_tabsRouterListener);
     }
 
@@ -66,7 +68,7 @@ class _TimetablePageState extends State<TimetablePage>
   @override
   void dispose() {
     final tabsRouter = context.findAncestorStateOfType<AutoTabsRouterState>();
-    if(tabsRouter != null) {
+    if (tabsRouter != null) {
       context.tabsRouter.removeListener(_tabsRouterListener);
     }
     _tabController?.dispose();
@@ -79,8 +81,9 @@ class _TimetablePageState extends State<TimetablePage>
 
     await loadDataOffline();
 
-    _events = await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
-    if(!AuthService.isLoggedIn()){
+    _events =
+        await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
+    if (!AuthService.isLoggedIn()) {
       await OfflineDataService.updateEventsWithMySchedule(_events);
     }
 
@@ -97,18 +100,17 @@ class _TimetablePageState extends State<TimetablePage>
         .where((element) => !element.isHidden)
         .map((x) => TimeBlockPlace.fromPlaceModel(x)));
 
-    if(mounted) {
+    if (mounted) {
       setState(() {
         _timetablePlaces = timetablePlaces;
 
-        _items = _events
-            .map((e) => TimeBlockItem.fromEventModel(e)).toList();
+        _items = _events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
 
         timetableController.rebuild?.call();
 
-        _days = TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour);
+        _days = TimeBlockHelper.splitTimeBlocksByDate(
+            _items, context, AppConfig.daySplitHour);
         setupTabController(_days);
-
       });
     }
   }
@@ -117,11 +119,14 @@ class _TimetablePageState extends State<TimetablePage>
       DateFormat("EEEE", context.locale.languageCode).format(e);
 
   void setupTabController(List<TimeBlockGroup> days) {
-    _currentIndex ??= TimeHelper.getTimeNowIndexFromDays(days.map((d)=>d.dateTime!.weekday));
+    _currentIndex ??= TimeHelper.getTimeNowIndexFromDays(
+        days.map((d) => d.dateTime!.weekday));
 
     if (_tabController?.length != days.length) {
-      _tabController?.removeListener(reactionOnIndexChanged); // Clean up old listener
-      _tabController = TabController(vsync: this, length: days.length, initialIndex: _currentIndex ?? 0);
+      _tabController
+          ?.removeListener(reactionOnIndexChanged); // Clean up old listener
+      _tabController = TabController(
+          vsync: this, length: days.length, initialIndex: _currentIndex ?? 0);
     } else {
       _tabController?.index = _currentIndex ?? 0;
     }
@@ -153,11 +158,10 @@ class _TimetablePageState extends State<TimetablePage>
     await OfflineDataService.updateEventsWithMySchedule(_events);
     await OfflineDataService.updateEventsWithGroupName(_events);
 
-    var items = _events
-        .map((e) => TimeBlockItem.fromEventModel(e)).toList();
+    var items = _events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
 
-
-    _days = TimeBlockHelper.splitTimeBlocksByDate(items, context, AppConfig.daySplitHour);
+    _days = TimeBlockHelper.splitTimeBlocksByDate(
+        items, context, AppConfig.daySplitHour);
     setupTabController(_days);
     setState(() {});
   }
@@ -165,7 +169,7 @@ class _TimetablePageState extends State<TimetablePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ThemeConfig.timetableBackgroundOutside(context),
+        backgroundColor: ThemeConfig.timetableBackgroundOutside(context),
         appBar: AppBar(
           title: Text("Schedule".tr()),
           leading: PopButton(),
@@ -191,10 +195,13 @@ class _TimetablePageState extends State<TimetablePage>
             }),
           ),
         ),
-        body: _days.isEmpty || _events.isEmpty ? SizedBox.shrink() : Timetable(
-            controller: timetableController,
-            items: _days[_currentIndex??0].events,
-            timetablePlaces: _timetablePlaces,
-            occasionEnd: RightsService.currentOccasion()!.endTime,));
+        body: _days.isEmpty || _events.isEmpty
+            ? SizedBox.shrink()
+            : Timetable(
+                controller: timetableController,
+                items: _days[_currentIndex ?? 0].events,
+                timetablePlaces: _timetablePlaces,
+                occasionEnd: RightsService.currentOccasion()!.endTime,
+              ));
   }
 }

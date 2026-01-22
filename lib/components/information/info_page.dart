@@ -58,7 +58,10 @@ class _InfoPageState extends State<InfoPage> {
     return Scaffold(
       backgroundColor: ThemeConfig.infoPageColor(context),
       appBar: AppBar(
-        title: Text(title, style: TextStyle(color: ThemeConfig.appBarColorNegative()),),
+        title: Text(
+          title,
+          style: TextStyle(color: ThemeConfig.appBarColorNegative()),
+        ),
         leading: PopButton(),
       ),
       body: Align(
@@ -71,7 +74,8 @@ class _InfoPageState extends State<InfoPage> {
               child: Column(
                 children: [
                   if (FeatureService.isFeatureEnabled(FeatureConstants.game) ||
-                      FeatureService.isFeatureEnabled(FeatureConstants.songbook))
+                      FeatureService.isFeatureEnabled(
+                          FeatureConstants.songbook))
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(24),
@@ -85,23 +89,29 @@ class _InfoPageState extends State<InfoPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            if (FeatureService.isFeatureEnabled(FeatureConstants.game))
+                            if (FeatureService.isFeatureEnabled(
+                                FeatureConstants.game))
                               ButtonsHelper.buildReferenceButton(
                                 context: context,
                                 onPressed: () {
                                   if (!AuthService.isLoggedIn()) {
                                     ToastHelper.Show(
-                                        context, "Sign in to participate in the game.".tr());
+                                        context,
+                                        "Sign in to participate in the game."
+                                            .tr());
                                     return;
                                   }
-                                  RouterService.navigateOccasion(context, GamePage.ROUTE);
+                                  RouterService.navigateOccasion(
+                                      context, GamePage.ROUTE);
                                 },
                                 icon: Icons.gamepad,
                                 label: "Game",
                               ),
-                            if (FeatureService.isFeatureEnabled(FeatureConstants.songbook))
+                            if (FeatureService.isFeatureEnabled(
+                                FeatureConstants.songbook))
                               const SizedBox(width: 16),
-                            if (FeatureService.isFeatureEnabled(FeatureConstants.songbook))
+                            if (FeatureService.isFeatureEnabled(
+                                FeatureConstants.songbook))
                               ButtonsHelper.buildReferenceButton(
                                 context: context,
                                 onPressed: () {
@@ -121,63 +131,76 @@ class _InfoPageState extends State<InfoPage> {
                     },
                     children: _informationList == null
                         ? []
-                        : _informationList!.map<ExpansionPanel>((InformationModel item) {
-                      int index = _informationList!.indexOf(item);
-                      return ExpansionPanel(
-                        backgroundColor: ThemeConfig.backgroundColor(context),
-                        headerBuilder: (BuildContext context, bool isExpanded) {
-                          return Container(
-                            key: _itemKeys[index],
-                            child: ListTile(
-                              title: Text(item.title ?? ""),
-                            ),
-                          );
-                        },
-                        body: _isItemLoading[index] ?? false
-                            ? const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Center(child: CircularProgressIndicator()),
-                        )
-                            : Column(
-                          children: [
-                            if (RightsService.isEditor())
-                              ElevatedButton(
-                                onPressed: () async {
-                                  var result = await RouterService.navigatePageInfo(
-                                      context,
-                                      HtmlEditorRoute(
-                                          content: {
-                                            HtmlEditorPage.parContent:
-                                            item.description
-                                          },
-                                          occasionId:
-                                          RightsService.currentOccasionId()));
-                                  if (result != null) {
-                                    setState(() {
-                                      item.description = result as String;
-                                    });
-                                    await DbInformation.updateInformation(item);
-                                    ToastHelper.Show(
-                                        context, "Content has been changed.".tr());
-                                  }
-                                },
-                                child: const Text("Edit content").tr(),
-                              ),
-                            Padding(
-                              padding: const EdgeInsetsDirectional.all(12),
-                              child: HtmlView(
-                                html: item.description ?? "",
-                                isSelectable: true,
-                                twoFingersOn: onPinchStart,
-                                twoFingersOff: onPinchEnd,
-                              ),
-                            ),
-                          ],
-                        ),
-                        isExpanded: item.isExpanded,
-                        canTapOnHeader: true,
-                      );
-                    }).toList(),
+                        : _informationList!
+                            .map<ExpansionPanel>((InformationModel item) {
+                            int index = _informationList!.indexOf(item);
+                            return ExpansionPanel(
+                              backgroundColor:
+                                  ThemeConfig.backgroundColor(context),
+                              headerBuilder:
+                                  (BuildContext context, bool isExpanded) {
+                                return Container(
+                                  key: _itemKeys[index],
+                                  child: ListTile(
+                                    title: Text(item.title ?? ""),
+                                  ),
+                                );
+                              },
+                              body: _isItemLoading[index] ?? false
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Center(
+                                          child: CircularProgressIndicator()),
+                                    )
+                                  : Column(
+                                      children: [
+                                        if (RightsService.isEditor())
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              var result = await RouterService
+                                                  .navigatePageInfo(
+                                                      context,
+                                                      HtmlEditorRoute(
+                                                          content: {
+                                                            HtmlEditorPage
+                                                                    .parContent:
+                                                                item.description
+                                                          },
+                                                          occasionId: RightsService
+                                                              .currentOccasionId()));
+                                              if (result != null) {
+                                                setState(() {
+                                                  item.description =
+                                                      result as String;
+                                                });
+                                                await DbInformation
+                                                    .updateInformation(item);
+                                                ToastHelper.Show(
+                                                    context,
+                                                    "Content has been changed."
+                                                        .tr());
+                                              }
+                                            },
+                                            child:
+                                                const Text("Edit content").tr(),
+                                          ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsetsDirectional.all(
+                                                  12),
+                                          child: HtmlView(
+                                            html: item.description ?? "",
+                                            isSelectable: true,
+                                            twoFingersOn: onPinchStart,
+                                            twoFingersOff: onPinchEnd,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                              isExpanded: item.isExpanded,
+                              canTapOnHeader: true,
+                            );
+                          }).toList(),
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -233,18 +256,24 @@ class _InfoPageState extends State<InfoPage> {
         jsInterop.changeUrl(
             "${RouterService.getCurrentUriWithOccasion()}${InfoPage.ROUTE}/${_informationList![panelIndex].id}");
       } else {
-        jsInterop.changeUrl("${RouterService.getCurrentUriWithOccasion()}${InfoPage.ROUTE}");
+        jsInterop.changeUrl(
+            "${RouterService.getCurrentUriWithOccasion()}${InfoPage.ROUTE}");
       }
     }
   }
 
   Future<void> loadDataOffline() async {
-    _informationList = (await OfflineDataService.getAllInfo()).filterByType(null);
+    _informationList =
+        (await OfflineDataService.getAllInfo()).filterByType(null);
     // collapse all panels by default
-    _informationList!.forEach((item) => item.isExpanded = false);
+    for (var item in _informationList!) {
+      item.isExpanded = false;
+    }
     // initialize keys for ensuring visibility
     _itemKeys = List.generate(_informationList!.length, (_) => GlobalKey());
 
-    _isItemLoading = {for (int i = 0; i < _informationList!.length; i++) i: false};
+    _isItemLoading = {
+      for (int i = 0; i < _informationList!.length; i++) i: false
+    };
   }
 }

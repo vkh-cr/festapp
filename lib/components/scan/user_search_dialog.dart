@@ -41,9 +41,9 @@ class _UserSearchDialogState extends State<UserSearchDialog> {
       setState(() {
         _filteredUsers = widget.allUsers.where((user) {
           final normalizedName =
-          Utilities.removeDiacritics(user.toFullNameString().toLowerCase());
+              Utilities.removeDiacritics(user.toFullNameString().toLowerCase());
           final normalizedEmail =
-          Utilities.removeDiacritics((user.email ?? "").toLowerCase());
+              Utilities.removeDiacritics((user.email ?? "").toLowerCase());
 
           return normalizedName.contains(normalizedQuery) ||
               normalizedEmail.contains(normalizedQuery);

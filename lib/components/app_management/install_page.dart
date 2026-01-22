@@ -52,7 +52,8 @@ class _InstallPageState extends State<InstallPage> {
   Future<void> _loadInitialData() async {
     platform = InstallPage.jsInterop.getOSInsideWeb();
     try {
-      final platforms = await DbOrganizations.getAvailablePlatforms(organizationId: AppConfig.organization);
+      final platforms = await DbOrganizations.getAvailablePlatforms(
+          organizationId: AppConfig.organization);
       if (mounted) {
         setState(() {
           _platforms = platforms;
@@ -61,7 +62,8 @@ class _InstallPageState extends State<InstallPage> {
     } catch (e) {
       print("Failed to load platforms: $e");
       if (mounted) {
-        ToastHelper.Show(context, "Failed to load installation options.".tr(), severity: ToastSeverity.NotOk);
+        ToastHelper.Show(context, "Failed to load installation options.".tr(),
+            severity: ToastSeverity.NotOk);
       }
     }
     await _loadPwaSettings();
@@ -84,17 +86,21 @@ class _InstallPageState extends State<InstallPage> {
     try {
       PWAInstall().promptInstall_();
     } catch (e) {
-      final webLink = _platforms.firstWhereOrNull((p) => p.platform == 'web')?.link ?? RouterService.getCurrentUri().toString();
+      final webLink =
+          _platforms.firstWhereOrNull((p) => p.platform == 'web')?.link ??
+              RouterService.getCurrentUri().toString();
       setState(() {
         _installFailed = true;
         _urlController.text = webLink;
-        _urlController.selection = TextSelection(baseOffset: 0, extentOffset: _urlController.text.length);
+        _urlController.selection = TextSelection(
+            baseOffset: 0, extentOffset: _urlController.text.length);
       });
     }
     await _loadPwaSettings();
   }
 
-  bool get _canInstallPWA => !_isAppInstalled && !_installFailed && _isPromptEnabled;
+  bool get _canInstallPWA =>
+      !_isAppInstalled && !_installFailed && _isPromptEnabled;
 
   void _handleExpansion(int index) {
     setState(() {
@@ -110,8 +116,10 @@ class _InstallPageState extends State<InstallPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appleLink = _platforms.firstWhereOrNull((p) => p.platform == 'ios')?.link;
-    final androidLink = _platforms.firstWhereOrNull((p) => p.platform == 'droid')?.link;
+    final appleLink =
+        _platforms.firstWhereOrNull((p) => p.platform == 'ios')?.link;
+    final androidLink =
+        _platforms.firstWhereOrNull((p) => p.platform == 'droid')?.link;
 
     return Scaffold(
       appBar: AppBar(
@@ -123,89 +131,93 @@ class _InstallPageState extends State<InstallPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Align(
-        alignment: Alignment.topCenter,
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // App Icon and Explanation
-                Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: ConstrainedBox(
+                  constraints:
+                      BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12.0),
-                          image: const DecorationImage(
-                            image: AssetImage('assets/icons/fstappicon.png'),
-                            fit: BoxFit.cover,
-                          ),
+                      // App Icon and Explanation
+                      Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Container(
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12.0),
+                                image: const DecorationImage(
+                                  image:
+                                      AssetImage('assets/icons/fstappicon.png'),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 22),
+                            Expanded(
+                              child: Text(
+                                "Install {title} to get notifications, offline functionality, and a quick launch icon."
+                                    .tr(namedArgs: {
+                                  "title": AppConfig.appName
+                                }),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: ThemeConfig.blackColor(context),
+                                ),
+                              ).tr(),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 22),
-                      Expanded(
-                        child: Text(
-                          "Install {title} to get notifications, offline functionality, and a quick launch icon."
-                              .tr(namedArgs: {"title": AppConfig.appName}),
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: ThemeConfig.blackColor(context),
-                          ),
-                        ).tr(),
+                      const SizedBox(height: 48),
+                      // Install Sections
+                      if (appleLink != null && appleLink.isNotEmpty)
+                        buildInstallSection(
+                          context,
+                          "Install for Apple".tr(),
+                          Icons.apple,
+                          appleLink,
+                          0,
+                        ),
+                      buildInstallSection(
+                        context,
+                        "Install for Android".tr(),
+                        Icons.android,
+                        androidLink,
+                        1,
+                        notice: androidLink == null || androidLink.isEmpty
+                            ? "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button."
+                                .tr()
+                            : null,
+                      ),
+                      buildInstallSection(
+                        context,
+                        "Install for PC/Mac".tr(),
+                        Icons.desktop_windows,
+                        null,
+                        2,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 48),
-                // Install Sections
-                if (appleLink != null && appleLink.isNotEmpty)
-                  buildInstallSection(
-                    context,
-                    "Install for Apple".tr(),
-                    Icons.apple,
-                    appleLink,
-                    0,
-                  ),
-                buildInstallSection(
-                  context,
-                  "Install for Android".tr(),
-                  Icons.android,
-                  androidLink,
-                  1,
-                  notice: androidLink == null || androidLink.isEmpty
-                      ? "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button."
-                      .tr()
-                      : null,
-                ),
-                buildInstallSection(
-                  context,
-                  "Install for PC/Mac".tr(),
-                  Icons.desktop_windows,
-                  null,
-                  2,
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 
   Widget buildInstallSection(
-      BuildContext context,
-      String title,
-      IconData icon,
-      String? link,
-      int index, {
-        String? notice,
-      }) {
+    BuildContext context,
+    String title,
+    IconData icon,
+    String? link,
+    int index, {
+    String? notice,
+  }) {
     final bool hasNativeLink = link != null && link.isNotEmpty;
     return ExpansionTile(
       controller: _controllers[index],
@@ -230,7 +242,8 @@ class _InstallPageState extends State<InstallPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
               notice,
-              style: TextStyle(color: ThemeConfig.blackColor(context).withOpacity(0.8)),
+              style: TextStyle(
+                  color: ThemeConfig.blackColor(context).withOpacity(0.8)),
             ).tr(),
           ),
           const SizedBox(height: 10),
@@ -245,9 +258,11 @@ class _InstallPageState extends State<InstallPage> {
                 onPressed: hasNativeLink
                     ? () => InstallPage.jsInterop.openLinkInNewTab(link)
                     : _canInstallPWA
-                    ? handleInstallButtonPress
-                    : null,
-                color: (hasNativeLink || _canInstallPWA) ? ThemeConfig.seed1 : Colors.grey,
+                        ? handleInstallButtonPress
+                        : null,
+                color: (hasNativeLink || _canInstallPWA)
+                    ? ThemeConfig.seed1
+                    : Colors.grey,
                 textColor: Colors.white,
               ),
               if (!hasNativeLink) ...[
@@ -282,8 +297,10 @@ class _InstallPageState extends State<InstallPage> {
                             const SizedBox(width: 8.0),
                             TextButton.icon(
                               onPressed: () {
-                                Clipboard.setData(ClipboardData(text: _urlController.text));
-                                ToastHelper.Show(context, "Copied to clipboard".tr());
+                                Clipboard.setData(
+                                    ClipboardData(text: _urlController.text));
+                                ToastHelper.Show(
+                                    context, "Copied to clipboard".tr());
                               },
                               icon: const Icon(Icons.copy),
                               label: const Text("Copy Link").tr(),

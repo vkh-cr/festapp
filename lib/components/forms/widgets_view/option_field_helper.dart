@@ -19,9 +19,9 @@ class OptionFieldHelper {
 
   /// Builds the combined "title (+ price)" string for an option.
   static String buildOptionTitle(
-      BuildContext context,
-      FormOptionModel option,
-      ) {
+    BuildContext context,
+    FormOptionModel option,
+  ) {
     if (option is FormOptionProductModel && option.price > 0) {
       return '${option.title} (${Utilities.formatPrice(context, option.price, currencyCode: option.currencyCode)})';
     }
@@ -56,8 +56,9 @@ class OptionFieldHelper {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
-            crossAxisAlignment:
-            hasDescription ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+            crossAxisAlignment: hasDescription
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
             children: [
               leading,
               const SizedBox(width: 8),

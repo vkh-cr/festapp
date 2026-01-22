@@ -69,7 +69,8 @@ class SvgIconButton extends StatelessWidget {
   final double splashRadius;
   final double iconSize;
 
-  const SvgIconButton({super.key, 
+  const SvgIconButton({
+    super.key,
     required this.onPressed,
     required this.iconPath,
     this.splashRadius = 32,
@@ -79,18 +80,18 @@ class SvgIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-        padding: const EdgeInsets.all(0),
-        splashRadius: splashRadius,
-        iconSize: iconSize,
-        icon: SimpleShadow(
-          opacity: 0.2,
-          offset: const Offset(0,2),
-          //sigma: 10,
-          child: SvgPicture.asset(
-            iconPath,
-          ),
+      padding: const EdgeInsets.all(0),
+      splashRadius: splashRadius,
+      iconSize: iconSize,
+      icon: SimpleShadow(
+        opacity: 0.2,
+        offset: const Offset(0, 2),
+        //sigma: 10,
+        child: SvgPicture.asset(
+          iconPath,
         ),
-        onPressed: onPressed,
+      ),
+      onPressed: onPressed,
     );
   }
 }

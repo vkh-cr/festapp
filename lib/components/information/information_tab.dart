@@ -14,7 +14,8 @@ class InformationTab extends StatefulWidget {
   _InformationTabState createState() => _InformationTabState();
 }
 
-class _InformationTabState extends State<InformationTab> with SingleTickerProviderStateMixin {
+class _InformationTabState extends State<InformationTab>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late int _tabLength;
 
@@ -47,9 +48,11 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                DataGridHelper.buildTab(context, Icons.info, "Information".tr()),
-                if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
-                  DataGridHelper.buildTab(context, Icons.library_music, "Songbook".tr()),
+                DataGridHelper.buildTab(
+                    context, Icons.info, "Information".tr()),
+                if (FeatureService.isFeatureEnabled(FeatureConstants.songbook))
+                  DataGridHelper.buildTab(
+                      context, Icons.library_music, "Songbook".tr()),
               ],
             ),
           ),
@@ -59,7 +62,7 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 InformationContent(),
-                if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
+                if (FeatureService.isFeatureEnabled(FeatureConstants.songbook))
                   SongbookContent(),
               ],
             ),

@@ -12,9 +12,9 @@ class UsersPanel extends StatelessWidget {
   final ActivityTimelineController controller;
 
   const UsersPanel({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   void _showUserAssignmentsDialog(
       BuildContext context, ActivityUserInfoModel user) {
@@ -48,10 +48,11 @@ class UsersPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     // ... (This method is unchanged)
     final normalizedFilter =
-    Utilities.removeDiacritics(controller.userFilter.toLowerCase());
+        Utilities.removeDiacritics(controller.userFilter.toLowerCase());
     final filtered = controller.allUsers
-        .where((u) => Utilities.removeDiacritics(u.toFullNameString().toLowerCase())
-        .contains(normalizedFilter))
+        .where((u) =>
+            Utilities.removeDiacritics(u.toFullNameString().toLowerCase())
+                .contains(normalizedFilter))
         .toList();
     final hintColor = controller.hintColor;
     final textColor = controller.textColor;
@@ -75,7 +76,7 @@ class UsersPanel extends StatelessWidget {
                   child: Icon(Icons.search, size: 14, color: hintColor),
                 ),
                 prefixIconConstraints:
-                const BoxConstraints(minWidth: 24, minHeight: 24),
+                    const BoxConstraints(minWidth: 24, minHeight: 24),
                 contentPadding: const EdgeInsets.symmetric(vertical: 6),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -100,7 +101,7 @@ class UsersPanel extends StatelessWidget {
                 final u = filtered[index];
                 final initials = u.getInitials();
                 final color = ActivityConstants.darkUserColors[
-                u.hashCode % ActivityConstants.darkUserColors.length];
+                    u.hashCode % ActivityConstants.darkUserColors.length];
                 final avatarTextColor = Colors.white;
                 final assignedHours =
                     controller.userAssignedHours[u.id] ?? Duration.zero;
@@ -245,12 +246,12 @@ class _UserAssignmentsDialog extends StatefulWidget {
   final List<ActivityAssignmentModel> assignments;
   final List<ActivityModel> allActivities;
   final List<ActivityUserInfoModel> allUsers;
-  final Function(ActivityUserInfoModel, List<ActivityAssignmentModel>) onCopyToUser;
+  final Function(ActivityUserInfoModel, List<ActivityAssignmentModel>)
+      onCopyToUser;
   final Function(List<ActivityAssignmentModel>) onDeleteAssignments;
   final Function(ActivityAssignmentModel, dynamic) onRemoveLink;
 
   const _UserAssignmentsDialog({
-    Key? key,
     required this.sourceUser,
     required this.assignments,
     required this.allActivities,
@@ -258,7 +259,7 @@ class _UserAssignmentsDialog extends StatefulWidget {
     required this.onCopyToUser,
     required this.onDeleteAssignments,
     required this.onRemoveLink,
-  }) : super(key: key);
+  });
 
   @override
   _UserAssignmentsDialogState createState() => _UserAssignmentsDialogState();
@@ -282,7 +283,7 @@ class _UserAssignmentsDialogState extends State<_UserAssignmentsDialog> {
   void _rebuildDisplayList() {
     _displayList = [];
     final groupedAssignments =
-    groupBy<ActivityAssignmentModel, DateTime>(_localAssignments, (a) {
+        groupBy<ActivityAssignmentModel, DateTime>(_localAssignments, (a) {
       final startTime = a.startTime!.toLocal();
       return DateTime(startTime.year, startTime.month, startTime.day);
     });
@@ -305,7 +306,7 @@ class _UserAssignmentsDialogState extends State<_UserAssignmentsDialog> {
 
   void _showTargetUserSelection() async {
     final otherUsers =
-    widget.allUsers.where((u) => u.id != widget.sourceUser.id).toList();
+        widget.allUsers.where((u) => u.id != widget.sourceUser.id).toList();
 
     final ActivityUserInfoModel? targetUser = await showDialog(
       context: context,
@@ -357,8 +358,8 @@ class _UserAssignmentsDialogState extends State<_UserAssignmentsDialog> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final assignedHours = _localAssignments.fold<Duration>(
       Duration.zero,
-          (prev, e) =>
-      prev + (e.endTime?.difference(e.startTime!) ?? Duration.zero),
+      (prev, e) =>
+          prev + (e.endTime?.difference(e.startTime!) ?? Duration.zero),
     );
     final String hoursText =
         '${assignedHours.inHours}h ${assignedHours.inMinutes.remainder(60)}m';
@@ -398,7 +399,7 @@ class _UserAssignmentsDialogState extends State<_UserAssignmentsDialog> {
         ],
       ),
       contentPadding: const EdgeInsets.fromLTRB(24.0, 0, 24.0, 24.0),
-      content: Container(
+      content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.5,
         height: MediaQuery.of(context).size.height * 0.6,
         child: Column(
@@ -412,8 +413,7 @@ class _UserAssignmentsDialogState extends State<_UserAssignmentsDialog> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Checkbox(
-                            value: _isAllSelected,
-                            onChanged: _handleSelectAll),
+                            value: _isAllSelected, onChanged: _handleSelectAll),
                         Text(ActivitiesComponentStrings.textSelectAll,
                             style: TextStyle(fontSize: 12)),
                       ],
@@ -435,10 +435,9 @@ class _UserAssignmentsDialogState extends State<_UserAssignmentsDialog> {
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton.icon(
-                          icon:
-                          const Icon(Icons.copy_all_outlined, size: 16),
-                          label: Text(
-                              ActivitiesComponentStrings.buttonCopyToUser),
+                          icon: const Icon(Icons.copy_all_outlined, size: 16),
+                          label:
+                              Text(ActivitiesComponentStrings.buttonCopyToUser),
                           onPressed: _selectedAssignments.isNotEmpty
                               ? _showTargetUserSelection
                               : null,
@@ -454,150 +453,141 @@ class _UserAssignmentsDialogState extends State<_UserAssignmentsDialog> {
             Expanded(
               child: _displayList.isEmpty
                   ? Center(
-                  child: Text(ActivitiesComponentStrings
-                      .textNoAssignmentsForUser))
-                  : ListView.builder(
-                itemCount: _displayList.length,
-                itemBuilder: (ctx, index) {
-                  final item = _displayList[index];
-
-                  if (item is DateTime) {
-                    // Build a day header
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                          top: 16.0, bottom: 8.0),
                       child: Text(
-                        DateFormat(
-                            ActivitiesComponentStrings
-                                .dateFormatDayMonth,
-                            context.locale.languageCode)
-                            .format(item)
-                            .toUpperCase(),
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Theme.of(context).primaryColor),
-                      ),
-                    );
-                  }
+                          ActivitiesComponentStrings.textNoAssignmentsForUser))
+                  : ListView.builder(
+                      itemCount: _displayList.length,
+                      itemBuilder: (ctx, index) {
+                        final item = _displayList[index];
 
-                  if (item is ActivityAssignmentModel) {
-                    // Build an assignment item
-                    final assignment = item;
-                    final activity = widget.allActivities
-                        .firstWhereOrNull(
-                            (a) => a.id == assignment.activityId);
-                    final isSelected =
-                    _selectedAssignments.contains(assignment);
-                    final timeFormatter =
-                    DateFormat.Hm(context.locale.languageCode);
+                        if (item is DateTime) {
+                          // Build a day header
+                          return Padding(
+                            padding:
+                                const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                            child: Text(
+                              DateFormat(
+                                      ActivitiesComponentStrings
+                                          .dateFormatDayMonth,
+                                      context.locale.languageCode)
+                                  .format(item)
+                                  .toUpperCase(),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                          );
+                        }
 
-                    return Card(
-                      elevation: 1.5,
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 4, horizontal: 2),
-                      child: InkWell(
-                        onTap: () => setState(() {
-                          if (isSelected) {
-                            _selectedAssignments.remove(assignment);
-                          } else {
-                            _selectedAssignments.add(assignment);
-                          }
-                        }),
-                        borderRadius: BorderRadius.circular(4),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                            children: [
-                              Checkbox(
-                                value: isSelected,
-                                onChanged: (value) => setState(() {
-                                  if (value == true) {
-                                    _selectedAssignments
-                                        .add(assignment);
-                                  } else {
-                                    _selectedAssignments
-                                        .remove(assignment);
-                                  }
-                                }),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                        if (item is ActivityAssignmentModel) {
+                          // Build an assignment item
+                          final assignment = item;
+                          final activity = widget.allActivities
+                              .firstWhereOrNull(
+                                  (a) => a.id == assignment.activityId);
+                          final isSelected =
+                              _selectedAssignments.contains(assignment);
+                          final timeFormatter =
+                              DateFormat.Hm(context.locale.languageCode);
+
+                          return Card(
+                            elevation: 1.5,
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 2),
+                            child: InkWell(
+                              onTap: () => setState(() {
+                                if (isSelected) {
+                                  _selectedAssignments.remove(assignment);
+                                } else {
+                                  _selectedAssignments.add(assignment);
+                                }
+                              }),
+                              borderRadius: BorderRadius.circular(4),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      activity?.title ??
-                                          ActivitiesComponentStrings
-                                              .textUntitledActivity,
-                                      style: const TextStyle(
-                                          fontWeight:
-                                          FontWeight.bold,
-                                          fontSize: 14),
+                                    Checkbox(
+                                      value: isSelected,
+                                      onChanged: (value) => setState(() {
+                                        if (value == true) {
+                                          _selectedAssignments.add(assignment);
+                                        } else {
+                                          _selectedAssignments
+                                              .remove(assignment);
+                                        }
+                                      }),
                                     ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      '${timeFormatter.format(assignment.startTime!.toLocal())} – ${timeFormatter.format(assignment.endTime!.toLocal())}',
-                                      style: TextStyle(
-                                          fontSize: 13,
-                                          color: isDark
-                                              ? Colors.white
-                                              : Colors.black87,
-                                          fontWeight:
-                                          FontWeight.w500),
-                                    ),
-                                    if (assignment.places.isNotEmpty ||
-                                        assignment.events.isNotEmpty)
-                                      Padding(
-                                        padding:
-                                        const EdgeInsets.only(
-                                            top: 8.0),
-                                        child: Wrap(
-                                          spacing: 6,
-                                          runSpacing: 4,
-                                          children: [
-                                            ...assignment.places
-                                                .map((p) => Chip(
-                                              label: Text(
-                                                  p.title ??
-                                                      '?'),
-                                              onDeleted: () =>
-                                                  setState(
-                                                          () => widget
-                                                          .onRemoveLink(
-                                                          assignment,
-                                                          p)),
-                                            )),
-                                            ...assignment.events
-                                                .map((e) => Chip(
-                                              label: Text(
-                                                  e.title ??
-                                                      '?'),
-                                              onDeleted: () =>
-                                                  setState(() =>
-                                                      widget
-                                                          .onRemoveLink(
-                                                          assignment,
-                                                          e)),
-                                            )),
-                                          ],
-                                        ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            activity?.title ??
+                                                ActivitiesComponentStrings
+                                                    .textUntitledActivity,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            '${timeFormatter.format(assignment.startTime!.toLocal())} – ${timeFormatter.format(assignment.endTime!.toLocal())}',
+                                            style: TextStyle(
+                                                fontSize: 13,
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : Colors.black87,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                          if (assignment.places.isNotEmpty ||
+                                              assignment.events.isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Wrap(
+                                                spacing: 6,
+                                                runSpacing: 4,
+                                                children: [
+                                                  ...assignment.places
+                                                      .map((p) => Chip(
+                                                            label: Text(
+                                                                p.title ?? '?'),
+                                                            onDeleted: () =>
+                                                                setState(() => widget
+                                                                    .onRemoveLink(
+                                                                        assignment,
+                                                                        p)),
+                                                          )),
+                                                  ...assignment.events
+                                                      .map((e) => Chip(
+                                                            label: Text(
+                                                                e.title ?? '?'),
+                                                            onDeleted: () =>
+                                                                setState(() => widget
+                                                                    .onRemoveLink(
+                                                                        assignment,
+                                                                        e)),
+                                                          )),
+                                                ],
+                                              ),
+                                            ),
+                                        ],
                                       ),
+                                    ),
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
             ),
           ],
         ),
@@ -609,7 +599,7 @@ class _UserAssignmentsDialogState extends State<_UserAssignmentsDialog> {
 
 class _UserSearchDialog extends StatefulWidget {
   final List<ActivityUserInfoModel> allUsers;
-  const _UserSearchDialog({Key? key, required this.allUsers}) : super(key: key);
+  const _UserSearchDialog({required this.allUsers});
 
   @override
   State<_UserSearchDialog> createState() => _UserSearchDialogState();
@@ -644,7 +634,7 @@ class _UserSearchDialogState extends State<_UserSearchDialog> {
       setState(() {
         _filteredUsers = widget.allUsers.where((user) {
           final normalizedName =
-          Utilities.removeDiacritics(user.toFullNameString().toLowerCase());
+              Utilities.removeDiacritics(user.toFullNameString().toLowerCase());
           return normalizedName.contains(normalizedQuery);
         }).toList();
       });
@@ -655,7 +645,7 @@ class _UserSearchDialogState extends State<_UserSearchDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(ActivitiesComponentStrings.dialogTitleSelectTargetUser),
-      content: Container(
+      content: SizedBox(
         width: 300,
         height: 400,
         child: Column(

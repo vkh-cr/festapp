@@ -14,7 +14,6 @@ import 'package:fstapp/components/groups/db_groups.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/components/users/user_management_helper.dart';
@@ -49,7 +48,9 @@ class UsersTabHelper {
         await UserManagementHelper.unsafeChangeUserPassword(context, u);
         ToastHelper.Show(context, UserStrings.passwordChanged);
       } catch (e) {
-        String errorMessage = "Failed for user ${u.data?[Tb.occasion_users.data_email] ?? '[no email]'}: ${e.toString()}".tr();
+        String errorMessage =
+            "Failed for user ${u.data?[Tb.occasion_users.data_email] ?? '[no email]'}: ${e.toString()}"
+                .tr();
         ToastHelper.Show(context, errorMessage, severity: ToastSeverity.NotOk);
         errorMessages.add(errorMessage);
       }
@@ -63,52 +64,60 @@ class UsersTabHelper {
     var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(
         context, await DbGroups.getAllUserGroupInfo());
     if (chosenGroup != null) {
-      chosenGroup.participants!
-          .addAll(users.map((u) => GroupParticipantModel(userInfo: UserInfoModel(id: u.id))));
+      chosenGroup.participants!.addAll(users.map(
+          (u) => GroupParticipantModel(userInfo: UserInfoModel(id: u.id))));
       await DbGroups.updateUserGroupParticipants(
           chosenGroup, chosenGroup.participants!);
-      ToastHelper.Show(context, "Updated {item}.".tr(
-          namedArgs: {"item": chosenGroup.title}));
+      ToastHelper.Show(context,
+          "Updated {item}.".tr(namedArgs: {"item": chosenGroup.title}));
     }
   }
 
   /// Adds an existing user (from those not already added) to the occasion.
   /// [currentUsers] are the users already added in the current state.
   /// [reloadUsers] is a callback to trigger reloading the user list.
-  static Future<void> addExisting(BuildContext context,
-      SingleDataGridController singleDataGrid, List<IHasId> currentUsers,
+  static Future<void> addExisting(
+      BuildContext context,
+      SingleDataGridController singleDataGrid,
+      List<IHasId> currentUsers,
       Future<void> Function() reloadUsers) async {
-    var existing = await DbUsers.getAllUsersBasicsForUnit(RightsService.currentUnit()!.id!);
-    var nonAdded =
-    existing.where((u) => !currentUsers.any((cu) => cu.id == u.id)).toList();
+    var existing = await DbUsers.getAllUsersBasicsForUnit(
+        RightsService.currentUnit()!.id!);
+    var nonAdded = existing
+        .where((u) => !currentUsers.any((cu) => cu.id == u.id))
+        .toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
       await DbUsers.addUserToOccasion(
           chosenUser.id!, RightsService.currentOccasionId()!);
-      ToastHelper.Show(context, "Updated {item}.".tr(
-          namedArgs: {"item": chosenUser.toString()}));
+      ToastHelper.Show(context,
+          "Updated {item}.".tr(namedArgs: {"item": chosenUser.toString()}));
       await reloadUsers();
-        }, nonAdded, CommonStrings.add);
+    }, nonAdded, CommonStrings.add);
   }
 
-  static Future<void> addExistingToUnit(BuildContext context,
-      SingleDataGridController singleDataGrid, List<ITrinaRowModel> currentUsers,
-      Future<void> Function() reloadUsers, int unit) async {
+  static Future<void> addExistingToUnit(
+      BuildContext context,
+      SingleDataGridController singleDataGrid,
+      List<ITrinaRowModel> currentUsers,
+      Future<void> Function() reloadUsers,
+      int unit) async {
     var existing = await DbUsers.getAllUsersBasicsForUnit(unit);
-    var nonAdded =
-    existing.where((u) => !currentUsers.any((cu) => cu.id == u.id)).toList();
+    var nonAdded = existing
+        .where((u) => !currentUsers.any((cu) => cu.id == u.id))
+        .toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
-      await DbUsers.addUserToUnit(
-          chosenUser.id!, unit);
-      ToastHelper.Show(context, "Updated {item}.".tr(
-          namedArgs: {"item": chosenUser.toString()}));
+      await DbUsers.addUserToUnit(chosenUser.id!, unit);
+      ToastHelper.Show(context,
+          "Updated {item}.".tr(namedArgs: {"item": chosenUser.toString()}));
       await reloadUsers();
-        }, nonAdded, CommonStrings.add);
+    }, nonAdded, CommonStrings.add);
   }
 
   /// Invites the checked users.
   /// [reloadUsers] is a callback to trigger reloading the user list.
   static Future<void> invite(
-      BuildContext context, SingleDataGridController singleDataGrid,
+      BuildContext context,
+      SingleDataGridController singleDataGrid,
       Future<void> Function() reloadUsers) async {
     var users = getCheckedUsers(singleDataGrid);
     if (users.isEmpty) return;
@@ -169,18 +178,14 @@ class UsersTabHelper {
               if (retryAttempts[user]! >= retryLimit) {
                 ToastHelper.Show(
                   context,
-                  "Failed to invite {user}. Number of retries: ({retries}).".tr(
-                      namedArgs: {
-                        "retries": retryLimit.toString(),
-                        "user": user.data![Tb.occasion_users.data_email]
-                      }),
+                  "Failed to invite {user}. Number of retries: ({retries})."
+                      .tr(namedArgs: {
+                    "retries": retryLimit.toString(),
+                    "user": user.data![Tb.occasion_users.data_email]
+                  }),
                   severity: ToastSeverity.NotOk,
                 );
-                print(
-                    "Failed to invite user: ${user.data![Tb.occasion_users.data_email]}. Error: $e");
-              } else {
-                print(
-                    "Retrying to invite user: ${user.data![Tb.occasion_users.data_email]}. Attempt: ${retryAttempts[user]}");
+                // Retrying to invite user
               }
               await Future.delayed(Duration(milliseconds: 500));
             }

@@ -41,10 +41,10 @@ class FormSession extends ChangeNotifier {
   void startSeatSelection() {
     final ticketHolder = formHolder.getTicket();
     if (ticketHolder != null) {
-      // Create a shallow copy of the list. 
-      // Note: FormTicketModel objects themselves are mutable, but we are primarily concerned 
+      // Create a shallow copy of the list.
+      // Note: FormTicketModel objects themselves are mutable, but we are primarily concerned
       // with the list composition here. If deep copy is needed, we'd need to implement it.
-      // For now, assuming replacing the list reference in TicketHolder on restore is sufficient 
+      // For now, assuming replacing the list reference in TicketHolder on restore is sufficient
       // if we don't mutate existing inner objects in a way that needs revert (SeatModel state is handled in blueprint controller possibly).
       // actually TicketHolder.updateTickets replaces the list.
       _ticketSnapshot = List.from(ticketHolder.tickets);
@@ -90,7 +90,7 @@ class FormSession extends ChangeNotifier {
 
       if (field is TicketHolder) {
         totalTickets = field.tickets.length;
-        
+
         for (var s in field.tickets) {
           if (s.seat != null) {
             totalProducts++; // Should specific seats count as products? Original code did this.
@@ -111,7 +111,8 @@ class FormSession extends ChangeNotifier {
               } else if (fValue is Iterable) {
                 var products = List<FormOptionProductModel>.from(fValue);
                 totalProducts += products.length;
-                totalPrice += products.fold(0, (sum, product) => sum + product.price);
+                totalPrice +=
+                    products.fold(0, (sum, product) => sum + product.price);
                 currencyC ??= products.firstOrNull?.currencyCode;
               }
             }
@@ -120,8 +121,7 @@ class FormSession extends ChangeNotifier {
       }
     }
     currencyCode = currencyC;
-    
+
     notifyListeners();
   }
 }
-

@@ -89,7 +89,8 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
     final result = await ExceptionHandler.guard<_LoadResult>(
       context,
       futureFunction: () async {
-        final bundle = await DbInventoryPools.getInventoryPoolBundle(widget.poolId);
+        final bundle =
+            await DbInventoryPools.getInventoryPoolBundle(widget.poolId);
         OccasionModel? occasion;
         if (bundle.pool.occasionId != null) {
           occasion = await DbUsers.getOccasion(bundle.pool.occasionId!);
@@ -105,7 +106,8 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
         if (result.bundle.contexts != null && result.bundle.products != null) {
           for (var context in result.bundle.contexts!) {
             if (context.productId != null) {
-              context.product = result.bundle.products!.firstWhereOrNull((p) => p.id == context.productId);
+              context.product = result.bundle.products!
+                  .firstWhereOrNull((p) => p.id == context.productId);
             }
           }
         }
@@ -113,17 +115,20 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
         setState(() {
           _bundle = result.bundle;
           _occasion = result.occasion;
-          _originalContexts = result.bundle.contexts?.map((c) => c.copyWith()).toList() ?? [];
+          _originalContexts =
+              result.bundle.contexts?.map((c) => c.copyWith()).toList() ?? [];
           _poolTitleController.text = result.bundle.pool.title ?? '';
           _sellableCapacityController.text =
               result.bundle.pool.sellableCapacity?.toString() ?? '';
           _selectedType = result.bundle.pool.type;
 
           _originalDescription = result.bundle.pool.description;
-          _originalIsAutoResourceAssignment = result.bundle.pool.isAutoResourceAssignment;
+          _originalIsAutoResourceAssignment =
+              result.bundle.pool.isAutoResourceAssignment;
           _originalIsEditableByUser = result.bundle.pool.isEditableByUser;
 
-          _originalPlace = result.bundle.places?.firstWhereOrNull((p) => p.id == result.bundle.pool.placeId);
+          _originalPlace = result.bundle.places
+              ?.firstWhereOrNull((p) => p.id == result.bundle.pool.placeId);
           _bundle!.pool.place = _originalPlace;
         });
       }
@@ -143,15 +148,16 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
 
     final contextsToDelete = _originalContexts
         .where((orig) =>
-    orig.id != null &&
-        !_bundle!.contexts!.any((curr) => curr.id == orig.id))
+            orig.id != null &&
+            !_bundle!.contexts!.any((curr) => curr.id == orig.id))
         .toList();
 
     if (contextsToDelete.isNotEmpty) {
       final confirmed = await DialogHelper.showConfirmationDialog(
         currentContext,
         InventoryStrings.settingsConfirmDeletionTitle,
-        InventoryStrings.settingsConfirmContextDeletionContent(contextsToDelete.length),
+        InventoryStrings.settingsConfirmContextDeletionContent(
+            contextsToDelete.length),
       );
       if (confirmed != true) return;
     }
@@ -159,13 +165,15 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
     setState(() => _isSaving = true);
 
     _bundle!.pool.title = _poolTitleController.text.trim();
-    _bundle!.pool.sellableCapacity = int.tryParse(_sellableCapacityController.text);
+    _bundle!.pool.sellableCapacity =
+        int.tryParse(_sellableCapacityController.text);
     _bundle!.pool.type = _selectedType;
     _updateContextsOrder();
 
     final updatedBundle = await ExceptionHandler.guard(
       currentContext,
-      futureFunction: () => DbInventoryPools.updateInventoryPoolBundle(_bundle!),
+      futureFunction: () =>
+          DbInventoryPools.updateInventoryPoolBundle(_bundle!),
       defaultErrorMessage: InventoryStrings.settingsErrorSave,
     );
 
@@ -175,24 +183,30 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
         if (updatedBundle.contexts != null && updatedBundle.products != null) {
           for (var context in updatedBundle.contexts!) {
             if (context.productId != null) {
-              context.product = updatedBundle.products!.firstWhereOrNull((p) => p.id == context.productId);
+              context.product = updatedBundle.products!
+                  .firstWhereOrNull((p) => p.id == context.productId);
             }
           }
         }
         setState(() {
           _bundle = updatedBundle;
-          _originalContexts = updatedBundle.contexts?.map((c) => c.copyWith()).toList() ?? [];
+          _originalContexts =
+              updatedBundle.contexts?.map((c) => c.copyWith()).toList() ?? [];
           _poolTitleController.text = updatedBundle.pool.title ?? '';
           _sellableCapacityController.text =
               updatedBundle.pool.sellableCapacity?.toString() ?? '';
           _selectedType = updatedBundle.pool.type;
           _originalDescription = updatedBundle.pool.description;
-          _originalIsAutoResourceAssignment = updatedBundle.pool.isAutoResourceAssignment;
+          _originalIsAutoResourceAssignment =
+              updatedBundle.pool.isAutoResourceAssignment;
           _originalIsEditableByUser = updatedBundle.pool.isEditableByUser;
-          _originalPlace = updatedBundle.places?.firstWhereOrNull((p) => p.id == updatedBundle.pool.placeId);
+          _originalPlace = updatedBundle.places
+              ?.firstWhereOrNull((p) => p.id == updatedBundle.pool.placeId);
           _bundle!.pool.place = _originalPlace;
         });
-        await ToastHelper.Show(currentContext, InventoryStrings.settingsSuccessSave, severity: ToastSeverity.Ok);
+        await ToastHelper.Show(
+            currentContext, InventoryStrings.settingsSuccessSave,
+            severity: ToastSeverity.Ok);
         widget.onPoolUpdated?.call();
       }
       setState(() => _isSaving = false);
@@ -209,12 +223,15 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
 
     final success = await ExceptionHandler.guardVoid(
       currentContext,
-      futureFunction: () => DbInventoryPools.deleteInventoryPool(_bundle!.pool.id!),
+      futureFunction: () =>
+          DbInventoryPools.deleteInventoryPool(_bundle!.pool.id!),
       defaultErrorMessage: InventoryStrings.settingsErrorDelete,
     );
 
     if (success && mounted) {
-      await ToastHelper.Show(currentContext, InventoryStrings.settingsSuccessDelete, severity: ToastSeverity.Ok);
+      await ToastHelper.Show(
+          currentContext, InventoryStrings.settingsSuccessDelete,
+          severity: ToastSeverity.Ok);
       widget.onPoolDeleted?.call();
     }
   }
@@ -223,11 +240,13 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
     setState(() {
       _bundle?.contexts = _originalContexts.map((c) => c.copyWith()).toList();
       _poolTitleController.text = _bundle?.pool.title ?? '';
-      _sellableCapacityController.text = _bundle?.pool.sellableCapacity?.toString() ?? '';
+      _sellableCapacityController.text =
+          _bundle?.pool.sellableCapacity?.toString() ?? '';
       _selectedType = _bundle?.pool.type ?? InventoryPoolType.other;
       if (_bundle != null) {
         _bundle!.pool.description = _originalDescription;
-        _bundle!.pool.isAutoResourceAssignment = _originalIsAutoResourceAssignment;
+        _bundle!.pool.isAutoResourceAssignment =
+            _originalIsAutoResourceAssignment;
         _bundle!.pool.isEditableByUser = _originalIsEditableByUser;
         _bundle!.pool.place = _originalPlace;
         _bundle!.pool.placeId = _originalPlace?.id;
@@ -250,7 +269,8 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
     setState(() {
       context.order = context.order! - 1;
       _bundle!.contexts!.add(context);
-      _bundle!.contexts!.sort((a, b) => (a.order ?? 999).compareTo(b.order ?? 999));
+      _bundle!.contexts!
+          .sort((a, b) => (a.order ?? 999).compareTo(b.order ?? 999));
       _updateContextsOrder();
     });
   }
@@ -266,9 +286,11 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
     });
   }
 
-  Future<void> _showEditContextDialog({InventoryContextModel? contextModel}) async {
+  Future<void> _showEditContextDialog(
+      {InventoryContextModel? contextModel}) async {
     final bool isNew = contextModel == null;
-    final model = contextModel?.copyWith() ?? InventoryContextModel(inventoryPoolId: widget.poolId);
+    final model = contextModel?.copyWith() ??
+        InventoryContextModel(inventoryPoolId: widget.poolId);
 
     final result = await showDialog<InventoryContextModel>(
       context: context,
@@ -278,11 +300,15 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
         final dateNotifier = ValueNotifier<DateTime?>(model.blockDate);
 
         if (model.blockDate != null) {
-          dateController.text = DateFormat.yMMMd(dialogContext.locale.toString()).format(model.blockDate!);
+          dateController.text =
+              DateFormat.yMMMd(dialogContext.locale.toString())
+                  .format(model.blockDate!);
         }
 
         return AlertDialog(
-          title: Text(isNew ? InventoryStrings.contextDialogAddTitle : InventoryStrings.contextDialogEditTitle),
+          title: Text(isNew
+              ? InventoryStrings.contextDialogAddTitle
+              : InventoryStrings.contextDialogEditTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -304,19 +330,26 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                 ),
                 onTap: () async {
                   const datePadding = Duration(days: _datePickerPaddingDays);
-                  final DateTime firstDate = (_occasion?.startTime ?? DateTime(2020)).subtract(datePadding);
-                  final DateTime lastDate = (_occasion?.endTime ?? DateTime(2030)).add(datePadding);
+                  final DateTime firstDate =
+                      (_occasion?.startTime ?? DateTime(2020))
+                          .subtract(datePadding);
+                  final DateTime lastDate =
+                      (_occasion?.endTime ?? DateTime(2030)).add(datePadding);
 
                   final newDate = await showDatePicker(
                     context: dialogContext,
                     locale: dialogContext.locale,
-                    initialDate: dateNotifier.value ?? _occasion?.startTime ?? DateTime.now(),
+                    initialDate: dateNotifier.value ??
+                        _occasion?.startTime ??
+                        DateTime.now(),
                     firstDate: firstDate,
                     lastDate: lastDate,
                   );
                   if (newDate != null) {
                     dateNotifier.value = newDate;
-                    dateController.text = DateFormat.yMMMd(dialogContext.locale.toString()).format(newDate);
+                    dateController.text =
+                        DateFormat.yMMMd(dialogContext.locale.toString())
+                            .format(newDate);
                   }
                 },
               ),
@@ -329,10 +362,14 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
             ),
             ElevatedButton(
               onPressed: () {
-                model.title = titleController.text.trim().isEmpty ? null : titleController.text.trim();
+                model.title = titleController.text.trim().isEmpty
+                    ? null
+                    : titleController.text.trim();
                 model.blockDate = dateNotifier.value;
                 if (model.title == null && model.blockDate == null) {
-                  ToastHelper.Show(context, InventoryStrings.contextDialogValidationError, severity: ToastSeverity.NotOk);
+                  ToastHelper.Show(
+                      context, InventoryStrings.contextDialogValidationError,
+                      severity: ToastSeverity.NotOk);
                   return;
                 }
                 Navigator.of(dialogContext).pop(model);
@@ -384,7 +421,8 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
   }
 
   // MODIFICATION: Signature updated to accept the filtered list.
-  Future<void> _showSelectProductDialog(InventoryContextModel contextModel, List<ProductModel> assignableProducts) async {
+  Future<void> _showSelectProductDialog(InventoryContextModel contextModel,
+      List<ProductModel> assignableProducts) async {
     final result = await showDialog<Object>(
       context: context,
       builder: (dialogContext) => ProductSearchDialog(
@@ -396,7 +434,8 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
     if (result == null || !mounted) return;
 
     setState(() {
-      final contextIndex = _bundle!.contexts!.indexWhere((c) => c.id == contextModel.id || c == contextModel);
+      final contextIndex = _bundle!.contexts!
+          .indexWhere((c) => c.id == contextModel.id || c == contextModel);
       if (contextIndex == -1) return;
 
       if (result is ProductModel) {
@@ -415,16 +454,19 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (_bundle == null) {
-      return Scaffold(body: Center(child: Text(InventoryStrings.settingsErrorCouldNotLoad)));
+      return Scaffold(
+          body:
+              Center(child: Text(InventoryStrings.settingsErrorCouldNotLoad)));
     }
 
     final activeContexts = _bundle!.contexts!;
-    activeContexts.sort((a,b) => (a.order ?? 999).compareTo((b.order ?? 999)));
+    activeContexts.sort((a, b) => (a.order ?? 999).compareTo((b.order ?? 999)));
 
     final deletedContexts = _originalContexts
-        .where((orig) => orig.id != null && !activeContexts.any((curr) => curr.id == orig.id))
+        .where((orig) =>
+            orig.id != null &&
+            !activeContexts.any((curr) => curr.id == orig.id))
         .toList();
-
 
     return Scaffold(
       body: Builder(
@@ -444,11 +486,17 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              InventoryStrings.settingsConfigureTitle(_bundle!.pool.title ?? 'Pool'),
-                              style: Theme.of(innerContext).textTheme.headlineSmall,
+                              InventoryStrings.settingsConfigureTitle(
+                                  _bundle!.pool.title ?? 'Pool'),
+                              style: Theme.of(innerContext)
+                                  .textTheme
+                                  .headlineSmall,
                             ),
                             const SizedBox(height: 24),
-                            Text(InventoryStrings.settingsPoolSettingsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
+                            Text(
+                                InventoryStrings
+                                    .settingsPoolSettingsSectionTitle,
+                                style: Theme.of(context).textTheme.titleLarge),
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _poolTitleController,
@@ -456,25 +504,31 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                                 labelText: InventoryStrings.poolTitleLabel,
                                 border: const OutlineInputBorder(),
                               ),
-                              validator: (value) => (value == null || value.trim().isEmpty)
-                                  ? InventoryStrings.validationTitleEmpty
-                                  : null,
+                              validator: (value) =>
+                                  (value == null || value.trim().isEmpty)
+                                      ? InventoryStrings.validationTitleEmpty
+                                      : null,
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _sellableCapacityController,
                               decoration: InputDecoration(
-                                labelText: InventoryStrings.settingsSellableCapacityLabel,
-                                hintText: InventoryStrings.settingsSellableCapacityHint,
+                                labelText: InventoryStrings
+                                    .settingsSellableCapacityLabel,
+                                hintText: InventoryStrings
+                                    .settingsSellableCapacityHint,
                                 border: const OutlineInputBorder(),
                               ),
                               keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
                             ),
                             const SizedBox(height: 24),
-                            Text(InventoryStrings.settingsDescriptionLabel, style: Theme.of(context).textTheme.labelLarge),
+                            Text(InventoryStrings.settingsDescriptionLabel,
+                                style: Theme.of(context).textTheme.labelLarge),
                             const SizedBox(height: 8),
-                            if(_bundle!.pool.description?.isNotEmpty ?? false)
+                            if (_bundle!.pool.description?.isNotEmpty ?? false)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 8.0),
                                 child: InputDecorator(
@@ -482,7 +536,9 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                                     border: const OutlineInputBorder(),
                                     contentPadding: const EdgeInsets.all(12),
                                   ),
-                                  child: HtmlView(html: _bundle!.pool.description!, isSelectable: true),
+                                  child: HtmlView(
+                                      html: _bundle!.pool.description!,
+                                      isSelectable: true),
                                 ),
                               ),
                             Center(
@@ -490,14 +546,17 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                                 icon: const Icon(Icons.edit),
                                 label: Text("Edit content".tr()),
                                 onPressed: () async {
-                                  final result = await RouterService.navigatePageInfo(
+                                  final result =
+                                      await RouterService.navigatePageInfo(
                                     context,
-                                    HtmlEditorRoute(
-                                        content: {HtmlEditorPage.parContent: _bundle!.pool.description ?? ""},
-                                        occasionId: _bundle!.pool.occasionId),
+                                    HtmlEditorRoute(content: {
+                                      HtmlEditorPage.parContent:
+                                          _bundle!.pool.description ?? ""
+                                    }, occasionId: _bundle!.pool.occasionId),
                                   );
                                   if (result != null && mounted) {
-                                    setState(() => _bundle!.pool.description = result as String);
+                                    setState(() => _bundle!.pool.description =
+                                        result as String);
                                   }
                                 },
                               ),
@@ -514,25 +573,31 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                                 Center(
                                   child: ToggleButtons(
                                     isSelected: [
-                                      _selectedType == InventoryPoolType.accommodation,
+                                      _selectedType ==
+                                          InventoryPoolType.accommodation,
                                       _selectedType == InventoryPoolType.food,
                                       _selectedType == InventoryPoolType.other,
                                     ],
                                     onPressed: (int index) {
                                       setState(() {
                                         if (index == 0) {
-                                          _selectedType = InventoryPoolType.accommodation;
+                                          _selectedType =
+                                              InventoryPoolType.accommodation;
                                         } else if (index == 1) {
-                                          _selectedType = InventoryPoolType.food;
+                                          _selectedType =
+                                              InventoryPoolType.food;
                                         } else if (index == 2) {
-                                          _selectedType = InventoryPoolType.other;
+                                          _selectedType =
+                                              InventoryPoolType.other;
                                         }
                                       });
                                     },
                                     borderRadius: BorderRadius.circular(8.0),
-                                    children: InventoryPoolType.values.map((type) {
+                                    children:
+                                        InventoryPoolType.values.map((type) {
                                       return Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
@@ -548,31 +613,37 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                               ],
                             ),
                             const SizedBox(height: 24),
-                            Text(InventoryStrings.settingsPlaceLabel, style: Theme.of(context).textTheme.labelLarge),
+                            Text(InventoryStrings.settingsPlaceLabel,
+                                style: Theme.of(context).textTheme.labelLarge),
                             const SizedBox(height: 8),
                             InputDecorator(
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 4),
                               ),
                               child: ListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: Text(_bundle!.pool.place?.title ?? InventoryStrings.settingsNoPlaceAssigned),
+                                title: Text(_bundle!.pool.place?.title ??
+                                    InventoryStrings.settingsNoPlaceAssigned),
                                 trailing: ElevatedButton(
-                                  child: Text(CommonStrings.edit),
                                   onPressed: _showSelectPlaceDialog,
+                                  child: Text(CommonStrings.edit),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 16),
                             SwitchListTile(
                               contentPadding: EdgeInsets.zero,
-                              title: Text(InventoryStrings.settingsAutoAssignmentLabel),
-                              subtitle: Text(InventoryStrings.settingsAutoAssignmentSubtitle),
+                              title: Text(
+                                  InventoryStrings.settingsAutoAssignmentLabel),
+                              subtitle: Text(InventoryStrings
+                                  .settingsAutoAssignmentSubtitle),
                               value: _bundle!.pool.isAutoResourceAssignment,
                               onChanged: (bool value) {
                                 setState(() {
-                                  _bundle!.pool.isAutoResourceAssignment = value;
+                                  _bundle!.pool.isAutoResourceAssignment =
+                                      value;
                                 });
                               },
                             ),
@@ -580,10 +651,15 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(InventoryStrings.settingsContextsSectionTitle, style: Theme.of(context).textTheme.titleLarge),
+                                Text(
+                                    InventoryStrings
+                                        .settingsContextsSectionTitle,
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge),
                                 IconButton(
                                   icon: const Icon(Icons.add_circle_outline),
-                                  tooltip: InventoryStrings.settingsAddContextTooltip,
+                                  tooltip: InventoryStrings
+                                      .settingsAddContextTooltip,
                                   onPressed: () => _showEditContextDialog(),
                                 )
                               ],
@@ -591,14 +667,16 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                             const SizedBox(height: 8),
                             if (activeContexts.isEmpty)
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                                child: Center(child: Text(InventoryStrings.settingsNoContexts)),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16.0),
+                                child: Center(
+                                    child: Text(
+                                        InventoryStrings.settingsNoContexts)),
                               ),
                           ],
                         ),
                       ),
                     ),
-
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       sliver: InventoryContextsEditor(
@@ -608,13 +686,13 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                         pool: _bundle?.pool,
                         allProducts: _bundle?.products ?? [],
                         onReorder: _reorderContext,
-                        onEdit: (context) => _showEditContextDialog(contextModel: context),
+                        onEdit: (context) =>
+                            _showEditContextDialog(contextModel: context),
                         onEditProduct: _showSelectProductDialog,
                         onRemove: _removeContext,
                         onRestore: _addContextBack,
                       ),
                     ),
-
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       sliver: SliverToBoxAdapter(
@@ -626,7 +704,9 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                                 onPressed: () => _confirmDelete(innerContext),
                                 child: Text(
                                   InventoryStrings.settingsDeletePoolButton,
-                                  style: TextStyle(color: ThemeConfig.redColor(innerContext)),
+                                  style: TextStyle(
+                                      color:
+                                          ThemeConfig.redColor(innerContext)),
                                 ),
                               ),
                             ),
@@ -656,11 +736,17 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton.icon(
-                  icon: _isSaving ? const SizedBox.shrink() : const Icon(Icons.save, size: 18),
+                  icon: _isSaving
+                      ? const SizedBox.shrink()
+                      : const Icon(Icons.save, size: 18),
                   label: _isSaving
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2))
                       : Text(InventoryStrings.settingsSaveChanges),
-                  onPressed: _isSaving ? null : () => _saveChanges(innerContext),
+                  onPressed:
+                      _isSaving ? null : () => _saveChanges(innerContext),
                 ),
               ],
             ),

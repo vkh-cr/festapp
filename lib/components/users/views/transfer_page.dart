@@ -40,53 +40,54 @@ class _TransferPageState extends State<TransferPage> {
     if (!loggedIn) {
       loggedIn = await AuthService.tryAuthUser();
     }
-    
-    // 2. If not, try to use the token provided
-    if (!loggedIn && widget.refresh_token != null && widget.refresh_token!.isNotEmpty) {
-       try {
-          debugPrint("TransferPage: Setting session from token...");
-          // Ensure a clean slate before setting a new session
-          if (Supabase.instance.client.auth.currentSession != null) {
-            await Supabase.instance.client.auth.signOut();
-          }
-          await AuthService.recoverSession(widget.refresh_token!);
-          // Refreshing might be redundant if setSession succeeds, but good for consistency
-          await AuthService.refreshSession();
-          loggedIn = true;
-       } catch (e) {
-          debugPrint("TransferPage: Session set error: $e");
-          // Final check in case it worked anyway
-          loggedIn = await AuthService.tryAuthUser();
-       }
+
+      // 2. If not, use the token provided
+    if (!loggedIn &&
+        widget.refresh_token != null &&
+        widget.refresh_token!.isNotEmpty) {
+      try {
+        debugPrint("TransferPage: Setting session from token...");
+        // Ensure a clean slate before setting a new session
+        if (Supabase.instance.client.auth.currentSession != null) {
+          await Supabase.instance.client.auth.signOut();
+        }
+        await AuthService.recoverSession(widget.refresh_token!);
+        // Refreshing session
+        await AuthService.refreshSession();
+        loggedIn = true;
+      } catch (e) {
+        debugPrint("TransferPage: Session set error: $e");
+        // Final check in case it worked anyway
+        loggedIn = await AuthService.tryAuthUser();
+      }
     }
 
     if (loggedIn) {
-        // 3. Logged In -> Execute Post-Login Logic (Mirrors LoginPage)
-        // This centralized method handles:
-        // - Updating App Data (force: true)
-        // - Checking for Units (redirect to UnitAdmin)
-        // - Fallback to provided path (or Home)
-        if (mounted) {
-           try {
-             debugPrint("TransferPage: Session valid ($loggedIn). calling handlePostLoginNavigation");
-             await RouterService.handlePostLoginNavigation(
-                 context, 
-                 fallbackPath: widget.redirect ?? "/", 
-                 useReplacement: true
-             );
-           } catch (e) {
-             debugPrint("TransferPage: Smart nav failed. Error: $e");
-             if (mounted) {
-               await context.router.replacePath("/");
-             }
-           }
+      // 3. Logged In -> Execute Post-Login Logic (Mirrors LoginPage)
+      // This centralized method handles:
+      // - Updating App Data (force: true)
+      // - Checking for Units (redirect to UnitAdmin)
+      // - Fallback to provided path (or Home)
+      if (mounted) {
+        try {
+          debugPrint(
+              "TransferPage: Session valid ($loggedIn). calling handlePostLoginNavigation");
+          await RouterService.handlePostLoginNavigation(context,
+              fallbackPath: widget.redirect ?? "/", useReplacement: true);
+        } catch (e) {
+          debugPrint("TransferPage: Smart nav failed. Error: $e");
+          if (mounted) {
+            await context.router.replacePath("/");
+          }
         }
+      }
     } else {
-        // 4. Failed -> Login Page
-        debugPrint("TransferPage: Session INVALID ($loggedIn). Redirecting to LoginRoute.");
-        if (mounted) {
-           context.router.replace(LoginRoute());
-        }
+      // 4. Failed -> Login Page
+      debugPrint(
+          "TransferPage: Session INVALID ($loggedIn). Redirecting to LoginRoute.");
+      if (mounted) {
+        context.router.replace(LoginRoute());
+      }
     }
   }
 

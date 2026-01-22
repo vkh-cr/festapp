@@ -10,43 +10,52 @@ class ActivityDataHelper {
       (j[Tb.activities.table] as List<dynamic>?)
           ?.map((item) => ActivityModel.fromJson(item as Map<String, dynamic>))
           .toList() ??
-          [];
+      [];
 
-  static List<AssignmentPlaceLinkModel> parseAssignmentPlaceLinks(Map<String, dynamic> j) =>
+  static List<AssignmentPlaceLinkModel> parseAssignmentPlaceLinks(
+          Map<String, dynamic> j) =>
       (j["assignment_place_links"] as List<dynamic>?)
-          ?.map((item) => AssignmentPlaceLinkModel.fromJson(item as Map<String, dynamic>))
+          ?.map((item) =>
+              AssignmentPlaceLinkModel.fromJson(item as Map<String, dynamic>))
           .toList() ??
-          [];
+      [];
 
-  static List<AssignmentEventLinkModel> parseAssignmentEventLinks(Map<String, dynamic> j) =>
+  static List<AssignmentEventLinkModel> parseAssignmentEventLinks(
+          Map<String, dynamic> j) =>
       (j["assignment_event_links"] as List<dynamic>?)
-          ?.map((item) => AssignmentEventLinkModel.fromJson(item as Map<String, dynamic>))
+          ?.map((item) =>
+              AssignmentEventLinkModel.fromJson(item as Map<String, dynamic>))
           .toList() ??
-          [];
+      [];
 
-  static List<ActivityAssignmentModel> parseActivityAssignments(Map<String, dynamic> j) =>
+  static List<ActivityAssignmentModel> parseActivityAssignments(
+          Map<String, dynamic> j) =>
       (j[Tb.activity_assignments.table] as List<dynamic>?)
-          ?.map((item) => ActivityAssignmentModel.fromJson(item as Map<String, dynamic>))
+          ?.map((item) =>
+              ActivityAssignmentModel.fromJson(item as Map<String, dynamic>))
           .toList() ??
-          [];
+      [];
 
   static List<ActivityEventModel> parseEvents(Map<String, dynamic> j) =>
       (j[Tb.events.table] as List<dynamic>?)
-          ?.map((item) => ActivityEventModel.fromJson(item as Map<String, dynamic>))
+          ?.map((item) =>
+              ActivityEventModel.fromJson(item as Map<String, dynamic>))
           .toList() ??
-          [];
+      [];
 
   static List<ActivityPlaceModel> parsePlaces(Map<String, dynamic> j) =>
       (j[Tb.places.table] as List<dynamic>?)
-          ?.map((item) => ActivityPlaceModel.fromJson(item as Map<String, dynamic>))
+          ?.map((item) =>
+              ActivityPlaceModel.fromJson(item as Map<String, dynamic>))
           .toList() ??
-          [];
+      [];
 
   static List<ActivityUserInfoModel> parseUsers(Map<String, dynamic> j) =>
       (j[Tb.user_info.table] as List<dynamic>?)
-          ?.map((item) => ActivityUserInfoModel.fromJson(item as Map<String, dynamic>))
+          ?.map((item) =>
+              ActivityUserInfoModel.fromJson(item as Map<String, dynamic>))
           .toList() ??
-          [];
+      [];
 
   static void linkAssignmentsToActivities(EditDataBundle bundle) {
     final allActivities = bundle.activities ?? [];
@@ -60,26 +69,33 @@ class ActivityDataHelper {
     final allUserModels = bundle.users ?? [];
 
     final placeModelById = <int, ActivityPlaceModel>{
-      for (final p in allPlaceModels) if (p.id != null) p.id!: p
+      for (final p in allPlaceModels)
+        if (p.id != null) p.id!: p
     };
     final eventModelById = <int, ActivityEventModel>{
-      for (final e in allEventModels) if (e.id != null) e.id!: e
+      for (final e in allEventModels)
+        if (e.id != null) e.id!: e
     };
     final userModelByUserInfo = <String, ActivityUserInfoModel>{
-      for (final u in allUserModels) if (u.id != null) u.id!: u
+      for (final u in allUserModels)
+        if (u.id != null) u.id!: u
     };
 
     final placeLinksByAssignmentId = <String, List<AssignmentPlaceLinkModel>>{};
     for (final apLink in allAssignmentPlaceLinks) {
       if (apLink.assignmentId != null && apLink.placeId != null) {
-        placeLinksByAssignmentId.putIfAbsent(apLink.assignmentId!, () => []).add(apLink);
+        placeLinksByAssignmentId
+            .putIfAbsent(apLink.assignmentId!, () => [])
+            .add(apLink);
       }
     }
 
     final eventLinksByAssignmentId = <String, List<AssignmentEventLinkModel>>{};
     for (final aeLink in allAssignmentEventLinks) {
       if (aeLink.assignmentId != null && aeLink.eventId != null) {
-        eventLinksByAssignmentId.putIfAbsent(aeLink.assignmentId!, () => []).add(aeLink);
+        eventLinksByAssignmentId
+            .putIfAbsent(aeLink.assignmentId!, () => [])
+            .add(aeLink);
       }
     }
 
@@ -87,7 +103,8 @@ class ActivityDataHelper {
     for (final assignment in allAssignments) {
       final String assignmentUuid = assignment.id;
 
-      final currentAssignmentPlaceLinks = placeLinksByAssignmentId[assignmentUuid];
+      final currentAssignmentPlaceLinks =
+          placeLinksByAssignmentId[assignmentUuid];
       if (currentAssignmentPlaceLinks != null) {
         assignment.places = currentAssignmentPlaceLinks
             .map((apLink) => placeModelById[apLink.placeId!])
@@ -97,7 +114,8 @@ class ActivityDataHelper {
         assignment.places = [];
       }
 
-      final currentAssignmentEventLinks = eventLinksByAssignmentId[assignmentUuid];
+      final currentAssignmentEventLinks =
+          eventLinksByAssignmentId[assignmentUuid];
       if (currentAssignmentEventLinks != null) {
         assignment.events = currentAssignmentEventLinks
             .map((aeLink) => eventModelById[aeLink.eventId!])
@@ -114,7 +132,9 @@ class ActivityDataHelper {
       }
 
       if (assignment.activityId != null) {
-        assignmentsByActivityId.putIfAbsent(assignment.activityId!, () => []).add(assignment);
+        assignmentsByActivityId
+            .putIfAbsent(assignment.activityId!, () => [])
+            .add(assignment);
       }
     }
 
@@ -124,7 +144,8 @@ class ActivityDataHelper {
     }
   }
 
-  static List<TimeBlockItem> activitiesToTimeBlocks(List<ActivityModel> activities, List<EventModel> events) {
+  static List<TimeBlockItem> activitiesToTimeBlocks(
+      List<ActivityModel> activities, List<EventModel> events) {
     final List<TimeBlockItem> timeBlocks = [];
     final Set<String> processedAssignmentIds = {};
 
@@ -157,27 +178,29 @@ class ActivityDataHelper {
         if (timeBlockPlace != null) {
           children = events
               .where((event) =>
-          event.place?.id == timeBlockPlace!.id &&
-              !event.endTime.isBefore(assignment.startTime!) &&
-              !event.startTime.isAfter(assignment.endTime!))
+                  event.place?.id == timeBlockPlace!.id &&
+                  !event.endTime.isBefore(assignment.startTime!) &&
+                  !event.startTime.isAfter(assignment.endTime!))
               .map((event) => TimeBlockItem.fromEventModelAsChild(event))
               .toList();
-        } else if(assignment.places.isNotEmpty){
+        } else if (assignment.places.isNotEmpty) {
           children = events
               .where((event) =>
-          assignment.places.any((p)=>p.id == event.place?.id) &&
-              !event.endTime.isBefore(assignment.startTime!) &&
-              !event.startTime.isAfter(assignment.endTime!))
+                  assignment.places.any((p) => p.id == event.place?.id) &&
+                  !event.endTime.isBefore(assignment.startTime!) &&
+                  !event.startTime.isAfter(assignment.endTime!))
               .map((event) => TimeBlockItem.fromEventModelAsChild(event))
               .toList();
         }
 
-        final Set<int> existingChildrenIds = children.map((child) => child.id).toSet();
+        final Set<int> existingChildrenIds =
+            children.map((child) => child.id).toSet();
 
         for (final assignmentEvent in assignment.events) {
           if (!existingChildrenIds.contains(assignmentEvent.id)) {
-            var event = events.firstWhereOrNull((e)=>e.id == assignmentEvent.id);
-            if(event == null){
+            var event =
+                events.firstWhereOrNull((e) => e.id == assignmentEvent.id);
+            if (event == null) {
               continue;
             }
             final eventAsChild = TimeBlockItem.fromEventModelAsChild(event);
@@ -196,7 +219,8 @@ class ActivityDataHelper {
           timeBlockType: TimeBlockType.signedIn,
           isActivity: true,
           data: {
-            "leftText": "${DateFormat.Hm().format(assignment.startTime!)} - ${DateFormat.Hm().format(assignment.endTime!)}",
+            "leftText":
+                "${DateFormat.Hm().format(assignment.startTime!)} - ${DateFormat.Hm().format(assignment.endTime!)}",
             "rightText": activity.title
           },
           timeBlockPlace: timeBlockPlace,
@@ -208,4 +232,5 @@ class ActivityDataHelper {
       }
     }
     return timeBlocks;
-  }}
+  }
+}

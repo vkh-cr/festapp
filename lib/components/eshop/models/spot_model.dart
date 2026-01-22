@@ -64,10 +64,14 @@ class SpotModel extends ITrinaRowModel {
     final t = TbEshop.spots;
     return SpotModel(
       id: json[t.id],
-      createdAt: json[t.created_at] != null ? DateTime.parse(json[t.created_at]) : null,
+      createdAt: json[t.created_at] != null
+          ? DateTime.parse(json[t.created_at])
+          : null,
       occasionId: json[t.occasion],
       productId: json[t.product],
-      updatedAt: json[t.updated_at] != null ? DateTime.parse(json[t.updated_at]) : null,
+      updatedAt: json[t.updated_at] != null
+          ? DateTime.parse(json[t.updated_at])
+          : null,
       secret: json[t.secret],
       secretExpirationTime: json[t.secret_expiration_time] != null
           ? DateTime.parse(json[t.secret_expiration_time])
@@ -112,7 +116,6 @@ class SpotModel extends ITrinaRowModel {
     };
   }
 
-
   @override
   String toBasicString() => title ?? id.toString();
 
@@ -125,10 +128,15 @@ class SpotModel extends ITrinaRowModel {
       t.state: TrinaCell(value: state ?? ""),
       // Added product display to the grid row
       t.product: TrinaCell(value: product?.toBasicString() ?? productId),
-      t.inventory_context: TrinaCell(value: inventoryContext?.title ?? inventoryContextId),
+      t.inventory_context:
+          TrinaCell(value: inventoryContext?.title ?? inventoryContextId),
       t.resource: TrinaCell(value: resource?.title ?? resourceId),
       t.resource_slot: TrinaCell(value: resourceSlot?.title ?? resourceSlotId),
-      "order": TrinaCell(value: order?.toBasicString() ?? (orderProductTicketId != null ? "Order ID: ${orderProductTicket?.orderId}" : "")),
+      "order": TrinaCell(
+          value: order?.toBasicString() ??
+              (orderProductTicketId != null
+                  ? "Order ID: ${orderProductTicket?.orderId}"
+                  : "")),
     };
     return TrinaRow(cells: cells);
   }

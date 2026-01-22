@@ -95,7 +95,7 @@ class _PlacesContentState extends State<PlacesContent> {
               title: ctx.row.cells[Tb.places.title]!.value,
               rendererContext: ctx,
               loadContent: () async =>
-              ctx.row.cells[Tb.places.description]!.value,
+                  ctx.row.cells[Tb.places.description]!.value,
             );
           },
         ),
@@ -103,9 +103,8 @@ class _PlacesContentState extends State<PlacesContent> {
           title: "Icon".tr(),
           field: Tb.places.icon,
           applyFormatterInEditing: true,
-          formatter: (d) => svgIcons
-              .firstWhereOrNull((i) => i.id == d)
-              ?.link ??
+          formatter: (d) =>
+              svgIcons.firstWhereOrNull((i) => i.id == d)?.link ??
               PlaceModel.WithoutValue,
           type: TrinaColumnType.select(
             defaultValue: null,

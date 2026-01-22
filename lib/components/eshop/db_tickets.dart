@@ -34,25 +34,27 @@ class DbTickets {
   }
 
   static Future<List<TicketModel>> getAllTickets(String occasionLink) async {
-    var ordersBundle = await DbOrders.getAllOrdersBundle(occasionLink: occasionLink, includeOrderDetails: true, includeSpots: true);
+    var ordersBundle = await DbOrders.getAllOrdersBundle(
+        occasionLink: occasionLink,
+        includeOrderDetails: true,
+        includeSpots: true);
     List<TicketModel> toReturn = [];
-    for(var o in ordersBundle.orders){
-
-      for(TicketModel t in o.relatedTickets??[]){
+    for (var o in ordersBundle.orders) {
+      for (TicketModel t in o.relatedTickets ?? []) {
         var tckst = o.data?[TbEshop.tickets.table];
         t.totalPrice = tckst.isNotEmpty ? 0 : null;
-        for(var tt in tckst){
-          if(tt[TbEshop.tickets.ticket_symbol] != t.ticketSymbol){
+        for (var tt in tckst) {
+          if (tt[TbEshop.tickets.ticket_symbol] != t.ticketSymbol) {
             continue;
           }
-          for(var p in tt[TbEshop.products.table]??[]){
+          for (var p in tt[TbEshop.products.table] ?? []) {
             t.totalPrice = t.totalPrice! + (p[TbEshop.products.price] ?? 0);
           }
         }
       }
-      toReturn.addAll(o.relatedTickets??[]);
+      toReturn.addAll(o.relatedTickets ?? []);
     }
-    toReturn = toReturn.sortedBy((ou)=>ou.createdAt!).reversed.toList();
+    toReturn = toReturn.sortedBy((ou) => ou.createdAt!).reversed.toList();
     return toReturn;
   }
 
@@ -73,7 +75,7 @@ class DbTickets {
 
       return response;
     } catch (e) {
-      print("Unexpected error in sendTicketsToEmail: $e");
+      // Unexpected error in sendTicketsToEmail
       rethrow;
     }
   }
@@ -94,12 +96,13 @@ class DbTickets {
       }
       return null;
     } catch (e) {
-      print("Error downloading ticket PDF: $e");
+      // Error downloading ticket PDF
       rethrow;
     }
   }
 
-  static Future<void> updateTicketNoteHidden(int ticketId, String newNoteHidden) async {
+  static Future<void> updateTicketNoteHidden(
+      int ticketId, String newNoteHidden) async {
     var response = await _supabase.rpc(
       "update_ticket_note_hidden",
       params: {
@@ -127,7 +130,8 @@ class DbTickets {
     return List<Map<String, dynamic>>.from(data);
   }
 
-  static Future<TicketModel?> scanTicket(String scannedId, String scannedCode) async {
+  static Future<TicketModel?> scanTicket(
+      String scannedId, String scannedCode) async {
     final response = await _supabase.rpc('scan_ticket', params: {
       'scanned_id': scannedId,
       'scanned_code': scannedCode,
@@ -177,7 +181,8 @@ class DbTickets {
     );
   }
 
-  static Future<void> updateScanCode(String occasionLink, String scannedCode) async {
+  static Future<void> updateScanCode(
+      String occasionLink, String scannedCode) async {
     final response = await _supabase.rpc('update_scan_code', params: {
       'occasion_link': occasionLink,
       'new_scan_code': scannedCode,
@@ -188,7 +193,8 @@ class DbTickets {
     }
   }
 
-  static Future<bool> updateTicketToUsed(int ticketId, String scannedCode) async {
+  static Future<bool> updateTicketToUsed(
+      int ticketId, String scannedCode) async {
     final response = await _supabase.rpc('update_ticket_to_used', params: {
       'ticket_id': ticketId,
       'scan_code': scannedCode,
@@ -210,7 +216,8 @@ class DbTickets {
 
   /// Resets the password for the user associated with the ticket.
   /// Returns the user's email if successful, otherwise null.
-  static Future<String?> resetPassword(int ticketId, String password, String scannedCode) async {
+  static Future<String?> resetPassword(
+      int ticketId, String password, String scannedCode) async {
     try {
       final response = await _supabase.rpc('reset_password_via_scan', params: {
         'ticket_id': ticketId,
@@ -222,12 +229,15 @@ class DbTickets {
         return AppConfig.removeUserPrefix(response["email"] as String);
       }
     } catch (e) {
-      print("Error in resetPassword: $e");
+      // Error in resetPassword
     }
     return null;
   }
 
-  static Future<void> swapSpotTickets(int spotId1, int spotId2,) async {
+  static Future<void> swapSpotTickets(
+    int spotId1,
+    int spotId2,
+  ) async {
     await _supabase.rpc(
       'swap_spot_tickets',
       params: {
@@ -237,9 +247,11 @@ class DbTickets {
     );
   }
 
-  static Future<Map<String, dynamic>?> getOccasionByScanCode(String scanCode) async {
+  static Future<Map<String, dynamic>?> getOccasionByScanCode(
+      String scanCode) async {
     try {
-      final response = await _supabase.rpc('get_occasion_by_scan_code', params: {
+      final response =
+          await _supabase.rpc('get_occasion_by_scan_code', params: {
         'scan_code': scanCode,
       });
       return response;

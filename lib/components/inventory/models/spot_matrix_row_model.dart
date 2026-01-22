@@ -30,24 +30,30 @@ class SpotMatrixRow extends ITrinaRowModel {
     final cells = <String, TrinaCell>{};
 
     // --- Visible and Identifier Columns ---
-    cells[SpotManagementConstants.rowIdentifier] = TrinaCell(value: rowIdentifier);
+    cells[SpotManagementConstants.rowIdentifier] =
+        TrinaCell(value: rowIdentifier);
 
-    String displayTitle = rowReference.resource.title ?? InventoryStrings.resourceDefaultTitle(rowReference.resource.id.toString());
+    String displayTitle = rowReference.resource.title ??
+        InventoryStrings.resourceDefaultTitle(
+            rowReference.resource.id.toString());
     if (rowReference.slot?.title != null) {
       displayTitle = rowReference.slot!.title!;
     } else if (rowReference.implicitSlotIndex != null) {
       displayTitle = "$displayTitle #${rowReference.implicitSlotIndex}";
     }
-    cells[SpotManagementConstants.resourceTitle] = TrinaCell(value: displayTitle);
+    cells[SpotManagementConstants.resourceTitle] =
+        TrinaCell(value: displayTitle);
 
     // --- The SINGLE Hidden Reference Column ---
     // Pass the entire reference object. This object will be updated in memory and persisted back to the grid state.
-    cells[SpotManagementConstants.rowReference] = TrinaCell(value: rowReference);
+    cells[SpotManagementConstants.rowReference] =
+        TrinaCell(value: rowReference);
 
     // --- Dynamic Context Columns ---
     // Populate cells for each context based on the CURRENT state from the reference object.
     rowReference.currentSpotsInRow.forEach((contextId, spot) {
-      final fieldName = '${SpotManagementConstants.contextColumnPrefix}$contextId';
+      final fieldName =
+          '${SpotManagementConstants.contextColumnPrefix}$contextId';
       // The cell value is now ONLY the display string, with no ID.
       final cellValue = spot?.order?.toCustomerData() ?? '';
       cells[fieldName] = TrinaCell(value: cellValue);
@@ -60,7 +66,8 @@ class SpotMatrixRow extends ITrinaRowModel {
   static SpotMatrixRow fromPlutoJson(Map<String, dynamic> json) {
     // Reconstruct the object by simply extracting our unified reference object.
     // This object will contain the latest state as updated by the cell renderers.
-    final rowRef = json[SpotManagementConstants.rowReference] as SpotManagementRowReference;
+    final rowRef = json[SpotManagementConstants.rowReference]
+        as SpotManagementRowReference;
     return SpotMatrixRow(rowReference: rowRef);
   }
 
@@ -95,7 +102,10 @@ class SpotMatrixRow extends ITrinaRowModel {
   }
 
   @override
-  String toBasicString() => rowReference.resource.title ?? InventoryStrings.resourceDefaultTitle(rowReference.resource.id.toString());
+  String toBasicString() =>
+      rowReference.resource.title ??
+      InventoryStrings.resourceDefaultTitle(
+          rowReference.resource.id.toString());
 
   @override
   Future<void> deleteMethod(BuildContext context) async {

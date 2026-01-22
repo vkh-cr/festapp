@@ -6,67 +6,67 @@ import 'package:fstapp/components/map/path_group_model.dart';
 import '../components/map/place_model.dart';
 
 extension DataExtension on int? {
-  int safeInt() => this??0;
+  int safeInt() => this ?? 0;
 }
 
 extension PlaceExtensions on List<PlaceModel> {
   void sortPlaces([bool asc = true]) {
-    if(asc)
-    {
-      sort((a,b) => (a.order.safeInt().compareTo(b.order.safeInt())));
+    if (asc) {
+      sort((a, b) => (a.order.safeInt().compareTo(b.order.safeInt())));
     } else {
-      sort((b,a) => (a.order.safeInt().compareTo(b.order.safeInt())));
+      sort((b, a) => (a.order.safeInt().compareTo(b.order.safeInt())));
     }
   }
 }
 
 extension PathGroupsExtensions on List<PathGroupsModel> {
   void sortPathGroups([bool asc = true]) {
-    if(asc)
-    {
-      sort((a,b) => (a.order.safeInt().compareTo(b.order.safeInt())));
+    if (asc) {
+      sort((a, b) => (a.order.safeInt().compareTo(b.order.safeInt())));
     } else {
-      sort((b,a) => (a.order.safeInt().compareTo(b.order.safeInt())));
+      sort((b, a) => (a.order.safeInt().compareTo(b.order.safeInt())));
     }
   }
 }
 
 extension DataExtensions on List<EventModel> {
-  List<EventModel> sortEvents() => sortedBy((element) => element.title??"")
-    .sortedBy((element) => element.startTime);
+  List<EventModel> sortEvents() => sortedBy((element) => element.title ?? "")
+      .sortedBy((element) => element.startTime);
 
   List<EventModel> filterRootEvents() {
     List<EventModel> filtered = [];
-    var children = where((element) => element.childEventIds!=null)
-        .expand((element) => element.childEventIds!).toList();
-    for(var e in where((element) => !children.contains(element.id!)))
-    {
+    var children = where((element) => element.childEventIds != null)
+        .expand((element) => element.childEventIds!)
+        .toList();
+    for (var e in where((element) => !children.contains(element.id!))) {
       filtered.add(e);
     }
     return filtered;
   }
 
   List<EventModel> withoutParentEvents() {
-    return where((element) => element.childEventIds == null || element.childEventIds!.isEmpty).toList();
+    return where((element) =>
+            element.childEventIds == null || element.childEventIds!.isEmpty)
+        .toList();
   }
 
   List<EventModel> filterNotHidden() {
-    return where((e) => !(e.isHidden??false)).toList();
+    return where((e) => !(e.isHidden ?? false)).toList();
   }
 
   List<EventModel> timetableEventsFilter(int minimalDurationMinutes) {
     return filterRootEvents()
         .where((e) => e.place?.id != null)
-        .where((element) => element.duration().inMinutes>=minimalDurationMinutes)
+        .where(
+            (element) => element.duration().inMinutes >= minimalDurationMinutes)
         .toList();
   }
 }
 
 extension InfoExtensions on List<InformationModel> {
   List<InformationModel> filterByType(String? type) {
-    if(type?.isEmpty??true)
-    {
-      return where((element) => element.type?.isEmpty??true).toList();
+    if (type?.isEmpty ?? true) {
+      return where((element) => element.type?.isEmpty ?? true).toList();
     }
     return where((element) => element.type == type).toList();
   }

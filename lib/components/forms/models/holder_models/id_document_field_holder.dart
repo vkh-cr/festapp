@@ -34,7 +34,8 @@ class IdDocumentFieldHolder extends FieldHolder {
     final String idNumberFieldName = id.toString();
     final String expiryDateFieldName = "${id}_expiry";
 
-    final idNumberValue = formKey.currentState?.fields[idNumberFieldName]?.value as String?;
+    final idNumberValue =
+        formKey.currentState?.fields[idNumberFieldName]?.value as String?;
 
     if (idNumberValue == null || idNumberValue.trim().isEmpty) {
       return null;
@@ -42,7 +43,8 @@ class IdDocumentFieldHolder extends FieldHolder {
 
     DateTime? expiryDateValue;
     if (showExpiryDate) {
-      expiryDateValue = formKey.currentState?.fields[expiryDateFieldName]?.value as DateTime?;
+      expiryDateValue =
+          formKey.currentState?.fields[expiryDateFieldName]?.value as DateTime?;
     }
 
     return IdDocumentData(

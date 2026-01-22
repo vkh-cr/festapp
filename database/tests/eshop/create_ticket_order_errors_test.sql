@@ -245,7 +245,7 @@ BEGIN
         v_dummy_opt_id bigint;
     BEGIN
         INSERT INTO eshop.orders (occasion, form) VALUES (v_occasion_id, v_form_id) RETURNING id INTO v_dummy_order_id;
-        INSERT INTO eshop.tickets (occasion, state) VALUES (v_occasion_id, 'valid') RETURNING id INTO v_dummy_ticket_id;
+        INSERT INTO eshop.tickets (occasion, state) VALUES (v_occasion_id, 'ordered') RETURNING id INTO v_dummy_ticket_id;
         INSERT INTO eshop.order_product_ticket ("order", product, ticket) VALUES (v_dummy_order_id, v_product_id, v_dummy_ticket_id) RETURNING id INTO v_dummy_opt_id;
         
         UPDATE eshop.spots SET order_product_ticket = v_dummy_opt_id WHERE id = v_spot_id;

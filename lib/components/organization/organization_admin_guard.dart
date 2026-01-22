@@ -6,7 +6,8 @@ class OrganizationAdminGuard extends StatefulWidget {
   final Widget Function(BuildContext context, int organizationId) builder;
   final int? targetOrganizationId;
 
-  const OrganizationAdminGuard({super.key, required this.builder, this.targetOrganizationId});
+  const OrganizationAdminGuard(
+      {super.key, required this.builder, this.targetOrganizationId});
 
   @override
   State<OrganizationAdminGuard> createState() => _OrganizationAdminGuardState();
@@ -37,17 +38,19 @@ class _OrganizationAdminGuardState extends State<OrganizationAdminGuard> {
       int? orgId = widget.targetOrganizationId;
       if (orgId == null) {
         final currentUnit = RightsService.currentUnit();
-        orgId = currentUnit?.organization ?? RightsService.currentUser()?.units?.firstOrNull?.organization;
+        orgId = currentUnit?.organization ??
+            RightsService.currentUser()?.units?.firstOrNull?.organization;
       }
 
       if (orgId == null) {
-         // Fallback: Check if the user is an admin of ANY organization?
-         // Or just fail. The page implies editing the "current" organization.
-         throw Exception("Could not determine context organization.");
+        // Fallback: Check if the user is an admin of ANY organization?
+        // Or just fail. The page implies editing the "current" organization.
+        throw Exception("Could not determine context organization.");
       }
 
-      final isAdmin = await Supabase.instance.client
-          .rpc('check_is_admin_of_organization', params: {'organization_id': orgId});
+      final isAdmin = await Supabase.instance.client.rpc(
+          'check_is_admin_of_organization',
+          params: {'organization_id': orgId});
 
       if (isAdmin == true) {
         if (mounted) {
@@ -58,7 +61,8 @@ class _OrganizationAdminGuardState extends State<OrganizationAdminGuard> {
           });
         }
       } else {
-        throw Exception("Access Denied. User is not an admin of organization $orgId.");
+        throw Exception(
+            "Access Denied. User is not an admin of organization $orgId.");
       }
     } catch (e) {
       if (mounted) {
@@ -83,7 +87,8 @@ class _OrganizationAdminGuardState extends State<OrganizationAdminGuard> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Access Denied", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text("Access Denied",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.all(16.0),

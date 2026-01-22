@@ -34,7 +34,8 @@ class _TicketsTabState extends State<TicketsTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newOccasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
+    final newOccasionLink =
+        context.routeData.params.getString(AppRouter.linkFormatted);
     // Initialize only once when the link is available
     if (occasionLink == null) {
       occasionLink = newOccasionLink;
@@ -59,7 +60,8 @@ class _TicketsTabState extends State<TicketsTab> {
       EshopColumns.TICKET_SYMBOL,
       EshopColumns.TICKET_CREATED_AT,
       EshopColumns.TICKET_STATE,
-      if (PlatformHelper.isWeb && FeatureService.isFeatureEnabled(FeatureConstants.ticket))
+      if (PlatformHelper.isWeb &&
+          FeatureService.isFeatureEnabled(FeatureConstants.ticket))
         EshopColumns.TICKET_DOWNLOAD,
       EshopColumns.TICKET_CONFIRM,
       EshopColumns.TICKET_TOTAL_PRICE,
@@ -186,7 +188,8 @@ class _TicketsTabState extends State<TicketsTab> {
     }
   }
 
-  List<TicketModel> _getCheckedTickets(SingleDataGridController singleDataGrid) {
+  List<TicketModel> _getCheckedTickets(
+      SingleDataGridController singleDataGrid) {
     return List<TicketModel>.from(
       singleDataGrid.stateManager.refRows.originalList
           .where((row) => row.checked == true)

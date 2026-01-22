@@ -61,9 +61,9 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
 
     // Determine the effective expiry date label
     final String effectiveExpiryDateLabel =
-    widget.fieldHolder.expiryDateLabel?.trim().isEmpty ?? true
-        ? 'Expiry Date'.tr()
-        : widget.fieldHolder.expiryDateLabel!;
+        widget.fieldHolder.expiryDateLabel?.trim().isEmpty ?? true
+            ? 'Expiry Date'.tr()
+            : widget.fieldHolder.expiryDateLabel!;
 
     Widget idNumberField = FormBuilderTextField(
       name: idNumberFieldName,
@@ -79,7 +79,9 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
         fillColor: Colors.transparent,
       ),
       validator: FormBuilderValidators.compose([
-        if (widget.fieldHolder.isRequired) FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty),
+        if (widget.fieldHolder.isRequired)
+          FormBuilderValidators.required(
+              errorText: CommonStrings.fieldCannotBeEmpty),
       ]),
       valueTransformer: (value) => value?.trim(),
     );
@@ -102,13 +104,15 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
           filled: true,
           fillColor: Colors.transparent,
         ),
-        firstDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
+        firstDate: DateTime(
+            DateTime.now().year, DateTime.now().month, DateTime.now().day),
         validator: (value) {
           // If an expiry date is entered, it cannot be in the past.
           // If expiry date needs to be *required* when shown, add a separate bool in IdDocumentFieldHolder
           // and check it here with FormBuilderValidators.required().
           if (value != null) {
-            final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+            final today = DateTime(
+                DateTime.now().year, DateTime.now().month, DateTime.now().day);
             if (value.isBefore(today)) {
               return "Expiry date cannot be in the past.".tr();
             }
@@ -130,10 +134,15 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
     );
 
     if (widget.isCardDesign || widget.fieldHolder.showExpiryDate) {
-      bool idNumberHasError = widget.formKey.currentState?.fields[idNumberFieldName]?.hasError ?? false;
-      bool expiryDateHasError = widget.fieldHolder.showExpiryDate && expiryDateField != null
-          ? (widget.formKey.currentState?.fields[expiryDateFieldName]?.hasError ?? false)
-          : false;
+      bool idNumberHasError =
+          widget.formKey.currentState?.fields[idNumberFieldName]?.hasError ??
+              false;
+      bool expiryDateHasError =
+          widget.fieldHolder.showExpiryDate && expiryDateField != null
+              ? (widget.formKey.currentState?.fields[expiryDateFieldName]
+                      ?.hasError ??
+                  false)
+              : false;
       bool overallHasError = idNumberHasError || expiryDateHasError;
 
       return FormHelper.buildCardWrapperDesign(

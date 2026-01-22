@@ -59,11 +59,9 @@ class _OccasionCardState extends State<OccasionCard> {
       FeatureConstants.form,
       features: widget.occasion.features,
     );
-    _externalPrice =
-    details is FormFeature ? details.formExternalPrice : null;
+    _externalPrice = details is FormFeature ? details.formExternalPrice : null;
 
-    _hasFormFeature = FeatureService.isFeatureEnabled(
-        FeatureConstants.form,
+    _hasFormFeature = FeatureService.isFeatureEnabled(FeatureConstants.form,
         features: widget.occasion.features);
 
     _isDescriptionEmpty =
@@ -76,9 +74,9 @@ class _OccasionCardState extends State<OccasionCard> {
   Widget build(BuildContext context) {
     final Border? border = widget.isPresent
         ? Border.all(
-      color: Theme.of(context).primaryColor,
-      width: OccasionCard.kPresentBorderWidth,
-    )
+            color: Theme.of(context).primaryColor,
+            width: OccasionCard.kPresentBorderWidth,
+          )
         : null;
 
     final double innerRadius = widget.isPresent
@@ -96,7 +94,8 @@ class _OccasionCardState extends State<OccasionCard> {
     void handleCardPress() async {
       // Use the state variables
       if (_skipDialog) {
-        await OccasionDetailDialog.handleReserveAction(context, widget.occasion);
+        await OccasionDetailDialog.handleReserveAction(
+            context, widget.occasion);
       } else if (_hasFormFeature && !_isDescriptionEmpty) {
         showDialog(
           context: context,
@@ -105,9 +104,10 @@ class _OccasionCardState extends State<OccasionCard> {
       } else if (!_hasFormFeature) {
         // Safe navigation for admins to avoid infinite loops
         if (RightsService.canEditOccasion()) {
-           await RouterService.navigateToOccasionByLink(context, widget.occasion.link!);
+          await RouterService.navigateToOccasionByLink(
+              context, widget.occasion.link!);
         } else {
-           try {
+          try {
             await RightsService.updateAppData(
                 link: widget.occasion.link, force: true);
           } catch (e) {
@@ -125,10 +125,8 @@ class _OccasionCardState extends State<OccasionCard> {
         // ← cache the entire card (including its BackdropFilters)
         child: LayoutBuilder(builder: (context, constraints) {
           // Scales kept for consistency, though button is gone
-          (constraints.maxWidth / OccasionCard.kMinCardWidth)
-              .clamp(1.0, 1.5);
-          (constraints.maxHeight / OccasionCard.kMinCardHeight)
-              .clamp(1.0, 1.2);
+          (constraints.maxWidth / OccasionCard.kMinCardWidth).clamp(1.0, 1.5);
+          (constraints.maxHeight / OccasionCard.kMinCardHeight).clamp(1.0, 1.2);
 
           return ConstrainedBox(
             constraints: const BoxConstraints(
@@ -142,7 +140,7 @@ class _OccasionCardState extends State<OccasionCard> {
               transformAlignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius:
-                BorderRadius.circular(OccasionCard.kCardBorderRadius),
+                    BorderRadius.circular(OccasionCard.kCardBorderRadius),
                 border: border,
                 boxShadow: [
                   if (widget.isPresent)
@@ -168,7 +166,7 @@ class _OccasionCardState extends State<OccasionCard> {
                       Positioned.fill(
                         child: CachedNetworkImage(
                           imageUrl:
-                          widget.occasion.data![Tb.occasions.data_image]!,
+                              widget.occasion.data![Tb.occasions.data_image]!,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -200,7 +198,7 @@ class _OccasionCardState extends State<OccasionCard> {
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         SelectableText(

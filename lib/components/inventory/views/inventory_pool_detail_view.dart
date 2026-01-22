@@ -9,7 +9,8 @@ import 'resource_editor_view.dart';
 class InventoryPoolDetailView extends StatefulWidget {
   final int poolId;
   final VoidCallback? onDeleteCompleted;
-  final VoidCallback? onDataUpdated; // This will now be the _refreshDataForCurrentGroup function
+  final VoidCallback?
+      onDataUpdated; // This will now be the _refreshDataForCurrentGroup function
 
   const InventoryPoolDetailView({
     super.key,
@@ -50,7 +51,6 @@ class _InventoryPoolDetailViewState extends State<InventoryPoolDetailView>
     widget.onDataUpdated?.call();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -62,9 +62,12 @@ class _InventoryPoolDetailViewState extends State<InventoryPoolDetailView>
             controller: _tabController,
             isScrollable: true,
             tabs: [
-              DataGridHelper.buildTab(context, Icons.grid_view, InventoryStrings.detailTabOccupancy),
-              DataGridHelper.buildTab(context, Icons.house_siding, InventoryStrings.detailTabRooms),
-              DataGridHelper.buildTab(context, Icons.settings, InventoryStrings.detailTabSettings),
+              DataGridHelper.buildTab(context, Icons.grid_view,
+                  InventoryStrings.detailTabOccupancy),
+              DataGridHelper.buildTab(
+                  context, Icons.house_siding, InventoryStrings.detailTabRooms),
+              DataGridHelper.buildTab(
+                  context, Icons.settings, InventoryStrings.detailTabSettings),
             ],
           ),
         ),

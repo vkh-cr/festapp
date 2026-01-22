@@ -39,6 +39,7 @@ BEGIN
     JOIN eshop.bank_account_users bau ON ba.id = bau.bank_account
     LEFT JOIN eshop.secrets s ON ba.secret = s.id
     WHERE bau."user" = auth.uid() AND bau.is_admin = true
+    AND ba.type != 'cash'
     ORDER BY ba.title;
 END;
 $$;

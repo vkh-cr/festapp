@@ -12,7 +12,6 @@ import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
-import 'package:flutter/services.dart';
 
 import '../models/holder_models/form_ticket_model.dart';
 import '../models/holder_models/ticket_holder.dart';
@@ -24,17 +23,22 @@ import 'id_document_field_builder.dart';
 import 'text_field_builder.dart';
 
 class FormFieldBuilders {
-  static Widget buildTitleWidget(String displayTitle, bool isRequired, BuildContext context,
-      {FocusNode? focusNode, TextStyle? textStyle, TextEditingController? controller}) {
-    final TextStyle themeLabelStyle = Theme.of(context).inputDecorationTheme.labelStyle ??
-        TextStyle(color: ThemeConfig.grey600(context));
-    
+  static Widget buildTitleWidget(
+      String displayTitle, bool isRequired, BuildContext context,
+      {FocusNode? focusNode,
+      TextStyle? textStyle,
+      TextEditingController? controller}) {
+    final TextStyle themeLabelStyle =
+        Theme.of(context).inputDecorationTheme.labelStyle ??
+            TextStyle(color: ThemeConfig.grey600(context));
+
     final TextStyle defaultLabelStyle = themeLabelStyle.copyWith(
-        fontSize: 16 * FormHelper.fontSizeFactor,
-        fontFamily: ThemeConfig.fontFamily,
+      fontSize: 16 * FormHelper.fontSizeFactor,
+      fontFamily: ThemeConfig.fontFamily,
     );
-    final TextStyle effectiveBaseStyle =
-    textStyle != null ? defaultLabelStyle.merge(textStyle) : defaultLabelStyle;
+    final TextStyle effectiveBaseStyle = textStyle != null
+        ? defaultLabelStyle.merge(textStyle)
+        : defaultLabelStyle;
 
     if (focusNode != null || controller != null) {
       final List<Listenable> listenables = [];
@@ -47,13 +51,18 @@ class FormFieldBuilders {
           final bool isFocused = focusNode?.hasFocus ?? false;
           final bool hasContent = controller?.text.isNotEmpty ?? false;
           // Color if focused OR has content (i.e., when label is floating)
-          final bool showColor = (controller != null) ? (isFocused || hasContent) : isFocused;
+          final bool showColor =
+              (controller != null) ? (isFocused || hasContent) : isFocused;
 
           final TextStyle effectiveStyle = effectiveBaseStyle.copyWith(
-            color: showColor ? Theme.of(context).primaryColor : effectiveBaseStyle.color,
+            color: showColor
+                ? Theme.of(context).primaryColor
+                : effectiveBaseStyle.color,
           );
           final TextSpan? requiredStar = isRequired
-              ? TextSpan(text: ' *', style: TextStyle(color: ThemeConfig.redColor(context)))
+              ? TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: ThemeConfig.redColor(context)))
               : null;
           return RichText(
             text: TextSpan(
@@ -66,7 +75,9 @@ class FormFieldBuilders {
       );
     } else {
       final TextSpan? requiredStar = isRequired
-          ? TextSpan(text: ' *', style: TextStyle(color: ThemeConfig.redColor(context)))
+          ? TextSpan(
+              text: ' *',
+              style: TextStyle(color: ThemeConfig.redColor(context)))
           : null;
       return RichText(
         text: TextSpan(
@@ -78,18 +89,23 @@ class FormFieldBuilders {
     }
   }
 
-  static Widget buildTicketField(BuildContext context, FormHolder formHolder, TicketHolder ticket) {
+  static Widget buildTicketField(
+      BuildContext context, FormHolder formHolder, TicketHolder ticket) {
     if (ticket.fields.none((f) => f.fieldType == FormHelper.fieldTypeSpot)) {
       if (ticket.tickets.isEmpty) {
         ticket.tickets.add(FormTicketModel(
-            ticketValues: ticket.fields, ticketKey: GlobalKey<FormBuilderState>()));
+            ticketValues: ticket.fields,
+            ticketKey: GlobalKey<FormBuilderState>()));
       }
       return FormBuilder(
         key: ticket.tickets[0].ticketKey,
         onChanged: formHolder.controller!.updateTotalPrice,
         child: Column(
           children: FormHelper.getFormFields(
-              context, ticket.tickets[0].ticketKey, formHolder, ticket.tickets[0].ticketValues),
+              context,
+              ticket.tickets[0].ticketKey,
+              formHolder,
+              ticket.tickets[0].ticketValues),
         ),
       );
     }
@@ -138,7 +154,8 @@ class FormFieldBuilders {
                   child: Container(
                     decoration: BoxDecoration(
                       color: ThemeConfig.whiteColor(context),
-                      border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
+                      border: Border.all(
+                          color: Theme.of(context).primaryColor, width: 2.0),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     padding: const EdgeInsets.all(12),
@@ -170,7 +187,8 @@ class FormFieldBuilders {
                         ),
                         Text(
                           "${ticket.tickets[i].seat!.objectModel}",
-                          style: TextStyle(fontSize: 14 * FormHelper.fontSizeFactor),
+                          style: TextStyle(
+                              fontSize: 14 * FormHelper.fontSizeFactor),
                         ),
                         Divider(color: Colors.black),
                         FormBuilder(
@@ -182,7 +200,8 @@ class FormFieldBuilders {
                                 ticket.tickets[i].ticketKey,
                                 formHolder,
                                 ticket.tickets[i].ticketValues
-                                    .where((f) => f.fieldType != FormHelper.fieldTypeSpot)
+                                    .where((f) =>
+                                        f.fieldType != FormHelper.fieldTypeSpot)
                                     .toList()),
                           ),
                         ),
@@ -197,41 +216,50 @@ class FormFieldBuilders {
     );
   }
 
-  static Widget buildSpotField(BuildContext context, GlobalKey<FormBuilderState> formKey,
-      FormHolder formHolder, FieldHolder fieldHolder) {
+  static Widget buildSpotField(
+      BuildContext context,
+      GlobalKey<FormBuilderState> formKey,
+      FormHolder formHolder,
+      FieldHolder fieldHolder) {
     FocusNode focusNode = FocusNode();
     TextEditingController textController = TextEditingController();
     return FormBuilderField<SeatModel>(
       name: fieldHolder.fieldType,
       validator: FormBuilderValidators.compose([
-        if (fieldHolder.isRequired) FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty),
-            (value) => value == null ? PublicOrderStrings.selectSeat(null) : null,
+        if (fieldHolder.isRequired)
+          FormBuilderValidators.required(
+              errorText: CommonStrings.fieldCannotBeEmpty),
+        (value) => value == null ? PublicOrderStrings.selectSeat(null) : null,
       ]),
       builder: (FormFieldState<SeatModel?> field) {
         SeatModel? seat = field.value;
-        textController.text = seat?.objectModel?.toString() ?? FormHelper.metaEmpty;
+        textController.text =
+            seat?.objectModel?.toString() ?? FormHelper.metaEmpty;
         return TextField(
           controller: textController,
           focusNode: focusNode,
           readOnly: true,
           canRequestFocus: true,
           decoration: InputDecoration(
-            label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode, controller: textController),
+            label: buildTitleWidget(
+                fieldHolder.title!, fieldHolder.isRequired, context,
+                focusNode: focusNode, controller: textController),
             suffixIcon: const Icon(Icons.event_seat),
             errorText: field.errorText,
             filled: true,
             fillColor: Colors.transparent,
           ),
           onTap: () async {
-            await formHolder.controller!.showSeatReservation!(seat == null ? [] : [seat]);
+            await formHolder
+                .controller!.showSeatReservation!(seat == null ? [] : [seat]);
           },
         );
       },
     );
   }
 
-  static Widget buildTextField(
-      BuildContext context, FormHolder formHolder, FieldHolder fieldHolder, Iterable<String> autofillHints) {
+  static Widget buildTextField(BuildContext context, FormHolder formHolder,
+      FieldHolder fieldHolder, Iterable<String> autofillHints) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
       formHolder: formHolder,
@@ -240,7 +268,8 @@ class FormFieldBuilders {
     );
   }
 
-  static Widget buildEmailField(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
+  static Widget buildEmailField(
+      BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
       formHolder: formHolder,
@@ -249,7 +278,8 @@ class FormFieldBuilders {
     );
   }
 
-  static Widget buildPhoneNumber(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
+  static Widget buildPhoneNumber(
+      BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
       formHolder: formHolder,
@@ -258,7 +288,8 @@ class FormFieldBuilders {
     );
   }
 
-  static Widget buildAddressField(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
+  static Widget buildAddressField(
+      BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
       formHolder: formHolder,
@@ -273,7 +304,8 @@ class FormFieldBuilders {
     );
   }
 
-  static Widget buildNationalityField(BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
+  static Widget buildNationalityField(
+      BuildContext context, FormHolder formHolder, FieldHolder fieldHolder) {
     return TextFieldBuilder(
       fieldHolder: fieldHolder,
       formHolder: formHolder,

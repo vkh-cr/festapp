@@ -24,64 +24,67 @@ class _SongbookContentState extends State<SongbookContent> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller ??= SingleDataGridController<InformationModel>(
-        context: context,
-        loadData: () => DbInformation.getAllInformationForDataGrid(InformationModel.songType),
-        fromPlutoJson: (plutoData) =>
-            InformationModel.fromPlutoJsonType(plutoData, InformationModel.songType),
-        firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
-        idColumn: Tb.information.id,
-        columns: [
-          TrinaColumn(
-            hide: true,
-            title: "Id".tr(),
-            field: Tb.information.id,
-            type: TrinaColumnType.number(defaultValue: -1),
-            readOnly: true,
-            width: 50,
-            renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
-          ),
-          TrinaColumn(
-            title: CommonStrings.hide,
-            field: Tb.information.is_hidden,
-            type: TrinaColumnType.text(),
-            applyFormatterInEditing: true,
-            enableEditingMode: false,
-            width: 100,
-            renderer: (rendererContext) =>
-                DataGridHelper.checkBoxRenderer(rendererContext, Tb.information.is_hidden),
-          ),
-          TrinaColumn(
-            title: CommonStrings.title,
-            field: Tb.information.title,
-            type: TrinaColumnType.text(),
-          ),
-          TrinaColumn(
-            width: 150,
-            title: CommonStrings.content,
-            field: Tb.information.description,
-            type: TrinaColumnType.text(),
-            renderer: (rendererContext) {
-              return DataGridHelper.buildHtmlEditorButton(
-                context: context,
-                occasionId: RightsService.currentOccasionId(),
-                field: Tb.information.description,
-                title: rendererContext.row.cells[Tb.information.title]!.value,
-                rendererContext: rendererContext,
-                loadContent: () async {
-                  return rendererContext.row.cells[Tb.information.description]!.value;
-                },
-              );
-            },
-          ),
-          TrinaColumn(
-            title: "Order".tr(),
-            field: Tb.information.order,
-            type: TrinaColumnType.number(defaultValue: null),
-            applyFormatterInEditing: true,
-            width: 100,
-          ),
-        ],
-      );
+      context: context,
+      loadData: () =>
+          DbInformation.getAllInformationForDataGrid(InformationModel.songType),
+      fromPlutoJson: (plutoData) => InformationModel.fromPlutoJsonType(
+          plutoData, InformationModel.songType),
+      firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
+      idColumn: Tb.information.id,
+      columns: [
+        TrinaColumn(
+          hide: true,
+          title: "Id".tr(),
+          field: Tb.information.id,
+          type: TrinaColumnType.number(defaultValue: -1),
+          readOnly: true,
+          width: 50,
+          renderer: (rendererContext) =>
+              DataGridHelper.idRenderer(rendererContext),
+        ),
+        TrinaColumn(
+          title: CommonStrings.hide,
+          field: Tb.information.is_hidden,
+          type: TrinaColumnType.text(),
+          applyFormatterInEditing: true,
+          enableEditingMode: false,
+          width: 100,
+          renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+              rendererContext, Tb.information.is_hidden),
+        ),
+        TrinaColumn(
+          title: CommonStrings.title,
+          field: Tb.information.title,
+          type: TrinaColumnType.text(),
+        ),
+        TrinaColumn(
+          width: 150,
+          title: CommonStrings.content,
+          field: Tb.information.description,
+          type: TrinaColumnType.text(),
+          renderer: (rendererContext) {
+            return DataGridHelper.buildHtmlEditorButton(
+              context: context,
+              occasionId: RightsService.currentOccasionId(),
+              field: Tb.information.description,
+              title: rendererContext.row.cells[Tb.information.title]!.value,
+              rendererContext: rendererContext,
+              loadContent: () async {
+                return rendererContext
+                    .row.cells[Tb.information.description]!.value;
+              },
+            );
+          },
+        ),
+        TrinaColumn(
+          title: "Order".tr(),
+          field: Tb.information.order,
+          type: TrinaColumnType.number(defaultValue: null),
+          applyFormatterInEditing: true,
+          width: 100,
+        ),
+      ],
+    );
   }
 
   @override

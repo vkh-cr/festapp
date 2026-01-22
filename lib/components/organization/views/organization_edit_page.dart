@@ -7,7 +7,6 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/organization/organization_admin_guard.dart';
 
-
 import 'package:fstapp/components/_shared/app_panel_helper.dart';
 
 @RoutePage()
@@ -63,20 +62,22 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
         _defaultUrlController.text = org.defaultUrl ?? '';
         _defaultLanguageController.text = org.defaultLanguage ?? '';
         _defaultUnitController.text = org.defaultUnit?.toString() ?? '';
-        _representativeOccasionController.text = org.representativeOccasion?.toString() ?? '';
+        _representativeOccasionController.text =
+            org.representativeOccasion?.toString() ?? '';
         _oneSignalAppIdController.text = org.oneSignalAppId ?? '';
         _oneSignalRestApiKeyController.text = org.oneSignalRestApiKey ?? '';
-        
+
         _isRegistrationEnabled = org.isRegistrationEnabled ?? false;
         _isUnitCreationEnabled = org.isUnitCreationEnabled ?? false;
         _isAppSupported = org.isAppSupported ?? false;
-        
+
         _platforms = org.platforms?.toList() ?? [];
       }
     } catch (e) {
       print("Error loading organization: $e");
       if (mounted) {
-        ToastHelper.Show(context, "Failed to load organization data.", severity: ToastSeverity.NotOk);
+        ToastHelper.Show(context, "Failed to load organization data.",
+            severity: ToastSeverity.NotOk);
       }
     } finally {
       if (mounted) {
@@ -104,7 +105,8 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
         oneSignalAppId: _oneSignalAppIdController.text,
         oneSignalRestApiKey: _oneSignalRestApiKeyController.text,
         defaultUnit: int.tryParse(_defaultUnitController.text),
-        representativeOccasion: int.tryParse(_representativeOccasionController.text),
+        representativeOccasion:
+            int.tryParse(_representativeOccasionController.text),
         isRegistrationEnabled: _isRegistrationEnabled,
         isUnitCreationEnabled: _isUnitCreationEnabled,
         isAppSupported: _isAppSupported,
@@ -115,15 +117,14 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
       if (mounted) {
         ToastHelper.Show(context, "Organization saved.");
       }
-      
+
       // Update local state manually to reflect changes immediately
       RightsService.updateOrganizationLocally(updatedOrg);
-      
-      
     } catch (e) {
       print("Save error: $e");
       if (mounted) {
-        ToastHelper.Show(context, "Error saving: $e", severity: ToastSeverity.NotOk);
+        ToastHelper.Show(context, "Error saving: $e",
+            severity: ToastSeverity.NotOk);
       }
     } finally {
       if (mounted) {
@@ -140,9 +141,9 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
       targetOrganizationId: widget.id,
       builder: (context, orgId) {
         if (_isLoading && _organization == null && _orgId != orgId) {
-           _loadData(orgId);
+          _loadData(orgId);
         }
-        
+
         return Scaffold(
           appBar: AppPanelHelper.buildAdaptiveAdminAppBar(context),
           body: _isLoading
@@ -150,7 +151,8 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
               : Align(
                   alignment: Alignment.topCenter,
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+                    constraints: const BoxConstraints(
+                        maxWidth: StylesConfig.formMaxWidth),
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Form(
@@ -158,51 +160,74 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Organization Settings", style: Theme.of(context).textTheme.headlineMedium),
+                            Text("Organization Settings",
+                                style:
+                                    Theme.of(context).textTheme.headlineMedium),
                             const SizedBox(height: 24),
-                            _buildTextField(_titleController, "Title", required: true),
-                            _buildTextField(_appNameController, "App Name (APP_NAME)", helper: "Brand identifier"),
-                            _buildTextField(_defaultUrlController, "Default URL (DEFAULT_URL)"),
-                            _buildTextField(_defaultLanguageController, "Default Language (DEFAULT_LANGUAGE)", helper: "e.g. cs, en"),
-                            
+                            _buildTextField(_titleController, "Title",
+                                required: true),
+                            _buildTextField(
+                                _appNameController, "App Name (APP_NAME)",
+                                helper: "Brand identifier"),
+                            _buildTextField(_defaultUrlController,
+                                "Default URL (DEFAULT_URL)"),
+                            _buildTextField(_defaultLanguageController,
+                                "Default Language (DEFAULT_LANGUAGE)",
+                                helper: "e.g. cs, en"),
                             const SizedBox(height: 16),
-                            Text("IDs & References", style: Theme.of(context).textTheme.titleMedium),
+                            Text("IDs & References",
+                                style: Theme.of(context).textTheme.titleMedium),
                             const SizedBox(height: 8),
                             Row(children: [
-                              Expanded(child: _buildTextField(_defaultUnitController, "Default Unit ID", isNumber: true)),
+                              Expanded(
+                                  child: _buildTextField(
+                                      _defaultUnitController, "Default Unit ID",
+                                      isNumber: true)),
                               const SizedBox(width: 16),
-                              Expanded(child: _buildTextField(_representativeOccasionController, "Rep. Occasion ID", isNumber: true)),
+                              Expanded(
+                                  child: _buildTextField(
+                                      _representativeOccasionController,
+                                      "Rep. Occasion ID",
+                                      isNumber: true)),
                             ]),
-
                             const SizedBox(height: 16),
-                            Text("OneSignal Configuration", style: Theme.of(context).textTheme.titleMedium),
+                            Text("OneSignal Configuration",
+                                style: Theme.of(context).textTheme.titleMedium),
                             const SizedBox(height: 8),
-                            _buildTextField(_oneSignalAppIdController, "OneSignal App ID"),
-                            _buildTextField(_oneSignalRestApiKeyController, "OneSignal REST API Key"),
-
+                            _buildTextField(
+                                _oneSignalAppIdController, "OneSignal App ID"),
+                            _buildTextField(_oneSignalRestApiKeyController,
+                                "OneSignal REST API Key"),
                             const SizedBox(height: 16),
-                            Text("Feature Flags", style: Theme.of(context).textTheme.titleMedium),
+                            Text("Feature Flags",
+                                style: Theme.of(context).textTheme.titleMedium),
                             SwitchListTile(
-                              title: const Text("App Supported (IS_APP_SUPPORTED)"),
+                              title: const Text(
+                                  "App Supported (IS_APP_SUPPORTED)"),
                               value: _isAppSupported,
-                              onChanged: (val) => setState(() => _isAppSupported = val),
+                              onChanged: (val) =>
+                                  setState(() => _isAppSupported = val),
                             ),
                             SwitchListTile(
-                              title: const Text("Registration Enabled (IS_REGISTRATION_ENABLED)"),
+                              title: const Text(
+                                  "Registration Enabled (IS_REGISTRATION_ENABLED)"),
                               value: _isRegistrationEnabled,
-                              onChanged: (val) => setState(() => _isRegistrationEnabled = val),
+                              onChanged: (val) =>
+                                  setState(() => _isRegistrationEnabled = val),
                             ),
                             SwitchListTile(
-                              title: const Text("Manual Unit Creation (IS_UNIT_CREATION_ENABLED)"),
+                              title: const Text(
+                                  "Manual Unit Creation (IS_UNIT_CREATION_ENABLED)"),
                               value: _isUnitCreationEnabled,
-                              onChanged: (val) => setState(() => _isUnitCreationEnabled = val),
+                              onChanged: (val) =>
+                                  setState(() => _isUnitCreationEnabled = val),
                             ),
-
                             const SizedBox(height: 24),
-                            Text("Platforms", style: Theme.of(context).textTheme.headlineSmall),
+                            Text("Platforms",
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall),
                             const SizedBox(height: 8),
                             _buildPlatformsEditor(),
-
                             const SizedBox(height: 32),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -210,7 +235,11 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
                                 ElevatedButton(
                                   onPressed: _isSaving ? null : _save,
                                   child: _isSaving
-                                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2))
                                       : const Text("Save Changes"),
                                 ),
                               ],
@@ -227,7 +256,8 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {bool required = false, String? helper, bool isNumber = false}) {
+  Widget _buildTextField(TextEditingController controller, String label,
+      {bool required = false, String? helper, bool isNumber = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextFormField(
@@ -238,7 +268,10 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
           border: const OutlineInputBorder(),
           helperText: helper,
         ),
-        validator: required ? (val) => (val == null || val.isEmpty) ? "$label is required" : null : null,
+        validator: required
+            ? (val) =>
+                (val == null || val.isEmpty) ? "$label is required" : null
+            : null,
       ),
     );
   }
@@ -260,7 +293,8 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
                       Expanded(
                         child: TextFormField(
                           initialValue: platform.platform,
-                          decoration: const InputDecoration(labelText: "Platform (e.g. web, ios, droid)"),
+                          decoration: const InputDecoration(
+                              labelText: "Platform (e.g. web, ios, droid)"),
                           onChanged: (val) => platform.platform = val,
                         ),
                       ),
@@ -281,7 +315,8 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
                   ),
                   TextFormField(
                     initialValue: platform.prompt,
-                    decoration: const InputDecoration(labelText: "Prompt / Version"),
+                    decoration:
+                        const InputDecoration(labelText: "Prompt / Version"),
                     onChanged: (val) => platform.prompt = val,
                   ),
                 ],
@@ -292,7 +327,8 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
         OutlinedButton.icon(
           onPressed: () {
             setState(() {
-              _platforms.add(PlatformModel(platform: "web", link: "", prompt: ""));
+              _platforms
+                  .add(PlatformModel(platform: "web", link: "", prompt: ""));
             });
           },
           icon: const Icon(Icons.add),

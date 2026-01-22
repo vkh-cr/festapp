@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class LanguageModel{
+class LanguageModel {
   Locale locale;
   String name;
 

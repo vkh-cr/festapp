@@ -5,6 +5,7 @@ import { OrdersStrings } from '../../eshop/orders_strings.js';
 import { FormHelper } from '../form_helper.js';
 // import { BlueprintSelector } from '../../blueprint/blueprint_selector.js';
 import { DbForms } from '../db_forms.js';
+import { formatPrice } from '../../../utils/formatters.js';
 
 export class TicketFieldBuilder {
     static _uniqueIndexCounter = 0;
@@ -92,7 +93,7 @@ export class TicketFieldBuilder {
                 if (!FormFieldBuilder) {
                      console.error("TicketFieldBuilder: FormFieldBuilder is undefined! Module keys:", Object.keys(FormFieldBuilderModule));
                 } else {
-                     console.log("TicketFieldBuilder: FormFieldBuilder resolved.", typeof FormFieldBuilder);
+
                 }
                 const subComp = FormFieldBuilder.createFormField(scopedDef, formModel);
 
@@ -111,9 +112,14 @@ export class TicketFieldBuilder {
             // --- Reactivity for Simple Mode ---
             if (session) {
                 const syncSimpleFromSession = () => {
-                     if (session.state.tickets.length === 0) return;
-                     const ticketData = session.state.tickets[0];
-                     if (!ticketData || !ticketData.fields) return;
+                     // Robustness: Handle empty session (cleared tickets)
+                     let ticketData = null;
+                     if (session.state.tickets.length > 0) {
+                         ticketData = session.state.tickets[0];
+                     }
+                     
+                     // Allow processing even if ticketData is null (to clear inputs)
+                     // if (!ticketData || !ticketData.fields) return;
 
                      const inputs = container.querySelectorAll('input, select, textarea');
                      inputs.forEach(input => {
@@ -121,24 +127,48 @@ export class TicketFieldBuilder {
                          if (!subId) return;
 
                          // Find value in ticket fields
-                         const fieldEntry = ticketData.fields.find(f => f._subFieldId === subId);
+                         const fieldEntry = (ticketData && ticketData.fields) 
+                            ? ticketData.fields.find(f => String(f._subFieldId) === String(subId))
+                            : null;
+
                          let newVal = '';
                          if (fieldEntry) {
-                             newVal = fieldEntry.value || fieldEntry[fieldEntry.type] || '';
-                             if (fieldEntry.type === 'product_type' && fieldEntry.product_type) newVal = fieldEntry.product_type;
+                             // Try to resolve type from subFields in scope
+                             const subDef = subFields.find(sf => sf.id === subId);
+                             const typeKey = subDef ? subDef.type : null;
+                             
+                             newVal = fieldEntry.value;
+                             if (newVal === undefined && typeKey) newVal = fieldEntry[typeKey];
+                             
+                             // Fallback / Specific check
+                             if (newVal === undefined && fieldEntry.product_type !== undefined) newVal = fieldEntry.product_type;
+                             if (newVal === undefined) newVal = '';
                          }
                          
                          // Update Input if needed
-                         if (input.type === 'radio' || input.type === 'checkbox') {
+                         if (input.type === 'radio') {
                              if (input.value === newVal || String(input.value) === String(newVal)) {
                                  input.checked = true;
-                             } else if (input.type === 'radio') {
-                                 // For radios, only uncheck if we are strictly ensuring single selection?
-                                 // Browser handles uncheck of others. 
-                                 // But if value is explicitly null (cleared), we should uncheck everything?
-                                 // Let's rely on mapped value.
-                                 // If this specific radio matches newVal, check it.
-                                 // If newVal is undefined, maybe uncheck?
+                             } else {
+                                 // Explicitly uncheck if it doesn't match (for cleared state)
+                                 input.checked = false;
+                             }
+                         } else if (input.type === 'checkbox') {
+                             // Checkbox Logic (Multiselect support)
+                             // Session value might be "101 | 102"
+                             let isChecked = false;
+                             if (newVal !== undefined && newVal !== null) {
+                                 if (newVal === true || newVal === 'true') {
+                                     isChecked = true;
+                                 } else {
+                                     const valStr = String(newVal);
+                                     const parts = valStr.split(' | ');
+                                     isChecked = parts.some(p => String(p) === String(input.value));
+                                 }
+                             }
+                             
+                             if (input.checked !== isChecked) {
+                                 input.checked = isChecked;
                              }
                          } else {
                              if (input.value !== newVal && document.activeElement !== input) {
@@ -259,12 +289,17 @@ export class TicketFieldBuilder {
                         // --- Restore Value from Session ---
                         if (ticketData && ticketData.fields) {
                             // Find field entry
-                            // console.log(`[TicketFieldBuilder] Looking for ${subDef.id} in ticket fields`, ticketData.fields);
                             const fieldEntry = ticketData.fields.find(f => String(f._subFieldId) === String(subDef.id));
                             if (fieldEntry) {
                                 // Extract Value
                                 // entry = { type: val, _subFieldId: id }
-                                const val = fieldEntry[subDef.type];
+                                let val = fieldEntry[subDef.type];
+                                
+                                // Fallback / Specific check (Same as updateFromSession)
+                                if (val === undefined && fieldEntry.value !== undefined) val = fieldEntry.value;
+                                if (val === undefined && fieldEntry.product_type !== undefined) val = fieldEntry.product_type;
+                                if (val === undefined && fieldEntry.text !== undefined) val = fieldEntry.text;
+
                                 if (val !== undefined) {
                                     scopedDef.value = val;
                                 }
@@ -325,7 +360,8 @@ export class TicketFieldBuilder {
                                 displayDiv.style.display = 'flex';
                                 displayDiv.style.alignItems = 'center';
 
-                                const priceHtml = priceVal > 0 ? `&nbsp;<span class="option-price">+${priceVal} ${currency}</span>` : '';
+                                const formattedPart = formatPrice(priceVal, currency);
+                                const priceHtml = priceVal > 0 ? `&nbsp;<span class="option-price">+${formattedPart}</span>` : '';
                                 const prefix = productTitle ? `${productTitle} - ` : '';
                                 
                                 displayDiv.innerHTML = `<span>${prefix}${seatName}</span>${priceHtml}`;
@@ -384,21 +420,17 @@ export class TicketFieldBuilder {
                         // Improved Value Resolution
                         let val = undefined;
                         if (fieldEntry) {
+                            // Try to resolve type from subFields in scope
+                            const subDef = subFields.find(sf => sf.id === subId);
+                            const typeKey = subDef ? subDef.type : null;
+                        
                             val = fieldEntry.value;
-                            if (val === undefined) {
-                                // Check common keys
-                                if (fieldEntry.product_type !== undefined) val = fieldEntry.product_type;
-                                else if (fieldEntry.text !== undefined) val = fieldEntry.text;
-                                else {
-                                    // Fallback: Exclude metadata keys
-                                    val = Object.entries(fieldEntry).find(([k, v]) => 
-                                        k !== '_subFieldId' && 
-                                        k !== 'currency_code' && 
-                                        k !== 'price'
-                                    )?.[1];
-                                }
-                            }
-                        }
+                            if (val === undefined && typeKey) val = fieldEntry[typeKey];
+                            
+                            // Fallback / Specific check
+                            if (val === undefined && fieldEntry.product_type !== undefined) val = fieldEntry.product_type;
+                            if (val === undefined && fieldEntry.text !== undefined) val = fieldEntry.text;
+                        } 
                         
                         // Don't overwrite active element to avoid cursor jumping (except checkboxes/radios where it matters less)
                         if (document.activeElement === input && input.type !== 'checkbox' && input.type !== 'radio') return;
@@ -409,6 +441,7 @@ export class TicketFieldBuilder {
                              if (input.checked !== shouldBeChecked) {
                                  input.checked = shouldBeChecked;
                              }
+                             if (!shouldBeChecked) input.checked = false; // Explicit Uncheck Fix
                         } else if (input.type === 'checkbox') {
                              // Checkbox Logic (Multiselect support)
                              // Session value might be "101 | 102"

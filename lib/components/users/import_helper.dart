@@ -68,8 +68,10 @@ class ImportHelper {
           if (trimmedString.isEmpty) {
             break;
           }
-          trimmedString =
-          (trimmedString.toLowerCase().startsWith("m") || trimmedString.toLowerCase().startsWith("k")) ? "male" : "female";
+          trimmedString = (trimmedString.toLowerCase().startsWith("m") ||
+                  trimmedString.toLowerCase().startsWith("k"))
+              ? "male"
+              : "female";
         } else if (entry.key == Tb.occasion_users.data_birthDate) {
           if (trimmedString.isEmpty) {
             continue;
@@ -79,12 +81,16 @@ class ImportHelper {
           userJsonObject[entry.key] = dateTime.toIso8601String();
           continue;
         } else if (entry.key == Tb.occasion_users.services_food) {
-          var foodJson = createServicesJson(trimmedString, DbOccasions.serviceTypeFood);
-          userJsonObject[Tb.occasion_users.services] = addJson(userJsonObject[Tb.occasion_users.services], foodJson);
+          var foodJson =
+              createServicesJson(trimmedString, DbOccasions.serviceTypeFood);
+          userJsonObject[Tb.occasion_users.services] =
+              addJson(userJsonObject[Tb.occasion_users.services], foodJson);
           continue;
         } else if (entry.key == Tb.occasion_users.services_accommodation) {
-          var accommodationJson = createServicesJson(trimmedString, DbOccasions.serviceTypeAccommodation);
-          userJsonObject[Tb.occasion_users.services] = addJson(userJsonObject[Tb.occasion_users.services], accommodationJson);
+          var accommodationJson = createServicesJson(
+              trimmedString, DbOccasions.serviceTypeAccommodation);
+          userJsonObject[Tb.occasion_users.services] = addJson(
+              userJsonObject[Tb.occasion_users.services], accommodationJson);
           continue;
         }
 
@@ -109,14 +115,15 @@ class ImportHelper {
     return userList;
   }
 
-  static Map<String, dynamic> createServicesJson(String data, String serviceType) {
+  static Map<String, dynamic> createServicesJson(
+      String data, String serviceType) {
     List<String> items = data.split(',').map((item) => item.trim()).toList();
 
     Map<String, String> servicesMap = {
       for (var item in items) item: DbOccasions.servicePaid,
     };
 
-    return { serviceType: servicesMap };
+    return {serviceType: servicesMap};
   }
 
   static Map<String, dynamic> addJson(

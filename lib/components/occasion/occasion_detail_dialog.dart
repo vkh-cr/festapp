@@ -19,7 +19,8 @@ class OccasionDetailDialog extends StatelessWidget {
   const OccasionDetailDialog({super.key, required this.occasion});
 
   /// Unified reserve button logic, usable from anywhere.
-  static Future<void> handleReserveAction(BuildContext context, OccasionModel occasion) async {
+  static Future<void> handleReserveAction(
+      BuildContext context, OccasionModel occasion) async {
     var details = FeatureService.getFeatureDetails(
       FeatureConstants.form,
       features: occasion.features,
@@ -56,10 +57,7 @@ class OccasionDetailDialog extends StatelessWidget {
         : "Reserve a spot".tr();
     final unifiedButtonStyle = OutlinedButton.styleFrom(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-      textStyle: Theme.of(context)
-          .textTheme
-          .labelLarge
-          ?.copyWith(fontSize: 16),
+      textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 16),
       side: BorderSide(
         color: ThemeConfig.blackColor(context),
         width: 1.0,
@@ -102,8 +100,8 @@ class OccasionDetailDialog extends StatelessWidget {
                         occasion.endTime!,
                       ),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).hintColor,
-                      ),
+                            color: Theme.of(context).hintColor,
+                          ),
                     ),
                     const SizedBox(height: 16),
                     Divider(

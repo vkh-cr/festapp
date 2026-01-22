@@ -287,7 +287,8 @@ class _ScheduleContentState extends State<ScheduleContent> {
         TrinaColumn(
           title: CommonStrings.place,
           field: EventModel.placeColumn,
-          type: TrinaColumnType.select(places, itemToString: DataGridHelper.getValueFromFormatted),
+          type: TrinaColumnType.select(places,
+              itemToString: DataGridHelper.getValueFromFormatted),
           applyFormatterInEditing: true,
           formatter: DataGridHelper.getValueFromFormatted,
           width: 140,
@@ -346,8 +347,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
               // Determine contrasting text color for readability
               Color textColor =
                   ThemeConfig.eventTypeToColorNegative(context, eventType.code);
-              String displayTitle =
-                  eventType.title;
+              String displayTitle = eventType.title;
 
               return Padding(
                 // Add padding around the chip to prevent touching cell borders

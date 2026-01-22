@@ -10,7 +10,9 @@ class ScheduleTabView extends StatefulWidget {
   final DateTime? defaultDateTime;
   final Function(int)? onEventPressed;
   final List<TimeBlockItem> events;
-  final Function(BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEventId)? onAddNewEvent;
+  final Function(
+          BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEventId)?
+      onAddNewEvent;
   final bool Function()? showAddNewEventButton;
 
   const ScheduleTabView({
@@ -39,13 +41,17 @@ class _ScheduleTabViewState extends State<ScheduleTabView> {
       AppConfig.daySplitHour,
     );
 
-    if(datedEvents.isEmpty){
+    if (datedEvents.isEmpty) {
       DateTime defaultTime = widget.defaultDateTime ?? TimeHelper.now();
-      datedEvents.add(TimeBlockGroup(title: defaultTime.weekdayToString(context), events: [], dateTime: defaultTime));
+      datedEvents.add(TimeBlockGroup(
+          title: defaultTime.weekdayToString(context),
+          events: [],
+          dateTime: defaultTime));
     }
 
     for (var eventsByDay in datedEvents) {
-      var eventGroups = TimeBlockHelper.groupEventsByFeatureSettings(eventsByDay.events);
+      var eventGroups =
+          TimeBlockHelper.groupEventsByFeatureSettings(eventsByDay.events);
       var timeline = ScheduleTimeline(
         eventGroups: eventGroups,
         onEventPressed: widget.onEventPressed,
@@ -89,6 +95,6 @@ class _ScheduleTabViewState extends State<ScheduleTabView> {
   }
 
   int getInitialIndex() => TimeHelper.getTimeNowIndexFromDays(
-    datedEvents.map((e) => e.dateTime!.weekday),
-  );
+        datedEvents.map((e) => e.dateTime!.weekday),
+      );
 }

@@ -12,6 +12,8 @@ import 'package:fstapp/services/responsive_service.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/app_router.gr.dart';
 
 class UserHeaderWidget extends StatefulWidget {
   final Color? appBarIconColor;
@@ -21,7 +23,7 @@ class UserHeaderWidget extends StatefulWidget {
       {super.key, this.appBarIconColor, this.onSignIn, this.onAdminPressed});
 
   @override
-  _UserHeaderWidgetState createState() => _UserHeaderWidgetState();
+  State<UserHeaderWidget> createState() => _UserHeaderWidgetState();
 }
 
 class _UserHeaderWidgetState extends State<UserHeaderWidget> {
@@ -55,7 +57,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
   Widget _buildSettingsContentInner(StateSetter setState) {
     List<LanguageModel> languages = AppConfig.availableLanguages();
     LanguageModel currentLanguage = languages.firstWhere(
-          (lang) => lang.locale.languageCode == context.locale.languageCode,
+      (lang) => lang.locale.languageCode == context.locale.languageCode,
       orElse: () => languages.first,
     );
     return Column(
@@ -63,8 +65,8 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
       children: [
         if (languages.length > 1) ...[
           Text("Language Settings",
-              style: TextStyle(
-                  fontSize: 16, color: ThemeConfig.blackColor(context)))
+                  style: TextStyle(
+                      fontSize: 16, color: ThemeConfig.blackColor(context)))
               .tr(),
           const SizedBox(height: 8),
           Row(
@@ -90,13 +92,13 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
           ),
           const SizedBox(height: 16),
         ],
-        if(ThemeConfig.isDarkModeEnabled)
+        if (ThemeConfig.isDarkModeEnabled)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Appearance",
-                  style: TextStyle(
-                      fontSize: 16, color: ThemeConfig.blackColor(context)))
+                      style: TextStyle(
+                          fontSize: 16, color: ThemeConfig.blackColor(context)))
                   .tr(),
               const SizedBox(height: 8),
               ToggleButtons(
@@ -124,22 +126,22 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Text("Dark",
-                        style: TextStyle(
-                            color: ThemeConfig.blackColor(context)))
+                            style: TextStyle(
+                                color: ThemeConfig.blackColor(context)))
                         .tr(),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Text("Auto",
-                        style: TextStyle(
-                            color: ThemeConfig.blackColor(context)))
+                            style: TextStyle(
+                                color: ThemeConfig.blackColor(context)))
                         .tr(),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Text("Light",
-                        style: TextStyle(
-                            color: ThemeConfig.blackColor(context)))
+                            style: TextStyle(
+                                color: ThemeConfig.blackColor(context)))
                         .tr(),
                   ),
                 ],
@@ -151,7 +153,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
   }
 
   /// Common popover wrapper that applies constraints, decoration and places a cross button.
-  Widget _buildPopoverWrapper(Widget content) {
+  Widget _buildPopoverWrapper(Widget content, {Widget? topLeftWidget}) {
     // Use a Builder so that we always have the current Theme.
     return Builder(
       builder: (context) {
@@ -182,6 +184,12 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                   hoverColor: Colors.transparent,
                 ),
               ),
+              if (topLeftWidget != null)
+                Positioned(
+                  top: 4,
+                  left: 4,
+                  child: topLeftWidget,
+                ),
             ],
           ),
         );
@@ -192,7 +200,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
   /// Combined popover for signed in state.
   void _showSignedInPopover() {
     final RenderBox? button =
-    _userKey.currentContext?.findRenderObject() as RenderBox?;
+        _userKey.currentContext?.findRenderObject() as RenderBox?;
     if (button == null) return;
     final Offset offset = button.localToGlobal(Offset.zero);
     final Size size = button.size;
@@ -219,9 +227,11 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               final String email = user?.email ?? "";
 
               // Determine if the settings section has any content to show
-              final bool hasLanguageSettings = AppConfig.availableLanguages().length > 1;
+              final bool hasLanguageSettings =
+                  AppConfig.availableLanguages().length > 1;
               final bool hasThemeSettings = ThemeConfig.isDarkModeEnabled;
-              final bool showSettingsSection = hasLanguageSettings || hasThemeSettings;
+              final bool showSettingsSection =
+                  hasLanguageSettings || hasThemeSettings;
 
               return _buildPopoverWrapper(
                 Column(
@@ -235,10 +245,12 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: ThemeConfig.bottomNavSelectedItemColor(context),
+                            color:
+                                ThemeConfig.bottomNavSelectedItemColor(context),
                             width: 2,
                           ),
-                          color: ThemeConfig.bottomNavSelectedItemColor(context),
+                          color:
+                              ThemeConfig.bottomNavSelectedItemColor(context),
                         ),
                         child: Center(
                           child: Text(
@@ -297,14 +309,32 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                             color: ThemeConfig.blackColor(context)),
                       ).tr(),
                       onTap: () async {
+                        final unitId = RightsService.currentUnit()?.id;
                         Navigator.pop(context);
                         await AuthService.logout();
-                        if (mounted) setState(() {});
-                        await RouterService.goToUnit(context, RightsService.currentUnit()!.id!);
+                        if (context.mounted && unitId != null) {
+                          setState(() {});
+                          await RouterService.goToUnit(context, unitId);
+                        }
                       },
                     ),
                   ],
                 ),
+                topLeftWidget: RightsService.isAdmin()
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.business,
+                          size: 24, // Slightly smaller than close button (28)
+                          color: ThemeConfig.blackColor(context),
+                        ),
+                        tooltip: "Platform Settings",
+                        onPressed: () {
+                          Navigator.pop(context);
+                          context.router
+                              .push(const OrganizationEditRedirectRoute());
+                        },
+                      )
+                    : null,
               );
             },
           ),
@@ -316,7 +346,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
   /// Popover for not-signed in state.
   void _showSettingsPopover() {
     final RenderBox? button =
-    _settingsKey.currentContext?.findRenderObject() as RenderBox?;
+        _settingsKey.currentContext?.findRenderObject() as RenderBox?;
     if (button == null) return;
     final Offset offset = button.localToGlobal(Offset.zero);
     final Size size = button.size;
@@ -418,8 +448,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
             side: BorderSide(
               color: iconColor,
             ),
-            padding:
-            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             textStyle: const TextStyle(fontSize: 16),
           ),
         );
@@ -460,7 +489,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
                 await widget.onSignIn?.call();
-                if(mounted) setState(() {});
+                if (mounted) setState(() {});
               },
             ),
             const SizedBox(width: 8),
@@ -488,7 +517,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               onPressed: () async {
                 await RouterService.navigate(context, LoginPage.ROUTE);
                 await widget.onSignIn?.call();
-                if(mounted) setState(() {}); // refresh after sign in
+                if (mounted) setState(() {}); // refresh after sign in
               },
               icon: Icon(
                 Icons.person,
@@ -503,7 +532,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                   color: iconColor,
                 ),
                 padding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
                 textStyle: const TextStyle(fontSize: 16),
               ),
             ),

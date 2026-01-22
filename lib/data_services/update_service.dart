@@ -24,8 +24,7 @@ class UpdateService {
             context,
             "New Version Available".tr(),
             "Update the app to the latest version to access all features.".tr(),
-            confirmButtonMessage: "Update".tr()
-        );
+            confirmButtonMessage: "Update".tr());
 
         if (updateConfirmed) {
           _redirectToUpdate();
@@ -38,7 +37,8 @@ class UpdateService {
     isVersionChecking = false;
   }
 
-  static bool _isVersionOutdated(String currentVersion, String versionRecommended) {
+  static bool _isVersionOutdated(
+      String currentVersion, String versionRecommended) {
     List<String> currentVersionParts = currentVersion.split('.');
     List<String> recommendedVersionParts = versionRecommended.split('.');
 

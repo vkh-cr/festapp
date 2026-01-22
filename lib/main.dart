@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:fstapp/config/url_strategy_noop.dart' if (dart.library.html) 'package:fstapp/config/url_strategy_web.dart';
+import 'package:fstapp/config/url_strategy_noop.dart'
+    if (dart.library.html) 'package:fstapp/config/url_strategy_web.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_config.dart';
@@ -25,16 +26,16 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 Future<void> main() async {
   debugProfileBuildsEnabled = true;
   await initializeEverything();
   runApp(
     EasyLocalization(
         supportedLocales:
-        AppConfig.availableLanguages().map((e) => e.locale).toList(),
+            AppConfig.availableLanguages().map((e) => e.locale).toList(),
         path: "assets/translations",
-        fallbackLocale: AppConfig.availableLanguages().map((e) => e.locale).first,
+        fallbackLocale:
+            AppConfig.availableLanguages().map((e) => e.locale).first,
         useOnlyLangCode: true,
         saveLocale: true,
         child: MyApp()),
@@ -95,8 +96,15 @@ Future<void> initializeEverything() async {
     var settings = await OfflineDataService.getGlobalSettings();
     if (settings != null) {
       SynchroService.globalSettingsModel = settings;
-      RightsService.occasionLinkModelNotifier.value = OccasionLinkModel(occasion: OccasionModel(features: settings.features, isOpen: true, isHidden: false, isPromoted: false, data: settings.data));
-      TimeHelper.setTimeZoneLocation(RightsService.currentOccasion()?.data?["timezone"]);
+      RightsService.occasionLinkModelNotifier.value = OccasionLinkModel(
+          occasion: OccasionModel(
+              features: settings.features,
+              isOpen: true,
+              isHidden: false,
+              isPromoted: false,
+              data: settings.data));
+      TimeHelper.setTimeZoneLocation(
+          RightsService.currentOccasion()?.data?["timezone"]);
       print('Global settings loaded');
     }
   } catch (e) {
@@ -113,9 +121,11 @@ Future<void> initializeEverything() async {
 
   print('Notification helper initializing');
 
-  NotificationHelper.initialize().then(
-          (f){ print('Notification helper initialized'); },
-          onError: (e){ print('Notification helper initialization failed: $e'); });
+  NotificationHelper.initialize().then((f) {
+    print('Notification helper initialized');
+  }, onError: (e) {
+    print('Notification helper initialization failed: $e');
+  });
 
   print('Initialization completed');
 
@@ -146,10 +156,15 @@ class _MyAppState extends State<MyApp> {
     var baseTheme = ThemeConfig.baseTheme();
     return AdaptiveTheme(
       light: ThemeConfig.baseTheme(),
-      dark: ThemeConfig.isDarkModeEnabled ? ThemeConfig.darkTheme(baseTheme) : baseTheme,
-      initial: ThemeConfig.isDarkModeEnabled ? AdaptiveThemeMode.system : AdaptiveThemeMode.light,
+      dark: ThemeConfig.isDarkModeEnabled
+          ? ThemeConfig.darkTheme(baseTheme)
+          : baseTheme,
+      initial: ThemeConfig.isDarkModeEnabled
+          ? AdaptiveThemeMode.system
+          : AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp.router(
-        routerConfig: RouterService.router.config(navigatorObservers: () => [RoutingObserver()]),
+        routerConfig: RouterService.router
+            .config(navigatorObservers: () => [RoutingObserver()]),
         debugShowCheckedModeBanner: false,
         builder: (context, child) {
           return Stack(
@@ -159,7 +174,8 @@ class _MyAppState extends State<MyApp> {
                 left: _offset.dx,
                 top: _offset.dy,
                 child: GestureDetector(
-                  onPanUpdate: (d) => setState(() => _offset += Offset(d.delta.dx, d.delta.dy)),
+                  onPanUpdate: (d) =>
+                      setState(() => _offset += Offset(d.delta.dx, d.delta.dy)),
                   child: Visibility(
                     visible: widget.isTimeTravelVisible,
                     child: TimeTravelWidget(),
@@ -179,8 +195,8 @@ class _MyAppState extends State<MyApp> {
         theme: theme,
         darkTheme: darkTheme,
       ).animate().fadeIn(
-        duration: 300.ms,
-      ),
+            duration: 300.ms,
+          ),
     );
   }
 }

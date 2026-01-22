@@ -23,8 +23,7 @@ class EventRoleModel {
 
   EventRoleModel({required this.eventId, required this.roleId});
 
-  factory EventRoleModel.fromJson(Map<String, dynamic> json) =>
-      EventRoleModel(
+  factory EventRoleModel.fromJson(Map<String, dynamic> json) => EventRoleModel(
         eventId: json['event'] as int,
         roleId: json['role'] as int,
       );
@@ -37,8 +36,7 @@ class EventUserCount {
 
   EventUserCount({required this.eventId, required this.count});
 
-  factory EventUserCount.fromJson(Map<String, dynamic> json) =>
-      EventUserCount(
+  factory EventUserCount.fromJson(Map<String, dynamic> json) => EventUserCount(
         eventId: json['event'] as int,
         count: json['count'] as int,
       );
@@ -105,7 +103,8 @@ class GetEventsHelper {
         .toList();
   }
 
-  static List<EventUserSavedCount> parseEventUsersSaved(Map<String, dynamic> json) {
+  static List<EventUserSavedCount> parseEventUsersSaved(
+      Map<String, dynamic> json) {
     final data = json['event_users_saved'] as List<dynamic>?;
     if (data == null) return [];
     return data

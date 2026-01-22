@@ -29,13 +29,11 @@ class UnitModel {
       data: json[Tb.units.data],
       features: json[Tb.units.features] is List
           ? List<Feature>.from(
-          (json[Tb.units.features] as List)
-              .map((x) => Feature.fromJson(x)))
+              (json[Tb.units.features] as List).map((x) => Feature.fromJson(x)))
           : [],
       organization: json[Tb.units.organization],
       occasions: json[Tb.occasions.table] != null
-          ? List<OccasionModel>.from(
-          (json[Tb.occasions.table] as List)
+          ? List<OccasionModel>.from((json[Tb.occasions.table] as List)
               .map((x) => OccasionModel.fromJson(x)))
           : [],
       unitUser: json["unit_user"] != null

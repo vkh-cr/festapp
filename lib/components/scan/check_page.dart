@@ -91,7 +91,10 @@ class _CheckPageState extends State<CheckPage> {
     final query = _searchController.text.toLowerCase().withoutDiacriticalMarks;
     setState(() {
       _filteredParticipants = _participants?.where((participant) {
-        final fullName = participant.toFullNameString().toLowerCase().withoutDiacriticalMarks;
+        final fullName = participant
+            .toFullNameString()
+            .toLowerCase()
+            .withoutDiacriticalMarks;
         return fullName.contains(query);
       }).toList();
     });
@@ -103,7 +106,8 @@ class _CheckPageState extends State<CheckPage> {
         child: Padding(
             padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
             child: const Text(
-                "Point the camera at the attendee's code for an entry verification.").tr()),
+                    "Point the camera at the attendee's code for an entry verification.")
+                .tr()),
       );
     }
 
@@ -136,19 +140,26 @@ class _CheckPageState extends State<CheckPage> {
             ],
           ),
           if (_scannedUser!.companionParent == null) ...[
-            Text(_scannedUser!.email!, style: TextStyle(color: Colors.black),),
-            Text(UserInfoModel.sexToLocale(_scannedUser!.sex,), style: TextStyle(color: Colors.black)),
+            Text(
+              _scannedUser!.email!,
+              style: TextStyle(color: Colors.black),
+            ),
+            Text(
+                UserInfoModel.sexToLocale(
+                  _scannedUser!.sex,
+                ),
+                style: TextStyle(color: Colors.black)),
             if (_scannedUser!.companions != null) ...[
               const SizedBox(height: 16),
-              Text("${'Signed in companions'.tr()}:", style: TextStyle(color: Colors.black)),
+              Text("${'Signed in companions'.tr()}:",
+                  style: TextStyle(color: Colors.black)),
               ..._scannedUser!.companions!.map((companion) => Row(
                     children: [
                       Text(companion.name,
                           style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black
-                          )),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black)),
                       const SizedBox(width: 5),
                       const Icon(Icons.check_circle, color: Colors.black),
                     ],
@@ -170,7 +181,9 @@ class _CheckPageState extends State<CheckPage> {
     const minChildSize = 0.25;
     const maxChildSize = 0.88;
     return Scaffold(
-      backgroundColor: _scannedUser == null ? ThemeConfig.grey200(context) : getResultColor(_scanState),
+      backgroundColor: _scannedUser == null
+          ? ThemeConfig.grey200(context)
+          : getResultColor(_scanState),
       body: SafeArea(
         child: Stack(
           children: [
@@ -238,16 +251,17 @@ class _CheckPageState extends State<CheckPage> {
                     onVerticalDragUpdate: (details) {
                       double newSize = draggableController!.size -
                           details.primaryDelta! / context.size!.height;
-                      draggableController!.jumpTo(newSize.clamp(minChildSize, maxChildSize));
+                      draggableController!
+                          .jumpTo(newSize.clamp(minChildSize, maxChildSize));
                     },
                     onVerticalDragEnd: (details) {
                       var velocityDirection = (-1 * details.primaryVelocity!);
-                        double nearestSize =
-                            draggableController!.size * velocityDirection;
-                        draggableController!.animateTo(
-                            nearestSize.clamp(minChildSize, maxChildSize),
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut);
+                      double nearestSize =
+                          draggableController!.size * velocityDirection;
+                      draggableController!.animateTo(
+                          nearestSize.clamp(minChildSize, maxChildSize),
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeInOut);
                     },
                     child: Container(
                       decoration: BoxDecoration(

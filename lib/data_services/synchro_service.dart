@@ -15,18 +15,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SynchroService {
   static final _supabase = Supabase.instance.client;
-  static OccasionSettingsModel? globalSettingsModel = OccasionSettingsModel.defaultSettings;
+  static OccasionSettingsModel? globalSettingsModel =
+      OccasionSettingsModel.defaultSettings;
 
   static Future<void> refreshOfflineData() async {
-    if(AuthService.isLoggedIn() && RightsService.currentOccasionId() != null) {
+    if (AuthService.isLoggedIn() && RightsService.currentOccasionId() != null) {
       var userInfo = await AuthService.getFullUserInfo();
       await OfflineDataService.saveUserInfo(userInfo);
-      var bundle = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, true);
+      var bundle = await DbEvents.getMyEventsAndActivities(
+          RightsService.currentOccasionId()!, true);
       await OfflineDataService.saveAllActivities(bundle!.activities);
       var userInventoryBundle = await DbInventoryPools.getUserInventory();
       await OfflineDataService.saveUserInventoryBundle(userInventoryBundle);
-    }
-    else {
+    } else {
       await OfflineDataService.deleteUserInfo();
     }
 
@@ -45,9 +46,9 @@ class SynchroService {
     var messages = await DbNews.getAllNewsMessages();
     await OfflineDataService.saveAllMessages(messages);
 
-    if (PlatformHelper.isPwaInstalledOrNative())
-    {
-      var events = await DbEvents.getAllEvents(RightsService.currentOccasionId()!, true);
+    if (PlatformHelper.isPwaInstalledOrNative()) {
+      var events =
+          await DbEvents.getAllEvents(RightsService.currentOccasionId()!, true);
       await OfflineDataService.saveAllEvents(events);
     }
 
@@ -55,21 +56,19 @@ class SynchroService {
   }
 
   static Future<OccasionLinkModel> getAppConfig(LinkModel link) async {
-    print(link.occasionLink);
-    print(link.formLink);
 
-    var data = await _supabase.rpc("get_app_config_v217",
-        params: {"data_in": {
-          "link": link.occasionLink,
-          "form_link": link.formLink,
-          "unit_id": link.unitId,
-          "organization": AppConfig.organization,
-          "platform": await PlatformHelper.getPlatform()
-        }});
-    print(data);
+
+    var data = await _supabase.rpc("get_app_config_v217", params: {
+      "data_in": {
+        "link": link.occasionLink,
+        "form_link": link.formLink,
+        "unit_id": link.unitId,
+        "organization": AppConfig.organization,
+        "platform": await PlatformHelper.getPlatform()
+      }
+    });
+
 
     return OccasionLinkModel.fromJson(data);
   }
-
 }
-

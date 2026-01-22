@@ -5,14 +5,17 @@ class DbSpots {
   static final _supabase = Supabase.instance.client;
 
   /// Fetches a bundle of spots and all related data for a given inventory pool.
-  static Future<SpotManagementBundle> getSpotManagementBundle(int inventoryPoolId) async {
+  static Future<SpotManagementBundle> getSpotManagementBundle(
+      int inventoryPoolId) async {
     final response = await _supabase.rpc(
       'get_spot_management_bundle',
       params: {'p_inventory_pool_id': inventoryPoolId},
     );
 
     // Handle potential errors from the RPC call
-    if (response is Map && response.containsKey('code') && response['code'] != 200) {
+    if (response is Map &&
+        response.containsKey('code') &&
+        response['code'] != 200) {
       throw Exception("Failed to fetch spot bundle: ${response['message']}");
     }
 
@@ -20,11 +23,13 @@ class DbSpots {
     final bundle = SpotManagementBundle.fromJson(response);
 
     // Create maps for efficient lookups.
-    final contextMap = { for (var c in bundle.inventoryContexts) c.id: c };
-    final resourceMap = { for (var r in bundle.resources) r.id: r };
-    final slotMap = { for (var s in bundle.resourceSlots) s.id: s };
-    final orderProductTicketMap = { for (var opt in bundle.orderProductTickets) opt.id: opt };
-    final orderMap = { for (var o in bundle.orders) o.id: o };
+    final contextMap = {for (var c in bundle.inventoryContexts) c.id: c};
+    final resourceMap = {for (var r in bundle.resources) r.id: r};
+    final slotMap = {for (var s in bundle.resourceSlots) s.id: s};
+    final orderProductTicketMap = {
+      for (var opt in bundle.orderProductTickets) opt.id: opt
+    };
+    final orderMap = {for (var o in bundle.orders) o.id: o};
 
     // Link orderProductTickets to their parent orders first for efficiency.
     for (final opt in bundle.orderProductTickets) {
@@ -48,7 +53,8 @@ class DbSpots {
 
       // Link order data using the pre-processed map
       if (spot.orderProductTicketId != null) {
-        spot.orderProductTicket = orderProductTicketMap[spot.orderProductTicketId];
+        spot.orderProductTicket =
+            orderProductTicketMap[spot.orderProductTicketId];
         // The order is already linked to the orderProductTicket, so we just assign it.
         if (spot.orderProductTicket != null) {
           spot.order = spot.orderProductTicket!.order;
@@ -59,7 +65,8 @@ class DbSpots {
     return bundle;
   }
 
-  static Future<void> updateSpotAssignments(List<Map<String, dynamic>> changes) async {
+  static Future<void> updateSpotAssignments(
+      List<Map<String, dynamic>> changes) async {
     if (changes.isEmpty) {
       return;
     }

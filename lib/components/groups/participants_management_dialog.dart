@@ -37,7 +37,8 @@ class _ParticipantsManagementDialogState
     super.initState();
     widget.group.participants ??= {};
 
-    final currentGroupIds = widget.group.participants!.map((p) => p.userInfo!.id).toSet();
+    final currentGroupIds =
+        widget.group.participants!.map((p) => p.userInfo!.id).toSet();
 
     _baseAvailableUsers = widget.allUsers.where((user) {
       final isAssignedElsewhere = widget.allAssignedUserIds.contains(user.id);
@@ -67,9 +68,10 @@ class _ParticipantsManagementDialogState
       final normalizedQuery = Utilities.removeDiacritics(query).toLowerCase();
       _filteredAvailableUsers = _baseAvailableUsers.where((user) {
         final normalizedName =
-        Utilities.removeDiacritics(user.toFullNameString()).toLowerCase();
+            Utilities.removeDiacritics(user.toFullNameString()).toLowerCase();
         final normalizedSecondary =
-        Utilities.removeDiacritics(user.getSecondaryInfoString(context)).toLowerCase();
+            Utilities.removeDiacritics(user.getSecondaryInfoString(context))
+                .toLowerCase();
 
         return normalizedName.contains(normalizedQuery) ||
             normalizedSecondary.contains(normalizedQuery);
@@ -80,10 +82,10 @@ class _ParticipantsManagementDialogState
   void _removeParticipant(GroupParticipantModel participant) {
     setState(() {
       widget.group.participants!.remove(participant);
-      if(participant.userInfo != null)
-      {
+      if (participant.userInfo != null) {
         _baseAvailableUsers.add(participant.userInfo!);
-        _baseAvailableUsers.sort((a,b) => a.toFullNameString().compareTo(b.toFullNameString()));
+        _baseAvailableUsers.sort(
+            (a, b) => a.toFullNameString().compareTo(b.toFullNameString()));
       }
       _applyFilter();
     });
@@ -117,8 +119,9 @@ class _ParticipantsManagementDialogState
   }
 
   void _demoteCurrentLeader() {
-    final oldLeader = widget.group.participants?.firstWhereOrNull((p) => p.isAdmin == true);
-    if(oldLeader != null) {
+    final oldLeader =
+        widget.group.participants?.firstWhereOrNull((p) => p.isAdmin == true);
+    if (oldLeader != null) {
       oldLeader.isAdmin = false;
     }
   }
@@ -127,18 +130,21 @@ class _ParticipantsManagementDialogState
   Widget build(BuildContext context) {
     final count = widget.group.participants?.length ?? 0;
     final leader =
-    widget.group.participants?.firstWhereOrNull((p) => p.isAdmin == true);
+        widget.group.participants?.firstWhereOrNull((p) => p.isAdmin == true);
     final members =
-        widget.group.participants?.where((p) => p.isAdmin != true).toList() ?? [];
-    members.sort((a,b) => a.userInfo!.toFullNameString().compareTo(b.userInfo!.toFullNameString()));
+        widget.group.participants?.where((p) => p.isAdmin != true).toList() ??
+            [];
+    members.sort((a, b) => a.userInfo!
+        .toFullNameString()
+        .compareTo(b.userInfo!.toFullNameString()));
 
     // Define a breakpoint and set flex factors based on screen width.
     const double desktopBreakpoint = 800.0;
-    final bool isDesktop = MediaQuery.of(context).size.width > desktopBreakpoint;
+    final bool isDesktop =
+        MediaQuery.of(context).size.width > desktopBreakpoint;
 
     final int topSectionFlex = 1;
     final int bottomSectionFlex = isDesktop ? 2 : 1;
-
 
     return AlertDialog(
       title: Text(GroupsStrings.dialogTitle(widget.group.title, count)),
@@ -158,17 +164,19 @@ class _ParticipantsManagementDialogState
                     _buildSectionTitle(GroupsStrings.sectionLeader),
                     leader != null
                         ? _buildParticipantChip(
-                      context: context,
-                      participant: leader,
-                      isLeader: true,
-                      onPromote: () {},
-                      onDemote: _handleDemoteLeader,
-                      onRemove: () => _removeParticipant(leader),
-                    )
+                            context: context,
+                            participant: leader,
+                            isLeader: true,
+                            onPromote: () {},
+                            onDemote: _handleDemoteLeader,
+                            onRemove: () => _removeParticipant(leader),
+                          )
                         : Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Text(GroupsStrings.noLeaderSelected, style: const TextStyle(fontStyle: FontStyle.italic)),
-                    ),
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Text(GroupsStrings.noLeaderSelected,
+                                style: const TextStyle(
+                                    fontStyle: FontStyle.italic)),
+                          ),
                     const SizedBox(height: 8),
                     _buildSectionTitle(GroupsStrings.sectionMembers),
                     Wrap(
@@ -176,13 +184,13 @@ class _ParticipantsManagementDialogState
                       runSpacing: 8.0,
                       children: members
                           .map((p) => _buildParticipantChip(
-                        context: context,
-                        participant: p,
-                        isLeader: false,
-                        onPromote: () => _promoteToLeader(p),
-                        onDemote: () {},
-                        onRemove: () => _removeParticipant(p),
-                      ))
+                                context: context,
+                                participant: p,
+                                isLeader: false,
+                                onPromote: () => _promoteToLeader(p),
+                                onDemote: () {},
+                                onRemove: () => _removeParticipant(p),
+                              ))
                           .toList(),
                     ),
                   ],
@@ -213,9 +221,10 @@ class _ParticipantsManagementDialogState
                     ),
                     subtitle: secondaryText.isNotEmpty
                         ? Text(
-                      secondaryText,
-                      style: TextStyle(color: Theme.of(context).hintColor),
-                    )
+                            secondaryText,
+                            style:
+                                TextStyle(color: Theme.of(context).hintColor),
+                          )
                         : null,
                     trailing: ElevatedButton(
                         onPressed: () => _addParticipant(user),
@@ -260,7 +269,8 @@ class _ParticipantsManagementDialogState
       child: Container(
         height: 32.0,
         decoration: BoxDecoration(
-          color: chipTheme.backgroundColor ?? Theme.of(context).disabledColor.withOpacity(0.1),
+          color: chipTheme.backgroundColor ??
+              Theme.of(context).disabledColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(16.0),
         ),
         child: Row(
@@ -269,25 +279,25 @@ class _ParticipantsManagementDialogState
             const SizedBox(width: 8),
             isLeader
                 ? IconButton(
-              icon: const Icon(Icons.star),
-              color: Colors.amber.shade700,
-              iconSize: 20,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              splashRadius: 16,
-              tooltip: GroupsStrings.demoteLeaderTooltip,
-              onPressed: onDemote,
-            )
+                    icon: const Icon(Icons.star),
+                    color: Colors.amber.shade700,
+                    iconSize: 20,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    splashRadius: 16,
+                    tooltip: GroupsStrings.demoteLeaderTooltip,
+                    onPressed: onDemote,
+                  )
                 : IconButton(
-              icon: const Icon(Icons.star_outline),
-              color: Theme.of(context).disabledColor,
-              iconSize: 20,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              splashRadius: 16,
-              tooltip: GroupsStrings.assignLeaderTooltip,
-              onPressed: onPromote,
-            ),
+                    icon: const Icon(Icons.star_outline),
+                    color: Theme.of(context).disabledColor,
+                    iconSize: 20,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    splashRadius: 16,
+                    tooltip: GroupsStrings.assignLeaderTooltip,
+                    onPressed: onPromote,
+                  ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text(participant.userInfo!.toFullNameString()),
@@ -295,7 +305,8 @@ class _ParticipantsManagementDialogState
             IconButton(
               icon: const Icon(Icons.cancel),
               iconSize: 20,
-              color: chipTheme.deleteIconColor ?? Theme.of(context).disabledColor,
+              color:
+                  chipTheme.deleteIconColor ?? Theme.of(context).disabledColor,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               splashRadius: 16,

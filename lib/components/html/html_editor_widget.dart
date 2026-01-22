@@ -53,14 +53,14 @@ class _HtmlEditorWidgetState extends State<HtmlEditorWidget> {
       debugPrint('Editor Loaded :)');
     });
 
-      Timer(const Duration(seconds: 2), () {
-        setState(() {
-          isLoading = false;
-        });
-        if(_html.isNotEmpty) {
-          setHtmlText(_html);
-      }});
-
+    Timer(const Duration(seconds: 2), () {
+      setState(() {
+        isLoading = false;
+      });
+      if (_html.isNotEmpty) {
+        setHtmlText(_html);
+      }
+    });
   }
 
   @override
@@ -106,13 +106,15 @@ class _HtmlEditorWidgetState extends State<HtmlEditorWidget> {
               hintTextPadding: const EdgeInsets.only(left: 20),
               backgroundColor: _backgroundColor,
               loadingBuilder: (context) {
-                return isLoading ? const Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 0.4,
-                    )) : const SizedBox.shrink();
+                return isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                        strokeWidth: 0.4,
+                      ))
+                    : const SizedBox.shrink();
               },
               onFocusChanged: (focus) async {
-                if(focus){
+                if (focus) {
                   widget.intermediateFocusNode?.requestFocus();
                 }
               },

@@ -1,6 +1,6 @@
 {
   "name": "festapp-web-client",
-  "version": "0.19.20",
+  "version": "0.19.22",
   "description": "Standalone Web Client for Festapp",
   "type": "module",
   "scripts": {
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^17.2.3",
     "flatpickr": "^4.6.13",
     "glob": "^13.0.0",
     "node-localstorage": "^3.0.5",

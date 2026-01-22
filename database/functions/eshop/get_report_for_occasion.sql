@@ -21,6 +21,8 @@ DECLARE
     single_cc    TEXT;
     total_revenue     NUMERIC;
     paid_revenue      NUMERIC;
+    paid_cash         NUMERIC; -- NEW
+    paid_bank         NUMERIC; -- NEW
     returned_revenue  NUMERIC;
     result_revenue    NUMERIC;
     remaining_balance NUMERIC;
@@ -31,7 +33,7 @@ DECLARE
     current_product_type TEXT := '';
     product_type_section TEXT := E'===========\nPočet zaplacených produktů podle typu:\n';
 BEGIN
-    -- 1) Spots
+    -- 1) Spots ... (Unchanged)
     SELECT
         COUNT(*),
         COUNT(*) FILTER (WHERE order_product_ticket IS NOT NULL),
@@ -41,7 +43,7 @@ BEGIN
     FROM eshop.spots
     WHERE occasion = occasion_id;
 
-    -- 2) Tickets
+    -- 2) Tickets ... (Unchanged)
     SELECT
         COUNT(DISTINCT t.id) FILTER (WHERE t.state = 'ordered'),
         COUNT(DISTINCT t.id) FILTER (WHERE t.state = 'paid'),
@@ -58,7 +60,7 @@ BEGIN
     JOIN eshop.order_product_ticket opt ON t.id = opt.ticket
     WHERE t.occasion = occasion_id;
 
-    -- 3) Orders
+    -- 3) Orders ... (Unchanged)
     SELECT
         COUNT(*),
         COUNT(*) FILTER (WHERE state = 'ordered'),
@@ -84,12 +86,44 @@ BEGIN
             o.currency_code,
             COALESCE(SUM(o.price),   0),
             COALESCE(SUM(pi.paid),   0),
-            COALESCE(SUM(pi.returned),0)
+            COALESCE(SUM(pi.returned),0),
+            -- Manual (Cash)
+            COALESCE(SUM(
+                (SELECT COALESCE(SUM(t.amount), 0) 
+                 FROM eshop.transactions t 
+                 WHERE t.payment_info = pi.id AND t.transaction_type = 'manual')
+            ), 0),
+            -- Bank (Others = Total Paid - Manual? Or explicit sum?)
+            -- Using explicit sum ensures we track what is actually IN transactions.
+            -- However, pi.paid might technically differ if there were manual DB edits.
+            -- User wants distinction. Let's calculate Bank as Paid - Cash to ensure they sum up to Paid?
+            -- No, "Normal transaction and cash transaction".
+            -- If we trust pi.paid is the master total, then Bank = pi.paid - Cash.
+            -- BUT, let's sum transactions for 'bank' explicitly to see if they match? 
+            -- Actually, to be safe and consistent with the total 'Paid' line:
+            --   Total Paid = X
+            --     Cash: Y
+            --     Bank: Z
+            -- If Y+Z != X, it might be confusing. 
+            -- Safest approach: 
+            --   Cash = Sum(Manual Transactions)
+            --   Bank = PaymentInfo.Paid - Cash (Treat 'Paid' as the source of truth for total, and Cash as the specific component).
+            -- This handles cases where transactions might be missing but balance was set.
+            -- ... Actually, if transactions are the ONLY way to pay, then Sum(Trans) == Paid.
+            -- Let's go with: Bank = Paid - Cash.
+            COALESCE(SUM(pi.paid), 0) - 
+            COALESCE(SUM(
+                (SELECT COALESCE(SUM(t.amount), 0) 
+                 FROM eshop.transactions t 
+                 WHERE t.payment_info = pi.id AND t.transaction_type = 'manual')
+            ), 0)
         INTO
             single_cc,
             total_revenue,
             paid_revenue,
-            returned_revenue
+            returned_revenue,
+            paid_cash,
+            paid_bank
         FROM eshop.orders o
         LEFT JOIN eshop.payment_info pi ON pi.id = o.payment_info
         WHERE o.occasion = occasion_id
@@ -101,6 +135,8 @@ BEGIN
         revenue_section := E'===========\nPřehled tržeb:\n' ||
             E'    • Suma všech objednávek: '   || to_char(total_revenue,     'FM99999990.00') || ' ' || single_cc || E'\n' ||
             E'    • Suma přijatých částek: '  || to_char(paid_revenue,      'FM99999990.00') || ' ' || single_cc || E'\n' ||
+            E'         - Banka: '             || to_char(paid_bank,         'FM99999990.00') || ' ' || single_cc || E'\n' ||
+            E'         - Hotovost: '          || to_char(paid_cash,         'FM99999990.00') || ' ' || single_cc || E'\n' ||
             E'    • Suma vrácených částek: '  || to_char(returned_revenue,  'FM99999990.00') || ' ' || single_cc || E'\n' ||
             E'    • Výsledná částka: '         || to_char(result_revenue,    'FM99999990.00') || ' ' || single_cc || E'\n' ||
             E'    • Zbývající částka: '       || to_char(remaining_balance,'FM99999990.00') || ' ' || single_cc || E'\n';
@@ -112,7 +148,13 @@ BEGIN
                 o.currency_code,
                 COALESCE(SUM(o.price),   0) AS total_revenue,
                 COALESCE(SUM(pi.paid),   0) AS paid_revenue,
-                COALESCE(SUM(pi.returned),0) AS returned_revenue
+                COALESCE(SUM(pi.returned),0) AS returned_revenue,
+                -- Cash
+                COALESCE(SUM(
+                    (SELECT COALESCE(SUM(t.amount), 0) 
+                     FROM eshop.transactions t 
+                     WHERE t.payment_info = pi.id AND t.transaction_type = 'manual')
+                ), 0) AS paid_cash
             FROM eshop.orders o
             LEFT JOIN eshop.payment_info pi ON pi.id = o.payment_info
             WHERE o.occasion = occasion_id
@@ -121,17 +163,21 @@ BEGIN
         LOOP
             result_revenue    := rec_rev.paid_revenue - rec_rev.returned_revenue;
             remaining_balance := rec_rev.total_revenue - rec_rev.paid_revenue;
+            paid_bank         := rec_rev.paid_revenue - rec_rev.paid_cash;
+            
             revenue_section := revenue_section ||
                 E' - ' || rec_rev.currency_code || E':\n' ||
                 E'    • Suma všech objednávek: '   || to_char(rec_rev.total_revenue,    'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n' ||
                 E'    • Suma přijatých částek: '  || to_char(rec_rev.paid_revenue,     'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n' ||
+                E'         - Banka: '             || to_char(paid_bank,                'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n' ||
+                E'         - Hotovost: '          || to_char(rec_rev.paid_cash,        'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n' ||
                 E'    • Suma vrácených částek: '  || to_char(rec_rev.returned_revenue, 'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n' ||
                 E'    • Výsledná částka: '         || to_char(result_revenue,           'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n' ||
                 E'    • Zbývající částka: '       || to_char(remaining_balance,       'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n';
         END LOOP;
     END IF;
 
-    -- 5) Products by type
+    -- 5) Products by type ... (Unchanged)
     FOR rec_product_type IN
         SELECT
             pt.title   AS product_type,
@@ -157,7 +203,7 @@ BEGIN
         product_type_section := product_type_section || E' - Žádné zaplacené produkty.\n';
     END IF;
 
-    -- 6) Assemble final report
+    -- 6) Assemble final report ... (Unchanged)
     RETURN
         E'===========\n' ||
         E'Počet míst celkem: '     || to_char(total_spots,              'FM9999') || E'\n' ||

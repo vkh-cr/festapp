@@ -18,7 +18,7 @@ class GameSettingsModel {
   }
 
   Map<String, dynamic> toJson() => {
-    Tb.occasions.data_game_start: start?.toIso8601String(),
-    Tb.occasions.data_game_end: end?.toIso8601String(),
-  };
+        Tb.occasions.data_game_start: start?.toIso8601String(),
+        Tb.occasions.data_game_end: end?.toIso8601String(),
+      };
 }

@@ -109,7 +109,7 @@ class _SongDialogState extends State<SongDialog> {
                           alignment: Alignment.topCenter,
                           child: HtmlView(
                             html:
-                            "<div style='text-align: center;'><h3>${widget.title}</h3>${widget.description}</div>",
+                                "<div style='text-align: center;'><h3>${widget.title}</h3>${widget.description}</div>",
                             isSelectable: true,
                             fontSize: fontSize,
                           ),
@@ -122,31 +122,38 @@ class _SongDialogState extends State<SongDialog> {
                     bottom: 20,
                     child: AnimatedOpacity(
                       opacity: _buttonOpacity,
-                      duration: Duration(milliseconds: buttonFadeAnimationDuration),
+                      duration:
+                          Duration(milliseconds: buttonFadeAnimationDuration),
                       child: Row(
                         children: [
                           ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                fontSize = (fontSize - fontSizeStep).clamp(minFontSize, maxFontSize);
+                                fontSize = (fontSize - fontSizeStep)
+                                    .clamp(minFontSize, maxFontSize);
                               });
                               _startFadeTimer(); // Restart fade timer
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                              backgroundColor: ThemeConfig.songButtonColor(context)
-                                  .withOpacity(_buttonOpacity),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 15),
+                              backgroundColor:
+                                  ThemeConfig.songButtonColor(context)
+                                      .withOpacity(_buttonOpacity),
                               shadowColor: Colors.transparent,
                               elevation: 0,
                             ),
                             child: Row(
                               children: [
                                 Icon(Icons.remove,
-                                    size: 28, color: ThemeConfig.whiteTextColor(context)),
+                                    size: 28,
+                                    color: ThemeConfig.whiteTextColor(context)),
                                 const SizedBox(width: 8),
                                 Text("Smaller".tr(),
                                     style: TextStyle(
-                                        color: ThemeConfig.whiteTextColor(context), fontSize: 18)),
+                                        color:
+                                            ThemeConfig.whiteTextColor(context),
+                                        fontSize: 18)),
                               ],
                             ),
                           ),
@@ -154,14 +161,17 @@ class _SongDialogState extends State<SongDialog> {
                           ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                fontSize = (fontSize + fontSizeStep).clamp(minFontSize, maxFontSize);
+                                fontSize = (fontSize + fontSizeStep)
+                                    .clamp(minFontSize, maxFontSize);
                               });
                               _startFadeTimer(); // Restart fade timer
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                              backgroundColor: ThemeConfig.songButtonColor(context)
-                                  .withOpacity(_buttonOpacity),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 15),
+                              backgroundColor:
+                                  ThemeConfig.songButtonColor(context)
+                                      .withOpacity(_buttonOpacity),
                               shadowColor: Colors.transparent,
                               elevation: 0,
                             ),
@@ -169,10 +179,13 @@ class _SongDialogState extends State<SongDialog> {
                               children: [
                                 Text("Larger".tr(),
                                     style: TextStyle(
-                                        color: ThemeConfig.whiteTextColor(context), fontSize: 18)),
+                                        color:
+                                            ThemeConfig.whiteTextColor(context),
+                                        fontSize: 18)),
                                 const SizedBox(width: 8),
                                 Icon(Icons.add,
-                                    size: 28, color: ThemeConfig.whiteTextColor(context)),
+                                    size: 28,
+                                    color: ThemeConfig.whiteTextColor(context)),
                               ],
                             ),
                           ),
@@ -185,14 +198,16 @@ class _SongDialogState extends State<SongDialog> {
                     left: 20,
                     child: AnimatedOpacity(
                       opacity: _buttonOpacity,
-                      duration: Duration(milliseconds: buttonFadeAnimationDuration),
+                      duration:
+                          Duration(milliseconds: buttonFadeAnimationDuration),
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
                           _fadeTimer?.cancel(); // Cancel timer on dialog close
                         },
                         style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.all(16),
                           backgroundColor: ThemeConfig.songButtonColor(context)
                               .withOpacity(_buttonOpacity),

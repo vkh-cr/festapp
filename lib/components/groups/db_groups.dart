@@ -11,12 +11,15 @@ class DbGroups {
   static final _supabase = Supabase.instance.client;
 
   static Future<List<UserGroupInfoModel>> getGroupsWithPlaces() async {
-    var data = await _supabase.from(Tb.user_group_info.table)
+    var data = await _supabase
+        .from(Tb.user_group_info.table)
         .select("${Tb.user_group_info.title}, ${Tb.places.table}(*)");
-    return List<UserGroupInfoModel>.from(data.map((x) => UserGroupInfoModel.fromJson(x)));
+    return List<UserGroupInfoModel>.from(
+        data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
 
-  static Future<List<UserGroupInfoModel>> getAllUserGroupInfo([String? type]) async {
+  static Future<List<UserGroupInfoModel>> getAllUserGroupInfo(
+      [String? type]) async {
     final response = await _supabase.rpc(
       'get_all_user_groups',
       params: {
@@ -32,10 +35,10 @@ class DbGroups {
         groupData.map((x) => UserGroupInfoModel.fromJson(x)));
 
     if (type == InformationModel.gameType && gameDefsData != null) {
-      Map<int, String> dict = gameDefsData.map((key, value) =>
-          MapEntry(int.parse(key), value as String));
+      Map<int, String> dict = gameDefsData
+          .map((key, value) => MapEntry(int.parse(key), value as String));
 
-      for(var u in toReturn){
+      for (var u in toReturn) {
         u.checkpointTitlesDict = dict;
       }
     }
@@ -59,7 +62,7 @@ class DbGroups {
   }
 
   static Future<void> updateUserGroupInfo(UserGroupInfoModel model) async {
-    if(!(RightsService.isEditor() || (model.isAdmin ?? false))) {
+    if (!(RightsService.isEditor() || (model.isAdmin ?? false))) {
       throw Exception("Must be leader or admin to change the group.");
     }
 
@@ -67,41 +70,50 @@ class DbGroups {
       Tb.user_group_info.title: model.title,
     };
 
-    if(model.type != null) {
+    if (model.type != null) {
       upsertObj.addAll({Tb.user_group_info.type: model.type});
     }
-    if(model.description != null) {
+    if (model.description != null) {
       upsertObj.addAll({Tb.user_group_info.description: model.description});
     }
-    if(model.place != null) {
+    if (model.place != null) {
       model.place = await DbPlaces.updatePlace(model.place!);
       upsertObj.addAll({Tb.user_group_info.place: model.place!.id.toString()});
     }
     dynamic eventData;
-    if(model.id!=null) {
+    if (model.id != null) {
       upsertObj.addAll({Tb.user_group_info.id: model.id.toString()});
-      eventData = await _supabase.from(Tb.user_group_info.table).update(upsertObj).eq(Tb.user_group_info.id, model.id!).select().single();
+      eventData = await _supabase
+          .from(Tb.user_group_info.table)
+          .update(upsertObj)
+          .eq(Tb.user_group_info.id, model.id!)
+          .select()
+          .single();
     } else {
-      upsertObj.addAll({Tb.user_group_info.occasion: RightsService.currentOccasionId()!});
-      eventData = await _supabase.from(Tb.user_group_info.table).insert(upsertObj).select().single();
+      upsertObj.addAll(
+          {Tb.user_group_info.occasion: RightsService.currentOccasionId()!});
+      eventData = await _supabase
+          .from(Tb.user_group_info.table)
+          .insert(upsertObj)
+          .select()
+          .single();
     }
 
     var updated = UserGroupInfoModel.fromJson(eventData);
     await updateUserGroupParticipants(updated, model.participants!);
   }
 
-  static Future<void> updateUserGroupParticipants(UserGroupInfoModel group, Set<GroupParticipantModel> participants) async {
+  static Future<void> updateUserGroupParticipants(
+      UserGroupInfoModel group, Set<GroupParticipantModel> participants) async {
     await _supabase
         .from(Tb.user_groups.table)
         .delete()
         .eq(Tb.user_groups.group, group.id!);
 
-    for(var p in participants) {
-      await _supabase
-          .from(Tb.user_groups.table)
-          .insert({
-        Tb.user_groups.group:group.id,
-        Tb.user_groups.user:p.userInfo!.id,
+    for (var p in participants) {
+      await _supabase.from(Tb.user_groups.table).insert({
+        Tb.user_groups.group: group.id,
+        Tb.user_groups.user: p.userInfo!.id,
         Tb.user_groups.is_admin: p.isAdmin ?? false
       });
     }
@@ -117,7 +129,7 @@ class DbGroups {
         .delete()
         .eq(Tb.user_group_info.id, model.id!);
 
-    if(model.place!=null) {
+    if (model.place != null) {
       await _supabase
           .from(Tb.places.table)
           .delete()
@@ -126,20 +138,22 @@ class DbGroups {
   }
 
   static Future<List<int>> getCorrectlyGuessedCheckpoints() async {
-
-    var response = await await _supabase
-        .rpc('game_get_correctly_guessed_checkpoints', params: {'oc': RightsService.currentOccasionId()});
+    var response = await await _supabase.rpc(
+        'game_get_correctly_guessed_checkpoints',
+        params: {'oc': RightsService.currentOccasionId()});
     if (response == null || response["code"] != 200) {
       return [];
     }
-    List<int> checkPoints = List<int>.from(response["data"].map((entry) => entry['check_point']));
+    List<int> checkPoints =
+        List<int>.from(response["data"].map((entry) => entry['check_point']));
 
     return checkPoints;
   }
 
   static Future<Set<UserGroupInfoModel>> getUserGroups() async {
-    final response = await _supabase.rpc('get_user_groups', params: {'p_occasion_id': RightsService.currentOccasionId()!});
-    return Set.from(response.values
-        .map((groupJson) => UserGroupInfoModel.fromJson(groupJson as Map<String, dynamic>)));
+    final response = await _supabase.rpc('get_user_groups',
+        params: {'p_occasion_id': RightsService.currentOccasionId()!});
+    return Set.from(response.values.map((groupJson) =>
+        UserGroupInfoModel.fromJson(groupJson as Map<String, dynamic>)));
   }
 }

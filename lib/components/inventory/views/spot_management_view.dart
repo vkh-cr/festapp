@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/resource_model.dart';
 import 'package:fstapp/components/inventory/models/spot_management_bundle.dart';
@@ -32,14 +31,13 @@ class _SpotIdentifier {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is _SpotIdentifier &&
-              runtimeType == other.runtimeType &&
-              id == other.id;
+      other is _SpotIdentifier &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
 
   @override
   int get hashCode => id.hashCode;
 }
-
 
 class SpotManagementViewState extends State<SpotManagementView> {
   SingleDataGridController<SpotMatrixRow>? _controller;
@@ -49,9 +47,10 @@ class SpotManagementViewState extends State<SpotManagementView> {
   // New: A temporary cache for the initial data bundle to avoid a double fetch.
   SpotManagementBundle? _initialBundle;
 
-  static final String _clearAllTitle = InventoryStrings.spotManagementClearAllTitle;
-  static final String _clearAllConfirmation = InventoryStrings.spotManagementClearAllConfirmation;
-
+  static final String _clearAllTitle =
+      InventoryStrings.spotManagementClearAllTitle;
+  static final String _clearAllConfirmation =
+      InventoryStrings.spotManagementClearAllConfirmation;
 
   @override
   void initState() {
@@ -89,7 +88,8 @@ class SpotManagementViewState extends State<SpotManagementView> {
 
     // If no cached bundle, fetch fresh data from the database.
     // This path is taken on user-initiated refreshes within the grid.
-    final bundle = await DbSpots.getSpotManagementBundle(widget.inventoryPoolId);
+    final bundle =
+        await DbSpots.getSpotManagementBundle(widget.inventoryPoolId);
     return _generateMatrixRows(bundle);
   }
 
@@ -97,11 +97,14 @@ class SpotManagementViewState extends State<SpotManagementView> {
   /// The controller itself will then use the cached data for its first render.
   Future<void> _initializeController() async {
     if (!mounted) return;
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       // Fetch #1: This is now the ONLY initial fetch.
-      _initialBundle = await DbSpots.getSpotManagementBundle(widget.inventoryPoolId);
+      _initialBundle =
+          await DbSpots.getSpotManagementBundle(widget.inventoryPoolId);
 
       if (mounted) {
         setState(() {
@@ -138,7 +141,9 @@ class SpotManagementViewState extends State<SpotManagementView> {
       if (mounted) {
         // Clear the cached bundle on error to prevent using stale/bad data.
         _initialBundle = null;
-        setState(() { _isLoading = false; });
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -166,17 +171,23 @@ class SpotManagementViewState extends State<SpotManagementView> {
   /// Generates the list of [SpotMatrixRow] models for the data grid using a
   /// single, unified "best fit" algorithm.
   List<SpotMatrixRow> _generateMatrixRows(SpotManagementBundle bundle) {
-    final allSpotsMap = { for (var spot in bundle.spots) spot.id!: spot };
-    bundle.resources.sort((a, b) => Utilities.naturalCompare(a.title ?? '', b.title ?? ''));
+    final allSpotsMap = {for (var spot in bundle.spots) spot.id!: spot};
+    bundle.resources
+        .sort((a, b) => Utilities.naturalCompare(a.title ?? '', b.title ?? ''));
 
     final List<SpotMatrixRow> generatedRows = [];
     final int numContexts = bundle.inventoryContexts.length;
 
     for (final ResourceModel resource in bundle.resources) {
       // 1. SETUP (Unchanged)
-      final availableSpots = bundle.spots.where((s) => s.resourceId == resource.id).toList();
-      final slotsForResource = bundle.resourceSlots.where((s) => s.resourceId == resource.id).toList();
-      final int rowCount = slotsForResource.isNotEmpty ? slotsForResource.length : ((resource.capacity ?? 1) > 0 ? resource.capacity! : 1);
+      final availableSpots =
+          bundle.spots.where((s) => s.resourceId == resource.id).toList();
+      final slotsForResource = bundle.resourceSlots
+          .where((s) => s.resourceId == resource.id)
+          .toList();
+      final int rowCount = slotsForResource.isNotEmpty
+          ? slotsForResource.length
+          : ((resource.capacity ?? 1) > 0 ? resource.capacity! : 1);
       final List<SpotMatrixRow> rowsForThisResource = [];
 
       // 2. BUILD ALL ROWS WITH SPOTS (Now using typed IDs)
@@ -186,13 +197,16 @@ class SpotManagementViewState extends State<SpotManagementView> {
         bool wasRowBuiltInPass;
         do {
           wasRowBuiltInPass = false;
-          if (rowsForThisResource.length >= rowCount || availableSpots.isEmpty) break;
+          if (rowsForThisResource.length >= rowCount || availableSpots.isEmpty)
+            break;
 
           final spotsByCustomer = _groupSpotsByCustomer(availableSpots);
           Object? candidateCustomer; // Key is now Object?
 
           for (final customerId in spotsByCustomer.keys) {
-            final contextsCovered = spotsByCustomer[customerId]!.map((s) => s.inventoryContextId).toSet();
+            final contextsCovered = spotsByCustomer[customerId]!
+                .map((s) => s.inventoryContextId)
+                .toSet();
             if (contextsCovered.length >= level) {
               candidateCustomer = customerId;
               break;
@@ -200,12 +214,15 @@ class SpotManagementViewState extends State<SpotManagementView> {
           }
 
           if (candidateCustomer != null) {
-            final spotsForCandidate = _groupSpotsByCustomer(availableSpots)[candidateCustomer]!;
-            final candidateSpotsByContext = _groupSpotsByContext(spotsForCandidate);
+            final spotsForCandidate =
+                _groupSpotsByCustomer(availableSpots)[candidateCustomer]!;
+            final candidateSpotsByContext =
+                _groupSpotsByContext(spotsForCandidate);
 
             int numRowsPossible = -1;
             candidateSpotsByContext.forEach((_, spotsInContext) {
-              if (numRowsPossible == -1 || spotsInContext.length < numRowsPossible) {
+              if (numRowsPossible == -1 ||
+                  spotsInContext.length < numRowsPossible) {
                 numRowsPossible = spotsInContext.length;
               }
             });
@@ -219,19 +236,22 @@ class SpotManagementViewState extends State<SpotManagementView> {
                   // Find the spot using the typed Object key
                   final spotToUse = availableSpots.firstWhere((s) {
                     final sId = s.order?.id ?? _SpotIdentifier(s.id!);
-                    return s.inventoryContextId == contextId && sId == candidateCustomer;
+                    return s.inventoryContextId == contextId &&
+                        sId == candidateCustomer;
                   });
                   initialSpotsInRow[contextId] = spotToUse;
                   availableSpots.remove(spotToUse);
                 }
 
-                bundle.inventoryContexts.forEach((context) {
+                for (var context in bundle.inventoryContexts) {
                   initialSpotsInRow.putIfAbsent(context.id!, () => null);
-                });
+                }
 
                 rowsForThisResource.add(SpotMatrixRow(
                   rowReference: SpotManagementRowReference(
-                      resource: resource, initialSpotsInRow: initialSpotsInRow, allSpotsMap: allSpotsMap),
+                      resource: resource,
+                      initialSpotsInRow: initialSpotsInRow,
+                      allSpotsMap: allSpotsMap),
                 ));
               }
               wasRowBuiltInPass = true;
@@ -252,7 +272,8 @@ class SpotManagementViewState extends State<SpotManagementView> {
           for (final contextId in contextIds) {
             if (rowRef.currentSpotsInRow[contextId] == null) {
               if (remainingByContext[contextId]?.isNotEmpty ?? false) {
-                rowRef.currentSpotsInRow[contextId] = remainingByContext[contextId]!.removeAt(0);
+                rowRef.currentSpotsInRow[contextId] =
+                    remainingByContext[contextId]!.removeAt(0);
               }
             }
           }
@@ -263,7 +284,11 @@ class SpotManagementViewState extends State<SpotManagementView> {
       while (rowsForThisResource.length < rowCount) {
         rowsForThisResource.add(SpotMatrixRow(
           rowReference: SpotManagementRowReference(
-              resource: resource, initialSpotsInRow: { for (var c in bundle.inventoryContexts) c.id!: null }, allSpotsMap: allSpotsMap),
+              resource: resource,
+              initialSpotsInRow: {
+                for (var c in bundle.inventoryContexts) c.id!: null
+              },
+              allSpotsMap: allSpotsMap),
         ));
       }
 
@@ -284,7 +309,8 @@ class SpotManagementViewState extends State<SpotManagementView> {
 
   /// Clears all spot assignments by mutating the underlying models and then refreshing the UI.
   /// This function remains unchanged.
-  Future<void> _clearAllAssignments(SingleDataGridController<ITrinaRowModel> controller) async {
+  Future<void> _clearAllAssignments(
+      SingleDataGridController<ITrinaRowModel> controller) async {
     if (!mounted) return;
 
     final confirm = await DialogHelper.showConfirmationDialog(
@@ -297,7 +323,8 @@ class SpotManagementViewState extends State<SpotManagementView> {
       final stateManager = controller.stateManager;
 
       for (final row in stateManager.rows) {
-        final rowRef = row.cells[SpotManagementConstants.rowReference]?.value as SpotManagementRowReference?;
+        final rowRef = row.cells[SpotManagementConstants.rowReference]?.value
+            as SpotManagementRowReference?;
         if (rowRef == null) continue;
 
         // 1. Mutate the data model for the entire row to be null.
@@ -305,8 +332,10 @@ class SpotManagementViewState extends State<SpotManagementView> {
 
         // 2. Update the UI for each cell in the row.
         for (final cellEntry in row.cells.entries) {
-          if (cellEntry.key.startsWith(SpotManagementConstants.contextColumnPrefix)) {
-            stateManager.changeCellValue(cellEntry.value, '', force: true, notify: false);
+          if (cellEntry.key
+              .startsWith(SpotManagementConstants.contextColumnPrefix)) {
+            stateManager.changeCellValue(cellEntry.value, '',
+                force: true, notify: false);
           }
         }
       }
@@ -314,7 +343,6 @@ class SpotManagementViewState extends State<SpotManagementView> {
       stateManager.notifyListeners();
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

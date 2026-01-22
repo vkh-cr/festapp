@@ -12,6 +12,7 @@ const dom = new JSDOM('<!DOCTYPE html><html><body><form id="test-form"></form></
 global.window = dom.window;
 global.document = dom.window.document;
 global.HTMLElement = dom.window.HTMLElement;
+global.FormData = dom.window.FormData;
 
 // Mock DbForms.selectSpot to prevent network calls
 DbForms.selectSpot = async (formKey, secret, spotId, selecting) => {
@@ -65,7 +66,6 @@ describe('FormSession State Inversion', () => {
         assert.strictEqual(session.payload.ticket[0].spotPrice, 200);
         
         // Check Price immediately
-        // console.log('DEBUG: Payload Ticket:', JSON.stringify(session.payload.ticket, null, 2));
         assert.strictEqual(session.state.totalPrice, 250); // Spot 200 + Prod 50
         assert.strictEqual(session.state.totalItems, 1);
     });
@@ -102,7 +102,7 @@ describe('FormSession State Inversion', () => {
         assert.strictEqual(session.state.totalPrice, 50);
     });
     
-    it.skip('should handle State Inversion correctly (DOM reflection)', () => {
+    it('should handle State Inversion correctly (DOM reflection)', () => {
         // This test verifies that we don't need DOM scraping for basic operations anymore
         // We simulate "Add Ticket" purely via State.
         
@@ -113,16 +113,7 @@ describe('FormSession State Inversion', () => {
         const form = document.getElementById('test-form');
         assert.strictEqual(form.innerHTML, ''); // Empty DOM
         
-        // If we were scraping, payload would be empty. 
-        // But we are using State Source of Truth.
-        // refreshPayload WOULD scrape and overwrite?
-        // Let's verify refreshPayload behavior:
-        
-        // session.refreshPayload(form); 
-        // If refreshPayload scrapes DOM, it would clear tickets because DOM is empty!
-        // This confirms we must be careful about mixing Source of Truth.
-        // But our strategy is "Sync Payload FROM State".
-        // refreshPayload calls _syncPayloadFromState() which uses STATE.
+        // Since we ignore the DOM, refreshPayload should respect the State as the source of truth.
         
         session.refreshPayload(form);
         assert.strictEqual(session.payload.ticket.length, 1, "Refresh should respect State for tickets");

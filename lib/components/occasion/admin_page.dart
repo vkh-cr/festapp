@@ -15,22 +15,22 @@ class AdminPage extends StatefulWidget {
   _AdminPageState createState() => _AdminPageState();
 }
 
-class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMixin {
+class _AdminPageState extends State<AdminPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   // List of active tabs by name
   final List<String> activeTabNames = [
     AdminTabDefinition.info,
-    if(!AppConfig.isAllUnit)
-    AdminTabDefinition.events,
-      AdminTabDefinition.places,
-    if(FeatureService.isFeatureEnabled(FeatureConstants.userGroups))
+    if (!AppConfig.isAllUnit) AdminTabDefinition.events,
+    AdminTabDefinition.places,
+    if (FeatureService.isFeatureEnabled(FeatureConstants.userGroups))
       AdminTabDefinition.groups,
-    if(FeatureService.isFeatureEnabled(FeatureConstants.game))
+    if (FeatureService.isFeatureEnabled(FeatureConstants.game))
       AdminTabDefinition.game,
-    if(FeatureService.isFeatureEnabled(FeatureConstants.services))
+    if (FeatureService.isFeatureEnabled(FeatureConstants.services))
       AdminTabDefinition.service,
-    if(FeatureService.isFeatureEnabled(FeatureConstants.volunteers))
+    if (FeatureService.isFeatureEnabled(FeatureConstants.volunteers))
       AdminTabDefinition.volunteers,
     AdminTabDefinition.emailTemplates,
     AdminTabDefinition.users,
@@ -45,12 +45,15 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    final activeTabs = activeTabNames.map((name) => AdminTabDefinition.availableTabs[name]!).toList();
+    final activeTabs = activeTabNames
+        .map((name) => AdminTabDefinition.availableTabs[name]!)
+        .toList();
 
     return DefaultTabController(
       length: _tabController.length,
       child: Scaffold(
-        appBar: AppPanelHelper.buildAdaptiveAdminAppBar(context, activeTabs: activeTabs, tabController: _tabController),
+        appBar: AppPanelHelper.buildAdaptiveAdminAppBar(context,
+            activeTabs: activeTabs, tabController: _tabController),
         body: TabBarView(
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),

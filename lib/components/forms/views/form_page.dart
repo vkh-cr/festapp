@@ -13,7 +13,6 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:fstapp/components/forms/form_session.dart';
-import 'package:fstapp/components/forms/models/form_option_product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/forms/db_forms.dart';
@@ -30,7 +29,6 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/components/html/html_view.dart';
 
 import '../models/holder_models/form_holder.dart';
-import '../models/holder_models/ticket_holder.dart';
 import '../form_strings.dart';
 import 'order_finish_screen.dart';
 
@@ -151,12 +149,12 @@ class _FormPageState extends State<FormPage> {
     RouterService.pushOverlayState('seat-reservation');
 
     formSession!.startSeatSelection();
-    // No need to updateSeats(seats) here as we are just opening it, 
+    // No need to updateSeats(seats) here as we are just opening it,
     // unless 'seats' differs from what's in ticket holder which shouldn't happen if we strictly follow ticket holder.
     // However, if the caller passed explicit seats (like from a specific ticket edit), we might want to respect that?
     // In `TicketFieldBuilder`, it passes `ticket.tickets.map((t) => t.seat!).toList()`.
     // Since we are using ticket holder as truth, we should be fine.
-    
+
     setState(() {
       _isSeatReservationVisible = true;
     });
@@ -182,9 +180,9 @@ class _FormPageState extends State<FormPage> {
     // Wait, _hideSeatReservation is called by US manually OR by history pop?
     // If `seats` is NOT null, it's a confirm.
     if (seats != null) {
-       formSession!.confirmSeatSelection();
+      formSession!.confirmSeatSelection();
     } else {
-       formSession!.cancelSeatSelection();
+      formSession!.cancelSeatSelection();
     }
 
     // Complete the future with the result (null for cancel, list for confirm)
@@ -225,7 +223,7 @@ class _FormPageState extends State<FormPage> {
               formSession!.updateSeats(sts);
             },
             onCloseSeatReservation:
-            formHolder!.controller!.onCloseSeatReservation!,
+                formHolder!.controller!.onCloseSeatReservation!,
           ),
         ),
       ),
@@ -234,9 +232,9 @@ class _FormPageState extends State<FormPage> {
 
   // _buildOrderPreviewOverlay removed as we use showModalBottomSheet
 
-
   Widget _buildPriceAndTicketInfo() {
-    if ((formSession?.totalPrice ?? 0) <= 0) return SizedBox(); // Do not display if total price is 0
+    if ((formSession?.totalPrice ?? 0) <= 0)
+      return SizedBox(); // Do not display if total price is 0
 
     return Positioned(
       top: 16,
@@ -244,7 +242,9 @@ class _FormPageState extends State<FormPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
-          color: form?.primaryColor != null ? Color(form!.primaryColor!) : Theme.of(context).primaryColor,
+          color: form?.primaryColor != null
+              ? Color(form!.primaryColor!)
+              : Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(8.0),
           boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black26)],
         ),
@@ -308,7 +308,9 @@ class _FormPageState extends State<FormPage> {
               // verification of _isOrderPreviewVisible in whenComplete will handle history sync.
               onClose: () => Navigator.of(context).pop(),
               tone: form!.data?[FormHelper.metaCommunicationTone],
-              hasTickets: FeatureService.isFeatureEnabled(FeatureConstants.ticket, features: form!.occasionModel?.features),
+              hasTickets: FeatureService.isFeatureEnabled(
+                  FeatureConstants.ticket,
+                  features: form!.occasionModel?.features),
             ),
           );
         },
@@ -317,7 +319,7 @@ class _FormPageState extends State<FormPage> {
         // (not by our back button handler which sets it to false first).
         // So we need to sync history (pop the hash).
         if (_isOrderPreviewVisible) {
-           _hideOrderPreview();
+          _hideOrderPreview();
         }
       });
     }
@@ -349,7 +351,7 @@ class _FormPageState extends State<FormPage> {
           return await DbOrders.sendTicketOrder(data);
         },
         onOrderConfirmed: () async {
-          // Reset session tickets? 
+          // Reset session tickets?
           // `_formKey.currentState?.reset()` resets the form fields.
           // TicketHolder might need manual reset or re-loadData will handle it.
           // formSession updateSeats([]) is effectively clearing it.
@@ -362,7 +364,8 @@ class _FormPageState extends State<FormPage> {
           _scrollToTop();
         },
         tone: form!.data?[FormHelper.metaCommunicationTone],
-        hasTickets: FeatureService.isFeatureEnabled(FeatureConstants.ticket, features: form!.occasionModel?.features),
+        hasTickets: FeatureService.isFeatureEnabled(FeatureConstants.ticket,
+            features: form!.occasionModel?.features),
       ),
       transitionBuilder: (context, anim1, anim2, child) {
         return Theme(
@@ -380,19 +383,18 @@ class _FormPageState extends State<FormPage> {
     });
   }
 
-
-
 // ... (imports)
 
   ThemeData _buildFormTheme(BuildContext context) {
     var theme = Theme.of(context);
     var form = this.form; // Use class member
-    
+
     if (form != null) {
       if (form.fontFamily != null) {
         try {
           theme = theme.copyWith(
-            textTheme: GoogleFonts.getTextTheme(form.fontFamily!, theme.textTheme),
+            textTheme:
+                GoogleFonts.getTextTheme(form.fontFamily!, theme.textTheme),
           );
         } catch (e) {
           print(e);
@@ -414,78 +416,82 @@ class _FormPageState extends State<FormPage> {
         final hsl = HSLColor.fromColor(primary);
         // Boost lightness more aggressively for dark mode to ensure visibility
         if (isDark && hsl.lightness < 0.75) {
-             primary = hsl.withLightness(0.75).toColor();
-             // Also optionally boost saturation if it's very low, to make it pop
-             if (hsl.saturation < 0.3) {
-                primary = HSLColor.fromColor(primary).withSaturation(0.4).toColor();
-             }
+          primary = hsl.withLightness(0.75).toColor();
+          // Also optionally boost saturation if it's very low, to make it pop
+          if (hsl.saturation < 0.3) {
+            primary = HSLColor.fromColor(primary).withSaturation(0.4).toColor();
+          }
         }
-        
+
         // Auto-calculate secondary if not provided
-        secondary ??= HSLColor.fromColor(primary).withLightness((isDark ? 0.85 : 0.9).clamp(0.0, 1.0)).toColor();
+        secondary ??= HSLColor.fromColor(primary)
+            .withLightness((isDark ? 0.85 : 0.9).clamp(0.0, 1.0))
+            .toColor();
 
         theme = theme.copyWith(
-          primaryColor: primary,
-          // Use a very subtle tint of the primary color for background in light mode
-          // User requested "very slightly colored" and "solid opaque" background
-          // Round 12: Increased opacity to 0.12 ("even darker") for light mode.
-          scaffoldBackgroundColor: Color.alphaBlend(
-              primary.withOpacity(isDark ? 0.05 : 0.07),
-              isDark ? Colors.grey.shade900 : Colors.white
-          ), 
-          colorScheme: theme.colorScheme.copyWith(
-            primary: primary,
-            onPrimary: isDark ? Colors.black : Colors.white, // Ensure text on primary is readable
-            secondary: secondary,
-            // Only force white surface if strictly desired, otherwise let theme decide or use a light tint
-            surface: isDark ? null : Colors.white,
-          ),
-          checkboxTheme: CheckboxThemeData(
-            fillColor: MaterialStateProperty.resolveWith<Color>((states) {
-               if (states.contains(MaterialState.selected)) {
-                 return primary!;
-               }
-               return isDark ? Colors.grey.shade400 : Colors.grey.shade600;
-            }),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-            side: BorderSide(color: isDark ? Colors.grey.shade500 : Colors.grey.shade600, width: 2),
-          ),
-          radioTheme: RadioThemeData(
-             fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-               if (states.contains(WidgetState.selected)) {
-                 return primary!;
-               }
-               return isDark ? Colors.grey.shade400 : Colors.grey.shade600;
-             }),
-          ),
-          switchTheme: SwitchThemeData(
-             thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
-               if (states.contains(WidgetState.selected)) {
-                 return primary!;
-               }
-               return isDark ? Colors.grey.shade400 : Colors.grey.shade200;
-             }),
-             trackColor: WidgetStateProperty.resolveWith<Color>((states) {
-               if (states.contains(WidgetState.selected)) {
-                 return primary!.withOpacity(0.5);
-               }
-               return isDark ? Colors.grey.shade700 : Colors.grey.shade400;
-             }),
-          ),
-          inputDecorationTheme: theme.inputDecorationTheme.copyWith(
-             filled: true,
-             // In dark mode, white fill is bad. Use a dark surface color or transparent.
-             fillColor: isDark ? Colors.grey.shade800 : Colors.white,
-             labelStyle: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade700),
-             
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-             style: ElevatedButton.styleFrom(
-               backgroundColor: primary,
-               foregroundColor: Colors.white, // Ensure text is white on primary
-             )
-          )
-        );
+            primaryColor: primary,
+            // Use a very subtle tint of the primary color for background in light mode
+            // User requested "very slightly colored" and "solid opaque" background
+            // Round 12: Increased opacity to 0.12 ("even darker") for light mode.
+            scaffoldBackgroundColor: Color.alphaBlend(
+                primary.withOpacity(isDark ? 0.05 : 0.07),
+                isDark ? Colors.grey.shade900 : Colors.white),
+            colorScheme: theme.colorScheme.copyWith(
+              primary: primary,
+              onPrimary: isDark
+                  ? Colors.black
+                  : Colors.white, // Ensure text on primary is readable
+              secondary: secondary,
+              // Only force white surface if strictly desired, otherwise let theme decide or use a light tint
+              surface: isDark ? null : Colors.white,
+            ),
+            checkboxTheme: CheckboxThemeData(
+              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return primary!;
+                }
+                return isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+              }),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4)),
+              side: BorderSide(
+                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                  width: 2),
+            ),
+            radioTheme: RadioThemeData(
+              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return primary!;
+                }
+                return isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+              }),
+            ),
+            switchTheme: SwitchThemeData(
+              thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return primary!;
+                }
+                return isDark ? Colors.grey.shade400 : Colors.grey.shade200;
+              }),
+              trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return primary!.withOpacity(0.5);
+                }
+                return isDark ? Colors.grey.shade700 : Colors.grey.shade400;
+              }),
+            ),
+            inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+              filled: true,
+              // In dark mode, white fill is bad. Use a dark surface color or transparent.
+              fillColor: isDark ? Colors.grey.shade800 : Colors.white,
+              labelStyle: TextStyle(
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade700),
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+              backgroundColor: primary,
+              foregroundColor: Colors.white, // Ensure text is white on primary
+            )));
       }
     }
     return theme;
@@ -508,16 +514,17 @@ class _FormPageState extends State<FormPage> {
         isClosed = true;
       }
     }
-    
+
     dynamic previewParam = context.routeData.queryParams.get('preview', false);
     bool isPreviewParam = previewParam.toString().toLowerCase() == 'true';
     bool canPreview = RightsService.isEditorOrderView();
     // Only allow preview if specifically requested AND user is editor
     bool showPreview = canPreview && isPreviewParam;
-    bool showCountdown = isBeforeStart && (form?.enableCountdown ?? false) && !showPreview;
+    bool showCountdown =
+        isBeforeStart && (form?.enableCountdown ?? false) && !showPreview;
 
     if (_isLoading) {
-       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_formNotAvailable || (isClosed && !showPreview && !showCountdown)) {
@@ -525,9 +532,9 @@ class _FormPageState extends State<FormPage> {
     }
 
     ThemeData theme = _buildFormTheme(context);
-    
+
     Widget bodyContent;
-    
+
     if (showCountdown) {
       bodyContent = CountdownWidget(
         targetTime: form!.startTime!,
@@ -539,14 +546,15 @@ class _FormPageState extends State<FormPage> {
         },
       );
     } else {
-       // Main Form Content
-       bodyContent = SafeArea(
+      // Main Form Content
+      bodyContent = SafeArea(
         child: Stack(
           children: [
             Align(
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+                constraints:
+                    BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
                 child: Builder(
                   builder: (scrollContext) {
                     return SingleChildScrollView(
@@ -564,51 +572,53 @@ class _FormPageState extends State<FormPage> {
                                 child: Text(
                                   FormStrings.previewMode,
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: Colors.black),
                                 ),
                               ),
-
                             if (formHolder == null)
-                               const Center(child: CircularProgressIndicator())
+                              const Center(child: CircularProgressIndicator())
                             else
-                                FormBuilder(
-                                  key: _formKey,
-                                  child: Builder(
-                                    builder: (context) {
-                                      return AutofillGroup(
-                                        child: Column(
-                                          children: [
-                                            if (form!.header != null)
-                                              Column(
-                                                children: [
-                                                  HtmlView(
-                                                      html: form!.header!,
-                                                      isSelectable: true),
-                                                  const SizedBox(height: 16),
-                                                ],
-                                              ),
-                                            ...FormHelper.getAllFormFields(
-                                                context, _formKey, formHolder!),
-                                            const SizedBox(height: 32),
-                                            ButtonsHelper.primaryButton(
-                                              context: context,
-                                              onPressed: (_isLoading ||
-                                                  (formSession?.totalProducts ?? 0) == 0)
-                                                  ? null
+                              FormBuilder(
+                                key: _formKey,
+                                child: Builder(builder: (context) {
+                                  return AutofillGroup(
+                                    child: Column(
+                                      children: [
+                                        if (form!.header != null)
+                                          Column(
+                                            children: [
+                                              HtmlView(
+                                                  html: form!.header!,
+                                                  isSelectable: true),
+                                              const SizedBox(height: 16),
+                                            ],
+                                          ),
+                                        ...FormHelper.getAllFormFields(
+                                            context, _formKey, formHolder!),
+                                        const SizedBox(height: 32),
+                                        ButtonsHelper.primaryButton(
+                                          context: context,
+                                          onPressed: (_isLoading ||
+                                                  (formSession?.totalProducts ??
+                                                          0) ==
+                                                      0)
+                                              ? null
                                               : () => _showOrderPreview(
                                                   scrollContext),
-                                              label: FormStrings.buttonContinue,
-                                              isLoading: _isLoading,
-                                              height: 50.0,
-                                              width: 250.0,
-                                            ),
-                                            const SizedBox(height: 32),
-                                          ],
+                                          label: FormStrings.buttonContinue,
+                                          isLoading: _isLoading,
+                                          height: 50.0,
+                                          width: 250.0,
                                         ),
-                                      );
-                                    }
-                                  ),
-                                ),
+                                        const SizedBox(height: 32),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                              ),
                           ],
                         ),
                       ),
@@ -690,7 +700,7 @@ class _FormPageState extends State<FormPage> {
   Map<String, dynamic> generateOptionsForItemType(
       List<ProductTypeModel> allItems, String itemType) {
     var itemTypeModel =
-    allItems.firstWhereOrNull((item) => item.type == itemType);
+        allItems.firstWhereOrNull((item) => item.type == itemType);
 
     if (itemTypeModel == null || itemTypeModel.products == null) {
       return {};
@@ -702,7 +712,8 @@ class _FormPageState extends State<FormPage> {
       options.add({
         FormOptionModel.metaOptionsName: item.title.toString(),
         FormOptionModel.metaOptionsId: item.id.toString(),
-        FormOptionModel.metaOptionsPrice: item.price ?? 0.0, // Include price in the options
+        FormOptionModel.metaOptionsPrice:
+            item.price ?? 0.0, // Include price in the options
       });
     }
 
@@ -739,8 +750,7 @@ class _FormPageState extends State<FormPage> {
         return;
       }
 
-      await RightsService.updateAppData(
-          formLink: widget.formLink);
+      await RightsService.updateAppData(formLink: widget.formLink);
 
       formHolder = FormHolder.fromFormFieldModel(form!);
 

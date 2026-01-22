@@ -19,30 +19,29 @@ class MyWidgetFactory extends WidgetFactory with CachedNetworkImageFactory {}
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
   HtmlWithAppLinksWidget(
-      this.context,
-      super.html, {
-        super.key,
-        required RenderMode renderMode,
-        super.textStyle,
-        super.customWidgetBuilder,
-        super.customStylesBuilder,
-      }) : super(factoryBuilder: () => MyWidgetFactory());
+    this.context,
+    super.html, {
+    super.key,
+    required RenderMode renderMode,
+    super.textStyle,
+    super.customWidgetBuilder,
+    super.customStylesBuilder,
+  }) : super(factoryBuilder: () => MyWidgetFactory());
 
   final BuildContext context;
 
   @override
   FutureOr<bool> Function(String)? get onTapUrl => (url) {
-    if (AppConfig.compatibleUrls()
-        .where((u) => u.isNotEmpty)
-        .any((u) => url.startsWith(u)) ||
-        url.contains("localhost")) {
-
-      RouterService.navigate(context, url);
-      return true;
-    }
-    super.onTapUrl?.call(url);
-    return false;
-  };
+        if (AppConfig.compatibleUrls()
+                .where((u) => u.isNotEmpty)
+                .any((u) => url.startsWith(u)) ||
+            url.contains("localhost")) {
+          RouterService.navigate(context, url);
+          return true;
+        }
+        super.onTapUrl?.call(url);
+        return false;
+      };
 
   @override
   void Function(ImageMetadata)? get onTapImage => (_) {};
@@ -75,8 +74,7 @@ class HtmlView extends StatefulWidget {
 class _HtmlViewState extends State<HtmlView> {
   @override
   Widget build(BuildContext context) {
-    final textColor =
-        widget.color ?? ThemeConfig.defaultHtmlViewColor(context);
+    final textColor = widget.color ?? ThemeConfig.defaultHtmlViewColor(context);
     final linkColor = colorToRgbString(ThemeConfig.htmlLinkColor(context));
 
     Widget content = HtmlWithAppLinksWidget(
@@ -85,7 +83,8 @@ class _HtmlViewState extends State<HtmlView> {
       renderMode: RenderMode.listView,
       textStyle: TextStyle(
         fontSize: widget.fontSize,
-        fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily ?? ThemeConfig.fontFamily,
+        fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily ??
+            ThemeConfig.fontFamily,
         color: textColor,
         inherit: false,
       ),
@@ -119,9 +118,9 @@ class _HtmlViewState extends State<HtmlView> {
           final img = src.startsWith('data:image/')
               ? Image.memory(base64Decode(src.split(',').last))
               : CachedNetworkImage(
-            imageUrl: src,
-            cacheManager: DefaultCacheManager(),
-          );
+                  imageUrl: src,
+                  cacheManager: DefaultCacheManager(),
+                );
           return Align(
             alignment: Alignment.center,
             heightFactor: 1,
@@ -189,10 +188,10 @@ class _HtmlViewState extends State<HtmlView> {
 
     return widget.isSelectable
         ? SelectionArea(
-      focusNode: FocusNode(),
-      selectionControls: materialTextSelectionControls,
-      child: content,
-    )
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: content,
+          )
         : content;
   }
 

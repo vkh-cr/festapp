@@ -101,14 +101,17 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
     });
 
     pastItems.sort((a, b) {
-      final dateA = (a is OccasionModel) ? a.endTime! : widget.itemDateBuilder!(a)!;
-      final dateB = (b is OccasionModel) ? b.endTime! : widget.itemDateBuilder!(b)!;
+      final dateA =
+          (a is OccasionModel) ? a.endTime! : widget.itemDateBuilder!(a)!;
+      final dateB =
+          (b is OccasionModel) ? b.endTime! : widget.itemDateBuilder!(b)!;
       return dateB.compareTo(dateA); // descending
     });
 
     List<dynamic> newDisplayList = [];
     if (presentItems.isNotEmpty) {
-      if (widget.happeningNowText != null) newDisplayList.add(widget.happeningNowText!);
+      if (widget.happeningNowText != null)
+        newDisplayList.add(widget.happeningNowText!);
       newDisplayList.addAll(presentItems);
     }
     if (upcomingItems.isNotEmpty) {
@@ -136,8 +139,8 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
     } else {
       final normalizedQuery = Utilities.removeDiacritics(query.toLowerCase());
       filtered = widget.items.where((item) {
-        final normalizedTitle =
-        Utilities.removeDiacritics(widget.itemTitleBuilder(item).toLowerCase());
+        final normalizedTitle = Utilities.removeDiacritics(
+            widget.itemTitleBuilder(item).toLowerCase());
         return normalizedTitle.contains(normalizedQuery);
       }).toList();
     }
@@ -153,43 +156,44 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
     final hintColor = isDarkMode ? Colors.grey[500] : Colors.grey[500];
     final iconColor = isDarkMode ? Colors.grey[400] : Colors.grey[600];
     final titleTextStyle = baseTextStyle?.copyWith(color: textColor);
-    final hintTextStyle = baseTextStyle?.copyWith(color: hintColor, fontWeight: FontWeight.normal);
+    final hintTextStyle = baseTextStyle?.copyWith(
+        color: hintColor, fontWeight: FontWeight.normal);
     const iconSize = 20.0;
 
     return SizedBox(
       width: 300,
       child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (widget.hintText.isNotEmpty) ...[
-              ListTile(
-                dense: true,
-                contentPadding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                title: Row(
-                  children: [
-                    Icon(Icons.search, color: iconColor, size: iconSize),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        autofocus: !ResponsiveService.isMobile(context),
-                        style: titleTextStyle,
-                        decoration: InputDecoration(
-                          hintText: widget.hintText,
-                          hintStyle: hintTextStyle,
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.hintText.isNotEmpty) ...[
+            ListTile(
+              dense: true,
+              contentPadding: const EdgeInsets.only(left: 16.0, right: 16.0),
+              title: Row(
+                children: [
+                  Icon(Icons.search, color: iconColor, size: iconSize),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      autofocus: !ResponsiveService.isMobile(context),
+                      style: titleTextStyle,
+                      decoration: InputDecoration(
+                        hintText: widget.hintText,
+                        hintStyle: hintTextStyle,
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const Divider(height: 1),
-            ],
-            Flexible(
-              child: ListView.builder(
+            ),
+            const Divider(height: 1),
+          ],
+          Flexible(
+            child: ListView.builder(
               shrinkWrap: true,
               padding: const EdgeInsets.symmetric(vertical: 4),
               itemCount: _displayItems.length,
@@ -202,8 +206,8 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
                     child: Text(
                       entry,
                       style: (ResponsiveService.isMobile(context)
-                          ? theme.textTheme.labelMedium
-                          : theme.textTheme.labelLarge)
+                              ? theme.textTheme.labelMedium
+                              : theme.textTheme.labelLarge)
                           ?.copyWith(
                         color: theme.primaryColor,
                         fontWeight: FontWeight.bold,
@@ -213,7 +217,8 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
                 }
 
                 final item = entry as T;
-                final isSelected = widget.itemIdBuilder(item) == widget.itemIdBuilder(widget.selectedItem);
+                final isSelected = widget.itemIdBuilder(item) ==
+                    widget.itemIdBuilder(widget.selectedItem);
 
                 Widget? subtitle;
                 if (widget.itemDateBuilder != null) {
@@ -221,17 +226,23 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
                   if (date != null) {
                     subtitle = Text(
                       DateFormat('d. M. yyyy').format(date),
-                      style: theme.textTheme.bodySmall?.copyWith(color: hintColor),
+                      style:
+                          theme.textTheme.bodySmall?.copyWith(color: hintColor),
                     );
                   }
                 }
 
                 return ListTile(
                   dense: true,
-                  contentPadding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                  title: Text(widget.itemTitleBuilder(item), style: titleTextStyle),
+                  contentPadding:
+                      const EdgeInsets.only(left: 16.0, right: 16.0),
+                  title: Text(widget.itemTitleBuilder(item),
+                      style: titleTextStyle),
                   subtitle: subtitle,
-                  trailing: isSelected ? Icon(Icons.check, color: theme.primaryColor, size: iconSize) : null,
+                  trailing: isSelected
+                      ? Icon(Icons.check,
+                          color: theme.primaryColor, size: iconSize)
+                      : null,
                   onTap: () {
                     widget.onItemSelected(item);
                     widget.onDismiss();
@@ -239,31 +250,32 @@ class _ProjectPickerState<T> extends State<ProjectPicker<T>> {
                 );
               },
             ),
-            ),
-            if(widget.onCreateNew != null)
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Divider(height: 1),
-                  ListTile(
-                    dense: true,
-                    contentPadding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                    onTap: () {
-                      widget.onCreateNew!();
-                      widget.onDismiss();
-                    },
-                    title: Row(
-                      children: [
-                        Icon(Icons.add, color: iconColor, size: iconSize),
-                        const SizedBox(width: 12),
-                        Text(widget.createNewText, style: titleTextStyle),
-                      ],
-                    ),
+          ),
+          if (widget.onCreateNew != null)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Divider(height: 1),
+                ListTile(
+                  dense: true,
+                  contentPadding:
+                      const EdgeInsets.only(left: 16.0, right: 16.0),
+                  onTap: () {
+                    widget.onCreateNew!();
+                    widget.onDismiss();
+                  },
+                  title: Row(
+                    children: [
+                      Icon(Icons.add, color: iconColor, size: iconSize),
+                      const SizedBox(width: 12),
+                      Text(widget.createNewText, style: titleTextStyle),
+                    ],
                   ),
-                ],
-              ),
-          ],
-        ),
+                ),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }

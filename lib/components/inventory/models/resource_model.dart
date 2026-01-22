@@ -80,7 +80,7 @@ class ResourceModel implements ITrinaRowModel {
       ResourceEditorView.RESOURCE_TITLE: TrinaCell(value: title),
       ResourceEditorView.RESOURCE_CAPACITY: TrinaCell(value: capacity),
       ResourceEditorView.INVENTORY_POOL_ID_FIELD:
-      TrinaCell(value: inventoryPoolId),
+          TrinaCell(value: inventoryPoolId),
     });
   }
 

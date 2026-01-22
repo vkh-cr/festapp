@@ -22,7 +22,8 @@ class ResponsiveSearchDialog<T> extends StatefulWidget {
   });
 
   @override
-  State<ResponsiveSearchDialog<T>> createState() => _ResponsiveSearchDialogState<T>();
+  State<ResponsiveSearchDialog<T>> createState() =>
+      _ResponsiveSearchDialogState<T>();
 }
 
 class _ResponsiveSearchDialogState<T> extends State<ResponsiveSearchDialog<T>> {
@@ -52,7 +53,8 @@ class _ResponsiveSearchDialogState<T> extends State<ResponsiveSearchDialog<T>> {
         _filteredItems = widget.items;
       } else {
         _isSearching = true;
-        _filteredItems = widget.items.where((item) => widget.filter(item, query)).toList();
+        _filteredItems =
+            widget.items.where((item) => widget.filter(item, query)).toList();
       }
     });
   }
@@ -64,7 +66,9 @@ class _ResponsiveSearchDialogState<T> extends State<ResponsiveSearchDialog<T>> {
         // Decide if we want a full screen scaffolding or a dialog shape
         // For mobile (small screens), we prefer full screen.
         // For desktop (large screens), we prefer a dialog.
-        final isMobile = constraints.maxWidth < StylesConfig.appMaxWidth; // Using appMaxWidth as a breakpoint or define a smaller one like 600
+        final isMobile = constraints.maxWidth <
+            StylesConfig
+                .appMaxWidth; // Using appMaxWidth as a breakpoint or define a smaller one like 600
 
         if (isMobile) {
           return Scaffold(
@@ -97,8 +101,9 @@ class _ResponsiveSearchDialogState<T> extends State<ResponsiveSearchDialog<T>> {
           );
         } else {
           return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
             // Limit the size of the dialog
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
@@ -116,7 +121,8 @@ class _ResponsiveSearchDialogState<T> extends State<ResponsiveSearchDialog<T>> {
                             controller: _controller,
                             autofocus: true,
                             decoration: InputDecoration(
-                              hintText: widget.searchLabel ?? CommonStrings.search,
+                              hintText:
+                                  widget.searchLabel ?? CommonStrings.search,
                               border: InputBorder.none,
                             ),
                           ),
@@ -157,15 +163,15 @@ class _ResponsiveSearchDialogState<T> extends State<ResponsiveSearchDialog<T>> {
 
   Widget _buildList() {
     if (!_isSearching && widget.suggestion != null) {
-      // If we are not actively searching (or query is empty) and have a suggestion widget? 
+      // If we are not actively searching (or query is empty) and have a suggestion widget?
       // The original search_page behavior shows 'suggestion' when query is empty.
       // But typically we want to show all items if provided, or the suggestion.
-      // Let's stick to showing all items if query is empty, unless we want the "start typing" valid behavior.
-      // Re-reading search_page logic: "showItemsOnEmpty" controls this. 
+      // Show all items if query is empty
+      // Re-reading search_page logic: "showItemsOnEmpty" controls this.
       // In DialogHelper, showItemsOnEmpty: true. So we show items.
       // If items list is empty initially?
-      if(_filteredItems.isEmpty && widget.failure != null) {
-         return widget.failure!;
+      if (_filteredItems.isEmpty && widget.failure != null) {
+        return widget.failure!;
       }
     }
 

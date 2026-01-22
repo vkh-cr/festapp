@@ -7,7 +7,6 @@ import 'package:fstapp/components/forms/widgets_view/form_field_builders.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:flutter/services.dart';
 import 'package:fstapp/components/forms/widgets_view/phone_input_formatter.dart';
 
 import '../form_strings.dart';
@@ -35,7 +34,8 @@ class TextFieldBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!FormHelper.isCardDesign(formHolder, fieldHolder) && HtmlHelper.isHtmlEmptyOrNull(fieldHolder.description)) {
+    if (!FormHelper.isCardDesign(formHolder, fieldHolder) &&
+        HtmlHelper.isHtmlEmptyOrNull(fieldHolder.description)) {
       return _buildStandardTextField(context);
     } else {
       return _buildCardDesignTextField(context);
@@ -46,7 +46,8 @@ class TextFieldBuilder extends StatelessWidget {
     List<String? Function(String?)> validators = [];
 
     if (fieldHolder.isRequired) {
-      validators.add(FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty));
+      validators.add(FormBuilderValidators.required(
+          errorText: CommonStrings.fieldCannotBeEmpty));
     }
 
     if (isEmail) {
@@ -57,7 +58,9 @@ class TextFieldBuilder extends StatelessWidget {
 
     if (isPhone) {
       validators.add(FormBuilderValidators.phoneNumber(
-        regex: RegExp(r'^\+?[0-9]{' + PhoneInputFormatter.kMaxPhoneNumberLength.toString() + r'}$'),
+        regex: RegExp(r'^\+?[0-9]{' +
+            PhoneInputFormatter.kMaxPhoneNumberLength.toString() +
+            r'}$'),
         checkNullOrEmpty: false,
         errorText: FormStrings.phoneFormatValidation,
       ));
@@ -88,7 +91,8 @@ class TextFieldBuilder extends StatelessWidget {
     List<String? Function(String?)> validators = [];
 
     if (fieldHolder.isRequired) {
-      validators.add(FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty));
+      validators.add(FormBuilderValidators.required(
+          errorText: CommonStrings.fieldCannotBeEmpty));
     }
 
     if (isEmail) {
@@ -99,7 +103,9 @@ class TextFieldBuilder extends StatelessWidget {
 
     if (isPhone) {
       validators.add(FormBuilderValidators.phoneNumber(
-        regex: RegExp(r'^\+?[0-9]{' + PhoneInputFormatter.kMaxPhoneNumberLength.toString() + r'}$'),
+        regex: RegExp(r'^\+?[0-9]{' +
+            PhoneInputFormatter.kMaxPhoneNumberLength.toString() +
+            r'}$'),
         checkNullOrEmpty: false,
         errorText: FormStrings.phoneFormatValidation,
       ));
@@ -203,7 +209,7 @@ class _StandardTextFieldState extends State<_StandardTextField> {
           maxLines: null,
           autofillHints: widget.autofillHints,
           inputFormatters: widget.isPhone ? [PhoneInputFormatter()] : null,
-            decoration: InputDecoration(
+          decoration: InputDecoration(
             filled: true,
             fillColor: Colors.transparent,
             hintText: widget.isPhone ? FormStrings.phoneFormatHint : null,
@@ -319,7 +325,6 @@ class _CardTextFieldState extends State<_CardTextField> {
     return TextInputType.text;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return FormHelper.buildCardWrapperDesign(
@@ -337,18 +342,23 @@ class _CardTextFieldState extends State<_CardTextField> {
             keyboardType: _getKeyboardType(),
             inputFormatters: widget.isPhone ? [PhoneInputFormatter()] : null,
             decoration: InputDecoration(
-              hintText: widget.isPhone ? FormStrings.phoneFormatHint : FormStrings.typeHere,
+              hintText: widget.isPhone
+                  ? FormStrings.phoneFormatHint
+                  : FormStrings.typeHere,
               isDense: true,
               contentPadding: const EdgeInsets.fromLTRB(2, 12, 2, 12),
               border: const UnderlineInputBorder(),
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+                borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor, width: 2.0),
               ),
               errorBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: ThemeConfig.redColor(context), width: 1.0),
+                borderSide: BorderSide(
+                    color: ThemeConfig.redColor(context), width: 1.0),
               ),
               focusedErrorBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: ThemeConfig.redColor(context), width: 2.0),
+                borderSide: BorderSide(
+                    color: ThemeConfig.redColor(context), width: 2.0),
               ),
             ),
             onChanged: (value) {
@@ -368,12 +378,13 @@ class _CardTextFieldState extends State<_CardTextField> {
                       onPrefixSelected: (prefix) {
                         // Keep focus to prevent onUnfocus validation
                         _focusNode.requestFocus();
-                        
+
                         String current = _controller.text;
                         String newText = _applyPrefix(current, prefix);
                         _controller.value = TextEditingValue(
                           text: newText,
-                          selection: TextSelection.collapsed(offset: newText.length),
+                          selection:
+                              TextSelection.collapsed(offset: newText.length),
                         );
                         widget.field.didChange(newText);
                       },
@@ -408,20 +419,16 @@ String _applyPrefix(String current, String prefix) {
   } else if (current.startsWith('+421')) {
     result = prefix + current.substring(4);
   } else if (current.startsWith('+')) {
-     // If starts with +, replace until space or just replace first 4 chars if they are +ddd?
-     // Safest is: if empty, set prefix. If starts with +, replace.
-     // But user might have typed +1.
-     // Let's stick to replacing known prefixes or just prepending if empty.
-     // If user typed +123, and clicks +420, maybe they want to replace +123?
-     // Let's go with: replace known prefixes, otherwise prepend/replace start.
-     result = prefix + current.substring(current.indexOf(' ') > 0 ? current.indexOf(' ') : current.length); 
+    result = prefix +
+        current.substring(
+            current.indexOf(' ') > 0 ? current.indexOf(' ') : current.length);
   } else {
     result = prefix + current;
   }
 
   // Clean and enforce max length using shared logic
   String cleaned = PhoneInputFormatter.cleanPhoneNumber(result);
-  
+
   // Re-apply formatting to the result
   return PhoneInputFormatter.formatPhoneNumber(cleaned);
 }
@@ -454,7 +461,8 @@ class _PhonePrefixHelpers extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
+          border: Border.all(
+              color: Theme.of(context).primaryColor.withOpacity(0.3)),
         ),
         child: Text(
           label,

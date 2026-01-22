@@ -69,10 +69,7 @@ describe('ID Document Field - Full Lifecycle', () => {
         // --- A. VALIDATION (Empty) ---
         // Native requires are set by Builder, so browser validity would catch it.
         // FormValidator checks native validity OR data-required.
-        
-        // Mock native validity if JSDOM doesn't support it fully? 
-        // JSDOM usually handles 'required' attribute presence but maybe not full checkValidity() logic on form submission.
-        // We use FormValidator.validateAndShowErrors logic.
+        // JSDOM handles 'required' attribute presence but full checkValidity() logic might vary.
         
         const isValidEmpty = FormValidator.validateAndShowErrors(formElement, formModel, session);
         assert.strictEqual(isValidEmpty, false, 'Should be invalid when empty (Required)');
@@ -102,11 +99,7 @@ describe('ID Document Field - Full Lifecycle', () => {
         assert.deepStrictEqual(state1, { id_document_number: 'AB123456' }, 'State should have ID Number');
         
         // Validation Should still fail? 
-        // Currently IdDocumentFieldBuilder only sets required on ID INPUT. 
-        // If Expiry is just "shown" but not strictly required by builder logic?
-        // Let's check builder: "if (field.isRequired) idInput.required = true;"
-        // Expiry input does NOT get required attribute in Builder even if field is required! 
-        // (See viewed code of IdDocumentFieldBuilder.js).
+        // Validation should fail. Currently IdDocumentFieldBuilder only sets required on ID INPUT. 
         // So checking Validator now might pass if ID is filled.
         
         const isValidPartial = FormValidator.validateAndShowErrors(formElement, formModel, session);
@@ -129,8 +122,8 @@ describe('ID Document Field - Full Lifecycle', () => {
         const previewText = FieldPreviewFactory.format(fieldDef, finalState, {});
         // LocalizationService defaults to EN/CS, formatting depends on it. 
         // Expectation: "AB123456 (..."
-        assert.ok(previewText.includes('AB123456'), `Preview must contain ID, got: ${previewText}`);
-        assert.ok(previewText.includes('2030'), `Preview must contain Year, got: ${previewText}`);
+        assert.ok(previewText.value.includes('AB123456'), `Preview must contain ID, got: ${previewText.value}`);
+        assert.ok(previewText.value.includes('2030'), `Preview must contain Year, got: ${previewText.value}`);
 
         // --- E. PAYLOAD CHECK ---
         const payloadFields = session.payload.fields;

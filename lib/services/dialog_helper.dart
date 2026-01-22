@@ -23,8 +23,7 @@ class ImportDialogChoice {
   ImportDialogChoice({this.fromTickets = false, this.fromFile});
 }
 
-class DialogHelper{
-
+class DialogHelper {
   static Widget createDialogAction(String text, void Function() onPressed) {
     return TextButton(
       onPressed: onPressed,
@@ -33,14 +32,13 @@ class DialogHelper{
   }
 
   static Future<ImportDialogChoice?> showImportDialog(
-      BuildContext context,
-      String titleMessage,
-      {
-        required bool showCsvImport,
-        required bool showTicketImport,
-        String confirmButtonMessage = "Ok",
-        String cancelButtonMessage = "Storno",
-      }) async {
+    BuildContext context,
+    String titleMessage, {
+    required bool showCsvImport,
+    required bool showTicketImport,
+    String confirmButtonMessage = "Ok",
+    String cancelButtonMessage = "Storno",
+  }) async {
     XFile? filePath;
     ImportDialogChoice? result;
 
@@ -51,6 +49,7 @@ class DialogHelper{
         return StatefulBuilder(
           builder: (context, setState) {
             final dropFileWidget = DropFile(
+              allowedExtensions: const ['csv'],
               onFilePathChanged: (file) {
                 setState(() {
                   filePath = file;
@@ -97,9 +96,9 @@ class DialogHelper{
                   ElevatedButton(
                     onPressed: filePath != null
                         ? () {
-                      result = ImportDialogChoice(fromFile: filePath);
-                      Navigator.pop(context);
-                    }
+                            result = ImportDialogChoice(fromFile: filePath);
+                            Navigator.pop(context);
+                          }
                         : null, // Disable if no file is selected
                     child: Text(FeaturesStrings.labelImportFromCsv),
                   ),
@@ -112,7 +111,11 @@ class DialogHelper{
     return result;
   }
 
-  static Future<void> chooseUser(BuildContext context, void Function(UserInfoModel) onPressedAction, List<UserInfoModel> allUsers, String setText) async {
+  static Future<void> chooseUser(
+      BuildContext context,
+      void Function(UserInfoModel) onPressedAction,
+      List<UserInfoModel> allUsers,
+      String setText) async {
     showDialog(
       context: context,
       builder: (context) => ResponsiveSearchDialog<UserInfoModel>(
@@ -120,53 +123,59 @@ class DialogHelper{
         searchLabel: "Search participants".tr(),
         filter: (person, query) {
           final q = query.toLowerCase().withoutDiacriticalMarks;
-          return (person.name?.toLowerCase().withoutDiacriticalMarks.contains(q) ?? false) ||
-              (person.surname?.toLowerCase().withoutDiacriticalMarks.contains(q) ?? false) ||
+          return (person.name
+                      ?.toLowerCase()
+                      .withoutDiacriticalMarks
+                      .contains(q) ??
+                  false) ||
+              (person.surname
+                      ?.toLowerCase()
+                      .withoutDiacriticalMarks
+                      .contains(q) ??
+                  false) ||
               (person.email?.toLowerCase().contains(q) ?? false);
         },
         itemBuilder: (person) => ListTile(
           title: Text(person.name!),
-          subtitle: Text(person.surname??""),
+          subtitle: Text(person.surname ?? ""),
           trailing: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               ElevatedButton(
                   onPressed: () {
-                     // We need to close the dialog before the action?
-                     // Or action closes it? 
-                     // The original impl called onPressedAction(person) which might have closed it or not.
-                     // The SearchPage pushes a route.
-                     // showDialog pushes a route.
-                     // We should probably pop before action?
-                     // In original 'EventPage', calling 'onPressedAction' invokes 'signIn' then 'loadData'.
-                     // It does NOT pop the search page explicitly in the callback.
-                     // Wait, SearchPage usually returns the selected item if used with showSearch.
-                     // But here 'chooseUser' takes an 'onPressedAction'.
-                     // Inside the builder of SearchPage:
-                     // onPressed: () { onPressedAction(person); }
-                     // It didn't pop automatically unless SearchPage does it? 
-                     // SearchPage [https://pub.dev/packages/search_page] behavior:
-                     // It doesn't pop automatically on generic builder click.
-                     // But usually one uses `close(context, result)`. 
-                     // Here the user implemented a Button in the builder.
-                     // IMPORTANT: If I am in a Dialog, I should probably pop.
-                     Navigator.of(context).pop();
-                     onPressedAction(person);
+                    // We need to close the dialog before the action?
+                    // Or action closes it?
+                    // The original impl called onPressedAction(person) which might have closed it or not.
+                    // The SearchPage pushes a route.
+                    // showDialog pushes a route.
+                    // We should probably pop before action?
+                    // In original 'EventPage', calling 'onPressedAction' invokes 'signIn' then 'loadData'.
+                    // It does NOT pop the search page explicitly in the callback.
+                    // Wait, SearchPage usually returns the selected item if used with showSearch.
+                    // But here 'chooseUser' takes an 'onPressedAction'.
+                    // Inside the builder of SearchPage:
+                    // onPressed: () { onPressedAction(person); }
+                    // It didn't pop automatically unless SearchPage does it?
+                    // SearchPage [https://pub.dev/packages/search_page] behavior:
+                    // It doesn't pop automatically on generic builder click.
+                    // But usually one uses `close(context, result)`.
+                    // Here the user implemented a Button in the builder.
+                    // IMPORTANT: If I am in a Dialog, I should probably pop.
+                    Navigator.of(context).pop();
+                    onPressedAction(person);
                   },
                   child: Text(setText)),
-              Text(person.email??""),
+              Text(person.email ?? ""),
             ],
           ),
-        ), 
+        ),
       ),
     );
   }
 
   static Future<void> showInformationDialog(
-      BuildContext context,
-      String titleMessage,
-      String textMessage,
-      [String buttonMessage = "Ok"]) async{
+      BuildContext context, String titleMessage, String textMessage,
+      [String buttonMessage = "Ok"]) async {
     await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -186,21 +195,19 @@ class DialogHelper{
   }
 
   static Future<bool> showScanTicketCode(
-      BuildContext context,
-      String titleMessage,
-      String textMessage, {
-        String confirmButtonMessage = "Ok",
-        String cancelButtonMessage = "Storno",
-      }) async {
+    BuildContext context,
+    String titleMessage,
+    String textMessage, {
+    String confirmButtonMessage = "Ok",
+    String cancelButtonMessage = "Storno",
+  }) async {
     bool result = false;
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(titleMessage),
-          content: Container(
-
-          ),
+          content: Container(),
           actions: [
             ElevatedButton(
               child: Text(confirmButtonMessage),
@@ -217,12 +224,12 @@ class DialogHelper{
   }
 
   static Future<bool> showConfirmationDialog(
-      BuildContext context,
-      String titleMessage,
-      String textMessage, {
-        String confirmButtonMessage = "Ok",
-        String cancelButtonMessage = "Storno",
-      }) async {
+    BuildContext context,
+    String titleMessage,
+    String textMessage, {
+    String confirmButtonMessage = "Ok",
+    String cancelButtonMessage = "Storno",
+  }) async {
     bool result = false;
     await showDialog(
       context: context,
@@ -252,14 +259,13 @@ class DialogHelper{
     return result;
   }
 
-
   static Future<bool> showConfirmationDialogRichText(
-      BuildContext context,
-      String titleMessage,
-      Text textMessage, {
-        String confirmButtonMessage = "Ok",
-        String cancelButtonMessage = "Storno",
-      }) async {
+    BuildContext context,
+    String titleMessage,
+    Text textMessage, {
+    String confirmButtonMessage = "Ok",
+    String cancelButtonMessage = "Storno",
+  }) async {
     bool result = false;
     await showDialog(
       context: context,
@@ -327,9 +333,9 @@ class DialogHelper{
   }
 
   static Future<UserGroupInfoModel?> showAddToGroupDialogAsync(
-      BuildContext context,
-      List<UserGroupInfoModel> userGroups,
-      ) async {
+    BuildContext context,
+    List<UserGroupInfoModel> userGroups,
+  ) async {
     UserGroupInfoModel? selectedGroup;
     await SelectDialog.showModal<UserGroupInfoModel>(
       context,
@@ -343,13 +349,16 @@ class DialogHelper{
           decoration: !isSelected
               ? null
               : BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            color: Colors.white,
-            border: Border.all(
-              color: Theme.of(context).primaryColor,
-            ),
+                  borderRadius: BorderRadius.circular(5),
+                  color: Colors.white,
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+          child: TextButton(
+            onPressed: null,
+            child: Text(item.title),
           ),
-          child: TextButton(onPressed: null, child: Text(item.title),),
         );
       },
       onChange: (selected) {
@@ -360,8 +369,8 @@ class DialogHelper{
   }
 
   static Future<LanguageModel?> chooseLanguage(
-      BuildContext context,
-      ) async {
+    BuildContext context,
+  ) async {
     var locales = AppConfig.availableLanguages();
     LanguageModel? selectedLocale;
     await SelectDialog.showModal<LanguageModel>(
@@ -370,49 +379,51 @@ class DialogHelper{
       items: locales,
       showSearchBox: false,
       selectedValue: selectedLocale,
-      itemBuilder:
-          (BuildContext context, LanguageModel item, bool isSelected) {
+      itemBuilder: (BuildContext context, LanguageModel item, bool isSelected) {
         return Container(
           decoration: !isSelected
               ? null
               : BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            color: Colors.white,
-            border: Border.all(
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-              child: Text(
-                item.name,
-                style: TextStyle(
-                  color: ThemeConfig.blackColor(context),
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  borderRadius: BorderRadius.circular(5),
+                  color: Colors.white,
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+            child: Text(
+              item.name,
+              style: TextStyle(
+                color: ThemeConfig.blackColor(context),
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
+          ),
         );
       },
       onChange: (selected) {
         selectedLocale = selected;
       },
     );
-    if(selectedLocale!=null)
-    {
+    if (selectedLocale != null) {
       context.setLocale(selectedLocale!.locale);
-      ToastHelper.Show(context, "Language was set to {language}.".tr(namedArgs: {"language":selectedLocale!.name}));
+      ToastHelper.Show(
+          context,
+          "Language was set to {language}."
+              .tr(namedArgs: {"language": selectedLocale!.name}));
     }
     return selectedLocale;
   }
 
   static Future<String?> showPasswordInputDialog(
-      BuildContext context,
-      String titleMessage,
-      String hint, [
-        String confirmButtonMessage = "Ok",
-        String cancelButtonMessage = "Storno",
-      ]) async {
+    BuildContext context,
+    String titleMessage,
+    String hint, [
+    String confirmButtonMessage = "Ok",
+    String cancelButtonMessage = "Storno",
+  ]) async {
     final TextEditingController messageController = TextEditingController();
     String? result;
 
@@ -453,11 +464,11 @@ class DialogHelper{
   }
 
   static Future<XFile?> dropFilesHere(
-      BuildContext context,
-      String titleMessage,
-      String confirmButtonMessage,
-      String cancelButtonMessage,
-      ) async {
+    BuildContext context,
+    String titleMessage,
+    String confirmButtonMessage,
+    String cancelButtonMessage,
+  ) async {
     XFile? filePath;
     final dropFileWidget = DropFile(
       onFilePathChanged: (file) => filePath = file,
@@ -497,7 +508,8 @@ class DialogHelper{
     return filePath;
   }
 
-  static Future<bool> showNotificationPermissionDialog(BuildContext context) async {
+  static Future<bool> showNotificationPermissionDialog(
+      BuildContext context) async {
     bool result = false;
     await showDialog(
       context: context,
@@ -508,7 +520,9 @@ class DialogHelper{
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                const Text("Notifications will inform you about schedule changes and other selected news.").tr(),
+                const Text(
+                        "Notifications will inform you about schedule changes and other selected news.")
+                    .tr(),
               ],
             ),
           ),
@@ -535,18 +549,19 @@ class DialogHelper{
   }
 
   static Future<bool> showProgressDialogAsync(
-      BuildContext context,
-      String title,
-      int total, {
-        List<Future<void> Function()>? futures,
-        Duration? delay,
-        bool isBasic = false, // New isBasic option
-      }) async {
+    BuildContext context,
+    String title,
+    int total, {
+    List<Future<void> Function()>? futures,
+    Duration? delay,
+    bool isBasic = false, // New isBasic option
+  }) async {
     final completer = Completer<bool>();
     final progressNotifier = ValueNotifier<int>(0);
     final isCancelled = ValueNotifier<bool>(false); // Track cancellation state
     final statusMessage = ValueNotifier<String>(""); // Track status message
-    final isStornoActive = ValueNotifier<bool>(!isBasic); // Storno button state depends on isBasic
+    final isStornoActive =
+        ValueNotifier<bool>(!isBasic); // Storno button state depends on isBasic
     final isOkActive = ValueNotifier<bool>(false); // Ok button state
     final hasError = ValueNotifier<bool>(false); // Track if any error occurred
 
@@ -565,7 +580,8 @@ class DialogHelper{
                 children: [
                   Text("${"Progress".tr()}: $progress/$total"),
                   SizedBox(height: 20),
-                  LinearProgressIndicator(value: total > 0 ? progress / total : 0),
+                  LinearProgressIndicator(
+                      value: total > 0 ? progress / total : 0),
                   SizedBox(height: 20),
                   ValueListenableBuilder<String>(
                     valueListenable: statusMessage,
@@ -589,22 +605,24 @@ class DialogHelper{
                           children: [
                             SizedBox(height: 20),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center, // Center the row
+                              mainAxisAlignment:
+                                  MainAxisAlignment.center, // Center the row
                               children: [
                                 ValueListenableBuilder<bool>(
                                   valueListenable: isStornoActive,
                                   builder: (context, isActive, _) {
                                     return SizedBox(
-                                      width: 100, // Equal width for both buttons
+                                      width: 100,
                                       child: ElevatedButton(
                                         onPressed: isActive
                                             ? () {
-                                          isCancelled.value = true; // Mark as cancelled
-                                          isStornoActive.value = false; // Disable Storno
-                                          isOkActive.value = true; // Enable Ok button
-                                          statusMessage.value =
-                                              "The processing has been cancelled.".tr(); // Update status
-                                        }
+                                                isCancelled.value = true;
+                                                isStornoActive.value = false;
+                                                isOkActive.value = true;
+                                                statusMessage.value =
+                                                    "The processing has been cancelled."
+                                                        .tr();
+                                              }
                                             : null,
                                         child: Text(CommonStrings.storno),
                                       ),
@@ -616,13 +634,13 @@ class DialogHelper{
                                   valueListenable: isOkActive,
                                   builder: (context, isActive, _) {
                                     return SizedBox(
-                                      width: 100, // Equal width for both buttons
+                                      width: 100,
                                       child: ElevatedButton(
                                         onPressed: isActive
                                             ? () {
-                                          Navigator.of(context).pop();
-                                          completer.complete(false); // Cancel or error result
-                                        }
+                                                Navigator.of(context).pop();
+                                                completer.complete(false);
+                                              }
                                             : null,
                                         child: Text(CommonStrings.ok),
                                       ),
@@ -651,27 +669,27 @@ class DialogHelper{
       for (var future in futures) {
         if (isCancelled.value) break; // Stop execution if cancelled
         try {
-          statusMessage.value = "Processing...".tr(); // Update processing message
+          statusMessage.value =
+              "Processing...".tr(); // Update processing message
           await future.call(); // Wait for each future to finish
           progressNotifier.value++;
           if (delay != null) {
             await Future.delayed(delay);
           }
         } catch (e) {
-          // On error: Stop further execution and display the error
           statusMessage.value = "$e";
-          isCancelled.value = true; // Stop further processing
-          isStornoActive.value = false; // Disable Storno button
-          isOkActive.value = true; // Enable Ok button
-          hasError.value = true; // Mark that an error occurred
+          isCancelled.value = true;
+          isStornoActive.value = false;
+          isOkActive.value = true;
+          hasError.value = true;
           break;
         }
       }
     }
 
     // Mark actions as completed
-    isOkActive.value = true; // Enable Ok button after actions are completed
-    isStornoActive.value = false; // Disable Storno button whenever Ok is enabled
+    isOkActive.value = true;
+    isStornoActive.value = false;
     if (hasError.value) {
       statusMessage.value = "The processing has finished with error.".tr();
     } else if (isCancelled.value) {
@@ -679,14 +697,14 @@ class DialogHelper{
     } else {
       statusMessage.value = "The processing has completed successfully.".tr();
       if (isBasic && !hasError.value) {
-        Navigator.of(context).pop(); // Automatically close dialog for basic mode
-        completer.complete(true); // Success result
+        Navigator.of(context).pop();
+        completer.complete(true);
       }
     }
 
     // Await the completer if not already completed
     if (!completer.isCompleted) {
-      completer.complete(!hasError.value && !isCancelled.value); // Return result based on state
+      completer.complete(!hasError.value && !isCancelled.value);
     }
 
     return completer.future;
@@ -698,7 +716,8 @@ class DialogHelper{
     required String dialogTitle,
     required String labelText,
   }) async {
-    final TextEditingController controller = TextEditingController(text: initialValue);
+    final TextEditingController controller =
+        TextEditingController(text: initialValue);
 
     return await showDialog<String>(
       context: context,
@@ -716,7 +735,8 @@ class DialogHelper{
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context, controller.text.trim()); // Return the input
+                Navigator.pop(
+                    context, controller.text.trim()); // Return the input
               },
               child: Text(CommonStrings.save),
             ),

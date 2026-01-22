@@ -32,9 +32,9 @@ class TextTooltipWidget extends StatelessWidget {
         ),
       ),
       textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-         color: ThemeConfig.blackColor(context),
-         fontSize: fontSize,
-      ),
+            color: ThemeConfig.blackColor(context),
+            fontSize: fontSize,
+          ),
       verticalOffset: 20.0,
       child: child,
     );

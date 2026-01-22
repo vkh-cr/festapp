@@ -45,12 +45,14 @@ class _FeatureFormState extends State<FeatureForm> {
         ),
         trailing: Switch(
           value: isEnabled,
-          onChanged: widget.feature.canBeDisabled ? (value) {
-            setState(() {
-              isEnabled = value;
-              widget.feature.isEnabled = value;
-            });
-          } : null,
+          onChanged: widget.feature.canBeDisabled
+              ? (value) {
+                  setState(() {
+                    isEnabled = value;
+                    widget.feature.isEnabled = value;
+                  });
+                }
+              : null,
         ),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,

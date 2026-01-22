@@ -64,13 +64,12 @@ class TicketModel extends ITrinaRowModel {
   }
 
   Map<String, dynamic> toJson() => {
-    TbEshop.tickets.state: state,
-    TbEshop.tickets.note_hidden: noteHidden,
-  };
+        TbEshop.tickets.state: state,
+        TbEshop.tickets.note_hidden: noteHidden,
+      };
 
   @override
   TrinaRow toTrinaRow(BuildContext context) {
-
     Map<String, TrinaCell> cells = {
       EshopColumns.TICKET_ID: TrinaCell(value: id ?? 0),
       EshopColumns.TICKET_CREATED_AT: TrinaCell(
@@ -82,41 +81,41 @@ class TicketModel extends ITrinaRowModel {
               ? DateFormat('yyyy-MM-dd HH:mm').format(updatedAt!)
               : ""),
       EshopColumns.TICKET_SYMBOL: TrinaCell(value: ticketSymbol ?? ""),
-      EshopColumns.TICKET_STATE: TrinaCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
+      EshopColumns.TICKET_STATE: TrinaCell(
+          value: OrderModel.formatState(state ?? OrderModel.orderedState)),
       EshopColumns.TICKET_DOWNLOAD: TrinaCell(value: ""),
       EshopColumns.TICKET_NOTE: TrinaCell(value: note ?? ""),
       EshopColumns.TICKET_NOTE_HIDDEN: TrinaCell(value: noteHidden ?? ""),
       EshopColumns.ORDER_SYMBOL: TrinaCell(
-          value: relatedOrder != null
-              ? relatedOrder!.toBasicString()
-              : ""),
+          value: relatedOrder != null ? relatedOrder!.toBasicString() : ""),
       EshopColumns.ORDER_DATA: TrinaCell(
-          value: relatedOrder != null
-              ? relatedOrder!.toCustomerData()
-              : ""),
+          value: relatedOrder != null ? relatedOrder!.toCustomerData() : ""),
       EshopColumns.TICKET_PRODUCTS: TrinaCell(
           value: relatedProducts != null
-              ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
+              ? relatedProducts!.map((p) => p.toBasicString()).join(" | ")
               : ""),
       EshopColumns.TICKET_SPOT: TrinaCell(
-          value: relatedSpot != null
-              ? relatedSpot?.toSpotString()
+          value: relatedSpot != null ? relatedSpot?.toSpotString() : ""),
+      EshopColumns.TICKET_TOTAL_PRICE: TrinaCell(
+          value: totalPrice != null
+              ? Utilities.formatPrice(context, totalPrice!)
               : ""),
-      EshopColumns.TICKET_TOTAL_PRICE: TrinaCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
       EshopColumns.TICKET_PRODUCTS_EDIT: TrinaCell(value: ""),
       EshopColumns.TICKET_CONFIRM: TrinaCell(value: ""),
     };
 
-    final productCells = EshopColumns.generateProductTypeCells(relatedProducts ?? []);
+    final productCells =
+        EshopColumns.generateProductTypeCells(relatedProducts ?? []);
     cells.addAll(productCells);
     return TrinaRow(cells: cells);
   }
 
   static TicketModel fromPlutoJson(Map<String, dynamic> json) {
     return TicketModel(
-        id: json[EshopColumns.TICKET_ID] == -1 ? null : json[EshopColumns.TICKET_ID],
-        noteHidden: json[EshopColumns.TICKET_NOTE_HIDDEN]
-    );
+        id: json[EshopColumns.TICKET_ID] == -1
+            ? null
+            : json[EshopColumns.TICKET_ID],
+        noteHidden: json[EshopColumns.TICKET_NOTE_HIDDEN]);
   }
 
   @override

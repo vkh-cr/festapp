@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'inventory_strings.dart';
@@ -31,7 +30,9 @@ class _QuickSearchDialogState<T> extends State<QuickSearchDialog<T>> {
   @override
   void initState() {
     super.initState();
-    _filteredItems = widget.allItems..sort((a, b) => widget.getItemTitle(a).compareTo(widget.getItemTitle(b)));
+    _filteredItems = widget.allItems
+      ..sort(
+          (a, b) => widget.getItemTitle(a).compareTo(widget.getItemTitle(b)));
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -46,13 +47,16 @@ class _QuickSearchDialogState<T> extends State<QuickSearchDialog<T>> {
     final query = _searchController.text;
     if (query.isEmpty) {
       setState(() {
-        _filteredItems = List.from(widget.allItems)..sort((a, b) => widget.getItemTitle(a).compareTo(widget.getItemTitle(b)));
+        _filteredItems = List.from(widget.allItems)
+          ..sort((a, b) =>
+              widget.getItemTitle(a).compareTo(widget.getItemTitle(b)));
       });
     } else {
       final normalizedQuery = Utilities.removeDiacritics(query.toLowerCase());
       setState(() {
         _filteredItems = widget.allItems.where((item) {
-          final normalizedName = Utilities.removeDiacritics(widget.getItemTitle(item).toLowerCase());
+          final normalizedName = Utilities.removeDiacritics(
+              widget.getItemTitle(item).toLowerCase());
           return normalizedName.contains(normalizedQuery);
         }).toList();
       });
@@ -83,11 +87,12 @@ class _QuickSearchDialogState<T> extends State<QuickSearchDialog<T>> {
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () => _searchController.clear(),
-                  )
+                          icon: const Icon(Icons.clear),
+                          onPressed: () => _searchController.clear(),
+                        )
                       : null,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
                   isDense: true,
                 ),
               ),
@@ -107,7 +112,8 @@ class _QuickSearchDialogState<T> extends State<QuickSearchDialog<T>> {
                   ..._filteredItems.map((item) {
                     return ListTile(
                       title: Text(widget.getItemTitle(item)),
-                      selected: widget.currentItem != null && widget.compareItems(widget.currentItem!, item),
+                      selected: widget.currentItem != null &&
+                          widget.compareItems(widget.currentItem as T, item),
                       onTap: () => _selectAndPop(item),
                     );
                   }),

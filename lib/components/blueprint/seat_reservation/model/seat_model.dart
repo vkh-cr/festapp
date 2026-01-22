@@ -23,9 +23,9 @@ class SeatModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is SeatModel &&
-              runtimeType == other.runtimeType &&
-              objectModel?.id == other.objectModel?.id;
+      other is SeatModel &&
+          runtimeType == other.runtimeType &&
+          objectModel?.id == other.objectModel?.id;
 
   @override
   int get hashCode => objectModel?.id.hashCode ?? 0;

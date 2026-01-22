@@ -23,15 +23,24 @@ class OccasionLinkModel {
   bool isNotFound() => code == 404;
 
   factory OccasionLinkModel.fromJson(Map<String, dynamic> json) {
-    var unitUser = json["unit_user"] != null ? OccasionUserModel.fromJson(json["unit_user"]) : null;
-    var occasionUser = json["occasion_user"] != null ? OccasionUserModel.fromJson(json["occasion_user"]) : null;
-    var userInfo = json["user_info"] != null ? UserInfoModel.fromJson(json["user_info"]) : null;
-    var organization = json["organization"] != null ? OrganizationModel.fromJson(json["organization"]) : null;
+    var unitUser = json["unit_user"] != null
+        ? OccasionUserModel.fromJson(json["unit_user"])
+        : null;
+    var occasionUser = json["occasion_user"] != null
+        ? OccasionUserModel.fromJson(json["occasion_user"])
+        : null;
+    var userInfo = json["user_info"] != null
+        ? UserInfoModel.fromJson(json["user_info"])
+        : null;
+    var organization = json["organization"] != null
+        ? OrganizationModel.fromJson(json["organization"])
+        : null;
 
     if (json["groups"] != null && json["groups"] is Map && userInfo != null) {
       final groupsData = json["groups"] as Map<String, dynamic>;
       userInfo.userGroups = groupsData.values
-          .map((groupJson) => UserGroupInfoModel.fromJson(groupJson as Map<String, dynamic>))
+          .map((groupJson) =>
+              UserGroupInfoModel.fromJson(groupJson as Map<String, dynamic>))
           .toSet();
     }
     return OccasionLinkModel(
@@ -40,7 +49,9 @@ class OccasionLinkModel {
       unitUser: unitUser,
       occasionUser: occasionUser,
       bankAccountsAdmin: List<int>.from(json["bank_accounts_admin"] ?? []),
-      occasion: json["occasion"] != null && json["occasion"]["id"] != null ? OccasionModel.fromJson(json["occasion"]) : null,
+      occasion: json["occasion"] != null && json["occasion"]["id"] != null
+          ? OccasionModel.fromJson(json["occasion"])
+          : null,
       unit: json["unit"] != null ? UnitModel.fromJson(json["unit"]) : null,
       isAdmin: json["is_admin"],
       versionRecommended: json["version_recommended"],

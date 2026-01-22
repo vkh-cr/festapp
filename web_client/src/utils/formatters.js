@@ -9,12 +9,18 @@
 export function formatPrice(price, currencyCode, decimals = 2, locale = 'cs-CZ') {
     if (price === null || price === undefined) return '';
     try {
-        return new Intl.NumberFormat(locale, {
+        const formatter = new Intl.NumberFormat(locale, {
             style: 'currency',
             currency: currencyCode || 'CZK',
-            minimumFractionDigits: decimals,
-            maximumFractionDigits: decimals
-        }).format(price);
+            minimumFractionDigits: 0, // Allow integers to be compact
+            maximumFractionDigits: decimals,
+            useGrouping: true,
+        });
+        
+        // Custom fix for Czech locale to ensure proper spacing if needed, 
+        // though standard Intl usually handles it well. 
+        // Some browsers use non-breaking space which is good.
+        return formatter.format(price);
     } catch (e) {
         console.error("Error formatting price:", e);
         return `${price} ${currencyCode || ''}`;

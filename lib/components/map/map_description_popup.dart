@@ -41,10 +41,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
               widget.marker.place.title,
               overflow: TextOverflow.fade,
               softWrap: true,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 18
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             Visibility(
@@ -58,7 +55,10 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
                         ? null
                         : changePositionPressed,
                     label: Text("Change location".tr()))),
-            HtmlView(html: widget.marker.place.description ?? "", isSelectable: true,),
+            HtmlView(
+              html: widget.marker.place.description ?? "",
+              isSelectable: true,
+            ),
           ],
         ),
       ),

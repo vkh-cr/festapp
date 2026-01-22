@@ -6,10 +6,11 @@ class DbImages {
   static final _supabase = Supabase.instance.client;
   static const _bucketName = 'public-files';
 
-  static Future<String> uploadImage(Uint8List imageData, int? occasion, int? unit) async {
+  static Future<String> uploadImage(
+      Uint8List imageData, int? occasion, int? unit) async {
     final path = 'images/${DateTime.now().millisecondsSinceEpoch}.jpg';
     final uploadResponse =
-    await _supabase.storage.from(_bucketName).uploadBinary(path, imageData);
+        await _supabase.storage.from(_bucketName).uploadBinary(path, imageData);
     if (uploadResponse.isEmpty) throw Exception('Upload failed');
     final publicUrl = _supabase.storage.from(_bucketName).getPublicUrl(path);
     await _supabase.rpc('add_image_record', params: {
@@ -31,13 +32,11 @@ class DbImages {
     final filePathSegments = segments.sublist(bucketIndex + 1);
     final filePath = filePathSegments.join('/');
     await _supabase.storage.from(_bucketName).remove([filePath]);
-    await _supabase
-        .from(Tb.images.table)
-        .delete()
-        .eq(Tb.images.link, imageUrl);
+    await _supabase.from(Tb.images.table).delete().eq(Tb.images.link, imageUrl);
   }
 
-  static Future<String> createCopyOfImage(String imageUrl, int? occasion, int? unit) async {
+  static Future<String> createCopyOfImage(
+      String imageUrl, int? occasion, int? unit) async {
     final uri = Uri.parse(imageUrl);
     final segments = uri.pathSegments;
     final bucketIndex = segments.indexOf(_bucketName);
@@ -50,7 +49,8 @@ class DbImages {
     final newPath = 'images/${DateTime.now().millisecondsSinceEpoch}.jpg';
     await _supabase.storage.from(_bucketName).copy(filePath, newPath);
 
-    final newPublicUrl = _supabase.storage.from(_bucketName).getPublicUrl(newPath);
+    final newPublicUrl =
+        _supabase.storage.from(_bucketName).getPublicUrl(newPath);
 
     await _supabase.from(Tb.images.table).insert({
       Tb.images.link: newPublicUrl,
@@ -62,17 +62,20 @@ class DbImages {
   }
 
   static Future<bool> isImageUploaded(String imageUrl, int occasion) async {
-    final response = await _supabase.from(Tb.images.table)
+    final response = await _supabase
+        .from(Tb.images.table)
         .select()
         .eq(Tb.images.link, imageUrl)
         .eq(Tb.images.occasion, occasion);
     return response.isNotEmpty;
   }
 
-  static Future<void> cleanupRemovedImages(List<String> removedImages, int occasion) async {
+  static Future<void> cleanupRemovedImages(
+      List<String> removedImages, int occasion) async {
     if (removedImages.isEmpty) return;
 
-    final response = await _supabase.from(Tb.images.table)
+    final response = await _supabase
+        .from(Tb.images.table)
         .select()
         .inFilter(Tb.images.link, removedImages)
         .eq(Tb.images.occasion, occasion);
@@ -93,7 +96,8 @@ class DbImages {
       await _supabase.storage.from(_bucketName).remove(filePaths);
     }
 
-    await _supabase.from(Tb.images.table)
+    await _supabase
+        .from(Tb.images.table)
         .delete()
         .inFilter(Tb.images.link, removedImages)
         .eq(Tb.images.occasion, occasion);

@@ -24,13 +24,15 @@ const double kHiddenOpacity = 0.5;
 class FormEditorContent extends StatefulWidget {
   final String formLink;
   final VoidCallback? onDataUpdated;
-  const FormEditorContent({super.key, required this.formLink, this.onDataUpdated});
+  const FormEditorContent(
+      {super.key, required this.formLink, this.onDataUpdated});
 
   @override
   _FormEditorContentState createState() => _FormEditorContentState();
 }
 
-class _FormEditorContentState extends State<FormEditorContent> with TickerProviderStateMixin {
+class _FormEditorContentState extends State<FormEditorContent>
+    with TickerProviderStateMixin {
   FormEditBundle? _bundle;
   String? _formLink;
   final ScrollController _scrollController = ScrollController();
@@ -62,7 +64,8 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
 
     if (form.startTime != null && form.endTime != null) {
       if (form.endTime!.isBefore(form.startTime!)) {
-        ToastHelper.Show(context, "End time must be after start time.".tr(), severity: ToastSeverity.NotOk);
+        ToastHelper.Show(context, "End time must be after start time.".tr(),
+            severity: ToastSeverity.NotOk);
         return;
       }
     }
@@ -77,7 +80,8 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
           field.type == FormHelper.fieldTypeProductType &&
           field.productType != null &&
           field.productType!.products != null) {
-        field.productType!.products!.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+        field.productType!.products!
+            .sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
         for (int i = 0; i < field.productType!.products!.length; i++) {
           field.productType!.products![i].order = i;
         }
@@ -87,12 +91,14 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     try {
       await DbForms.updateForm(form);
       if (!mounted) return;
-      ToastHelper.Show(context, "${CommonStrings.saved}: ${form.link}", severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, "${CommonStrings.saved}: ${form.link}",
+          severity: ToastSeverity.Ok);
       await loadData();
       widget.onDataUpdated?.call();
     } catch (e) {
       if (!mounted) return;
-      ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""), severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""),
+          severity: ToastSeverity.NotOk);
     }
   }
 
@@ -101,7 +107,8 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
   }
 
   List<String> get _availableFieldTypes {
-    final existingTypes = _bundle?.form.relatedFields.map((f) => f.type).toList() ?? [];
+    final existingTypes =
+        _bundle?.form.relatedFields.map((f) => f.type).toList() ?? [];
     return FormHelper.fieldTypeIcons.keys.where((type) {
       if ([
         FormHelper.fieldTypeText,
@@ -135,9 +142,13 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(FormStrings.availability, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                        _buildAvailabilityStatusBanner(form),
-                        /*
+                      Text(FormStrings.availability,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold)),
+                      _buildAvailabilityStatusBanner(form),
+                      /*
                         (form.isOpen ?? true) ? "Form is OPEN & accepting responses.".tr() : "Form is CLOSED.".tr(),
                         style: TextStyle(
                             color: (form.isOpen ?? true) 
@@ -164,8 +175,10 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
               ExpansionTile(
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: EdgeInsets.zero,
-                title: Text(FormStrings.scheduleAndLimits, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text(FormStrings.autoOpenHelp, style: Theme.of(context).textTheme.bodySmall),
+                title: Text(FormStrings.scheduleAndLimits,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(FormStrings.autoOpenHelp,
+                    style: Theme.of(context).textTheme.bodySmall),
                 initiallyExpanded: false,
                 shape: const Border(), // Remove default borders
                 children: [
@@ -173,30 +186,43 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                   Row(
                     children: [
                       Expanded(
-                        child: _buildDateTimeInput(FormStrings.labelStartTime, form.startTime, (date) {
+                        child: _buildDateTimeInput(
+                            FormStrings.labelStartTime, form.startTime, (date) {
                           setState(() {
                             form.startTime = date;
                             if (date == null) {
                               form.enableCountdown = false;
                             } else {
-                              if (form.endTime == null || form.endTime!.isBefore(date)) {
-                                 form.endTime = date.add(const Duration(hours: 1));
+                              if (form.endTime == null ||
+                                  form.endTime!.isBefore(date)) {
+                                form.endTime =
+                                    date.add(const Duration(hours: 1));
                               }
                             }
                           });
-                        }, isStart: true, enabled: RightsService.isOrderEditor()),
+                        },
+                            isStart: true,
+                            enabled: RightsService.isOrderEditor()),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _buildDateTimeInput(FormStrings.labelEndTime, form.endTime, (date) {
+                        child: _buildDateTimeInput(
+                            FormStrings.labelEndTime, form.endTime, (date) {
                           // Validation Logic: Prevent setting end time before start time
                           // Note: UI picker is now also restricted, but this double check is safe.
-                          if (date != null && form.startTime != null && date.isBefore(form.startTime!)) {
-                             ToastHelper.Show(context, FormStrings.errorEndTimeBeforeStartTime, severity: ToastSeverity.NotOk);
-                             return;
+                          if (date != null &&
+                              form.startTime != null &&
+                              date.isBefore(form.startTime!)) {
+                            ToastHelper.Show(context,
+                                FormStrings.errorEndTimeBeforeStartTime,
+                                severity: ToastSeverity.NotOk);
+                            return;
                           }
                           setState(() => form.endTime = date);
-                        }, isEnd: true, minDate: form.startTime, enabled: RightsService.isOrderEditor()),
+                        },
+                            isEnd: true,
+                            minDate: form.startTime,
+                            enabled: RightsService.isOrderEditor()),
                       ),
                     ],
                   ),
@@ -204,15 +230,19 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     secondary: const Icon(Icons.timer_outlined),
-                    title: Text(FormStrings.labelCountdownTimer, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    title: Text(FormStrings.labelCountdownTimer,
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
                     subtitle: Text(
-                      form.startTime == null 
-                          ? FormStrings.requiresStartTime 
+                      form.startTime == null
+                          ? FormStrings.requiresStartTime
                           : FormStrings.countdownDescription,
-                      style: TextStyle(color: form.startTime == null ? Colors.grey : null, fontSize: 12),
+                      style: TextStyle(
+                          color: form.startTime == null ? Colors.grey : null,
+                          fontSize: 12),
                     ),
                     value: form.enableCountdown,
-                    onChanged: form.startTime != null && RightsService.isOrderEditor()
+                    onChanged: form.startTime != null &&
+                            RightsService.isOrderEditor()
                         ? (val) => setState(() => form.enableCountdown = val)
                         : null,
                   ),
@@ -227,8 +257,8 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                       child: Column(
                         children: [
                           _buildHtmlFieldPreview(
-                            FormStrings.labelCountdownMessage, 
-                            form.countdownTitle, 
+                            FormStrings.labelCountdownMessage,
+                            form.countdownTitle,
                             (val) => setState(() => form.countdownTitle = val),
                             defaultText: FormStrings.registrationStart,
                             showLabel: false,
@@ -241,7 +271,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                             child: CountdownWidget(
                               targetTime: form.startTime!,
                               onFinished: () {},
-                              title: null, 
+                              title: null,
                               compact: true,
                             ),
                           ),
@@ -255,7 +285,8 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
               ExpansionTile(
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: EdgeInsets.zero,
-                title: Text(FormStrings.labelClosedMessage, style: const TextStyle(fontWeight: FontWeight.w600)),
+                title: Text(FormStrings.labelClosedMessage,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
                 initiallyExpanded: false,
                 shape: const Border(),
                 children: [
@@ -277,7 +308,12 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     );
   }
 
-  Widget _buildDateTimeInput(String label, DateTime? value, Function(DateTime?) onChanged, {bool isStart = false, bool isEnd = false, DateTime? minDate, bool enabled = true}) {
+  Widget _buildDateTimeInput(
+      String label, DateTime? value, Function(DateTime?) onChanged,
+      {bool isStart = false,
+      bool isEnd = false,
+      DateTime? minDate,
+      bool enabled = true}) {
     /*
     Color? statusColor;
     String statusText = "";
@@ -300,41 +336,54 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     */
 
     return InkWell(
-      onTap: !enabled ? null : () async {
-        final initialDate = value ?? DateTime.now();
-        final firstDate = minDate ?? DateTime(2000);
-        
-        // Ensure initialDate is valid (must be >= firstDate)
-        final effectiveInitialDate = initialDate.isBefore(firstDate) ? firstDate : initialDate;
+      onTap: !enabled
+          ? null
+          : () async {
+              final initialDate = value ?? DateTime.now();
+              final firstDate = minDate ?? DateTime(2000);
 
-        final date = await showDatePicker(
-          context: context,
-          initialDate: effectiveInitialDate,
-          firstDate: firstDate,
-          lastDate: DateTime(2100),
-        );
-        if (date != null) {
-          final time = await showTimePicker(
-            context: context,
-            initialTime: TimeOfDay.fromDateTime(value ?? DateTime.now()),
-          );
-          if (time != null) {
-            onChanged(DateTime( date.year, date.month, date.day, time.hour, time.minute));
-          }
-        }
-      },
+              // Ensure initialDate is valid (must be >= firstDate)
+              final effectiveInitialDate =
+                  initialDate.isBefore(firstDate) ? firstDate : initialDate;
+
+              final date = await showDatePicker(
+                context: context,
+                initialDate: effectiveInitialDate,
+                firstDate: firstDate,
+                lastDate: DateTime(2100),
+              );
+              if (date != null) {
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(value ?? DateTime.now()),
+                );
+                if (time != null) {
+                  onChanged(DateTime(
+                      date.year, date.month, date.day, time.hour, time.minute));
+                }
+              }
+            },
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          suffixIcon: value != null && enabled ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => onChanged(null)) : const Icon(Icons.calendar_today, size: 18),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          suffixIcon: value != null && enabled
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: () => onChanged(null))
+              : const Icon(Icons.calendar_today, size: 18),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(value != null ? DateFormat('dd.MM.yyyy HH:mm').format(value) : FormStrings.notSet, style: const TextStyle(fontSize: 14)),
+            Text(
+                value != null
+                    ? DateFormat('dd.MM.yyyy HH:mm').format(value)
+                    : FormStrings.notSet,
+                style: const TextStyle(fontSize: 14)),
             /*
             if (statusText.isNotEmpty)
                Padding(
@@ -348,33 +397,41 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
     );
   }
 
-
   Widget _buildAvailabilityStatusBanner(FormModel form) {
-     String text;
-     Color color;
-     final now = DateTime.now();
+    String text;
+    Color color;
+    final now = DateTime.now();
 
-     if (!(form.isOpen ?? true)) {
-       text = FormStrings.formClosedMessage;
-       color = ThemeConfig.redColor(context);
-     } else if (form.startTime != null && now.isBefore(form.startTime!)) {
-       text = FormStrings.scheduledWithTime(DateFormat('dd.MM HH:mm').format(form.startTime!));
-       color = ThemeConfig.redColor(context);
-     } else if (form.endTime != null && now.isAfter(form.endTime!)) {
-       text = FormStrings.endedWithTime(DateFormat('dd.MM HH:mm').format(form.endTime!));
-       color = ThemeConfig.redColor(context);
-     } else {
-       text = FormStrings.formOpenMessage;
-       color = Theme.of(context).primaryColor;
-     }
+    if (!(form.isOpen ?? true)) {
+      text = FormStrings.formClosedMessage;
+      color = ThemeConfig.redColor(context);
+    } else if (form.startTime != null && now.isBefore(form.startTime!)) {
+      text = FormStrings.scheduledWithTime(
+          DateFormat('dd.MM HH:mm').format(form.startTime!));
+      color = ThemeConfig.redColor(context);
+    } else if (form.endTime != null && now.isAfter(form.endTime!)) {
+      text = FormStrings.endedWithTime(
+          DateFormat('dd.MM HH:mm').format(form.endTime!));
+      color = ThemeConfig.redColor(context);
+    } else {
+      text = FormStrings.formOpenMessage;
+      color = Theme.of(context).primaryColor;
+    }
 
-     return Text(
-       text,
-       style: TextStyle(color: color, fontWeight: FontWeight.bold),
-     );
+    return Text(
+      text,
+      style: TextStyle(color: color, fontWeight: FontWeight.bold),
+    );
   }
 
-  Widget _buildHtmlFieldPreview(String label, String? content, ValueChanged<String> onChanged, {String? defaultText, String? helpText, bool showLabel = true, bool minimal = false, double? fontSize, bool enabled = true}) {
+  Widget _buildHtmlFieldPreview(
+      String label, String? content, ValueChanged<String> onChanged,
+      {String? defaultText,
+      String? helpText,
+      bool showLabel = true,
+      bool minimal = false,
+      double? fontSize,
+      bool enabled = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -386,9 +443,11 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (showLabel)
-                      Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(label,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     if (helpText != null)
-                      Text(helpText, style: Theme.of(context).textTheme.bodySmall),
+                      Text(helpText,
+                          style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
               ),
@@ -397,23 +456,26 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
         if (showLabel || helpText != null) const SizedBox(height: 8),
         Container(
           width: double.infinity,
-          decoration: minimal ? null : BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark 
-                ? Colors.grey.withOpacity(0.2) 
-                : Colors.grey.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(
-              color: Theme.of(context).brightness == Brightness.dark 
-                  ? Colors.white24 
-                  : Colors.grey.withOpacity(0.3)
-            ),
-          ),
+          decoration: minimal
+              ? null
+              : BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white24
+                          : Colors.grey.withOpacity(0.3)),
+                ),
           child: Stack(
             children: [
               Padding(
-                padding: minimal ? const EdgeInsets.fromLTRB(4, 32, 4, 0) : const EdgeInsets.fromLTRB(12, 12, 80, 12),
+                padding: minimal
+                    ? const EdgeInsets.fromLTRB(4, 32, 4, 0)
+                    : const EdgeInsets.fromLTRB(12, 12, 80, 12),
                 child: HtmlView(
-                  html: minimal 
+                  html: minimal
                       ? "<div style='text-align: center;'>${(content?.isNotEmpty ?? false) ? content! : (defaultText ?? FormStrings.notSet)}</div>"
                       : ((content?.isNotEmpty ?? false)
                           ? content!
@@ -432,17 +494,19 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
                     visualDensity: VisualDensity.compact,
                     foregroundColor: Theme.of(context).primaryColor,
                   ),
-                  onPressed: !enabled ? null : () async {
-                    final result = await RouterService.navigatePageInfo(
-                      context,
-                      HtmlEditorRoute(
-                          content: {HtmlEditorPage.parContent: content ?? ''},
-                          occasionId: _bundle!.form.occasionId),
-                    );
-                    if (result != null && mounted) {
-                      onChanged(result as String);
-                    }
-                  },
+                  onPressed: !enabled
+                      ? null
+                      : () async {
+                          final result = await RouterService.navigatePageInfo(
+                            context,
+                            HtmlEditorRoute(content: {
+                              HtmlEditorPage.parContent: content ?? ''
+                            }, occasionId: _bundle!.form.occasionId),
+                          );
+                          if (result != null && mounted) {
+                            onChanged(result as String);
+                          }
+                        },
                 ),
               ),
             ],
@@ -471,42 +535,51 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
       builder: (BuildContext dialogContext) {
         List<Widget> resolvedItemsForDialog = [];
         if (personalInfoTypes.isNotEmpty) {
-          resolvedItemsForDialog.add(
-              PopupMenuButton<String>(
-                tooltip: FormStrings.personalInfo,
-                offset: isWideScreen ? const Offset(160, 0) : const Offset(20, 0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                onSelected: (String type) {
-                  Navigator.of(dialogContext).pop(type);
-                },
-                itemBuilder: (BuildContext popupContext) {
-                  return personalInfoTypes.map((type) {
-                    return PopupMenuItem<String>(
-                      value: type,
-                      child: Row(
-                        children: [
-                          Icon(FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
-                          const SizedBox(width: 12),
-                          Text(FormHelper.fieldTypeToLocale(type)),
-                        ],
-                      ),
-                    );
-                  }).toList();
-                },
-                child: ListTile(
-                  leading: Icon(Icons.person_search_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
-                  title: Text(FormStrings.personalInfo),
-                  trailing: Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodyLarge?.color),
-                  dense: true,
-                ),
-              )
-          );
+          resolvedItemsForDialog.add(PopupMenuButton<String>(
+            tooltip: FormStrings.personalInfo,
+            offset: isWideScreen ? const Offset(160, 0) : const Offset(20, 0),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0)),
+            onSelected: (String type) {
+              Navigator.of(dialogContext).pop(type);
+            },
+            itemBuilder: (BuildContext popupContext) {
+              return personalInfoTypes.map((type) {
+                return PopupMenuItem<String>(
+                  value: type,
+                  child: Row(
+                    children: [
+                      Icon(
+                          FormHelper.fieldTypeIcons[type] ??
+                              Icons.circle_outlined,
+                          size: 20,
+                          color: Theme.of(context).textTheme.bodyLarge?.color),
+                      const SizedBox(width: 12),
+                      Text(FormHelper.fieldTypeToLocale(type)),
+                    ],
+                  ),
+                );
+              }).toList();
+            },
+            child: ListTile(
+              leading: Icon(Icons.person_search_outlined,
+                  size: 20,
+                  color: Theme.of(context).textTheme.bodyLarge?.color),
+              title: Text(FormStrings.personalInfo),
+              trailing: Icon(Icons.chevron_right,
+                  color: Theme.of(context).textTheme.bodyLarge?.color),
+              dense: true,
+            ),
+          ));
           resolvedItemsForDialog.add(const Divider(height: 1, thickness: 0.5));
         }
 
         resolvedItemsForDialog.addAll(otherTypes.map((type) {
           return ListTile(
-            leading: Icon(FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
+            leading: Icon(
+                FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined,
+                size: 20,
+                color: Theme.of(context).textTheme.bodyLarge?.color),
             title: Text(FormHelper.fieldTypeToLocale(type)),
             dense: true,
             onTap: () {
@@ -516,20 +589,19 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
         }).toList());
 
         if (resolvedItemsForDialog.isEmpty) {
-          resolvedItemsForDialog.add(
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(FormStrings.noFieldsAvailable),
-                ),
-              )
-          );
+          resolvedItemsForDialog.add(Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(FormStrings.noFieldsAvailable),
+            ),
+          ));
         }
 
         return AlertDialog(
           title: Text(FormStrings.addFieldTitle),
           contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
           content: SizedBox(
             width: 280,
             child: ListView(
@@ -574,7 +646,8 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    if (_bundle == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (_bundle == null)
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     return Scaffold(
       floatingActionButtonAnimator: _NoScalingAnimation(),
@@ -585,7 +658,7 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
           FloatingActionButton(
             heroTag: "viewFormFab",
             onPressed: () {
-              if(_formLink != null) {
+              if (_formLink != null) {
                 RouterService.navigate(context, "${FormPage.ROUTE}/$_formLink");
               }
             },
@@ -596,8 +669,9 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
           FloatingActionButton(
             heroTag: "previewFormFab",
             onPressed: () {
-              if(_formLink != null) {
-                RouterService.navigate(context, "${FormPage.ROUTE}/$_formLink?preview=true");
+              if (_formLink != null) {
+                RouterService.navigate(
+                    context, "${FormPage.ROUTE}/$_formLink?preview=true");
               }
             },
             tooltip: FormStrings.editorPreview,
@@ -618,67 +692,73 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
       body: _bundle == null
           ? const Center(child: CircularProgressIndicator())
           : Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Column(
-                children: [
-                  _buildFormOpenToggleAndOffTextEditor(),
-                  const Divider(
-                    thickness: 1,
-                    color: Colors.grey,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // UPDATED: Use bundle.form
-                      if (_bundle!.form.header?.isNotEmpty ?? false)
-                        HtmlView(html: _bundle!.form.header!, isSelectable: true),
-                      const SizedBox(height: 16),
-                      if (RightsService.isOrderEditor())
-                        Center(
-                          child: ElevatedButton.icon(
-                          icon: const Icon(Icons.edit),
-                          label: Text(FormStrings.editContent),
-                          onPressed: () async {
-                            final result = await RouterService.navigatePageInfo(
-                              context,
-                              HtmlEditorRoute(
-                                  content: {HtmlEditorPage.parContent: _bundle!.form.header ?? ""},
-                                  occasionId: _bundle!.form.occasionId),
-                            );
-                            if (result != null && mounted) {
-                              setState(() => _bundle!.form.header = result as String);
-                            }
-                          },
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints:
+                    BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Column(
+                      children: [
+                        _buildFormOpenToggleAndOffTextEditor(),
+                        const Divider(
+                          thickness: 1,
+                          color: Colors.grey,
                         ),
-                      ),
-                    ],
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // UPDATED: Use bundle.form
+                            if (_bundle!.form.header?.isNotEmpty ?? false)
+                              HtmlView(
+                                  html: _bundle!.form.header!,
+                                  isSelectable: true),
+                            const SizedBox(height: 16),
+                            if (RightsService.isOrderEditor())
+                              Center(
+                                child: ElevatedButton.icon(
+                                  icon: const Icon(Icons.edit),
+                                  label: Text(FormStrings.editContent),
+                                  onPressed: () async {
+                                    final result =
+                                        await RouterService.navigatePageInfo(
+                                      context,
+                                      HtmlEditorRoute(content: {
+                                        HtmlEditorPage.parContent:
+                                            _bundle!.form.header ?? ""
+                                      }, occasionId: _bundle!.form.occasionId),
+                                    );
+                                    if (result != null && mounted) {
+                                      setState(() => _bundle!.form.header =
+                                          result as String);
+                                    }
+                                  },
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 8),
+                            Text(
+                              FormStrings.dragToReorder,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        FormFieldsGenerator(bundle: _bundle!),
+                        const SizedBox(height: 102),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 24),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-                      Text(
-                        FormStrings.dragToReorder,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  FormFieldsGenerator(bundle: _bundle!),
-                  const SizedBox(height: 102),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
       bottomNavigationBar: Container(
         color: ThemeConfig.appBarColor(),
         padding: const EdgeInsets.all(10),
@@ -687,14 +767,12 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed:
-                RightsService.isOrderEditor() ? cancelEdit : null,
+                onPressed: RightsService.isOrderEditor() ? cancelEdit : null,
                 child: Text(CommonStrings.storno),
               ),
               const SizedBox(width: 16),
               ElevatedButton(
-                onPressed:
-                RightsService.isOrderEditor() ? saveChanges : null,
+                onPressed: RightsService.isOrderEditor() ? saveChanges : null,
                 child: Text(CommonStrings.save),
               ),
             ],
@@ -707,7 +785,8 @@ class _FormEditorContentState extends State<FormEditorContent> with TickerProvid
 
 class _NoScalingAnimation extends FloatingActionButtonAnimator {
   @override
-  Offset getOffset({required Offset begin, required Offset end, required double progress}) {
+  Offset getOffset(
+      {required Offset begin, required Offset end, required double progress}) {
     return end;
   }
 

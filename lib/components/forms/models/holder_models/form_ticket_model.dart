@@ -17,9 +17,9 @@ class FormTicketModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is FormTicketModel &&
-              runtimeType == other.runtimeType &&
-              seat!.objectModel!.id! == other.seat!.objectModel!.id!;
+      other is FormTicketModel &&
+          runtimeType == other.runtimeType &&
+          seat!.objectModel!.id! == other.seat!.objectModel!.id!;
 
   @override
   int get hashCode => seat!.objectModel!.id!.hashCode;

@@ -11,7 +11,6 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/widgets/internal_form_fields.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_config.dart';
@@ -56,9 +55,9 @@ class _LoginPageState extends State<LoginPage> {
       if (loggedIn) {
         var userUnits = RightsService.currentUser()?.units;
         if (userUnits != null && userUnits.isNotEmpty) {
-           await RouterService.navigateToUnitAdmin(context, userUnits.first);
+          await RouterService.navigateToUnitAdmin(context, userUnits.first);
         } else {
-           await _refreshSignedInStatus(null);
+          await _refreshSignedInStatus(null);
         }
       }
     }
@@ -102,21 +101,25 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(
                       height: 200,
                     ),
-                    if(RightsService.occasionLinkModel?.organization?.isRegistrationEnabled??false)
+                    if (RightsService.occasionLinkModel?.organization
+                            ?.isRegistrationEnabled ??
+                        false)
                       Container(
                         padding: const EdgeInsets.all(12.0),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(UserStrings.firstTime, style: TextStyle(fontSize: 18)),
+                              Text(UserStrings.firstTime,
+                                  style: TextStyle(fontSize: 18)),
                               const SizedBox(
                                 width: 16,
                               ),
                               TextButton(
-                                  onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
-                                  child: Text(UserStrings.signUp, style: StylesConfig.normalTextStyle))
-                            ]
-                        ),
+                                  onPressed: () => RouterService.navigate(
+                                      context, SignupPage.ROUTE),
+                                  child: Text(UserStrings.signUp,
+                                      style: StylesConfig.normalTextStyle))
+                            ]),
                       ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -125,7 +128,10 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 15.0, right: 15.0, top: 15, bottom: 0),
-                      child: PasswordField(label: UserStrings.passwordOrCode, controller:  _passwordController, passwordType: AutofillHints.password),
+                      child: PasswordField(
+                          label: UserStrings.passwordOrCode,
+                          controller: _passwordController,
+                          passwordType: AutofillHints.password),
                     ),
                     const SizedBox(
                       height: 16,
@@ -139,7 +145,10 @@ class _LoginPageState extends State<LoginPage> {
                           setState(() {
                             _isLoading = true;
                           });
-                          await AuthService.login(AppConfig.getUserPrefix(_emailController.text), _passwordController.text)
+                          await AuthService.login(
+                                  AppConfig.getUserPrefix(
+                                      _emailController.text),
+                                  _passwordController.text)
                               .then(_showToast)
                               .then(_refreshSignedInStatus)
                               .catchError(_onError);
@@ -159,9 +168,10 @@ class _LoginPageState extends State<LoginPage> {
                         padding: const EdgeInsets.all(8.0),
                         alignment: Alignment.topRight,
                         child: TextButton(
-                            onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
-                            child: Text(UserStrings.forgotPassword, style: StylesConfig.normalTextStyle))
-                    ),
+                            onPressed: () => RouterService.navigate(
+                                context, ForgotPasswordPage.ROUTE),
+                            child: Text(UserStrings.forgotPassword,
+                                style: StylesConfig.normalTextStyle))),
                   ],
                 ),
               ),
@@ -175,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _refreshSignedInStatus(dynamic value) async {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
-       await RouterService.handlePostLoginNavigation(context);
+      await RouterService.handlePostLoginNavigation(context);
     }
   }
 
@@ -184,6 +194,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onError(err) {
-    ToastHelper.Show(context, UserStrings.invalidCredentials, severity: ToastSeverity.NotOk);
+    ToastHelper.Show(context, UserStrings.invalidCredentials,
+        severity: ToastSeverity.NotOk);
   }
 }

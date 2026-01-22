@@ -68,6 +68,15 @@ async function runTest(file) {
     // Start Transaction
     await client.query('BEGIN');
 
+    // Reset Sequences to match max(id)
+    // This prevents "messed up" IDs where tests expect low numbers but sequences are high.
+    // We do this INSIDE the transaction so it applies to the test run, but rolls back (setval is non-transactional though! Warning)
+    // Actually setval IS NOT transactional. The changes persist. 
+    // BUT that is exactly what we want: "reset ... to max current record". 
+    // Since the database state (max id) behaves transactionally (we see only committed rows), 
+    // resetting to max(id)+1 of the *current* data is correct for this test run.
+    await resetSequences(client);
+
     // Inject Assertions
     if (fs.existsSync(ASSERTIONS_FILE)) {
         const assertionsSql = fs.readFileSync(ASSERTIONS_FILE, 'utf8');
@@ -120,6 +129,59 @@ async function runAll() {
     process.exit(1);
   } else {
     process.exit(0);
+  }
+}
+
+
+
+async function resetSequences(client) {
+  try {
+    // 1. Get List of Sequences
+    const sequencesRes = await client.query(`
+      SELECT 
+        table_schema, 
+        table_name, 
+        column_name,
+        pg_get_serial_sequence('"' || table_schema || '"."' || table_name || '"', column_name) AS seq
+      FROM information_schema.columns
+      WHERE table_schema IN ('public', 'eshop') 
+        AND (column_default LIKE 'nextval%' OR is_identity = 'YES')
+        AND pg_get_serial_sequence('"' || table_schema || '"."' || table_name || '"', column_name) IS NOT NULL;
+    `);
+
+    for (const row of sequencesRes.rows) {
+      if (!row.seq) continue;
+      
+      // 2. Generate Safe Update for each
+      // We read current sequence value directly from the sequence relation
+      // And we prevent rewinding by using GREATEST found ID vs Current Sequence
+      const seq = row.seq;
+      const table = `"${row.table_schema}"."${row.table_name}"`;
+      const col = `"${row.column_name}"`;
+
+      const sql = `
+        DO $$
+        DECLARE
+            v_seq_val bigint;
+            v_max_id bigint;
+        BEGIN
+            -- Get Sequence Value
+            EXECUTE 'SELECT last_value FROM ' || '${seq}' INTO v_seq_val;
+            
+            -- Get Max ID
+            EXECUTE 'SELECT COALESCE(MAX(${col}), 0) FROM ${table}' INTO v_max_id;
+            
+            -- Only advance, never rewind (Safe)
+            IF v_max_id >= v_seq_val THEN
+                PERFORM setval('${seq}', v_max_id + 1, false);
+            END IF;
+        END $$;
+      `;
+      
+      await client.query(sql);
+    }
+  } catch (err) {
+    console.warn(`  [WARN] Failed to reset sequences: ${err.message}`);
   }
 }
 

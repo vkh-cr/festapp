@@ -44,7 +44,9 @@ class InventoryContextModel {
     return InventoryContextModel(
       id: json[t.id],
       inventoryPoolId: json[t.inventory_pool],
-      blockDate: json[t.block_date] != null ? DateTime.parse(json[t.block_date]) : null,
+      blockDate: json[t.block_date] != null
+          ? DateTime.parse(json[t.block_date])
+          : null,
       title: json[t.title],
       order: json[t.order],
       spots: parsedSpots,
@@ -107,11 +109,13 @@ class InventoryContextModel {
     if (blockDate != null) {
       final String locale = Localizations.localeOf(context).toString();
       final String datePart = DateFormat('d.M.', locale).format(blockDate!);
-      final String dayOfWeekPart = DateFormat('E', locale).format(blockDate!).toUpperCase();
+      final String dayOfWeekPart =
+          DateFormat('E', locale).format(blockDate!).toUpperCase();
       return '$dayOfWeekPart $datePart';
     }
     return InventoryStrings.contextDefaultTitle;
   }
 
-  String getFullTitle(BuildContext context) => "${inventoryPool?.title ?? InventoryStrings.poolDefaultTitle} - ${getContextTitle(context)}";
+  String getFullTitle(BuildContext context) =>
+      "${inventoryPool?.title ?? InventoryStrings.poolDefaultTitle} - ${getContextTitle(context)}";
 }

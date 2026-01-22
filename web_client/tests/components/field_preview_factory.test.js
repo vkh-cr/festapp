@@ -10,7 +10,7 @@ describe('FieldPreviewFactory', () => {
         it('should return raw value if no options', () => {
              const field = { type: 'text', title: 'Name' };
              const result = FieldPreviewFactory.format(field, 'John', {});
-             assert.strictEqual(result, 'John');
+             assert.strictEqual(result.value, 'John');
         });
 
         it('should resolve option title', () => {
@@ -22,7 +22,8 @@ describe('FieldPreviewFactory', () => {
                 ]
             };
             const result = FieldPreviewFactory.format(field, 'opt1', {});
-            assert.strictEqual(result, 'Option 1');
+            assert.strictEqual(result.value, 'Option 1');
+            assert.strictEqual(result.price, null);
         });
 
         it('should append price to title if context has currency', () => {
@@ -33,7 +34,10 @@ describe('FieldPreviewFactory', () => {
                 ]
             };
             const result = FieldPreviewFactory.format(field, 'opt1', { currency: 'CZK' });
-            assert.strictEqual(result, 'Premium (100 CZK)');
+            assert.strictEqual(result.value, 'Premium');
+            // formatPrice uses NBSP usually, let's match loose or copy NBSP
+            // 100\u00A0Kč
+            assert.match(result.price, /100.*Kč/);
         });
 
         it('should handle multi-select (joined strings)', () => {
@@ -46,7 +50,7 @@ describe('FieldPreviewFactory', () => {
             };
             // FormDataReader joins with ' | '
             const result = FieldPreviewFactory.format(field, 'a | b', {});
-            assert.strictEqual(result, 'A, B');
+            assert.strictEqual(result.value, 'A, B');
         });
     });
 
@@ -63,7 +67,8 @@ describe('FieldPreviewFactory', () => {
                 }
             };
             const result = FieldPreviewFactory.format(field, 'p1', { currency: 'CZK' });
-            assert.strictEqual(result, 'Shirt (200 CZK)');
+            assert.strictEqual(result.value, 'Shirt');
+            assert.match(result.price, /200.*Kč/);
         });
     });
 
@@ -71,7 +76,7 @@ describe('FieldPreviewFactory', () => {
         it('should format simple ID number string (Legacy/Simple)', () => {
             const field = { type: 'id_document' };
             const result = FieldPreviewFactory.format(field, '12345', {});
-            assert.strictEqual(result, '12345');
+            assert.strictEqual(result.value, '12345');
         });
 
         it('should format nested object with Number and Expiry', () => {
@@ -93,14 +98,14 @@ describe('FieldPreviewFactory', () => {
             // But usually '25. 6. 2028' or '25.6.2028'
             
             // To be safe against minor space differences in Intl:
-            assert.ok(result.includes('987654'));
-            assert.ok(result.includes('2028'));
-            assert.ok(result.includes('6.')); 
+            assert.ok(result.value.includes('987654'));
+            assert.ok(result.value.includes('2028'));
+            assert.ok(result.value.includes('6.')); 
             
             // Verify structure "Number (Date)"
             // 987654 (25. 6. 2028)
             const regex = /^987654 \(\d{1,2}\. ?\d{1,2}\. ?2028\)$/;
-            assert.match(result, regex);
+            assert.match(result.value, regex);
         });
 
         it('should switch format based on locale', () => {
@@ -114,8 +119,8 @@ describe('FieldPreviewFactory', () => {
             const result = FieldPreviewFactory.format(field, val, {});
             
             // US Format: 12/31/2028
-            assert.ok(result.includes('ABC'));
-            assert.match(result, /12\/31\/2028/);
+            assert.ok(result.value.includes('ABC'));
+            assert.match(result.value, /12\/31\/2028/);
         });
 
         it('should handle missing expiry gracefully', () => {
@@ -124,7 +129,7 @@ describe('FieldPreviewFactory', () => {
                 id_document_number: 'ONLY_ID'
             };
             const result = FieldPreviewFactory.format(field, val, {});
-            assert.strictEqual(result, 'ONLY_ID');
+            assert.strictEqual(result.value, 'ONLY_ID');
         });
     });
 

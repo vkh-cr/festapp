@@ -15,7 +15,8 @@ class ProductDetailEditorDialog extends StatefulWidget {
   const ProductDetailEditorDialog({super.key, required this.product});
 
   @override
-  _ProductDetailEditorDialogState createState() => _ProductDetailEditorDialogState();
+  _ProductDetailEditorDialogState createState() =>
+      _ProductDetailEditorDialogState();
 }
 
 class _ProductDetailEditorDialogState extends State<ProductDetailEditorDialog> {
@@ -27,11 +28,13 @@ class _ProductDetailEditorDialogState extends State<ProductDetailEditorDialog> {
   void initState() {
     super.initState();
     _description = widget.product.description ?? "";
-    _quantityController = TextEditingController(text: widget.product.maximum?.toString() ?? "0");
+    _quantityController =
+        TextEditingController(text: widget.product.maximum?.toString() ?? "0");
     _quantityController.addListener(() {
       widget.product.maximum = int.tryParse(_quantityController.text) ?? 0;
     });
-    _shortTitleController = TextEditingController(text: widget.product.shortTitle ?? "");
+    _shortTitleController =
+        TextEditingController(text: widget.product.shortTitle ?? "");
     _shortTitleController.addListener(() {
       widget.product.shortTitle = _shortTitleController.text;
     });
@@ -47,7 +50,9 @@ class _ProductDetailEditorDialogState extends State<ProductDetailEditorDialog> {
   Future<void> _editContent() async {
     RouterService.navigatePageInfo(
       context,
-      HtmlEditorRoute(content: {HtmlEditorPage.parContent: _description}, occasionId: widget.product.occasion),
+      HtmlEditorRoute(
+          content: {HtmlEditorPage.parContent: _description},
+          occasionId: widget.product.occasion),
     ).then((value) {
       if (value != null) {
         setState(() {
@@ -91,14 +96,14 @@ class _ProductDetailEditorDialogState extends State<ProductDetailEditorDialog> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: "Product Quantity".tr(),
-                helperText: "Enter 0 for unlimited" .tr(),
+                helperText: "Enter 0 for unlimited".tr(),
                 border: const UnderlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
             // Product Description Title
             Text(
-              "Description" .tr(),
+              "Description".tr(),
             ),
             const SizedBox(height: 8),
             // Full HTML description (no height limit)
@@ -111,7 +116,7 @@ class _ProductDetailEditorDialogState extends State<ProductDetailEditorDialog> {
             Center(
               child: ElevatedButton(
                 onPressed: _editContent,
-                child: Text("Edit content" .tr()),
+                child: Text("Edit content".tr()),
               ),
             ),
             const SizedBox(height: 24),

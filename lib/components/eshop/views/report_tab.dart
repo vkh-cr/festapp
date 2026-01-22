@@ -19,7 +19,8 @@ class _ReportTabState extends State<ReportTab> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (occasionLink == null && context.routeData.params.isNotEmpty) {
-      occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
+      occasionLink =
+          context.routeData.params.getString(AppRouter.linkFormatted);
     }
     loadData();
   }
@@ -35,26 +36,26 @@ class _ReportTabState extends State<ReportTab> {
       body: textReport == null
           ? const Center(child: CircularProgressIndicator())
           : Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (textReport != null)
-                    SelectableText(
-                      textReport!,
-                      style: TextStyle(fontSize: 16),
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (textReport != null)
+                          SelectableText(
+                            textReport!,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                      ],
                     ),
-                ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ),
     );
   }
 }

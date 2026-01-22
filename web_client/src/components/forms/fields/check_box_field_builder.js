@@ -1,4 +1,5 @@
 import { FormStrings } from '../form_strings.js';
+import { formatPrice } from '../../../utils/formatters.js';
 
 export class CheckBoxFieldBuilder {
     static create(field, formModel) {
@@ -7,15 +8,11 @@ export class CheckBoxFieldBuilder {
         if (field.isHidden) container.style.display = 'none';
 
         // Check if it's a simple boolean (no options) or select many (options)
-        // Check if it's a simple boolean (no options) or select many (options)
         const shouldCheckOptions = field.type !== 'product_type';
         const hasOptionDescription = shouldCheckOptions && field.options && field.options.some(opt => opt.description && opt.description.trim().length > 0);
         const isCardDesign = (formModel && formModel.isCardDesign) || 
                              (field.description && field.description.trim().length > 0) ||
                              hasOptionDescription;
-        // Flutter logic: if type is select_many or product_type(select_many), it has options.
-        // If type is check_box (not explicitly listed in standard types but common), or just empty options?
-        // Let's assume 'select_many' has `field.options`.
         
         // Label
         if (!field._hideLabel) {
@@ -44,8 +41,7 @@ export class CheckBoxFieldBuilder {
                 
                 const input = document.createElement('input');
                 input.type = 'checkbox';
-                input.name = field.id; // Same name for array logic in FormData?
-                // FormData handles same-name as array in getAll()
+                input.name = field.id; 
                 input.value = (opt.id !== undefined && opt.id !== null) ? opt.id : opt.title;
                 input.id = `${field.id}_${(opt.id !== undefined && opt.id !== null) ? opt.id : opt.title}`;
                 input.className = 'form-check-input';
@@ -74,8 +70,8 @@ export class CheckBoxFieldBuilder {
                 
                 let labelContent = `<span>${opt.title || ''}</span>`;
                 if (opt.price) {
-                     const priceDisplay = `${opt.price}&nbsp;${currency || ''}`;
-                    labelContent += `<span class="option-price">+${priceDisplay}</span>`; 
+                     const priceDisplay = formatPrice(opt.price, currency, 0, 'cs-CZ');
+                     labelContent += `<span class="option-price">+ ${priceDisplay}</span>`; 
                 }
                 optLabel.innerHTML = labelContent;
                 
@@ -97,7 +93,8 @@ export class CheckBoxFieldBuilder {
                     
                     let descHtml = '';
                     if (surchargeData && surchargeData.amount && showSurchargeDescription) {
-                        descHtml += `<span class="surcharge-info">+ ${surchargeData.amount}&nbsp;${surchargeData.currency || ''} ${FormStrings.surchargeOnSite}</span>`;
+                        const surchargePrice = formatPrice(surchargeData.amount, surchargeData.currency || currency, 0, 'cs-CZ');
+                        descHtml += `<span class="surcharge-info">${FormStrings.surchargeOnSite}&nbsp;<span class="surcharge-price">+ ${surchargePrice}</span></span>`;
                         if (opt.description) descHtml += '<br>'; // New line separation
                     }
                     if (opt.description) {
@@ -116,10 +113,8 @@ export class CheckBoxFieldBuilder {
         
         container.appendChild(optionsContainer);
         
-        // The original code had an `else` block here for single checkboxes.
-        // We need to preserve that logic if `field.options` is empty or null.
+        // Single Boolean Checkbox (e.g. Terms & Conditions)
         if (!field.options || field.options.length === 0) {
-            // Single Boolean Checkbox (e.g. Terms & Conditions)
             const optWrapper = document.createElement('div');
             optWrapper.className = 'form-check single-checkbox';
 
@@ -133,20 +128,19 @@ export class CheckBoxFieldBuilder {
             const optLabel = document.createElement('label');
             optLabel.htmlFor = input.id;
             optLabel.className = 'form-check-label';
-            optLabel.textContent = field.title || ''; // Title is next to checkbox
+            optLabel.textContent = field.title || ''; 
             if (field.isRequired) {
-                optLabel.innerHTML += ' <span class="required-star">*</span>'; // HTML append for unsafe?
+                optLabel.innerHTML += ' <span class="required-star">*</span>';
             }
 
             optWrapper.appendChild(input);
             optWrapper.appendChild(optLabel);
             container.appendChild(optWrapper);
             
-            // Description below?
             if (field.description) {
                 const desc = document.createElement('div');
                 desc.className = 'form-field-description';
-                desc.style.marginLeft = '1.5em'; // Indent under label
+                desc.style.marginLeft = '1.5em';
                 desc.innerHTML = field.description;
                 container.appendChild(desc);
             }

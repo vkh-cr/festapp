@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';

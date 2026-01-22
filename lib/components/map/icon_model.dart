@@ -9,26 +9,18 @@ class IconModel {
 
   factory IconModel.fromJson(Map<String, dynamic> json) {
     return IconModel(
-    link: json[Tb.icons.link],
-    data: json[Tb.icons.data],
-    id: json[Tb.icons.id],
-  );
+      link: json[Tb.icons.link],
+      data: json[Tb.icons.data],
+      id: json[Tb.icons.id],
+    );
   }
 
-  Map toJson() =>
-  {
-    Tb.icons.link: link,
-    Tb.icons.data: data,
-    Tb.icons.id: id
-  };
+  Map toJson() => {Tb.icons.link: link, Tb.icons.data: data, Tb.icons.id: id};
 
-  IconModel({
-    this.link,
-    this.data,
-    this.id});
+  IconModel({this.link, this.data, this.id});
 
   @override
   String toString() {
-    return link??"";
+    return link ?? "";
   }
 }

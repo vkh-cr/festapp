@@ -17,7 +17,7 @@ class PathGroupsModel extends ITrinaRowModel {
   String? color;
   bool? isHidden;
   int? icon;
-  int? order;      // new ordering field
+  int? order; // new ordering field
 
   PathGroupsModel({
     required this.id,
@@ -50,7 +50,7 @@ class PathGroupsModel extends ITrinaRowModel {
       color: data?[Tb.path_groups.color] as String?,
       isHidden: hidden,
       icon: json[Tb.path_groups.icon] as int?,
-      order: json[Tb.path_groups.order] as int?,    // extract order
+      order: json[Tb.path_groups.order] as int?, // extract order
     );
   }
 
@@ -61,10 +61,10 @@ class PathGroupsModel extends ITrinaRowModel {
     final pathData = rawPlaces.isEmpty
         ? <List<int>>[]
         : rawPlaces.split(';').map((segment) {
-      final part = segment.trim();
-      if (part.isEmpty) return <int>[];
-      return part.split(',').map((s) => int.parse(s.trim())).toList();
-    }).toList();
+            final part = segment.trim();
+            if (part.isEmpty) return <int>[];
+            return part.split(',').map((s) => int.parse(s.trim())).toList();
+          }).toList();
 
     // parse any JSON blob
     final rawData = (json[Tb.path_groups.data]?.toString().trim() ?? "");
@@ -112,39 +112,40 @@ class PathGroupsModel extends ITrinaRowModel {
       color: parsedData[Tb.path_groups.color] as String?,
       isHidden: hidden,
       icon: icon,
-      order: order,    // include order
+      order: order, // include order
     );
   }
 
   /// Serialize back to JSON
   Map<String, dynamic> toJson() => {
-    Tb.path_groups.id: id,
-    Tb.path_groups.title: title,
-    Tb.path_groups.data: data,
-    Tb.path_groups.is_hidden: isHidden,
-    Tb.path_groups.path_data: pathData,
-    Tb.path_groups.icon: icon,
-    Tb.path_groups.order: order,    // add order
-  };
+        Tb.path_groups.id: id,
+        Tb.path_groups.title: title,
+        Tb.path_groups.data: data,
+        Tb.path_groups.is_hidden: isHidden,
+        Tb.path_groups.path_data: pathData,
+        Tb.path_groups.icon: icon,
+        Tb.path_groups.order: order, // add order
+      };
 
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     // join each sub‑list with commas, then sub‑lists with semicolons
     final placesCsv = (pathData != null && pathData!.isNotEmpty)
         ? pathData!
-        .map((sub) => sub.map((i) => i.toString()).join(','))
-        .join(';')
+            .map((sub) => sub.map((i) => i.toString()).join(','))
+            .join(';')
         : "";
 
     return TrinaRow(cells: {
       Tb.path_groups.id: TrinaCell(value: id),
       Tb.path_groups.title: TrinaCell(value: title),
-      Tb.path_groups.data: TrinaCell(value: data != null ? jsonEncode(data) : ""),
+      Tb.path_groups.data:
+          TrinaCell(value: data != null ? jsonEncode(data) : ""),
       Tb.path_groups.color: TrinaCell(value: color ?? ""),
       Tb.path_groups.is_hidden: TrinaCell(value: isHidden.toString()),
       Tb.places.table: TrinaCell(value: placesCsv),
       Tb.path_groups.icon: TrinaCell(value: icon),
-      Tb.path_groups.order: TrinaCell(value: order),    // include order cell
+      Tb.path_groups.order: TrinaCell(value: order), // include order cell
     });
   }
 

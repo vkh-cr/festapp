@@ -32,18 +32,46 @@ class OccasionUserModel extends ITrinaRowModel {
   bool? isApprover = false;
   bool? isApproved = false;
 
-  bool isPrivileged() => (isEditor ?? false) || (isManager ?? false) || (isEditorView ?? false) || (isEditorOrder ?? false) || (isEditorOrderView ?? false);
+  bool isPrivileged() =>
+      (isEditor ?? false) ||
+      (isManager ?? false) ||
+      (isEditorView ?? false) ||
+      (isEditorOrder ?? false) ||
+      (isEditorOrderView ?? false);
 
   Map<String, dynamic>? data;
   Map<String, dynamic>? services;
-  OccasionUserModel({this.createdAt, this.lastSignInAt, this.orderCreatedAt, this.occasion, this.user, this.data, this.role,
-    this.isEditor, this.isEditorView, this.isEditorOrder, this.isEditorOrderView, this.isManager, this.isApprover, this.isApproved, this.services, this.unit, this.formId, this.form});
+  OccasionUserModel(
+      {this.createdAt,
+      this.lastSignInAt,
+      this.orderCreatedAt,
+      this.occasion,
+      this.user,
+      this.data,
+      this.role,
+      this.isEditor,
+      this.isEditorView,
+      this.isEditorOrder,
+      this.isEditorOrderView,
+      this.isManager,
+      this.isApprover,
+      this.isApproved,
+      this.services,
+      this.unit,
+      this.formId,
+      this.form});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
-        createdAt: json[Tb.occasion_users.created_at] != null ? DateTime.parse(json[Tb.occasion_users.created_at]) : null,
-        lastSignInAt: json[DbUsers.lastSignInAtKey] != null ? DateTime.parse(json[DbUsers.lastSignInAtKey]) : null,
-        orderCreatedAt: json[DbUsers.orderCreatedAtKey] != null ? DateTime.parse(json[DbUsers.orderCreatedAtKey]) : null,
+        createdAt: json[Tb.occasion_users.created_at] != null
+            ? DateTime.parse(json[Tb.occasion_users.created_at])
+            : null,
+        lastSignInAt: json[DbUsers.lastSignInAtKey] != null
+            ? DateTime.parse(json[DbUsers.lastSignInAtKey])
+            : null,
+        orderCreatedAt: json[DbUsers.orderCreatedAtKey] != null
+            ? DateTime.parse(json[DbUsers.orderCreatedAtKey])
+            : null,
         occasion: json[Tb.occasion_users.occasion],
         user: json[Tb.occasion_users.user],
         unit: json[Tb.unit_users.unit],
@@ -57,12 +85,12 @@ class OccasionUserModel extends ITrinaRowModel {
         isManager: json[Tb.occasion_users.is_manager],
         role: json[Tb.occasion_users.role],
         data: json[Tb.occasion_users.data],
-        services: json[Tb.occasion_users.services]
-    );
+        services: json[Tb.occasion_users.services]);
   }
 
   dynamic toUpdateJson() {
-    if (AppConfig.areAllVolunteersApprovers && data![Tb.occasion_users.data_is_volunteer] == true) {
+    if (AppConfig.areAllVolunteersApprovers &&
+        data![Tb.occasion_users.data_is_volunteer] == true) {
       isApprover = true;
     }
 
@@ -82,7 +110,8 @@ class OccasionUserModel extends ITrinaRowModel {
     };
   }
 
-  factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json, [OccasionUserModel? original]) {
+  factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json,
+      [OccasionUserModel? original]) {
     return OccasionUserModel(
         occasion: RightsService.currentOccasionId()!,
         user: original?.user ?? json[UserColumns.ID],
@@ -99,10 +128,10 @@ class OccasionUserModel extends ITrinaRowModel {
           Tb.occasion_users.data_birthDate: json[UserColumns.BIRTHDAY],
           Tb.occasion_users.data_note: json[UserColumns.NOTE],
           Tb.occasion_users.data_diet: json[UserColumns.DIET],
-          Tb.occasion_users.data_isInvited: original?.data?[Tb.occasion_users.data_isInvited],
+          Tb.occasion_users.data_isInvited:
+              original?.data?[Tb.occasion_users.data_isInvited],
         },
-        services: json[Tb.occasion_users.services]
-    );
+        services: json[Tb.occasion_users.services]);
   }
 
   factory OccasionUserModel.newRow(int occasionId) {
@@ -131,7 +160,8 @@ class OccasionUserModel extends ITrinaRowModel {
     };
   }
 
-  Map<String, TrinaCell> serviceToOneColumnTrinaRow(Map<String, dynamic>? services, String serviceType) {
+  Map<String, TrinaCell> serviceToOneColumnTrinaRow(
+      Map<String, dynamic>? services, String serviceType) {
     Map<String, TrinaCell> serviceCells = {};
     for (var entry in services?[serviceType]?.entries ?? []) {
       serviceCells[serviceType + entry.key] = TrinaCell(value: entry.value);
@@ -139,22 +169,24 @@ class OccasionUserModel extends ITrinaRowModel {
     return serviceCells;
   }
 
-  Map<String, TrinaCell> servicesToOneColumnTrinaRow(Map<String, dynamic>? services, String serviceType) {
+  Map<String, TrinaCell> servicesToOneColumnTrinaRow(
+      Map<String, dynamic>? services, String serviceType) {
     TrinaCell cell = TrinaCell(value: "");
-    var emptyResult = { serviceType : cell };
-    if(services?[serviceType] == null) {
+    var emptyResult = {serviceType: cell};
+    if (services?[serviceType] == null) {
       return emptyResult;
     }
     var value = services?[serviceType]?.entries;
-    if(value.isEmpty){
+    if (value.isEmpty) {
       return emptyResult;
     }
     var first = value.first.key;
     cell = TrinaCell(value: first);
-    return { serviceType : cell };
+    return {serviceType: cell};
   }
 
-  Map<String, TrinaCell> servicesToTrinaRow(Map<String, dynamic>? services, String serviceType) {
+  Map<String, TrinaCell> servicesToTrinaRow(
+      Map<String, dynamic>? services, String serviceType) {
     Map<String, TrinaCell> serviceCells = {};
     for (var entry in services?[serviceType]?.entries ?? []) {
       serviceCells[serviceType + entry.key] = TrinaCell(value: entry.value);
@@ -173,32 +205,49 @@ class OccasionUserModel extends ITrinaRowModel {
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     Map<String, TrinaCell> json = {};
-    Map<String, TrinaCell> foodServices = servicesToTrinaRow(services, DbOccasions.serviceTypeFood);
+    Map<String, TrinaCell> foodServices =
+        servicesToTrinaRow(services, DbOccasions.serviceTypeFood);
     json.addAll(foodServices);
-    json.addAll(servicesToOneColumnTrinaRow(services, DbOccasions.serviceTypeAccommodation));
+    json.addAll(servicesToOneColumnTrinaRow(
+        services, DbOccasions.serviceTypeAccommodation));
     json.addAll({
       UserColumns.ID: TrinaCell(value: user),
       UserColumns.EDITOR: TrinaCell(value: isEditor.toString()),
       UserColumns.EDITOR_VIEW: TrinaCell(value: isEditorView.toString()),
       UserColumns.EDITOR_ORDER: TrinaCell(value: isEditorOrder.toString()),
-      UserColumns.EDITOR_ORDER_VIEW: TrinaCell(value: isEditorOrderView.toString()),
+      UserColumns.EDITOR_ORDER_VIEW:
+          TrinaCell(value: isEditorOrderView.toString()),
       UserColumns.MANAGER: TrinaCell(value: isManager.toString()),
       UserColumns.APPROVED: TrinaCell(value: isApproved.toString()),
       UserColumns.APPROVER: TrinaCell(value: isApprover.toString()),
       UserColumns.ROLE: TrinaCell(value: role?.toString() ?? ""),
-      UserColumns.EMAIL: TrinaCell(value: data?[Tb.occasion_users.data_email] ?? ""),
-      UserColumns.NAME: TrinaCell(value: data?[Tb.occasion_users.data_name] ?? ""),
-      UserColumns.SURNAME: TrinaCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
+      UserColumns.EMAIL:
+          TrinaCell(value: data?[Tb.occasion_users.data_email] ?? ""),
+      UserColumns.NAME:
+          TrinaCell(value: data?[Tb.occasion_users.data_name] ?? ""),
+      UserColumns.SURNAME:
+          TrinaCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
       UserColumns.SEX: TrinaCell(value: data?[Tb.occasion_users.data_sex]),
-      UserColumns.PHONE: TrinaCell(value: data?[Tb.occasion_users.data_phone] ?? ""),
-      UserColumns.BIRTHDAY: TrinaCell(value: DateTime.tryParse(data?[Tb.occasion_users.data_birthDate] ?? "") ?? DateTime.fromMicrosecondsSinceEpoch(0)),
-      UserColumns.INVITED: TrinaCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
-      UserColumns.IS_VOLUNTEER: TrinaCell(value: data?[Tb.occasion_users.data_is_volunteer].toString()),
-      UserColumns.NOTE: TrinaCell(value: data?[Tb.occasion_users.data_note] ?? ""),
-      UserColumns.DIET: TrinaCell(value: data?[Tb.occasion_users.data_diet] ?? ""),
-      UserColumns.TEXT1: TrinaCell(value: data?[Tb.occasion_users.data_text1] ?? ""),
-      UserColumns.TEXT2: TrinaCell(value: data?[Tb.occasion_users.data_text2] ?? ""),
-      UserColumns.TEXT3: TrinaCell(value: data?[Tb.occasion_users.data_text3] ?? ""),
+      UserColumns.PHONE:
+          TrinaCell(value: data?[Tb.occasion_users.data_phone] ?? ""),
+      UserColumns.BIRTHDAY: TrinaCell(
+          value: DateTime.tryParse(
+                  data?[Tb.occasion_users.data_birthDate] ?? "") ??
+              DateTime.fromMicrosecondsSinceEpoch(0)),
+      UserColumns.INVITED:
+          TrinaCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
+      UserColumns.IS_VOLUNTEER: TrinaCell(
+          value: data?[Tb.occasion_users.data_is_volunteer].toString()),
+      UserColumns.NOTE:
+          TrinaCell(value: data?[Tb.occasion_users.data_note] ?? ""),
+      UserColumns.DIET:
+          TrinaCell(value: data?[Tb.occasion_users.data_diet] ?? ""),
+      UserColumns.TEXT1:
+          TrinaCell(value: data?[Tb.occasion_users.data_text1] ?? ""),
+      UserColumns.TEXT2:
+          TrinaCell(value: data?[Tb.occasion_users.data_text2] ?? ""),
+      UserColumns.TEXT3:
+          TrinaCell(value: data?[Tb.occasion_users.data_text3] ?? ""),
       UserColumns.FORM: TrinaCell(value: form?.toString() ?? ""),
       UserColumns.ORDERED_AT: TrinaCell(value: orderCreatedAt),
       UserColumns.CREATED_AT: TrinaCell(value: createdAt),
@@ -207,17 +256,19 @@ class OccasionUserModel extends ITrinaRowModel {
     return TrinaRow(cells: json);
   }
 
-  static void mapOneToServices(Map<String, dynamic> services, String serviceType, String? key, String value) {
-    if(key == null) {
+  static void mapOneToServices(Map<String, dynamic> services,
+      String serviceType, String? key, String value) {
+    if (key == null) {
       return;
     }
-    if(services[serviceType] == null) {
+    if (services[serviceType] == null) {
       services[serviceType] = {};
     }
     services[serviceType][key] = value;
   }
 
-  static void mapJsonToServices(Map<String, dynamic> json, Map<String, dynamic> services, String serviceType) {
+  static void mapJsonToServices(Map<String, dynamic> json,
+      Map<String, dynamic> services, String serviceType) {
     for (var entry in json.entries) {
       if (entry.key.startsWith(serviceType)) {
         var code = entry.key.substring(serviceType.length);
@@ -239,8 +290,11 @@ class OccasionUserModel extends ITrinaRowModel {
     }
     Map<String, dynamic> services = {};
     mapJsonToServices(json, services, DbOccasions.serviceTypeFood);
-    var value = json[UserColumns.ACCOMMODATION]?.isEmpty ?? true ? DbOccasions.serviceNone : DbOccasions.servicePaid;
-    mapOneToServices(services, DbOccasions.serviceTypeAccommodation, json[UserColumns.ACCOMMODATION], value);
+    var value = json[UserColumns.ACCOMMODATION]?.isEmpty ?? true
+        ? DbOccasions.serviceNone
+        : DbOccasions.servicePaid;
+    mapOneToServices(services, DbOccasions.serviceTypeAccommodation,
+        json[UserColumns.ACCOMMODATION], value);
     return OccasionUserModel(
       occasion: RightsService.currentOccasionId(),
       user: json[UserColumns.ID]?.isEmpty == true ? null : json[UserColumns.ID],
@@ -250,7 +304,8 @@ class OccasionUserModel extends ITrinaRowModel {
       isEditor: json[UserColumns.EDITOR] == "true" ? true : false,
       isEditorView: json[UserColumns.EDITOR_VIEW] == "true" ? true : false,
       isEditorOrder: json[UserColumns.EDITOR_ORDER] == "true" ? true : false,
-      isEditorOrderView: json[UserColumns.EDITOR_ORDER_VIEW] == "true" ? true : false,
+      isEditorOrderView:
+          json[UserColumns.EDITOR_ORDER_VIEW] == "true" ? true : false,
       role: int.tryParse(json[UserColumns.ROLE] ?? ""),
       services: services,
       data: {
@@ -260,8 +315,10 @@ class OccasionUserModel extends ITrinaRowModel {
         Tb.occasion_users.data_email: json[UserColumns.EMAIL]?.trim(),
         Tb.occasion_users.data_phone: json[UserColumns.PHONE]?.trim(),
         Tb.occasion_users.data_birthDate: bd?.toIso8601String(),
-        Tb.occasion_users.data_isInvited: json[UserColumns.INVITED] == "true" ? true : false,
-        Tb.occasion_users.data_is_volunteer: json[UserColumns.IS_VOLUNTEER] == "true" ? true : false,
+        Tb.occasion_users.data_isInvited:
+            json[UserColumns.INVITED] == "true" ? true : false,
+        Tb.occasion_users.data_is_volunteer:
+            json[UserColumns.IS_VOLUNTEER] == "true" ? true : false,
         Tb.occasion_users.data_note: json[UserColumns.NOTE]?.trim(),
         Tb.occasion_users.data_diet: json[UserColumns.DIET]?.trim(),
         Tb.occasion_users.data_text1: json[UserColumns.TEXT1]?.trim(),
@@ -289,26 +346,42 @@ class OccasionUserModel extends ITrinaRowModel {
   }
 
   bool importedEquals(Map<String, dynamic> iu) {
-    return compareField(iu, Tb.occasion_users.data_email, Tb.occasion_users.data_email)
-        && compareField(iu, Tb.occasion_users.data_name, Tb.occasion_users.data_name)
-        && compareField(iu, Tb.occasion_users.data_surname, Tb.occasion_users.data_surname)
-        && compareField(iu, Tb.occasion_users.data_sex, Tb.occasion_users.data_sex)
-        && iu[Tb.user_info.role] == role
-        && compareField(iu, Tb.occasion_users.data_phone, Tb.occasion_users.data_phone)
-        && compareField(iu, Tb.occasion_users.data_text1, Tb.occasion_users.data_text1)
-        && compareField(iu, Tb.occasion_users.data_text2, Tb.occasion_users.data_text2)
-        && compareField(iu, Tb.occasion_users.data_text3, Tb.occasion_users.data_text3)
-        && compareField(iu, Tb.occasion_users.data_text4, Tb.occasion_users.data_text4)
-        && compareField(iu, Tb.occasion_users.data_diet, Tb.occasion_users.data_diet)
-        && compareField(iu, Tb.occasion_users.data_note, Tb.occasion_users.data_note)
-        && compareServicesJson(iu[Tb.occasion_users.services], services, [DbOccasions.serviceTypeFood, DbOccasions.serviceTypeAccommodation])
-        && iu[Tb.occasion_users.data_birthDate] == data?[Tb.occasion_users.data_birthDate];
+    return compareField(
+            iu, Tb.occasion_users.data_email, Tb.occasion_users.data_email) &&
+        compareField(
+            iu, Tb.occasion_users.data_name, Tb.occasion_users.data_name) &&
+        compareField(iu, Tb.occasion_users.data_surname,
+            Tb.occasion_users.data_surname) &&
+        compareField(
+            iu, Tb.occasion_users.data_sex, Tb.occasion_users.data_sex) &&
+        iu[Tb.user_info.role] == role &&
+        compareField(
+            iu, Tb.occasion_users.data_phone, Tb.occasion_users.data_phone) &&
+        compareField(
+            iu, Tb.occasion_users.data_text1, Tb.occasion_users.data_text1) &&
+        compareField(
+            iu, Tb.occasion_users.data_text2, Tb.occasion_users.data_text2) &&
+        compareField(
+            iu, Tb.occasion_users.data_text3, Tb.occasion_users.data_text3) &&
+        compareField(
+            iu, Tb.occasion_users.data_text4, Tb.occasion_users.data_text4) &&
+        compareField(
+            iu, Tb.occasion_users.data_diet, Tb.occasion_users.data_diet) &&
+        compareField(
+            iu, Tb.occasion_users.data_note, Tb.occasion_users.data_note) &&
+        compareServicesJson(iu[Tb.occasion_users.services], services, [
+          DbOccasions.serviceTypeFood,
+          DbOccasions.serviceTypeAccommodation
+        ]) &&
+        iu[Tb.occasion_users.data_birthDate] ==
+            data?[Tb.occasion_users.data_birthDate];
 
     // Uncomment and adjust for additional fields
     // && (u[Tb.user_info.sex].toString().trim().toLowerCase().startsWith("m") ? "male" : "female") == data?[Tb.occasion_users.data_sex];
   }
 
-  static bool compareJson(Map<String, dynamic>? json1, Map<String, dynamic>? json2) {
+  static bool compareJson(
+      Map<String, dynamic>? json1, Map<String, dynamic>? json2) {
     if (json1 == null && json2 == null) return true;
     if (json1 == null || json2 == null) return false;
 
@@ -317,7 +390,8 @@ class OccasionUserModel extends ITrinaRowModel {
     return deepEquality(json1, json2);
   }
 
-  static bool compareServicesJson(Map<String, dynamic>? json1, Map<String, dynamic>? json2, List<String> serviceTypes) {
+  static bool compareServicesJson(Map<String, dynamic>? json1,
+      Map<String, dynamic>? json2, List<String> serviceTypes) {
     if (json1 == null && json2 == null) return true;
     if (json1 == null || json2 == null) return false;
     for (String serviceType in serviceTypes) {
@@ -334,14 +408,16 @@ class OccasionUserModel extends ITrinaRowModel {
         var value2 = service2[key];
 
         // Check if value is "serviceNone" in one JSON and something else in the other
-        if ((value1 == DbOccasions.serviceNone && value2 != DbOccasions.serviceNone) ||
-            (value2 == DbOccasions.serviceNone && value1 != DbOccasions.serviceNone)) {
+        if ((value1 == DbOccasions.serviceNone &&
+                value2 != DbOccasions.serviceNone) ||
+            (value2 == DbOccasions.serviceNone &&
+                value1 != DbOccasions.serviceNone)) {
           return false;
         }
       }
 
       // Check for any extra keys in json2 that are not in json1
-      for (var key in service2.keys.where((k)=>k.isNotEmpty)) {
+      for (var key in service2.keys.where((k) => k.isNotEmpty)) {
         if (!service1.containsKey(key)) {
           return false;
         }

@@ -19,19 +19,23 @@ class DescriptionTooltip extends StatelessWidget {
     }
 
     final tooltipTheme = TooltipTheme.of(context);
-    final effectiveDecoration = tooltipTheme.decoration ?? BoxDecoration(
-      color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[700] : Colors.white,
-      borderRadius: const BorderRadius.all(Radius.circular(4)),
-      border: Border.all(color: Colors.grey.shade400, width: 0.5),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          blurRadius: 4,
-          offset: const Offset(0, 2),
-        )
-      ],
-    );
-    final baseTextStyle = tooltipTheme.textStyle ?? DefaultTextStyle.of(context).style;
+    final effectiveDecoration = tooltipTheme.decoration ??
+        BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.grey[700]
+              : Colors.white,
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
+          border: Border.all(color: Colors.grey.shade400, width: 0.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            )
+          ],
+        );
+    final baseTextStyle =
+        tooltipTheme.textStyle ?? DefaultTextStyle.of(context).style;
     final effectiveTextStyle = baseTextStyle.copyWith(fontSize: 14);
 
     return Tooltip(
@@ -45,7 +49,9 @@ class DescriptionTooltip extends StatelessWidget {
         alignment: PlaceholderAlignment.bottom,
         child: Container(
           padding: const EdgeInsets.all(10.0),
-          constraints: const BoxConstraints(maxWidth: 300, maxHeight: 200), // Slightly smaller constraints for form look
+          constraints: const BoxConstraints(
+              maxWidth: 300,
+              maxHeight: 200), // Slightly smaller constraints for form look
           decoration: effectiveDecoration,
           child: SingleChildScrollView(
             child: HtmlView(

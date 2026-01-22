@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -9,7 +8,6 @@ import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 
 import '../../_shared/common_strings.dart';
-
 
 class OccasionEditCard extends StatelessWidget {
   final OccasionModel occasion;
@@ -26,10 +24,14 @@ class OccasionEditCard extends StatelessWidget {
   });
 
   /// Builds a single stat widget with an icon, value, and tooltip.
-  Widget _buildStat(BuildContext context, {required IconData icon, required String value, required String tooltip}) {
+  Widget _buildStat(BuildContext context,
+      {required IconData icon,
+      required String value,
+      required String tooltip}) {
     final theme = Theme.of(context);
     final defaultColor = theme.colorScheme.onSurface.withOpacity(0.7);
-    final statsTextStyle = theme.textTheme.bodySmall?.copyWith(color: defaultColor);
+    final statsTextStyle =
+        theme.textTheme.bodySmall?.copyWith(color: defaultColor);
 
     return Tooltip(
       message: tooltip,
@@ -75,7 +77,8 @@ class OccasionEditCard extends StatelessWidget {
             children: [
               PopupMenuButton<String>(
                 elevation: 0,
-                icon: Icon(Icons.more_vert, color: onSurfaceColor.withOpacity(0.7)),
+                icon: Icon(Icons.more_vert,
+                    color: onSurfaceColor.withOpacity(0.7)),
                 onSelected: (value) {
                   if (value == "create_copy") {
                     onCreateCopy();
@@ -114,37 +117,50 @@ class OccasionEditCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (occasion.stats != null) ...[
-                      if (FeatureService.isFeatureEnabled(FeatureConstants.form, features: occasion.features)) ...[
+                      if (FeatureService.isFeatureEnabled(FeatureConstants.form,
+                          features: occasion.features)) ...[
                         const SizedBox(height: 8),
-                        Builder(
-                            builder: (context) {
-                              final bool hasTickets = FeatureService.isFeatureEnabled(
+                        Builder(builder: (context) {
+                          final bool hasTickets =
+                              FeatureService.isFeatureEnabled(
                                   FeatureConstants.ticket,
                                   features: occasion.features);
 
-                              return Wrap(
-                                spacing: 12.0,
-                                runSpacing: 4.0,
-                                children: [
-                                  _buildStat(
-                                      context,
-                                      icon: hasTickets ? Icons.confirmation_number_outlined : Icons.chat_bubble,
-                                      value: (occasion.stats!.total - occasion.stats!.storno).toString(),
-                                      tooltip: FormStrings.responses
-                                  ),
-                                  _buildStat(context, icon: Icons.check_circle_outline, value: (occasion.stats!.paidOrSent + occasion.stats!.used).toString(), tooltip: OrdersStrings.gridPaidOrSent),
-                                  _buildStat(context, icon: Icons.shopping_cart_outlined, value: occasion.stats!.ordered.toString(), tooltip: OrdersStrings.gridOrdered),
-                                ],
-                              );
-                            }
-                        )
+                          return Wrap(
+                            spacing: 12.0,
+                            runSpacing: 4.0,
+                            children: [
+                              _buildStat(context,
+                                  icon: hasTickets
+                                      ? Icons.confirmation_number_outlined
+                                      : Icons.chat_bubble,
+                                  value: (occasion.stats!.total -
+                                          occasion.stats!.storno)
+                                      .toString(),
+                                  tooltip: FormStrings.responses),
+                              _buildStat(context,
+                                  icon: Icons.check_circle_outline,
+                                  value: (occasion.stats!.paidOrSent +
+                                          occasion.stats!.used)
+                                      .toString(),
+                                  tooltip: OrdersStrings.gridPaidOrSent),
+                              _buildStat(context,
+                                  icon: Icons.shopping_cart_outlined,
+                                  value: occasion.stats!.ordered.toString(),
+                                  tooltip: OrdersStrings.gridOrdered),
+                            ],
+                          );
+                        })
                       ] else ...[
                         const SizedBox(height: 8),
                         Wrap(
                           spacing: 12.0,
                           runSpacing: 4.0,
                           children: [
-                            _buildStat(context, icon: Icons.group_outlined, value: occasion.stats!.users.toString(), tooltip: CommonStrings.users),
+                            _buildStat(context,
+                                icon: Icons.group_outlined,
+                                value: occasion.stats!.users.toString(),
+                                tooltip: CommonStrings.users),
                           ],
                         )
                       ],

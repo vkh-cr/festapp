@@ -52,16 +52,16 @@ class UserGroupInfoModel extends ITrinaRowModel {
       place: json[Tb.places.table] != null
           ? PlaceModel.fromJson(json[Tb.places.table])
           : json[PlaceModel.placeObjectColumn] != null
-          ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
-          : null,
+              ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
+              : null,
       description: json[Tb.user_group_info.description],
       participants: json.containsKey(Tb.user_groups.table)
           ? Set<GroupParticipantModel>.from(json[Tb.user_groups.table]
-          .map((e) => GroupParticipantModel.fromJson(e)))
+              .map((e) => GroupParticipantModel.fromJson(e)))
           : json[participantsColumn] != null
-          ? Set<GroupParticipantModel>.from(json[participantsColumn]
-          .map((p) => GroupParticipantModel.fromJson(p)))
-          : {},
+              ? Set<GroupParticipantModel>.from(json[participantsColumn]
+                  .map((p) => GroupParticipantModel.fromJson(p)))
+              : {},
       isAdmin: json[isAdminColumn],
     );
   }
@@ -108,7 +108,8 @@ class UserGroupInfoModel extends ITrinaRowModel {
       Tb.user_group_info.type: TrinaCell(value: type ?? ""),
       progressColumn: TrinaCell(value: progressText),
       isAdminColumn: TrinaCell(value: isAdmin),
-      participantsManagementColumn: TrinaCell(value: getParticipantsDisplayValue()),
+      participantsManagementColumn:
+          TrinaCell(value: getParticipantsDisplayValue()),
       modelReference: TrinaCell(value: this),
     });
   }
@@ -141,9 +142,9 @@ class UserGroupInfoModel extends ITrinaRowModel {
       Tb.user_group_info.data: data,
       "participants": participants
           ?.map((p) => {
-        "user_id": p.userInfo?.id,
-        "is_admin": p.isAdmin ?? false,
-      })
+                "user_id": p.userInfo?.id,
+                "is_admin": p.isAdmin ?? false,
+              })
           .toList(),
     };
   }

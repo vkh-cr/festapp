@@ -37,7 +37,8 @@ class SpotManagementBundle {
           .map((i) => ResourceSlotModel.fromJson(i as Map<String, dynamic>))
           .toList(),
       orderProductTickets: (json['order_product_tickets'] as List)
-          .map((i) => OrderProductTicketModel.fromJson(i as Map<String, dynamic>))
+          .map((i) =>
+              OrderProductTicketModel.fromJson(i as Map<String, dynamic>))
           .toList(),
       orders: (json['orders'] as List)
           .map((i) => OrderModel.fromJson(i as Map<String, dynamic>))

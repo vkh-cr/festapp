@@ -50,14 +50,19 @@ class ContractFeature extends Feature {
       FeatureConstants.metaCode: code,
       FeatureConstants.metaIsEnabled: isEnabled,
     };
-    if (transport != null) data[FeatureConstants.contractTransport] = transport!;
-    if (departurePoint != null) data[FeatureConstants.contractDeparturePoint] = departurePoint!;
-    if (placeOfStay != null) data[FeatureConstants.contractPlaceOfStay] = placeOfStay!;
+    if (transport != null)
+      data[FeatureConstants.contractTransport] = transport!;
+    if (departurePoint != null)
+      data[FeatureConstants.contractDeparturePoint] = departurePoint!;
+    if (placeOfStay != null)
+      data[FeatureConstants.contractPlaceOfStay] = placeOfStay!;
     if (tourName != null) data[FeatureConstants.contractTourName] = tourName!;
     if (tourDate != null) data[FeatureConstants.contractTourDate] = tourDate!;
     if (notes != null) data[FeatureConstants.contractNotes] = notes!;
-    if (numberOfDays != null) data[FeatureConstants.contractNumberOfDays] = numberOfDays!;
-    if (paymentInfo != null) data[FeatureConstants.contractPaymentInfo] = paymentInfo!;
+    if (numberOfDays != null)
+      data[FeatureConstants.contractNumberOfDays] = numberOfDays!;
+    if (paymentInfo != null)
+      data[FeatureConstants.contractPaymentInfo] = paymentInfo!;
     return data;
   }
 
@@ -74,30 +79,34 @@ class ContractFeature extends Feature {
       final start = occasion.startTime;
       final end = occasion.endTime;
       if (start != null && end != null) {
-        tourDate = '${DateFormat('d. M. yyyy').format(start)} - ${DateFormat('d. M. yyyy').format(end)}';
+        tourDate =
+            '${DateFormat('d. M. yyyy').format(start)} - ${DateFormat('d. M. yyyy').format(end)}';
       }
     }
 
     if (numberOfDays == null || numberOfDays!.isEmpty) {
       final start = occasion.startTime;
       final end = occasion.endTime;
-      if(start != null && end != null) {
+      if (start != null && end != null) {
         final diffTime = end.difference(start).abs();
-        final diffDays = diffTime.inDays + (diffTime.inHours % 24 > 0 ? 1 : 0); // Math.ceil equivalent logic or simple inDays
-        // TS logic: Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-        // Dart Duration inDays is truncated.
-        // Let's mirror TS closely:
-        final milliseconds = end.millisecondsSinceEpoch - start.millisecondsSinceEpoch;
+        final diffDays = diffTime.inDays +
+            (diffTime.inHours % 24 > 0
+                ? 1
+                : 0); // Math.ceil equivalent logic or simple inDays
+        // Mirror TS logic closely:
+        final milliseconds =
+            end.millisecondsSinceEpoch - start.millisecondsSinceEpoch;
         final days = (milliseconds / (1000 * 60 * 60 * 24)).ceil();
         numberOfDays = days.toString();
       }
     }
 
     final description = occasion.description;
-    
+
     //Regex to strip basic HTML tags for simpler matching or match around them
     if (description != null) {
-      final transportRegex = RegExp(r'Doprava\s*(?:<\/?[^>]+>)?\s*([^.<]+)', caseSensitive: false);
+      final transportRegex =
+          RegExp(r'Doprava\s*(?:<\/?[^>]+>)?\s*([^.<]+)', caseSensitive: false);
 
       final transportMatch = transportRegex.firstMatch(description);
       if (transportMatch != null && (transport == null || transport!.isEmpty)) {
@@ -106,11 +115,11 @@ class ContractFeature extends Feature {
     }
 
     if (departurePoint == null || departurePoint!.isEmpty) {
-        departurePoint = ContractDefaults.defaultDeparturePoint;
+      departurePoint = ContractDefaults.defaultDeparturePoint;
     }
 
     if (placeOfStay == null || placeOfStay!.isEmpty) {
-        placeOfStay = ContractDefaults.defaultPlaceOfStay;
+      placeOfStay = ContractDefaults.defaultPlaceOfStay;
     }
 
     if (paymentInfo == null || paymentInfo!.isEmpty) {
@@ -142,48 +151,55 @@ class ContractFeature extends Feature {
           TextFormField(
             key: ValueKey('tourName_$tourName'),
             initialValue: tourName,
-            decoration: InputDecoration(labelText: FeaturesStrings.contractTourName),
+            decoration:
+                InputDecoration(labelText: FeaturesStrings.contractTourName),
             onChanged: (val) => tourName = val,
           ),
           const SizedBox(height: 16),
           TextFormField(
             key: ValueKey('numberOfDays_$numberOfDays'),
             initialValue: numberOfDays,
-            decoration: InputDecoration(labelText: FeaturesStrings.contractNumberOfDays),
+            decoration: InputDecoration(
+                labelText: FeaturesStrings.contractNumberOfDays),
             onChanged: (val) => numberOfDays = val,
           ),
           const SizedBox(height: 16),
           TextFormField(
             key: ValueKey('tourDate_$tourDate'),
             initialValue: tourDate,
-            decoration: InputDecoration(labelText: FeaturesStrings.contractTourDate),
+            decoration:
+                InputDecoration(labelText: FeaturesStrings.contractTourDate),
             onChanged: (val) => tourDate = val,
           ),
           const SizedBox(height: 16),
           TextFormField(
             key: ValueKey('transport_$transport'),
             initialValue: transport,
-            decoration: InputDecoration(labelText: FeaturesStrings.contractTransport),
+            decoration:
+                InputDecoration(labelText: FeaturesStrings.contractTransport),
             onChanged: (val) => transport = val,
           ),
           const SizedBox(height: 16),
           TextFormField(
             key: ValueKey('departurePoint_$departurePoint'),
             initialValue: departurePoint,
-            decoration: InputDecoration(labelText: FeaturesStrings.contractDeparturePoint),
+            decoration: InputDecoration(
+                labelText: FeaturesStrings.contractDeparturePoint),
             onChanged: (val) => departurePoint = val,
           ),
           const SizedBox(height: 16),
           TextFormField(
             key: ValueKey('placeOfStay_$placeOfStay'),
             initialValue: placeOfStay,
-            decoration: InputDecoration(labelText: FeaturesStrings.contractPlaceOfStay),
+            decoration:
+                InputDecoration(labelText: FeaturesStrings.contractPlaceOfStay),
             onChanged: (val) => placeOfStay = val,
           ),
           const SizedBox(height: 16),
           TextFormField(
             initialValue: notes,
-            decoration: InputDecoration(labelText: FeaturesStrings.contractNotes),
+            decoration:
+                InputDecoration(labelText: FeaturesStrings.contractNotes),
             onChanged: (val) => notes = val,
           ),
           const SizedBox(height: 16),
@@ -191,7 +207,8 @@ class ContractFeature extends Feature {
             key: ValueKey('paymentInfo_$paymentInfo'),
             initialValue: paymentInfo,
             maxLines: 3,
-            decoration: InputDecoration(labelText: FeaturesStrings.contractPaymentInfo),
+            decoration:
+                InputDecoration(labelText: FeaturesStrings.contractPaymentInfo),
             onChanged: (val) => paymentInfo = val,
           ),
         ],

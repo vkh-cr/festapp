@@ -277,6 +277,11 @@ export class FormSession extends EventTarget {
 
     updateTicket(index, fieldId, value) {
 
+        // Auto-vivify Ticket 0 if needed (Robustness for Simple Mode after clear)
+        if (index === 0 && this.state.tickets.length === 0) {
+            this.addTicket();
+        }
+
         if (index < 0 || index >= this.state.tickets.length) return;
         
         const ticket = this.state.tickets[index];
@@ -356,7 +361,6 @@ export class FormSession extends EventTarget {
         const task = async () => {
             try {
                  const currentSecret = this.formModel.secret;
-                 console.log(`[FormSession] Executing toggleSpot queue task. Spot: ${spotId}, Action: ${isSelecting ? 'Select' : 'Deselect'}, Secret: ${currentSecret}`);
 
                  // 2. Sync with Backend
                  // ALWAYS use the latest secret from the model (which might have been updated by previous queue task)
@@ -690,7 +694,6 @@ export class FormSession extends EventTarget {
         const initialTickets = FormDataReader.getTicketDataFromDom(form, this.formModel);
         if (initialTickets.length > 0) {
             this.state.tickets = initialTickets;
-            console.log('FormSession: Hydrated tickets from DOM:', this.state.tickets);
         }
 
         // 2. Hydrate/Refresh Standard Fields & Calc
@@ -751,18 +754,46 @@ export class FormSession extends EventTarget {
 
     _recalculate() {
         // Debug Logging
-        // console.log('FormSession: Recalculating with Payload:', JSON.parse(JSON.stringify(this.payload)));
         const priceData = FormHelper.calculatePrice(this.payload, this.formModel);
         
-        // --- Currency Persistence Logic ---
-        // If calculator found a bound currency (because items were selected), use it.
-        // If calculator returned null (no items selected), KEEP existing session currency.
-        if (!priceData.currency) {
+        const hasBoundCurrency = this._payloadHasBoundCurrency();
+        
+
+        
+        if (!hasBoundCurrency && this.state.currency) {
+            // Force keep session currency if payload doesn't care
             priceData.currency = this.state.currency;
+        } else if (!priceData.currency) {
+            // If calculator returned nothing (no default?), keep session
+             priceData.currency = this.state.currency;
         }
 
         // console.log('FormSession: Calculated Price Data:', priceData);
         this.updateState(priceData);
+    }
+
+    _payloadHasBoundCurrency() {
+        // Check if any field or ticket item has an explicit currency_code
+        // Note: this.payload is built in _syncPayloadFromState
+        
+        if (this.payload.fields) {
+            for (const f of this.payload.fields) {
+                if (f.currency_code) return true;
+            }
+        }
+        
+        if (this.payload.ticket) {
+            for (const t of this.payload.ticket) {
+                 // Check ticket-level or field-level?
+                 // Usually ticket fields have currency_code
+                 if (t.fields) {
+                     for (const f of t.fields) {
+                         if (f.currency_code) return true;
+                     }
+                 }
+            }
+        }
+        return false;
     }
 
 
@@ -775,7 +806,29 @@ export class FormSession extends EventTarget {
     setCurrency(currencyCode) {
         if (this.state.currency !== currencyCode) {
             this.state.currency = currencyCode;
-            this.resetIncompatibleCurrencyFields(currencyCode);
+            
+            // STRICT CLEARING Logic (User Request: "all selected products or fields must be deselected")
+            // 1. Clear all tickets
+            // Reset to 1 empty ticket (Default State) instead of wiping all (which removes UI).
+            this.state.tickets = [{ fields: [] }];
+            
+            // 2. Clear fields that are likely products or currency-dependent choices
+            // Text inputs usually preserved, but product_type/selects cleared.
+            const fieldsToRemove = [];
+            for (const [key, val] of this.state.fields.entries()) {
+                const fieldDef = this.formModel.visibleFields.find(f => String(f.id) === String(key));
+                if (fieldDef) {
+                     // Heuristic: If it has options or is a product_type, clear it.
+                     // Exceptions: 'text', 'textarea', 'email', 'tel', 'date' - usually keep unless currency specific.
+                     // The user said "selected products or fields". Usually "selected" implies choices.
+                     const isSelection = ['product_type', 'select', 'radio', 'checkbox', 'ticket'].includes(fieldDef.type);
+                     if (isSelection) {
+                         fieldsToRemove.push(key);
+                     }
+                }
+            }
+            fieldsToRemove.forEach(k => this.state.fields.delete(k));
+
             this._syncPayloadFromState();
             this._recalculate();
             this._emitStateChanged();

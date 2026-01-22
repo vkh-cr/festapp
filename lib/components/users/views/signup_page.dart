@@ -67,75 +67,92 @@ class _SignupPageState extends State<SignupPage> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(12.0),
-              child: _isRegistrationSuccess ?
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12,88,12,12),
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          style: TextStyle(fontSize: 18, color: ThemeConfig.blackColor(context)),
-                          text: UserStrings.credentialsSentLong(fieldsData?["email"]?.toString() ?? ""),
-                        ),
-                        const WidgetSpan(
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(6,0,0,0),
-                              child: Icon(Icons.check_circle)),
-                        )
-                      ],
-                    )))
-                  :
-              FormBuilder(
-                key: _formKey,
-                child: AutofillGroup(
-                  child: Column(
-                    children: [
-                    ...FormHelper.getAllFormFields(context, formHolder!.controller!.globalKey, formHolder!),
-                      const SizedBox(
-                        height: 16,
+              child: _isRegistrationSuccess
+                  ? Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 88, 12, 12),
+                      child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: ThemeConfig.blackColor(context)),
+                                text: UserStrings.credentialsSentLong(
+                                    fieldsData?["email"]?.toString() ?? ""),
+                              ),
+                              const WidgetSpan(
+                                child: Padding(
+                                    padding: EdgeInsets.fromLTRB(6, 0, 0, 0),
+                                    child: Icon(Icons.check_circle)),
+                              )
+                            ],
+                          )))
+                  : FormBuilder(
+                      key: _formKey,
+                      child: AutofillGroup(
+                        child: Column(children: [
+                          ...FormHelper.getAllFormFields(context,
+                              formHolder!.controller!.globalKey, formHolder!),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          ButtonsHelper.bigButton(
+                            context: context,
+                            onPressed: _isLoading
+                                ? null
+                                : () async {
+                                    TextInput.finishAutofillContext();
+                                    if (_formKey.currentState
+                                            ?.saveAndValidate() ??
+                                        false) {
+                                      setState(() {
+                                        _isLoading = true;
+                                      });
+                                      var data = FormHelper.getDataFromForm(
+                                          formHolder!, true);
+                                      fieldsData = Map<String, dynamic>.from(
+                                          data[FormHelper.metaFields]);
+                                      fieldsData![AuthService.metaLang] =
+                                          EasyLocalization.of(context)
+                                              ?.locale
+                                              .toString();
+                                      var resp = await AuthService.register(
+                                          fieldsData!);
+                                      if (resp["code"] == 200) {
+                                        ToastHelper.Show(
+                                            context,
+                                            UserStrings
+                                                .registrationAlmostComplete);
+                                        setState(() {
+                                          _isRegistrationSuccess = true;
+                                        });
+                                      } else if (resp["code"] == 409) {
+                                        ToastHelper.Show(
+                                            context,
+                                            UserStrings.emailInUse(
+                                                resp["email"]),
+                                            severity: ToastSeverity.NotOk);
+                                      } else {
+                                        ToastHelper.Show(context,
+                                            UserStrings.registrationFailed,
+                                            severity: ToastSeverity.NotOk);
+                                      }
+                                      setState(() {
+                                        _isLoading = false;
+                                      });
+                                    }
+                                  },
+                            label: UserStrings.signUp,
+                            color: ThemeConfig.seed1,
+                            textColor: Colors.white,
+                            isEnabled: !_isLoading,
+                            height: 50.0,
+                            width: 250.0,
+                          ),
+                        ]),
                       ),
-                      ButtonsHelper.bigButton(
-                        context: context,
-                        onPressed: _isLoading ? null : () async {
-                          TextInput.finishAutofillContext();
-                          if (_formKey.currentState?.saveAndValidate() ?? false) {
-                            setState(() {
-                              _isLoading = true;
-                            });
-                            var data = FormHelper.getDataFromForm(formHolder!, true);
-                            fieldsData = Map<String, dynamic>.from(data[FormHelper.metaFields]);
-                            fieldsData![AuthService.metaLang] = EasyLocalization.of(context)?.locale.toString();
-                            var resp = await AuthService.register(fieldsData!);
-                            if (resp["code"] == 200) {
-                              ToastHelper.Show(context, UserStrings.registrationAlmostComplete);
-                              setState(() {
-                                _isRegistrationSuccess = true;
-                              });
-                            } else if (resp["code"] == 409) {
-                              ToastHelper.Show(
-                                  context,
-                                  UserStrings.emailInUse(resp["email"]),
-                                  severity: ToastSeverity.NotOk
-                              );
-                            } else {
-                              ToastHelper.Show(context, UserStrings.registrationFailed, severity: ToastSeverity.NotOk);
-                            }
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          }
-                        },
-                        label: UserStrings.signUp,
-                        color: ThemeConfig.seed1,
-                        textColor: Colors.white,
-                        isEnabled: !_isLoading,
-                        height: 50.0,
-                        width: 250.0,
-                      ),]
-                  ),
-                ),
-              ),
+                    ),
             ),
           ),
         ),

@@ -23,7 +23,8 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
   @override
   Widget build(BuildContext context) {
     final bool isCancelled = widget.item.isCancelled;
-    final bool isUserSpecific = !isCancelled && (widget.item.isInMySchedule || widget.item.isSignedIn());
+    final bool isUserSpecific = !isCancelled &&
+        (widget.item.isInMySchedule || widget.item.isSignedIn());
     final bool isActivity = widget.item.isActivity;
 
     // --- Strip Style ---
@@ -33,9 +34,9 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
       stripColor = Colors.grey;
     } else if (isActivity) {
       stripColor = Theme.of(context).primaryColor;
-    }
-    else {
-      stripColor = ThemeConfig.eventTypeToColorTimetable(context, widget.item.eventType);
+    } else {
+      stripColor =
+          ThemeConfig.eventTypeToColorTimetable(context, widget.item.eventType);
     }
 
     // --- Main Content Background ---
@@ -63,16 +64,19 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
       borderWidth = 0.5;
     }
 
-
     // --- Dimensions Calculation (preserved from original) ---
     final double actualWidth, actualHeight;
     if (widget.controller.isTimeHorizontal) {
-      actualWidth = widget.controller.timeRangeLength(widget.item.startTime, widget.item.endTime) -
+      actualWidth = widget.controller
+              .timeRangeLength(widget.item.startTime, widget.item.endTime) -
           widget.controller.minimalPadding() * 2;
-      actualHeight = widget.controller.itemStaticDimension() - widget.controller.minimalPadding() * 2;
+      actualHeight = widget.controller.itemStaticDimension() -
+          widget.controller.minimalPadding() * 2;
     } else {
-      actualWidth = widget.controller.itemStaticDimension() - widget.controller.minimalPadding() * 2;
-      actualHeight = widget.controller.timeRangeLength(widget.item.startTime, widget.item.endTime) -
+      actualWidth = widget.controller.itemStaticDimension() -
+          widget.controller.minimalPadding() * 2;
+      actualHeight = widget.controller
+              .timeRangeLength(widget.item.startTime, widget.item.endTime) -
           widget.controller.minimalPadding() * 2;
     }
 
@@ -108,8 +112,10 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
             // --- Event Content ---
             Expanded(
               child: widget.controller.isTimeHorizontal
-                  ? _buildHorizontalContent(context, isUserSpecific, isCancelled, actualWidth, Theme.of(context).primaryColor)
-                  : _buildVerticalContent(context, isUserSpecific, isCancelled, actualHeight, ThemeConfig.blackColor(context)),
+                  ? _buildHorizontalContent(context, isUserSpecific,
+                      isCancelled, actualWidth, Theme.of(context).primaryColor)
+                  : _buildVerticalContent(context, isUserSpecific, isCancelled,
+                      actualHeight, ThemeConfig.blackColor(context)),
             ),
           ],
         ),
@@ -117,7 +123,8 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
     );
   }
 
-  Widget _buildVerticalContent(BuildContext context, bool isUserSpecific, bool isCancelled, double itemHeight, Color iconColor) {
+  Widget _buildVerticalContent(BuildContext context, bool isUserSpecific,
+      bool isCancelled, double itemHeight, Color iconColor) {
     final start = widget.item.startTime;
     final end = widget.item.endTime;
     final durationMins = end.difference(start).inMinutes;
@@ -131,14 +138,21 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
       textColor = Theme.of(context).disabledColor;
       fontWeight = FontWeight.normal;
     } else if (isUserSpecific) {
-      textColor = textTheme.bodyLarge?.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black);
+      textColor = textTheme.bodyLarge?.color ??
+          (Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black);
       fontWeight = FontWeight.bold;
     } else {
-      textColor = textTheme.bodyMedium?.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black87);
+      textColor = textTheme.bodyMedium?.color ??
+          (Theme.of(context).brightness == Brightness.dark
+              ? Colors.white70
+              : Colors.black87);
       fontWeight = FontWeight.w500;
     }
 
-    Color timeLabelColor = (textTheme.bodySmall?.color ?? Colors.grey).withOpacity(isCancelled ? 0.6 : 0.8);
+    Color timeLabelColor = (textTheme.bodySmall?.color ?? Colors.grey)
+        .withOpacity(isCancelled ? 0.6 : 0.8);
 
     const double iconSize = 14.0;
     const double iconTextSpacing = 5.0;
@@ -154,7 +168,9 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
             children: [
               if (showTimeLabel)
                 Padding(
-                  padding: EdgeInsets.only(right: isUserSpecific ? (iconSize + iconTextSpacing) : 0.0),
+                  padding: EdgeInsets.only(
+                      right:
+                          isUserSpecific ? (iconSize + iconTextSpacing) : 0.0),
                   child: Text(
                     '${DateFormat.Hm().format(start)} - ${DateFormat.Hm().format(end)}',
                     style: TextStyle(
@@ -173,7 +189,9 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
                   child: Text(
                     widget.item.toString(),
                     style: TextStyle(
-                      decoration: isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
+                      decoration: isCancelled
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
                       fontSize: 13,
                       fontWeight: fontWeight,
                       color: textColor,
@@ -200,7 +218,8 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
     );
   }
 
-  Widget _buildHorizontalContent(BuildContext context, bool isUserSpecific, bool isCancelled, double itemWidth, Color iconColor) {
+  Widget _buildHorizontalContent(BuildContext context, bool isUserSpecific,
+      bool isCancelled, double itemWidth, Color iconColor) {
     Color textColor;
     FontWeight fontWeight;
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -209,10 +228,16 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
       textColor = Theme.of(context).disabledColor;
       fontWeight = FontWeight.normal;
     } else if (isUserSpecific) {
-      textColor = textTheme.bodyLarge?.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black);
+      textColor = textTheme.bodyLarge?.color ??
+          (Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black);
       fontWeight = FontWeight.bold;
     } else {
-      textColor = textTheme.bodyMedium?.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black87);
+      textColor = textTheme.bodyMedium?.color ??
+          (Theme.of(context).brightness == Brightness.dark
+              ? Colors.white70
+              : Colors.black87);
       fontWeight = FontWeight.w500;
     }
 
@@ -240,7 +265,9 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
               child: Text(
                 widget.item.data.toString(),
                 style: TextStyle(
-                  decoration: isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
+                  decoration: isCancelled
+                      ? TextDecoration.lineThrough
+                      : TextDecoration.none,
                   fontSize: 12,
                   fontWeight: fontWeight,
                   color: textColor,

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/html/html_view.dart';
@@ -47,10 +46,13 @@ class _DetailDialogState extends State<DetailDialog> {
         ],
       ),
       content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: StylesConfig.formMaxWidthMid, maxHeight: 500),
+        constraints: const BoxConstraints(
+            maxWidth: StylesConfig.formMaxWidthMid, maxHeight: 500),
         child: SizedBox(
           height: widget.customContentWidget != null ? 500 : null,
-          width: widget.customContentWidget != null ? StylesConfig.formMaxWidthMid : null,
+          width: widget.customContentWidget != null
+              ? StylesConfig.formMaxWidthMid
+              : null,
           child: PinchScrollView(
             builder: (onPinchStart, onPinchEnd) => Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -65,13 +67,11 @@ class _DetailDialogState extends State<DetailDialog> {
                       label: Text(CommonStrings.edit),
                     ),
                   ),
-
                 if (widget.customContentWidget != null) ...[
                   const SizedBox(height: 16),
                   widget.customContentWidget!,
                 ],
-
-                if(widget.htmlDescription != null)
+                if (widget.htmlDescription != null)
                   HtmlView(
                     html: widget.htmlDescription!,
                     isSelectable: true,

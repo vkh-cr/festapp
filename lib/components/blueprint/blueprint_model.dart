@@ -32,19 +32,24 @@ class BlueprintModel {
 
   /// (New) Helper to get only products of type "spot"
   List<ProductModel> get spotProducts =>
-      products?.where((p) => p.productTypeString == ProductModel.spotType)
-          .toList() ?? [];
+      products
+          ?.where((p) => p.productTypeString == ProductModel.spotType)
+          .toList() ??
+      [];
 
   factory BlueprintModel.fromJson(Map<String, dynamic> json) {
     final List<BlueprintGroupModel> groups = GetOrdersHelper.parseGroups(json);
-    final List<BlueprintObjectModel>? rawObjects = GetOrdersHelper.parseObjects(json);
+    final List<BlueprintObjectModel>? rawObjects =
+        GetOrdersHelper.parseObjects(json);
     final List<BlueprintObjectModel>? spots = GetOrdersHelper.parseSpots(json);
     final List<ProductModel>? products = GetOrdersHelper.parseProducts(json);
     final List<TicketModel>? tickets = GetOrdersHelper.parseTickets(json);
     final List<OrderModel>? orders = GetOrdersHelper.parseOrders(json);
-    final List<OrderProductTicketModel>? orderProductTickets = GetOrdersHelper.parseOrderProductTickets(json);
+    final List<OrderProductTicketModel>? orderProductTickets =
+        GetOrdersHelper.parseOrderProductTickets(json);
 
-    final List<BlueprintObjectModel>? enrichedObjects = GetOrdersHelper.enrichObjects(rawObjects, spots, products);
+    final List<BlueprintObjectModel>? enrichedObjects =
+        GetOrdersHelper.enrichObjects(rawObjects, spots, products);
 
     GetOrdersHelper.assignObjectsToGroups(enrichedObjects, groups);
 
@@ -58,9 +63,10 @@ class BlueprintModel {
       organization: json[TbEshop.blueprints.organization],
       occasion: json[TbEshop.blueprints.occasion],
       configuration: json[TbEshop.blueprints.configuration] != null
-          ? BlueprintConfiguration.fromJson(json[TbEshop.blueprints.configuration])
+          ? BlueprintConfiguration.fromJson(
+              json[TbEshop.blueprints.configuration])
           : null,
-      objects: enrichedObjects??[],
+      objects: enrichedObjects ?? [],
       groups: groups,
       backgroundSvg: json[TbEshop.blueprints.background_svg],
       products: products,
@@ -71,21 +77,21 @@ class BlueprintModel {
   }
 
   Map<String, dynamic> toJson() => {
-    TbEshop.blueprints.id: id,
-    TbEshop.blueprints.created_at: createdAt?.toIso8601String(),
-    TbEshop.blueprints.data: data,
-    TbEshop.blueprints.title: title,
-    TbEshop.blueprints.occasion: occasion,
-    TbEshop.blueprints.organization: organization,
-    TbEshop.blueprints.configuration: configuration,
-    TbEshop.blueprints.objects: objects,
-    TbEshop.blueprints.groups: groups,
-    TbEshop.blueprints.background_svg: backgroundSvg,
-    TbEshop.products.table: products,
-    TbEshop.tickets.table: tickets,
-    TbEshop.orders.table: orders,
-    TbEshop.order_product_ticket.table: orderProductTickets,
-  };
+        TbEshop.blueprints.id: id,
+        TbEshop.blueprints.created_at: createdAt?.toIso8601String(),
+        TbEshop.blueprints.data: data,
+        TbEshop.blueprints.title: title,
+        TbEshop.blueprints.occasion: occasion,
+        TbEshop.blueprints.organization: organization,
+        TbEshop.blueprints.configuration: configuration,
+        TbEshop.blueprints.objects: objects,
+        TbEshop.blueprints.groups: groups,
+        TbEshop.blueprints.background_svg: backgroundSvg,
+        TbEshop.products.table: products,
+        TbEshop.tickets.table: tickets,
+        TbEshop.orders.table: orders,
+        TbEshop.order_product_ticket.table: orderProductTickets,
+      };
 
   String toBasicString() => title ?? id.toString();
 
