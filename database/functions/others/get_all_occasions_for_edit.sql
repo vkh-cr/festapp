@@ -40,7 +40,11 @@ BEGIN
       'title', o.title,
       'created_at', o.created_at,
       'updated_at', o.updated_at,
-      'data', o.data,
+      -- 'data', o.data, -- OPTIMIZED: Removed heavy unused field
+      'data', CASE 
+        WHEN o.data ? 'data_timezone' THEN jsonb_build_object('data_timezone', o.data->'data_timezone')
+        ELSE NULL 
+      END,
       'is_hidden', o.is_hidden,
       'is_open', o.is_open,
       'start_time', o.start_time,
@@ -49,7 +53,16 @@ BEGIN
       'organization', o.organization,
       'services', o.services,
       'unit', o.unit,
-      'features', o.features,
+      -- 'features', o.features, -- OPTIMIZED: Return only essential fields
+      'features', (
+        SELECT jsonb_agg(
+          jsonb_build_object(
+            'code', elem->>'code',
+            'is_enabled', (elem->>'is_enabled')::boolean
+          )
+        )
+        FROM jsonb_array_elements(o.features) elem
+      ),
       'stats', jsonb_build_object(
           'total', COALESCE(ticket_stats.total, 0),
           'storno', COALESCE(ticket_stats.storno, 0),
@@ -63,15 +76,15 @@ BEGIN
          SELECT jsonb_build_object(
            'id', f.id,
            'created_at', f.created_at,
-           'data', f.data,
+           -- 'data', f.data, -- OPTIMIZED: Removed heavy unused field
            'key', f.key,
            'occasion', f.occasion,
            'type', f.type,
            'is_open', f.is_open,
            'link', f.link,
-           'blueprint', f.blueprint,
-           'header', f.header,
-           'header_off', f.header_off,
+           -- 'blueprint', f.blueprint, -- OPTIMIZED: Removed heavy unused field
+           -- 'header', f.header, -- OPTIMIZED: Removed heavy unused field
+           -- 'header_off', f.header_off, -- OPTIMIZED: Unused in list
            'updated_at', f.updated_at
          )
          FROM public.forms f

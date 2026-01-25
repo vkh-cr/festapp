@@ -68,14 +68,10 @@ async function runTest(file) {
     // Start Transaction
     await client.query('BEGIN');
 
-    // Reset Sequences to match max(id)
-    // This prevents "messed up" IDs where tests expect low numbers but sequences are high.
-    // We do this INSIDE the transaction so it applies to the test run, but rolls back (setval is non-transactional though! Warning)
-    // Actually setval IS NOT transactional. The changes persist. 
-    // BUT that is exactly what we want: "reset ... to max current record". 
-    // Since the database state (max id) behaves transactionally (we see only committed rows), 
-    // resetting to max(id)+1 of the *current* data is correct for this test run.
-    await resetSequences(client);
+    // Sequences are now reset GLOBALLY at the start of the run (in runAll).
+    // This optimization allows tests to run in parallel without locking/contention on sequences.
+    
+    // Inject Assertions
 
     // Inject Assertions
     if (fs.existsSync(ASSERTIONS_FILE)) {
@@ -111,14 +107,45 @@ async function runTest(file) {
   }
 }
 
+// Basic concurrency limit
+const CONCURRENCY = 5;
+
 async function runAll() {
+  console.log('>>> Setup: Resetting Sequences (Global)...');
+  // 1. Global Setup (Run Once)
+  const setupClient = new Client({
+    connectionString: DATABASE_URL,
+    ssl: DATABASE_URL.includes('supabase.com') ? { rejectUnauthorized: false } : false
+  });
+
+  try {
+    await setupClient.connect();
+    await resetSequences(setupClient);
+  } catch (err) {
+    console.error(`Setup Failed: ${err.message}`);
+    process.exit(1);
+  } finally {
+    await setupClient.end();
+  }
+  console.log('>>> Setup Complete.\n');
+
+  // 2. Run Tests in Batches
   let successCount = 0;
   let failureCount = 0;
+  
+  // Helper to chunk array
+  const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+    arr.slice(i * size, i * size + size)
+  );
 
-  for (const file of testFiles) {
-    const success = await runTest(file);
-    if (success) successCount++;
-    else failureCount++;
+  const batches = chunk(testFiles, CONCURRENCY);
+
+  for (const batch of batches) {
+    const results = await Promise.all(batch.map(file => runTest(file)));
+    results.forEach(success => {
+        if (success) successCount++;
+        else failureCount++;
+    });
   }
 
   console.log('\n==================================================');

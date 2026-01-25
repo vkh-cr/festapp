@@ -57,6 +57,24 @@ System-level tests (requires Supabase connection).
 node tests/integration/bank_import.js --existing-token "..."
 ```
 
+## 2.5 Database Deployment via MCP
+
+To deploy/update SQL functions remotely:
+
+1. **Identify**: `mcp_supabase-mcp-server_list_projects` to get the
+   `project_id`.
+2. **Read**: `view_file` the local SQL file.
+3. **Execute**: `mcp_supabase-mcp-server_execute_sql` with the `project_id` and
+   `query` (file content).
+
+## 2.6 Deno Edge Function Deployment via MCP
+
+To deploy/update Edge Functions:
+
+1. **Upload**: `mcp_supabase-mcp-server_deploy_edge_function`.
+   - `files`: Read content of `index.ts`, `deno.json` etc. first.
+2. **Note**: Always `list_dir` and `view_file` to get the latest content.
+
 ## 3. Flutter Workflow
 
 ### Code Generation (Build Runner)
@@ -75,7 +93,7 @@ Before committing, run this checklist:
    version/theme sync).
 2. **Cleanup**: Remove `analysis.txt`, `test_results.txt`, `temp_*.sql`.
 3. **Verify**:
-   - Run `./automation/test_all.sh` (Web + DB).
+   - Run `./automation/test_all.sh` (Web + DB + Integration).
    - Run `fvm flutter analyze`.
 4. **Sync Translations**:
    - `node web_client/scripts/unify_translations.js` (Flutter <-> Web)
