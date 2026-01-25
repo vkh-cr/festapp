@@ -2722,6 +2722,7 @@ url_launcher_ios
 url_launcher_linux
 url_launcher_macos
 url_launcher_windows
+vector_graphics_compiler
 video_player
 video_player_android
 video_player_avfoundation
@@ -7926,7 +7927,6 @@ url_launcher
 url_launcher_platform_interface
 vector_graphics
 vector_graphics_codec
-vector_graphics_compiler
 video_player_web
 webview_flutter
 webview_flutter_platform_interface
