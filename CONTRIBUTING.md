@@ -57,6 +57,34 @@ If a test fails saying "function does not exist":
    - _Note_: This runs tests in the target environment (local or remote). Ensure
      you are targeting the correct Project ID.
 
+### E. Database Deployment via MCP (Agent Workflow)
+
+When you need to deploy or update a function remotely without a full deployment:
+
+1. **Identify Target**: Run `mcp_supabase-mcp-server_list_projects` to find the
+   active project ID (e.g., `festapp` / `kjdpmixlnhntmxjedpxh`).
+2. **Read Source**: Always read the **local file** first (e.g.,
+   `view_file("database/functions/...")`) to get the latest source code.
+3. **Execute**: Use `mcp_supabase-mcp-server_execute_sql` with the `project_id`
+   and the file content as the `query`.
+   - _Tip_: This bypasses the need for local processing or git pushes if you are
+     just Hot-Fixing or validating logic.
+
+### F. Deno Edge Function Deployment via MCP
+
+To update Edge Functions (TypeScript) remotely:
+
+1. **Upload Files**: Use `mcp_supabase-mcp-server_deploy_edge_function`.
+   - **`project_id`**: Target project (e.g., `kjdpmixlnhntmxjedpxh`).
+   - **`name`**: Function name (folder name).
+   - **`entrypoint_path`**: Path to main file (e.g., `index.ts`).
+   - **`files`**: CONTENT of the files. You must read them first!
+2. **Process**:
+   - `list_dir` the function directory.
+   - `view_file` relevant files (`index.ts`, `deno.json`).
+   - Call `deploy_edge_function` passing the file contents in the `files` array
+     argument.
+
 ## 2. Secrets & Configuration
 
 - **Local**: Keys in `.env.local` (NOT committed). This file is automatically
@@ -116,10 +144,10 @@ changes):
 
 ### Step 3: Verify Integrity
 
-Run the full test suite.
+Run the full test suite (Web, DB, Integration, and Edge Functions).
 
 ```bash
-node web_client/scripts/run_db_tests.js database/tests
+./automation/test_all.sh
 ```
 
 > All tests must PASS.

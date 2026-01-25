@@ -10,6 +10,7 @@ import 'package:fstapp/data_services/update_service.dart';
 import 'package:fstapp/components/unit/db_units.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/unit/views/occasions_screen.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/components/unit/views/quotes_tab.dart';
 import 'package:fstapp/components/unit/views/unit_users_screen.dart';
 import 'package:fstapp/router_service.dart';
@@ -79,9 +80,10 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
       await RightsService.updateAppData(unitId: widget.id!, force: force);
     }
     try {
-      final bundle = await DbUnits.getUnitEditData(widget.id!);
-      _currentUnit = bundle.unit;
-      _occasions = bundle.occasions;
+      _currentUnit = RightsService.currentUnit();
+      if (_currentUnit != null) {
+        _occasions = await DbOccasions.getAllOccasionsForEdit(widget.id!);
+      }
     } catch (e) {
       // Fallback or error handling
       print("Error loading unit edit data: $e");
