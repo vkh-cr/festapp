@@ -134,7 +134,7 @@ class DbForms {
 
     if (response["code"] != 200) {
       // You can add more robust error handling here, e.g., logging or showing a toast.
-      print("Failed to get form for edit: ${response['message']}");
+
       return null;
     }
 
@@ -177,11 +177,10 @@ class DbForms {
 
     // Find and assign the selected bank account model to the form.
     if (availableBankAccounts.isNotEmpty) {
+      form.availableBankAccounts = availableBankAccounts;
       if (form.bankAccountId != null) {
         form.bankAccount = availableBankAccounts
             .firstWhereOrNull((ba) => ba.id == form.bankAccountId);
-      } else {
-        form.availableBankAccounts = availableBankAccounts;
       }
     }
 

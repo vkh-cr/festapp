@@ -128,16 +128,20 @@ class _DropFileState extends State<DropFile> {
                             : ThemeConfig.grey600(context),
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        isClickable
-                            ? "Drop file here or click to upload".tr()
-                            : "Drop file here".tr(),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: _dragging
-                              ? Colors.blue
-                              : ThemeConfig.grey600(context),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text(
+                          isClickable
+                              ? "Drop file here or click to upload".tr()
+                              : "Drop file here".tr(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: _dragging
+                                ? Colors.blue
+                                : ThemeConfig.grey600(context),
+                          ),
                         ),
                       ),
                       if (widget.hint != null)

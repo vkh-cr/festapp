@@ -176,24 +176,26 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                 if (_payment != null && _payment!.variableSymbol != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          "${OrdersStrings.variableSymbol}: ",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        Expanded(
-                          child: SelectableText(
-                            _payment!.variableSymbol!.toString(),
+                    child: SelectionArea(
+                      child: Row(
+                        children: [
+                          Text(
+                            "${OrdersStrings.variableSymbol}: ",
                             style: TextStyle(
+                              fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
                           ),
-                        ),
-                      ],
+                          Expanded(
+                            child: Text(
+                              _payment!.variableSymbol!.toString(),
+                              style: TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 if (_payment != null && _payment!.variableSymbol != null)
@@ -205,91 +207,93 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                OrdersStrings.amount,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                      child: SelectionArea(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  OrdersStrings.amount,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4),
-                              SelectableText(
-                                _payment!.amount != null
-                                    ? Utilities.formatPrice(
-                                        context,
-                                        _payment!.amount!,
-                                        currencyCode:
-                                            _payment!.currencyCode ?? "N/A",
-                                        decimalDigits: 2,
-                                      )
-                                    : "N/A".tr(),
-                                style: TextStyle(
-                                  fontSize: 14,
+                                SizedBox(height: 4),
+                                Text(
+                                  _payment!.amount != null
+                                      ? Utilities.formatPrice(
+                                          context,
+                                          _payment!.amount!,
+                                          currencyCode:
+                                              _payment!.currencyCode ?? "N/A",
+                                          decimalDigits: 2,
+                                        )
+                                      : "N/A".tr(),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                OrdersStrings.paid,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  OrdersStrings.paid,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4),
-                              SelectableText(
-                                _payment!.paid != null
-                                    ? Utilities.formatPrice(
-                                        context,
-                                        _payment!.paid!,
-                                        currencyCode:
-                                            _payment!.currencyCode ?? "N/A",
-                                        decimalDigits: 2,
-                                      )
-                                    : "N/A".tr(),
-                                style: TextStyle(
-                                  fontSize: 14,
+                                SizedBox(height: 4),
+                                Text(
+                                  _payment!.paid != null
+                                      ? Utilities.formatPrice(
+                                          context,
+                                          _payment!.paid!,
+                                          currencyCode:
+                                              _payment!.currencyCode ?? "N/A",
+                                          decimalDigits: 2,
+                                        )
+                                      : "N/A".tr(),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                OrdersStrings.returned,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  OrdersStrings.returned,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4),
-                              SelectableText(
-                                _payment!.returned != null
-                                    ? Utilities.formatPrice(
-                                        context,
-                                        _payment!.returned!,
-                                        currencyCode:
-                                            _payment!.currencyCode ?? "N/A",
-                                        decimalDigits: 2,
-                                      )
-                                    : "N/A".tr(),
-                                style: TextStyle(
-                                  fontSize: 14,
+                                SizedBox(height: 4),
+                                Text(
+                                  _payment!.returned != null
+                                      ? Utilities.formatPrice(
+                                          context,
+                                          _payment!.returned!,
+                                          currencyCode:
+                                              _payment!.currencyCode ?? "N/A",
+                                          decimalDigits: 2,
+                                        )
+                                      : "N/A".tr(),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -301,7 +305,8 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                       constraints: BoxConstraints(maxHeight: dialogHeight),
                       child: SizedBox(
                         width: StylesConfig.formMaxWidth,
-                        child: ListView.builder(
+                        child: SelectionArea(
+                          child: ListView.builder(
                           shrinkWrap: true,
                           itemCount: _transactions.length,
                           itemBuilder: (context, index) {
@@ -337,7 +342,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
-                                                  SelectableText(
+                                                  Text(
                                                     Utilities.formatPrice(
                                                       context,
                                                       transaction.amount!,
@@ -375,7 +380,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                                     )
                                                   else if (counterAccountName
                                                       .isNotEmpty)
-                                                    SelectableText(
+                                                    Text(
                                                       counterAccountName,
                                                       style: TextStyle(
                                                         fontStyle:
@@ -479,6 +484,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                       ),
                     ),
                   ),
+                  ),
                 SizedBox(height: 8),
                 Wrap(
                   alignment: WrapAlignment.center,
@@ -522,7 +528,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
         ),
         Expanded(
           flex: 5,
-          child: SelectableText(value),
+          child: Text(value),
         ),
       ],
     );

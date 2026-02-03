@@ -177,7 +177,7 @@ class _SchedulePageState extends State<SchedulePage>
       RightsService.currentOccasionId()!,
       false,
     );
-    print("loaded data fast");
+
     _lastQuickLoadTime = DateTime.now();
 
     for (var e in fast) {

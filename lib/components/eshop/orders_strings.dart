@@ -36,6 +36,8 @@ class OrdersStrings {
   static String get returned => 'FeatureOrders.returned'.tr(); // "Returned"
   static String get noTransactionsFound =>
       'FeatureOrders.noTransactionsFound'.tr(); // "No transactions found."
+  static String get noUnpairedTransactionsFound =>
+      'FeatureOrders.noUnpairedTransactionsFound'.tr();
   static String get findAndLinkTransaction =>
       'FeatureOrders.findAndLinkTransaction'
           .tr(); // "Find and link a transaction"

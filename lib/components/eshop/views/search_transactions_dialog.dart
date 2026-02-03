@@ -190,128 +190,130 @@ class _SearchTransactionsDialogState extends State<SearchTransactionsDialog> {
               child: _isLoading
                   ? Center(child: CircularProgressIndicator())
                   : _filteredTransactions.isEmpty
-                      ? Center(child: Text(OrdersStrings.noTransactionsFound))
-                      : ListView.builder(
-                          itemCount: _filteredTransactions.length,
-                          itemBuilder: (context, index) {
-                            final transaction = _filteredTransactions[index];
-                            final counterAccountName =
-                                transaction.counterAccountName ??
-                                    transaction.performedBy ??
-                                    "N/A".tr();
+                      ? Center(child: Text(OrdersStrings.noUnpairedTransactionsFound))
+                      : SelectionArea(
+                          child: ListView.builder(
+                            itemCount: _filteredTransactions.length,
+                            itemBuilder: (context, index) {
+                              final transaction = _filteredTransactions[index];
+                              final counterAccountName =
+                                  transaction.counterAccountName ??
+                                      transaction.performedBy ??
+                                      "N/A".tr();
 
-                            return Card(
-                              margin: EdgeInsets.symmetric(vertical: 4),
-                              elevation: 1,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: InkWell(
-                                onTap: () => _selectTransaction(transaction),
-                                borderRadius: BorderRadius.circular(8),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          SelectableText(
-                                            Utilities.formatPrice(
-                                              context,
-                                              transaction.amount!,
-                                              currencyCode:
-                                                  transaction.currency!,
-                                              decimalDigits: 2,
-                                            ),
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          if (transaction.transactionType ==
-                                              'manual')
-                                            Row(
-                                              children: [
-                                                Icon(Icons.payments,
-                                                    size: 18,
-                                                    color: ThemeConfig.grey700(
-                                                        context)),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  OrdersStrings
-                                                      .transactionTypeCash,
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 15,
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                          else if (counterAccountName
-                                              .isNotEmpty)
-                                            Flexible(
-                                              child: Text(
-                                                counterAccountName,
-                                                style: TextStyle(
-                                                  fontStyle: FontStyle.italic,
-                                                  color: ThemeConfig.grey600(
-                                                      context),
-                                                  fontSize: 14,
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
+                              return Card(
+                                margin: EdgeInsets.symmetric(vertical: 4),
+                                elevation: 1,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: InkWell(
+                                  onTap: () => _selectTransaction(transaction),
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              Utilities.formatPrice(
+                                                context,
+                                                transaction.amount!,
+                                                currencyCode:
+                                                    transaction.currency!,
+                                                decimalDigits: 2,
+                                              ),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
                                               ),
                                             ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        DateFormat.yMMMd(
-                                                context.locale.languageCode)
-                                            .format(transaction.date!),
-                                        style: TextStyle(
-                                            fontSize: 13,
-                                            color:
-                                                ThemeConfig.grey800(context)),
-                                      ),
-                                      Text(
-                                        '${transaction.counterAccount ?? ""} / ${transaction.bankCode ?? ""} (${transaction.bankName ?? ""})',
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            color:
-                                                ThemeConfig.grey600(context)),
-                                      ),
-                                      if (transaction.vs != null &&
-                                          transaction.vs!.isNotEmpty)
+                                            if (transaction.transactionType ==
+                                                'manual')
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.payments,
+                                                      size: 18,
+                                                      color: ThemeConfig.grey700(
+                                                          context)),
+                                                  SizedBox(width: 8),
+                                                  Text(
+                                                    OrdersStrings
+                                                        .transactionTypeCash,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            else if (counterAccountName
+                                                .isNotEmpty)
+                                              Flexible(
+                                                child: Text(
+                                                  counterAccountName,
+                                                  style: TextStyle(
+                                                    fontStyle: FontStyle.italic,
+                                                    color: ThemeConfig.grey600(
+                                                        context),
+                                                    fontSize: 14,
+                                                  ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 4),
                                         Text(
-                                          '${'Variable symbol'.tr()}: ${transaction.vs!}',
+                                          DateFormat.yMMMd(
+                                                  context.locale.languageCode)
+                                              .format(transaction.date!),
+                                          style: TextStyle(
+                                              fontSize: 13,
+                                              color:
+                                                  ThemeConfig.grey800(context)),
+                                        ),
+                                        Text(
+                                          '${transaction.counterAccount ?? ""} / ${transaction.bankCode ?? ""} (${transaction.bankName ?? ""})',
                                           style: TextStyle(
                                               fontSize: 12,
                                               color:
                                                   ThemeConfig.grey600(context)),
                                         ),
-                                      if (transaction.messageForRecipient !=
-                                              null &&
-                                          transaction
-                                              .messageForRecipient!.isNotEmpty)
-                                        Text(
-                                          '${'Message'.tr()}: ${transaction.messageForRecipient!}',
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color:
-                                                  ThemeConfig.grey600(context)),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                    ],
+                                        if (transaction.vs != null &&
+                                            transaction.vs!.isNotEmpty)
+                                          Text(
+                                            '${'Variable symbol'.tr()}: ${transaction.vs!}',
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color:
+                                                    ThemeConfig.grey600(context)),
+                                          ),
+                                        if (transaction.messageForRecipient !=
+                                                null &&
+                                            transaction
+                                                .messageForRecipient!.isNotEmpty)
+                                          Text(
+                                            '${'Message'.tr()}: ${transaction.messageForRecipient!}',
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color:
+                                                    ThemeConfig.grey600(context)),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
             ),
           ],

@@ -108,6 +108,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
   }
 
   Future<void> _save() async {
+    setState(() => _loading = true);
     try {
       // The rpc call now either returns the success data or throws an exception.
       await DbEshop.updateProductsForOrder(
@@ -123,6 +124,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
     } catch (e) {
       // If the call fails, a PostgrestException will be caught here.
       if (mounted) {
+        setState(() => _loading = false);
         // Pass the error to our new handler to display a detailed dialog.
         ExceptionHandler.handle(
           context,

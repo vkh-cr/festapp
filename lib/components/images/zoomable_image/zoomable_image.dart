@@ -37,7 +37,6 @@ class _PinchScrollViewState extends State<PinchScrollView> {
   final ScrollController controller = ScrollController();
 
   void _onPinchStart() {
-    print('>> scroll blocked');
     setState(() => blockScroll = true);
   }
 
@@ -45,7 +44,7 @@ class _PinchScrollViewState extends State<PinchScrollView> {
     Future.delayed(
       PinchZoomReleaseUnzoomWidget.defaultResetDuration,
       () {
-        print('>> scroll unblocked');
+
         setState(() => blockScroll = false);
       },
     );
@@ -91,7 +90,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   void _handlePointerDown(PointerDownEvent e) {
     _pointers++;
     if (_pointers == 2) {
-      print('>> pinch start (_pointers==2)');
+
       final cb =
           widget.onTwoFingerStart ?? PinchScrollScope.of(context)?.onPinchStart;
       cb?.call();
@@ -101,7 +100,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   void _handlePointerUp(PointerUpEvent e) {
     _pointers = (_pointers - 1).clamp(0, 10);
     if (_pointers < 1) {
-      print('>> pinch end (_pointers<2)');
+
       final cb =
           widget.onTwoFingerEnd ?? PinchScrollScope.of(context)?.onPinchEnd;
       cb?.call();

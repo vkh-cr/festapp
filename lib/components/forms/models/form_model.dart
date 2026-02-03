@@ -53,6 +53,7 @@ class FormModel {
   List<BankAccountModel>? availableBankAccounts;
   FormStatsModel? stats;
   bool? isReminderEnabled;
+  bool? canDelete;
 
   static const String metaIsCardDesign = "is_card_design";
   static const String metaIsReminderEnabled = "is_reminder_enabled";
@@ -95,6 +96,7 @@ class FormModel {
     this.availableBankAccounts,
     this.stats,
     this.isReminderEnabled,
+    this.canDelete,
   }) : relatedFields = relatedFields ?? [];
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
@@ -142,6 +144,7 @@ class FormModel {
       stats:
           json['stats'] != null ? FormStatsModel.fromJson(json['stats']) : null,
       isReminderEnabled: json['is_reminder_feature_enabled'],
+      canDelete: json['can_delete'] ?? true, // Default to true if not present to avoid breaking existing clients slightly, but realistically it comes from DB.
     );
   }
 

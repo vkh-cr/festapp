@@ -208,6 +208,8 @@ class FormStrings {
       'FormsFeature.duplicateSuccess'.tr(); // "Form duplicated successfully!"
   static String get deleteFormTitle => 'FormsFeature.deleteFormTitle'.tr();
   static String get deleteFormContent => 'FormsFeature.deleteFormContent'.tr();
+  static String get cannotDeleteFormWithResponses =>
+      'FormsFeature.cannotDeleteFormWithResponses'.tr();
 
 // --- FormTab (The TabBar holder) ---
   static String get tabForm => 'FormsFeature.tabForm'.tr(); // "Form"

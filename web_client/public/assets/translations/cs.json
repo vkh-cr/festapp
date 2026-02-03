@@ -672,7 +672,7 @@
     "labelReserveButtonTitle": "Název rezervačního tlačítka",
     "labelDeadlineDuration": "Termín platby (ve dnech)",
     "helperDeadlineDuration": "Nastavte, kolik dní má uživatel na zaplacení objednávky. Ponechte prázdné pro nastavení bez termínu.",
-    "labelReminderEnabled": "Povolit přípomínky k platbě",
+    "labelReminderEnabled": "Povolit připomínky k platbě",
     "helperReminderEnabled": "Automaticky odeslat e-mailovou připomínku o platbě.",
     "labelReminderInterval": "Interval připomínky (dny před termínem)",
     "helperReminderInterval": "Kolik dní před termínem má být připomínka odeslána.",
@@ -820,6 +820,7 @@
     "numberOfResponsesTooltip": "Počet odpovědí: {0}",
     "noFormsForEventPrompt": "Formuláře k této události nejsou k dispozici. Klikněte na '{createNew}' pro vytvoření.",
     "typeHere": "Vyplňte zde...",
+    "typeHere_informal": "Vyplň zde...",
     "phoneFormatHint": "+420 123 456 789",
     "phoneFormatValidation": "Neplatný formát. Příklad: +420 123 456 789",
     "noOptionsForCurrency": "Pro zvolenou měnu nejsou k dispozici žádné možnosti.",
@@ -892,6 +893,7 @@
     "returned": "Vráceno",
     "date": "Datum",
     "noTransactionsFound": "Nebyly nalezeny žádné transakce.",
+    "noUnpairedTransactionsFound": "Žádné nespárované transakce",
     "findAndLinkTransaction": "Najít a propojit transakci",
     "unlinkTransactionConfirmation": "Opravdu chcete odpojit tuto transakci?",
     "confirmRemoval": "Potvrdit odstranění",
@@ -902,7 +904,7 @@
   },
   "UserColumns": {
     "id": "Id",
-    "unit": "Jednotka",
+    "unit": "Organizace",
     "email": "E-mail",
     "name": "Jméno",
     "surname": "Příjmení",
@@ -1475,7 +1477,7 @@
     "manageInUnitSettings": "Bankovní účty lze spravovat v nastavení organizace.",
     "unlink": "Odpojit",
     "unlinkConfirmationTitle": "Odpojit bankovní účet?",
-    "unlinkConfirmationMessage": "Opravdu chcete odpojit tento bankovní účet od jednotky?",
+    "unlinkConfirmationMessage": "Opravdu chcete odpojit tento bankovní účet od organizace?",
     "unlinkDependencyWarningTitle": "Nelze bezpečně odpojit",
     "unlinkDependencyMessage": "Následující aktivní formuláře používají produkty závislé na měnách podporovaných tímto účtem:",
     "unlinkAnyway": "Přesto odpojit",
@@ -1534,5 +1536,6 @@
   },
   "surchargeOnSite": "doplatek",
   "FeatureOrders.searchUnpairedTransactions": "Vyhledat nespárované transakce",
-  "Drop file here or click to upload": "Přetáhněte soubor sem nebo klikněte pro nahrání"
+  "Drop file here or click to upload": "Přetáhněte soubor sem nebo klikněte pro nahrání",
+  "FormsFeature.cannotDeleteFormWithResponses": "Formulář nelze smazat, protože již obsahuje odpovědi."
 }
