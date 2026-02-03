@@ -154,3 +154,4 @@ supabase/.env
 .agent/skills/skills/*
 !.agent/skills/skills/project-workflows/
 .set_appstore_env.sh
+.agent/workflows/

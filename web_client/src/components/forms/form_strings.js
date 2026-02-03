@@ -171,6 +171,7 @@ export class FormStrings {
     static get newProductTypeDefaultName() { return LocalizationService.tr('FormsFeature.newProductTypeDefaultName'); }
 
     static get typeHere() { return LocalizationService.tr('FormsFeature.typeHere'); }
+    static get typeHere_informal() { return LocalizationService.tr('FormsFeature.typeHere_informal'); }
     static get phoneFormatHint() { return LocalizationService.tr('FormsFeature.phoneFormatHint'); }
     static get phoneFormatValidation() { return LocalizationService.tr('FormsFeature.phoneFormatValidation'); }
 

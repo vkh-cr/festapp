@@ -196,7 +196,7 @@ class OccasionCreationHelper {
                                   isHidden: false,
                                   isPromoted: false,
                                   unit: unit.id,
-                                  organization: unit.organization,
+                                  organization: AppConfig.organization,
                                   data: {
                                     Tb.occasions.data_timezone: unit.data?[
                                             Tb.occasions.data_timezone] ??

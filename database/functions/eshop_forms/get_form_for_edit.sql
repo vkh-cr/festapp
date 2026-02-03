@@ -45,7 +45,11 @@ BEGIN
         'blueprint', f.blueprint,
         'link', f.link,
         'bank_account', f.bank_account,
-        'deadline_duration_seconds', f.deadline_duration_seconds
+        'deadline_duration_seconds', f.deadline_duration_seconds,
+        'can_delete', NOT EXISTS (
+            SELECT 1 FROM eshop.orders
+            WHERE (data->>'form')::uuid = f.key
+        )
     )
     INTO formData
     FROM public.forms f

@@ -98,7 +98,11 @@ Before committing, run this checklist:
 4. **Sync Translations**:
    - `node web_client/scripts/unify_translations.js` (Flutter <-> Web)
    - `node web_client/scripts/reorder_cs_like_en.js` (CS Structure)
-5. **Stage Only (NEVER COMMIT)**:
+5. **Security Check**:
+   - **Scan for Secrets**: Ensure no API keys, tokens, or passwords are in the
+     staged files.
+   - **Check .env**: Confirm `.env` files are ignored and not being committed.
+6. **Stage Only (NEVER COMMIT)**:
    - `git add .`
    - **STOP**. Do not run `git commit`. The user will perform the commit.
 

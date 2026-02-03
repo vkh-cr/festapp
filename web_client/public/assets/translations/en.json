@@ -820,6 +820,7 @@
     "numberOfResponsesTooltip": "Number of responses: {0}",
     "noFormsForEventPrompt": "There are no forms for this event. Click '{createNew}' to add one.",
     "typeHere": "Type here...",
+    "typeHere_informal": "Type here...",
     "phoneFormatHint": "+420 123 456 789",
     "phoneFormatValidation": "Invalid format. Example: +420 123 456 789",
     "noOptionsForCurrency": "No options available for the selected currency.",
@@ -892,6 +893,7 @@
     "returned": "Returned",
     "date": "Date",
     "noTransactionsFound": "No transactions found.",
+    "noUnpairedTransactionsFound": "No unpaired transactions",
     "findAndLinkTransaction": "Find and link a transaction",
     "unlinkTransactionConfirmation": "Are you sure you want to unlink this transaction?",
     "confirmRemoval": "Confirm removal",
@@ -902,7 +904,7 @@
   },
   "UserColumns": {
     "id": "Id",
-    "unit": "Unit",
+    "unit": "Organization",
     "email": "E-mail",
     "name": "Name",
     "surname": "Surname",
@@ -1464,7 +1466,7 @@
     "noMoreUsersToAdd": "No more users to add.",
     "primaryAccountFor": "Primary account for {}",
     "backupAccountFor": "Backup account for {}",
-    "removeAccountConfirmation": "This will remove the bank account from this unit.",
+    "removeAccountConfirmation": "This will remove the bank account from this organization.",
     "humanReadableLabel": "Human Readable Format",
     "humanReadableHelper": "Auto-generated from IBAN",
     "usedIn": "Used in",
@@ -1475,7 +1477,7 @@
     "manageInUnitSettings": "Bank accounts can be managed in organization settings.",
     "unlink": "Unlink",
     "unlinkConfirmationTitle": "Unlink Bank Account?",
-    "unlinkConfirmationMessage": "Are you sure you want to unlink this bank account from the unit?",
+    "unlinkConfirmationMessage": "Are you sure you want to unlink this bank account from the organization?",
     "unlinkDependencyWarningTitle": "Cannot Safely Unlink",
     "unlinkDependencyMessage": "Several forms rely on this bank account for the following currencies. If you unlink it, these forms will lose support for these currencies.",
     "unlinkAnyway": "Unlink Anyway",
@@ -1532,5 +1534,6 @@
   },
   "surchargeOnSite": "surcharge",
   "FeatureOrders.searchUnpairedTransactions": "Search unpaired transactions",
-  "Drop file here or click to upload": "Drop file here or click to upload"
+  "Drop file here or click to upload": "Drop file here or click to upload",
+  "FormsFeature.cannotDeleteFormWithResponses": "Form cannot be deleted because it already has responses."
 }

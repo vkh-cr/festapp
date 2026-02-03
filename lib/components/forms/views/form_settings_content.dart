@@ -629,14 +629,25 @@ class _FormSettingsContentState extends State<FormSettingsContent> {
                                   const SizedBox(height: 48),
                                   if (RightsService.canEditOccasion())
                                     Center(
-                                      child: TextButton(
-                                        onPressed: () =>
-                                            _confirmDelete(innerContext),
-                                        child: Text(
-                                          FormStrings.deleteFormTitle,
-                                          style: TextStyle(
-                                              color: ThemeConfig.redColor(
-                                                  innerContext)),
+                                      child: Tooltip(
+                                        message: (_form?.canDelete ?? true)
+                                            ? ""
+                                            : FormStrings
+                                                .cannotDeleteFormWithResponses,
+                                        child: TextButton(
+                                          onPressed: (_form?.canDelete ?? true)
+                                              ? () =>
+                                                  _confirmDelete(innerContext)
+                                              : null,
+                                          child: Text(
+                                            FormStrings.deleteFormTitle,
+                                            style: TextStyle(
+                                                color: (_form?.canDelete ??
+                                                        true)
+                                                    ? ThemeConfig.redColor(
+                                                        innerContext)
+                                                    : Colors.grey),
+                                          ),
                                         ),
                                       ),
                                     ),
