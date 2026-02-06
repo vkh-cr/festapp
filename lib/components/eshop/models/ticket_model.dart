@@ -84,8 +84,10 @@ class TicketModel extends ITrinaRowModel {
       EshopColumns.TICKET_STATE: TrinaCell(
           value: OrderModel.formatState(state ?? OrderModel.orderedState)),
       EshopColumns.TICKET_DOWNLOAD: TrinaCell(value: ""),
-      EshopColumns.TICKET_NOTE: TrinaCell(value: note ?? ""),
-      EshopColumns.TICKET_NOTE_HIDDEN: TrinaCell(value: noteHidden ?? ""),
+      EshopColumns.TICKET_NOTE: TrinaCell(
+          value: Utilities.removeTabsAndNewLines(note ?? "")),
+      EshopColumns.TICKET_NOTE_HIDDEN: TrinaCell(
+          value: Utilities.removeTabsAndNewLines(noteHidden ?? "")),
       EshopColumns.ORDER_SYMBOL: TrinaCell(
           value: relatedOrder != null ? relatedOrder!.toBasicString() : ""),
       EshopColumns.ORDER_DATA: TrinaCell(
