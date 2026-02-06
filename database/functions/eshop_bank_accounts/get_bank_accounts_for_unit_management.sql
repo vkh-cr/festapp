@@ -38,6 +38,7 @@ BEGIN
     FROM eshop.bank_accounts ba
     JOIN eshop.unit_bank_accounts uba ON ba.id = uba.bank_account
     LEFT JOIN eshop.secrets s ON ba.secret = s.id
-    WHERE uba.unit = p_unit_id;
+    WHERE uba.unit = p_unit_id
+    AND ba.type != 'CASH'; -- Exclude Cash Accounts from management list
 END;
 $$;

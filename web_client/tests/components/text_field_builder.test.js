@@ -29,7 +29,7 @@ export default async function test() {
 
   // Test Case 1: Formal (Default)
   {
-    const formModel = { settings: { communicationTone: 'formal' } };
+    const formModel = { communicationTone: 'formal' };
     const element = TextFieldBuilder.create(field, formModel);
     const input = element.querySelector('input');
     
@@ -38,7 +38,7 @@ export default async function test() {
 
   // Test Case 2: Informal
   {
-    const formModel = { settings: { communicationTone: 'informal' } };
+    const formModel = { communicationTone: 'informal' };
     const element = TextFieldBuilder.create(field, formModel);
     const input = element.querySelector('input');
     
