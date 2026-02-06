@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/app_management/language_model.dart';
-import 'package:fstapp/components/occasion/admin_page.dart';
 
 import 'components/forms/views/reservation_page.dart';
 
