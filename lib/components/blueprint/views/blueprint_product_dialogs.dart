@@ -40,7 +40,8 @@ class _SelectProductDialogState extends State<SelectProductDialog> {
   }
 
   void _sortProducts() {
-    _spotProducts.sort((a, b) => Utilities.naturalCompare(a.title ?? "", b.title ?? ""));
+    _spotProducts
+        .sort((a, b) => Utilities.naturalCompare(a.title ?? "", b.title ?? ""));
   }
 
   /// Shows the EditProductDialog to create or update a product.
@@ -51,11 +52,12 @@ class _SelectProductDialogState extends State<SelectProductDialog> {
       context: context,
       builder: (dialogContext) {
         return EditProductDialog(
-          product: product?.copyWith() ?? ProductModel(
-            title: "",
-            price: 0.0,
-            productTypeString: ProductModel.spotType, // Set valid type
-          ),
+          product: product?.copyWith() ??
+              ProductModel(
+                title: "",
+                price: 0.0,
+                productTypeString: ProductModel.spotType, // Set valid type
+              ),
           isCreating: isCreating,
         );
       },
@@ -100,11 +102,12 @@ class _SelectProductDialogState extends State<SelectProductDialog> {
             _sortProducts();
           });
 
-          ToastHelper.Show(context, BlueprintStrings.productCreated, severity: ToastSeverity.Ok);
-
+          ToastHelper.Show(context, BlueprintStrings.productCreated,
+              severity: ToastSeverity.Ok);
         } else {
           // Find the original product in the blueprint and update it
-          final originalProduct = widget.blueprint.products?.firstWhereOrNull((p) => p.id == product.id);
+          final originalProduct = widget.blueprint.products
+              ?.firstWhereOrNull((p) => p.id == product.id);
           if (originalProduct != null) {
             originalProduct.title = newTitle;
             originalProduct.price = newPrice;
@@ -119,7 +122,8 @@ class _SelectProductDialogState extends State<SelectProductDialog> {
               _sortProducts();
             });
 
-            ToastHelper.Show(context, BlueprintStrings.productUpdated, severity: ToastSeverity.Ok);
+            ToastHelper.Show(context, BlueprintStrings.productUpdated,
+                severity: ToastSeverity.Ok);
           }
         }
       } catch (e) {
@@ -138,29 +142,31 @@ class _SelectProductDialogState extends State<SelectProductDialog> {
         child: _spotProducts.isEmpty
             ? Center(child: Text(BlueprintStrings.noSpotProducts))
             : ListView.builder(
-          shrinkWrap: true,
-          itemCount: _spotProducts.length,
-          itemBuilder: (context, index) {
-            final product = _spotProducts[index];
-            // Check if this product is the selected one
-            final isSelected = product.id == widget.currentProductId;
-            return ListTile(
-              // Apply selected state
-              selected: isSelected,
-              selectedTileColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              title: Text(product.title ?? ""),
-              subtitle: Text(Utilities.formatPrice(context, product.price ?? 0)),
-              trailing: IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                tooltip: BlueprintStrings.editProduct,
-                onPressed: () => _editProduct(product),
+                shrinkWrap: true,
+                itemCount: _spotProducts.length,
+                itemBuilder: (context, index) {
+                  final product = _spotProducts[index];
+                  // Check if this product is the selected one
+                  final isSelected = product.id == widget.currentProductId;
+                  return ListTile(
+                    // Apply selected state
+                    selected: isSelected,
+                    selectedTileColor:
+                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    title: Text(product.title ?? ""),
+                    subtitle: Text(
+                        Utilities.formatPrice(context, product.price ?? 0)),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit_outlined),
+                      tooltip: BlueprintStrings.editProduct,
+                      onPressed: () => _editProduct(product),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop(product); // Select the product
+                    },
+                  );
+                },
               ),
-              onTap: () {
-                Navigator.of(context).pop(product); // Select the product
-              },
-            );
-          },
-        ),
       ),
       actions: [
         TextButton(
@@ -182,7 +188,8 @@ class EditProductDialog extends StatefulWidget {
   final ProductModel product;
   final bool isCreating;
 
-  const EditProductDialog({super.key, required this.product, required this.isCreating});
+  const EditProductDialog(
+      {super.key, required this.product, required this.isCreating});
 
   @override
   State<EditProductDialog> createState() => _EditProductDialogState();
@@ -252,7 +259,8 @@ class _EditProductDialogState extends State<EditProductDialog> {
                 labelText: CommonStrings.price,
                 border: const OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
                 // Allow digits, and at most one decimal point
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -300,7 +308,8 @@ class GroupProductManagerDialog extends StatefulWidget {
   });
 
   @override
-  State<GroupProductManagerDialog> createState() => _GroupProductManagerDialogState();
+  State<GroupProductManagerDialog> createState() =>
+      _GroupProductManagerDialogState();
 }
 
 class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
@@ -383,14 +392,16 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
         } else {
           // --- CASE B: Change Group Product (Master) ---
           // Apply this product to EVERY seat to enforce uniformity.
-          widget.group.product = selectedProduct; // Update fallback just in case
+          widget.group.product =
+              selectedProduct; // Update fallback just in case
 
           for (var obj in widget.group.objects) {
             obj.product = selectedProduct;
             obj.spotProduct = selectedProduct.id;
           }
 
-          ToastHelper.Show(context, BlueprintStrings.productAssignedToAll, severity: ToastSeverity.Ok);
+          ToastHelper.Show(context, BlueprintStrings.productAssignedToAll,
+              severity: ToastSeverity.Ok);
 
           _recalculateState();
 
@@ -419,19 +430,25 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
         : "";
 
     // Status visual colors using ThemeConfig
-    final statusText = _isUniform ? BlueprintStrings.statusUniform : BlueprintStrings.statusMixed;
+    final statusText = _isUniform
+        ? BlueprintStrings.statusUniform
+        : BlueprintStrings.statusMixed;
 
     // Use ThemeConfig.greenColor for "good" status, and orange for "mixed/warning".
     final Color statusColor = _isUniform
         ? ThemeConfig.greenColor(context)
-        : (ThemeConfig.isDarkMode(context) ? Colors.orangeAccent : Colors.orange);
+        : (ThemeConfig.isDarkMode(context)
+            ? Colors.orangeAccent
+            : Colors.orange);
 
     // Warning color for occupied/mixed elements
-    final Color warningColor = ThemeConfig.isDarkMode(context) ? Colors.orangeAccent : Colors.orange;
+    final Color warningColor =
+        ThemeConfig.isDarkMode(context) ? Colors.orangeAccent : Colors.orange;
 
     return AlertDialog(
       contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-      title: Text("${BlueprintStrings.manageGroupProducts}: ${widget.group.title}"),
+      title: Text(
+          "${BlueprintStrings.manageGroupProducts}: ${widget.group.title}"),
       content: SizedBox(
         width: 600,
         height: 500,
@@ -441,25 +458,31 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
             // --- SECTION 1: GROUP PRODUCT (Master Control) ---
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withOpacity(0.3),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: ListTile(
                 leading: const Icon(Icons.category_outlined),
-                title: Text(BlueprintStrings.groupDefaultProduct, style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(BlueprintStrings.groupDefaultProduct,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("${BlueprintStrings.currentProductPrefix}$groupProductTitle $groupProductPrice"),
+                    Text(
+                        "${BlueprintStrings.currentProductPrefix}$groupProductTitle $groupProductPrice"),
                     const SizedBox(height: 4),
                     Row(
                       children: [
                         Icon(
-                            _isUniform ? Icons.check_circle_outline : Icons.warning_amber_rounded,
+                            _isUniform
+                                ? Icons.check_circle_outline
+                                : Icons.warning_amber_rounded,
                             size: 14,
-                            color: statusColor
-                        ),
+                            color: statusColor),
                         const SizedBox(width: 4),
                         Text(
                           statusText,
@@ -486,11 +509,13 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
               children: [
                 Switch(
                   value: _showIndividualList || !_isUniform,
-                  onChanged: _isUniform ? (val) {
-                    setState(() {
-                      _showIndividualList = val;
-                    });
-                  } : null, // Disable toggle if mixed (must show list)
+                  onChanged: _isUniform
+                      ? (val) {
+                          setState(() {
+                            _showIndividualList = val;
+                          });
+                        }
+                      : null, // Disable toggle if mixed (must show list)
                 ),
                 const SizedBox(width: 8),
                 Text(BlueprintStrings.customizeIndividualSeats),
@@ -503,64 +528,74 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
             Expanded(
               child: (_showIndividualList || !_isUniform)
                   ? ListView.separated(
-                itemCount: sortedObjects.length,
-                separatorBuilder: (ctx, i) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final obj = sortedObjects[index];
-                  final isOccupied = _isOccupied(obj);
+                      itemCount: sortedObjects.length,
+                      separatorBuilder: (ctx, i) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final obj = sortedObjects[index];
+                        final isOccupied = _isOccupied(obj);
 
-                  // Resolve effective product (fallback to group if null, though we try to set it)
-                  final displayProduct = obj.product ?? widget.group.product;
-                  final productTitle = displayProduct?.title ?? BlueprintStrings.noProductAssigned;
-                  final productPrice = displayProduct != null
-                      ? Utilities.formatPrice(context, displayProduct.price ?? 0)
-                      : "";
+                        // Resolve effective product (fallback to group if null, though we try to set it)
+                        final displayProduct =
+                            obj.product ?? widget.group.product;
+                        final productTitle = displayProduct?.title ??
+                            BlueprintStrings.noProductAssigned;
+                        final productPrice = displayProduct != null
+                            ? Utilities.formatPrice(
+                                context, displayProduct.price ?? 0)
+                            : "";
 
-                  return Container(
-                    color: isOccupied ? warningColor.withOpacity(0.05) : null,
-                    child: ListTile(
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                      leading: Icon(
-                        isOccupied ? Icons.lock_clock : Icons.event_seat,
-                        color: isOccupied ? warningColor : Colors.grey,
-                        size: 20,
-                      ),
-                      title: Text(
-                        obj.title ?? "", // Shows only Seat Title (e.g., "A1")
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      subtitle: Text(
-                        "$productTitle ($productPrice)",
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: ThemeConfig.grey600(context)),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.edit, size: 20),
-                        tooltip: BlueprintStrings.editProduct,
-                        onPressed: () => _pickProduct(seat: obj),
+                        return Container(
+                          color: isOccupied
+                              ? warningColor.withOpacity(0.05)
+                              : null,
+                          child: ListTile(
+                            dense: true,
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 8),
+                            leading: Icon(
+                              isOccupied ? Icons.lock_clock : Icons.event_seat,
+                              color: isOccupied ? warningColor : Colors.grey,
+                              size: 20,
+                            ),
+                            title: Text(
+                              obj.title ??
+                                  "", // Shows only Seat Title (e.g., "A1")
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            subtitle: Text(
+                              "$productTitle ($productPrice)",
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: ThemeConfig.grey600(context)),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.edit, size: 20),
+                              tooltip: BlueprintStrings.editProduct,
+                              onPressed: () => _pickProduct(seat: obj),
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.format_list_bulleted,
+                                size: 48,
+                                color: Theme.of(context).disabledColor),
+                            const SizedBox(height: 16),
+                            Text(
+                              BlueprintStrings.uniformViewHelp,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  );
-                },
-              )
-                  : Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.format_list_bulleted, size: 48, color: Theme.of(context).disabledColor),
-                      const SizedBox(height: 16),
-                      Text(
-                        BlueprintStrings.uniformViewHelp,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ),
           ],
         ),
@@ -578,7 +613,9 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
                 Expanded(
                   child: Text(
                     BlueprintStrings.occupiedWarningInline,
-                    style: TextStyle(fontSize: 13, color: warningColor.withOpacityUniversal(context, 1.0)),
+                    style: TextStyle(
+                        fontSize: 13,
+                        color: warningColor.withOpacityUniversal(context, 1.0)),
                   ),
                 ),
               ],

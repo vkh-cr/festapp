@@ -341,7 +341,7 @@
   "Transactions for order {order}.": "Transactions for order {order}.",
   "Are you sure you want to unlink this transaction?": "Are you sure you want to unlink this transaction?",
   "Remove": "Remove",
-  "Find and link a transaction": "Find and link a transaction",
+  "Find and link a transaction": "Find unlinked transactions",
   "Transaction added successfully.": "Transaction added successfully.",
   "Confirm Add": "Confirm Add",
   "Are you sure you want to add this transaction?": "Are you sure you want to add this transaction?",
@@ -820,6 +820,7 @@
     "numberOfResponsesTooltip": "Number of responses: {0}",
     "noFormsForEventPrompt": "There are no forms for this event. Click '{createNew}' to add one.",
     "typeHere": "Type here...",
+    "typeHere_informal": "Type here...",
     "phoneFormatHint": "+420 123 456 789",
     "phoneFormatValidation": "Invalid format. Example: +420 123 456 789",
     "noOptionsForCurrency": "No options available for the selected currency.",
@@ -879,7 +880,7 @@
     "scanningForOccasion": "Scanning for: ",
     "scanNotFound": "Invalid code",
     "addPayment": "Add Payment",
-    "addCashPaymentTitle": "Add Cash Payment",
+    "addCashPaymentTitle": "Add Payment (Cash)",
     "transactionTypeCash": "Cash",
     "transactionTypeManual": "Manual",
     "deleteCashTransactionConfirmation": "Are you sure you want to delete this cash payment? This will permanently remove it.",
@@ -892,16 +893,18 @@
     "returned": "Returned",
     "date": "Date",
     "noTransactionsFound": "No transactions found.",
+    "noUnpairedTransactionsFound": "No unpaired transactions",
     "findAndLinkTransaction": "Find and link a transaction",
     "unlinkTransactionConfirmation": "Are you sure you want to unlink this transaction?",
     "confirmRemoval": "Confirm removal",
     "removeTransactionSuccess": "Removed {item}.",
     "removeTooltip": "Remove",
-    "transactionsForOrder": "Transactions for order {order}."
+    "transactionsForOrder": "Transactions for order {order}.",
+    "transactionTypeCashless": "Cashless"
   },
   "UserColumns": {
     "id": "Id",
-    "unit": "Unit",
+    "unit": "Organization",
     "email": "E-mail",
     "name": "Name",
     "surname": "Surname",
@@ -1409,7 +1412,8 @@
     "save": "Save",
     "loading": "Loading...",
     "reset": "Reset",
-    "amountCannotBeZero": "Amount cannot be 0"
+    "amountCannotBeZero": "Amount cannot be 0",
+    "or": "or"
   },
   "BankAccount": {
     "settingsTitle": "Bank Account Settings",
@@ -1424,7 +1428,7 @@
     "fioTokenLabel": "FIO API Token",
     "fioTokenHint": "Enter NEW token to update",
     "updateToken": "Update Token",
-    "tokenUpdated": "Token updated successfully",
+    "tokenUpdated": "Token updated.",
     "tokenValidUntilLabel": "Token Valid Until",
     "tokenMaskedInfo": "Token is set and masked",
     "setDate": "Set Date",
@@ -1462,7 +1466,7 @@
     "noMoreUsersToAdd": "No more users to add.",
     "primaryAccountFor": "Primary account for {}",
     "backupAccountFor": "Backup account for {}",
-    "removeAccountConfirmation": "This will remove the bank account from this unit.",
+    "removeAccountConfirmation": "This will remove the bank account from this organization.",
     "humanReadableLabel": "Human Readable Format",
     "humanReadableHelper": "Auto-generated from IBAN",
     "usedIn": "Used in",
@@ -1473,11 +1477,44 @@
     "manageInUnitSettings": "Bank accounts can be managed in organization settings.",
     "unlink": "Unlink",
     "unlinkConfirmationTitle": "Unlink Bank Account?",
-    "unlinkConfirmationMessage": "Are you sure you want to unlink this bank account from the unit?",
+    "unlinkConfirmationMessage": "Are you sure you want to unlink this bank account from the organization?",
     "unlinkDependencyWarningTitle": "Cannot Safely Unlink",
     "unlinkDependencyMessage": "Several forms rely on this bank account for the following currencies. If you unlink it, these forms will lose support for these currencies.",
     "unlinkAnyway": "Unlink Anyway",
-    "unlinkDependencyConsequence": "Warning: Customers will NOT be able to pay for orders in these currencies until you resolve this!"
+    "unlinkDependencyConsequence": "Warning: Customers will NOT be able to pay for orders in these currencies until you resolve this!",
+    "syncTab": "Automatic Import",
+    "syncInstruction": "For automatic transaction pairing, set up email forwarding from your bank to the address below.",
+    "emailSecurityNote": "This address is safe (the robot only processes payments), please keep it private and do not share it.",
+    "setupGuide": {
+      "title": "How to set up bank connection",
+      "step1": "Log in to your internet banking.",
+      "step2": "Navigate to Settings > Notifications (or Alerts).",
+      "step3": "Create a new notification for Incoming Payments.",
+      "step4": "Set the email recipient to the address shown below.",
+      "step5": "Ensure the notification contains the variable symbol and message for recipient.",
+      "explanationTitle": "Why do this?",
+      "explanationSet": "If you set this email in your bank, the app will automatically mark orders as paid when money arrives. (see instructions below)",
+      "explanationNotSet": "If you don't, you will have to check your bank account yourself and mark orders as paid manually.",
+      "explanationFioNote": "Since you have FIO Bank, using the token above is enough. You don't need this email if the token works."
+    },
+    "fioSetupGuide": {
+      "title": "How to get FIO API token",
+      "step1": "Log in to FIO Internetbanking.",
+      "step2": "Go to Settings > API.",
+      "step3": "Add new token (Read-only)."
+    },
+    "forwardingEmailLabel": "Forwarding Email",
+    "copyEmail": "Copied",
+    "regenerateToken": "Regenerate Token",
+    "inputModeSplit": "National Format (CZ)",
+    "inputModeIban": "IBAN / Generic",
+    "fullFormatLabel": "Full format:",
+    "prefixLabel": "Prefix",
+    "bankCodeLabel": "Bank Code",
+    "ibanValidationHelp": "Supports IBAN validation",
+    "regenerateTokenConfirmation": "Are you sure you want to regenerate the token? The old email address will stop working. For pairing to work, you will have to set email forwarding to the new email.",
+    "bankConnectionTab": "Bank Connection",
+    "maskedEmailExplanation": "The email address is hidden for security reasons. If you need to see it, please ask an administrator of this bank account."
   },
   "FeatureContract": {
     "title": "Contract",
@@ -1495,5 +1532,8 @@
     "generatingContractFor": "Generating Contract for {customer}...",
     "paymentInfo": "Payment Info"
   },
-  "surchargeOnSite": "surcharge"
+  "surchargeOnSite": "surcharge",
+  "FeatureOrders.searchUnpairedTransactions": "Search unpaired transactions",
+  "Drop file here or click to upload": "Drop file here or click to upload",
+  "FormsFeature.cannotDeleteFormWithResponses": "Form cannot be deleted because it already has responses."
 }

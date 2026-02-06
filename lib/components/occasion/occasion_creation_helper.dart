@@ -13,24 +13,28 @@ import 'package:fstapp/widgets/mouse_detector.dart';
 import 'package:fstapp/widgets/time_data_range_picker.dart';
 
 class OccasionCreationHelper {
-  static Future<OccasionModel?> createNewOccasion(
-      BuildContext context, UnitModel unit, List<OccasionModel> existingOccasions) async {
+  static Future<OccasionModel?> createNewOccasion(BuildContext context,
+      UnitModel unit, List<OccasionModel> existingOccasions) async {
     final formKey = GlobalKey<FormState>();
     String? title = AdministrationStrings.myFestival;
     String? link = "myfestival${DateTime.now().add(Duration(days: 33)).year}";
     DateTime? startDate = DateTime.now()
         .add(Duration(days: 30))
         .copyWith(minute: 0, second: 0, millisecond: 0, microsecond: 0);
-    DateTime? endDate = startDate.add(Duration(days: 3))
+    DateTime? endDate = startDate
+        .add(Duration(days: 3))
         .copyWith(minute: 0, second: 0, millisecond: 0, microsecond: 0);
     bool isLinkManuallyChanged = false;
     String? linkError;
     bool isFormValid = true;
 
-    final TextEditingController titleController = TextEditingController(text: title);
-    final TextEditingController linkController = TextEditingController(text: link);
+    final TextEditingController titleController =
+        TextEditingController(text: title);
+    final TextEditingController linkController =
+        TextEditingController(text: link);
 
-    ValueNotifier<String> htmlNotifier = ValueNotifier<String>(_generateHtml(link));
+    ValueNotifier<String> htmlNotifier =
+        ValueNotifier<String>(_generateHtml(link));
 
     void validateForm() {
       linkError = _validateLink(link ?? "", existingOccasions);
@@ -106,7 +110,9 @@ class OccasionCreationHelper {
                           decoration: InputDecoration(
                             labelText: AdministrationStrings.linkLabel,
                             labelStyle: TextStyle(
-                              color: linkError != null ? ThemeConfig.redColor(context) : null,
+                              color: linkError != null
+                                  ? ThemeConfig.redColor(context)
+                                  : null,
                             ),
                             errorText: linkError,
                           ),
@@ -119,7 +125,9 @@ class OccasionCreationHelper {
                           onStartChanged: (pickedStart) {
                             setState(() {
                               startDate = pickedStart;
-                              if (pickedStart != null && endDate != null && pickedStart.isAfter(endDate!)) {
+                              if (pickedStart != null &&
+                                  endDate != null &&
+                                  pickedStart.isAfter(endDate!)) {
                                 endDate = DateTime(
                                   pickedStart.year,
                                   pickedStart.month,
@@ -134,7 +142,9 @@ class OccasionCreationHelper {
                           onEndChanged: (pickedEnd) {
                             setState(() {
                               endDate = pickedEnd;
-                              if (pickedEnd != null && startDate != null && pickedEnd.isBefore(startDate!)) {
+                              if (pickedEnd != null &&
+                                  startDate != null &&
+                                  pickedEnd.isBefore(startDate!)) {
                                 startDate = DateTime(
                                   pickedEnd.year,
                                   pickedEnd.month,
@@ -173,27 +183,31 @@ class OccasionCreationHelper {
                     ElevatedButton(
                       onPressed: isFormValid
                           ? () async {
-                        if (formKey.currentState!.validate()) {
-                          final startDateTime = startDate!;
-                          final endDateTime = endDate!;
+                              if (formKey.currentState!.validate()) {
+                                final startDateTime = startDate!;
+                                final endDateTime = endDate!;
 
-                          OccasionModel newOccasion = OccasionModel(
-                            title: title,
-                            startTime: startDateTime,
-                            endTime: endDateTime,
-                            link: link,
-                            isOpen: true,
-                            isHidden: false,
-                            isPromoted: false,
-                            unit: unit.id,
-                            organization: unit.organization,
-                            data: { Tb.occasions.data_timezone: unit.data?[Tb.occasions.data_timezone] ?? TimeHelper.getSystemTimezoneName() },
-                          );
+                                OccasionModel newOccasion = OccasionModel(
+                                  title: title,
+                                  startTime: startDateTime,
+                                  endTime: endDateTime,
+                                  link: link,
+                                  isOpen: true,
+                                  isHidden: false,
+                                  isPromoted: false,
+                                  unit: unit.id,
+                                  organization: AppConfig.organization,
+                                  data: {
+                                    Tb.occasions.data_timezone: unit.data?[
+                                            Tb.occasions.data_timezone] ??
+                                        TimeHelper.getSystemTimezoneName()
+                                  },
+                                );
 
-                          await DbOccasions.updateOccasion(newOccasion);
-                          Navigator.of(context).pop(newOccasion);
-                        }
-                      }
+                                await DbOccasions.updateOccasion(newOccasion);
+                                Navigator.of(context).pop(newOccasion);
+                              }
+                            }
                           : null,
                       child: Text(AdministrationStrings.createButton),
                     ),
@@ -214,7 +228,8 @@ class OccasionCreationHelper {
     ''';
   }
 
-  static String? _validateLink(String link, List<OccasionModel> existingOccasions) {
+  static String? _validateLink(
+      String link, List<OccasionModel> existingOccasions) {
     if (link.isEmpty) {
       return AdministrationStrings.linkIsRequiredError;
     }
@@ -222,7 +237,8 @@ class OccasionCreationHelper {
     if (!isValidFormat) {
       return AdministrationStrings.invalidCharactersError;
     }
-    final isUnique = !existingOccasions.any((occasion) => occasion.link == link);
+    final isUnique =
+        !existingOccasions.any((occasion) => occasion.link == link);
     if (!isUnique) {
       return AdministrationStrings.linkInUseError;
     }

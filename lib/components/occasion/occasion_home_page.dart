@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
@@ -27,10 +26,8 @@ class OccasionHomePage extends StatefulWidget {
   const OccasionHomePage({super.key});
 
   static final List<String> visibleTabKeys = [
-    if(AppConfig.isAllUnit)
-      OccasionTab.unit,
-    if(!AppConfig.isAllUnit)
-      OccasionTab.home,
+    if (AppConfig.isAllUnit) OccasionTab.unit,
+    if (!AppConfig.isAllUnit) OccasionTab.home,
     OccasionTab.news,
     OccasionTab.map,
     OccasionTab.more,
@@ -41,7 +38,8 @@ class OccasionHomePage extends StatefulWidget {
   State<OccasionHomePage> createState() => _OccasionHomePageState();
 }
 
-class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBindingObserver {
+class _OccasionHomePageState extends State<OccasionHomePage>
+    with WidgetsBindingObserver {
   int _messageCount = 0;
   late final Map<String, OccasionTab> _availableTabs;
 
@@ -93,12 +91,15 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
     await NotificationHelper.checkForNotificationPermission(context);
   }
 
-  String messageCountString() => _messageCount < 100 ? _messageCount.toString() : "99+";
+  String messageCountString() =>
+      _messageCount < 100 ? _messageCount.toString() : "99+";
 
   @override
   Widget build(BuildContext context) {
     return AutoTabsRouter(
-      routes: OccasionHomePage.visibleTabKeys.map((key) => _availableTabs[key]!.route).toList(),
+      routes: OccasionHomePage.visibleTabKeys
+          .map((key) => _availableTabs[key]!.route)
+          .toList(),
       builder: (tabsContext, child) {
         final tabsRouter = AutoTabsRouter.of(tabsContext);
         return Scaffold(
@@ -106,9 +107,12 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
             valueListenable: RightsService.occasionLinkModelNotifier,
             builder: (listenableContext, occasionLinkModel, __) {
               return BottomNavigationBar(
-                backgroundColor: ThemeConfig.bottomNavBackgroundColor(listenableContext),
-                selectedItemColor: ThemeConfig.bottomNavSelectedItemColor(listenableContext),
-                unselectedItemColor: ThemeConfig.bottomNavUnselectedItemColor(listenableContext),
+                backgroundColor:
+                    ThemeConfig.bottomNavBackgroundColor(listenableContext),
+                selectedItemColor:
+                    ThemeConfig.bottomNavSelectedItemColor(listenableContext),
+                unselectedItemColor:
+                    ThemeConfig.bottomNavUnselectedItemColor(listenableContext),
                 currentIndex: tabsRouter.activeIndex,
                 type: BottomNavigationBarType.fixed,
                 onTap: (int index) async {
@@ -116,10 +120,12 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
                   final tab = _availableTabs[key]!;
 
                   if (tab.requiresLogin && !AuthService.isLoggedIn()) {
-                    await RouterService.navigate(listenableContext, LoginPage.ROUTE);
+                    await RouterService.navigate(
+                        listenableContext, LoginPage.ROUTE);
                     await loadData();
                   } else {
-                    if (AuthService.isLoggedIn() && context.widget is OccasionHomePage) {
+                    if (AuthService.isLoggedIn() &&
+                        context.widget is OccasionHomePage) {
                       DbNews.countNewMessages().then((count) {
                         if (mounted) {
                           setState(() => _messageCount = count);
@@ -132,10 +138,13 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
                 items: OccasionHomePage.visibleTabKeys.map((key) {
                   final tab = _availableTabs[key]!;
                   return BottomNavigationBarItem(
-                    icon: tab.buildIcon(listenableContext, _messageCount, messageCountString),
-                    activeIcon: tab.buildActiveIcon(listenableContext, _messageCount, messageCountString),
+                    icon: tab.buildIcon(
+                        listenableContext, _messageCount, messageCountString),
+                    activeIcon: tab.buildActiveIcon(
+                        listenableContext, _messageCount, messageCountString),
                     label: key == OccasionTab.user
-                        ? (occasionLinkModel?.userInfo?.name ?? UserStrings.signIn)
+                        ? (occasionLinkModel?.userInfo?.name ??
+                            UserStrings.signIn)
                         : tab.label,
                   );
                 }).toList(),
@@ -174,64 +183,67 @@ class OccasionTab {
   static const String user = "user";
   static const String timetable = "timetable";
 
-  static Map<String, OccasionTab> getAvailableTabs([VoidCallback? onSetAsRead]) => {
-    unit: OccasionTab(
-      key: unit,
-      label: "Home".tr(),
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home,
-      route: UnitRoute(),
-    ),
-    home: OccasionTab(
-      key: home,
-      label: "Home".tr(),
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home,
-      route: ScheduleNavigationRoute(),
-    ),
-    timetable: OccasionTab(
-      key: home,
-      label: "Schedule".tr(),
-      icon: Icons.calendar_month_outlined,
-      activeIcon: Icons.calendar_month,
-      route: TimetableRoute(),
-    ),
-    news: OccasionTab(
-      key: news,
-      label: "News".tr(),
-      icon: Icons.notifications_none_outlined,
-      activeIcon: Icons.notifications,
-      route: NewsRoute(onSetAsRead: onSetAsRead),
-    ),
-    map: OccasionTab(
-      key: map,
-      label: "Map".tr(),
-      icon: Icons.map_outlined,
-      activeIcon: Icons.map,
-      route: MapRoute(),
-    ),
-    more: OccasionTab(
-      key: more,
-      label: "More".tr(),
-      icon: Icons.info_outline,
-      activeIcon: Icons.info,
-      route: InfoRoute(),
-    ),
-    user: OccasionTab(
-      key: user,
-      label: "", // Label dynamically replaced in the navigation bar
-      icon: Icons.account_circle_outlined,
-      activeIcon: Icons.account_circle,
-      route: UserRoute(),
-      requiresLogin: true,
-    ),
-  };
+  static Map<String, OccasionTab> getAvailableTabs(
+          [VoidCallback? onSetAsRead]) =>
+      {
+        unit: OccasionTab(
+          key: unit,
+          label: "Home".tr(),
+          icon: Icons.home_outlined,
+          activeIcon: Icons.home,
+          route: UnitRoute(),
+        ),
+        home: OccasionTab(
+          key: home,
+          label: "Home".tr(),
+          icon: Icons.home_outlined,
+          activeIcon: Icons.home,
+          route: ScheduleNavigationRoute(),
+        ),
+        timetable: OccasionTab(
+          key: home,
+          label: "Schedule".tr(),
+          icon: Icons.calendar_month_outlined,
+          activeIcon: Icons.calendar_month,
+          route: TimetableRoute(),
+        ),
+        news: OccasionTab(
+          key: news,
+          label: "News".tr(),
+          icon: Icons.notifications_none_outlined,
+          activeIcon: Icons.notifications,
+          route: NewsRoute(onSetAsRead: onSetAsRead),
+        ),
+        map: OccasionTab(
+          key: map,
+          label: "Map".tr(),
+          icon: Icons.map_outlined,
+          activeIcon: Icons.map,
+          route: MapRoute(),
+        ),
+        more: OccasionTab(
+          key: more,
+          label: "More".tr(),
+          icon: Icons.info_outline,
+          activeIcon: Icons.info,
+          route: InfoRoute(),
+        ),
+        user: OccasionTab(
+          key: user,
+          label: "", // Label dynamically replaced in the navigation bar
+          icon: Icons.account_circle_outlined,
+          activeIcon: Icons.account_circle,
+          route: UserRoute(),
+          requiresLogin: true,
+        ),
+      };
 
   static List<PageRouteInfo<dynamic>> getTabRoutes(List<String> tabKeys) {
     return tabKeys.map((key) => getAvailableTabs()[key]!.route).toList();
   }
 
-  Widget buildIcon(BuildContext context, int messageCount, String Function() messageCountString) {
+  Widget buildIcon(BuildContext context, int messageCount,
+      String Function() messageCountString) {
     if (key == news) {
       return badges.Badge(
         showBadge: messageCount > 0,
@@ -245,7 +257,8 @@ class OccasionTab {
     return Icon(icon);
   }
 
-  Widget buildActiveIcon(BuildContext context, int messageCount, String Function() messageCountString) {
+  Widget buildActiveIcon(BuildContext context, int messageCount,
+      String Function() messageCountString) {
     if (key == news) {
       return badges.Badge(
         showBadge: messageCount > 0,

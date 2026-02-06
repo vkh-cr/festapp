@@ -78,7 +78,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (occasionLink == null && context.routeData.params.isNotEmpty) {
-      occasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
+      occasionLink =
+          context.routeData.params.getString(AppRouter.linkFormatted);
       _loadData();
     }
   }
@@ -93,7 +94,9 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
 
   Future<void> _loadData() async {
     if (occasionLink == null) return;
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
     final fetchedOccasion = await DbOccasions.getOccasionByLink(occasionLink!);
 
@@ -104,7 +107,9 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
         _isLoading = false;
       });
     } else if (mounted) {
-      setState(() { _isLoading = false; });
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -122,27 +127,35 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     _isPromoted = occasion!.isPromoted;
 
     // Initialize reply-to email
-    _replyToEmailController.text = occasion!.data?[Tb.occasions.data_reply_to] as String? ?? '';
+    _replyToEmailController.text =
+        occasion!.data?[Tb.occasions.data_reply_to] as String? ?? '';
 
     // Initialize timezone
     _allTimezones = TimeHelper.getAvailableTimezoneNames();
-    _selectedTimezone = occasion!.data?[Tb.occasions.data_timezone] as String? ?? tz.local.name;
+    _selectedTimezone =
+        occasion!.data?[Tb.occasions.data_timezone] as String? ?? tz.local.name;
 
-    if (!_allTimezones.contains(_selectedTimezone) && _allTimezones.isNotEmpty) {
-      _selectedTimezone = _allTimezones.contains("Europe/Prague") ? "Europe/Prague" : _allTimezones.first;
+    if (!_allTimezones.contains(_selectedTimezone) &&
+        _allTimezones.isNotEmpty) {
+      _selectedTimezone = _allTimezones.contains("Europe/Prague")
+          ? "Europe/Prague"
+          : _allTimezones.first;
     }
 
     final defaultFeatures = FeatureService.getDefaultFeatures();
     for (var defaultFeature in defaultFeatures) {
-      bool exists = occasion!.features.any((f) => f.code == defaultFeature.code);
+      bool exists =
+          occasion!.features.any((f) => f.code == defaultFeature.code);
       if (!exists) {
         occasion!.features.add(defaultFeature);
       }
     }
 
     occasion!.features.sort((a, b) {
-      final aIndex = defaultFeatures.indexWhere((defaultFeature) => defaultFeature.code == a.code);
-      final bIndex = defaultFeatures.indexWhere((defaultFeature) => defaultFeature.code == b.code);
+      final aIndex = defaultFeatures
+          .indexWhere((defaultFeature) => defaultFeature.code == a.code);
+      final bIndex = defaultFeatures
+          .indexWhere((defaultFeature) => defaultFeature.code == b.code);
       return aIndex.compareTo(bIndex);
     });
   }
@@ -152,7 +165,9 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     // 2. Set the state to "saving" to show a loading indicator on the button.
-    setState(() { _isSaving = true; });
+    setState(() {
+      _isSaving = true;
+    });
 
     // 3. Save the form fields to update the local state variables.
     _formKey.currentState!.save();
@@ -207,7 +222,9 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
 
     // 8. Reset the saving state.
     if (mounted) {
-      setState(() { _isSaving = false; });
+      setState(() {
+        _isSaving = false;
+      });
     }
   }
 
@@ -215,7 +232,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     try {
       await DbOccasions.deleteOccasion(occasion!.id!);
       await RightsService.updateAppData(force: true);
-      ToastHelper.Show(context, "${CommonStrings.deleted}: ${occasion!.title!}");
+      ToastHelper.Show(
+          context, "${CommonStrings.deleted}: ${occasion!.title!}");
       Navigator.of(context).pop();
     } catch (e) {
       ToastHelper.Show(context, e.toString());
@@ -269,7 +287,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
             }
             // <-- END MODIFICATION -->
           });
-          ToastHelper.Show(context, OccasionSettingsStrings.imageRemovedSuccess);
+          ToastHelper.Show(
+              context, OccasionSettingsStrings.imageRemovedSuccess);
         } catch (e) {
           ToastHelper.Show(context, OccasionSettingsStrings.imageRemovedFail);
         }
@@ -298,16 +317,19 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
 
     final filteredFeaturesBySearch = occasion!.features.where((feature) {
       final title = FeatureMetadata.getTitle(feature.code).toLowerCase();
-      final description = FeatureMetadata.getDescription(feature.code).toLowerCase();
+      final description =
+          FeatureMetadata.getDescription(feature.code).toLowerCase();
       final query = _featureSearchQuery.toLowerCase();
-      return query.isEmpty || title.contains(query) || description.contains(query);
+      return query.isEmpty ||
+          title.contains(query) ||
+          description.contains(query);
     }).toList();
 
     final featuresToShow = AppConfig.isAppSupported
         ? filteredFeaturesBySearch
         : filteredFeaturesBySearch
-        .where((f) => !FeatureService.appSupportedFeatures.contains(f.code))
-        .toList();
+            .where((f) => !FeatureService.appSupportedFeatures.contains(f.code))
+            .toList();
 
     final enabledFeatures = featuresToShow.where((f) => f.isEnabled).toList();
     final disabledFeatures = featuresToShow.where((f) => !f.isEnabled).toList();
@@ -319,7 +341,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+          constraints:
+              const BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Form(
@@ -334,7 +357,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                       labelText: OccasionSettingsStrings.title,
                     ),
                     validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(errorText: OccasionSettingsStrings.titleIsRequired),
+                      FormBuilderValidators.required(
+                          errorText: OccasionSettingsStrings.titleIsRequired),
                     ]),
                     onSaved: (val) {
                       _title = val;
@@ -346,10 +370,14 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                     end: _to,
                     enabled: isEditingEnabled,
                     onStartChanged: (dateTime) {
-                      setState(() { _from = dateTime; });
+                      setState(() {
+                        _from = dateTime;
+                      });
                     },
                     onEndChanged: (dateTime) {
-                      setState(() { _to = dateTime; });
+                      setState(() {
+                        _to = dateTime;
+                      });
                     },
                   ),
                   const SizedBox(height: 16),
@@ -365,15 +393,20 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                     onFileSelected: (file) async {
                       Uint8List imageData = await file.readAsBytes();
                       try {
-                        var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
-                        final publicUrl = await DbImages.uploadImage(compressedImageData, occasion!.id, null);
+                        var compressedImageData =
+                            await ImageCompressionHelper.compress(
+                                imageData, 900);
+                        final publicUrl = await DbImages.uploadImage(
+                            compressedImageData, occasion!.id, null);
                         setState(() {
                           occasion!.data ??= {};
                           occasion!.data![Tb.occasions.data_image] = publicUrl;
                         });
-                        ToastHelper.Show(context, OccasionSettingsStrings.fileUploadedSuccess);
+                        ToastHelper.Show(context,
+                            OccasionSettingsStrings.fileUploadedSuccess);
                       } catch (e) {
-                        ToastHelper.Show(context, OccasionSettingsStrings.failedToUploadImage);
+                        ToastHelper.Show(context,
+                            OccasionSettingsStrings.failedToUploadImage);
                       }
                       return null;
                     },
@@ -403,19 +436,22 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                   const SizedBox(height: 8),
                   Center(
                     child: ElevatedButton(
-                      onPressed: isEditingEnabled ? () async {
-                        RouterService.navigatePageInfo(
-                          context,
-                          HtmlEditorRoute(
-                              content: {HtmlEditorPage.parContent: _description},
-                              occasionId: occasion!.id
-                          ),
-                        ).then((value) {
-                          if (value != null) {
-                            setState(() { _description = value as String; });
-                          }
-                        });
-                      } : null,
+                      onPressed: isEditingEnabled
+                          ? () async {
+                              RouterService.navigatePageInfo(
+                                context,
+                                HtmlEditorRoute(content: {
+                                  HtmlEditorPage.parContent: _description
+                                }, occasionId: occasion!.id),
+                              ).then((value) {
+                                if (value != null) {
+                                  setState(() {
+                                    _description = value as String;
+                                  });
+                                }
+                              });
+                            }
+                          : null,
                       child: Text(OccasionSettingsStrings.editContent),
                     ),
                   ),
@@ -427,17 +463,19 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                           Expanded(child: Text(OccasionSettingsStrings.public)),
                           HelpWidget(
                               title: OccasionSettingsStrings.public,
-                              content: OccasionSettingsStrings.publicHelp
-                          )
+                              content: OccasionSettingsStrings.publicHelp)
                         ],
                       ),
                       value: _isOpen,
-                      onChanged: isEditingEnabled ? (value) {
-                        setState(() { _isOpen = value; });
-                      } : null,
+                      onChanged: isEditingEnabled
+                          ? (value) {
+                              setState(() {
+                                _isOpen = value;
+                              });
+                            }
+                          : null,
                     ),
-                  if (AppConfig.isAppSupported)
-                    const SizedBox(height: 16),
+                  if (AppConfig.isAppSupported) const SizedBox(height: 16),
                   SwitchListTile(
                     title: Row(
                       children: [
@@ -449,9 +487,13 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                       ],
                     ),
                     value: _isHidden,
-                    onChanged: isEditingEnabled ? (value) {
-                      setState(() { _isHidden = value; });
-                    } : null,
+                    onChanged: isEditingEnabled
+                        ? (value) {
+                            setState(() {
+                              _isHidden = value;
+                            });
+                          }
+                        : null,
                   ),
                   const SizedBox(height: 16),
 
@@ -470,9 +512,13 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                     // Only allow changing the switch if:
                     // 1. Editing is enabled AND
                     // 2. canChangePromotion is true (meaning it's already ON, or it's OFF but has an image)
-                    onChanged: isEditingEnabled && canChangePromotion ? (value) {
-                      setState(() { _isPromoted = value; });
-                    } : null,
+                    onChanged: isEditingEnabled && canChangePromotion
+                        ? (value) {
+                            setState(() {
+                              _isPromoted = value;
+                            });
+                          }
+                        : null,
                     // <-- END MODIFICATION -->
                   ),
 
@@ -480,7 +526,10 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                   ExpansionTile(
                     title: Text(
                       OccasionSettingsStrings.advancedSettings,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     initiallyExpanded: _advancedSettingsExpanded,
                     onExpansionChanged: (bool expanded) {
@@ -488,7 +537,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                     },
                     children: <Widget>[
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -499,60 +549,77 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                                   labelText: OccasionSettingsStrings.link,
                                 ),
                                 validator: FormBuilderValidators.compose([
-                                  FormBuilderValidators.required(errorText: OccasionSettingsStrings.linkIsRequired),
+                                  FormBuilderValidators.required(
+                                      errorText: OccasionSettingsStrings
+                                          .linkIsRequired),
                                 ]),
                                 onChanged: (val) {
                                   final fixed = Utilities.sanitizeFullUrl(val);
                                   if (fixed != val) {
-                                    _linkController.value = _linkController.value.copyWith(
+                                    _linkController.value =
+                                        _linkController.value.copyWith(
                                       text: fixed,
-                                      selection: TextSelection.collapsed(offset: fixed.length),
+                                      selection: TextSelection.collapsed(
+                                          offset: fixed.length),
                                     );
                                   }
-                                  setState(() { _linkValue = fixed; });
+                                  setState(() {
+                                    _linkValue = fixed;
+                                  });
                                 },
-                                onSaved: (val){
-                                  _linkValue = Utilities.sanitizeFullUrl(val ?? "");
-                                }
-                            ),
+                                onSaved: (val) {
+                                  _linkValue =
+                                      Utilities.sanitizeFullUrl(val ?? "");
+                                }),
                             const SizedBox(height: 24),
-
                             TextFormField(
                               controller: _replyToEmailController,
                               enabled: isEditingEnabled,
-                                decoration: InputDecoration(
-                                  labelText: OccasionSettingsStrings.labelReplyToEmail,
-                                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                                  hintText: (RightsService.currentUnit()?.data?[Tb.units.data_reply_to] as String?)?.isNotEmpty == true
-                                      ? "${OccasionSettingsStrings.defaultValue}: ${RightsService.currentUnit()?.data?[Tb.units.data_reply_to]}"
-                                      : null,
-                                  border: const OutlineInputBorder(),
-                                  helperText: OccasionSettingsStrings.helperReplyToEmail,
-                                  helperMaxLines: 3,
-                                ),
+                              decoration: InputDecoration(
+                                labelText:
+                                    OccasionSettingsStrings.labelReplyToEmail,
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always,
+                                hintText: (RightsService.currentUnit()?.data?[Tb
+                                                .units
+                                                .data_reply_to] as String?)
+                                            ?.isNotEmpty ==
+                                        true
+                                    ? "${OccasionSettingsStrings.defaultValue}: ${RightsService.currentUnit()?.data?[Tb.units.data_reply_to]}"
+                                    : null,
+                                border: const OutlineInputBorder(),
+                                helperText:
+                                    OccasionSettingsStrings.helperReplyToEmail,
+                                helperMaxLines: 3,
+                              ),
                               keyboardType: TextInputType.emailAddress,
                               validator: (val) {
                                 if (val == null || val.isEmpty) return null;
-                                return FormBuilderValidators.email(errorText: OccasionSettingsStrings.validationEmailInvalid)(val);
+                                return FormBuilderValidators.email(
+                                    errorText: OccasionSettingsStrings
+                                        .validationEmailInvalid)(val);
                               },
                             ),
-
                             const SizedBox(height: 16),
-
                             if (_allTimezones.isNotEmpty)
                               Autocomplete<String>(
-                                initialValue: _selectedTimezone != null && _allTimezones.contains(_selectedTimezone)
+                                initialValue: _selectedTimezone != null &&
+                                        _allTimezones
+                                            .contains(_selectedTimezone)
                                     ? TextEditingValue(text: _selectedTimezone!)
                                     : null, // Use TextEditingValue for initialValue
-                                optionsBuilder: (TextEditingValue textEditingValue) {
+                                optionsBuilder:
+                                    (TextEditingValue textEditingValue) {
                                   if (!isEditingEnabled) {
                                     return const Iterable<String>.empty();
                                   }
                                   if (textEditingValue.text.isEmpty) {
-                                    return _allTimezones.take(50); // Show some initial options
+                                    return _allTimezones
+                                        .take(50); // Show some initial options
                                   }
                                   return _allTimezones.where((String option) {
-                                    return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                                    return option.toLowerCase().contains(
+                                        textEditingValue.text.toLowerCase());
                                   });
                                 },
                                 onSelected: (String selection) {
@@ -561,7 +628,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                                   });
                                 },
                                 fieldViewBuilder: (BuildContext context,
-                                    TextEditingController fieldTextEditingController,
+                                    TextEditingController
+                                        fieldTextEditingController,
                                     FocusNode fieldFocusNode,
                                     VoidCallback onFieldSubmitted) {
                                   return TextFormField(
@@ -569,33 +637,43 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                                     focusNode: fieldFocusNode,
                                     enabled: isEditingEnabled,
                                     decoration: InputDecoration(
-                                      labelText: OccasionSettingsStrings.timezone,
+                                      labelText:
+                                          OccasionSettingsStrings.timezone,
                                       border: const OutlineInputBorder(),
-                                      suffixIcon: fieldTextEditingController.text.isNotEmpty && isEditingEnabled
+                                      suffixIcon: fieldTextEditingController
+                                                  .text.isNotEmpty &&
+                                              isEditingEnabled
                                           ? IconButton(
-                                        icon: const Icon(Icons.clear),
-                                        onPressed: () {
-                                          fieldTextEditingController.clear();
-                                          setState(() {
-                                            _selectedTimezone = null;
-                                          });
-                                        },
-                                      )
+                                              icon: const Icon(Icons.clear),
+                                              onPressed: () {
+                                                fieldTextEditingController
+                                                    .clear();
+                                                setState(() {
+                                                  _selectedTimezone = null;
+                                                });
+                                              },
+                                            )
                                           : null,
                                     ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return OccasionSettingsStrings.timezoneIsRequired;
+                                        return OccasionSettingsStrings
+                                            .timezoneIsRequired;
                                       }
                                       if (!_allTimezones.contains(value)) {
                                         if (_selectedTimezone != value) {
-                                          return OccasionSettingsStrings.invalidTimezone;
+                                          return OccasionSettingsStrings
+                                              .invalidTimezone;
                                         }
                                       }
-                                      if(_allTimezones.contains(value) && _selectedTimezone != value) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      if (_allTimezones.contains(value) &&
+                                          _selectedTimezone != value) {
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
                                           if (mounted) {
-                                            setState(() { _selectedTimezone = value; });
+                                            setState(() {
+                                              _selectedTimezone = value;
+                                            });
                                           }
                                         });
                                       }
@@ -605,7 +683,8 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                                   );
                                 },
                                 optionsViewBuilder: (BuildContext context,
-                                    AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+                                    AutocompleteOnSelected<String> onSelected,
+                                    Iterable<String> options) {
                                   return Align(
                                     alignment: Alignment.topLeft,
                                     child: Material(
@@ -613,20 +692,31 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                                       child: ConstrainedBox(
                                         constraints: BoxConstraints(
                                             maxHeight: 300,
-                                            maxWidth: MediaQuery.of(context).size.width - 40 > 0 ? MediaQuery.of(context).size.width - 40 : 300
-                                        ),
+                                            maxWidth: MediaQuery.of(context)
+                                                            .size
+                                                            .width -
+                                                        40 >
+                                                    0
+                                                ? MediaQuery.of(context)
+                                                        .size
+                                                        .width -
+                                                    40
+                                                : 300),
                                         child: ListView.builder(
                                           padding: EdgeInsets.zero,
                                           itemCount: options.length,
                                           shrinkWrap: true,
-                                          itemBuilder: (BuildContext context, int index) {
-                                            final String option = options.elementAt(index);
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            final String option =
+                                                options.elementAt(index);
                                             return InkWell(
                                               onTap: () {
                                                 onSelected(option);
                                               },
                                               child: Padding(
-                                                padding: const EdgeInsets.all(16.0),
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
                                                 child: Text(option),
                                               ),
                                             );
@@ -639,8 +729,10 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                               )
                             else
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                child: Text(OccasionSettingsStrings.timezonesLoading),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12.0),
+                                child: Text(
+                                    OccasionSettingsStrings.timezonesLoading),
                               ),
                             const SizedBox(height: 16),
                           ],
@@ -657,56 +749,65 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                         padding: const EdgeInsets.all(12.0),
                         decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8)
-                        ),
+                            borderRadius: BorderRadius.circular(8)),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(OccasionSettingsStrings.features, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            Text(OccasionSettingsStrings.features,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 18)),
                             const SizedBox(height: 8),
                             TextField(
                               controller: _featureSearchController,
                               enabled: isEditingEnabled,
                               decoration: InputDecoration(
-                                labelText: OccasionSettingsStrings.searchFeatures,
+                                labelText:
+                                    OccasionSettingsStrings.searchFeatures,
                                 prefixIcon: const Icon(Icons.search),
                                 border: const OutlineInputBorder(),
-                                suffixIcon: _featureSearchQuery.isNotEmpty && isEditingEnabled
+                                suffixIcon: _featureSearchQuery.isNotEmpty &&
+                                        isEditingEnabled
                                     ? IconButton(
-                                  icon: const Icon(Icons.clear),
-                                  onPressed: () {
-                                    _featureSearchController.clear();
-                                    setState(() {
-                                      _featureSearchQuery = "";
-                                    });
-                                  },
-                                )
+                                        icon: const Icon(Icons.clear),
+                                        onPressed: () {
+                                          _featureSearchController.clear();
+                                          setState(() {
+                                            _featureSearchQuery = "";
+                                          });
+                                        },
+                                      )
                                     : null,
                               ),
                               onChanged: (value) {
-                                setState(() { _featureSearchQuery = value; });
+                                setState(() {
+                                  _featureSearchQuery = value;
+                                });
                               },
                             ),
                             const SizedBox(height: 16),
                             if (enabledFeatures.isNotEmpty) ...[
-                              Text(OccasionSettingsStrings.enabledFeatures, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              Text(OccasionSettingsStrings.enabledFeatures,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
                               const SizedBox(height: 8),
-                              ...enabledFeatures.map((feature) =>
-                                  FeatureForm(feature: feature, occasion: occasion!.id!)
-                              ),
+                              ...enabledFeatures.map((feature) => FeatureForm(
+                                  feature: feature, occasion: occasion!.id!)),
                             ],
                             if (disabledFeatures.isNotEmpty) ...[
                               const SizedBox(height: 16),
-                              Text(OccasionSettingsStrings.otherFeatures, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              Text(OccasionSettingsStrings.otherFeatures,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
                               const SizedBox(height: 8),
-                              ...disabledFeatures.map((feature) =>
-                                  FeatureForm(feature: feature, occasion: occasion!.id!)
-                              ),
+                              ...disabledFeatures.map((feature) => FeatureForm(
+                                  feature: feature, occasion: occasion!.id!)),
                             ],
-                            if (featuresToShow.isEmpty && _featureSearchQuery.isNotEmpty)
+                            if (featuresToShow.isEmpty &&
+                                _featureSearchQuery.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text(OccasionSettingsStrings.noFeaturesFound),
+                                child: Text(
+                                    OccasionSettingsStrings.noFeaturesFound),
                               ),
                           ],
                         ),
@@ -717,28 +818,31 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                   if (RightsService.isUnitManager())
                     Center(
                       child: Tooltip(
-                        message: hasOrders ? OccasionSettingsStrings.cannotDeleteWithOrders : "",
+                        message: hasOrders
+                            ? OccasionSettingsStrings.cannotDeleteWithOrders
+                            : "",
                         child: TextButton(
                           onPressed: isEditingEnabled
                               ? () {
-                            if (hasOrders) {
-                              ToastHelper.Show(
-                                  context,
-                                  OccasionSettingsStrings.cannotDeleteWithOrders,
-                                  severity: ToastSeverity.NotOk
-                              );
-                              return;
-                            }
-                            _confirmDelete();
-                          }
+                                  if (hasOrders) {
+                                    ToastHelper.Show(
+                                        context,
+                                        OccasionSettingsStrings
+                                            .cannotDeleteWithOrders,
+                                        severity: ToastSeverity.NotOk);
+                                    return;
+                                  }
+                                  _confirmDelete();
+                                }
                               : null,
                           child: Text(
                             OccasionSettingsStrings.deleteEvent,
                             style: TextStyle(
                                 color: isEditingEnabled
-                                    ? (canDelete ? ThemeConfig.redColor(context) : Colors.grey)
-                                    : Colors.grey
-                            ),
+                                    ? (canDelete
+                                        ? ThemeConfig.redColor(context)
+                                        : Colors.grey)
+                                    : Colors.grey),
                           ),
                         ),
                       ),
@@ -763,11 +867,17 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
               ),
               const SizedBox(width: 16),
               ElevatedButton.icon(
-                icon: _isSaving ? const SizedBox.shrink() : const Icon(Icons.save, size: 18),
+                icon: _isSaving
+                    ? const SizedBox.shrink()
+                    : const Icon(Icons.save, size: 18),
                 label: _isSaving
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2))
                     : Text(CommonStrings.save),
-                onPressed: _isSaving || !isEditingEnabled ? null : _saveSettings,
+                onPressed:
+                    _isSaving || !isEditingEnabled ? null : _saveSettings,
               ),
             ],
           ),

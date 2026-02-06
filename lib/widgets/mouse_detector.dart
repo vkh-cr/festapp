@@ -15,8 +15,7 @@ class _MouseDetectorState extends State<MouseDetector> {
   @override
   initState() {
     super.initState();
-    WidgetsBinding.instance.mouseTracker
-        .addListener(_handleMouseTrackerChange);
+    WidgetsBinding.instance.mouseTracker.addListener(_handleMouseTrackerChange);
     _mouseIsConnected = WidgetsBinding.instance.mouseTracker.mouseIsConnected;
   }
 
@@ -29,8 +28,7 @@ class _MouseDetectorState extends State<MouseDetector> {
 
   void _handleMouseTrackerChange() {
     setState(() {
-      _mouseIsConnected =
-          WidgetsBinding.instance.mouseTracker.mouseIsConnected;
+      _mouseIsConnected = WidgetsBinding.instance.mouseTracker.mouseIsConnected;
     });
   }
 

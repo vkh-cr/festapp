@@ -48,7 +48,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   }
 
   void _initializeOccasions() {
-     if (widget.initialOccasions != null) {
+    if (widget.initialOccasions != null) {
       _allOccasions = widget.initialOccasions!;
       _filteredOccasions = widget.initialOccasions!;
       _isLoading = false;
@@ -102,7 +102,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
     setState(() {
       _filteredOccasions = _allOccasions.where((occasion) {
         final normalizedTitle =
-        Utilities.removeDiacritics(occasion.title?.toLowerCase() ?? "");
+            Utilities.removeDiacritics(occasion.title?.toLowerCase() ?? "");
         return normalizedTitle.contains(normalizedQuery);
       }).toList();
     });
@@ -120,7 +120,8 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   Future<void> _handleView(OccasionModel occasion) async {
     try {
       if (occasion.link == null) return;
-      await RouterService.navigateToOccasionAdministration(context, occasion: occasion);
+      await RouterService.navigateToOccasionAdministration(context,
+          occasion: occasion);
     } catch (e) {
       ToastHelper.Show(context, "Could not load event. Please try again.".tr());
     }
@@ -148,13 +149,11 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
     final presentEvents = _filteredOccasions
         .where((o) => o.startTime!.isBefore(now) && o.endTime!.isAfter(now))
         .toList();
-    final upcomingEvents = _filteredOccasions
-        .where((o) => o.startTime!.isAfter(now))
-        .toList();
+    final upcomingEvents =
+        _filteredOccasions.where((o) => o.startTime!.isAfter(now)).toList();
     upcomingEvents.sort((a, b) => a.startTime!.compareTo(b.startTime!));
-    final pastEvents = _filteredOccasions
-        .where((o) => o.endTime!.isBefore(now))
-        .toList();
+    final pastEvents =
+        _filteredOccasions.where((o) => o.endTime!.isBefore(now)).toList();
     pastEvents.sort((a, b) => b.endTime!.compareTo(a.endTime!));
 
     return Scaffold(
@@ -163,32 +162,32 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : RefreshIndicator(
-          onRefresh: _loadOccasions,
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(child: _buildHeaderControls()),
-              if (_filteredOccasions.isEmpty &&
-                  _searchController.text.isNotEmpty)
-                SliverFillRemaining(
-                    child: Center(child: Text("No events found.".tr())))
-              else ...[
-                if (presentEvents.isNotEmpty) ...[
-                  _buildSectionHeader(context, "Happening Now".tr()),
-                  _buildGrid(presentEvents, isPresent: true),
-                ],
-                if (upcomingEvents.isNotEmpty) ...[
-                  _buildSectionHeader(context, "Upcoming Events".tr()),
-                  _buildGrid(upcomingEvents),
-                ],
-                if (pastEvents.isNotEmpty) ...[
-                  _buildSectionHeader(context, "Past Events".tr()),
-                  _buildGrid(pastEvents),
-                ],
-              ],
-              const SliverToBoxAdapter(child: SizedBox(height: 64)),
-            ],
-          ),
-        ),
+                onRefresh: _loadOccasions,
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(child: _buildHeaderControls()),
+                    if (_filteredOccasions.isEmpty &&
+                        _searchController.text.isNotEmpty)
+                      SliverFillRemaining(
+                          child: Center(child: Text("No events found.".tr())))
+                    else ...[
+                      if (presentEvents.isNotEmpty) ...[
+                        _buildSectionHeader(context, "Happening Now".tr()),
+                        _buildGrid(presentEvents, isPresent: true),
+                      ],
+                      if (upcomingEvents.isNotEmpty) ...[
+                        _buildSectionHeader(context, "Upcoming Events".tr()),
+                        _buildGrid(upcomingEvents),
+                      ],
+                      if (pastEvents.isNotEmpty) ...[
+                        _buildSectionHeader(context, "Past Events".tr()),
+                        _buildGrid(pastEvents),
+                      ],
+                    ],
+                    const SliverToBoxAdapter(child: SizedBox(height: 64)),
+                  ],
+                ),
+              ),
       ),
     );
   }
@@ -226,27 +225,28 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                         child: child),
                     child: showButton
                         ? Row(
-                      key: const ValueKey('add-button'),
-                      children: [
-                        const SizedBox(width: 16),
-                        ElevatedButton.icon(
-                          onPressed: _addNewEvent,
-                          icon: const Icon(Icons.add, size: 18),
-                          label: Text('Add New Event'.tr()),
-                          style: ElevatedButton.styleFrom(
-                            // This will force the button to be at least 48px tall.
-                            minimumSize: const Size(0, 48),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 10.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  StylesConfig.commonRoundness),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
+                            key: const ValueKey('add-button'),
+                            children: [
+                              const SizedBox(width: 16),
+                              ElevatedButton.icon(
+                                onPressed: _addNewEvent,
+                                icon: const Icon(Icons.add, size: 18),
+                                label: Text('Add New Event'.tr()),
+                                style: ElevatedButton.styleFrom(
+                                  // This will force the button to be at least 48px tall.
+                                  minimumSize: const Size(0, 48),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0, vertical: 10.0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        StylesConfig.commonRoundness),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
                         : const SizedBox.shrink(key: ValueKey('empty-box')),
                   ),
                 ],
@@ -280,20 +280,20 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
         ),
         isDense: true,
         // Reduced vertical padding to make the search field smaller.
-        contentPadding:
-        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         suffixIcon: _searchController.text.isNotEmpty
             ? IconButton(
-          // By removing padding and constraints, the IconButton won't add extra vertical space.
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          icon: const Icon(Icons.clear, size: 20),
-          onPressed: () => _searchController.clear(),
-        )
+                // By removing padding and constraints, the IconButton won't add extra vertical space.
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.clear, size: 20),
+                onPressed: () => _searchController.clear(),
+              )
             : null,
       ),
     );
   }
+
   Widget _buildSectionHeader(BuildContext context, String title) {
     return SliverToBoxAdapter(
       child: Padding(
@@ -314,7 +314,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
           crossAxisSpacing: 16,
         ),
         delegate: SliverChildBuilderDelegate(
-              (context, index) {
+          (context, index) {
             final occasion = occasions[index];
             return OccasionEditCard(
               occasion: occasion,

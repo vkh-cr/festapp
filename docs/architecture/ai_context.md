@@ -10,7 +10,7 @@ Festapp is a customized event management application built with:
 - **Frontend**: Flutter (Mobile & Web)
 - **Backend**: Supabase (PostgreSQL, Edge Functions, Auth)
 - **Database Logic**: Heavy usage of SQL functions defined in
-  `scripts/functions`.
+  `database/functions`.
 
 ## Data Hierarchy (Mental Model)
 
@@ -48,7 +48,7 @@ The main application code.
   - `OfflineDataService`: Handles local caching logic.
   - `SynchroService`: Syncs data between local and remote.
 
-### `/scripts` (Database Logic)
+### `/database` (Database Logic)
 
 Contains SQL scripts that define the database schema and business logic. **This
 is where most "backend" logic lives.**
@@ -122,6 +122,15 @@ documentation:
   integration.
 - **[Email Templates](lib/components/email_templates/README.md)**: Template
   management and Edge Function delivery.
+- **[Bank Accounts](lib/components/bank_accounts/README.md)**: Management of
+  bank accounts and payment pairing configuration.
+- **[Unit](lib/components/unit/README.md)**: Organization configuration (payment
+  methods, colors) and branding.
+- **[Organization](lib/components/organization/README.md)**: Domain-level
+  settings and admin management.
+- **[Feedback](lib/components/feedback/README.md)**: User feedback collection.
+- **[App Management](lib/components/app_management/README.md)**: Global app
+  settings (versions, maintenance mode).
 
 ### 4. Supabase Interactions
 
@@ -129,7 +138,7 @@ documentation:
   `data_services`.
 - **Complex Logic**: Often wrapped in Postgres Functions (RPC calls) rather than
   raw CRUD from the client, especially for critical flows like Order Creation.
-  Look in `scripts/functions` for the implementation of these RPCs.
+  Look in `database/functions` for the implementation of these RPCs.
 
 ### 5. Error Handling (`ExceptionHandler`)
 
@@ -137,7 +146,6 @@ documentation:
   UI code.
 - **Behavior**: Automatically catches errors, parses Supabase/Postgrest
   exceptions, and shows a user-friendly Dialog or Toast.
-
 
 ## Context
 
@@ -150,7 +158,7 @@ this file explains the _internal architecture_ for developers and AI assistants.
 ## Critical Implementation Details
 
 - **Database Changes**: If you change logical flows (like ordering or
-  permissions), check if a SQL function in `scripts/` needs updating.
+  permissions), check if a SQL function in `database/` needs updating.
 - **Generated Code**: Run
   `fvm dart run build_runner build --delete-conflicting-outputs` after changing
   Refit services, JSON models, or AutoRoute definitions.
@@ -160,10 +168,11 @@ this file explains the _internal architecture_ for developers and AI assistants.
   or imports (avoid `dart:io` in shared UI code).
 - **Split Brain Logic**: A lot of business logic (e.g.,
   `confirm_blueprint_order_change`) lives in **SQL Functions**
-  (`scripts/functions/`).
+  (`database/functions/`).
   - **Risk**: AI might modify Dart logic without realizing the "real work" is
     happening in a stored procedure it didn't check.
-  - **Mitigation**: Always check `scripts/functions/` when modifying data flows.
+  - **Mitigation**: Always check `database/functions/` when modifying data
+    flows.
 
 ## Recommended Architecture (Existing Pattern)
 

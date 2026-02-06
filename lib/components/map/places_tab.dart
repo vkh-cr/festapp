@@ -41,10 +41,8 @@ class _PlacesTabState extends State<PlacesTab>
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                DataGridHelper.buildTab(
-                    context, Icons.place, "Places".tr()),
-                DataGridHelper.buildTab(
-                    context, Icons.timeline, "Paths".tr()),
+                DataGridHelper.buildTab(context, Icons.place, "Places".tr()),
+                DataGridHelper.buildTab(context, Icons.timeline, "Paths".tr()),
               ],
             ),
           ),
@@ -52,10 +50,7 @@ class _PlacesTabState extends State<PlacesTab>
             child: TabBarView(
               controller: _tabController,
               physics: const NeverScrollableScrollPhysics(),
-              children: const [
-                PlacesContent(),
-                PathGroupsContent()
-              ],
+              children: const [PlacesContent(), PathGroupsContent()],
             ),
           ),
         ],

@@ -82,7 +82,7 @@ class BlueprintGroupsPanel extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   padding:
-                  const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
@@ -105,72 +105,92 @@ class BlueprintGroupsPanel extends StatelessWidget {
                           children: [
                             Text(
                               group.title!,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : null,
-                                fontWeight: isSelected ? FontWeight.bold : null,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: isSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : null,
+                                    fontWeight:
+                                        isSelected ? FontWeight.bold : null,
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             // Show product info (Mixed or Specific)
-                            Builder(
-                                builder: (context) {
-                                  // Logic to determine Mixed vs Uniform
-                                  bool isMixed = false;
-                                  // Default logic: group.product ?? implicit first child ?? blueprint default
-                                  // But we need to check consistency across all children.
+                            Builder(builder: (context) {
+                              // Logic to determine Mixed vs Uniform
+                              bool isMixed = false;
+                              // Default logic: group.product ?? implicit first child ?? blueprint default
+                              // But we need to check consistency across all children.
 
-                                  final objects = group.objects;
-                                  final fallbackProduct = group.product ?? blueprint!.spotProducts.firstOrNull;
+                              final objects = group.objects;
+                              final fallbackProduct = group.product ??
+                                  blueprint!.spotProducts.firstOrNull;
 
-                                  // The product we will display if uniform
-                                  final displayProduct = objects.isNotEmpty
-                                      ? (objects.first.product ?? group.product)
-                                      : fallbackProduct;
+                              // The product we will display if uniform
+                              final displayProduct = objects.isNotEmpty
+                                  ? (objects.first.product ?? group.product)
+                                  : fallbackProduct;
 
-                                  if (objects.isNotEmpty) {
-                                    final firstId = displayProduct?.id;
-                                    for (var obj in objects) {
-                                      final p = obj.product ?? group.product;
-                                      if (p?.id != firstId) {
-                                        isMixed = true;
-                                        break;
-                                      }
-                                    }
+                              if (objects.isNotEmpty) {
+                                final firstId = displayProduct?.id;
+                                for (var obj in objects) {
+                                  final p = obj.product ?? group.product;
+                                  if (p?.id != firstId) {
+                                    isMixed = true;
+                                    break;
                                   }
+                                }
+                              }
 
-                                  // 1. Mixed State
-                                  if (isMixed) {
-                                    return Text(
-                                      BlueprintStrings.mixedProducts,
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              // 1. Mixed State
+                              if (isMixed) {
+                                return Text(
+                                  BlueprintStrings.mixedProducts,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
                                         color: isSelected
-                                            ? Theme.of(context).colorScheme.primary.withOpacity(0.9)
-                                            : Colors.orange, // Orange to hint at complexity
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.9)
+                                            : Colors
+                                                .orange, // Orange to hint at complexity
                                         fontStyle: FontStyle.italic,
                                       ),
-                                      overflow: TextOverflow.ellipsis,
-                                    );
-                                  }
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                              }
 
-                                  // 2. Uniform State
-                                  final priceString = displayProduct != null
-                                      ? Utilities.formatPrice(context, displayProduct.price ?? 0)
-                                      : null;
-                                  final productTitle = displayProduct?.title ?? BlueprintStrings.noProductAssigned;
+                              // 2. Uniform State
+                              final priceString = displayProduct != null
+                                  ? Utilities.formatPrice(
+                                      context, displayProduct.price ?? 0)
+                                  : null;
+                              final productTitle = displayProduct?.title ??
+                                  BlueprintStrings.noProductAssigned;
 
-                                  return Text(
-                                    priceString != null ? "$productTitle ($priceString)" : productTitle,
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              return Text(
+                                priceString != null
+                                    ? "$productTitle ($priceString)"
+                                    : productTitle,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
                                       color: isSelected
-                                          ? Theme.of(context).colorScheme.primary.withOpacity(0.9)
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(0.9)
                                           : ThemeConfig.grey600(context),
                                     ),
-                                    overflow: TextOverflow.ellipsis,
-                                  );
-                                }
-                            ),
+                                overflow: TextOverflow.ellipsis,
+                              );
+                            }),
                           ],
                         ),
                       ),

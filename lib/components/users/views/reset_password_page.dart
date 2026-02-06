@@ -55,9 +55,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       await AuthService.changePassword(token!, _passwordController.text)
           .then((value) async {
         if (value["code"] == 403 || value["code"] == 404) {
-          ToastHelper.Show(context, UserStrings.tokenInvalid, severity: ToastSeverity.NotOk);
+          ToastHelper.Show(context, UserStrings.tokenInvalid,
+              severity: ToastSeverity.NotOk);
         } else if (value["code"] == 200) {
-          await AuthService.login(AppConfig.getUserPrefix(value["email"]), _passwordController.text);
+          await AuthService.login(AppConfig.getUserPrefix(value["email"]),
+              _passwordController.text);
           ToastHelper.Show(context, UserStrings.passwordChanged);
           RouterService.goBackOrInitial(context);
         }
@@ -87,17 +89,29 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             child: AutofillGroup(
               child: Column(
                 children: <Widget>[
-                  Text("Welcome in {name}!".tr(namedArgs: {"name":AppConfig.appName}), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                  Text(
+                    "Welcome in {name}!"
+                        .tr(namedArgs: {"name": AppConfig.appName}),
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(
                     height: 16,
                   ),
-                  Text(UserStrings.createAPassword, style: const TextStyle(fontSize: 18),),
+                  Text(
+                    UserStrings.createAPassword,
+                    style: const TextStyle(fontSize: 18),
+                  ),
                   const SizedBox(
                     height: 64,
                   ),
                   Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: PasswordField(label: UserStrings.newPassword, controller:  _passwordController, passwordType: AutofillHints.newPassword),),
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: PasswordField(
+                        label: UserStrings.newPassword,
+                        controller: _passwordController,
+                        passwordType: AutofillHints.newPassword),
+                  ),
                   const SizedBox(
                     height: 16,
                   ),

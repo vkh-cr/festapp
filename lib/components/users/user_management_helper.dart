@@ -6,8 +6,7 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
-class UserManagementHelper{
-
+class UserManagementHelper {
   /// Prompts for and sets a new password for a single user.
   /// Throws an exception if the process fails.
   static Future<void> unsafeChangeUserPassword(

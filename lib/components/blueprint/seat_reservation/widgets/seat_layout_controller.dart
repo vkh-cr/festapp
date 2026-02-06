@@ -8,7 +8,8 @@ import '../model/seat_model.dart';
 import '../utils/seat_state.dart';
 
 class SeatLayoutController extends ChangeNotifier {
-  final TransformationController transformationController = TransformationController();
+  final TransformationController transformationController =
+      TransformationController();
   List<SeatModel> seats = [];
   int rows = 0;
   int cols = 0;
@@ -46,7 +47,7 @@ class SeatLayoutController extends ChangeNotifier {
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < cols; col++) {
         var boxModel =
-        objects.firstWhereOrNull((b) => b.x == col && b.y == row);
+            objects.firstWhereOrNull((b) => b.x == col && b.y == row);
         newSeats.add(
           SeatModel(
             objectModel: boxModel,
@@ -87,8 +88,8 @@ class SeatLayoutController extends ChangeNotifier {
   /// Updates both the visual seat state AND the underlying data model.
   /// Use this for permanent changes (Edit mode).
   void updateSeat(SeatModel model, SeatState newState) {
-    final seat = seats.firstWhereOrNull(
-            (s) => s.rowI == model.rowI && s.colI == model.colI);
+    final seat = seats
+        .firstWhereOrNull((s) => s.rowI == model.rowI && s.colI == model.colI);
     if (seat != null) {
       seat.seatState = newState;
       seat.objectModel?.stateEnum = newState;
@@ -100,8 +101,8 @@ class SeatLayoutController extends ChangeNotifier {
   /// Use this for temporary selections (Create Order, Swapping) so the
   /// underlying data (objectModel) remains untouched for saving.
   void updateVisualState(SeatModel model, SeatState visualState) {
-    final seat = seats.firstWhereOrNull(
-            (s) => s.rowI == model.rowI && s.colI == model.colI);
+    final seat = seats
+        .firstWhereOrNull((s) => s.rowI == model.rowI && s.colI == model.colI);
     if (seat != null) {
       seat.seatState = visualState;
       notifyListeners();
@@ -109,18 +110,19 @@ class SeatLayoutController extends ChangeNotifier {
   }
 
   void setSeatHighlight(SeatModel model, bool isHighlighted) {
-    final seat = seats.firstWhereOrNull(
-            (s) => s.rowI == model.rowI && s.colI == model.colI);
+    final seat = seats
+        .firstWhereOrNull((s) => s.rowI == model.rowI && s.colI == model.colI);
     if (seat != null) {
       seat.isHighlightedForSwap = isHighlighted;
       notifyListeners();
     }
   }
 
-  void addObject(BlueprintObjectModel objectModel, {bool isHighlighted = false}) {
+  void addObject(BlueprintObjectModel objectModel,
+      {bool isHighlighted = false}) {
     if (objectModel.x == null || objectModel.y == null) return;
     final seat = seats.firstWhereOrNull(
-            (s) => s.rowI == objectModel.y && s.colI == objectModel.x);
+        (s) => s.rowI == objectModel.y && s.colI == objectModel.x);
     if (seat != null) {
       seat.objectModel = objectModel;
       seat.seatState = objectModel.stateEnum ?? SeatState.available;
@@ -132,7 +134,7 @@ class SeatLayoutController extends ChangeNotifier {
   void removeObject(BlueprintObjectModel objectModel) {
     if (objectModel.x == null || objectModel.y == null) return;
     final seat = seats.firstWhereOrNull(
-            (s) => s.rowI == objectModel.y && s.colI == objectModel.x);
+        (s) => s.rowI == objectModel.y && s.colI == objectModel.x);
     if (seat != null) {
       seat.objectModel = null;
       seat.seatState = SeatState.empty;
@@ -149,7 +151,8 @@ class SeatLayoutController extends ChangeNotifier {
     if (group != null) {
       final groupObjectIds = group.objects.map((o) => o.id).toSet();
       for (final seat in seats) {
-        if (seat.objectModel != null && groupObjectIds.contains(seat.objectModel!.id)) {
+        if (seat.objectModel != null &&
+            groupObjectIds.contains(seat.objectModel!.id)) {
           seat.isHighlightedForGroup = true;
         }
       }
@@ -165,7 +168,7 @@ class SeatLayoutController extends ChangeNotifier {
 
     if (model != null) {
       final seat = seats.firstWhereOrNull(
-              (s) => s.rowI == model.rowI && s.colI == model.colI);
+          (s) => s.rowI == model.rowI && s.colI == model.colI);
       if (seat != null) {
         seat.isHighlightedForTooltip = true;
       }
@@ -177,7 +180,7 @@ class SeatLayoutController extends ChangeNotifier {
     if (_layoutKey?.currentContext == null) return;
 
     final RenderBox? renderBox =
-    _layoutKey!.currentContext!.findRenderObject() as RenderBox?;
+        _layoutKey!.currentContext!.findRenderObject() as RenderBox?;
     if (renderBox == null || !renderBox.hasSize) return;
 
     double widgetWidth = renderBox.size.width;
@@ -202,7 +205,7 @@ class SeatLayoutController extends ChangeNotifier {
         (widgetHeight - layoutHeight * scaleFactor) / 2,
         0,
       );
-    
+
     isLayoutReady = true;
     notifyListeners();
   }
@@ -211,7 +214,7 @@ class SeatLayoutController extends ChangeNotifier {
     if (_layoutKey?.currentContext == null) return;
 
     final RenderBox? renderBox =
-    _layoutKey!.currentContext!.findRenderObject() as RenderBox?;
+        _layoutKey!.currentContext!.findRenderObject() as RenderBox?;
     if (renderBox == null || !renderBox.hasSize) return;
 
     final Matrix4 matrix = transformationController.value;
@@ -234,10 +237,11 @@ class SeatLayoutController extends ChangeNotifier {
         (widgetHeight - scaledHeight).clamp(0, double.infinity) / 2;
 
     double minX =
-    widgetWidth < scaledWidth ? widgetWidth - scaledWidth : centerOffsetX;
+        widgetWidth < scaledWidth ? widgetWidth - scaledWidth : centerOffsetX;
     double maxX = widgetWidth < scaledWidth ? 0 : centerOffsetX;
-    double minY =
-    widgetHeight < scaledHeight ? widgetHeight - scaledHeight : centerOffsetY;
+    double minY = widgetHeight < scaledHeight
+        ? widgetHeight - scaledHeight
+        : centerOffsetY;
     double maxY = widgetHeight < scaledHeight ? 0 : centerOffsetY;
 
     double clampedX = translateX.clamp(minX, maxX);

@@ -5,7 +5,8 @@ import 'package:intl/intl.dart';
 import 'timetable_controller.dart';
 
 class TimetableHelper {
-  static Widget showTime(BuildContext context, DateTime now, TimetableController controller) {
+  static Widget showTime(
+      BuildContext context, DateTime now, TimetableController controller) {
     return SizedBox(
       width: 100,
       child: Center(
@@ -24,7 +25,9 @@ class TimetableHelper {
           ),
           child: Text(
             DateFormat("H:mm").format(now),
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.bold),
           ),
         ),
       ),

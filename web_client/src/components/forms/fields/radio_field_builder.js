@@ -1,3 +1,4 @@
+import { formatPrice } from '../../../utils/formatters.js';
 import { FormFieldBuilder } from './form_field_builder.js';
 import { FormStrings } from '../form_strings.js';
 
@@ -27,9 +28,6 @@ export class RadioFieldBuilder {
         optionsContainer.className = 'radio-options';
         
         // Determine Card Design
-        // Logic matches Flutter: Global flag OR Field Description OR Any Option Description
-        // User Adjustment: "just being product is not reason to have iscard to be true"
-        // So we exclude product_type from the "option description" auto-trigger.
         const shouldCheckOptions = field.type !== 'product_type';
         const hasOptionDescription = shouldCheckOptions && field.options && field.options.some(opt => opt.description && opt.description.trim().length > 0);
         
@@ -54,11 +52,10 @@ export class RadioFieldBuilder {
                 const currency = opt.currencyCode || opt.currency || opt.currency_code;
                 if (currency) {
                     input.setAttribute('data-currency', currency);
-                    wrapper.setAttribute('data-currency', currency); // Also on wrapper for easy hiding
+                    wrapper.setAttribute('data-currency', currency);
                 }
                 
                 // Debug Checked Logic
-                // Use the exact same value derivation as the input.value to ensure consistency
                 const optionValue = (opt.id !== undefined && opt.id !== null) ? opt.id : opt.title;
                 const isSelected = (field.value !== undefined && field.value !== null) && (String(optionValue) === String(field.value));
                 
@@ -68,9 +65,7 @@ export class RadioFieldBuilder {
                 
                 if (isCardDesign) {
                     wrapper.classList.add('option-card');
-                    // Full card clickability
                     wrapper.onclick = (e) => {
-                         // Prevent double-toggle if clicking directly on input or label (since label triggers input)
                         if (e.target !== input && e.target.tagName !== 'LABEL' && !e.target.closest('label')) {
                              input.click();
                         }
@@ -84,9 +79,8 @@ export class RadioFieldBuilder {
                 
                 let labelContent = `<span>${opt.title || ''}</span>`;
                 if (opt.price) {
-                     // Check if we should show currency code
-                     const priceDisplay = `${opt.price}&nbsp;${currency || ''}`; 
-                     labelContent += `<span class="option-price">+${priceDisplay}</span>`; 
+                     const priceDisplay = formatPrice(opt.price, currency, 0, 'cs-CZ'); 
+                     labelContent += `<span class="option-price">+ ${priceDisplay}</span>`; 
                 }
                 optLabel.innerHTML = labelContent;
                 
@@ -108,7 +102,8 @@ export class RadioFieldBuilder {
                     
                     let descHtml = '';
                      if (surchargeData && surchargeData.amount && showSurchargeDescription) {
-                         descHtml += `<span class="surcharge-info">+ ${surchargeData.amount}&nbsp;${surchargeData.currency || ''} ${FormStrings.surchargeOnSite}</span>`;
+                         const surchargePrice = formatPrice(surchargeData.amount, surchargeData.currency || currency, 0, 'cs-CZ');
+                         descHtml += `<span class="surcharge-info">${FormStrings.surchargeOnSite}&nbsp;<span class="surcharge-price">+ ${surchargePrice}</span></span>`;
                          if (opt.description) descHtml += '<br>'; // New line separation
                      }
                      if (opt.description) {
@@ -128,18 +123,13 @@ export class RadioFieldBuilder {
         container.appendChild(optionsContainer);
 
         // Clear Selection Logic
-        // Always created but hidden by default until selection is made
         const clearBtn = document.createElement('button');
         clearBtn.type = 'button';
         clearBtn.className = 'btn-clear-selection';
         clearBtn.innerText = FormStrings.clearSelection;
 
-        // Show button when selection changes
         container.addEventListener('change', (e) => {
-            // Loose equality to handle numeric IDs vs string attribute
             if (e.target.name == field.id && e.target.type === 'radio') {
-                // Ensure button reflects REALITY: Check if anything is actually checked
-                // This handles cases where uncheck events are dispatched
                 const anyChecked = container.querySelector(`input[name="${field.id}"]:checked`);
                 clearBtn.style.display = anyChecked ? 'inline-block' : 'none';
             }
@@ -155,10 +145,8 @@ export class RadioFieldBuilder {
             radios.forEach(r => r.checked = false);
             clearBtn.style.display = 'none';
             
-            // Fix: Signal "Clear" to FormSession by making container look like an input with null value
-            // FormSession reads target.name and target.value
             container.setAttribute('name', field.id);
-            container.name = field.id; // CRITICAL: FormPage checks e.target.name property to route to handleInput
+            container.name = field.id; 
             container.value = null; 
             
             container.dispatchEvent(new Event('input', { bubbles: true }));
@@ -167,7 +155,6 @@ export class RadioFieldBuilder {
         
         container.appendChild(clearBtn);
 
-        // Error message placeholder
         const error = document.createElement('div');
         error.className = 'form-field-error';
         error.style.display = 'none';

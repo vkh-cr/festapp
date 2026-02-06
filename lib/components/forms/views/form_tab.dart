@@ -52,10 +52,13 @@ class _FormTabState extends State<FormTab> with SingleTickerProviderStateMixin {
             controller: _tabController,
             isScrollable: true,
             tabs: [
-              DataGridHelper.buildTab(context, Icons.data_object, FormStrings.tabForm),
-              DataGridHelper.buildTab(context, Icons.settings, CommonStrings.settings),
+              DataGridHelper.buildTab(
+                  context, Icons.data_object, FormStrings.tabForm),
+              DataGridHelper.buildTab(
+                  context, Icons.settings, CommonStrings.settings),
               DataGridHelper.buildTab(context, Icons.palette, "Design".tr()),
-              DataGridHelper.buildTab(context, Icons.list, FormStrings.tabResponses),
+              DataGridHelper.buildTab(
+                  context, Icons.list, FormStrings.tabResponses),
             ],
           ),
         ),

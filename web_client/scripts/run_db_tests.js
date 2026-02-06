@@ -68,6 +68,11 @@ async function runTest(file) {
     // Start Transaction
     await client.query('BEGIN');
 
+    // Sequences are now reset GLOBALLY at the start of the run (in runAll).
+    // This optimization allows tests to run in parallel without locking/contention on sequences.
+    
+    // Inject Assertions
+
     // Inject Assertions
     if (fs.existsSync(ASSERTIONS_FILE)) {
         const assertionsSql = fs.readFileSync(ASSERTIONS_FILE, 'utf8');
@@ -102,14 +107,45 @@ async function runTest(file) {
   }
 }
 
+// Basic concurrency limit
+const CONCURRENCY = 5;
+
 async function runAll() {
+  console.log('>>> Setup: Resetting Sequences (Global)...');
+  // 1. Global Setup (Run Once)
+  const setupClient = new Client({
+    connectionString: DATABASE_URL,
+    ssl: DATABASE_URL.includes('supabase.com') ? { rejectUnauthorized: false } : false
+  });
+
+  try {
+    await setupClient.connect();
+    await resetSequences(setupClient);
+  } catch (err) {
+    console.error(`Setup Failed: ${err.message}`);
+    process.exit(1);
+  } finally {
+    await setupClient.end();
+  }
+  console.log('>>> Setup Complete.\n');
+
+  // 2. Run Tests in Batches
   let successCount = 0;
   let failureCount = 0;
+  
+  // Helper to chunk array
+  const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+    arr.slice(i * size, i * size + size)
+  );
 
-  for (const file of testFiles) {
-    const success = await runTest(file);
-    if (success) successCount++;
-    else failureCount++;
+  const batches = chunk(testFiles, CONCURRENCY);
+
+  for (const batch of batches) {
+    const results = await Promise.all(batch.map(file => runTest(file)));
+    results.forEach(success => {
+        if (success) successCount++;
+        else failureCount++;
+    });
   }
 
   console.log('\n==================================================');
@@ -120,6 +156,59 @@ async function runAll() {
     process.exit(1);
   } else {
     process.exit(0);
+  }
+}
+
+
+
+async function resetSequences(client) {
+  try {
+    // 1. Get List of Sequences
+    const sequencesRes = await client.query(`
+      SELECT 
+        table_schema, 
+        table_name, 
+        column_name,
+        pg_get_serial_sequence('"' || table_schema || '"."' || table_name || '"', column_name) AS seq
+      FROM information_schema.columns
+      WHERE table_schema IN ('public', 'eshop') 
+        AND (column_default LIKE 'nextval%' OR is_identity = 'YES')
+        AND pg_get_serial_sequence('"' || table_schema || '"."' || table_name || '"', column_name) IS NOT NULL;
+    `);
+
+    for (const row of sequencesRes.rows) {
+      if (!row.seq) continue;
+      
+      // 2. Generate Safe Update for each
+      // We read current sequence value directly from the sequence relation
+      // And we prevent rewinding by using GREATEST found ID vs Current Sequence
+      const seq = row.seq;
+      const table = `"${row.table_schema}"."${row.table_name}"`;
+      const col = `"${row.column_name}"`;
+
+      const sql = `
+        DO $$
+        DECLARE
+            v_seq_val bigint;
+            v_max_id bigint;
+        BEGIN
+            -- Get Sequence Value
+            EXECUTE 'SELECT last_value FROM ' || '${seq}' INTO v_seq_val;
+            
+            -- Get Max ID
+            EXECUTE 'SELECT COALESCE(MAX(${col}), 0) FROM ${table}' INTO v_max_id;
+            
+            -- Only advance, never rewind (Safe)
+            IF v_max_id >= v_seq_val THEN
+                PERFORM setval('${seq}', v_max_id + 1, false);
+            END IF;
+        END $$;
+      `;
+      
+      await client.query(sql);
+    }
+  } catch (err) {
+    console.warn(`  [WARN] Failed to reset sequences: ${err.message}`);
   }
 }
 

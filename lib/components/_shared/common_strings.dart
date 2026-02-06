@@ -16,28 +16,31 @@ class CommonStrings {
   static String get reset => 'Common.reset'.tr(); // "Reset"
   static String get search => 'Search'.tr(); // "Search"
   static String get back => 'Common.back'.tr(); // "Back"
+  static String get or => 'Common.or'.tr(); // "Or"
 
   // --- Common Nouns & Labels ---
   static String get title => 'Title'.tr(); // "Title"
   static String get price => 'Price'.tr(); // "Price"
-  static String get amount => 'Amount'.tr(); // "Amount" -- NEW
-  static String get currency => 'Currency'.tr(); // "Currency" -- NEW
+  static String get amount => 'Amount'.tr(); // "Amount"
+  static String get currency => 'Currency'.tr(); // "Currency"
   static String get date => 'Date'.tr(); // "Date"
   static String get note => 'Note'.tr(); // "Note"
-  static String get password => 'FeatureUser.password'.tr(); // "Password" (Moved to FeatureUser, but widely used? UserStrings has it too?)
+  static String get password => 'FeatureUser.password'
+      .tr(); // "Password" (Moved to FeatureUser, but widely used? UserStrings has it too?)
 
   // --- Common Statuses & Feedback ---
   static String get saved => 'Saved'.tr(); // "Saved"
   static String get deleted => 'Deleted'.tr(); // "Deleted"
   static String get success => 'Common.success'.tr(); // "Success"
-  static String get error => 'Common.error'.tr(); // Map "Error" getter to "An error occurred" or keep separate? I'll map to Common.error for now as it's the generic error string I have.
   static String get loading => 'Common.loading'.tr(); // "Loading..."
   static String get settings => 'Settings'.tr(); // "Settings"
   static String get advancedSettings => 'Advanced Settings'.tr();
 
   // --- Forms & Validation ---
-  static String get fieldCannotBeEmpty => 'Common.fieldCannotBeEmpty'.tr(); // "Field cannot be empty"
-  static String get invalidFormat => 'Common.invalidFormat'.tr(); // "Invalid format"
+  static String get fieldCannotBeEmpty =>
+      'Common.fieldCannotBeEmpty'.tr(); // "Field cannot be empty"
+  static String get invalidFormat =>
+      'Common.invalidFormat'.tr(); // "Invalid format"
   static String get name => 'Name'.tr(); // "Name"
   static String get description => 'Description'.tr(); // "Description"
   static String get content => 'Content'.tr(); // "Content"

@@ -22,12 +22,14 @@ echo "=================================================="
 RUN_WEB=false
 RUN_DB=false
 RUN_FLUTTER=false
+RUN_INTEGRATION=false
 
 # If no arguments, run all
 if [ $# -eq 0 ]; then
     RUN_WEB=true
     RUN_DB=true
     RUN_FLUTTER=true
+    RUN_INTEGRATION=true
 else
     # Parse arguments
     for arg in "$@"
@@ -42,9 +44,12 @@ else
             flutter)
                 RUN_FLUTTER=true
                 ;;
+            integration)
+                RUN_INTEGRATION=true
+                ;;
             *)
                 echo "Unknown argument: $arg"
-                echo "Usage: ./automation/test_all.sh [web] [db] [flutter]"
+                echo "Usage: ./automation/test_all.sh [web] [db] [flutter] [integration]"
                 exit 1
                 ;;
         esac
@@ -132,6 +137,60 @@ if [ "$RUN_FLUTTER" = true ]; then
     
     if [ $res -ne 0 ]; then
         echo "⚠️  WARNING: Flutter Tests Failed."
+    fi
+fi
+
+# 3b. Run Deno Edge Function Tests
+if [ "$RUN_DB" = true ] || [ "$RUN_INTEGRATION" = true ]; then
+    # Deno Edge Function Tests
+    # Tests business logic of server functions.
+    echo ""
+    echo ">>> Deno Edge Function Tests..."
+    
+    if command -v deno &> /dev/null; then
+        # Find and run all test_*.ts files in supabase/functions
+        # We use explicit paths to avoid running unrelated stuff if any
+        DENO_TEST_FILES=$(find supabase/functions -name "test_*.ts" -not -path "*/node_modules/*")
+        
+        if [ -n "$DENO_TEST_FILES" ]; then
+             echo "Found Deno tests: $DENO_TEST_FILES"
+             # Run without --allow-all to be safe.
+             # test_parser_comprehensive only needs logic, but imports might trigger env read.
+             set +e
+             # Load env vars for Deno tests
+             if [ -f ".env.local" ]; then
+                export $(grep -v '^#' .env.local | xargs)
+             fi
+             deno test --allow-env --allow-net --allow-read $DENO_TEST_FILES
+             res=$?
+             set -e
+             
+             if [ $res -ne 0 ]; then
+                echo "⚠️  WARNING: Deno Tests Failed."
+                exit 1 
+             fi
+        else
+             echo "No Deno tests found."
+        fi
+    else
+        echo "⚠️  Deno not installed. Skipping Edge Function tests."
+    fi
+fi
+
+# 4. Run Integration Tests
+if [ "$RUN_INTEGRATION" = true ]; then
+    echo ""
+    echo ">>> Integration Tests..."
+    
+    # Check for Supabase Keys (basic check)
+    if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+        echo "Running Bank Import Integration..."
+        node tests/integration/bank_import.js --existing-token "00000000-0000-0000-0000-00000000TEST"
+    elif [ -f "automation/project.conf" ]; then
+         echo "Running Bank Import Integration (using project.conf defaults)..."
+         node tests/integration/bank_import.js --existing-token "00000000-0000-0000-0000-00000000TEST"
+    else
+        echo "⚠️  SKIPPING Integration Tests: Missing SUPABASE credentials."
     fi
 fi
 

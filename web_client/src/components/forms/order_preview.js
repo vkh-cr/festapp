@@ -1,4 +1,5 @@
 import { CommonStrings } from '../shared/common_strings.js';
+import { formatPrice } from '../../utils/formatters.js';
 import { FormStrings } from './form_strings.js';
 import { OrdersStrings } from '../eshop/orders_strings.js'; 
 
@@ -269,21 +270,31 @@ export class OrderPreview {
         const personalInfo = [];
 
         // 1. Process Payload Fields (for Personal Info)
-        // Payload fields are [{ id: val }, { id: val }]
-        payload.fields.forEach(fObj => {
-            Object.keys(fObj).forEach(key => {
-                 if (key === 'currency_code') return;
-                 const val = fObj[key];
-                 // Find field definition
-                 const field = formModel.relatedFields.find(f => String(f.id) === key);
-                 if (field && field.type !== 'ticket') {
-                      const finalVal = FieldPreviewFactory.format(field, val, { 
+        // Ensure deterministic order by iterating formModel.visibleFields
+        const payloadFieldsMap = new Map();
+        if (payload.fields) {
+            payload.fields.forEach(fObj => {
+                Object.keys(fObj).forEach(k => payloadFieldsMap.set(k, fObj[k]));
+            });
+        }
+
+        if (formModel.visibleFields) {
+            formModel.visibleFields.forEach(field => {
+                 // Skip ticket fields
+                 if (field.type === 'ticket') return;
+                 
+                 if (payloadFieldsMap.has(String(field.id))) {
+                     const val = payloadFieldsMap.get(String(field.id));
+                     if (field.id === 'currency_code') return; 
+
+                     const result = FieldPreviewFactory.format(field, val, { 
                           currency: totalPriceData.currency 
-                      });
-                      personalInfo.push({ label: field.title, value: finalVal });
+                     });
+                     // result is now { value, price }
+                     personalInfo.push({ label: field.title, value: result.value, price: result.price });
                  }
             });
-        });
+        }
 
 
         // 2. Process Payload Tickets
@@ -291,14 +302,16 @@ export class OrderPreview {
         const tickets = [];
         const payloadTickets = payload.ticket || [];
         
-        // Helper to get definition
-        const allSubFields = [];
-        formModel.visibleFields.forEach(f => {
-            if (f.type === 'ticket') {
-                const subs = f.subFields || f.fields || (f.data && f.data.fields) || [];
-                allSubFields.push(...subs);
-            }
-        });
+        // Collect all ticket sub-definitions in order from formModel
+        const allSubFieldsOrdered = [];
+        if (formModel.visibleFields) {
+            formModel.visibleFields.forEach(f => {
+                if (f.type === 'ticket') {
+                    const subs = f.subFields || f.fields || (f.data && f.data.fields) || [];
+                    allSubFieldsOrdered.push(...subs);
+                }
+            });
+        }
 
         payloadTickets.forEach((ticketData, index) => {
              const tData = { index: index + 1, rows: [], hasSpot: false };
@@ -308,36 +321,42 @@ export class OrderPreview {
                  
                  // Resolve Spot Label
                  let spotLabel = ticketData.spotName || `Spot #${ticketData.spot}`;
+                 let spotPrice = null;
                  if (ticketData.spotPrice) {
-                     spotLabel += ` (${ticketData.spotPrice} ${totalPriceData.currency})`;
+                     spotPrice = formatPrice(ticketData.spotPrice, totalPriceData.currency, 0, 'cs-CZ');
+                     // Don't append price to label anymore
                  }
                  
-                 tData.rows.push({ label: OrdersStrings.gridSpot || "Spot", value: spotLabel, isSpot: true });
+                 tData.rows.push({ label: OrdersStrings.gridSpot || "Spot", value: spotLabel, price: spotPrice, isSpot: true });
              }
              
              if (ticketData.fields) {
-                 ticketData.fields.forEach(fObj => {
-                     Object.keys(fObj).forEach(key => {
-                         if (key === 'currency_code') return;
-                         const val = fObj[key];
-                          
-                          let subDef = null;
-                          if (fObj['_subFieldId']) {
-                              subDef = allSubFields.find(s => String(s.id) === String(fObj['_subFieldId']));
-                          } else {
-                              subDef = allSubFields.find(s => s.type === key);
-                          }
-                          
-                          // Prevent duplicates: Only process the key that matches the definition type
-                          if (subDef && key !== subDef.type) return;
+                 // Iterate definitions to ensure correct order
+                 allSubFieldsOrdered.forEach(subDef => {
+                      // Find matching data entry in ticketData.fields
+                      const fObj = ticketData.fields.find(obj => {
+                           if (obj['_subFieldId']) {
+                               return String(obj['_subFieldId']) === String(subDef.id);
+                           }
+                           // Match by Key (fallback if no subFieldId)
+                           return obj.hasOwnProperty(subDef.type);
+                      });
 
-                          if (subDef) {
-                              const valLabel = FieldPreviewFactory.format(subDef, val, { 
+                      if (fObj) {
+                           let val = fObj[subDef.type];
+                           if (val === undefined) {
+                                // Fallback: find relevant value key
+                                const key = Object.keys(fObj).find(k => k !== '_subFieldId' && k !== 'currency_code');
+                                if (key) val = fObj[key];
+                           }
+
+                           if (val !== undefined) {
+                               const result = FieldPreviewFactory.format(subDef, val, { 
                                   currency: totalPriceData.currency 
-                              });
-                              tData.rows.push({ label: subDef.title, value: valLabel });
-                          }
-                     });
+                               });
+                               tData.rows.push({ label: subDef.title, value: result.value, price: result.price });
+                           }
+                      }
                  });
              }
              tickets.push(tData);
@@ -380,10 +399,14 @@ export class OrderPreview {
         if (data.personalInfo.length > 0) {
             html += `<div class="preview-section">`;
             data.personalInfo.forEach((item, index) => {
+                const priceHtml = item.price ? `<span class="preview-price">+ ${item.price}</span>` : '';
                 html += `
                     <div class="preview-info-row">
                         <span class="preview-label">${item.label}:</span>
-                        <span class="preview-value">${item.value}</span>
+                        <div class="preview-value-row">
+                             <span class="preview-value">${item.value}</span>
+                             ${priceHtml}
+                        </div>
                     </div>
                 `;
                 if (index < data.personalInfo.length - 1) {
@@ -403,10 +426,14 @@ export class OrderPreview {
                   
                   // Spot/Fields
                   ticket.rows.forEach((row, rIndex) => {
+                      const priceHtml = row.price ? `<span class="preview-price">+ ${row.price}</span>` : '';
                       html += `
                         <div class="preview-info-row">
                              <span class="preview-label">${row.label}:</span>
-                             <span class="preview-value">${row.value}</span>
+                             <div class="preview-value-row">
+                                  <span class="preview-value">${row.value}</span>
+                                  ${priceHtml}
+                             </div>
                         </div>
                       `;
                       if (rIndex < ticket.rows.length - 1) {
@@ -419,7 +446,8 @@ export class OrderPreview {
         }
 
         // Total
-        const totalPriceString = PublicOrderStrings.totalPrice(`${data.totalPrice} ${data.currency}`);
+        const formattedPrice = formatPrice(data.totalPrice, data.currency, 0, 'cs-CZ');
+        const totalPriceString = PublicOrderStrings.totalPrice(formattedPrice);
         html += `
              <div class="preview-total-price">
                  ${totalPriceString}

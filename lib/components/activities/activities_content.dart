@@ -32,8 +32,7 @@ import 'vertical_grid_lines_painter.dart';
 class ActivitiesContent extends StatefulWidget {
   final int occasionId;
 
-  const ActivitiesContent({Key? key, required this.occasionId})
-      : super(key: key);
+  const ActivitiesContent({super.key, required this.occasionId});
 
   @override
   _ActivitiesContentState createState() => _ActivitiesContentState();
@@ -49,7 +48,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   double _scale = ActivityConstants.kInitialScale;
   double _panOffset = ActivityConstants.kInitialPanOffset;
   final ValueNotifier<double> _currentPanOffsetNotifier =
-  ValueNotifier<double>(ActivityConstants.kInitialPanOffset);
+      ValueNotifier<double>(ActivityConstants.kInitialPanOffset);
   double _gesturePanOffsetStart = 0.0;
   double _gestureDragStartX = 0.0;
   double _scrollbarGestureDragStartX = 0.0;
@@ -62,7 +61,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   String _placeFilter = '';
   String _eventFilter = '';
   final Map<ActivityModel, List<ActivityAssignmentModel>> _activityAssignments =
-  {};
+      {};
   final Map<String, Duration> _userAssignedHours = {};
   final Set<ActivityModel> _selectedActivities = {};
   late MultiSplitViewController _mainController;
@@ -139,9 +138,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   bool _handleGlobalModifierKey(KeyEvent event) {
-    final bool newModifierState =
-        HardwareKeyboard.instance.isControlPressed ||
-            HardwareKeyboard.instance.isMetaPressed;
+    final bool newModifierState = HardwareKeyboard.instance.isControlPressed ||
+        HardwareKeyboard.instance.isMetaPressed;
 
     if (_isModifierKeyPressedForScroll != newModifierState) {
       if (mounted) {
@@ -210,19 +208,24 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
     bool didSaveSuccessfully = false;
     try {
-      final response = await DbActivities.autosaveActivities(widget.occasionId, _bundle!);
+      final response =
+          await DbActivities.autosaveActivities(widget.occasionId, _bundle!);
 
       if (response != null && response['code'] == 409) {
         final conflictData = response['data'] as Map<String, dynamic>?;
         final latestPublishId = conflictData?['latest_publish_id'] as int?;
         final publishedAtStr = conflictData?['published_at'] as String?;
 
-        String conflictMessage = ActivitiesComponentStrings.conflictMessageDefault;
+        String conflictMessage =
+            ActivitiesComponentStrings.conflictMessageDefault;
         if (publishedAtStr != null) {
           final publishedAt = DateTime.parse(publishedAtStr).toLocal();
-          final formattedTime = DateFormat.jm(context.locale.toString()).format(publishedAt);
-          final formattedDate = DateFormat.yMMMd(context.locale.toString()).format(publishedAt);
-          conflictMessage = ActivitiesComponentStrings.conflictMessageWithTime(formattedTime, formattedDate);
+          final formattedTime =
+              DateFormat.jm(context.locale.toString()).format(publishedAt);
+          final formattedDate =
+              DateFormat.yMMMd(context.locale.toString()).format(publishedAt);
+          conflictMessage = ActivitiesComponentStrings.conflictMessageWithTime(
+              formattedTime, formattedDate);
         }
 
         final choice = await _showConflictDialog(conflictMessage);
@@ -242,10 +245,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       } else if (response != null && response['code'] == 200) {
         didSaveSuccessfully = true;
       } else {
-        print("Autosave failed: ${response?['message']}");
+
       }
     } catch (e) {
-      print("Autosave failed with exception: $e");
+      // Autosave failed
     }
 
     if (!mounted) return;
@@ -262,8 +265,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     setState(() {
       for (final originalAssignment in assignmentsToCopy) {
         // Find the original activity for this assignment
-        final activity = _bundle!.activities!.firstWhereOrNull(
-                (act) => act.id == originalAssignment.activityId);
+        final activity = _bundle!.activities!
+            .firstWhereOrNull((act) => act.id == originalAssignment.activityId);
 
         if (activity != null) {
           // Create a new assignment with the same details but for the target user
@@ -288,7 +291,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
   }
 
-
   void _deleteAssignments(List<ActivityAssignmentModel> assignmentsToDelete) {
     if (assignmentsToDelete.isEmpty) return;
     setState(() {
@@ -297,7 +299,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         final activity = _bundle?.activities
             ?.firstWhereOrNull((act) => act.id == assignment.activityId);
         if (activity != null) {
-          _activityAssignments[activity]?.removeWhere((a) => a.id == assignment.id);
+          _activityAssignments[activity]
+              ?.removeWhere((a) => a.id == assignment.id);
         }
       }
       _recalculateUserAssignedHours();
@@ -316,7 +319,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       _recordStateChange();
     });
   }
-
 
   Future<String?> _showConflictDialog(String message) async {
     if (_isShowingConflictDialog) return null;
@@ -346,7 +348,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       ),
     );
 
-    if(mounted) {
+    if (mounted) {
       setState(() => _isShowingConflictDialog = false);
     }
 
@@ -380,7 +382,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     ActivityDataHelper.linkAssignmentsToActivities(newCompleteBundle);
 
     // Sort activities by their specified order.
-    newCompleteBundle.activities?.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+    newCompleteBundle.activities
+        ?.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
 
     setState(() {
       // Set the main state bundle to our newly constructed complete bundle.
@@ -396,7 +399,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       _activityAssignments.clear();
       if (_bundle!.activities != null) {
         for (final activity in _bundle!.activities!) {
-          _activityAssignments[activity] = List.from(activity.assignments ?? []);
+          _activityAssignments[activity] =
+              List.from(activity.assignments ?? []);
         }
       }
       _recalculateUserAssignedHours();
@@ -409,7 +413,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
   }
 
-  Future<void> _loadData({ bool forcePublished = false, double? initialPanOffset, double? initialScale }) async {
+  Future<void> _loadData(
+      {bool forcePublished = false,
+      double? initialPanOffset,
+      double? initialScale}) async {
     // Prevent multiple load operations from running concurrently
     if (_isShowingConflictDialog) return;
 
@@ -419,28 +426,31 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (baseBundle == null) {
       if (mounted) {
         // Handle the critical failure to load essential data
-        ToastHelper.Show(context, ActivitiesComponentStrings.toastFailedToLoad, severity: ToastSeverity.NotOk);
+        ToastHelper.Show(context, ActivitiesComponentStrings.toastFailedToLoad,
+            severity: ToastSeverity.NotOk);
       }
       return;
     }
 
     // Step 2: Now, check for autosaves and the latest published version ID.
-    final autosaveInfo = await DbActivities.getAutosaveAndPublishInfo(widget.occasionId);
+    final autosaveInfo =
+        await DbActivities.getAutosaveAndPublishInfo(widget.occasionId);
     final latestPublishId = autosaveInfo.latestPublishId;
     // If forcePublished is true, we ignore the returned autosave bundle.
-    final autosavedBundle = forcePublished ? null : autosaveInfo.autosavedBundle;
+    final autosavedBundle =
+        forcePublished ? null : autosaveInfo.autosavedBundle;
 
     EditDataBundle? dataToLoad;
     bool loadedFromAutosave = false;
 
     if (autosavedBundle != null) {
       // An autosave exists. It only contains activity-specific data.
-      final isStale = latestPublishId != null && autosavedBundle.parentHistoryId != latestPublishId;
+      final isStale = latestPublishId != null &&
+          autosavedBundle.parentHistoryId != latestPublishId;
       if (isStale) {
         // The user's autosave is based on an older published version.
         final choice = await _showConflictDialog(
-            ActivitiesComponentStrings.staleAutosaveConflictMessage
-        );
+            ActivitiesComponentStrings.staleAutosaveConflictMessage);
 
         if (choice == 'reload') {
           await DbActivities.deleteAutosave(widget.occasionId);
@@ -450,8 +460,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           // User wants to keep their draft. MERGE it with the base data.
           baseBundle.activities = autosavedBundle.activities;
           baseBundle.activityAssignments = autosavedBundle.activityAssignments;
-          baseBundle.assignmentEventLinks = autosavedBundle.assignmentEventLinks;
-          baseBundle.assignmentPlaceLinks = autosavedBundle.assignmentPlaceLinks;
+          baseBundle.assignmentEventLinks =
+              autosavedBundle.assignmentEventLinks;
+          baseBundle.assignmentPlaceLinks =
+              autosavedBundle.assignmentPlaceLinks;
           // Re-base the merged bundle on the new published version.
           baseBundle.parentHistoryId = latestPublishId;
           dataToLoad = baseBundle;
@@ -460,7 +472,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           // User dismissed the dialog. Default to loading the fresh data without the autosave.
           dataToLoad = baseBundle;
         }
-
       } else {
         // Autosave is not stale. MERGE its data into the base bundle.
         baseBundle.activities = autosavedBundle.activities;
@@ -476,7 +487,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     // If dataToLoad is still null, it means no autosave existed. Use the base bundle.
     if (dataToLoad == null) {
       dataToLoad = baseBundle;
-      dataToLoad.parentHistoryId = latestPublishId; // Base this session on the latest publish
+      dataToLoad.parentHistoryId =
+          latestPublishId; // Base this session on the latest publish
       loadedFromAutosave = false;
     }
 
@@ -616,7 +628,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       title:
-      '${ActivitiesComponentStrings.textUntitledActivity} ${newOrder + 1}',
+          '${ActivitiesComponentStrings.textUntitledActivity} ${newOrder + 1}',
       description: '',
       type: null,
       occasion: widget.occasionId,
@@ -653,7 +665,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     final double timelinePointAtViewportCenterPx =
         -_panOffset + (visibleTimelineAreaWidth / 2);
     final Duration durationOffsetFromStart =
-    Duration(seconds: (timelinePointAtViewportCenterPx / oldPps).round());
+        Duration(seconds: (timelinePointAtViewportCenterPx / oldPps).round());
     final double newTimelinePointAtViewportCenterPx =
         durationOffsetFromStart.inSeconds * newPps;
 
@@ -674,7 +686,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
   }
 
-
   void _zoomOut(double vpWidth, double totalSec) {
     _hideAssignmentDetailOverlay();
     if (_timelineStart == null) return;
@@ -693,7 +704,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     final double timelinePointAtViewportCenterPx =
         -_panOffset + (visibleTimelineAreaWidth / 2);
     final Duration durationOffsetFromStart =
-    Duration(seconds: (timelinePointAtViewportCenterPx / oldPps).round());
+        Duration(seconds: (timelinePointAtViewportCenterPx / oldPps).round());
     final double newTimelinePointAtViewportCenterPx =
         durationOffsetFromStart.inSeconds * newPps;
 
@@ -892,7 +903,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     }
     if (targetActivity != null) {
       // Mutate state directly, without wrapping in setState
-      _activityAssignments[targetActivity]?.removeWhere((a) => a.id == assignmentToDelete.id);
+      _activityAssignments[targetActivity]
+          ?.removeWhere((a) => a.id == assignmentToDelete.id);
       _recalculateUserAssignedHours();
       // Now call the method that triggers the rebuild
       _recordStateChange();
@@ -918,11 +930,12 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   Future<void> _showHistoryDialog() async {
     // Fetch the latest publish ID *before* showing the dialog,
     // so we have it ready for the restore operation.
-    final autosaveInfo = await DbActivities.getAutosaveAndPublishInfo(widget.occasionId);
+    final autosaveInfo =
+        await DbActivities.getAutosaveAndPublishInfo(widget.occasionId);
     final latestPublishId = autosaveInfo.latestPublishId;
 
     final historyItems =
-    await DbActivities.listActivityHistory(widget.occasionId);
+        await DbActivities.listActivityHistory(widget.occasionId);
     if (!mounted) return;
 
     showDialog(
@@ -933,8 +946,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           title: Text(ActivitiesComponentStrings.dialogTitleVersionHistory),
           backgroundColor: isDark ? Colors.grey[800] : Colors.white,
           titleTextStyle:
-          TextStyle(color: isDark ? Colors.white : Colors.black),
-          content: Container(
+              TextStyle(color: isDark ? Colors.white : Colors.black),
+          content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
               itemCount: historyItems.length,
@@ -942,9 +955,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 final item = historyItems[index];
                 final isAutosave = item.historyType == 'AUTOSAVE';
                 final formattedDate =
-                DateFormat.yMMMd(context.locale.toString())
-                    .add_jms()
-                    .format(item.createdAt.toLocal());
+                    DateFormat.yMMMd(context.locale.toString())
+                        .add_jms()
+                        .format(item.createdAt.toLocal());
 
                 final typeString = isAutosave
                     ? ActivitiesComponentStrings.textAutosavedDraft
@@ -954,18 +967,24 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 final IconData versionIcon;
                 final Color versionColor;
                 if (isAutosave) {
-                  versionIcon = Icons.history_toggle_off; // Icon for an in-progress draft
-                  versionColor = isDark ? Colors.orange.shade300 : Colors.orange.shade700;
-                } else { // Published
-                  versionIcon = Icons.publish_outlined; // Icon for a finalized, published version
-                  versionColor = isDark ? Colors.green.shade300 : Colors.green.shade600;
+                  versionIcon =
+                      Icons.history_toggle_off; // Icon for an in-progress draft
+                  versionColor =
+                      isDark ? Colors.orange.shade300 : Colors.orange.shade700;
+                } else {
+                  // Published
+                  versionIcon = Icons
+                      .publish_outlined; // Icon for a finalized, published version
+                  versionColor =
+                      isDark ? Colors.green.shade300 : Colors.green.shade600;
                 }
 
                 return ListTile(
                   // Add the leading icon to the list tile.
                   leading: Icon(versionIcon, color: versionColor),
                   title: Text(
-                    ActivitiesComponentStrings.historyLabel(typeString, item.userFullName),
+                    ActivitiesComponentStrings.historyLabel(
+                        typeString, item.userFullName),
                     style: TextStyle(
                         fontSize: 14,
                         color: isDark ? Colors.white : Colors.black),
@@ -981,8 +1000,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     onPressed: () async {
                       Navigator.of(ctx).pop(); // Close dialog
                       final bundleToRestore =
-                      await DbActivities.getActivityHistoryVersion(
-                          widget.occasionId, item.id);
+                          await DbActivities.getActivityHistoryVersion(
+                              widget.occasionId, item.id);
 
                       if (bundleToRestore != null) {
                         // Re-base the restored version on the CURRENT latest publish ID.
@@ -1168,7 +1187,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
 // In _ActivitiesContentState class
 
-  void _showAssignmentDetailOverlay(ActivityAssignmentModel assignment, Offset globalTapPosition) {
+  void _showAssignmentDetailOverlay(
+      ActivityAssignmentModel assignment, Offset globalTapPosition) {
     _hideAssignmentDetailOverlay();
     _selectedAssignmentForDetail = assignment;
     final isDark = ActivityConstants.isDarkMode(context);
@@ -1178,8 +1198,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     final screenSize = MediaQuery.of(context).size;
 
     // Correct coordinate mapping for nested scrollviews or tabviews
-    final RenderBox overlayRenderBox = overlay.context.findRenderObject() as RenderBox;
-    final Offset localTapPosition = overlayRenderBox.globalToLocal(globalTapPosition);
+    final RenderBox overlayRenderBox =
+        overlay.context.findRenderObject() as RenderBox;
+    final Offset localTapPosition =
+        overlayRenderBox.globalToLocal(globalTapPosition);
     var realHeightAddition = ActivityConstants.realHeightAddition;
 
     _detailOverlayEntry = OverlayEntry(
@@ -1487,7 +1509,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           final dx = d.globalPosition.dx - _gestureDragStartX;
           double newPanOffsetValue = (_gesturePanOffsetStart + dx).clamp(
               (vpWidth -
-                  (ActivityConstants.kTimelineLabelWidth + timelineWidth))
+                      (ActivityConstants.kTimelineLabelWidth + timelineWidth))
                   .clamp(double.negativeInfinity, 0.0),
               0.0);
           _currentPanOffsetNotifier.value = newPanOffsetValue;
@@ -1497,7 +1519,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             final double start = _currentPanOffsetNotifier.value;
             final double end = (start + d.primaryVelocity! * 0.1).clamp(
                 (vpWidth -
-                    (ActivityConstants.kTimelineLabelWidth + timelineWidth))
+                        (ActivityConstants.kTimelineLabelWidth + timelineWidth))
                     .clamp(double.negativeInfinity, 0.0),
                 0.0);
             _animationX = Tween<double>(begin: start, end: end).animate(
@@ -1523,13 +1545,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               } else {
                 _animationController.stop();
                 double newPanOffsetValue = (_currentPanOffsetNotifier.value -
-                    pointerSignal.scrollDelta.dx)
+                        pointerSignal.scrollDelta.dx)
                     .clamp(
-                    (vpWidth -
-                        (ActivityConstants.kTimelineLabelWidth +
-                            timelineWidth))
-                        .clamp(double.negativeInfinity, 0.0),
-                    0.0);
+                        (vpWidth -
+                                (ActivityConstants.kTimelineLabelWidth +
+                                    timelineWidth))
+                            .clamp(double.negativeInfinity, 0.0),
+                        0.0);
                 _currentPanOffsetNotifier.value = newPanOffsetValue;
                 _panOffset = newPanOffsetValue;
               }
@@ -1575,7 +1597,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                   fontSize: 11,
                                   fontStyle: FontStyle.italic,
                                   color:
-                                  isDark ? Colors.white54 : Colors.black54))
+                                      isDark ? Colors.white54 : Colors.black54))
                         ],
                       ),
                     ),
@@ -1586,66 +1608,66 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       child: ElevatedButton.icon(
                         icon: _isPublishing
                             ? SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color:
-                                isDark ? Colors.black : Colors.white))
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color:
+                                        isDark ? Colors.black : Colors.white))
                             : Icon(Icons.publish_outlined, size: 14),
                         label: Text(ActivitiesComponentStrings.buttonPublish,
                             style: TextStyle(fontSize: 11)),
                         style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).primaryColor,
                             foregroundColor:
-                            ActivityConstants.isDarkMode(context)
-                                ? Colors.black
-                                : Colors.white,
+                                ActivityConstants.isDarkMode(context)
+                                    ? Colors.black
+                                    : Colors.white,
                             padding: EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 6),
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             minimumSize: Size(60, 30)),
                         onPressed: canPublish
                             ? () async {
-                          // Cancel any pending autosave operation to prevent race conditions.
-                          _autosaveDebounce?.cancel();
+                                // Cancel any pending autosave operation to prevent race conditions.
+                                _autosaveDebounce?.cancel();
 
-                          setState(() => _isPublishing = true);
-                          _bundle!.activities ??= [];
-                          for (var activityInBundle
-                          in _bundle!.activities!) {
-                            List<ActivityAssignmentModel>?
-                            assignmentsForThisActivity =
-                            _activityAssignments[activityInBundle];
-                            if (assignmentsForThisActivity != null) {
-                              activityInBundle.assignments =
-                                  assignmentsForThisActivity
-                                      .where((assign) =>
-                                  assign.data?['isDragPreview'] !=
-                                      true)
-                                      .toList();
-                            } else {
-                              activityInBundle.assignments = [];
-                            }
-                          }
-                          try {
-                            await DbActivities.saveActivitiesForEdit(
-                                context, widget.occasionId, _bundle!);
-                            await DbActivities.deleteAutosave(
-                                widget.occasionId);
-                            _isAutosaveLoaded = false;
-                            await _loadData(
-                                initialPanOffset: _panOffset,
-                                initialScale: _scale);
-                          } catch (e) {
-                            print(
-                                "Error publishing activities from UI: $e");
-                          } finally {
-                            if (mounted) {
-                              setState(() => _isPublishing = false);
-                            }
-                          }
-                        }
+                                setState(() => _isPublishing = true);
+                                _bundle!.activities ??= [];
+                                for (var activityInBundle
+                                    in _bundle!.activities!) {
+                                  List<ActivityAssignmentModel>?
+                                      assignmentsForThisActivity =
+                                      _activityAssignments[activityInBundle];
+                                  if (assignmentsForThisActivity != null) {
+                                    activityInBundle.assignments =
+                                        assignmentsForThisActivity
+                                            .where((assign) =>
+                                                assign.data?['isDragPreview'] !=
+                                                true)
+                                            .toList();
+                                  } else {
+                                    activityInBundle.assignments = [];
+                                  }
+                                }
+                                try {
+                                  await DbActivities.saveActivitiesForEdit(
+                                      context, widget.occasionId, _bundle!);
+                                  await DbActivities.deleteAutosave(
+                                      widget.occasionId);
+                                  _isAutosaveLoaded = false;
+                                  await _loadData(
+                                      initialPanOffset: _panOffset,
+                                      initialScale: _scale);
+                                } catch (e) {
+                                  print(
+                                      "Error publishing activities from UI: $e");
+                                } finally {
+                                  if (mounted) {
+                                    setState(() => _isPublishing = false);
+                                  }
+                                }
+                              }
                             : null,
                       ),
                     ),
@@ -1695,16 +1717,16 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       ),
                       suffixIcon: _globalTimelineFilter.isNotEmpty
                           ? IconButton(
-                        icon: Icon(Icons.clear,
-                            size: 14,
-                            color:
-                            isDark ? Colors.white54 : Colors.black54),
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                        onPressed: () {
-                          _globalFilterController.clear();
-                        },
-                      )
+                              icon: Icon(Icons.clear,
+                                  size: 14,
+                                  color:
+                                      isDark ? Colors.white54 : Colors.black54),
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                              onPressed: () {
+                                _globalFilterController.clear();
+                              },
+                            )
                           : null,
                     ),
                   ),
@@ -1803,10 +1825,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                   isDarkMode: isDark,
                                   weekdays: ActivitiesComponentStrings
                                       .getWeekdayAbbreviations(
-                                      context.locale.languageCode),
+                                          context.locale.languageCode),
                                   monthAbbreviations: ActivitiesComponentStrings
                                       .getMonthAbbreviations(
-                                      context.locale.languageCode),
+                                          context.locale.languageCode),
                                   dateHeaderHeight: ActivityConstants
                                       .kDateHeaderHeightConstant,
                                   timeTickAreaHeight: ActivityConstants
@@ -1824,99 +1846,99 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               child: Container(
                 color: isDark ? Colors.grey[900] : Colors.white,
                 child: _filteredActivities.isEmpty &&
-                    _globalTimelineFilter.isNotEmpty
+                        _globalTimelineFilter.isNotEmpty
                     ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      ActivitiesComponentStrings.textNoFilterMatch,
-                      style: TextStyle(
-                          color: isDark
-                              ? Colors.grey[400]
-                              : Colors.grey[600],
-                          fontSize: 14),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                )
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            ActivitiesComponentStrings.textNoFilterMatch,
+                            style: TextStyle(
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
+                                fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
                     : (_bundle!.activities?.isEmpty ?? true)
-                    ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      ActivitiesComponentStrings
-                          .textNoActivitiesAvailable +
-                          (!_isTimelineFullscreen
-                              ? " ${ActivitiesComponentStrings.textClickPlusToAddOne}"
-                              : ""),
-                      style: TextStyle(
-                          color: isDark
-                              ? Colors.grey[400]
-                              : Colors.grey[600],
-                          fontSize: 14),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                )
-                    : ReorderableListView.builder(
-                  physics: _isModifierKeyPressedForScroll
-                      ? NeverScrollableScrollPhysics()
-                      : null,
-                  buildDefaultDragHandles: false,
-                  itemCount: _filteredActivities.length,
-                  onReorderStart: (_) =>
-                      _hideAssignmentDetailOverlay(),
-                  onReorder: (oldI, newI) {
-                    _hideAssignmentDetailOverlay();
-                    setState(() {
-                      final itemToMove = _filteredActivities[oldI];
-                      final originalList = _bundle!.activities!;
-                      int originalIndexOld =
-                      originalList.indexOf(itemToMove);
-                      if (originalIndexOld == -1) return;
-                      int targetOriginalIndexInAllActivities;
-                      if (newI >= _filteredActivities.length) {
-                        if (_filteredActivities.isNotEmpty) {
-                          final lastFilteredItem =
-                              _filteredActivities.last;
-                          targetOriginalIndexInAllActivities =
-                              originalList.indexOf(lastFilteredItem) +
-                                  1;
-                        } else {
-                          targetOriginalIndexInAllActivities =
-                              originalList.length;
-                        }
-                      } else {
-                        if (newI > oldI) newI--;
-                        final itemAtNewFilteredPosition =
-                        _filteredActivities[newI];
-                        targetOriginalIndexInAllActivities =
-                            originalList
-                                .indexOf(itemAtNewFilteredPosition);
-                      }
-                      final item =
-                      originalList.removeAt(originalIndexOld);
-                      if (targetOriginalIndexInAllActivities >
-                          originalList.length) {
-                        targetOriginalIndexInAllActivities =
-                            originalList.length;
-                      }
-                      originalList.insert(
-                          targetOriginalIndexInAllActivities, item);
-                      for (var i = 0; i < originalList.length; i++) {
-                        originalList[i].order = i;
-                      }
-                      _updateFilteredActivities();
-                      _recordStateChange();
-                    });
-                  },
-                  itemBuilder: (context, index) =>
-                      _buildActivityWithAssignments(
-                          _filteredActivities[index],
-                          timelineWidth,
-                          vpWidth,
-                          index),
-                ),
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                ActivitiesComponentStrings
+                                        .textNoActivitiesAvailable +
+                                    (!_isTimelineFullscreen
+                                        ? " ${ActivitiesComponentStrings.textClickPlusToAddOne}"
+                                        : ""),
+                                style: TextStyle(
+                                    color: isDark
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
+                                    fontSize: 14),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          )
+                        : ReorderableListView.builder(
+                            physics: _isModifierKeyPressedForScroll
+                                ? NeverScrollableScrollPhysics()
+                                : null,
+                            buildDefaultDragHandles: false,
+                            itemCount: _filteredActivities.length,
+                            onReorderStart: (_) =>
+                                _hideAssignmentDetailOverlay(),
+                            onReorder: (oldI, newI) {
+                              _hideAssignmentDetailOverlay();
+                              setState(() {
+                                final itemToMove = _filteredActivities[oldI];
+                                final originalList = _bundle!.activities!;
+                                int originalIndexOld =
+                                    originalList.indexOf(itemToMove);
+                                if (originalIndexOld == -1) return;
+                                int targetOriginalIndexInAllActivities;
+                                if (newI >= _filteredActivities.length) {
+                                  if (_filteredActivities.isNotEmpty) {
+                                    final lastFilteredItem =
+                                        _filteredActivities.last;
+                                    targetOriginalIndexInAllActivities =
+                                        originalList.indexOf(lastFilteredItem) +
+                                            1;
+                                  } else {
+                                    targetOriginalIndexInAllActivities =
+                                        originalList.length;
+                                  }
+                                } else {
+                                  if (newI > oldI) newI--;
+                                  final itemAtNewFilteredPosition =
+                                      _filteredActivities[newI];
+                                  targetOriginalIndexInAllActivities =
+                                      originalList
+                                          .indexOf(itemAtNewFilteredPosition);
+                                }
+                                final item =
+                                    originalList.removeAt(originalIndexOld);
+                                if (targetOriginalIndexInAllActivities >
+                                    originalList.length) {
+                                  targetOriginalIndexInAllActivities =
+                                      originalList.length;
+                                }
+                                originalList.insert(
+                                    targetOriginalIndexInAllActivities, item);
+                                for (var i = 0; i < originalList.length; i++) {
+                                  originalList[i].order = i;
+                                }
+                                _updateFilteredActivities();
+                                _recordStateChange();
+                              });
+                            },
+                            itemBuilder: (context, index) =>
+                                _buildActivityWithAssignments(
+                                    _filteredActivities[index],
+                                    timelineWidth,
+                                    vpWidth,
+                                    index),
+                          ),
               ),
             ),
             if (isScrollable)
@@ -1936,7 +1958,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                         ? visibleContentWidth / timelineWidth
                         : 1.0;
                     final double thumbWidth =
-                    (trackWidth * contentRatio).clamp(20.0, trackWidth);
+                        (trackWidth * contentRatio).clamp(20.0, trackWidth);
                     final double maxScrollableTrackWidth =
                         trackWidth - thumbWidth;
                     final double maxTimelineScrollOffset =
@@ -1946,14 +1968,14 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       builder: (context, currentPanOffsetValue,
                           gestureDetectorChild) {
                         final double currentTimelineScrollOffset =
-                        -currentPanOffsetValue;
+                            -currentPanOffsetValue;
                         final double thumbPosition =
-                        maxScrollableTrackWidth > 0 &&
-                            maxTimelineScrollOffset > 0
-                            ? (currentTimelineScrollOffset /
-                            maxTimelineScrollOffset) *
-                            maxScrollableTrackWidth
-                            : 0.0;
+                            maxScrollableTrackWidth > 0 &&
+                                    maxTimelineScrollOffset > 0
+                                ? (currentTimelineScrollOffset /
+                                        maxTimelineScrollOffset) *
+                                    maxScrollableTrackWidth
+                                : 0.0;
                         return Container(
                           width: trackWidth,
                           decoration: BoxDecoration(
@@ -1966,18 +1988,18 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                             children: [
                               Positioned(
                                 left: (thumbPosition.isNaN ||
-                                    thumbPosition.isInfinite
-                                    ? 0
-                                    : thumbPosition)
+                                            thumbPosition.isInfinite
+                                        ? 0
+                                        : thumbPosition)
                                     .clamp(0.0, maxScrollableTrackWidth)
                                     .toDouble(),
                                 top: 0,
                                 bottom: 0,
                                 width:
-                                (thumbWidth.isNaN || thumbWidth.isInfinite
-                                    ? trackWidth
-                                    : thumbWidth)
-                                    .clamp(0.0, trackWidth),
+                                    (thumbWidth.isNaN || thumbWidth.isInfinite
+                                            ? trackWidth
+                                            : thumbWidth)
+                                        .clamp(0.0, trackWidth),
                                 child: gestureDetectorChild!,
                               ),
                             ],
@@ -2002,15 +2024,15 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                               (dragDeltaX / maxScrollableTrackWidth) *
                                   maxTimelineScrollOffset;
                           double newPanOffsetValue =
-                          (_scrollbarGesturePanOffsetStartValue -
-                              contentPanDelta)
-                              .clamp(
-                              (vpWidth -
-                                  (ActivityConstants
-                                      .kTimelineLabelWidth +
-                                      timelineWidth))
-                                  .clamp(double.negativeInfinity, 0.0),
-                              0.0);
+                              (_scrollbarGesturePanOffsetStartValue -
+                                      contentPanDelta)
+                                  .clamp(
+                                      (vpWidth -
+                                              (ActivityConstants
+                                                      .kTimelineLabelWidth +
+                                                  timelineWidth))
+                                          .clamp(double.negativeInfinity, 0.0),
+                                      0.0);
                           _currentPanOffsetNotifier.value = newPanOffsetValue;
                         },
                         onHorizontalDragEnd: (details) {
@@ -2044,19 +2066,19 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     final allAssignmentsForActivity = _activityAssignments[a] ?? [];
     final validAssignments = allAssignmentsForActivity
         .where((assign) =>
-    assign.userInfo != null &&
-        assign.user != null &&
-        assign.data?['isDragPreview'] != true)
+            assign.userInfo != null &&
+            assign.user != null &&
+            assign.data?['isDragPreview'] != true)
         .toList();
     final isDark = ActivityConstants.isDarkMode(context);
     final String normalizedFilter =
-    Utilities.removeDiacritics(_globalTimelineFilter.toLowerCase());
+        Utilities.removeDiacritics(_globalTimelineFilter.toLowerCase());
     bool activityTitleMatchesFilter = _globalTimelineFilter.isEmpty ||
         Utilities.removeDiacritics(a.title?.toLowerCase() ?? "")
             .contains(normalizedFilter);
     Map<String?, List<ActivityAssignmentModel>> assignmentsByUser =
-    groupBy<ActivityAssignmentModel, String?>(
-        validAssignments, (assignment) => assignment.userInfo);
+        groupBy<ActivityAssignmentModel, String?>(
+            validAssignments, (assignment) => assignment.userInfo);
     List<String?> sortedUserInfos = assignmentsByUser.keys.toList();
     sortedUserInfos.sort((userInfoA, userInfoB) {
       if (userInfoA == null || userInfoB == null) return 0;
@@ -2091,9 +2113,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           assignmentsToConsiderForRendering = List.from(userAssignmentsList);
         } else {
           List<ActivityAssignmentModel> filteredUserAssignmentsByName =
-          userAssignmentsList.where((assign) {
+              userAssignmentsList.where((assign) {
             if (Utilities.removeDiacritics(
-                assign.user!.toFullNameString().toLowerCase())
+                    assign.user!.toFullNameString().toLowerCase())
                 .contains(normalizedFilter)) {
               return true;
             }
@@ -2119,7 +2141,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       if (assignmentsToConsiderForRendering != null &&
           assignmentsToConsiderForRendering.isNotEmpty) {
         List<ActivityAssignmentModel> assignmentsToRender =
-        List.from(assignmentsToConsiderForRendering);
+            List.from(assignmentsToConsiderForRendering);
         final userForThisRow = assignmentsToRender[0].user;
         if (userForThisRow == null) continue;
         if (_hoveredActivityForPreview == a &&
@@ -2161,7 +2183,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           showDraggedUserPreviewForThisActivity = true;
         } else {
           if (Utilities.removeDiacritics(
-              _currentlyDraggedUser!.toFullNameString().toLowerCase())
+                  _currentlyDraggedUser!.toFullNameString().toLowerCase())
               .contains(normalizedFilter)) {
             showDraggedUserPreviewForThisActivity = true;
           }
@@ -2208,15 +2230,15 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           if (_timelineStart != null && _timelineEnd != null) {
             bool needsStateUpdate = false;
             DateTime snappedStartTime =
-            _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
+                _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
             final Duration dynamicDuration = _getSnappedDragDuration();
             final DateTimeRange clampedRange =
-            TimeClampingService.clampDateTimeRange(
-                initialStartTime: snappedStartTime,
-                itemDuration: dynamicDuration,
-                timelineStart: _timelineStart!,
-                timelineEnd: _timelineEnd!,
-                minAllowedDuration: ActivityConstants.kMinTimeLength);
+                TimeClampingService.clampDateTimeRange(
+                    initialStartTime: snappedStartTime,
+                    itemDuration: dynamicDuration,
+                    timelineStart: _timelineStart!,
+                    timelineEnd: _timelineEnd!,
+                    minAllowedDuration: ActivityConstants.kMinTimeLength);
             if (_hoveredActivityForPreview != a) {
               _hoveredActivityForPreview = a;
               needsStateUpdate = true;
@@ -2242,15 +2264,15 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               _timelineStart != null &&
               _timelineEnd != null) {
             DateTime snappedStartTime =
-            _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
+                _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
             final Duration dynamicDuration = _getSnappedDragDuration();
             final DateTimeRange clampedRange =
-            TimeClampingService.clampDateTimeRange(
-                initialStartTime: snappedStartTime,
-                itemDuration: dynamicDuration,
-                timelineStart: _timelineStart!,
-                timelineEnd: _timelineEnd!,
-                minAllowedDuration: ActivityConstants.kMinTimeLength);
+                TimeClampingService.clampDateTimeRange(
+                    initialStartTime: snappedStartTime,
+                    itemDuration: dynamicDuration,
+                    timelineStart: _timelineStart!,
+                    timelineEnd: _timelineEnd!,
+                    minAllowedDuration: ActivityConstants.kMinTimeLength);
             if (_previewStartTime != clampedRange.start) {
               setState(() => _previewStartTime = clampedRange.start);
             }
@@ -2270,15 +2292,15 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           }
           final draggedDataOnDrop = details.data;
           DateTime finalSnappedStartTime =
-          _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
+              _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
           final Duration dynamicDuration = _getSnappedDragDuration();
           final DateTimeRange finalClampedRange =
-          TimeClampingService.clampDateTimeRange(
-              initialStartTime: finalSnappedStartTime,
-              itemDuration: dynamicDuration,
-              timelineStart: _timelineStart!,
-              timelineEnd: _timelineEnd!,
-              minAllowedDuration: ActivityConstants.kMinTimeLength);
+              TimeClampingService.clampDateTimeRange(
+                  initialStartTime: finalSnappedStartTime,
+                  itemDuration: dynamicDuration,
+                  timelineStart: _timelineStart!,
+                  timelineEnd: _timelineEnd!,
+                  minAllowedDuration: ActivityConstants.kMinTimeLength);
           final newAssignment = ActivityAssignmentModel(
               activityId: a.id,
               userInfo: draggedDataOnDrop.id!,
@@ -2308,7 +2330,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 ? Colors.grey.shade700.withOpacity(0.7)
                 : Colors.blueGrey.shade800.withOpacity(0.7);
             activityHeaderTextColor =
-            a.isHidden! ? Colors.white60 : Colors.white;
+                a.isHidden! ? Colors.white60 : Colors.white;
             activityContentBgColor = isHighlighted
                 ? Theme.of(context).primaryColor.withAlpha(30)
                 : Colors.transparent;
@@ -2317,7 +2339,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 ? Colors.grey.shade400.withOpacity(0.7)
                 : Colors.blueGrey.shade50.withOpacity(0.7);
             activityHeaderTextColor =
-            a.isHidden! ? Colors.white70 : Colors.black87;
+                a.isHidden! ? Colors.white70 : Colors.black87;
             activityContentBgColor = isHighlighted
                 ? Colors.lightBlue.shade50.withOpacity(0.6)
                 : Colors.transparent;
@@ -2327,7 +2349,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             if (userRowsAndPreviews.isNotEmpty) {
               activityContentChildren.addAll(userRowsAndPreviews);
             } else if ((_activityAssignments[a] == null ||
-                _activityAssignments[a]!.isEmpty) &&
+                    _activityAssignments[a]!.isEmpty) &&
                 _globalTimelineFilter.isEmpty) {
               activityContentChildren.add(Padding(
                 padding: EdgeInsets.only(
@@ -2377,11 +2399,11 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               border: Border(
                   bottom: BorderSide(
                       color:
-                      isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                          isDark ? Colors.grey.shade700 : Colors.grey.shade300,
                       width: 0.8)),
             ),
             child:
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Container(
                 color: activityHeaderBgColor,
                 child: Row(children: [
@@ -2398,16 +2420,16 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                       : Icons.visibility_outlined,
                                   size: 13,
                                   color:
-                                  activityHeaderTextColor.withOpacity(0.8)),
+                                      activityHeaderTextColor.withOpacity(0.8)),
                               padding: EdgeInsets.zero,
                               constraints:
-                              BoxConstraints(minWidth: 22, minHeight: 22),
+                                  BoxConstraints(minWidth: 22, minHeight: 22),
                               splashRadius: 12,
                               tooltip: a.isHidden!
                                   ? ActivitiesComponentStrings
-                                  .tooltipMarkVisible
+                                      .tooltipMarkVisible
                                   : ActivitiesComponentStrings
-                                  .tooltipMarkHidden,
+                                      .tooltipMarkHidden,
                               onPressed: () {
                                 setState(() {
                                   a.isHidden = !a.isHidden!;
@@ -2431,7 +2453,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                               icon: Icon(Icons.more_vert,
                                   size: 15,
                                   color:
-                                  activityHeaderTextColor.withOpacity(0.8)),
+                                      activityHeaderTextColor.withOpacity(0.8)),
                               tooltip: ActivitiesComponentStrings
                                   .tooltipActivityOptions,
                               color: isDark ? Colors.grey[800] : Colors.white,
@@ -2511,7 +2533,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                       child: RepaintBoundary(
                                         child: CustomPaint(
                                           foregroundPainter:
-                                          VerticalGridLinesPainter(
+                                              VerticalGridLinesPainter(
                                             start: _timelineStart!,
                                             end: _timelineEnd!,
                                             pps: _basePps * _scale,
@@ -2544,12 +2566,12 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     }
     final isDark = ActivityConstants.isDarkMode(context);
     final isHostingPreview =
-    assignments.any((u) => u.data?['isDragPreview'] == true);
+        assignments.any((u) => u.data?['isDragPreview'] == true);
     final color = ActivityConstants.darkUserColors[
-    userInfo.hashCode % ActivityConstants.darkUserColors.length];
+        userInfo.hashCode % ActivityConstants.darkUserColors.length];
     final avatarTextColor = Colors.white;
     final List<ActivityAssignmentModel> assignmentsToRender =
-    assignments.toList();
+        assignments.toList();
     if (_copyDragPreview != null &&
         _copyDragPreview?.userInfo == userInfo.id &&
         _copyDragSource?.activityId == activity.id) {
@@ -2577,10 +2599,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               final bool isPreview = u.data?['isDragPreview'] == true;
               Color itemBarColor = isPreview ? color.withOpacity(0.6) : color;
               if (activity.isHidden!) {
-                itemBarColor = (isDark
-                    ? Colors.grey.shade600
-                    : Colors.grey.shade500)
-                    .withOpacity(isPreview ? 0.5 : 0.7);
+                itemBarColor =
+                    (isDark ? Colors.grey.shade600 : Colors.grey.shade500)
+                        .withOpacity(isPreview ? 0.5 : 0.7);
               }
               final bool isDraggable = !isPreview && !activity.isHidden!;
               Widget timelineRowWidget = TimelineRow(
@@ -2594,32 +2615,32 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 onTapBar: isPreview || activity.isHidden!
                     ? null
                     : (details) =>
-                    _showAssignmentDetailOverlay(u, details.globalPosition),
+                        _showAssignmentDetailOverlay(u, details.globalPosition),
                 onDragStart: _hideAssignmentDetailOverlay,
                 onDragEnd: isPreview || activity.isHidden!
                     ? (ns, ne) {}
                     : (finalStart, finalEnd) {
-                  if (_timelineStart == null || _timelineEnd == null) {
-                    return;
-                  }
-                  final DateTimeRange finalClampedRange =
-                  TimeClampingService.clampDateTimeRange(
-                      initialStartTime: finalStart,
-                      itemDuration: finalEnd.difference(finalStart),
-                      timelineStart: _timelineStart!,
-                      timelineEnd: _timelineEnd!,
-                      minAllowedDuration:
-                      ActivityConstants.kMinTimeLength);
-                  if (u.startTime != finalClampedRange.start ||
-                      u.endTime != finalClampedRange.end) {
-                    setState(() {
-                      u.startTime = finalClampedRange.start;
-                      u.endTime = finalClampedRange.end;
-                      _recalculateUserAssignedHours();
-                      _recordStateChange();
-                    });
-                  }
-                },
+                        if (_timelineStart == null || _timelineEnd == null) {
+                          return;
+                        }
+                        final DateTimeRange finalClampedRange =
+                            TimeClampingService.clampDateTimeRange(
+                                initialStartTime: finalStart,
+                                itemDuration: finalEnd.difference(finalStart),
+                                timelineStart: _timelineStart!,
+                                timelineEnd: _timelineEnd!,
+                                minAllowedDuration:
+                                    ActivityConstants.kMinTimeLength);
+                        if (u.startTime != finalClampedRange.start ||
+                            u.endTime != finalClampedRange.end) {
+                          setState(() {
+                            u.startTime = finalClampedRange.start;
+                            u.endTime = finalClampedRange.end;
+                            _recalculateUserAssignedHours();
+                            _recordStateChange();
+                          });
+                        }
+                      },
                 draggable: isDraggable &&
                     !_isModifierKeyPressedForScroll &&
                     _copyDragSource == null,
@@ -2627,9 +2648,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 onPlaceOrEventDropped: isPreview || activity.isHidden!
                     ? null
                     : (droppedItemData) {
-                  _handlePlaceOrEventDropOnAssignment(
-                      u, droppedItemData);
-                },
+                        _handlePlaceOrEventDropOnAssignment(u, droppedItemData);
+                      },
                 assignment: u,
                 isDarkMode: isDark,
               );
@@ -2669,11 +2689,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     final double dragDeltaX =
                         details.globalPosition.dx - _gestureDragStartX;
                     final Duration timeDelta =
-                    Duration(seconds: (dragDeltaX / pps).round());
+                        Duration(seconds: (dragDeltaX / pps).round());
                     final DateTime previewStartTime =
-                    _copyDragSource!.startTime!.add(timeDelta);
-                    final Duration originalDuration = _copyDragSource!
-                        .endTime!
+                        _copyDragSource!.startTime!.add(timeDelta);
+                    final Duration originalDuration = _copyDragSource!.endTime!
                         .difference(_copyDragSource!.startTime!);
                     final Duration snapStep = _scale < 0.5
                         ? ActivityConstants.kSnapStepCoarse
@@ -2681,15 +2700,14 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     DateTime snappedStartTime = previewStartTime;
                     if (snapStep.inSeconds > 0) {
                       final int numSnapSteps = (previewStartTime
-                          .difference(_timelineStart!)
-                          .inSeconds /
-                          snapStep.inSeconds)
+                                  .difference(_timelineStart!)
+                                  .inSeconds /
+                              snapStep.inSeconds)
                           .round();
                       snappedStartTime = _timelineStart!.add(
                           Duration(seconds: numSnapSteps * snapStep.inSeconds));
                     }
-                    final clampedRange =
-                    TimeClampingService.clampDateTimeRange(
+                    final clampedRange = TimeClampingService.clampDateTimeRange(
                         initialStartTime: snappedStartTime,
                         itemDuration: originalDuration,
                         timelineStart: _timelineStart!,
@@ -2711,8 +2729,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     }
                   },
                   onHorizontalDragEnd: (details) {
-                    if (_copyDragSource != u || _copyDragPreview == null)
+                    if (_copyDragSource != u || _copyDragPreview == null) {
                       return;
+                    }
 
                     final newAssignment = ActivityAssignmentModel(
                       activityId: _copyDragSource!.activityId,
@@ -2794,7 +2813,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       size: 11,
                       color: isDark ? Colors.white54 : Colors.black45),
                   tooltip:
-                  ActivitiesComponentStrings.tooltipUserAssignmentOptions,
+                      ActivitiesComponentStrings.tooltipUserAssignmentOptions,
                   color: isDark ? Colors.grey[800] : Colors.white,
                   splashRadius: 9,
                   padding: EdgeInsets.zero,
@@ -2814,7 +2833,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     if (v == 'delete_user_from_activity') {
                       setState(() {
                         _activityAssignments[activity]?.removeWhere((assign) =>
-                        assign.userInfo == userInfo.id &&
+                            assign.userInfo == userInfo.id &&
                             assign.data?['isDragPreview'] != true);
                         _recalculateUserAssignedHours();
                         _recordStateChange();
@@ -2832,7 +2851,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               builder: (context, currentPanOffsetValue, child) {
                 return ClipRect(
                     child: Transform.translate(
-                        offset: Offset(currentPanOffsetValue, 0), child: child));
+                        offset: Offset(currentPanOffsetValue, 0),
+                        child: child));
               }),
         ]));
   }

@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/eshop_columns.dart';
@@ -11,7 +10,8 @@ void main() {
       // Set a value first
       product.surchargeAmount = 100.0;
       expect(product.data?[TbEshop.products.data_surcharge], isNotNull);
-      expect((product.data?[TbEshop.products.data_surcharge] as Map)['amount'], 100.0);
+      expect((product.data?[TbEshop.products.data_surcharge] as Map)['amount'],
+          100.0);
 
       // Set to 0
       product.surchargeAmount = 0;
@@ -27,24 +27,26 @@ void main() {
       expect(product.data?[TbEshop.products.data_surcharge], isNull);
     });
 
-    test('surchargeAmount setter keeps field if currency is present but clears amount if 0 (backend consistency)', () {
+    test(
+        'surchargeAmount setter keeps field if currency is present but clears amount if 0 (backend consistency)',
+        () {
       final product = ProductModel();
       product.surchargeAmount = 100.0;
       product.surchargeCurrency = 'CZK';
-      
+
       expect(product.data?[TbEshop.products.data_surcharge], isNotNull);
-      
+
       product.surchargeAmount = 0;
-      
+
       expect(product.data?[TbEshop.products.data_surcharge], isNull);
     });
 
     test('fromPlutoJson handles "0" string by removing surcharge', () {
       final json = {
         EshopColumns.PRODUCT_SURCHARGE: "0",
-         EshopColumns.PRODUCT_ID: 1,
+        EshopColumns.PRODUCT_ID: 1,
       };
-      
+
       final product = ProductModel.fromPlutoJson(json);
       expect(product.data?[TbEshop.products.data_surcharge], isNull);
     });
@@ -52,9 +54,9 @@ void main() {
     test('fromPlutoJson handles "0 CZK" string by removing surcharge', () {
       final json = {
         EshopColumns.PRODUCT_SURCHARGE: "0 CZK",
-         EshopColumns.PRODUCT_ID: 1,
+        EshopColumns.PRODUCT_ID: 1,
       };
-      
+
       final product = ProductModel.fromPlutoJson(json);
       expect(product.data?[TbEshop.products.data_surcharge], isNull);
     });
@@ -63,13 +65,13 @@ void main() {
       final modelWithData = ProductModel(data: {
         TbEshop.products.data_surcharge: {'amount': 100.0, 'currency': 'CZK'}
       });
-      
+
       final json = {
         EshopColumns.PRODUCT_SURCHARGE: "",
         EshopColumns.PRODUCT_ID: 1,
         EshopColumns.PRODUCT_MODEL_REFERENCE: modelWithData,
       };
-      
+
       final product = ProductModel.fromPlutoJson(json);
       expect(product.data?[TbEshop.products.data_surcharge], isNull);
     });
@@ -77,9 +79,9 @@ void main() {
     test('fromPlutoJson parses valid surcharge', () {
       final json = {
         EshopColumns.PRODUCT_SURCHARGE: "150.50 EUR",
-         EshopColumns.PRODUCT_ID: 1,
+        EshopColumns.PRODUCT_ID: 1,
       };
-      
+
       final product = ProductModel.fromPlutoJson(json);
       final surcharge = product.data?[TbEshop.products.data_surcharge];
       expect(surcharge, isNotNull);
@@ -87,11 +89,13 @@ void main() {
       expect(surcharge['currency'], 'EUR');
     });
 
-    test('getter surchargeAmount returns null if underlying data has 0 (legacy data safety)', () {
+    test(
+        'getter surchargeAmount returns null if underlying data has 0 (legacy data safety)',
+        () {
       final product = ProductModel(data: {
         TbEshop.products.data_surcharge: {'amount': 0.0, 'currency': 'CZK'}
       });
-      
+
       expect(product.surchargeAmount, isNull);
     });
 
@@ -102,21 +106,24 @@ void main() {
           TbEshop.products.data_surcharge: {'amount': 0, 'currency': 'CZK'}
         }
       };
-      
+
       final product = ProductModel.fromJson(json);
       expect(product.data?[TbEshop.products.data_surcharge], isNull);
     });
 
-    test('surchargeCurrency setter removes entry if amount is missing/null', () {
+    test('surchargeCurrency setter removes entry if amount is missing/null',
+        () {
       final product = ProductModel();
       product.surchargeCurrency = 'CZK';
       expect(product.data?[TbEshop.products.data_surcharge], isNull);
-      
+
       product.surchargeAmount = 100;
       product.surchargeCurrency = 'EUR';
       expect(product.data?[TbEshop.products.data_surcharge], isNotNull);
-      expect((product.data?[TbEshop.products.data_surcharge] as Map)['currency'], 'EUR');
-      
+      expect(
+          (product.data?[TbEshop.products.data_surcharge] as Map)['currency'],
+          'EUR');
+
       product.surchargeAmount = 0;
       expect(product.data?[TbEshop.products.data_surcharge], isNull);
     });

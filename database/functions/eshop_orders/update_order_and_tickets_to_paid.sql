@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION update_order_and_tickets_to_paid(order_id bigint)
 RETURNS void
 LANGUAGE plpgsql
-SECURITY DEFINER
+
 AS $$
 DECLARE 
     v_order_id bigint;

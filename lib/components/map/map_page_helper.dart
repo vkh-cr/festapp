@@ -18,8 +18,7 @@ class MapPageHelper {
     final lat2 = _toRadians(b.latitude);
     final dLon = _toRadians(b.longitude - a.longitude);
     final y = sin(dLon) * cos(lat2);
-    final x = cos(lat1) * sin(lat2) -
-        sin(lat1) * cos(lat2) * cos(dLon);
+    final x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
     return (_toDegrees(atan2(y, x)) + 360) % 360;
   }
 
@@ -32,9 +31,9 @@ class MapPageHelper {
 
   /// Build all polylines per group and return a map: groupId -> List<Polyline>.
   static Future<Map<int, List<fm.Polyline>>> loadGroupPolylines(
-      List<PlaceModel> placesList,
-      List<PathGroupsModel> groups,
-      ) async {
+    List<PlaceModel> placesList,
+    List<PathGroupsModel> groups,
+  ) async {
     const bool drawFilledTriangles = true;
     const int trianglesPerSegment = 3;
     const int hatchLinesPerTriangle = 4;
@@ -120,18 +119,18 @@ class MapPageHelper {
   /// Builds a responsive, rounded background "icon area" that is either
   /// a horizontal strip (mobile) or vertical column (tablet/desktop).
   static Widget buildGroupIconArea(
-      BuildContext         context,
-      List<PathGroupsModel> groups,
-      int?                 selectedGroupId,
-      void Function(int)   onTap,
-      List<IconModel>      icons, {
-        ScrollController?   scrollController,
-      }) {
+    BuildContext context,
+    List<PathGroupsModel> groups,
+    int? selectedGroupId,
+    void Function(int) onTap,
+    List<IconModel> icons, {
+    ScrollController? scrollController,
+  }) {
     if (groups.isEmpty) return const SizedBox.shrink();
 
     final bool isMobile = ResponsiveService.isMobile(context);
-    final double itemWidth = 60;     // same as in _buildIconColumn
-    final double itemSpacing = 12;   // horizontal margin*2
+    final double itemWidth = 60; // same as in _buildIconColumn
+    final double itemSpacing = 12; // horizontal margin*2
 
     // build children with index so we can scroll to i
     final children = List<Widget>.generate(groups.length, (i) {
@@ -140,20 +139,17 @@ class MapPageHelper {
         context,
         g,
         selectedGroupId,
-            (id) {
+        (id) {
           if (g.id == null) return;
           onTap(g.id!);
 
           // on mobile, animate the scroll so tapped icon is centered
           if (isMobile && scrollController != null) {
             final screenW = MediaQuery.of(context).size.width;
-            final target = i * (itemWidth + itemSpacing)
-                - (screenW - itemWidth) / 2;
+            final target =
+                i * (itemWidth + itemSpacing) - (screenW - itemWidth) / 2;
             scrollController.animateTo(
-              target.clamp(
-                  0.0,
-                  scrollController.position.maxScrollExtent
-              ),
+              target.clamp(0.0, scrollController.position.maxScrollExtent),
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
             );
@@ -165,24 +161,24 @@ class MapPageHelper {
 
     Widget strip = isMobile
         ? SingleChildScrollView(
-      controller: scrollController,
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,  // icons stay at top
-        children: children,
-      ),
-    )
+            controller: scrollController,
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start, // icons stay at top
+              children: children,
+            ),
+          )
         : SingleChildScrollView(
-      controller: scrollController,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,  // align left
-        children: children,
-      ),
-    );
+            controller: scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, // align left
+              children: children,
+            ),
+          );
 
     return Positioned(
       top: 8,
-      left:  isMobile ? 8 : null,
+      left: isMobile ? 8 : null,
       right: 8,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -195,14 +191,13 @@ class MapPageHelper {
     );
   }
 
-
   static Widget _buildIconColumn(
-      BuildContext context,
-      PathGroupsModel g,
-      int? selectedGroupId,
-      void Function(int) onTap,
-      List<IconModel> icons,
-      ) {
+    BuildContext context,
+    PathGroupsModel g,
+    int? selectedGroupId,
+    void Function(int) onTap,
+    List<IconModel> icons,
+  ) {
     final pathColor = g.color != null
         ? Color(int.parse(g.color!.replaceFirst('#', '0x')))
         : Colors.blue;
@@ -255,13 +250,14 @@ class MapPageHelper {
     );
   }
 
-
   /// Shows the selected path‑group’s title in a pill overlay with matching border.
   static Widget buildSelectedGroupTitle(
-      BuildContext context,
-      PathGroupsModel? selectedGroup,
-      ) {
-    if (ResponsiveService.isMobile(context) || selectedGroup == null || selectedGroup.title == null) {
+    BuildContext context,
+    PathGroupsModel? selectedGroup,
+  ) {
+    if (ResponsiveService.isMobile(context) ||
+        selectedGroup == null ||
+        selectedGroup.title == null) {
       return const SizedBox.shrink();
     }
     final pathColor = selectedGroup.color != null
@@ -284,7 +280,8 @@ class MapPageHelper {
           child: Text(
             selectedGroup.title!,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),
+            style: const TextStyle(
+                fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ),
       ),

@@ -134,11 +134,12 @@ body.dark-mode .order-preview-header h2 {
 
 /* Common Info Row */
 /* Common Info Row */
+/* Common Info Row */
 .preview-info-row {
     padding: 8px 0; /* Increased padding for better separation */
     display: flex;
-    flex-direction: column; /* Stack vertically for clear distinction */
-    align-items: flex-start;
+    flex-direction: column; /* Stack vertically: Label on top, Value Row below */
+    align-items: stretch; /* Stretch to full width */
     font-size: 1rem;
     color: var(--text-color, #000);
     line-height: 1.4;
@@ -154,14 +155,33 @@ body.dark-mode .order-preview-header h2 {
 }
 
 /* Ensure dark mode adjustment for hardcoded grey fallback */
-
 body.dark-mode .preview-label {
     color: rgba(255, 255, 255, 0.7) !important; /* Explicit dark mode class support */
+}
+
+.preview-value-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline; /* Align text baselines */
+    width: 100%;
 }
 
 .preview-value {
     font-weight: 600; /* Slightly bolder */
     font-size: 1.1rem;
+    flex: 1; /* Take available space */
+}
+
+.preview-price {
+    font-weight: 600;
+    color: var(--primary-color, #000); /* Highlight price slightly? Or keep standard text */
+    white-space: nowrap;
+    margin-left: 8px;
+    font-size: 1.0rem; /* Same or slightly smaller */
+}
+
+body.dark-mode .preview-price {
+    color: var(--text-color, #fff); 
 }
 
 /* Divider */

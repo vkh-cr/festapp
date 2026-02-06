@@ -75,15 +75,15 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                     child: blueprint == null
                         ? const Center(child: CircularProgressIndicator())
                         : Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 24, 12, 0),
-                      child: SeatLayoutWidget(
-                        onSeatTap: (model) async {
-                          await _handleSeatTap(model);
-                        },
-                        controller: _seatLayoutController,
-                        isEditorMode: false,
-                      ),
-                    ),
+                            padding: const EdgeInsets.fromLTRB(12, 24, 12, 0),
+                            child: SeatLayoutWidget(
+                              onSeatTap: (model) async {
+                                await _handleSeatTap(model);
+                              },
+                              controller: _seatLayoutController,
+                              isEditorMode: false,
+                            ),
+                          ),
                   ),
                   // Bottom Buttons
                   Padding(
@@ -92,11 +92,11 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       child: ButtonsHelper.primaryButton(
                           context: context,
                           onPressed: () {
-                            widget.onCloseSeatReservation?.call(widget.selectedSeats);
+                            widget.onCloseSeatReservation
+                                ?.call(widget.selectedSeats);
                           },
                           label: "Continue".tr(),
-                          width: 250
-                      ),
+                          width: 250),
                     ),
                   ),
                 ],
@@ -114,14 +114,14 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
       // Deselect
       model.seatState = SeatState.available; // Optimistic update
       _seatLayoutController.updateSeat(model, SeatState.available);
-      
+
       // Optimistic list update
       widget.selectedSeats.remove(model);
       widget.onSelectionChanged?.call(widget.selectedSeats);
       setState(() {});
 
       bool success = false;
-      try{
+      try {
         success = await DbOrders.selectSpot(
           context,
           widget.formDataKey,
@@ -129,7 +129,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
           model.objectModel!.id!,
           false,
         );
-      } catch(e){
+      } catch (e) {
         success = false;
       }
 
@@ -139,15 +139,17 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
         // Revert
         model.seatState = SeatState.selected_by_me;
         _seatLayoutController.updateSeat(model, SeatState.selected_by_me);
-        
+
         // Revert list update
         widget.selectedSeats.add(model);
         widget.onSelectionChanged?.call(widget.selectedSeats);
       }
     } else if (model.seatState == SeatState.available) {
       // Select
-      if(widget.maxTickets != null && widget.selectedSeats.length >= widget.maxTickets!){
-        ToastHelper.Show(context, "It is not possible to select more tickets.".tr());
+      if (widget.maxTickets != null &&
+          widget.selectedSeats.length >= widget.maxTickets!) {
+        ToastHelper.Show(
+            context, "It is not possible to select more tickets.".tr());
         return;
       }
       model.seatState = SeatState.selected_by_me; // Optimistic update
@@ -159,7 +161,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
       setState(() {});
 
       bool success = false;
-      try{
+      try {
         success = await DbOrders.selectSpot(
           context,
           widget.formDataKey,
@@ -167,7 +169,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
           model.objectModel!.id!,
           true,
         );
-      } catch (e){
+      } catch (e) {
         success = false;
       }
 

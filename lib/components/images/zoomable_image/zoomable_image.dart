@@ -24,7 +24,7 @@ class PinchScrollScope extends InheritedWidget {
 /// during two-finger pinch gestures.
 class PinchScrollView extends StatefulWidget {
   final Widget Function(VoidCallback onPinchStart, VoidCallback onPinchEnd)
-  builder;
+      builder;
 
   const PinchScrollView({super.key, required this.builder});
 
@@ -37,15 +37,14 @@ class _PinchScrollViewState extends State<PinchScrollView> {
   final ScrollController controller = ScrollController();
 
   void _onPinchStart() {
-    print('>> scroll blocked');
     setState(() => blockScroll = true);
   }
 
   void _onPinchEnd() {
     Future.delayed(
       PinchZoomReleaseUnzoomWidget.defaultResetDuration,
-          () {
-        print('>> scroll unblocked');
+      () {
+
         setState(() => blockScroll = false);
       },
     );
@@ -91,8 +90,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
   void _handlePointerDown(PointerDownEvent e) {
     _pointers++;
     if (_pointers == 2) {
-      print('>> pinch start (_pointers==2)');
-      final cb = widget.onTwoFingerStart ?? PinchScrollScope.of(context)?.onPinchStart;
+
+      final cb =
+          widget.onTwoFingerStart ?? PinchScrollScope.of(context)?.onPinchStart;
       cb?.call();
     }
   }
@@ -100,8 +100,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
   void _handlePointerUp(PointerUpEvent e) {
     _pointers = (_pointers - 1).clamp(0, 10);
     if (_pointers < 1) {
-      print('>> pinch end (_pointers<2)');
-      final cb = widget.onTwoFingerEnd ?? PinchScrollScope.of(context)?.onPinchEnd;
+
+      final cb =
+          widget.onTwoFingerEnd ?? PinchScrollScope.of(context)?.onPinchEnd;
       cb?.call();
     }
   }
@@ -111,7 +112,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
     return Listener(
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUp,
-      child: PinchZoomReleaseUnzoomWidget(maxScale: 4, child: widget.child, fingersRequiredToPinch: 2,),
+      child: PinchZoomReleaseUnzoomWidget(
+        maxScale: 4,
+        fingersRequiredToPinch: 2,
+        child: widget.child,
+      ),
     );
   }
 }

@@ -18,11 +18,11 @@ class ActivityTimelineController {
   final void Function(ActivityUserInfoModel) onUserDragStarted;
   final VoidCallback onUserDragEnd;
   final VoidCallback hideAssignmentDetailOverlay;
-  final void Function(
-      ActivityUserInfoModel targetUser,
+  final void Function(ActivityUserInfoModel targetUser,
       List<ActivityAssignmentModel> assignmentsToCopy) onCopyAssignments;
   final void Function(List<ActivityAssignmentModel>) onDeleteAssignments;
-  final void Function(ActivityAssignmentModel, dynamic) onRemoveLinkFromAssignment;
+  final void Function(ActivityAssignmentModel, dynamic)
+      onRemoveLinkFromAssignment;
 
   final bool isDark;
 
@@ -44,8 +44,7 @@ class ActivityTimelineController {
     required this.onCopyAssignments,
     required this.onDeleteAssignments,
     required this.onRemoveLinkFromAssignment,
-
-  required this.hideAssignmentDetailOverlay,
+    required this.hideAssignmentDetailOverlay,
     required this.isDark,
   });
 

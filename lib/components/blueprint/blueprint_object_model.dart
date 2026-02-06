@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
@@ -75,15 +74,16 @@ class BlueprintObjectModel {
   }
 
   Map<String, dynamic> toJson() => {
-    metaX: x,
-    metaY: y,
-    metaType: type,
-    metaTitle: title,
-    metaState: state, // Use the synced state string
-    if (id != null) metaId: id,
-    if (group?.id != null) metaGroupId: group?.id,
-    if (spotProduct != null || product != null) TbEshop.spots.product: spotProduct ?? product?.id,
-  };
+        metaX: x,
+        metaY: y,
+        metaType: type,
+        metaTitle: title,
+        metaState: state, // Use the synced state string
+        if (id != null) metaId: id,
+        if (group?.id != null) metaGroupId: group?.id,
+        if (spotProduct != null || product != null)
+          TbEshop.spots.product: spotProduct ?? product?.id,
+      };
 
   BlueprintObjectModel({
     this.x,
@@ -103,7 +103,7 @@ class BlueprintObjectModel {
     if (state != null && stateEnum == null) {
       stateEnum = statesMap.entries
           .firstWhere((entry) => entry.value == state,
-          orElse: () => const MapEntry(SeatState.empty, ""))
+              orElse: () => const MapEntry(SeatState.empty, ""))
           .key;
     } else if (stateEnum != null && state == null) {
       state = statesMap[stateEnum];
@@ -118,11 +118,13 @@ class BlueprintObjectModel {
 
   String blueprintTooltip(BuildContext context) {
     // Find the matching order product ticket
-    var opt = blueprint?.orderProductTickets?.firstWhereOrNull((t) => t.id == orderProductTicket);
+    var opt = blueprint?.orderProductTickets
+        ?.firstWhereOrNull((t) => t.id == orderProductTicket);
 
     if (opt != null) {
       // Find the corresponding ticket
-      var ticket = blueprint?.tickets?.firstWhereOrNull((t) => t.id == opt.ticketId);
+      var ticket =
+          blueprint?.tickets?.firstWhereOrNull((t) => t.id == opt.ticketId);
 
       if (ticket != null) {
         // Get other products associated with the ticket
@@ -133,29 +135,34 @@ class BlueprintObjectModel {
 
         // Generate string for other products
         var productsString = otherProducts
-            ?.where((p) => p != product?.id)
-            .map((op) {
-          var pr = blueprint?.products?.firstWhere((p) => p.id == op);
-          return pr?.title ?? "";
-        })
-            .where((title) => title.isNotEmpty)
-            .join("\n") ?? "";
+                ?.where((p) => p != product?.id)
+                .map((op) {
+                  var pr = blueprint?.products?.firstWhere((p) => p.id == op);
+                  return pr?.title ?? "";
+                })
+                .where((title) => title.isNotEmpty)
+                .join("\n") ??
+            "";
 
         // Get the order details
         var order = blueprint?.orders?.firstWhere((p) => p.id == opt.orderId);
         var orderNote = order?.toCustomerNote() ?? "";
-        if(orderNote.isNotEmpty){
+        if (orderNote.isNotEmpty) {
           orderNote = "\n$orderNote";
         }
-        var orderString = order != null
-            ? "\n${order.toCustomerData()}$orderNote"
-            : "";
+        var orderString =
+            order != null ? "\n${order.toCustomerData()}$orderNote" : "";
 
         // Add ticket note if available
-        var ticketNoteString = ticket.note != null && ticket.note!.isNotEmpty ? "\n${ticket.note}" : "";
-        
+        var ticketNoteString = ticket.note != null && ticket.note!.isNotEmpty
+            ? "\n${ticket.note}"
+            : "";
+
         // Add hidden note if available
-        var noteHiddenString = ticket.noteHidden != null && ticket.noteHidden!.isNotEmpty ? "\n(${ticket.noteHidden})" : "";
+        var noteHiddenString =
+            ticket.noteHidden != null && ticket.noteHidden!.isNotEmpty
+                ? "\n(${ticket.noteHidden})"
+                : "";
 
         return "${product?.title} ${title ?? ""}\n${OrdersStrings.itemSingular} ${ticket.ticketSymbol}$ticketNoteString$noteHiddenString\n$productsString$orderString";
       }
@@ -167,12 +174,15 @@ class BlueprintObjectModel {
 
   String getSwapSummary() {
     if (orderProductTicket != null) {
-      var opt = blueprint?.orderProductTickets?.firstWhereOrNull((t) => t.id == orderProductTicket);
+      var opt = blueprint?.orderProductTickets
+          ?.firstWhereOrNull((t) => t.id == orderProductTicket);
       if (opt != null) {
         var order = blueprint?.orders?.firstWhere((p) => p.id == opt.orderId);
-        var ticket = blueprint?.tickets?.firstWhereOrNull((t) => t.id == opt.ticketId);
+        var ticket =
+            blueprint?.tickets?.firstWhereOrNull((t) => t.id == opt.ticketId);
         if (order != null && ticket != null) {
-          return BlueprintStrings.swapSummaryCustomer(ticket.ticketSymbol ?? '?', order.toCustomerData());
+          return BlueprintStrings.swapSummaryCustomer(
+              ticket.ticketSymbol ?? '?', order.toCustomerData());
         }
       }
       return BlueprintStrings.swapSummaryOccupied;
@@ -193,7 +203,7 @@ class BlueprintObjectModel {
     }
   }
 
-  bool isOrdered(){
+  bool isOrdered() {
     return orderProductTicket != null;
   }
 

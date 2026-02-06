@@ -47,7 +47,8 @@ class _GamePageState extends State<GamePage> {
       loadCorrectGuesses();
     });
 
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) {
+    _connectivitySubscription =
+        Connectivity().onConnectivityChanged.listen((result) {
       setState(() {
         _isOffline = result.contains(ConnectivityResult.none);
       });
@@ -66,16 +67,19 @@ class _GamePageState extends State<GamePage> {
     _gameSettings = await DbOccasions.loadGameSettings();
     var userGroups = await DbGroups.getUserGroups();
 
-    _isUserInGameGroup = userGroups.any((g) => g.type == InformationModel.gameType);
+    _isUserInGameGroup =
+        userGroups.any((g) => g.type == InformationModel.gameType);
 
     if (_isUserInGameGroup) {
-      var userGroup = userGroups.firstWhere((g) => g.type == InformationModel.gameType);
+      var userGroup =
+          userGroups.firstWhere((g) => g.type == InformationModel.gameType);
       setState(() {
         _groupTitle = userGroup.title;
       });
     }
 
-    var allInfo = await DbInformation.getAllInformationForDataGrid(InformationModel.gameType);
+    var allInfo = await DbInformation.getAllInformationForDataGrid(
+        InformationModel.gameType);
     setState(() {
       _gameList = allInfo.toList();
     });
@@ -106,7 +110,8 @@ class _GamePageState extends State<GamePage> {
         if (_remainingTime!.isNegative) {
           _countdownTimer?.cancel();
           _remainingTime = null;
-          Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+          Navigator.of(context, rootNavigator: true)
+              .popUntil((route) => route.isFirst);
         }
       });
     });
@@ -115,7 +120,8 @@ class _GamePageState extends State<GamePage> {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final hasNotStarted = _gameSettings != null && now.isBefore(_gameSettings!.start!);
+    final hasNotStarted =
+        _gameSettings != null && now.isBefore(_gameSettings!.start!);
     final hasEnded = _gameSettings != null && now.isAfter(_gameSettings!.end!);
 
     return Scaffold(
@@ -168,12 +174,17 @@ class _GamePageState extends State<GamePage> {
           ),
 
           if (!_isUserInGameGroup)
-            _buildOverlay("For playing the game, you must be assigned to a game group".tr()),
+            _buildOverlay(
+                "For playing the game, you must be assigned to a game group"
+                    .tr()),
 
           if (_isUserInGameGroup && hasNotStarted)
             _buildOverlay("Game has not started yet".tr()),
 
-          if (_isUserInGameGroup && !hasNotStarted && !hasEnded && _remainingTime != null)
+          if (_isUserInGameGroup &&
+              !hasNotStarted &&
+              !hasEnded &&
+              _remainingTime != null)
             Positioned(
               top: 16,
               right: 16,
@@ -184,7 +195,10 @@ class _GamePageState extends State<GamePage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  "Time left: {time}".tr(namedArgs: {"time":"${_remainingTime!.inHours}:${(_remainingTime!.inMinutes % 60).toString().padLeft(2, '0')}:${(_remainingTime!.inSeconds % 60).toString().padLeft(2, '0')}"}),
+                  "Time left: {time}".tr(namedArgs: {
+                    "time":
+                        "${_remainingTime!.inHours}:${(_remainingTime!.inMinutes % 60).toString().padLeft(2, '0')}:${(_remainingTime!.inSeconds % 60).toString().padLeft(2, '0')}"
+                  }),
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
@@ -195,7 +209,8 @@ class _GamePageState extends State<GamePage> {
 
           // Overlay for offline status
           if (_isOffline)
-            _buildOverlay("You are offline. Please check your internet connection.".tr()),
+            _buildOverlay(
+                "You are offline. Please check your internet connection.".tr()),
         ],
       ),
     );
@@ -230,7 +245,8 @@ class _GamePageState extends State<GamePage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text("Check point {title}".tr(namedArgs: {"title": gameTitle})),
+          title:
+              Text("Check point {title}".tr(namedArgs: {"title": gameTitle})),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -245,7 +261,8 @@ class _GamePageState extends State<GamePage> {
           actions: [
             TextButton(
               onPressed: () async {
-                var isCorrect = await DbInformation.makeGameGuess(context, _gameList[index].id!, userGuess ?? "");
+                var isCorrect = await DbInformation.makeGameGuess(
+                    context, _gameList[index].id!, userGuess ?? "");
                 if (isCorrect) {
                   setState(() {
                     _correctGuesses.add(_gameList[index].id!);

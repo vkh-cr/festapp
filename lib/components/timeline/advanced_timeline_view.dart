@@ -33,7 +33,8 @@ class AdvancedTimelineView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = DefaultTabController.of(context);
     final animation = controller.animation!;
-    final todayDate = TimeHelper.now();  // changed from `final today = TimeHelper.now().day;`
+    final todayDate =
+        TimeHelper.now(); // changed from `final today = TimeHelper.now().day;`
 
     // Total extra width to accommodate both arrows (approx. IconButton width)
     const arrowTotalWidth = 96.0;
@@ -78,8 +79,8 @@ class AdvancedTimelineView extends StatelessWidget {
                     indicator: BoxDecoration(
                       color: ThemeConfig.indicatorColor(context),
                       border: StylesConfig.indicatorBorder(),
-                      borderRadius:
-                      BorderRadius.circular(StylesConfig.indicatorRoundness),
+                      borderRadius: BorderRadius.circular(
+                          StylesConfig.indicatorRoundness),
                     ),
                     indicatorSize: TabBarIndicatorSize.tab,
                     labelColor: Colors.transparent,
@@ -97,7 +98,7 @@ class AdvancedTimelineView extends StatelessWidget {
                           animation: animation,
                           builder: (ctx, _) {
                             final diff =
-                            (animation.value - i).abs().clamp(0.0, 1.0);
+                                (animation.value - i).abs().clamp(0.0, 1.0);
                             final factor = 1.0 - diff;
                             final labelColor = Color.lerp(
                               ThemeConfig.tabTextColor(context),

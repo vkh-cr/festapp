@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class TimetableController {
@@ -14,7 +13,6 @@ class TimetableController {
   double verticalAxisSpace() => isTimeHorizontal == true ? 0 : 60;
   double itemStaticDimension() => isTimeHorizontal == true ? 56 : 112;
   int minimalDurationMinutes() => isTimeHorizontal == true ? 25 : 15;
-
 
   TimetableController({this.onItemTap});
 

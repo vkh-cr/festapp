@@ -19,10 +19,10 @@ class FormCreationHelper {
   }
 
   static Future<void> showCreateFormDialog(
-      BuildContext context, {
-        required String occasionLink,
-        required Function onFormCreated,
-      }) async {
+    BuildContext context, {
+    required String occasionLink,
+    required Function onFormCreated,
+  }) async {
     final formKey = GlobalKey<FormState>();
 
     String title = FormStrings.defaultFormTitle;
@@ -48,7 +48,7 @@ class FormCreationHelper {
 
     void updateLink() {
       var processedTitle = Utilities.removeDiacritics(titleController.text);
-      if(processedTitle.isEmpty) return;
+      if (processedTitle.isEmpty) return;
 
       var firstWord = processedTitle.split(' ').first.toLowerCase();
       var currentYear = DateTime.now().year;
@@ -71,7 +71,8 @@ class FormCreationHelper {
           builder: (context, setState) {
             bool isFormValid() {
               validateLink(linkController.text);
-              return titleController.text.trim().isNotEmpty && linkError == null;
+              return titleController.text.trim().isNotEmpty &&
+                  linkError == null;
             }
 
             return AlertDialog(
@@ -89,7 +90,9 @@ class FormCreationHelper {
                           border: const OutlineInputBorder(),
                         ),
                         onChanged: (value) {
-                          setState(() { title = value; });
+                          setState(() {
+                            title = value;
+                          });
                         },
                         autofocus: true,
                       ),
@@ -114,7 +117,8 @@ class FormCreationHelper {
                       ValueListenableBuilder<String>(
                         valueListenable: htmlNotifier,
                         builder: (context, htmlContent, child) {
-                          if (htmlContent.isEmpty) return const SizedBox.shrink();
+                          if (htmlContent.isEmpty)
+                            return const SizedBox.shrink();
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: HtmlView(
@@ -137,46 +141,48 @@ class FormCreationHelper {
                 ElevatedButton(
                   onPressed: isFormValid() && !isCreating
                       ? () async {
-                    setState(() {
-                      isCreating = true;
-                      linkError = null;
-                    });
+                          setState(() {
+                            isCreating = true;
+                            linkError = null;
+                          });
 
-                    title = titleController.text.trim();
-                    link = linkController.text.trim();
+                          title = titleController.text.trim();
+                          link = linkController.text.trim();
 
-                    try {
-                      await DbForms.createNewForm(
-                        title: title,
-                        link: link,
-                        occasionLink: occasionLink,
-                      );
+                          try {
+                            await DbForms.createNewForm(
+                              title: title,
+                              link: link,
+                              occasionLink: occasionLink,
+                            );
 
-                      if (!context.mounted) return;
-                      ToastHelper.Show(context, FormStrings.formCreatedSuccess, severity: ToastSeverity.Ok);
-                      onFormCreated();
-                      Navigator.of(context).pop();
-
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      setState(() {
-                        linkError = e.toString().replaceFirst("Exception: ", "");
-                      });
-                    } finally {
-                      if(context.mounted) {
-                        setState(() {
-                          isCreating = false;
-                        });
-                      }
-                    }
-                  }
+                            if (!context.mounted) return;
+                            ToastHelper.Show(
+                                context, FormStrings.formCreatedSuccess,
+                                severity: ToastSeverity.Ok);
+                            onFormCreated();
+                            Navigator.of(context).pop();
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            setState(() {
+                              linkError =
+                                  e.toString().replaceFirst("Exception: ", "");
+                            });
+                          } finally {
+                            if (context.mounted) {
+                              setState(() {
+                                isCreating = false;
+                              });
+                            }
+                          }
+                        }
                       : null,
                   child: isCreating
                       ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : Text("Create".tr()),
                 ),
               ],

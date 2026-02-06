@@ -6,7 +6,6 @@ AS $$
 DECLARE
     bank_acc bigint;
 BEGIN
-    -- Retrieve the associated order_id from payment_info
     SELECT pi.bank_account INTO bank_acc
     FROM eshop.payment_info pi
     WHERE pi.id = payment_info_id

@@ -10,16 +10,18 @@ class PhoneInputFormatter extends TextInputFormatter {
   ) {
     var text = newValue.text;
     int cursorIndex = newValue.selection.end;
-    
+
     // Handle backspace of space: delete the digit before it
-    if (oldValue.selection.isCollapsed && 
-        newValue.selection.isCollapsed && 
+    if (oldValue.selection.isCollapsed &&
+        newValue.selection.isCollapsed &&
         oldValue.text.length == newValue.text.length + 1) {
       final deletedCharIndex = newValue.selection.end;
-      if (deletedCharIndex < oldValue.text.length && oldValue.text[deletedCharIndex] == ' ') {
+      if (deletedCharIndex < oldValue.text.length &&
+          oldValue.text[deletedCharIndex] == ' ') {
         // Space was deleted. Remove the character before it (the digit)
         if (newValue.selection.end > 0) {
-          text = text.substring(0, newValue.selection.end - 1) + text.substring(newValue.selection.end);
+          text = text.substring(0, newValue.selection.end - 1) +
+              text.substring(newValue.selection.end);
           cursorIndex--;
         }
       }
@@ -29,12 +31,13 @@ class PhoneInputFormatter extends TextInputFormatter {
 
     // Clean and enforce max length
     String cleaned = cleanPhoneNumber(text);
-    
+
     // Format
     String formatted = formatPhoneNumber(cleaned);
 
     // Smart space handling: if user typed a space at the end and it's a valid separator position, keep it.
-    if (newValue.text.endsWith(' ') && (cleaned.length == 4 || cleaned.length == 7 || cleaned.length == 10)) {
+    if (newValue.text.endsWith(' ') &&
+        (cleaned.length == 4 || cleaned.length == 7 || cleaned.length == 10)) {
       if (!formatted.endsWith(' ')) {
         formatted += ' ';
       }
@@ -45,7 +48,7 @@ class PhoneInputFormatter extends TextInputFormatter {
     for (int i = 0; i < cursorIndex && i < text.length; i++) {
       if (text[i] != ' ') digitsBeforeCursor++;
     }
-    
+
     int newCursorIndex = 0;
     int currentDigits = 0;
     for (int i = 0; i < formatted.length; i++) {
@@ -53,10 +56,11 @@ class PhoneInputFormatter extends TextInputFormatter {
       if (currentDigits > digitsBeforeCursor) break;
       newCursorIndex++;
     }
-    
+
     return TextEditingValue(
       text: formatted,
-      selection: TextSelection.collapsed(offset: newCursorIndex.clamp(0, formatted.length)),
+      selection: TextSelection.collapsed(
+          offset: newCursorIndex.clamp(0, formatted.length)),
     );
   }
 
@@ -64,7 +68,7 @@ class PhoneInputFormatter extends TextInputFormatter {
     // Remove all non-digit characters except leading +
     String cleaned = text.replaceAll(RegExp(r'[^\d+]'), '');
     if (cleaned.startsWith('+')) {
-      cleaned = '+' + cleaned.substring(1).replaceAll('+', '');
+      cleaned = '+${cleaned.substring(1).replaceAll('+', '')}';
     } else {
       cleaned = cleaned.replaceAll('+', '');
     }
@@ -99,11 +103,11 @@ class PhoneInputFormatter extends TextInputFormatter {
         formatted = cleaned;
       }
     } else {
-       // 123456 -> 123 456
-       for (int i = 0; i < cleaned.length; i++) {
-         if (i > 0 && i % 3 == 0) formatted += ' ';
-         formatted += cleaned[i];
-       }
+      // 123456 -> 123 456
+      for (int i = 0; i < cleaned.length; i++) {
+        if (i > 0 && i % 3 == 0) formatted += ' ';
+        formatted += cleaned[i];
+      }
     }
     return formatted;
   }

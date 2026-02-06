@@ -35,7 +35,8 @@ class AdminTabDefinition {
     required this.label,
     required this.icon,
     required this.widget,
-    this.isEnabled = true, // Defaults to true, so all tabs are enabled unless specified otherwise
+    this.isEnabled =
+        true, // Defaults to true, so all tabs are enabled unless specified otherwise
   });
 
   // Tab labels as static const strings.
@@ -63,71 +64,64 @@ class AdminTabDefinition {
   // You can now conditionally set isEnabled: false for any tab.
   // For example: isEnabled: RightsService.canSeeGameTab()
   static Map<String, AdminTabDefinition> get availableTabs => {
-    info: AdminTabDefinition(
-        label: "Info".tr(), icon: Icons.info, widget: InformationTab()),
-    events: AdminTabDefinition(
-        label: "Schedule".tr(),
-        icon: Icons.calendar_month,
-        widget: ScheduleTab()),
-    places: AdminTabDefinition(
-        label: "Places".tr(),
-        icon: Icons.pin_drop,
-        widget: PlacesTab()),
-    groups: AdminTabDefinition(
-        label: "Groups".tr(),
-        icon: Icons.groups,
-        widget: UserGroupsTab()),
-    service: AdminTabDefinition(
-        label: "Service".tr(),
-        icon: Icons.food_bank,
-        widget: ServiceTab()),
-    // Added new tab for Inclusion Types
-    inventoryPools: AdminTabDefinition(
-        label: InventoryStrings.tabTitle,
-        icon: Icons.view_module_outlined,
-        widget: InventoryPoolsTab()),
-    volunteers: AdminTabDefinition(
-        label: "Volunteers".tr(),
-        icon: Icons.view_timeline,
-        widget: ActivitiesContent(occasionId: RightsService.currentOccasionId()!)),
-    users: AdminTabDefinition(
-        label: CommonStrings.users,
-        icon: Icons.people,
-        widget: UsersTab()),
-    game: AdminTabDefinition(
-        label: "Game".tr(),
-        icon: Icons.gamepad,
-        widget: GameTab()),
-    form: AdminTabDefinition(
-        label: FormStrings.formsTitle, icon: Icons.list, widget: FormsTab()),
-    blueprint: AdminTabDefinition(
-        label: "Blueprint".tr(),
-        icon: Icons.grid_on,
-        widget: BlueprintTab()),
-    tickets: AdminTabDefinition(
-        label: OrdersStrings.itemsPlural,
-        icon: Icons.local_activity,
-        widget: TicketsTab()),
-    orders: AdminTabDefinition(
-        label: "Orders".tr(),
-        icon: Icons.shopping_cart,
-        widget: OrdersTab()),
-    products: AdminTabDefinition(
-        label: "Products".tr(),
-        icon: Icons.category,
-        widget: ProductsTab()),
-    report: AdminTabDefinition(
-        label: "Report".tr(),
-        icon: Icons.stacked_bar_chart,
-        widget: ReportTab()),
-    emailTemplates: AdminTabDefinition(
-        label: EmailTemplatesStrings.title,
-        icon: Icons.email,
-        widget: EmailTemplatesTab()),
-    settings: AdminTabDefinition(
-        isEnabled: RightsService.isUnitEditor(),
-        label: CommonStrings.settings,
-        icon: Icons.settings,
-        widget: OccasionSettingsTab()),
-  };
+        info: AdminTabDefinition(
+            label: "Info".tr(), icon: Icons.info, widget: InformationTab()),
+        events: AdminTabDefinition(
+            label: "Schedule".tr(),
+            icon: Icons.calendar_month,
+            widget: ScheduleTab()),
+        places: AdminTabDefinition(
+            label: "Places".tr(), icon: Icons.pin_drop, widget: PlacesTab()),
+        groups: AdminTabDefinition(
+            label: "Groups".tr(), icon: Icons.groups, widget: UserGroupsTab()),
+        service: AdminTabDefinition(
+            label: "Service".tr(), icon: Icons.food_bank, widget: ServiceTab()),
+        // Added new tab for Inclusion Types
+        inventoryPools: AdminTabDefinition(
+            label: InventoryStrings.tabTitle,
+            icon: Icons.view_module_outlined,
+            widget: InventoryPoolsTab()),
+        volunteers: AdminTabDefinition(
+            label: "Volunteers".tr(),
+            icon: Icons.view_timeline,
+            widget: ActivitiesContent(
+                occasionId: RightsService.currentOccasionId()!)),
+        users: AdminTabDefinition(
+            label: CommonStrings.users, icon: Icons.people, widget: UsersTab()),
+        game: AdminTabDefinition(
+            label: "Game".tr(), icon: Icons.gamepad, widget: GameTab()),
+        form: AdminTabDefinition(
+            label: FormStrings.formsTitle,
+            icon: Icons.list,
+            widget: FormsTab()),
+        blueprint: AdminTabDefinition(
+            label: "Blueprint".tr(),
+            icon: Icons.grid_on,
+            widget: BlueprintTab()),
+        tickets: AdminTabDefinition(
+            label: OrdersStrings.itemsPlural,
+            icon: Icons.local_activity,
+            widget: TicketsTab()),
+        orders: AdminTabDefinition(
+            label: "Orders".tr(),
+            icon: Icons.shopping_cart,
+            widget: OrdersTab()),
+        products: AdminTabDefinition(
+            label: "Products".tr(),
+            icon: Icons.category,
+            widget: ProductsTab()),
+        report: AdminTabDefinition(
+            label: "Report".tr(),
+            icon: Icons.stacked_bar_chart,
+            widget: ReportTab()),
+        emailTemplates: AdminTabDefinition(
+            label: EmailTemplatesStrings.title,
+            icon: Icons.email,
+            widget: EmailTemplatesTab()),
+        settings: AdminTabDefinition(
+            isEnabled: RightsService.isUnitEditor(),
+            label: CommonStrings.settings,
+            icon: Icons.settings,
+            widget: OccasionSettingsTab()),
+      };
 }

@@ -39,7 +39,8 @@ class UserStrings {
   static String get emailLabel => 'FeatureUser.email'.tr();
   static String get password => 'FeatureUser.password'.tr();
   static String get confirmPassword => 'FeatureUser.confirmPassword'.tr();
-  static String get passwordsDoNotMatch => 'FeatureUser.passwordsDoNotMatch'.tr();
+  static String get passwordsDoNotMatch =>
+      'FeatureUser.passwordsDoNotMatch'.tr();
   static String get passwordMinLength => 'FeatureUser.passwordMinLength'.tr();
   static String get fillPassword => 'FeatureUser.fillPassword'.tr();
   static String get signInSuccess => 'FeatureUser.signInSuccess'.tr();
@@ -52,21 +53,28 @@ class UserStrings {
   static String get passwordResetSent => 'FeatureUser.passwordResetSent'.tr();
   static String get enterEmailReset => 'FeatureUser.enterEmailReset'.tr();
   static String get registrationFailed => 'FeatureUser.registrationFailed'.tr();
-  static String Function(String email) get emailInUse => (email) => 'FeatureUser.emailInUse'.tr(namedArgs: {"email": email});
+  static String Function(String email) get emailInUse =>
+      (email) => 'FeatureUser.emailInUse'.tr(namedArgs: {"email": email});
   static String get passwordChanged => 'FeatureUser.passwordChanged'.tr();
   static String get tokenInvalid => 'FeatureUser.tokenInvalid'.tr();
   static String get firstTime => 'FeatureUser.firstTime'.tr();
   static String get signUp => 'FeatureUser.signUp'.tr();
-  static String get registrationAlmostComplete => 'FeatureUser.registrationAlmostComplete'.tr();
+  static String get registrationAlmostComplete =>
+      'FeatureUser.registrationAlmostComplete'.tr();
   static String get passwordOrCode => 'FeatureUser.passwordOrCode'.tr();
-  static String Function(String email) get credentialsSentLong => (email) => 'FeatureUser.credentialsSentLong'.tr(namedArgs: {"email": email});
+  static String Function(String email) get credentialsSentLong => (email) =>
+      'FeatureUser.credentialsSentLong'.tr(namedArgs: {"email": email});
   static String get clickToSignIn => 'FeatureUser.clickToSignIn'.tr();
-  static String get accountRequiredToJoin => 'FeatureUser.accountRequiredToJoin'.tr();
+  static String get accountRequiredToJoin =>
+      'FeatureUser.accountRequiredToJoin'.tr();
   static String get resetPassword => 'FeatureUser.resetPassword'.tr();
-  static String get forgotPasswordQuestion => 'FeatureUser.forgotPasswordQuestion'.tr();
+  static String get forgotPasswordQuestion =>
+      'FeatureUser.forgotPasswordQuestion'.tr();
   static String get forgotYourPassword => 'FeatureUser.forgotYourPassword'.tr();
   static String get sendResetEmail => 'FeatureUser.sendResetEmail'.tr();
-  static String get changePasswordTitle => 'FeatureUser.changePasswordTitle'.tr();
-  static String get createPasswordToContinue => 'FeatureUser.createPasswordToContinue'.tr();
+  static String get changePasswordTitle =>
+      'FeatureUser.changePasswordTitle'.tr();
+  static String get createPasswordToContinue =>
+      'FeatureUser.createPasswordToContinue'.tr();
   static String get iAm => 'FeatureUser.iAm'.tr();
 }

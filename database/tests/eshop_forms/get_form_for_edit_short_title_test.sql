@@ -20,12 +20,13 @@ BEGIN
     -- 1. Setup: Create Hierarchy & User context
     
     -- Mocking Permission Functions to bypass Auth/User dependencies
-    CREATE OR REPLACE FUNCTION public.check_is_editor_order_view_via_form_link(form_link text)
-    RETURNS void AS '
+    -- Mocking Permission Functions to bypass Auth/User dependencies
+    EXECUTE 'CREATE OR REPLACE FUNCTION public.check_is_editor_order_view_via_form_link(form_link text)
+    RETURNS void AS ''
     BEGIN
         RETURN;
     END;
-    ' LANGUAGE plpgsql;
+    '' LANGUAGE plpgsql';
 
     -- Insert Org
     INSERT INTO public.organizations (title) VALUES ('Form Test Org') RETURNING id INTO v_org_id;

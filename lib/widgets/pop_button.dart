@@ -17,7 +17,9 @@ class PopButton extends StatelessWidget {
     color ??= ThemeConfig.appBarColorNegative();
     if (RouterService.canPop(context)) {
       return IconButton(
-        icon: Icon(Icons.arrow_back, color: Theme.of(context).navigationBarTheme.indicatorColor, size: iconSize),
+        icon: Icon(Icons.arrow_back,
+            color: Theme.of(context).navigationBarTheme.indicatorColor,
+            size: iconSize),
         onPressed: () => RouterService.popOrHome(context),
       );
     }

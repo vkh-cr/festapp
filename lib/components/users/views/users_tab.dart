@@ -13,7 +13,6 @@ import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_columns.dart';
-import 'package:fstapp/components/users/views/user_page.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/users/views/users_tab_helper.dart';
 
@@ -53,8 +52,8 @@ class _UsersTabState extends State<UsersTab> {
     ];
 
     final importFeature =
-    FeatureService.getFeatureDetails(FeatureConstants.import)
-    as ImportFeature?;
+        FeatureService.getFeatureDetails(FeatureConstants.import)
+            as ImportFeature?;
     if (importFeature != null &&
         importFeature.isEnabled &&
         importFeature.importFromTickets) {
@@ -117,7 +116,8 @@ class _UsersTabState extends State<UsersTab> {
         context: context,
         loadData: DbUsers.getOccasionEditorData,
         fromPlutoJson: OccasionUserModel.fromPlutoJson,
-        getNewObject: () => OccasionUserModel.newRow(RightsService.currentOccasionId()!),
+        getNewObject: () =>
+            OccasionUserModel.newRow(RightsService.currentOccasionId()!),
         firstColumnType: DataGridFirstColumn.deleteAndCheck,
         idColumn: Tb.occasion_users.user,
         actionsExtended: DataGridActionsController(

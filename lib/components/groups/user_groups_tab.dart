@@ -90,12 +90,13 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
           enableEditingMode: false,
           renderer: (rendererContext) {
             final model = rendererContext
-                .row.cells[UserGroupInfoModel.modelReference]!.value
-            as UserGroupInfoModel;
+                .row
+                .cells[UserGroupInfoModel.modelReference]!
+                .value as UserGroupInfoModel;
 
             final participants = model.participants!;
             final leader =
-            participants.firstWhereOrNull((p) => p.isAdmin == true);
+                participants.firstWhereOrNull((p) => p.isAdmin == true);
             final members = participants.where((p) => p.isAdmin != true);
             final count = participants.length;
 
@@ -111,20 +112,25 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                     constraints: const BoxConstraints(),
                     tooltip: GroupsStrings.manageParticipantsTooltip,
                     onPressed: () async {
-                      if (model.participants != null && _allUsersMap.isNotEmpty) {
+                      if (model.participants != null &&
+                          _allUsersMap.isNotEmpty) {
                         for (final participant in model.participants!) {
-                          if (participant.userInfo?.id != null && _allUsersMap.containsKey(participant.userInfo!.id)) {
-                            participant.userInfo = _allUsersMap[participant.userInfo!.id];
+                          if (participant.userInfo?.id != null &&
+                              _allUsersMap
+                                  .containsKey(participant.userInfo!.id)) {
+                            participant.userInfo =
+                                _allUsersMap[participant.userInfo!.id];
                           }
                         }
                       }
 
-                      final initialDisplayValue = model.getParticipantsDisplayValue();
+                      final initialDisplayValue =
+                          model.getParticipantsDisplayValue();
                       final allAssignedUserIds = <String>{};
                       for (final row in rendererContext.stateManager.rows) {
-                        final rowModel =
-                        row.cells[UserGroupInfoModel.modelReference]?.value
-                        as UserGroupInfoModel?;
+                        final rowModel = row
+                            .cells[UserGroupInfoModel.modelReference]
+                            ?.value as UserGroupInfoModel?;
                         rowModel?.participants?.forEach((p) {
                           if (p.userInfo?.id != null) {
                             allAssignedUserIds.add(p.userInfo!.id!);
@@ -135,12 +141,13 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                       await showDialog(
                           context: context,
                           builder: (_) => ParticipantsManagementDialog(
-                            group: model,
-                            allUsers: _allUsersMap.values.toList(),
-                            allAssignedUserIds: allAssignedUserIds,
-                          ));
+                                group: model,
+                                allUsers: _allUsersMap.values.toList(),
+                                allAssignedUserIds: allAssignedUserIds,
+                              ));
 
-                      final newDisplayValue = model.getParticipantsDisplayValue();
+                      final newDisplayValue =
+                          model.getParticipantsDisplayValue();
                       if (initialDisplayValue != newDisplayValue) {
                         rendererContext.stateManager.changeCellValue(
                             rendererContext.cell, newDisplayValue,
@@ -153,7 +160,10 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                     "($count)",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.6),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -168,21 +178,22 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                               child: Chip(
                                 avatar: Icon(Icons.star,
                                     color: Colors.amber.shade800, size: 16),
-                                label: Text(leader.userInfo!.toFullNameString()),
+                                label:
+                                    Text(leader.userInfo!.toFullNameString()),
                                 materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
+                                    MaterialTapTargetSize.shrinkWrap,
                                 visualDensity: VisualDensity.compact,
                               ),
                             ),
                           ...members.map((p) => Padding(
-                            padding: const EdgeInsets.only(right: 4.0),
-                            child: Chip(
-                              label: Text(p.userInfo!.toFullNameString()),
-                              materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                              visualDensity: VisualDensity.compact,
-                            ),
-                          )),
+                                padding: const EdgeInsets.only(right: 4.0),
+                                child: Chip(
+                                  label: Text(p.userInfo!.toFullNameString()),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              )),
                         ],
                       ),
                     ),
@@ -200,15 +211,13 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
           renderer: (rendererContext) {
             return ElevatedButton(
               onPressed: () async {
-                var oldText = rendererContext
-                    .row.cells[Tb.user_group_info.description]!.value as String?;
+                var oldText = rendererContext.row
+                    .cells[Tb.user_group_info.description]!.value as String?;
                 RouterService.navigatePageInfo(
                   context,
-                  HtmlEditorRoute(
-                      content: {
-                        HtmlEditorPage.parContent: oldText,
-                      },
-                      occasionId: RightsService.currentOccasionId()),
+                  HtmlEditorRoute(content: {
+                    HtmlEditorPage.parContent: oldText,
+                  }, occasionId: RightsService.currentOccasionId()),
                 ).then((value) async {
                   if (value != null) {
                     var newText = value as String;
@@ -241,8 +250,8 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
           renderer: (rendererContext) {
             return ElevatedButton(
               onPressed: () async {
-                var title = rendererContext
-                    .row.cells[Tb.user_group_info.title]?.value;
+                var title =
+                    rendererContext.row.cells[Tb.user_group_info.title]?.value;
                 var placeModel = rendererContext
                     .row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
                 placeModel ??= PlaceModel(
@@ -258,8 +267,8 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                 ).then((value) async {
                   if (value != null) {
                     placeModel!.latLng = value;
-                    var cell = rendererContext
-                        .row.cells[Tb.user_group_info.place]!;
+                    var cell =
+                        rendererContext.row.cells[Tb.user_group_info.place]!;
                     rendererContext.stateManager
                         .changeCellValue(cell, placeModel, force: true);
                   }

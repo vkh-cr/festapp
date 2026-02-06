@@ -23,16 +23,18 @@ void main() {
       expect(transaction.vs, isNull);
     });
 
-    test('fromJson correctly parses legacy message_for_recipient if comment is missing', () {
+    test(
+        'fromJson correctly parses legacy message_for_recipient if comment is missing',
+        () {
       final json = {
-         TbEshop.transactions.id: 2,
-         TbEshop.transactions.transaction_id: 67890,
-         TbEshop.transactions.amount: 100.0,
-         TbEshop.transactions.message_for_recipient: 'Legacy Message',
+        TbEshop.transactions.id: 2,
+        TbEshop.transactions.transaction_id: 67890,
+        TbEshop.transactions.amount: 100.0,
+        TbEshop.transactions.message_for_recipient: 'Legacy Message',
       };
 
       final transaction = TransactionModel.fromJson(json);
-      
+
       expect(transaction.messageForRecipient, 'Legacy Message');
       expect(transaction.comment, isNull);
     });

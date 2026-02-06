@@ -14,6 +14,10 @@ DECLARE
   new_product_id  bigint;
   new_form_id     bigint;
 BEGIN
+    -- [SECURITY FIX] Check permissions first
+    -- Only managers of the unit can duplicate occasions
+    PERFORM public.check_is_manager_on_unit((SELECT unit FROM public.occasions WHERE id = oc));
+
   ------------------------------------------------------------------
   -- 1. Duplicate the main occasion record.
   --    Modify the link to ensure uniqueness by appending a unique suffix.

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:intl/intl.dart';
 
 class StylesConfig {
   // Text styles
@@ -9,10 +8,10 @@ class StylesConfig {
   static const TextStyle timeLineSmallTextStyle = TextStyle(fontSize: 15);
 
   static TextStyle timeLineSplitTextStyle(BuildContext context) => TextStyle(
-    color: ThemeConfig.timelineSplitLabelColor(context),
-    fontWeight: FontWeight.bold,
-    fontSize: 15,
-  );
+        color: ThemeConfig.timelineSplitLabelColor(context),
+        fontWeight: FontWeight.bold,
+        fontSize: 15,
+      );
 
   static const TextStyle normalTextStyle = TextStyle(fontSize: 18);
 
@@ -36,12 +35,14 @@ class StylesConfig {
 
   static const double commonRoundness = 10;
 
-
-  static const EdgeInsets tabHeaderPadding = EdgeInsets.symmetric(vertical: 4); //4
+  static const EdgeInsets tabHeaderPadding =
+      EdgeInsets.symmetric(vertical: 4); //4
   static Border? indicatorBorder() => null;
-  static Border? headerBorder() => null; //Theme.of(context).scaffoldBackgroundColor
+  static Border? headerBorder() =>
+      null; //Theme.of(context).scaffoldBackgroundColor
 
-  static TextStyle textStyleBig = TextStyle(fontWeight: FontWeight.w900, fontSize: 16);
+  static TextStyle textStyleBig =
+      TextStyle(fontWeight: FontWeight.w900, fontSize: 16);
 
   static const double scheduleTimelineNodePosition = 0.35;
 
@@ -56,14 +57,14 @@ class StylesConfig {
       );
 
   static String formatDateTimeForTab(BuildContext context, DateTime time) {
-    return "${time.weekdayToString(context).toUpperCase().substring(0, 2)} ${DateFormat('dd.MM.').format(time)}";
+    return time.weekdayToString(context);
   }
 
-  static String formatTimelineSplit(String string){
+  static String formatTimelineSplit(String string) {
     return string;
   }
 
-  static String formatTimelineRightText(String string){
+  static String formatTimelineRightText(String string) {
     return string;
   }
 }

@@ -31,7 +31,8 @@ class _FormsTabState extends State<FormsTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newOccasionLink = context.routeData.params.get(AppRouter.linkFormatted, null);
+    final newOccasionLink =
+        context.routeData.params.get(AppRouter.linkFormatted, null);
 
     if (newOccasionLink != null && newOccasionLink != _previousOccasionLink) {
       occasionLink = newOccasionLink;
@@ -66,7 +67,7 @@ class _FormsTabState extends State<FormsTab> {
     if (occasionLink == null) return;
 
     final List<FormModel> formsForDialog =
-    await DbForms.getAllFormsForOccasionOrUnit();
+        await DbForms.getAllFormsForOccasionOrUnit();
 
     final result = await showDialog<dynamic>(
       context: context,
@@ -104,12 +105,14 @@ class _FormsTabState extends State<FormsTab> {
       );
 
       if (!mounted) return;
-      ToastHelper.Show(context, FormStrings.duplicateSuccess, severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, FormStrings.duplicateSuccess,
+          severity: ToastSeverity.Ok);
       _navigateToFormsHome();
       await loadData();
     } catch (e) {
       if (!mounted) return;
-      ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""), severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, e.toString().replaceFirst("Exception: ", ""),
+          severity: ToastSeverity.NotOk);
     }
   }
 
@@ -143,7 +146,10 @@ class _FormsTabState extends State<FormsTab> {
                 const SizedBox(width: 6),
                 Text(
                   FormStrings.formsTitle,
-                  style: TextStyle(fontSize: 16, color: onAppBarColor, fontWeight: FontWeight.normal),
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: onAppBarColor,
+                      fontWeight: FontWeight.normal),
                 ),
               ],
             ),
@@ -153,7 +159,8 @@ class _FormsTabState extends State<FormsTab> {
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Text(
                 "/",
-                style: TextStyle(fontSize: 14, color: onAppBarColor.withOpacity(0.4)),
+                style: TextStyle(
+                    fontSize: 14, color: onAppBarColor.withOpacity(0.4)),
               ),
             ),
             _buildFormSelector(),
@@ -164,11 +171,13 @@ class _FormsTabState extends State<FormsTab> {
   }
 
   Widget _buildFormSelector() {
-    final onAppBarColor = Theme.of(context).appBarTheme.foregroundColor ?? Colors.white;
+    final onAppBarColor =
+        Theme.of(context).appBarTheme.foregroundColor ?? Colors.white;
     if (_forms.length <= 1) {
       return Text(
         _selectedForm.toString(),
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: onAppBarColor),
+        style: TextStyle(
+            fontSize: 16, fontWeight: FontWeight.bold, color: onAppBarColor),
       );
     }
 
@@ -188,7 +197,8 @@ class _FormsTabState extends State<FormsTab> {
               children: [
                 Text(form.toString()),
                 if (isSelected)
-                  Icon(Icons.check, color: Theme.of(context).colorScheme.primary),
+                  Icon(Icons.check,
+                      color: Theme.of(context).colorScheme.primary),
               ],
             ),
           );
@@ -202,12 +212,16 @@ class _FormsTabState extends State<FormsTab> {
           children: [
             Text(
               _selectedForm.toString(),
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: onAppBarColor),
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                  color: onAppBarColor),
             ),
             const SizedBox(width: 8),
             Transform.scale(
               scaleY: 0.8,
-              child: Icon(Icons.unfold_more_rounded, size: 20, color: onAppBarColor.withOpacity(0.7)),
+              child: Icon(Icons.unfold_more_rounded,
+                  size: 20, color: onAppBarColor.withOpacity(0.7)),
             ),
           ],
         ),
@@ -231,7 +245,7 @@ class _FormsTabState extends State<FormsTab> {
                 crossAxisSpacing: 16,
               ),
               delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                (context, index) {
                   final form = _forms[index];
                   return FormCard(
                     form: form,
@@ -256,9 +270,10 @@ class _FormsTabState extends State<FormsTab> {
         child: Text(
           FormStrings.noFormsForEventPrompt(FormStrings.createNewForm),
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).hintColor
-          ),
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(color: Theme.of(context).hintColor),
         ),
       ),
     );
@@ -283,7 +298,8 @@ class _FormsTabState extends State<FormsTab> {
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(StylesConfig.commonRoundness),
+                  borderRadius:
+                      BorderRadius.circular(StylesConfig.commonRoundness),
                 ),
               ),
             ),
@@ -294,15 +310,15 @@ class _FormsTabState extends State<FormsTab> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _selectedForm != null
-          ? FormTab(
-        key: ValueKey(_selectedForm!.id),
-        formLink: _selectedForm!.link!,
-        onActionCompleted: _handleActionAndRefresh,
-        onDataUpdated: loadData,
-      )
-          : _forms.isEmpty
-          ? _buildEmptyState()
-          : _buildFormsGrid(),
+              ? FormTab(
+                  key: ValueKey(_selectedForm!.id),
+                  formLink: _selectedForm!.link!,
+                  onActionCompleted: _handleActionAndRefresh,
+                  onDataUpdated: loadData,
+                )
+              : _forms.isEmpty
+                  ? _buildEmptyState()
+                  : _buildFormsGrid(),
     );
   }
 }
@@ -323,11 +339,16 @@ class FormCard extends StatelessWidget {
     required this.onCreateCopy,
   });
 
-  Widget _buildStat(BuildContext context, {required IconData icon, required String value, required String tooltip, Color? color}) {
+  Widget _buildStat(BuildContext context,
+      {required IconData icon,
+      required String value,
+      required String tooltip,
+      Color? color}) {
     final theme = Theme.of(context);
     final defaultColor = theme.colorScheme.onSurface.withOpacity(0.7);
     final iconColor = color ?? defaultColor;
-    final statsTextStyle = theme.textTheme.bodySmall?.copyWith(color: defaultColor);
+    final statsTextStyle =
+        theme.textTheme.bodySmall?.copyWith(color: defaultColor);
 
     return Tooltip(
       message: tooltip,
@@ -368,7 +389,8 @@ class FormCard extends StatelessWidget {
             children: [
               PopupMenuButton<String>(
                 elevation: 0,
-                icon: Icon(Icons.more_vert, color: onSurfaceColor.withOpacity(0.7)),
+                icon: Icon(Icons.more_vert,
+                    color: onSurfaceColor.withOpacity(0.7)),
                 onSelected: (value) {
                   if (value == "create_copy") {
                     onCreateCopy();
@@ -405,10 +427,22 @@ class FormCard extends StatelessWidget {
                             spacing: 12.0,
                             runSpacing: 4.0,
                             children: [
-                              _buildStat(context, icon: Icons.chat_bubble, value: form.stats!.total.toString(), tooltip: FormStrings.responses),
-                              _buildStat(context, icon: Icons.check_circle_outline, value: form.stats!.paidOrSent.toString(), tooltip: OrdersStrings.gridPaidOrSent),
-                              _buildStat(context, icon: Icons.shopping_cart_outlined, value: form.stats!.ordered.toString(), tooltip: OrdersStrings.gridOrdered),
-                              _buildStat(context, icon: Icons.cancel_outlined, value: form.stats!.storno.toString(), tooltip: OrdersStrings.gridCancelled),
+                              _buildStat(context,
+                                  icon: Icons.chat_bubble,
+                                  value: form.stats!.total.toString(),
+                                  tooltip: FormStrings.responses),
+                              _buildStat(context,
+                                  icon: Icons.check_circle_outline,
+                                  value: form.stats!.paidOrSent.toString(),
+                                  tooltip: OrdersStrings.gridPaidOrSent),
+                              _buildStat(context,
+                                  icon: Icons.shopping_cart_outlined,
+                                  value: form.stats!.ordered.toString(),
+                                  tooltip: OrdersStrings.gridOrdered),
+                              _buildStat(context,
+                                  icon: Icons.cancel_outlined,
+                                  value: form.stats!.storno.toString(),
+                                  tooltip: OrdersStrings.gridCancelled),
                             ],
                           )
                         ],
@@ -418,7 +452,9 @@ class FormCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          form.isOpen == true ? Icons.check_circle : Icons.cancel,
+                          form.isOpen == true
+                              ? Icons.check_circle
+                              : Icons.cancel,
                           color: form.isOpen == true
                               ? ThemeConfig.greenColor(context)
                               : ThemeConfig.redColor(context),
@@ -426,7 +462,9 @@ class FormCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          form.isOpen == true ? FormStrings.statusOpen : FormStrings.statusClosed,
+                          form.isOpen == true
+                              ? FormStrings.statusOpen
+                              : FormStrings.statusClosed,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: form.isOpen == true
                                 ? ThemeConfig.greenColor(context)

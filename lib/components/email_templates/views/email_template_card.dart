@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/email_templates/email_template_model.dart';
@@ -9,6 +7,7 @@ import 'package:fstapp/components/_shared/common_strings.dart';
 class EmailTemplateCard extends StatelessWidget {
   final EmailTemplateModel template;
   final VoidCallback onEdit;
+
   /// Additional field to show the context title (occasion/unit/organization).
   final String contextTitle;
 

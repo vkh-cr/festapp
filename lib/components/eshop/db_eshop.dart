@@ -22,13 +22,15 @@ class DbEshop {
 
   /// Fetches transactions based on a form link using a Supabase Function.
   static Future<FunctionResponse> fetchTransactions(String formLink) async {
-    return await _supabase.functions.invoke("fetch-transactions", body: {"occasionLink": formLink});
+    return await _supabase.functions
+        .invoke("fetch-transactions", body: {"occasionLink": formLink});
   }
 
-  static Future<FunctionResponse> sendTicketOrderUpdateEmail(int orderId) async {
+  static Future<FunctionResponse> sendTicketOrderUpdateEmail(
+      int orderId) async {
     final body = {
       "code": "TICKET_ORDER_UPDATE",
-      "data": { "orderId": orderId },
+      "data": {"orderId": orderId},
     };
 
     final response = await _supabase.functions.invoke(
@@ -40,17 +42,18 @@ class DbEshop {
   }
 
   static Future<String> getReportForOccasion(String link) async {
-    final response = await _supabase
-        .rpc('get_report_ws', params: {'occasion_link': link});
+    final response =
+        await _supabase.rpc('get_report_ws', params: {'occasion_link': link});
 
-    if(response["code"] == 200){
+    if (response["code"] == 200) {
       return response["data"];
     }
     return "";
   }
 
   /// Retrieves all transactions associated with a specific order ID.
-  static Future<GetTransactionsForOrderResponse?> getTransactionsForOrder(int orderId) async {
+  static Future<GetTransactionsForOrderResponse?> getTransactionsForOrder(
+      int orderId) async {
     final response = await _supabase.rpc(
       'get_transactions_for_order',
       params: {'order_id': orderId},
@@ -65,23 +68,25 @@ class DbEshop {
 
   /// Retrieves all transactions that have the same bank account as the order's payment_info
   /// and have a NULL payment_info field.
-  static Future<List<TransactionModel>?> getTransactionsForOrderAllAvailable(int paymentInfoId) async {
+  static Future<List<TransactionModel>?> getTransactionsForOrderAllAvailable(
+      int paymentInfoId) async {
     final response = await _supabase.rpc(
       'get_transactions_for_order_all_available',
       params: {'payment_info_id': paymentInfoId},
     );
 
     if (response != null) {
-      return List<TransactionModel>.from(response.map((x) => TransactionModel.fromJson(x)));
+      return List<TransactionModel>.from(
+          response.map((x) => TransactionModel.fromJson(x)));
     }
 
     return null;
   }
 
   /// Adds a transaction to payment_info with security checks using RPC.
-  static Future<void> addTransactionToPaymentInfoWithSecurity(BuildContext context,
-      int transactionId, int paymentInfoId) async {
-    try{
+  static Future<void> addTransactionToPaymentInfoWithSecurity(
+      BuildContext context, int transactionId, int paymentInfoId) async {
+    try {
       await _supabase.rpc(
         'add_transaction_to_payment_info_ws',
         params: {
@@ -89,13 +94,14 @@ class DbEshop {
           'p_payment_info_id': paymentInfoId,
         },
       );
-    }catch(e){
+    } catch (e) {
       ToastHelper.Show(context, e.toString());
       rethrow;
     }
   }
 
-  static Future<Map<String, dynamic>> analyzeNewOrderSpots(List<int> spotIds) async {
+  static Future<Map<String, dynamic>> analyzeNewOrderSpots(
+      List<int> spotIds) async {
     final response = await _supabase.rpc(
       'analyze_new_order_spots',
       params: {'p_spot_ids': spotIds},
@@ -103,7 +109,8 @@ class DbEshop {
     return response as Map<String, dynamic>;
   }
 
-  static Future<void> createOrderFromSpots(List<int> spotIds, Map<String, dynamic> inputData) async {
+  static Future<void> createOrderFromSpots(
+      List<int> spotIds, Map<String, dynamic> inputData) async {
     // STEP 1: Call SQL to perform Storno and get order payload
     // We pass the full inputData map (containing email, and potentially name/note)
     final dbResponse = await _supabase.rpc(
@@ -115,7 +122,8 @@ class DbEshop {
     );
 
     if (dbResponse == null || dbResponse['success'] != true) {
-      throw Exception(dbResponse?['message'] ?? 'Database error during order preparation.');
+      throw Exception(
+          dbResponse?['message'] ?? 'Database error during order preparation.');
     }
 
     // Extract the payload prepared by SQL
@@ -168,9 +176,10 @@ class DbEshop {
     }
   }
 
-  static Future<List<ProductModel>?> getProductsForTicketAllAvailable(int ticketId) async {
-    final result = await _supabase
-        .rpc('get_products_for_ticket_all_available', params: {'ticket_id': ticketId});
+  static Future<List<ProductModel>?> getProductsForTicketAllAvailable(
+      int ticketId) async {
+    final result = await _supabase.rpc('get_products_for_ticket_all_available',
+        params: {'ticket_id': ticketId});
     if (result != null && result['code'] == 200) {
       return (result['data'] as List)
           .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
@@ -191,8 +200,10 @@ class DbEshop {
     return null;
   }
 
-  static Future<dynamic> updateProductsForOrder(int ticketId, List<ProductModel> products) {
-    final productsJson = products.map((p) => {'id': p.id, 'price': p.price}).toList();
+  static Future<dynamic> updateProductsForOrder(
+      int ticketId, List<ProductModel> products) {
+    final productsJson =
+        products.map((p) => {'id': p.id, 'price': p.price}).toList();
 
     // Directly return the Future. The calling code will handle success or exceptions.
     return _supabase.rpc(
@@ -204,11 +215,14 @@ class DbEshop {
     );
   }
 
-  static Future<void> updateProductInventoryContexts(int productId, List<ProductInventoryContextModel> contexts) async {
-    final contextsJson = contexts.map((c) => {
-      'inventory_context_id': c.inventoryContextId,
-      'quantity': c.quantity
-    }).toList();
+  static Future<void> updateProductInventoryContexts(
+      int productId, List<ProductInventoryContextModel> contexts) async {
+    final contextsJson = contexts
+        .map((c) => {
+              'inventory_context_id': c.inventoryContextId,
+              'quantity': c.quantity
+            })
+        .toList();
 
     await _supabase.rpc(
       'update_product_inventory_contexts',
@@ -219,7 +233,8 @@ class DbEshop {
     );
   }
 
-  static Future<ProductsEditBundle> getProductsAndTypesForOccasion(String occasionLink) async {
+  static Future<ProductsEditBundle> getProductsAndTypesForOccasion(
+      String occasionLink) async {
     final response = await _supabase.rpc(
       'get_products_and_types_for_edit',
       params: {'occasion_link': occasionLink},
@@ -241,9 +256,8 @@ class DbEshop {
     final productContextLinks = (response['product_inventory_contexts'] as List)
         .map((pc) => ProductInventoryContextModel.fromJson(pc))
         .toList();
-    final forms = (response['forms'] as List)
-        .map((f) => FormModel.fromJson(f))
-        .toList();
+    final forms =
+        (response['forms'] as List).map((f) => FormModel.fromJson(f)).toList();
 
     // Create lookup maps for efficient joins
     final typesMap = {for (var t in types) t.id: t};
@@ -262,7 +276,8 @@ class DbEshop {
     }
 
     // Group inventory links by product ID
-    final productLinksMap = groupBy(productContextLinks, (link) => link.productId);
+    final productLinksMap =
+        groupBy(productContextLinks, (link) => link.productId);
 
     // Join all data to the final product models
     for (var product in products) {
@@ -272,10 +287,8 @@ class DbEshop {
           .toList();
 
       // Populate the formTitles string for each product
-      product.formTitles = product.formIds
-          .map((id) => formsMap[id])
-          .map((f) => f)
-          .join(', ');
+      product.formTitles =
+          product.formIds.map((id) => formsMap[id]).map((f) => f).join(', ');
     }
 
     products.sort((a, b) {
@@ -295,10 +308,11 @@ class DbEshop {
       forms: forms,
     );
   }
+
   static Future<int> updateProduct(ProductModel product) async {
     return await _supabase.rpc(
       'update_product',
-      params: {'p_input': product },
+      params: {'p_input': product},
     );
   }
 
@@ -310,7 +324,8 @@ class DbEshop {
   }
 
   /// Fetches all resources associated with a specific inventory pool ID.
-  static Future<List<ResourceModel>> getResourcesForInventoryPool(int inventoryPoolId) async {
+  static Future<List<ResourceModel>> getResourcesForInventoryPool(
+      int inventoryPoolId) async {
     try {
       final response = await _supabase.rpc(
         'get_resources_for_inventory_pool',
@@ -347,9 +362,10 @@ class GetTransactionsForOrderResponse {
   factory GetTransactionsForOrderResponse.fromJson(Map<String, dynamic> json) {
     // Parse users
     final users = json['users'] != null
-        ? List<UserInfoModel>.from((json['users'] as List).map((x) => UserInfoModel.fromJson(x)))
+        ? List<UserInfoModel>.from(
+            (json['users'] as List).map((x) => UserInfoModel.fromJson(x)))
         : <UserInfoModel>[];
-    
+
     // Create user map
     final userMap = {for (var u in users) u.id: u};
 
@@ -357,7 +373,7 @@ class GetTransactionsForOrderResponse {
         ? List<TransactionModel>.from(
             json['transactions'].map((x) => TransactionModel.fromJson(x)))
         : <TransactionModel>[];
-    
+
     // Link users
     for (var t in transactions) {
       t.createdBy = userMap[t.createdById];
@@ -383,7 +399,9 @@ class OrderHistoryInfo {
 
   factory OrderHistoryInfo.fromJson(Map<String, dynamic> json) {
     return OrderHistoryInfo(
-      latestSentAt: json['latest_sent_at'] != null ? DateTime.parse(json['latest_sent_at']) : null,
+      latestSentAt: json['latest_sent_at'] != null
+          ? DateTime.parse(json['latest_sent_at'])
+          : null,
       isNewerVersionAvailable: json['is_newer_version_available'],
     );
   }

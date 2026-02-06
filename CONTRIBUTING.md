@@ -46,17 +46,82 @@ If a test fails saying "function does not exist":
 1. Check if local migrations are pushed: `supabase db push`
 2. Run schema check tests if available.
 
+### D. Testing via Supabase MCP (Recommended for Agents/No-Docker)
+
+1. **Run SQL/RPCs**: Use `mcp_supabase-mcp-server_execute_sql` or
+   `apply_migration`.
+2. **Run Tests**:
+   - Read the content of a test file (e.g.,
+     `database/tests/bank_account_sync_test.sql`).
+   - Execute that content using `mcp_supabase-mcp-server_execute_sql`.
+   - _Note_: This runs tests in the target environment (local or remote). Ensure
+     you are targeting the correct Project ID.
+
+### E. Database Deployment via MCP (Agent Workflow)
+
+When you need to deploy or update a function remotely without a full deployment:
+
+1. **Identify Target**: Run `mcp_supabase-mcp-server_list_projects` to find the
+   active project ID (e.g., `festapp` / `kjdpmixlnhntmxjedpxh`).
+2. **Read Source**: Always read the **local file** first (e.g.,
+   `view_file("database/functions/...")`) to get the latest source code.
+3. **Execute**: Use `mcp_supabase-mcp-server_execute_sql` with the `project_id`
+   and the file content as the `query`.
+   - _Tip_: This bypasses the need for local processing or git pushes if you are
+     just Hot-Fixing or validating logic.
+
+### F. Deno Edge Function Deployment via MCP
+
+To update Edge Functions (TypeScript) remotely:
+
+1. **Upload Files**: Use `mcp_supabase-mcp-server_deploy_edge_function`.
+   - **`project_id`**: Target project (e.g., `kjdpmixlnhntmxjedpxh`).
+   - **`name`**: Function name (folder name).
+   - **`entrypoint_path`**: Path to main file (e.g., `index.ts`).
+   - **`files`**: CONTENT of the files. You must read them first!
+2. **Process**:
+   - `list_dir` the function directory.
+   - `view_file` relevant files (`index.ts`, `deno.json`).
+   - Call `deploy_edge_function` passing the file contents in the `files` array
+     argument.
+
 ## 2. Secrets & Configuration
 
-- **Local**: Keys in `.env.local` (NOT committed).
+- **Local**: Keys in `.env.local` (NOT committed). This file is automatically
+  loaded by local scripts and Next.js. **Put all secrets here.**
 - **Web Client**: Public keys in `web_client/src/app_config.js`.
 - **Database**: `DATABASE_URL` required for test runner.
 
-## 3. Commit Workflow
+## 3. Security Audit (Before Commit)
+
+**CRITICAL**: Every time you write a new PostgreSQL function (RPC), especially
+with `SECURITY DEFINER`, you MUST verify:
+
+1. **Search Path**: Always include `SET search_path = public, eshop, extensions`
+   (or relevant schemas).
+   - _Why?_ Prevents search_path hijacking where malicious users create objects
+     in public schema.
+2. **Permissions Check**: If the function modifies data or returns sensitive
+   info, it MUST check permissions.
+   - Example: `PERFORM public.check_is_admin_for_bank_account(p_account_id);`
+   - _Why?_ `SECURITY DEFINER` runs with superuser-like (or owner) privileges,
+     bypassing RLS. explicit checks are mandatory.
+3. **Input sanitization**: Avoid `EXECUTE` with raw strings. Use `format()` or
+   parameter binding.
+
+## 4. Commit Workflow
 
 Follow this checklist **before** every commit:
 
-### Step 1: Cleanup and Hygiene
+### Step 1: Configuration Check
+
+Ensure your local configuration is applied to the code:
+
+```bash
+./automation/apply_config.sh
+```
+
+### Step 2: Cleanup and Hygiene
 
 Ensure the codebase is clean:
 
@@ -65,17 +130,29 @@ Ensure the codebase is clean:
 - **Remove Dead Code**: Delete unused files/comments.
 - **Remove Debug Logs**: No `console.log` in production code.
 
-### Step 2: Verify Integrity
+### Step 2.5: Dealing with Complex Refactors (Checklist Strategy)
 
-Run the full test suite.
+If you are dealing with a complex issue (e.g., data leaks, wide-spread API
+changes):
+
+1. **Search**: Use `grep` or `find_by_name` to identify all affected files.
+   - Example: `grep -l "CREATE OR REPLACE FUNCTION" database/tests/**/*.sql`
+2. **List**: Create a checklist in `task.md` or a temporary artifact.
+3. **Execute**: systematically go through each file in the list.
+4. **Mark and Verify**: Check off each item as you fix it. Verify after each
+   batch.
+
+### Step 3: Verify Integrity
+
+Run the full test suite (Web, DB, Integration, and Edge Functions).
 
 ```bash
-node web_client/scripts/run_db_tests.js database/tests
+./automation/test_all.sh
 ```
 
 > All tests must PASS.
 
-### Step 3: Synchronize Translations
+### Step 4: Synchronize Translations
 
 If you modified `en.json` or `cs.json`:
 
@@ -88,12 +165,20 @@ If you modified `en.json` or `cs.json`:
    node web_client/scripts/reorder_cs_like_en.js
    ```
 
-### Step 4: Stage and Commit
+### Step 5: Stage and Commit
 
 Review status, stage, and commit.
+
+> **AGENT RULE**: **NEVER** automatically commit changes. You MUST Always stop
+> after `git add` and ask the user for confirmation before committing.
+>
+> 1. Run `git add .` (if appropriate).
+> 2. Show `git status`.
+> 3. **STOP** and ask "Ready to commit?"
 
 ```bash
 git status
 git add .
+# User must approve the following:
 git commit -m "feat: description of changes"
 ```

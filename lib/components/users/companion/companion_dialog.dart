@@ -42,8 +42,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
         _nameController.text.isNotEmpty) {
       await DbCompanions.create(_nameController.text);
       _nameController.clear();
-      _companions =
-      await DbCompanions.getAllCompanions();
+      _companions = await DbCompanions.getAllCompanions();
       if (mounted) setState(() {});
     }
   }
@@ -92,7 +91,9 @@ class _CompanionDialogState extends State<CompanionDialog> {
             children: [
               const Text(
                 "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.",
-              ).tr(namedArgs: {"max_companions": FeatureService.getMaxCompanions().toString()}),
+              ).tr(namedArgs: {
+                "max_companions": FeatureService.getMaxCompanions().toString()
+              }),
               const SizedBox(height: 20),
               Visibility(
                 visible: _companions.length < widget.maxCompanions,
@@ -101,7 +102,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
                     TextField(
                       controller: _nameController,
                       decoration:
-                      InputDecoration(labelText: "Companion Name".tr()),
+                          InputDecoration(labelText: "Companion Name".tr()),
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(30),
                       ],
@@ -125,17 +126,21 @@ class _CompanionDialogState extends State<CompanionDialog> {
                   itemBuilder: (context, index) {
                     final companion = _companions[index];
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 8.0),
                       child: Row(
                         children: [
-                          if (companion.isSignedIn(widget.eventId)) const Icon(Icons.check_circle),
+                          if (companion.isSignedIn(widget.eventId))
+                            const Icon(Icons.check_circle),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(companion.name),
                           ),
                           if (!companion.isSignedIn(widget.eventId))
                             ElevatedButton(
-                              onPressed: currentCanSignIn ? () => _signInCompanion(companion) : null,
+                              onPressed: currentCanSignIn
+                                  ? () => _signInCompanion(companion)
+                                  : null,
                               child: Text(UserStrings.signIn),
                             ),
                           if (companion.isSignedIn(widget.eventId))

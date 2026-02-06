@@ -10,26 +10,25 @@ class EventsPanel extends StatelessWidget {
   final ActivityTimelineController controller;
 
   const EventsPanel({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final normalizedFilter =
-    Utilities.removeDiacritics(controller.eventFilter.toLowerCase());
+        Utilities.removeDiacritics(controller.eventFilter.toLowerCase());
     final filtered = controller.allEvents
-        .where((e) => Utilities.removeDiacritics(
-        (e.title ?? "").toLowerCase())
-        .contains(normalizedFilter))
+        .where((e) => Utilities.removeDiacritics((e.title ?? "").toLowerCase())
+            .contains(normalizedFilter))
         .toList()
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
     final hintColor = controller.hintColor;
     final textColor = controller.textColor;
     final chipBgColor =
-    controller.isDark ? Colors.orange[800] : Colors.orange[100];
+        controller.isDark ? Colors.orange[800] : Colors.orange[100];
     final chipTextColor =
-    controller.isDark ? Colors.white.withOpacity(0.9) : Colors.black87;
+        controller.isDark ? Colors.white.withOpacity(0.9) : Colors.black87;
 
     return Container(
       padding: const EdgeInsets.all(2),
@@ -49,7 +48,7 @@ class EventsPanel extends StatelessWidget {
                 child: Icon(Icons.search, size: 14, color: hintColor),
               ),
               prefixIconConstraints:
-              const BoxConstraints(minWidth: 24, minHeight: 24),
+                  const BoxConstraints(minWidth: 24, minHeight: 24),
               contentPadding: const EdgeInsets.symmetric(vertical: 6),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -70,7 +69,7 @@ class EventsPanel extends StatelessWidget {
                 // Format the start time to show weekday and time, e.g., "Sat 14:30"
                 final locale = Localizations.localeOf(context).toString();
                 final formattedTime =
-                DateFormat('E HH:mm', locale).format(e.startTime);
+                    DateFormat('E HH:mm', locale).format(e.startTime);
 
                 return Draggable<ActivityEventModel>(
                   data: e,
@@ -89,7 +88,8 @@ class EventsPanel extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            e.title ?? ActivitiesComponentStrings.textUnnamedEvent,
+                            e.title ??
+                                ActivitiesComponentStrings.textUnnamedEvent,
                             style: TextStyle(
                                 fontSize: 12,
                                 color: chipTextColor,
@@ -109,7 +109,7 @@ class EventsPanel extends StatelessWidget {
                   child: Chip(
                     backgroundColor: chipBgColor,
                     padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
                     label: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [

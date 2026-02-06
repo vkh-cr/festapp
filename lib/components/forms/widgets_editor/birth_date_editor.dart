@@ -10,7 +10,8 @@ import 'package:fstapp/components/html/html_editor_page.dart';
 import 'form_message_widget.dart';
 
 class BirthDateEditor {
-  static Widget buildBirthDateReadOnly(BuildContext context, FormFieldModel field) {
+  static Widget buildBirthDateReadOnly(
+      BuildContext context, FormFieldModel field) {
     final data = field.data ?? {};
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -18,18 +19,25 @@ class BirthDateEditor {
     // Configuration Data
     final int? minAgeInt = data[BirthDateFieldHolder.metaMinYear] is int
         ? data[BirthDateFieldHolder.metaMinYear] as int
-        : int.tryParse(data[BirthDateFieldHolder.metaMinYear]?.toString() ?? "");
+        : int.tryParse(
+            data[BirthDateFieldHolder.metaMinYear]?.toString() ?? "");
     final int? maxAgeInt = data[BirthDateFieldHolder.metaMaxYear] is int
         ? data[BirthDateFieldHolder.metaMaxYear] as int
-        : int.tryParse(data[BirthDateFieldHolder.metaMaxYear]?.toString() ?? "");
+        : int.tryParse(
+            data[BirthDateFieldHolder.metaMaxYear]?.toString() ?? "");
     final bool showAgeLimits = (minAgeInt ?? 0) > 0 || (maxAgeInt ?? 0) > 0;
-    final bool isStrict = data[BirthDateFieldHolder.metaIsHard] as bool? ?? false;
-    final String customMessage = data[BirthDateFieldHolder.metaMessage]?.toString() ?? "";
+    final bool isStrict =
+        data[BirthDateFieldHolder.metaIsHard] as bool? ?? false;
+    final String customMessage =
+        data[BirthDateFieldHolder.metaMessage]?.toString() ?? "";
     final bool hasCustomMessage = customMessage.trim().isNotEmpty;
 
     // Custom adaptive colors for a subtle look that works in both light and dark themes.
-    final Color fillColor = isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.035);
-    final Color borderColor = isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.08);
+    final Color fillColor = isDark
+        ? Colors.white.withOpacity(0.05)
+        : Colors.black.withOpacity(0.035);
+    final Color borderColor =
+        isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.08);
     final Color contentColor = theme.colorScheme.onSurface.withOpacity(0.7);
 
     return Column(
@@ -41,8 +49,7 @@ class BirthDateEditor {
           decoration: BoxDecoration(
               color: fillColor,
               borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: borderColor, width: 1.0)
-          ),
+              border: Border.all(color: borderColor, width: 1.0)),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -73,8 +80,10 @@ class BirthDateEditor {
             spacing: 16.0,
             runSpacing: 2.0,
             children: [
-              Text("${'Min Age'.tr()}: $minAgeInt", style: theme.textTheme.bodySmall),
-              Text("${'Max Age'.tr()}: $maxAgeInt", style: theme.textTheme.bodySmall),
+              Text("${'Min Age'.tr()}: $minAgeInt",
+                  style: theme.textTheme.bodySmall),
+              Text("${'Max Age'.tr()}: $maxAgeInt",
+                  style: theme.textTheme.bodySmall),
             ],
           ),
           const SizedBox(height: 10.0),
@@ -86,7 +95,8 @@ class BirthDateEditor {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.lock_outline, size: 15, color: theme.colorScheme.primary),
+                  Icon(Icons.lock_outline,
+                      size: 15, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text.rich(
@@ -94,7 +104,9 @@ class BirthDateEditor {
                         TextSpan(text: "${'Validation Mode'.tr()}: "),
                         TextSpan(
                           text: "Strict".tr(),
-                          style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary),
                         ),
                       ]),
                       style: theme.textTheme.bodySmall,
@@ -108,26 +120,32 @@ class BirthDateEditor {
           if (!isStrict && hasCustomMessage)
             FormMessageWidget(
               message: customMessage,
-              defaultMessage: "", // Default is not needed as we only show if a custom one exists.
+              defaultMessage:
+                  "", // Default is not needed as we only show if a custom one exists.
             ),
         ],
       ],
     );
   }
 
-  static Widget buildBirthDateEditor(BuildContext context, FormFieldModel field, int? occasionId) {
+  static Widget buildBirthDateEditor(
+      BuildContext context, FormFieldModel field, int? occasionId) {
     final TextEditingController minAgeController = TextEditingController(
-      text: field.data != null && field.data![BirthDateFieldHolder.metaMinYear] != null
+      text: field.data != null &&
+              field.data![BirthDateFieldHolder.metaMinYear] != null
           ? field.data![BirthDateFieldHolder.metaMinYear].toString()
           : "",
     );
     final TextEditingController maxAgeController = TextEditingController(
-      text: field.data != null && field.data![BirthDateFieldHolder.metaMaxYear] != null
+      text: field.data != null &&
+              field.data![BirthDateFieldHolder.metaMaxYear] != null
           ? field.data![BirthDateFieldHolder.metaMaxYear].toString()
           : "",
     );
-    bool isStrict = field.data != null && field.data![BirthDateFieldHolder.metaIsHard] == true;
-    String currentMessage = field.data != null && field.data![BirthDateFieldHolder.metaMessage] != null
+    bool isStrict = field.data != null &&
+        field.data![BirthDateFieldHolder.metaIsHard] == true;
+    String currentMessage = field.data != null &&
+            field.data![BirthDateFieldHolder.metaMessage] != null
         ? field.data![BirthDateFieldHolder.metaMessage].toString()
         : "";
 
@@ -136,8 +154,10 @@ class BirthDateEditor {
 
     // Define a helper function to compute the default warning.
     String getDefaultWarning() {
-      final minAge = field.data?[BirthDateFieldHolder.metaMinYear]?.toString() ?? "";
-      final maxAge = field.data?[BirthDateFieldHolder.metaMaxYear]?.toString() ?? "";
+      final minAge =
+          field.data?[BirthDateFieldHolder.metaMinYear]?.toString() ?? "";
+      final maxAge =
+          field.data?[BirthDateFieldHolder.metaMaxYear]?.toString() ?? "";
       return "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
           .tr(namedArgs: {"minAge": minAge, "maxAge": maxAge});
     }
@@ -158,7 +178,8 @@ class BirthDateEditor {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onChanged: (value) {
                 field.data ??= {};
-                field.data![BirthDateFieldHolder.metaMinYear] = int.tryParse(value) ?? value;
+                field.data![BirthDateFieldHolder.metaMinYear] =
+                    int.tryParse(value) ?? value;
                 final currentMax = int.tryParse(maxAgeController.text) ?? 0;
                 final currentMin = int.tryParse(value) ?? 0;
                 if (currentMax > 0 && currentMax < currentMin) {
@@ -217,13 +238,13 @@ class BirthDateEditor {
                     context,
                     HtmlEditorRoute(
                         content: {HtmlEditorPage.parContent: currentMessage},
-                        occasionId: occasionId
-                    ),
+                        occasionId: occasionId),
                   );
                   if (result != null) {
                     currentMessage = result as String;
                     field.data ??= {};
-                    field.data![BirthDateFieldHolder.metaMessage] = currentMessage;
+                    field.data![BirthDateFieldHolder.metaMessage] =
+                        currentMessage;
                     setState(() {});
                   }
                 },

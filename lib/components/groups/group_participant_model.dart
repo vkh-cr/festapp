@@ -21,16 +21,16 @@ class GroupParticipantModel {
   }
 
   Map<String, dynamic> toJson() => {
-    Tb.user_info.table: userInfo?.toJson(),
-    Tb.user_groups.is_admin: isAdmin ?? false,
-  };
+        Tb.user_info.table: userInfo?.toJson(),
+        Tb.user_groups.is_admin: isAdmin ?? false,
+      };
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is GroupParticipantModel &&
-              runtimeType == other.runtimeType &&
-              userInfo == other.userInfo;
+      other is GroupParticipantModel &&
+          runtimeType == other.runtimeType &&
+          userInfo == other.userInfo;
 
   @override
   int get hashCode => userInfo.hashCode;

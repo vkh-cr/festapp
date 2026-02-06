@@ -9,6 +9,9 @@ their actions against these guidelines.
   standards, SRP, meaningful naming._
 - **[Systematic Debugging](skills/skills/systematic-debugging/SKILL.md)**
   _Focus: Root cause analysis before fixing. Mandatory for complex bugs._
+  - See also:
+    **[Edge Function Debugging](skills/skills/systematic-debugging/edge-function-debugging.md)**
+    **[Database RPC Debugging](skills/skills/systematic-debugging/database-rpc-debugging.md)**
 
 ## Architecture & Data
 
@@ -38,3 +41,5 @@ their actions against these guidelines.
 
 - **[Project Workflows](skills/skills/project-workflows/SKILL.md)** _Focus:
   Festapp-specific testing, committing, and migration procedures._
+- **[Bank Integration](skills/skills/bank-integration/SKILL.md)** _Focus: Email
+  parsing, deduplication strategy, and strict pairing logic._

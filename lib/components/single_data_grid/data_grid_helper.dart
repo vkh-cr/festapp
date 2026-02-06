@@ -17,16 +17,16 @@ import 'package:trina_grid/trina_grid.dart';
 import '../map/place_model.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
-class DataGridHelper
-{
+class DataGridHelper {
   static Widget buildHtmlEditorButton({
     required BuildContext context,
     required String field,
     required TrinaColumnRendererContext rendererContext,
-    required Future<String?> Function() loadContent, // Used for both editor and potentially tooltip
-    bool showTooltipWithContent = true, // Flag to enable tooltip
+    required Future<String?> Function()
+        loadContent, // Used for both editor and potentially tooltip
+    bool showTooltipWithContent = true,
     int? occasionId,
-    String? title, // <<< New voluntary parameter for the tooltip title
+    String? title,
   }) {
     String? textToEdit = rendererContext.row.cells[field]?.value as String?;
 
@@ -48,14 +48,17 @@ class DataGridHelper
           HtmlEditorPage.parLoad: loadContent,
         };
 
-        RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param, occasionId: occasionId)).then((value) async {
+        RouterService.navigatePageInfo(context,
+                HtmlEditorRoute(content: param, occasionId: occasionId))
+            .then((value) async {
           if (value != null) {
             var newText = value as String;
             // Compare with the value that was in the cell when edit was initiated
             if (newText != textToEdit) {
               rendererContext.row.cells[field]?.value = newText;
               var cell = rendererContext.row.cells[field]!;
-              rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
+              rendererContext.stateManager
+                  .changeCellValue(cell, cell.value, force: true);
             }
           }
         });
@@ -65,19 +68,23 @@ class DataGridHelper
 
     if (showTooltipWithContent) {
       final tooltipTheme = TooltipTheme.of(context);
-      final effectiveDecoration = tooltipTheme.decoration ?? BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[700] : Colors.white,
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-        border: Border.all(color: Colors.grey.shade400, width: 0.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          )
-        ],
-      );
-      final baseTextStyle = tooltipTheme.textStyle ?? DefaultTextStyle.of(context).style;
+      final effectiveDecoration = tooltipTheme.decoration ??
+          BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[700]
+                : Colors.white,
+            borderRadius: const BorderRadius.all(Radius.circular(4)),
+            border: Border.all(color: Colors.grey.shade400, width: 0.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              )
+            ],
+          );
+      final baseTextStyle =
+          tooltipTheme.textStyle ?? DefaultTextStyle.of(context).style;
       final effectiveTextStyle = baseTextStyle.copyWith(fontSize: 14);
 
       return Tooltip(
@@ -100,7 +107,8 @@ class DataGridHelper
                     title,
                     style: effectiveTextStyle.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: (effectiveTextStyle.fontSize ?? 14.0) + 2, // Slightly larger for title
+                      fontSize: (effectiveTextStyle.fontSize ?? 14.0) +
+                          2, // Slightly larger for title
                     ),
                     textAlign: TextAlign.start,
                   ),
@@ -109,13 +117,16 @@ class DataGridHelper
 
               Widget mainContentArea;
               if (snapshot.connectionState == ConnectionState.waiting) {
-                mainContentArea = const Center(child: CircularProgressIndicator(strokeWidth: 2));
-              } else if (snapshot.hasError || HtmlHelper.isHtmlEmptyOrNull(snapshot.data)) {
+                mainContentArea = const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2));
+              } else if (snapshot.hasError ||
+                  HtmlHelper.isHtmlEmptyOrNull(snapshot.data)) {
                 mainContentArea = Center(
                   child: Icon(
                     Icons.text_snippet_outlined,
                     size: 22,
-                    color: (effectiveTextStyle.color ?? Colors.grey).withOpacity(0.5),
+                    color: (effectiveTextStyle.color ?? Colors.grey)
+                        .withOpacity(0.5),
                   ),
                 );
               } else {
@@ -130,15 +141,21 @@ class DataGridHelper
               }
 
               return Container(
-                padding: const EdgeInsets.all(10.0), // Overall padding for the tooltip content
-                constraints: const BoxConstraints(maxWidth: 450, maxHeight: 300),
+                padding: const EdgeInsets.all(
+                    10.0), // Overall padding for the tooltip content
+                constraints:
+                    const BoxConstraints(maxWidth: 450, maxHeight: 300),
                 decoration: effectiveDecoration,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch, // Make title stretch if it's multi-line
-                  mainAxisSize: MainAxisSize.min, // Let column be as tall as needed, up to constraints
+                  crossAxisAlignment: CrossAxisAlignment
+                      .stretch, // Make title stretch if it's multi-line
+                  mainAxisSize: MainAxisSize
+                      .min, // Let column be as tall as needed, up to constraints
                   children: [
                     if (titleWidget != null) titleWidget,
-                    Expanded(child: mainContentArea), // Main content takes remaining space
+                    Expanded(
+                        child:
+                            mainContentArea), // Main content takes remaining space
                   ],
                 ),
               );
@@ -174,17 +191,16 @@ class DataGridHelper
 
   static String getValueFromFormatted(dynamic value) {
     final startIndex = value.indexOf(":");
-    if(startIndex == -1)
-    {
+    if (startIndex == -1) {
       return value;
     }
-    var result = value.substring(startIndex+1);
+    var result = value.substring(startIndex + 1);
     return result;
   }
 
-  static String returnQuestionMarkOnInvalid(dynamic value, List<String> allValues) {
-    if(!allValues.contains(value))
-    {
+  static String returnQuestionMarkOnInvalid(
+      dynamic value, List<String> allValues) {
+    if (!allValues.contains(value)) {
       return "???";
     }
     return UserInfoModel.sexToLocale(value);
@@ -192,8 +208,7 @@ class DataGridHelper
 
   static int? getIdFromFormatted(String value) {
     final startIndex = value.indexOf(":");
-    if(startIndex == -1)
-    {
+    if (startIndex == -1) {
       return null;
     }
     var result = value.substring(0, startIndex);
@@ -201,19 +216,25 @@ class DataGridHelper
     return res;
   }
 
-  static Checkbox checkBoxRenderer(TrinaColumnRendererContext rendererContext, String idString, [bool Function()? isEnabled]) {
+  static Checkbox checkBoxRenderer(
+      TrinaColumnRendererContext rendererContext, String idString,
+      [bool Function()? isEnabled]) {
     var value = rendererContext.cell.value == "true" ? true : false;
     return Checkbox(
       value: value,
-      onChanged: isEnabled != null && isEnabled() == false ? null : (bool? value) {
-        var cell = rendererContext.row.cells[idString]!;
-        rendererContext.stateManager.changeCellValue(cell, value.toString(), force: true);
-        rendererContext.cell.value = value.toString();
-        },
-    );}
+      onChanged: isEnabled != null && isEnabled() == false
+          ? null
+          : (bool? value) {
+              var cell = rendererContext.row.cells[idString]!;
+              rendererContext.stateManager
+                  .changeCellValue(cell, value.toString(), force: true);
+              rendererContext.cell.value = value.toString();
+            },
+    );
+  }
 
-  static Widget foodCheckBoxRenderer(
-      rendererContext, String idString, [bool Function()? isEnabled]) {
+  static Widget foodCheckBoxRenderer(rendererContext, String idString,
+      [bool Function()? isEnabled]) {
     // Get the current state (default to "none" if the value is null or invalid)
     String currentState = rendererContext.cell.value ?? DbOccasions.serviceNone;
 
@@ -224,7 +245,8 @@ class DataGridHelper
       currentState: currentState,
       onStateChanged: (String newState) {
         var cell = rendererContext.row.cells[idString]!;
-        rendererContext.stateManager.changeCellValue(cell, newState, force: true);
+        rendererContext.stateManager
+            .changeCellValue(cell, newState, force: true);
         rendererContext.cell.value = newState;
         rendererContext.stateManager.notifyListeners();
       },
@@ -232,15 +254,20 @@ class DataGridHelper
     );
   }
 
-  static Widget backgroundFromText(rendererContext, Color Function(String) getBackground, [Function(String)? processText]) {
+  static Widget backgroundFromText(
+      rendererContext, Color Function(String) getBackground,
+      [Function(String)? processText]) {
     String value = rendererContext.cell.value;
     String textValue = processText?.call(value);
     return Container(
-      color: getBackground(value),
-      child: Center(child: Text(textValue)));
+        color: getBackground(value), child: Center(child: Text(textValue)));
   }
 
-  static Widget orderState(BuildContext context, TrinaColumnRendererContext rendererContext, Color Function(String) getBackground, [Function(String)? processText]) {
+  static Widget orderState(
+      BuildContext context,
+      TrinaColumnRendererContext rendererContext,
+      Color Function(String) getBackground,
+      [Function(String)? processText]) {
     String value = rendererContext.cell.value;
     String firstPart = value.split(";")[0];
     String textValue = processText?.call(value) ?? value;
@@ -276,7 +303,10 @@ class DataGridHelper
     );
   }
 
-  static Widget orderStateRenderer(BuildContext context, TrinaColumnRendererContext rendererContext, Color Function(String) getBackground) {
+  static Widget orderStateRenderer(
+      BuildContext context,
+      TrinaColumnRendererContext rendererContext,
+      Color Function(String) getBackground) {
     String value = rendererContext.cell.value;
 
     // A helper to create a single colored state tag
@@ -319,18 +349,22 @@ class DataGridHelper
     else {
       return Container(
         color: getBackground(value.split(";").first),
-        child: Center(child: Text(OrderModel.statesDataGridToUpper(value.split(";").last))),
+        child: Center(
+            child:
+                Text(OrderModel.statesDataGridToUpper(value.split(";").last))),
       );
     }
   }
 
-  static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
+  static Widget mapIconRenderer(
+      BuildContext context, rendererContext, List<IconModel> icons) {
     int? value = rendererContext.cell.value;
     return iconToRow(context, value, icons);
   }
 
-  static Widget iconToRow(BuildContext context, int? id, List<IconModel> icons) {
-    var icon = icons.firstWhereOrNull((t)=>t.id == id);
+  static Widget iconToRow(
+      BuildContext context, int? id, List<IconModel> icons) {
+    var icon = icons.firstWhereOrNull((t) => t.id == id);
 
     if (icon != null) {
       var svgIcon = SizedBox(
@@ -338,7 +372,8 @@ class DataGridHelper
         height: 20,
         child: SvgPicture.string(
           icon.data!,
-          colorFilter: ColorFilter.mode(ThemeConfig.blackColor(context), BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(
+              ThemeConfig.blackColor(context), BlendMode.srcIn),
         ),
       );
 
@@ -355,17 +390,20 @@ class DataGridHelper
   }
 
   static Widget idRenderer(rendererContext) {
-    var value = rendererContext.cell.value == -1 ? "" : rendererContext.cell.value.toString();
+    var value = rendererContext.cell.value == -1
+        ? ""
+        : rendererContext.cell.value.toString();
     return Text(value);
   }
 
-  static TrinaGridLocaleText getPlutoLocaleFromLangCode(String langCode)
-  {
-    switch(langCode)
-    {
-      case "cs": return const TrinaGridLocaleText.czech();
-      case "de": return const TrinaGridLocaleText.german();
-      case "sk": return const TrinaGridLocaleText(
+  static TrinaGridLocaleText getPlutoLocaleFromLangCode(String langCode) {
+    switch (langCode) {
+      case "cs":
+        return const TrinaGridLocaleText.czech();
+      case "de":
+        return const TrinaGridLocaleText.german();
+      case "sk":
+        return const TrinaGridLocaleText(
           // Column menu
           unfreezeColumn: 'Odomknúť stĺpec',
           freezeColumnToStart: 'Zmraziť stĺpec na začiatok',
@@ -403,87 +441,89 @@ class DataGridHelper
           minute: 'Minúta',
           // Common
           loadingText: 'Načíta sa',
-      );
-      case "pl": return const TrinaGridLocaleText(
-        // Column menu
-        unfreezeColumn: 'Odblokuj kolumnę',
-        freezeColumnToStart: 'Zamroź kolumnę na początku',
-        freezeColumnToEnd: 'Zamroź kolumnę na końcu',
-        autoFitColumn: 'Dopasuj kolumnę automatycznie',
-        hideColumn: 'Ukryj kolumnę',
-        setColumns: 'Ustaw kolumny',
-        setFilter: 'Ustaw filtr',
-        resetFilter: 'Resetuj filtr',
-        // SetColumns popup
-        setColumnsTitle: 'Nazwa kolumny',
-        // Filter popup
-        filterColumn: 'Kolumna',
-        filterType: 'Typ',
-        filterValue: 'Wartość',
-        filterAllColumns: 'Wszystkie kolumny',
-        filterContains: 'Zawiera',
-        filterEquals: 'Równa się',
-        filterStartsWith: 'Zaczyna się od',
-        filterEndsWith: 'Kończy się na',
-        filterGreaterThan: 'Większa niż',
-        filterGreaterThanOrEqualTo: 'Większa lub równa',
-        filterLessThan: 'Mniejsza niż',
-        filterLessThanOrEqualTo: 'Mniejsza lub równa',
-        // Date popup
-        sunday: 'Ni',
-        monday: 'Po',
-        tuesday: 'Wt',
-        wednesday: 'Śr',
-        thursday: 'Cz',
-        friday: 'Pi',
-        saturday: 'So',
-        // Time column popup
-        hour: 'Godzina',
-        minute: 'Minuta',
-        // Common
-        loadingText: 'Ładowanie',
-      );
-      case "uk": return const TrinaGridLocaleText(
-        unfreezeColumn: 'Розблокувати стовпець',
-        freezeColumnToStart: 'Заморозити стовпець на початок',
-        freezeColumnToEnd: 'Заморозити стовпець на кінець',
-        autoFitColumn: 'Автоматично підлаштувати стовпець',
-        hideColumn: 'Сховати стовпець',
-        setColumns: 'Налаштувати стовпці',
-        setFilter: 'Налаштувати фільтр',
-        resetFilter: 'Скинути фільтр',
-        setColumnsTitle: 'Назва стовпця',
-        filterColumn: 'Стовпець',
-        filterType: 'Тип',
-        filterValue: 'Значення',
-        filterAllColumns: 'Всі стовпці',
-        filterContains: 'Містить',
-        filterEquals: 'Дорівнює',
-        filterStartsWith: 'Починається з',
-        filterEndsWith: 'Закінчується на',
-        filterGreaterThan: 'Більше ніж',
-        filterGreaterThanOrEqualTo: 'Більше або дорівнює',
-        filterLessThan: 'Менше ніж',
-        filterLessThanOrEqualTo: 'Менше або дорівнює',
-        sunday: 'Нд',
-        monday: 'Пн',
-        tuesday: 'Вт',
-        wednesday: 'Ср',
-        thursday: 'Чт',
-        friday: 'Пт',
-        saturday: 'Сб',
-        hour: 'Година',
-        minute: 'Хвилина',
-        loadingText: 'Завантажується',
-      );
+        );
+      case "pl":
+        return const TrinaGridLocaleText(
+          // Column menu
+          unfreezeColumn: 'Odblokuj kolumnę',
+          freezeColumnToStart: 'Zamroź kolumnę na początku',
+          freezeColumnToEnd: 'Zamroź kolumnę na końcu',
+          autoFitColumn: 'Dopasuj kolumnę automatycznie',
+          hideColumn: 'Ukryj kolumnę',
+          setColumns: 'Ustaw kolumny',
+          setFilter: 'Ustaw filtr',
+          resetFilter: 'Resetuj filtr',
+          // SetColumns popup
+          setColumnsTitle: 'Nazwa kolumny',
+          // Filter popup
+          filterColumn: 'Kolumna',
+          filterType: 'Typ',
+          filterValue: 'Wartość',
+          filterAllColumns: 'Wszystkie kolumny',
+          filterContains: 'Zawiera',
+          filterEquals: 'Równa się',
+          filterStartsWith: 'Zaczyna się od',
+          filterEndsWith: 'Kończy się na',
+          filterGreaterThan: 'Większa niż',
+          filterGreaterThanOrEqualTo: 'Większa lub równa',
+          filterLessThan: 'Mniejsza niż',
+          filterLessThanOrEqualTo: 'Mniejsza lub równa',
+          // Date popup
+          sunday: 'Ni',
+          monday: 'Po',
+          tuesday: 'Wt',
+          wednesday: 'Śr',
+          thursday: 'Cz',
+          friday: 'Pi',
+          saturday: 'So',
+          // Time column popup
+          hour: 'Godzina',
+          minute: 'Minuta',
+          // Common
+          loadingText: 'Ładowanie',
+        );
+      case "uk":
+        return const TrinaGridLocaleText(
+          unfreezeColumn: 'Розблокувати стовпець',
+          freezeColumnToStart: 'Заморозити стовпець на початок',
+          freezeColumnToEnd: 'Заморозити стовпець на кінець',
+          autoFitColumn: 'Автоматично підлаштувати стовпець',
+          hideColumn: 'Сховати стовпець',
+          setColumns: 'Налаштувати стовпці',
+          setFilter: 'Налаштувати фільтр',
+          resetFilter: 'Скинути фільтр',
+          setColumnsTitle: 'Назва стовпця',
+          filterColumn: 'Стовпець',
+          filterType: 'Тип',
+          filterValue: 'Значення',
+          filterAllColumns: 'Всі стовпці',
+          filterContains: 'Містить',
+          filterEquals: 'Дорівнює',
+          filterStartsWith: 'Починається з',
+          filterEndsWith: 'Закінчується на',
+          filterGreaterThan: 'Більше ніж',
+          filterGreaterThanOrEqualTo: 'Більше або дорівнює',
+          filterLessThan: 'Менше ніж',
+          filterLessThanOrEqualTo: 'Менше або дорівнює',
+          sunday: 'Нд',
+          monday: 'Пн',
+          tuesday: 'Вт',
+          wednesday: 'Ср',
+          thursday: 'Чт',
+          friday: 'Пт',
+          saturday: 'Сб',
+          hour: 'Година',
+          minute: 'Хвилина',
+          loadingText: 'Завантажується',
+        );
     }
 
     return const TrinaGridLocaleText();
   }
 
-  static String textTransform(String? value, List<String> allValues, String Function(String?) transform) {
-    if(!allValues.contains(value))
-    {
+  static String textTransform(String? value, List<String> allValues,
+      String Function(String?) transform) {
+    if (!allValues.contains(value)) {
       return "???";
     }
     return transform(value);

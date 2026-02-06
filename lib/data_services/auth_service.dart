@@ -30,7 +30,7 @@ class AuthService {
         .signInWithPassword(email: email, password: password);
     await _secureStorage.write(
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
-    if(AppConfig.isAppSupported){
+    if (AppConfig.isAppSupported) {
       DbEvents.synchronizeMySchedule(join: true);
       SynchroService.refreshOfflineData();
     }
@@ -48,31 +48,39 @@ class AuthService {
   }
 
   static Future<dynamic> resetPasswordForEmail(String email) async {
-    return await _supabase.functions.invoke("send-reset-password-link", body: {"email": email, "organization": AppConfig.organization});
+    return await _supabase.functions.invoke("send-reset-password-link",
+        body: {"email": email, "organization": AppConfig.organization});
   }
 
   static Future<dynamic> sendSignInCode(OccasionUserModel ou) async {
-    return await _supabase.functions.invoke("send-sign-in-code", body: {"oc": ou.occasion, "usr": ou.user,});
+    return await _supabase.functions.invoke("send-sign-in-code", body: {
+      "oc": ou.occasion,
+      "usr": ou.user,
+    });
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {
     var user = UserInfoModel();
-    user.occasionUser = await DbUsers.getOccasionUser(AuthService.currentUserId());
-    if(RightsService.currentOccasionUser()?.role != null) {
-      user.roleString = await getRoleInfo(RightsService.currentOccasionUser()!.role!);
+    user.occasionUser =
+        await DbUsers.getOccasionUser(AuthService.currentUserId());
+    if (RightsService.currentOccasionUser()?.role != null) {
+      user.roleString =
+          await getRoleInfo(RightsService.currentOccasionUser()!.role!);
     }
     user.userGroups = await DbGroups.getUserGroups();
-    var eUserGroup = user.userGroups!.firstWhereOrNull((g)=>g.type == null);
-    if(eUserGroup!=null) {
+    var eUserGroup = user.userGroups!.firstWhereOrNull((g) => g.type == null);
+    if (eUserGroup != null) {
       user.eventUserGroup = await DbGroups.getUserGroupInfo(eUserGroup.id!);
     }
-    if(FeatureService.isFeatureEnabled(FeatureConstants.companions)) {
+    if (FeatureService.isFeatureEnabled(FeatureConstants.companions)) {
       user.companions = await DbCompanions.getAllCompanions();
     }
     var oc = RightsService.currentOccasion()!;
-    var place = oc.getReferenceToService(DbOccasions.serviceTypeAccommodation, user.occasionUser?.services);
-    if(place!=null){
-      user.accommodationPlace = PlaceModel(id: place.reference, title: place.title, description: "", type: "");
+    var place = oc.getReferenceToService(
+        DbOccasions.serviceTypeAccommodation, user.occasionUser?.services);
+    if (place != null) {
+      user.accommodationPlace = PlaceModel(
+          id: place.reference, title: place.title, description: "", type: "");
     }
     return user;
   }
@@ -88,10 +96,10 @@ class AuthService {
 
   static Future<bool> refreshSession() async {
     var response = await _supabase.auth.refreshSession();
-    if(response.session!=null){
+    if (response.session != null) {
       return true;
     }
-    if(await tryAuthUser()){
+    if (await tryAuthUser()) {
       return true;
     }
     return false;
@@ -102,7 +110,7 @@ class AuthService {
       return false;
     }
     var refresh = await _secureStorage.read(key: REFRESH_TOKEN_KEY);
-    try{
+    try {
       var result = await _supabase.auth.setSession(refresh.toString());
       if (result.user != null) {
         await _secureStorage.write(
@@ -112,15 +120,13 @@ class AuthService {
       } else {
         await NotificationHelper.logout();
       }
-    }
-    catch(e)
-    {
+    } catch (e) {
       //invalid refresh token
     }
     return false;
   }
 
-  static isLoggedIn() {
+  static bool isLoggedIn() {
     return _supabase.auth.currentSession != null;
   }
 
@@ -128,58 +134,52 @@ class AuthService {
     return _supabase.auth.currentUser!.id;
   }
 
-  static void ensureUserIsLoggedIn(){
-    if(!AuthService.isLoggedIn())
-    {
+  static void ensureUserIsLoggedIn() {
+    if (!AuthService.isLoggedIn()) {
       throw Exception("User must be logged in.");
     }
   }
 
   static Future<void> ensureCanUpdateUsers(OccasionUserModel oum) async {
-    if(!RightsService.canUpdateUsers())
-    {
+    if (!RightsService.canUpdateUsers()) {
       await AuthService.refreshSession();
-      if(!RightsService.canUpdateUsers())
-      {
-        var errorText = "Elevated permission is required. Changes to user ${oum.data?[Tb.occasion_users.data_email]} could not be saved.";
+      if (!RightsService.canUpdateUsers()) {
+        var errorText =
+            "Elevated permission is required. Changes to user ${oum.data?[Tb.occasion_users.data_email]} could not be saved.";
         throw Exception(errorText);
       }
     }
   }
 
-  static Future<Map<String, dynamic>> register(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> register(
+      Map<String, dynamic> data) async {
     data["organization"] = AppConfig.organization;
     var resp = await _supabase.functions.invoke("register", body: data);
     return resp.data;
   }
 
-  static Future<void> unsafeChangeUserPassword(OccasionUserModel occasionUserModel, String pwd) async {
+  static Future<void> unsafeChangeUserPassword(
+      OccasionUserModel occasionUserModel, String pwd) async {
     var data = await _supabase.rpc("reset_user_password",
-        params:
-        {
-          "p_user_id": occasionUserModel.user,
-          "p_password": pwd
-        });
-    if(data["code"] != 200){
+        params: {"p_user_id": occasionUserModel.user, "p_password": pwd});
+    if (data["code"] != 200) {
       throw Exception(data["message"]);
     }
   }
 
   static Future<void> changeMyPassword(String pw) async {
-    await _supabase.auth.updateUser(
-        UserAttributes(
-          password: pw,
-        ));
+    await _supabase.auth.updateUser(UserAttributes(
+      password: pw,
+    ));
   }
 
   static Future<dynamic> changePassword(String token, String pw) async {
-    return await _supabase.rpc("set_user_password_token",
-        params:
-        {
-          "token": token,
-          "password": pw,
-        });
+    return await _supabase.rpc("set_user_password_token", params: {
+      "token": token,
+      "password": pw,
+    });
   }
+
   static Future<void> recoverSession(String refreshToken) async {
     final response = await _supabase.auth.setSession(refreshToken);
     if (response.session != null) {

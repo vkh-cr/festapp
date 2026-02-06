@@ -2,7 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/features/feature_constants.dart' show FeatureConstants;
+import 'package:fstapp/components/features/feature_constants.dart'
+    show FeatureConstants;
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_controller.dart';
@@ -48,7 +49,6 @@ class SchedulePage extends StatefulWidget {
 
 class _SchedulePageState extends State<SchedulePage>
     with WidgetsBindingObserver {
-
   static bool _isLoading = false;
   static bool _fullDataGloballyLoaded = false;
   static DateTime? _lastQuickLoadTime;
@@ -111,12 +111,13 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   Future<void> _onTabSwitch() async {
-
     final String targetRouteName = ScheduleNavigationRoute.name;
-    if (context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.home) &&
+    if (context.tabsRouter.activeIndex ==
+            OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.home) &&
         _isRoutePresent(targetRouteName)) {
       final now = DateTime.now();
-      if (_lastQuickLoadTime == null || now.difference(_lastQuickLoadTime!) > _quickLoadRateLimit) {
+      if (_lastQuickLoadTime == null ||
+          now.difference(_lastQuickLoadTime!) > _quickLoadRateLimit) {
         // Set the time before calling loadData to prevent multiple rapid calls.
         _lastQuickLoadTime = now;
         await loadData();
@@ -138,7 +139,7 @@ class _SchedulePageState extends State<SchedulePage>
         _fullDataGloballyLoaded = true;
       }
     } finally {
-      if(mounted) {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
@@ -159,7 +160,8 @@ class _SchedulePageState extends State<SchedulePage>
           .toList();
     }
 
-    if (!AuthService.isLoggedIn() && AppConfig.isOwnProgramSupportedWithoutSignIn) {
+    if (!AuthService.isLoggedIn() &&
+        AppConfig.isOwnProgramSupportedWithoutSignIn) {
       await OfflineDataService.updateEventsWithMySchedule(_events);
       _dots = _events
           .filterRootEvents()
@@ -167,7 +169,7 @@ class _SchedulePageState extends State<SchedulePage>
           .toList();
     }
 
-    if(mounted) {
+    if (mounted) {
       setState(() {});
     }
 
@@ -175,9 +177,8 @@ class _SchedulePageState extends State<SchedulePage>
       RightsService.currentOccasionId()!,
       false,
     );
-    print("loaded data fast");
-    _lastQuickLoadTime = DateTime.now();
 
+    _lastQuickLoadTime = DateTime.now();
 
     for (var e in fast) {
       if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
@@ -197,7 +198,7 @@ class _SchedulePageState extends State<SchedulePage>
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
 
-    if(mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
@@ -212,7 +213,8 @@ class _SchedulePageState extends State<SchedulePage>
     }
     _events = full;
 
-    if (!AuthService.isLoggedIn() && AppConfig.isOwnProgramSupportedWithoutSignIn) {
+    if (!AuthService.isLoggedIn() &&
+        AppConfig.isOwnProgramSupportedWithoutSignIn) {
       await OfflineDataService.updateEventsWithMySchedule(_events);
     }
 
@@ -221,7 +223,7 @@ class _SchedulePageState extends State<SchedulePage>
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
     await OfflineDataService.saveAllEvents(_events);
-    if(mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
@@ -257,17 +259,19 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   void _openAddDialog(
-      BuildContext ctx, List<TimeBlockGroup> groups, TimeBlockItem? p) =>
+          BuildContext ctx, List<TimeBlockGroup> groups, TimeBlockItem? p) =>
       AddNewEventDialog.showAddEventDialog(ctx, groups, p)
           .then((_) => loadData());
 
   bool _isUserApprover() => RightsService.isApprover();
 
-  Future<void> _handleScanButtonPressed(BuildContext context, int eventId) async {
+  Future<void> _handleScanButtonPressed(
+      BuildContext context, int eventId) async {
     RouterService.navigatePageInfo(context, CheckRoute(id: eventId));
   }
 
-  Future<void> _handleCompanionButtonPressed(BuildContext context, TimeBlockItem timeBlockItem) async {
+  Future<void> _handleCompanionButtonPressed(
+      BuildContext context, TimeBlockItem timeBlockItem) async {
     List<CompanionModel> companions = await DbCompanions.getAllCompanions();
     showDialog(
       context: context,
@@ -287,7 +291,8 @@ class _SchedulePageState extends State<SchedulePage>
               }
             },
             canSignIn: () {
-              final currentItem = _dots.firstWhereOrNull((element) => element.id == timeBlockItem.id);
+              final currentItem = _dots.firstWhereOrNull(
+                  (element) => element.id == timeBlockItem.id);
               return currentItem?.canSignIn() ?? false;
             },
           );
@@ -343,7 +348,6 @@ class _SchedulePageState extends State<SchedulePage>
     return targetIndex;
   }
 
-
   @override
   Widget build(BuildContext context) {
     final bool isLargeScreen = MediaQuery.of(context).size.height > 860;
@@ -370,8 +374,10 @@ class _SchedulePageState extends State<SchedulePage>
 
     int currentTargetTabIndex = _calculateTargetTabIndex(datedEvents);
 
-    final scheduleFeature = FeatureService.getFeatureDetails(FeatureConstants.schedule);
-    final bool subScheduleIsEnabled = ((scheduleFeature is ScheduleFeature) && scheduleFeature.enableChildren);
+    final scheduleFeature =
+        FeatureService.getFeatureDetails(FeatureConstants.schedule);
+    final bool subScheduleIsEnabled = ((scheduleFeature is ScheduleFeature) &&
+        scheduleFeature.enableChildren);
 
     return Scaffold(
       backgroundColor: ThemeConfig.appBarColor(),
@@ -379,7 +385,8 @@ class _SchedulePageState extends State<SchedulePage>
         top: true,
         bottom: false,
         child: DefaultTabController(
-          key: ValueKey<String>("SchedulePage_TabController_${currentTargetTabIndex}_${datedEvents.length}"),
+          key: ValueKey<String>(
+              "SchedulePage_TabController_${currentTargetTabIndex}_${datedEvents.length}"),
           initialIndex: currentTargetTabIndex,
           length: datedEvents.length,
           child: NestedScrollView(
@@ -398,8 +405,7 @@ class _SchedulePageState extends State<SchedulePage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () => RouterService.navigate(
-                              context,
+                          onTap: () => RouterService.navigate(context,
                               "${UnitPage.ROUTE}/${RightsService.currentUnit()!.id!}"),
                           onDoubleTap: () async {
                             final info = await PackageInfo.fromPlatform();
@@ -423,7 +429,7 @@ class _SchedulePageState extends State<SchedulePage>
                             label: "My schedule".tr(),
                             onPressed: () {
                               RouterService.navigateOccasion(
-                                  context, MySchedulePage.ROUTE)
+                                      context, MySchedulePage.ROUTE)
                                   .then((_) => loadData());
                             },
                           ),
@@ -434,7 +440,7 @@ class _SchedulePageState extends State<SchedulePage>
                             label: "Schedule".tr(),
                             onPressed: () {
                               RouterService.navigateOccasion(
-                                  context, TimetablePage.ROUTE)
+                                      context, TimetablePage.ROUTE)
                                   .then((_) => loadData());
                             },
                           ),
@@ -462,21 +468,21 @@ class _SchedulePageState extends State<SchedulePage>
                   for (var i = 0; i < datedEvents.length; i++)
                     DayList(
                       dayGroup: datedEvents[i],
-                      onToggle: (id) => setState(
-                              () => _openId = _openId == id ? null : id),
+                      onToggle: (id) =>
+                          setState(() => _openId = _openId == id ? null : id),
                       openId: _openId,
                       controller: AdvancedTimelineController(
                         events: _dots,
                         onEventPressed: _eventPressed,
-                        showAddNewEventButton: () => (RightsService.isEditor() && subScheduleIsEnabled),
+                        showAddNewEventButton: () =>
+                            (RightsService.isEditor() && subScheduleIsEnabled),
                         onAddNewEvent: _openAddDialog,
                         onSignInEvent: _handleSignIn,
                         onSignOutEvent: _handleSignOut,
                         onAddToProgramEvent: _handleAdd,
                         onRemoveFromProgramEvent: _handleRemove,
-                        onEditEvent: (c, ev) => RouterService
-                            .navigateOccasion(
-                            context, "${EventEditPage.ROUTE}/$ev")
+                        onEditEvent: (c, ev) => RouterService.navigateOccasion(
+                                context, "${EventEditPage.ROUTE}/$ev")
                             .then((_) => loadData()),
                         onPlaceTap: (c, pl) => _goToMap(pl.id),
                         isUserApprover: _isUserApprover,
@@ -499,16 +505,20 @@ class _SliverToBoxAdapterDelegate extends SliverPersistentHeaderDelegate {
   final List<TimeBlockGroup> dayGroups;
   _SliverToBoxAdapterDelegate({required this.child, required this.dayGroups});
 
-  @override double get minExtent => child is PreferredSizeWidget
+  @override
+  double get minExtent => child is PreferredSizeWidget
       ? (child as PreferredSizeWidget).preferredSize.height
       : 62;
-  @override double get maxExtent => minExtent;
+  @override
+  double get maxExtent => minExtent;
 
-  @override Widget build(BuildContext _, double __, bool ___) => child;
+  @override
+  Widget build(BuildContext _, double __, bool ___) => child;
 
   @override
   bool shouldRebuild(_SliverToBoxAdapterDelegate old) {
-    return old.child != child || !const ListEquality().equals(old.dayGroups, dayGroups);
+    return old.child != child ||
+        !const ListEquality().equals(old.dayGroups, dayGroups);
   }
 }
 
@@ -518,11 +528,10 @@ class _IconWithLabel extends StatelessWidget {
   final VoidCallback onPressed;
 
   const _IconWithLabel({
-    Key? key,
     required this.icon,
     required this.label,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

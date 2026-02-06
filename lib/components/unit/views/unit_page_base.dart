@@ -112,7 +112,6 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
   }
 
   Future<void> _handleSignIn() async {
-
     if (RightsService.currentUnit()?.id == null) return;
     final newUnitId = RightsService.currentUnit()!.id!;
 
@@ -140,27 +139,26 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
     final filteredOccasions = _searchQuery.isEmpty
         ? _occasions
         : _occasions.where((o) {
-      final title = o.title?.toLowerCase() ?? '';
-      return title.contains(_searchQuery);
-    }).toList();
+            final title = o.title?.toLowerCase() ?? '';
+            return title.contains(_searchQuery);
+          }).toList();
 
     final presentEvents = filteredOccasions
         .where((o) => o.startTime!.isBefore(now) && o.endTime!.isAfter(now))
         .toList();
     final upcomingEvents =
-    filteredOccasions.where((o) => o.startTime!.isAfter(now)).toList();
+        filteredOccasions.where((o) => o.startTime!.isAfter(now)).toList();
     upcomingEvents.sort((a, b) => a.startTime!.compareTo(b.startTime!));
     final pastEvents =
-    filteredOccasions.where((o) => o.endTime!.isBefore(now)).toList();
+        filteredOccasions.where((o) => o.endTime!.isBefore(now)).toList();
 
     // Define the grid delegate here to be reused
     final gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-      maxCrossAxisExtent:
-      400.0, // This will make cards smaller
+      maxCrossAxisExtent: 400.0, // This will make cards smaller
       crossAxisSpacing: 10,
       mainAxisSpacing: 10,
       childAspectRatio:
-      OccasionCard.kCardWidth / OccasionCard.kCardHeight, // 16:9
+          OccasionCard.kCardWidth / OccasionCard.kCardHeight, // 16:9
     );
 
     // Define the admin callback
@@ -168,8 +166,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
     if (RightsService.currentUser()?.units?.isNotEmpty ?? false) {
       adminCallback = () {
         _currentUnitId ??= RightsService.currentUser()!.units!.first.id;
-        RouterService.navigate(context, "unit/$_currentUnitId/edit")
-            .then((_) {
+        RouterService.navigate(context, "unit/$_currentUnitId/edit").then((_) {
           if (_currentUnitId != null) {
             _loadDataForUnit(_currentUnitId!);
           }
@@ -178,9 +175,8 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
     }
 
     return Scaffold(
-      floatingActionButton: AppConfig.isFeedbackEnabled
-          ? const FeedbackFloatingButton()
-          : null,
+      floatingActionButton:
+          AppConfig.isFeedbackEnabled ? const FeedbackFloatingButton() : null,
       // Ensure the button sits above the bottom safe area
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
@@ -201,31 +197,32 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
               child: Center(
                 child: ConstrainedBox(
                   constraints:
-                  BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+                      BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: "ActivitiesComponentStrings.hintSearchEvents".tr(),
+                      hintText:
+                          "ActivitiesComponentStrings.hintSearchEvents".tr(),
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: ThemeConfig.whiteColor(context),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                         borderSide:
-                        BorderSide(color: ThemeConfig.grey300(context)),
+                            BorderSide(color: ThemeConfig.grey300(context)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                         borderSide:
-                        BorderSide(color: ThemeConfig.grey300(context)),
+                            BorderSide(color: ThemeConfig.grey300(context)),
                       ),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                        },
-                      )
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                              },
+                            )
                           : null,
                     ),
                   ),
@@ -242,13 +239,12 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                 child: Center(
                   child: ConstrainedBox(
                     constraints:
-                    BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+                        BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
                     child: Container(
                       padding: const EdgeInsets.all(16.0),
                       decoration: BoxDecoration(
                         color: ThemeConfig.whiteColor(context),
-                        border:
-                        Border.all(color: ThemeConfig.grey300(context)),
+                        border: Border.all(color: ThemeConfig.grey300(context)),
                         borderRadius: BorderRadius.circular(8.0),
                         boxShadow: const [
                           BoxShadow(
@@ -287,7 +283,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
               sliver: SliverGrid(
                 gridDelegate: gridDelegate,
                 delegate: SliverChildBuilderDelegate(
-                      (context, index) {
+                  (context, index) {
                     final occasion = presentEvents[index];
                     // Wrap each card in a RepaintBoundary.
                     return RepaintBoundary(
@@ -322,7 +318,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
               sliver: SliverGrid(
                 gridDelegate: gridDelegate,
                 delegate: SliverChildBuilderDelegate(
-                      (context, index) {
+                  (context, index) {
                     final occasion = upcomingEvents[index];
                     return RepaintBoundary(
                       child: OccasionCard(
@@ -356,7 +352,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
               sliver: SliverGrid(
                 gridDelegate: gridDelegate,
                 delegate: SliverChildBuilderDelegate(
-                      (context, index) {
+                  (context, index) {
                     final occasion = pastEvents[index];
                     return RepaintBoundary(
                       child: OccasionCard(

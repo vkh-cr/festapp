@@ -18,12 +18,13 @@ enum ImportSource {
 }
 
 class ImportDialogHelper {
-
   /// Acts as the main entry point for the user import process.
   /// It checks if the feature is enabled, shows the source selection
   /// dialog, and then calls the appropriate helper based on the user's choice.
   static Future<void> import(BuildContext context) async {
-    final importFeature = FeatureService.getFeatureDetails(FeatureConstants.import) as ImportFeature?;
+    final importFeature =
+        FeatureService.getFeatureDetails(FeatureConstants.import)
+            as ImportFeature?;
     if (importFeature == null || !importFeature.isEnabled) return;
 
     final bool canImportCsv = importFeature.importFromCsv;
@@ -59,17 +60,17 @@ class ImportDialogHelper {
   }
 
   static Future<ImportSource?> showImportSourceSelectionDialog(
-      BuildContext context, {
-        required bool showCsvImport,
-        required bool showTicketImport,
-      }) async {
+    BuildContext context, {
+    required bool showCsvImport,
+    required bool showTicketImport,
+  }) async {
     List<Widget> actions = [];
 
     if (showCsvImport) {
       actions.add(
         DialogHelper.createDialogAction(
           "Import from CSV".tr(),
-              () => Navigator.of(context).pop(ImportSource.csv),
+          () => Navigator.of(context).pop(ImportSource.csv),
         ),
       );
     }
@@ -78,13 +79,13 @@ class ImportDialogHelper {
       actions.add(
         DialogHelper.createDialogAction(
           FeaturesStrings.importFromTicketsTitle,
-              () => Navigator.of(context).pop(ImportSource.tickets),
+          () => Navigator.of(context).pop(ImportSource.tickets),
         ),
       );
     }
 
     if (actions.isEmpty) {
-      // No import options are enabled, maybe show a toast or log.
+      // No import options are enabled.
       // For now, we return null.
       return null;
     }

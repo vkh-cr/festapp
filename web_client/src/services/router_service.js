@@ -59,19 +59,16 @@ export class RouterService {
 
     static navigateToLogin() {
         const url = RouterService.getLoginUrl();
-        console.log(`Navigating to Login: ${url}`);
         window.location.href = url;
     }
 
     static navigateToAdmin() {
         const url = RouterService.getAdminUrl();
-        console.log(`Navigating to Admin: ${url}`);
         window.location.href = url;
     }
     
     static navigateToHandover() {
         const url = RouterService.getHandoverUrl();
-        console.log(`Initiating Session Handover: ${url}`);
         window.location.href = url;
     }
 
@@ -168,7 +165,6 @@ export class RouterService {
 
                          if (targetIsWebClient) {
                              // SPA Navigate (Stay in Web Client)
-                             console.log(`RouterService: SPA redirect from / to ${defaultLink}`);
                              window.history.replaceState(null, '', defaultLink);
                              RouterService._lastPath = defaultLink; // Critical: Sync tracker to prevent re-init on popstate
                              path = defaultLink; // Update path for subsequent loading logic
@@ -200,7 +196,6 @@ export class RouterService {
                 shouldRedirectToFlutter = true;
             } else {
                 // Unknown route -> Home
-                console.log(`Unknown route "${path}" and App not supported. Redirecting to Home.`);
                 window.history.replaceState(null, '', '/');
                 RouterService._lastPath = '/';
                 return true;
@@ -227,7 +222,6 @@ export class RouterService {
                      // 2. Trim whitespace just in case
                      const rawToken = tokenMatch[1].split('#')[0].trim();
                      
-                     console.log("RouterService: Intercepted Reset Password Token:", rawToken);
                      
                      const { LoginModal } = await import('../components/users/login_modal.js'); 
                      
@@ -262,7 +256,6 @@ export class RouterService {
                  const separator = redirectUrl.includes('#') ? '&' : '?';
                  redirectUrl += `${separator}redirect=${encodeURIComponent(redirectPath)}`;
 
-                 console.log(`RouterService: Global Redirecting ${path} to Flutter App with Session: ${redirectUrl}`);
                  window.location.replace(redirectUrl);
                  return true; // Stop SPA load
              }
@@ -275,7 +268,6 @@ export class RouterService {
              const hasSearch = window.location.search && (window.location.search.includes('?q=') || window.location.search.includes('&q='));
 
              if (!hasPreview && !hasSearch && (window.location.search || window.location.hash || fullUrl.includes('?'))) {
-                  console.log(`[RouterService] Sanitizing URL: ${fullUrl} -> ${path}`);
                   window.history.replaceState(null, '', path);
                   RouterService._lastPath = path; // Sync tracker
              }
@@ -286,7 +278,6 @@ export class RouterService {
         }
 
         // 5. Load Component
-        console.log("RouterService loading component for path:", path);
         if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {
             const link = path.substring(RouterService.FORM_PATH_PREFIX.length);
             const cleanLink = link.split('/')[0];
@@ -369,10 +360,8 @@ export class RouterService {
             
             // Ignore hash changes (SPA overlays)
             if (path === RouterService._lastPath) {
-                console.log(`[RouterService] PopState ignored (Hash change): ${path}`);
                 return;
             }
-            console.log(`[RouterService] PopState detected change: ${RouterService._lastPath} -> ${path}`);
             RouterService._lastPath = path;
 
             if (path.startsWith(RouterService.FORM_PATH_PREFIX)) {

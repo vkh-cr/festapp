@@ -25,21 +25,22 @@ BEGIN
     -- Mocking Permission Functions to bypass Auth/User dependencies
     
     -- Mock check_is_editor_order_on_occasion (used by update_product)
-    CREATE OR REPLACE FUNCTION public.check_is_editor_order_on_occasion(oc bigint)
-    RETURNS void AS '
+    -- Mock check_is_editor_order_on_occasion (used by update_product)
+    EXECUTE 'CREATE OR REPLACE FUNCTION public.check_is_editor_order_on_occasion(oc bigint)
+    RETURNS void AS ''
     BEGIN
         -- No-op: assert failure if we wanted to test negative cases, but here we emulate "authorized"
         RETURN;
     END;
-    ' LANGUAGE plpgsql;
+    '' LANGUAGE plpgsql';
 
     -- Mock get_is_editor_order_view_on_occasion (used by get_products_and_types_for_edit)
-    CREATE OR REPLACE FUNCTION public.get_is_editor_order_view_on_occasion(oc bigint)
-    RETURNS boolean AS '
+    EXECUTE 'CREATE OR REPLACE FUNCTION public.get_is_editor_order_view_on_occasion(oc bigint)
+    RETURNS boolean AS ''
     BEGIN
         RETURN true;
     END;
-    ' LANGUAGE plpgsql;
+    '' LANGUAGE plpgsql';
 
     
     -- Insert Org

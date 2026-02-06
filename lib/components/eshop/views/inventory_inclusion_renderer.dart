@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
 import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
@@ -32,7 +31,8 @@ class _InventoryInclusionRendererState
   String? _initialInclusionsString;
 
   void _triggerGridUpdate() {
-    var newValue = ProductModel.getInventoryDisplayValue(widget.product, context);
+    var newValue =
+        ProductModel.getInventoryDisplayValue(widget.product, context);
     // Only trigger a change if the new value is different from the initial value
     if (newValue != _initialInclusionsString) {
       widget.rendererContext.stateManager.changeCellValue(
@@ -47,14 +47,16 @@ class _InventoryInclusionRendererState
 
   Future<void> _showInventoryDialog(BuildContext context) async {
     // Capture the current state as a string before the dialog opens
-    _initialInclusionsString = ProductModel.getInventoryDisplayValue(widget.product, context);
+    _initialInclusionsString =
+        ProductModel.getInventoryDisplayValue(widget.product, context);
 
     await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           // MODIFIED LINE: Added the product title to the dialog title
-          title: Text(InventoryStrings.inclusionManageTitle(widget.product.title ?? "")),
+          title: Text(InventoryStrings.inclusionManageTitle(
+              widget.product.title ?? "")),
           content: SizedBox(
             // Set max width for the dialog content
             width: StylesConfig.formMaxWidthMid,
@@ -95,8 +97,10 @@ class _InventoryInclusionRendererState
               spacing: 4,
               runSpacing: 4,
               children: widget.product.includedInventories.map((link) {
-                final quantityText = link.quantity > 1 ? " (x${link.quantity})" : "";
-                final labelText = "${link.inventoryContext?.getFullTitle(context) ?? '...'}$quantityText";
+                final quantityText =
+                    link.quantity > 1 ? " (x${link.quantity})" : "";
+                final labelText =
+                    "${link.inventoryContext?.getFullTitle(context) ?? '...'}$quantityText";
 
                 return Chip(
                   label: Text(labelText),
@@ -118,13 +122,13 @@ class _InventoryDialogContent extends StatefulWidget {
   final List<InventoryContextModel> availableContexts;
 
   const _InventoryDialogContent({
-    Key? key,
     required this.product,
     required this.availableContexts,
-  }) : super(key: key);
+  });
 
   @override
-  State<_InventoryDialogContent> createState() => _InventoryDialogContentState();
+  State<_InventoryDialogContent> createState() =>
+      _InventoryDialogContentState();
 }
 
 class _InventoryDialogContentState extends State<_InventoryDialogContent> {
@@ -162,20 +166,23 @@ class _InventoryDialogContentState extends State<_InventoryDialogContent> {
     final normalizedQuery = Utilities.removeDiacritics(query).toLowerCase();
 
     setState(() {
-      _filteredAvailableContexts = widget.availableContexts.where((contextModel) {
+      _filteredAvailableContexts =
+          widget.availableContexts.where((contextModel) {
         // Use the BuildContext from this dialog's state
         final contextTitle = contextModel.getFullTitle(context);
-        final normalizedTitle = Utilities.removeDiacritics(contextTitle).toLowerCase();
+        final normalizedTitle =
+            Utilities.removeDiacritics(contextTitle).toLowerCase();
         return normalizedTitle.contains(normalizedQuery);
       }).toList();
     });
   }
 
   // Helper to get the included model for a given context
-  ProductInventoryContextModel? _getInclusion(InventoryContextModel contextModel) {
+  ProductInventoryContextModel? _getInclusion(
+      InventoryContextModel contextModel) {
     try {
-      return widget.product.includedInventories.firstWhere(
-              (p) => p.inventoryContextId == contextModel.id);
+      return widget.product.includedInventories
+          .firstWhere((p) => p.inventoryContextId == contextModel.id);
     } catch (e) {
       return null;
     }
@@ -208,7 +215,8 @@ class _InventoryDialogContentState extends State<_InventoryDialogContent> {
             itemCount: _filteredAvailableContexts.length,
             itemBuilder: (context, index) {
               final currentContext = _filteredAvailableContexts[index];
-              final inclusion = _getInclusion(currentContext); // Use the local helper
+              final inclusion =
+                  _getInclusion(currentContext); // Use the local helper
               final isIncluded = inclusion != null;
 
               return Card(
@@ -216,12 +224,14 @@ class _InventoryDialogContentState extends State<_InventoryDialogContent> {
                 margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
                 child: InkWell(
                   onTap: () {
-                    setState(() { // This setState now correctly rebuilds _InventoryDialogContent
+                    setState(() {
+                      // This setState now correctly rebuilds _InventoryDialogContent
                       if (isIncluded) {
                         widget.product.includedInventories.removeWhere(
-                                (p) => p.inventoryContextId == currentContext.id);
+                            (p) => p.inventoryContextId == currentContext.id);
                       } else {
-                        widget.product.includedInventories.add(ProductInventoryContextModel(
+                        widget.product.includedInventories
+                            .add(ProductInventoryContextModel(
                           productId: widget.product.id!,
                           inventoryContextId: currentContext.id!,
                           quantity: 1,
@@ -239,9 +249,11 @@ class _InventoryDialogContentState extends State<_InventoryDialogContent> {
                         Checkbox(
                           value: isIncluded,
                           onChanged: (bool? value) {
-                            setState(() { // This setState now correctly rebuilds _InventoryDialogContent
+                            setState(() {
+                              // This setState now correctly rebuilds _InventoryDialogContent
                               if (value == true) {
-                                widget.product.includedInventories.add(ProductInventoryContextModel(
+                                widget.product.includedInventories
+                                    .add(ProductInventoryContextModel(
                                   productId: widget.product.id!,
                                   inventoryContextId: currentContext.id!,
                                   quantity: 1,
@@ -249,7 +261,9 @@ class _InventoryDialogContentState extends State<_InventoryDialogContent> {
                                 ));
                               } else {
                                 widget.product.includedInventories.removeWhere(
-                                        (p) => p.inventoryContextId == currentContext.id);
+                                    (p) =>
+                                        p.inventoryContextId ==
+                                        currentContext.id);
                               }
                             });
                           },
@@ -266,14 +280,17 @@ class _InventoryDialogContentState extends State<_InventoryDialogContent> {
                                 icon: const Icon(Icons.remove),
                                 onPressed: () {
                                   if (inclusion.quantity > 1) {
-                                    setState(() => inclusion.quantity--); // This setState now correctly rebuilds _InventoryDialogContent
+                                    setState(() => inclusion
+                                        .quantity--); // This setState now correctly rebuilds _InventoryDialogContent
                                   }
                                 },
                               ),
-                              Text(inclusion.quantity.toString(), style: const TextStyle(fontSize: 16)),
+                              Text(inclusion.quantity.toString(),
+                                  style: const TextStyle(fontSize: 16)),
                               IconButton(
                                 icon: const Icon(Icons.add),
-                                onPressed: () => setState(() => inclusion.quantity++), // This setState now correctly rebuilds _InventoryDialogContent
+                                onPressed: () => setState(() => inclusion
+                                    .quantity++), // This setState now correctly rebuilds _InventoryDialogContent
                               ),
                             ],
                           ),

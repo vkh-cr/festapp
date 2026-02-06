@@ -13,8 +13,6 @@ DECLARE
     productsData JSONB;
     availableBankAccountsData JSONB;
 BEGIN
-    -- Step 1: Retrieve essential IDs for the form, occasion, and unit.
-    -- This also serves as a check to ensure the form exists.
     SELECT
         f.id,
         f.occasion,
@@ -27,17 +25,12 @@ BEGIN
     JOIN public.occasions o ON f.occasion = o.id
     WHERE f.link = form_link;
 
-    -- If no form is found, return a 404 Not Found response.
     IF v_form_id IS NULL THEN
         RETURN jsonb_build_object('code', 404, 'message', 'Form not found for the provided link.');
     END IF;
 
-    -- Step 2: Perform authorization check.
-    -- The check_is_editor_order_view_via_form_link function is expected to raise an
-    -- exception if the user is not authorized, which will terminate execution.
     PERFORM check_is_editor_order_view_via_form_link(form_link);
 
-    -- Step 3: Fetch the main form data as a single JSON object.
     SELECT jsonb_build_object(
         'id', f.id,
         'key', f.key,
@@ -51,14 +44,17 @@ BEGIN
         'occasion', f.occasion,
         'blueprint', f.blueprint,
         'link', f.link,
-        'bank_account', f.bank_account, -- The ID of the selected bank account
-        'deadline_duration_seconds', f.deadline_duration_seconds
+        'bank_account', f.bank_account,
+        'deadline_duration_seconds', f.deadline_duration_seconds,
+        'can_delete', NOT EXISTS (
+            SELECT 1 FROM eshop.orders
+            WHERE (data->>'form')::uuid = f.key
+        )
     )
     INTO formData
     FROM public.forms f
     WHERE f.id = v_form_id;
 
-    -- Step 4: Fetch all related form fields and aggregate them into a JSON array.
     SELECT COALESCE(jsonb_agg(
         jsonb_build_object(
             'id', ff.id,
@@ -71,14 +67,13 @@ BEGIN
             'is_hidden', ff.is_hidden,
             'is_ticket_field', ff.is_ticket_field,
             'order', ff."order",
-            'product_type', ff.product_type -- The ID of the related product type
+            'product_type', ff.product_type
         ) ORDER BY COALESCE(ff."order", 0)
     ), '[]'::jsonb)
     INTO formFieldsData
     FROM public.form_fields ff
     WHERE ff.form = v_form_id;
 
-    -- Step 5: Fetch all product types for the occasion.
     SELECT COALESCE(jsonb_agg(
         jsonb_build_object(
             'id', pt.id,
@@ -93,7 +88,6 @@ BEGIN
     FROM eshop.product_types pt
     WHERE pt.occasion = v_occasion_id;
 
-    -- Step 6: Fetch all products for the occasion, including their order count.
     SELECT COALESCE(jsonb_agg(
         jsonb_build_object(
             'id', p.id,
@@ -109,7 +103,7 @@ BEGIN
                 SELECT count(*)
                 FROM eshop.order_product_ticket opt
                 JOIN eshop.orders o ON opt."order" = o.id
-                WHERE opt.product = p.id AND o.state <> 'storno' -- Exclude cancelled orders from the count
+                WHERE opt.product = p.id AND o.state <> 'storno'
             ),
             'maximum', p.maximum,
             'data', p.data
@@ -119,22 +113,23 @@ BEGIN
     FROM eshop.products p
     WHERE p.product_type IN (SELECT id FROM eshop.product_types WHERE occasion = v_occasion_id);
 
-    -- Step 7: Fetch all bank accounts available for the occasion's unit.
+    -- FIX: Exclude CASH accounts and ensure deterministic sorting by Priority
     SELECT COALESCE(jsonb_agg(
         jsonb_build_object(
             'id', ba.id,
             'account_number', ba.account_number,
             'account_number_human_readable', ba.account_number_human_readable,
             'title', ba.title,
-            'supported_currencies', ba.supported_currencies
-        )
+            'supported_currencies', ba.supported_currencies,
+            'type', ba.type -- Adding type for debugging/verification
+        ) ORDER BY uba.priority ASC, ba.id ASC
     ), '[]'::jsonb)
     INTO availableBankAccountsData
     FROM eshop.unit_bank_accounts uba
     JOIN eshop.bank_accounts ba ON uba.bank_account = ba.id
-    WHERE uba.unit = v_unit_id;
+    WHERE uba.unit = v_unit_id
+      AND (ba.type IS DISTINCT FROM 'CASH'); -- EXCLUDE CASH ACCOUNTS
 
-    -- Step 8: Assemble the final normalized JSON object and return it.
     RETURN jsonb_build_object(
         'code', 200,
         'data', jsonb_build_object(

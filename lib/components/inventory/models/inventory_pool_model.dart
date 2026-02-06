@@ -90,7 +90,8 @@ class InventoryPoolModel {
       title: json[t.title],
       sellableCapacity: json[t.sellable_capacity],
       occasionId: json[t.occasion],
-      isAutoResourceAssignment: data[t.data_is_auto_resource_assignment] as bool? ?? true,
+      isAutoResourceAssignment:
+          data[t.data_is_auto_resource_assignment] as bool? ?? true,
       description: json[t.description],
       type: _stringToInventoryPoolType(json[t.type]),
       placeId: data[t.data_place_id] as int?, // ADDED

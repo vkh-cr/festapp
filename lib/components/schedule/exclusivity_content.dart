@@ -29,37 +29,37 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller ??= SingleDataGridController<ExclusiveGroupModel>(
-        context: context,
-        loadData: DbEvents.getAllExclusiveGroups,
-        fromPlutoJson: ExclusiveGroupModel.fromPlutoJson,
-        firstColumnType: DataGridFirstColumn.delete,
-        idColumn: Tb.exclusive_groups.id,
-        columns: [
-          TrinaColumn(
-            hide: true,
-            title: "Id".tr(),
-            field: Tb.exclusive_groups.id,
-            type: TrinaColumnType.number(defaultValue: -1),
-            readOnly: true,
-            enableEditingMode: false,
-            width: 50,
-            renderer: (rendererContext) =>
-                DataGridHelper.idRenderer(rendererContext),
-          ),
-          TrinaColumn(
-            title: CommonStrings.name,
-            field: Tb.exclusive_groups.title,
-            type: TrinaColumnType.text(),
-            width: 300,
-          ),
-          TrinaColumn(
-            title: CommonStrings.events,
-            field: Tb.events.table,
-            type: TrinaColumnType.text(),
-            width: 500,
-          ),
-        ],
-      );
+      context: context,
+      loadData: DbEvents.getAllExclusiveGroups,
+      fromPlutoJson: ExclusiveGroupModel.fromPlutoJson,
+      firstColumnType: DataGridFirstColumn.delete,
+      idColumn: Tb.exclusive_groups.id,
+      columns: [
+        TrinaColumn(
+          hide: true,
+          title: "Id".tr(),
+          field: Tb.exclusive_groups.id,
+          type: TrinaColumnType.number(defaultValue: -1),
+          readOnly: true,
+          enableEditingMode: false,
+          width: 50,
+          renderer: (rendererContext) =>
+              DataGridHelper.idRenderer(rendererContext),
+        ),
+        TrinaColumn(
+          title: CommonStrings.name,
+          field: Tb.exclusive_groups.title,
+          type: TrinaColumnType.text(),
+          width: 300,
+        ),
+        TrinaColumn(
+          title: CommonStrings.events,
+          field: Tb.events.table,
+          type: TrinaColumnType.text(),
+          width: 500,
+        ),
+      ],
+    );
   }
 
   @override

@@ -24,7 +24,8 @@ class FormResponseModel extends ITrinaRowModel {
     this.allFields,
   });
 
-  static FormResponseModel fromPlutoJson(Map<String, dynamic> json, List<FormFieldModel> allFields) {
+  static FormResponseModel fromPlutoJson(
+      Map<String, dynamic> json, List<FormFieldModel> allFields) {
     final int? orderId = json[EshopColumns.ORDER_ID] as int?;
     final Map<String, dynamic> responseFields = {};
 
@@ -49,33 +50,29 @@ class FormResponseModel extends ITrinaRowModel {
 
         if (fieldModel.type == FormHelper.fieldTypeSex) {
           // Sex is independent, handled as a single string-to-string mapping
-          responseFields[fieldId] = UserInfoModel.sexFromLocale(value as String?);
-        }
-        else if (fieldModel.type == FormHelper.fieldTypeBirthDate) {
+          responseFields[fieldId] =
+              UserInfoModel.sexFromLocale(value as String?);
+        } else if (fieldModel.type == FormHelper.fieldTypeBirthDate) {
           // BirthDate is handled
           final dt = DateTime.tryParse(value as String? ?? "");
           responseFields[fieldId] = dt?.toIso8601String();
-        }
-        else if (fieldModel.type == FormHelper.fieldTypeIdDocument) {
+        } else if (fieldModel.type == FormHelper.fieldTypeIdDocument) {
           // IdDocument is handled
           responseFields[fieldId] = value;
-        }
-        else if (fieldModel.type == FormHelper.fieldTypeSelectMany) {
-
+        } else if (fieldModel.type == FormHelper.fieldTypeSelectMany) {
           final String? stringValue = value as String?;
           if (stringValue == null || stringValue.isEmpty) {
             // If the grid value is empty, store an empty list
             responseFields[fieldId] = <String>[];
           } else {
-            responseFields[fieldId] = stringValue.split(FormHelper.optionDelimiter);
+            responseFields[fieldId] =
+                stringValue.split(FormHelper.optionDelimiter);
           }
-        }
-        else {
+        } else {
           // Default for all other field types (text, number, etc.)
           responseFields[fieldId] = value;
         }
-      }
-      else if (int.tryParse(fieldId) != null) {
+      } else if (int.tryParse(fieldId) != null) {
         // Preserve numeric keys even if not in allFields
         responseFields[fieldId] = value;
       }
@@ -93,14 +90,18 @@ class FormResponseModel extends ITrinaRowModel {
     Map<String, TrinaCell> cells = {
       EshopColumns.ORDER_ID: TrinaCell(value: id),
       EshopColumns.ORDER_SYMBOL: TrinaCell(value: order!.toBasicString()),
-      EshopColumns.ORDER_STATE: TrinaCell(value: OrderModel.formatState(order!.state!)),
+      EshopColumns.ORDER_STATE:
+          TrinaCell(value: OrderModel.formatState(order!.state!)),
       EshopColumns.TICKET_PRODUCTS: TrinaCell(
           value: order!.relatedProducts != null
-              ? order!.relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
+              ? order!.relatedProducts!
+                  .map((p) => p.toBasicString())
+                  .join(" | ")
               : ""),
     };
 
-    final productCells = EshopColumns.generateProductTypeCells(order!.relatedProducts ?? []);
+    final productCells =
+        EshopColumns.generateProductTypeCells(order!.relatedProducts ?? []);
     cells.addAll(productCells);
 
     // Process additional form fields.
@@ -113,14 +114,11 @@ class FormResponseModel extends ITrinaRowModel {
         cells[f.id.toString()] = TrinaCell(
             value: UserInfoModel.sexToLocale(fields![f.id.toString()]));
         continue;
-      }
-      else if (f.type == FormHelper.fieldTypeIdDocument) {
+      } else if (f.type == FormHelper.fieldTypeIdDocument) {
         var val = fields![f.id.toString()];
-        cells[f.id.toString()] = TrinaCell(
-            value: val?.toString() ?? "");
+        cells[f.id.toString()] = TrinaCell(value: val?.toString() ?? "");
         continue;
-      }
-      else if (f.type == FormHelper.fieldTypeBirthDate) {
+      } else if (f.type == FormHelper.fieldTypeBirthDate) {
         // Parse ISO datetime string into a DateTime object.
         var dt = DateTime.tryParse(fields![f.id.toString()] ?? "");
         // Format the DateTime into a "year-month-day" string.
@@ -130,15 +128,16 @@ class FormResponseModel extends ITrinaRowModel {
         cells[f.id.toString()] = TrinaCell(value: formattedDate);
         continue;
       }
-      var rValue =
-      Utilities.removeTabsAndNewLines((fields![f.id.toString()] ?? "").toString());
+      var rValue = Utilities.removeTabsAndNewLines(
+          (fields![f.id.toString()] ?? "").toString());
       cells[f.id.toString()] = TrinaCell(value: rValue);
     }
 
     return TrinaRow(cells: cells);
   }
 
-  factory FormResponseModel.fromOrder(OrderModel order, List<FormFieldModel> allFields) {
+  factory FormResponseModel.fromOrder(
+      OrderModel order, List<FormFieldModel> allFields) {
     // Extract the order symbol. Adjust this based on how orderSymbol is defined in OrderModel.
     order.id?.toString();
 
@@ -151,8 +150,7 @@ class FormResponseModel extends ITrinaRowModel {
       extractedFields = {
         for (var f in fieldsData)
           if (f is Map<String, dynamic>)
-            for (var entry in f.entries)
-              entry.key: entry.value,
+            for (var entry in f.entries) entry.key: entry.value,
       };
     } else {
       extractedFields = null;
@@ -162,13 +160,11 @@ class FormResponseModel extends ITrinaRowModel {
         id: order.id,
         order: order,
         fields: extractedFields,
-        allFields: allFields
-    );
+        allFields: allFields);
   }
 
   @override
-  Future<void> deleteMethod(BuildContext context) async {
-  }
+  Future<void> deleteMethod(BuildContext context) async {}
 
   @override
   Future<void> updateMethod(BuildContext context) async {
@@ -179,5 +175,4 @@ class FormResponseModel extends ITrinaRowModel {
   String toBasicString() {
     return order?.toBasicString() ?? id.toString();
   }
-
 }

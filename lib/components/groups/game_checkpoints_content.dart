@@ -23,35 +23,37 @@ class _GameCheckPointsContentState extends State<GameCheckPointsContent> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller ??= SingleDataGridController<InformationModel>(
-        context: context,
-        loadData: () => DbInformation.getAllInformationForDataGrid(InformationModel.gameType),
-        fromPlutoJson: InformationModel.fromPlutoJsonGame,
-        firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
-        idColumn: Tb.information.id,
-        columns: [
-          TrinaColumn(
-            hide: true,
-            title: "Id".tr(),
-            field: Tb.information.id,
-            type: TrinaColumnType.number(defaultValue: -1),
-            readOnly: true,
-            width: 50,
-            renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
-          ),
-          TrinaColumn(
-            title: CommonStrings.title,
-            enableAutoEditing: true,
-            field: Tb.information.title,
-            type: TrinaColumnType.text(),
-          ),
-          TrinaColumn(
-            enableAutoEditing: true,
-            title: "Correct answer".tr(),
-            field: Tb.information.data_correct,
-            type: TrinaColumnType.text(),
-          ),
-        ],
-      );
+      context: context,
+      loadData: () =>
+          DbInformation.getAllInformationForDataGrid(InformationModel.gameType),
+      fromPlutoJson: InformationModel.fromPlutoJsonGame,
+      firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
+      idColumn: Tb.information.id,
+      columns: [
+        TrinaColumn(
+          hide: true,
+          title: "Id".tr(),
+          field: Tb.information.id,
+          type: TrinaColumnType.number(defaultValue: -1),
+          readOnly: true,
+          width: 50,
+          renderer: (rendererContext) =>
+              DataGridHelper.idRenderer(rendererContext),
+        ),
+        TrinaColumn(
+          title: CommonStrings.title,
+          enableAutoEditing: true,
+          field: Tb.information.title,
+          type: TrinaColumnType.text(),
+        ),
+        TrinaColumn(
+          enableAutoEditing: true,
+          title: "Correct answer".tr(),
+          field: Tb.information.data_correct,
+          type: TrinaColumnType.text(),
+        ),
+      ],
+    );
   }
 
   @override

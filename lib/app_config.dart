@@ -42,7 +42,7 @@ class AppConfig {
   static const String feedbackEmail = "info@festapp.net";
 
   static bool isNotificationsCurrentlySupported() {
-    if(kIsWeb) {
+    if (kIsWeb) {
       return isNotificationsSupported && isWebNotificationsSupported;
     }
     return isNotificationsSupported;
@@ -58,18 +58,16 @@ class AppConfig {
   /// It combines the organization ID and the separator (e.g., "2+").
   static String get _prefixBase => "$organization+";
 
-  static String getUserPrefix(String email){
+  static String getUserPrefix(String email) {
     return "$_prefixBase$email";
   }
 
-  static String removeUserPrefix(String emailWithPrefix){
+  static String removeUserPrefix(String emailWithPrefix) {
     if (emailWithPrefix.startsWith(_prefixBase)) {
       return emailWithPrefix.substring(_prefixBase.length);
     }
     return emailWithPrefix;
   }
 
-  static List<String> compatibleUrls() => [
-    AppConfig.webLink
-  ];
+  static List<String> compatibleUrls() => [AppConfig.webLink];
 }

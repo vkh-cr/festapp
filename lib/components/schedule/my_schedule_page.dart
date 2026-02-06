@@ -38,7 +38,6 @@ class MySchedulePage extends StatefulWidget {
 }
 
 class _MySchedulePageState extends State<MySchedulePage> {
-
   bool _fullEventsLoaded = false;
   bool? _isAdvancedTimeline = false;
   final Map<int, String?> _eventAndActivitiesDescriptions = {};
@@ -47,8 +46,10 @@ class _MySchedulePageState extends State<MySchedulePage> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    var scheduleFeat = FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
-    if (scheduleFeat is ScheduleFeature && scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced){
+    var scheduleFeat =
+        FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
+    if (scheduleFeat is ScheduleFeature &&
+        scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced) {
       _isAdvancedTimeline = true;
     }
     await loadDataOffline();
@@ -58,7 +59,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
   MyEventsBundle? _data;
 
   Future<void> _loadFullData() async {
-    _data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, true);
+    _data = await DbEvents.getMyEventsAndActivities(
+        RightsService.currentOccasionId()!, true);
 
     // init _eventAndActivitiesDescriptions
     for (var e in _data!.events) {
@@ -71,15 +73,17 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   Future<void> loadData() async {
-    if(!AuthService.isLoggedIn()){
+    if (!AuthService.isLoggedIn()) {
       return;
     }
     if (!_fullEventsLoaded) {
       await _loadFullData();
     } else {
-      _data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, false);
+      _data = await DbEvents.getMyEventsAndActivities(
+          RightsService.currentOccasionId()!, false);
       for (var e in _data!.events) {
-        if (e.id != null && _eventAndActivitiesDescriptions.containsKey(e.id!)) {
+        if (e.id != null &&
+            _eventAndActivitiesDescriptions.containsKey(e.id!)) {
           e.description = _eventAndActivitiesDescriptions[e.id!];
         }
       }
@@ -89,14 +93,17 @@ class _MySchedulePageState extends State<MySchedulePage> {
         }
       }
     }
-    
-    var actDots = ActivityDataHelper.activitiesToTimeBlocks(_data!.activities, _data!.events);
 
-    var events = _data!.events.where((e) => canBeShownInMySchedule(RightsService.currentUser(), e));
+    var actDots = ActivityDataHelper.activitiesToTimeBlocks(
+        _data!.activities, _data!.events);
+
+    var events = _data!.events
+        .where((e) => canBeShownInMySchedule(RightsService.currentUser(), e));
     if (_isAdvancedTimeline ?? false) {
       _dots = events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
     } else {
-      _dots = events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
+      _dots =
+          events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
 
     _dots!.addAll(actDots);
@@ -104,12 +111,15 @@ class _MySchedulePageState extends State<MySchedulePage> {
     _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
     setState(() {});
 
-    await DbEvents.synchronizeMySchedule(currentIds: events.where((e)=>e.isInMySchedule == true).map((e)=>e.id!).toList());
+    await DbEvents.synchronizeMySchedule(
+        currentIds: events
+            .where((e) => e.isInMySchedule == true)
+            .map((e) => e.id!)
+            .toList());
   }
-  
+
   bool canBeShownInMySchedule(UserInfoModel? userInfo, EventModel e) {
-    return
-    e.isInMySchedule == true ||
+    return e.isInMySchedule == true ||
         ((e.isGroupEvent ?? false) && (userInfo?.hasGroup() ?? false)) ||
         (e.isSignedIn ?? false);
   }
@@ -120,13 +130,12 @@ class _MySchedulePageState extends State<MySchedulePage> {
     await OfflineDataService.updateEventsWithGroupName(offlineEvents);
     var userInfo = await OfflineDataService.getUserInfo();
 
-    var myEvents = offlineEvents.where((e) => canBeShownInMySchedule(userInfo, e));
-
-
+    var myEvents =
+        offlineEvents.where((e) => canBeShownInMySchedule(userInfo, e));
 
     _events.clear();
     _events.addAll(myEvents);
-    
+
     var activities = await OfflineDataService.getAllActivities();
 
     // init _eventAndActivitiesDescriptions
@@ -137,12 +146,14 @@ class _MySchedulePageState extends State<MySchedulePage> {
       _eventAndActivitiesDescriptions[e.id.hashCode] = e.description;
     }
 
-    var actDots = ActivityDataHelper.activitiesToTimeBlocks(activities, offlineEvents);
-    
-    if (_isAdvancedTimeline??false) {
+    var actDots =
+        ActivityDataHelper.activitiesToTimeBlocks(activities, offlineEvents);
+
+    if (_isAdvancedTimeline ?? false) {
       _dots = _events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
     } else {
-      _dots = _events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
+      _dots =
+          _events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
 
     _dots!.addAll(actDots);
@@ -184,11 +195,13 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
   bool _isUserApprover() => RightsService.isApprover();
 
-  Future<void> _handleScanButtonPressed(BuildContext context, int eventId) async {
+  Future<void> _handleScanButtonPressed(
+      BuildContext context, int eventId) async {
     RouterService.navigatePageInfo(context, CheckRoute(id: eventId));
   }
 
-  Future<void> _handleCompanionButtonPressed(BuildContext context, TimeBlockItem timeBlockItem) async {
+  Future<void> _handleCompanionButtonPressed(
+      BuildContext context, TimeBlockItem timeBlockItem) async {
     List<CompanionModel> companions = await DbCompanions.getAllCompanions();
     showDialog(
       context: context,
@@ -208,7 +221,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
               }
             },
             canSignIn: () {
-              final currentItem = _dots?.firstWhereOrNull((element) => element.id == timeBlockItem.id);
+              final currentItem = _dots?.firstWhereOrNull(
+                  (element) => element.id == timeBlockItem.id);
               return currentItem?.canSignIn() ?? false;
             },
           );
@@ -216,7 +230,6 @@ class _MySchedulePageState extends State<MySchedulePage> {
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -230,42 +243,45 @@ class _MySchedulePageState extends State<MySchedulePage> {
       ),
     );
 
-    Widget body = (_isAdvancedTimeline == true) ?
-    DayList(dayGroup: TimeBlockGroup(title: "", events: _dots!),
-      controller: AdvancedTimelineController(
-        events: _dots!,
-        onEventPressed: _eventPressed,
-        showAddNewEventButton: RightsService.isEditor,
-        onSignInEvent: _handleSignIn,
-        onSignOutEvent: _handleSignOut,
-        onAddToProgramEvent: _handleAdd,
-        onRemoveFromProgramEvent: _handleRemove,
-        onEditEvent: (c, ev) => RouterService
-            .navigateOccasion(
-            context, "${EventEditPage.ROUTE}/$ev")
-            .then((_) => loadData()),
-        onPlaceTap: (c, pl) => _goToMap(pl.id),
-        customSplitter: TimeBlockHelper.splitTimeBlocksByDay,
-        animateEventRemoval: true,
-        emptyContent: commonEmptyContent,
-        isUserApprover: _isUserApprover,
-        onScanButtonPressed: _handleScanButtonPressed,
-        onCompanionButtonPressed: _handleCompanionButtonPressed,
-      ),
-      openId: _openId,
-      onToggle: (id) => setState(
-              () => _openId = _openId == id ? null : id),) :
-    SingleChildScrollView(
-        child: ScheduleTimeline(
-          eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_dots!, context),
-          onEventPressed: _eventPressed,
-          nodePosition: 0.3,
-          emptyContent: commonEmptyContent,
-        ));
+    Widget body = (_isAdvancedTimeline == true)
+        ? DayList(
+            dayGroup: TimeBlockGroup(title: "", events: _dots!),
+            controller: AdvancedTimelineController(
+              events: _dots!,
+              onEventPressed: _eventPressed,
+              showAddNewEventButton: RightsService.isEditor,
+              onSignInEvent: _handleSignIn,
+              onSignOutEvent: _handleSignOut,
+              onAddToProgramEvent: _handleAdd,
+              onRemoveFromProgramEvent: _handleRemove,
+              onEditEvent: (c, ev) => RouterService.navigateOccasion(
+                      context, "${EventEditPage.ROUTE}/$ev")
+                  .then((_) => loadData()),
+              onPlaceTap: (c, pl) => _goToMap(pl.id),
+              customSplitter: TimeBlockHelper.splitTimeBlocksByDay,
+              animateEventRemoval: true,
+              emptyContent: commonEmptyContent,
+              isUserApprover: _isUserApprover,
+              onScanButtonPressed: _handleScanButtonPressed,
+              onCompanionButtonPressed: _handleCompanionButtonPressed,
+            ),
+            openId: _openId,
+            onToggle: (id) =>
+                setState(() => _openId = _openId == id ? null : id),
+          )
+        : SingleChildScrollView(
+            child: ScheduleTimeline(
+            eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_dots!, context),
+            onEventPressed: _eventPressed,
+            nodePosition: 0.3,
+            emptyContent: commonEmptyContent,
+          ));
 
     return Scaffold(
         appBar: AppBar(
-          title: Text("My schedule", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
+          title: Text("My schedule",
+                  style: TextStyle(color: ThemeConfig.appBarColorNegative()))
+              .tr(),
           leading: BackButton(
             color: ThemeConfig.appBarColorNegative(),
             onPressed: () => RouterService.popOrHome(context),
@@ -274,16 +290,15 @@ class _MySchedulePageState extends State<MySchedulePage> {
         body: SafeArea(
           child: Align(
               alignment: Alignment.topCenter,
-              child:
-              _dots == null ?
-              const Center(child: CircularProgressIndicator()) :
-              ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-                  child: body)),
+              child: _dots == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : ConstrainedBox(
+                      constraints:
+                          BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                      child: body)),
         ));
   }
 
   final List<EventModel> _events = [];
   List<TimeBlockItem>? _dots = [];
-
 }

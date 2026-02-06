@@ -12,7 +12,8 @@ class ScheduleTab extends StatefulWidget {
   _ScheduleTabState createState() => _ScheduleTabState();
 }
 
-class _ScheduleTabState extends State<ScheduleTab> with SingleTickerProviderStateMixin {
+class _ScheduleTabState extends State<ScheduleTab>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -40,8 +41,10 @@ class _ScheduleTabState extends State<ScheduleTab> with SingleTickerProviderStat
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                DataGridHelper.buildTab(context, Icons.calendar_month, "Schedule".tr()),
-                DataGridHelper.buildTab(context, Icons.punch_clock_rounded, "Exclusivity".tr()),
+                DataGridHelper.buildTab(
+                    context, Icons.calendar_month, "Schedule".tr()),
+                DataGridHelper.buildTab(
+                    context, Icons.punch_clock_rounded, "Exclusivity".tr()),
               ],
             ),
           ),

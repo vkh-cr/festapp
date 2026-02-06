@@ -21,7 +21,8 @@ class OfflineDataService {
   static const String eventsOfflineStorage = "events";
   static const String informationOfflineStorage = "information";
   static const String activitiesOfflineStorage = "activities";
-  static const String userInventoryBundleOffline = "userInventoryBundle"; // Added key for inventory
+  static const String userInventoryBundleOffline =
+      "userInventoryBundle"; // Added key for inventory
 
   static Future<void> saveMyScheduleData(List<int> offlineData) async {
     var encoded = jsonEncode(offlineData);
@@ -39,7 +40,8 @@ class OfflineDataService {
 
   static Future<void> addToMySchedule(int id) async {
     var offlineData = await getMyScheduleData();
-    if (!offlineData.contains(id)) { // Avoid duplicates
+    if (!offlineData.contains(id)) {
+      // Avoid duplicates
       offlineData.add(id);
       await saveMyScheduleData(offlineData);
     }
@@ -48,7 +50,8 @@ class OfflineDataService {
   static Future<void> addAllToMySchedule(List<int> ids) async {
     var offlineData = await getMyScheduleData();
     for (var id in ids) {
-      if (!offlineData.contains(id)) { // Avoid duplicates
+      if (!offlineData.contains(id)) {
+        // Avoid duplicates
         offlineData.add(id);
       }
     }
@@ -66,14 +69,16 @@ class OfflineDataService {
     return offlineData.contains(id);
   }
 
-  static Future<void> updateEventsWithMySchedule(Iterable<EventModel> events) async {
+  static Future<void> updateEventsWithMySchedule(
+      Iterable<EventModel> events) async {
     var myScheduleIds = await getMyScheduleData();
     for (var e in events) {
       e.isInMySchedule = myScheduleIds.contains(e.id!);
     }
   }
 
-  static Future<void> updateEventsWithGroupName(Iterable<EventModel> events) async {
+  static Future<void> updateEventsWithGroupName(
+      Iterable<EventModel> events) async {
     var me = await getUserInfo();
     if (me?.eventUserGroup != null) {
       for (var e in events) {
@@ -133,8 +138,9 @@ class OfflineDataService {
   static Future<void> saveGlobalSettings(OccasionSettingsModel toSave) =>
       saveOffline(OccasionSettingsModel.globalSettingsOffline, toSave);
 
-  static Future<OccasionSettingsModel?> getGlobalSettings() =>
-      getOffline(OccasionSettingsModel.globalSettingsOffline, OccasionSettingsModel.fromJson);
+  static Future<OccasionSettingsModel?> getGlobalSettings() => getOffline(
+      OccasionSettingsModel.globalSettingsOffline,
+      OccasionSettingsModel.fromJson);
 
   static Future<void> saveAllEvents(List<EventModel> toSave) =>
       saveAllOffline(eventsOfflineStorage, toSave);
@@ -145,8 +151,8 @@ class OfflineDataService {
   static Future<void> saveAllInfo(List<InformationModel> toSave) =>
       saveAllOffline(InformationModel.informationOffline, toSave);
 
-  static Future<List<InformationModel>> getAllInfo() =>
-      getAllOffline(InformationModel.informationOffline, InformationModel.fromJson);
+  static Future<List<InformationModel>> getAllInfo() => getAllOffline(
+      InformationModel.informationOffline, InformationModel.fromJson);
 
   static Future<void> saveAllActivities(List<ActivityModel> toSave) =>
       saveAllOffline(activitiesOfflineStorage, toSave);
@@ -174,8 +180,10 @@ class OfflineDataService {
     await deleteOffline(userInventoryBundleOffline);
   }
 
-  static Future<void> saveAllOffline<T>(String offlineTable, List<T> toSave) async {
-    var encoded = jsonEncode(toSave.map((item) => (item as dynamic).toJson()).toList());
+  static Future<void> saveAllOffline<T>(
+      String offlineTable, List<T> toSave) async {
+    var encoded =
+        jsonEncode(toSave.map((item) => (item as dynamic).toJson()).toList());
     await StorageHelper.set(offlineTable, encoded);
   }
 
@@ -183,14 +191,16 @@ class OfflineDataService {
     await StorageHelper.remove(id, storage);
   }
 
-  static Future<void> saveOffline<T>(String id, T toSave, [String? storage]) async {
+  static Future<void> saveOffline<T>(String id, T toSave,
+      [String? storage]) async {
     // The toJson method of T will be called automatically by jsonEncode
     var encoded = jsonEncode(toSave);
     await StorageHelper.set(id, encoded, storage);
   }
 
   static Future<T?> getOffline<T>(
-      String id, T Function(Map<String, dynamic>) fromJson, [String? storage]) async {
+      String id, T Function(Map<String, dynamic>) fromJson,
+      [String? storage]) async {
     try {
       var data = await StorageHelper.get(id, storage);
       if (data == null) {
@@ -200,7 +210,7 @@ class OfflineDataService {
       return fromJson(js);
     } catch (e) {
       //catch incompatibility fails
-      print("Error in getOffline for id $id: $e");
+      // Error in getOffline
       return null;
     }
   }
@@ -213,11 +223,13 @@ class OfflineDataService {
       if (data == null) {
         return toReturn;
       }
-      var offlineData = json.decode(data) as List<dynamic>; // Ensure it's a List
-      toReturn.addAll(List<T>.from(offlineData.map((o) => fromJson(o as Map<String, dynamic>))));
+      var offlineData =
+          json.decode(data) as List<dynamic>; // Ensure it's a List
+      toReturn.addAll(List<T>.from(
+          offlineData.map((o) => fromJson(o as Map<String, dynamic>))));
     } catch (e) {
       //catch incompatibility fails
-      print("Error in getAllOffline for table $offlineTable: $e");
+      // Error in getAllOffline
     }
     return toReturn;
   }

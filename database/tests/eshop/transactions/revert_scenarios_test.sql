@@ -35,7 +35,7 @@ BEGIN
     VALUES (123, v_pi_id, 'ordered', 200.0, 'CZK', now()) RETURNING id INTO v_order_id;
 
     -- 1.2 Pay
-    PERFORM public.insert_manual_transaction(200.0, 'CZK', 999, '2024-01-01', NULL, 'Pay', v_pi_id);
+    PERFORM public.insert_manual_transaction(200.0::double precision, 'CZK', 999, NULL, '2024-01-01', 'Pay', v_pi_id::integer);
     
     -- 1.3 Manually move to SENT
     UPDATE eshop.orders SET state = 'sent' WHERE id = v_order_id;
@@ -57,10 +57,10 @@ BEGIN
     VALUES (123, v_pi_id, 'ordered', 200.0, 'CZK', now()) RETURNING id INTO v_order_id;
 
     -- 2.2 Pay Full
-    PERFORM public.insert_manual_transaction(200.0, 'CZK', 999, '2024-01-01', NULL, 'Pay', v_pi_id);
+    PERFORM public.insert_manual_transaction(200.0::double precision, 'CZK', 999, NULL, '2024-01-01', 'Pay', v_pi_id::integer);
     
     -- 2.3 Insert Negative (-200)
-    PERFORM public.insert_manual_transaction(-200.0, 'CZK', 999, '2024-01-01', NULL, 'Refund', v_pi_id);
+    PERFORM public.insert_manual_transaction(-200.0::double precision, 'CZK', 999, NULL, '2024-01-01', 'Refund', v_pi_id::integer);
     
     -- 2.4 Check State and Amounts
     SELECT state, payment_info INTO v_state, v_pi_id FROM eshop.orders WHERE id = v_order_id;

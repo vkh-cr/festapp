@@ -4,7 +4,6 @@ import 'package:fstapp/components/inventory/models/resource_model.dart';
 import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 class DbInventoryPools {
   static final _supabase = Supabase.instance.client;
 
@@ -16,18 +15,22 @@ class DbInventoryPools {
     return UserInventoryBundle.fromJson(response);
   }
 
-  static Future<InventoryPoolsListBundle> getInventoryPoolsByOccasionLink(String occasionLink) async {
+  static Future<InventoryPoolsListBundle> getInventoryPoolsByOccasionLink(
+      String occasionLink) async {
     final response = await _supabase.rpc(
       'get_inventory_pools_by_occasion_link',
       params: {'p_occasion_link': occasionLink},
     );
 
-    if (response is Map && response.containsKey('code') && response['code'] != 200) {
-      throw Exception("Failed to fetch inventory pools: ${response['message']}");
+    if (response is Map &&
+        response.containsKey('code') &&
+        response['code'] != 200) {
+      throw Exception(
+          "Failed to fetch inventory pools: ${response['message']}");
     }
     final bundle = InventoryPoolsListBundle.fromJson(response);
-    final poolMap = { for (var p in bundle.pools) p.id: p };
-    final contextMap = { for (var c in bundle.inventoryContexts) c.id: c };
+    final poolMap = {for (var p in bundle.pools) p.id: p};
+    final contextMap = {for (var c in bundle.inventoryContexts) c.id: c};
     for (final context in bundle.inventoryContexts) {
       context.inventoryPool = poolMap[context.inventoryPoolId];
     }
@@ -45,17 +48,21 @@ class DbInventoryPools {
       params: {'p_inventory_pool_id': poolId},
     );
 
-    if (response is Map && response.containsKey('code') && response['code'] != 200) {
-      throw Exception("Failed to fetch inventory pool bundle: ${response['message']}");
+    if (response is Map &&
+        response.containsKey('code') &&
+        response['code'] != 200) {
+      throw Exception(
+          "Failed to fetch inventory pool bundle: ${response['message']}");
     }
 
     return InventoryPoolBundle.fromJson(response);
   }
 
-  static Future<InventoryPoolBundle> updateInventoryPoolBundle(InventoryPoolBundle bundle) async {
+  static Future<InventoryPoolBundle> updateInventoryPoolBundle(
+      InventoryPoolBundle bundle) async {
     final response = await _supabase.rpc(
       'update_inventory_pool_bundle',
-      params: {'p_bundle_data': bundle },
+      params: {'p_bundle_data': bundle},
     );
     return InventoryPoolBundle.fromJson(response);
   }

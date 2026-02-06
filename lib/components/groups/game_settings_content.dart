@@ -39,8 +39,12 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
   }
 
   Future<void> saveData() async {
-    if (_startDateTime != null && _endDateTime != null && _startDateTime!.isAfter(_endDateTime!)) {
-      ToastHelper.Show(context, "Start time must be earlier than end time.".tr(), severity: ToastSeverity.NotOk);
+    if (_startDateTime != null &&
+        _endDateTime != null &&
+        _startDateTime!.isAfter(_endDateTime!)) {
+      ToastHelper.Show(
+          context, "Start time must be earlier than end time.".tr(),
+          severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -51,9 +55,11 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
 
     final success = await DbOccasions.updateGameSettings(gameSettings);
     if (success) {
-      ToastHelper.Show(context, CommonStrings.saved, severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, CommonStrings.saved,
+          severity: ToastSeverity.Ok);
     } else {
-      ToastHelper.Show(context, "Failed to save game settings.", severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, "Failed to save game settings.",
+          severity: ToastSeverity.NotOk);
     }
   }
 

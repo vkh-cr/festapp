@@ -46,10 +46,9 @@ class ProductModel extends ITrinaRowModel {
   static const String metaPaidCount = "paid_count";
   static const String metaSentCount = "sent_count";
 
-
   String? get shortTitle => data?[TbEshop.products.data_short_title];
   set shortTitle(String? value) {
-    if (data == null) data = {};
+    data ??= {};
     if (value == null || value.isEmpty) {
       data!.remove(TbEshop.products.data_short_title);
     } else {
@@ -69,13 +68,13 @@ class ProductModel extends ITrinaRowModel {
     double? result;
     if (val is num) result = val.toDouble();
     if (val is String) result = double.tryParse(val);
-    
+
     if (result == 0) return null;
     return result;
   }
 
   set surchargeAmount(double? value) {
-    if (data == null) data = {};
+    data ??= {};
     if (data![TbEshop.products.data_surcharge] is! Map) {
       data![TbEshop.products.data_surcharge] = {};
     }
@@ -95,7 +94,7 @@ class ProductModel extends ITrinaRowModel {
   }
 
   set surchargeCurrency(String? value) {
-    if (data == null) data = {};
+    data ??= {};
     if (data![TbEshop.products.data_surcharge] is! Map) {
       data![TbEshop.products.data_surcharge] = {};
     }
@@ -105,12 +104,11 @@ class ProductModel extends ITrinaRowModel {
     } else {
       map['currency'] = value;
     }
-    
+
     if (map.isEmpty || !map.containsKey('amount')) {
       data!.remove(TbEshop.products.data_surcharge);
     }
   }
-
 
   ProductModel({
     this.id,
@@ -136,7 +134,7 @@ class ProductModel extends ITrinaRowModel {
     this.isDynamicallyAvailable,
     List<int>? formIds,
     this.formTitles,
-  }) : includedInventories = includedInventories ?? [],
+  })  : includedInventories = includedInventories ?? [],
         formIds = formIds ?? [];
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -153,10 +151,10 @@ class ProductModel extends ITrinaRowModel {
       } else if (amount is String) {
         if (double.tryParse(amount) == 0) shouldRemove = true;
       }
-      
+
       if (shouldRemove) {
         // Create a copy of data to avoid mutating the original JSON map if it's reused
-        // although usually json decode produces fresh maps. 
+        // although usually json decode produces fresh maps.
         // Better safe:
         data = Map<String, dynamic>.from(data);
         data.remove(TbEshop.products.data_surcharge);
@@ -200,7 +198,7 @@ class ProductModel extends ITrinaRowModel {
       data = Map.from(model!.data!);
     }
     if (json.containsKey(EshopColumns.PRODUCT_SHORT_TITLE)) {
-      if (data == null) data = {};
+      data ??= {};
       var val = json[EshopColumns.PRODUCT_SHORT_TITLE];
       if (val != null && val.toString().isNotEmpty) {
         data[TbEshop.products.data_short_title] = val.toString();
@@ -211,7 +209,7 @@ class ProductModel extends ITrinaRowModel {
 
     // Handle Surcharge combined field from Grid
     if (json.containsKey(EshopColumns.PRODUCT_SURCHARGE)) {
-      if (data == null) data = {};
+      data ??= {};
       var surchargeMap = data[TbEshop.products.data_surcharge] is Map
           ? Map<String, dynamic>.from(data[TbEshop.products.data_surcharge])
           : <String, dynamic>{};
@@ -222,24 +220,24 @@ class ProductModel extends ITrinaRowModel {
         String raw = val.toString().trim();
         List<String> parts = raw.split(" ");
         if (parts.isNotEmpty) {
-           double? amount = double.tryParse(parts[0]);
-           if (amount != null && amount != 0) {
-             surchargeMap['amount'] = amount;
-           } else {
-             surchargeMap.remove('amount');
-           }
-           
-           if (parts.length > 1) {
-             surchargeMap['currency'] = parts.sublist(1).join(" ");
-           } else {
-              surchargeMap.remove('currency');
-           }
+          double? amount = double.tryParse(parts[0]);
+          if (amount != null && amount != 0) {
+            surchargeMap['amount'] = amount;
+          } else {
+            surchargeMap.remove('amount');
+          }
+
+          if (parts.length > 1) {
+            surchargeMap['currency'] = parts.sublist(1).join(" ");
+          } else {
+            surchargeMap.remove('currency');
+          }
         }
       } else {
-         surchargeMap.remove('amount');
-         surchargeMap.remove('currency');
+        surchargeMap.remove('amount');
+        surchargeMap.remove('currency');
       }
-      
+
       if (surchargeMap.containsKey('amount')) {
         data[TbEshop.products.data_surcharge] = surchargeMap;
       } else {
@@ -248,7 +246,9 @@ class ProductModel extends ITrinaRowModel {
     }
 
     return ProductModel(
-      id: json[EshopColumns.PRODUCT_ID] == -1 ? null : json[EshopColumns.PRODUCT_ID],
+      id: json[EshopColumns.PRODUCT_ID] == -1
+          ? null
+          : json[EshopColumns.PRODUCT_ID],
       title: json[EshopColumns.PRODUCT_TITLE],
       isHidden: json[EshopColumns.PRODUCT_IS_HIDDEN] == 'true',
       data: data,
@@ -266,18 +266,18 @@ class ProductModel extends ITrinaRowModel {
   }
 
   Map<String, dynamic> toJson() => {
-    TbEshop.products.id: id,
-    TbEshop.products.title: title,
-    TbEshop.products.is_hidden: isHidden,
-    TbEshop.products.description: description,
-    TbEshop.products.price: price,
-    TbEshop.products.currency_code: currencyCode,
-    TbEshop.products.data: data,
-    TbEshop.products.product_type: productTypeId,
-    TbEshop.products.occasion: occasion,
-    TbEshop.products.order: order,
-    TbEshop.products.maximum: maximum,
-  };
+        TbEshop.products.id: id,
+        TbEshop.products.title: title,
+        TbEshop.products.is_hidden: isHidden,
+        TbEshop.products.description: description,
+        TbEshop.products.price: price,
+        TbEshop.products.currency_code: currencyCode,
+        TbEshop.products.data: data,
+        TbEshop.products.product_type: productTypeId,
+        TbEshop.products.occasion: occasion,
+        TbEshop.products.order: order,
+        TbEshop.products.maximum: maximum,
+      };
 
   ProductModel copyWith({
     int? id,
@@ -312,12 +312,14 @@ class ProductModel extends ITrinaRowModel {
       isHidden: isHidden ?? this.isHidden,
       description: description ?? this.description,
       price: price ?? this.price,
-      data: data ?? (this.data != null ? Map<String, dynamic>.from(this.data!) : null),
+      data: data ??
+          (this.data != null ? Map<String, dynamic>.from(this.data!) : null),
       productTypeId: productTypeId ?? this.productTypeId,
       productType: productType ?? this.productType,
       occasion: occasion ?? this.occasion,
       productTypeString: productTypeString ?? this.productTypeString,
-      productTypeTitleString: productTypeTitleString ?? this.productTypeTitleString,
+      productTypeTitleString:
+          productTypeTitleString ?? this.productTypeTitleString,
       order: order ?? this.order,
       maximum: maximum ?? this.maximum,
       orderedCount: orderedCount ?? this.orderedCount,
@@ -325,7 +327,8 @@ class ProductModel extends ITrinaRowModel {
       sentCount: sentCount ?? this.sentCount,
       currencyCode: currencyCode ?? this.currencyCode,
       includedInventories: includedInventories ?? this.includedInventories,
-      isDynamicallyAvailable: isDynamicallyAvailable ?? this.isDynamicallyAvailable,
+      isDynamicallyAvailable:
+          isDynamicallyAvailable ?? this.isDynamicallyAvailable,
       formIds: formIds ?? this.formIds,
       formTitles: formTitles ?? this.formTitles,
     );
@@ -335,7 +338,9 @@ class ProductModel extends ITrinaRowModel {
   /// It checks static limits (`maximum` vs `orderedCount`) and the dynamic availability flag from the backend.
   /// If `isDynamicallyAvailable` is null, it's treated as true to ensure backward compatibility.
   bool get isAvailable =>
-      ((maximum == null || maximum == 0) || ((orderedCount ?? 0) < (maximum ?? 0))) && (isDynamicallyAvailable ?? true);
+      ((maximum == null || maximum == 0) ||
+          ((orderedCount ?? 0) < (maximum ?? 0))) &&
+      (isDynamicallyAvailable ?? true);
 
   @override
   String toBasicString() => title ?? id.toString();
@@ -364,13 +369,18 @@ class ProductModel extends ITrinaRowModel {
         value: price != null ? price?.toStringAsFixed(2) : '',
       ),
       EshopColumns.PRODUCT_CURRENCY_CODE: TrinaCell(value: currencyCode ?? ''),
-      EshopColumns.PRODUCT_SURCHARGE: TrinaCell(value: (surchargeAmount != null ? "${surchargeAmount} ${surchargeCurrency ?? ''}" : "").trim()),
+      EshopColumns.PRODUCT_SURCHARGE: TrinaCell(
+          value: (surchargeAmount != null
+                  ? "$surchargeAmount ${surchargeCurrency ?? ''}"
+                  : "")
+              .trim()),
       EshopColumns.PRODUCT_TYPE: TrinaCell(value: productType?.title ?? ''),
       EshopColumns.PRODUCT_ORDER: TrinaCell(value: order ?? 0),
       EshopColumns.PRODUCT_MAXIMUM: TrinaCell(value: maximum ?? 0),
       EshopColumns.PRODUCT_ORDERED_COUNT: TrinaCell(value: orderedCount),
       EshopColumns.PRODUCT_PAID_COUNT: TrinaCell(value: total),
-      EshopColumns.PRODUCT_INCLUDED_INVENTORY: TrinaCell(value: getInventoryDisplayValue(this, context)),
+      EshopColumns.PRODUCT_INCLUDED_INVENTORY:
+          TrinaCell(value: getInventoryDisplayValue(this, context)),
       EshopColumns.PRODUCT_USED_IN_FORMS: TrinaCell(value: formTitles ?? ''),
       EshopColumns.PRODUCT_MODEL_REFERENCE: TrinaCell(value: this),
     });
@@ -382,7 +392,8 @@ class ProductModel extends ITrinaRowModel {
       context,
       futureFunction: () async {
         var productId = await DbEshop.updateProduct(this);
-        await DbEshop.updateProductInventoryContexts(productId, includedInventories);
+        await DbEshop.updateProductInventoryContexts(
+            productId, includedInventories);
       },
       defaultErrorMessage: "Failed to save product.".tr(),
       rethrowError: true,
@@ -402,23 +413,26 @@ class ProductModel extends ITrinaRowModel {
     );
   }
 
-  static String getInventoryDisplayValue(ProductModel product, BuildContext context) {
+  static String getInventoryDisplayValue(
+      ProductModel product, BuildContext context) {
     if (product.includedInventories.isEmpty) {
       return "";
     }
     return product.includedInventories.map((link) {
       final quantityText = link.quantity > 1 ? " (x${link.quantity})" : "";
       // Use the populated object for its title, with a fallback to the ID.
-      final title = link.inventoryContext?.getFullTitle(context) ?? link.inventoryContextId.toString();
+      final title = link.inventoryContext?.getFullTitle(context) ??
+          link.inventoryContextId.toString();
       return "$title$quantityText";
     }).join(" | ");
   }
 
   String getFormattedProductTitle() {
     if (price != null) {
-      final priceString = "${price!.toStringAsFixed(2)} ${currencyCode ?? ''}".trim();
+      final priceString =
+          "${price!.toStringAsFixed(2)} ${currencyCode ?? ''}".trim();
       return "$title ($priceString)";
     }
-    return title??"";
+    return title ?? "";
   }
 }

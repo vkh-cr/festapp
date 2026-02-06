@@ -1,6 +1,8 @@
 # 📦 iOS Release Upload Guide (App Store Connect)
 
-This guide explains how to configure and use the `release_scripts/` automation to build, upload, and submit your Flutter iOS app to App Store Connect.
+This guide explains how to configure and use the `automation/release/`
+automation to build, upload, and submit your Flutter iOS app to App Store
+Connect.
 
 ---
 
@@ -15,17 +17,19 @@ This guide explains how to configure and use the `release_scripts/` automation t
 
 ## 🔐 Step 1: Create an API Key for App Store Connect
 
-1. Go to [https://appstoreconnect.apple.com/access/integrations/api](https://appstoreconnect.apple.com/access/integrations/api)
+1. Go to
+   [https://appstoreconnect.apple.com/access/integrations/api](https://appstoreconnect.apple.com/access/integrations/api)
 2. Click the ➕ button to create a new API key
 3. Name it (e.g., `Release Upload Key`)
-4. Set **Access**: **App Manager** or **Admin** (❗ required for submitting builds)
+4. Set **Access**: **App Manager** or **Admin** (❗ required for submitting
+   builds)
 5. Download the `.p8` file (e.g. `AuthKey_ABCD123456.p8`)
 
 ---
 
 ## 🗝 Step 2: Set Up Local Authentication Script
 
-1. Open `.set_appstore_env.sh` in the `release_scripts/` folder
+1. Open `.set_appstore_env.sh` in the `automation/release/` folder
 2. Fill in your credentials:
 
 ```bash
@@ -39,8 +43,10 @@ export APP_STORE_CONNECT_ISSUER_ID="01234567-89ab-cdef-0123-456789abcdef"
 
 ## 📁 Step 3: Place the Private Key
 
-Place your downloaded `.p8` file (e.g. `AuthKey_ABCD123456.p8`) **inside the `release_scripts/` folder**.  
+Place your downloaded `.p8` file (e.g. `AuthKey_ABCD123456.p8`) **inside the
+`automation/release/` folder**.\
 The script will automatically copy it to the required location:
+
 ```
 ~/.appstoreconnect/private_keys/
 ```
@@ -52,7 +58,7 @@ The script will automatically copy it to the required location:
 Run the setup script to install Fastlane (if needed) and create `Fastfile`:
 
 ```bash
-./release_scripts/fastlane_setup.sh
+./automation/release/fastlane_setup.sh
 ```
 
 ---
@@ -60,8 +66,8 @@ Run the setup script to install Fastlane (if needed) and create `Fastfile`:
 ## 🚀 Step 5: Build, Upload & Submit
 
 ```bash
-source release_scripts/.set_appstore_env.sh
-./release_scripts/build_and_upload.sh
+source automation/release/.set_appstore_env.sh
+./automation/release/build_and_upload.sh
 ```
 
 You’ll be prompted to enter **release notes**. The script will:
@@ -92,7 +98,7 @@ Whatever you type will be used as the "What's New" description for that version.
 
 Make sure:
 
-- The `.p8` file is placed correctly in `release_scripts/`
+- The `.p8` file is placed correctly in `automation/release/`
 - The filename follows `AuthKey_<KEY_ID>.p8`
 - The key ID in your env file matches the actual file name
 
@@ -105,14 +111,15 @@ my_project/
 ├── ios/
 │   └── Runner/
 │       └── Info.plist
-├── release_scripts/
-│   ├── build_and_upload.sh
-│   ├── fastlane_setup.sh
-│   ├── .set_appstore_env.sh
-│   ├── ios_howto.md
-│   ├── AuthKey_ABCD123456.p8
-│   └── fastlane/
-│       └── Fastfile
+├── automation/
+│   └── release/
+│       ├── build_and_upload.sh
+│       ├── fastlane_setup.sh
+│       ├── .set_appstore_env.sh
+│       ├── ios_howto.md
+│       ├── AuthKey_ABCD123456.p8
+│       └── fastlane/
+│           └── Fastfile
 └── pubspec.yaml
 ```
 

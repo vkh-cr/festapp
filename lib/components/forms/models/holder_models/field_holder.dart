@@ -75,8 +75,8 @@ class OptionsFieldProductHolder extends OptionsFieldHolder {
     required super.isRequired,
     super.description,
   }) : super(
-    options: productOptions,
-  );
+          options: productOptions,
+        );
 
   @override
   String toString() =>

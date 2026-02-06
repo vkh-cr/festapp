@@ -4,7 +4,6 @@ INSERT INTO organizations (id, title) VALUES (999, 'Test Org') ON CONFLICT (id) 
 INSERT INTO units (id, organization, title) VALUES (999, 999, 'Test Unit') ON CONFLICT (id) DO NOTHING;
 
 -- Setup Mock User (Manager)
--- Setup Mock User (Manager)
 DO $$
 DECLARE
     v_user_id uuid := gen_random_uuid();
@@ -32,6 +31,7 @@ INSERT INTO eshop.payment_info (id, variable_symbol, amount, currency_code, bank
 VALUES (1001, 123456789, 200.0, 'CZK', 1000, now()) 
 ON CONFLICT (id) DO UPDATE SET variable_symbol = 123456789, paid = 0, amount = 200.0, bank_account = 1000;
 UPDATE eshop.payment_info SET paid = 0 WHERE id = 1001;
+DELETE FROM eshop.transactions WHERE payment_info = 1001;
 
 -- 3. Create Order
 -- Need occasion
@@ -50,8 +50,8 @@ BEGIN
         200.0::double precision, 
         'CZK', 
         999, 
-        '2024-01-01 12:00:00', 
         '123456789', 
+        '2024-01-01 12:00:00', 
         'Test Note'
     );
 END $$;

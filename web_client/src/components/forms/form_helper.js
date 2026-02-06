@@ -16,10 +16,7 @@ export class FormHelper {
         const fields = formModel.visibleFields || [];
         
         fields.forEach(field => {
-             // Debug log
-             if (field.type === 'product_type' || field.type === 'ticket') {
-                 console.log(`FormHelper: Inspecting field [${field.id}] type=${field.type}`, field);
-             }
+
 
              // Check top level options (product_type mapped to fields)
              if (field.data && field.data.product_type_data && field.data.product_type_data.products) {
@@ -42,7 +39,6 @@ export class FormHelper {
              // Tickets
              if (field.type === 'ticket') {
                  const subFields = field.subFields || field.fields || (field.data && field.data.fields) || [];
-                 // console.log(`FormHelper: Ticket [${field.id}] subfields:`, subFields);
                  subFields.forEach(sf => {
                      // Check 'options' as FormFieldModel parses product_type_data into options
                      if (sf.options) {
@@ -74,11 +70,10 @@ export class FormHelper {
         });
         
         if (currencies.size === 0) {
-            console.log('FormHelper: No currencies found, defaulting to CZK');
             return ['CZK']; // Default
         }
         
-        console.log('FormHelper: Found currencies:', Array.from(currencies));
+
         
         // Ensure CZK is first if present (Priority)
         const arr = Array.from(currencies);
@@ -131,6 +126,23 @@ export class FormHelper {
                 if (ticketPrice > 0) {
                     totalPrice += ticketPrice;
                 }
+            });
+        }
+
+        // --- NEW: Top-Level Fields Handling ---
+        // (Fix for Simple Mode / Direct Product Fields)
+        if (payload.fields && payload.fields.length > 0) {
+            payload.fields.forEach(f => {
+                 let fieldPrice = 0;
+                 if (f.price !== undefined) {
+                     fieldPrice += parseFloat(f.price);
+                 }
+                 
+                 if (fieldPrice > 0) {
+                     totalPrice += fieldPrice;
+                 }
+                 
+                 if (f.currency_code) currency = f.currency_code;
             });
         }
 

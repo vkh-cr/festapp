@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -22,7 +21,8 @@ class EmailBannerSettingsCard extends StatefulWidget {
   });
 
   @override
-  State<EmailBannerSettingsCard> createState() => _EmailBannerSettingsCardState();
+  State<EmailBannerSettingsCard> createState() =>
+      _EmailBannerSettingsCardState();
 }
 
 class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
@@ -54,7 +54,8 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
   void _loadUrls() {
     if (_isOccasion) {
       _overrideUrl = _occasion!.data?['email_banner'];
-      _inheritedUrl = _unit.data?['email_banner'] ?? _organization.data?['email_banner'];
+      _inheritedUrl =
+          _unit.data?['email_banner'] ?? _organization.data?['email_banner'];
     } else {
       _overrideUrl = _unit.data?['email_banner'];
       _inheritedUrl = _organization.data?['email_banner'];
@@ -80,7 +81,7 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
           _occasion!.data!.remove('email_banner');
         }
       } else {
-        if (_unit.data == null) _unit.data = {};
+        _unit.data ??= {};
         if (url != null) {
           _unit.data!['email_banner'] = url;
         } else {
@@ -95,7 +96,9 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
 
       if (mounted) ToastHelper.Show(context, CommonStrings.saved);
     } catch (e) {
-      if (mounted) ToastHelper.Show(context, EmailTemplatesStrings.settingsUploadFailed, severity: ToastSeverity.NotOk);
+      if (mounted)
+        ToastHelper.Show(context, EmailTemplatesStrings.settingsUploadFailed,
+            severity: ToastSeverity.NotOk);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -109,9 +112,11 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
   Widget build(BuildContext context) {
     String statusText;
     bool isOverride = _overrideUrl != null;
-    
+
     if (isOverride) {
-      statusText = _isOccasion ? EmailTemplatesStrings.statusOccasionOverride : EmailTemplatesStrings.statusUnit;
+      statusText = _isOccasion
+          ? EmailTemplatesStrings.statusOccasionOverride
+          : EmailTemplatesStrings.statusUnit;
     } else if (_inheritedUrl != null) {
       statusText = EmailTemplatesStrings.statusUnitInherited;
     } else {
@@ -122,16 +127,16 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
     const double headerHeight = 10;
 
     return Material(
-      clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      color: theme.cardColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-           // Upper fixed-height header with primary color.
+        clipBehavior: Clip.antiAlias,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        color: theme.cardColor,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Upper fixed-height header with primary color.
             Container(
               height: headerHeight,
               color: theme.primaryColor,
@@ -146,11 +151,14 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
                 ),
               ),
               child: Theme(
-                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                data: Theme.of(context)
+                    .copyWith(dividerColor: Colors.transparent),
                 child: ExpansionTile(
                   initiallyExpanded: _isExpanded,
-                  onExpansionChanged: (expanded) => setState(() => _isExpanded = expanded),
-                  tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  onExpansionChanged: (expanded) =>
+                      setState(() => _isExpanded = expanded),
+                  tilePadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   // leading property removed
                   title: Row(
@@ -162,16 +170,16 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
                             Text(
                               EmailTemplatesStrings.settingsBanner,
                               style: TextStyle(
-                                fontWeight: FontWeight.bold, 
-                                fontSize: 16,
-                                // Use body text color from theme
-                                color: ThemeConfig.blackColor(context)
-                              ),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  // Use body text color from theme
+                                  color: ThemeConfig.blackColor(context)),
                             ),
                             const SizedBox(height: 4),
                             // Status Pill
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
                                 color: ThemeConfig.grey200(context),
                                 borderRadius: BorderRadius.circular(4),
@@ -179,17 +187,16 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
                               child: Text(
                                 statusText,
                                 style: TextStyle(
-                                  fontSize: 11, 
-                                  fontWeight: FontWeight.w600,
-                                  color: ThemeConfig.grey800(context)
-                                ),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: ThemeConfig.grey800(context)),
                               ),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 16),
-                      if (_effectiveUrl != null) 
+                      if (_effectiveUrl != null)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(4),
                           child: Image.network(
@@ -197,7 +204,9 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
                             width: 90,
                             height: 30,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Icon(Icons.image, color: ThemeConfig.grey600(context)),
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                                Icons.image,
+                                color: ThemeConfig.grey600(context)),
                           ),
                         )
                       else
@@ -210,73 +219,103 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SelectableText(
-                          _isOccasion 
-                            ? EmailTemplatesStrings.settingsBannerDescriptionOccasion 
-                            : EmailTemplatesStrings.settingsBannerDescriptionOrganization,
-                          style: TextStyle(fontSize: 13, color: ThemeConfig.grey600(context)),
+                          _isOccasion
+                              ? EmailTemplatesStrings
+                                  .settingsBannerDescriptionOccasion
+                              : EmailTemplatesStrings
+                                  .settingsBannerDescriptionOrganization,
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: ThemeConfig.grey600(context)),
                         ),
                         const SizedBox(height: 12),
                         if (_overrideUrl != null)
                           AspectRatio(
                             aspectRatio: 3,
-                            child: _isLoading 
-                              ? const Center(child: CircularProgressIndicator())
-                              : ImageArea(
-                                imageUrl: _overrideUrl,
-                                hint: EmailTemplatesStrings.settingsBannerHint,
-                                onFileSelected: (file) async {
-                                  Uint8List imageData = await file.readAsBytes();
-                                  try {
-                                    var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
-                                    final publicUrl = await DbImages.uploadImage(
-                                      compressedImageData,
-                                      _isOccasion ? _occasion!.id : null,
-                                      !_isOccasion ? _unit.id : null
-                                    );
-                                    await _updateBanner(publicUrl);
-                                    return publicUrl;
-                                  } catch (e) {
-                                      if(mounted) ToastHelper.Show(context, EmailTemplatesStrings.settingsUploadFailed, severity: ToastSeverity.NotOk);
-                                    return null;
-                                  }
-                                },
-                                onRemove: () {
-                                    if (_overrideUrl != null) {
-                                      _handleReset();
-                                    }
-                                },
-                              ),
+                            child: _isLoading
+                                ? const Center(
+                                    child: CircularProgressIndicator())
+                                : ImageArea(
+                                    imageUrl: _overrideUrl,
+                                    hint: EmailTemplatesStrings
+                                        .settingsBannerHint,
+                                    onFileSelected: (file) async {
+                                      Uint8List imageData =
+                                          await file.readAsBytes();
+                                      try {
+                                        var compressedImageData =
+                                            await ImageCompressionHelper
+                                                .compress(imageData, 900);
+                                        final publicUrl =
+                                            await DbImages.uploadImage(
+                                                compressedImageData,
+                                                _isOccasion
+                                                    ? _occasion!.id
+                                                    : null,
+                                                !_isOccasion ? _unit.id : null);
+                                        await _updateBanner(publicUrl);
+                                        return publicUrl;
+                                      } catch (e) {
+                                        if (mounted)
+                                          ToastHelper.Show(
+                                              context,
+                                              EmailTemplatesStrings
+                                                  .settingsUploadFailed,
+                                              severity: ToastSeverity.NotOk);
+                                        return null;
+                                      }
+                                    },
+                                    onRemove: () {
+                                      if (_overrideUrl != null) {
+                                        _handleReset();
+                                      }
+                                    },
+                                  ),
                           )
                         else
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxHeight: 250),
-                            child: _isLoading 
-                              ? const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()))
-                              : ImageArea(
-                                imageUrl: _overrideUrl,
-                                hint: EmailTemplatesStrings.settingsBannerHint,
-                                onFileSelected: (file) async {
-                                  Uint8List imageData = await file.readAsBytes();
-                                  try {
-                                    var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
-                                    final publicUrl = await DbImages.uploadImage(
-                                      compressedImageData,
-                                      _isOccasion ? _occasion!.id : null,
-                                      !_isOccasion ? _unit.id : null
-                                    );
-                                    await _updateBanner(publicUrl);
-                                    return publicUrl;
-                                  } catch (e) {
-                                      if(mounted) ToastHelper.Show(context, EmailTemplatesStrings.settingsUploadFailed, severity: ToastSeverity.NotOk);
-                                    return null;
-                                  }
-                                },
-                                onRemove: () {
-                                    if (_overrideUrl != null) {
-                                      _handleReset();
-                                    }
-                                },
-                              ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 100,
+                                    child: Center(
+                                        child: CircularProgressIndicator()))
+                                : ImageArea(
+                                    imageUrl: _overrideUrl,
+                                    hint: EmailTemplatesStrings
+                                        .settingsBannerHint,
+                                    onFileSelected: (file) async {
+                                      Uint8List imageData =
+                                          await file.readAsBytes();
+                                      try {
+                                        var compressedImageData =
+                                            await ImageCompressionHelper
+                                                .compress(imageData, 900);
+                                        final publicUrl =
+                                            await DbImages.uploadImage(
+                                                compressedImageData,
+                                                _isOccasion
+                                                    ? _occasion!.id
+                                                    : null,
+                                                !_isOccasion ? _unit.id : null);
+                                        await _updateBanner(publicUrl);
+                                        return publicUrl;
+                                      } catch (e) {
+                                        if (mounted)
+                                          ToastHelper.Show(
+                                              context,
+                                              EmailTemplatesStrings
+                                                  .settingsUploadFailed,
+                                              severity: ToastSeverity.NotOk);
+                                        return null;
+                                      }
+                                    },
+                                    onRemove: () {
+                                      if (_overrideUrl != null) {
+                                        _handleReset();
+                                      }
+                                    },
+                                  ),
                           ),
                       ],
                     )
@@ -284,8 +323,7 @@ class _EmailBannerSettingsCardState extends State<EmailBannerSettingsCard> {
                 ),
               ),
             ),
-        ],
-      )
-    );
+          ],
+        ));
   }
 }

@@ -22,7 +22,8 @@ class _EditPriceDialogState extends State<EditPriceDialog> {
   @override
   void initState() {
     super.initState();
-    _priceController = TextEditingController(text: widget.initialPrice.toStringAsFixed(2));
+    _priceController =
+        TextEditingController(text: widget.initialPrice.toStringAsFixed(2));
     _focusNode = FocusNode();
 
     // Add a short delay to allow the dialog animation to complete before focusing.
@@ -43,7 +44,8 @@ class _EditPriceDialogState extends State<EditPriceDialog> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      Navigator.of(context).pop(double.parse(_priceController.text.replaceAll(",", ".")));
+      Navigator.of(context)
+          .pop(double.parse(_priceController.text.replaceAll(",", ".")));
     }
   }
 
@@ -70,8 +72,10 @@ class _EditPriceDialogState extends State<EditPriceDialog> {
                   child: TextFormField(
                     focusNode: _focusNode,
                     controller: _priceController,
-                    decoration: InputDecoration(labelText: OrdersStrings.newPriceLabel),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+                    decoration:
+                        InputDecoration(labelText: OrdersStrings.newPriceLabel),
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true, signed: false),
                     onFieldSubmitted: (_) => _submit(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {

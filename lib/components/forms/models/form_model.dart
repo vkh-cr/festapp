@@ -53,6 +53,7 @@ class FormModel {
   List<BankAccountModel>? availableBankAccounts;
   FormStatsModel? stats;
   bool? isReminderEnabled;
+  bool? canDelete;
 
   static const String metaIsCardDesign = "is_card_design";
   static const String metaIsReminderEnabled = "is_reminder_enabled";
@@ -95,6 +96,7 @@ class FormModel {
     this.availableBankAccounts,
     this.stats,
     this.isReminderEnabled,
+    this.canDelete,
   }) : relatedFields = relatedFields ?? [];
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
@@ -131,72 +133,74 @@ class FormModel {
       link: json[Tb.forms.link],
       relatedFields: json['fields'] != null
           ? (json['fields'] as List)
-          .map((field) => FormFieldModel.fromJson(field))
-          .toList()
+              .map((field) => FormFieldModel.fromJson(field))
+              .toList()
           : [],
       availableBankAccounts: json['available_bank_accounts'] != null
           ? (json['available_bank_accounts'] as List)
-          .map((account) => BankAccountModel.fromJson(account))
-          .toList()
+              .map((account) => BankAccountModel.fromJson(account))
+              .toList()
           : null,
-      stats: json['stats'] != null
-          ? FormStatsModel.fromJson(json['stats'])
-          : null,
+      stats:
+          json['stats'] != null ? FormStatsModel.fromJson(json['stats']) : null,
       isReminderEnabled: json['is_reminder_feature_enabled'],
+      canDelete: json['can_delete'] ?? true, // Default to true if not present to avoid breaking existing clients slightly, but realistically it comes from DB.
     );
   }
 
   Map<String, dynamic> toJson() => {
-    Tb.forms.id: id,
-    Tb.forms.created_at: createdAt?.toIso8601String(),
-    Tb.forms.title: title,
-    Tb.forms.data: data,
-    Tb.forms.key: key,
-    Tb.forms.occasion: occasionId,
-    Tb.forms.blueprint: blueprint,
-    Tb.forms.type: type,
-    Tb.forms.bank_account: bankAccount?.id,
-    Tb.forms.deadline_duration_seconds: deadlineDurationSeconds,
-    Tb.forms.is_open: isOpen,
-    'account_number': accountNumber,
-    'secret': secret,
-    Tb.forms.header: header,
-    Tb.forms.header_off: headerOff,
-    Tb.forms.link: link,
-    'fields': relatedFields,
-  };
+        Tb.forms.id: id,
+        Tb.forms.created_at: createdAt?.toIso8601String(),
+        Tb.forms.title: title,
+        Tb.forms.data: data,
+        Tb.forms.key: key,
+        Tb.forms.occasion: occasionId,
+        Tb.forms.blueprint: blueprint,
+        Tb.forms.type: type,
+        Tb.forms.bank_account: bankAccount?.id,
+        Tb.forms.deadline_duration_seconds: deadlineDurationSeconds,
+        Tb.forms.is_open: isOpen,
+        'account_number': accountNumber,
+        'secret': secret,
+        Tb.forms.header: header,
+        Tb.forms.header_off: headerOff,
+        Tb.forms.link: link,
+        'fields': relatedFields,
+      };
 
   Map<String, dynamic> toEditedJson() => {
-    Tb.forms.id: id,
-    Tb.forms.created_at: createdAt?.toIso8601String(),
-    Tb.forms.title: title,
-    Tb.forms.data: data,
-    Tb.forms.key: key,
-    Tb.forms.occasion: occasionId,
-    Tb.forms.blueprint: blueprint,
-    Tb.forms.type: type,
-    Tb.forms.bank_account: bankAccount?.id,
-    Tb.forms.deadline_duration_seconds: deadlineDurationSeconds,
-    Tb.forms.is_open: isOpen,
-    Tb.forms.header: header,
-    Tb.forms.header_off: headerOff,
-    Tb.forms.link: link,
-    Tb.forms.header: header,
-    Tb.forms.header_off: headerOff,
-    Tb.forms.link: link,
-    Tb.form_fields.table: relatedFields,
-  };
+        Tb.forms.id: id,
+        Tb.forms.created_at: createdAt?.toIso8601String(),
+        Tb.forms.title: title,
+        Tb.forms.data: data,
+        Tb.forms.key: key,
+        Tb.forms.occasion: occasionId,
+        Tb.forms.blueprint: blueprint,
+        Tb.forms.type: type,
+        Tb.forms.bank_account: bankAccount?.id,
+        Tb.forms.deadline_duration_seconds: deadlineDurationSeconds,
+        Tb.forms.is_open: isOpen,
+        Tb.forms.header: header,
+        Tb.forms.header_off: headerOff,
+        Tb.forms.link: link,
+        Tb.forms.header: header,
+        Tb.forms.header_off: headerOff,
+        Tb.forms.link: link,
+        Tb.form_fields.table: relatedFields,
+      };
 
   // Helper for Design Data
   Map<String, dynamic> get _designData {
     data ??= {};
-    return data!.putIfAbsent(metaDesign, () => <String, dynamic>{}) as Map<String, dynamic>;
+    return data!.putIfAbsent(metaDesign, () => <String, dynamic>{})
+        as Map<String, dynamic>;
   }
 
   // Helper for Schedule Data
   Map<String, dynamic> get _scheduleData {
     data ??= {};
-    return data!.putIfAbsent(metaSchedule, () => <String, dynamic>{}) as Map<String, dynamic>;
+    return data!.putIfAbsent(metaSchedule, () => <String, dynamic>{})
+        as Map<String, dynamic>;
   }
 
   DateTime? get startTime {
@@ -210,7 +214,8 @@ class FormModel {
     if (value == null) {
       _scheduleData.remove(metaStartTime);
     } else {
-      _scheduleData[metaStartTime] = value.toUtcFromOccasionTime().toIso8601String();
+      _scheduleData[metaStartTime] =
+          value.toUtcFromOccasionTime().toIso8601String();
     }
   }
 
@@ -225,7 +230,8 @@ class FormModel {
     if (value == null) {
       _scheduleData.remove(metaEndTime);
     } else {
-      _scheduleData[metaEndTime] = value.toUtcFromOccasionTime().toIso8601String();
+      _scheduleData[metaEndTime] =
+          value.toUtcFromOccasionTime().toIso8601String();
     }
   }
 
@@ -343,16 +349,12 @@ class FormModel {
 
   /// Returns a list of available supported currencies.
   List<String> getSupportedCurrencies() {
-    if (bankAccount != null &&
-        bankAccount!.supportedCurrencies != null &&
-        bankAccount!.supportedCurrencies!.isNotEmpty) {
-      return bankAccount!.supportedCurrencies!;
+    if (bankAccount != null && bankAccount!.supportedCurrencies.isNotEmpty) {
+      return bankAccount!.supportedCurrencies;
     } else if (availableBankAccounts != null) {
       final currencySet = <String>{};
       for (var account in availableBankAccounts!) {
-        if (account.supportedCurrencies != null) {
-          currencySet.addAll(account.supportedCurrencies!);
-        }
+        currencySet.addAll(account.supportedCurrencies);
       }
       return currencySet.toList();
     } else {

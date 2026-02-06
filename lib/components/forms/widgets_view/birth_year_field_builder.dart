@@ -24,8 +24,10 @@ class BirthYearFieldBuilder extends StatelessWidget {
   /// Returns the specific validators for the Birth Year field.
   List<String? Function(String?)> _getValidators(FieldHolder fieldHolder) {
     return [
-      if (fieldHolder.isRequired) FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty),
-          (value) {
+      if (fieldHolder.isRequired)
+        FormBuilderValidators.required(
+            errorText: CommonStrings.fieldCannotBeEmpty),
+      (value) {
         if (value == null || value.isEmpty) {
           // Let FormBuilderValidators.required() handle the empty case
           return null;
@@ -152,16 +154,16 @@ class _CardBirthYearFieldState extends State<_CardBirthYearField> {
               contentPadding: const EdgeInsets.fromLTRB(2, 12, 2, 12),
               border: const UnderlineInputBorder(),
               focusedBorder: UnderlineInputBorder(
-                borderSide:
-                BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+                borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor, width: 2.0),
               ),
               errorBorder: UnderlineInputBorder(
-                borderSide:
-                BorderSide(color: ThemeConfig.redColor(context), width: 1.0),
+                borderSide: BorderSide(
+                    color: ThemeConfig.redColor(context), width: 1.0),
               ),
               focusedErrorBorder: UnderlineInputBorder(
-                borderSide:
-                BorderSide(color: ThemeConfig.redColor(context), width: 2.0),
+                borderSide: BorderSide(
+                    color: ThemeConfig.redColor(context), width: 2.0),
               ),
             ),
             onChanged: (value) {

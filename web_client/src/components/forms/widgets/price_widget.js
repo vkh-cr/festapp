@@ -1,4 +1,5 @@
 import { ColorUtils } from '../../../utils/color_utils.js';
+import { formatPrice } from '../../../utils/formatters.js';
 
 export class PriceWidget {
     constructor(formSession, container) {
@@ -34,8 +35,6 @@ export class PriceWidget {
         if (totalPrice <= 0 && totalItems <= 0) {
             shouldHide = true;
         }
-        
-        console.log(`[PriceWidget] Render: Price=${totalPrice} Items=${totalItems} Hide=${shouldHide} Blueprint=${isBlueprint} El=${!!this.element}`);
 
         if (shouldHide) {
              if (this.element) {
@@ -104,10 +103,12 @@ export class PriceWidget {
             };
         }
 
+        const formattedPrice = formatPrice(totalPrice, currency, 0, 'cs-CZ');
+
         this.element.innerHTML = `
             <span style="margin-right: 6px; font-weight: 600;">${totalItems}x</span>
             <i class="material-icons" style="font-size: 24px; margin-right: 10px;">local_activity</i>
-            <span style="font-weight: 600;">${totalPrice} ${currency}</span>
+            <span style="font-weight: 600;">${formattedPrice}</span>
         `;
     }
 

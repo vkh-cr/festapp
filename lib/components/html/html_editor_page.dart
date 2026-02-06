@@ -56,6 +56,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
       await setHtmlText(_originalHtml ?? _html);
       _isTextSet = true;
     }
+
     controller.onTextChanged(firstLoad);
     if (_originalHtml == null) {
       _loadHtmlContent();
@@ -97,7 +98,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
               Align(
                 alignment: Alignment.topCenter,
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                  constraints:
+                      BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
                   child: HtmlEditorWidget(
                     initialContent: _html,
                     controller: controller,
@@ -121,7 +123,11 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (_progress == null) ...[
-                          const Text('Processing content and detecting large images...', style: TextStyle(color: Colors.white, fontSize: 16)).tr(),
+                          const Text(
+                                  'Processing content and detecting large images...',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16))
+                              .tr(),
                         ] else ...[
                           Container(
                             padding: const EdgeInsets.all(16),
@@ -129,13 +135,17 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Text('Reducing Images Size...', style: TextStyle(color: Colors.black, fontSize: 16)).tr(),
+                                const Text('Reducing Images Size...',
+                                        style: TextStyle(
+                                            color: Colors.black, fontSize: 16))
+                                    .tr(),
                                 const SizedBox(height: 20),
                                 LinearProgressIndicator(value: _progress),
                                 const SizedBox(height: 10),
                                 Text(
                                   '$processedCount / ${imagesToProcess.length}',
-                                  style: const TextStyle(fontSize: 16, color: Colors.black),
+                                  style: const TextStyle(
+                                      fontSize: 16, color: Colors.black),
                                 ),
                               ],
                             ),
@@ -150,34 +160,34 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
         ),
         bottomNavigationBar: !_isSaving && !_showOverlay
             ? Container(
-          width: double.maxFinite,
-          color: Colors.grey.shade200,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: IntrinsicWidth(
-              child: Row(
-                children: [
-                  ButtonsHelper.bottomBarButton(
-                    text: CommonStrings.reset,
-                    onPressed: _isSaving
-                        ? null
-                        : () async {
-                      await setHtmlText(_originalHtml ?? _html);
-                    },
+                width: double.maxFinite,
+                color: Colors.grey.shade200,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: IntrinsicWidth(
+                    child: Row(
+                      children: [
+                        ButtonsHelper.bottomBarButton(
+                          text: CommonStrings.reset,
+                          onPressed: _isSaving
+                              ? null
+                              : () async {
+                                  await setHtmlText(_originalHtml ?? _html);
+                                },
+                        ),
+                        ButtonsHelper.bottomBarButton(
+                          text: CommonStrings.storno,
+                          onPressed: _isSaving ? null : cancelPressed,
+                        ),
+                        ButtonsHelper.bottomBarButton(
+                          text: CommonStrings.save,
+                          onPressed: _isSaving ? null : savePressed,
+                        ),
+                      ],
+                    ),
                   ),
-                  ButtonsHelper.bottomBarButton(
-                    text: CommonStrings.storno,
-                    onPressed: _isSaving ? null : cancelPressed,
-                  ),
-                  ButtonsHelper.bottomBarButton(
-                    text: CommonStrings.save,
-                    onPressed: _isSaving ? null : savePressed,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        )
+                ),
+              )
             : null,
       ),
     );
@@ -196,7 +206,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
         _showOverlay = true;
       });
       await Future.delayed(const Duration(milliseconds: 50));
-      htmlText = await HtmlHelper.storeImagesToOccasion(_originalHtml ?? _html, htmlText, widget.occasionId!);
+      htmlText = await HtmlHelper.storeImagesToOccasion(
+          _originalHtml ?? _html, htmlText, widget.occasionId!);
       htmlText = HtmlHelper.applyEmailCompatibleStyleToImages(htmlText);
 
       RouterService.goBack(context, htmlText);
@@ -218,7 +229,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text("Large Images Detected"),
-          content: const Text("Some images are large and may slow down the app. Press OK to convert them into optimal size."),
+          content: const Text(
+              "Some images are large and may slow down the app. Press OK to convert them into optimal size."),
           actions: [
             TextButton(
               child: Text(CommonStrings.ok),

@@ -32,7 +32,6 @@ class DbUnits {
       );
 
       return UnitModel.fromJson(result);
-
     } catch (e) {
       // You can re-throw, log, or handle the error as needed.
       // For example:
@@ -42,6 +41,7 @@ class DbUnits {
       rethrow;
     }
   }
+
   static Future<void> updateUnit(UnitModel unit) async {
     await _supabase.rpc(
       "update_unit",
@@ -71,7 +71,8 @@ class DbUnits {
   }
 
   static Future<int> createUnitAndAssignManager(String title) async {
-    final response = await _supabase.rpc("create_unit_and_assign_manager", params: {'title': title});
+    final response = await _supabase
+        .rpc("create_unit_and_assign_manager", params: {'title': title});
     if (response['code'] == 200) {
       return response['data']['id'];
     } else {

@@ -77,7 +77,8 @@ class _ServiceDialogState extends State<ServiceDialog> {
       var answer = await DialogHelper.showConfirmationDialog(
         context,
         "Really delete service?".tr(),
-        "At least one user has this service. You can find them in the grid. Are you sure you want to delete it? Deletion cannot be undone.".tr(),
+        "At least one user has this service. You can find them in the grid. Are you sure you want to delete it? Deletion cannot be undone."
+            .tr(),
       );
       if (answer) {
         await DbOccasions.deleteService(widget.type, companion, true);
@@ -90,8 +91,10 @@ class _ServiceDialogState extends State<ServiceDialog> {
   }
 
   Future<void> _showEditDialog(ServiceItemModel item) async {
-    final TextEditingController titleController = TextEditingController(text: item.title);
-    final TextEditingController referenceController = TextEditingController(text: item.reference.toString());
+    final TextEditingController titleController =
+        TextEditingController(text: item.title);
+    final TextEditingController referenceController =
+        TextEditingController(text: item.reference.toString());
 
     await showDialog(
       context: context,
@@ -125,7 +128,8 @@ class _ServiceDialogState extends State<ServiceDialog> {
             TextButton(
               onPressed: () async {
                 item.title = titleController.text;
-                item.reference = int.tryParse(referenceController.text) ?? item.reference;
+                item.reference =
+                    int.tryParse(referenceController.text) ?? item.reference;
                 await _updateService(item);
                 Navigator.of(context).pop();
               },
@@ -168,7 +172,8 @@ class _ServiceDialogState extends State<ServiceDialog> {
                     flex: 1, // 25% width
                     child: TextField(
                       controller: _referenceController,
-                      decoration: InputDecoration(labelText: widget.referenceString),
+                      decoration:
+                          InputDecoration(labelText: widget.referenceString),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(10),
@@ -192,7 +197,8 @@ class _ServiceDialogState extends State<ServiceDialog> {
                   itemBuilder: (context, index) {
                     final companion = widget.items[index];
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 4.0),
                       child: Row(
                         children: [
                           Expanded(

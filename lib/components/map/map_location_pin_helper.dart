@@ -6,7 +6,8 @@ import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/theme_config.dart';
 
 class MapLocationPinHelper {
-  static Widget? type2icon(BuildContext context, MapPlaceModel placeType, List<IconModel> source) {
+  static Widget? type2icon(
+      BuildContext context, MapPlaceModel placeType, List<IconModel> source) {
     SvgPicture? fill;
 
     var iconData = source.firstWhereOrNull((i) => i.id == placeType.icon)?.data;
@@ -16,16 +17,29 @@ class MapLocationPinHelper {
         iconData,
         colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
       );
-      return _locationPin(context, fill, top: 7.5, left: 14.5, iconTop: 12, iconLeft: 19, iconWidth: 19, iconHeight: 19);
+      return _locationPin(context, fill,
+          top: 7.5,
+          left: 14.5,
+          iconTop: 12,
+          iconLeft: 19,
+          iconWidth: 19,
+          iconHeight: 19);
     }
 
     return null;
   }
 
-  static Stack _locationPin(BuildContext context, SvgPicture fill, {required double top, required double left, required double iconTop, required double iconLeft, required double iconWidth, required double iconHeight}) {
+  static Stack _locationPin(BuildContext context, SvgPicture fill,
+      {required double top,
+      required double left,
+      required double iconTop,
+      required double iconLeft,
+      required double iconWidth,
+      required double iconHeight}) {
     return Stack(
       children: [
-        Icon(Icons.location_pin, size: 58, color: ThemeConfig.mapPinColor(context)),
+        Icon(Icons.location_pin,
+            size: 58, color: ThemeConfig.mapPinColor(context)),
         Positioned(
           top: top,
           left: left,

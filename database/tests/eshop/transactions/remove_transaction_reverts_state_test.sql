@@ -40,6 +40,7 @@ INSERT INTO eshop.payment_info (id, variable_symbol, amount, currency_code, bank
 VALUES (1001, 123456789, 200.0, 'CZK', 1000, now(), 0.0) 
 ON CONFLICT (id) DO UPDATE SET variable_symbol = 123456789, paid = 0.0, amount = 200.0, bank_account = 1000;
 UPDATE eshop.payment_info SET paid = 0 WHERE id = 1001;
+DELETE FROM eshop.transactions WHERE payment_info = 1001;
 
 -- Create Order (ID 5000, Price 200, State 'ordered')
 INSERT INTO eshop.orders (id, occasion, payment_info, state, price, currency_code, created_at)
@@ -62,8 +63,8 @@ BEGIN
         200.0::double precision, 
         'CZK', 
         999, 
+        NULL,
         '2024-01-01 12:00:00', 
-        NULL, 
         'Full Payment',
         1001 -- explicit payment info
     );

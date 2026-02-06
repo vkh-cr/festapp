@@ -10,6 +10,7 @@ class AddCashPaymentDialog extends StatefulWidget {
   final String currency;
   final String variableSymbol;
   final int paymentInfoId;
+  final bool isBankAdmin;
 
   const AddCashPaymentDialog({
     super.key,
@@ -17,6 +18,7 @@ class AddCashPaymentDialog extends StatefulWidget {
     required this.currency,
     required this.variableSymbol,
     required this.paymentInfoId,
+    this.isBankAdmin = false,
   });
 
   @override
@@ -34,7 +36,8 @@ class _AddCashPaymentDialogState extends State<AddCashPaymentDialog> {
   void initState() {
     super.initState();
     _amountController = TextEditingController(text: "0");
-    _amountController.selection = TextSelection(baseOffset: 0, extentOffset: _amountController.text.length);
+    _amountController.selection = TextSelection(
+        baseOffset: 0, extentOffset: _amountController.text.length);
     _noteController = TextEditingController();
   }
 
@@ -53,13 +56,14 @@ class _AddCashPaymentDialogState extends State<AddCashPaymentDialog> {
     });
 
     try {
-      final double amount = double.parse(_amountController.text.replaceAll(',', '.'));
-      
+      final double amount =
+          double.parse(_amountController.text.replaceAll(',', '.'));
+
       await DbOrders.insertManualTransaction(
         amount: amount,
         currency: widget.currency,
         unitId: widget.unitId,
-        variableSymbol: null, // Don't save VS for cash payments
+        variableSymbol: null,
         date: _selectedDate,
         note: _noteController.text.isEmpty ? null : _noteController.text,
         paymentInfoId: widget.paymentInfoId,
@@ -70,7 +74,8 @@ class _AddCashPaymentDialogState extends State<AddCashPaymentDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) {
@@ -105,12 +110,17 @@ class _AddCashPaymentDialogState extends State<AddCashPaymentDialog> {
                   FilteringTextInputFormatter.digitsOnly,
                 ],
                 validator: (value) {
-                  if (value == null || value.isEmpty) return CommonStrings.fieldCannotBeEmpty;
-                  if (double.tryParse(value.replaceAll(',', '.')) == null) return "Invalid number";
-                  if (double.parse(value.replaceAll(',', '.')) == 0) return "Amount cannot be 0";
+                  if (value == null || value.isEmpty)
+                    return CommonStrings.fieldCannotBeEmpty;
+                  if (double.tryParse(value.replaceAll(',', '.')) == null)
+                    return "Invalid number";
+                  if (double.parse(value.replaceAll(',', '.')) == 0)
+                    return "Amount cannot be 0";
                   return null;
                 },
-                onTap: () => _amountController.selection = TextSelection(baseOffset: 0, extentOffset: _amountController.value.text.length),
+                onTap: () => _amountController.selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: _amountController.value.text.length),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 4.0, bottom: 8.0),
@@ -127,7 +137,10 @@ class _AddCashPaymentDialogState extends State<AddCashPaymentDialog> {
               ExpansionTile(
                 title: Text(
                   CommonStrings.advancedSettings,
-                  style: TextStyle(color: Theme.of(context).hintColor),
+                  style: TextStyle(
+                    color: Theme.of(context).hintColor,
+                    fontSize: 12,
+                  ),
                 ),
                 tilePadding: EdgeInsets.zero,
                 children: [
@@ -149,7 +162,9 @@ class _AddCashPaymentDialogState extends State<AddCashPaymentDialog> {
                       decoration: InputDecoration(
                         labelText: CommonStrings.date,
                       ),
-                      child: Text(DateFormat.yMd(Localizations.localeOf(context).toString()).format(_selectedDate)),
+                      child: Text(DateFormat.yMd(
+                              Localizations.localeOf(context).toString())
+                          .format(_selectedDate)),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -162,6 +177,35 @@ class _AddCashPaymentDialogState extends State<AddCashPaymentDialog> {
                   ),
                 ],
               ),
+              if (widget.isBankAdmin) ...[
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(CommonStrings.or.toUpperCase(),
+                          style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                  child: Center(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop('SWITCH_TO_CASHLESS');
+                      },
+                      icon: Icon(Icons.account_balance, size: 18),
+                      label: Text(OrdersStrings.findAndLinkTransaction),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -173,9 +217,12 @@ class _AddCashPaymentDialogState extends State<AddCashPaymentDialog> {
         ),
         ElevatedButton(
           onPressed: _isSaving ? null : _submit,
-          child: _isSaving 
-            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) 
-            : Text(OrdersStrings.addPayment),
+          child: _isSaving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2))
+              : Text(OrdersStrings.addPayment),
         ),
       ],
     );

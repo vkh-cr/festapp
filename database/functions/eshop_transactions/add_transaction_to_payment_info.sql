@@ -7,34 +7,29 @@ DECLARE
     associated_order_id bigint;
     v_transaction_type text;
 BEGIN
-    -- Link transaction to payment info and get its type
+    -- Link transaction and get type
     UPDATE eshop.transactions
     SET payment_info = payment_info_id
     WHERE id = p_transaction_id
     RETURNING transaction_type INTO v_transaction_type;
 
     IF v_transaction_type = 'return' THEN
-        -- Only update 'returned' amount if it's a return transaction
         UPDATE eshop.payment_info
         SET 
             returned = (SELECT COALESCE(ABS(SUM(amount)), 0) FROM eshop.transactions WHERE payment_info = payment_info_id AND transaction_type = 'return')
         WHERE id = payment_info_id;
     ELSE
-        -- Otherwise update 'paid' amount (standard behavior)
-        -- We do NOT touch 'returned' here as requested
         UPDATE eshop.payment_info
         SET 
-            paid = (SELECT COALESCE(SUM(amount), 0) FROM eshop.transactions WHERE payment_info = payment_info_id AND transaction_type != 'return')
+            paid = (SELECT COALESCE(SUM(amount), 0) FROM eshop.transactions WHERE payment_info = payment_info_id AND transaction_type IS DISTINCT FROM 'return')
         WHERE id = payment_info_id;
     END IF;
 
-    -- Get associated order
     SELECT id INTO associated_order_id
     FROM eshop.orders
     WHERE payment_info = payment_info_id;
 
     IF associated_order_id IS NOT NULL THEN
-        -- Use the unified helper to recalculate state
         PERFORM public.recalculate_order_payment_status(associated_order_id);
     END IF;
 END;

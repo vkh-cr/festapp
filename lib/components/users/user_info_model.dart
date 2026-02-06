@@ -6,7 +6,6 @@ import 'package:fstapp/components/users/occasion_user_model.dart';
 import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:collection/collection.dart';
-import 'package:intl/intl.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import '../map/place_model.dart';
 import '../occasion/occasion_model.dart';
@@ -96,43 +95,69 @@ class UserInfoModel extends IHasId {
       email: json[emailReadonlyColumn] ?? json["email"],
       name: json[nameColumn],
       surname: json[surnameColumn],
-      accommodationPlace: json[placeColumn] != null ? PlaceModel.fromJson(json[placeColumn]) : null,
-      eventUserGroup: json[userGroupColumn] != null ? UserGroupInfoModel.fromJson(json[userGroupColumn]) : null,
-      occasionUser: json[occasionUserColumn] != null ? OccasionUserModel.fromJson(json[occasionUserColumn]) : null,
+      accommodationPlace: json[placeColumn] != null
+          ? PlaceModel.fromJson(json[placeColumn])
+          : null,
+      eventUserGroup: json[userGroupColumn] != null
+          ? UserGroupInfoModel.fromJson(json[userGroupColumn])
+          : null,
+      occasionUser: json[occasionUserColumn] != null
+          ? OccasionUserModel.fromJson(json[occasionUserColumn])
+          : null,
       roleString: json[roleStringColumn],
-      companions: json[userCompanionsColumn] != null ? List<CompanionModel>.from(json[userCompanionsColumn]!.map((c) => CompanionModel.fromJson(c))) : null,
-      companionParent: json[companionParentColumn] != null ? UserInfoModel.fromJson(json[companionParentColumn]) : null,
-      units: json[unitsField] != null ? List<UnitModel>.from(json[unitsField].map((u) => UnitModel.fromJson(u))) : null,
-      occasions: json[occasionsField] != null ? List<OccasionModel>.from(json[occasionsField].map((o) => OccasionModel.fromJson(o))) : null,
-      eventIds: json[scheduleColumn] != null ? List<String>.from(json[scheduleColumn]!.map((s) => s)) : null,
+      companions: json[userCompanionsColumn] != null
+          ? List<CompanionModel>.from(json[userCompanionsColumn]!
+              .map((c) => CompanionModel.fromJson(c)))
+          : null,
+      companionParent: json[companionParentColumn] != null
+          ? UserInfoModel.fromJson(json[companionParentColumn])
+          : null,
+      units: json[unitsField] != null
+          ? List<UnitModel>.from(
+              json[unitsField].map((u) => UnitModel.fromJson(u)))
+          : null,
+      occasions: json[occasionsField] != null
+          ? List<OccasionModel>.from(
+              json[occasionsField].map((o) => OccasionModel.fromJson(o)))
+          : null,
+      eventIds: json[scheduleColumn] != null
+          ? List<String>.from(json[scheduleColumn]!.map((s) => s))
+          : null,
       sex: json[sexColumn],
-      birthDate: json[birthDateColumn] != null ? DateTime.tryParse(json[birthDateColumn] as String) : null,
+      birthDate: json[birthDateColumn] != null
+          ? DateTime.tryParse(json[birthDateColumn] as String)
+          : null,
       ticketId: json[ticketIdColumn],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    idColumn: id,
-    emailReadonlyColumn: email,
-    nameColumn: name,
-    surnameColumn: surname,
-    phoneColumn: phone,
-    roleColumn: role,
-    placeColumn: accommodationPlace?.toJson(),
-    userGroupColumn: eventUserGroup?.toJson(),
-    occasionUserColumn: occasionUser?.toUpdateJson(),
-    roleStringColumn: roleString,
-    sexColumn: sex,
-    birthDateColumn: birthDate != null ? DateFormat(birthDateJsonFormat).format(birthDate!) : null,
-    userCompanionsColumn: companions != null ? List<dynamic>.from(companions!.map((c) => c.toJson())) : null,
-  };
+        idColumn: id,
+        emailReadonlyColumn: email,
+        nameColumn: name,
+        surnameColumn: surname,
+        phoneColumn: phone,
+        roleColumn: role,
+        placeColumn: accommodationPlace?.toJson(),
+        userGroupColumn: eventUserGroup?.toJson(),
+        occasionUserColumn: occasionUser?.toUpdateJson(),
+        roleStringColumn: roleString,
+        sexColumn: sex,
+        birthDateColumn: birthDate != null
+            ? DateFormat(birthDateJsonFormat).format(birthDate!)
+            : null,
+        userCompanionsColumn: companions != null
+            ? List<dynamic>.from(companions!.map((c) => c.toJson()))
+            : null,
+      };
 
   @override
   String toString() => toFullNameString();
 
   String toFullNameString() {
     if (companionParent != null) {
-      return (name ?? "") + (" (${"Companion of".tr()}: ${companionParent!.toFullNameString()})");
+      return (name ?? "") +
+          (" (${"Companion of".tr()}: ${companionParent!.toFullNameString()})");
     }
     return "${name ?? ""} ${surname ?? ""}".trim();
   }
@@ -160,7 +185,8 @@ class UserInfoModel extends IHasId {
     // 4. Add Order Creation Date
     final orderDate = ticket?.relatedOrder?.createdAt;
     if (orderDate != null) {
-      infoParts.add(DateFormat.yMd(context.locale.toString()).format(orderDate));
+      infoParts
+          .add(DateFormat.yMd(context.locale.toString()).format(orderDate));
     }
 
     return infoParts.join(' • ');
@@ -172,7 +198,8 @@ class UserInfoModel extends IHasId {
 
   bool hasGroup() => eventUserGroup != null;
 
-  UserGroupInfoModel? get getGameUserGroup => userGroups?.firstWhereOrNull((g) => g.type == InformationModel.gameType);
+  UserGroupInfoModel? get getGameUserGroup =>
+      userGroups?.firstWhereOrNull((g) => g.type == InformationModel.gameType);
 
   bool isSignedIn = false;
 

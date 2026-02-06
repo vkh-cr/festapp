@@ -7,17 +7,18 @@ class DbEmailTemplates {
   static final _supabase = Supabase.instance.client;
 
   static Future<List<EmailTemplateModel>> getAllEmailTemplates(int oc) async {
-    final response = await _supabase.rpc("get_all_email_templates", params: {"p_context": { "occasion":oc }});
+    final response = await _supabase.rpc("get_all_email_templates", params: {
+      "p_context": {"occasion": oc}
+    });
     return List<EmailTemplateModel>.from(
-        (response as List).map((x) => EmailTemplateModel.fromJson(x))
-    );
+        (response as List).map((x) => EmailTemplateModel.fromJson(x)));
   }
 
-  static Future<EmailTemplatesResponse> getAllEmailTemplatesViaOccasionLink(String link) async {
+  static Future<EmailTemplatesResponse> getAllEmailTemplatesViaOccasionLink(
+      String link) async {
     final response = await _supabase.rpc(
         "get_all_email_templates_via_occasion_link",
-        params: {"occasion_link": link}
-    );
+        params: {"occasion_link": link});
     return EmailTemplatesResponse.fromJson(response);
   }
 
@@ -26,10 +27,10 @@ class DbEmailTemplates {
   }
 
   static Future<FunctionResponse> sendCustomEmail(
-      EmailTemplateModel template,
-      Map<String, String> subs,
-      String email,
-      ) async {
+    EmailTemplateModel template,
+    Map<String, String> subs,
+    String email,
+  ) async {
     final body = {
       "template": template.toJson(),
       "subs": subs,
@@ -110,7 +111,9 @@ class EmailTemplatesResponse {
 
   factory EmailTemplatesResponse.fromJson(Map<String, dynamic> json) {
     return EmailTemplatesResponse(
-      occasion: json['occasion'] != null ? OccasionModel.fromJson(json['occasion']) : null,
+      occasion: json['occasion'] != null
+          ? OccasionModel.fromJson(json['occasion'])
+          : null,
       unit: UnitModel.fromJson(json['unit']),
       organization: UnitModel.fromJson(json['organization']),
       templates: (json['templates'] as List)
@@ -118,5 +121,4 @@ class EmailTemplatesResponse {
           .toList(),
     );
   }
-
 }

@@ -14,7 +14,7 @@ class FeatureModel {
   }
 
   Map<String, dynamic> toJson() => {
-    Tb.occasions.data_features_code: code,
-    Tb.occasions.data_features_is_enabled: isEnabled,
-  };
+        Tb.occasions.data_features_code: code,
+        Tb.occasions.data_features_is_enabled: isEnabled,
+      };
 }

@@ -205,9 +205,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-
-
-
 class PinchZoomReleaseUnzoomWidget extends StatefulWidget {
   static const Duration defaultResetDuration = Duration(milliseconds: 200);
 

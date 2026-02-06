@@ -1,5 +1,4 @@
-// ignore_for_file: deprecated_member_use
-
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/bank_accounts/bank_account_model.dart';
@@ -11,10 +10,15 @@ import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/services/time_helper.dart';
+
+import 'package:fstapp/components/bank_accounts/logic/iban_utils.dart';
+import 'package:fstapp/components/bank_accounts/data/cz_banks.dart';
+import 'package:timeago/timeago.dart' as timeago;
+
 
 class BankAccountSettingsScreen extends StatefulWidget {
   final int unitId;
+  final int? organizationId;
   final BankAccountModel account;
   final bool readOnly;
 
@@ -23,103 +27,305 @@ class BankAccountSettingsScreen extends StatefulWidget {
   const BankAccountSettingsScreen({
     super.key,
     required this.unitId,
+    this.organizationId,
     required this.account,
     this.readOnly = false,
     this.isDialog = false,
   });
 
   @override
-  State<BankAccountSettingsScreen> createState() => _BankAccountSettingsScreenState();
+  State<BankAccountSettingsScreen> createState() =>
+      _BankAccountSettingsScreenState();
 }
 
-class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> with TickerProviderStateMixin {
-  late TabController _tabController;
+class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
+    with SingleTickerProviderStateMixin {
+  // New state for IBAN/Account switching
+  bool _isTokenTokenVisible = false;
+  bool _useIbanInput = true;
+
+
+  late TextEditingController _ibanController;
+  late TextEditingController _prefixController;
+  late TextEditingController _accountBodyController;
+  late TextEditingController _bankCodeController; // Used for text input if needed, but mainly we sync with dropdown
+
+  String? _selectedBankCode;
+
   late TextEditingController _titleController;
-  late TextEditingController _numberController;
-  late TextEditingController _humanReadableController;
-  late TextEditingController _tokenController;
   late TextEditingController _priorityController;
+  late TextEditingController _tokenController;
+  late TabController _tabController;
   DateTime? _expiryDate;
-  
+
   late BankAccountModel _account;
-  String _selectedType = 'FIO';
+  // _selectedType removed, we use dynamic check
+
+  String? _pairingCode; // Code for parsing email
   List<String> _supportedCurrencies = [];
   List<BankAccountUser> _users = [];
   bool _isLoadingUsers = false;
   bool _isSaving = false;
-  bool _isTokenTokenVisible = false;
+  
+  // Validation State
+  String? _ibanError;
+  String? _humanError;
 
   final _formKey = GlobalKey<FormState>();
 
   bool get _isReadOnly => widget.readOnly || _account.type == 'CASH';
+  final String _emailDomain = "bank.festapp.net";
 
   @override
   void initState() {
     super.initState();
     _account = widget.account;
-    _selectedType = _account.type;
     _titleController = TextEditingController(text: _account.title);
-    _numberController = TextEditingController(text: _account.accountNumber);
-    _humanReadableController = TextEditingController(text: _account.accountNumberHumanReadable);
-    _priorityController = TextEditingController(text: _account.priority.toString());
+    _priorityController =
+        TextEditingController(text: _account.priority.toString());
+    _tokenController = TextEditingController(); // FIO Token
+
+    _ibanController = TextEditingController(text: _account.accountNumber);
+    _prefixController = TextEditingController();
+    _accountBodyController = TextEditingController();
+    _bankCodeController = TextEditingController();
+    
+    _pairingCode = _account.pairingCode;
+    // _selectedType init removed
+
+    
+    _parseInitialIban();
+    
+    // Default: Split Format, unless we have data that isn't valid CZ
+    bool hasData = _ibanController.text.isNotEmpty;
+    bool isCzParsed = _prefixController.text.isNotEmpty || 
+                      _accountBodyController.text.isNotEmpty || 
+                      (_selectedBankCode != null);
+    
+    _useIbanInput = hasData && !isCzParsed;
     _supportedCurrencies = List.from(_account.supportedCurrencies);
-    _tokenController = TextEditingController(); 
     _expiryDate = _account.tokenExpiryDate;
-    
-    _numberController.addListener(_updateHumanReadable);
-    _updateHumanReadable(); // Initial check if empty but number exists
-    
+
+
+
+    // Listeners for Sync
+    _ibanController.addListener(_onIbanChanged);
+    _prefixController.addListener(_onHumanChanged);
+    _accountBodyController.addListener(_onHumanChanged);
+    // _selectedBankCode changes trigger _onHumanChanged manually
+
     _initTabController();
-    
     _loadUsers();
-    
+
     if (_supportedCurrencies.isEmpty) {
       _supportedCurrencies.add('CZK');
     }
+    
+    // Auto-generate token if missing
+    if (_pairingCode == null && _account.id != 0 && !_isReadOnly) {
+       WidgetsBinding.instance.addPostFrameCallback((_) {
+         _loadOrGenerateToken();
+      });
+    }
+
+    // Configure timeago
+    timeago.setLocaleMessages('cs', timeago.CsMessages());
   }
 
-  void _updateHumanReadable() {
-    final iban = _numberController.text.trim();
-    if (iban.isEmpty) {
-       if (_humanReadableController.text.isNotEmpty) {
-         _humanReadableController.clear();
-       }
-       return;
+  bool get _isFio {
+    if (_ibanController.text.isNotEmpty && isFioBank(_ibanController.text)) return true;
+    if (_selectedBankCode != null && isFioBank(_selectedBankCode)) return true;
+    return false;
+  }
+
+  @override
+  void dispose() {
+    _ibanController.dispose();
+    _prefixController.dispose();
+    _accountBodyController.dispose();
+    _bankCodeController.dispose();
+    
+    _titleController.dispose();
+    _priorityController.dispose();
+    _tokenController.dispose();
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _parseInitialIban() {
+    final iban = _ibanController.text.trim();
+    if (iban.isNotEmpty) {
+      final parsed = IbanUtils.parseCzIban(iban);
+      if (parsed != null) {
+        _prefixController.text = parsed.prefix == '0' ? '' : parsed.prefix;
+        _accountBodyController.text = parsed.number;
+          if (czBanks.containsKey(parsed.bankCode)) {
+          _selectedBankCode = parsed.bankCode;
+          // _selectedType update removed
+
+        } else {
+
+        }
+      }
+    }
+  }
+
+  bool _isUpdating = false;
+
+  void _onIbanChanged() {
+    if (_isUpdating) return;
+    final iban = _ibanController.text.trim();
+    
+    // Validate IBAN
+    bool isValid = IbanUtils.isValidIban(iban);
+    if (iban.isNotEmpty && !isValid) {
+      setState(() => _ibanError = "Invalid IBAN");
+      // Don't clear human fields, user might be typing
+      return;
+    } else {
+      if (mounted && _ibanError != null) setState(() => _ibanError = null);
     }
 
-    if (iban.toUpperCase().startsWith('CZ') && iban.length == 24) {
-       try {
-         final bankCode = iban.substring(4, 8);
-         String prefix = iban.substring(8, 14);
-         String number = iban.substring(14, 24);
-         
-         prefix = int.parse(prefix).toString();
-         number = int.parse(number).toString();
-         
-         String generated;
-         if (prefix == '0') {
-           generated = '$number/$bankCode';
-         } else {
-           generated = '$prefix-$number/$bankCode';
-         }
-
-         if (_humanReadableController.text != generated) {
-           _humanReadableController.text = generated;
-         }
-       } catch (e) {
-         // Invalid format, ignore
+    if (isValid && iban.toUpperCase().startsWith('CZ')) {
+       final parsed = IbanUtils.parseCzIban(iban);
+       if (parsed != null) {
+         _isUpdating = true;
+         _prefixController.text = parsed.prefix == '0' ? '' : parsed.prefix;
+         _accountBodyController.text = parsed.number;
+          if (czBanks.containsKey(parsed.bankCode)) {
+             setState(() {
+               _selectedBankCode = parsed.bankCode;
+                // _selectedType update removed
+             });
+          }
+         _isUpdating = false;
        }
     }
+  }
+
+  void _onHumanChanged() {
+    if (_isUpdating) return;
+    
+    String prefix = _prefixController.text.trim();
+    String body = _accountBodyController.text.trim();
+    String? bank = _selectedBankCode;
+
+    if (body.isEmpty || bank == null) {
+       return; // Not enough info to generate
+    }
+
+    // Attempt generation
+    try {
+      if (prefix.isEmpty) prefix = "0";
+      
+      // Validate components locally first to show specific errors
+      // (Optional, IbanUtils.generate throws)
+      
+      String generated = IbanUtils.generateCzIban(bank, prefix, body);
+      
+      _isUpdating = true;
+      if (_ibanController.text != generated) {
+        _ibanController.text = generated;
+        setState(() => _ibanError = null); // Valid generation implies valid IBAN
+      }
+      _isUpdating = false;
+      
+      if (_humanError != null) setState(() => _humanError = null);
+
+    } catch (e) {
+      // Show error on human side?
+      // Or just don't generate IBAN
+      // setState(() => _humanError = e.toString());
+    }
+  }
+  
+
+  Future<void> _saveGeneralInfo() async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    // Custom Validation
+    if (_ibanError != null) {
+        _showError("Please fix validaton errors: $_ibanError");
+        return;
+    }
+    // Validate final IBAN validity
+    if (!IbanUtils.isValidIban(_ibanController.text)) {
+         _showError("Invalid IBAN format");
+         return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final updatedAccount = BankAccountModel(
+          id: _account.id,
+          title: _titleController.text,
+          accountNumber: _ibanController.text.trim(), // Saving IBAN
+          priority: int.tryParse(_priorityController.text) ?? _account.priority,
+          type: _isFio ? 'FIO' : 'OTHER', // Derived type
+          isAdmin: _account.isAdmin,
+
+          supportedCurrencies: _supportedCurrencies,
+
+          accountNumberHumanReadable: _buildLegacyHumanReadable(),
+          tokenMasked: _account.tokenMasked,
+          lastFetchTime: _account.lastFetchTime,
+          tokenExpiryDate: _account.tokenExpiryDate,
+          pairingCode: _pairingCode,
+      );
+      final newId = await DbBankAccounts.updateBankAccount(updatedAccount,
+          unitId: widget.unitId, organizationId: widget.organizationId);
+      final savedAccount = updatedAccount.copyWith(id: newId);
+
+      if (!mounted) return;
+      ToastHelper.Show(context, BankAccountStrings.save);
+
+      setState(() {
+        _account = savedAccount;
+      });
+      
+      setState(() {
+        _account = savedAccount;
+      });
+      
+      
+      // Auto-refresh tabs if type changed effectively (FIO <-> Other)
+      // Since we don't store _selectedType state, we can just rebuild.
+      // But we might want to reset tab if the new state hides the current tab?
+      // For now, let's keep it simple.
+
+      if (widget.isDialog) {
+        Navigator.pop(context, savedAccount);
+      }
+    } catch (e) {
+      if (e.toString().contains("ACCOUNT_NUMBER_EXISTS")) {
+        _showError(BankAccountStrings.accountNumberExists);
+      } else {
+        _showError("$e");
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+  
+  String? _buildLegacyHumanReadable() {
+    if (_accountBodyController.text.isEmpty || _selectedBankCode == null) return null;
+    String prefix = _prefixController.text.trim();
+    String body = _accountBodyController.text.trim();
+    if (prefix.isNotEmpty && prefix != '0') {
+        return "$prefix-$body/$_selectedBankCode";
+    }
+    return "$body/$_selectedBankCode";
   }
 
   void _initTabController() {
-    _tabController = TabController(length: _selectedType == 'FIO' ? 3 : 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   Future<void> _loadUsers() async {
     setState(() => _isLoadingUsers = true);
     try {
-      final users = await DbBankAccounts.getBankAccountUsers(_account.id, unitId: widget.unitId);
+      final users = await DbBankAccounts.getBankAccountUsers(_account.id,
+          unitId: widget.unitId);
       if (mounted) {
         setState(() {
           _users = users;
@@ -149,116 +355,58 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
     );
   }
 
-  Future<void> _saveGeneralInfo() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isSaving = true);
-    try {
-      final updatedAccount = BankAccountModel(
-        id: _account.id,
-        title: _titleController.text,
-        accountNumber: _numberController.text.trim(),
-        priority: int.tryParse(_priorityController.text) ?? _account.priority,
-        type: _selectedType,
-        isAdmin: _account.isAdmin,
-        supportedCurrencies: _supportedCurrencies,
-        accountNumberHumanReadable: _humanReadableController.text.isEmpty ? null : _humanReadableController.text,
-        tokenMasked: _account.tokenMasked, // Preserve masking state
-        lastFetchTime: _account.lastFetchTime,
-        tokenExpiryDate: _account.tokenExpiryDate
-      );
-      final newId = await DbBankAccounts.updateBankAccount(updatedAccount, unitId: widget.unitId);
-      final savedAccount = updatedAccount.copyWith(id: newId);
-      
-      if (!mounted) return;
-      ToastHelper.Show(context, BankAccountStrings.save);
-      
-      setState(() {
-        _account = savedAccount;
-      });
-      
-      if (_account.type != _selectedType) {
-         setState(() {
-           // Re-init tabs if type changed
-           _tabController.dispose();
-           _initTabController();
-         });
-      }
-      if (widget.isDialog) {
-        if (mounted) Navigator.pop(context, savedAccount);
-      }
-    } catch (e) {
-      if (e.toString().contains("ACCOUNT_NUMBER_EXISTS")) {
-        if (mounted) _showError(BankAccountStrings.accountNumberExists);
-      } else {
-        if (mounted) _showError("${BankAccountStrings.errorSaving}: $e");
-      }
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
-    }
-  }
 
-  Future<void> _saveToken() async {
-    setState(() => _isSaving = true);
-    try {
-      await DbBankAccounts.updateBankAccountToken(_account.id, _tokenController.text, _expiryDate);
-      if (!mounted) return;
-      
-      // Update local masking to reflect change immediately
-      final newToken = _tokenController.text;
-      if (newToken.isNotEmpty) {
-        final mask = "************${newToken.length >= 4 ? newToken.substring(newToken.length - 4) : newToken}";
-         setState(() {
-          _account = _account.copyWith(tokenMasked: mask);
-        });
-      }
-      
-      ToastHelper.Show(context, BankAccountStrings.tokenUpdated);
-      _tokenController.clear();
-    } catch (e) {
-      if (mounted) _showError("${BankAccountStrings.errorSavingToken}: $e");
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
-    }
+  Future<void> _loadOrGenerateToken() async {
+     // If we are here, pairing code is missing.
+     // We should try to fetch the latest details or regenerate.
+     await _regenerateToken();
   }
+  
+
 
   Future<void> _addUser() async {
     // 1. Fetch potential users (Unit users)
     setState(() => _isLoadingUsers = true);
     try {
-      final allUnitUsers = await DbUsers.getAllUsersBasicsForUnit(widget.unitId);
-      
+      final allUnitUsers =
+          await DbUsers.getAllUsersBasicsForUnit(widget.unitId);
+
       // 2. Filter out already added users
       final currentIds = _users.map((u) => u.userId).toSet();
-      final availableUsers = allUnitUsers.where((u) => !currentIds.contains(u.id)).toList();
-      
+      final availableUsers =
+          allUnitUsers.where((u) => !currentIds.contains(u.id)).toList();
+
       if (mounted) setState(() => _isLoadingUsers = false);
 
       if (availableUsers.isEmpty) {
-        if (mounted) ToastHelper.Show(context, BankAccountStrings.noMoreUsersToAdd);
+        if (mounted) {
+          ToastHelper.Show(context, BankAccountStrings.noMoreUsersToAdd);
+        }
         return;
       }
 
       // 3. Show selection dialog
       if (!mounted) return;
       DialogHelper.chooseUser(context, (chosenUser) async {
-         if (chosenUser.id == null || chosenUser.email == null) {
-           _showError(BankAccountStrings.errorUpdatingUser);
-           return;
-         }
-         
-         // 4. Show Role Selection Dialog
-         bool isAdmin = true;
-         bool isSupport = false;
-         
-         await showDialog(
+        if (chosenUser.id == null || chosenUser.email == null) {
+          _showError(BankAccountStrings.errorUpdatingUser);
+          return;
+        }
+
+        // 4. Show Role Selection Dialog
+        bool isAdmin = true;
+        bool isSupport = false;
+
+        await showDialog(
           context: context,
           builder: (context) => StatefulBuilder(
             builder: (context, setState) => AlertDialog(
-              title: Text('${BankAccountStrings.addUser}: ${chosenUser.name ?? chosenUser.email}'),
+              title: Text(
+                  '${BankAccountStrings.addUser}: ${chosenUser.name ?? chosenUser.email}'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                   Padding(
+                  Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
                       BankAccountStrings.addUserExplanation,
@@ -276,22 +424,26 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
                       value: isSupport,
                       onChanged: (v) => setState(() => isSupport = v!),
                     ),
-                   if (isAdmin)
+                  if (isAdmin)
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         BankAccountStrings.adminInfoText,
-                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                        style:
+                            const TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                     ),
                 ],
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: Text(BankAccountStrings.cancel)),
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(BankAccountStrings.cancel)),
                 ElevatedButton(
                   onPressed: () async {
-                     Navigator.pop(context);
-                     await _performUpdateUser(chosenUser.email!, isAdmin, isSupport);
+                    Navigator.pop(context);
+                    await _performUpdateUser(
+                        chosenUser.email!, isAdmin, isSupport);
                   },
                   child: Text(BankAccountStrings.add),
                 ),
@@ -299,9 +451,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
             ),
           ),
         );
-
       }, availableUsers, BankAccountStrings.add);
-
     } catch (e) {
       if (mounted) setState(() => _isLoadingUsers = false);
       _showError("Error loading users: $e");
@@ -316,21 +466,18 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text('${BankAccountStrings.editRole}: ${user.name ?? user.email}'),
+          title: Text(
+              '${BankAccountStrings.editRole}: ${user.name ?? user.email}'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-               CheckboxListTile(
+              CheckboxListTile(
                 title: Text(BankAccountStrings.isAdminLabel),
                 value: isAdmin,
                 onChanged: (v) => setState(() => isAdmin = v!),
               ),
 
-              // CheckboxListTile(
-              //   title: Text(BankAccountStrings.isSupportLabel),
-              //   value: isSupport,
-              //   onChanged: (v) => setState(() => isSupport = v!),
-              // ),
+
               if (isAdmin)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -341,14 +488,16 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
                 ),
             ],
           ),
-           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: Text(BankAccountStrings.cancel)),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(BankAccountStrings.cancel)),
             ElevatedButton(
               onPressed: () async {
-                 Navigator.pop(context);
-                 if (user.email != null) {
-                    _performUpdateUser(user.email!, isAdmin, isSupport);
-                 }
+                Navigator.pop(context);
+                if (user.email != null) {
+                  _performUpdateUser(user.email!, isAdmin, isSupport);
+                }
               },
               child: Text(BankAccountStrings.save),
             ),
@@ -358,10 +507,12 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
     );
   }
 
-  Future<void> _performUpdateUser(String email, bool isAdmin, bool isSupport) async {
+  Future<void> _performUpdateUser(
+      String email, bool isAdmin, bool isSupport) async {
     setState(() => _isLoadingUsers = true);
     try {
-      await DbBankAccounts.updateBankAccountUser(_account.id, email, isAdmin, isSupport);
+      await DbBankAccounts.updateBankAccountUser(
+          _account.id, email, isAdmin, isSupport);
       await _loadUsers();
     } catch (e) {
       _showError("${BankAccountStrings.errorUpdatingUser}: $e");
@@ -373,27 +524,24 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
     setState(() => _isLoadingUsers = true);
     try {
       if (user.email == null) {
-         _showError("${BankAccountStrings.errorRemovingUser}: Email missing");
-         setState(() => _isLoadingUsers = false);
-         return;
+        _showError("${BankAccountStrings.errorRemovingUser}: Email missing");
+        setState(() => _isLoadingUsers = false);
+        return;
       }
       await DbBankAccounts.removeBankAccountUser(_account.id, user.email!);
       await _loadUsers();
     } catch (e) {
       _showError("${BankAccountStrings.errorRemovingUser}: $e");
-       if (mounted) setState(() => _isLoadingUsers = false);
+      if (mounted) setState(() => _isLoadingUsers = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    bool showFio = _selectedType == 'FIO';
-    int tabCount = 2 + (showFio ? 1 : 0);
-    
-    if (_tabController.length != tabCount) {
-      _tabController.dispose();
-      _tabController = TabController(length: tabCount, vsync: this);
-    }
+
+
+
+
 
     final content = Column(
       children: [
@@ -410,7 +558,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
           labelColor: Theme.of(context).primaryColor,
           tabs: [
             Tab(text: BankAccountStrings.generalTab),
-            if (showFio) Tab(text: BankAccountStrings.fioTokenTab),
+            Tab(text: BankAccountStrings.bankConnectionTab),
             Tab(text: BankAccountStrings.usersTab),
           ],
         ),
@@ -419,13 +567,13 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
             controller: _tabController,
             children: [
               _buildGeneralTab(),
-              if (showFio) _buildFioTab(),
+              _buildConnectionTab(),
               _buildUsersTab(),
             ],
           ),
         ),
         if (widget.isDialog)
-           Padding(
+          Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -441,103 +589,441 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
     );
 
     if (widget.isDialog) {
-       return Dialog(
-         child: ConstrainedBox(
-           constraints: const BoxConstraints(maxWidth: 600, maxHeight: 800),
-           child: content,
-         ),
-       );
+      return Dialog(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 800),
+          child: content,
+        ),
+      );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_account.title ?? BankAccountStrings.bankAccountSettingsTitle),
+        title:
+            Text(_account.title ?? BankAccountStrings.bankAccountSettingsTitle),
       ),
       body: content,
     );
   }
 
-  Widget _buildGeneralTab() {
+  Widget _buildConnectionTab() {
+    final forwardingEmail = 'bank.${_pairingCode ?? '**********'}@$_emailDomain';
+
     return SelectionArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Form(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_isFio) ..._buildFioTokenSectionWidgets(),
+            if (_isFio) ...[
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(CommonStrings.or.toUpperCase(),
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 12)),
+                  ),
+                  const Expanded(child: Divider()),
+                ],
+              ),
+              const SizedBox(height: 24),
+            ],
+            Text(BankAccountStrings.syncInstruction),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Theme.of(context).dividerColor),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                   if (_isFio) ...[
+                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("💡 ", style: TextStyle(fontSize: 14)),
+                        Expanded(
+                            child: Text(BankAccountStrings
+                                .setupGuideExplanationFioNote,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13))),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                   ],
+                   Text(
+                    BankAccountStrings.setupGuideExplanationTitle,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("✅ ", style: TextStyle(fontSize: 14)),
+                      Expanded(
+                          child: Text(BankAccountStrings.setupGuideExplanationSet,
+                              style: const TextStyle(fontSize: 13))),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("❌ ", style: TextStyle(fontSize: 14)),
+                      Expanded(
+                          child: Text(BankAccountStrings
+                              .setupGuideExplanationNotSet,
+                              style: const TextStyle(fontSize: 13))),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+             _buildGuideCard(
+               context,
+               title: BankAccountStrings.setupGuideTitle,
+               steps: [
+                 BankAccountStrings.setupGuideStep1,
+                 BankAccountStrings.setupGuideStep2,
+                 BankAccountStrings.setupGuideStep3,
+                 BankAccountStrings.setupGuideStep4,
+                 BankAccountStrings.setupGuideStep5,
+               ],
+             ),
+            const SizedBox(height: 24),
+            InputDecorator(
+              decoration: InputDecoration(
+                labelText: BankAccountStrings.forwardingEmailLabel,
+                border: const OutlineInputBorder(),
+                suffixIcon: _pairingCode == null
+                    ? const Icon(Icons.lock_outline, color: Colors.grey)
+                    : IconButton(
+                        icon: const Icon(Icons.copy),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: forwardingEmail));
+                          ToastHelper.Show(context, BankAccountStrings.copyEmail);
+                        },
+                      ),
+              ),
+              child: SelectableText(
+                forwardingEmail,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+            if (_pairingCode == null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.info_outline, size: 16, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        BankAccountStrings.maskedEmailExplanation,
+                        style: const TextStyle(
+                            color: Colors.grey, fontStyle: FontStyle.italic, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+             const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.security, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    BankAccountStrings.emailSecurityNote,
+                    style: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall?.color, fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (!_isReadOnly)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: _regenerateToken,
+                  icon: const Icon(Icons.refresh),
+                  label: Text(BankAccountStrings.regenerateToken),
+                ),
+              ),
+            const SizedBox(height: 24),
+
+            const SizedBox(height: 24),
+
+              if (_account.lastFetchTime != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Center(
+                    child: Text(
+                      "${BankAccountStrings.lastFetchTime}: ${timeago.format(_account.lastFetchTime!.toLocal(), locale: context.locale.languageCode)}",
+                      style: const TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                  ),
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGuideCard(BuildContext context,
+      {required String title, required List<String> steps}) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor,
+        ),
+      ),
+      child: ExpansionTile(
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          steps.first,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        initiallyExpanded: false,
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        children: steps.asMap().entries.map((e) => _buildStep(e.key + 1, e.value)).toList(),
+      ),
+    );
+  }
+
+  Widget _buildStep(int number, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 10,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            child: Text(
+              number.toString(),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text)),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveToken() async {
+    setState(() => _isSaving = true);
+    try {
+      await DbBankAccounts.updateBankAccountToken(
+          _account.id, _tokenController.text, _expiryDate);
+      if (!mounted) return;
+
+      // Update local masking to reflect change immediately
+      final newToken = _tokenController.text;
+      if (newToken.isNotEmpty) {
+        final mask =
+            "************${newToken.length >= 4 ? newToken.substring(newToken.length - 4) : newToken}";
+        setState(() {
+          _account = _account.copyWith(tokenMasked: mask);
+        });
+      }
+
+      ToastHelper.Show(context, BankAccountStrings.tokenUpdated);
+      _tokenController.clear();
+    } catch (e) {
+      if (mounted) _showError("${BankAccountStrings.errorSavingToken}: $e");
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _regenerateToken({bool silent = false}) async {
+    if (!silent) {
+      bool? confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(BankAccountStrings.regenerateToken),
+          content: Text(BankAccountStrings.regenerateTokenConfirmation),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(BankAccountStrings.cancel)),
+            TextButton(
+                style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error),
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(BankAccountStrings.regenerateToken)),
+          ],
+        ),
+      );
+      if (confirm != true) return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final newToken =
+          await DbBankAccounts.regenerateBankAccountPairingCode(_account.id);
+      setState(() {
+        _pairingCode = newToken;
+        _account = _account.copyWith(pairingCode: newToken); // Update local model
+      });
+      if (!silent) {
+        if (!mounted) return;
+        ToastHelper.Show(context, BankAccountStrings.tokenUpdated);
+      }
+    } catch (e) {
+      _showError("${BankAccountStrings.errorSavingToken}: $e");
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+
+  Widget _buildGeneralTab() {
+    return SelectionArea(
+        child: SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Form(
         key: _formKey,
         child: Column(
           children: [
-             _isReadOnly 
-               ? TextFormField(
-                   initialValue: _selectedType == 'CASH' ? 'CASH' : (_selectedType == 'General' ? BankAccountStrings.typeGeneral : BankAccountStrings.typeFio),
-                   decoration: InputDecoration(labelText: BankAccountStrings.typeLabel),
-                   readOnly: true,
-                 )
-               : DropdownButtonFormField<String>(
-              value: _selectedType,
-              decoration: InputDecoration(labelText: BankAccountStrings.typeLabel),
-              items: [
-                DropdownMenuItem(value: 'FIO', child: Text(BankAccountStrings.typeFio)),
-                DropdownMenuItem(value: 'General', child: Text(BankAccountStrings.typeGeneral)),
-              ],
-              onChanged: (v) {
-                if (v != _selectedType) {
-                  _tabController.dispose();
-                  setState(() {
-                    _selectedType = v!;
-                    _initTabController();
-                  });
-                }
-              },
-            ),
+
             const SizedBox(height: 16),
             TextFormField(
               controller: _titleController,
-              decoration: InputDecoration(labelText: BankAccountStrings.titleLabel),
+              decoration:
+                  InputDecoration(labelText: BankAccountStrings.titleLabel),
               readOnly: _isReadOnly,
-              validator: (v) => v!.isEmpty ? CommonStrings.fieldCannotBeEmpty : null,
+              validator: (v) =>
+                  v!.isEmpty ? CommonStrings.fieldCannotBeEmpty : null,
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _numberController,
-              decoration: InputDecoration(labelText: BankAccountStrings.accountNumberLabel),
-              readOnly: _isReadOnly,
-              validator: (v) => v!.isEmpty ? CommonStrings.fieldCannotBeEmpty : null,
-            ),
+            const SizedBox(height: 24),
+            if (!_isReadOnly)
+              LayoutBuilder(builder: (context, constraints) {
+                return ToggleButtons(
+                  isSelected: [!_useIbanInput, _useIbanInput],
+                  onPressed: (index) =>
+                      setState(() => _useIbanInput = index == 1),
+                  borderRadius: BorderRadius.circular(8),
+                  constraints: BoxConstraints.expand(
+                      width: (constraints.maxWidth - 4) / 2, height: 40),
+                  children: [
+                    Text(BankAccountStrings.inputModeSplit),
+                    Text(BankAccountStrings.inputModeIban),
+                  ],
+                );
+              }),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _priorityController,
-              decoration: InputDecoration(
-                labelText: BankAccountStrings.priority,
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.info_outline),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(BankAccountStrings.priorityHelpTitle),
-                        content: Text(BankAccountStrings.priorityHelpContent),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('OK'),
+            if (_useIbanInput)
+              TextFormField(
+                controller: _ibanController,
+                decoration: InputDecoration(
+                    labelText: BankAccountStrings.accountNumberLabel,
+                    errorText: _ibanError,
+                    helperText: _useIbanInput && !_isReadOnly
+                        ? BankAccountStrings.ibanValidationHelp
+                        : null),
+                readOnly: _isReadOnly,
+                onChanged: (_) => _onIbanChanged(),
+                validator: (v) =>
+                    v!.isEmpty ? CommonStrings.fieldCannotBeEmpty : null,
+              )
+            else
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 80,
+                          child: TextFormField(
+                            controller: _prefixController,
+                            decoration: InputDecoration(labelText: BankAccountStrings.prefixLabel),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            onChanged: (_) => _onHumanChanged(),
+                            readOnly: _isReadOnly,
                           ),
-                        ],
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _accountBodyController,
+                            decoration:
+                                InputDecoration(labelText: BankAccountStrings.accountNumberLabel),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            onChanged: (_) => _onHumanChanged(),
+                            readOnly: _isReadOnly,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      isExpanded: true,
+                      value: czBanks.containsKey(_selectedBankCode)
+                          ? _selectedBankCode
+                          : null,
+                      decoration: InputDecoration(labelText: BankAccountStrings.bankCodeLabel),
+                      items: czBanks.entries
+                          .map((e) => DropdownMenuItem(
+                                value: e.key,
+                                child: Text("${e.value} (${e.key})",
+                                    overflow: TextOverflow.ellipsis),
+                              ))
+                          .toList(),
+                      onChanged: _isReadOnly ? null : (v) {
+                        setState(() {
+                          _selectedBankCode = v;
+                          // _selectedType update removed
+                        });
+                        _onHumanChanged();
+                      },
+                    ),
+                    if (_selectedBankCode != null &&
+                        _accountBodyController.text.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          "${BankAccountStrings.fullFormatLabel} ${_buildLegacyHumanReadable() ?? ''}",
+                          style: TextStyle(
+                              color: Theme.of(context).hintColor, fontSize: 13),
+                        ),
                       ),
-                    );
-                  },
+                  ],
                 ),
               ),
-              keyboardType: TextInputType.number,
-              readOnly: true,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _humanReadableController,
-              decoration: InputDecoration(
-                labelText: BankAccountStrings.humanReadableLabel, // Needs to be added to strings? Or hardcoded for now "Human Readable Format"
-                helperText: BankAccountStrings.humanReadableHelper, // "Auto-generated from IBAN"
-              ),
-              readOnly: true,
-            ),
+
+
             const SizedBox(height: 16),
             InputDecorator(
               decoration: InputDecoration(
@@ -551,9 +1037,12 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
                     spacing: 8,
                     children: [
                       ..._supportedCurrencies.map((c) => Chip(
-                        label: Text(c),
-                        onDeleted: _isReadOnly ? null : () => setState(() => _supportedCurrencies.remove(c)),
-                      )),
+                            label: Text(c),
+                            onDeleted: _isReadOnly
+                                ? null
+                                : () => setState(
+                                    () => _supportedCurrencies.remove(c)),
+                          )),
                       if (!_isReadOnly)
                         ActionChip(
                           avatar: const Icon(Icons.add, size: 16),
@@ -569,7 +1058,9 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
             if (!_isReadOnly)
               ElevatedButton(
                 onPressed: _isSaving ? null : _saveGeneralInfo,
-                child: _isSaving ? const CircularProgressIndicator() : Text(BankAccountStrings.saveChanges),
+                child: _isSaving
+                    ? const CircularProgressIndicator()
+                    : Text(BankAccountStrings.saveChanges),
               ),
           ],
         ),
@@ -577,99 +1068,103 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
     ));
   }
 
-  Widget _buildFioTab() {
-    return SelectionArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(BankAccountStrings.fioTokenInstruction),
-          const SizedBox(height: 16),
-          if (_account.tokenMasked != null)
-             Padding(
-               padding: const EdgeInsets.only(bottom: 16.0),
-               child: Text(
-                 "${BankAccountStrings.tokenMaskedInfo}: ${_account.tokenMasked}",
-                 style: const TextStyle(fontWeight: FontWeight.bold),
-               ),
-             ),
-          
-          TextFormField(
-            controller: _tokenController,
-            readOnly: _isReadOnly,
-            obscureText: !_isTokenTokenVisible,
-            onChanged: (value) {
-              if (_expiryDate != null) {
-                setState(() {
-                  _expiryDate = null;
-                });
-              }
-            },
-            decoration: InputDecoration(
-              labelText: BankAccountStrings.fioTokenLabel,
-              hintText: BankAccountStrings.fioTokenHint,
-              helperText: _account.tokenMasked != null ? BankAccountStrings.leaveEmptyToKeepToken : null,
-              suffixIcon: IconButton(
-                icon: Icon(_isTokenTokenVisible ? Icons.visibility : Icons.visibility_off),
-                onPressed: () {
-                  setState(() {
-                    _isTokenTokenVisible = !_isTokenTokenVisible;
-                  });
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          InkWell(
-            onTap: _isReadOnly ? null : () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _expiryDate ?? DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-              );
-              if (picked != null) {
-                setState(() => _expiryDate = picked);
-              }
-            },
-            child: InputDecorator(
-              decoration: InputDecoration(
-                labelText: BankAccountStrings.tokenExpiryDateLabel,
-                suffixIcon: const Icon(Icons.calendar_today),
-              ),
-              child: Text(
-                _expiryDate != null 
-                  ? DateFormat.yMd(context.locale.toString()).format(_expiryDate!) 
-                  : BankAccountStrings.setDate,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          if (!_isReadOnly)
-            Center(
-              child: ElevatedButton(
-                onPressed: _isSaving ? null : _saveToken,
-                child: _isSaving ? const CircularProgressIndicator() : Text(BankAccountStrings.updateToken),
-              ),
-            ),
-          const SizedBox(height: 24),
-          if (_account.lastFetchTime != null)
-             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                "${BankAccountStrings.lastFetchTime}: ${DateFormat.yMd(context.locale.toString()).add_jm().format(_account.lastFetchTime!.toOccasionTime())}",
-                style: const TextStyle(color: Colors.grey, fontSize: 13),
-              ),
-            ),
+  List<Widget> _buildFioTokenSectionWidgets() {
+    return [
+      Text(BankAccountStrings.fioTokenInstruction),
+      const SizedBox(height: 16),
+      _buildGuideCard(
+        context,
+        title: BankAccountStrings.fioSetupGuideTitle,
+        steps: [
+          BankAccountStrings.fioSetupGuideStep1,
+          BankAccountStrings.fioSetupGuideStep2,
+          BankAccountStrings.fioSetupGuideStep3,
         ],
       ),
-    ));
+      const SizedBox(height: 16),
+      if (_account.tokenMasked != null)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Text(
+            "${BankAccountStrings.tokenMaskedInfo}: ${_account.tokenMasked}",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+      TextFormField(
+        controller: _tokenController,
+        readOnly: _isReadOnly,
+        obscureText: !_isTokenTokenVisible,
+        onChanged: (value) {
+          if (_expiryDate != null) {
+            setState(() {
+              _expiryDate = null;
+            });
+          }
+        },
+        decoration: InputDecoration(
+          labelText: BankAccountStrings.fioTokenLabel,
+          hintText: BankAccountStrings.fioTokenHint,
+          helperText: _account.tokenMasked != null
+              ? BankAccountStrings.leaveEmptyToKeepToken
+              : null,
+          suffixIcon: IconButton(
+            icon: Icon(_isTokenTokenVisible
+                ? Icons.visibility
+                : Icons.visibility_off),
+            onPressed: () {
+              setState(() {
+                _isTokenTokenVisible = !_isTokenTokenVisible;
+              });
+            },
+          ),
+        ),
+      ),
+      const SizedBox(height: 16),
+      InkWell(
+        onTap: _isReadOnly
+            ? null
+            : () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _expiryDate ?? DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                );
+                if (picked != null) {
+                  setState(() => _expiryDate = picked);
+                }
+              },
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: BankAccountStrings.tokenExpiryDateLabel,
+            suffixIcon: const Icon(Icons.calendar_today),
+          ),
+          child: Text(
+            _expiryDate != null
+                ? DateFormat.yMd(context.locale.toString())
+                    .format(_expiryDate!)
+                : BankAccountStrings.setDate,
+          ),
+        ),
+      ),
+      const SizedBox(height: 24),
+      if (!_isReadOnly)
+        Center(
+          child: ElevatedButton(
+            onPressed: _isSaving ? null : _saveToken,
+            child: _isSaving
+                ? const CircularProgressIndicator()
+                : Text(BankAccountStrings.updateToken),
+          ),
+        ),
+    ];
   }
 
   Widget _buildUsersTab() {
-    if (_isLoadingUsers) return const Center(child: CircularProgressIndicator());
-    
+    if (_isLoadingUsers) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Column(
       children: [
         if (!_isReadOnly)
@@ -686,8 +1181,12 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
             itemCount: _users.length,
             itemBuilder: (context, index) {
               final user = _users[index];
-              final fullName = [user.name, user.surname].where((s) => s != null && s.isNotEmpty).join(' ');
-              final displayName = fullName.isNotEmpty ? "$fullName (${user.email ?? ''})" : (user.email ?? 'Unknown');
+              final fullName = [user.name, user.surname]
+                  .where((s) => s != null && s.isNotEmpty)
+                  .join(' ');
+              final displayName = fullName.isNotEmpty
+                  ? "$fullName (${user.email ?? ''})"
+                  : (user.email ?? 'Unknown');
 
               return ListTile(
                 title: Text(displayName),
@@ -696,33 +1195,45 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
                   children: [
                     if (user.isAdmin)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: Colors.orange.shade100,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.orange.shade300),
                         ),
-                        child: Text(BankAccountStrings.isAdminLabel, style: TextStyle(fontSize: 12, color: Colors.orange.shade900)),
+                        child: Text(BankAccountStrings.isAdminLabel,
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.orange.shade900)),
                       ),
                     if (AppConfig.showBankSupportRole && user.isSupport)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: Colors.blue.shade100,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.blue.shade300),
                         ),
-                        child: Text(BankAccountStrings.isSupportLabel, style: TextStyle(fontSize: 12, color: Colors.blue.shade900)),
+                        child: Text(BankAccountStrings.isSupportLabel,
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.blue.shade900)),
                       ),
                   ],
                 ),
-                trailing: _isReadOnly ? null : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(icon: const Icon(Icons.edit), onPressed: () => _editUser(user)),
-                    IconButton(icon: const Icon(Icons.delete), onPressed: () => _removeUser(user)),
-                  ],
-                ),
+                trailing: _isReadOnly
+                    ? null
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => _editUser(user)),
+                          IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () => _removeUser(user)),
+                        ],
+                      ),
               );
             },
           ),
@@ -743,10 +1254,13 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
           children: [
             Wrap(
               spacing: 8,
-              children: ['CZK', 'EUR'].where((c) => !_supportedCurrencies.contains(c)).map((c) => ActionChip(
-                label: Text(c),
-                onPressed: () => Navigator.pop(context, c),
-              )).toList(),
+              children: ['CZK', 'EUR']
+                  .where((c) => !_supportedCurrencies.contains(c))
+                  .map((c) => ActionChip(
+                        label: Text(c),
+                        onPressed: () => Navigator.pop(context, c),
+                      ))
+                  .toList(),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -761,15 +1275,18 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text(BankAccountStrings.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(BankAccountStrings.cancel)),
           ElevatedButton(
             onPressed: () {
-               final val = controller.text.toUpperCase();
-               if (val.length == 3) {
-                 Navigator.pop(context, val);
-               } else {
-                 ToastHelper.Show(context, BankAccountStrings.invalidCurrencyCode);
-               }
+              final val = controller.text.toUpperCase();
+              if (val.length == 3) {
+                Navigator.pop(context, val);
+              } else {
+                ToastHelper.Show(
+                    context, BankAccountStrings.invalidCurrencyCode);
+              }
             },
             child: Text(BankAccountStrings.addCurrency),
           ),
@@ -778,7 +1295,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen> w
     ).then((val) {
       if (val != null && val is String && val.length == 3) {
         if (!_supportedCurrencies.contains(val)) {
-           setState(() => _supportedCurrencies.add(val));
+          setState(() => _supportedCurrencies.add(val));
         }
       }
     });

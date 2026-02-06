@@ -64,7 +64,7 @@ class _ImageAreaState extends State<ImageArea> {
         _currentUrl = uploadedUrl;
       });
     } catch (e) {
-      // you might want to show an error here
+      debugPrint("Error: $e");
     } finally {
       setState(() {
         _uploading = false;
@@ -104,9 +104,8 @@ class _ImageAreaState extends State<ImageArea> {
               // Set onPressed to null to disable the button
               onPressed: widget.enabled
                   ? () {
-                widget.onRemove();
-                setState(() => _currentUrl = null);
-              }
+                      widget.onRemove();
+                    }
                   : null,
               padding: const EdgeInsets.all(4),
               constraints: const BoxConstraints(),
@@ -124,6 +123,7 @@ class _ImageAreaState extends State<ImageArea> {
         opacity: widget.enabled ? 1.0 : 0.5,
         child: DropFile(
           hint: widget.hint,
+          allowedExtensions: const ['jpg', 'jpeg', 'png', 'webp', 'heic'],
           onFilePathChanged: (file) => _handleFileSelected(file),
         ),
       ),

@@ -10,12 +10,12 @@ class CountdownWidget extends StatefulWidget {
   final bool compact;
 
   const CountdownWidget({
-    Key? key,
+    super.key,
     required this.targetTime,
     required this.onFinished,
     this.title,
     this.compact = false,
-  }) : super(key: key);
+  });
 
   @override
   _CountdownWidgetState createState() => _CountdownWidgetState();
@@ -72,16 +72,20 @@ class _CountdownWidgetState extends State<CountdownWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: widget.compact ? 12 : 60), // Add some top spacing so it is not superglued to the top
+            SizedBox(
+                height: widget.compact
+                    ? 12
+                    : 60), // Add some top spacing so it is not superglued to the top
             if (widget.title != null)
-               Padding(
-              padding: EdgeInsets.only(bottom: widget.compact ? 8 : 24),
-              child: HtmlView(
-                html: "<div style='text-align: center;'>${widget.title!}</div>",
-                fontSize: 24, // Approx headlineMedium size
-                isSelectable: false,
+              Padding(
+                padding: EdgeInsets.only(bottom: widget.compact ? 8 : 24),
+                child: HtmlView(
+                  html:
+                      "<div style='text-align: center;'>${widget.title!}</div>",
+                  fontSize: 24, // Approx headlineMedium size
+                  isSelectable: false,
+                ),
               ),
-            ),
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Row(
@@ -89,11 +93,14 @@ class _CountdownWidgetState extends State<CountdownWidget> {
                 children: [
                   _buildTimeBlock(context, _timeLeft.inDays, FormStrings.days),
                   const SizedBox(width: 8),
-                  _buildTimeBlock(context, _timeLeft.inHours.remainder(24), FormStrings.hours),
+                  _buildTimeBlock(context, _timeLeft.inHours.remainder(24),
+                      FormStrings.hours),
                   const SizedBox(width: 8),
-                  _buildTimeBlock(context, _timeLeft.inMinutes.remainder(60), FormStrings.minutes),
+                  _buildTimeBlock(context, _timeLeft.inMinutes.remainder(60),
+                      FormStrings.minutes),
                   const SizedBox(width: 8),
-                  _buildTimeBlock(context, _timeLeft.inSeconds.remainder(60), FormStrings.seconds),
+                  _buildTimeBlock(context, _timeLeft.inSeconds.remainder(60),
+                      FormStrings.seconds),
                 ],
               ),
             ),
@@ -113,10 +120,8 @@ class _CountdownWidgetState extends State<CountdownWidget> {
       decoration: BoxDecoration(
         // Use a very subtle tint of the primary color for background in light mode
         // User requested "very slightly colored" and "solid opaque" background
-        color: Color.alphaBlend(
-            primary.withOpacity(isDark ? 0.05 : 0.03),
-            isDark ? Colors.grey.shade900 : Colors.white
-        ),
+        color: Color.alphaBlend(primary.withOpacity(isDark ? 0.05 : 0.03),
+            isDark ? Colors.grey.shade900 : Colors.white),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: theme.primaryColor.withOpacity(0.3)),
         boxShadow: [

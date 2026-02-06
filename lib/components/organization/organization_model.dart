@@ -10,10 +10,10 @@ class PlatformModel {
   });
 
   factory PlatformModel.fromJson(Map<String, dynamic> json) => PlatformModel(
-    link: json['link'] as String?,
-    prompt: json['prompt'] as String?,
-    platform: json['platform'] as String?,
-  );
+        link: json['link'] as String?,
+        prompt: json['prompt'] as String?,
+        platform: json['platform'] as String?,
+      );
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
@@ -33,7 +33,8 @@ class OrganizationModel {
   String? oneSignalAppId;
   String? oneSignalRestApiKey;
   bool? isRegistrationEnabled;
-  bool? isUnitCreationEnabled; // Not in user JSON request but kept as it was there
+  bool?
+      isUnitCreationEnabled; // Not in user JSON request but kept as it was there
   bool? isAppSupported;
   int? defaultUnit;
   int? representativeOccasion;
@@ -58,8 +59,7 @@ class OrganizationModel {
       title: json['title'] as String?,
       appName: json['APP_NAME'] as String?,
       platforms: json['PLATFORMS'] is List
-          ? List<PlatformModel>.from(
-          (json['PLATFORMS'] as List)
+          ? List<PlatformModel>.from((json['PLATFORMS'] as List)
               .map((x) => PlatformModel.fromJson(x as Map<String, dynamic>)))
           : [],
       defaultUrl: json['DEFAULT_URL'] as String?,
@@ -87,9 +87,9 @@ class OrganizationModel {
 
     addIfNotEmpty('title', title);
     addIfNotEmpty('APP_NAME', appName);
-    
+
     if (platforms != null && platforms!.isNotEmpty) {
-       data['PLATFORMS'] = platforms!.map((p) => p.toJson()).toList();
+      data['PLATFORMS'] = platforms!.map((p) => p.toJson()).toList();
     }
 
     addIfNotEmpty('DEFAULT_URL', defaultUrl);

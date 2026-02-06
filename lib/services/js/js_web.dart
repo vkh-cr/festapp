@@ -21,7 +21,7 @@ class JSInterop {
   factory JSInterop() => _instance;
 
   final StreamController<web.PopStateEvent> _popStateController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   JSInterop._internal() {
     web.window.onpopstate = (web.PopStateEvent event) {

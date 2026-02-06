@@ -18,11 +18,11 @@ import 'package:fstapp/components/forms/models/form_option_product_model.dart';
 class RadioFieldBuilder {
   /// Builds a currency-aware radio field.
   static Widget buildRadioField(
-      BuildContext context,
-      FieldHolder fieldHolder,
-      List<FormOptionModel> optionsIn,
-      FormHolder formHolder,
-      ) {
+    BuildContext context,
+    FieldHolder fieldHolder,
+    List<FormOptionModel> optionsIn,
+    FormHolder formHolder,
+  ) {
     return _CurrencyFilteredRadioField(
       fieldHolder: fieldHolder,
       optionsIn: optionsIn,
@@ -32,11 +32,11 @@ class RadioFieldBuilder {
 
   /// A simple radio group when none of the options have a description.
   static Widget _buildBasicRadioField(
-      BuildContext context,
-      FieldHolder fieldHolder,
-      List<FormOptionModel> optionsIn,
-      FormHolder formHolder,
-      ) {
+    BuildContext context,
+    FieldHolder fieldHolder,
+    List<FormOptionModel> optionsIn,
+    FormHolder formHolder,
+  ) {
     return _BasicRadioFieldWidget(
       fieldHolder: fieldHolder,
       optionsIn: optionsIn,
@@ -47,19 +47,18 @@ class RadioFieldBuilder {
   /// A card-based radio list when at least one option has a description.
   /// This version uses the FormBuilderField's builder to obtain the live error state.
   static Widget _buildCardDesignRadioField(
-      BuildContext context,
-      FieldHolder fieldHolder,
-      List<FormOptionModel> optionsIn,
-      FormHolder formHolder,
-      ) {
+    BuildContext context,
+    FieldHolder fieldHolder,
+    List<FormOptionModel> optionsIn,
+    FormHolder formHolder,
+  ) {
     // If there are no options to display for the current filter, show a message.
     if (optionsIn.isEmpty) {
       return FormHelper.buildCardWrapperDesign(
           context: context,
           fieldHolder: fieldHolder,
           hasError: false,
-          content: Center(child: Text(FormStrings.noOptionsForCurrency))
-      );
+          content: Center(child: Text(FormStrings.noOptionsForCurrency)));
     }
     return ClipRect(
       child: AnimatedSize(
@@ -67,9 +66,13 @@ class RadioFieldBuilder {
         duration: Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         child: FormBuilderField<FormOptionModel?>(
-          key: ValueKey(fieldHolder.id.toString() + optionsIn.toString()), // Add key to force rebuild
+          key: ValueKey(fieldHolder.id.toString() +
+              optionsIn.toString()), // Add key to force rebuild
           name: fieldHolder.id.toString(),
-          validator: fieldHolder.isRequired ? FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty) : null,
+          validator: fieldHolder.isRequired
+              ? FormBuilderValidators.required(
+                  errorText: CommonStrings.fieldCannotBeEmpty)
+              : null,
           initialValue: null,
           builder: (field) {
             // Use the field's error state to update the card wrapper.
@@ -82,7 +85,8 @@ class RadioFieldBuilder {
                   // Build the list of option cards.
                   Column(
                     children: optionsIn
-                        .map((o) => _buildRadioOptionCard(context, field, o, formHolder))
+                        .map((o) => _buildRadioOptionCard(
+                            context, field, o, formHolder))
                         .toList(),
                   ),
                   // Animate the appearance/disappearance of the "Clear selection" button.
@@ -90,17 +94,17 @@ class RadioFieldBuilder {
                     duration: Duration(milliseconds: 300),
                     child: field.value != null
                         ? Padding(
-                      key: ValueKey('removeButton'),
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: TextButton(
-                        onPressed: () {
-                          field.didChange(null);
-                          formHolder.controller?.updateTotalPrice?.call();
-                          field.validate();
-                        },
-                        child: Text(FormStrings.clearSelection),
-                      ),
-                    )
+                            key: ValueKey('removeButton'),
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: TextButton(
+                              onPressed: () {
+                                field.didChange(null);
+                                formHolder.controller?.updateTotalPrice?.call();
+                                field.validate();
+                              },
+                              child: Text(FormStrings.clearSelection),
+                            ),
+                          )
                         : SizedBox(key: ValueKey('empty')),
                   ),
                   // Display error text below the field if there is one.
@@ -127,27 +131,33 @@ class RadioFieldBuilder {
 
   /// Builds a single card with a radio button for the given option.
   static Widget _buildRadioOptionCard(
-      BuildContext context,
-      FormFieldState<FormOptionModel?> field,
-      FormOptionModel o,
-      FormHolder formHolder,
-      ) {
+    BuildContext context,
+    FormFieldState<FormOptionModel?> field,
+    FormOptionModel o,
+    FormHolder formHolder,
+  ) {
     // If the option is a product option and is disabled, mark it accordingly.
     final bool isDisabled = o is FormOptionProductModel && !o.isAvailable;
     final title = OptionFieldHelper.buildOptionTitle(context, o);
     // If disabled, update text style to use the disabled color and append "Unavailable".
-    final effectiveTitle = isDisabled ? "$title (${FormStrings.unavailable})" : title;
+    final effectiveTitle =
+        isDisabled ? "$title (${FormStrings.unavailable})" : title;
     final isSelected = (field.value == o);
 
     String? effectiveDescription = o.description;
-    final showSurchargeInfo = formHolder.getTicket()?.showSurchargeDescription ?? true;
-    if (showSurchargeInfo && o is FormOptionProductModel && o.data?['surcharge'] != null) {
+    final showSurchargeInfo =
+        formHolder.getTicket()?.showSurchargeDescription ?? true;
+    if (showSurchargeInfo &&
+        o is FormOptionProductModel &&
+        o.data?['surcharge'] != null) {
       final surcharge = o.data!['surcharge'];
-      if(surcharge['amount'] != null) {
+      if (surcharge['amount'] != null) {
         final amount = surcharge['amount'];
         final currency = surcharge['currency'] ?? '';
-        final surchargeText = "+ $amount $currency ${FormStrings.surchargeOnSite}";
-        effectiveDescription = "<span style='color: #666; font-weight: bold;'>$surchargeText</span>${o.description != null ? "<br>${o.description}" : ""}";
+        final surchargeText =
+            "+ $amount $currency ${FormStrings.surchargeOnSite}";
+        effectiveDescription =
+            "<span style='color: #666; font-weight: bold;'>$surchargeText</span>${o.description != null ? "<br>${o.description}" : ""}";
       }
     }
 
@@ -162,18 +172,18 @@ class RadioFieldBuilder {
         onChanged: isDisabled
             ? null
             : (val) {
-          field.didChange(val);
-          formHolder.controller?.updateTotalPrice?.call();
-          field.validate();
-        },
+                field.didChange(val);
+                formHolder.controller?.updateTotalPrice?.call();
+                field.validate();
+              },
       ),
       onTap: isDisabled
           ? null
           : () {
-        field.didChange(o);
-        formHolder.controller?.updateTotalPrice?.call();
-        field.validate();
-      },
+              field.didChange(o);
+              formHolder.controller?.updateTotalPrice?.call();
+              field.validate();
+            },
     );
     // Wrap the card in an Opacity widget to grey it out if disabled.
     return isDisabled ? Opacity(opacity: 0.5, child: optionCard) : optionCard;
@@ -193,10 +203,12 @@ class _CurrencyFilteredRadioField extends StatefulWidget {
   });
 
   @override
-  State<_CurrencyFilteredRadioField> createState() => _CurrencyFilteredRadioFieldState();
+  State<_CurrencyFilteredRadioField> createState() =>
+      _CurrencyFilteredRadioFieldState();
 }
 
-class _CurrencyFilteredRadioFieldState extends State<_CurrencyFilteredRadioField> {
+class _CurrencyFilteredRadioFieldState
+    extends State<_CurrencyFilteredRadioField> {
   final List<String> _availableCurrencies = [];
   String? _selectedCurrency;
 
@@ -209,7 +221,9 @@ class _CurrencyFilteredRadioFieldState extends State<_CurrencyFilteredRadioField
   void _initializeCurrencies() {
     final currencies = <String>{};
     for (final option in widget.optionsIn) {
-      if (option is FormOptionProductModel && option.price > 0 && option.currencyCode != null) {
+      if (option is FormOptionProductModel &&
+          option.price > 0 &&
+          option.currencyCode != null) {
         currencies.add(option.currencyCode!);
       }
     }
@@ -244,15 +258,16 @@ class _CurrencyFilteredRadioFieldState extends State<_CurrencyFilteredRadioField
           ),
           const SizedBox(height: 8),
           ToggleButtons(
-            isSelected: _availableCurrencies.map((c) => c == _selectedCurrency).toList(),
+            isSelected: _availableCurrencies
+                .map((c) => c == _selectedCurrency)
+                .toList(),
             onPressed: (index) {
               _onCurrencyChanged(_availableCurrencies[index]);
             },
             borderRadius: BorderRadius.circular(8.0),
             constraints: BoxConstraints(minHeight: 40.0, minWidth: 80.0),
-            children: _availableCurrencies
-                .map((c) => Text(c.toUpperCase()))
-                .toList(),
+            children:
+                _availableCurrencies.map((c) => Text(c.toUpperCase())).toList(),
           ),
         ],
       ),
@@ -268,7 +283,9 @@ class _CurrencyFilteredRadioFieldState extends State<_CurrencyFilteredRadioField
       filteredOptions = widget.optionsIn;
     } else {
       filteredOptions = widget.optionsIn.where((option) {
-        if (option is FormOptionProductModel && option.price > 0 && option.currencyCode != null) {
+        if (option is FormOptionProductModel &&
+            option.price > 0 &&
+            option.currencyCode != null) {
           return option.currencyCode == _selectedCurrency;
         }
         // Always include non-product options or free products
@@ -279,7 +296,8 @@ class _CurrencyFilteredRadioFieldState extends State<_CurrencyFilteredRadioField
     // If the currently selected value is not in the filtered list, clear it.
     final formState = FormBuilder.of(context);
     final fieldState = formState?.fields[widget.fieldHolder.id.toString()];
-    if (fieldState?.value != null && !filteredOptions.contains(fieldState?.value)) {
+    if (fieldState?.value != null &&
+        !filteredOptions.contains(fieldState?.value)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           fieldState?.didChange(null);
@@ -288,11 +306,12 @@ class _CurrencyFilteredRadioFieldState extends State<_CurrencyFilteredRadioField
       });
     }
 
-    final fieldWidget = FormHelper.isCardDesign(widget.formHolder, widget.fieldHolder)
+    final fieldWidget = FormHelper.isCardDesign(
+            widget.formHolder, widget.fieldHolder)
         ? RadioFieldBuilder._buildCardDesignRadioField(
-        context, widget.fieldHolder, filteredOptions, widget.formHolder)
+            context, widget.fieldHolder, filteredOptions, widget.formHolder)
         : RadioFieldBuilder._buildBasicRadioField(
-        context, widget.fieldHolder, filteredOptions, widget.formHolder);
+            context, widget.fieldHolder, filteredOptions, widget.formHolder);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,7 +340,8 @@ class _BasicRadioFieldWidget extends StatefulWidget {
 }
 
 class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
-  final GlobalKey<FormBuilderFieldState> _radioGroupKey = GlobalKey<FormBuilderFieldState>();
+  final GlobalKey<FormBuilderFieldState> _radioGroupKey =
+      GlobalKey<FormBuilderFieldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -340,34 +360,40 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
         color: isDisabled ? Theme.of(context).disabledColor : null,
       );
       final title = OptionFieldHelper.buildOptionTitle(context, o);
-      final effectiveTitle = isDisabled ? "$title (${FormStrings.unavailable})" : title;
+      final effectiveTitle =
+          isDisabled ? "$title (${FormStrings.unavailable})" : title;
 
       Widget labelWidget = Text(
         effectiveTitle,
         style: style,
       );
 
-      final showSurchargeInfo = widget.formHolder.getTicket()?.showSurchargeDescription ?? true;
-      if (showSurchargeInfo && o is FormOptionProductModel && o.data?['surcharge'] != null) {
+      final showSurchargeInfo =
+          widget.formHolder.getTicket()?.showSurchargeDescription ?? true;
+      if (showSurchargeInfo &&
+          o is FormOptionProductModel &&
+          o.data?['surcharge'] != null) {
         final surcharge = o.data!['surcharge'];
         if (surcharge['amount'] != null) {
           final amount = surcharge['amount'];
           final currency = surcharge['currency'] ?? '';
-          final surchargeText = "+ $amount $currency ${FormStrings.surchargeOnSite}";
+          final surchargeText =
+              "+ $amount $currency ${FormStrings.surchargeOnSite}";
 
           labelWidget = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               labelWidget,
               const SizedBox(height: 2),
-              Text(
-                  surchargeText,
-                  style: style?.copyWith(
-                      color: Colors.grey[600],
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500
-                  ) ?? TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w500)
-              ),
+              Text(surchargeText,
+                  style: style.copyWith(
+                          color: Colors.grey[600],
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500) ??
+                      TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500)),
             ],
           );
         }
@@ -391,8 +417,10 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
             label: widget.fieldHolder.title ?? '',
             isRequired: widget.fieldHolder.isRequired,
           ),
-          validator:
-          widget.fieldHolder.isRequired ? FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty) : null,
+          validator: widget.fieldHolder.isRequired
+              ? FormBuilderValidators.required(
+                  errorText: CommonStrings.fieldCannotBeEmpty)
+              : null,
           options: options,
           orientation: OptionsOrientation.vertical,
           wrapDirection: Axis.vertical,

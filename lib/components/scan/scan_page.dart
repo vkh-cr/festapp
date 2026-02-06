@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
-import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
@@ -45,7 +44,6 @@ class _ScanPageState extends State<ScanPage> {
   static const String _defaultResetPassword = "1";
   static const bool _showResetPasswordButton = AppConfig.isAppSupported;
 
-
   TicketModel? _scannedObject;
   ScanState _scanState = ScanState.nothing;
 
@@ -55,16 +53,18 @@ class _ScanPageState extends State<ScanPage> {
   String? _occasionTitle;
   List<Feature> _features = [];
   bool _canScanTicketsManually = false;
-  
+
   // Track if we just successfully used the ticket
   bool _justConfirmed = false;
 
   @override
   void initState() {
     super.initState();
-    final ticketFeature = FeatureService.getFeatureDetails(FeatureConstants.ticket) as TicketFeature?;
+    final ticketFeature =
+        FeatureService.getFeatureDetails(FeatureConstants.ticket)
+            as TicketFeature?;
     if (ticketFeature?.canScanManually == true) {
-       _canScanTicketsManually = true;
+      _canScanTicketsManually = true;
     }
     Future.delayed(const Duration(seconds: 10), () {
       if (mounted) {
@@ -74,7 +74,7 @@ class _ScanPageState extends State<ScanPage> {
       }
     });
   }
-  
+
   // DEFINITION: Mapping array for specific fields to show
   final Map<String, String> _specificFieldMappings = {
     "735": "Typ účastníka",
@@ -87,7 +87,7 @@ class _ScanPageState extends State<ScanPage> {
   };
 
   final MobileScannerController _mobileScannerController =
-  MobileScannerController(
+      MobileScannerController(
     formats: [BarcodeFormat.qrCode],
     detectionSpeed: DetectionSpeed.noDuplicates,
   );
@@ -135,7 +135,8 @@ class _ScanPageState extends State<ScanPage> {
   Future<void> _loadOccasionTitle() async {
     if (widget.scanCode == null) return;
     try {
-      final occasionData = await DbTickets.getOccasionByScanCode(widget.scanCode!);
+      final occasionData =
+          await DbTickets.getOccasionByScanCode(widget.scanCode!);
       if (occasionData != null && mounted) {
         setState(() {
           _occasionTitle = occasionData['title'];
@@ -193,8 +194,8 @@ class _ScanPageState extends State<ScanPage> {
       final ticketsList = data['tickets'] as List;
 
       // 2. Find the specific ticket in the JSON that matches the scanned object's ID
-      final ticketData = ticketsList.firstWhereOrNull(
-              (t) => t is Map && t['id'] == _scannedObject!.id);
+      final ticketData = ticketsList
+          .firstWhereOrNull((t) => t is Map && t['id'] == _scannedObject!.id);
 
       if (ticketData != null && ticketData is Map) {
         double totalTicketPrice = 0.0;
@@ -236,7 +237,8 @@ class _ScanPageState extends State<ScanPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(24.0),
-                child: Icon(Icons.error_outline, size: 60, color: foregroundColor),
+                child:
+                    Icon(Icons.error_outline, size: 60, color: foregroundColor),
               ),
               Text(
                 OrdersStrings.scanNotFound,
@@ -258,7 +260,6 @@ class _ScanPageState extends State<ScanPage> {
               padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
               child: Text(OrdersStrings.scanCameraInstruction),
             ),
-
             if (AppConfig.isAppSupported)
               AnimatedOpacity(
                 duration: const Duration(milliseconds: 500),
@@ -278,7 +279,8 @@ class _ScanPageState extends State<ScanPage> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
-                          color: ThemeConfig.blackColor(context).withOpacity(0.7),
+                          color:
+                              ThemeConfig.blackColor(context).withOpacity(0.7),
                         ),
                       ),
                     ),
@@ -364,7 +366,7 @@ class _ScanPageState extends State<ScanPage> {
     if (_scannedObject!.state == OrderModel.usedState &&
         _scannedObject!.updatedAt != null) {
       String formattedDate =
-      DateFormat('dd.MM.yyyy HH:mm').format(_scannedObject!.updatedAt!);
+          DateFormat('dd.MM.yyyy HH:mm').format(_scannedObject!.updatedAt!);
       stateString += " ($formattedDate)";
     }
 
@@ -432,8 +434,7 @@ class _ScanPageState extends State<ScanPage> {
                     child: RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(
-                        style:
-                        TextStyle(color: foregroundColor, fontSize: 16),
+                        style: TextStyle(color: foregroundColor, fontSize: 16),
                         children: [
                           TextSpan(
                             text: OrdersStrings.bigGameLabel,
@@ -468,7 +469,8 @@ class _ScanPageState extends State<ScanPage> {
                 priceWidget,
 
                 // DISPLAY NOTES
-                if (_scannedObject!.note != null && _scannedObject!.note!.isNotEmpty)
+                if (_scannedObject!.note != null &&
+                    _scannedObject!.note!.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
@@ -524,7 +526,7 @@ class _ScanPageState extends State<ScanPage> {
                     String fieldId = entry.key;
                     String label = entry.value;
                     String? value =
-                    _getFieldValue(_scannedObject!.relatedOrder!, fieldId);
+                        _getFieldValue(_scannedObject!.relatedOrder!, fieldId);
 
                     if (value == null) return const SizedBox.shrink();
 
@@ -533,13 +535,13 @@ class _ScanPageState extends State<ScanPage> {
                       child: RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(
-                          style: TextStyle(
-                              color: foregroundColor, fontSize: 15),
+                          style:
+                              TextStyle(color: foregroundColor, fontSize: 15),
                           children: [
                             TextSpan(
                               text: "$label: ",
                               style:
-                              const TextStyle(fontWeight: FontWeight.w600),
+                                  const TextStyle(fontWeight: FontWeight.w600),
                             ),
                             TextSpan(text: value),
                           ],
@@ -571,9 +573,9 @@ class _ScanPageState extends State<ScanPage> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                Theme.of(context).colorScheme.secondaryContainer,
+                    Theme.of(context).colorScheme.secondaryContainer,
                 foregroundColor:
-                Theme.of(context).colorScheme.onSecondaryContainer,
+                    Theme.of(context).colorScheme.onSecondaryContainer,
               ),
               onPressed: _resetPassword,
               child: Text(OrdersStrings.resetPasswordTo(_defaultResetPassword)),
@@ -587,11 +589,10 @@ class _ScanPageState extends State<ScanPage> {
   Widget build(BuildContext context) {
     bool canSearch = AppConfig.isAppSupported || _canScanTicketsManually;
 
-    Color backgroundColor = (_scannedObject == null && _scanState == ScanState.nothing)
-        ? ThemeConfig.grey200(context)
-        : getResultColor(_scanState);
-
-
+    Color backgroundColor =
+        (_scannedObject == null && _scanState == ScanState.nothing)
+            ? ThemeConfig.grey200(context)
+            : getResultColor(_scanState);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -613,7 +614,8 @@ class _ScanPageState extends State<ScanPage> {
                   Container(
                     width: double.infinity,
                     color: ThemeConfig.whiteColor(context),
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                     child: Text(
                       "${OrdersStrings.scanningForOccasion} $_occasionTitle",
                       style: TextStyle(
@@ -625,7 +627,6 @@ class _ScanPageState extends State<ScanPage> {
                     ),
                   ),
                 // Header
-
 
                 // Display scanned user details
                 buildScannedUserDetails(backgroundColor),
@@ -664,9 +665,9 @@ class _ScanPageState extends State<ScanPage> {
     // I can merge them? Or separate dialogs.
 
     if (AppConfig.isAppSupported) {
-       await _openUserSearchDialog();
+      await _openUserSearchDialog();
     } else if (_canScanTicketsManually) {
-       await _openTicketSearchDialog();
+      await _openTicketSearchDialog();
     }
   }
 
@@ -704,7 +705,7 @@ class _ScanPageState extends State<ScanPage> {
       }
     }
   }
-  
+
   Future<void> setupNewId(String scannedId) async {
     if (scannedId == rightNowScanned) {
       return;
@@ -746,8 +747,6 @@ class _ScanPageState extends State<ScanPage> {
       }
     }
 
-
-
     // Not found in DB or null return
     _scannedObject = null;
     _scanState = ScanState.notFound;
@@ -785,7 +784,8 @@ class _ScanPageState extends State<ScanPage> {
       builder: (context) {
         return AlertDialog(
           title: Text(OrdersStrings.resetPasswordTitle),
-          content: Text(OrdersStrings.resetPasswordConfirmationContent(_defaultResetPassword)),
+          content: Text(OrdersStrings.resetPasswordConfirmationContent(
+              _defaultResetPassword)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -821,18 +821,18 @@ class _ScanPageState extends State<ScanPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(OrdersStrings.gridEmail,
-                    style:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 SelectableText(email, style: const TextStyle(fontSize: 18)),
                 const SizedBox(height: 24),
                 Text(CommonStrings.password, // Use CommonStrings
-                    style:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 const SelectableText(_defaultResetPassword,
                     style:
-                    TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               ],
             ),
             actions: [
@@ -851,7 +851,8 @@ class _ScanPageState extends State<ScanPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(OrdersStrings.errorResetPassword(e.toString()))),
+          SnackBar(
+              content: Text(OrdersStrings.errorResetPassword(e.toString()))),
         );
       }
     }
@@ -874,6 +875,4 @@ class _ScanPageState extends State<ScanPage> {
         return ThemeConfig.backgroundColor(context);
     }
   }
-
 }
-

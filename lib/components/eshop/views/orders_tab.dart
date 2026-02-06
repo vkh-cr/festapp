@@ -6,7 +6,6 @@ import 'package:fstapp/theme_config.dart';
 
 import '../orders_strings.dart';
 
-
 class OrdersTab extends StatefulWidget {
   const OrdersTab({super.key});
 
@@ -14,7 +13,8 @@ class OrdersTab extends StatefulWidget {
   _OrdersTabState createState() => _OrdersTabState();
 }
 
-class _OrdersTabState extends State<OrdersTab> with SingleTickerProviderStateMixin {
+class _OrdersTabState extends State<OrdersTab>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   // Set the number of tabs. For this example, we have "Orders" and a placeholder "Products".
   final int _tabLength = 2;
@@ -44,8 +44,10 @@ class _OrdersTabState extends State<OrdersTab> with SingleTickerProviderStateMix
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                DataGridHelper.buildTab(context, Icons.shopping_cart, OrdersStrings.ordersTab),
-                DataGridHelper.buildTab(context, Icons.history, OrdersStrings.ordersHistoryTab),
+                DataGridHelper.buildTab(
+                    context, Icons.shopping_cart, OrdersStrings.ordersTab),
+                DataGridHelper.buildTab(
+                    context, Icons.history, OrdersStrings.ordersHistoryTab),
               ],
             ),
           ),
@@ -55,7 +57,7 @@ class _OrdersTabState extends State<OrdersTab> with SingleTickerProviderStateMix
               physics: const NeverScrollableScrollPhysics(),
               children: const [
                 OrdersContent(), // Your original widget is now the content of the first tab
-                OrdersHistoryContent(),   // A placeholder for the second tab's content
+                OrdersHistoryContent(), // A placeholder for the second tab's content
               ],
             ),
           ),

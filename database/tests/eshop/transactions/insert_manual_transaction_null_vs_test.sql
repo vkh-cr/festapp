@@ -20,16 +20,16 @@ VALUES (1000, 'FIO Account', '1111/2010', 'FIO', ARRAY['CZK']) ON CONFLICT (id) 
 INSERT INTO eshop.payment_info (id, variable_symbol, amount, currency_code, bank_account, created_at)
 VALUES (1001, 123456789, 200.0, 'CZK', 1000, now()) ON CONFLICT (id) DO NOTHING;
 UPDATE eshop.payment_info SET paid = 0 WHERE id = 1001;
+DELETE FROM eshop.transactions WHERE payment_info = 1001;
 
 -- 3. Call the RPC (Pay 200 CZK CASH manually - EXPLICIT ID, NULL VS)
 -- Params: amount, currency, unit_id, date, vs, note, payment_info_id
--- Note order: amount, currency, unit, date, vs, note, payment_info_id
 SELECT public.insert_manual_transaction(
     200.0::double precision, -- p_amount
     'CZK',                   -- p_currency
     999,                     -- p_unit_id
-    '2024-01-01T12:00:00Z',  -- p_date
     NULL,                    -- p_variable_symbol (VS is NULL)
+    '2024-01-01T12:00:00Z',  -- p_date
     'Test Explicit Link',    -- p_note
     1001                     -- p_payment_info_id (Explicit Link)
 );

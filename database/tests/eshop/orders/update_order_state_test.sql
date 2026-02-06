@@ -14,7 +14,7 @@ INSERT INTO eshop.orders (id, occasion, state, price, currency_code, created_at)
 VALUES (6002, 124, 'ordered', 100.0, 'CZK', now());
 
 -- Create Tickets for Order 2
-INSERT INTO eshop.tickets (id, state, created_at, occasion) VALUES (7001, 'valid', now(), 124);
+INSERT INTO eshop.tickets (id, state, created_at, occasion) VALUES (7001, 'ordered', now(), 124);
 INSERT INTO eshop.order_product_ticket ("order", ticket, product) VALUES (6002, 7001, null); -- simplified join
 
 -- 2. Call Original Function on 'created' order

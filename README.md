@@ -127,8 +127,10 @@ serverless platform. It includes:
   permissions) resides in **PostgreSQL Functions (RPC)** rather than Dart code.
 
 > [!TIP] **For Developers & AI Agents**:\
-> Please consult **[AI_README.md](AI_README.md)** for a deep architectural
-> deep-dive, component analysis, and "Split Brain" logic documentation.
+> Please consult
+> **[docs/architecture/ai_context.md](docs/architecture/ai_context.md)** for a
+> deep architectural deep-dive, component analysis, and "Split Brain" logic
+> documentation.
 
 ---
 
@@ -165,7 +167,7 @@ This script automatically:
 ## Setup
 
 For a helpful step-by-step guide on creating your own app, see
-[howto.md](./howto.md).
+[docs/setup/howto.md](docs/setup/howto.md).
 
 ---
 
@@ -275,39 +277,34 @@ Under similar names usually available in AppStore and Google Play Store.
 
 ---
 
-## AI Integration (MCP)
+---
 
-This project supports the **Model Context Protocol (MCP)** to allow AI
-assistants to interact with the project environment.
+## Development
 
-### Chrome Automation (Puppeteer)
+### Prerequisites
 
-To enable AI agents to control a headless Chrome instance (e.g., for end-to-end
-testing or automation), use the Puppeteer MCP server:
+- **FVM** (Flutter Version Management): This project adheres to a specific
+  Flutter version using FVM.
+  - Install FVM: `dart pub global activate fvm`
+  - Install project SDK: `fvm install`
 
-```bash
-./automation/start-mcp-puppeteer.sh
-```
+### Running the App
 
-This script exposes Chrome Developer Tools capabilities via the MCP protocol.
-
-### Supabase Integration
-
-To enable AI agents to interact with the Supabase database and management API:
-
-**1. Postgres Database Access** Allows direct SQL queries and schema inspection.
-Requires `DATABASE_URL` in `.env.local`.
+Always prefix flutter/dart commands with `fvm`:
 
 ```bash
-./automation/start-mcp-db.sh
+# Get dependencies
+fvm flutter pub get
+
+# Run on Chrome
+fvm flutter run -d chrome
+
+# Run code generation
+fvm dart run build_runner build --delete-conflicting-outputs
 ```
 
-**2. Supabase Management** Allows project management and log inspection.
-Requires `SUPABASE_ACCESS_TOKEN` in `.env.local`.
-
-```bash
-./automation/start-mcp-supabase.sh
-```
+For detailed project architecture and internal documentation, please refer to
+**[docs/architecture/ai_context.md](docs/architecture/ai_context.md)**.
 
 ---
 

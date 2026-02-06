@@ -14,11 +14,11 @@ import '../form_strings.dart';
 
 class CheckboxFieldBuilder {
   static Widget buildSelectManyField(
-      BuildContext context,
-      FieldHolder fieldHolder,
-      List<FormOptionModel> optionsIn,
-      FormHolder formHolder,
-      ) {
+    BuildContext context,
+    FieldHolder fieldHolder,
+    List<FormOptionModel> optionsIn,
+    FormHolder formHolder,
+  ) {
     if (!FormHelper.isCardDesign(formHolder, fieldHolder)) {
       return _BasicCheckboxFieldWidget(
         fieldHolder: fieldHolder,
@@ -26,16 +26,17 @@ class CheckboxFieldBuilder {
         formHolder: formHolder,
       );
     } else {
-      return _buildCardSelectManyField(context, fieldHolder, optionsIn, formHolder);
+      return _buildCardSelectManyField(
+          context, fieldHolder, optionsIn, formHolder);
     }
   }
 
   static Widget _buildCardSelectManyField(
-      BuildContext context,
-      FieldHolder fieldHolder,
-      List<FormOptionModel> optionsIn,
-      FormHolder formHolder,
-      ) {
+    BuildContext context,
+    FieldHolder fieldHolder,
+    List<FormOptionModel> optionsIn,
+    FormHolder formHolder,
+  ) {
     return FormHelper.buildCardWrapperDesign(
       context: context,
       fieldHolder: fieldHolder,
@@ -46,7 +47,10 @@ class CheckboxFieldBuilder {
           curve: Curves.easeInOut,
           child: FormBuilderField<List<FormOptionModel>>(
             name: fieldHolder.id.toString(),
-            validator: fieldHolder.isRequired ? FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty) : null,
+            validator: fieldHolder.isRequired
+                ? FormBuilderValidators.required(
+                    errorText: CommonStrings.fieldCannotBeEmpty)
+                : null,
             initialValue: [],
             builder: (FormFieldState<List<FormOptionModel>> field) {
               return Column(
@@ -54,7 +58,7 @@ class CheckboxFieldBuilder {
                 children: [
                   // Build card for each option.
                   ...optionsIn.map(
-                        (o) => _buildOptionCard(context, field, o, formHolder),
+                    (o) => _buildOptionCard(context, field, o, formHolder),
                   ),
                   // Show error text below the options if validation fails.
                   if (field.errorText != null)
@@ -75,33 +79,38 @@ class CheckboxFieldBuilder {
         ),
       ),
       hasError: formHolder.controller?.globalKey.currentState
-          ?.fields[fieldHolder.id.toString()]?.hasError ??
+              ?.fields[fieldHolder.id.toString()]?.hasError ??
           false,
     );
   }
 
   static Widget _buildOptionCard(
-      BuildContext context,
-      FormFieldState<List<FormOptionModel>> field,
-      FormOptionModel o,
-      FormHolder formHolder,
-      ) {
+    BuildContext context,
+    FormFieldState<List<FormOptionModel>> field,
+    FormOptionModel o,
+    FormHolder formHolder,
+  ) {
     // Determine if this option is a priced product and disabled.
     final bool isDisabled = o is FormOptionProductModel && !o.isAvailable;
     final originalTitle = OptionFieldHelper.buildOptionTitle(context, o);
     final effectiveTitle =
-    isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
+        isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
     final isSelected = field.value?.contains(o) ?? false;
 
     String? effectiveDescription = o.description;
-    final showSurchargeInfo = formHolder.getTicket()?.showSurchargeDescription ?? true;
-    if (showSurchargeInfo && o is FormOptionProductModel && o.data?['surcharge'] != null) {
+    final showSurchargeInfo =
+        formHolder.getTicket()?.showSurchargeDescription ?? true;
+    if (showSurchargeInfo &&
+        o is FormOptionProductModel &&
+        o.data?['surcharge'] != null) {
       final surcharge = o.data!['surcharge'];
-      if(surcharge['amount'] != null) {
+      if (surcharge['amount'] != null) {
         final amount = surcharge['amount'];
         final currency = surcharge['currency'] ?? '';
-        final surchargeText = "+ $amount $currency ${FormStrings.surchargeOnSite}";
-        effectiveDescription = "<span style='color: #666; font-weight: bold;'>$surchargeText</span>${o.description != null ? "<br>${o.description}" : ""}";
+        final surchargeText =
+            "+ $amount $currency ${FormStrings.surchargeOnSite}";
+        effectiveDescription =
+            "<span style='color: #666; font-weight: bold;'>$surchargeText</span>${o.description != null ? "<br>${o.description}" : ""}";
       }
     }
 
@@ -117,19 +126,19 @@ class CheckboxFieldBuilder {
         onChanged: isDisabled
             ? null
             : (val) {
-          _toggleItemInFieldValue(field, o, isSelected);
-          formHolder.controller?.updateTotalPrice?.call();
-          field.validate();
-        },
+                _toggleItemInFieldValue(field, o, isSelected);
+                formHolder.controller?.updateTotalPrice?.call();
+                field.validate();
+              },
       ),
       // Disable onTap for disabled items.
       onTap: isDisabled
           ? null
           : () {
-        _toggleItemInFieldValue(field, o, isSelected);
-        formHolder.controller?.updateTotalPrice?.call();
-        field.validate();
-      },
+              _toggleItemInFieldValue(field, o, isSelected);
+              formHolder.controller?.updateTotalPrice?.call();
+              field.validate();
+            },
     );
 
     // Grey out the card if the option is disabled.
@@ -140,10 +149,10 @@ class CheckboxFieldBuilder {
   }
 
   static void _toggleItemInFieldValue(
-      FormFieldState<List<FormOptionModel>> field,
-      FormOptionModel option,
-      bool isSelected,
-      ) {
+    FormFieldState<List<FormOptionModel>> field,
+    FormOptionModel option,
+    bool isSelected,
+  ) {
     final newValue = List<FormOptionModel>.from(field.value ?? []);
     if (isSelected) {
       newValue.remove(option);
@@ -174,7 +183,7 @@ class _BasicCheckboxFieldWidget extends StatefulWidget {
 
 class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
   final GlobalKey<FormBuilderFieldState> fieldKey =
-  GlobalKey<FormBuilderFieldState>();
+      GlobalKey<FormBuilderFieldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +192,7 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
       final bool isDisabled = o is FormOptionProductModel && !o.isAvailable;
       final originalTitle = OptionFieldHelper.buildOptionTitle(context, o);
       final effectiveTitle =
-      isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
+          isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
 
       final style = OptionFieldHelper.optionTitleTextStyle().copyWith(
         color: isDisabled ? Theme.of(context).disabledColor : null,
@@ -194,27 +203,32 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
         style: style,
       );
 
-      final showSurchargeInfo = widget.formHolder.getTicket()?.showSurchargeDescription ?? true;
-      if (showSurchargeInfo && o is FormOptionProductModel && o.data?['surcharge'] != null) {
+      final showSurchargeInfo =
+          widget.formHolder.getTicket()?.showSurchargeDescription ?? true;
+      if (showSurchargeInfo &&
+          o is FormOptionProductModel &&
+          o.data?['surcharge'] != null) {
         final surcharge = o.data!['surcharge'];
         if (surcharge['amount'] != null) {
           final amount = surcharge['amount'];
           final currency = surcharge['currency'] ?? '';
-          final surchargeText = "+ $amount $currency ${FormStrings.surchargeOnSite}";
+          final surchargeText =
+              "+ $amount $currency ${FormStrings.surchargeOnSite}";
 
           labelWidget = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               labelWidget,
               const SizedBox(height: 2),
-              Text(
-                  surchargeText,
-                  style: style?.copyWith(
-                      color: Colors.grey[600],
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500
-                  ) ?? TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w500)
-              ),
+              Text(surchargeText,
+                  style: style.copyWith(
+                          color: Colors.grey[600],
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500) ??
+                      TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500)),
             ],
           );
         }
@@ -238,7 +252,8 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
             isRequired: widget.fieldHolder.isRequired,
           ),
           validator: widget.fieldHolder.isRequired
-              ? FormBuilderValidators.required(errorText: CommonStrings.fieldCannotBeEmpty)
+              ? FormBuilderValidators.required(
+                  errorText: CommonStrings.fieldCannotBeEmpty)
               : null,
           options: options,
           activeColor: Theme.of(context).primaryColor,

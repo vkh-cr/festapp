@@ -1,15 +1,17 @@
 class BankAccountModel {
   final int id;
+  // force cache invalidation
   final String? accountNumber;
   final String? title;
   final String type;
   final bool isAdmin;
   final int priority;
-  
+
   final String? tokenMasked;
   final DateTime? tokenExpiryDate;
   final List<String> supportedCurrencies;
   final List<String> linkedUnits;
+  final String? pairingCode;
   final String? accountNumberHumanReadable;
   final DateTime? lastFetchTime;
 
@@ -26,6 +28,7 @@ class BankAccountModel {
     this.linkedUnits = const [],
     this.accountNumberHumanReadable,
     this.lastFetchTime,
+    this.pairingCode,
   });
 
   factory BankAccountModel.fromJson(Map<String, dynamic> json) {
@@ -37,11 +40,22 @@ class BankAccountModel {
       type: json['type'] ?? 'FIO',
       isAdmin: json['is_admin'] ?? false,
       tokenMasked: json['token_masked'],
-      tokenExpiryDate: json['token_expiry_date'] != null ? DateTime.parse(json['token_expiry_date']) : null,
-      supportedCurrencies: (json['supported_currencies'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      linkedUnits: (json['linked_units'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      tokenExpiryDate: json['token_expiry_date'] != null
+          ? DateTime.parse(json['token_expiry_date'])
+          : null,
+      supportedCurrencies: (json['supported_currencies'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      linkedUnits: (json['linked_units'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
       accountNumberHumanReadable: json['account_number_human_readable'],
-      lastFetchTime: json['last_fetch_time'] != null ? DateTime.parse(json['last_fetch_time']) : null,
+      lastFetchTime: json['last_fetch_time'] != null
+          ? DateTime.parse(json['last_fetch_time'])
+          : null,
+      pairingCode: json['pairing_code'] == '************' ? null : json['pairing_code'],
     );
   }
 
@@ -58,6 +72,7 @@ class BankAccountModel {
       'supported_currencies': supportedCurrencies,
       'account_number_human_readable': accountNumberHumanReadable,
       'last_fetch_time': lastFetchTime?.toIso8601String(),
+      'pairing_code': pairingCode,
     };
   }
 
@@ -74,6 +89,7 @@ class BankAccountModel {
     List<String>? linkedUnits,
     String? accountNumberHumanReadable,
     DateTime? lastFetchTime,
+    String? pairingCode,
   }) {
     return BankAccountModel(
       id: id ?? this.id,
@@ -86,8 +102,10 @@ class BankAccountModel {
       tokenExpiryDate: tokenExpiryDate ?? this.tokenExpiryDate,
       supportedCurrencies: supportedCurrencies ?? this.supportedCurrencies,
       linkedUnits: linkedUnits ?? this.linkedUnits,
-      accountNumberHumanReadable: accountNumberHumanReadable ?? this.accountNumberHumanReadable,
+      accountNumberHumanReadable:
+          accountNumberHumanReadable ?? this.accountNumberHumanReadable,
       lastFetchTime: lastFetchTime ?? this.lastFetchTime,
+      pairingCode: pairingCode ?? this.pairingCode,
     );
   }
 }

@@ -35,7 +35,6 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
   late String? _subject;
   late String? _htmlContent;
 
-
   @override
   void initState() {
     super.initState();
@@ -61,8 +60,6 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
       Navigator.of(context).pop();
     }
   }
-
-
 
   /// Builds a widget displaying the available substitutions.
   /// If [subs] is a list, each substitution is shown on its own line.
@@ -148,8 +145,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
+                            fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -209,9 +205,9 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context)
-                        .inputDecorationTheme
-                        .labelStyle
-                        ?.color ??
+                            .inputDecorationTheme
+                            .labelStyle
+                            ?.color ??
                         ThemeConfig.grey700(context).withOpacity(0.85),
                   ),
                 ),
@@ -231,9 +227,8 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                       final result = await RouterService.navigatePageInfo(
                         context,
                         HtmlEditorRoute(
-                          content: {HtmlEditorPage.parContent: _htmlContent},
-                          occasionId: widget.template.occasion
-                        ),
+                            content: {HtmlEditorPage.parContent: _htmlContent},
+                            occasionId: widget.template.occasion),
                       );
                       if (result != null && result is String) {
                         setState(() {
@@ -243,38 +238,49 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                     },
                     child: Text("Edit content".tr()),
                   ),
-                  if ((widget.template.occasion != null && widget.template.occasion == widget.emailTemplatesResponse.occasion?.id) ||
-                          (widget.template.unit != null && widget.template.unit == widget.emailTemplatesResponse.unit.id && widget.emailTemplatesResponse.occasion == null))
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: ThemeConfig.redColor(context),
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () async {
-                              final confirmed = await DialogHelper.showConfirmationDialog(
-                                context,
-                                EmailTemplatesStrings.resetConfirmTitle,
-                                EmailTemplatesStrings.resetConfirmContent,
-                                confirmButtonMessage: EmailTemplatesStrings.resetToDefault,
-                              );
-                              
-                              if (confirmed == true) {
-                                await DbEmailTemplates.deleteEntityEmailTemplate(
-                                  occasionId: widget.emailTemplatesResponse.occasion?.id,
-                                  unitId: widget.emailTemplatesResponse.occasion == null ? widget.emailTemplatesResponse.unit.id : null,
-                                  code: widget.template.code!,
-                                );
-
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
-                              }
-                            },
-                            child: Text(EmailTemplatesStrings.resetToDefault),
-                          ),
+                  if ((widget.template.occasion != null &&
+                          widget.template.occasion ==
+                              widget.emailTemplatesResponse.occasion?.id) ||
+                      (widget.template.unit != null &&
+                          widget.template.unit ==
+                              widget.emailTemplatesResponse.unit.id &&
+                          widget.emailTemplatesResponse.occasion == null))
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ThemeConfig.redColor(context),
+                          foregroundColor: Colors.white,
                         ),
+                        onPressed: () async {
+                          final confirmed =
+                              await DialogHelper.showConfirmationDialog(
+                            context,
+                            EmailTemplatesStrings.resetConfirmTitle,
+                            EmailTemplatesStrings.resetConfirmContent,
+                            confirmButtonMessage:
+                                EmailTemplatesStrings.resetToDefault,
+                          );
+
+                          if (confirmed == true) {
+                            await DbEmailTemplates.deleteEntityEmailTemplate(
+                              occasionId:
+                                  widget.emailTemplatesResponse.occasion?.id,
+                              unitId:
+                                  widget.emailTemplatesResponse.occasion == null
+                                      ? widget.emailTemplatesResponse.unit.id
+                                      : null,
+                              code: widget.template.code!,
+                            );
+
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                            }
+                          }
+                        },
+                        child: Text(EmailTemplatesStrings.resetToDefault),
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 16),

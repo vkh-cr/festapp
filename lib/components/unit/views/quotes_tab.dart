@@ -23,8 +23,8 @@ class QuotesTab extends StatelessWidget {
         context: context,
         loadData: () => DbInformation.getAllInformationForDataGridForUnit(
             unitId, InformationModel.quoteType),
-        fromPlutoJson: (plutoData) =>
-            InformationModel.fromPlutoJsonType(plutoData, InformationModel.quoteType),
+        fromPlutoJson: (plutoData) => InformationModel.fromPlutoJsonType(
+            plutoData, InformationModel.quoteType),
         firstColumnType: DataGridFirstColumn.delete,
         idColumn: Tb.information.id,
         getNewObject: () => InformationModel.newRow(unitId),
@@ -67,7 +67,8 @@ class QuotesTab extends StatelessWidget {
                 title: rendererContext.row.cells[Tb.information.title]!.value,
                 rendererContext: rendererContext,
                 loadContent: () async {
-                  return rendererContext.row.cells[Tb.information.description]!.value;
+                  return rendererContext
+                      .row.cells[Tb.information.description]!.value;
                 },
               );
             },

@@ -82,11 +82,12 @@ async function sync() {
                 console.log(`✅ Applied ${file}`);
 
             } catch (err) {
+                await client.query('ROLLBACK'); // Reset transaction state if file contained BEGIN/COMMIT and failed
                 // Check if error is "already exists"
                 // Postgres error codes for "duplicate_table" (42P07), "duplicate_column" (42701), "duplicate_function" (42723), "duplicate_object" (42710)
                 // Or checking message content.
                 const msg = err.message.toLowerCase();
-                const isAlreadyExists = msg.includes('already exists') || msg.includes('constraint') && msg.includes('exists'); // Loose check
+                const isAlreadyExists = msg.includes('already exists') || (msg.includes('constraint') && msg.includes('exists')) || msg.includes('not unique'); // Loose check
                 
                 if (isAlreadyExists) {
                     console.log(`⚠️  ${file} failed with "already exists". Marking as APPLIED.`);

@@ -57,12 +57,12 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
       final result = await widget.orderFutureFunction();
       final elapsed = DateTime.now().difference(start).inMilliseconds;
       code = int.tryParse(
-          result.data["code"].toString().replaceAll(RegExp(r'\D'), '')) ??
+              result.data["code"].toString().replaceAll(RegExp(r'\D'), '')) ??
           0;
       _isSuccess = code == 200;
       if (code == 1017) _errorProduct = result.data["product"];
       if (_isSuccess) {
-         widget.onOrderConfirmed?.call();
+        widget.onOrderConfirmed?.call();
       }
       if (_isSuccess && elapsed < 1000) {
         await Future.delayed(Duration(milliseconds: 1000 - elapsed));
@@ -112,7 +112,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
           width: 100,
           height: 100,
           decoration:
-          BoxDecoration(shape: BoxShape.circle, color: Colors.grey[300]),
+              BoxDecoration(shape: BoxShape.circle, color: Colors.grey[300]),
           child: Center(
             child: CircularProgressIndicator(
               color: Theme.of(context).primaryColor,
@@ -127,7 +127,8 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
   Widget _buildResult() {
     String title, subtitle;
     if (_isSuccess) {
-      title = PublicOrderStrings.successTitle(widget.tone, hasTickets: widget.hasTickets);
+      title = PublicOrderStrings.successTitle(widget.tone,
+          hasTickets: widget.hasTickets);
       subtitle = PublicOrderStrings.paymentInfo(widget.tone);
     } else if (code == 1017) {
       final prodTitle = _errorProduct?["title"] ?? "";
@@ -161,22 +162,24 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         const SizedBox(height: 24),
         Text(
           title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith( // Use Theme text style
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: _isSuccess
-                ? ThemeConfig.darkGreen
-                : ThemeConfig.redColor(context),
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                // Use Theme text style
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: _isSuccess
+                    ? ThemeConfig.darkGreen
+                    : ThemeConfig.redColor(context),
+              ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
           subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith( // Use Theme text style
-            fontSize: 14,
-            color: ThemeConfig.blackColor(context).withOpacity(0.7),
-          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                // Use Theme text style
+                fontSize: 14,
+                color: ThemeConfig.blackColor(context).withOpacity(0.7),
+              ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -185,8 +188,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
             Navigator.of(context).pop();
           },
           style: OutlinedButton.styleFrom(
-            padding:
-            const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),

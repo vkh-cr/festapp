@@ -90,7 +90,8 @@ class BlueprintLegend extends StatelessWidget {
           label: BlueprintStrings.legendSwapSeats,
           state: SeatState.empty,
           isActive: currentSelectionMode == BlueprintSelectionMode.swapSeats,
-          forceHighlight: true, // Keeps orange border for Swap to indicate "special/warning"
+          forceHighlight:
+              true, // Keeps orange border for Swap to indicate "special/warning"
           onTap: () => onModeSelected(BlueprintSelectionMode.swapSeats),
         ),
         const SizedBox(height: 8),
@@ -103,42 +104,47 @@ class BlueprintLegend extends StatelessWidget {
               context: context,
               label: BlueprintStrings.legendCreateOrder,
               state: SeatState.selected_by_me,
-              isActive: currentSelectionMode == BlueprintSelectionMode.createNewOrder,
+              isActive:
+                  currentSelectionMode == BlueprintSelectionMode.createNewOrder,
               forceHighlight: false, // REMOVED orange border here
-              onTap: () => onModeSelected(BlueprintSelectionMode.createNewOrder),
+              onTap: () =>
+                  onModeSelected(BlueprintSelectionMode.createNewOrder),
             ),
 
             // The Button appears here if mode is active
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
-              child: currentSelectionMode == BlueprintSelectionMode.createNewOrder
+              child: currentSelectionMode ==
+                      BlueprintSelectionMode.createNewOrder
                   ? Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: selectedCount > 0 ? onConfirmOrder : null,
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      elevation: 4,
-                      shadowColor: Colors.black26,
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      padding: const EdgeInsets.only(top: 12.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: selectedCount > 0 ? onConfirmOrder : null,
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            elevation: 4,
+                            shadowColor: Colors.black26,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon:
+                              const Icon(Icons.check_circle_outline, size: 20),
+                          label: Text(
+                            "${BlueprintStrings.btnCreateOrder} ($selectedCount)",
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    icon: const Icon(Icons.check_circle_outline, size: 20),
-                    label: Text(
-                      "${BlueprintStrings.btnCreateOrder} ($selectedCount)",
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ),
-              )
+                    )
                   : const SizedBox.shrink(),
             ),
           ],
@@ -183,14 +189,16 @@ class BlueprintLegend extends StatelessWidget {
   }) {
     return MouseRegion(
       cursor:
-      grayedOut ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
+          grayedOut ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
       child: GestureDetector(
         onTap: grayedOut ? null : onTap,
         child: Opacity(
           opacity: 1.0,
           child: Container(
             decoration: BoxDecoration(
-              color: isActive ? Theme.of(context).colorScheme.primary.withOpacity(0.05) : null,
+              color: isActive
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.05)
+                  : null,
               border: Border.all(
                 color: isActive
                     ? Theme.of(context).colorScheme.primary
@@ -214,7 +222,8 @@ class BlueprintLegend extends StatelessWidget {
                     context: context,
                     state: state,
                     isHighlightedForSwap: forceHighlight,
-                    size: SeatReservationWidget.boxSize.toDouble() * (drawBorder ? 0.7 : 1.0),
+                    size: SeatReservationWidget.boxSize.toDouble() *
+                        (drawBorder ? 0.7 : 1.0),
                   ),
                 ),
                 const SizedBox(width: 8),

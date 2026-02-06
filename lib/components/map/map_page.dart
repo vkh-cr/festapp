@@ -64,7 +64,7 @@ class MapPage extends StatefulWidget {
   State<MapPage> createState() => _MapPageState();
 }
 
-class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
+class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   static const bool _showAllPathsWhenNoGroupSelected = true;
   late final _animatedMapController = AnimatedMapController(vsync: this);
   final PopupController _popupLayerController = PopupController();
@@ -107,13 +107,15 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     super.initState();
     _iconScrollController = ScrollController();
     context.tabsRouter.addListener(() async {
-      if (context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.map)) {
+      if (context.tabsRouter.activeIndex ==
+          OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.map)) {
         setState(() => _showLocation = true);
         widget.id = null;
-        if(kIsWeb) {
+        if (kIsWeb) {
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             await Future.delayed(Duration(milliseconds: 100));
-            jsInterop.changeUrl("${RouterService.getCurrentUriWithOccasion()}${MapPage.ROUTE}");
+            jsInterop.changeUrl(
+                "${RouterService.getCurrentUriWithOccasion()}${MapPage.ROUTE}");
           });
         }
       } else {
@@ -129,20 +131,20 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   }
 
   fm.MapOptions get _mapOptions => fm.MapOptions(
-    interactionOptions: const fm.InteractionOptions(
-      flags: fm.InteractiveFlag.doubleTapDragZoom |
-      fm.InteractiveFlag.doubleTapZoom |
-      fm.InteractiveFlag.pinchMove |
-      fm.InteractiveFlag.pinchZoom |
-      fm.InteractiveFlag.flingAnimation |
-      fm.InteractiveFlag.drag |
-      fm.InteractiveFlag.scrollWheelZoom,
-    ),
-    initialZoom: _mapFeature.defaultMapZoom,
-    maxZoom: 18,
-    initialCenter: _mapCenter!,
-    onTap: (_, location) => onMapTap(location),
-  );
+        interactionOptions: const fm.InteractionOptions(
+          flags: fm.InteractiveFlag.doubleTapDragZoom |
+              fm.InteractiveFlag.doubleTapZoom |
+              fm.InteractiveFlag.pinchMove |
+              fm.InteractiveFlag.pinchZoom |
+              fm.InteractiveFlag.flingAnimation |
+              fm.InteractiveFlag.drag |
+              fm.InteractiveFlag.scrollWheelZoom,
+        ),
+        initialZoom: _mapFeature.defaultMapZoom,
+        maxZoom: 18,
+        initialCenter: _mapCenter!,
+        onTap: (_, location) => onMapTap(location),
+      );
 
   @override
   void didChangeDependencies() async {
@@ -159,9 +161,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     _mapCenter = widget.place != null
         ? LatLng(widget.place!.getLat(), widget.place!.getLng())
         : LatLng(
-      _mapFeature.defaultMapLocation.lat,
-      _mapFeature.defaultMapLocation.lng,
-    );
+            _mapFeature.defaultMapLocation.lat,
+            _mapFeature.defaultMapLocation.lng,
+          );
     if (!PlatformHelper.isWeb && _isOfflineMapConfigured()) {
       _useOffline = true;
       await _initOfflineMap();
@@ -195,13 +197,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   Future<void> _initOfflineMap() async {
     try {
       _style = await StyleReader(
-          uri: _mapFeature.offlineMapLayer.offlineMapStyleURL!)
+              uri: _mapFeature.offlineMapLayer.offlineMapStyleURL!)
           .read();
     } catch (e) {
       debugPrint("Failed to load style: $e");
     }
-    _offlinePackagePath = await OfflineMapHelper
-        .getOfflinePackagePath(_mapFeature.offlineMapLayer.offlineMapPackageURL!);
+    _offlinePackagePath = await OfflineMapHelper.getOfflinePackagePath(
+        _mapFeature.offlineMapLayer.offlineMapPackageURL!);
     bool fileExists = await File(_offlinePackagePath!).exists();
     if (fileExists) {
       _mbtiles = MbTiles(mbtilesPath: _offlinePackagePath!, gzip: true);
@@ -209,11 +211,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     if (_mapFeature.offlineMapLayer.forceOfflineMap == true) {
       setState(() => _useOffline = true);
       if (!fileExists) {
-        Future.delayed(const Duration(seconds: 1), () => _downloadOfflinePackage());
+        Future.delayed(
+            const Duration(seconds: 1), () => _downloadOfflinePackage());
       }
     } else {
       List<ConnectivityResult> connectivityResult =
-      await Connectivity().checkConnectivity();
+          await Connectivity().checkConnectivity();
       bool hasConnection = connectivityResult.isNotEmpty &&
           !connectivityResult.contains(ConnectivityResult.none);
       setState(() => _useOffline = !hasConnection);
@@ -232,7 +235,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       final mbtilesFile = await OfflineMapHelper.getOfflineMapPackage(
         _mapFeature.offlineMapLayer.offlineMapPackageURL!,
         _offlinePackagePath!,
-            (progress) {
+        (progress) {
           setState(() => _downloadProgress = progress);
         },
       );
@@ -245,7 +248,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       final styleFile = await OfflineMapHelper.getOrDownloadFile(
         _mapFeature.offlineMapLayer.offlineMapStyleURL!,
         offlineStylePath,
-            (progress) {},
+        (progress) {},
       );
       if (styleFile == null) {
         setState(() => _isDownloading = false);
@@ -272,14 +275,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
 
   @override
   Widget build(BuildContext context) {
-    Widget mapWidget =
-    _useOffline ? _buildOfflineMap() : _buildOnlineMap();
+    Widget mapWidget = _useOffline ? _buildOfflineMap() : _buildOnlineMap();
     return Scaffold(
       appBar: AppBar(
-        title: Text(pageTitle, style: TextStyle(color: ThemeConfig.appBarColorNegative())),
-        leading: PopButton(color: ThemeConfig.appBarColorNegative(),),
+        title: Text(pageTitle,
+            style: TextStyle(color: ThemeConfig.appBarColorNegative())),
+        leading: PopButton(
+          color: ThemeConfig.appBarColorNegative(),
+        ),
         actions: [
-          if (!kIsWeb && _isOfflineMapConfigured() && !_mapFeature.offlineMapLayer.forceOfflineMap)
+          if (!kIsWeb &&
+              _isOfflineMapConfigured() &&
+              !_mapFeature.offlineMapLayer.forceOfflineMap)
             Row(
               children: [
                 Icon(
@@ -290,38 +297,33 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
                   onChanged: _isDownloading
                       ? null
                       : (value) async {
-                    final currentCenter = _animatedMapController
-                        .mapController
-                        .camera
-                        .center;
-                    final currentZoom = _animatedMapController
-                        .mapController
-                        .camera
-                        .zoom;
-                    if (value) {
-                      if (_offlinePackagePath != null &&
-                          !(await File(_offlinePackagePath!)
-                              .exists())) {
-                        await _downloadOfflinePackage();
-                        if (!(await File(_offlinePackagePath!)
-                            .exists())) {
-                          setState(() => _useOffline = false);
-                        } else {
-                          setState(() => _useOffline = true);
-                        }
-                      } else {
-                        setState(() => _useOffline = true);
-                      }
-                    } else {
-                      setState(() => _useOffline = false);
-                    }
-                    _animatedMapController.animateTo(
-                      dest: currentCenter,
-                      zoom: currentZoom,
-                    );
-                  },
+                          final currentCenter = _animatedMapController
+                              .mapController.camera.center;
+                          final currentZoom =
+                              _animatedMapController.mapController.camera.zoom;
+                          if (value) {
+                            if (_offlinePackagePath != null &&
+                                !(await File(_offlinePackagePath!).exists())) {
+                              await _downloadOfflinePackage();
+                              if (!(await File(_offlinePackagePath!)
+                                  .exists())) {
+                                setState(() => _useOffline = false);
+                              } else {
+                                setState(() => _useOffline = true);
+                              }
+                            } else {
+                              setState(() => _useOffline = true);
+                            }
+                          } else {
+                            setState(() => _useOffline = false);
+                          }
+                          _animatedMapController.animateTo(
+                            dest: currentCenter,
+                            zoom: currentZoom,
+                          );
+                        },
                   value: _useOffline,
-                  activeColor: Colors.grey[600],
+                  activeThumbColor: Colors.grey[600],
                   inactiveThumbColor: Colors.grey[400],
                   inactiveTrackColor: Colors.grey[300],
                   activeTrackColor: Colors.grey[600],
@@ -335,10 +337,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
           (_mapCenter == null || (_useOffline && _style == null))
               ? const SizedBox.shrink()
               : mapWidget,
-          if (_isDownloading || _downloadCompleted)
-            _buildProgressIndicator(),
+          if (_isDownloading || _downloadCompleted) _buildProgressIndicator(),
           if (selectedMarker != null) _buildEditControls(),
-
           if (selectedMarker == null)
             MapPageHelper.buildGroupIconArea(
               context,
@@ -359,8 +359,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   }
 
   Widget _buildProgressIndicator() {
-    Alignment alignment =
-    _useOffline ? Alignment.center : Alignment.topRight;
+    Alignment alignment = _useOffline ? Alignment.center : Alignment.topRight;
     EdgeInsets padding = _useOffline
         ? EdgeInsets.zero
         : const EdgeInsets.only(top: 16, right: 16);
@@ -378,27 +377,26 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
             ),
             child: _isDownloading
                 ? Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    value: _downloadProgress,
-                    valueColor:
-                    const AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-                Text(
-                  "${(_downloadProgress * 100).toInt()}%",
-                  style:
-                  const TextStyle(color: Colors.white, fontSize: 10),
-                ),
-              ],
-            )
-                : const Icon(Icons.check,
-                size: 18, color: Colors.white),
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          value: _downloadProgress,
+                          valueColor:
+                              const AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      ),
+                      Text(
+                        "${(_downloadProgress * 100).toInt()}%",
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                    ],
+                  )
+                : const Icon(Icons.check, size: 18, color: Colors.white),
           ),
         ),
       ),
@@ -444,7 +442,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
           sprites: _style?.sprites,
           tileProviders: vmt.TileProviders({
             _mapFeature.offlineMapLayer.offlineMapLayerName!:
-            vmtm.MbTilesVectorTileProvider(
+                vmtm.MbTilesVectorTileProvider(
               mbtiles: _mbtiles!,
             ),
           }),
@@ -477,12 +475,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   List<Widget> _buildCommonMapLayers() {
     return [
       fm.PolylineLayer(polylines: _polylines),
-      if(_showLocation) CurrentLocationLayer(),
+      if (_showLocation) CurrentLocationLayer(),
       PopupMarkerLayer(
         options: PopupMarkerLayerOptions(
           popupController: _popupLayerController,
           markers: _getDisplayedMarkers(),
-          markerTapBehavior: MarkerTapBehavior.custom((space, state, controller){
+          markerTapBehavior:
+              MarkerTapBehavior.custom((space, state, controller) {
             showPopupOrDialogFor(controller, space.marker);
           }),
           popupDisplayOptions: PopupDisplayOptions(
@@ -546,9 +545,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     _popupLayerController.hideAllPopups();
     if (focusedMarker != null) {
       setState(() {
-        final oldFocusedIndex = _markers.indexWhere((m) => m.place.id == focusedMarker!.place.id);
+        final oldFocusedIndex =
+            _markers.indexWhere((m) => m.place.id == focusedMarker!.place.id);
         if (oldFocusedIndex != -1) {
-          _markers[oldFocusedIndex] = _markers[oldFocusedIndex].cloneWithFocus(context, false);
+          _markers[oldFocusedIndex] =
+              _markers[oldFocusedIndex].cloneWithFocus(context, false);
         }
         focusedMarker = null;
       });
@@ -558,15 +559,20 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   void runEditPositionMode(MapMarkerWithText marker) {
     _popupLayerController.hideAllPopups();
     if (focusedMarker != null && focusedMarker!.place.id != marker.place.id) {
-      final oldFocusedIndex = _markers.indexWhere((m) => m.place.id == focusedMarker!.place.id);
+      final oldFocusedIndex =
+          _markers.indexWhere((m) => m.place.id == focusedMarker!.place.id);
       if (oldFocusedIndex != -1) {
-        _markers[oldFocusedIndex] = _markers[oldFocusedIndex].cloneWithFocus(context, false);
+        _markers[oldFocusedIndex] =
+            _markers[oldFocusedIndex].cloneWithFocus(context, false);
       }
       focusedMarker = null;
-    } else if (focusedMarker != null && focusedMarker!.place.id == marker.place.id) {
-      final oldFocusedIndex = _markers.indexWhere((m) => m.place.id == focusedMarker!.place.id);
+    } else if (focusedMarker != null &&
+        focusedMarker!.place.id == marker.place.id) {
+      final oldFocusedIndex =
+          _markers.indexWhere((m) => m.place.id == focusedMarker!.place.id);
       if (oldFocusedIndex != -1) {
-        _markers[oldFocusedIndex] = _markers[oldFocusedIndex].cloneWithFocus(context, false);
+        _markers[oldFocusedIndex] =
+            _markers[oldFocusedIndex].cloneWithFocus(context, false);
       }
       focusedMarker = null;
     }
@@ -586,10 +592,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       });
       return;
     }
-    await DbPlaces.saveLocation(
-        selectedMarker!.place.id!,
-        selectedMarker!.point.latitude,
-        selectedMarker!.point.longitude);
+    await DbPlaces.saveLocation(selectedMarker!.place.id!,
+        selectedMarker!.point.latitude, selectedMarker!.point.longitude);
     ToastHelper.Show(context, "Place has been changed.".tr());
 
     // We keep selectedMarker assigned until after potentially reloading places
@@ -598,7 +602,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     if (_isShowingGroupsInEditMode) {
       _isShowingGroupsInEditMode = false;
       // Store current selected marker details to reapply focus/edit state after load
-      if(selectedMarker?.place.id != null) {
+      if (selectedMarker?.place.id != null) {
         // If we need to re-enter edit mode for the same item after reload:
         // This part might be complex if the item is removed or its properties change significantly.
         // For now, we just reload places and exit edit mode.
@@ -607,17 +611,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       await loadData(); // Reload default places and polylines
     } else {
       // Original logic for updating _markers when not in _isShowingGroupsInEditMode
-      var markerToRemove = _markers.firstWhereOrNull((m) => m.place.id == savedMarkerPlaceId);
-      if(markerToRemove != null) _markers.remove(markerToRemove);
+      var markerToRemove =
+          _markers.firstWhereOrNull((m) => m.place.id == savedMarkerPlaceId);
+      if (markerToRemove != null) _markers.remove(markerToRemove);
       // Add the updated marker back without the edit-mode specific focus.
       // The selectedMarker instance holds the new point.
-      _markers.add(selectedMarker!.cloneWithFocus(context, false)); // Assuming cloneWithFocus also updates the point if needed from selectedMarker
+      _markers.add(selectedMarker!.cloneWithFocus(context,
+          false)); // Assuming cloneWithFocus also updates the point if needed from selectedMarker
       selectedMarker = null; // Exit edit mode
     }
     _popupLayerController.hideAllPopups();
     setState(() {}); // General UI update
   }
-
 
   void cancelNewPosition() {
     if (isOnlyEditMode) {
@@ -631,10 +636,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     if (_isShowingGroupsInEditMode) {
       _isShowingGroupsInEditMode = false;
       selectedMarker = null; // Exit edit mode first
-      loadData().then((_) { // Reload default places
+      loadData().then((_) {
+        // Reload default places
         // If we need to restore focus or re-select the original marker:
         if (originalPlaceId != null) {
-          var originalMarkerInNewList = _markers.firstWhereOrNull((m) => m.place.id == originalPlaceId);
+          var originalMarkerInNewList =
+              _markers.firstWhereOrNull((m) => m.place.id == originalPlaceId);
           if (originalMarkerInNewList != null && oldPoint != null) {
             // Potentially re-focus or re-select, but for cancel, usually just revert and exit edit mode.
           }
@@ -644,7 +651,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     } else {
       // Original cancel logic
       if (selectedMarker != null && selectedMarker!.oldPoint != null) {
-        final originalMarkerIndex = _markers.indexWhere((m) => m.place.id == selectedMarker!.place.id);
+        final originalMarkerIndex =
+            _markers.indexWhere((m) => m.place.id == selectedMarker!.place.id);
         if (originalMarkerIndex != -1) {
           _markers[originalMarkerIndex] = MapMarkerWithText(
               context: context,
@@ -652,8 +660,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
               place: selectedMarker!.place,
               icon: selectedMarker!.icon,
               editAction: runEditPositionMode,
-              showTitle: false
-          );
+              showTitle: false);
         }
       }
       selectedMarker = null;
@@ -672,9 +679,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     loadData(loadOtherGroups: true);
   }
 
-
-  Future<void> loadData(
-      {int? placeId, bool loadOtherGroups = false}) async {
+  Future<void> loadData({int? placeId, bool loadOtherGroups = false}) async {
     // Preserve selected marker's ID if in edit mode to potentially re-apply state later if needed,
     // though current logic replaces _markers list entirely.
     // The selectedMarker instance itself in _selectedMarkers should persist.
@@ -683,20 +688,23 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     var offlinePlaces = await OfflineDataService.getAllPlaces();
     _icons = await OfflineDataService.getAllIcons();
     offlinePlaces.sortPlaces(false);
-    var offlineList =
-    loadOtherGroups ? offlinePlaces : offlinePlaces.where((e) => !(e.isHidden)).toList();
+    var offlineList = loadOtherGroups
+        ? offlinePlaces
+        : offlinePlaces.where((e) => !(e.isHidden)).toList();
     if (placeId != null) {
       var p = offlinePlaces.firstWhereOrNull((p) => p.id == placeId);
-      if (p != null && !offlineList.any((item) => item.id == p.id)) offlineList.add(p);
+      if (p != null && !offlineList.any((item) => item.id == p.id))
+        offlineList.add(p);
     }
     await addOfflineEventsToPlace(offlineList);
     addPlacesToMap(offlineList);
 
-    _pathGroups = (await OfflineDataService.getAllPathGroups()).where((p)=> !(p.isHidden??false)).toList();
+    _pathGroups = (await OfflineDataService.getAllPathGroups())
+        .where((p) => !(p.isHidden ?? false))
+        .toList();
     _allGroupPolylines = await MapPageHelper.loadGroupPolylines(
         offlineList, // Use offline list for initial polyline calculation if it's primary
-        _pathGroups
-    );
+        _pathGroups);
 
     bool isPlaceSetToOnePlace = false;
 
@@ -711,15 +719,15 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       _polylines = _allGroupPolylines[_selectedGroupId!] ?? [];
     }
 
-    if(mounted) setState(() {});
-    if (placeId != null && !isOnlyEditMode && selectedMarker == null) { // Avoid auto-focusing if in edit mode already
+    if (mounted) setState(() {});
+    if (placeId != null && !isOnlyEditMode && selectedMarker == null) {
+      // Avoid auto-focusing if in edit mode already
       var p = offlineList.firstWhereOrNull((p) => p.id == placeId);
       if (p != null) {
         setMapToOnePlaceAndShowPopup(placeId, p);
         isPlaceSetToOnePlace = true;
       }
     }
-
 
     // online part
     var onlineIcons = await DbPlaces.getAllIcons();
@@ -731,13 +739,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
 
     if (loadOtherGroups) {
       var dbGroups = await DbGroups.getGroupsWithPlaces();
-      onlineList = dbGroups
-          .where((e) => e.place != null)
-          .map((e) {
+      onlineList = dbGroups.where((e) => e.place != null).map((e) {
         e.place!.title = e.title;
         return e.place!;
-      })
-          .toList();
+      }).toList();
     } else {
       onlineList = placesFromDb.where((p) => !(p.isHidden)).toList();
     }
@@ -755,15 +760,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       }
     }
 
-    _markers.clear(); // Clear again before final population with online/merged data
+    _markers
+        .clear(); // Clear again before final population with online/merged data
     await addEventsToPlace(onlineList);
-    addPlacesToMap(onlineList); // This will use the _isShowingGroupsInEditMode flag correctly
+    addPlacesToMap(
+        onlineList); // This will use the _isShowingGroupsInEditMode flag correctly
 
-    _pathGroups = (await DbPlaces.getAllPathGroups()).where((p)=>!(p.isHidden??false)).toList();
+    _pathGroups = (await DbPlaces.getAllPathGroups())
+        .where((p) => !(p.isHidden ?? false))
+        .toList();
     _allGroupPolylines = await MapPageHelper.loadGroupPolylines(
         onlineList, // Use final list of places for polylines
-        _pathGroups
-    );
+        _pathGroups);
 
     // Update polylines based on current selection
     if (_selectedGroupId == null) {
@@ -777,10 +785,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     }
 
     // This setState call was inside addPlacesToMap, moved here for clarity after all data processing
-    if(mounted) setState(() {});
+    if (mounted) setState(() {});
 
-
-    if (placeId != null && !isOnlyEditMode && selectedMarker == null && !isPlaceSetToOnePlace) { // Avoid auto-focusing if in edit mode already
+    if (placeId != null &&
+        !isOnlyEditMode &&
+        selectedMarker == null &&
+        !isPlaceSetToOnePlace) {
+      // Avoid auto-focusing if in edit mode already
       var p = onlineList.firstWhereOrNull((p) => p.id == placeId);
       if (p != null) {
         setMapToOnePlaceAndShowPopup(placeId, p);
@@ -799,7 +810,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   }
 
   Future<void> addEventsToPlace(List<PlaceModel> places) async {
-    var events = await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
+    var events =
+        await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
     events = events.filterRootEvents().sortEvents();
     for (var p in places) {
       var matches = events.where((e) => e.place?.id == p.id);
@@ -808,12 +820,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     }
   }
 
-  bool _shouldShowMarkerTitle(
-      int? placeId,
-      int? currentFocusedMarkerId,
-      int? editingMarkerId,
-      Set<int> placeIdsInCurrentGroup
-      ) {
+  bool _shouldShowMarkerTitle(int? placeId, int? currentFocusedMarkerId,
+      int? editingMarkerId, Set<int> placeIdsInCurrentGroup) {
     if (_isShowingGroupsInEditMode) {
       // In "show all groups during edit" mode:
       // Show title for all markers EXCEPT the one currently being edited.
@@ -825,7 +833,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
         return true;
       }
       // Show title if a group is selected AND this marker belongs to that group.
-      if (_selectedGroupId != null && placeIdsInCurrentGroup.contains(placeId)) {
+      if (_selectedGroupId != null &&
+          placeIdsInCurrentGroup.contains(placeId)) {
         return true;
       }
     }
@@ -838,9 +847,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
 
     Set<int> placeIdsInSelectedGroup = {};
     if (!_isShowingGroupsInEditMode && _selectedGroupId != null) {
-      final group = _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId);
+      final group =
+          _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId);
       if (group != null && group.pathData != null) {
-        placeIdsInSelectedGroup.addAll(group.pathData!.expand((segment) => segment));
+        placeIdsInSelectedGroup
+            .addAll(group.pathData!.expand((segment) => segment));
       }
     }
 
@@ -850,12 +861,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
           ? MapLocationPinHelper.type2icon(context, mapPlace, _icons)
           : null;
 
-      bool displayTitle = _shouldShowMarkerTitle(
-          mapPlace.id,
-          currentFocusedId,
-          editingMarkerId,
-          placeIdsInSelectedGroup
-      );
+      bool displayTitle = _shouldShowMarkerTitle(mapPlace.id, currentFocusedId,
+          editingMarkerId, placeIdsInSelectedGroup);
 
       return MapMarkerWithText(
         context: context,
@@ -889,12 +896,14 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   void setMapToOnePlace(PlaceModel place) async {
     _mapCenter = LatLng(place.getLat(), place.getLng());
     int i = 0;
-    while (!_isMapLoaded && mounted && i < 50) { // Poll with 5-second timeout
+    while (!_isMapLoaded && mounted && i < 50) {
+      // Poll with 5-second timeout
       await Future.delayed(const Duration(milliseconds: 100));
       i++;
     }
     if (_isMapLoaded && mounted) {
-      _animatedMapController.animateTo(dest: _mapCenter!, zoom: _mapOptions.maxZoom);
+      _animatedMapController.animateTo(
+          dest: _mapCenter!, zoom: _mapOptions.maxZoom);
     }
   }
 
@@ -923,9 +932,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     final List<MapMarkerWithText> otherMarkers = [];
     Set<int> placeIdsInSelectedGroup = {};
     if (_selectedGroupId != null) {
-      final group = _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId);
+      final group =
+          _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId);
       if (group != null && group.pathData != null) {
-        placeIdsInSelectedGroup.addAll(group.pathData!.expand((segment) => segment));
+        placeIdsInSelectedGroup
+            .addAll(group.pathData!.expand((segment) => segment));
       }
     }
 
@@ -933,12 +944,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     var editingMarkerId = selectedMarker?.place.id;
 
     for (final oldMarker in _markers) {
-      bool newShowTitleState = _shouldShowMarkerTitle(
-          oldMarker.place.id!,
-          currentFocusedId,
-          editingMarkerId,
-          placeIdsInSelectedGroup
-      );
+      bool newShowTitleState = _shouldShowMarkerTitle(oldMarker.place.id!,
+          currentFocusedId, editingMarkerId, placeIdsInSelectedGroup);
 
       var updatedMarker = oldMarker;
       if (oldMarker.showTitle != newShowTitleState) {
@@ -971,12 +978,15 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
         _polylines = newLines;
       });
       await _animatedMapController.animatedFitCamera(
-        cameraFit: fm.CameraFit.coordinates(coordinates: allPoints, padding: EdgeInsets.fromLTRB(32, 160, 84, 12)),
+        cameraFit: fm.CameraFit.coordinates(
+            coordinates: allPoints,
+            padding: EdgeInsets.fromLTRB(32, 160, 84, 12)),
         curve: Curves.easeInOut,
       );
     } else {
       setState(() {
-        _polylines = newLines; // Will be [] if deselected (and not _showAllPathsWhenNoGroupSelected) or if selected group has no lines
+        _polylines =
+            newLines; // Will be [] if deselected (and not _showAllPathsWhenNoGroupSelected) or if selected group has no lines
       });
     }
   }
@@ -989,32 +999,25 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
           Container(
             color: Colors.white,
             child: Row(
-              mainAxisAlignment:
-              MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
                   onPressed: cancelNewPosition,
                   child: const Text("Storno").tr(),
                 ),
-                const Padding(
-                    padding:
-                    EdgeInsets.all(16.0)),
+                const Padding(padding: EdgeInsets.all(16.0)),
                 Visibility(
                   visible: !isOnlyEditMode,
                   child: ElevatedButton(
-                    onPressed: showAllGroups, // This now handles being in edit mode
-                    child:
-                    const Text("Show groups")
-                        .tr(),
+                    onPressed:
+                        showAllGroups, // This now handles being in edit mode
+                    child: const Text("Show groups").tr(),
                   ),
                 ),
-                const Padding(
-                    padding:
-                    EdgeInsets.all(16.0)),
+                const Padding(padding: EdgeInsets.all(16.0)),
                 ElevatedButton(
                   onPressed: saveNewPosition,
-                  child: const Text("Save location")
-                      .tr(),
+                  child: const Text("Save location").tr(),
                 ),
               ],
             ),
@@ -1022,10 +1025,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
           Container(
             color: Colors.white,
             child: const Text(
-                "You can change location by tapping on the map.",
+              "You can change location by tapping on the map.",
               style: TextStyle(color: Colors.black),
-            )
-                .tr(),
+            ).tr(),
           ),
           Expanded(child: Container()),
         ],
@@ -1035,7 +1037,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
 
   void _setFocusedMarkerLogic(MapMarkerWithText markerToFocus) {
     // If we are in the mode of showing all group titles during edit, don't let tap-focus override them
-    if (_isShowingGroupsInEditMode && (selectedMarker != null && markerToFocus.place.id != selectedMarker!.place.id)) {
+    if (_isShowingGroupsInEditMode &&
+        (selectedMarker != null &&
+            markerToFocus.place.id != selectedMarker!.place.id)) {
       // If a group marker (not the one being edited) is tapped, show its popup but don't change its title state from true.
       // The popup logic is handled in showPopupOrDialogFor.
       // Here we just avoid toggling its 'showTitle' if it's a background group marker.
@@ -1049,9 +1053,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
 
       for (int i = 0; i < _markers.length; i++) {
         // Do not change focus state of the marker currently being edited
-        if (selectedMarker != null && _markers[i].place.id == selectedMarker!.place.id) {
-          if (_markers[i].place.id == placeIdToFocus) { // If the edited marker itself is somehow re-focused
-            focusedMarker = _markers[i]; // Keep it as the focused marker conceptually
+        if (selectedMarker != null &&
+            _markers[i].place.id == selectedMarker!.place.id) {
+          if (_markers[i].place.id == placeIdToFocus) {
+            // If the edited marker itself is somehow re-focused
+            focusedMarker =
+                _markers[i]; // Keep it as the focused marker conceptually
             newFocusSet = true;
           }
           continue;
@@ -1069,12 +1076,16 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
             // Only defocuse if not part of selected group that should show title or not in group edit mode display
             bool shouldRetainTitle = false;
             if (_selectedGroupId != null) {
-              final group = _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId);
-              if (group != null && group.pathData != null && group.pathData!.any((segment) => segment.contains(_markers[i].place.id))) {
+              final group =
+                  _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId);
+              if (group != null &&
+                  group.pathData != null &&
+                  group.pathData!.any(
+                      (segment) => segment.contains(_markers[i].place.id))) {
                 shouldRetainTitle = true;
               }
             }
-            if(!shouldRetainTitle) {
+            if (!shouldRetainTitle) {
               _markers[i] = _markers[i].cloneWithFocus(context, false);
             }
           }
@@ -1091,34 +1102,39 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     });
   }
 
-
-  void showPopupOrDialogFor(PopupController controller, fm.Marker markerInstance) async {
-    if (selectedMarker != null && markerInstance is MapMarkerWithText && markerInstance.place.id != selectedMarker!.place.id) {
+  void showPopupOrDialogFor(
+      PopupController controller, fm.Marker markerInstance) async {
+    if (selectedMarker != null &&
+        markerInstance is MapMarkerWithText &&
+        markerInstance.place.id != selectedMarker!.place.id) {
       // If in edit mode, and a *different* marker is tapped,
       // we might want to show its popup but not switch focus or exit edit mode.
       // For now, let's only allow interaction with the selectedMarker or no popups for others.
       // Or, if the tap on a background marker should show its popup:
       // Check if it's a background marker during group edit mode
-      if(_isShowingGroupsInEditMode) {
+      if (_isShowingGroupsInEditMode) {
         // Allow popup for background group markers
         _popupLayerController.hideAllPopups(); // Hide any existing popups
-        controller.showPopupsOnlyFor([markerInstance]); // Show popup for this tapped marker
+        controller.showPopupsOnlyFor(
+            [markerInstance]); // Show popup for this tapped marker
         return; // Do not proceed with focus logic or dialog for these background markers
       }
     }
 
-
     if (markerInstance is MapMarkerWithText) {
       final currentPlace = markerInstance.place;
-      final hasLongDescription = HtmlHelper.isHtmlLong(currentPlace.description);
+      final hasLongDescription =
+          HtmlHelper.isHtmlLong(currentPlace.description);
       final hasEvents = currentPlace.events?.isNotEmpty ?? false;
-      final descriptionIsNullOrEmpty = currentPlace.description == null || currentPlace.description!.isEmpty;
+      final descriptionIsNullOrEmpty =
+          currentPlace.description == null || currentPlace.description!.isEmpty;
 
       _popupLayerController.hideAllPopups();
 
       if (hasLongDescription || hasEvents) {
         // Set focus only if not in edit mode or if it's the marker being edited.
-        if(selectedMarker == null || markerInstance.place.id == selectedMarker!.place.id) {
+        if (selectedMarker == null ||
+            markerInstance.place.id == selectedMarker!.place.id) {
           _setFocusedMarkerLogic(markerInstance);
         }
 
@@ -1130,24 +1146,27 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
               title: currentPlace.title,
               canEdit: RightsService.isEditor(),
               onEditPressed: () {
-                if(selectedMarker == null) { // Only enter edit mode if not already editing another
+                if (selectedMarker == null) {
+                  // Only enter edit mode if not already editing another
                   runEditPositionMode(markerInstance);
                 }
               },
               htmlDescription: currentPlace.description,
-              customContentWidget: activityContent(events),);
+              customContentWidget: activityContent(events),
+            );
           },
         );
         // Show title after dialog closes, only if not in edit mode for another marker
-        if(selectedMarker == null || markerInstance.place.id == selectedMarker!.place.id) {
+        if (selectedMarker == null ||
+            markerInstance.place.id == selectedMarker!.place.id) {
           _setFocusedMarkerLogic(markerInstance);
         }
-
       } else {
         // No dialog needed (short/no description AND no events)
         if (descriptionIsNullOrEmpty) {
           // Description is null or empty: Show Title only (if not in edit mode for another)
-          if(selectedMarker == null || markerInstance.place.id == selectedMarker!.place.id) {
+          if (selectedMarker == null ||
+              markerInstance.place.id == selectedMarker!.place.id) {
             _setFocusedMarkerLogic(markerInstance);
           }
         } else {
@@ -1163,13 +1182,15 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       children: [
         if (events != null && events.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.fromLTRB(0,0,0,24),
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
             child: ScheduleTimeline(
-              eventGroups: TimeBlockHelper.splitTimeBlocksByDay(events, context),
+              eventGroups:
+                  TimeBlockHelper.splitTimeBlocksByDay(events, context),
               onEventPressed: (int id) {
-                RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
+                RouterService.navigateOccasion(
+                        context, "${EventPage.ROUTE}/$id")
                     .then((_) => loadData());
-               },
+              },
               showAddNewEventButton: () => false,
               onAddNewEvent: null,
               nodePosition: 0.35,
