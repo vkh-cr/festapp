@@ -1,9 +1,7 @@
-CREATE OR REPLACE FUNCTION public.delete_manual_transaction_ws(
-    p_transaction_id bigint,
-    p_payment_info_id bigint
-)
-RETURNS void
-LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION public.delete_manual_transaction_ws(p_transaction_id bigint, p_payment_info_id bigint)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
 AS $$
 DECLARE
     transaction_amount numeric(12, 2);
@@ -23,8 +21,9 @@ BEGIN
 
      PERFORM public.check_is_admin_for_bank_account(bank_acc);
 
-     SELECT o.occasion
-     INTO occasion_id
+     -- FIX: Retrieve ID as well (stored in associated_order_id)
+     SELECT o.occasion, o.id
+     INTO occasion_id, associated_order_id
      FROM eshop.orders o
      WHERE o.payment_info = p_payment_info_id
      LIMIT 1;
@@ -32,7 +31,6 @@ BEGIN
      PERFORM public.check_is_editor_order_on_occasion(occasion_id);
     
     -- Check if the transaction is linked to the specified payment_info
-    -- (We don't need to check link if we are deleting? Well, yes, we assume we are deleting it FROM this payment info context)
     IF NOT EXISTS (
         SELECT 1
         FROM eshop.transactions
@@ -103,9 +101,14 @@ BEGIN
     DELETE FROM eshop.transactions
     WHERE id = p_transaction_id;
 
+    -- FIX: Recalculate Order Status!
+    IF associated_order_id IS NOT NULL THEN
+        PERFORM public.recalculate_order_payment_status(associated_order_id);
+    END IF;
+
     RAISE NOTICE 'Manual Transaction % successfully deleted from Payment Info %.', p_transaction_id, p_payment_info_id;
 EXCEPTION
     WHEN others THEN
         RAISE EXCEPTION 'Failed to delete Transaction % from Payment Info %: %', p_transaction_id, p_payment_info_id, SQLERRM;
 END;
-$$ SECURITY DEFINER;
+$$;

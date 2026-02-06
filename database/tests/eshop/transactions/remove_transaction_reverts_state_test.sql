@@ -74,8 +74,8 @@ BEGIN
     IF v_state != 'paid' THEN RAISE EXCEPTION 'Order should be PAID, got %', v_state; END IF;
 
     -- 4. Delete Payment - Should switch back to ORDERED
-    -- Get Transaction ID of the one we just made (Select by comment)
-    SELECT id INTO v_trans_id FROM eshop.transactions WHERE payment_info = 1001 AND comment = 'Full Payment' LIMIT 1;
+    -- Get Transaction ID of the one we just made (Select by message_for_recipient)
+    SELECT id INTO v_trans_id FROM eshop.transactions WHERE payment_info = 1001 AND message_for_recipient = 'Full Payment' LIMIT 1;
     
     -- Delete it
     PERFORM public.delete_manual_transaction_ws(v_trans_id, 1001);

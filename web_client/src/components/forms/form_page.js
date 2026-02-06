@@ -305,7 +305,15 @@ export class FormPage extends Component {
                  if (input.type === 'submit' || input.type === 'button' || input.type === 'hidden') return;
                  if (!input.name) return;
                  
-                 const val = session.state.fields.get(input.name);
+                 let lookupKey = input.name;
+                 let isExpiry = false;
+
+                 if (input.name && input.name.endsWith('_expiry')) {
+                     lookupKey = input.name.replace('_expiry', '');
+                     isExpiry = true;
+                 }
+                 
+                 const val = session.state.fields.get(lookupKey);
                  
                  // Apply Logic (Standard)
                  if (input.type === 'radio') {
@@ -319,7 +327,20 @@ export class FormPage extends Component {
                       }
                       if (input.checked !== isChecked) input.checked = isChecked;
                  } else {
-                     const expected = val !== undefined ? val : '';
+                     let expected = val !== undefined ? val : '';
+                     
+                     // Handle Composite Objects (e.g. ID Document)
+                     if (typeof expected === 'object' && expected !== null) {
+                         // Check for ID Document structure
+                         if (expected.id_document_number !== undefined) {
+                             if (isExpiry) {
+                                  expected = expected.id_document_expiry_date || '';
+                             } else {
+                                  expected = expected.id_document_number || '';
+                             }
+                         }
+                     }
+
                      if (String(input.value) !== String(expected)) {
                          input.value = expected;
                      }

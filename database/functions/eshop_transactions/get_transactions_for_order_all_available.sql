@@ -22,7 +22,6 @@ BEGIN
             WHERE pi.id = payment_info_id
         )
         AND t.payment_info IS NULL
-        AND t.transaction_type != 'manual'
     );
 END;
 $$;
