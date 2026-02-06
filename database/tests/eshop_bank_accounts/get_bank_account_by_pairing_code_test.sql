@@ -13,10 +13,10 @@ DO $$
 DECLARE
     v_count bigint;
 BEGIN
-    SELECT count(*) INTO v_count FROM eshop.get_bank_account_by_pairing_code('abcdef1234');
+    SELECT count(*) INTO v_count FROM public.get_bank_account_by_pairing_code('abcdef1234');
     PERFORM assert_eq(v_count, 1::bigint, 'Should find account even with lowercase input');
     
-    SELECT count(*) INTO v_count FROM eshop.get_bank_account_by_pairing_code(' ABCDEF1234 ');
+    SELECT count(*) INTO v_count FROM public.get_bank_account_by_pairing_code(' ABCDEF1234 ');
     PERFORM assert_eq(v_count, 1::bigint, 'Should find account even with whitespace input');
 END;
 $$;

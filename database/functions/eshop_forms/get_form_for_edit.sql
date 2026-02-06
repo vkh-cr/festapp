@@ -1,7 +1,8 @@
-CREATE OR REPLACE FUNCTION get_form_for_edit(form_link TEXT)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
+-- Fix get_form_for_edit: Remove bigint = uuid comparison and add can_delete
+CREATE OR REPLACE FUNCTION public.get_form_for_edit(form_link text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
 AS $$
 DECLARE
     v_form_id BIGINT;
@@ -12,6 +13,7 @@ DECLARE
     productTypesData JSONB;
     productsData JSONB;
     availableBankAccountsData JSONB;
+    canDelete BOOLEAN;
 BEGIN
     SELECT
         f.id,
@@ -31,6 +33,12 @@ BEGIN
 
     PERFORM check_is_editor_order_view_via_form_link(form_link);
 
+    -- Calculate can_delete
+    -- FIXED: Compare form (bigint) with v_form_id (bigint) directly
+    SELECT NOT EXISTS (
+        SELECT 1 FROM eshop.orders WHERE form = v_form_id
+    ) INTO canDelete;
+
     SELECT jsonb_build_object(
         'id', f.id,
         'key', f.key,
@@ -46,10 +54,7 @@ BEGIN
         'link', f.link,
         'bank_account', f.bank_account,
         'deadline_duration_seconds', f.deadline_duration_seconds,
-        'can_delete', NOT EXISTS (
-            SELECT 1 FROM eshop.orders
-            WHERE (data->>'form')::uuid = f.key
-        )
+        'can_delete', canDelete -- Added field
     )
     INTO formData
     FROM public.forms f
@@ -121,7 +126,7 @@ BEGIN
             'account_number_human_readable', ba.account_number_human_readable,
             'title', ba.title,
             'supported_currencies', ba.supported_currencies,
-            'type', ba.type -- Adding type for debugging/verification
+            'type', ba.type
         ) ORDER BY uba.priority ASC, ba.id ASC
     ), '[]'::jsonb)
     INTO availableBankAccountsData

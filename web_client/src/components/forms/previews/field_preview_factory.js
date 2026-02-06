@@ -12,6 +12,19 @@ class BasePreviewStrategy {
     format(value, fieldDef, context) {
         if (value === null || value === undefined) return { value: '', price: null };
         
+        // Safety Fallback for ID Documents catching Base Strategy
+        if (typeof value === 'object' && value.id_document_number) {
+            console.warn('[FieldPreviewFactory] ID Document caught in BaseStrategy via sniffing');
+            // Delegate manually if we can't switch strategy easily, or just format here
+            let display = value.id_document_number;
+            if (value.id_document_expiry_date) {
+                // Formatting isn't easily available here without referencing IdDocumentPreviewStrategy instance
+                // So let's just do basic display to avoid [object Object]
+                 display += ` (${value.id_document_expiry_date})`;
+            }
+            return { value: display, price: null };
+        }
+
         // 1. Resolve Options (if applicable)
         let resolved = this._resolveValue(value, fieldDef, context);
         return resolved;
@@ -41,6 +54,11 @@ class BasePreviewStrategy {
             return this._findOption(val, options, context);
         }
         
+        // Fallback for objects to avoid [object Object]
+        if (typeof val === 'object') {
+            return { value: JSON.stringify(val), price: null };
+        }
+
         return { value: valStr, price: null };
     }
 
