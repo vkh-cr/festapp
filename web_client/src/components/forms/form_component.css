@@ -284,6 +284,7 @@ body:not(.dark-mode) .form-check.option-card {
     font-weight: bold;
     color: var(--primary-color);
     margin-left: 8px;
+    white-space: nowrap;
 }
 
 .option-description {
@@ -308,6 +309,7 @@ body.dark-mode .option-description {
 .surcharge-price {
     font-weight: bold;
     color: var(--primary-color);
+    white-space: nowrap;
 }
 
 /* Tickets */
