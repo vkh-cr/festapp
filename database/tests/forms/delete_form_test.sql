@@ -44,8 +44,8 @@ BEGIN
     END IF;
 
     -- 4. Create Order (Response)
-    INSERT INTO eshop.orders (data, created_at, updated_at, price, state)
-    VALUES (jsonb_build_object('form', (SELECT key FROM public.forms WHERE id = v_form_id)), now(), now(), 0, 'created')
+    INSERT INTO eshop.orders (form, data, created_at, updated_at, price, state)
+    VALUES (v_form_id, jsonb_build_object('form', (SELECT key FROM public.forms WHERE id = v_form_id)), now(), now(), 0, 'created')
     RETURNING id INTO v_order_id;
     
     -- 5. Check can_delete = false (after order)

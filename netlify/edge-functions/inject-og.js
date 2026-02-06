@@ -1,4 +1,7 @@
 export default async (request, context) => {
+  let response;
+  let page;
+  
   try {
     const url = new URL(request.url);
     const parts = url.pathname.split('/');
@@ -20,8 +23,8 @@ export default async (request, context) => {
     });
 
     // 2. Get upstream content (Full 200 response)
-    const response = await context.next(fullContentRequest);
-    const page = await response.text();
+    response = await context.next(fullContentRequest);
+    page = await response.text();
 
     // 3. Prepare default "Fail Open" reponse (200 OK)
     const createResponse = (body) => {
@@ -162,8 +165,29 @@ export default async (request, context) => {
     });
 
   } catch (e) {
-    console.log("Edge error", e);
-    return new Response("Internal Error (Fail Open)", { status: 500 });
+    console.log("Edge error:", e);
+    // FAIL OPEN STRATEGY:
+    // 1. If we successfully fetched the upstream page, return it despite the error in our logic
+    if (response) {
+        // We need to clone it or create new response if we already consumed body
+        // But we already read 'page' text.
+        if (page) {
+             console.log("Failing open with cached page content.");
+             return new Response(page, {
+                 status: 200,
+                 headers: response.headers // context.next headers
+             });
+        }
+    }
+    
+    // 2. If we haven't even fetched upstream yet, or failed to read it, try to pass through.
+    try {
+        console.log("Failing open with context.next()");
+        return context.next();
+    } catch (z) {
+        console.log("Critical Fail Open Error:", z);
+        return new Response("Internal Error (Fail Open Failed)", { status: 500 });
+    }
   }
 };
 

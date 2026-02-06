@@ -56,7 +56,7 @@ BEGIN
     -- update_bank_account signature: (id, acc_num, title, type, currencies, readable, unit_id)
     SELECT public.update_bank_account(
         NULL::bigint, 
-        '999888777/2010'::text, 
+        (floor(random() * 1000000000)::text || '/2010'), 
         'Floating Sync Acc'::text, 
         'FIO'::text, 
         ARRAY['CZK']::text[], 

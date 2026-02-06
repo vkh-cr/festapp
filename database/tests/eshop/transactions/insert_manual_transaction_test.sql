@@ -91,9 +91,9 @@ BEGIN
         RAISE EXCEPTION 'Transaction was NOT inserted correctly';
     END IF;
 
-    -- CHECK COMMENT (NOTE)
-    IF v_trans_record.comment IS DISTINCT FROM 'Test Note' THEN
-         RAISE EXCEPTION 'Transaction NOTE (comment) mismatch. Expected "Test Note", got %', v_trans_record.comment;
+    -- CHECK COMMENT (NOTE) -> Mapped to message_for_recipient in new migration
+    IF v_trans_record.message_for_recipient IS DISTINCT FROM 'Test Note' THEN
+         RAISE EXCEPTION 'Transaction NOTE (message_for_recipient) mismatch. Expected "Test Note", got %', v_trans_record.message_for_recipient;
     END IF;
     
     -- Verify Payment Info Updated

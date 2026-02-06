@@ -10,11 +10,11 @@ export class TextFieldBuilder {
         const isHidden = field.isHidden;
         const inputType = TextFieldBuilder.getInputType(field.type);
         const inputName = field.id.toString();
-        const isInformal = formModel?.communicationTone === 'informal';
+        const isInformal = formModel?.settings?.communicationTone === 'informal';
         const placeholder = isInformal ? FormStrings.typeHere_informal : FormStrings.typeHere;
         const autocomplete = TextFieldBuilder.getAutocompleteValue(field.type);
         
-        container.i<nnerHTML = html`
+        container.innerHTML = html`
             <div class="form-field-container" style="${isHidden ? 'display:none' : ''}">
                 <label class="form-field-label">
                     ${field.title || ''}
