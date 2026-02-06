@@ -10,7 +10,7 @@ export class TextFieldBuilder {
         const isHidden = field.isHidden;
         const inputType = TextFieldBuilder.getInputType(field.type);
         const inputName = field.id.toString();
-        const isInformal = formModel?.settings?.communicationTone === 'informal';
+        const isInformal = formModel?.communicationTone === 'informal';
         const placeholder = isInformal ? FormStrings.typeHere_informal : FormStrings.typeHere;
         const autocomplete = TextFieldBuilder.getAutocompleteValue(field.type);
         

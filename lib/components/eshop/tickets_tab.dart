@@ -110,6 +110,7 @@ class _TicketsTabState extends State<TicketsTab> {
           EshopColumns.TICKET_DOWNLOAD: null,
         },
       ),
+      exportOptions: ExportOptions(fileName: "$occasionLink-tickets"),
     );
 
     if (mounted) {
