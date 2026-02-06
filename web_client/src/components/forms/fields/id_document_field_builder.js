@@ -35,7 +35,8 @@ export class IdDocumentFieldBuilder {
         idInput.name = field.id.toString();
         idInput.className = 'form-control';
         if (field.isRequired) idInput.required = true;
-        idInput.placeholder = FormStrings.typeHere;
+        const isInformal = formModel?.communicationTone === 'informal';
+        idInput.placeholder = isInformal ? FormStrings.typeHere_informal : FormStrings.typeHere;
         idWrapper.appendChild(idInput);
 
         const idDesc = field.description ? document.createElement('div') : null;
