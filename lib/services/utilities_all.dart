@@ -88,9 +88,9 @@ class Utilities {
     return cleaned.replaceAll(invalidChars, '');
   }
 
+  static final RegExp _tabsAndNewLinesPattern = RegExp(r'[\t\n]+');
   static String removeTabsAndNewLines(String input) {
-    final pattern = RegExp(r'[\t\n]+');
-    return input.replaceAll(pattern, '');
+    return input.replaceAll(_tabsAndNewLinesPattern, '');
   }
 
   static int naturalCompare(String a, String b) {
