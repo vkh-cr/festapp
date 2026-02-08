@@ -7,8 +7,7 @@ RETURNS TABLE (
     is_admin boolean,
     token_masked text,
     token_expiry_date timestamptz,
-    supported_currencies text[],
-    pairing_code text
+    supported_currencies text[]
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -33,8 +32,7 @@ BEGIN
             ELSE NULL 
         END as token_masked,
         s.expiry_date as token_expiry_date,
-        ba.supported_currencies,
-        ba.pairing_code
+        ba.supported_currencies
     FROM eshop.bank_accounts ba
     JOIN eshop.unit_bank_accounts uba ON ba.id = uba.bank_account
     LEFT JOIN eshop.secrets s ON ba.secret = s.id

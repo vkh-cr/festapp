@@ -1,5 +1,6 @@
 import { FormStrings } from '../form_strings.js';
 import { PhoneFormatter } from '../../../utils/phone_formatter.js';
+import { PhoneCountryCodes } from '../../../logic/phone_country_codes.js';
 import { html, unsafe } from '../../../utils/html.js';
 
 
@@ -50,13 +51,13 @@ export class TextFieldBuilder {
         const input = actualContainer.querySelector('input');
         
         if (field.type === 'phone') {
-            TextFieldBuilder._attachPhoneLogic(input, actualContainer);
+            TextFieldBuilder._attachPhoneLogic(input, actualContainer, formModel);
         }
         
         return actualContainer;
     }
 
-    static _attachPhoneLogic(input, container) {
+    static _attachPhoneLogic(input, container, formModel) {
             // Default value if empty
             if (!input.value) {
                 input.value = '+420'; // Default to CZ
@@ -72,19 +73,17 @@ export class TextFieldBuilder {
             
             const badgesContainer = container.querySelector('.phone-badges-container');
             if (!badgesContainer) return;
-            
-            // Chips (Declarative?)
-            // We can't easily attach listeners in HTML string without global handlers.
-            // So we create them manually or use helper?
-            // Let's keep manual creation for chips to safeguard listeners.
+
+            // Determine prefixes
+            let prefixes = ['+420', '+421'];
+            if (formModel && formModel.data && formModel.data.phone_prefixes && Array.isArray(formModel.data.phone_prefixes) && formModel.data.phone_prefixes.length > 0) {
+                prefixes = formModel.data.phone_prefixes;
+            }
             
             const createChip = (label, prefix) => {
                 const chip = document.createElement('div');
                 chip.textContent = label;
                 chip.className = 'phone-badge-chip'; 
-                // Using class defined in CSS or style attribute if needed.
-                // Re-using the styles from before via cssText or class.
-                // Let's assume there is css or we intentionally inline it for now to match previous behavior
                 chip.style.cssText = `
                     display: inline-block;
                     padding: 4px 8px;
@@ -106,15 +105,14 @@ export class TextFieldBuilder {
                     
                     if (current.startsWith(prefix)) {
                         result = current;
-                    } else if (current.startsWith('+420')) {
-                        result = prefix + current.substring(4);
-                    } else if (current.startsWith('+421')) {
-                        result = prefix + current.substring(4);
                     } else if (current.startsWith('+')) {
+                         // Replace existing prefix
                          const spaceIdx = current.indexOf(' ');
                          if (spaceIdx > 0) {
                              result = prefix + current.substring(spaceIdx);
                          } else {
+                             // Try to be smart about 3-digit prefixes vs others?
+                             // Simple regex replace of leading +digits
                              result = prefix + ' ' + current.replace(/^\+\d+\s*/, '');
                          }
                     } else {
@@ -128,11 +126,14 @@ export class TextFieldBuilder {
                 return chip;
             };
 
-            const czChip = createChip('CZ +420', '+420');
-            const skChip = createChip('SK +421', '+421');
-            
-            badgesContainer.appendChild(czChip);
-            badgesContainer.appendChild(skChip);
+            prefixes.forEach(p => {
+                let label = p;
+                const iso = PhoneCountryCodes.getIso(p);
+                if (iso) {
+                    label = `${iso} ${p}`;
+                }
+                badgesContainer.appendChild(createChip(label, p));
+            });
             
             input.addEventListener('focus', () => {
                 badgesContainer.style.display = 'block';

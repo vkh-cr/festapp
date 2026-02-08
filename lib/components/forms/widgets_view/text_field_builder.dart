@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:fstapp/components/forms/logic/phone_country_codes.dart';
 import 'package:fstapp/components/forms/models/holder_models/field_holder.dart';
 import 'package:fstapp/components/forms/models/holder_models/form_holder.dart';
 import 'package:fstapp/components/forms/widgets_view/form_field_builders.dart';
@@ -79,6 +80,7 @@ class TextFieldBuilder extends StatelessWidget {
         return _StandardTextField(
           field: field,
           fieldHolder: fieldHolder,
+          formHolder: formHolder,
           isPhone: isPhone,
           isEmail: isEmail,
           autofillHints: autofillHints,
@@ -121,6 +123,7 @@ class TextFieldBuilder extends StatelessWidget {
         return _CardTextField(
           field: field,
           fieldHolder: fieldHolder,
+          formHolder: formHolder,
           autofillHints: autofillHints,
           isPhone: isPhone,
           isEmail: isEmail,
@@ -133,6 +136,7 @@ class TextFieldBuilder extends StatelessWidget {
 class _StandardTextField extends StatefulWidget {
   final FormFieldState<String?> field;
   final FieldHolder fieldHolder;
+  final FormHolder formHolder;
   final bool isPhone;
   final bool isEmail;
   final Iterable<String> autofillHints;
@@ -140,6 +144,7 @@ class _StandardTextField extends StatefulWidget {
   const _StandardTextField({
     required this.field,
     required this.fieldHolder,
+    required this.formHolder,
     required this.isPhone,
     required this.isEmail,
     this.autofillHints = const [],
@@ -228,6 +233,7 @@ class _StandardTextFieldState extends State<_StandardTextField> {
         ),
         if (widget.isPhone && _showPrefixes)
           _PhonePrefixHelpers(
+            prefixes: widget.formHolder.phonePrefixes,
             onPrefixSelected: (prefix) {
               // Keep focus to prevent onUnfocus validation logic triggered by focus loss
               _focusNode.requestFocus();
@@ -249,6 +255,7 @@ class _StandardTextFieldState extends State<_StandardTextField> {
 class _CardTextField extends StatefulWidget {
   final FormFieldState<String?> field;
   final FieldHolder fieldHolder;
+  final FormHolder formHolder;
   final Iterable<String> autofillHints;
   final bool isPhone;
   final bool isEmail;
@@ -256,6 +263,7 @@ class _CardTextField extends StatefulWidget {
   const _CardTextField({
     required this.field,
     required this.fieldHolder,
+    required this.formHolder,
     required this.autofillHints,
     required this.isPhone,
     required this.isEmail,
@@ -373,8 +381,10 @@ class _CardTextFieldState extends State<_CardTextField> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (widget.isPhone && _showPrefixes)
-                    _PhonePrefixHelpers(
+                    if (widget.isPhone && _showPrefixes)
+                      _PhonePrefixHelpers(
+                        prefixes:
+                            widget.formHolder.phonePrefixes,
                       onPrefixSelected: (prefix) {
                         // Keep focus to prevent onUnfocus validation
                         _focusNode.requestFocus();
@@ -433,28 +443,45 @@ String _applyPrefix(String current, String prefix) {
   return PhoneInputFormatter.formatPhoneNumber(cleaned);
 }
 
-class _PhonePrefixHelpers extends StatelessWidget {
+class _PhonePrefixHelpers extends StatefulWidget {
   final Function(String) onPrefixSelected;
+  final List<String> prefixes;
 
-  const _PhonePrefixHelpers({required this.onPrefixSelected});
+  const _PhonePrefixHelpers(
+      {required this.onPrefixSelected, this.prefixes = const []});
+
+  @override
+  State<_PhonePrefixHelpers> createState() => _PhonePrefixHelpersState();
+}
+
+class _PhonePrefixHelpersState extends State<_PhonePrefixHelpers> {
 
   @override
   Widget build(BuildContext context) {
+    // Default to +420, +421 if empty
+    final prefixes = widget.prefixes.isNotEmpty
+        ? widget.prefixes
+        : ['+420', '+421'];
+
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Wrap(
         spacing: 8.0,
-        children: [
-          _buildChip(context, 'CZ +420', '+420'),
-          _buildChip(context, 'SK +421', '+421'),
-        ],
+        children: prefixes.map((p) {
+          String label = p;
+          final iso = PhoneCountryCodes.getIso(p);
+          if (iso != null) {
+            label = '$iso $p';
+          }
+          return _buildChip(context, label, p);
+        }).toList(),
       ),
     );
   }
 
   Widget _buildChip(BuildContext context, String label, String value) {
     return InkWell(
-      onTap: () => onPrefixSelected(value),
+      onTap: () => widget.onPrefixSelected(value),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

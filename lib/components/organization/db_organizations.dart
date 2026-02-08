@@ -67,7 +67,7 @@ class DbOrganizations {
       Map<String, dynamic> data =
           Map<String, dynamic>.from(response['data'] ?? {});
       data['title'] = response['title'];
-      // Add other columns if needed?
+      data['PHONE_PREFIXES'] = response['phone_prefixes']; // Add phone_prefixes column to data for parsing
 
       return OrganizationModel.fromJson(data);
     } catch (e) {
@@ -85,12 +85,15 @@ class DbOrganizations {
 
 
 
+      final jsonData = organization.toJson();
+      jsonData.remove('PHONE_PREFIXES'); // Store only in column, not in data jsonb
+
       await _supabase.rpc('update_organization_admin', params: {
         'organization_id': id,
         'title':
             organization.title, // Pass title if changed, or null? Model has it.
-        'data': organization
-            .toJson(), // This only contains changed/non-empty fields.
+        'phone_prefixes': organization.phonePrefixes,
+        'data': jsonData, // This only contains changed/non-empty fields.
       }).maybeSingle(); // Now that it returns rows, strictly consume it (expect 1 or 0)
     } catch (e) {
       print("Failed to update organization: $e");

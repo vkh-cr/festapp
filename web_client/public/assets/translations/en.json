@@ -284,14 +284,10 @@
   "The processing has been cancelled.": "The processing has been cancelled.",
   "The processing has completed successfully.": "The processing has completed successfully.",
   "Saving changes": "Saving changes",
-  "Price": "Price",
-  "Ticket": "Ticket",
-  "Drop file here": "Drop file here",
   "Continue": "Continue",
-  "Spot": "Spot",
   "Close": "Close",
-  "It is not possible to select more tickets.": "It is not possible to select more tickets.",
-  "Seat selection": "Seat selection",
+  "Drop file here": "Drop file here",
+  "Drop file here or click to upload": "Drop file here or click to upload",
   "Ticket Symbol": "Ticket Symbol",
   "Created": "Created",
   "Products": "Products",
@@ -780,9 +776,10 @@
     "usedInForms": "Used in Forms",
     "shortTitle": "Short Title",
     "surcharge": "Surcharge",
-    "surchargeOnSite": "surcharge on site"
+    "surchargeOnSite": "surcharge"
   },
   "FormsFeature": {
+    "cannotDeleteFormWithResponses": "Form cannot be deleted because it already has responses.",
     "addTicket": "Add Ticket",
     "formsTitle": "Forms",
     "createNewForm": "Create/Copy Form",
@@ -834,9 +831,14 @@
     "labelMaxTicketsPerOrder": "Max tickets per order:",
     "helperMaxTicketsPerOrder": "How many tickets a user can buy in a single order (default: 1).",
     "validationMaxTicketsInvalid": "Please enter a valid number (1 or more).",
-    "showSurchargeDescription": "Show surcharge description"
+    "showSurchargeDescription": "Show surcharge description",
+    "It is not possible to select more tickets.": "It is not possible to select more tickets.",
+    "Spot": "Spot",
+    "Price": "Price",
+    "Ticket": "Ticket"
   },
   "FeatureOrders": {
+    "searchUnpairedTransactions": "Search unpaired transactions",
     "cancel": "Cancel",
     "synchronizePayments": "Synchronize Payments",
     "processing": "Processing...",
@@ -1514,7 +1516,8 @@
     "ibanValidationHelp": "Supports IBAN validation",
     "regenerateTokenConfirmation": "Are you sure you want to regenerate the token? The old email address will stop working. For pairing to work, you will have to set email forwarding to the new email.",
     "bankConnectionTab": "Bank Connection",
-    "maskedEmailExplanation": "The email address is hidden for security reasons. If you need to see it, please ask an administrator of this bank account."
+    "maskedEmailExplanation": "The email address is hidden for security reasons. If you need to see it, please ask an administrator of this bank account.",
+    "setupConnectionNow": "Setup connection now"
   },
   "FeatureContract": {
     "title": "Contract",
@@ -1532,8 +1535,9 @@
     "generatingContractFor": "Generating Contract for {customer}...",
     "paymentInfo": "Payment Info"
   },
-  "surchargeOnSite": "surcharge",
-  "FeatureOrders.searchUnpairedTransactions": "Search unpaired transactions",
-  "Drop file here or click to upload": "Drop file here or click to upload",
-  "FormsFeature.cannotDeleteFormWithResponses": "Form cannot be deleted because it already has responses."
+  "Price": "Price",
+  "Ticket": "Ticket",
+  "Spot": "Spot",
+  "It is not possible to select more tickets.": "It is not possible to select more tickets.",
+  "Seat selection": "Seat selection"
 }

@@ -141,4 +141,6 @@ class BankAccountStrings {
   static String get regenerateTokenConfirmation =>
       'BankAccount.regenerateTokenConfirmation'.tr();
 
+  static String get setupConnectionNow =>
+      'BankAccount.setupConnectionNow'.tr();
 }

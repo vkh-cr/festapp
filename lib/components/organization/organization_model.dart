@@ -38,6 +38,7 @@ class OrganizationModel {
   bool? isAppSupported;
   int? defaultUnit;
   int? representativeOccasion;
+  List<String>? phonePrefixes;
 
   OrganizationModel({
     this.title,
@@ -52,6 +53,7 @@ class OrganizationModel {
     this.isAppSupported,
     this.defaultUnit,
     this.representativeOccasion,
+    this.phonePrefixes,
   });
 
   factory OrganizationModel.fromJson(Map<String, dynamic> json) {
@@ -71,6 +73,9 @@ class OrganizationModel {
       isAppSupported: json['IS_APP_SUPPORTED'] as bool?,
       defaultUnit: json['DEFAULT_UNIT'] as int?,
       representativeOccasion: json['REPRESENTATIVE_OCCASION'] as int?,
+      phonePrefixes: json['PHONE_PREFIXES'] != null
+          ? List<String>.from(json['PHONE_PREFIXES'])
+          : null,
     );
   }
 
@@ -101,6 +106,9 @@ class OrganizationModel {
     addIfNotEmpty('IS_APP_SUPPORTED', isAppSupported);
     addIfNotEmpty('DEFAULT_UNIT', defaultUnit);
     addIfNotEmpty('REPRESENTATIVE_OCCASION', representativeOccasion);
+    if (phonePrefixes != null && phonePrefixes!.isNotEmpty) {
+      data['PHONE_PREFIXES'] = phonePrefixes;
+    }
 
     return data;
   }

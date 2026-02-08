@@ -287,6 +287,7 @@
   "Price": "Cena",
   "Ticket": "Vstupenka",
   "Drop file here": "Přetáhněte soubor sem",
+  "Drop file here or click to upload": "Přetáhněte soubor sem nebo klikněte pro nahrání",
   "Continue": "Pokračovat",
   "Spot": "Místo",
   "Close": "Zavřít",
@@ -741,7 +742,8 @@
     "helperClosedMessage": "Zobrazeno, když je formulář uzavřen / neaktivní.",
     "notSet": "Nenastaveno",
     "publicView": "Veřejný pohled",
-    "editorPreview": "Náhled editora"
+    "editorPreview": "Náhled editora",
+    "seatSelection": "Výběr místa"
   },
   "OrderGridColumns": {
     "id": "Id",
@@ -783,6 +785,7 @@
     "surchargeOnSite": "doplatek na místě"
   },
   "FormsFeature": {
+    "cannotDeleteFormWithResponses": "Formulář nelze smazat, protože již obsahuje odpovědi.",
     "addTicket": "Přidat vstupenku",
     "formsTitle": "Formuláře",
     "createNewForm": "Vytvořit/Zkopírovat formulář",
@@ -837,6 +840,7 @@
     "showSurchargeDescription": "Zobrazit popis doplatku"
   },
   "FeatureOrders": {
+    "searchUnpairedTransactions": "Vyhledat nespárované transakce",
     "cancel": "Stornovat",
     "synchronizePayments": "Synchronizovat platby",
     "processing": "Zpracovává se...",
@@ -1259,7 +1263,8 @@
     "mixedProducts": "Různé / Smíšené",
     "toastNoTemplateProduct": "Nelze vytvořit produkt: Musí existovat alespoň jeden produkt typu 'Místo', který poslouží jako šablona.",
     "uniformViewHelp": "Všechna místa mají stejný produkt.\nZapněte přepínač pro úpravu konkrétních míst.",
-    "warningNoCancellationEmail": "Poznámka: Uživatelé neobdrží e-mail o zrušení pro tyto změny."
+    "warningNoCancellationEmail": "Poznámka: Uživatelé neobdrží e-mail o zrušení pro tyto změny.",
+    "surchargeOnSite": "doplatek"
   },
   "OccasionSettings": {
     "title": "Název",
@@ -1516,7 +1521,8 @@
     "bankConnectionTab": "Propojení s bankou",
     "maskedEmailExplanation": "Emailová adresa je z bezpečnostních důvodů skryta. Pokud ji potřebujete vidět, požádejte prosím administrátora tohoto bankovního účtu.",
     "safeSenderInfo": "Tato adresa je bezpečná. Je to speciální robot, který čte pouze e-maily o platbách a nic jiného.",
-    "forwardingEmailWarning": "Upozornění: Prosím, udržujte tento e-mail v tajnosti. S nikým jej nesdílejte."
+    "forwardingEmailWarning": "Upozornění: Prosím, udržujte tento e-mail v tajnosti. S nikým jej nesdílejte.",
+    "setupConnectionNow": "Nastavit připojení nyní"
   },
   "FeatureContract": {
     "title": "Smlouva",
@@ -1533,9 +1539,5 @@
     "generatingContract": "Generování smlouvy...",
     "generatingContractFor": "Generování smlouvy pro {customer}...",
     "paymentInfo": "Informace k platbě"
-  },
-  "surchargeOnSite": "doplatek",
-  "FeatureOrders.searchUnpairedTransactions": "Vyhledat nespárované transakce",
-  "Drop file here or click to upload": "Přetáhněte soubor sem nebo klikněte pro nahrání",
-  "FormsFeature.cannotDeleteFormWithResponses": "Formulář nelze smazat, protože již obsahuje odpovědi."
+  }
 }
