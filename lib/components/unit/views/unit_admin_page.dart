@@ -65,13 +65,25 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
     }
   }
 
+  int? _loadedId;
+
+  @override
+  void didUpdateWidget(UnitAdminPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.id != oldWidget.id) {
+      _loadOrganization();
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (widget.id == null && context.routeData.hasPendingChildren) {
       widget.id = context.routeData.pendingChildren[0].params.getInt("id");
     }
-    _loadOrganization();
+    if (widget.id != null && widget.id != _loadedId) {
+      _loadOrganization();
+    }
   }
 
   Future<void> _loadOrganization({bool force = false}) async {
@@ -79,6 +91,7 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
     if (RightsService.currentUnit()?.id != widget.id! || force) {
       await RightsService.updateAppData(unitId: widget.id!, force: force);
     }
+    _loadedId = widget.id;
     try {
       _currentUnit = RightsService.currentUnit();
       if (_currentUnit != null) {

@@ -100,7 +100,8 @@ class TicketModel extends ITrinaRowModel {
           value: relatedSpot != null ? relatedSpot?.toSpotString() : ""),
       EshopColumns.TICKET_TOTAL_PRICE: TrinaCell(
           value: totalPrice != null
-              ? Utilities.formatPrice(context, totalPrice!)
+              ? Utilities.formatPrice(context, totalPrice!,
+                  currencyCode: relatedOrder?.currencyCode)
               : ""),
       EshopColumns.TICKET_PRODUCTS_EDIT: TrinaCell(value: ""),
       EshopColumns.TICKET_CONFIRM: TrinaCell(value: ""),

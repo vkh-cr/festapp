@@ -121,12 +121,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
       _supportedCurrencies.add('CZK');
     }
     
-    // Auto-generate token if missing
-    if (_pairingCode == null && _account.id != 0 && !_isReadOnly) {
-       WidgetsBinding.instance.addPostFrameCallback((_) {
-         _loadOrGenerateToken();
-      });
-    }
+    // Auto-generate token block removed to prevent accidental regeneration on view
 
     // Configure timeago
     timeago.setLocaleMessages('cs', timeago.CsMessages());
@@ -254,6 +249,8 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
          return;
     }
 
+    final isCreation = _account.id == 0;
+
     setState(() => _isSaving = true);
     try {
       final updatedAccount = BankAccountModel(
@@ -277,24 +274,34 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
       final savedAccount = updatedAccount.copyWith(id: newId);
 
       if (!mounted) return;
-      ToastHelper.Show(context, BankAccountStrings.save);
-
-      setState(() {
-        _account = savedAccount;
-      });
       
       setState(() {
         _account = savedAccount;
       });
-      
-      
-      // Auto-refresh tabs if type changed effectively (FIO <-> Other)
-      // Since we don't store _selectedType state, we can just rebuild.
-      // But we might want to reset tab if the new state hides the current tab?
-      // For now, let's keep it simple.
 
-      if (widget.isDialog) {
-        Navigator.pop(context, savedAccount);
+      if (isCreation) {
+         // On creation, we immediately fetch/regenerate the pairing code
+         // so the user can see it once and set it up.
+         await _regenerateToken(silent: true);
+         
+         // Switch to Connection Tab
+         _tabController.animateTo(1);
+         
+         ToastHelper.Show(context, "${BankAccountStrings.save}. ${BankAccountStrings.setupConnectionNow}");
+      } else {
+         ToastHelper.Show(context, BankAccountStrings.save);
+      }
+      
+      if (widget.isDialog && _account.pairingCode == null) {
+          // If it's a dialog and we didn't just generate a code (or user closed it?)
+          // actually, if we just created it, we usually want to stay open to show the code.
+          // If it's an EDIT, we might pop. 
+          // But for flow consistency: 
+          if (!isCreation) {
+             Navigator.pop(context, savedAccount);
+          }
+      } else if (!isCreation && widget.isDialog) {
+         Navigator.pop(context, savedAccount);
       }
     } catch (e) {
       if (e.toString().contains("ACCOUNT_NUMBER_EXISTS")) {
@@ -356,11 +363,6 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
   }
 
 
-  Future<void> _loadOrGenerateToken() async {
-     // If we are here, pairing code is missing.
-     // We should try to fetch the latest details or regenerate.
-     await _regenerateToken();
-  }
   
 
 
