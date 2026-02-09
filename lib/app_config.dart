@@ -18,17 +18,17 @@ class AppConfig {
   static const String oneSignalAppId = '';
   static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
-  static const int organization = 3;
+  static const int organization = 1;
   //setup occasion id to force occasion
   static const String? forceOccasionLink = null;
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
-  static const bool isAppSupported = false;
+  static const bool isAppSupported = true;
   static const bool isWebclientSupported = true;
   static const bool isContractFeatureEnabled = false;
   static const bool showBankSupportRole = false;
 
-  static const String webLink = "https://vstupenky.online";
+  static const String webLink = "https://live.festapp.net";
   static bool isProLicense = false;
   static const int imagesMaxWidth = 980;
   static const int imagesMaxBytes = 800000;
