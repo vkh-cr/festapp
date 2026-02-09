@@ -253,6 +253,7 @@ class FormStrings {
       'FormsFeature.newProductTypeDefaultName'.tr();
 
   static String get typeHere => 'FormsFeature.typeHere'.tr();
+  static String get typeHere_informal => 'FormsFeature.typeHere_informal'.tr();
   static String get phoneFormatHint => 'FormsFeature.phoneFormatHint'.tr();
   static String get phoneFormatValidation =>
       'FormsFeature.phoneFormatValidation'.tr();
@@ -293,5 +294,5 @@ class FormStrings {
   static String get groupOther => 'FormsFeature.groupOther'.tr(); // "Other"
   static String numberOfResponsesTooltip(int count) =>
       'FormsFeature.numberOfResponsesTooltip'
-          .tr(args: [count.toString()]); // "Number of responses: {0}"
+          .tr(namedArgs: {'count': count.toString()}); // "Number of responses: {count}"
 }

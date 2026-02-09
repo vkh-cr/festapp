@@ -352,7 +352,9 @@ class _CardTextFieldState extends State<_CardTextField> {
             decoration: InputDecoration(
               hintText: widget.isPhone
                   ? FormStrings.phoneFormatHint
-                  : FormStrings.typeHere,
+                  : widget.formHolder.communicationTone == 'informal'
+                      ? FormStrings.typeHere_informal
+                      : FormStrings.typeHere,
               isDense: true,
               contentPadding: const EdgeInsets.fromLTRB(2, 12, 2, 12),
               border: const UnderlineInputBorder(),

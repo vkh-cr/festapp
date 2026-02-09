@@ -123,6 +123,11 @@ body.dark-mode .form-description *:not(a) {
     margin: 8px 0;
 }
 
+.form-description img,
+.form-header img {
+    border-radius: 8px !important;
+}
+
 /* Aggressively prevent any wrapper from exceeding width */
 .form-description *, 
 .form-field-description *,

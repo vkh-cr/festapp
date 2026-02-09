@@ -433,8 +433,9 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                         'manual') ...[
                                       _buildInfoRow(
                                         title: BankAccountStrings.bankAccount,
-                                        value:
-                                            '${transaction.counterAccount ?? "N/A".tr()} / ${transaction.bankCode ?? "N/A".tr()} (${transaction.bankName ?? "N/A".tr()})',
+                                        value: transaction.formattedBankAccount.isNotEmpty
+                                            ? transaction.formattedBankAccount
+                                            : "N/A".tr(),
                                       ),
                                       SizedBox(height: 5),
                                     ],

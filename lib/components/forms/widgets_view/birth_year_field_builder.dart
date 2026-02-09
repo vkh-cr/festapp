@@ -90,6 +90,7 @@ class BirthYearFieldBuilder extends StatelessWidget {
             return _CardBirthYearField(
               field: field,
               fieldHolder: fieldHolder,
+              formHolder: formHolder,
             );
           },
         ),
@@ -101,10 +102,12 @@ class BirthYearFieldBuilder extends StatelessWidget {
 class _CardBirthYearField extends StatefulWidget {
   final FormFieldState<String?> field;
   final FieldHolder fieldHolder;
+  final FormHolder formHolder;
 
   const _CardBirthYearField({
     required this.field,
     required this.fieldHolder,
+    required this.formHolder,
   });
 
   @override
@@ -149,7 +152,9 @@ class _CardBirthYearFieldState extends State<_CardBirthYearField> {
             maxLines: 1,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              hintText: FormStrings.typeHere,
+              hintText: widget.formHolder.communicationTone == 'informal'
+                  ? FormStrings.typeHere_informal
+                  : FormStrings.typeHere,
               isDense: true,
               contentPadding: const EdgeInsets.fromLTRB(2, 12, 2, 12),
               border: const UnderlineInputBorder(),
