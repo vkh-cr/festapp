@@ -278,13 +278,14 @@ class _SearchTransactionsDialogState extends State<SearchTransactionsDialog> {
                                               color:
                                                   ThemeConfig.grey800(context)),
                                         ),
-                                        Text(
-                                          '${transaction.counterAccount ?? ""} / ${transaction.bankCode ?? ""} (${transaction.bankName ?? ""})',
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color:
-                                                  ThemeConfig.grey600(context)),
-                                        ),
+                                        if (transaction.formattedBankAccount.isNotEmpty)
+                                          Text(
+                                            transaction.formattedBankAccount,
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color:
+                                                    ThemeConfig.grey600(context)),
+                                          ),
                                         if (transaction.vs != null &&
                                             transaction.vs!.isNotEmpty)
                                           Text(

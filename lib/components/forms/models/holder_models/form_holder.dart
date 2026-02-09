@@ -42,6 +42,7 @@ class FormHolder {
   final List<FieldHolder> fields;
   final bool isCardDesign;
   final List<String> phonePrefixes;
+  final String? communicationTone;
 
   TicketHolder? getTicket() =>
       fields.firstWhereOrNull((f) => f is TicketHolder) as TicketHolder?;
@@ -49,7 +50,8 @@ class FormHolder {
   FormHolder(
       {required this.fields,
       required this.isCardDesign,
-      this.phonePrefixes = const []});
+      this.phonePrefixes = const [],
+      this.communicationTone});
 
   factory FormHolder.fromFormFieldModel(FormModel formModel) {
     // Extract and sort ticket child fields.
@@ -76,7 +78,8 @@ class FormHolder {
         phonePrefixes: formModel.data != null &&
                 formModel.data!['phone_prefixes'] != null
             ? List<String>.from(formModel.data!['phone_prefixes'])
-            : []);
+            : [],
+        communicationTone: formModel.communicationTone);
   }
 
   /// Creates a [FieldHolder] instance based on the provided [FormFieldModel].

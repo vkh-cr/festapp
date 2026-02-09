@@ -347,6 +347,12 @@ class FormModel {
     _designData['is_card_design'] = value;
   }
 
+  static const String metaCommunicationTone = "communication_tone";
+
+  String? get communicationTone {
+    return data?[metaCommunicationTone];
+  }
+
   /// Returns a list of available supported currencies.
   List<String> getSupportedCurrencies() {
     if (bankAccount != null && bankAccount!.supportedCurrencies.isNotEmpty) {

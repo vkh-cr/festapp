@@ -213,4 +213,25 @@ class TransactionModel extends ITrinaRowModel {
   /// Returns a basic string representation of the transaction.
   @override
   String toBasicString() => "Transaction #$transactionId";
+
+  String get formattedBankAccount {
+    String accountPart = "";
+    if (counterAccount != null && counterAccount!.isNotEmpty) {
+      accountPart = counterAccount!;
+      if (bankCode != null && bankCode!.isNotEmpty) {
+        accountPart += "/$bankCode";
+      }
+    } else if (bankCode != null && bankCode!.isNotEmpty) {
+      accountPart = bankCode!;
+    }
+
+    if (bankName != null && bankName!.isNotEmpty) {
+      if (accountPart.isNotEmpty) {
+        return "$accountPart ($bankName)";
+      }
+      return bankName!;
+    }
+    
+    return accountPart;
+  }
 }

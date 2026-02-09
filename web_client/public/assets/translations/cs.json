@@ -820,7 +820,7 @@
     "groupHappeningNow": "Právě probíhá",
     "groupUpcoming": "Nadcházející",
     "groupOther": "Ostatní",
-    "numberOfResponsesTooltip": "Počet odpovědí: {0}",
+    "numberOfResponsesTooltip": "Počet odpovědí: {count}",
     "noFormsForEventPrompt": "Formuláře k této události nejsou k dispozici. Klikněte na '{createNew}' pro vytvoření.",
     "typeHere": "Vyplňte zde...",
     "typeHere_informal": "Vyplň zde...",

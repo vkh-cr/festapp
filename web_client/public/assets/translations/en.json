@@ -814,7 +814,7 @@
     "groupHappeningNow": "Happening Now",
     "groupUpcoming": "Upcoming",
     "groupOther": "Other",
-    "numberOfResponsesTooltip": "Number of responses: {0}",
+    "numberOfResponsesTooltip": "Number of responses: {count}",
     "noFormsForEventPrompt": "There are no forms for this event. Click '{createNew}' to add one.",
     "typeHere": "Type here...",
     "typeHere_informal": "Type here...",

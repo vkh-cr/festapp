@@ -127,7 +127,10 @@ class _HtmlViewState extends State<HtmlView> {
             child: ZoomableImage(
               onTwoFingerStart: widget.twoFingersOn,
               onTwoFingerEnd: widget.twoFingersOff,
-              child: img,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: img,
+              ),
             ),
           );
         }

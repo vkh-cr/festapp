@@ -26,7 +26,7 @@ serve(async (req) => {
     try {
       payload = JSON.parse(bodyText);
     } catch (e) {
-      await supabase.rpc("log_transactions_log", {
+      await supabase.rpc("log_transactions_parser_log", {
            p_bank_account_id: null, 
            p_external_id: "unknown",
            p_raw_data: bodyText,
@@ -66,7 +66,7 @@ serve(async (req) => {
       
       if (!tokenMatch) {
          console.error("No token found in recipient:", recipient);
-         await supabase.rpc("log_transactions_log", {
+         await supabase.rpc("log_transactions_parser_log", {
              p_bank_account_id: null, 
              p_external_id: messageId,
              p_raw_data: emailBody || JSON.stringify(payload),
@@ -90,7 +90,7 @@ serve(async (req) => {
       if (dbError || !bankAccount) {
         console.error("Bank account not found for code:", pairingCode);
         // We log ID if we have messageId, but account is null
-         await supabase.rpc("log_transactions_log", {
+         await supabase.rpc("log_transactions_parser_log", {
              p_bank_account_id: null, 
              p_external_id: messageId,
              p_raw_data: emailBody,
@@ -111,7 +111,7 @@ serve(async (req) => {
          console.error("Failed to parse email format");
          
          // Log failure to DB
-         await supabase.rpc("log_transactions_log", {
+         await supabase.rpc("log_transactions_parser_log", {
              p_bank_account_id: bankAccount.id,
              p_external_id: messageId,
              p_raw_data: emailBody,
@@ -145,7 +145,7 @@ serve(async (req) => {
 
       if (rpcError) {
         console.error("RPC Error:", rpcError);
-        await supabase.rpc("log_transactions_log", {
+        await supabase.rpc("log_transactions_parser_log", {
              p_bank_account_id: bankAccount.id,
              p_external_id: messageId,
              p_raw_data: JSON.stringify(transactionPayload),
@@ -170,7 +170,7 @@ serve(async (req) => {
         const errorMsg = e instanceof Error ? e.message : JSON.stringify(e);
         const rawBody = (typeof bodyText !== 'undefined') ? bodyText : "Body read failed";
         
-        await supabase.rpc("log_transaction_log", {
+        await supabase.rpc("log_transactions_parser_log", {
              p_bank_account_id: bankAccount ? bankAccount.id : null,
              p_external_id: messageId, // Might be null
              p_raw_data: rawBody,
