@@ -187,7 +187,7 @@ class FormStrings {
   static String get clearSelection => 'FormsFeature.clearSelection'.tr();
   static String get unavailable => 'FormsFeature.unavailable'.tr();
   static String get inWhatCurrency => 'FormsFeature.inWhatCurrency'.tr();
-  static String get surchargeOnSite => 'surchargeOnSite'.tr();
+  static String get surchargeOnSite => 'OrderGridColumns.surchargeOnSite'.tr();
 
 // --- FormsTab (Main Grid View) ---
   static String get formsTitle => 'FormsFeature.formsTitle'.tr(); // "Forms"

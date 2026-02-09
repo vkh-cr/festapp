@@ -69,7 +69,7 @@ class RouterService {
       }
     }
 
-    return context.router.pushPath(path);
+    return context.router.root.pushPath(path);
   }
 
   static String fixPath(String path) {

@@ -6,6 +6,8 @@ import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/organization/organization_admin_guard.dart';
+import 'package:fstapp/components/forms/logic/phone_country_codes.dart';
+import 'package:select_dialog/select_dialog.dart';
 
 import 'package:fstapp/components/_shared/app_panel_helper.dart';
 
@@ -37,6 +39,7 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
   final _representativeOccasionController = TextEditingController();
   final _oneSignalAppIdController = TextEditingController();
   final _oneSignalRestApiKeyController = TextEditingController();
+  final _phonePrefixesController = TextEditingController();
 
   // Flags
   bool _isRegistrationEnabled = false;
@@ -66,6 +69,7 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
             org.representativeOccasion?.toString() ?? '';
         _oneSignalAppIdController.text = org.oneSignalAppId ?? '';
         _oneSignalRestApiKeyController.text = org.oneSignalRestApiKey ?? '';
+        _phonePrefixesController.text = org.phonePrefixes?.join(', ') ?? '';
 
         _isRegistrationEnabled = org.isRegistrationEnabled ?? false;
         _isUnitCreationEnabled = org.isUnitCreationEnabled ?? false;
@@ -74,7 +78,7 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
         _platforms = org.platforms?.toList() ?? [];
       }
     } catch (e) {
-      print("Error loading organization: $e");
+
       if (mounted) {
         ToastHelper.Show(context, "Failed to load organization data.",
             severity: ToastSeverity.NotOk);
@@ -111,6 +115,11 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
         isUnitCreationEnabled: _isUnitCreationEnabled,
         isAppSupported: _isAppSupported,
         platforms: _platforms,
+        phonePrefixes: _phonePrefixesController.text
+            .split(',')
+            .where((s) => s.trim().isNotEmpty)
+            .map((s) => s.trim())
+            .toList(),
       );
 
       await DbOrganizations.updateOrganization(_orgId!, updatedOrg);
@@ -121,7 +130,7 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
       // Update local state manually to reflect changes immediately
       RightsService.updateOrganizationLocally(updatedOrg);
     } catch (e) {
-      print("Save error: $e");
+
       if (mounted) {
         ToastHelper.Show(context, "Error saving: $e",
             severity: ToastSeverity.NotOk);
@@ -174,6 +183,7 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
                             _buildTextField(_defaultLanguageController,
                                 "Default Language (DEFAULT_LANGUAGE)",
                                 helper: "e.g. cs, en"),
+                            _buildPrefixesSelector(context),
                             const SizedBox(height: 16),
                             Text("IDs & References",
                                 style: Theme.of(context).textTheme.titleMedium),
@@ -335,6 +345,102 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
           label: const Text("Add Platform"),
         ),
       ],
+    );
+  }
+  Widget _buildPrefixesSelector(BuildContext context) {
+    // Current prefixes from controller to list
+    List<String> currentPrefixes = _phonePrefixesController.text
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Phone Prefixes (PHONE_PREFIXES)",
+              style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 8),
+          InkWell(
+            onTap: () {
+              // Prepare items for SelectDialog
+              // Each item is the formatted string from PhoneCountryCodes.getAll()
+              // e.g. "CZ +420"
+              SelectDialog.showModal<String>(
+                context,
+                label: "Select Countries",
+                multipleSelectedValues: currentPrefixes.map((p) {
+                  // Reconstruct the label for the pre-selection
+                  // p is just the prefix e.g. "+420"
+                  // We need to find the matching entry in PhoneCountryCodes.getAll()
+                  // or just construct it if we knew the ISO.
+                  // Simpler: Just rely on string matching if getAll() returns "ISO +Prefix"
+                  // Actually, getAll() returns "ISO +Prefix".
+                  // So we need to map current prefixes to these full strings.
+                  final iso = PhoneCountryCodes.getIso(p);
+                  if (iso != null) {
+                    return "$iso $p";
+                  }
+                  return p; // Fallback? But SelectDialog matches by value.
+                }).toList(),
+                items: PhoneCountryCodes.getAll(),
+                onMultipleItemsChange: (List<String> selected) {
+                  setState(() {
+                    // Extract just the prefixes from the selection (e.g. "CZ +420" -> "+420")
+                    final prefixes = selected.map((s) {
+                      final parts = s.split(' ');
+                      return parts.last; // Assuming valid format "ISO +Prefix"
+                    }).toList();
+                    _phonePrefixesController.text = prefixes.join(', ');
+                  });
+                },
+                searchBoxDecoration: const InputDecoration(
+                  hintText: "Search country or code",
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: currentPrefixes.isEmpty
+                        ? const Text("Select prefixes...",
+                            style: TextStyle(color: Colors.grey))
+                        : Wrap(
+                            spacing: 8.0,
+                            runSpacing: 4.0,
+                            children: currentPrefixes.map((p) {
+                              final iso = PhoneCountryCodes.getIso(p);
+                              return Chip(
+                                label: Text(iso != null ? "$iso $p" : p),
+                                onDeleted: () {
+                                  setState(() {
+                                    currentPrefixes.remove(p);
+                                    _phonePrefixesController.text =
+                                        currentPrefixes.join(', ');
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
+                  ),
+                  const Icon(Icons.arrow_drop_down),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text("Select supported phone prefixes for this organization.",
+              style: TextStyle(fontSize: 12, color: Colors.grey)),
+        ],
+      ),
     );
   }
 }
