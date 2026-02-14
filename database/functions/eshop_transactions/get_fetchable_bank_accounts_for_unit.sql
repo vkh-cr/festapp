@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.get_fetchable_bank_accounts_for_unit(p_unit_id bigint)
-RETURNS TABLE (bank_account_id bigint, bank_secret text, account_type text) AS $$
+RETURNS TABLE (bank_account_id bigint, bank_secret text, account_type text)
+SET search_path = public, extensions AS $$
 BEGIN
   RETURN QUERY
   SELECT

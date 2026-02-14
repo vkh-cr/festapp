@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION public._swap_spots_generate_product_json(
 RETURNS JSONB
 LANGUAGE plpgsql
 STABLE
+SET search_path = eshop, public, extensions
 AS $$
 DECLARE
     product_data RECORD;

@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION set_user_password_token(token uuid, password text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 #variable_conflict use_variable
   declare

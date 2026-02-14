@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_ticket_details_for_generating(ticket_id_input BIGINT)
 RETURNS JSONB
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     result JSONB;

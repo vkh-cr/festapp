@@ -8,6 +8,7 @@ RETURNS TABLE (
     admin_uid uuid
 )
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 BEGIN
     -- Security Check

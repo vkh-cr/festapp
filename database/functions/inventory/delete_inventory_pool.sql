@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION delete_inventory_pool(p_inventory_pool_id bigint)
 RETURNS void
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_id bigint;

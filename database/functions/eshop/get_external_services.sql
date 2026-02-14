@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION public.get_external_services(p_order_id bigint)
     unit bigint
   )
   LANGUAGE sql
+SET search_path = public, extensions
 AS $$
   SELECT
     es.id,

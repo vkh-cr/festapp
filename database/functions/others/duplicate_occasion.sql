@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION duplicate_occasion(oc bigint)
 RETURNS bigint
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   new_occ         bigint;

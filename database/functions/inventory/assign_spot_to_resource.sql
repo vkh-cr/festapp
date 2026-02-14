@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION assign_spot_to_resource(p_spot_id BIGINT, p_inventory_context_id BIGINT)
 RETURNS VOID
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_pool_id BIGINT;

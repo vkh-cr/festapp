@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.add_transaction_to_payment_info(p_transaction_
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = eshop, public, extensions
 AS $$
 DECLARE
     associated_order_id bigint;

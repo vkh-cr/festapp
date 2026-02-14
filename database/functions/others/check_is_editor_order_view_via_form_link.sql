@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.check_is_editor_order_view_via_form_link(form_
 RETURNS void
 SECURITY DEFINER
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     occasion_id bigint;

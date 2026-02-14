@@ -7,6 +7,7 @@ CREATE OR REPLACE FUNCTION create_companion_in_organization(
 RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     new_companion UUID;

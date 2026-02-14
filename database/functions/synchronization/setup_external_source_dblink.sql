@@ -11,6 +11,7 @@ CREATE OR REPLACE FUNCTION public.setup_external_source_dblink(
 RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_job_name TEXT := 'sync_job_' || p_source_name;

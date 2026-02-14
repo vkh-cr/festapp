@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION get_user_companions_data ()
 RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     companions jsonb;

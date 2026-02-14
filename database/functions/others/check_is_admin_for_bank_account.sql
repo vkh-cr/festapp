@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION check_is_admin_for_bank_account(bank_acc bigint)
 RETURNS void
 SECURITY DEFINER
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 BEGIN
     IF NOT EXISTS (

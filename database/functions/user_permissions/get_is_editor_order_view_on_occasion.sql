@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_is_editor_order_view_on_occasion(oc bigint) RETURNS bool
     LANGUAGE "sql" STABLE
     SECURITY DEFINER
+SET search_path = public, extensions
     AS $$
   select coalesce((
   select

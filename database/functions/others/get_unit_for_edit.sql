@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_unit_for_edit(unit_id bigint) RETURNS jsonb
 LANGUAGE plpgsql STABLE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     unit_data jsonb;

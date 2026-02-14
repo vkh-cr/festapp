@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION extract_history_products_with_price(history_data jsonb)
-RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
+RETURNS jsonb LANGUAGE sql IMMUTABLE
+SET search_path = public, extensions AS $$
   SELECT COALESCE(
     -- Step 2: Aggregate the distinct product objects into a single JSONB array,
     -- ordering them by the 'id' field cast to an integer.

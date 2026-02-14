@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION create_unit_and_assign_manager(
   title text
 ) RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_user_id uuid;

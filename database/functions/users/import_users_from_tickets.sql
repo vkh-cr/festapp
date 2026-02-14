@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION public.import_users_from_tickets(p_occasion_id bigint)
 RETURNS JSONB
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     ticket_record RECORD;

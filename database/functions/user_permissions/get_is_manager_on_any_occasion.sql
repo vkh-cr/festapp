@@ -3,6 +3,7 @@ RETURNS BOOLEAN
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
   SELECT COALESCE((
     SELECT true

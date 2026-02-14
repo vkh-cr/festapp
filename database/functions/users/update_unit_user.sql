@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION update_unit_user(
     input_data jsonb
 ) RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     -- Variables extracted from input_data

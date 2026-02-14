@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION update_ticket_to_used(
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     occasion_id bigint;

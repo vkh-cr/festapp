@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_latest_order_history(order_id bigint)
 RETURNS jsonb
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
   result jsonb;

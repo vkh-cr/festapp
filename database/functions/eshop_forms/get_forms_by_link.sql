@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION public.get_forms_by_link(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_id BIGINT;

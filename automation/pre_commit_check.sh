@@ -20,6 +20,15 @@ echo "=================================================="
 echo "PREPARING COMMIT: Syncing Version and Translations"
 echo "=================================================="
 
+# 0. Auto-increment Version
+echo ""
+echo ">>> Checking/Incrementing Version..."
+if [ -f "$PROJECT_ROOT/automation/increment_version.js" ]; then
+    node "$PROJECT_ROOT/automation/increment_version.js"
+else
+    echo "Warning: automation/increment_version.js not found."
+fi
+
 # 1. Sync Application Version (Handled by apply_config.sh now)
 # echo ""
 # echo ">>> Syncing Version..."

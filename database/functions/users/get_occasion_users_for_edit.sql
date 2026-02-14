@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION public.get_occasion_users_for_edit(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     users_data JSONB;

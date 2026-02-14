@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_is_editor_on_unit(unit_id bigint) RETURNS bool
     LANGUAGE "sql" STABLE
     SECURITY DEFINER
+SET search_path = public, extensions
     AS $$
   select coalesce((
   select

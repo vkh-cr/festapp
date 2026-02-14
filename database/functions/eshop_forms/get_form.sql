@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION get_form(form_key UUID)
-RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
     allData JSON;
     generated_secret UUID := gen_random_uuid();

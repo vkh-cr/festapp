@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION delete_user(usr uuid, oc bigint)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 
 BEGIN

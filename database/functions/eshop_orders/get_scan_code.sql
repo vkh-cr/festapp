@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION get_scan_code(
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     occasion_id BIGINT;

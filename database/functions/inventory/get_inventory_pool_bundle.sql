@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_inventory_pool_bundle(p_inventory_pool_id bigint)
 RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_id bigint;

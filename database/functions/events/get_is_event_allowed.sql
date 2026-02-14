@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_is_event_allowed(ev bigint) RETURNS bool
     LANGUAGE "plpgsql" STABLE
     SECURITY DEFINER
+SET search_path = public, extensions
     AS $$
     DECLARE
         userRole bigint;

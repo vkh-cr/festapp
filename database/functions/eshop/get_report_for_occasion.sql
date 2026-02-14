@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION get_report_for_occasion(occasion_id bigint)
-RETURNS TEXT AS $$
+RETURNS TEXT
+SET search_path = public, extensions AS $$
 DECLARE
     total_spots             INT;
     booked_spots            INT;

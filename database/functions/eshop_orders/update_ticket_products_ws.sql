@@ -4,7 +4,8 @@ CREATE OR REPLACE FUNCTION public.update_ticket_products_wsv2(
 )
 RETURNS jsonb
 LANGUAGE plpgsql
-SECURITY DEFINER AS
+SECURITY DEFINER
+SET search_path = public, extensions AS
 $$
 DECLARE
   v_order_id         bigint;

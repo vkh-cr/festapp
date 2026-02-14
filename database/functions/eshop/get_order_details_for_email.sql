@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION get_order_details_for_email(p_order_id bigint)
-RETURNS jsonb AS $$
+RETURNS jsonb
+SET search_path = public, extensions AS $$
 DECLARE
     result_data jsonb;
     reference_history_data jsonb;

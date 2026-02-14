@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.generate_request_secret(p_ttl_seconds integer)
-RETURNS text AS $$
+RETURNS text
+SET search_path = public, extensions AS $$
 DECLARE
   v_secret text;
 BEGIN

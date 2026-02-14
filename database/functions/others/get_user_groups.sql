@@ -1,7 +1,8 @@
 DROP FUNCTION IF EXISTS public.get_user_groups(BIGINT);
 
 CREATE OR REPLACE FUNCTION public.get_user_groups(p_occasion_id BIGINT)
-RETURNS JSONB AS $$
+RETURNS JSONB
+SET search_path = public, extensions AS $$
 DECLARE
     -- Retrieve the user ID from the authentication context
     current_user_id UUID := auth.uid();

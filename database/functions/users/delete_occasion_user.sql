@@ -3,6 +3,7 @@ DROP FUNCTION IF EXISTS delete_occasion_user(uuid,bigint);
 CREATE OR REPLACE FUNCTION public.delete_occasion_user(usr uuid, oc bigint)
 RETURNS void
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 BEGIN
     -- Set created_by to null for news created by the user on this occasion

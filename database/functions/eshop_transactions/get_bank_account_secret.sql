@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.get_bank_account_secret(p_bank_account_id bigint)
-RETURNS jsonb AS $$
+RETURNS jsonb
+SET search_path = public, extensions AS $$
 DECLARE
   v_bank_secret bigint;
   v_secret_rec RECORD;

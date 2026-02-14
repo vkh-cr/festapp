@@ -10,6 +10,7 @@ CREATE OR REPLACE FUNCTION public.add_sync_map(
 RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 BEGIN
     -- Security Check

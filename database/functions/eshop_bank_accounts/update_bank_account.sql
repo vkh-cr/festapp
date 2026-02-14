@@ -10,6 +10,7 @@ CREATE OR REPLACE FUNCTION public.update_bank_account(
 RETURNS bigint
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_id bigint;

@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_current_quote(unit_id bigint)
 RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     unit_rec RECORD;

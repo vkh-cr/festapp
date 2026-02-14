@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION validate_product_type(product_id BIGINT, required_type TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     product_type RECORD;

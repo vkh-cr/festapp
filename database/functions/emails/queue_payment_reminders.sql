@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.queue_payment_reminders(p_occasion_id BIGINT, p_seconds_before_deadline BIGINT)
-RETURNS VOID AS $$
+RETURNS VOID
+SET search_path = public, extensions AS $$
 DECLARE
   v_interval INTERVAL;
 BEGIN

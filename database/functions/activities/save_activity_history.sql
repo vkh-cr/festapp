@@ -8,6 +8,7 @@ CREATE OR REPLACE FUNCTION public.save_activity_history(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_user_id UUID := auth.uid();

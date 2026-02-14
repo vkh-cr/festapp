@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION get_occasion_by_scan_code(scan_code TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     found_occasion_record RECORD;

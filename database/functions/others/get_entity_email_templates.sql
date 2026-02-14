@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_entity_email_templates(p_entity_type text,
 RETURNS jsonb
 SECURITY DEFINER
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_id bigint;

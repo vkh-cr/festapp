@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_order(order_id bigint)
 RETURNS eshop.orders
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
   result eshop.orders;

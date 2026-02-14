@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_inventory_pools_by_occasion_link(p_occasion_link text)
 RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_id bigint;

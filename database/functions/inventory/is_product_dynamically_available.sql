@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION is_product_dynamically_available(p_product_id BIGINT)
-RETURNS BOOLEAN LANGUAGE plpgsql STABLE AS $$
+RETURNS BOOLEAN LANGUAGE plpgsql STABLE
+SET search_path = public, extensions AS $$
 DECLARE
     context_record RECORD;
     occupied_spots BIGINT;

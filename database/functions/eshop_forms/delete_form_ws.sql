@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION delete_form_ws(p_form_id bigint)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     result jsonb;

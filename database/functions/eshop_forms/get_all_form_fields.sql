@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION get_all_form_fields(form_link TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_form_id BIGINT;

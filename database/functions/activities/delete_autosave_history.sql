@@ -3,6 +3,7 @@ RETURNS JSONB
 LANGUAGE plpgsql
 VOLATILE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 BEGIN
     -- First, verify that the current user has editor permissions for the specified occasion.

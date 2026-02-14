@@ -7,6 +7,7 @@ CREATE OR REPLACE FUNCTION select_spot(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     blueprint_id BIGINT;

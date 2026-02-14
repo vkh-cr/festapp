@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION create_user_in_organization_with_data_ws(org bigint, 
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     is_registration_enabled BOOLEAN;

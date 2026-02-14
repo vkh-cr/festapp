@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION public.add_transaction_to_payment_info_ws(
     p_payment_info_id bigint
 )
 RETURNS jsonb SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     bank_acc bigint;

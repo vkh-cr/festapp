@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION update_blueprint(input_data JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     blueprint_id BIGINT;

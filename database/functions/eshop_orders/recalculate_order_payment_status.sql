@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION public.recalculate_order_payment_status(p_order_id bigint)
 RETURNS void
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_payment_info_id bigint;

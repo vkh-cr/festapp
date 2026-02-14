@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION public.update_order_responses(
 RETURNS void
 SECURITY DEFINER
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_id BIGINT;

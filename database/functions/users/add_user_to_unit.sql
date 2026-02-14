@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION add_user_to_unit(
 ) RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     unit_org BIGINT;

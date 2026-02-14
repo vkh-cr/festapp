@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION public.process_occasion_auto_import(p_occasion_id bigint)
 RETURNS JSONB
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_features JSONB;

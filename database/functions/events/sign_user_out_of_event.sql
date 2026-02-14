@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION sign_user_out_of_event(ev BIGINT, usr UUID)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     event_end_time TIMESTAMP;

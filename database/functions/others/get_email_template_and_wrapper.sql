@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION public.get_email_template_and_wrapper(p_code text, p_context jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
   result jsonb;

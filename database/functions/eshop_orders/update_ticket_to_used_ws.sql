@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION update_ticket_to_used_ws(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     occasion_id bigint;

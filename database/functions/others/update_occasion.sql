@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
  RETURNS void
  LANGUAGE plpgsql
  SECURITY DEFINER
+SET search_path = public, extensions
  AS $$
  DECLARE
      updated_occ public.occasions;

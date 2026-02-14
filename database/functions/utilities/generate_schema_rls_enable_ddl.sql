@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION generate_schema_rls_enable_ddl(p_schema text)
-RETURNS text AS $$
+RETURNS text
+SET search_path = public, extensions AS $$
 WITH tables AS (
   SELECT n.nspname AS schemaname,
          c.relname AS tablename

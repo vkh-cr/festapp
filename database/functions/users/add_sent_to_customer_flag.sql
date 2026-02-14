@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION public.add_sent_to_customer_flag(history_id BIGINT)
 RETURNS void
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 BEGIN
   UPDATE eshop.orders_history

@@ -1,7 +1,8 @@
 CREATE OR REPLACE FUNCTION public.get_all_user_groups(p_occasion_id bigint, p_type text DEFAULT NULL)
 RETURNS jsonb
 LANGUAGE plpgsql
-SECURITY DEFINER AS $$
+SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
     groups_json jsonb;
     game_defs_json jsonb;

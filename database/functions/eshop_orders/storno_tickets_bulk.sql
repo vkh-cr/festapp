@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.storno_tickets_bulk(p_ticket_ids BIGINT[])
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_order_id BIGINT;

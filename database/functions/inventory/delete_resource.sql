@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.delete_resource(p_resource_id BIGINT)
-RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
   v_occasion_id BIGINT;
   v_inventory_pool_id BIGINT;

@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_all_users_from_unit(unit_id bigint)
 RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   user_basics jsonb;

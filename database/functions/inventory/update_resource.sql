@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.update_resource(p_input JSONB)
-RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
   v_resource_id BIGINT;
   v_occasion_id BIGINT;

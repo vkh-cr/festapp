@@ -1,7 +1,8 @@
 CREATE OR REPLACE FUNCTION delete_order_history(p_history_id bigint)
 RETURNS void
 SECURITY DEFINER
-LANGUAGE plpgsql AS $$
+LANGUAGE plpgsql
+SET search_path = public, extensions AS $$
 DECLARE
     v_occasion_id bigint;
     v_unit_id bigint;

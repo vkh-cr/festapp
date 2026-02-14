@@ -3,6 +3,7 @@ RETURNS JSONB
 LANGUAGE plpgsql
 STABLE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     autosave_record JSONB;

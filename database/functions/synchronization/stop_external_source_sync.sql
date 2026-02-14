@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION public.stop_external_source_sync(p_source_name TEXT)
 RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_job_name TEXT := 'sync_job_' || p_source_name;

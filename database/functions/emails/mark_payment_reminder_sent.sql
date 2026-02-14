@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION public.mark_payment_reminder_sent(p_payment_info_id BIGINT)
 RETURNS void
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 BEGIN
   -- This function updates the 'data' JSONB column in the eshop.payment_info table

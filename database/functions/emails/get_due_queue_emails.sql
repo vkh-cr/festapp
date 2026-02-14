@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.get_due_queue_emails()
-RETURNS jsonb AS $$
+RETURNS jsonb
+SET search_path = public, extensions AS $$
 DECLARE
   v_result JSONB;
 BEGIN
