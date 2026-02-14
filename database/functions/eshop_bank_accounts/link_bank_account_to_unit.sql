@@ -7,7 +7,7 @@ CREATE OR REPLACE FUNCTION public.link_bank_account_to_unit(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, eshop, extensions
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_conflict_data jsonb;

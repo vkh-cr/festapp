@@ -1,57 +1,36 @@
-# Eshop Feature
+# Eshop (Orders, Tickets, Payments)
 
-**Purpose**: Manages Orders, Tickets, Payments, and the checkout flow.
+## Split Brain: Dart Reads, SQL Writes (CRITICAL)
 
-## Core Models
+Dart is a thin RPC wrapper. ALL write logic lives in SQL. Do NOT replicate multi-step logic in Dart -- causes race conditions.
 
-- `OrderModel`: The central entity. Wraps customer info, price, and state.
-- `TicketModel`: Represents a sold item linked to a `Product`.
-- `OrderProductTicketModel`: The join table/entity linking Orders, Products, and
-  Tickets.
+## Atomic Order Changes (`confirm_blueprint_order_change`)
 
-## Split Brain Logic (CRITICAL)
+This SQL function handles the Old Order -> New Order atomic switch:
+1. `analyze_new_order_spots` checks if spots are occupied
+2. If occupied, cancels old tickets (`storno_tickets_bulk`)
+3. Clears secrets, prepares new order JSON
+4. Dart takes output and sends to `send-ticket-order` Edge Function
 
-**Warning**: Dart code handles the _view_ and _fetching_, but **write logic** is
-often in SQL.
+**Warning**: If modifying the "Claim" button, check this SQL path.
 
-### 1. Order Creation & Storno (`confirm_blueprint_order_change`)
+## Gotchas
 
-This SQL function (scripts/functions/eshop/confirm_blueprint_order_change.sql)
-is the "heavy lifter" for modifying orders or creating new ones from blueprint
-selections.
+- **Stringly Typed**: `OrderModel` fields mapped from `Tb` class strings. Renames break silently.
+- **3-Layer Architecture**:
 
-- **Scenario**: User selects new seats and "Claims" them, potentially
-  effectively cancelling (Storno) old tickets if this is a modification.
-- **Logic**:
-  1. **Analyze**: Calls `analyze_new_order_spots` to see if spots are occupied.
-  2. **Storno**: If occupied, it **cancels the old tickets**
-     (`storno_tickets_bulk`).
-  3. **Unlock**: Clears secrets on spots.
-  4. **Prepare**: Finds an open form and constructs a JSON payload for the _new_
-     order.
-  5. **Output**: Returns `orderDetails` JSON.
-- **Next Step**: Dart code takes this `orderDetails` and sends it to the **Edge
-  Function** (`send-ticket-order`), which actually creates the new order record.
-- **Risk**: If you modify the Dart "Claim" button, you MUST check this SQL. It
-  handles the _atomic_ switch from Old Order -> New Order.
+```mermaid
+graph LR
+    A[Dart / JS<br/>DbOrders] -->|RPC| B[PostgreSQL<br/>SQL Functions]
+    B -->|invoke| C[Edge Functions<br/>email · Stripe · Comgate]
+```
+- **Storno RPC**: `update_order_and_tickets_to_storno_ws_221` -- the `_ws_221` suffix is not a typo
 
-### 2. State Managment
+## SQL RPCs
 
-- **Paid**: `update_order_and_tickets_to_paid` (SQL).
-- **Scanning**: `scan_ticket` (SQL) handles validation and strict state
-  transitions (e.g., checking entrance limits).
-
-## Database Layers
-
-1. **Dart (`DbOrders`)**: Thin wrapper. mostly calls RPCs.
-2. **Supabase (`scripts/functions`)**: The actual business logic.
-3. **Edge Functions**: Used for emailing and complex integrations (like
-   Stripe/Comgate).
-
-## Critical Implementation Details
-
-- **Transactions**: We rely on Postgres functions to ensure atomicity. Do not
-  try to replicate "multi-step" logic (e.g., "delete old, create new") in Dart
-  client-side code. It will cause race conditions.
-- **Stringly Typed**: `OrderModel` fields are often mapped manually from `Tb`
-  class strings. Be careful with renames.
+- `select_spot` -- temporary spot lock with secret + expiration
+- `confirm_blueprint_order_change` -- atomic seat reassignment with storno
+- `update_order_and_tickets_to_paid_ws` -- marks order + tickets paid
+- `update_order_and_tickets_to_storno_ws_221` -- cancels order + tickets
+- `scan_ticket` -- validates + processes ticket scanning (enforces entrance limits)
+- `get_report_ws` -- financial report for an occasion

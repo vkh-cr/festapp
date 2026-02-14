@@ -48,11 +48,11 @@ BEGIN
 
     -- 1. Try to find occasion via form_link
     IF form_link IS NOT NULL AND form_link <> '' THEN
-        SELECT forms.occasion, occasions.link
+        SELECT f.occasion, o.link
           INTO occasionId, occasion_link
-        FROM forms
-        JOIN occasions ON forms.occasion = occasions.id
-        WHERE forms.link = form_link
+        FROM public.forms f
+        JOIN public.occasions o ON f.occasion = o.id
+        WHERE f.link = form_link
           AND occasions.organization = org_id;
     END IF;
 

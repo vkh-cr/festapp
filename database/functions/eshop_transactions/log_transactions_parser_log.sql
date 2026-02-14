@@ -7,7 +7,7 @@ CREATE OR REPLACE FUNCTION public.log_transactions_parser_log(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, eshop, extensions
+SET search_path = public, extensions
 AS $$
 BEGIN
     INSERT INTO eshop.transactions_parser_log (bank_account_id, external_id, raw_email, error_message, created_at)

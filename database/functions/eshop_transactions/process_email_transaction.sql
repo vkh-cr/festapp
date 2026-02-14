@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION public.process_email_transaction(
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, eshop, extensions
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_bank_account_id bigint;

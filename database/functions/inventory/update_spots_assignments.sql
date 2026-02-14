@@ -3,6 +3,8 @@
 CREATE OR REPLACE FUNCTION update_spot_assignments(p_changes jsonb)
 RETURNS void
 SECURITY DEFINER
+LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_change jsonb;

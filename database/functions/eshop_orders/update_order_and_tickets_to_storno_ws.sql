@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION update_order_and_tickets_to_storno_ws_221(order_id bi
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     occasion_id bigint;

@@ -1,193 +1,63 @@
-# AI Context & Documentation
+# AI Context — Festapp
 
-This document is designed to help AI assistants understand the **Festapp**
-codebase structure, architecture, and common development patterns.
+Festapp is an event management platform: Flutter (mobile+web) + Supabase (PostgreSQL, Edge Functions, Auth) + vanilla JS web client for public forms/eshop.
 
-## Project Overview
+## Critical: Split Brain Logic
 
-Festapp is a customized event management application built with:
+Business logic is split between **SQL functions** (`database/functions/`) and Dart/JS. Before modifying any data flow, check if the logic lives in SQL.
 
-- **Frontend**: Flutter (Mobile & Web)
-- **Backend**: Supabase (PostgreSQL, Edge Functions, Auth)
-- **Database Logic**: Heavy usage of SQL functions defined in
-  `database/functions`.
+- Search for `supabase.rpc('...')` in Dart/JS to find which SQL function handles the operation
+- **In SQL**: Order creation, permissions, payments, ticket scanning, sign-ups, inventory
+- **In Dart/JS**: UI, navigation, file operations (image upload/copy)
+- **Hybrid**: Occasion duplication/deletion — SQL copies DB rows, Dart copies images from Storage
 
-## Data Hierarchy (Mental Model)
+Key SQL directories: `eshop_orders/` (orders), `eshop_forms/` (form→order), `user_permissions/` (RBAC), `events/` (schedule), `inventory/` (capacity).
 
-Understanding this hierarchy is crucial for navigating the codebase:
+## Critical: Security Rules
 
-1. **Organization**: Domain Level (e.g. `vstupenky.online`). Distinct from
-   specific non-profits or units.
+All functions MUST be created in the `public` schema. Never create functions in other schemas.
 
-2. **Unit**: The **Real-world Organization** (e.g. "Youth Group"). Named "Unit"
-   because "Organization" was reserved for the domain level.
-3. **Occasion**: A specific event instance (e.g., "Summer Camp 2024").
-   - Occasions belong to Units.
+Every `SECURITY DEFINER` function MUST:
+1. Set `search_path = public, extensions` — always use explicit `eshop.tablename` for eshop schema tables, never rely on search_path to resolve them
+2. Check permissions explicitly (`check_is_editor_order_on_occasion`, `check_is_manager_on_unit`, etc.)
+3. Use parameterized queries, never `EXECUTE` with raw strings
 
-- Features (Map, Schedule) are configured per Occasion.
+Permission patterns: `check_is_*` raises exception (for writes), `get_is_*` returns boolean (for reads).
+
+## Data Hierarchy
+
+Organization (tenant/domain) > Unit (real-world org) > Occasion (event instance). Features configured per Occasion. "Unit" is used because "Organization" was reserved for the domain level.
+
+## Code Patterns
+
+- **FVM**: Always prefix flutter/dart commands with `fvm`
+- **Error handling**: Prefer `ExceptionHandler.guard()` over try-catch in UI code
+- **Localization**: `*_strings.dart` files with static getters (`CommonStrings.save`) not `"key".tr()`
+- **Routing**: `auto_route`, `app_router.gr.dart` is generated — don't edit
+- **Permissions**: Check `RightsService` before showing admin/editor UI
+- **No `dart:io`** in shared UI code (breaks web). Exception: `map/` uses it for platform-specific offline maps
+- **Config**: `automation/project.conf` → `apply_config.sh` propagates to all targets
+- **Web client**: Page components extend `base/component.js` with `init()`/`render()`/`clear()` lifecycle; smaller widgets (dialogs, fabs) don't
 
 ## Directory Structure
 
-### `/lib` (Flutter App)
+- `lib/components/[feature]/` — Feature-oriented Flutter (views/, models/, sub-features)
+- `lib/data_services/` — DB interaction. Key singletons: `RightsService` (context + permissions), `OfflineDataService` (cache), `SynchroService` (sync)
+- `database/functions/` — SQL functions organized by domain. `database/tests/` for SQL tests (auto-rollback)
+- `supabase/functions/` — Deno Edge Functions (email, tickets, payments). See `docs/backend/edge_functions.md`
+- `web_client/src/` — Vanilla JS (Vite). Components + services (supabase, router, auth, theme, i18n)
+- `automation/` — `project.conf` (single source of truth), `apply_config.sh`, `test_all.sh`
 
-The main application code.
+## Feature READMEs (Complex Components Only)
 
-- `main.dart`: Entry point. Initializes Supabase, Services, and Localization.
-- `app_router.dart`: Routing configuration using `auto_route`.
-- `app_config.dart` & `theme_config.dart`: App-wide configuration and theming.
-- `components/`: **Core of the Application**. Contains Feature folders.
-  - `[feature_name]/`: Groups UI, Views, and Logic for a feature (e.g., `eshop`,
-    `inventory`, `blueprint`).
-  - `features/`: Logic definitions for abstract features (feature
-    flags/configuration).
-  - `forms/`: Dynamic form builder and rendering.
-- `services/`: Helper classes (Time, Toast, Notification, Mailer).
-- `data_services/`: Database interaction and "Business Logic" for data.
-  - `RightsService`: **CRITICAL**. Handles current user permissions, current
-    occasion/unit context.
-  - `OfflineDataService`: Handles local caching logic.
-  - `SynchroService`: Syncs data between local and remote.
+These components have non-obvious architecture worth reading before modifying:
 
-### `/database` (Database Logic)
-
-Contains SQL scripts that define the database schema and business logic. **This
-is where most "backend" logic lives.**
-
-- `functions/`: SQL functions (Stored Procedures). Organized by domain.
-  - `eshop_orders/`: Logic for creating and managing orders.
-  - `users/`: User management logic.
-  - `user_permissions/`: RBAC logic.
-- `migrations/`: Database schema changes.
-
-### `/supabase` (Edge Functions)
-
-Supabase configuration and TypeScript Edge Functions.
-
-- `functions/`: TypeScript code for server-side logic that requires external
-  APIs or complex processing not suitable for SQL.
-
-## Key Patterns & Architecture
-
-### 1. Navigation (AutoRoute)
-
-- We use `auto_route` for navigation.
-- Routes are defined in `app_router.dart`.
-- `app_router.gr.dart` is generated. **Do not edit manually.**
-- Navigation often depends on `RightsService.currentLink` or `currentUnit` to
-  construct URLs (e.g., `/:occasionLink/...`).
-
-### 2. Localization (EasyLocalization)
-
-- We use `easy_localization`.
-- Translations are in `assets/translations/`.
-- **Preferred Pattern**: Use `*Strings.dart` files (e.g., `CommonStrings`,
-  `FormStrings`) to define static getters for translation keys.
-- Usage: `CommonStrings.save` instead of `"Save".tr()`.
-- Old way (avoid if possible): `"StringKey".tr()`.
-
-### 3. Permissions & Context
-
-- `RightsService` is the central singleton for checking what the user can do.
-- It determines the "Current Occasion" or "Current Unit".
-
-## Feature Documentation (See Local READMEs)
-
-For detailed instructions on specific features, refer to their local
-documentation:
-
-- **[Blueprint](lib/components/blueprint/README.md)**: Visual seat reservation &
-  editor.
-- **[Forms](lib/components/forms/README.md)**: Dynamic form engine.
-- **[Eshop](lib/components/eshop/README.md)**: Orders, payments, and "Split
-  Brain" SQL logic.
-- **[Inventory](lib/components/inventory/README.md)**: Capacity pools and
-  contexts.
-- **[Users](lib/components/users/README.md)**: Multi-tenancy and User/Occasion
-  linking.
-- **[Activities](lib/components/activities/README.md)**: **Volunteer
-  Management**. Staff tasks, shifts, and assignments (NOT the public program).
-- **[Occasion](lib/components/occasion/README.md)**: Core Event definition,
-  duplication, and settings.
-- **[Schedule](lib/components/schedule/README.md)**: **Public Program**. Events,
-  workshops, sign-ups, and offline sync.
-- **[Groups](lib/components/groups/README.md)**: User grouping and specialized
-  Game Team logic.
-- **[Features](lib/components/features/README.md)**: Configuration
-  system/Feature flags (configured per Occasion).
-- **[Information](lib/components/information/README.md)**: CMS pages, Game
-  logic, and Songbook (lyrics/chords).
-- **[Map](lib/components/map/README.md)**: Dual-mode rendering (Online/Offline
-  MBTiles) and Path Groups.
-- **[News](lib/components/news/README.md)**: Announcements and Notification
-  integration.
-- **[Email Templates](lib/components/email_templates/README.md)**: Template
-  management and Edge Function delivery.
-- **[Bank Accounts](lib/components/bank_accounts/README.md)**: Management of
-  bank accounts and payment pairing configuration.
-- **[Unit](lib/components/unit/README.md)**: Organization configuration (payment
-  methods, colors) and branding.
-- **[Organization](lib/components/organization/README.md)**: Domain-level
-  settings and admin management.
-- **[Feedback](lib/components/feedback/README.md)**: User feedback collection.
-- **[App Management](lib/components/app_management/README.md)**: Global app
-  settings (versions, maintenance mode).
-
-### 4. Supabase Interactions
-
-- **Data Fetching**: Often done via `Supabase.instance.client` in
-  `data_services`.
-- **Complex Logic**: Often wrapped in Postgres Functions (RPC calls) rather than
-  raw CRUD from the client, especially for critical flows like Order Creation.
-  Look in `database/functions` for the implementation of these RPCs.
-
-### 5. Error Handling (`ExceptionHandler`)
-
-- **Pattern**: Use `ExceptionHandler.guard()` instead of `try-catch` blocks in
-  UI code.
-- **Behavior**: Automatically catches errors, parses Supabase/Postgrest
-  exceptions, and shows a user-friendly Dialog or Toast.
-
-## Context
-
-**Context**: This document is a technical companion to the main
-**[README.md](README.md)**. While the main README covers features and setup,
-this file explains the _internal architecture_ for developers and AI assistants.
-
----
-
-## Critical Implementation Details
-
-- **Database Changes**: If you change logical flows (like ordering or
-  permissions), check if a SQL function in `database/` needs updating.
-- **Generated Code**: Run
-  `fvm dart run build_runner build --delete-conflicting-outputs` after changing
-  Refit services, JSON models, or AutoRoute definitions.
-- **FVM**: The project uses **FVM** (Flutter Version Management). Always prefix
-  flutter/dart commands with `fvm` (e.g., `fvm flutter run`, `fvm dart run`).
-- **Web Support**: The app runs on Web. Be mindful of web-specific constraints
-  or imports (avoid `dart:io` in shared UI code).
-- **Split Brain Logic**: A lot of business logic (e.g.,
-  `confirm_blueprint_order_change`) lives in **SQL Functions**
-  (`database/functions/`).
-  - **Risk**: AI might modify Dart logic without realizing the "real work" is
-    happening in a stored procedure it didn't check.
-  - **Mitigation**: Always check `database/functions/` when modifying data
-    flows.
-
-## Recommended Architecture (Existing Pattern)
-
-The project follows a **Feature-Oriented** structure within `lib/components/`.
-
-- **Directory**: `lib/components/[feature_name]/`
-- **Goal**: Keep related UI, Models, and Views together.
-- **Structure**:
-  ```
-  lib/components/my_feature/
-  ├── views/            # Full screen pages and other ui views
-  ├── models/           # Data models specific to this feature (if not shared)
-  └── sub_feature/      # Nested sub-feature with its own structure
-  ```
-- **Action for AI**: When adding or modifying features, respect this
-  encapsulation. Look for existing features in `lib/components/` before creating
-  global pages. Avoid creating generic `widgets/` folders unless absolutely
-  necessary; prefer `views/` or sub-features.
+- **[Eshop](../../lib/components/eshop/README.md)**: Orders, payments, Split Brain SQL
+- **[Blueprint](../../lib/components/blueprint/README.md)**: Seat reservation with SQL locking
+- **[Forms](../../lib/components/forms/README.md)**: Dynamic form engine, massive data bundles
+- **[Schedule](../../lib/components/schedule/README.md)**: Sign-ups with SQL error codes, offline sync
+- **[Users](../../lib/components/users/README.md)**: Bundle re-stitching, multi-tenancy
+- **[Inventory](../../lib/components/inventory/README.md)**: Pool/Resource/Context hierarchy
+- **[Activities](../../lib/components/activities/README.md)**: Draft & Publish with version history
+- **[Email Templates](../../lib/components/email_templates/README.md)**: 3-level inheritance
+- **[Bank Accounts](../../lib/components/bank_accounts/README.md)**: Dual-layer auth, eshop schema

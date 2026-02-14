@@ -3,6 +3,17 @@
 The following skills have been selected for this project. Agents should verify
 their actions against these guidelines.
 
+## Essential Reading
+
+Before using skills, review:
+
+- **[docs/architecture/ai_context.md](../docs/architecture/ai_context.md)** -
+  Architecture, directory structure, Split Brain Logic
+- **[docs/architecture/SERVICES.md](../docs/architecture/SERVICES.md)** -
+  Critical data services (RightsService, OfflineDataService)
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Testing, security checklist,
+  commit workflow
+
 ## Core Standards
 
 - **[Clean Code](skills/skills/clean-code/SKILL.md)** _Focus: Pragmatic

@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION public.regenerate_bank_account_pairing_code(p_account
 RETURNS text
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, eshop, extensions
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_new_code text;

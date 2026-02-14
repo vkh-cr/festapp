@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION delete_order_221(order_id BIGINT)
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   payment_info_id BIGINT;

@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION get_tickets_with_details(order_id BIGINT)
 RETURNS JSONB
 LANGUAGE plpgsql
-SET search_path = eshop, public, extensions
+SET search_path = public, extensions
 AS $$
 DECLARE
     tickets JSONB;

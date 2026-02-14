@@ -1,37 +1,30 @@
-# Inventory Feature
+# Inventory (Capacity & Stock Management)
 
-**Purpose**: Capacity and stock management for Resources (Accommodations,
-Goods).
+## Concept Hierarchy (Non-Obvious)
 
-## Concept Hierarchy
+Products link to **Contexts**, NOT directly to Pools.
 
-1. **Inventory Pool**: A category of generic resources (e.g., "Tent Spot").
-   - _Capacity_: Defined by `Resources`.
-2. **Resource**: A distinct physical/logical unit (e.g., "Tent Area A").
-   - _Slots_: `ResourceSlots` define specific units inside a resource (e.g.,
-     "Bed 1").
-3. **Inventory Context**: A specific instance/time-slice of a pool (e.g., "Tent
-   Spot - Friday Night").
-   - _Link_: Connects an `InventoryPool` to a `Product`.
-4. **Product**: The sellable item in the Eshop.
+```mermaid
+graph TD
+    Pool["Pool<br/>(e.g. Tent Spots)"] --> Resource["Resource<br/>(e.g. Tent Area A)"]
+    Resource --> Slot["ResourceSlot<br/>(e.g. Bed 1)"]
+    Pool --> Context["Context<br/>(e.g. Friday Night)"]
+    Context --> Product["Product<br/>(e.g. Tent Spot - Friday Night)"]
+```
 
-## Data Flow: The "Pool Bundle"
+This indirection allows one pool to serve multiple products/time-slots.
 
-The entire inventory state for a pool is fetched in one massive SQL call to
-minimize round-trips.
+## Bundle Pattern
 
-- **RPC**: `get_inventory_pool_bundle`
-  (`scripts/functions/inventory/get_inventory_pool_bundle.sql`)
-- **Returns**:
-  - `pool`: The metadata.
-  - `resources` (with nested `slots`): The physical capacity.
-  - `contexts`: The logical time-slices.
-  - **`products`**: All products linked to these contexts (Recent Addition).
-  - `product_inventory_contexts`: The join table logic.
+Entire inventory state fetched AND saved in one SQL call. Do NOT add separate Dart fetches -- extend `get_inventory_pool_bundle` SQL instead.
 
-## Critical Implementation Details
+Save is also atomic: `update_inventory_pool_bundle` receives the entire bundle as JSON.
 
-- **Linking**: Products are linked to _Contexts_, not directly to Pools. This
-  allows "One Pool (Capacity)" to serve "Multiple Products (Time/Variations)".
-- **Aggregation**: If you need to add data to the inventory screen, add it to
-  the `get_inventory_pool_bundle` SQL function, not a separate Dart fetch.
+## SQL RPCs
+
+- `get_inventory_pool_bundle` -- complete pool with resources, slots, contexts, products
+- `get_inventory_pools_by_occasion_link` -- lists all pools for an occasion
+- `update_inventory_pool_bundle` -- saves entire pool bundle in one transaction
+- `get_spot_management_bundle` -- spots with related data for admin assignment
+- `update_spot_assignments` -- batch-updates spot assignments
+- `get_user_inventory` -- current user's accommodation/resource assignments

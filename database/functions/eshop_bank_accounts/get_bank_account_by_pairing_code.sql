@@ -6,7 +6,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, eshop, extensions
+SET search_path = public, extensions
 AS $$
 BEGIN
     RETURN QUERY

@@ -1,67 +1,38 @@
 # Shared Functions (`_shared`)
 
-This directory contains utility modules and shared code used across multiple
-Supabase Edge Functions.
+Utility modules shared across Supabase Edge Functions.
 
 ## Modules
 
 ### `auth.ts`
-
-Handles request authorization.
-
-- `authorizeRequest`: Verifies request validity using either a shared secret
-  (system/admin access) or a user's authorization header + editor role check.
-- `AuthError`: Custom error class for auth failures.
+Request authorization via shared secret (system/admin) or user token + editor role check. Exports `authorizeRequest` and `AuthError`.
 
 ### `emailClient.ts`
-
-Provides email sending capabilities using `nodemailer`.
-
-- `sendEmail`: Sends a raw email.
-- `sendEmailWithSubs`: Sends an email by replacing placeholders in the subject
-  and content with provided substitutions. Also supports wrapping content in a
-  "wrapper" (e.g. for banners).
+Email delivery via `nodemailer`. `sendEmail` for raw sends; `sendEmailWithSubs` for template placeholder substitution with optional wrapper.
 
 ### `supabaseUtil.ts`
-
-Supabase-specific helpers.
-
-- `supabaseAdmin`: A Supabase client instance with `service_role` key for
-  administrative operations.
-- `getSupabaseUser`: Retrieves the user object from an auth token.
-- `isUserEditorOrder`: Checks if a user has editor permissions for a specific
-  occasion.
-- `getEmailTemplateAndWrapper`: Fetches the correct email template and wrapper
-  based on the inheritance hierarchy (Occasion > Unit > Organization).
-
-### `translations/`
-
-Contains localized strings for emails and other backend-generated content.
-
-- `translations.ts`: Aggregates all language files.
-- `translations.cs.ts`, `translations.en.ts`: Language-specific definitions.
-- `payment-details.helpers.ts`: Helpers for formatting payment information
-  tables and other common UI elements.
+`supabaseAdmin` (service-role client), `createUserClient` (RLS-scoped client from a Bearer token), `getSupabaseUser`, `isUserEditor`, `isUserEditorOrder`, `getEmailTemplateAndWrapper` (resolves templates via Occasion > Unit > Organization hierarchy).
 
 ### `utilities.ts`
-
-General utility functions.
-
-- `formatCurrency`: Formats numbers as currency strings.
-- `formatIBAN`: Formats IBAN strings for better readability.
+`formatCurrency`, `formatDatetime`, `formatIBAN` -- number/string/date formatting helpers.
 
 ### `orderOverview.ts`
-
-Helpers for generating order summaries (e.g. for confirmation emails).
-
-- `generateFullOrder`: Creates an HTML summary of ordered items.
+`generateFullOrder` -- HTML summary of ordered items for confirmation emails.
 
 ### `qrCodePayment.ts`
-
-- `generateQrCode`: Generates a SPAYD (Short Payment Descriptor) QR code for
-  Czech bank payments.
+`generateQrCode` -- SPAYD QR codes for Czech bank payments.
 
 ### `changeOverview.ts`
+Order change diff/summary helpers (used in `TICKET_ORDER_UPDATE` emails).
 
-Helpers for generating diffs or summaries of changes in an order (used in
-`TICKET_ORDER_UPDATE`).
+### `generateTicket.ts`
+Standard PDF ticket generation using `pdf-lib`, `fontkit`, and `qrcode`. Exports `fetchTicketResources` (downloads background, font, and product data) and `generateTicketImage` (renders the PDF).
+
+### `generateNamedTicket.ts`
+Personalized/named PDF ticket generation using `pdf-lib`, `fontkit`, and `qrcode`. Exports `fetchNamedTicketResources` (downloads occasion logo, font) and `generateNamedTicketImage` (renders a mobile-sized ticket with attendee name, event details, and QR code).
+
+### `translatePlatformLinks.ts`
+Converts `{platform, link}` objects to localized HTML anchors for emails (Czech/English).
+
+### `translations/`
+Localized strings for backend-generated content. Contains `translations.ts` (aggregator that re-exports all), `translations.cs.ts` (Czech), `translations.en.ts` (English), and `payment-details.helpers.ts` (shared HTML builders for payment detail blocks, spacing, and bold helpers).

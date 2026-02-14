@@ -23,7 +23,7 @@ It explains:
 
 When writing PostgreSQL functions (`database/functions/`):
 
-1. **Search Path**: ALWAYS use `SET search_path = public, eshop, extensions`.
+1. **Search Path**: All functions live in `public` schema. Always set `search_path = public, extensions`. Use explicit `eshop.tablename` for eshop schema tables — never rely on search_path to resolve them.
 2. **Permissions**: ALWAYS check permissions (e.g. `check_is_admin...`).
 3. **References**: Do not assume RLS protects `SECURITY DEFINER` functions.
 

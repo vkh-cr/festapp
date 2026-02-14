@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION check_access_to_occasion(oc bigint)
 RETURNS void
 SECURITY DEFINER
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     exists_on_occasion boolean;

@@ -18,7 +18,8 @@ git clone https://github.com/sickn33/antigravity-awesome-skills.git .agent/skill
 
 ### A. The "One-Click" Way (Recommended)
 
-Runs both Web Client (JavaScript) and Database (SQL) tests.
+Runs all project tests: Web Client (JavaScript), Database (SQL), Flutter,
+Deno Edge Functions, and Integration tests.
 
 ```bash
 ./automation/test_all.sh
@@ -88,7 +89,7 @@ To update Edge Functions (TypeScript) remotely:
 ## 2. Secrets & Configuration
 
 - **Local**: Keys in `.env.local` (NOT committed). This file is automatically
-  loaded by local scripts and Next.js. **Put all secrets here.**
+  loaded by local scripts and Vite. **Put all secrets here.**
 - **Web Client**: Public keys in `web_client/src/app_config.js`.
 - **Database**: `DATABASE_URL` required for test runner.
 
@@ -182,3 +183,105 @@ git add .
 # User must approve the following:
 git commit -m "feat: description of changes"
 ```
+
+## 5. Web Client Development
+
+The `web_client/` directory contains a standalone vanilla JavaScript application
+for public-facing features (forms, blueprints, e-shop). It is separate from the
+Flutter app but shares the same Supabase backend.
+
+### Setup
+
+```bash
+cd web_client
+npm install
+npm run dev    # Vite dev server
+npm test       # Node.js native test runner
+```
+
+### Component Pattern
+
+All components extend a base class (`src/components/base/component.js`) with a
+standard lifecycle:
+
+- `init()` - Initialize state and fetch data
+- `render()` - Build DOM elements
+- `clear()` - Cleanup listeners and DOM
+
+### Key Directories
+
+- `src/components/` - UI components (forms, blueprint, eshop, feedback, etc.)
+- `src/services/` - Singleton services (supabase, router, auth, theme, localization, rights, seo, time)
+- `scripts/` - Build tools (version sync, DB test runner, translation scripts)
+- `tests/` - Test files organized by area (components, core, forms, logic, issues)
+
+### Relationship to Flutter App
+
+- Both apps share the same Supabase backend (same PostgreSQL functions/RPC)
+- Configuration is shared via `automation/project.conf` (propagated by
+  `apply_config.sh` to both `lib/app_config.dart` and
+  `web_client/src/app_config.js`)
+- Translation keys should be kept in sync using `unify_translations.js`
+
+## 6. Edge Function Development
+
+Edge Functions live in `supabase/functions/` and are written in TypeScript for
+the Deno runtime.
+
+### Local Development
+
+```bash
+# Serve locally
+supabase functions serve <function-name> --env-file .env.local
+
+# Deploy
+supabase functions deploy <function-name>
+```
+
+### Shared Utilities
+
+Common code lives in `supabase/functions/_shared/`:
+
+- `supabaseUtil.ts` - Admin client, template fetching
+- `emailClient.ts` - Email sending (SMTP via nodemailer)
+- `auth.ts` - Request authorization (`authorizeRequest`)
+- `utilities.ts` - General helpers
+
+### Testing
+
+Edge Functions are tested as part of the full test suite
+(`./automation/test_all.sh`). For manual testing, use `curl` or the Supabase
+Dashboard.
+
+## 7. Code Review Checklist
+
+Before submitting code for review, verify:
+
+### Dart / Flutter
+
+- [ ] No `print()` statements in production code (use proper logging)
+- [ ] No hardcoded strings in UI (use `*_strings.dart` localization pattern)
+- [ ] `ExceptionHandler.guard()` used instead of raw `try-catch` in UI code
+- [ ] `RightsService` checked before displaying admin/editor features
+- [ ] No `dart:io` imports in shared UI code (breaks web)
+
+### SQL / PostgreSQL
+
+- [ ] `SECURITY DEFINER` functions have `SET search_path = public, ...`
+- [ ] Permission checks present (e.g., `check_is_editor_order_on_occasion`, `check_is_manager_on_unit`)
+- [ ] No `EXECUTE` with raw string concatenation (use `format()`)
+- [ ] Function follows `verb_noun` naming convention
+- [ ] Corresponding test in `database/tests/`
+
+### Web Client
+
+- [ ] No `console.log` in production code
+- [ ] Event listeners cleaned up in `clear()` method
+- [ ] Supabase calls use service layer (not direct client access)
+
+### Edge Functions
+
+- [ ] CORS headers present on all responses
+- [ ] Auth check via `authorizeRequest()` for sensitive operations
+- [ ] Error responses include proper HTTP status codes
+- [ ] Shared code imported from `_shared/` (no duplication)

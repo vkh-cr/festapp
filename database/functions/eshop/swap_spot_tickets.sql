@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION public._swap_spots_generate_product_json(
 RETURNS JSONB
 LANGUAGE plpgsql
 STABLE
-SET search_path = eshop, public, extensions
+SET search_path = public, extensions
 AS $$
 DECLARE
     product_data RECORD;
@@ -59,6 +59,7 @@ CREATE OR REPLACE FUNCTION public._swap_spots_update_ticket(
 )
 RETURNS VOID
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     opt RECORD;
@@ -181,6 +182,7 @@ CREATE OR REPLACE FUNCTION public.swap_spot_tickets(spot_id_1 BIGINT, spot_id_2 
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     spot1 RECORD;

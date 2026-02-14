@@ -1,60 +1,46 @@
-# Blueprint Feature
+# Blueprint (Visual Seat Selection)
 
-**Purpose**: Provides a visual interface for seat selection and reservation in
-the Eshop.
+Visual seat selection/reservation interface for the Eshop.
 
-## Key Components
+## Split Brain: Dart UI vs SQL Authority (CRITICAL)
 
-### 1. Visualizer (`BlueprintPage`)
+Selection state is managed optimistically in Dart but authoritatively in SQL.
 
-- **Location**: `lib/components/blueprint/ui/blueprint_page.dart`
-- **Function**: Renders the SVG map or seat grid.
-- **Interaction**: Handles zooming, panning, and tapping on seats.
-- **Performance**: Uses `BlueprintPainter` (CustomPainter) for high-performance
-  rendering of thousands of seats.
+- Dart updates UI color immediately on tap.
+- `select_spot` RPC does the real work:
+  1. Validates Blueprint/Form exists
+  2. Checks availability (`order_product_ticket IS NULL`)
+  3. On select: sets `secret` + `secret_expiration_time` (temporary lock)
+  4. On deselect: verifies secret matches before clearing
 
-### 2. Data Model (`BlueprintModel`)
+**If RPC fails (spot taken by another user), UI must roll back** -- handled in `_handleSeatTap`.
 
-- **Location**: `lib/components/blueprint/blueprint_model.dart`
-- **Source**: Parsed from a complex JSON structure (Objects, Groups, Spots).
-- **Key Methods**:
-  - `findObject`: Locates an object by ID.
-  - Complex logic for parsing seat coordinates and linking them to "Product"
-    IDs.
+## Gotchas
 
-### 3. Seat Selection Logic ("Split Brain")
+- **SVG Coordinates**: Do not change `BlueprintModel` parsing without verifying the SVG export format. Coordinate mapping is fragile.
+- **Spot -> Product linking**: `BlueprintModel.findObject` locates objects by ID; complex logic links seat coordinates to Product IDs.
 
-**CRITICAL**: The selection state is managed _optimistically_ in Dart but
-_authoritatively_ in SQL.
+## Data Flow
 
-- **Dart Side**: `SeatReservationWidget` (and checking `SeatState`).
-- **SQL Side**: `select_spot` (RPC: `select_spot`)
-  - **File**: `scripts/functions/eshop/select_spot.sql`
-  - **Logic**:
-    1. **Validation**: Checks if Blueprint/Form exists.
-    2. **Availability**: Checks `order_product_ticket IS NULL` (not already
-       sold).
-    3. **Locking**: If selecting, sets `secret` and `secret_expiration_time`
-       (+15 mins).
-    4. **Unlocking**: If deselecting, **verifies the secret matches** before
-       clearing.
-  - **Note**: This function handles the "temporary hold" logic entirely. Dart
-    just updates the UI color.
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant D as Dart UI
+    participant SQL as PostgreSQL
+    participant EF as Edge Function
 
-## Data Flow & RPCs
+    U->>D: Tap seat
+    D->>D: Optimistic UI update (color)
+    D->>SQL: select_spot RPC
+    SQL-->>SQL: Check availability + set secret + expiration
+    SQL-->>D: OK / Error (roll back UI)
+    U->>D: Submit order
+    D->>EF: send-ticket-order (spots + payload)
+    EF->>SQL: Create order + tickets
+    EF-->>D: Confirmation
+```
 
-1. **Initialization**: `BlueprintModel` loaded via `get_form_by_link` (see
-   Forms).
-2. **Selection**:
-   `DbOrders.selectSpot(context, formDataKey, secret, spotID, isSelect)` calls
-   `select_spot`.
-3. **Order Creation**: See [Eshop README](../eshop/README.md) for how selected
-   spots are converted to orders.
+## SQL RPCs
 
-## Critical Implementation Details
-
-- **SVG & Coordinates**: The blueprint system relies on coordinate mapping. Do
-  not change `BlueprintModel` parsing logic without verifying the SVG export
-  format.
-- **Optimistic UI**: The UI assumes the selection will succeed. If the RPC fails
-  (e.g., spot taken), the UI must be rolled back (handled in `_handleSeatTap`).
+- `select_spot` -- locks/unlocks seat with secret and expiration
+- `confirm_blueprint_order_change` -- atomic seat reassignment with storno of old tickets

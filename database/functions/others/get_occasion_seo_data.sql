@@ -13,7 +13,7 @@ DECLARE
 BEGIN
     -- 1. Try to find occasion via Form Link
     SELECT occasion, header INTO v_occasion_id, v_form_header
-    FROM forms
+    FROM public.forms
     WHERE link = p_link_slug
     LIMIT 1;
 

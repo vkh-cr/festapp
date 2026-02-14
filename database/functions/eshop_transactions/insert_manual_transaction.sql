@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION public.insert_manual_transaction(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, eshop, extensions
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_account_id int;

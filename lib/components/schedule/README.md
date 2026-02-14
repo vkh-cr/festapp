@@ -1,58 +1,36 @@
-# Schedule Component (Public Program)
+# Schedule (Public Program)
 
-**Purpose**: The core **Festival Program** viewed by attendees. Handles events,
-workshops, concerts, and user sign-ups. **Distinction**: This is NOT for
-volunteer tasks (see `lib/components/activities`).
+Attendee-facing festival program. NOT volunteer tasks (that's `lib/components/activities/`).
 
-## Core Concepts
+- **Activities** writes to `activities` table (admin editor)
+- **Schedule** reads from `events` table (populated/synced from activities)
 
-display, signing in/out, and offline synchronization.
+## Sign In/Out Error Codes (CRITICAL)
 
-## Vs. Activities Component
+`sign_user_to_event` RPC enforces all business rules server-side. Error codes:
+- `100` = event over
+- `101` = full
+- `102` = exclusive event already taken
+- `103` = already signed in
+- `104` = too early
+- `105`/`106` = gender limits reached (male/female)
+- `107` = conflicting event schedule
+- `108` = workshop registration not enabled
 
-- **Activities (`lib/components/activities`)**: The "Editor" side. Used by
-  admins to _plan_ the schedule. Writes to `activities` table.
-- **Schedule (`lib/components/schedule`)**: The "Client" side. Used by attendees
-  to _view_ the program. Reads from `events` table (which is populated/synced
-  from `activities`).
+These map to localized messages in Dart.
 
-## Core Concepts
+## My Schedule & Offline Sync
 
-### 1. Events (`EventModel`)
+Dual storage: remote `event_users_saved` table + local `OfflineDataService`. Sync merges via `synchronize_my_schedule` RPC.
 
-The atomic unit of the schedule.
+## Exclusive Groups
 
-- **Fetching**: `DbEvents.getAllEvents` -> `get_events` RPC.
-- **Optimization**: This RPC performs massive joins (places, roles, signups) to
-  return a "ready-to-render" object to the Flutter client.
+`exclusive_groups` and `exclusive_events` tables enforce mutual exclusivity (e.g., parallel workshops -- can only attend one).
 
-### 2. Sign In / Sign Out
+## SQL RPCs
 
-Users can "sign up" for workshops, etc. This is **strictly** controlled by SQL
-to prevent race conditions (overbooking).
-
-- **RPC**: `sign_user_to_event`
-  (`scripts/functions/schedule/sign_user_to_event.sql` - _example path_)
-- **Error Codes**: The Dart code handles specific integer codes returned by the
-  RPC:
-  - `100`: Event over.
-  - `101`: Full capacity.
-  - `102`/`103`: Already signed in (or mutual exclusivity conflict).
-  - `104`: Registration not open yet.
-  - `105`/`106`: Gender balancing limits (men/women).
-
-### 3. "My Schedule" & Offline Sync
-
-The app allows users to "star" events (My Schedule) works offline.
-
-- **Logic**: `DbEvents.synchronizeMySchedule`
-- **Hybrid Flow**:
-  1. **Local**: Saves `eventIds` to `OfflineDataService`.
-  2. **Remote**: Calls `synchronize_my_schedule` RPC to merge local IDs with
-     server-side saved items.
-
-## Critical Implementation Details
-
-- **Error handling**: The `sign_user_to_event` RPC is the "Source of Truth" for
-  business rules. If a user complains they can't sign in, check the logic in
-  that SQL function first.
+- `get_events` -- all events with places, groups, roles, counts in one payload
+- `sign_user_to_event` -- sign-in with full validation (capacity, timing, exclusivity, gender)
+- `sign_user_out_of_event` -- sign-out with validation
+- `synchronize_my_schedule` -- merges local and remote saved event IDs
+- `get_my_events_and_activities` -- user's events + volunteer activities
