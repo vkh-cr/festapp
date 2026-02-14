@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION create_user_in_organization_with_data_pure(org bigint, email text, password text, data jsonb)
 RETURNS uuid
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     usr uuid;

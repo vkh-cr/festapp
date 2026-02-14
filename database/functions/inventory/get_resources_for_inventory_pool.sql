@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_resources_for_inventory_pool(p_inventory_p
 RETURNS SETOF public.resources -- Returns a table of resource rows
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_occasion_id BIGINT;

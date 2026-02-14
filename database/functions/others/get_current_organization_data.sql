@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_current_organization_data() RETURNS jsonb
 LANGUAGE plpgsql STABLE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     organization_id bigint;

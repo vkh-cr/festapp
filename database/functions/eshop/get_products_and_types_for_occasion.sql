@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION public.get_products_and_types_for_edit(occasion_link text)
 RETURNS json LANGUAGE plpgsql
-SECURITY DEFINER AS $$
+SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
   product_types json;
   products json;

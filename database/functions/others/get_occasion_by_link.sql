@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION get_occasion_by_link(link_param text)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     occ_record public.occasions;

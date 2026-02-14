@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_transactions_for_order_all_available(payme
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     bank_acc bigint;

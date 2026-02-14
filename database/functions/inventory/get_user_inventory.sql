@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION get_user_inventory()
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_user_id UUID;

@@ -8,6 +8,7 @@ CREATE OR REPLACE FUNCTION create_user_from_registration(
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     is_registration_enabled BOOLEAN;

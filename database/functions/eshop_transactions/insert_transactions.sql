@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.insert_transactions(transactions JSONB, bank_account_id BIGINT)
-  RETURNS JSONB AS $$
+  RETURNS JSONB
+SET search_path = public, extensions AS $$
   DECLARE
       transaction JSONB;
       parsed_date TIMESTAMPTZ;

@@ -2,6 +2,7 @@ create or replace function public.delete_entity_email_template(p_entity_type tex
     returns void
     language plpgsql
     security definer
+SET search_path = public, extensions
 as
 $$
 begin

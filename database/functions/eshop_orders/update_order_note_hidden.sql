@@ -1,5 +1,6 @@
     CREATE OR REPLACE FUNCTION update_order_note_hidden(order_id bigint, new_note_hidden text)
-    RETURNS jsonb SECURITY DEFINER AS $$
+    RETURNS jsonb SECURITY DEFINER
+SET search_path = public, extensions AS $$
     DECLARE
         occasion_id bigint;
     BEGIN

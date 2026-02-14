@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION get_orders(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_id BIGINT;

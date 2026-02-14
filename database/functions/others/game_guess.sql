@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION game_guess(check_point_id BIGINT, guess TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     hidden_value TEXT;

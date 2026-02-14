@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.get_products_and_types(p_occasion_id bigint)
-RETURNS json AS $$
+RETURNS json
+SET search_path = public, extensions AS $$
 DECLARE
   product_types json;
   products json;

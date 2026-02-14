@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION synchronize_my_schedule(
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_user_id UUID := auth.uid();

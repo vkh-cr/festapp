@@ -9,6 +9,7 @@ RETURNS TABLE(
 )
 SECURITY DEFINER
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 
 BEGIN

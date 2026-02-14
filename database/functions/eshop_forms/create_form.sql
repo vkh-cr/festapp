@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION create_form(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     new_form_id BIGINT;

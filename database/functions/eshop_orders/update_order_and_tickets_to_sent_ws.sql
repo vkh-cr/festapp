@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION update_order_and_tickets_to_sent_ws(order_id bigint, 
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_id bigint;

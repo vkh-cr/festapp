@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION public.update_activities(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     activity_json RECORD;

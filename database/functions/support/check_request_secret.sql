@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.check_request_secret(p_secret text)
-RETURNS boolean AS $$
+RETURNS boolean
+SET search_path = public, extensions AS $$
 DECLARE
   v_count integer;
 BEGIN

@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION public.update_payment_info_variable_symbol(
 )
   RETURNS void
   LANGUAGE sql
+SET search_path = public, extensions
 AS $$
   UPDATE eshop.payment_info
      SET variable_symbol = p_variable_symbol

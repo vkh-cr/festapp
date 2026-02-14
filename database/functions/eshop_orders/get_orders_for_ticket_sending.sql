@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.get_orders_for_ticket_sending()
-RETURNS TABLE(order_id bigint, order_email text) AS $$
+RETURNS TABLE(order_id bigint, order_email text)
+SET search_path = public, extensions AS $$
 BEGIN
   RETURN QUERY
   SELECT

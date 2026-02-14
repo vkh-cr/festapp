@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION public.update_bank_account_token(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_secret_id bigint;

@@ -53,6 +53,7 @@ async function main() {
     const domain = config['DOMAIN'];
     const sbUrl = config['SUPABASE_URL'];
     const sbKey = config['SUPABASE_ANON_KEY'];
+    const orgId = config['ORGANIZATION_ID']; // Added for Edge Function parity
 
     if (!domain || !sbUrl || !sbKey) {
         console.error("❌ Missing required fields in project.conf (DOMAIN, SUPABASE_URL, SUPABASE_ANON_KEY)");
@@ -110,6 +111,9 @@ async function main() {
 
     setEnv('SUPABASE_URL', sbUrl);
     setEnv('SUPABASE_ANON_KEY', sbKey);
+    if (orgId) {
+        setEnv('ORGANIZATION_ID', orgId);
+    }
 
     // 5. Build/Deploy
     console.log("🛠  Configuring local build...");

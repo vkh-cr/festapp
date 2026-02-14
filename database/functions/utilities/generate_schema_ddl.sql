@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION generate_schema_ddl(p_schema text)
-RETURNS text AS $$
+RETURNS text
+SET search_path = public, extensions AS $$
 WITH table_info AS (
   SELECT
     t.table_schema,

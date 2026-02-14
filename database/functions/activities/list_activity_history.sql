@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION public.list_activity_history(p_occasion_id bigint)
  LANGUAGE plpgsql
  STABLE
  SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     history_data JSONB;

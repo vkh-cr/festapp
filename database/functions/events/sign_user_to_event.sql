@@ -1,6 +1,7 @@
 create or replace function sign_user_to_event (ev bigint, usr uuid) returns jsonb
  language plpgsql
  SECURITY DEFINER
+SET search_path = public, extensions
  as $$
 declare
   i_max_participants integer;

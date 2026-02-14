@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION public.update_order_and_tickets_to_paid(order_id bigint)
 RETURNS jsonb
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $function$
 DECLARE
     occasion_id bigint;

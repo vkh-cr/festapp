@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION get_report_ws(occasion_link TEXT)
-RETURNS jsonb SECURITY DEFINER AS $$
+RETURNS jsonb SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
     occasion_id bigint;
     report_data text;

@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION get_events(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     current_user_id        UUID;

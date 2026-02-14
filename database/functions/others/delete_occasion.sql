@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION delete_occasion(oc bigint)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     unit_id BIGINT;

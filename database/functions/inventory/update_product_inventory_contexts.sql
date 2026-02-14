@@ -1,7 +1,8 @@
 CREATE OR REPLACE FUNCTION public.update_product_inventory_contexts(p_product_id bigint, p_contexts jsonb)
 RETURNS void
 LANGUAGE plpgsql
-SECURITY DEFINER AS $$
+SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
   v_occasion_id BIGINT;
   v_order_id BIGINT;

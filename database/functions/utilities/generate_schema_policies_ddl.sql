@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION generate_schema_policies_ddl(p_schema text)
-RETURNS text AS $$
+RETURNS text
+SET search_path = public, extensions AS $$
 WITH policies AS (
   SELECT schemaname,
          tablename,

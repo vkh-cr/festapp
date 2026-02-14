@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION update_inventory_pool_bundle(p_bundle_data jsonb)
 RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_pool_data jsonb := p_bundle_data->'pool';

@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.update_email_template(p_data jsonb)
 RETURNS void
 SECURITY DEFINER
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_occ   bigint;

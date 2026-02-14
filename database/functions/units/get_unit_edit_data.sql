@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_unit_edit_data(p_unit_id bigint)
 RETURNS jsonb
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_unit_data jsonb;

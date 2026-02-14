@@ -1,4 +1,5 @@
-CREATE OR REPLACE FUNCTION process_token_register(data jsonb) RETURNS jsonb AS $$
+CREATE OR REPLACE FUNCTION process_token_register(data jsonb) RETURNS jsonb
+SET search_path = public, extensions AS $$
 DECLARE
     email_exists boolean;
     inserted_id uuid;

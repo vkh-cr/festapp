@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION public.duplicate_form_to_occasion(
 RETURNS BIGINT -- Returns the ID of the new form
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     user_id UUID := auth.uid();

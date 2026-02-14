@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_last_sign_in_at_for_users(user_ids uuid[], oc bigint)
 RETURNS jsonb
 SECURITY definer
+SET search_path = public, extensions
 AS $$
 BEGIN
   -- Check if the user is a manager for the occasion

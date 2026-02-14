@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_all_email_templates_via_occasion_link(occa
 RETURNS jsonb
 SECURITY DEFINER
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_id bigint;

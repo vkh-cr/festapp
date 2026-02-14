@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.delete_occasion_user_ws(usr_to_delete uuid, oc
 RETURNS void
 LANGUAGE plpgsql
 SECURITY INVOKER
+SET search_path = public, extensions
 AS $$
 DECLARE
     has_permission boolean := false;

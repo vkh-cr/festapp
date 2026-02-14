@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION public.get_occasion_user_email(
 )
 RETURNS TEXT
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_email TEXT;

@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_is_admin_on_occasion(oc bigint) RETURNS boolean
 LANGUAGE plpgsql STABLE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     is_admin_var boolean;

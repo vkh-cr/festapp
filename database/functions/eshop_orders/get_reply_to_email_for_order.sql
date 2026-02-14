@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION get_reply_to_email_for_order(
 RETURNS TEXT
 LANGUAGE sql
 STABLE
+SET search_path = public, extensions
 AS $$
     -- by joining its occasion and extracting the email from the occasion's 'data'.
     -- If occasion's reply_to is null, it falls back to the unit's reply_to.

@@ -1,7 +1,8 @@
 CREATE OR REPLACE FUNCTION public.get_user_group_info_with_users(p_group_id bigint)
 RETURNS jsonb
 LANGUAGE plpgsql
-SECURITY DEFINER AS $$
+SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
     v_occasion_id bigint;
     v_is_member boolean;

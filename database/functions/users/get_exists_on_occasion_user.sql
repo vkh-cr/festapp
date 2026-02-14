@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_exists_on_occasion_user(usr uuid, oc bigint) RETURNS bool
     LANGUAGE "sql" STABLE
     SECURITY DEFINER
+SET search_path = public, extensions
     AS $$
   select exists(
   select

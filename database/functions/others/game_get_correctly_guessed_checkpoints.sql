@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION game_get_correctly_guessed_checkpoints(oc BIGINT)
-RETURNS JSONB AS $$
+RETURNS JSONB
+SET search_path = public, extensions AS $$
 DECLARE
     user_group_data JSONB;
 BEGIN

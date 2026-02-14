@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.delete_manual_transaction_ws(p_transaction_id 
  RETURNS void
  LANGUAGE plpgsql
  SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     transaction_amount numeric(12, 2);

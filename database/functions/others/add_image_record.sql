@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.add_image_record(p_link text, p_occasion_id bi
 RETURNS void
 SECURITY DEFINER
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 BEGIN
     -- Permission Check

@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_users_from_occasion_with_orders(oc bigint)
 RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   users_data jsonb;

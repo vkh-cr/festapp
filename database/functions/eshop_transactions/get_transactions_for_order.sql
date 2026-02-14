@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_transactions_for_order(order_id bigint)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_occasion_id bigint;

@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION public.get_form_for_edit(form_link text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_form_id BIGINT;

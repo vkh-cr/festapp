@@ -3,7 +3,8 @@ CREATE OR REPLACE FUNCTION public.analyze_new_order_spots(
 )
 RETURNS jsonb
 LANGUAGE plpgsql
-SECURITY DEFINER AS $$
+SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
   v_conflicts jsonb;
   v_new_order_items jsonb;

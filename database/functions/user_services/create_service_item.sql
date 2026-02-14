@@ -7,6 +7,7 @@ CREATE OR REPLACE FUNCTION create_service_item(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
   existing_codes JSONB;

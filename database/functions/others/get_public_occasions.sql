@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION get_public_occasions(
 )
 RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   result_data jsonb;

@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_all_tickets_for_scan(scan_code text)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     occasion_id_val bigint;

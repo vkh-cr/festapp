@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_all_service_items(oc BIGINT, type TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
   result JSONB;

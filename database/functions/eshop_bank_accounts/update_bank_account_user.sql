@@ -7,6 +7,7 @@ CREATE OR REPLACE FUNCTION public.update_bank_account_user(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_user_id uuid;

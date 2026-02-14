@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION game_update_settings(
 RETURNS JSONB
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   existing_data JSONB;

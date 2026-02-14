@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_all_viewable_forms_for_copying()
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     forms_data JSONB;

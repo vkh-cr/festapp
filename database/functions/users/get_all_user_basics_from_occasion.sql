@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_all_user_basics_from_occasion(oc bigint)
 RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   org_id bigint;

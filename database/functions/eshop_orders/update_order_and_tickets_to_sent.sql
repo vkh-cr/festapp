@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION update_order_and_tickets_to_sent(order_id bigint, ticket_ids bigint[])
-RETURNS jsonb AS $$
+RETURNS jsonb
+SET search_path = public, extensions AS $$
 BEGIN
     -- Update the state of the order to 'sent'
     UPDATE eshop.orders

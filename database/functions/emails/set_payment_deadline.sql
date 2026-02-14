@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION public.set_payment_deadline(
 )
 RETURNS void
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
   order_details RECORD;

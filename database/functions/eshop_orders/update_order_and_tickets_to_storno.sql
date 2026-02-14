@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION update_order_and_tickets_to_storno_221(order_id BIGINT)
 RETURNS VOID
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     ticket_ids BIGINT[];

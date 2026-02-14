@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION update_form(input_data JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     ----------------------------------------------------------------------------

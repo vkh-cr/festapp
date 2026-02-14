@@ -1,11 +1,11 @@
 {
   "name": "festapp-web-client",
-  "version": "0.19.28",
+  "version": "0.19.29",
   "description": "Standalone Web Client for Festapp",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/update_sitemap.js && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "prestart": "node scripts/sync_version.js",
     "start": "npm run dev",

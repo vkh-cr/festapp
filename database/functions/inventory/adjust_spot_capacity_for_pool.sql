@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION adjust_spot_capacity_for_pool(p_inventory_pool_id bigint)
 RETURNS integer
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_context RECORD;

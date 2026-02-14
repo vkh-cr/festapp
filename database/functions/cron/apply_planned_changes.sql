@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION apply_planned_changes()
-RETURNS VOID AS $$
+RETURNS VOID
+SET search_path = public, extensions AS $$
 DECLARE
     change RECORD;
 BEGIN

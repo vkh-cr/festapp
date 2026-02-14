@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION update_order_and_tickets_to_paid_ws(order_id bigint)
-RETURNS jsonb SECURITY DEFINER AS $$
+RETURNS jsonb SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
     occasion_id bigint;
 BEGIN

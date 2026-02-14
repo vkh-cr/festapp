@@ -4,7 +4,8 @@ RETURNS TABLE (
     bank_secret TEXT,
     account_type TEXT,
     transaction_count_last_90_days INT
-) AS $$
+)
+SET search_path = public, extensions AS $$
 BEGIN
   RETURN QUERY
   SELECT

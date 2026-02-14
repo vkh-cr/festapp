@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_bank_name_from_code(p_code text)
 RETURNS text
 LANGUAGE plpgsql
 IMMUTABLE
+SET search_path = public, extensions
 AS $$
 BEGIN
     -- Common Czech Banks

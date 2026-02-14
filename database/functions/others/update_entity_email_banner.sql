@@ -2,6 +2,7 @@ create or replace function public.update_entity_email_banner(p_entity_type text,
     returns void
     language plpgsql
     security definer
+SET search_path = public, extensions
 as
 $$
 declare

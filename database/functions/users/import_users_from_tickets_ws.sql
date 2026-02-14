@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION public.import_users_from_tickets_ws(p_occasion_id bigint)
-RETURNS jsonb SECURITY DEFINER AS $$
+RETURNS jsonb SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
     -- Declare a variable to hold the JSONB result from the import function.
     import_results JSONB;

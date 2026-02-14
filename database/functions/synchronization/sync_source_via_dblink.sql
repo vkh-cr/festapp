@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION public.sync_source_via_dblink(p_target_source_name TE
 RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     r_source RECORD;

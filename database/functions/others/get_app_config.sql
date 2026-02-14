@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION get_app_config_v218(data_in jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     org_id bigint := (data_in->>'organization')::bigint;

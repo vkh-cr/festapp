@@ -3,6 +3,7 @@ DROP FUNCTION IF EXISTS get_all_user_basics_from_occasion_unit;
 CREATE OR REPLACE FUNCTION get_all_user_basics_from_occasion_unit(p_unit_id bigint)
 RETURNS jsonb
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   user_basics jsonb;

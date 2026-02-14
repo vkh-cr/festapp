@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION delete_service_item(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
   in_use BOOLEAN;

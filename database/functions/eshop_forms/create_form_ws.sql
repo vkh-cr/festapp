@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION create_form_ws(input_data JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     result JSONB;

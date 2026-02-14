@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION public.remove_transaction_from_payment_info_ws(
 )
 RETURNS void
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     transaction_amount numeric(12, 2);

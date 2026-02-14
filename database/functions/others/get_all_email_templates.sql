@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_all_email_templates(p_context jsonb)
 RETURNS jsonb
 SECURITY DEFINER
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
   email_data jsonb;

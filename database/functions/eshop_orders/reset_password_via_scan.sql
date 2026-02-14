@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION reset_password_via_scan(
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_occasion_id bigint;

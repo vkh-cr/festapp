@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION delete_form(p_form_id bigint)
 RETURNS void
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_response_count INT;

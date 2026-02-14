@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION apply_allocations(p_order_id bigint)
 RETURNS void
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_order_state TEXT;

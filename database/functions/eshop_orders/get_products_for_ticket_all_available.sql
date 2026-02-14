@@ -3,7 +3,8 @@ CREATE OR REPLACE FUNCTION public.get_products_for_ticket_all_available(
 )
 RETURNS jsonb
 LANGUAGE plpgsql
-SECURITY DEFINER AS $$
+SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
   v_occasion_id bigint;
   v_available   jsonb;

@@ -7,6 +7,7 @@ CREATE OR REPLACE FUNCTION update_service_item(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
+SET search_path = public, extensions
 AS $$
 DECLARE
   updated_services JSONB;

@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION reset_user_password(p_user_id uuid, p_password text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_current_user_id uuid := auth.uid();

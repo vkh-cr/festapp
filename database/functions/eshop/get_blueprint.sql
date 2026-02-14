@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION get_blueprint(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     blueprintData JSONB;

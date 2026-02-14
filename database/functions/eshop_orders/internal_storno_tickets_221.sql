@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION internal_storno_tickets_221(ticket_ids_to_storno BIGINT[])
 RETURNS VOID
 LANGUAGE plpgsql
+SET search_path = public, extensions
 
 AS $$
 DECLARE

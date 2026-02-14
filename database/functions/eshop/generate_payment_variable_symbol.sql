@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION generate_payment_variable_symbol(p_bank_account_id BIGINT, p_form_id BIGINT)
-RETURNS BIGINT AS $$
+RETURNS BIGINT
+SET search_path = public, extensions AS $$
 DECLARE
     -- Variables for form configuration
     v_form_data JSONB;

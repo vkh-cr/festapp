@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION public.reset_all_sequences()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     r RECORD;

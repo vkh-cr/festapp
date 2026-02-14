@@ -12,6 +12,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_org_id bigint;

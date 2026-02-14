@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION public.confirm_blueprint_order_change(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_analysis JSONB;

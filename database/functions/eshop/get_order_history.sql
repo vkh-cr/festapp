@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION get_order_history(order_id bigint)
-RETURNS jsonb SECURITY DEFINER AS $$
+RETURNS jsonb SECURITY DEFINER
+SET search_path = public, extensions AS $$
 DECLARE
     v_occasion_id bigint;
     v_order_data jsonb;

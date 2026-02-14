@@ -27,6 +27,10 @@ command = "cd web_client && npm run build && cp -r dist/* ../build/web/"
 path = "/form/*"
 function = "inject-og"
 
+[[edge_functions]]
+path = "/sitemap.xml"
+function = "sitemap"
+
 [functions]
 
 [functions."*"]
