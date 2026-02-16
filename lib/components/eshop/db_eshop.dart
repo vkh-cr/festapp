@@ -8,6 +8,7 @@ import 'package:fstapp/components/eshop/models/payment_info_model.dart';
 import 'package:fstapp/components/eshop/models/product_edit_bundle.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/components/eshop/models/transaction_model.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
@@ -340,7 +341,7 @@ class DbEshop {
             .toList();
       }
     } catch (e) {
-      debugPrint('Error fetching resources for pool $inventoryPoolId: $e');
+      AppLogger.error('Error fetching resources for pool $inventoryPoolId: $e');
       // Depending on your error handling strategy, you might want to show a toast.
       // For now, we return an empty list to prevent crashes.
     }

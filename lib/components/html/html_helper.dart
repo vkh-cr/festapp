@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/images/db_images.dart';
 import 'package:fstapp/components/images/image_compression_helper.dart';
 import 'package:html/parser.dart' as html_parser;
@@ -357,11 +357,11 @@ class HtmlHelper {
         if (base64String is String) {
           return base64.decode(base64String);
         } else {
-          print("Error: Data is not a string.");
+          AppLogger.error("Error: Data is not a string.");
           return null;
         }
       } else {
-        print("Error: No data returned from supabase function.");
+        AppLogger.error("Error: No data returned from supabase function.");
         return null;
       }
     }
@@ -372,11 +372,11 @@ class HtmlHelper {
       if (response.statusCode == 200) {
         return response.bodyBytes;
       } else {
-        print('Error fetching image: ${response.statusCode}');
+        AppLogger.error('Error fetching image: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('Error fetching image: $e');
+      AppLogger.error('Error fetching image: $e');
       return null;
     } finally {
       client.close();

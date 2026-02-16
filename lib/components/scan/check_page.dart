@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/users/db_users.dart';
@@ -227,7 +228,7 @@ class _CheckPageState extends State<CheckPage> {
                       if (id == null) {
                         return;
                       }
-                      debugPrint(id.rawValue);
+                      AppLogger.debug(id.rawValue ?? '');
                       await setupNewId(id.rawValue.toString());
                     },
                   ),

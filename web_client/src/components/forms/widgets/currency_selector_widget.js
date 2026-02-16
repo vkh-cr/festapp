@@ -24,9 +24,7 @@ export class CurrencySelectorWidget {
         }
 
         // Only show if multiple currencies
-        console.log('CurrencySelectorWidget: Available currencies:', availableCurrencies);
         if (!availableCurrencies || availableCurrencies.length <= 1) {
-            console.log('CurrencySelectorWidget: Not enough currencies to show selector');
             return;
         }
 

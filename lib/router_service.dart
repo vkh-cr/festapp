@@ -8,6 +8,7 @@ import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/js/js_interop.dart';
 import 'dart:async';
 
@@ -266,7 +267,7 @@ class RouterService {
 
     // If no link could be resolved, we can't navigate.
     if (resolvedLink.isEmpty) {
-      debugPrint(
+      AppLogger.error(
           "RouterService Error: Could not resolve occasion link for navigation.");
       return;
     }
@@ -342,7 +343,7 @@ class RouterService {
       _js.navigateExternal(url);
     } else {
       // Fallback or no-op for non-web
-      debugPrint("External navigation not supported on this platform: $url");
+      AppLogger.debug("External navigation not supported on this platform: $url");
     }
   }
 
@@ -367,11 +368,11 @@ class RouterService {
         if (extracted.occasionLink != null &&
             extracted.occasionLink!.isNotEmpty) {
           linkToUse = extracted.occasionLink!;
-          debugPrint(
+          AppLogger.debug(
               "[RouterService] Post-Login: Extracted link '$linkToUse' from fallbackPath '$fallbackPath'");
         }
       } catch (e) {
-        debugPrint(
+        AppLogger.error(
             "[RouterService] Post-Login: Failed to extract link from fallbackPath: $e");
       }
     }
@@ -384,7 +385,7 @@ class RouterService {
     if (unitId == null) {
       var userUnits = RightsService.currentUser()?.units;
       if (userUnits != null && userUnits.isNotEmpty) {
-        debugPrint(
+        AppLogger.debug(
             "[RouterService] Post-Login: User has units. Navigating to UnitAdmin.");
         await navigateToUnitAdmin(context, userUnits.first);
         return;
@@ -398,13 +399,13 @@ class RouterService {
       // we should NOT go to login. We should go Home instead.
       if (fallbackPath.toLowerCase() == "/login" ||
           fallbackPath.toLowerCase() == "login") {
-        debugPrint(
+        AppLogger.debug(
             "[RouterService] Post-Login: Redirect was 'login', avoiding redundant loop. Going Home.");
         await context.router.replacePath('/');
         return;
       }
 
-      debugPrint(
+      AppLogger.debug(
           "[RouterService] Post-Login: Using fallback path: $fallbackPath (Replace: $useReplacement)");
       if (useReplacement) {
         // Fix path to ensure it starts with /
@@ -415,7 +416,7 @@ class RouterService {
       }
     } else {
       // Default behavior (pop or home)
-      debugPrint("[RouterService] Post-Login: Pop or Home");
+      AppLogger.debug("[RouterService] Post-Login: Pop or Home");
       if (useReplacement) {
         // If we must replace but have no specific target, we go Home.
         await context.router.replacePath('/');

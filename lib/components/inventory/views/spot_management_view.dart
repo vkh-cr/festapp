@@ -10,6 +10,7 @@ import 'package:fstapp/components/eshop/models/spot_model.dart';
 import 'package:fstapp/components/inventory/db_spots.dart';
 import 'package:fstapp/components/inventory/views/spot_management_columns.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/utilities_all.dart';
 
 import '../models/spot_management_constants.dart';
@@ -137,7 +138,7 @@ class SpotManagementViewState extends State<SpotManagementView> {
         });
       }
     } catch (e) {
-      debugPrint("Error loading spot management data: $e");
+      AppLogger.error("Error loading spot management data: $e");
       if (mounted) {
         // Clear the cached bundle on error to prevent using stale/bad data.
         _initialBundle = null;

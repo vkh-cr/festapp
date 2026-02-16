@@ -13,7 +13,6 @@ class Main {
     static async init() {
         try {
             // 1. Init Core Services
-            console.log(`Starting Festapp Web Client v${AppConfig.version}`);
             // SupabaseService is now eager loaded
             await LocalizationService.init();
             ThemeService.init();

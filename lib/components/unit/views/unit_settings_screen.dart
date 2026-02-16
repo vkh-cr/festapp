@@ -8,6 +8,7 @@ import 'package:fstapp/components/unit/db_units.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/unit/unit_settings_strings.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
@@ -96,7 +97,7 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
         });
       }
     } catch (e) {
-      print("Error checking delete constraints: $e");
+      AppLogger.error("Error checking delete constraints: $e");
     }
   }
 
@@ -121,7 +122,7 @@ class _UnitSettingsScreenState extends State<UnitSettingsScreen> {
 
       await _checkDeleteConstraints();
     } catch (e) {
-      print("Error loading unit data: $e");
+      AppLogger.error("Error loading unit data: $e");
     } finally {
       if (mounted) {
         _initializeFormState();

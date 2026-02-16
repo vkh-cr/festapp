@@ -56,7 +56,6 @@ export class RightsService {
             }
 
             this._context = data;
-            console.log("RightsService: Context updated", this._context);
             this._notifyListeners();
             return true;
         } catch (e) {
@@ -96,12 +95,10 @@ export class RightsService {
     }
 
     static isAdmin() {
-        console.log("RightsService Check isAdmin:", this._context?.is_admin);
         return !!this._context?.is_admin;
     }
 
     static isEditor() {
-        console.log("RightsService Check isEditor:", this.occasionUser?.is_editor);
         return !!this.occasionUser?.is_editor;
     }
 
@@ -115,14 +112,11 @@ export class RightsService {
 
 
     static canSeeAdmin() {
-        // Log the raw values as well
-        console.log("Raw context:", this._context);
         const admin = this.isAdmin();
         const editor = this.isEditor();
         const manager = this.isManager();
         const unitEditorView = this.isUnitEditorView();
         const hasUnits = this.hasUnits();
-        console.log(`RightsService canSeeAdmin: admin=${admin}, editor=${editor}, manager=${manager}, unitEditorView=${unitEditorView}, hasUnits=${hasUnits}`);
         return admin || editor || manager || unitEditorView || hasUnits;
     }
 

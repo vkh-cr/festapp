@@ -1,6 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
@@ -12,8 +10,8 @@ import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/components/eshop/db_tickets.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/services/vibrate_service.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -21,9 +19,9 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/ticket_feature.dart';
 import 'package:fstapp/components/features/feature.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 
-import '../html/html_view.dart';
+import 'scan_field_mappings.dart';
+import 'scan_result_display.dart';
 import 'ticket_search_dialog.dart';
 import 'user_search_dialog.dart';
 
@@ -42,7 +40,6 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   static const String _defaultResetPassword = "1";
-  static const bool _showResetPasswordButton = AppConfig.isAppSupported;
 
   TicketModel? _scannedObject;
   ScanState _scanState = ScanState.nothing;
@@ -75,17 +72,6 @@ class _ScanPageState extends State<ScanPage> {
     });
   }
 
-  // DEFINITION: Mapping array for specific fields to show
-  final Map<String, String> _specificFieldMappings = {
-    "735": "Typ účastníka",
-    "725": "Člen Anima Iuventutis, z. s.",
-    "739": "Stravovací omezení",
-    "615": "Typ účastníka",
-    "616": "Přípravný tým",
-    "629": "Člen Anima Iuventutis, z. s.",
-    "620": "Stravovací omezení",
-  };
-
   final MobileScannerController _mobileScannerController =
       MobileScannerController(
     formats: [BarcodeFormat.qrCode],
@@ -110,7 +96,7 @@ class _ScanPageState extends State<ScanPage> {
       MobileScannerPlatform.instance.setBarcodeLibraryScriptUrl(
           "https://unpkg.com/@zxing/library@0.21.3");
     }
-    print(widget.scanCode);
+    AppLogger.debug(widget.scanCode ?? '');
 
     checkForCode();
   }
@@ -152,436 +138,25 @@ class _ScanPageState extends State<ScanPage> {
         });
       }
     } catch (e) {
-      debugPrint("Error loading occasion title: $e");
+      AppLogger.error("Error loading occasion title: $e");
     }
-  }
-
-  /// Helper to extract value from dynamic fields
-  String? _getFieldValue(OrderModel order, String targetFieldId) {
-    if (order.data == null || order.data!['fields'] == null) {
-      return null;
-    }
-    var fieldsList = order.data!['fields'];
-    if (fieldsList is! List) return null;
-
-    for (var fieldEntry in fieldsList) {
-      if (fieldEntry is Map) {
-        for (var key in fieldEntry.keys) {
-          if (key.toString() == targetFieldId) {
-            var value = fieldEntry[key];
-            return (value != null && value.toString().isNotEmpty)
-                ? value.toString()
-                : null;
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  /// Helper to get specific ticket price from order.data['tickets']
-  double? _getTicketPrice() {
-    if (_scannedObject == null ||
-        _scannedObject!.relatedOrder == null ||
-        _scannedObject!.relatedOrder!.data == null) {
-      return null;
-    }
-
-    final data = _scannedObject!.relatedOrder!.data!;
-
-    // 1. Access the 'tickets' list in the order JSON
-    if (data.containsKey('tickets') && data['tickets'] is List) {
-      final ticketsList = data['tickets'] as List;
-
-      // 2. Find the specific ticket in the JSON that matches the scanned object's ID
-      final ticketData = ticketsList
-          .firstWhereOrNull((t) => t is Map && t['id'] == _scannedObject!.id);
-
-      if (ticketData != null && ticketData is Map) {
-        double totalTicketPrice = 0.0;
-        bool productsFound = false;
-
-        // 3. Iterate through the 'products' list inside this specific ticket
-        if (ticketData.containsKey('products') &&
-            ticketData['products'] is List) {
-          final productsList = ticketData['products'] as List;
-
-          for (var product in productsList) {
-            if (product is Map && product.containsKey('price')) {
-              productsFound = true;
-              totalTicketPrice +=
-                  double.tryParse(product['price'].toString()) ?? 0.0;
-            }
-          }
-        }
-
-        if (productsFound ||
-            (ticketData.containsKey('products') &&
-                (ticketData['products'] as List).isEmpty)) {
-          return totalTicketPrice;
-        }
-      }
-    }
-    return null;
   }
 
   Widget buildScannedUserDetails(Color backgroundColor) {
-    // Determine text color based on background luminance
-    Color foregroundColor = ThemeConfig.textColorForBackground(backgroundColor);
-
-    if (_scannedObject == null) {
-      if (_scanState == ScanState.notFound) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child:
-                    Icon(Icons.error_outline, size: 60, color: foregroundColor),
-              ),
-              Text(
-                OrdersStrings.scanNotFound,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: foregroundColor,
-                ),
-              ),
-              const SizedBox(height: 32),
-            ],
-          ),
-        );
-      }
-      return Center(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
-              child: Text(OrdersStrings.scanCameraInstruction),
-            ),
-            if (AppConfig.isAppSupported)
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 500),
-                opacity: _showHelpText ? 1.0 : 0.0,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _showHelpText = false;
-                      });
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        OrdersStrings.scanInstructionsAppUser,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color:
-                              ThemeConfig.blackColor(context).withOpacity(0.7),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      );
-    }
-
-    // --- ICONS ---
-    IconData icon;
-    if (_scanState == ScanState.valid) {
-      icon = Icons.verified;
-    } else if (_scanState == ScanState.ordered) {
-      icon = Icons.pending_actions;
-    } else if (_scanState == ScanState.invalid) {
-      icon = Icons.block;
-    } else if (_scanState == ScanState.used) {
-      icon = Icons.beenhere;
-    } else if (_scanState == ScanState.notFound) {
-      icon = Icons.error_outline;
-    } else {
-      return const SizedBox.shrink();
-    }
-
-    // Prepare Price and Status Text
-    Widget priceWidget = const SizedBox.shrink();
-    double? price = _getTicketPrice();
-
-    if (price != null) {
-      String formattedPrice = Utilities.formatPrice(
-        context,
-        price,
-        currencyCode: _scannedObject!.relatedOrder!.currencyCode,
-      );
-
-      String statusText = "";
-      // Status color matches foreground for visibility
-      Color statusColor = foregroundColor;
-
-      if (_scanState == ScanState.valid) {
-        statusText = OrderModel.stateToLocale(OrderModel.paidState);
-      } else if (_scanState == ScanState.used) {
-        // Use exact translation from OrderModel
-        statusText = OrderModel.stateToLocale(OrderModel.usedState);
-      } else if (_scanState == ScanState.ordered) {
-        statusText = OrderModel.stateToLocale(OrderModel.orderedState);
-      } else if (_scanState == ScanState.invalid) {
-        // Use exact translation from OrderModel (likely Storno)
-        statusText = OrderModel.stateToLocale(OrderModel.stornoState);
-      }
-
-      if (statusText.isNotEmpty) {
-        priceWidget = Padding(
-          padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-          child: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: TextStyle(fontSize: 20, color: foregroundColor),
-              children: [
-                TextSpan(
-                  text: "$formattedPrice  ",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(
-                  text: statusText,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-    }
-
-    // Prepare State String with Date if Used
-    String stateString = OrderModel.stateToLocale(_scannedObject!.state);
-    if (_scannedObject!.state == OrderModel.usedState &&
-        _scannedObject!.updatedAt != null) {
-      String formattedDate =
-          DateFormat('dd.MM.yyyy HH:mm').format(_scannedObject!.updatedAt!);
-      stateString += " ($formattedDate)";
-    }
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // --- USER DETAILS SECTION ---
-          Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // 1. Display related products
-                if (_scannedObject!.relatedProducts != null &&
-                    _scannedObject!.relatedProducts!.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: _scannedObject!.relatedProducts!.map((product) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              product.title ?? "",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: foregroundColor,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            if (product.description != null &&
-                                product.description!.trim().isNotEmpty)
-                              HtmlView(
-                                html: product.description!,
-                                fontSize: 14,
-                                color: foregroundColor.withOpacity(0.9),
-                              ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-
-                const SizedBox(height: 8),
-
-                // 2. Customer data, symbol, state
-                Text(
-                  "${_scannedObject!.relatedOrder!.toCustomerData()}   ${_scannedObject!.ticketSymbol}   $stateString",
-                  style: TextStyle(
-                    color: foregroundColor,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                // ---------------------------------------------------
-                // 2b. NEW: Display User Groups if available
-                // ---------------------------------------------------
-                if (_scannedObject!.relatedGroups != null &&
-                    _scannedObject!.relatedGroups!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        style: TextStyle(color: foregroundColor, fontSize: 16),
-                        children: [
-                          TextSpan(
-                            text: OrdersStrings.bigGameLabel,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          TextSpan(
-                            text: _scannedObject!.relatedGroups!
-                                .map((g) => g.title)
-                                .join(", "),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                // 3. Display Related Spot
-                if (_scannedObject!.relatedSpot != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      _scannedObject!.relatedSpot!.toSpotString(),
-                      style: TextStyle(
-                        color: foregroundColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-
-                // 4. Price and Payment Status
-                priceWidget,
-
-                // DISPLAY NOTES
-                if (_scannedObject!.note != null &&
-                    _scannedObject!.note!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      _scannedObject!.note!,
-                      style: TextStyle(
-                        color: foregroundColor,
-                        fontSize: 16,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-
-                if (_features.isNotEmpty) ...[
-                  Builder(builder: (context) {
-                    final ticketFeature = FeatureService.getFeatureDetails(
-                        FeatureConstants.ticket,
-                        features: _features) as TicketFeature?;
-                    if (ticketFeature?.showHiddenNote == true &&
-                        _scannedObject!.noteHidden != null &&
-                        _scannedObject!.noteHidden!.isNotEmpty) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              FeaturesStrings.labelShowHiddenNote,
-                              style: TextStyle(
-                                color: foregroundColor.withOpacity(0.7),
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              _scannedObject!.noteHidden!,
-                              style: TextStyle(
-                                color: foregroundColor,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  }),
-                ],
-
-                // 5. Extra fields
-                if (_scannedObject!.relatedOrder != null)
-                  ..._specificFieldMappings.entries.map((entry) {
-                    String fieldId = entry.key;
-                    String label = entry.value;
-                    String? value =
-                        _getFieldValue(_scannedObject!.relatedOrder!, fieldId);
-
-                    if (value == null) return const SizedBox.shrink();
-
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style:
-                              TextStyle(color: foregroundColor, fontSize: 15),
-                          children: [
-                            TextSpan(
-                              text: "$label: ",
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            TextSpan(text: value),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // --- ICON SECTION ---
-          Icon(icon, color: foregroundColor, size: 40),
-          const SizedBox(height: 16),
-
-          // --- ACTION BUTTONS SECTION ---
-
-          if (_scanState == ScanState.valid || _scanState == ScanState.ordered)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: ElevatedButton(
-                onPressed: _confirmTicket,
-                child: Text(OrdersStrings.confirmTicketAction),
-              ),
-            ),
-
-          if (_showResetPasswordButton)
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    Theme.of(context).colorScheme.secondaryContainer,
-                foregroundColor:
-                    Theme.of(context).colorScheme.onSecondaryContainer,
-              ),
-              onPressed: _resetPassword,
-              child: Text(OrdersStrings.resetPasswordTo(_defaultResetPassword)),
-            ),
-        ],
-      ),
+    return ScanResultDisplay(
+      scannedObject: _scannedObject,
+      scanState: _scanState,
+      features: _features,
+      fieldMappings: specificFieldMappings,
+      showHelpText: _showHelpText,
+      backgroundColor: backgroundColor,
+      onConfirm: _confirmTicket,
+      onResetPassword: _resetPassword,
+      onDismissHelp: () {
+        setState(() {
+          _showHelpText = false;
+        });
+      },
     );
   }
 
@@ -641,7 +216,7 @@ class _ScanPageState extends State<ScanPage> {
                       if (id == null) {
                         return;
                       }
-                      debugPrint(id.rawValue);
+                      AppLogger.debug(id.rawValue ?? '');
                       await setupNewId(id.rawValue.toString());
                     },
                   ),

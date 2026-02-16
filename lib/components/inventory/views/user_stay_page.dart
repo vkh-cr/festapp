@@ -8,6 +8,7 @@ import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
@@ -53,7 +54,7 @@ class _UserStayPageState extends State<UserStayPage> {
         _processBundle(offlineBundle); // Process and display stale data
       }
     } catch (e) {
-      debugPrint("Could not load offline user stay data: $e");
+      AppLogger.error("Could not load offline user stay data: $e");
       // It's okay to fail here, we proceed to fetch fresh data.
     }
 
@@ -71,7 +72,7 @@ class _UserStayPageState extends State<UserStayPage> {
       // As requested, fail silently if the online load fails.
       // The user will be left with the offline data if it was available.
       // We still print the error for debugging purposes.
-      debugPrint("Error loading user inventory from network: $e");
+      AppLogger.error("Error loading user inventory from network: $e");
     } finally {
       // 3. Stop the loading indicator after the network attempt is complete.
       if (mounted) {

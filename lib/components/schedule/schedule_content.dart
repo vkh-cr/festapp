@@ -13,6 +13,7 @@ import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/images/db_images.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -83,7 +84,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
         _eventTypeSelectOptions.add(et.code);
       }
     } catch (e) {
-      debugPrint("Error loading initial data for ScheduleContent: $e");
+      AppLogger.error("Error loading initial data for ScheduleContent: $e");
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

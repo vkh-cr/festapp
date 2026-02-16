@@ -12,6 +12,7 @@ import 'package:fstapp/widgets/detail_dialog.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/time_helper.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:multi_split_view/multi_split_view.dart';
@@ -1660,7 +1661,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                       initialPanOffset: _panOffset,
                                       initialScale: _scale);
                                 } catch (e) {
-                                  print(
+                                  AppLogger.error(
                                       "Error publishing activities from UI: $e");
                                 } finally {
                                   if (mounted) {

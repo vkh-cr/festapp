@@ -2,8 +2,8 @@
 -- [REMOVED] Schema patching removed. Test must run against authoritative schema.
 
 -- [REMOVED] Obsolete function definition overrides removed.
--- The test now strictly uses the authoritative `public.process_email_transaction(jsonb)` 
--- defined in migration `20260124140000_bank_import_complete.sql`.
+-- The test now strictly uses the authoritative `public.process_email_transaction(jsonb)`
+-- defined in `database/functions/eshop_transactions/process_email_transaction.sql`.
 
 
 -- Force-define new getter for test environment consistency

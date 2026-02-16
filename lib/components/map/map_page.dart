@@ -11,6 +11,7 @@ import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/components/features/map_feature.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
@@ -200,7 +201,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
               uri: _mapFeature.offlineMapLayer.offlineMapStyleURL!)
           .read();
     } catch (e) {
-      debugPrint("Failed to load style: $e");
+      AppLogger.error("Failed to load style: $e");
     }
     _offlinePackagePath = await OfflineMapHelper.getOfflinePackagePath(
         _mapFeature.offlineMapLayer.offlineMapPackageURL!);
@@ -268,7 +269,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         });
       });
     } catch (e) {
-      debugPrint("Error downloading offline package: $e");
+      AppLogger.error("Error downloading offline package: $e");
       setState(() => _isDownloading = false);
     }
   }

@@ -27,7 +27,6 @@ export class LoginModal extends HTMLElement {
 
     _isRegistrationEnabled() {
         const orgSettings = RightsService.context?.organization;
-        console.log('DEBUG: LoginModal _isRegistrationEnabled config:', JSON.stringify(orgSettings));
         // Check exact boolean false to disable, otherwise default directly to enabled (legacy/fallback)
         if (orgSettings && typeof orgSettings.IS_REGISTRATION_ENABLED === 'boolean') {
             return orgSettings.IS_REGISTRATION_ENABLED;
@@ -79,7 +78,6 @@ export class LoginModal extends HTMLElement {
         this.modal.close = () => {
             // Prevent closing if we are in the middle of a forced reset
             if (this._resetToken || this.currentView === 'reset_password') {
-                console.log("LoginModal: Close prevented due to mandatory password reset.");
                 return;
             }
             
@@ -380,8 +378,6 @@ export class LoginModal extends HTMLElement {
         
         if (!this._validateForm('login-form')) return;
         
-        console.log("Login submitted");
-        
         const emailInput = this.authContainer.querySelector('#email');
         const passwordInput = this.authContainer.querySelector('#password');
 
@@ -490,8 +486,6 @@ export class LoginModal extends HTMLElement {
         const password = output ? output.value : '';
         
         if (!password || !this._resetToken) return;
-
-        console.log("LoginModal: Changing password with token:", this._resetToken);
 
         this._setLoading(true);
         try {

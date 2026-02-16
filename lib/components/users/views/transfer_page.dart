@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/services/app_logger.dart';
+import 'package:fstapp/services/auth_handoff_noop.dart'
+    if (dart.library.html) 'package:fstapp/services/auth_handoff_web.dart'
+    if (dart.library.js_interop) 'package:fstapp/services/auth_handoff_web.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 @RoutePage()
@@ -33,7 +37,7 @@ class _TransferPageState extends State<TransferPage> {
   }
 
   Future<void> _handleSession() async {
-    debugPrint("TransferPage: Handling Session...");
+    AppLogger.debug("TransferPage: Handling Session...");
 
     // 1. Check if we are already logged in (Persistence)
     bool loggedIn = AuthService.isLoggedIn();
@@ -41,12 +45,34 @@ class _TransferPageState extends State<TransferPage> {
       loggedIn = await AuthService.tryAuthUser();
     }
 
-      // 2. If not, use the token provided
+      // 2. Try sessionStorage handoff (web auth_bridge)
+    if (!loggedIn) {
+      final handoff = consumeAuthHandoff();
+      if (handoff != null) {
+        final refreshToken = handoff['refresh_token'];
+        if (refreshToken != null && refreshToken.isNotEmpty) {
+          try {
+            AppLogger.debug("TransferPage: Setting session from handoff...");
+            if (Supabase.instance.client.auth.currentSession != null) {
+              await Supabase.instance.client.auth.signOut();
+            }
+            await AuthService.recoverSession(refreshToken);
+            await AuthService.refreshSession();
+            loggedIn = true;
+          } catch (e) {
+            AppLogger.error("TransferPage: Handoff session error: $e");
+            loggedIn = await AuthService.tryAuthUser();
+          }
+        }
+      }
+    }
+
+      // 3. Fallback: use the token from query params (mobile deep links)
     if (!loggedIn &&
         widget.refresh_token != null &&
         widget.refresh_token!.isNotEmpty) {
       try {
-        debugPrint("TransferPage: Setting session from token...");
+        AppLogger.debug("TransferPage: Setting session from token...");
         // Ensure a clean slate before setting a new session
         if (Supabase.instance.client.auth.currentSession != null) {
           await Supabase.instance.client.auth.signOut();
@@ -56,7 +82,7 @@ class _TransferPageState extends State<TransferPage> {
         await AuthService.refreshSession();
         loggedIn = true;
       } catch (e) {
-        debugPrint("TransferPage: Session set error: $e");
+        AppLogger.error("TransferPage: Session set error: $e");
         // Final check in case it worked anyway
         loggedIn = await AuthService.tryAuthUser();
       }
@@ -70,12 +96,12 @@ class _TransferPageState extends State<TransferPage> {
       // - Fallback to provided path (or Home)
       if (mounted) {
         try {
-          debugPrint(
+          AppLogger.debug(
               "TransferPage: Session valid ($loggedIn). calling handlePostLoginNavigation");
           await RouterService.handlePostLoginNavigation(context,
               fallbackPath: widget.redirect ?? "/", useReplacement: true);
         } catch (e) {
-          debugPrint("TransferPage: Smart nav failed. Error: $e");
+          AppLogger.error("TransferPage: Smart nav failed. Error: $e");
           if (mounted) {
             await context.router.replacePath("/");
           }
@@ -83,7 +109,7 @@ class _TransferPageState extends State<TransferPage> {
       }
     } else {
       // 4. Failed -> Login Page
-      debugPrint(
+      AppLogger.debug(
           "TransferPage: Session INVALID ($loggedIn). Redirecting to LoginRoute.");
       if (mounted) {
         context.router.replace(LoginRoute());

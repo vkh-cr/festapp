@@ -7,18 +7,15 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/components/features/feature_metadata.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
-import 'package:fstapp/components/features/feature_form.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/components/images/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/help_widget.dart';
@@ -31,6 +28,8 @@ import 'package:fstapp/services/time_helper.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../_shared/common_strings.dart';
+import 'occasion_advanced_settings.dart';
+import 'occasion_features_section.dart';
 import 'occasion_settings_strings.dart';
 
 class OccasionSettingsTab extends StatefulWidget {
@@ -62,15 +61,12 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
   bool _isPromoted = false;
   String? _selectedTimezone;
   List<String> _allTimezones = [];
-  String _featureSearchQuery = "";
-  late TextEditingController _featureSearchController;
   bool _advancedSettingsExpanded = false;
 
   @override
   void initState() {
     super.initState();
     _linkController = TextEditingController();
-    _featureSearchController = TextEditingController();
     _replyToEmailController = TextEditingController();
   }
 
@@ -88,7 +84,6 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
   void dispose() {
     _linkController.dispose();
     _replyToEmailController.dispose();
-    _featureSearchController.dispose();
     super.dispose();
   }
 
@@ -315,24 +310,6 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     final bool canChangePromotion = _isPromoted || hasImage;
     // <-- END MODIFICATION -->
 
-    final filteredFeaturesBySearch = occasion!.features.where((feature) {
-      final title = FeatureMetadata.getTitle(feature.code).toLowerCase();
-      final description =
-          FeatureMetadata.getDescription(feature.code).toLowerCase();
-      final query = _featureSearchQuery.toLowerCase();
-      return query.isEmpty ||
-          title.contains(query) ||
-          description.contains(query);
-    }).toList();
-
-    final featuresToShow = AppConfig.isAppSupported
-        ? filteredFeaturesBySearch
-        : filteredFeaturesBySearch
-            .where((f) => !FeatureService.appSupportedFeatures.contains(f.code))
-            .toList();
-
-    final enabledFeatures = featuresToShow.where((f) => f.isEnabled).toList();
-    final disabledFeatures = featuresToShow.where((f) => !f.isEnabled).toList();
     final bool hasOrders = occasion?.hasOrders ?? false;
     final bool canDelete = !hasOrders;
 
@@ -523,296 +500,36 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
                   ),
 
                   const SizedBox(height: 16),
-                  ExpansionTile(
-                    title: Text(
-                      OccasionSettingsStrings.advancedSettings,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                  OccasionAdvancedSettings(
+                    linkController: _linkController,
+                    replyToEmailController: _replyToEmailController,
+                    selectedTimezone: _selectedTimezone,
+                    allTimezones: _allTimezones,
+                    isEditingEnabled: isEditingEnabled,
                     initiallyExpanded: _advancedSettingsExpanded,
-                    onExpansionChanged: (bool expanded) {
+                    onExpansionChanged: (expanded) {
                       setState(() => _advancedSettingsExpanded = expanded);
                     },
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            TextFormField(
-                                controller: _linkController,
-                                enabled: isEditingEnabled,
-                                decoration: InputDecoration(
-                                  labelText: OccasionSettingsStrings.link,
-                                ),
-                                validator: FormBuilderValidators.compose([
-                                  FormBuilderValidators.required(
-                                      errorText: OccasionSettingsStrings
-                                          .linkIsRequired),
-                                ]),
-                                onChanged: (val) {
-                                  final fixed = Utilities.sanitizeFullUrl(val);
-                                  if (fixed != val) {
-                                    _linkController.value =
-                                        _linkController.value.copyWith(
-                                      text: fixed,
-                                      selection: TextSelection.collapsed(
-                                          offset: fixed.length),
-                                    );
-                                  }
-                                  setState(() {
-                                    _linkValue = fixed;
-                                  });
-                                },
-                                onSaved: (val) {
-                                  _linkValue =
-                                      Utilities.sanitizeFullUrl(val ?? "");
-                                }),
-                            const SizedBox(height: 24),
-                            TextFormField(
-                              controller: _replyToEmailController,
-                              enabled: isEditingEnabled,
-                              decoration: InputDecoration(
-                                labelText:
-                                    OccasionSettingsStrings.labelReplyToEmail,
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.always,
-                                hintText: (RightsService.currentUnit()?.data?[Tb
-                                                .units
-                                                .data_reply_to] as String?)
-                                            ?.isNotEmpty ==
-                                        true
-                                    ? "${OccasionSettingsStrings.defaultValue}: ${RightsService.currentUnit()?.data?[Tb.units.data_reply_to]}"
-                                    : null,
-                                border: const OutlineInputBorder(),
-                                helperText:
-                                    OccasionSettingsStrings.helperReplyToEmail,
-                                helperMaxLines: 3,
-                              ),
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (val) {
-                                if (val == null || val.isEmpty) return null;
-                                return FormBuilderValidators.email(
-                                    errorText: OccasionSettingsStrings
-                                        .validationEmailInvalid)(val);
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            if (_allTimezones.isNotEmpty)
-                              Autocomplete<String>(
-                                initialValue: _selectedTimezone != null &&
-                                        _allTimezones
-                                            .contains(_selectedTimezone)
-                                    ? TextEditingValue(text: _selectedTimezone!)
-                                    : null, // Use TextEditingValue for initialValue
-                                optionsBuilder:
-                                    (TextEditingValue textEditingValue) {
-                                  if (!isEditingEnabled) {
-                                    return const Iterable<String>.empty();
-                                  }
-                                  if (textEditingValue.text.isEmpty) {
-                                    return _allTimezones
-                                        .take(50); // Show some initial options
-                                  }
-                                  return _allTimezones.where((String option) {
-                                    return option.toLowerCase().contains(
-                                        textEditingValue.text.toLowerCase());
-                                  });
-                                },
-                                onSelected: (String selection) {
-                                  setState(() {
-                                    _selectedTimezone = selection;
-                                  });
-                                },
-                                fieldViewBuilder: (BuildContext context,
-                                    TextEditingController
-                                        fieldTextEditingController,
-                                    FocusNode fieldFocusNode,
-                                    VoidCallback onFieldSubmitted) {
-                                  return TextFormField(
-                                    controller: fieldTextEditingController,
-                                    focusNode: fieldFocusNode,
-                                    enabled: isEditingEnabled,
-                                    decoration: InputDecoration(
-                                      labelText:
-                                          OccasionSettingsStrings.timezone,
-                                      border: const OutlineInputBorder(),
-                                      suffixIcon: fieldTextEditingController
-                                                  .text.isNotEmpty &&
-                                              isEditingEnabled
-                                          ? IconButton(
-                                              icon: const Icon(Icons.clear),
-                                              onPressed: () {
-                                                fieldTextEditingController
-                                                    .clear();
-                                                setState(() {
-                                                  _selectedTimezone = null;
-                                                });
-                                              },
-                                            )
-                                          : null,
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return OccasionSettingsStrings
-                                            .timezoneIsRequired;
-                                      }
-                                      if (!_allTimezones.contains(value)) {
-                                        if (_selectedTimezone != value) {
-                                          return OccasionSettingsStrings
-                                              .invalidTimezone;
-                                        }
-                                      }
-                                      if (_allTimezones.contains(value) &&
-                                          _selectedTimezone != value) {
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          if (mounted) {
-                                            setState(() {
-                                              _selectedTimezone = value;
-                                            });
-                                          }
-                                        });
-                                      }
-                                      return null;
-                                    },
-                                    onFieldSubmitted: (_) => onFieldSubmitted(),
-                                  );
-                                },
-                                optionsViewBuilder: (BuildContext context,
-                                    AutocompleteOnSelected<String> onSelected,
-                                    Iterable<String> options) {
-                                  return Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Material(
-                                      elevation: 4.0,
-                                      child: ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                            maxHeight: 300,
-                                            maxWidth: MediaQuery.of(context)
-                                                            .size
-                                                            .width -
-                                                        40 >
-                                                    0
-                                                ? MediaQuery.of(context)
-                                                        .size
-                                                        .width -
-                                                    40
-                                                : 300),
-                                        child: ListView.builder(
-                                          padding: EdgeInsets.zero,
-                                          itemCount: options.length,
-                                          shrinkWrap: true,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            final String option =
-                                                options.elementAt(index);
-                                            return InkWell(
-                                              onTap: () {
-                                                onSelected(option);
-                                              },
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(16.0),
-                                                child: Text(option),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              )
-                            else
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12.0),
-                                child: Text(
-                                    OccasionSettingsStrings.timezonesLoading),
-                              ),
-                            const SizedBox(height: 16),
-                          ],
-                        ),
-                      ),
-                    ],
+                    onTimezoneSelected: (selection) {
+                      setState(() {
+                        _selectedTimezone =
+                            selection.isEmpty ? null : selection;
+                      });
+                    },
+                    onLinkChanged: (fixed) {
+                      setState(() {
+                        _linkValue = fixed;
+                      });
+                    },
+                    onLinkSaved: (val) {
+                      _linkValue = val;
+                    },
                   ),
                   const SizedBox(height: 24),
-                  Opacity(
-                    opacity: isEditingEnabled ? 1.0 : 0.5,
-                    child: AbsorbPointer(
-                      absorbing: !isEditingEnabled,
-                      child: Container(
-                        padding: const EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8)),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(OccasionSettingsStrings.features,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 18)),
-                            const SizedBox(height: 8),
-                            TextField(
-                              controller: _featureSearchController,
-                              enabled: isEditingEnabled,
-                              decoration: InputDecoration(
-                                labelText:
-                                    OccasionSettingsStrings.searchFeatures,
-                                prefixIcon: const Icon(Icons.search),
-                                border: const OutlineInputBorder(),
-                                suffixIcon: _featureSearchQuery.isNotEmpty &&
-                                        isEditingEnabled
-                                    ? IconButton(
-                                        icon: const Icon(Icons.clear),
-                                        onPressed: () {
-                                          _featureSearchController.clear();
-                                          setState(() {
-                                            _featureSearchQuery = "";
-                                          });
-                                        },
-                                      )
-                                    : null,
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _featureSearchQuery = value;
-                                });
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            if (enabledFeatures.isNotEmpty) ...[
-                              Text(OccasionSettingsStrings.enabledFeatures,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 8),
-                              ...enabledFeatures.map((feature) => FeatureForm(
-                                  feature: feature, occasion: occasion!.id!)),
-                            ],
-                            if (disabledFeatures.isNotEmpty) ...[
-                              const SizedBox(height: 16),
-                              Text(OccasionSettingsStrings.otherFeatures,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 8),
-                              ...disabledFeatures.map((feature) => FeatureForm(
-                                  feature: feature, occasion: occasion!.id!)),
-                            ],
-                            if (featuresToShow.isEmpty &&
-                                _featureSearchQuery.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                    OccasionSettingsStrings.noFeaturesFound),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  OccasionFeaturesSection(
+                    features: occasion!.features,
+                    isEditingEnabled: isEditingEnabled,
+                    occasionId: occasion!.id!,
                   ),
                   const SizedBox(height: 24),
                   if (RightsService.isUnitManager())

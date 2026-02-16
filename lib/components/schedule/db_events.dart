@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/activities/activity_data_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -667,7 +668,7 @@ class DbEvents {
     );
 
     if (response == null) {
-      print('Failed to load my events bundle. Response was null.');
+      AppLogger.error('Failed to load my events bundle. Response was null.');
       return null;
     }
 
@@ -675,7 +676,7 @@ class DbEvents {
       final code = response is Map ? response['code'] : 'N/A';
       final message =
           response is Map ? response['message'] : response.toString();
-      print('Failed to load my events bundle. Code: $code, Message: $message');
+      AppLogger.error('Failed to load my events bundle. Code: $code, Message: $message');
       return null;
     }
 

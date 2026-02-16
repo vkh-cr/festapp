@@ -142,7 +142,6 @@ export class UserHeader extends HTMLElement {
              // 1. Admin Button (if applicable)
              const canSeeAdmin = RightsService.canSeeAdmin();
              const canSeeReservations = RightsService.canSeeReservations();
-             console.log(`UserHeader: canSeeAdmin=${canSeeAdmin}, canSeeReservations=${canSeeReservations}`);
              
              if (canSeeAdmin || canSeeReservations) {
                  const adminBtn = document.createElement('button');

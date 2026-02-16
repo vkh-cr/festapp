@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/time_travel_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -43,32 +44,38 @@ Future<void> main() async {
 }
 
 Future<void> initializeEverything() async {
-  print('Initialization started');
+  AppLogger.debug('Initialization started');
 
   configureUrlStrategy();
 
   WidgetsFlutterBinding.ensureInitialized();
-  print('Widgets binding initialized');
+  AppLogger.debug('Widgets binding initialized');
+
+  SynchroService.configure(
+    isLoggedIn: AuthService.isLoggedIn,
+    getFullUserInfo: AuthService.getFullUserInfo,
+    getCurrentOccasionId: RightsService.currentOccasionId,
+  );
 
   try {
     PWAInstall().setup();
-    print('PWA setup completed');
+    AppLogger.debug('PWA setup completed');
   } catch (e) {
-    print('PWA setup failed: $e');
+    AppLogger.error('PWA setup failed: $e');
   }
 
   try {
     await initializeDateFormatting();
-    print('Date formatting initialized');
+    AppLogger.debug('Date formatting initialized');
   } catch (e) {
-    print('Date formatting initialization failed: $e');
+    AppLogger.error('Date formatting initialization failed: $e');
   }
 
   try {
     await EasyLocalization.ensureInitialized();
-    print('EasyLocalization initialized');
+    AppLogger.debug('EasyLocalization initialized');
   } catch (e) {
-    print('EasyLocalization initialization failed: $e');
+    AppLogger.error('EasyLocalization initialization failed: $e');
   }
 
   try {
@@ -76,20 +83,20 @@ Future<void> initializeEverything() async {
       url: AppConfig.supabaseUrl,
       anonKey: AppConfig.anonKey,
     ).timeout(const Duration(seconds: 2));
-    print('Supabase initialized');
+    AppLogger.debug('Supabase initialized');
     if (!AuthService.isLoggedIn()) {
       await AuthService.refreshSession().timeout(const Duration(seconds: 2));
-      print('Session refreshed');
+      AppLogger.debug('Session refreshed');
     }
   } catch (e) {
-    print('Supabase initialization failed: $e');
+    AppLogger.error('Supabase initialization failed: $e');
   }
 
   try {
     await TimeHelper.initializeTimeZone().timeout(const Duration(seconds: 2));
-    print('Tz setup completed');
+    AppLogger.debug('Tz setup completed');
   } catch (e) {
-    print('Tz setup failed: $e');
+    AppLogger.error('Tz setup failed: $e');
   }
 
   try {
@@ -105,29 +112,29 @@ Future<void> initializeEverything() async {
               data: settings.data));
       TimeHelper.setTimeZoneLocation(
           RightsService.currentOccasion()?.data?["timezone"]);
-      print('Global settings loaded');
+      AppLogger.debug('Global settings loaded');
     }
   } catch (e) {
-    print('Offline data helper initialization failed: $e');
+    AppLogger.error('Offline data helper initialization failed: $e');
   }
 
   try {
     await RightsService.updateAppData();
-    print('Occasion loaded');
+    AppLogger.debug('Occasion loaded');
   } catch (e) {
-    print('Occasion loading failed: $e');
+    AppLogger.error('Occasion loading failed: $e');
     RightsService.useOfflineVersion = true;
   }
 
-  print('Notification helper initializing');
+  AppLogger.debug('Notification helper initializing');
 
   NotificationHelper.initialize().then((f) {
-    print('Notification helper initialized');
+    AppLogger.debug('Notification helper initialized');
   }, onError: (e) {
-    print('Notification helper initialization failed: $e');
+    AppLogger.error('Notification helper initialization failed: $e');
   });
 
-  print('Initialization completed');
+  AppLogger.debug('Initialization completed');
 
   WebStylesHelper.setBodyBackgroundColor(ThemeConfig.appBarColor());
   WebStylesHelper.setMetaThemeColor(ThemeConfig.seed1);

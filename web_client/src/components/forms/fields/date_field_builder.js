@@ -199,7 +199,6 @@ export class DateFieldBuilder {
             input.addEventListener('input', validateAge);
             input.addEventListener('change', validateAge);
         } else {
-             console.log('DateFieldBuilder: No age limits for field', field.id, field.title);
         }
 
         return container;

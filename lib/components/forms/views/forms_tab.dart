@@ -323,9 +323,7 @@ class _FormsTabState extends State<FormsTab> {
   }
 }
 
-// NOTE: The FormCard widget and the now-removed _CreateOrCopyFormDialog
-// remain the same as in your provided code, but the dialog is now in its own file.
-// I have included FormCard here for completeness of the file.
+// NOTE: _CreateOrCopyFormDialog has been extracted to create_or_copy_dialog.dart.
 
 class FormCard extends StatelessWidget {
   final FormModel form;

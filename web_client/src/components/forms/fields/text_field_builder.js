@@ -1,7 +1,7 @@
 import { FormStrings } from '../form_strings.js';
 import { PhoneFormatter } from '../../../utils/phone_formatter.js';
 import { PhoneCountryCodes } from '../../../logic/phone_country_codes.js';
-import { html, unsafe } from '../../../utils/html.js';
+import { html, sanitizeHtml } from '../../../utils/html.js';
 
 
 export class TextFieldBuilder {
@@ -22,7 +22,7 @@ export class TextFieldBuilder {
                     ${field.isRequired ? html`<span class="required-star"> *</span>` : ''}
                 </label>
                 
-                ${field.description ? html`<div class="form-field-description">${unsafe(field.description)}</div>` : ''}
+                ${field.description ? html`<div class="form-field-description">${sanitizeHtml(field.description)}</div>` : ''}
                 
                 <div class="input-wrapper">
                     <input type="${inputType}" 
@@ -58,9 +58,9 @@ export class TextFieldBuilder {
     }
 
     static _attachPhoneLogic(input, container, formModel) {
-            // Default value if empty
+            // Fallback default; organizations override via formModel.data.phone_prefixes (line 79).
             if (!input.value) {
-                input.value = '+420'; // Default to CZ
+                input.value = '+420';
             }
             
             // Format +420 logic
@@ -74,7 +74,7 @@ export class TextFieldBuilder {
             const badgesContainer = container.querySelector('.phone-badges-container');
             if (!badgesContainer) return;
 
-            // Determine prefixes
+            // Default prefix chips; overridden by organization-level phone_prefixes config.
             let prefixes = ['+420', '+421'];
             if (formModel && formModel.data && formModel.data.phone_prefixes && Array.isArray(formModel.data.phone_prefixes) && formModel.data.phone_prefixes.length > 0) {
                 prefixes = formModel.data.phone_prefixes;

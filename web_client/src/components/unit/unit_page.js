@@ -39,7 +39,6 @@ export class UnitPage extends Component {
             const params = new URLSearchParams(window.location.search);
             const query = params.get('q');
             if (query && this.searchInput) {
-                console.log('UnitPage: Auto-filtering for query:', query);
                 this.searchInput.value = query;
                 this.filter(query);
             }

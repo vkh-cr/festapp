@@ -11,7 +11,6 @@ import { IdDocumentConstants } from '../constants/id_document_constants.js';
 
 export class IdDocumentFieldBuilder {
     static create(field, formModel) {
-        console.log('IdDocumentFieldBuilder field data:', JSON.parse(JSON.stringify(field)));
         // Check if we should split into cards (Card Design Mode)
         const isCardDesign = formModel.isCardDesign;
 

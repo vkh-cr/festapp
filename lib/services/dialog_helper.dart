@@ -1,21 +1,23 @@
-import 'dart:async';
-
 import 'package:cross_file/cross_file.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/app_management/language_model.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
+import 'package:fstapp/services/dialog_helper_confirmation.dart';
+import 'package:fstapp/services/dialog_helper_input.dart';
+import 'package:fstapp/services/dialog_helper_progress.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/drop_file.dart';
-import 'package:fstapp/widgets/password_field.dart';
 import 'package:fstapp/components/dialogs/responsive_search_dialog.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:select_dialog/select_dialog.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+
+export 'package:fstapp/services/dialog_helper_confirmation.dart';
+export 'package:fstapp/services/dialog_helper_input.dart';
+export 'package:fstapp/services/dialog_helper_progress.dart';
 
 class ImportDialogChoice {
   final bool fromTickets;
@@ -38,78 +40,154 @@ class DialogHelper {
     required bool showTicketImport,
     String confirmButtonMessage = "Ok",
     String cancelButtonMessage = "Storno",
-  }) async {
-    XFile? filePath;
-    ImportDialogChoice? result;
+  }) =>
+      InputDialogs.showImportDialog(
+        context,
+        titleMessage,
+        showCsvImport: showCsvImport,
+        showTicketImport: showTicketImport,
+        confirmButtonMessage: confirmButtonMessage,
+        cancelButtonMessage: cancelButtonMessage,
+      );
 
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // Using a stateful builder to handle button state
-        return StatefulBuilder(
-          builder: (context, setState) {
-            final dropFileWidget = DropFile(
-              allowedExtensions: const ['csv'],
-              onFilePathChanged: (file) {
-                setState(() {
-                  filePath = file;
-                });
-              },
-            );
+  static Future<void> showInformationDialog(
+          BuildContext context, String titleMessage, String textMessage,
+          [String buttonMessage = "Ok"]) =>
+      ConfirmationDialogs.showInformationDialog(
+          context, titleMessage, textMessage, buttonMessage);
 
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              title: Text(titleMessage),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (showCsvImport) dropFileWidget,
-                    if (showCsvImport && showTicketImport) ...[
-                      const SizedBox(height: 32),
-                    ],
-                    if (showTicketImport)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            result = ImportDialogChoice(fromTickets: true);
-                            Navigator.pop(context);
-                          },
-                          child: Text(FeaturesStrings.importFromTicketsTitle),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    result = null;
-                    Navigator.pop(context);
-                  },
-                  child: Text(cancelButtonMessage),
-                ),
-                if (showCsvImport)
-                  ElevatedButton(
-                    onPressed: filePath != null
-                        ? () {
-                            result = ImportDialogChoice(fromFile: filePath);
-                            Navigator.pop(context);
-                          }
-                        : null, // Disable if no file is selected
-                    child: Text(FeaturesStrings.labelImportFromCsv),
-                  ),
-              ],
-            );
-          },
-        );
-      },
-    );
-    return result;
-  }
+  static Future<bool> showScanTicketCode(
+    BuildContext context,
+    String titleMessage,
+    String textMessage, {
+    String confirmButtonMessage = "Ok",
+    String cancelButtonMessage = "Storno",
+  }) =>
+      ConfirmationDialogs.showScanTicketCode(
+        context,
+        titleMessage,
+        textMessage,
+        confirmButtonMessage: confirmButtonMessage,
+        cancelButtonMessage: cancelButtonMessage,
+      );
+
+  static Future<bool> showConfirmationDialog(
+    BuildContext context,
+    String titleMessage,
+    String textMessage, {
+    String confirmButtonMessage = "Ok",
+    String cancelButtonMessage = "Storno",
+  }) =>
+      ConfirmationDialogs.showConfirmationDialog(
+        context,
+        titleMessage,
+        textMessage,
+        confirmButtonMessage: confirmButtonMessage,
+        cancelButtonMessage: cancelButtonMessage,
+      );
+
+  static Future<bool> showConfirmationDialogRichText(
+    BuildContext context,
+    String titleMessage,
+    Text textMessage, {
+    String confirmButtonMessage = "Ok",
+    String cancelButtonMessage = "Storno",
+  }) =>
+      ConfirmationDialogs.showConfirmationDialogRichText(
+        context,
+        titleMessage,
+        textMessage,
+        confirmButtonMessage: confirmButtonMessage,
+        cancelButtonMessage: cancelButtonMessage,
+      );
+
+  static Future<bool> showConfirmationDialogRich({
+    required BuildContext context,
+    required String title,
+    required Widget content,
+    String confirmButtonText = "Ok",
+    String cancelButtonText = "Storno",
+  }) =>
+      ConfirmationDialogs.showConfirmationDialogRich(
+        context: context,
+        title: title,
+        content: content,
+        confirmButtonText: confirmButtonText,
+        cancelButtonText: cancelButtonText,
+      );
+
+  static Future<bool> showNotificationPermissionDialog(
+          BuildContext context) =>
+      ConfirmationDialogs.showNotificationPermissionDialog(context);
+
+  static Future<String?> showPasswordInputDialog(
+    BuildContext context,
+    String titleMessage,
+    String hint, [
+    String confirmButtonMessage = "Ok",
+    String cancelButtonMessage = "Storno",
+  ]) =>
+      InputDialogs.showPasswordInputDialog(
+        context,
+        titleMessage,
+        hint,
+        confirmButtonMessage,
+        cancelButtonMessage,
+      );
+
+  static Future<XFile?> dropFilesHere(
+    BuildContext context,
+    String titleMessage,
+    String confirmButtonMessage,
+    String cancelButtonMessage,
+  ) =>
+      InputDialogs.dropFilesHere(
+        context,
+        titleMessage,
+        confirmButtonMessage,
+        cancelButtonMessage,
+      );
+
+  static Future<String?> showInputDialog({
+    required BuildContext context,
+    String? initialValue,
+    required String dialogTitle,
+    required String labelText,
+  }) =>
+      InputDialogs.showInputDialog(
+        context: context,
+        initialValue: initialValue,
+        dialogTitle: dialogTitle,
+        labelText: labelText,
+      );
+
+  static Future<bool> showProgressDialogAsync(
+    BuildContext context,
+    String title,
+    int total, {
+    List<Future<void> Function()>? futures,
+    Duration? delay,
+    bool isBasic = false,
+  }) =>
+      ProgressDialogs.showProgressDialogAsync(
+        context,
+        title,
+        total,
+        futures: futures,
+        delay: delay,
+        isBasic: isBasic,
+      );
+
+  static Future<T?> showFutureProgressDialog<T>({
+    required BuildContext context,
+    required String title,
+    required Future<T> Function() futureCallback,
+  }) =>
+      ProgressDialogs.showFutureProgressDialog<T>(
+        context: context,
+        title: title,
+        futureCallback: futureCallback,
+      );
 
   static Future<void> chooseUser(
       BuildContext context,
@@ -143,24 +221,6 @@ class DialogHelper {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    // We need to close the dialog before the action?
-                    // Or action closes it?
-                    // The original impl called onPressedAction(person) which might have closed it or not.
-                    // The SearchPage pushes a route.
-                    // showDialog pushes a route.
-                    // We should probably pop before action?
-                    // In original 'EventPage', calling 'onPressedAction' invokes 'signIn' then 'loadData'.
-                    // It does NOT pop the search page explicitly in the callback.
-                    // Wait, SearchPage usually returns the selected item if used with showSearch.
-                    // But here 'chooseUser' takes an 'onPressedAction'.
-                    // Inside the builder of SearchPage:
-                    // onPressed: () { onPressedAction(person); }
-                    // It didn't pop automatically unless SearchPage does it?
-                    // SearchPage [https://pub.dev/packages/search_page] behavior:
-                    // It doesn't pop automatically on generic builder click.
-                    // But usually one uses `close(context, result)`.
-                    // Here the user implemented a Button in the builder.
-                    // IMPORTANT: If I am in a Dialog, I should probably pop.
                     Navigator.of(context).pop();
                     onPressedAction(person);
                   },
@@ -171,165 +231,6 @@ class DialogHelper {
         ),
       ),
     );
-  }
-
-  static Future<void> showInformationDialog(
-      BuildContext context, String titleMessage, String textMessage,
-      [String buttonMessage = "Ok"]) async {
-    await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(titleMessage),
-            content: SelectableText(textMessage),
-            actions: [
-              ElevatedButton(
-                child: Text(buttonMessage),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        });
-  }
-
-  static Future<bool> showScanTicketCode(
-    BuildContext context,
-    String titleMessage,
-    String textMessage, {
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
-  }) async {
-    bool result = false;
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(titleMessage),
-          content: Container(),
-          actions: [
-            ElevatedButton(
-              child: Text(confirmButtonMessage),
-              onPressed: () {
-                result = true;
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-    return result;
-  }
-
-  static Future<bool> showConfirmationDialog(
-    BuildContext context,
-    String titleMessage,
-    String textMessage, {
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
-  }) async {
-    bool result = false;
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(titleMessage),
-          content: SingleChildScrollView(child: Text(textMessage)),
-          actions: [
-            TextButton(
-              child: Text(cancelButtonMessage),
-              onPressed: () {
-                result = false;
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text(confirmButtonMessage),
-              onPressed: () {
-                result = true;
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-    return result;
-  }
-
-  static Future<bool> showConfirmationDialogRichText(
-    BuildContext context,
-    String titleMessage,
-    Text textMessage, {
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
-  }) async {
-    bool result = false;
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(titleMessage),
-          content: SingleChildScrollView(child: textMessage),
-          actions: [
-            TextButton(
-              child: Text(cancelButtonMessage),
-              onPressed: () {
-                result = false;
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text(confirmButtonMessage),
-              onPressed: () {
-                result = true;
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-    return result;
-  }
-
-  static Future<bool> showConfirmationDialogRich({
-    required BuildContext context,
-    required String title,
-    required Widget content,
-    String confirmButtonText = "Ok",
-    String cancelButtonText = "Storno",
-  }) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: content, // Directly use the provided widget
-          actions: [
-            TextButton(
-              child: Text(cancelButtonText),
-              onPressed: () {
-                // Pass the result back when popping the dialog
-                Navigator.of(context).pop(false);
-              },
-            ),
-            ElevatedButton(
-              child: Text(confirmButtonText),
-              onPressed: () {
-                // Pass the result back when popping the dialog
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    );
-
-    // Handle the case where the dialog is dismissed (e.g., by tapping outside)
-    return result ?? false;
   }
 
   static Future<UserGroupInfoModel?> showAddToGroupDialogAsync(
@@ -415,380 +316,5 @@ class DialogHelper {
               .tr(namedArgs: {"language": selectedLocale!.name}));
     }
     return selectedLocale;
-  }
-
-  static Future<String?> showPasswordInputDialog(
-    BuildContext context,
-    String titleMessage,
-    String hint, [
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
-  ]) async {
-    final TextEditingController messageController = TextEditingController();
-    String? result;
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(titleMessage),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                PasswordField(
-                  label: hint,
-                  controller: messageController,
-                  passwordType: AutofillHints.password,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(cancelButtonMessage),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                result = messageController.text;
-                messageController.clear();
-                Navigator.pop(context);
-              },
-              child: Text(confirmButtonMessage),
-            ),
-          ],
-        );
-      },
-    );
-    return result;
-  }
-
-  static Future<XFile?> dropFilesHere(
-    BuildContext context,
-    String titleMessage,
-    String confirmButtonMessage,
-    String cancelButtonMessage,
-  ) async {
-    XFile? filePath;
-    final dropFileWidget = DropFile(
-      onFilePathChanged: (file) => filePath = file,
-    );
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: Text(
-            titleMessage,
-          ),
-          content: SingleChildScrollView(
-            child: dropFileWidget,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                filePath = null;
-                Navigator.pop(context);
-              },
-              child: Text(cancelButtonMessage),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text(confirmButtonMessage),
-            ),
-          ],
-        );
-      },
-    );
-    return filePath;
-  }
-
-  static Future<bool> showNotificationPermissionDialog(
-      BuildContext context) async {
-    bool result = false;
-    await showDialog(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Notifications").tr(),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                const Text(
-                        "Notifications will inform you about schedule changes and other selected news.")
-                    .tr(),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text("Disable").tr(),
-              onPressed: () {
-                result = false;
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text("Enable").tr(),
-              onPressed: () async {
-                result = true;
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-    return result;
-  }
-
-  static Future<bool> showProgressDialogAsync(
-    BuildContext context,
-    String title,
-    int total, {
-    List<Future<void> Function()>? futures,
-    Duration? delay,
-    bool isBasic = false, // New isBasic option
-  }) async {
-    final completer = Completer<bool>();
-    final progressNotifier = ValueNotifier<int>(0);
-    final isCancelled = ValueNotifier<bool>(false); // Track cancellation state
-    final statusMessage = ValueNotifier<String>(""); // Track status message
-    final isStornoActive =
-        ValueNotifier<bool>(!isBasic); // Storno button state depends on isBasic
-    final isOkActive = ValueNotifier<bool>(false); // Ok button state
-    final hasError = ValueNotifier<bool>(false); // Track if any error occurred
-
-    // Show the dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return ValueListenableBuilder<int>(
-          valueListenable: progressNotifier,
-          builder: (context, progress, _) {
-            return AlertDialog(
-              title: Text(title),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text("${"Progress".tr()}: $progress/$total"),
-                  SizedBox(height: 20),
-                  LinearProgressIndicator(
-                      value: total > 0 ? progress / total : 0),
-                  SizedBox(height: 20),
-                  ValueListenableBuilder<String>(
-                    valueListenable: statusMessage,
-                    builder: (context, message, _) {
-                      return Text(
-                        message,
-                        style: TextStyle(
-                          color: hasError.value
-                              ? ThemeConfig.redColor(context)
-                              : ThemeConfig.blackColor(context),
-                        ),
-                        textAlign: TextAlign.center,
-                      );
-                    },
-                  ),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: hasError,
-                    builder: (context, errorOccurred, _) {
-                      if (!isBasic || errorOccurred) {
-                        return Column(
-                          children: [
-                            SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.center, // Center the row
-                              children: [
-                                ValueListenableBuilder<bool>(
-                                  valueListenable: isStornoActive,
-                                  builder: (context, isActive, _) {
-                                    return SizedBox(
-                                      width: 100,
-                                      child: ElevatedButton(
-                                        onPressed: isActive
-                                            ? () {
-                                                isCancelled.value = true;
-                                                isStornoActive.value = false;
-                                                isOkActive.value = true;
-                                                statusMessage.value =
-                                                    "The processing has been cancelled."
-                                                        .tr();
-                                              }
-                                            : null,
-                                        child: Text(CommonStrings.storno),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                SizedBox(width: 20), // Space between buttons
-                                ValueListenableBuilder<bool>(
-                                  valueListenable: isOkActive,
-                                  builder: (context, isActive, _) {
-                                    return SizedBox(
-                                      width: 100,
-                                      child: ElevatedButton(
-                                        onPressed: isActive
-                                            ? () {
-                                                Navigator.of(context).pop();
-                                                completer.complete(false);
-                                              }
-                                            : null,
-                                        child: Text(CommonStrings.ok),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      } else {
-                        return SizedBox.shrink();
-                      }
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-
-    // Execute futures sequentially
-    if (futures != null && futures.isNotEmpty) {
-      for (var future in futures) {
-        if (isCancelled.value) break; // Stop execution if cancelled
-        try {
-          statusMessage.value =
-              "Processing...".tr(); // Update processing message
-          await future.call(); // Wait for each future to finish
-          progressNotifier.value++;
-          if (delay != null) {
-            await Future.delayed(delay);
-          }
-        } catch (e) {
-          statusMessage.value = "$e";
-          isCancelled.value = true;
-          isStornoActive.value = false;
-          isOkActive.value = true;
-          hasError.value = true;
-          break;
-        }
-      }
-    }
-
-    // Mark actions as completed
-    isOkActive.value = true;
-    isStornoActive.value = false;
-    if (hasError.value) {
-      statusMessage.value = "The processing has finished with error.".tr();
-    } else if (isCancelled.value) {
-      statusMessage.value = "The processing has been cancelled.".tr();
-    } else {
-      statusMessage.value = "The processing has completed successfully.".tr();
-      if (isBasic && !hasError.value) {
-        Navigator.of(context).pop();
-        completer.complete(true);
-      }
-    }
-
-    // Await the completer if not already completed
-    if (!completer.isCompleted) {
-      completer.complete(!hasError.value && !isCancelled.value);
-    }
-
-    return completer.future;
-  }
-
-  static Future<String?> showInputDialog({
-    required BuildContext context,
-    String? initialValue,
-    required String dialogTitle,
-    required String labelText,
-  }) async {
-    final TextEditingController controller =
-        TextEditingController(text: initialValue);
-
-    return await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(dialogTitle),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(labelText: labelText),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context), // Cancel button
-              child: Text(CommonStrings.storno),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(
-                    context, controller.text.trim()); // Return the input
-              },
-              child: Text(CommonStrings.save),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  /// Shows a dialog for a single long-running task (like a download)
-  /// and returns the result of the future.
-  static Future<T?> showFutureProgressDialog<T>({
-    required BuildContext context,
-    required String title,
-    required Future<T> Function() futureCallback,
-  }) async {
-    // 1. Show the dialog immediately
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const LinearProgressIndicator(), // Indeterminate loading
-              const SizedBox(height: 20),
-              Text("Processing...".tr()),
-            ],
-          ),
-        );
-      },
-    );
-
-    try {
-      // 2. Await the task
-      final result = await futureCallback();
-
-      // 3. Close the dialog on success
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
-      return result;
-    } catch (e) {
-      // 4. Close the dialog on error and handle it
-      if (context.mounted) {
-        Navigator.of(context).pop();
-        // Optional: Show error info
-        ToastHelper.Show(context, "Error: $e");
-      }
-      return null;
-    }
   }
 }

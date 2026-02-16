@@ -7,6 +7,7 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
@@ -74,7 +75,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
       };
       Navigator.pop(context, toReturn);
     } else {
-      debugPrint('Content is required');
+      AppLogger.debug('Content is required');
     }
   }
 

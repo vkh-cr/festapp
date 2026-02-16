@@ -58,8 +58,6 @@ export class FormValidator {
              }
          }
          
-         console.log(`[FormValidator] Input: ${fieldName} Valid: ${nowValid}`);
-
          if (nowValid) {
              if (currentErrors[fieldName]) {
                  delete currentErrors[fieldName];
@@ -160,13 +158,6 @@ export class FormValidator {
                 });
             });
         }
-        
-        // Log if empty (failure case)
-        /*
-        if (values.length === 0 && (subFieldDef.isRequired || subFieldDef.is_required)) {
-             console.log(`[FormValidator] Empty Match for ${subFieldDef.title} (${subFieldDef.id}). Ticket Fields:`, JSON.stringify(ticketItem.fields));
-        }
-        */
         
         return values;
     }

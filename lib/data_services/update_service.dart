@@ -8,13 +8,21 @@ class UpdateService {
   static String? versionRecommended;
   static String? versionLink;
   static bool alreadyChecked = false;
-  static bool isVersionChecking = false;
+  static Future<void>? _pendingCheck;
 
   static Future<void> versionCheck(BuildContext context) async {
-    if (alreadyChecked || isVersionChecking) return;
+    if (alreadyChecked) return;
+    // Deduplicate concurrent calls — reuse the pending future.
+    if (_pendingCheck != null) return;
+    _pendingCheck = _doVersionCheck(context);
+    try {
+      await _pendingCheck;
+    } finally {
+      _pendingCheck = null;
+    }
+  }
 
-    isVersionChecking = true;
-
+  static Future<void> _doVersionCheck(BuildContext context) async {
     if (versionRecommended != null) {
       var packageInfo = await PackageInfo.fromPlatform();
       String currentVersion = packageInfo.version;
@@ -33,8 +41,6 @@ class UpdateService {
         }
       }
     }
-
-    isVersionChecking = false;
   }
 
   static bool _isVersionOutdated(

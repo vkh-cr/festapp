@@ -131,7 +131,6 @@ export class BlueprintSelector {
             // The backend may return a persistent secret if we sent a partial/empty one.
             // We must adopt this secret for the session.
             if (blueprintData && blueprintData.secret) {
-                console.log("[BlueprintSelector] ADOPTING SECRET FROM API:", blueprintData.secret);
                 formModel.secret = blueprintData.secret;
                 this.reservationSecret = blueprintData.secret;
                 
@@ -179,12 +178,8 @@ export class BlueprintSelector {
     async handleSeatClick(obj, session) {
         // --- Fix: Prevent Double Click / Race Conditions ---
         if (obj.processing) {
-            console.log("Seat is processing, ignoring click");
             return;
         }
-
-        // Optimistic UI Update
-        console.log("Seat clicked", obj);
         // STRICTER CHECK: Only allow interaction with AVAILABLE or SELECTED_BY_ME
         if (obj.state !== SeatStates.AVAILABLE && obj.state !== SeatStates.SELECTED_BY_ME) {
             return;

@@ -2,7 +2,7 @@ import { FormStrings } from './form_strings.js';
 import { CommonStrings } from '../shared/common_strings.js';
 import { FormFieldBuilder } from './fields/form_field_builder.js';
 import { DbForms } from './db_forms.js';
-import { html, unsafe } from '../../utils/html.js';
+import { html, sanitizeHtml } from '../../utils/html.js';
 
 export class FormRenderer {
     
@@ -12,9 +12,9 @@ export class FormRenderer {
             <div class="form-wrapper ${formModel.isCardDesign ? 'is-card-design' : ''}">
                 ${showPreview ? html`<div style="width:100%; color:black; background:orange; padding:8px; margin-bottom:16px; text-align:center; font-weight:bold; font-size:13px;">${FormStrings.previewMode}</div>` : ''}
                 
-                ${formModel.header ? html`<div class="form-header">${unsafe(this._optimizeLcp(formModel.header))}</div>` : ''}
+                ${formModel.header ? html`<div class="form-header">${sanitizeHtml(this._optimizeLcp(formModel.header))}</div>` : ''}
                 
-                ${formModel.description ? html`<div class="form-description">${unsafe(formModel.description)}</div>` : ''}
+                ${formModel.description ? html`<div class="form-description">${sanitizeHtml(formModel.description)}</div>` : ''}
 
                 <form id="dynamic-form" novalidate>
                     <!-- Fields will be appended here -->
@@ -39,7 +39,6 @@ export class FormRenderer {
         // Bind Callbacks
         form.onsubmit = (e) => {
             e.preventDefault();
-            console.log('[FormRenderer] onsubmit triggered'); 
             if(callbacks.onSubmit) callbacks.onSubmit(form, formModel);
         }
 
@@ -55,7 +54,6 @@ export class FormRenderer {
                  // Let's just monitor. If 'submit' doesn't fire, we manually fire it?
                  // No, safer is: Click -> Prevent Default -> Call Submit Logic directly.
                  e.preventDefault();
-                 console.log('[FormRenderer] Submit Clicked (Manual Trigger)');
                  if(callbacks.onSubmit) callbacks.onSubmit(form, formModel);
             };
         }

@@ -45,7 +45,27 @@ class RightsService {
   static List<int>? bankAccountAdmin() =>
       occasionLinkModelNotifier.value?.bankAccountsAdmin;
 
+  // Serializes concurrent updateAppData calls to prevent state interleaving.
+  static Future<bool> _lastUpdate = Future.value(true);
+
   static Future<bool> updateAppData(
+      {int? unitId,
+      String? link,
+      bool force = false,
+      bool refreshOffline = AppConfig.isAppSupported,
+      String? formLink}) {
+    final previous = _lastUpdate;
+    final current = previous.catchError((_) => false).then((_) => _doUpdateAppData(
+        unitId: unitId,
+        link: link,
+        force: force,
+        refreshOffline: refreshOffline,
+        formLink: formLink));
+    _lastUpdate = current;
+    return current;
+  }
+
+  static Future<bool> _doUpdateAppData(
       {int? unitId,
       String? link,
       bool force = false,

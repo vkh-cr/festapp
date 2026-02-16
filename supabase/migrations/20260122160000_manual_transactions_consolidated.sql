@@ -87,7 +87,7 @@ BEGIN
     END IF;
 
     -- 2. Insert Transaction
-    -- Removed sender_name as the column does not exist on Prod
+    -- sender_name not included; superseded by counter_account_name
     INSERT INTO eshop.transactions (
         bank_account_id,
         transaction_id,
@@ -687,7 +687,7 @@ BEGIN
     END IF;
 
     -- 2. Insert Transaction
-    -- Removed sender_name as the column does not exist on Prod
+    -- sender_name not included; superseded by counter_account_name
     INSERT INTO eshop.transactions (
         bank_account_id,
         transaction_id,

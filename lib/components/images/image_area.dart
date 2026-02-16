@@ -1,5 +1,6 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/drop_file.dart';
 
@@ -64,7 +65,7 @@ class _ImageAreaState extends State<ImageArea> {
         _currentUrl = uploadedUrl;
       });
     } catch (e) {
-      debugPrint("Error: $e");
+      AppLogger.error("Error: $e");
     } finally {
       setState(() {
         _uploading = false;

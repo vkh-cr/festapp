@@ -10,6 +10,7 @@ import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.da
 import 'package:fstapp/components/blueprint/seat_reservation/widgets/seat_reservation_widget.dart';
 import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:fstapp/components/forms/form_session.dart';
@@ -397,7 +398,7 @@ class _FormPageState extends State<FormPage> {
                 GoogleFonts.getTextTheme(form.fontFamily!, theme.textTheme),
           );
         } catch (e) {
-          print(e);
+          AppLogger.error(e.toString());
         }
       }
 

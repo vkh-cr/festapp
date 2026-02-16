@@ -5,10 +5,8 @@ export class LocalizationService {
     static translations = {};
 
     static async init() {
-        console.log('LocalizationService.init start', { default: AppConfig.defaultLanguage });
         // 1. Load preference
         const saved = localStorage.getItem(AppConfig.Keys.locale);
-        console.log('LocalizationService: saved locale', saved);
         if (saved && AppConfig.supportedLanguages.includes(saved)) {
             LocalizationService.currentLocale = saved;
         } else {
@@ -19,13 +17,11 @@ export class LocalizationService {
                  LocalizationService.currentLocale = browserLang;
              }
         }
-        console.log('LocalizationService: currentLocale determined as', LocalizationService.currentLocale);
 
         await LocalizationService.loadTranslations(LocalizationService.currentLocale);
     }
 
     static async loadTranslations(locale) {
-        console.log('LocalizationService.loadTranslations', locale);
         try {
             const res = await fetch(`/assets/translations/${locale}.json`);
             if (!res.ok) throw new Error('Translation not found');
@@ -33,7 +29,6 @@ export class LocalizationService {
             LocalizationService.currentLocale = locale;
             localStorage.setItem(AppConfig.Keys.locale, locale);
             document.documentElement.lang = locale;
-            console.log('LocalizationService: translations loaded and locale set to', locale);
         } catch (e) {
             console.error("Failed to load translations", e);
         }
@@ -69,11 +64,8 @@ export class LocalizationService {
     }
 
     static async setLocale(locale) {
-        console.log('LocalizationService.setLocale called with', locale);
         await LocalizationService.loadTranslations(locale);
-        // Dispatch event or reload to update UI
-        // Simple approach: Reload page to re-render everything with new strings
-        console.log('LocalizationService: reloading page');
-        window.location.reload(); 
+        // Reload page to re-render everything with new strings
+        window.location.reload();
     }
 }

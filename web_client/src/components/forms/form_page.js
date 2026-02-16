@@ -85,7 +85,6 @@ export class FormPage extends Component {
         // Hardened Check: If container has content, we assume it's valid.
         // NOTE: this.host is managed by base Component
         if (this.currentLink === link && this.host && this.host.innerHTML.trim() !== '') {
-            console.log('FormPage already initialized for link (Persistent):', link);
             return;
         }
         // Check for existing instance to prevent duplicates or state leaks
@@ -406,7 +405,6 @@ export class FormPage extends Component {
 
         const fetcher = () => {
              if (this._previewModulePromise) return;
-             console.log('[FormPage] Prefetching OrderPreview...');
              this._previewModulePromise = import('./order_preview.js');
         };
 

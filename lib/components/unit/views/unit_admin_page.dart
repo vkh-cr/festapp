@@ -7,6 +7,7 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/data_services/update_service.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/unit/db_units.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/unit/views/occasions_screen.dart';
@@ -99,7 +100,7 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
       }
     } catch (e) {
       // Fallback or error handling
-      print("Error loading unit edit data: $e");
+      AppLogger.error("Error loading unit edit data: $e");
     }
 
     if (_currentUnit != null) {

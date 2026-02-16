@@ -1,4 +1,5 @@
 import 'package:fstapp/components/organization/organization_model.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbOrganizations {
@@ -27,7 +28,7 @@ class DbOrganizations {
 
       return platforms;
     } catch (e) {
-      print("Failed to fetch available platforms: $e");
+      AppLogger.error("Failed to fetch available platforms: $e");
       throw Exception("Failed to fetch available platforms: $e");
     }
   }
@@ -41,7 +42,7 @@ class DbOrganizations {
           .single();
       return OrganizationModel.fromJson(response);
     } catch (e) {
-      print("Failed to fetch organization: $e");
+      AppLogger.error("Failed to fetch organization: $e");
       return null;
     }
   }
@@ -50,7 +51,7 @@ class DbOrganizations {
     try {
       return await _supabase.rpc('get_my_admin_organization_id');
     } catch (e) {
-      print("Failed to fetch my admin organization id: $e");
+      AppLogger.error("Failed to fetch my admin organization id: $e");
       return null;
     }
   }
@@ -71,7 +72,7 @@ class DbOrganizations {
 
       return OrganizationModel.fromJson(data);
     } catch (e) {
-      print("Failed to fetch admin organization: $e");
+      AppLogger.error("Failed to fetch admin organization: $e");
       return null;
     }
   }
@@ -96,7 +97,7 @@ class DbOrganizations {
         'data': jsonData, // This only contains changed/non-empty fields.
       }).maybeSingle(); // Now that it returns rows, strictly consume it (expect 1 or 0)
     } catch (e) {
-      print("Failed to update organization: $e");
+      AppLogger.error("Failed to update organization: $e");
       throw Exception("Failed to update organization: $e");
     }
   }

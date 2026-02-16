@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'toast_helper.dart';
 
 // ... (AppError class remains the same) ...
@@ -93,7 +94,7 @@ class ExceptionHandler {
     } else {
       final message = defaultMessage ?? "An unexpected error occurred.".tr();
       ToastHelper.Show(context, message, severity: ToastSeverity.NotOk);
-      debugPrint('Unhandled Exception: ${error.toString()}');
+      AppLogger.error('Unhandled Exception: ${error.toString()}');
     }
   }
 

@@ -46,6 +46,31 @@ Deno.serve(async (req) => {
     );
   }
 
+  // Input validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (admin_email && !emailRegex.test(admin_email)) {
+    return new Response(
+      JSON.stringify({ error: "Invalid admin_email format" }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      }
+    );
+  }
+  if (project_url) {
+    try {
+      new URL(project_url);
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid project_url format" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+  }
+
   // For seed scripts, ensure the additional parameters are provided.
   if (directory === "scripts/seed") {
     if (!project_url) {
@@ -83,7 +108,7 @@ Deno.serve(async (req) => {
     database: dbUrl.pathname.slice(1), // removes the leading '/'
     hostname: dbUrl.hostname,
     port: parseInt(dbUrl.port),
-    tls: { rejectUnauthorized: false },
+    tls: { enabled: true },
   });
 
   // Helper function to recursively process directories and execute SQL files.
@@ -133,8 +158,10 @@ Deno.serve(async (req) => {
       ) {
         try {
           console.log("Executing seed_org_with_admin...");
-          const seedQuery = `SELECT seed_org_with_admin('${admin_email}', '${admin_password}')`;
-          await client.queryObject(seedQuery);
+          await client.queryObject(
+            "SELECT seed_org_with_admin($1, $2)",
+            [admin_email, admin_password],
+          );
         } catch (err) {
           console.error("Error executing seed_org_with_admin:", err);
           return new Response(
@@ -155,8 +182,10 @@ Deno.serve(async (req) => {
       // Execute setup_triggers.
       try {
         console.log("Executing setup_triggers...");
-        const triggerQuery = `SELECT setup_triggers('${project_url}')`;
-        await client.queryObject(triggerQuery);
+        await client.queryObject(
+          "SELECT setup_triggers($1)",
+          [project_url],
+        );
       } catch (err) {
         console.error("Error executing setup_triggers:", err);
         return new Response(
@@ -174,8 +203,10 @@ Deno.serve(async (req) => {
       // Execute setup_crons.
       try {
         console.log("Executing setup_crons...");
-        const cronQuery = `SELECT setup_crons('${project_url}')`;
-        await client.queryObject(cronQuery);
+        await client.queryObject(
+          "SELECT setup_crons($1)",
+          [project_url],
+        );
       } catch (err) {
         console.error("Error executing setup_crons:", err);
         return new Response(

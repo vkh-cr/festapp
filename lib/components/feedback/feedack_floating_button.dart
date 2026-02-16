@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'feedback_strings.dart';
 
@@ -226,7 +227,7 @@ class _EmailOptionDialog extends StatelessWidget {
     if (await canLaunchUrl(emailLaunchUri)) {
       await launchUrl(emailLaunchUri);
     } else {
-      debugPrint("Could not launch email client");
+      AppLogger.error("Could not launch email client");
     }
   }
 

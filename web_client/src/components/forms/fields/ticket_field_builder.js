@@ -540,7 +540,6 @@ export class TicketFieldBuilder {
                  
                  if (newTickets.length !== currentItems.length) {
                      structureChanged = true;
-                     console.log(`[TicketFieldBuilder] Structure changed (length mismatch): ${newTickets.length} vs ${currentItems.length}`);
                  } else {
                      // Check Spots (if any mismatch, we rebuild)
                      for (let i = 0; i < newTickets.length; i++) {

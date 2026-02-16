@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/services/exception_handler.dart';
@@ -9,6 +8,8 @@ import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/eshop/views/search_products_screen.dart';
+import 'package:fstapp/components/eshop/views/product_changes_preview.dart';
+import 'package:fstapp/components/eshop/views/product_info_panel.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
 import '../orders_strings.dart';
@@ -186,8 +187,7 @@ class _ProductsDialogState extends State<ProductsDialog> {
                               fontWeight: FontWeight.bold,
                               fontStyle: FontStyle.italic)),
                       const SizedBox(height: 12),
-                      _buildChangesListItem(
-                        context: context,
+                      ProductChangesPreview(
                         added: added,
                         removed: removed,
                         changed: changed,
@@ -215,16 +215,19 @@ class _ProductsDialogState extends State<ProductsDialog> {
                             ],
                           ),
                         ),
-                      _buildConfirmationListItem(Icons.credit_card,
+                      ProductChangesPreview.buildConfirmationListItem(
+                          context, Icons.credit_card,
                           OrdersStrings.sendUpdateItemStatus),
                       if (balance < 0)
-                        _buildConfirmationListItem(Icons.undo_outlined,
+                        ProductChangesPreview.buildConfirmationListItem(
+                            context, Icons.undo_outlined,
                             OrdersStrings.sendUpdateItemRefund),
-                      _buildConfirmationListItem(Icons.receipt_long_outlined,
+                      ProductChangesPreview.buildConfirmationListItem(
+                          context, Icons.receipt_long_outlined,
                           OrdersStrings.sendUpdateItemSummary),
                       if (balance > 0)
-                        _buildConfirmationListItem(
-                            Icons.qr_code_2, OrdersStrings.sendUpdateItemQr),
+                        ProductChangesPreview.buildConfirmationListItem(
+                            context, Icons.qr_code_2, OrdersStrings.sendUpdateItemQr),
                     ],
                   ),
                 ),
@@ -258,264 +261,6 @@ class _ProductsDialogState extends State<ProductsDialog> {
         await _fetch();
       }
     }
-  }
-
-  Widget _buildChangesListItem({
-    required BuildContext context,
-    required List<ProductModel> added,
-    required List<ProductModel> removed,
-    required List<Map<String, ProductModel>> changed,
-    required double referenceTotal,
-    required double currentTotal,
-  }) {
-    final theme = Theme.of(context);
-    final hasChanges =
-        added.isNotEmpty || removed.isNotEmpty || changed.isNotEmpty;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 2.0),
-            child: Icon(Icons.list_alt_outlined,
-                size: 18, color: theme.textTheme.bodySmall?.color),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(OrdersStrings.sendUpdateItemChanges),
-                if (hasChanges) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.amber.shade200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (added.isNotEmpty) ...[
-                          Text(OrdersStrings.addedProductsTitle,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
-                          ...added.map((p) => Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 8.0, top: 4.0),
-                                child: Text(
-                                    "+ ${p.title} (${Utilities.formatPrice(context, p.price!)})",
-                                    style:
-                                        const TextStyle(color: Colors.green)),
-                              )),
-                          const SizedBox(height: 12),
-                        ],
-                        if (removed.isNotEmpty) ...[
-                          Text(OrdersStrings.removedProductsTitle,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
-                          ...removed.map((p) => Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 8.0, top: 4.0),
-                                child: Text(
-                                    "- ${p.title} (${Utilities.formatPrice(context, p.price!)})",
-                                    style: const TextStyle(color: Colors.red)),
-                              )),
-                          const SizedBox(height: 12),
-                        ],
-                        if (changed.isNotEmpty) ...[
-                          Text(OrdersStrings.changedPricesTitle,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
-                          ...changed.map((c) {
-                            final from = c['from']!;
-                            final to = c['to']!;
-
-                            final List<Widget> changesWidgets = [];
-
-                            if (from.title != to.title) {
-                              changesWidgets.add(Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 8.0, top: 4.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(child: Text("• ${to.title}: ")),
-                                    Text.rich(
-                                      TextSpan(
-                                        style:
-                                            DefaultTextStyle.of(context).style,
-                                        children: [
-                                          TextSpan(
-                                            text: from.title!,
-                                            style: TextStyle(
-                                                decoration:
-                                                    TextDecoration.lineThrough,
-                                                color: theme.textTheme.bodySmall
-                                                    ?.color),
-                                          ),
-                                          WidgetSpan(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 6.0),
-                                              child: Icon(Icons.arrow_forward,
-                                                  size: 16,
-                                                  color: theme
-                                                      .colorScheme.primary),
-                                            ),
-                                            alignment:
-                                                PlaceholderAlignment.middle,
-                                          ),
-                                          TextSpan(
-                                            text: to.title!,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ));
-                            }
-
-                            if ((from.price ?? 0) != (to.price ?? 0)) {
-                              changesWidgets.add(Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 8.0, top: 4.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(child: Text("• ${to.title}: ")),
-                                    Text.rich(
-                                      TextSpan(
-                                        style:
-                                            DefaultTextStyle.of(context).style,
-                                        children: [
-                                          TextSpan(
-                                            text: Utilities.formatPrice(
-                                                context, from.price!),
-                                            style: TextStyle(
-                                                decoration:
-                                                    TextDecoration.lineThrough,
-                                                color: theme.textTheme.bodySmall
-                                                    ?.color),
-                                          ),
-                                          WidgetSpan(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 6.0),
-                                              child: Icon(Icons.arrow_forward,
-                                                  size: 16,
-                                                  color: theme
-                                                      .colorScheme.primary),
-                                            ),
-                                            alignment:
-                                                PlaceholderAlignment.middle,
-                                          ),
-                                          TextSpan(
-                                            text: Utilities.formatPrice(
-                                                context, to.price!),
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ));
-                            }
-
-                            return Column(children: changesWidgets);
-                          }),
-                          const SizedBox(height: 12),
-                        ],
-                        if (referenceTotal != currentTotal) ...[
-                          const Divider(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(OrdersStrings.totalPriceChange,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold)),
-                                Text.rich(
-                                  TextSpan(
-                                    style: DefaultTextStyle.of(context).style,
-                                    children: [
-                                      TextSpan(
-                                        text: Utilities.formatPrice(
-                                            context, referenceTotal),
-                                        style: TextStyle(
-                                            decoration:
-                                                TextDecoration.lineThrough,
-                                            color: theme
-                                                .textTheme.bodySmall?.color),
-                                      ),
-                                      WidgetSpan(
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 6.0),
-                                          child: Icon(Icons.arrow_forward,
-                                              size: 16,
-                                              color: theme.colorScheme.primary),
-                                        ),
-                                        alignment: PlaceholderAlignment.middle,
-                                      ),
-                                      TextSpan(
-                                        text: Utilities.formatPrice(
-                                            context, currentTotal),
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                          )
-                        ]
-                      ],
-                    ),
-                  ),
-                ] else
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0, top: 4.0),
-                    child: Text(OrdersStrings.noProductChangesDetected,
-                        style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            color: theme.textTheme.bodySmall?.color)),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildConfirmationListItem(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon,
-              size: 18, color: Theme.of(context).textTheme.bodySmall?.color),
-          const SizedBox(width: 12),
-          Expanded(child: Text(text)),
-        ],
-      ),
-    );
   }
 
   @override
@@ -559,7 +304,13 @@ class _ProductsDialogState extends State<ProductsDialog> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (_bundle != null) ...[
-                      _buildInfoPanel(),
+                      ProductInfoPanel(
+                        order: _bundle!.order,
+                        paymentInfo: _bundle!.paymentInfo,
+                        ticket: _bundle!.ticket,
+                        orderHistory: _bundle!.orderHistory,
+                        onSendUpdate: _showSendUpdateConfirmDialog,
+                      ),
                       const Divider(height: 32),
                     ],
                     Row(
@@ -691,84 +442,6 @@ class _ProductsDialogState extends State<ProductsDialog> {
           child: Text(CommonStrings.save),
         ),
       ],
-    );
-  }
-
-  Widget _buildInfoPanel() {
-    if (_bundle == null) return const SizedBox.shrink();
-
-    final order = _bundle!.order;
-    final payment = _bundle!.paymentInfo;
-    final ticket = _bundle!.ticket;
-    final history = _bundle!.orderHistory;
-
-    final totalPaid = payment?.paid ?? 0;
-    final orderPrice = order.price ?? 0;
-    final isFullyPaid = totalPaid >= orderPrice && orderPrice > 0;
-
-    return Column(
-      children: [
-        _buildInfoRow(
-            OrdersStrings.infoTicketSymbol, ticket.ticketSymbol ?? "N/A"),
-        _buildInfoRow(OrdersStrings.infoEmail, order.data?["email"] ?? "N/A"),
-        _buildInfoRow(OrdersStrings.infoOrderStatus,
-            OrderModel.stateToLocale(order.state!)),
-        _buildInfoRow(OrdersStrings.infoPayment,
-            "${Utilities.formatPrice(context, totalPaid)} / ${Utilities.formatPrice(context, orderPrice)}",
-            valueColor: isFullyPaid ? Colors.green : Colors.orange.shade700),
-        if (history.isNewerVersionAvailable)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Card(
-              color: Colors.amber.withOpacity(0.1),
-              elevation: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.warning_amber_rounded,
-                          color: Colors.amber.shade800),
-                      title: Text(OrdersStrings.outdatedTitle,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.amber.shade900)),
-                      subtitle: Text(OrdersStrings.outdatedSubtitle),
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton.icon(
-                      onPressed: _showSendUpdateConfirmDialog,
-                      icon: const Icon(Icons.email_outlined),
-                      label: Text(OrdersStrings.sendUpdateButton),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber.shade700,
-                        foregroundColor: Colors.white,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          )
-      ],
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          SelectableText(
-            value,
-            style: TextStyle(
-                color: valueColor,
-                fontWeight: valueColor != null ? FontWeight.bold : null),
-          ),
-        ],
-      ),
     );
   }
 

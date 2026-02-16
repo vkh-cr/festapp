@@ -9,6 +9,7 @@ import 'package:fstapp/components/organization/db_organizations.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/js/js_interop.dart';
 import 'package:fstapp/services/platform_helper.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -60,7 +61,7 @@ class _InstallPageState extends State<InstallPage> {
         });
       }
     } catch (e) {
-      print("Failed to load platforms: $e");
+      AppLogger.error("Failed to load platforms: $e");
       if (mounted) {
         ToastHelper.Show(context, "Failed to load installation options.".tr(),
             severity: ToastSeverity.NotOk);

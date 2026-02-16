@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 
 class HtmlEditorWidget extends StatefulWidget {
@@ -50,7 +51,7 @@ class _HtmlEditorWidgetState extends State<HtmlEditorWidget> {
       widget.onTextChanged?.call(text);
     });
     widget.controller.onEditorLoaded(() {
-      debugPrint('Editor Loaded :)');
+      AppLogger.debug('Editor Loaded :)');
     });
 
     Timer(const Duration(seconds: 2), () {
@@ -118,11 +119,11 @@ class _HtmlEditorWidgetState extends State<HtmlEditorWidget> {
                   widget.intermediateFocusNode?.requestFocus();
                 }
               },
-              onTextChanged: (text) => debugPrint('widget text change $text'),
+              onTextChanged: (text) => AppLogger.debug('widget text change $text'),
               onEditorCreated: () {},
-              onEditorResized: (height) => debugPrint('Editor resized $height'),
+              onEditorResized: (height) => AppLogger.debug('Editor resized $height'),
               onSelectionChanged: (sel) =>
-                  debugPrint('index ${sel.index}, range ${sel.length}'),
+                  AppLogger.debug('index ${sel.index}, range ${sel.length}'),
             ),
           ),
         ),

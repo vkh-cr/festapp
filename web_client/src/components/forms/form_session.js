@@ -768,7 +768,6 @@ export class FormSession extends EventTarget {
              priceData.currency = this.state.currency;
         }
 
-        // console.log('FormSession: Calculated Price Data:', priceData);
         this.updateState(priceData);
     }
 

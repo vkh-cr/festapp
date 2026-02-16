@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/components/bank_accounts/bank_account_model.dart';
 
@@ -115,7 +115,7 @@ class DbBankAccounts {
             }
           }
         } catch (parsingError) {
-          debugPrint("Error parsing dependency error: $parsingError");
+          AppLogger.error("Error parsing dependency error: $parsingError");
         }
       }
       rethrow;
