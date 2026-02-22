@@ -287,6 +287,7 @@
   "Price": "Cena",
   "Ticket": "Vstupenka",
   "Drop file here": "Přetáhněte soubor sem",
+  "Drop file here or click to upload": "Přetáhněte soubor sem nebo klikněte pro nahrání",
   "Continue": "Pokračovat",
   "Spot": "Místo",
   "Close": "Zavřít",
@@ -341,7 +342,7 @@
   "Transactions for order {order}.": "Transakce pro objednávku {order}.",
   "Are you sure you want to unlink this transaction?": "Jste si jisti, že chcete odpojit tuto transakci?",
   "Remove": "Odebrat",
-  "Find and link a transaction": "Najít a propojit transakci",
+  "Find and link a transaction": "Vyhledat nespárované transakce",
   "Transaction added successfully.": "Transakce byla úspěšně přidána.",
   "Confirm Add": "Potvrdit přidání",
   "Are you sure you want to add this transaction?": "Jste si jisti, že chcete přidat tuto transakci?",
@@ -672,7 +673,7 @@
     "labelReserveButtonTitle": "Název rezervačního tlačítka",
     "labelDeadlineDuration": "Termín platby (ve dnech)",
     "helperDeadlineDuration": "Nastavte, kolik dní má uživatel na zaplacení objednávky. Ponechte prázdné pro nastavení bez termínu.",
-    "labelReminderEnabled": "Povolit přípomínky k platbě",
+    "labelReminderEnabled": "Povolit připomínky k platbě",
     "helperReminderEnabled": "Automaticky odeslat e-mailovou připomínku o platbě.",
     "labelReminderInterval": "Interval připomínky (dny před termínem)",
     "helperReminderInterval": "Kolik dní před termínem má být připomínka odeslána.",
@@ -741,7 +742,8 @@
     "helperClosedMessage": "Zobrazeno, když je formulář uzavřen / neaktivní.",
     "notSet": "Nenastaveno",
     "publicView": "Veřejný pohled",
-    "editorPreview": "Náhled editora"
+    "editorPreview": "Náhled editora",
+    "seatSelection": "Výběr místa"
   },
   "OrderGridColumns": {
     "id": "Id",
@@ -783,6 +785,7 @@
     "surchargeOnSite": "doplatek na místě"
   },
   "FormsFeature": {
+    "cannotDeleteFormWithResponses": "Formulář nelze smazat, protože již obsahuje odpovědi.",
     "addTicket": "Přidat vstupenku",
     "formsTitle": "Formuláře",
     "createNewForm": "Vytvořit/Zkopírovat formulář",
@@ -817,9 +820,10 @@
     "groupHappeningNow": "Právě probíhá",
     "groupUpcoming": "Nadcházející",
     "groupOther": "Ostatní",
-    "numberOfResponsesTooltip": "Počet odpovědí: {0}",
+    "numberOfResponsesTooltip": "Počet odpovědí: {count}",
     "noFormsForEventPrompt": "Formuláře k této události nejsou k dispozici. Klikněte na '{createNew}' pro vytvoření.",
     "typeHere": "Vyplňte zde...",
+    "typeHere_informal": "Vyplň zde...",
     "phoneFormatHint": "+420 123 456 789",
     "phoneFormatValidation": "Neplatný formát. Příklad: +420 123 456 789",
     "noOptionsForCurrency": "Pro zvolenou měnu nejsou k dispozici žádné možnosti.",
@@ -836,6 +840,7 @@
     "showSurchargeDescription": "Zobrazit popis doplatku"
   },
   "FeatureOrders": {
+    "searchUnpairedTransactions": "Vyhledat nespárované transakce",
     "cancel": "Stornovat",
     "synchronizePayments": "Synchronizovat platby",
     "processing": "Zpracovává se...",
@@ -877,11 +882,33 @@
     "generatingPdfForWithSpot": "Generování Vstupenky pro {customer} - {spot}",
     "scanInstructionsAppUser": "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile.",
     "scanningForOccasion": "Skenuji pro: ",
-    "scanNotFound": "Neplatný kód"
+    "scanNotFound": "Neplatný kód",
+    "addPayment": "Přidat platbu",
+    "addCashPaymentTitle": "Přidat platbu (v hotovosti)",
+    "transactionTypeCash": "Hotově",
+    "transactionTypeManual": "Ručně",
+    "deleteCashTransactionConfirmation": "Opravdu chcete smazat tuto hotovostní platbu? Tímto ji trvale odstraníte.",
+    "enterCashAmountDescription": "Zadejte částku, kterou jste přijali v hotovosti.",
+    "acceptedBy": "Zadal(a)",
+    "variableSymbol": "Variabilní symbol",
+    "messageForRecipient": "Zpráva pro příjemce",
+    "amount": "Částka",
+    "paid": "Zaplaceno",
+    "returned": "Vráceno",
+    "date": "Datum",
+    "noTransactionsFound": "Nebyly nalezeny žádné transakce.",
+    "noUnpairedTransactionsFound": "Žádné nespárované transakce",
+    "findAndLinkTransaction": "Najít a propojit transakci",
+    "unlinkTransactionConfirmation": "Opravdu chcete odpojit tuto transakci?",
+    "confirmRemoval": "Potvrdit odstranění",
+    "removeTransactionSuccess": "Odstraněno: {item}.",
+    "removeTooltip": "Odstranit",
+    "transactionsForOrder": "Transakce k objednávce {order}.",
+    "transactionTypeCashless": "Bezhotovostně"
   },
   "UserColumns": {
     "id": "Id",
-    "unit": "Jednotka",
+    "unit": "Organizace",
     "email": "E-mail",
     "name": "Jméno",
     "surname": "Příjmení",
@@ -970,7 +997,8 @@
     "newOrderTotal": "Celkem za novou objednávku",
     "emailHelpText": "Zadejte e-mailovou adresu zákazníka pro zaslání potvrzení nové objednávky a platebních údajů.",
     "noDetailsFound": "Podrobnosti nenalezeny",
-    "customerExample": "zakaznik@priklad.cz"
+    "customerExample": "zakaznik@priklad.cz",
+    "globalChangesNote": "E-mail zahrnuje změny ze všech vstupenek v této objednávce."
   },
   "EmailTemplates": {
     "subs": {
@@ -1235,7 +1263,8 @@
     "mixedProducts": "Různé / Smíšené",
     "toastNoTemplateProduct": "Nelze vytvořit produkt: Musí existovat alespoň jeden produkt typu 'Místo', který poslouží jako šablona.",
     "uniformViewHelp": "Všechna místa mají stejný produkt.\nZapněte přepínač pro úpravu konkrétních míst.",
-    "warningNoCancellationEmail": "Poznámka: Uživatelé neobdrží e-mail o zrušení pro tyto změny."
+    "warningNoCancellationEmail": "Poznámka: Uživatelé neobdrží e-mail o zrušení pro tyto změny.",
+    "surchargeOnSite": "doplatek"
   },
   "OccasionSettings": {
     "title": "Název",
@@ -1301,7 +1330,11 @@
   },
   "UnitSettings": {
     "labelReplyToEmail": "Výchozí e-mail pro odpovědi",
-    "labelDefaultTimezone": "Výchozí časová zóna"
+    "labelDefaultTimezone": "Výchozí časová zóna",
+    "deleteUnit": "Smazat organizaci",
+    "deleteUnitConfirmation": "Opravdu chcete smazat tuto organizaci? Všechna data včetně událostí budou ztracena.",
+    "cannotDeleteUnitWithOccasions": "Nelze smazat organizaci, která má události.",
+    "cannotDeleteLastUnit": "Nelze smazat vaši poslední organizaci."
   },
   "PublicOrder": {
     "successTitle": "Vaše objednávka byla přijata!",
@@ -1382,7 +1415,10 @@
     "delete": "Smazat",
     "edit": "Upravit",
     "save": "Uložit",
-    "loading": "Načítání..."
+    "loading": "Načítání...",
+    "reset": "Obnovit",
+    "amountCannotBeZero": "Částka nesmí být 0",
+    "or": "nebo"
   },
   "BankAccount": {
     "settingsTitle": "Nastavení bankovního účtu",
@@ -1397,7 +1433,7 @@
     "fioTokenLabel": "FIO API Token",
     "fioTokenHint": "Zadejte NOVÝ token pro aktualizaci",
     "updateToken": "Aktualizovat token",
-    "tokenUpdated": "Token úspěšně aktualizován",
+    "tokenUpdated": "Token byl aktualizován.",
     "tokenValidUntilLabel": "Token platný do",
     "tokenMaskedInfo": "Token je nastaven a skryt",
     "setDate": "Nastavit datum",
@@ -1410,6 +1446,7 @@
     "selectAccount": "Vybrat účet",
     "description": "Spravujte bankovní účty pro tuto organizaci. Můžete vytvářet nové účty, připojovat existující a nastavovat jejich prioritu.",
     "addBankAccount": "Přidat bankovní účet",
+    "lastFetchTime": "Poslední aktualizace transakcí",
     "leaveEmptyToKeepToken": "Ponechte prázdné pro zachování současného tokenu",
     "currencyCodeLabel": "Kód (3 písmena)",
     "currencyHint": "např. CZK",
@@ -1427,7 +1464,7 @@
     "supportedCurrencies": "Podporované měny",
     "addCurrency": "Přidat měnu",
     "invalidCurrencyCode": "Neplatný kód (3 znaky)",
-    "priority": "Priorita",
+    "priority": "Priorita v organizaci",
     "priorityTooltip": "Určuje pořadí účtů. Nižší čísla se zobrazují jako první.",
     "priorityHelpTitle": "Priorita",
     "priorityHelpContent": "Priorita určuje pořadí, v jakém se účty zobrazují. Můžete ji změnit přetažením účtů v seznamu.",
@@ -1441,16 +1478,51 @@
     "manageInSettings": "Spravovat účty",
     "addInSettings": "Přidat nový",
     "bankAccountsTitle": "Bankovní účty",
-    "lastFetchTime": "Poslední aktualizace transakcí",
     "deleteAccountTitle": "Odstranit bankovní účet?",
     "manageInUnitSettings": "Bankovní účty lze spravovat v nastavení organizace.",
     "unlink": "Odpojit",
     "unlinkConfirmationTitle": "Odpojit bankovní účet?",
-    "unlinkConfirmationMessage": "Opravdu chcete odpojit tento bankovní účet od jednotky?",
+    "unlinkConfirmationMessage": "Opravdu chcete odpojit tento bankovní účet od organizace?",
     "unlinkDependencyWarningTitle": "Nelze bezpečně odpojit",
     "unlinkDependencyMessage": "Následující aktivní formuláře používají produkty závislé na měnách podporovaných tímto účtem:",
     "unlinkAnyway": "Přesto odpojit",
-    "unlinkDependencyConsequence": "Pozor: Zákazníci NEBUDOU moci platit za objednávky v těchto měnách, dokud to nevyřešíte!"
+    "unlinkDependencyConsequence": "Pozor: Zákazníci NEBUDOU moci platit za objednávky v těchto měnách, dokud to nevyřešíte!",
+    "syncTab": "Propojení s bankou",
+    "syncInstruction": "Pro automatické párování transakcí nastavte přeposílání e-mailů z vaší banky na níže uvedenou adresu.",
+    "emailSecurityNote": "Tato adresa je bezpečná (robot čte pouze platby), prosím udržujte ji v tajnosti a s nikým nesdílejte.",
+    "setupGuide": {
+      "title": "Jak nastavit propojení s bankou",
+      "step1": "Přihlaste se do svého internetového bankovnictví.",
+      "step2": "Přejděte do Nastavení > Oznámení (nebo Notifikace).",
+      "step3": "Vytvořte nové oznámení pro Příchozí platby.",
+      "step4": "Jako příjemce e-mailu nastavte níže uvedenou adresu.",
+      "step5": "Ujistěte se, že oznámení obsahuje variabilní symbol a zprávu pro příjemce.",
+      "explanationTitle": "Proč to dělat?",
+      "explanationSet": "Když toto nastavíte v bance (podle návodu níže), aplikace sama pozná, že peníze dorazily, a označí objednávku jako zaplacenou.",
+      "explanationNotSet": "Když to neuděláte, budete muset kontrolovat účet sami a označovat platby ručně.",
+      "explanationFioNote": "Jelikož máte FIO banku, stačí když vyplníte token výše. Pokud token funguje, tento email nastavovat nemusíte."
+    },
+    "fioSetupGuide": {
+      "title": "Jak získat FIO API token",
+      "step1": "Přihlaste se do FIO Internetbankingu.",
+      "step2": "Přejděte do Nastavení > API.",
+      "step3": "Přidejte nový token (Pouze čtení)."
+    },
+    "forwardingEmailLabel": "Přeposílací e-mail",
+    "copyEmail": "Zkopírováno",
+    "regenerateToken": "Přegenerovat token",
+    "inputModeSplit": "Národní formát (CZ)",
+    "inputModeIban": "IBAN / Jiný",
+    "fullFormatLabel": "Celý formát:",
+    "prefixLabel": "Předčíslí",
+    "bankCodeLabel": "Kód banky",
+    "ibanValidationHelp": "Podporuje ověření IBAN",
+    "regenerateTokenConfirmation": "Opravdu chcete přegenerovat token? Stará e-mailová adresa přestane fungovat a pro fungování párování budete muset nastavit přeposílání e-mailů na novou adresu.",
+    "bankConnectionTab": "Propojení s bankou",
+    "maskedEmailExplanation": "Emailová adresa je z bezpečnostních důvodů skryta. Pokud ji potřebujete vidět, požádejte prosím administrátora tohoto bankovního účtu.",
+    "safeSenderInfo": "Tato adresa je bezpečná. Je to speciální robot, který čte pouze e-maily o platbách a nic jiného.",
+    "forwardingEmailWarning": "Upozornění: Prosím, udržujte tento e-mail v tajnosti. S nikým jej nesdílejte.",
+    "setupConnectionNow": "Nastavit připojení nyní"
   },
   "FeatureContract": {
     "title": "Smlouva",
@@ -1467,6 +1539,5 @@
     "generatingContract": "Generování smlouvy...",
     "generatingContractFor": "Generování smlouvy pro {customer}...",
     "paymentInfo": "Informace k platbě"
-  },
-  "surchargeOnSite": "doplatek"
+  }
 }
