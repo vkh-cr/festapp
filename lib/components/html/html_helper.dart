@@ -1,8 +1,5 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
-import 'package:fstapp/app_config.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/images/db_images.dart';
 import 'package:fstapp/components/images/image_compression_helper.dart';
@@ -249,8 +246,7 @@ class HtmlHelper {
   }
 
   static Future<String> storeImagesToOccasion(
-      String oldHtml, String newHtml, int occasionId,
-      {int? maxWidth, int maxBytes = AppConfig.imagesMaxBytes}) async {
+      String oldHtml, String newHtml, int occasionId) async {
     // Parse the old and new HTML documents.
     final oldDocument = html_parser.parse(oldHtml);
     final newDocument = html_parser.parse(newHtml);
@@ -297,47 +293,10 @@ class HtmlHelper {
         imageData = fetched;
       }
 
-      // Only use resize parameter if the image is bigger than given width.
-      Uint8List compressedImageData;
-
-      if (imageData.lengthInBytes > maxBytes) {
-        var decodedImage = img.decodeImage(imageData);
-        if (decodedImage != null) {
-          // Determine the target width: use maxWidth if the image is too wide,
-          // otherwise keep the original width.
-          int targetWidth = maxWidth != null && decodedImage.width > maxWidth
-              ? maxWidth
-              : decodedImage.width;
-          // Calculate the scaling factor.
-          double scale = targetWidth / decodedImage.width;
-          // Estimate the new file size at 100% quality after scaling.
-          int estimatedSizeQuality100 =
-              (decodedImage.lengthInBytes * scale * scale).floor();
-
-          int dynamicQuality = 100;
-          if (estimatedSizeQuality100 > maxBytes) {
-            // Compute the ratio of the desired size to the estimated size.
-            double ratio = maxBytes / estimatedSizeQuality100;
-            // Use an exponent of 2 for more aggressive compression.
-            dynamicQuality = (pow(ratio, 2) * 100).floor();
-            dynamicQuality = dynamicQuality.clamp(1, 100);
-          }
-
-          compressedImageData = await ImageCompressionHelper.compress(
-            imageData,
-            targetWidth,
-            quality: dynamicQuality,
-          );
-        } else {
-          compressedImageData = imageData;
-        }
-      } else {
-        compressedImageData = imageData;
-      }
-
-      // Upload the compressed image and get the public URL.
+      // Upload raw image to Worker — Cloudflare Images binding handles
+      // the single transform (resize + optimize) server-side.
       final publicUrl =
-          await DbImages.uploadImage(compressedImageData, occasionId, null);
+          await DbImages.uploadImage(imageData, occasionId, null);
       // Update the image tag's src attribute.
       image.attributes['src'] = publicUrl;
     }

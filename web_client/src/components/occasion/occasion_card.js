@@ -6,6 +6,7 @@ import { FeatureService } from '../features/feature_service.js';
 import { FeatureConstants } from '../features/feature_constants.js';
 import { HtmlUtils } from '../../utils/html_utils.js';
 import { OccasionDetailDialog } from './occasion_detail_dialog.js';
+import { transformImageUrl, MEDIUM_WIDTH } from '../../utils/image_url_helper.js';
 
 export class OccasionCard {
     static create(occasion, isPresent = false, isPast = false) {
@@ -36,7 +37,7 @@ export class OccasionCard {
         // Image
         if (occasion.data?.image) {
             const img = document.createElement('img');
-            img.src = occasion.data.image;
+            img.src = transformImageUrl(occasion.data.image, { width: MEDIUM_WIDTH, quality: 75 });
             img.alt = occasion.title || 'Event Image';
             img.className = 'oc-bg';
             card.appendChild(img);

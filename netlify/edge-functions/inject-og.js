@@ -93,7 +93,7 @@ export default async (request, context) => {
     if (imagePath && imagePath.startsWith('http')) {
         imageUrl = imagePath;
     } else if (imagePath) {
-        imageUrl = `${supabaseUrl}/storage/v1/object/public/public/${imagePath}`;
+        imageUrl = `https://img.festapp.net/${imagePath}`;
     } else {
         imageUrl = `${url.origin}/og_image.jpg`;
     }

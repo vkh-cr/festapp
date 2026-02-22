@@ -1,0 +1,21 @@
+{
+  "name": "festapp-migration",
+  "version": "1.0.0",
+  "description": "Migration scripts for Supabase Storage to Cloudflare R2",
+  "type": "module",
+  "scripts": {
+    "migrate": "node migrate-files.js",
+    "migrate:dry": "node migrate-files.js --dry-run",
+    "rewrite": "node rewrite-urls.js",
+    "rewrite:dry": "node rewrite-urls.js --dry-run",
+    "verify": "node verify.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.500.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.3.0",
+    "p-limit": "^5.0.0",
+    "pg": "^8.13.0"
+  }
+}

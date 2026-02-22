@@ -1,95 +1,23 @@
 import 'dart:typed_data';
-import 'package:fstapp/app_config.dart';
 import 'package:image/image.dart' as img;
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ImageCompressionHelper {
-  static const String _bucketName = 'images-temp';
   static const String _jpgFormat = 'jpg';
   static const String _pngFormat = 'png';
   static const String _webpFormat = 'webp';
 
   static Future<Uint8List> compressJpeg(Uint8List imageData, int width,
       {int quality = 85}) async {
-    return await compressImageWithSupabase(
-      imageData,
-      width,
-      quality: quality,
-      format: _jpgFormat,
-      offlineCompression: () =>
-          compressJpegOffline(imageData, width, quality: quality),
-    );
+    return compressJpegOffline(imageData, width, quality: quality);
   }
 
   static Future<Uint8List> compressPng(Uint8List imageData, int width) async {
-    return await compressImageWithSupabase(
-      imageData,
-      width,
-      format: _pngFormat,
-      offlineCompression: () => compressPngOffline(imageData, width),
-    );
+    return compressPngOffline(imageData, width);
   }
 
   static Future<Uint8List> compressWebp(Uint8List imageData, int width,
       {int quality = 85}) async {
-    return await compressImageWithSupabase(
-      imageData,
-      width,
-      quality: quality,
-      format: _webpFormat,
-      offlineCompression: () =>
-          compressWebpOffline(imageData, width, quality: quality),
-    );
-  }
-
-  static Future<Uint8List> compressImageWithSupabase(
-    Uint8List imageData,
-    int width, {
-    int? quality,
-    required String format,
-    required Uint8List Function() offlineCompression,
-  }) async {
-    if (!AppConfig.isProLicense) {
-      return offlineCompression();
-    }
-
-    final supabase = Supabase.instance.client;
-    final path = 'uploads/${DateTime.now().millisecondsSinceEpoch}.$format';
-
-    try {
-      // Upload the image to Supabase Storage
-      final uploadResponse = await supabase.storage
-          .from(_bucketName)
-          .uploadBinary(path, imageData);
-      if (uploadResponse.isEmpty) {
-        return offlineCompression();
-      }
-
-      try {
-        // Attempt to transform and download the image
-        var imgData = await supabase.storage.from(_bucketName).download(
-              path,
-              transform: TransformOptions(
-                  width: width,
-                  quality: quality,
-                  format: RequestImageFormat.origin),
-            );
-
-        return imgData;
-      } on StorageException catch (e) {
-        if (e.statusCode == "403") {
-          // Set limited license flag and fallback to offline conversion
-          AppConfig.isProLicense = false;
-        }
-        return offlineCompression();
-      } finally {
-        // Always delete the original image from Supabase Storage after processing
-        await supabase.storage.from(_bucketName).remove([path]);
-      }
-    } catch (e) {
-      // If an error occurs, fallback to offline compression
-      return offlineCompression();
-    }
+    return compressWebpOffline(imageData, width, quality: quality);
   }
 
   static Uint8List compressJpegOffline(Uint8List imageData, int width,
@@ -170,15 +98,6 @@ class ImageCompressionHelper {
   static Future<Uint8List> compress(Uint8List imageData, int width,
       {int quality = 85}) async {
     final format = _determineImageFormat(imageData);
-    if (format == _jpgFormat) {
-      return await compressJpeg(imageData, width, quality: quality);
-    } else if (format == _pngFormat) {
-      return await compressPng(imageData, width);
-    } else if (format == _webpFormat) {
-      return await compressWebp(imageData, width, quality: quality);
-    } else {
-      // Fallback to JPEG compression if the format is not recognized.
-      return await compressJpeg(imageData, width, quality: quality);
-    }
+    return _compressImageOffline(imageData, width, quality: quality, format: format);
   }
 }

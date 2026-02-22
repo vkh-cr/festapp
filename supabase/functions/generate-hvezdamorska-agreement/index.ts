@@ -22,7 +22,8 @@ const staticOrganizerData = {
 const staticPaymentClause = "Platba zálohy probíhá převodem na účet, doplatek se hradí v hotovosti v eurech při příjezdu na místo ubytování.";
 const staticTermsClause = "Zákazník svým podpisem/zaplacením zálohy potvrzuje, že tato smlouva je pro něj i ostatní přihlášené osoby ZÁVAZNÁ a že mu jsou známy Všeobecné obchodní podmínky cestovní kanceláře a SOUHLASÍ s nimi. Dále souhlasí, aby veškerá korespondence byla zasílána na jeho výše uvedený email a zavazuje se svoje spolucestující včas a plně informovat. Objednavatel a jeho spolucestující též souhlasí se zpracováním jejich osobních údajů ve smyslu platných právních předpisů (GDPR).";
 const DEFAULT_FONT_URL = "https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf";
-const LOGO_IMAGE_URL = "https://lwfpdjxsdmkfyrzqbrlk.supabase.co/storage/v1/object/public/public-files/hvezdamorska/hvezdamorskaCKlogo.png";
+// Logo manually uploaded to R2 from secondary Supabase project (lwfpdjxsdmkfyrzqbrlk)
+const LOGO_IMAGE_URL = "https://img.festapp.net/hvezdamorska/hvezdamorskaCKlogo.png";
 
 
 // --- HELPER FUNCTIONS ---

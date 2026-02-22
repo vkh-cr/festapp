@@ -10,9 +10,7 @@
 const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
 
-// Default Config (Fallback)
-const DEFAULT_SB_URL = "https://kjdpmixlnhntmxjedpxh.supabase.co";
-const DEFAULT_SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI";
+// Config from environment
 
 // Parse CLI Args
 const args = process.argv.slice(2);
@@ -46,8 +44,14 @@ for (let i = 0; i < args.length; i++) {
 }
 
 async function main() {
-    const sbUrl = process.env.SUPABASE_URL || DEFAULT_SB_URL;
-    const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || DEFAULT_SB_KEY;
+    const sbUrl = process.env.SUPABASE_URL;
+    const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+
+    if (!sbUrl || !sbKey) {
+        console.error('ERROR: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY) are required.');
+        console.error('   Set them in .env.local or pass them directly.');
+        process.exit(1);
+    }
 
     console.log("Using Supabase URL:", sbUrl);
     // console.log("Using Key:", sbKey.substring(0, 10) + "...");

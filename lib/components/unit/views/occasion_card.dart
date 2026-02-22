@@ -12,6 +12,7 @@ import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/occasion/occasion_detail_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fstapp/components/images/image_url_helper.dart';
 
 class OccasionCard extends StatefulWidget {
   static const double kCardBorderRadius = 15.0;
@@ -165,8 +166,10 @@ class _OccasionCardState extends State<OccasionCard> {
                     if (widget.occasion.data?[Tb.occasions.data_image] != null)
                       Positioned.fill(
                         child: CachedNetworkImage(
-                          imageUrl:
+                          imageUrl: ImageUrlHelper.transformImageUrl(
                               widget.occasion.data![Tb.occasions.data_image]!,
+                              width: ImageUrlHelper.mediumWidth,
+                              quality: 75),
                           fit: BoxFit.cover,
                         ),
                       ),

@@ -8,7 +8,7 @@ Business logic is split between **SQL functions** (`database/functions/`) and Da
 
 - Search for `supabase.rpc('...')` in Dart/JS to find which SQL function handles the operation
 - **In SQL**: Order creation, permissions, payments, ticket scanning, sign-ups, inventory
-- **In Dart/JS**: UI, navigation, file operations (image upload/copy)
+- **In Dart/JS**: UI, navigation, file operations (image upload/copy via `workers/image-worker/`)
 - **Hybrid**: Occasion duplication/deletion — SQL copies DB rows, Dart copies images from Storage
 
 Key SQL directories: `eshop_orders/` (orders), `eshop_forms/` (form→order), `user_permissions/` (RBAC), `events/` (schedule), `inventory/` (capacity).
@@ -46,7 +46,9 @@ Organization (tenant/domain) > Unit (real-world org) > Occasion (event instance)
 - `database/functions/` — SQL functions organized by domain. `database/tests/` for SQL tests (auto-rollback)
 - `supabase/functions/` — Deno Edge Functions (email, tickets, payments). See `docs/backend/edge_functions.md`
 - `web_client/src/` — Vanilla JS (Vite). Components + services (supabase, router, auth, theme, i18n)
+- `workers/image-worker/` — Cloudflare Worker (TypeScript/Node.js, Wrangler). Serves images from R2, handles upload/delete/presigned URLs, on-the-fly transforms via `?w=&f=&q=` query params. Custom domain: `img.festapp.net`
 - `automation/` — `project.conf` (single source of truth), `apply_config.sh`, `test_all.sh`
+- `automation/image-migration/` — One-time migration scripts (Supabase Storage → R2). See `automation/image-migration/README.md`
 
 ## Feature READMEs (Complex Components Only)
 

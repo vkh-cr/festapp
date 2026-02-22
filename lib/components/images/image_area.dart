@@ -1,5 +1,6 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/images/image_url_helper.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/drop_file.dart';
@@ -39,6 +40,7 @@ class ImageArea extends StatefulWidget {
 class _ImageAreaState extends State<ImageArea> {
   String? _currentUrl;
   bool _uploading = false;
+  String? _error;
 
   @override
   void initState() {
@@ -56,20 +58,29 @@ class _ImageAreaState extends State<ImageArea> {
   }
 
   Future<void> _handleFileSelected(XFile file) async {
+    if (!mounted) return;
     setState(() {
       _uploading = true;
+      _error = null;
     });
     try {
       final uploadedUrl = await widget.onFileSelected(file);
+      if (!mounted) return;
       setState(() {
         _currentUrl = uploadedUrl;
       });
     } catch (e) {
       AppLogger.error("Error: $e");
-    } finally {
+      if (!mounted) return;
       setState(() {
-        _uploading = false;
+        _error = e.toString();
       });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _uploading = false;
+        });
+      }
     }
   }
 
@@ -83,6 +94,34 @@ class _ImageAreaState extends State<ImageArea> {
       );
     }
 
+    // If there was an error, show it with a retry option
+    if (_error != null) {
+      return SizedBox(
+        height: 200,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 40, color: ThemeConfig.redColor(context)),
+              const SizedBox(height: 8),
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: ThemeConfig.redColor(context), fontSize: 13),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => setState(() => _error = null),
+                child: const Text('Try again'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     // If we have a URL (either initial or newly uploaded), show it
     if (_currentUrl != null && _currentUrl!.isNotEmpty) {
       return Stack(
@@ -91,10 +130,28 @@ class _ImageAreaState extends State<ImageArea> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.network(
-              _currentUrl!,
+              ImageUrlHelper.transformImageUrl(_currentUrl!, width: ImageUrlHelper.mediumWidth),
               height: 200,
               width: double.infinity,
               fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.broken_image, size: 40, color: ThemeConfig.grey600(context)),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Failed to load image',
+                          style: TextStyle(color: ThemeConfig.grey600(context)),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           Positioned(

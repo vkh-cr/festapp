@@ -1,0 +1,31 @@
+name = "festapp-image-worker"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# Custom domain
+routes = [
+  { pattern = "img.festapp.net", custom_domain = true }
+]
+
+# Keep workers.dev route active alongside custom domain
+workers_dev = true
+
+# R2 bucket bindings
+[[r2_buckets]]
+binding = "IMAGES_BUCKET"
+bucket_name = "festapp-images"
+
+[[r2_buckets]]
+binding = "IMAGES_TEMP"
+bucket_name = "festapp-images-temp"
+
+# Images binding for compression (requires Images subscription)
+[images]
+binding = "IMAGES"
+
+# Secrets (set via `wrangler secret put`):
+# SUPABASE_URL
+# SUPABASE_SERVICE_ROLE_KEY
+# R2_ACCESS_KEY_ID
+# R2_SECRET_ACCESS_KEY
+# CF_ACCOUNT_ID

@@ -2,8 +2,17 @@
 # ==============================================================================
 # TEST ALL
 # Purpose: Runs all tests for the project.
-#          Currently runs Web Client unit tests (npm test).
-# Usage: ./automation/test_all.sh
+#
+# Reads credentials from .env.local (DATABASE_URL, SUPABASE_URL, etc.)
+# Tests that require missing env vars are skipped gracefully.
+#
+# Test types:
+# - Web client (JavaScript): npm test
+# - Database (SQL): node web_client/scripts/run_db_tests.js
+# - Deno edge functions: deno test
+# - Flutter: fvm flutter test
+#
+# Usage: ./automation/test_all.sh [web] [db] [flutter] [integration]
 # ==============================================================================
 
 # Exit on error
@@ -12,6 +21,29 @@ set -e
 # Get the absolute path to the directory containing this script
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Load environment from .env.local if it exists
+cd "$PROJECT_ROOT"
+if [ -f ".env.local" ]; then
+    set -a
+    source .env.local
+    set +a
+fi
+
+echo "========================================"
+if [ -n "$DATABASE_URL" ]; then
+    echo "Database: ${DATABASE_URL:0:50}..."
+else
+    echo "WARNING: DATABASE_URL not set — DB tests will be skipped."
+fi
+if [ -n "$SUPABASE_URL" ]; then
+    echo "Supabase: ${SUPABASE_URL}"
+else
+    echo "WARNING: SUPABASE_URL not set — integration tests will be skipped."
+fi
+echo "========================================"
+echo ""
+
 WEB_CLIENT_DIR="$PROJECT_ROOT/web_client"
 
 echo "=================================================="
@@ -109,11 +141,16 @@ fi
 if [ "$RUN_DB" = true ]; then
     echo ""
     echo ">>> Database Tests..."
-    DB_TEST_RUNNER="$PROJECT_ROOT/web_client/scripts/run_db_tests.js"
-    if [ -f "$DB_TEST_RUNNER" ]; then
-        node "$DB_TEST_RUNNER"
+
+    if [ -z "$DATABASE_URL" ]; then
+        echo "SKIPPING: DATABASE_URL not set."
     else
-        echo "WARNING: DB Test Runner not found at $DB_TEST_RUNNER. Skipping."
+        DB_TEST_RUNNER="$PROJECT_ROOT/web_client/scripts/run_db_tests.js"
+        if [ -f "$DB_TEST_RUNNER" ]; then
+            node "$DB_TEST_RUNNER"
+        else
+            echo "WARNING: DB Test Runner not found at $DB_TEST_RUNNER. Skipping."
+        fi
     fi
 fi
 
@@ -157,10 +194,6 @@ if [ "$RUN_DB" = true ] || [ "$RUN_INTEGRATION" = true ]; then
              # Run without --allow-all to be safe.
              # test_parser_comprehensive only needs logic, but imports might trigger env read.
              set +e
-             # Load env vars for Deno tests
-             if [ -f ".env.local" ]; then
-                export $(grep -v '^#' .env.local | xargs)
-             fi
              deno test --allow-env --allow-net --allow-read $DENO_TEST_FILES
              res=$?
              set -e
@@ -181,7 +214,7 @@ fi
 if [ "$RUN_INTEGRATION" = true ]; then
     echo ""
     echo ">>> Integration Tests..."
-    
+
     # Check for Supabase Keys (basic check)
     if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_SERVICE_ROLE_KEY" ]; then
         echo "Running Bank Import Integration..."
@@ -191,6 +224,24 @@ if [ "$RUN_INTEGRATION" = true ]; then
          node tests/integration/bank_import.js --existing-token "00000000-0000-0000-0000-00000000TEST"
     else
         echo "⚠️  SKIPPING Integration Tests: Missing SUPABASE credentials."
+    fi
+
+    # Image Worker integration tests (upload, compress, auth, transforms, private files)
+    WORKER_TEST_DIR="$PROJECT_ROOT/workers/image-worker"
+    if [ -d "$WORKER_TEST_DIR" ] && [ -n "$DATABASE_URL" ] && [ -n "$SUPABASE_URL" ]; then
+        echo ""
+        echo "Running Image Worker Integration Tests..."
+        cd "$WORKER_TEST_DIR"
+        set +e
+        npx vitest run tests/integration/ 2>&1
+        res=$?
+        set -e
+        cd "$PROJECT_ROOT"
+        if [ $res -ne 0 ]; then
+            echo "⚠️  WARNING: Image Worker Integration Tests Failed."
+        fi
+    else
+        echo "⚠️  SKIPPING Image Worker Tests: Missing DATABASE_URL or SUPABASE_URL."
     fi
 fi
 

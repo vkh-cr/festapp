@@ -29,6 +29,7 @@ class AppConfig {
   static const bool showBankSupportRole = false;
 
   static const String webLink = "https://live.festapp.net";
+  static const String imageWorkerUrl = 'https://img.festapp.net';
   static bool isProLicense = false;
   static const int imagesMaxWidth = 980;
   static const int imagesMaxBytes = 800000;

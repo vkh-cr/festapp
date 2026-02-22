@@ -143,6 +143,8 @@ supabase/.env
 
 # Local Env Files
 **/.env.local
+# Local development environment (generated from supabase status)
+.env.development
 
 # Agent Skills
 .agent/skills/skills/*
@@ -155,4 +157,14 @@ supabase/.env
 !.agent/skills/skills/project-workflows/
 .set_appstore_env.sh
 .agent/workflows/
-/.planning
+
+# Migration scripts
+automation/image-migration/.env
+automation/image-migration/node_modules/
+
+# GSD Planning
+.planning/
+
+# Workers
+workers/*/node_modules/
+**/.wrangler/
