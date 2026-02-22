@@ -837,16 +837,18 @@ create table if not exists public.event_users (
 
 -- Extensions
 CREATE EXTENSION IF NOT EXISTS pg_cron;
-CREATE EXTENSION IF NOT EXISTS dblink;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS http WITH SCHEMA extensions;
 
 -- Cache Table
 CREATE TABLE IF NOT EXISTS public.external_occasions_cache (
-    link TEXT PRIMARY KEY,
+    source_name TEXT NOT NULL,
+    external_id BIGINT NOT NULL,
+    link TEXT,
     remaining_places INTEGER,
     raw_data JSONB,
     last_synced_at TIMESTAMPTZ DEFAULT NOW(),
-    source_name TEXT
+    PRIMARY KEY (source_name, external_id)
 );
 
 
@@ -856,11 +858,8 @@ CREATE TABLE IF NOT EXISTS public.external_occasions_cache (
 -- Sources Table
 CREATE TABLE IF NOT EXISTS public.external_sync_sources (
     source_name TEXT PRIMARY KEY,
-    src_host TEXT NOT NULL,
-    src_port INTEGER DEFAULT 5432,
-    src_db TEXT DEFAULT 'postgres',
-    src_user TEXT DEFAULT 'postgres',
-    encrypted_password TEXT,
+    supabase_url TEXT NOT NULL,
+    anon_key TEXT NOT NULL,
     cron_schedule TEXT DEFAULT '*/5 * * * *',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

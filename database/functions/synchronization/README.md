@@ -1,28 +1,33 @@
 # Synchronization Functions & Lifecycle
 
 This directory contains the core logic for the **External Occasion Sync** system
-(Postgres-Native).
+(HTTP-based, no database passwords needed).
 
 ## Core Functions
 
-1. **`setup_external_source_dblink(source_name, ...)`** (Function B)
+1. **`setup_external_source(source_name, supabase_url, anon_key, cron_schedule)`**
    - **Purpose:** Registers a new external source and **starts the sync job**.
-   - **Action:** Stores credentials (encrypted) and creates a `pg_cron` job
-     named `sync_job_<source_name>`.
+   - **Action:** Stores the Supabase URL and public anon key, creates a `pg_cron`
+     job named `sync_job_<source_name>`.
    - **Schedule:** Default is `*/5 * * * *` (Every 5 minutes).
 
-2. **`sync_source_via_dblink(source_name)`** (Function A)
-   - **Purpose:** The actual sync logic. Connects via dblink, fetches data,
-     upserts local records, and deletes orphans.
+2. **`sync_source_via_http(source_name)`**
+   - **Purpose:** The actual sync logic. Calls the remote's `get_sync_occasions`
+     RPC via HTTP, upserts local records, and deletes orphans.
    - **Usage:** Called automatically by the cron job. Can be triggered manually
      for debugging.
 
-3. **`stop_external_source_sync(source_name)`** (New)
+3. **`get_sync_occasions(p_organization_id, p_unit_id)`**
+   - **Purpose:** Public RPC deployed on every source instance. Returns occasion
+     data as JSONB for cross-instance synchronization.
+   - **Security:** Anon-callable — only exposes already-public data.
+
+4. **`stop_external_source_sync(source_name)`**
    - **Purpose:** Stops the automated sync for a specific source.
    - **Action:** Removes the `pg_cron` job `sync_job_<source_name>`.
    - **Usage:** `SELECT public.stop_external_source_sync('vstupenky_remote');`
 
-4. **`add_sync_map(...)`**
+5. **`add_sync_map(...)`**
    - **Purpose:** Configures _which_ remote organizations/units to map to
      _which_ local counterparts.
 
@@ -30,9 +35,7 @@ This directory contains the core logic for the **External Occasion Sync** system
 
 ### Starting a Sync
 
-The sync starts automatically when you call `setup_external_source_dblink`
-(usually via `register_sync_source.js`). It effectively "Ensures State" (Upserts
-config + Schedules job).
+The sync starts automatically when you call `setup_external_source`.
 
 ### Stopping a Sync
 
@@ -44,5 +47,5 @@ SELECT public.stop_external_source_sync('my_source_name');
 
 ### Restarting/Updating
 
-To change the schedule or password, just run `setup_external_source_dblink`
+To change the schedule or anon key, just run `setup_external_source`
 again. It gracefully unschedules the old job and schedules the new one.
