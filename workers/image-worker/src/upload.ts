@@ -1,5 +1,6 @@
 import type { Env } from './types';
 import { extractBearerToken, checkEditorPermission, checkUnitEditorPermission, resolveSupabaseAuth, type SupabaseAuth } from './auth';
+import { resolveBucket, resolvePublicOrigin } from './bucket';
 
 /** Absolute maximum upload size (before any transform). */
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -121,13 +122,20 @@ export async function handleUpload(
   const maxBytes = maxBytesRaw ? parseInt(String(maxBytesRaw), 10) : DEFAULT_MAX_BYTES;
   const jpegQuality = qualityRaw ? parseInt(String(qualityRaw), 10) : DEFAULT_JPEG_QUALITY;
 
-  // Generate storage key — timestamp + random suffix guarantees uniqueness
-  const safeName = sanitizeFilename(file.name);
-  const prefix = occasionId !== null
-    ? `images/${occasionId}`
-    : `images/unit-${unitId}`;
-  const uid = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const key = `${prefix}/${uid}-${safeName}`;
+  // Use explicit key for private uploads, otherwise generate one
+  const explicitKey = formData.get('key') as string | null;
+  let key: string;
+  if (explicitKey && explicitKey.startsWith('private/')) {
+    key = explicitKey;
+  } else {
+    // Generate storage key — timestamp + random suffix guarantees uniqueness
+    const safeName = sanitizeFilename(file.name);
+    const prefix = occasionId !== null
+      ? `images/${occasionId}`
+      : `images/unit-${unitId}`;
+    const uid = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    key = `${prefix}/${uid}-${safeName}`;
+  }
 
   // Detect if PNG (has alpha channel — preserve format)
   const bytes = new Uint8Array(buffer);
@@ -170,14 +178,16 @@ export async function handleUpload(
     contentType = file.type || 'application/octet-stream';
   }
 
-  // Store to R2
-  await env.IMAGES_BUCKET.put(key, body, {
+  // Store to R2 — route by Supabase project URL
+  const routingOpts = { supabaseUrl: auth.supabaseUrl };
+  const bucket = resolveBucket(env, routingOpts);
+  await bucket.put(key, body, {
     httpMetadata: { contentType },
   });
 
-  // Use the request's origin so the returned URL works for both
-  // img.festapp.net and the workers.dev fallback domain
-  const origin = new URL(request.url).origin;
+  // Resolve public origin from bucket routing (not request origin)
+  // so the URL matches the domain that serves the correct bucket
+  const origin = resolvePublicOrigin(env, routingOpts, new URL(request.url).origin);
   const publicUrl = `${origin}/${key}`;
 
   // Add image record to the caller's Supabase database

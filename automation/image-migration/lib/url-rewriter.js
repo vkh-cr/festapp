@@ -1,11 +1,20 @@
 /**
  * URL transformation logic for Supabase Storage to R2 migration.
+ *
+ * The Supabase project reference is read from SUPABASE_PROJECT_REF env var.
  */
+import 'dotenv/config';
 
-/** Supabase Storage public URL prefixes for this project (kjdpmixlnhntmxjedpxh) */
+const PROJECT_REF = process.env.SUPABASE_PROJECT_REF;
+if (!PROJECT_REF) {
+  console.error('ERROR: SUPABASE_PROJECT_REF is required in .env');
+  process.exit(1);
+}
+
+/** Supabase Storage public URL prefixes for the target project */
 const SUPABASE_PREFIXES = [
-  'https://kjdpmixlnhntmxjedpxh.supabase.co/storage/v1/object/public/public-files/',
-  'https://kjdpmixlnhntmxjedpxh.supabase.co/storage/v1/object/public/custom-files/',
+  `https://${PROJECT_REF}.supabase.co/storage/v1/object/public/public-files/`,
+  `https://${PROJECT_REF}.supabase.co/storage/v1/object/public/custom-files/`,
 ];
 
 /** Legacy: primary prefix for migrate-files.js */
@@ -18,7 +27,13 @@ export const R2_PREFIX = 'https://img.festapp.net/';
 export const SUPABASE_PATTERN = '%supabase.co/storage%';
 
 /** Pattern scoped to this project only */
-export const THIS_PROJECT_PATTERN = '%kjdpmixlnhntmxjedpxh%supabase.co/storage%';
+export const THIS_PROJECT_PATTERN = `%${PROJECT_REF}%supabase.co/storage%`;
+
+/** Regex for finding Supabase URLs in text (used by migrate-files.js) */
+export const SUPABASE_URL_REGEX = new RegExp(
+  `https://${PROJECT_REF}\\.supabase\\.co/storage/v1/object/(?:public|sign)/[^"'\\s<>]+`,
+  'g'
+);
 
 /**
  * Rewrite a single URL from Supabase Storage to R2.
@@ -28,7 +43,7 @@ export const THIS_PROJECT_PATTERN = '%kjdpmixlnhntmxjedpxh%supabase.co/storage%'
  * @returns {{ newUrl: string, changed: boolean }}
  */
 export function rewriteUrl(url) {
-  if (!url || !url.includes('kjdpmixlnhntmxjedpxh.supabase.co/storage')) {
+  if (!url || !url.includes(`${PROJECT_REF}.supabase.co/storage`)) {
     return { newUrl: url, changed: false };
   }
 
@@ -40,9 +55,10 @@ export function rewriteUrl(url) {
   }
 
   // Handle signed URLs: /object/sign/editor-files/filename?token=...
-  const signedMatch = url.match(
-    /https:\/\/kjdpmixlnhntmxjedpxh\.supabase\.co\/storage\/v1\/object\/sign\/editor-files\/([^?]+)/
+  const signedRegex = new RegExp(
+    `https://${PROJECT_REF}\\.supabase\\.co/storage/v1/object/sign/editor-files/([^?]+)`
   );
+  const signedMatch = url.match(signedRegex);
   if (signedMatch) {
     return { newUrl: R2_PREFIX + 'editor/' + signedMatch[1], changed: true };
   }

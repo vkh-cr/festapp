@@ -1,4 +1,5 @@
 import type { Env } from './types';
+import { resolveBucket } from './bucket';
 
 /**
  * Serve public files from R2 with cache headers, conditional requests,
@@ -13,6 +14,7 @@ import type { Env } from './types';
  * the image is resized/re-encoded on the fly. The transformed variant
  * gets its own cache key (params are part of the URL).
  */
+
 export async function handlePublicServe(
   request: Request,
   env: Env
@@ -24,9 +26,11 @@ export async function handlePublicServe(
     return new Response('Not found', { status: 404 });
   }
 
+  const bucket = resolveBucket(env, { hostname: url.hostname });
+
   // HEAD request — metadata only
   if (request.method === 'HEAD') {
-    const head = await env.IMAGES_BUCKET.head(key);
+    const head = await bucket.head(key);
     if (!head) {
       return new Response(null, { status: 404 });
     }
@@ -38,7 +42,7 @@ export async function handlePublicServe(
   }
 
   // GET request
-  const object = await env.IMAGES_BUCKET.get(key);
+  const object = await bucket.get(key);
   if (!object) {
     return new Response('Not found', { status: 404 });
   }
@@ -112,7 +116,7 @@ export async function handlePublicServe(
     } catch (err) {
       // Transform failed — re-fetch original from R2 (stream was consumed)
       console.error('On-the-fly transform failed, serving original:', err);
-      const fallback = await env.IMAGES_BUCKET.get(key);
+      const fallback = await bucket.get(key);
       if (fallback) {
         const headers = new Headers();
         fallback.writeHttpMetadata(headers);

@@ -1,5 +1,6 @@
 import type { Env } from './types';
-import { extractBearerToken, checkIsEditorOnAnyOccasion } from './auth';
+import { extractBearerToken, checkIsEditorOnAnyOccasion, resolveSupabaseAuth } from './auth';
+import { resolveBucket } from './bucket';
 
 /**
  * Serve private files from R2 with JWT authentication and editor permission check.
@@ -27,21 +28,23 @@ export async function handlePrivate(
   }
 
   // Check editor-on-any-occasion permission via RPC
-  const isEditor = await checkIsEditorOnAnyOccasion(userJwt, env);
+  const auth = resolveSupabaseAuth(null, null, env);
+  const isEditor = await checkIsEditorOnAnyOccasion(userJwt, auth);
   if (!isEditor) {
     return new Response('Forbidden', { status: 403 });
   }
 
-  // Extract key from path
+  // Extract key from path — keep the private/ prefix (matches R2 key from upload)
   const url = new URL(request.url);
-  const key = url.pathname.replace('/private/', '');
+  const key = url.pathname.slice(1); // Remove leading /
 
   if (!key) {
     return new Response('Not found', { status: 404 });
   }
 
-  // Get object from R2
-  const object = await env.IMAGES_BUCKET.get(key);
+  // Get object from R2 — route to the correct bucket by hostname
+  const bucket = resolveBucket(env, { hostname: url.hostname });
+  const object = await bucket.get(key);
   if (!object) {
     return new Response('Not found', { status: 404 });
   }

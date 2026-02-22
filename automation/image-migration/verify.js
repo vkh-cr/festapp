@@ -26,8 +26,12 @@ import { listAllFiles } from './lib/supabase-storage.js';
 
 config();
 
-/** This project's Supabase instance */
-const THIS_PROJECT = 'kjdpmixlnhntmxjedpxh';
+/** This project's Supabase instance (from .env) */
+const THIS_PROJECT = process.env.SUPABASE_PROJECT_REF;
+if (!THIS_PROJECT) {
+  console.error('ERROR: SUPABASE_PROJECT_REF is required in .env');
+  process.exit(1);
+}
 const THIS_PROJECT_PATTERN = `%${THIS_PROJECT}%supabase.co/storage%`;
 const ALL_SUPABASE_PATTERN = '%supabase.co/storage%';
 

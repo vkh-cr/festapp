@@ -116,7 +116,7 @@ async function collectAllSupabaseUrls(pool) {
 
   // Run HTML queries and extract URLs with regex
   // Match both public and signed URLs for this project
-  const supabaseUrlRegex = /https:\/\/kjdpmixlnhntmxjedpxh\.supabase\.co\/storage\/v1\/object\/(?:public|sign)\/[^"'\s<>]+/g;
+  const { SUPABASE_URL_REGEX: supabaseUrlRegex } = await import('./lib/url-rewriter.js');
 
   for (const query of htmlQueries) {
     try {
@@ -250,11 +250,10 @@ async function main() {
     }
 
     // Map URLs to R2 keys (only this project's Supabase instance)
-    const THIS_PROJECT = 'kjdpmixlnhntmxjedpxh';
     const filesToMigrate = [];
     let skippedOther = 0;
     for (const url of urls) {
-      if (!url.includes(THIS_PROJECT)) {
+      if (!url.includes(process.env.SUPABASE_PROJECT_REF)) {
         skippedOther++;
         continue;
       }

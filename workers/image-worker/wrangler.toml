@@ -2,9 +2,10 @@ name = "festapp-image-worker"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
-# Custom domain
+# Custom domains — one per project bucket
 routes = [
-  { pattern = "img.festapp.net", custom_domain = true }
+  { pattern = "img.festapp.net", custom_domain = true },
+  { pattern = "a.img.festapp.net", custom_domain = true }
 ]
 
 # Keep workers.dev route active alongside custom domain
@@ -18,6 +19,10 @@ bucket_name = "festapp-images"
 [[r2_buckets]]
 binding = "IMAGES_TEMP"
 bucket_name = "festapp-images-temp"
+
+[[r2_buckets]]
+binding = "IMAGES_BUCKET_A"
+bucket_name = "festapp-images-a"
 
 # Images binding for compression (requires Images subscription)
 [images]

@@ -215,22 +215,10 @@ if [ "$RUN_INTEGRATION" = true ]; then
     echo ""
     echo ">>> Integration Tests..."
 
-    # Check for Supabase Keys (basic check)
-    if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-        echo "Running Bank Import Integration..."
-        node tests/integration/bank_import.js --existing-token "00000000-0000-0000-0000-00000000TEST"
-    elif [ -f "automation/project.conf" ]; then
-         echo "Running Bank Import Integration (using project.conf defaults)..."
-         node tests/integration/bank_import.js --existing-token "00000000-0000-0000-0000-00000000TEST"
-    else
-        echo "⚠️  SKIPPING Integration Tests: Missing SUPABASE credentials."
-    fi
-
-    # Image Worker integration tests (upload, compress, auth, transforms, private files)
+    # All integration tests (bank import, image worker) via Vitest
     WORKER_TEST_DIR="$PROJECT_ROOT/workers/image-worker"
-    if [ -d "$WORKER_TEST_DIR" ] && [ -n "$DATABASE_URL" ] && [ -n "$SUPABASE_URL" ]; then
-        echo ""
-        echo "Running Image Worker Integration Tests..."
+    if [ -d "$WORKER_TEST_DIR" ] && [ -n "$DATABASE_URL" ]; then
+        echo "Running Integration Tests (Vitest)..."
         cd "$WORKER_TEST_DIR"
         set +e
         npx vitest run tests/integration/ 2>&1
@@ -238,10 +226,10 @@ if [ "$RUN_INTEGRATION" = true ]; then
         set -e
         cd "$PROJECT_ROOT"
         if [ $res -ne 0 ]; then
-            echo "⚠️  WARNING: Image Worker Integration Tests Failed."
+            echo "⚠️  WARNING: Integration Tests Failed."
         fi
     else
-        echo "⚠️  SKIPPING Image Worker Tests: Missing DATABASE_URL or SUPABASE_URL."
+        echo "⚠️  SKIPPING Integration Tests: Missing DATABASE_URL."
     fi
 fi
 

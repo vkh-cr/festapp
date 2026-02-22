@@ -1,128 +1,45 @@
-import { formatPrice } from '../../../utils/formatters.js';
-import { FormFieldBuilder } from './form_field_builder.js';
 import { FormStrings } from '../form_strings.js';
+import { OptionBuilderHelper } from './option_builder_helper.js';
 
 export class RadioFieldBuilder {
     static create(field, formModel) {
         const container = document.createElement('div');
         container.className = 'form-field-container radio-field';
-        
+
         // Label
         if (!field._hideLabel) {
-            const label = document.createElement('label');
-            label.className = 'form-field-label';
-            label.innerHTML = `${field.title || ''}${field.isRequired ? '<span class="required-star">*</span>' : ''}`;
-            container.appendChild(label);
+            container.appendChild(OptionBuilderHelper.buildFieldLabel(field));
         }
-        
+
         // Description
         if (field.description) {
-            const desc = document.createElement('div');
-            desc.className = 'form-field-description';
-            desc.innerHTML = field.description;
-            container.appendChild(desc);
+            container.appendChild(OptionBuilderHelper.buildFieldDescription(field));
         }
-        
-        // Options Container
+
+        // Options
         const optionsContainer = document.createElement('div');
         optionsContainer.className = 'radio-options';
-        
-        // Determine Card Design
-        const shouldCheckOptions = field.type !== 'product_type';
-        const hasOptionDescription = shouldCheckOptions && field.options && field.options.some(opt => opt.description && opt.description.trim().length > 0);
-        
-        const isCardDesign = (formModel && formModel.isCardDesign) || 
-                             (field.description && field.description.trim().length > 0) ||
-                             hasOptionDescription;
+
+        const isCard = OptionBuilderHelper.isCardDesign(field, formModel);
 
         if (field.options) {
             field.options.forEach(opt => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'form-check';
-                if (isCardDesign) wrapper.classList.add('option-card');
-                
-                const input = document.createElement('input');
-                input.type = 'radio';
-                input.name = field.id;
-                input.value = (opt.id !== undefined && opt.id !== null) ? opt.id : opt.title;
-                input.id = `${field.id}_${(opt.id !== undefined && opt.id !== null) ? opt.id : opt.title}`;
-                input.className = 'form-check-input';
+                const wrapper = OptionBuilderHelper.buildOptionWrapper(field, opt, formModel, 'radio', isCard);
 
-                // Currency Tagging
-                const currency = opt.currencyCode || opt.currency || opt.currency_code;
-                if (currency) {
-                    input.setAttribute('data-currency', currency);
-                    wrapper.setAttribute('data-currency', currency);
-                }
-                
-                // Debug Checked Logic
+                // Pre-selected value
+                const input = wrapper.querySelector('input');
                 const optionValue = (opt.id !== undefined && opt.id !== null) ? opt.id : opt.title;
-                const isSelected = (field.value !== undefined && field.value !== null) && (String(optionValue) === String(field.value));
-                
-                if (isSelected) {
-                     input.checked = true;
-                }
-                
-                if (isCardDesign) {
-                    wrapper.classList.add('option-card');
-                    wrapper.onclick = (e) => {
-                        if (e.target !== input && e.target.tagName !== 'LABEL' && !e.target.closest('label')) {
-                             input.click();
-                        }
-                    };
-                }
-                
-                // Rich Label
-                const optLabel = document.createElement('label');
-                optLabel.className = 'form-check-label';
-                optLabel.htmlFor = input.id;
-                
-                let labelContent = `<span>${opt.title || ''}</span>`;
-                if (opt.price) {
-                     const priceDisplay = formatPrice(opt.price, currency, 0, 'cs-CZ'); 
-                     labelContent += `<span class="option-price">+ ${priceDisplay}</span>`; 
-                }
-                optLabel.innerHTML = labelContent;
-                
-                // Description inside wrapper
-                const contentWrapper = document.createElement('div');
-                contentWrapper.appendChild(optLabel);
-                
-                const surchargeData = opt.data && opt.data.surcharge;
-                const ticketField = formModel && formModel.relatedFields
-                    ? formModel.relatedFields.find(f => f.type === 'ticket')
-                    : null;
-                const showSurchargeDescription = ticketField && ticketField.data && ticketField.data.show_surcharge_description !== undefined
-                    ? ticketField.data.show_surcharge_description
-                    : true;
-
-                if (opt.description || (surchargeData && surchargeData.amount && showSurchargeDescription)) {
-                    const optDesc = document.createElement('span');
-                    optDesc.className = 'option-description';
-                    
-                    let descHtml = '';
-                     if (surchargeData && surchargeData.amount && showSurchargeDescription) {
-                         const surchargePrice = formatPrice(surchargeData.amount, surchargeData.currency || currency, 0, 'cs-CZ');
-                         descHtml += `<span class="surcharge-info">${FormStrings.surchargeOnSite}&nbsp;<span class="surcharge-price">+ ${surchargePrice}</span></span>`;
-                         if (opt.description) descHtml += '<br>'; // New line separation
-                     }
-                     if (opt.description) {
-                          descHtml += opt.description;
-                     }
-
-                    optDesc.innerHTML = descHtml;
-                    contentWrapper.appendChild(optDesc);
+                if (field.value !== undefined && field.value !== null && String(optionValue) === String(field.value)) {
+                    input.checked = true;
                 }
 
-                wrapper.appendChild(input);
-                wrapper.appendChild(contentWrapper);
                 optionsContainer.appendChild(wrapper);
             });
         }
-        
+
         container.appendChild(optionsContainer);
 
-        // Clear Selection Logic
+        // Clear Selection
         const clearBtn = document.createElement('button');
         clearBtn.type = 'button';
         clearBtn.className = 'btn-clear-selection';
@@ -144,22 +61,22 @@ export class RadioFieldBuilder {
             const radios = container.querySelectorAll(`input[type="radio"][name="${field.id}"]`);
             radios.forEach(r => r.checked = false);
             clearBtn.style.display = 'none';
-            
+
             container.setAttribute('name', field.id);
-            container.name = field.id; 
-            container.value = null; 
-            
+            container.name = field.id;
+            container.value = null;
+
             container.dispatchEvent(new Event('input', { bubbles: true }));
             container.dispatchEvent(new Event('change', { bubbles: true }));
         };
-        
+
         container.appendChild(clearBtn);
 
         const error = document.createElement('div');
         error.className = 'form-field-error';
         error.style.display = 'none';
         container.appendChild(error);
-        
+
         return container;
     }
 }
