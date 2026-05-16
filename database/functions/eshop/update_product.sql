@@ -7,6 +7,10 @@ DECLARE
   v_product_id BIGINT;
   v_occasion_id BIGINT;
   v_product_type_id BIGINT;
+  v_existing_price NUMERIC;
+  v_input_price NUMERIC;
+  v_effective_price NUMERIC;
+  v_input_deposit NUMERIC;
 BEGIN
   -- Extract product id from the input JSON
   v_product_id := (p_input->>'id')::BIGINT;
@@ -14,8 +18,8 @@ BEGIN
   -- Try to find the product to determine if we are updating or creating.
   -- This also gets the *current* occasion for the permission check on UPDATE.
   IF v_product_id IS NOT NULL THEN
-    SELECT pt.occasion
-    INTO v_occasion_id
+    SELECT pt.occasion, p.price
+    INTO v_occasion_id, v_existing_price
     FROM eshop.products p
     JOIN eshop.product_types pt ON p.product_type = pt.id
     WHERE p.id = v_product_id;
@@ -28,6 +32,18 @@ BEGIN
     -- Ensure the caller has permission to edit this product's *current* occasion.
     -- This function is expected to raise an exception on failure.
     PERFORM public.check_is_editor_order_on_occasion(v_occasion_id);
+
+    -- VALIDATION: deposit amount must be less than effective price (input price overrides existing)
+    v_input_price := NULLIF(p_input->>'price', '')::NUMERIC;
+    v_effective_price := COALESCE(v_input_price, v_existing_price);
+    v_input_deposit := NULLIF(p_input->'data'->'deposit'->>'amount', '')::NUMERIC;
+    IF v_input_deposit IS NOT NULL AND v_input_deposit > 0
+       AND v_effective_price IS NOT NULL AND v_input_deposit >= v_effective_price THEN
+      RAISE EXCEPTION '%', jsonb_build_object(
+          'code', 'DEPOSIT_AMOUNT_TOO_HIGH',
+          'message', 'Deposit amount (' || v_input_deposit || ') must be less than price (' || v_effective_price || ').'
+      )::text;
+    END IF;
 
     -- Update only the fields that are provided in the input JSON.
     -- COALESCE is used to keep the existing value if a new one isn't provided.
@@ -82,7 +98,18 @@ BEGIN
     -- 5. Ensure the caller has permission to create a product on this occasion.
     PERFORM public.check_is_editor_order_on_occasion(v_occasion_id);
 
-    -- 6. Insert the new product.
+    -- 6. VALIDATION: deposit amount must be less than price (both from input on CREATE)
+    v_input_price := NULLIF(p_input->>'price', '')::NUMERIC;
+    v_input_deposit := NULLIF(p_input->'data'->'deposit'->>'amount', '')::NUMERIC;
+    IF v_input_deposit IS NOT NULL AND v_input_deposit > 0
+       AND v_input_price IS NOT NULL AND v_input_deposit >= v_input_price THEN
+      RAISE EXCEPTION '%', jsonb_build_object(
+          'code', 'DEPOSIT_AMOUNT_TOO_HIGH',
+          'message', 'Deposit amount (' || v_input_deposit || ') must be less than price (' || v_input_price || ').'
+      )::text;
+    END IF;
+
+    -- 7. Insert the new product.
     -- We ignore the `id` from the JSON (v_product_id) and let the sequence generate a new one.
     -- We use NULLIF to safely cast potentially empty strings.
     INSERT INTO eshop.products (

@@ -35,8 +35,8 @@ BEGIN
     RAISE NOTICE 'Creating Bank Account...';
     
     SELECT public.update_bank_account(
-        NULL::bigint, 
-        '100020003/2010'::text, 
+        NULL::bigint,
+        ('TEST-' || floor(random()*1000000)::text || '/2010')::text,
         'Test Admin Creator Acc'::text, 
         'FIO'::text, 
         ARRAY['CZK']::text[], 

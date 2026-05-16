@@ -126,12 +126,11 @@ class _ProductsDialogState extends State<ProductsDialog> {
       // If the call fails, a PostgrestException will be caught here.
       if (mounted) {
         setState(() => _loading = false);
-        // Pass the error to our new handler to display a detailed dialog.
+        // Show friendly toast — backend error message is extracted by ExceptionHandler.
         ExceptionHandler.handle(
           context,
           error: e,
           defaultMessage: OrdersStrings.productsUpdateFailed,
-          showAsDialog: true, // Show the detailed dialog with JSON
         );
       }
     }

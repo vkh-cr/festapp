@@ -104,4 +104,64 @@ export const enTranslations = {
   days_remaining: (days: number) => {
     return `${days} ${days === 1 ? "day" : "days"}`;
   },
+  depositRequired: (
+    depositAmount: string,
+    remainingAmount: string,
+    depositDeadline: string,
+    accountNumber: string,
+    iban: string | null,
+    variableSymbol: string,
+    _tone: Tone
+  ) => {
+    const isOnSite = depositDeadline === 'on site' || depositDeadline === 'na místě';
+    const deadlineText = isOnSite
+      ? `the remaining surcharge of ${bold(remainingAmount)} is to be paid on site`
+      : `the remaining surcharge of ${bold(remainingAmount)} is due by ${bold(depositDeadline)}`;
+
+    return [
+      verticalSpacer(spaceBeforeText),
+      styledParagraph(`To secure your spot, please pay a deposit of ${bold(depositAmount)}. ${deadlineText}.`),
+      verticalSpacer('15px'),
+      styledParagraph(`A QR code is attached to simplify the payment.`),
+      verticalSpacer(spaceAfterText),
+      generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: depositAmount, lang: 'en' }),
+    ].join('');
+  },
+  depositPaid: (
+    depositAmount: string,
+    remainingAmount: string,
+    depositDeadline: string,
+    _tone: Tone
+  ) => {
+    const isOnSite = depositDeadline === 'on site' || depositDeadline === 'na místě';
+    const deadlineText = isOnSite ? 'on site' : `by ${bold(depositDeadline)}`;
+
+    return [
+      verticalSpacer(spaceBeforeText),
+      styledParagraph(`Thank you for paying the deposit of ${bold(depositAmount)}. The remaining surcharge of ${bold(remainingAmount)} is due ${deadlineText}.`),
+      verticalSpacer(spaceAfterText),
+    ].join('');
+  },
+  depositFullyPaid: (totalAmount: string, _tone: Tone) => [
+    verticalSpacer(spaceBeforeText),
+    styledParagraph(`Thank you for your full payment of ${bold(totalAmount)}. Your order is fully paid.`),
+    verticalSpacer(spaceAfterText),
+  ].join(''),
+  depositReminder: (
+    remainingAmount: string,
+    depositDeadline: string,
+    accountNumber: string,
+    iban: string | null,
+    variableSymbol: string,
+    _tone: Tone
+  ) => {
+    return [
+      verticalSpacer(spaceBeforeText),
+      styledParagraph(`This is a reminder that your order has a remaining balance of ${bold(remainingAmount)}, due by ${bold(depositDeadline)}.`),
+      verticalSpacer('15px'),
+      styledParagraph(`A QR code is attached to simplify the payment.`),
+      verticalSpacer(spaceAfterText),
+      generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remainingAmount, lang: 'en' }),
+    ].join('');
+  },
 };

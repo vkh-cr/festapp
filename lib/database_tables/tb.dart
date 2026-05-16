@@ -89,6 +89,9 @@ class OccasionsTb {
 
   String get data_timezone => "timezone";
   String get data_reply_to => "reply_to";
+  // Legacy - deadline config now stored in deposit feature (features JSONB)
+  String get data_surcharge_deadline_days => "surcharge_deadline_days";
+  String get data_surcharge_deadline => "surcharge_deadline";
 }
 
 class OccasionUsersTb {

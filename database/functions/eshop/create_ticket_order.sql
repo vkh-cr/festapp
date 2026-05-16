@@ -50,6 +50,8 @@ DECLARE
     reply_to TEXT;
     is_open_val BOOLEAN;
     is_editor BOOLEAN;
+    v_product_deposit NUMERIC;
+    v_total_deposit NUMERIC := 0;
 BEGIN
     -- Wrap the entirelogic in a subtransaction block
     BEGIN
@@ -297,6 +299,19 @@ BEGIN
                 -- Accumulate the product price into the order total
                 calculated_price := calculated_price + COALESCE(product_data.price, 0)::NUMERIC(10,2);
 
+                -- Accumulate the product deposit into the order deposit total
+                v_product_deposit := COALESCE((product_data.data->'deposit'->>'amount')::NUMERIC, 0);
+                IF v_product_deposit > COALESCE(product_data.price, 0) THEN
+                    RAISE EXCEPTION '%', JSONB_BUILD_OBJECT(
+                        'code', 1016,
+                        'message', 'Deposit amount cannot exceed product price',
+                        'product_id', product_id,
+                        'deposit', v_product_deposit,
+                        'price', product_data.price
+                    )::TEXT;
+                END IF;
+                v_total_deposit := v_total_deposit + v_product_deposit;
+
                 -- Link the ticket and product to the order
                 INSERT INTO eshop.order_product_ticket ("order", product, ticket)
                 VALUES (order_id, product_id, ticket_id)
@@ -373,10 +388,15 @@ BEGIN
             WHERE b.id = bank_account_id;
         END IF;
 
+        -- If user chose to pay full amount, skip deposit
+        IF input_data->>'payment_type' = 'full' THEN
+            v_total_deposit := 0;
+        END IF;
+
         -- Generate a variable symbol and create the payment info record
         generated_variable_symbol := generate_payment_variable_symbol(bank_account_id, form_id);
-        INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, currency_code, created_at)
-        VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now)
+        INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, deposit_amount, currency_code, created_at)
+        VALUES (bank_account_id, generated_variable_symbol, calculated_price, NULLIF(v_total_deposit, 0), first_currency_code, now)
         RETURNING id INTO payment_info_id;
 
         -- persist all of the non‐state fields
@@ -412,6 +432,69 @@ BEGIN
         -- Check via Unified Helper if order is already paid (e.g. price is 0)
         PERFORM public.recalculate_order_payment_status(order_id);
 
+        -- Queue deposit reminder if deposit exists and deadline is days-based (not "on site")
+        IF v_total_deposit > 0 THEN
+            DECLARE
+                v_occ_start_time TIMESTAMPTZ;
+                v_deposit_deadline_days INT;
+                v_deposit_deadline TEXT;
+                v_reminder_interval BIGINT;
+                v_reminder_is_enabled BOOLEAN;
+                v_deposit_deadline_ts TIMESTAMPTZ;
+                v_deposit_feature JSONB;
+            BEGIN
+                -- Read occasion start_time
+                SELECT start_time INTO v_occ_start_time
+                FROM public.occasions WHERE id = occasion_id;
+
+                -- Get deposit feature config from features JSONB
+                SELECT elem INTO v_deposit_feature
+                FROM jsonb_array_elements(occasion_features) elem
+                WHERE elem->>'code' = 'deposit';
+
+                v_deposit_deadline_days := (v_deposit_feature->>'deposit_deadline_days')::int;
+                v_deposit_deadline := v_deposit_feature->>'deposit_deadline';
+
+                -- Store deposit deadline on payment_info and queue reminder
+                IF v_deposit_deadline IS DISTINCT FROM 'on_site' AND v_deposit_deadline_days IS NOT NULL THEN
+                    v_deposit_deadline_ts := v_occ_start_time - make_interval(days => v_deposit_deadline_days);
+
+                    -- Store the calculated deposit deadline on the payment_info record
+                    UPDATE eshop.payment_info
+                    SET deposit_deadline = v_deposit_deadline_ts
+                    WHERE id = payment_info_id;
+
+                    -- Only queue reminder if deadline is in the future
+                    IF v_deposit_deadline_ts > NOW() THEN
+                        -- Get reminder interval from occasion form feature
+                        SELECT elem->>'reminder_interval_seconds'
+                        INTO v_reminder_interval
+                        FROM jsonb_array_elements(occasion_features) elem
+                        WHERE elem->>'code' = 'form';
+
+                        -- Check if reminder is enabled on the form feature
+                        SELECT (elem->>'reminder_is_enabled')::boolean
+                        INTO v_reminder_is_enabled
+                        FROM jsonb_array_elements(occasion_features) elem
+                        WHERE elem->>'code' = 'form';
+
+                        IF COALESCE(v_reminder_is_enabled, FALSE) AND v_reminder_interval IS NOT NULL THEN
+                            INSERT INTO public.queue_emails (target_time, code, data, organization, occasion, unit)
+                            VALUES (
+                                v_deposit_deadline_ts - make_interval(secs => v_reminder_interval),
+                                'TICKET_ORDER_REMINDER',
+                                jsonb_build_object('order_id', order_id, 'is_deposit_reminder', true),
+                                organization_id,
+                                occasion_id,
+                                unit_id
+                            );
+                        END IF;
+                    END IF;
+                END IF;
+                -- Note: if deposit_deadline = 'on_site', deposit_deadline stays NULL → means "Na místě"
+            END;
+        END IF;
+
         -- Log the order to orders_history with details
         INSERT INTO eshop.orders_history (created_at, data, "order", state, price, currency_code)
         VALUES (
@@ -443,6 +526,8 @@ BEGIN
                     'id', payment_info_id,
                     'variable_symbol', generated_variable_symbol,
                     'amount', calculated_price,
+                    'deposit_amount', NULLIF(v_total_deposit, 0),
+                    'deposit_deadline', (SELECT deposit_deadline FROM eshop.payment_info WHERE id = payment_info_id),
                     'deadline', deadline,
                     'account_number', account_number,
                     'account_number_human_readable', account_number_human_readable,
@@ -453,7 +538,8 @@ BEGIN
                     'organization', organization_id,
                     'unit', unit_id,
                     'title', occasion_title,
-                    'features', occasion_features
+                    'features', occasion_features,
+                    'data', (SELECT data FROM public.occasions WHERE id = occasion_id)
                 ),
                 'reply_to', reply_to
             )

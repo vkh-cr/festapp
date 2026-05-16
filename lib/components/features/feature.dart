@@ -1,6 +1,7 @@
 // feature.dart
 import 'package:flutter/material.dart';
 import 'companion_feature.dart';
+import 'deposit_feature.dart';
 import 'feature_constants.dart';
 import 'feature_metadata.dart';
 import 'form_feature.dart';
@@ -47,6 +48,8 @@ abstract class Feature {
         return ScheduleFeature.fromJson(json);
       case FeatureConstants.workshops:
         return WorkshopsFeature.fromJson(json);
+      case FeatureConstants.deposit:
+        return DepositFeature.fromJson(json);
       case FeatureConstants.import:
         return ImportFeature.fromJson(json);
       case FeatureConstants.contract:

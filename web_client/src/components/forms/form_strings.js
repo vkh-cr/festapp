@@ -107,6 +107,7 @@ export class FormStrings {
     static get unavailable() { return LocalizationService.tr('FormsFeature.unavailable'); }
     static get inWhatCurrency() { return LocalizationService.tr('FormsFeature.inWhatCurrency'); }
     static get surchargeOnSite() { return LocalizationService.tr('OrderGridColumns.surchargeOnSite'); }
+    static get depositInfo() { return LocalizationService.tr('OrderGridColumns.depositInfo'); }
 
 
     // Auto-Titles

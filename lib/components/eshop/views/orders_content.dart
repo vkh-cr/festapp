@@ -95,6 +95,8 @@ class _OrdersContentState extends State<OrdersContent> {
       if (formFeat.isEnabled && (formFeat.reminderIsEnabled ?? false))
         EshopColumns.PAYMENT_INFO_REMINDER_SENT,
       EshopColumns.PAYMENT_INFO_DEADLINE,
+      if (FeatureService.isFeatureEnabled(FeatureConstants.deposit))
+        EshopColumns.PAYMENT_INFO_DEPOSIT_DEADLINE,
       EshopColumns.ORDER_TRANSACTIONS,
       EshopColumns.ORDER_HISTORY,
     ];

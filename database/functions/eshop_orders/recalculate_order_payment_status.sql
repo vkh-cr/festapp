@@ -6,6 +6,7 @@ AS $$
 DECLARE
     v_payment_info_id bigint;
     v_paid numeric;
+    v_deposit_amount numeric;
     v_price numeric;
     v_state text;
 BEGIN
@@ -18,14 +19,14 @@ BEGIN
         RETURN;
     END IF;
 
-    -- Get Paid Amount from Payment Info
-    SELECT paid INTO v_paid
+    -- Get Paid Amount and Deposit Amount from Payment Info
+    SELECT paid, deposit_amount INTO v_paid, v_deposit_amount
     FROM eshop.payment_info
     WHERE id = v_payment_info_id;
 
     -- Update Logic
-    IF COALESCE(v_paid, 0) >= v_price THEN
-        -- Fully Paid -> Move to Paid
+    IF COALESCE(v_paid, 0) >= COALESCE(v_deposit_amount, v_price) THEN
+        -- Fully Paid (or Deposit Paid) -> Move to Paid
         IF v_state != 'paid' AND (v_state = 'ordered' OR v_state = 'created' OR v_state = 'expired') THEN
              PERFORM public.update_order_and_tickets_to_paid(p_order_id);
         END IF;

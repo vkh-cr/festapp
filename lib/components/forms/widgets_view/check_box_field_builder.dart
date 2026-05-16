@@ -6,11 +6,11 @@ import 'package:fstapp/components/forms/models/form_option_product_model.dart'; 
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import '../models/holder_models/field_holder.dart';
 import '../models/holder_models/form_holder.dart';
 import 'form_helper.dart';
 import 'option_field_helper.dart';
-import '../form_strings.dart';
 
 class CheckboxFieldBuilder {
   static Widget buildSelectManyField(
@@ -98,26 +98,22 @@ class CheckboxFieldBuilder {
     final isSelected = field.value?.contains(o) ?? false;
 
     String? effectiveDescription = o.description;
-    final showSurchargeInfo =
-        formHolder.getTicket()?.showSurchargeDescription ?? true;
-    if (showSurchargeInfo &&
+    final showDepositInfo =
+        formHolder.getTicket()?.showDepositDescription ?? true;
+    if (showDepositInfo &&
+        FeatureService.isDepositChoiceAvailable() &&
         o is FormOptionProductModel &&
-        o.data?['surcharge'] != null) {
-      final surcharge = o.data!['surcharge'];
-      if (surcharge['amount'] != null) {
-        final amount = surcharge['amount'];
-        final currency = surcharge['currency'] ?? '';
-        final surchargeText =
-            "+ $amount $currency ${FormStrings.surchargeOnSite}";
-        effectiveDescription =
-            "<span style='color: #666; font-weight: bold;'>$surchargeText</span>${o.description != null ? "<br>${o.description}" : ""}";
-      }
+        o.depositAmount != null) {
+      final depositText = OptionFieldHelper.buildDepositText(context, o);
+      effectiveDescription =
+          "<span style='font-weight: bold;'>$depositText</span>${effectiveDescription != null ? "<br>$effectiveDescription" : ""}";
     }
 
     Widget optionCard = OptionFieldHelper.buildOptionCard(
       context: context,
       isSelected: isSelected,
       title: effectiveTitle,
+      priceText: OptionFieldHelper.buildPriceText(context, o),
       description: effectiveDescription,
       // The leading widget (checkbox) is disabled when needed.
       leading: Checkbox(
@@ -198,40 +194,39 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
         color: isDisabled ? Theme.of(context).disabledColor : null,
       );
 
-      Widget labelWidget = Text(
-        effectiveTitle,
-        style: style,
-      );
+      final priceText = OptionFieldHelper.buildPriceText(context, o);
+      Widget labelWidget = priceText != null
+          ? Row(
+              children: [
+                Expanded(child: Text(effectiveTitle, style: style)),
+                const SizedBox(width: 8),
+                Text(priceText, style: style.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isDisabled ? null : Theme.of(context).primaryColor,
+                )),
+              ],
+            )
+          : Text(effectiveTitle, style: style);
 
-      final showSurchargeInfo =
-          widget.formHolder.getTicket()?.showSurchargeDescription ?? true;
-      if (showSurchargeInfo &&
+      final showDepositInfo =
+          widget.formHolder.getTicket()?.showDepositDescription ?? true;
+      if (showDepositInfo &&
+          FeatureService.isDepositChoiceAvailable() &&
           o is FormOptionProductModel &&
-          o.data?['surcharge'] != null) {
-        final surcharge = o.data!['surcharge'];
-        if (surcharge['amount'] != null) {
-          final amount = surcharge['amount'];
-          final currency = surcharge['currency'] ?? '';
-          final surchargeText =
-              "+ $amount $currency ${FormStrings.surchargeOnSite}";
-
-          labelWidget = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              labelWidget,
-              const SizedBox(height: 2),
-              Text(surchargeText,
-                  style: style.copyWith(
-                          color: Colors.grey[600],
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500) ??
-                      TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500)),
-            ],
-          );
-        }
+          o.depositAmount != null) {
+        final depositText = OptionFieldHelper.buildDepositText(context, o);
+        labelWidget = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            labelWidget,
+            const SizedBox(height: 2),
+            Text(depositText,
+                style: style.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500)),
+          ],
+        );
       }
 
       return FormBuilderFieldOption<FormOptionModel>(

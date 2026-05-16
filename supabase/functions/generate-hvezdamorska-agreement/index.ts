@@ -22,8 +22,7 @@ const staticOrganizerData = {
 const staticPaymentClause = "Platba zálohy probíhá převodem na účet, doplatek se hradí v hotovosti v eurech při příjezdu na místo ubytování.";
 const staticTermsClause = "Zákazník svým podpisem/zaplacením zálohy potvrzuje, že tato smlouva je pro něj i ostatní přihlášené osoby ZÁVAZNÁ a že mu jsou známy Všeobecné obchodní podmínky cestovní kanceláře a SOUHLASÍ s nimi. Dále souhlasí, aby veškerá korespondence byla zasílána na jeho výše uvedený email a zavazuje se svoje spolucestující včas a plně informovat. Objednavatel a jeho spolucestující též souhlasí se zpracováním jejich osobních údajů ve smyslu platných právních předpisů (GDPR).";
 const DEFAULT_FONT_URL = "https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf";
-// Logo manually uploaded to R2 from secondary Supabase project (lwfpdjxsdmkfyrzqbrlk)
-const LOGO_IMAGE_URL = "https://img.festapp.net/hvezdamorska/hvezdamorskaCKlogo.png";
+const LOGO_IMAGE_URL = "https://lwfpdjxsdmkfyrzqbrlk.supabase.co/storage/v1/object/public/public-files/hvezdamorska/hvezdamorskaCKlogo.png";
 
 
 // --- HELPER FUNCTIONS ---
@@ -300,10 +299,10 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
   const paymentLineHeight = regularFontSize + 3;
   const paymentValueX = paymentBlockX + 55;
 
-  const totalSurcharge = (data.calculation.doplatek?.totalAmount || 0);
-  const depositLabel = totalSurcharge > 0 ? "Záloha:" : "Cena celkem:";
+  const isDeposit = data.calculation.isDepositPayment || false;
+  const firstSectionLabel = isDeposit ? "Záloha:" : "Cena celkem:";
 
-  page.drawText(depositLabel, { x: paymentBlockX, y: rightY, font: boldFont, size: regularFontSize, color: colorDataText });
+  page.drawText(firstSectionLabel, { x: paymentBlockX, y: rightY, font: boldFont, size: regularFontSize, color: colorDataText });
   rightY -= paymentLineHeight;
   page.drawText("Částka:", { x: paymentBlockX + 10, y: rightY, font: font, size: smallFontSize, color: colorLabelText });
   page.drawText(data.calculation.zaloha.castka || '', { x: paymentValueX, y: rightY, font: font, size: regularFontSize, color: colorDataText });
@@ -314,7 +313,7 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
   page.drawLine({start: {x: paymentBlockX, y: rightY}, end: {x: paymentBlockX + paymentBlockWidth, y: rightY}, thickness: lineThickness, color: colorSeparatorLine});
   rightY -= (paymentLineHeight + 2);
 
-  if (totalSurcharge > 0) {
+  if (isDeposit) {
       page.drawText("Doplatek:", { x: paymentBlockX, y: rightY, font: boldFont, size: regularFontSize, color: colorDataText });
       rightY -= paymentLineHeight;
       page.drawText("Částka:", { x: paymentBlockX + 10, y: rightY, font: font, size: smallFontSize, color: colorLabelText });
@@ -518,51 +517,42 @@ Deno.serve(async (req: Request) => {
         };
     });
 
-    const totalFromFeatures = occasion?.features?.find((f:any) => f.code === 'form')?.external_price;
-    const fallbackTotal = rpcOrder?.price != null ? `${rpcOrder.price.toLocaleString('cs-CZ')} ${rpcOrder.currency_code || 'Kč'}` : 'N/A';
+    const orderAmount = payment_info?.amount != null ? Number(payment_info.amount) : 0;
+    const depositAmount = payment_info?.deposit_amount != null ? Number(payment_info.deposit_amount) : 0;
+    const orderCurrency = payment_info?.currency_code || rpcOrder?.currency_code || 'Kč';
+    const isDepositPayment = depositAmount > 0 && depositAmount < orderAmount;
+    const doplatekAmount = isDepositPayment ? orderAmount - depositAmount : 0;
 
-    // Calculate total surcharge
-    let totalSurcharge = 0;
-    let surchargeCurrency = '';
-
-    (rpcOrder?.data?.tickets || []).forEach((t: any) => {
-        (t.products || []).forEach((p: any) => {
-            // Check for surcharge in product data
-            // Structure: p.data.surcharge.amount / currency
-            const surcharge = p.data?.surcharge;
-            if (surcharge && surcharge.amount) {
-                totalSurcharge += Number(surcharge.amount);
-                if (!surchargeCurrency && surcharge.currency) {
-                    surchargeCurrency = surcharge.currency;
-                }
-            }
-        });
-    });
-
-    // If no currency found but amount > 0 (should shouldn't happen if validation works), fallback to order currency or 'EUR' as per contract defaults
-    if (totalSurcharge > 0 && !surchargeCurrency) {
-        surchargeCurrency = 'EUR'; // Defaulting to EUR as per "doplatek se hradí .. v eurech" in the static text, though dynamic is better.
+    // Determine surcharge deadline from payment_info
+    // deposit_deadline set = specific date, NULL with deposit = on-site payment
+    let doplatekUhraditDo = '';
+    if (isDepositPayment) {
+        if (payment_info?.deposit_deadline) {
+            doplatekUhraditDo = formatDate(payment_info.deposit_deadline);
+        } else {
+            doplatekUhraditDo = 'Na místě';
+        }
     }
-    
-    // Format surcharge string
-    const surchargeString = totalSurcharge > 0 
-        ? `${totalSurcharge.toLocaleString('cs-CZ')} ${surchargeCurrency}`
-        : "0";
+
+    const totalPriceDisplay = orderAmount > 0
+        ? `${orderAmount.toLocaleString('cs-CZ')} ${orderCurrency}`
+        : 'N/A';
 
     const calculationData = {
         items: calculationItems,
         zaloha: {
-            castka: payment_info?.amount != null ? `${payment_info.amount.toLocaleString('cs-CZ')} ${payment_info.currency_code || 'Kč'}` : 'Dle pokynů',
+            castka: isDepositPayment
+                ? `${depositAmount.toLocaleString('cs-CZ')} ${orderCurrency}`
+                : (orderAmount > 0 ? `${orderAmount.toLocaleString('cs-CZ')} ${orderCurrency}` : 'Dle pokynů'),
             uhraditDo: formatDate(payment_info?.deadline),
         },
         doplatek: {
-            totalAmount: totalSurcharge,
-            castka: totalSurcharge > 0 ? surchargeString : "Dle pokynů", // Only used if rendered
-            uhraditDo: "Dle pokynů" // Static for now as usually paid on arrival
+            totalAmount: doplatekAmount,
+            castka: doplatekAmount > 0 ? `${doplatekAmount.toLocaleString('cs-CZ')} ${orderCurrency}` : '',
+            uhraditDo: doplatekUhraditDo || 'Dle pokynů',
         },
-        totalPriceForDisplay: totalSurcharge > 0 
-            ? fallbackTotal + " + " + surchargeString + " doplatek" 
-            : fallbackTotal
+        isDepositPayment,
+        totalPriceForDisplay: totalPriceDisplay,
     };
 
     const dataForPdf = {

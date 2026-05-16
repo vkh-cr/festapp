@@ -21,31 +21,63 @@ BEGIN
       CASE
         -- For ticket reminders, re-check the original conditions plus feature flags and the form-specific setting.
         WHEN de.code = 'TICKET_ORDER_REMINDER' THEN
-          (
-            o.state = 'ordered'
-            AND pi.deadline IS NOT NULL
-            AND COALESCE((pi.data->>'current_version_reminded')::boolean, false) IS FALSE
-            AND (form_settings.feature->>'is_enabled')::boolean IS TRUE
-            AND (form_settings.feature->>'reminder_is_enabled')::boolean IS TRUE
-            AND (f.id IS NULL OR COALESCE((f.data->>'is_reminder_enabled')::boolean, false) IS TRUE) -- Check form-level reminder setting, default to TRUE if form not found
-          )
+          CASE
+            -- Deposit reminder (has is_deposit_reminder flag)
+            WHEN (de.data->>'is_deposit_reminder')::boolean IS TRUE THEN
+              (
+                o_dr.state = 'paid'
+                AND pi_dr.deposit_amount IS NOT NULL
+                AND pi_dr.paid < pi_dr.amount
+                AND (deposit_feature.feature->>'is_enabled')::boolean IS TRUE
+                AND (deposit_feature.feature->>'deposit_deadline') IS DISTINCT FROM 'on_site'
+                AND (form_settings_dr.feature->>'is_enabled')::boolean IS TRUE
+                AND (form_settings_dr.feature->>'reminder_is_enabled')::boolean IS TRUE
+                AND (f_dr.id IS NULL OR COALESCE((f_dr.data->>'is_reminder_enabled')::boolean, TRUE) IS TRUE)
+              )
+            -- Regular payment reminder
+            ELSE
+              (
+                o.state = 'ordered'
+                AND pi.deadline IS NOT NULL
+                AND COALESCE((pi.data->>'current_version_reminded')::boolean, false) IS FALSE
+                AND (form_settings.feature->>'is_enabled')::boolean IS TRUE
+                AND (form_settings.feature->>'reminder_is_enabled')::boolean IS TRUE
+                AND (f.id IS NULL OR COALESCE((f.data->>'is_reminder_enabled')::boolean, false) IS TRUE)
+              )
+          END
+        -- Paid emails are immediate sends, just validate order exists.
+        WHEN de.code = 'TICKET_ORDER_PAYMENT_DONE' THEN
+          TRUE
         -- All other email types are considered valid by default.
         ELSE
           TRUE
       END AS is_valid
     FROM due_emails de
-    -- LEFT JOINs are used so that if any related record has been deleted,
-    -- the validation will correctly fail.
-    LEFT JOIN eshop.orders o ON de.code = 'TICKET_ORDER_REMINDER' AND o.id = (de.data->>'order_id')::bigint
-    LEFT JOIN eshop.payment_info pi ON de.code = 'TICKET_ORDER_REMINDER' AND pi.id = o.payment_info
-    LEFT JOIN public.occasions occ ON de.code = 'TICKET_ORDER_REMINDER' AND occ.id = o.occasion
-    -- This lateral join efficiently finds the 'form' feature object from the JSON array in the occasion.
+    -- JOINs for regular TICKET_ORDER_REMINDER validation
+    LEFT JOIN eshop.orders o ON de.code = 'TICKET_ORDER_REMINDER' AND (de.data->>'is_deposit_reminder')::boolean IS NOT TRUE AND o.id = (de.data->>'order_id')::bigint
+    LEFT JOIN eshop.payment_info pi ON de.code = 'TICKET_ORDER_REMINDER' AND (de.data->>'is_deposit_reminder')::boolean IS NOT TRUE AND pi.id = o.payment_info
+    LEFT JOIN public.occasions occ ON de.code = 'TICKET_ORDER_REMINDER' AND (de.data->>'is_deposit_reminder')::boolean IS NOT TRUE AND occ.id = o.occasion
     LEFT JOIN LATERAL (
         SELECT elem AS feature
         FROM jsonb_array_elements(occ.features) elem
         WHERE elem->>'code' = 'form'
     ) form_settings ON TRUE
-    LEFT JOIN public.forms f ON de.code = 'TICKET_ORDER_REMINDER' AND f.id = o.form
+    LEFT JOIN public.forms f ON de.code = 'TICKET_ORDER_REMINDER' AND (de.data->>'is_deposit_reminder')::boolean IS NOT TRUE AND f.id = o.form
+    -- JOINs for deposit reminder validation (TICKET_ORDER_REMINDER with is_deposit_reminder flag)
+    LEFT JOIN eshop.orders o_dr ON de.code = 'TICKET_ORDER_REMINDER' AND (de.data->>'is_deposit_reminder')::boolean IS TRUE AND o_dr.id = (de.data->>'order_id')::bigint
+    LEFT JOIN eshop.payment_info pi_dr ON de.code = 'TICKET_ORDER_REMINDER' AND (de.data->>'is_deposit_reminder')::boolean IS TRUE AND pi_dr.id = o_dr.payment_info
+    LEFT JOIN public.occasions occ_dr ON de.code = 'TICKET_ORDER_REMINDER' AND (de.data->>'is_deposit_reminder')::boolean IS TRUE AND occ_dr.id = o_dr.occasion
+    LEFT JOIN LATERAL (
+        SELECT elem AS feature
+        FROM jsonb_array_elements(occ_dr.features) elem
+        WHERE elem->>'code' = 'deposit'
+    ) deposit_feature ON de.code = 'TICKET_ORDER_REMINDER' AND (de.data->>'is_deposit_reminder')::boolean IS TRUE
+    LEFT JOIN LATERAL (
+        SELECT elem AS feature
+        FROM jsonb_array_elements(occ_dr.features) elem
+        WHERE elem->>'code' = 'form'
+    ) form_settings_dr ON de.code = 'TICKET_ORDER_REMINDER' AND (de.data->>'is_deposit_reminder')::boolean IS TRUE
+    LEFT JOIN public.forms f_dr ON de.code = 'TICKET_ORDER_REMINDER' AND (de.data->>'is_deposit_reminder')::boolean IS TRUE AND f_dr.id = o_dr.form
   ),
   deleted_emails AS (
     -- 3. Delete all emails that failed the validation check.

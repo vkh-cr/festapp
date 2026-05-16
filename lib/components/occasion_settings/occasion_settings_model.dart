@@ -99,17 +99,21 @@ class OccasionSettingsModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        Tb.occasions.services: services,
-        Tb.occasions.features: features?.map((f) => f.toJson()).toList(),
-        Tb.occasions.is_hidden: isHidden,
-        Tb.occasions.data: {
-          Tb.occasions.data_game: {
-            Tb.occasions.data_game_start: gameStartTime?.toIso8601String(),
-            Tb.occasions.data_game_end: gameEndTime?.toIso8601String(),
-          },
-        }
-      };
+  Map<String, dynamic> toJson() {
+    final dataMap = <String, dynamic>{
+      Tb.occasions.data_game: {
+        Tb.occasions.data_game_start: gameStartTime?.toIso8601String(),
+        Tb.occasions.data_game_end: gameEndTime?.toIso8601String(),
+      },
+    };
+
+    return {
+      Tb.occasions.services: services,
+      Tb.occasions.features: features?.map((f) => f.toJson()).toList(),
+      Tb.occasions.is_hidden: isHidden,
+      Tb.occasions.data: dataMap,
+    };
+  }
 
   static OccasionSettingsModel defaultSettings = OccasionSettingsModel();
 

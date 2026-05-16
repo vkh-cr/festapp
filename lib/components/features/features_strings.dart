@@ -95,6 +95,10 @@ class FeaturesStrings {
       'FeatureContract.generatingContractFor'
           .tr(namedArgs: {'customer': customer});
 
+  // Feature Deposit
+  static String get depositTitle => 'FeatureDeposit.title'.tr();
+  static String get depositDescription => 'FeatureDeposit.description'.tr();
+
   // Feature Ticket
   static String get enableManualTicketScan =>
       'FeatureTicket.enableManualTicketScan'.tr();

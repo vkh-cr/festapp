@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
@@ -131,7 +132,7 @@ class ProgressDialogs {
             await Future.delayed(delay);
           }
         } catch (e) {
-          statusMessage.value = "$e";
+          statusMessage.value = ExceptionHandler.toFriendlyMessage(e);
           isCancelled.value = true;
           isStornoActive.value = false;
           isOkActive.value = true;
@@ -145,11 +146,17 @@ class ProgressDialogs {
     isStornoActive.value = false;
     if (hasError.value) {
       statusMessage.value = "The processing has finished with error.".tr();
+      // In basic mode the error toast is shown by the upstream caller; auto-dismiss
+      // the progress dialog so the user isn't shown an extra error UI on top of it.
+      if (isBasic && context.mounted) {
+        Navigator.of(context).pop();
+        completer.complete(false);
+      }
     } else if (isCancelled.value) {
       statusMessage.value = "The processing has been cancelled.".tr();
     } else {
       statusMessage.value = "The processing has completed successfully.".tr();
-      if (isBasic && !hasError.value) {
+      if (isBasic && context.mounted) {
         Navigator.of(context).pop();
         completer.complete(true);
       }

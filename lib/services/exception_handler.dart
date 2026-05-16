@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'toast_helper.dart';
 
@@ -31,18 +32,19 @@ class ExceptionHandler {
     required Future<T> Function() futureFunction,
     String? defaultErrorMessage,
     bool rethrowError = false,
+    bool showAsDialog = false,
   }) async {
     try {
       return await futureFunction();
     } catch (e) {
-      // Use the existing handle method to show the UI
-      await handle(
-        context,
-        error: e,
-        defaultMessage: defaultErrorMessage,
-        showAsDialog: true, // Defaults to showing a dialog for guarded actions
-      );
-
+      if (context.mounted) {
+        await handle(
+          context,
+          error: e,
+          defaultMessage: defaultErrorMessage,
+          showAsDialog: showAsDialog,
+        );
+      }
       if (rethrowError) {
         rethrow;
       }
@@ -56,17 +58,20 @@ class ExceptionHandler {
     required Future<void> Function() futureFunction,
     String? defaultErrorMessage,
     bool rethrowError = false,
+    bool showAsDialog = false,
   }) async {
     try {
       await futureFunction();
       return true;
     } catch (e) {
-      await handle(
-        context,
-        error: e,
-        defaultMessage: defaultErrorMessage,
-        showAsDialog: true,
-      );
+      if (context.mounted) {
+        await handle(
+          context,
+          error: e,
+          defaultMessage: defaultErrorMessage,
+          showAsDialog: showAsDialog,
+        );
+      }
       if (rethrowError) {
         rethrow;
       }
@@ -92,10 +97,19 @@ class ExceptionHandler {
             severity: ToastSeverity.NotOk);
       }
     } else {
-      final message = defaultMessage ?? "An unexpected error occurred.".tr();
+      final message = defaultMessage ?? CommonStrings.unexpectedError;
       ToastHelper.Show(context, message, severity: ToastSeverity.NotOk);
       AppLogger.error('Unhandled Exception: ${error.toString()}');
     }
+  }
+
+  /// Returns a user-friendly message for any exception. Postgrest errors carrying
+  /// a JSON body are parsed; everything else falls back to [defaultMessage] or a
+  /// generic message.
+  static String toFriendlyMessage(Object error, {String? defaultMessage}) {
+    final parsed = _parsePostgrestException(error);
+    if (parsed != null) return parsed.message;
+    return defaultMessage ?? CommonStrings.unexpectedError;
   }
 
   // Helper methods _parsePostgrestException and _showErrorDialog remain the same...
@@ -124,8 +138,13 @@ class ExceptionHandler {
       context: context,
       builder: (ctx) {
         final theme = Theme.of(ctx);
+        final scheme = theme.colorScheme;
         return AlertDialog(
-          title: Text('Error (Code: ${appError.code})'.tr()),
+          backgroundColor: scheme.surface,
+          title: Text(
+            'Error (Code: ${appError.code})'.tr(),
+            style: TextStyle(color: scheme.error),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -133,19 +152,31 @@ class ExceptionHandler {
               children: [
                 Text(
                   appError.message,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: scheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 24),
-                Text('Details:'.tr()),
+                Text(
+                  'Details:'.tr(),
+                  style: TextStyle(color: scheme.onSurfaceVariant),
+                ),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.all(8),
-                  color: theme.colorScheme.surfaceContainerHighest,
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                   child: SelectableText(
                     const JsonEncoder.withIndent('  ')
                         .convert(jsonDecode(appError.rawJson)),
-                    style:
-                        const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],

@@ -1,5 +1,6 @@
 import { formatPrice } from '../../../utils/formatters.js';
 import { FormStrings } from '../form_strings.js';
+import { FeatureService } from '../../features/feature_service.js';
 
 export class OptionBuilderHelper {
     /**
@@ -82,26 +83,32 @@ export class OptionBuilderHelper {
         }
         optLabel.innerHTML = labelContent;
 
-        // Content wrapper with label + optional surcharge/description
+        // Content wrapper with label + optional deposit/description
         const contentWrapper = document.createElement('div');
         contentWrapper.appendChild(optLabel);
 
-        const surchargeData = opt.data && opt.data.surcharge;
         const ticketField = formModel && formModel.relatedFields
             ? formModel.relatedFields.find(f => f.type === 'ticket')
             : null;
-        const showSurchargeDescription = ticketField && ticketField.data && ticketField.data.show_surcharge_description !== undefined
+        const showDepositDescription = ticketField && ticketField.data && ticketField.data.show_surcharge_description !== undefined
             ? ticketField.data.show_surcharge_description
             : true;
 
-        if (opt.description || (surchargeData && surchargeData.amount && showSurchargeDescription)) {
+        const depositData = opt.data && opt.data.deposit;
+        const isDepositAvailable = FeatureService.isDepositChoiceAvailable(
+            formModel && formModel.occasionFeatures,
+            formModel && formModel.occasionStartTime
+        );
+        const hasDeposit = showDepositDescription && isDepositAvailable && depositData && depositData.amount && depositData.amount > 0;
+
+        if (opt.description || hasDeposit) {
             const optDesc = document.createElement('span');
             optDesc.className = 'option-description';
 
             let descHtml = '';
-            if (surchargeData && surchargeData.amount && showSurchargeDescription) {
-                const surchargePrice = formatPrice(surchargeData.amount, surchargeData.currency || currency, 0, 'cs-CZ');
-                descHtml += `<span class="surcharge-info">${FormStrings.surchargeOnSite}&nbsp;<span class="surcharge-price">+ ${surchargePrice}</span></span>`;
+            if (hasDeposit) {
+                const depositPrice = formatPrice(depositData.amount, currency, 0, 'cs-CZ');
+                descHtml += `<span class="deposit-info">${FormStrings.depositInfo}: ${depositPrice}</span>`;
                 if (opt.description) descHtml += '<br>';
             }
             if (opt.description) {

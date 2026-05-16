@@ -782,7 +782,13 @@
     "usedInForms": "Použito ve formulářích",
     "shortTitle": "Zkrácený název",
     "surcharge": "Doplatek",
-    "surchargeOnSite": "doplatek na místě"
+    "surchargeOnSite": "doplatek na místě",
+    "deposit": "Záloha",
+    "depositOnSite": "doplatek na místě",
+    "depositInfo": "záloha",
+    "depositDeadline": "Doplatek do",
+    "depositPaymentDeadline": "Záloha do",
+    "depositOnSiteLabel": "Na místě"
   },
   "FormsFeature": {
     "cannotDeleteFormWithResponses": "Formulář nelze smazat, protože již obsahuje odpovědi.",
@@ -904,7 +910,12 @@
     "removeTransactionSuccess": "Odstraněno: {item}.",
     "removeTooltip": "Odstranit",
     "transactionsForOrder": "Transakce k objednávce {order}.",
-    "transactionTypeCashless": "Bezhotovostně"
+    "transactionTypeCashless": "Bezhotovostně",
+    "scanDepositRemaining": "Zbývá doplatit",
+    "scanDepositFullyPaid": "Plně uhrazeno",
+    "scanDepositDeadline": "Termín doplatku",
+    "scanDepositOnSite": "Platba na místě",
+    "scanDepositCollect": "Vybrat doplatek"
   },
   "UserColumns": {
     "id": "Id",
@@ -1302,7 +1313,11 @@
     "imageRemovedSuccess": "Obrázek byl úspěšně odstraněn.",
     "imageRemovedFail": "Odstranění obrázku se nezdařilo.",
     "fileUploadedSuccess": "Soubor byl úspěšně nahrán.",
-    "failedToUploadImage": "Nahrání obrázku se nezdařilo."
+    "failedToUploadImage": "Nahrání obrázku se nezdařilo.",
+    "depositDeadline": "Termín doplatku",
+    "depositDeadlineDaysBefore": "Dní před akcí",
+    "depositDeadlineOnSite": "Na místě",
+    "numberOfDays": "Počet dní"
   },
   "Feedback": {
     "helpTitle": "Jak můžeme pomoci?",
@@ -1356,7 +1371,12 @@
     "productUnavailable": "Produkt {product_title} již není k dispozici.",
     "chooseDifferentVariant": "Vyberte prosím jinou variantu.",
     "chooseDifferentVariant_informal": "Vyber prosím jinou variantu.",
-    "totalPrice": "Celková cena: {price}"
+    "totalPrice": "Celková cena: {price}",
+    "paymentMethod": "Způsob platby",
+    "payFullAmount": "Zaplatit celou částku najednou",
+    "payWithDeposit": "Zaplatit zálohu",
+    "depositInfoOnSite": "Zbývající částku doplatíte na místě.",
+    "depositInfoDaysBefore": "Zbývající částku je třeba doplatit nejpozději {days} dní před začátkem akce."
   },
   "_": "_",
   "FeatureTicket": {
@@ -1539,5 +1559,9 @@
     "generatingContract": "Generování smlouvy...",
     "generatingContractFor": "Generování smlouvy pro {customer}...",
     "paymentInfo": "Informace k platbě"
+  },
+  "FeatureDeposit": {
+    "title": "Záloha",
+    "description": "Umožní nastavit zálohu u produktů"
   }
 }

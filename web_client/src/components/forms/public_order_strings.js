@@ -63,4 +63,24 @@ export class PublicOrderStrings {
     static totalPrice(price) {
         return LocalizationService.tr(`${PublicOrderStrings._prefix}.totalPrice`, { price: price });
     }
+
+    static get paymentMethod() {
+        return LocalizationService.tr(`${PublicOrderStrings._prefix}.paymentMethod`);
+    }
+
+    static get payFullAmount() {
+        return LocalizationService.tr(`${PublicOrderStrings._prefix}.payFullAmount`);
+    }
+
+    static get payWithDeposit() {
+        return LocalizationService.tr(`${PublicOrderStrings._prefix}.payWithDeposit`);
+    }
+
+    static get depositInfoOnSite() {
+        return LocalizationService.tr(`${PublicOrderStrings._prefix}.depositInfoOnSite`);
+    }
+
+    static depositInfoDaysBefore(days) {
+        return LocalizationService.tr(`${PublicOrderStrings._prefix}.depositInfoDaysBefore`, { days: days });
+    }
 }

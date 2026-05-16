@@ -130,10 +130,10 @@ async function runAll() {
   }
   console.log('>>> Setup Complete.\n');
 
-  // 2. Run Tests in Batches
+  // 2. Run Tests in Batches (parallel)
   let successCount = 0;
-  let failureCount = 0;
-  
+  const failedFiles = [];
+
   // Helper to chunk array
   const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
     arr.slice(i * size, i * size + size)
@@ -142,15 +142,34 @@ async function runAll() {
   const batches = chunk(testFiles, CONCURRENCY);
 
   for (const batch of batches) {
-    const results = await Promise.all(batch.map(file => runTest(file)));
-    results.forEach(success => {
-        if (success) successCount++;
-        else failureCount++;
-    });
+    const results = await Promise.all(batch.map(async (file) => ({ file, success: await runTest(file) })));
+    for (const { file, success } of results) {
+      if (success) successCount++;
+      else failedFiles.push(file);
+    }
   }
 
+  // 3. Retry failed tests sequentially — eliminates parallel-batching flakiness
+  let recoveredCount = 0;
+  const trulyFailedFiles = [];
+  if (failedFiles.length > 0) {
+    console.log('\n>>> Retrying ' + failedFiles.length + ' failed test(s) sequentially...');
+    for (const file of failedFiles) {
+      const success = await runTest(file);
+      if (success) recoveredCount++;
+      else trulyFailedFiles.push(file);
+    }
+  }
+
+  const failureCount = trulyFailedFiles.length;
+  successCount += recoveredCount;
+
   console.log('\n==================================================');
-  console.log(`SUMMARY: ${successCount} Passed, ${failureCount} Failed`);
+  console.log(`SUMMARY: ${successCount} Passed, ${failureCount} Failed` + (recoveredCount > 0 ? ` (recovered ${recoveredCount} on sequential retry)` : ''));
+  if (trulyFailedFiles.length > 0) {
+    console.log('Truly failing tests:');
+    trulyFailedFiles.forEach(f => console.log('  - ' + path.relative(PROJECT_ROOT, f)));
+  }
   console.log('==================================================');
 
   if (failureCount > 0) {

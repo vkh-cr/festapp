@@ -157,8 +157,8 @@ class TicketEditorWidgets {
   /// Builds the editor for the "max_tickets" setting
   static Widget _buildMaxTicketsEditor(
       BuildContext context, FormFieldModel ticketField, VoidCallback refresh) {
-    bool showSurcharge =
-        ticketField.data?[TicketHolder.metaShowSurchargeDescription] ?? true;
+    bool showDeposit =
+        ticketField.data?[TicketHolder.metaShowDepositDescription] ?? true;
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Row(
@@ -200,18 +200,18 @@ class TicketEditorWidgets {
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
-              if (value == 'surcharge') {
+              if (value == 'deposit') {
                 ticketField.data ??= {};
-                ticketField.data![TicketHolder.metaShowSurchargeDescription] =
-                    !showSurcharge;
+                ticketField.data![TicketHolder.metaShowDepositDescription] =
+                    !showDeposit;
                 refresh();
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               CheckedPopupMenuItem<String>(
-                value: 'surcharge',
-                checked: showSurcharge,
-                child: Text(FormStrings.showSurchargeDescription),
+                value: 'deposit',
+                checked: showDeposit,
+                child: Text(FormStrings.showDepositDescription),
               ),
             ],
           ),

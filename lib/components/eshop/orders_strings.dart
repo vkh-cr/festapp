@@ -8,6 +8,10 @@ class OrdersStrings {
       'FeatureOrders.synchronizePayments'.tr(); // "Synchronize Payments"
   static String get processing =>
       'FeatureOrders.processing'.tr(); // "Processing..."
+  static String get failedToSaveProduct =>
+      'FeatureOrders.failedToSaveProduct'.tr(); // "Failed to save product."
+  static String get failedToDeleteProduct =>
+      'FeatureOrders.failedToDeleteProduct'.tr(); // "Failed to delete product."
   static String get changeStateToPaid =>
       'FeatureOrders.changeStateToPaid'.tr(); // "Change state to paid"
   static String get changeStateToPaidConfirmation =>
@@ -165,6 +169,25 @@ class OrdersStrings {
   static String get scanNotFound =>
       'FeatureOrders.scanNotFound'.tr(); // "Invalid code" (Neplatný kód)
 
+  // --- Deposit Scan Info ---
+  static String get scanDepositRemaining =>
+      'FeatureOrders.scanDepositRemaining'.tr(); // "Deposit remaining"
+  static String get scanDepositFullyPaid =>
+      'FeatureOrders.scanDepositFullyPaid'.tr(); // "Fully paid"
+  static String get scanDepositDeadline =>
+      'FeatureOrders.scanDepositDeadline'.tr(); // "Deadline"
+  static String get scanDepositOnSite =>
+      'FeatureOrders.scanDepositOnSite'.tr(); // "Pay on site"
+  static String get scanDepositCollect =>
+      'FeatureOrders.scanDepositCollect'.tr(); // "Collect remaining"
+
+  // Backward compatibility aliases
+  static String get scanSurchargeRemaining => scanDepositRemaining;
+  static String get scanSurchargeFullyPaid => scanDepositFullyPaid;
+  static String get scanSurchargeDeadline => scanDepositDeadline;
+  static String get scanSurchargeOnSite => scanDepositOnSite;
+  static String get scanSurchargeCollect => scanDepositCollect;
+
   // Specific Field Mappings (previously hardcoded)
   static String get fieldTypeParticipant =>
       'FeatureOrders.fieldTypeParticipant'.tr(); // "Participant Type"
@@ -260,6 +283,13 @@ class OrdersStrings {
   static String get gridShortTitle =>
       'OrderGridColumns.shortTitle'.tr(); // "Short Title"
   static String get gridSurcharge => 'OrderGridColumns.surcharge'.tr();
+  static String get gridDeposit => 'OrderGridColumns.deposit'.tr();
+  static String get gridDepositDeadline =>
+      'OrderGridColumns.depositDeadline'.tr();
+  static String get gridDepositPaymentDeadline =>
+      'OrderGridColumns.depositPaymentDeadline'.tr();
+  static String get gridDepositOnSiteLabel =>
+      'OrderGridColumns.depositOnSiteLabel'.tr();
 
   // --- PDF Generation Strings ---
   static String get generatingPdf =>

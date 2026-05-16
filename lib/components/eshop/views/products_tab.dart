@@ -26,25 +26,26 @@ class _ProductsTabState extends State<ProductsTab> {
   String? _occasionLink;
   bool _isLoading = true;
 
-  static List<String> columnIdentifiers = [
-    EshopColumns.PRODUCT_ID,
-    EshopColumns.PRODUCT_TYPE,
-    EshopColumns.PRODUCT_TITLE,
-    if (FeatureService.isFeatureEnabled(FeatureConstants.ticket))
-      EshopColumns.PRODUCT_SHORT_TITLE,
-    if (FeatureService.isFeatureEnabled(FeatureConstants.services))
-      EshopColumns.PRODUCT_INCLUDED_INVENTORY,
-    EshopColumns.PRODUCT_DESCRIPTION,
-    EshopColumns.PRODUCT_IS_HIDDEN,
-    EshopColumns.PRODUCT_PRICE,
-    EshopColumns.PRODUCT_CURRENCY_CODE,
-    EshopColumns.PRODUCT_SURCHARGE,
-    EshopColumns.PRODUCT_PAID_COUNT,
-    EshopColumns.PRODUCT_ORDERED_COUNT,
-    EshopColumns.PRODUCT_MAXIMUM,
-    EshopColumns.PRODUCT_USED_IN_FORMS,
-    EshopColumns.PRODUCT_ORDER,
-  ];
+  List<String> get columnIdentifiers => [
+        EshopColumns.PRODUCT_ID,
+        EshopColumns.PRODUCT_TYPE,
+        EshopColumns.PRODUCT_TITLE,
+        if (FeatureService.isFeatureEnabled(FeatureConstants.ticket))
+          EshopColumns.PRODUCT_SHORT_TITLE,
+        if (FeatureService.isFeatureEnabled(FeatureConstants.services))
+          EshopColumns.PRODUCT_INCLUDED_INVENTORY,
+        EshopColumns.PRODUCT_DESCRIPTION,
+        EshopColumns.PRODUCT_IS_HIDDEN,
+        EshopColumns.PRODUCT_PRICE,
+        EshopColumns.PRODUCT_CURRENCY_CODE,
+        if (FeatureService.isFeatureEnabled(FeatureConstants.deposit))
+          EshopColumns.PRODUCT_DEPOSIT,
+        EshopColumns.PRODUCT_PAID_COUNT,
+        EshopColumns.PRODUCT_ORDERED_COUNT,
+        EshopColumns.PRODUCT_MAXIMUM,
+        EshopColumns.PRODUCT_USED_IN_FORMS,
+        EshopColumns.PRODUCT_ORDER,
+      ];
 
   @override
   void didChangeDependencies() {

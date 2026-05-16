@@ -43,6 +43,7 @@ class FormHolder {
   final bool isCardDesign;
   final List<String> phonePrefixes;
   final String? communicationTone;
+  String? paymentType;
 
   TicketHolder? getTicket() =>
       fields.firstWhereOrNull((f) => f is TicketHolder) as TicketHolder?;
@@ -91,8 +92,8 @@ class FormHolder {
         fieldType: ffm.type!,
         maxTickets:
             ffm.data != null ? ffm.data[FormHelper.metaMaxTickets] ?? 1 : 1,
-        showSurchargeDescription: ffm.data != null
-            ? ffm.data[TicketHolder.metaShowSurchargeDescription] ?? true
+        showDepositDescription: ffm.data != null
+            ? ffm.data[TicketHolder.metaShowDepositDescription] ?? true
             : true,
         fields: [],
         isRequired: true,

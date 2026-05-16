@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'product_detail_editor_dialog.dart';
 import 'ticket_editor_widgets.dart';
@@ -26,7 +29,9 @@ class TicketProductEditorRow extends StatefulWidget {
 class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
   late TextEditingController _titleController;
   late TextEditingController _priceController;
+  late TextEditingController _depositController;
   late String selectedCurrency;
+  String? _depositError;
 
   @override
   void initState() {
@@ -34,6 +39,8 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
     _titleController = TextEditingController(text: widget.product.title ?? "");
     _priceController =
         TextEditingController(text: (widget.product.price ?? 0).toString());
+    _depositController = TextEditingController(
+        text: widget.product.depositAmount?.toString() ?? "");
     _titleController.addListener(() {
       widget.product.title = _titleController.text;
     });
@@ -43,7 +50,9 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
       if (newPrice != null) {
         widget.product.price = newPrice;
       }
+      _validateDeposit();
     });
+    _depositController.addListener(_validateDeposit);
     // Initialize the selected currency from the product model or default to the first available.
     selectedCurrency = widget.product.currencyCode ??
         (widget.availableCurrencies.isNotEmpty
@@ -52,10 +61,29 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
     widget.product.currencyCode = selectedCurrency;
   }
 
+  void _validateDeposit() {
+    final depositText = _depositController.text.replaceAll(RegExp(r'\s+'), '');
+    final priceText = _priceController.text.replaceAll(RegExp(r'\s+'), '');
+    final deposit = depositText.isNotEmpty ? double.tryParse(depositText) : null;
+    final price = double.tryParse(priceText) ?? 0;
+
+    setState(() {
+      if (deposit != null && deposit > 0 && deposit >= price) {
+        _depositError = "< ${CommonStrings.price}";
+      } else {
+        _depositError = null;
+      }
+      // Keep the entered value on the model — backend validates on save and surfaces
+      // a server-side error toast if the value is still invalid at submit time.
+      widget.product.depositAmount = (deposit != null && deposit > 0) ? deposit : null;
+    });
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
     _priceController.dispose();
+    _depositController.dispose();
     super.dispose();
   }
 
@@ -173,6 +201,27 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                       border: const UnderlineInputBorder(),
                     ),
                   ),
+                  if (FeatureService.isFeatureEnabled(
+                      FeatureConstants.deposit)) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _depositController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: InputDecoration(
+                              labelText: OrdersStrings.gridDeposit,
+                              border: const UnderlineInputBorder(),
+                              isDense: true,
+                              errorText: _depositError,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Row(
                     children: [

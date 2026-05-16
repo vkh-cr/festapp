@@ -1,75 +1,62 @@
--- 1. Setup Data
--- Create a test organization and unit
-INSERT INTO organizations (id, title) VALUES (999, 'Test Org') ON CONFLICT (id) DO NOTHING;
-INSERT INTO units (id, organization, title) VALUES (999, 999, 'Test Unit') ON CONFLICT (id) DO NOTHING;
+-- Verify: insert_manual_transaction creates CASH account lazily, inserts manual
+-- transaction, links it to payment_info, and triggers order → 'paid' state.
 
--- Setup Mock User (Manager)
 DO $$
 DECLARE
+    v_org_id bigint;
+    v_unit_id bigint;
     v_user_id uuid := gen_random_uuid();
-BEGIN
-    -- Store for later blocks
-    PERFORM set_config('test.user_id', v_user_id::text, false);
-
-    INSERT INTO auth.users (id, email) VALUES (v_user_id, 'test_' || v_user_id || '@example.com');
-    INSERT INTO public.user_info (id, email_readonly) VALUES (v_user_id, 'test_' || v_user_id || '@example.com');
-    
-    -- Login as this user
-    PERFORM set_config('request.jwt.claim.sub', v_user_id::text, true);
-    
-    INSERT INTO public.unit_users (unit, "user", is_manager) VALUES (999, v_user_id, true);
-END $$;
-
--- Create Order & Payment Info
--- 1. Create a dummy Bank Account (e.g. FIO) for the order logic
-INSERT INTO eshop.bank_accounts (id, title, account_number, type, supported_currencies) 
-VALUES (1000, 'FIO Account', '1111/2010', 'FIO', ARRAY['CZK']) ON CONFLICT (id) DO NOTHING;
-
--- 2. Create Payment Info linked to FIO account
--- (This simulates the user creating an order expecting FIO payment)
-INSERT INTO eshop.payment_info (id, variable_symbol, amount, currency_code, bank_account, created_at)
-VALUES (1001, 123456789, 200.0, 'CZK', 1000, now()) 
-ON CONFLICT (id) DO UPDATE SET variable_symbol = 123456789, paid = 0, amount = 200.0, bank_account = 1000;
-UPDATE eshop.payment_info SET paid = 0 WHERE id = 1001;
-DELETE FROM eshop.transactions WHERE payment_info = 1001;
-
--- 3. Create Order
--- Need occasion
-INSERT INTO occasions (id, unit, title, link, start_time, end_time) VALUES (123, 999, 'Test Occasion', 'test-link', now(), now() + interval '1 day') ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO eshop.orders (id, occasion, payment_info, state, price, currency_code, created_at)
-VALUES (5000, 123, 1001, 'created', 200.0, 'CZK', now()) ON CONFLICT (id) DO NOTHING;
-UPDATE eshop.orders SET state = 'created' WHERE id = 5000;
-
-
--- 3. Call the RPC (Pay 200 CZK CASH manually - Full Payment)
--- Params: amount, currency, unit_id, vs, date, note
-DO $$
-BEGIN
-    PERFORM public.insert_manual_transaction(
-        200.0::double precision, 
-        'CZK', 
-        999, 
-        '123456789', 
-        '2024-01-01 12:00:00', 
-        'Test Note'
-    );
-END $$;
-
--- 4. Verify Side Effects
-
-DO $$
-DECLARE
+    v_bank_id bigint;
+    v_pi_id bigint;
+    v_occasion_id bigint;
+    v_order_id bigint;
+    v_vs text := floor(random()*1000000000)::text;
     v_acc_id int;
     v_paid_amount numeric;
     v_order_state text;
     v_trans_record eshop.transactions%ROWTYPE;
 BEGIN
-    -- Verify CASH account was created
+    -- 1. Setup: org, unit, mock user (manager)
+    INSERT INTO public.organizations (title) VALUES ('Test Org IMT') RETURNING id INTO v_org_id;
+    INSERT INTO public.units (organization, title) VALUES (v_org_id, 'Test Unit IMT') RETURNING id INTO v_unit_id;
+
+    INSERT INTO auth.users (id, email) VALUES (v_user_id, 'test_imt_' || v_user_id || '@example.com');
+    INSERT INTO public.user_info (id, email_readonly) VALUES (v_user_id, 'test_imt_' || v_user_id || '@example.com');
+    PERFORM set_config('request.jwt.claim.sub', v_user_id::text, true);
+    INSERT INTO public.unit_users (unit, "user", is_manager) VALUES (v_unit_id, v_user_id, true);
+
+    -- 2. Setup: bank account + payment_info + order
+    INSERT INTO eshop.bank_accounts (title, account_number, type, supported_currencies)
+    VALUES ('FIO Account IMT', 'TEST-' || floor(random()*1000000)::text || '/2010', 'FIO', ARRAY['CZK'])
+    RETURNING id INTO v_bank_id;
+
+    INSERT INTO eshop.payment_info (variable_symbol, amount, currency_code, bank_account, paid)
+    VALUES (v_vs::bigint, 200.0, 'CZK', v_bank_id, 0)
+    RETURNING id INTO v_pi_id;
+
+    INSERT INTO public.occasions (unit, title, link, start_time, end_time)
+    VALUES (v_unit_id, 'Test Occasion IMT', 'test-link-imt-' || floor(random()*1000000)::text, now(), now() + interval '1 day')
+    RETURNING id INTO v_occasion_id;
+
+    INSERT INTO eshop.orders (occasion, payment_info, state, price, currency_code)
+    VALUES (v_occasion_id, v_pi_id, 'created', 200.0, 'CZK')
+    RETURNING id INTO v_order_id;
+
+    -- 3. Call the RPC (Pay 200 CZK CASH manually — full payment)
+    PERFORM public.insert_manual_transaction(
+        200.0::double precision,
+        'CZK',
+        v_unit_id::integer,
+        v_vs,
+        '2024-01-01 12:00:00',
+        'Test Note'
+    );
+
+    -- 4. Verify: CASH account was lazy-created on the unit
     SELECT ba.id INTO v_acc_id
     FROM eshop.bank_accounts ba
     JOIN eshop.unit_bank_accounts uba ON ba.id = uba.bank_account
-    WHERE uba.unit = 999 
+    WHERE uba.unit = v_unit_id
     AND 'CZK' = ANY(ba.supported_currencies)
     AND ba.type = 'CASH';
 
@@ -77,13 +64,13 @@ BEGIN
         RAISE EXCEPTION 'CASH account was NOT lazy-created';
     END IF;
 
-    -- Verify Transaction was inserted
+    -- Verify: transaction inserted
     SELECT * INTO v_trans_record
-    FROM eshop.transactions 
-    WHERE bank_account_id = v_acc_id 
-    AND amount = 200.0 
+    FROM eshop.transactions
+    WHERE bank_account_id = v_acc_id
+    AND amount = 200.0
     AND currency = 'CZK'
-    AND vs = '123456789'
+    AND vs = v_vs
     AND transaction_type = 'manual'
     LIMIT 1;
 
@@ -91,32 +78,22 @@ BEGIN
         RAISE EXCEPTION 'Transaction was NOT inserted correctly';
     END IF;
 
-    -- CHECK COMMENT (NOTE) -> Mapped to message_for_recipient in new migration
+    -- Verify: NOTE (mapped to message_for_recipient)
     IF v_trans_record.message_for_recipient IS DISTINCT FROM 'Test Note' THEN
-         RAISE EXCEPTION 'Transaction NOTE (message_for_recipient) mismatch. Expected "Test Note", got %', v_trans_record.message_for_recipient;
+        RAISE EXCEPTION 'Transaction NOTE mismatch. Expected "Test Note", got %', v_trans_record.message_for_recipient;
     END IF;
-    
-    -- Verify Payment Info Updated
-    SELECT paid INTO v_paid_amount
-    FROM eshop.payment_info
-    WHERE id = 1001;
-    
+
+    -- Verify: payment_info.paid updated to 200
+    SELECT paid INTO v_paid_amount FROM eshop.payment_info WHERE id = v_pi_id;
     IF v_paid_amount IS NULL OR v_paid_amount != 200.0 THEN
-         RAISE EXCEPTION 'Payment Info was NOT updated. Expected 200.0, got %', v_paid_amount;
+        RAISE EXCEPTION 'Payment Info was NOT updated. Expected 200.0, got %', v_paid_amount;
     END IF;
 
-    -- Verify Order State Updated
-    SELECT state INTO v_order_state
-    FROM eshop.orders
-    WHERE id = 5000;
-
+    -- Verify: order state transitioned to 'paid'
+    SELECT state INTO v_order_state FROM eshop.orders WHERE id = v_order_id;
     IF v_order_state != 'paid' THEN
         RAISE EXCEPTION 'Order state was NOT updated to paid. Current state: %', v_order_state;
     END IF;
 
     RAISE NOTICE 'Test Passed: CASH account created, transaction inserted with NOTE, payment info updated, and order marked PAID.';
 END $$;
-
-
-
-ROLLBACK;

@@ -27,6 +27,9 @@ DECLARE
     returned_revenue  NUMERIC;
     result_revenue    NUMERIC;
     remaining_balance NUMERIC;
+    deposit_paid      NUMERIC;
+    remaining_paid    NUMERIC;
+    has_deposits      BOOLEAN;
     revenue_section   TEXT;
 
     -- Variables for product type counts
@@ -112,19 +115,40 @@ BEGIN
             -- This handles cases where transactions might be missing but balance was set.
             -- ... Actually, if transactions are the ONLY way to pay, then Sum(Trans) == Paid.
             -- Let's go with: Bank = Paid - Cash.
-            COALESCE(SUM(pi.paid), 0) - 
+            COALESCE(SUM(pi.paid), 0) -
             COALESCE(SUM(
-                (SELECT COALESCE(SUM(t.amount), 0) 
-                 FROM eshop.transactions t 
+                (SELECT COALESCE(SUM(t.amount), 0)
+                 FROM eshop.transactions t
                  WHERE t.payment_info = pi.id AND t.transaction_type = 'manual')
-            ), 0)
+            ), 0),
+            -- Deposit revenue: MIN(paid, deposit_amount) for deposit orders
+            COALESCE(SUM(
+                CASE
+                    WHEN pi.deposit_amount IS NOT NULL
+                    THEN LEAST(COALESCE(pi.paid, 0), pi.deposit_amount)
+                    ELSE 0
+                END
+            ), 0),
+            -- Remaining revenue (paid beyond deposit): MAX(0, paid - deposit_amount) for deposit orders
+            COALESCE(SUM(
+                CASE
+                    WHEN pi.deposit_amount IS NOT NULL AND COALESCE(pi.paid, 0) > pi.deposit_amount
+                    THEN COALESCE(pi.paid, 0) - pi.deposit_amount
+                    ELSE 0
+                END
+            ), 0),
+            -- Has any deposit orders
+            BOOL_OR(pi.deposit_amount IS NOT NULL)
         INTO
             single_cc,
             total_revenue,
             paid_revenue,
             returned_revenue,
             paid_cash,
-            paid_bank
+            paid_bank,
+            deposit_paid,
+            remaining_paid,
+            has_deposits
         FROM eshop.orders o
         LEFT JOIN eshop.payment_info pi ON pi.id = o.payment_info
         WHERE o.occasion = occasion_id
@@ -141,6 +165,12 @@ BEGIN
             E'    • Suma vrácených částek: '  || to_char(returned_revenue,  'FM99999990.00') || ' ' || single_cc || E'\n' ||
             E'    • Výsledná částka: '         || to_char(result_revenue,    'FM99999990.00') || ' ' || single_cc || E'\n' ||
             E'    • Zbývající částka: '       || to_char(remaining_balance,'FM99999990.00') || ' ' || single_cc || E'\n';
+
+        IF has_deposits THEN
+            revenue_section := revenue_section ||
+                E'    • Zálohy (deposits): '    || to_char(deposit_paid,    'FM99999990.00') || ' ' || single_cc || E'\n' ||
+                E'    • Doplatky (remaining): ' || to_char(remaining_paid,  'FM99999990.00') || ' ' || single_cc || E'\n';
+        END IF;
     ELSE
         -- Multiple currencies: loop per currency
         revenue_section := E'===========\nPřehled tržeb podle měny:\n';
@@ -152,10 +182,26 @@ BEGIN
                 COALESCE(SUM(pi.returned),0) AS returned_revenue,
                 -- Cash
                 COALESCE(SUM(
-                    (SELECT COALESCE(SUM(t.amount), 0) 
-                     FROM eshop.transactions t 
+                    (SELECT COALESCE(SUM(t.amount), 0)
+                     FROM eshop.transactions t
                      WHERE t.payment_info = pi.id AND t.transaction_type = 'manual')
-                ), 0) AS paid_cash
+                ), 0) AS paid_cash,
+                -- Deposit revenue
+                COALESCE(SUM(
+                    CASE
+                        WHEN pi.deposit_amount IS NOT NULL
+                        THEN LEAST(COALESCE(pi.paid, 0), pi.deposit_amount)
+                        ELSE 0
+                    END
+                ), 0) AS deposit_paid,
+                -- Remaining revenue (paid beyond deposit)
+                COALESCE(SUM(
+                    CASE
+                        WHEN pi.deposit_amount IS NOT NULL AND COALESCE(pi.paid, 0) > pi.deposit_amount
+                        THEN COALESCE(pi.paid, 0) - pi.deposit_amount
+                        ELSE 0
+                    END
+                ), 0) AS remaining_paid
             FROM eshop.orders o
             LEFT JOIN eshop.payment_info pi ON pi.id = o.payment_info
             WHERE o.occasion = occasion_id
@@ -175,6 +221,12 @@ BEGIN
                 E'    • Suma vrácených částek: '  || to_char(rec_rev.returned_revenue, 'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n' ||
                 E'    • Výsledná částka: '         || to_char(result_revenue,           'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n' ||
                 E'    • Zbývající částka: '       || to_char(remaining_balance,       'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n';
+
+            IF rec_rev.deposit_paid > 0 OR rec_rev.remaining_paid > 0 THEN
+                revenue_section := revenue_section ||
+                    E'    • Zálohy (deposits): '    || to_char(rec_rev.deposit_paid,    'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n' ||
+                    E'    • Doplatky (remaining): ' || to_char(rec_rev.remaining_paid,  'FM99999990.00') || ' ' || rec_rev.currency_code || E'\n';
+            END IF;
         END LOOP;
     END IF;
 

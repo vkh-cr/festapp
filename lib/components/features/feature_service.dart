@@ -5,6 +5,7 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 
 import 'companion_feature.dart';
+import 'deposit_feature.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
 import 'form_feature.dart';
@@ -59,6 +60,7 @@ class FeatureService {
         ticketDarkColor: '000000',
         ticketBackground: '',
       ),
+      DepositFeature(code: FeatureConstants.deposit, isEnabled: false),
       SimpleFeature(code: FeatureConstants.blueprint, isEnabled: false),
 
       // These features are only added to the list if the app is supported.
@@ -112,6 +114,32 @@ class FeatureService {
       "lat": MapFeature.defaultLocation.lat,
       "lng": MapFeature.defaultLocation.lng
     };
+  }
+
+  /// Returns true if deposit payment option should be offered to the customer.
+  /// False when deposit is disabled, or when the deposit deadline has already
+  /// passed (now is less than X days before event start).
+  static bool isDepositChoiceAvailable() {
+    if (!isFeatureEnabled(FeatureConstants.deposit)) return false;
+    final feature = getFeatureDetails(FeatureConstants.deposit);
+    if (feature is! DepositFeature) return false;
+
+    // On-site deadline: always available
+    if (feature.depositDeadline == "on_site") return true;
+
+    // Days-before deadline: check if we're still before the cutoff
+    final eventStart = RightsService.currentOccasion()?.startTime;
+    if (eventStart == null) return false;
+    final days = feature.depositDeadlineDays;
+    if (days == null) return false;
+    final cutoff = eventStart.subtract(Duration(days: days));
+    return DateTime.now().isBefore(cutoff);
+  }
+
+  /// Returns deposit deadline info: "on_site" or the number of days, or null.
+  static DepositFeature? getDepositFeature() {
+    final feature = getFeatureDetails(FeatureConstants.deposit);
+    return feature is DepositFeature ? feature : null;
   }
 
   /// Returns the maximum number of companions allowed.

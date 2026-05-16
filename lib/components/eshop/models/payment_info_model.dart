@@ -6,6 +6,8 @@ class PaymentInfoModel {
   int? bankAccount;
   int? variableSymbol;
   double? amount;
+  double? depositAmount;
+  DateTime? depositDeadline;
   double? paid;
   double? returned;
   DateTime? deadline;
@@ -24,6 +26,12 @@ class PaymentInfoModel {
       variableSymbol: json[TbEshop.payment_info.variable_symbol],
       amount: json[TbEshop.payment_info.amount] != null
           ? double.tryParse(json[TbEshop.payment_info.amount].toString())
+          : null,
+      depositAmount: json[TbEshop.payment_info.deposit_amount] != null
+          ? double.tryParse(json[TbEshop.payment_info.deposit_amount].toString())
+          : null,
+      depositDeadline: json[TbEshop.payment_info.deposit_deadline] != null
+          ? DateTime.parse(json[TbEshop.payment_info.deposit_deadline])
           : null,
       paid: json[TbEshop.payment_info.paid] != null
           ? double.tryParse(json[TbEshop.payment_info.paid].toString())
@@ -48,6 +56,8 @@ class PaymentInfoModel {
     this.bankAccount,
     this.variableSymbol,
     this.amount,
+    this.depositAmount,
+    this.depositDeadline,
     this.paid,
     this.returned,
     this.deadline,

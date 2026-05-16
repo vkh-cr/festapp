@@ -776,7 +776,13 @@
     "usedInForms": "Used in Forms",
     "shortTitle": "Short Title",
     "surcharge": "Surcharge",
-    "surchargeOnSite": "surcharge"
+    "surchargeOnSite": "surcharge",
+    "deposit": "Deposit",
+    "depositOnSite": "remaining on site",
+    "depositInfo": "deposit",
+    "depositDeadline": "Surcharge deadline",
+    "depositPaymentDeadline": "Deposit by",
+    "depositOnSiteLabel": "On site"
   },
   "FormsFeature": {
     "cannotDeleteFormWithResponses": "Form cannot be deleted because it already has responses.",
@@ -902,7 +908,12 @@
     "removeTransactionSuccess": "Removed {item}.",
     "removeTooltip": "Remove",
     "transactionsForOrder": "Transactions for order {order}.",
-    "transactionTypeCashless": "Cashless"
+    "transactionTypeCashless": "Cashless",
+    "scanDepositRemaining": "Remaining to pay",
+    "scanDepositFullyPaid": "Fully paid",
+    "scanDepositDeadline": "Payment deadline",
+    "scanDepositOnSite": "Pay on site",
+    "scanDepositCollect": "Collect remaining"
   },
   "UserColumns": {
     "id": "Id",
@@ -1299,7 +1310,11 @@
     "imageRemovedSuccess": "Image removed successfully.",
     "imageRemovedFail": "Failed to remove image.",
     "fileUploadedSuccess": "File uploaded successfully.",
-    "failedToUploadImage": "Failed to upload image."
+    "failedToUploadImage": "Failed to upload image.",
+    "depositDeadline": "Deposit deadline",
+    "depositDeadlineDaysBefore": "Days before event",
+    "depositDeadlineOnSite": "On site",
+    "numberOfDays": "Number of days"
   },
   "Feedback": {
     "helpTitle": "How can we help?",
@@ -1353,7 +1368,12 @@
     "productUnavailable": "The {product_title} is no longer available for order.",
     "chooseDifferentVariant": "Please choose a different variant.",
     "chooseDifferentVariant_informal": "Please choose a different variant.",
-    "totalPrice": "Total Price: {price}"
+    "totalPrice": "Total Price: {price}",
+    "paymentMethod": "Payment method",
+    "payFullAmount": "Pay full amount at once",
+    "payWithDeposit": "Pay deposit",
+    "depositInfoOnSite": "Remaining amount payable on site.",
+    "depositInfoDaysBefore": "Remaining amount must be paid at least {days} days before the event."
   },
   "_": "_",
   "FeatureTicket": {
@@ -1539,5 +1559,9 @@
   "Ticket": "Ticket",
   "Spot": "Spot",
   "It is not possible to select more tickets.": "It is not possible to select more tickets.",
-  "Seat selection": "Seat selection"
+  "Seat selection": "Seat selection",
+  "FeatureDeposit": {
+    "title": "Deposit",
+    "description": "Enable deposit payments for products"
+  }
 }

@@ -460,9 +460,10 @@ export class FormPage extends Component {
                  const priceData = this.calculateTotal(form, formModel);
                  const precalculatedPayload = this.currentSession ? this.currentSession.payload : null;
                  
-                 OrderPreview.show(form, formModel, priceData, (overlay) => {
+                 OrderPreview.show(form, formModel, priceData, (overlay, paymentType) => {
                      // On Confirm
-                     this.submitOrder(form, formModel, overlay || document.body); 
+                     this._pendingPaymentType = paymentType || null;
+                     this.submitOrder(form, formModel, overlay || document.body);
                  }, () => {
                      // On Close
                  }, precalculatedPayload);
@@ -500,7 +501,13 @@ export class FormPage extends Component {
         
         // 3. Prepare Data
         const payload = this.currentSession ? this.currentSession.payload : FormDataReader.getPayload(form, formModel);
-        
+
+        // Inject payment_type if deposit option was selected
+        if (this._pendingPaymentType) {
+            payload.payment_type = this._pendingPaymentType;
+            this._pendingPaymentType = null;
+        }
+
         // 4. Submit via Network
         FormNetwork.submitOrder(payload).then(result => {
              loader.remove();

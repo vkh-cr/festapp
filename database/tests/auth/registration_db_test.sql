@@ -2,7 +2,8 @@
 DO $$
 DECLARE
     v_org_id bigint := 1;
-    v_email text := 'test.db.reg@example.com';
+    v_test_run_id text := floor(random()*1000000)::text;
+    v_email text := 'test.db.reg.' || v_test_run_id || '@example.com';
     v_password text := 'password123';
     v_payload_flat jsonb := '{"name": "Jan", "surname": "Novak", "lang": "cs", "firstName": "Ignored"}';
     v_payload_nested jsonb := '{"data": {"firstName": "Jan", "lastName": "Novak"}, "email": "ignored@example.com"}';
@@ -69,7 +70,7 @@ BEGIN
     
     
     -- 2. Test NESTED payload (Incorrect Format - Regression Test)
-    v_email := 'test.db.reg.nested@example.com';
+    v_email := 'test.db.reg.nested.' || v_test_run_id || '@example.com';
     v_result_json := create_user_from_registration(v_org_id, v_email, v_password, v_payload_nested);
     v_user_id := (v_result_json->>'id')::uuid;
     
@@ -83,7 +84,7 @@ BEGIN
 
 
     -- 3. Test Localized Unit Title (Explicit unit_title argument)
-    v_email := 'test.db.reg.en@example.com';
+    v_email := 'test.db.reg.en.' || v_test_run_id || '@example.com';
     -- Calling with 5th argument 'My events'
     v_result_json := create_user_from_registration(v_org_id, v_email, v_password, v_payload_flat, 'My events');
     v_user_id := (v_result_json->>'id')::uuid;

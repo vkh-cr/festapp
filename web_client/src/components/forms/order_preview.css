@@ -254,6 +254,65 @@ body.dark-mode .ticket-header-title {
     transition: background-color 0.2s, filter 0.2s;
 }
 
+/* Deposit Section */
+.deposit-section {
+    margin: 20px 0;
+    padding: 16px 20px;
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+}
+
+body.dark-mode .deposit-section {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.deposit-section-title {
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.deposit-option {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+.deposit-option input[type="radio"] {
+    accent-color: var(--primary-color, #007bff);
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.deposit-option span {
+    font-size: 14px;
+}
+
+.deposit-info-text {
+    width: 100%;
+    padding-left: 28px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-color-secondary, #666);
+    margin-top: 2px;
+}
+
+body.dark-mode .deposit-info-text {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+body.dark-mode .deposit-section-title {
+    color: var(--text-color, #bdbdbd);
+}
+
+body.dark-mode .deposit-option span {
+    color: var(--text-color, #bdbdbd);
+}
+
 .btn-submit-order {
     background-color: var(--primary-color, #007bff);
     color: var(--btn-text-color, #fff); /* Use calculated button text color */

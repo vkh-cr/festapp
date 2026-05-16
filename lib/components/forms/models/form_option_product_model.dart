@@ -34,4 +34,18 @@ class FormOptionProductModel extends FormOptionModel {
       ((maximum == null || maximum == 0) ||
           ((orderedCount ?? 0) < (maximum ?? 0))) &&
       (isDynamicallyAvailable ?? true);
+
+  /// Returns the deposit amount from product.data.deposit.amount, or null if not set.
+  double? get depositAmount {
+    if (data == null) return null;
+    final deposit = data!['deposit'];
+    if (deposit is! Map) return null;
+    final val = deposit['amount'];
+    if (val is num && val > 0) return val.toDouble();
+    if (val is String) {
+      final parsed = double.tryParse(val);
+      if (parsed != null && parsed > 0) return parsed;
+    }
+    return null;
+  }
 }

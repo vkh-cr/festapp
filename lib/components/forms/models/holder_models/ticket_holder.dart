@@ -10,19 +10,19 @@ class TicketHolder extends FieldHolder {
   static const String metaFields = "fields";
   static const String metaTicket = "ticket";
   static const String metaMaxTickets = "max_tickets";
-  static const String metaShowSurchargeDescription =
+  static const String metaShowDepositDescription =
       "show_surcharge_description";
 
   List<FormTicketModel> tickets = [];
 
   final int maxTickets;
-  final bool showSurchargeDescription;
+  final bool showDepositDescription;
   final List<FieldHolder> fields;
 
   TicketHolder({
     required super.fieldType,
     required this.maxTickets,
-    this.showSurchargeDescription = true,
+    this.showDepositDescription = true,
     required this.fields,
     super.isRequired = true,
     required super.id,

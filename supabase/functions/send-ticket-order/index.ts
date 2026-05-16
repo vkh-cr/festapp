@@ -167,8 +167,12 @@ Deno.serve(async (req) => {
       const occasion = ticketOrder.order.occasion;
       const paymentInfo = ticketOrder.order.payment_info;
       if (paymentInfo.amount > 0) {
+        // For deposit orders, QR code should show deposit amount (not full price)
+        const qrPaymentInfo = paymentInfo.deposit_amount && paymentInfo.deposit_amount < paymentInfo.amount
+          ? { ...paymentInfo, amount: Number(paymentInfo.deposit_amount) }
+          : paymentInfo;
         const qr = await generateQrCode(
-          paymentInfo,
+          qrPaymentInfo,
           ticketOrder.order,
           occasion.title,
         );
@@ -204,16 +208,47 @@ Deno.serve(async (req) => {
     let balanceReasoning = '';
 
     if (paymentInfo.amount > 0) {
-        balanceReasoning = tr.unpaid(
-            formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
-            paymentInfo.account_number_human_readable,
-            formatIBAN(paymentInfo.account_number),
-            paymentInfo.variable_symbol,
-            formatDatetime(paymentInfo.deadline, lang),
-            tone // Pass tone
-        );
+        if (paymentInfo.deposit_amount && paymentInfo.deposit_amount < paymentInfo.amount) {
+            // Deposit scenario: show deposit to pay + remaining amount info
+            const depositAmount = Number(paymentInfo.deposit_amount);
+            const remainingAmount = paymentInfo.amount - depositAmount;
+
+            // Get deposit deadline from the deposit feature in occasion features
+            const features = occasion.features || [];
+            const depositFeature = features.find((f: any) => f.code === 'deposit');
+            let depositDeadline: string;
+            if (depositFeature?.deposit_deadline === 'on_site') {
+                depositDeadline = lang === 'cs' ? 'na místě' : 'on site';
+            } else if (depositFeature?.deposit_deadline_days) {
+                depositDeadline = lang === 'cs'
+                    ? `${depositFeature.deposit_deadline_days} dní před akcí`
+                    : `${depositFeature.deposit_deadline_days} days before the event`;
+            } else {
+                depositDeadline = lang === 'cs' ? 'na místě' : 'on site';  // fallback
+            }
+
+            balanceReasoning = tr.depositRequired(
+                formatCurrency(depositAmount, paymentInfo.currency_code),
+                formatCurrency(remainingAmount, paymentInfo.currency_code),
+                depositDeadline,
+                paymentInfo.account_number_human_readable,
+                formatIBAN(paymentInfo.account_number),
+                paymentInfo.variable_symbol,
+                tone
+            );
+        } else {
+            // No deposit: show full price as today (existing behavior)
+            balanceReasoning = tr.unpaid(
+                formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
+                paymentInfo.account_number_human_readable,
+                formatIBAN(paymentInfo.account_number),
+                paymentInfo.variable_symbol,
+                formatDatetime(paymentInfo.deadline, lang),
+                tone
+            );
+        }
     } else {
-        balanceReasoning = tr.zeroOrder(paymentInfo.currency_code, tone); // Pass tone
+        balanceReasoning = tr.zeroOrder(paymentInfo.currency_code, tone);
     }
 
     const subs = {

@@ -90,7 +90,11 @@ class AppPanelHelper {
     }
 
     // Separator, Occasion Selector, and new Action Selector
-    if (currentUnit != null && currentOccasion != null) {
+    // Skip on unit-level pages (e.g. /unit/5/edit) where occasion context is stale
+    final currentRoutePath = context.routeData.path;
+    final isUnitLevelPage = currentRoutePath.contains('/unit/') &&
+        currentRoutePath.contains('/edit');
+    if (currentUnit != null && currentOccasion != null && !isUnitLevelPage) {
       final onAppBarColor =
           Theme.of(context).appBarTheme.foregroundColor ?? Colors.white;
       // Separator

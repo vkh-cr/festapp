@@ -341,6 +341,9 @@ class _FormPageState extends State<FormPage> {
     data = FormHelper.replaceSpotWithId(data);
     data[FormHelper.metaSecret] = form!.secret;
     data[FormHelper.metaForm] = form!.key;
+    if (formHolder!.paymentType != null) {
+      data['payment_type'] = formHolder!.paymentType;
+    }
     formResult = data;
 
     showGeneralDialog(

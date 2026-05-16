@@ -205,6 +205,9 @@ class EmailTemplateModel {
     ],
     'TICKET_ORDER_PAYMENT_DONE': [
       occasionTitleSub,
+      fullOrderSub,
+      balanceReasoningSub,
+      amountSub,
     ],
     'TICKET_ORDER_REMINDER': [
       occasionTitleSub,

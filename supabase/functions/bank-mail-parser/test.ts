@@ -18,10 +18,11 @@ Deno.test("Fio Banka Email Parser - Valid Email", () => {
     `;
     
     const result = parseEmail("fio_email", "Pohyb na uctu", body);
-    
+
     assertEquals(result?.amount, 1200.50);
     assertEquals(result?.currency, "CZK");
-    assertEquals(result?.counterparty, "987654321/0800");
+    assertEquals(result?.counterpartyAccount, "987654321");
+    assertEquals(result?.counterpartyBankCode, "0800");
     assertEquals(result?.vs, "2024001");
     assertEquals(result?.message, "Platba za listky");
 });
@@ -32,7 +33,9 @@ Deno.test("Fio Banka Email Parser - Minimal Data", () => {
     `;
     // Should still parse amount/curr, others null
     const result = parseEmail("fio_email", "", body);
-    
+
     assertEquals(result?.amount, 500.0);
-    assertEquals(result?.counterparty, null);
+    assertEquals(result?.counterpartyAccount, null);
+    assertEquals(result?.counterpartyBankCode, null);
+    assertEquals(result?.counterpartyName, null);
 });

@@ -187,7 +187,8 @@ class FormStrings {
   static String get clearSelection => 'FormsFeature.clearSelection'.tr();
   static String get unavailable => 'FormsFeature.unavailable'.tr();
   static String get inWhatCurrency => 'FormsFeature.inWhatCurrency'.tr();
-  static String get surchargeOnSite => 'OrderGridColumns.surchargeOnSite'.tr();
+  static String get depositOnSite => 'OrderGridColumns.depositOnSite'.tr();
+  static String get depositInfo => 'OrderGridColumns.depositInfo'.tr();
 
 // --- FormsTab (Main Grid View) ---
   static String get formsTitle => 'FormsFeature.formsTitle'.tr(); // "Forms"
@@ -275,8 +276,8 @@ class FormStrings {
   static String get validationMaxTicketsInvalid =>
       'FormsFeature.validationMaxTicketsInvalid'
           .tr(); // "Please enter a valid number (1 or more)."
-  static String get showSurchargeDescription =>
-      'FormsFeature.showSurchargeDescription'.tr();
+  static String get showDepositDescription =>
+      'FormsFeature.showDepositDescription'.tr();
 
 // --- Create/Copy Dialog (_CreateOrCopyFormDialog) ---
   static String get createFormTitle =>

@@ -45,6 +45,19 @@ class OccasionSettingsStrings {
       .tr(); // "Please select or type a valid timezone"
   static String get timezonesLoading => 'OccasionSettings.timezonesLoading'
       .tr(); // "Timezones loading or unavailable..."
+  static String get invalidNumber => 'OccasionSettings.invalidNumber'
+      .tr(); // "Please enter a valid number"
+
+  // Deposit Deadline Settings
+  static String get depositDeadline =>
+      'OccasionSettings.depositDeadline'.tr(); // "Deposit Deadline"
+  static String get depositDeadlineDaysBefore =>
+      'OccasionSettings.depositDeadlineDaysBefore'.tr(); // "X days before occasion"
+  static String get depositDeadlineOnSite =>
+      'OccasionSettings.depositDeadlineOnSite'.tr(); // "On site (no deadline)"
+  static String get numberOfDays =>
+      'OccasionSettings.numberOfDays'.tr(); // "Number of days"
+
 
   // Email Settings
   static String get labelReplyToEmail =>

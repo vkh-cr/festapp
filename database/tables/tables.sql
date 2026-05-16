@@ -203,6 +203,8 @@ create table if not exists eshop.payment_info (
   bank_account BIGINT NULL,
   variable_symbol BIGINT NULL,
   amount NUMERIC(10, 2) NULL,
+  deposit_amount NUMERIC(10, 2) DEFAULT NULL,
+  deposit_deadline TIMESTAMP WITH TIME ZONE DEFAULT NULL,
   paid NUMERIC(10, 2) NULL,
   deadline TIMESTAMP WITH TIME ZONE NULL,
   currency_code CHARACTER(3) NOT NULL DEFAULT 'CZK'::bpchar,

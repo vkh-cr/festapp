@@ -19,17 +19,16 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:trina_grid/trina_grid.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'views/deposit_renderer.dart';
 import 'views/inventory_inclusion_renderer.dart';
 import 'models/orders_history_model.dart';
 import 'orders_strings.dart';
 import 'views/order_history_dialog.dart';
 import 'views/order_state_display.dart';
 import 'package:fstapp/components/features/features_strings.dart';
-import 'package:fstapp/components/bank_accounts/bank_account_strings.dart';
-import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/eshop/views/search_transactions_dialog.dart';
-
-import 'package:fstapp/data_services/rights_service.dart';
 import 'views/add_cash_payment_dialog.dart';
 
 class EshopColumns {
@@ -53,6 +52,7 @@ class EshopColumns {
   static const String ORDER_ID = "orderId";
   static const String ORDER_PRICE = "orderPrice";
   static const String ORDER_STATE = "orderState";
+  static const String ORDER_MODEL_REFERENCE = "orderModelReference";
 
   static const String PRODUCT_ID = "productId";
   static const String PRODUCT_TITLE = "productTitle";
@@ -70,6 +70,7 @@ class EshopColumns {
   static const String PRODUCT_MODEL_REFERENCE = "productModelReference";
   static const String PRODUCT_USED_IN_FORMS = "productUsedInForms";
   static const String PRODUCT_SURCHARGE = "productSurcharge";
+  static const String PRODUCT_DEPOSIT = "productDeposit";
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
@@ -78,6 +79,7 @@ class EshopColumns {
   static const String PAYMENT_INFO_VARIABLE_SYMBOL =
       "paymentInfoVariableSymbol";
   static const String PAYMENT_INFO_DEADLINE = "orderDataDeadline";
+  static const String PAYMENT_INFO_DEPOSIT_DEADLINE = "paymentInfoDepositDeadline";
   static const String PAYMENT_INFO_REMINDER_SENT = "isReminderSent";
 
   static const String ORDER_SYMBOL = "orderSymbol";
@@ -226,46 +228,17 @@ class EshopColumns {
             width: 80,
           ),
         ],
-        PRODUCT_SURCHARGE: [
+        PRODUCT_DEPOSIT: [
           TrinaColumn(
-            enableAutoEditing: false,
-            title: OrdersStrings.gridSurcharge,
-            field: PRODUCT_SURCHARGE,
-            type: TrinaColumnType.text(),
+            enableAutoEditing: true,
+            title: OrdersStrings.gridDeposit,
+            field: PRODUCT_DEPOSIT,
+            type: TrinaColumnType.number(
+                negative: false,
+                format: "#.##",
+                locale: context.locale.languageCode),
             textAlign: TrinaColumnTextAlign.end,
-            width: 150,
-            renderer: (ctx) {
-              String currentValue = ctx.cell.value?.toString() ?? "";
-              if (currentValue.startsWith("0 ") || currentValue == "0") {
-                currentValue = "";
-              }
-
-              return Center(
-                child: InkWell(
-                  onTap: () async {
-                    final newValue =
-                        await _showSurchargeDialog(context, currentValue);
-                    if (newValue != null) {
-                      ctx.stateManager
-                          .changeCellValue(ctx.cell, newValue, force: true);
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0, vertical: 8.0),
-                    child: Text(
-                      currentValue.isEmpty ? CommonStrings.edit : currentValue,
-                      style: TextStyle(
-                        color: currentValue.isEmpty ? Colors.grey : null,
-                        decoration: currentValue.isEmpty
-                            ? TextDecoration.underline
-                            : null,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
+            width: 100,
           ),
         ],
         PRODUCT_DESCRIPTION: (Map<String, dynamic> data) => [
@@ -527,7 +500,18 @@ class EshopColumns {
             field: ORDER_PRICE,
             type: TrinaColumnType.text(),
             textAlign: TrinaColumnTextAlign.end,
-            width: 100,
+            width: FeatureService.isFeatureEnabled(FeatureConstants.deposit) ? 140 : 100,
+            renderer: FeatureService.isFeatureEnabled(FeatureConstants.deposit)
+                ? (ctx) {
+                    final order = ctx.row.cells[ORDER_MODEL_REFERENCE]?.value
+                        as OrderModel?;
+                    if (order == null) return const SizedBox.shrink();
+                    return OrderPriceDepositRenderer(
+                      rendererContext: ctx,
+                      order: order,
+                    );
+                  }
+                : null,
           ),
         ],
         ORDER_STATE: [
@@ -1014,11 +998,25 @@ class EshopColumns {
           TrinaColumn(
             readOnly: true,
             enableEditingMode: false,
-            title: OrdersStrings.gridDeadline,
+            title: FeatureService.isFeatureEnabled(FeatureConstants.deposit)
+                ? OrdersStrings.gridDepositPaymentDeadline
+                : OrdersStrings.gridDeadline,
             field: PAYMENT_INFO_DEADLINE,
             type: TrinaColumnType.text(),
             textAlign: TrinaColumnTextAlign.end,
             width: 100,
+          ),
+        ],
+        if (FeatureService.isFeatureEnabled(FeatureConstants.deposit))
+        PAYMENT_INFO_DEPOSIT_DEADLINE: [
+          TrinaColumn(
+            readOnly: true,
+            enableEditingMode: false,
+            title: OrdersStrings.gridDepositDeadline,
+            field: PAYMENT_INFO_DEPOSIT_DEADLINE,
+            type: TrinaColumnType.text(),
+            textAlign: TrinaColumnTextAlign.end,
+            width: 110,
           ),
         ],
         PAYMENT_INFO_REMINDER_SENT: [
@@ -1317,93 +1315,5 @@ class EshopColumns {
     );
   }
 
-  static Future<String?> _showSurchargeDialog(
-      BuildContext context, String? currentValue) async {
-    // currentValue likely "100.0 CZK" or "100"
-    String initialAmount = "";
-    String initialCurrency = "CZK"; // Default
 
-    if (currentValue != null && currentValue.isNotEmpty) {
-      List<String> parts = currentValue.split(" ");
-      if (parts.isNotEmpty) {
-        initialAmount = parts[0];
-      }
-      if (parts.length > 1) {
-        initialCurrency = parts.sublist(1).join(" ");
-      }
-    }
-
-    final amountController = TextEditingController(text: initialAmount);
-    final currencyController = TextEditingController(text: initialCurrency);
-
-    final supportedCurrencies = ['CZK', 'EUR'];
-
-    return await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(OrdersStrings.gridSurcharge),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: amountController,
-              decoration: InputDecoration(
-                labelText: CommonStrings.amount,
-                hintText: "0.00",
-              ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-            ),
-            const SizedBox(height: 16),
-            Text(CommonStrings.currency),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: supportedCurrencies
-                  .map((c) => ActionChip(
-                        label: Text(c),
-                        onPressed: () {
-                          currencyController.text = c;
-                        },
-                      ))
-                  .toList(),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: currencyController,
-              decoration: InputDecoration(
-                labelText: BankAccountStrings.currencyCodeLabel,
-              ),
-              textCapitalization: TextCapitalization.characters,
-              maxLength: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(BankAccountStrings.cancel)),
-          ElevatedButton(
-            onPressed: () {
-              final amount = amountController.text.trim();
-              final currency = currencyController.text.trim().toUpperCase();
-
-              if (amount.isEmpty) {
-                // Clear value if amount empty?
-                Navigator.pop(context, "");
-              } else {
-                if (currency.isNotEmpty) {
-                  Navigator.pop(context, "$amount $currency");
-                } else {
-                  Navigator.pop(context, amount);
-                }
-              }
-            },
-            child: Text(BankAccountStrings.save),
-          ),
-        ],
-      ),
-    );
-  }
 }

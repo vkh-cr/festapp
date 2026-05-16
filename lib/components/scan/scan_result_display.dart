@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
@@ -276,6 +277,13 @@ class ScanResultDisplay extends StatelessWidget {
                 // 4. Price and Payment Status
                 priceWidget,
 
+                // 4b. Deposit Info
+                if (scannedObject!.depositInfo != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: _buildDepositInfoWidget(context, scannedObject!, foregroundColor),
+                  ),
+
                 // DISPLAY NOTES
                 if (scannedObject!.note != null &&
                     scannedObject!.note!.isNotEmpty)
@@ -388,6 +396,80 @@ class ScanResultDisplay extends StatelessWidget {
               onPressed: onResetPassword,
               child: Text(OrdersStrings.resetPasswordTo(_defaultResetPassword)),
             ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _buildDepositInfoWidget(
+      BuildContext context, TicketModel ticket, Color foregroundColor) {
+    final info = ticket.depositInfo!;
+    final isFullyPaid = info['is_fully_paid'] == true;
+    final remainingAmount =
+        (info['remaining_amount'] as num?)?.toDouble() ?? 0;
+    final deadlineType = info['deadline_type'] as String?;
+    final deadlineDate = info['deadline_date'] as String?;
+    final currencyCode = ticket.relatedOrder?.currencyCode;
+
+    if (isFullyPaid) {
+      return Text(
+        OrdersStrings.scanDepositFullyPaid,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: foregroundColor,
+        ),
+        textAlign: TextAlign.center,
+      );
+    }
+
+    String formattedRemaining = Utilities.formatPrice(
+      context,
+      remainingAmount,
+      currencyCode: currencyCode,
+    );
+
+    String deadlineText = '';
+    if (deadlineType == 'on_site') {
+      deadlineText = OrdersStrings.scanDepositOnSite;
+    } else if (deadlineType == 'date' && deadlineDate != null) {
+      try {
+        final dt = DateTime.parse(deadlineDate);
+        deadlineText = DateFormat('dd.MM.yyyy').format(dt);
+      } catch (_) {
+        deadlineText = deadlineDate;
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: foregroundColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: foregroundColor.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '${OrdersStrings.scanDepositCollect}: $formattedRemaining',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: foregroundColor,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          if (deadlineText.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              '${OrdersStrings.scanDepositDeadline}: $deadlineText',
+              style: TextStyle(
+                fontSize: 14,
+                color: foregroundColor.withOpacity(0.8),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ],
       ),
     );

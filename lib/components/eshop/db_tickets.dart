@@ -169,6 +169,11 @@ class DbTickets {
           .toList();
     }
 
+    // 6. Attach deposit info from scan response
+    if (response.containsKey("deposit_info") && response["deposit_info"] != null) {
+      ticket.depositInfo = response["deposit_info"] as Map<String, dynamic>;
+    }
+
     return ticket;
   }
 

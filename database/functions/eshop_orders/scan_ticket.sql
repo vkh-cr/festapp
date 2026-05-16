@@ -15,6 +15,16 @@ DECLARE
     target_user_id UUID; -- New variable to store the resolved User ID
     expected_scan_code TEXT;
     is_uuid BOOLEAN;
+    -- Deposit info variables
+    v_deposit_amount NUMERIC;
+    v_paid NUMERIC;
+    v_amount NUMERIC;
+    v_deposit_deadline_days INT;
+    v_deposit_deadline TEXT;
+    v_occ_start_time TIMESTAMPTZ;
+    v_occ_features JSONB;
+    v_deposit_feature JSONB;
+    v_deposit_info JSONB;
 BEGIN
     -----------------------------------------------------
     -- 1. Attempt to find ticket by Ticket Symbol
@@ -169,6 +179,49 @@ BEGIN
     END IF;
 
     -----------------------------------------------------
+    -- 6E. Fetch deposit info for deposit orders
+    -----------------------------------------------------
+    SELECT pi.deposit_amount, pi.paid, pi.amount
+    INTO v_deposit_amount, v_paid, v_amount
+    FROM eshop.payment_info pi
+    JOIN eshop.orders o ON o.payment_info = pi.id
+    WHERE o.id = order_id;
+
+    IF v_deposit_amount IS NOT NULL THEN
+        -- Get occasion features and start_time for deposit deadline
+        SELECT occ.features, occ.start_time
+        INTO v_occ_features, v_occ_start_time
+        FROM public.occasions occ
+        WHERE occ.id = occasion_id;
+
+        -- Read deposit deadline from deposit feature in features JSONB
+        SELECT elem INTO v_deposit_feature
+        FROM jsonb_array_elements(v_occ_features) elem
+        WHERE elem->>'code' = 'deposit';
+
+        v_deposit_deadline_days := (v_deposit_feature->>'deposit_deadline_days')::int;
+        v_deposit_deadline := v_deposit_feature->>'deposit_deadline';
+
+        v_deposit_info := jsonb_build_object(
+            'remaining_amount', GREATEST(0, COALESCE(v_amount, 0) - COALESCE(v_paid, 0)),
+            'is_fully_paid', COALESCE(v_paid, 0) >= COALESCE(v_amount, 0),
+            'deadline_type', CASE
+                WHEN v_deposit_deadline = 'on_site' THEN 'on_site'
+                WHEN v_deposit_deadline_days IS NOT NULL THEN 'date'
+                ELSE NULL
+            END,
+            'deadline_date', CASE
+                WHEN v_deposit_deadline_days IS NOT NULL AND v_deposit_deadline IS DISTINCT FROM 'on_site'
+                THEN (v_occ_start_time - make_interval(days => v_deposit_deadline_days))::text
+                ELSE NULL
+            END,
+            'deposit_amount', v_deposit_amount,
+            'total_amount', v_amount,
+            'paid_amount', COALESCE(v_paid, 0)
+        );
+    END IF;
+
+    -----------------------------------------------------
     -- 7. Return the compiled JSONB response
     -----------------------------------------------------
     RETURN jsonb_build_object(
@@ -177,7 +230,8 @@ BEGIN
         'order', order_json,
         'products', products_json,
         'spot', spot_json,
-        'groups', COALESCE(groups_json, '[]'::jsonb)
+        'groups', COALESCE(groups_json, '[]'::jsonb),
+        'deposit_info', v_deposit_info
     );
 
 EXCEPTION

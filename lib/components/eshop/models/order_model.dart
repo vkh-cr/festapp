@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/components/eshop/eshop_columns.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/eshop/models/payment_info_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
@@ -250,6 +251,13 @@ class OrderModel extends ITrinaRowModel {
             ? DateFormat('yyyy-MM-dd').format(paymentInfoModel!.deadline!)
             : "",
       ),
+      EshopColumns.PAYMENT_INFO_DEPOSIT_DEADLINE: TrinaCell(
+        value: paymentInfoModel?.depositDeadline != null
+            ? DateFormat('yyyy-MM-dd').format(paymentInfoModel!.depositDeadline!)
+            : (paymentInfoModel?.depositAmount != null && paymentInfoModel!.depositAmount! > 0
+                ? OrdersStrings.gridDepositOnSiteLabel
+                : ""),
+      ),
       EshopColumns.ORDER_CREATED_AT: TrinaCell(
           value: createdAt != null
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
@@ -269,6 +277,7 @@ class OrderModel extends ITrinaRowModel {
       EshopColumns.PAYMENT_INFO_REMINDER_SENT:
           TrinaCell(value: paymentInfoModel!.isReminderSent.toString()),
       EshopColumns.ORDER_CONTRACT_DOWNLOAD: TrinaCell(value: ""),
+      EshopColumns.ORDER_MODEL_REFERENCE: TrinaCell(value: this),
     });
   }
 

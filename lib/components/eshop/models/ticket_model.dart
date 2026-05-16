@@ -31,6 +31,9 @@ class TicketModel extends ITrinaRowModel {
 
   List<UserGroupInfoModel>? relatedGroups;
 
+  // Deposit info from scan response
+  Map<String, dynamic>? depositInfo;
+
   TicketModel({
     this.id,
     this.createdAt,
@@ -44,6 +47,7 @@ class TicketModel extends ITrinaRowModel {
     this.relatedProducts,
     this.relatedOrder,
     this.relatedGroups,
+    this.depositInfo,
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {

@@ -52,4 +52,11 @@ class PublicOrderStrings {
 
   static String totalPrice(BuildContext context, String price) =>
       '$_prefix.totalPrice'.tr(namedArgs: {"price": price});
+
+  static String get paymentMethod => '$_prefix.paymentMethod'.tr();
+  static String get payFullAmount => '$_prefix.payFullAmount'.tr();
+  static String get payWithDeposit => '$_prefix.payWithDeposit'.tr();
+  static String get depositInfoOnSite => '$_prefix.depositInfoOnSite'.tr();
+  static String depositInfoDaysBefore(int days) =>
+      '$_prefix.depositInfoDaysBefore'.tr(namedArgs: {"days": days.toString()});
 }

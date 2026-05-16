@@ -170,6 +170,10 @@ export class FormModel {
         // Capture Features for FeatureService
         // Backend might send it in 'features' or inside 'occasion' object
         this.occasionFeatures = data.features || (data.occasion && data.occasion.features) || [];
+
+        // Capture occasion start_time for deposit deadline calculation
+        const occasionStartRaw = data.occasion && data.occasion.start_time;
+        this.occasionStartTime = occasionStartRaw ? new Date(occasionStartRaw) : null;
     }
 
     get _designData() {

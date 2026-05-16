@@ -245,32 +245,23 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
 
     for (var element in deleteList) {
       actions.add(() async {
-        try {
-          await element.deleteMethod(context);
-          ToastHelper.Show(
-              context, "${CommonStrings.deleted}: ${element.toBasicString()}");
-        } catch (e) {
-          ToastHelper.Show(context, e.toString(),
-              severity: ToastSeverity.NotOk);
-          rethrow;
-        }
+        await element.deleteMethod(context);
+        if (!mounted) return;
+        ToastHelper.Show(
+            context, "${CommonStrings.deleted}: ${element.toBasicString()}");
       });
     }
 
     for (var element in updatedSet) {
       actions.add(() async {
-        try {
-          await element.updateMethod(context);
-          ToastHelper.Show(
-              context, "${CommonStrings.saved}: ${element.toBasicString()}");
-        } catch (e) {
-          ToastHelper.Show(context, e.toString(),
-              severity: ToastSeverity.NotOk);
-          rethrow;
-        }
+        await element.updateMethod(context);
+        if (!mounted) return;
+        ToastHelper.Show(
+            context, "${CommonStrings.saved}: ${element.toBasicString()}");
       });
     }
 
+    if (!mounted) return;
     var success = await DialogHelper.showProgressDialogAsync(
       context,
       "Saving changes".tr(),

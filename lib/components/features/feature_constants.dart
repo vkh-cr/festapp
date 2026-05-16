@@ -24,6 +24,7 @@ class FeatureConstants {
   static const String volunteers = "volunteers";
   static const String schedule = "schedule";
   static const String contract = "contract";
+  static const String deposit = "deposit";
   static const String import = "import"; // New feature
 
   // Contract Feature
@@ -74,6 +75,10 @@ class FeatureConstants {
   static const String mapLogoLink = "logo_link";
   static const String mapTextLink = "text_link";
   static const String mapLayerLink = "layer_link";
+
+  // Deposit Feature
+  static const String depositDeadline = "deposit_deadline";
+  static const String depositDeadlineDays = "deposit_deadline_days";
 
   // Import Feature
   static const String importAutoImport = "auto_import";

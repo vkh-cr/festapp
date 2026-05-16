@@ -46,6 +46,7 @@ class ProductsTb {
   String get maximum => "maximum";
   String get data_short_title => "short_title";
   String get data_surcharge => "surcharge";
+  String get data_deposit => "deposit";
 }
 
 class OrderProductTicketTb {
@@ -132,6 +133,8 @@ class PaymentInfoTb {
   String get bank_account => "bank_account";
   String get variable_symbol => "variable_symbol";
   String get amount => "amount";
+  String get deposit_amount => "deposit_amount";
+  String get deposit_deadline => "deposit_deadline";
   String get paid => "paid";
   String get returned => "returned";
   String get deadline => "deadline";

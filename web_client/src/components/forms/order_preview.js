@@ -110,7 +110,10 @@ export class OrderPreview {
         const submitBtn = overlay.querySelector('.btn-submit-order');
         if (submitBtn) {
             submitBtn.onclick = () => {
-                 if (onConfirm) onConfirm(overlay); 
+                 // Capture payment_type from deposit radio if present
+                 const selectedRadio = overlay.querySelector('input[name="payment_type"]:checked');
+                 const paymentType = selectedRadio ? selectedRadio.value : null;
+                 if (onConfirm) onConfirm(overlay, paymentType);
             };
         }
 
@@ -363,19 +366,84 @@ export class OrderPreview {
         });
 
 
+        // Deposit logic: check if any selected ticket product has deposit data
+        const depositInfo = OrderPreview._getDepositInfo(payload, formModel, totalPriceData.currency);
+
         return {
             personalInfo,
             tickets,
             totalPrice: totalPriceData.totalPrice,
             currency: totalPriceData.currency,
             hasTickets: FeatureService.isFeatureEnabled(FeatureService.FeatureConstants.ticket, formModel.occasionFeatures),
-            tone: formModel.communicationTone
+            tone: formModel.communicationTone,
+            deposit: depositInfo
         };
     }
 
     static _getAutoTitle(type) {
         // ... existing ...
         return ""; 
+    }
+
+    /**
+     * Checks if any selected ticket product has deposit and calculates deposit total.
+     * Mirrors Flutter's _hasDepositProducts + _calculateDepositTotal + isDepositChoiceAvailable.
+     * Returns { hasDeposit, depositTotal, depositFeature, currency } or null.
+     */
+    static _getDepositInfo(payload, formModel, currency) {
+        const features = formModel.occasionFeatures;
+        if (!FeatureService.isFeatureEnabled(FeatureService.FeatureConstants.deposit, features)) return null;
+        if (!FeatureService.isDepositChoiceAvailable(features, formModel.occasionStartTime)) return null;
+
+        // Build map: product ID → deposit amount from FormOptionModel instances
+        // (sub.options are FormOptionModel with .id and .data.deposit.amount)
+        const depositMap = new Map();
+        const allSubFields = [];
+        if (formModel.relatedFields) {
+            formModel.relatedFields.forEach(f => {
+                const subs = f.subFields || [];
+                allSubFields.push(...subs);
+            });
+        }
+        allSubFields.forEach(sub => {
+            if (sub.type === 'product_type' && sub.options) {
+                sub.options.forEach(opt => {
+                    if (opt.data && opt.data.deposit && opt.data.deposit.amount > 0) {
+                        depositMap.set(String(opt.id), opt.data.deposit.amount);
+                    }
+                });
+            }
+        });
+
+        if (depositMap.size === 0) return null;
+
+        // Check selected products in payload and calculate deposit total
+        // Mirrors Flutter: depositAmount ?? price (fallback to full price)
+        let depositTotal = 0;
+        let hasDeposit = false;
+        const payloadTickets = payload.ticket || [];
+        payloadTickets.forEach(t => {
+            if (t.fields) {
+                t.fields.forEach(f => {
+                    const productId = f.product_type;
+                    if (productId) {
+                        // Handle multiselect (pipe-separated)
+                        String(productId).split(' | ').forEach(pid => {
+                            const depAmount = depositMap.get(String(pid));
+                            if (depAmount) {
+                                depositTotal += depAmount;
+                                hasDeposit = true;
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        if (!hasDeposit) return null;
+
+        const depositFeature = FeatureService.getDepositFeature(features);
+        return { hasDeposit, depositTotal, depositFeature, currency };
     }
 
     static _render(data) {
@@ -443,6 +511,32 @@ export class OrderPreview {
 
                   html += `</div>`; // Close card
              });
+        }
+
+        // Deposit Section
+        if (data.deposit) {
+            const dep = data.deposit;
+            const depositPrice = formatPrice(dep.depositTotal, dep.currency, 0, 'cs-CZ');
+            const fullPrice = formatPrice(data.totalPrice, data.currency, 0, 'cs-CZ');
+            const isOnSite = dep.depositFeature && dep.depositFeature.deposit_deadline === 'on_site';
+            const infoText = isOnSite
+                ? PublicOrderStrings.depositInfoOnSite
+                : PublicOrderStrings.depositInfoDaysBefore(dep.depositFeature?.deposit_deadline_days || 0);
+
+            html += `
+                <div class="preview-section deposit-section">
+                    <div class="deposit-section-title">${PublicOrderStrings.paymentMethod}</div>
+                    <label class="deposit-option">
+                        <input type="radio" name="payment_type" value="deposit" checked />
+                        <span>${PublicOrderStrings.payWithDeposit} (${depositPrice})</span>
+                        <div class="deposit-info-text">${infoText}</div>
+                    </label>
+                    <label class="deposit-option">
+                        <input type="radio" name="payment_type" value="full" />
+                        <span>${PublicOrderStrings.payFullAmount} (${fullPrice})</span>
+                    </label>
+                </div>
+            `;
         }
 
         // Total

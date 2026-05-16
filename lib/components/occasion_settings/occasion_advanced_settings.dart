@@ -17,7 +17,6 @@ class OccasionAdvancedSettings extends StatelessWidget {
   final ValueChanged<String> onTimezoneSelected;
   final ValueChanged<String> onLinkChanged;
   final ValueChanged<String?> onLinkSaved;
-
   const OccasionAdvancedSettings({
     super.key,
     required this.linkController,

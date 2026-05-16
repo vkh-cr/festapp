@@ -342,7 +342,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                 ),
               ],
             ),
-            // Popup Menu (Description & Surcharge)
+            // Popup Menu (Description & Deposit)
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == "add_description") {
@@ -351,13 +351,13 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                       field.description = defaultDescription;
                     }
                   });
-                } else if (value == "show_surcharge_description") {
+                } else if (value == "show_deposit_description") {
                   setState(() {
                     field.data ??= {};
                     var current = field
-                            .data![TicketHolder.metaShowSurchargeDescription] ??
+                            .data![TicketHolder.metaShowDepositDescription] ??
                         true;
-                    field.data![TicketHolder.metaShowSurchargeDescription] =
+                    field.data![TicketHolder.metaShowDepositDescription] =
                         !current;
                   });
                 }
@@ -372,14 +372,14 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
                 // Ticket Specific Options
                 if (isTicket) {
-                  bool showSurcharge =
-                      field.data?[TicketHolder.metaShowSurchargeDescription] ??
+                  bool showDeposit =
+                      field.data?[TicketHolder.metaShowDepositDescription] ??
                           true;
                   items.add(const PopupMenuDivider());
                   items.add(CheckedPopupMenuItem<String>(
-                    value: "show_surcharge_description",
-                    checked: showSurcharge,
-                    child: Text(FormStrings.showSurchargeDescription),
+                    value: "show_deposit_description",
+                    checked: showDeposit,
+                    child: Text(FormStrings.showDepositDescription),
                   ));
                 }
                 return items;

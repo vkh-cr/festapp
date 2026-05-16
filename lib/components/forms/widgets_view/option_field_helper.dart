@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:fstapp/components/forms/models/form_option_product_model.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
@@ -17,23 +18,34 @@ class OptionFieldHelper {
     return TextStyle(fontSize: 14.0 * FormHelper.fontSizeFactor);
   }
 
-  /// Builds the combined "title (+ price)" string for an option.
+  /// Returns just the option title (without price).
   static String buildOptionTitle(
     BuildContext context,
     FormOptionModel option,
   ) {
-    if (option is FormOptionProductModel && option.price > 0) {
-      return '${option.title} (${Utilities.formatPrice(context, option.price, currencyCode: option.currencyCode)})';
-    }
     return option.title;
   }
 
+  /// Returns formatted price string like "+ 1 000 CZK", or null if no price.
+  static String? buildPriceText(BuildContext context, FormOptionModel option) {
+    if (option is FormOptionProductModel && option.price > 0) {
+      return '+ ${Utilities.formatPrice(context, option.price, currencyCode: option.currencyCode)}';
+    }
+    return null;
+  }
+
+  /// Formatted deposit label: "záloha: 500 CZK"
+  static String buildDepositText(BuildContext context, FormOptionProductModel option) {
+    final depositStr = Utilities.formatPrice(context, option.depositAmount!, currencyCode: option.currencyCode);
+    return '${FormStrings.depositInfo}: $depositStr';
+  }
   /// Builds a card with a leading widget (checkbox or radio), a title, and an optional HTML description.
   static Widget buildOptionCard({
     required BuildContext context,
     required bool isSelected,
     required Widget leading,
     required String title,
+    String? priceText,
     required String? description,
     required VoidCallback? onTap,
   }) {
@@ -66,9 +78,25 @@ class OptionFieldHelper {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: FormHelper.cardOptionTitleTextStyle(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: FormHelper.cardOptionTitleTextStyle(),
+                          ),
+                        ),
+                        if (priceText != null) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            priceText,
+                            style: FormHelper.cardOptionTitleTextStyle().copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     if (hasDescription)
                       Padding(

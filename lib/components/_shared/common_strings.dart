@@ -3,6 +3,8 @@ import 'package:easy_localization/easy_localization.dart';
 class CommonStrings {
   // --- Common Actions ---
   static String get save => 'Common.save'.tr(); // "Save"
+  static String get unexpectedError =>
+      'Common.unexpectedError'.tr(); // "An unexpected error occurred."
   static String get storno => 'Storno'.tr(); // "Storno"
   static String get delete => 'Common.delete'.tr(); // "Delete"
   static String get edit => 'Common.edit'.tr(); // "Edit"

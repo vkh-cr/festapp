@@ -66,5 +66,66 @@ BEGIN
     AND COALESCE((f.data->>'is_reminder_enabled')::boolean, TRUE) IS TRUE;
     -- END: New validation conditions for forms
 
+  -- =========================================================================
+  -- DEPOSIT REMINDERS
+  -- For orders already paid with deposit (state='paid'), where remaining
+  -- balance is still due. These get is_deposit_reminder flag in data.
+  -- Target time = (occasion start_time - deposit_deadline_days) - reminder_interval
+  -- =========================================================================
+  INSERT INTO public.queue_emails (
+    target_time,
+    code,
+    data,
+    organization,
+    occasion,
+    unit
+  )
+  SELECT
+    (occ.start_time - make_interval(days => (deposit_settings.feature->>'deposit_deadline_days')::int)) - v_interval,
+    'TICKET_ORDER_REMINDER',
+    jsonb_build_object(
+      'order_id', o.id,
+      'is_deposit_reminder', true
+    ),
+    occ.organization,
+    o.occasion,
+    occ.unit
+  FROM
+    eshop.payment_info pi
+  JOIN
+    eshop.orders o ON pi.id = o.payment_info
+  JOIN
+    public.occasions occ ON o.occasion = occ.id
+  -- Find the 'deposit' feature from the occasion
+  LEFT JOIN LATERAL (
+      SELECT elem AS feature
+      FROM jsonb_array_elements(occ.features) elem
+      WHERE elem->>'code' = 'deposit'
+  ) deposit_settings ON TRUE
+  -- Find the 'form' feature for reminder settings
+  LEFT JOIN LATERAL (
+      SELECT elem AS feature
+      FROM jsonb_array_elements(occ.features) elem
+      WHERE elem->>'code' = 'form'
+  ) form_settings ON TRUE
+  LEFT JOIN public.forms f ON f.key = (o.data->>'form')::uuid
+  WHERE
+    o.occasion = p_occasion_id
+    AND o.state = 'paid'                           -- Deposit was paid, order is in 'paid' state
+    AND pi.deposit_amount IS NOT NULL              -- Order has a deposit
+    AND pi.paid < pi.amount                        -- Remaining balance is still due
+    -- Deposit feature must be enabled
+    AND (deposit_settings.feature->>'is_enabled')::boolean IS TRUE
+    -- Deadline type must not be on_site (on_site = pay at venue, no reminder needed)
+    AND (deposit_settings.feature->>'deposit_deadline') IS DISTINCT FROM 'on_site'
+    -- deposit_deadline_days must be set
+    AND (deposit_settings.feature->>'deposit_deadline_days') IS NOT NULL
+    -- occasion must have a start_time for deadline calculation
+    AND occ.start_time IS NOT NULL
+    -- Form feature validations (same as regular reminders)
+    AND (form_settings.feature->>'is_enabled')::boolean IS TRUE
+    AND (form_settings.feature->>'reminder_is_enabled')::boolean IS TRUE
+    AND COALESCE((f.data->>'is_reminder_enabled')::boolean, TRUE) IS TRUE;
+
 END;
 $$ LANGUAGE plpgsql;

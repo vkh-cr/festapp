@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
@@ -110,6 +111,59 @@ class ProductModel extends ITrinaRowModel {
     }
   }
 
+  Map<String, dynamic> get _depositMap {
+    if (data != null && data![TbEshop.products.data_deposit] is Map) {
+      return Map<String, dynamic>.from(data![TbEshop.products.data_deposit]);
+    }
+    return {};
+  }
+
+  double? get depositAmount {
+    var val = _depositMap['amount'];
+    double? result;
+    if (val is num) result = val.toDouble();
+    if (val is String) result = double.tryParse(val);
+    if (result == 0) return null;
+    return result;
+  }
+
+  set depositAmount(double? value) {
+    data ??= {};
+    if (data![TbEshop.products.data_deposit] is! Map) {
+      data![TbEshop.products.data_deposit] = {};
+    }
+    var map = data![TbEshop.products.data_deposit] as Map;
+    if (value == null || value == 0) {
+      map.remove('amount');
+    } else {
+      map['amount'] = value;
+    }
+    if (!map.containsKey('amount')) {
+      data!.remove(TbEshop.products.data_deposit);
+    }
+  }
+
+  String? get depositCurrency {
+    return _depositMap['currency']?.toString();
+  }
+
+  set depositCurrency(String? value) {
+    data ??= {};
+    if (data![TbEshop.products.data_deposit] is! Map) {
+      data![TbEshop.products.data_deposit] = {};
+    }
+    var map = data![TbEshop.products.data_deposit] as Map;
+    if (value == null || value.isEmpty) {
+      map.remove('currency');
+    } else {
+      map['currency'] = value;
+    }
+
+    if (map.isEmpty || !map.containsKey('amount')) {
+      data!.remove(TbEshop.products.data_deposit);
+    }
+  }
+
   ProductModel({
     this.id,
     this.createdAt,
@@ -206,42 +260,26 @@ class ProductModel extends ITrinaRowModel {
         data.remove(TbEshop.products.data_short_title);
       }
     }
-
-    // Handle Surcharge combined field from Grid
-    if (json.containsKey(EshopColumns.PRODUCT_SURCHARGE)) {
+    if (json.containsKey(EshopColumns.PRODUCT_DEPOSIT)) {
       data ??= {};
-      var surchargeMap = data[TbEshop.products.data_surcharge] is Map
-          ? Map<String, dynamic>.from(data[TbEshop.products.data_surcharge])
-          : <String, dynamic>{};
-
-      var val = json[EshopColumns.PRODUCT_SURCHARGE];
-      if (val != null && val.toString().isNotEmpty) {
-        // Expected format: "100.00 CZK" or just "100"
-        String raw = val.toString().trim();
-        List<String> parts = raw.split(" ");
-        if (parts.isNotEmpty) {
-          double? amount = double.tryParse(parts[0]);
-          if (amount != null && amount != 0) {
-            surchargeMap['amount'] = amount;
+      var val = json[EshopColumns.PRODUCT_DEPOSIT];
+      var parsed = val != null ? double.tryParse(val.toString()) : null;
+      if (parsed != null && parsed > 0) {
+        var depositMap = data[TbEshop.products.data_deposit];
+        if (depositMap is! Map) depositMap = {};
+        depositMap = Map<String, dynamic>.from(depositMap);
+        depositMap['amount'] = parsed;
+        data[TbEshop.products.data_deposit] = depositMap;
+      } else {
+        if (data[TbEshop.products.data_deposit] is Map) {
+          var depositMap = Map<String, dynamic>.from(data[TbEshop.products.data_deposit]);
+          depositMap.remove('amount');
+          if (depositMap.isEmpty) {
+            data.remove(TbEshop.products.data_deposit);
           } else {
-            surchargeMap.remove('amount');
-          }
-
-          if (parts.length > 1) {
-            surchargeMap['currency'] = parts.sublist(1).join(" ");
-          } else {
-            surchargeMap.remove('currency');
+            data[TbEshop.products.data_deposit] = depositMap;
           }
         }
-      } else {
-        surchargeMap.remove('amount');
-        surchargeMap.remove('currency');
-      }
-
-      if (surchargeMap.containsKey('amount')) {
-        data[TbEshop.products.data_surcharge] = surchargeMap;
-      } else {
-        data.remove(TbEshop.products.data_surcharge);
       }
     }
 
@@ -369,11 +407,6 @@ class ProductModel extends ITrinaRowModel {
         value: price != null ? price?.toStringAsFixed(2) : '',
       ),
       EshopColumns.PRODUCT_CURRENCY_CODE: TrinaCell(value: currencyCode ?? ''),
-      EshopColumns.PRODUCT_SURCHARGE: TrinaCell(
-          value: (surchargeAmount != null
-                  ? "$surchargeAmount ${surchargeCurrency ?? ''}"
-                  : "")
-              .trim()),
       EshopColumns.PRODUCT_TYPE: TrinaCell(value: productType?.title ?? ''),
       EshopColumns.PRODUCT_ORDER: TrinaCell(value: order ?? 0),
       EshopColumns.PRODUCT_MAXIMUM: TrinaCell(value: maximum ?? 0),
@@ -381,6 +414,9 @@ class ProductModel extends ITrinaRowModel {
       EshopColumns.PRODUCT_PAID_COUNT: TrinaCell(value: total),
       EshopColumns.PRODUCT_INCLUDED_INVENTORY:
           TrinaCell(value: getInventoryDisplayValue(this, context)),
+      EshopColumns.PRODUCT_DEPOSIT: TrinaCell(
+        value: depositAmount != null ? depositAmount?.toStringAsFixed(2) : '',
+      ),
       EshopColumns.PRODUCT_USED_IN_FORMS: TrinaCell(value: formTitles ?? ''),
       EshopColumns.PRODUCT_MODEL_REFERENCE: TrinaCell(value: this),
     });
@@ -395,7 +431,7 @@ class ProductModel extends ITrinaRowModel {
         await DbEshop.updateProductInventoryContexts(
             productId, includedInventories);
       },
-      defaultErrorMessage: "Failed to save product.".tr(),
+      defaultErrorMessage: OrdersStrings.failedToSaveProduct,
       rethrowError: true,
     );
   }
@@ -408,7 +444,7 @@ class ProductModel extends ITrinaRowModel {
       futureFunction: () async {
         await DbEshop.deleteProduct(id!);
       },
-      defaultErrorMessage: "Failed to delete product.".tr(),
+      defaultErrorMessage: OrdersStrings.failedToDeleteProduct,
       rethrowError: true,
     );
   }

@@ -13,6 +13,10 @@ class FeatureMetadata {
               'After payment, a ticket is sent to the user. The ticket can have a custom background and text color.'
                   .tr(),
         },
+        FeatureConstants.deposit: {
+          'title': FeaturesStrings.depositTitle,
+          'description': FeaturesStrings.depositDescription,
+        },
         FeatureConstants.form: {
           'title': 'Form'.tr(),
           'description':
