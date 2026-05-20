@@ -1,10 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
+import 'package:fstapp/components/eshop/db_eshop.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:trina_grid/trina_grid.dart';
 
@@ -46,6 +47,122 @@ class ProductModel extends ITrinaRowModel {
   static const String metaPaidCount = "paid_count";
   static const String metaSentCount = "sent_count";
 
+  String? get shortTitle => data?[TbEshop.products.data_short_title];
+  set shortTitle(String? value) {
+    data ??= {};
+    if (value == null || value.isEmpty) {
+      data!.remove(TbEshop.products.data_short_title);
+    } else {
+      data![TbEshop.products.data_short_title] = value;
+    }
+  }
+
+  Map<String, dynamic> get _surchargeMap {
+    if (data != null && data![TbEshop.products.data_surcharge] is Map) {
+      return Map<String, dynamic>.from(data![TbEshop.products.data_surcharge]);
+    }
+    return {};
+  }
+
+  double? get surchargeAmount {
+    var val = _surchargeMap['amount'];
+    double? result;
+    if (val is num) result = val.toDouble();
+    if (val is String) result = double.tryParse(val);
+
+    if (result == 0) return null;
+    return result;
+  }
+
+  set surchargeAmount(double? value) {
+    data ??= {};
+    if (data![TbEshop.products.data_surcharge] is! Map) {
+      data![TbEshop.products.data_surcharge] = {};
+    }
+    var map = data![TbEshop.products.data_surcharge] as Map;
+    if (value == null || value == 0) {
+      map.remove('amount');
+    } else {
+      map['amount'] = value;
+    }
+    if (!map.containsKey('amount')) {
+      data!.remove(TbEshop.products.data_surcharge);
+    }
+  }
+
+  String? get surchargeCurrency {
+    return _surchargeMap['currency']?.toString();
+  }
+
+  set surchargeCurrency(String? value) {
+    data ??= {};
+    if (data![TbEshop.products.data_surcharge] is! Map) {
+      data![TbEshop.products.data_surcharge] = {};
+    }
+    var map = data![TbEshop.products.data_surcharge] as Map;
+    if (value == null || value.isEmpty) {
+      map.remove('currency');
+    } else {
+      map['currency'] = value;
+    }
+
+    if (map.isEmpty || !map.containsKey('amount')) {
+      data!.remove(TbEshop.products.data_surcharge);
+    }
+  }
+
+  Map<String, dynamic> get _depositMap {
+    if (data != null && data![TbEshop.products.data_deposit] is Map) {
+      return Map<String, dynamic>.from(data![TbEshop.products.data_deposit]);
+    }
+    return {};
+  }
+
+  double? get depositAmount {
+    var val = _depositMap['amount'];
+    double? result;
+    if (val is num) result = val.toDouble();
+    if (val is String) result = double.tryParse(val);
+    if (result == 0) return null;
+    return result;
+  }
+
+  set depositAmount(double? value) {
+    data ??= {};
+    if (data![TbEshop.products.data_deposit] is! Map) {
+      data![TbEshop.products.data_deposit] = {};
+    }
+    var map = data![TbEshop.products.data_deposit] as Map;
+    if (value == null || value == 0) {
+      map.remove('amount');
+    } else {
+      map['amount'] = value;
+    }
+    if (!map.containsKey('amount')) {
+      data!.remove(TbEshop.products.data_deposit);
+    }
+  }
+
+  String? get depositCurrency {
+    return _depositMap['currency']?.toString();
+  }
+
+  set depositCurrency(String? value) {
+    data ??= {};
+    if (data![TbEshop.products.data_deposit] is! Map) {
+      data![TbEshop.products.data_deposit] = {};
+    }
+    var map = data![TbEshop.products.data_deposit] as Map;
+    if (value == null || value.isEmpty) {
+      map.remove('currency');
+    } else {
+      map['currency'] = value;
+    }
+
+    if (map.isEmpty || !map.containsKey('amount')) {
+      data!.remove(TbEshop.products.data_deposit);
+    }
+  }
 
   ProductModel({
     this.id,
@@ -71,10 +188,33 @@ class ProductModel extends ITrinaRowModel {
     this.isDynamicallyAvailable,
     List<int>? formIds,
     this.formTitles,
-  }) : includedInventories = includedInventories ?? [],
+  })  : includedInventories = includedInventories ?? [],
         formIds = formIds ?? [];
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic>? data = json[TbEshop.products.data];
+
+    if (data != null && data[TbEshop.products.data_surcharge] is Map) {
+      var map = data[TbEshop.products.data_surcharge] as Map;
+      var amount = map['amount'];
+      bool shouldRemove = false;
+      if (amount == null) {
+        shouldRemove = true;
+      } else if (amount is num && amount == 0) {
+        shouldRemove = true;
+      } else if (amount is String) {
+        if (double.tryParse(amount) == 0) shouldRemove = true;
+      }
+
+      if (shouldRemove) {
+        // Create a copy of data to avoid mutating the original JSON map if it's reused
+        // although usually json decode produces fresh maps.
+        // Better safe:
+        data = Map<String, dynamic>.from(data);
+        data.remove(TbEshop.products.data_surcharge);
+      }
+    }
+
     return ProductModel(
       id: json[TbEshop.products.id],
       createdAt: json[TbEshop.products.created_at] != null
@@ -90,7 +230,7 @@ class ProductModel extends ITrinaRowModel {
           ? double.tryParse(json[TbEshop.products.price].toString())
           : null,
       currencyCode: json[TbEshop.products.currency_code],
-      data: json[TbEshop.products.data],
+      data: data,
       productTypeId: json[TbEshop.products.product_type],
       occasion: json[TbEshop.products.occasion],
       productTypeString: json[metaTypeField],
@@ -107,11 +247,49 @@ class ProductModel extends ITrinaRowModel {
 
   static ProductModel fromPlutoJson(Map<String, dynamic> json) {
     var model = json[EshopColumns.PRODUCT_MODEL_REFERENCE] as ProductModel?;
+    Map<String, dynamic>? data;
+    if (model?.data != null) {
+      data = Map.from(model!.data!);
+    }
+    if (json.containsKey(EshopColumns.PRODUCT_SHORT_TITLE)) {
+      data ??= {};
+      var val = json[EshopColumns.PRODUCT_SHORT_TITLE];
+      if (val != null && val.toString().isNotEmpty) {
+        data[TbEshop.products.data_short_title] = val.toString();
+      } else {
+        data.remove(TbEshop.products.data_short_title);
+      }
+    }
+    if (json.containsKey(EshopColumns.PRODUCT_DEPOSIT)) {
+      data ??= {};
+      var val = json[EshopColumns.PRODUCT_DEPOSIT];
+      var parsed = val != null ? double.tryParse(val.toString()) : null;
+      if (parsed != null && parsed > 0) {
+        var depositMap = data[TbEshop.products.data_deposit];
+        if (depositMap is! Map) depositMap = {};
+        depositMap = Map<String, dynamic>.from(depositMap);
+        depositMap['amount'] = parsed;
+        data[TbEshop.products.data_deposit] = depositMap;
+      } else {
+        if (data[TbEshop.products.data_deposit] is Map) {
+          var depositMap = Map<String, dynamic>.from(data[TbEshop.products.data_deposit]);
+          depositMap.remove('amount');
+          if (depositMap.isEmpty) {
+            data.remove(TbEshop.products.data_deposit);
+          } else {
+            data[TbEshop.products.data_deposit] = depositMap;
+          }
+        }
+      }
+    }
 
     return ProductModel(
-      id: json[EshopColumns.PRODUCT_ID] == -1 ? null : json[EshopColumns.PRODUCT_ID],
+      id: json[EshopColumns.PRODUCT_ID] == -1
+          ? null
+          : json[EshopColumns.PRODUCT_ID],
       title: json[EshopColumns.PRODUCT_TITLE],
       isHidden: json[EshopColumns.PRODUCT_IS_HIDDEN] == 'true',
+      data: data,
       description: json[EshopColumns.PRODUCT_DESCRIPTION],
       price: json[EshopColumns.PRODUCT_PRICE] != null
           ? double.tryParse(json[EshopColumns.PRODUCT_PRICE].toString())
@@ -126,18 +304,18 @@ class ProductModel extends ITrinaRowModel {
   }
 
   Map<String, dynamic> toJson() => {
-    TbEshop.products.id: id,
-    TbEshop.products.title: title,
-    TbEshop.products.is_hidden: isHidden,
-    TbEshop.products.description: description,
-    TbEshop.products.price: price,
-    TbEshop.products.currency_code: currencyCode,
-    TbEshop.products.data: data,
-    TbEshop.products.product_type: productTypeId,
-    TbEshop.products.occasion: occasion,
-    TbEshop.products.order: order,
-    TbEshop.products.maximum: maximum,
-  };
+        TbEshop.products.id: id,
+        TbEshop.products.title: title,
+        TbEshop.products.is_hidden: isHidden,
+        TbEshop.products.description: description,
+        TbEshop.products.price: price,
+        TbEshop.products.currency_code: currencyCode,
+        TbEshop.products.data: data,
+        TbEshop.products.product_type: productTypeId,
+        TbEshop.products.occasion: occasion,
+        TbEshop.products.order: order,
+        TbEshop.products.maximum: maximum,
+      };
 
   ProductModel copyWith({
     int? id,
@@ -172,12 +350,14 @@ class ProductModel extends ITrinaRowModel {
       isHidden: isHidden ?? this.isHidden,
       description: description ?? this.description,
       price: price ?? this.price,
-      data: data ?? (this.data != null ? Map<String, dynamic>.from(this.data!) : null),
+      data: data ??
+          (this.data != null ? Map<String, dynamic>.from(this.data!) : null),
       productTypeId: productTypeId ?? this.productTypeId,
       productType: productType ?? this.productType,
       occasion: occasion ?? this.occasion,
       productTypeString: productTypeString ?? this.productTypeString,
-      productTypeTitleString: productTypeTitleString ?? this.productTypeTitleString,
+      productTypeTitleString:
+          productTypeTitleString ?? this.productTypeTitleString,
       order: order ?? this.order,
       maximum: maximum ?? this.maximum,
       orderedCount: orderedCount ?? this.orderedCount,
@@ -185,7 +365,8 @@ class ProductModel extends ITrinaRowModel {
       sentCount: sentCount ?? this.sentCount,
       currencyCode: currencyCode ?? this.currencyCode,
       includedInventories: includedInventories ?? this.includedInventories,
-      isDynamicallyAvailable: isDynamicallyAvailable ?? this.isDynamicallyAvailable,
+      isDynamicallyAvailable:
+          isDynamicallyAvailable ?? this.isDynamicallyAvailable,
       formIds: formIds ?? this.formIds,
       formTitles: formTitles ?? this.formTitles,
     );
@@ -195,7 +376,9 @@ class ProductModel extends ITrinaRowModel {
   /// It checks static limits (`maximum` vs `orderedCount`) and the dynamic availability flag from the backend.
   /// If `isDynamicallyAvailable` is null, it's treated as true to ensure backward compatibility.
   bool get isAvailable =>
-      ((maximum == null || maximum == 0) || ((orderedCount ?? 0) < (maximum ?? 0))) && (isDynamicallyAvailable ?? true);
+      ((maximum == null || maximum == 0) ||
+          ((orderedCount ?? 0) < (maximum ?? 0))) &&
+      (isDynamicallyAvailable ?? true);
 
   @override
   String toBasicString() => title ?? id.toString();
@@ -218,6 +401,7 @@ class ProductModel extends ITrinaRowModel {
       EshopColumns.PRODUCT_ID: TrinaCell(value: id ?? 0),
       EshopColumns.PRODUCT_IS_HIDDEN: TrinaCell(value: isHidden.toString()),
       EshopColumns.PRODUCT_TITLE: TrinaCell(value: title ?? ''),
+      EshopColumns.PRODUCT_SHORT_TITLE: TrinaCell(value: shortTitle ?? ''),
       EshopColumns.PRODUCT_DESCRIPTION: TrinaCell(value: description ?? ''),
       EshopColumns.PRODUCT_PRICE: TrinaCell(
         value: price != null ? price?.toStringAsFixed(2) : '',
@@ -228,7 +412,11 @@ class ProductModel extends ITrinaRowModel {
       EshopColumns.PRODUCT_MAXIMUM: TrinaCell(value: maximum ?? 0),
       EshopColumns.PRODUCT_ORDERED_COUNT: TrinaCell(value: orderedCount),
       EshopColumns.PRODUCT_PAID_COUNT: TrinaCell(value: total),
-      EshopColumns.PRODUCT_INCLUDED_INVENTORY: TrinaCell(value: getInventoryDisplayValue(this, context)),
+      EshopColumns.PRODUCT_INCLUDED_INVENTORY:
+          TrinaCell(value: getInventoryDisplayValue(this, context)),
+      EshopColumns.PRODUCT_DEPOSIT: TrinaCell(
+        value: depositAmount != null ? depositAmount?.toStringAsFixed(2) : '',
+      ),
       EshopColumns.PRODUCT_USED_IN_FORMS: TrinaCell(value: formTitles ?? ''),
       EshopColumns.PRODUCT_MODEL_REFERENCE: TrinaCell(value: this),
     });
@@ -240,9 +428,10 @@ class ProductModel extends ITrinaRowModel {
       context,
       futureFunction: () async {
         var productId = await DbEshop.updateProduct(this);
-        await DbEshop.updateProductInventoryContexts(productId, includedInventories);
+        await DbEshop.updateProductInventoryContexts(
+            productId, includedInventories);
       },
-      defaultErrorMessage: "Failed to save product.".tr(),
+      defaultErrorMessage: OrdersStrings.failedToSaveProduct,
       rethrowError: true,
     );
   }
@@ -255,28 +444,31 @@ class ProductModel extends ITrinaRowModel {
       futureFunction: () async {
         await DbEshop.deleteProduct(id!);
       },
-      defaultErrorMessage: "Failed to delete product.".tr(),
+      defaultErrorMessage: OrdersStrings.failedToDeleteProduct,
       rethrowError: true,
     );
   }
 
-  static String getInventoryDisplayValue(ProductModel product, BuildContext context) {
+  static String getInventoryDisplayValue(
+      ProductModel product, BuildContext context) {
     if (product.includedInventories.isEmpty) {
       return "";
     }
     return product.includedInventories.map((link) {
       final quantityText = link.quantity > 1 ? " (x${link.quantity})" : "";
       // Use the populated object for its title, with a fallback to the ID.
-      final title = link.inventoryContext?.getFullTitle(context) ?? link.inventoryContextId.toString();
+      final title = link.inventoryContext?.getFullTitle(context) ??
+          link.inventoryContextId.toString();
       return "$title$quantityText";
     }).join(" | ");
   }
 
   String getFormattedProductTitle() {
     if (price != null) {
-      final priceString = "${price!.toStringAsFixed(2)} ${currencyCode ?? ''}".trim();
+      final priceString =
+          "${price!.toStringAsFixed(2)} ${currencyCode ?? ''}".trim();
       return "$title ($priceString)";
     }
-    return title??"";
+    return title ?? "";
   }
 }

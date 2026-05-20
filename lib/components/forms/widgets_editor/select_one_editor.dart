@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_models/form_option_model.dart';
+import 'package:fstapp/components/forms/models/form_field_model.dart';
+import 'package:fstapp/components/forms/models/form_option_model.dart';
 
 import 'option_editor_dialog.dart';
+import 'description_tooltip.dart';
 
 class SelectOneEditor {
-  static Widget buildSelectOneReadOnly(BuildContext context, FormFieldModel field) {
+  static Widget buildSelectOneReadOnly(
+      BuildContext context, FormFieldModel field) {
     final options = field.options;
     if (options.isEmpty) {
       return Text(
@@ -30,8 +32,8 @@ class SelectOneEditor {
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Row(
                   children: [
-                    Tooltip(
-                      message: "Has description".tr(),
+                    DescriptionTooltip(
+                      description: option.description!,
                       child: const Icon(Icons.description, size: 16),
                     ),
                   ],
@@ -43,7 +45,8 @@ class SelectOneEditor {
     );
   }
 
-  static Widget buildSelectOneEditor(BuildContext context, FormFieldModel field, int? occasionId) {
+  static Widget buildSelectOneEditor(
+      BuildContext context, FormFieldModel field, int? occasionId) {
     final optionsController = TextEditingController();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +55,8 @@ class SelectOneEditor {
         const SizedBox(height: 8),
         Column(
           children: field.options.map((FormOptionModel formOption) {
-            final optionController = TextEditingController(text: formOption.title);
+            final optionController =
+                TextEditingController(text: formOption.title);
             return Row(
               children: [
                 Radio<String>(
@@ -66,11 +70,11 @@ class SelectOneEditor {
                     decoration: InputDecoration(
                       border: const UnderlineInputBorder(),
                       suffixIcon: formOption.description != null &&
-                          formOption.description!.trim().isNotEmpty
-                          ? Tooltip(
-                        message: "Has description".tr(),
-                        child: Icon(Icons.description, size: 20),
-                      )
+                              formOption.description!.trim().isNotEmpty
+                          ? DescriptionTooltip(
+                              description: formOption.description!,
+                              child: Icon(Icons.description, size: 20),
+                            )
                           : null,
                     ),
                     onChanged: (value) {
@@ -84,14 +88,18 @@ class SelectOneEditor {
                     if (value == 'additional_settings') {
                       showDialog(
                         context: context,
-                        builder: (context) => OptionDetailEditorDialog(option: formOption, occasionId: occasionId,),
+                        builder: (context) => OptionDetailEditorDialog(
+                          option: formOption,
+                          occasionId: occasionId,
+                        ),
                       ).then((_) {
                         // Refresh the widget when the dialog is closed.
                         (context as Element).markNeedsBuild();
                       });
                     }
                   },
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuEntry<String>>[
                     PopupMenuItem<String>(
                       value: 'additional_settings',
                       child: Text("Additional Settings".tr()),

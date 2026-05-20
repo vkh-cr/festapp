@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/services/utilities_all.dart';
-import 'package:intl/intl.dart';
 import '../form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class CreateOrCopyFormDialog extends StatefulWidget {
   final List<FormModel> existingForms;
@@ -52,9 +52,12 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
     } else {
       final normalizedQuery = Utilities.removeDiacritics(query.toLowerCase());
       tempFilteredForms = widget.existingForms.where((form) {
-        final normalizedTitle = Utilities.removeDiacritics((form.title ?? "").toLowerCase());
-        final normalizedOccasionTitle = Utilities.removeDiacritics((form.occasionModel?.title ?? "").toLowerCase());
-        return normalizedTitle.contains(normalizedQuery) || normalizedOccasionTitle.contains(normalizedQuery);
+        final normalizedTitle =
+            Utilities.removeDiacritics((form.title ?? "").toLowerCase());
+        final normalizedOccasionTitle = Utilities.removeDiacritics(
+            (form.occasionModel?.title ?? "").toLowerCase());
+        return normalizedTitle.contains(normalizedQuery) ||
+            normalizedOccasionTitle.contains(normalizedQuery);
       }).toList();
     }
 
@@ -79,7 +82,8 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
         continue;
       }
 
-      if (occasion!.startTime!.isBefore(now) && occasion.endTime!.isAfter(now)) {
+      if (occasion!.startTime!.isBefore(now) &&
+          occasion.endTime!.isAfter(now)) {
         currentOccasions.add(form);
       } else if (occasion.startTime!.isAfter(now)) {
         upcomingOccasions.add(form);
@@ -105,15 +109,14 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
         (pastByYear[year] ??= []).add(form);
       }
 
-      final sortedYears = pastByYear.keys.toList()..sort((a, b) => b.compareTo(a));
+      final sortedYears = pastByYear.keys.toList()
+        ..sort((a, b) => b.compareTo(a));
 
       for (final year in sortedYears) {
         newGroupedList.add(year.toString());
         newGroupedList.addAll(pastByYear[year]!);
       }
     }
-
-
 
     if (datelessOccasions.isNotEmpty) {
       newGroupedList.add(FormStrings.groupOther);
@@ -170,7 +173,8 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
                 decoration: InputDecoration(
                   hintText: FormStrings.searchFormsToCopy,
                   prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
                   isDense: true,
                 ),
               ),
@@ -188,9 +192,9 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
                       child: Text(
                         item,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
+                              color: Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                     );
                   } else if (item is FormModel) {
@@ -205,7 +209,8 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
 
                     String subtitleText = occasion?.title ?? '---';
                     if (occasion?.startTime != null) {
-                      final formattedDate = DateFormat.yMd(currentLocale).format(occasion!.startTime!);
+                      final formattedDate = DateFormat.yMd(currentLocale)
+                          .format(occasion!.startTime!);
                       subtitleText = '$subtitleText ($formattedDate)';
                     }
 
@@ -213,7 +218,8 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
                       leading: const Icon(Icons.article_outlined, size: 24),
                       title: Text(
                         form.toString(),
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                        style: theme.textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w500),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -223,7 +229,8 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       trailing: Tooltip(
-                        message: FormStrings.numberOfResponsesTooltip(totalResponses),
+                        message: FormStrings.numberOfResponsesTooltip(
+                            totalResponses),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -231,7 +238,8 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
                             const SizedBox(width: 4),
                             Text(
                               totalResponses.toString(),
-                              style: theme.textTheme.bodyMedium?.copyWith(color: hintColor),
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(color: hintColor),
                             ),
                           ],
                         ),
@@ -249,7 +257,7 @@ class _CreateOrCopyFormDialogState extends State<CreateOrCopyFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text("Storno".tr()),
+          child: Text(CommonStrings.storno),
         ),
       ],
     );

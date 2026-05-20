@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_services_eshop/db_forms.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
+import '../models/form_field_model.dart';
 import '../widgets_view/form_helper.dart';
 import 'birth_date_editor.dart';
 import 'description_with_edit.dart';
@@ -14,10 +15,11 @@ import 'ticket_editor_widgets.dart';
 import 'select_one_editor.dart';
 import 'select_many_editor.dart';
 import 'id_document_editor.dart';
+import '../form_strings.dart';
+import 'package:fstapp/components/forms/models/holder_models/ticket_holder.dart';
 
 // Define kHiddenOpacity if it's not globally available from form_editor_content.dart
 const double kHiddenOpacity = 0.5;
-
 
 class FormFieldsGenerator extends StatefulWidget {
   final FormEditBundle bundle;
@@ -35,9 +37,8 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
     super.initState();
     // Use the form from the bundle
     final topLevelFields = widget.bundle.form.relatedFields
-        ?.where((f) => f.isTicketField != true)
-        .toList() ??
-        [];
+        .where((f) => f.isTicketField != true)
+        .toList();
     if (topLevelFields.isNotEmpty) {
       selectedIndex = 0;
     }
@@ -50,7 +51,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   Widget _buildFieldsList() {
     // Use the form from the bundle
-    final topLevelFields = widget.bundle.form.relatedFields!
+    final topLevelFields = widget.bundle.form.relatedFields
         .where((f) => f.isTicketField != true)
         .toList();
 
@@ -73,12 +74,12 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
           final form = widget.bundle.form;
           final updatedList = <FormFieldModel>[];
           updatedList.addAll(topLevelFields);
-          updatedList.addAll(form.relatedFields!
-              .where((f) => f.isTicketField == true));
+          updatedList
+              .addAll(form.relatedFields.where((f) => f.isTicketField == true));
           form.relatedFields = updatedList;
 
-          for (int i = 0; i < form.relatedFields!.length; i++) {
-            form.relatedFields![i].order = i;
+          for (int i = 0; i < form.relatedFields.length; i++) {
+            form.relatedFields[i].order = i;
           }
 
           if (selectedIndex == oldIndex) {
@@ -137,20 +138,20 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
     final bool hidden = field.isHidden ?? false;
     final requiredStar = (field.isRequired ?? false)
         ? TextSpan(
-      text: ' *',
-      style: TextStyle(color: ThemeConfig.redColor(context)),
-    )
+            text: ' *',
+            style: TextStyle(color: ThemeConfig.redColor(context)),
+          )
         : null;
     final titleStyle = hidden
         ? TextStyle(
-      decoration: TextDecoration.lineThrough,
-      color: Theme.of(context).colorScheme.primary,
-      fontWeight: FontWeight.bold,
-    )
+            decoration: TextDecoration.lineThrough,
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          )
         : TextStyle(
-      color: Theme.of(context).colorScheme.primary,
-      fontWeight: FontWeight.bold,
-    );
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          );
     final displayTitle = (field.title?.isNotEmpty ?? false)
         ? field.title!
         : FormHelper.fieldTypeToLocale(field.type!);
@@ -197,7 +198,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
   Widget _buildFieldItemSelected(
       FormFieldModel field, List<FormFieldModel> displayList, int index) {
     final isTicket = field.type == FormHelper.fieldTypeTicket;
-    final String defaultDescription = "Description".tr();
+    final String defaultDescription = CommonStrings.description;
     final form = widget.bundle.form;
 
     return Column(
@@ -206,8 +207,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
         Center(
           child: ReorderableDragStartListener(
             index: index,
-            child:
-            const Icon(Icons.drag_handle, color: Colors.grey, size: 24),
+            child: const Icon(Icons.drag_handle, color: Colors.grey, size: 24),
           ),
         ),
         const SizedBox(height: 8),
@@ -218,21 +218,15 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                   size: 24, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 8),
               Text(OrdersStrings.itemSingular,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary))
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary))
                   .tr(),
             ],
           )
         else ...[
           TextFormField(
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary),
             decoration: InputDecoration(
@@ -269,8 +263,8 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                 width: 150,
                 child: PopupMenuButton<String>(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(8),
@@ -285,19 +279,19 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                   ),
                   itemBuilder: (context) => _availableFieldTypes
                       .map((entry) => PopupMenuItem(
-                    value: entry,
-                    child: Row(
-                      children: [
-                        Icon(FormHelper.fieldTypeIcons[entry]),
-                        const SizedBox(width: 8),
-                        Text(FormHelper.fieldTypeToLocale(entry)),
-                      ],
-                    ),
-                  ))
+                            value: entry,
+                            child: Row(
+                              children: [
+                                Icon(FormHelper.fieldTypeIcons[entry]),
+                                const SizedBox(width: 8),
+                                Text(FormHelper.fieldTypeToLocale(entry)),
+                              ],
+                            ),
+                          ))
                       .toList(),
                   onSelected: (newType) => setState(() {
                     if (!((field.type == FormHelper.fieldTypeSelectOne ||
-                        field.type == FormHelper.fieldTypeSelectMany) &&
+                            field.type == FormHelper.fieldTypeSelectMany) &&
                         (newType == FormHelper.fieldTypeSelectOne ||
                             newType == FormHelper.fieldTypeSelectMany))) {
                       field.data = null;
@@ -315,13 +309,11 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
               ),
             const Spacer(),
             if (isTicket) ...[
-              Text("Note".tr(),
-                  style: Theme.of(context).textTheme.bodySmall),
+              Text("Note".tr(), style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(width: 4),
-              TicketEditorWidgets.buildTicketNoteCheckbox(context, form,
-                      () {
-                    setState(() {});
-                  }),
+              TicketEditorWidgets.buildTicketNoteCheckbox(context, form, () {
+                setState(() {});
+              }),
               const SizedBox(width: 16),
             ],
             Row(
@@ -340,35 +332,60 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
             const SizedBox(width: 16),
             Row(
               children: [
-                Text('Show'.tr(),
-                    style: Theme.of(context).textTheme.bodySmall),
+                Text('Show'.tr(), style: Theme.of(context).textTheme.bodySmall),
                 Switch(
                   value: !(field.isHidden ?? false),
-                  onChanged: (field.type == FormHelper.fieldTypeEmail || isTicket)
-                      ? null
-                      : (value) => setState(() => field.isHidden = !value),
+                  onChanged:
+                      (field.type == FormHelper.fieldTypeEmail || isTicket)
+                          ? null
+                          : (value) => setState(() => field.isHidden = !value),
                 ),
               ],
             ),
-            if (!isTicket)
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == "add_description") {
-                    setState(() {
-                      if (HtmlHelper.isHtmlEmptyOrNull(field.description)) {
-                        field.description = defaultDescription;
-                      }
-                    });
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem<String>(
-                    value: "add_description",
-                    child: Text("Add description".tr()),
-                  ),
-                ],
-                icon: const Icon(Icons.more_vert),
-              ),
+            // Popup Menu (Description & Deposit)
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == "add_description") {
+                  setState(() {
+                    if (HtmlHelper.isHtmlEmptyOrNull(field.description)) {
+                      field.description = defaultDescription;
+                    }
+                  });
+                } else if (value == "show_deposit_description") {
+                  setState(() {
+                    field.data ??= {};
+                    var current = field
+                            .data![TicketHolder.metaShowDepositDescription] ??
+                        true;
+                    field.data![TicketHolder.metaShowDepositDescription] =
+                        !current;
+                  });
+                }
+              },
+              itemBuilder: (context) {
+                List<PopupMenuEntry<String>> items = [];
+                // Add Description Option
+                items.add(PopupMenuItem<String>(
+                  value: "add_description",
+                  child: Text("Add description".tr()),
+                ));
+
+                // Ticket Specific Options
+                if (isTicket) {
+                  bool showDeposit =
+                      field.data?[TicketHolder.metaShowDepositDescription] ??
+                          true;
+                  items.add(const PopupMenuDivider());
+                  items.add(CheckedPopupMenuItem<String>(
+                    value: "show_deposit_description",
+                    checked: showDeposit,
+                    child: Text(FormStrings.showDepositDescription),
+                  ));
+                }
+                return items;
+              },
+              icon: const Icon(Icons.more_vert),
+            ),
             if (field.id == null)
               IconButton(
                 icon: Icon(Icons.delete,
@@ -376,7 +393,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                 onPressed: () {
                   setState(() {
                     displayList.remove(field);
-                    widget.bundle.form.relatedFields!.remove(field);
+                    widget.bundle.form.relatedFields.remove(field);
                     if (selectedIndex == index) {
                       selectedIndex = null;
                     }
@@ -396,30 +413,32 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
       case FormHelper.fieldTypeTicket:
         return isEditable
             ? TicketEditorWidgets.buildTicketEditor(
-            context,
-            form,
-            field,
-            widget.bundle.productTypes,
-                () { setState(() {}); })
+                context, form, field, widget.bundle.productTypes, () {
+                setState(() {});
+              })
             : TicketEditorWidgets.buildTicketEditorReadOnly(
-            context, form, field);
+                context, form, field);
       case FormHelper.fieldTypeSelectOne:
         return isEditable
-            ? SelectOneEditor.buildSelectOneEditor(context, field, form.occasionId)
+            ? SelectOneEditor.buildSelectOneEditor(
+                context, field, form.occasionId)
             : SelectOneEditor.buildSelectOneReadOnly(context, field);
       case FormHelper.fieldTypeSelectMany:
         return isEditable
-            ? SelectManyEditor.buildSelectManyEditor(context, field, form.occasionId)
+            ? SelectManyEditor.buildSelectManyEditor(
+                context, field, form.occasionId)
             : SelectManyEditor.buildSelectManyReadOnly(context, field);
       case FormHelper.fieldTypeSex:
         return SexEditor.buildSexFieldReadOnly(context, field);
       case FormHelper.fieldTypeBirthDate:
         return isEditable
-            ? BirthDateEditor.buildBirthDateEditor(context, field, form.occasionId)
+            ? BirthDateEditor.buildBirthDateEditor(
+                context, field, form.occasionId)
             : BirthDateEditor.buildBirthDateReadOnly(context, field);
       case FormHelper.fieldTypeIdDocument:
         return isEditable
-            ? IdDocumentEditor.buildIdDocumentEditor(context, field, form.occasionId)
+            ? IdDocumentEditor.buildIdDocumentEditor(
+                context, field, form.occasionId)
             : IdDocumentEditor.buildIdDocumentReadOnly(context, field);
       default:
         if (isEditable) {
@@ -429,8 +448,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
               decoration: InputDecoration(
                 border: const UnderlineInputBorder(),
                 hintText: 'Answer text'.tr(),
-                contentPadding:
-                const EdgeInsets.symmetric(vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(vertical: 8),
               ),
               style: Theme.of(context).textTheme.bodyLarge,
             ),
@@ -449,7 +467,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   List<String> get _availableFieldTypes {
     final existingTypes =
-        widget.bundle.form.relatedFields?.map((f) => f.type).toList() ?? [];
+        widget.bundle.form.relatedFields.map((f) => f.type).toList();
     return FormHelper.fieldTypeIcons.keys.where((type) {
       if ([
         FormHelper.fieldTypeText,

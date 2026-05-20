@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'product_detail_editor_dialog.dart';
 import 'ticket_editor_widgets.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'description_tooltip.dart';
 
 class TicketProductEditorRow extends StatefulWidget {
   final ProductModel product;
@@ -24,7 +29,9 @@ class TicketProductEditorRow extends StatefulWidget {
 class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
   late TextEditingController _titleController;
   late TextEditingController _priceController;
+  late TextEditingController _depositController;
   late String selectedCurrency;
+  String? _depositError;
 
   @override
   void initState() {
@@ -32,7 +39,9 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
     _titleController = TextEditingController(text: widget.product.title ?? "");
     _priceController =
         TextEditingController(text: (widget.product.price ?? 0).toString());
-     _titleController.addListener(() {
+    _depositController = TextEditingController(
+        text: widget.product.depositAmount?.toString() ?? "");
+    _titleController.addListener(() {
       widget.product.title = _titleController.text;
     });
     _priceController.addListener(() {
@@ -41,7 +50,9 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
       if (newPrice != null) {
         widget.product.price = newPrice;
       }
+      _validateDeposit();
     });
+    _depositController.addListener(_validateDeposit);
     // Initialize the selected currency from the product model or default to the first available.
     selectedCurrency = widget.product.currencyCode ??
         (widget.availableCurrencies.isNotEmpty
@@ -50,10 +61,29 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
     widget.product.currencyCode = selectedCurrency;
   }
 
+  void _validateDeposit() {
+    final depositText = _depositController.text.replaceAll(RegExp(r'\s+'), '');
+    final priceText = _priceController.text.replaceAll(RegExp(r'\s+'), '');
+    final deposit = depositText.isNotEmpty ? double.tryParse(depositText) : null;
+    final price = double.tryParse(priceText) ?? 0;
+
+    setState(() {
+      if (deposit != null && deposit > 0 && deposit >= price) {
+        _depositError = "< ${CommonStrings.price}";
+      } else {
+        _depositError = null;
+      }
+      // Keep the entered value on the model — backend validates on save and surfaces
+      // a server-side error toast if the value is still invalid at submit time.
+      widget.product.depositAmount = (deposit != null && deposit > 0) ? deposit : null;
+    });
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
     _priceController.dispose();
+    _depositController.dispose();
     super.dispose();
   }
 
@@ -111,8 +141,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveOpacity =
-    (widget.product.isHidden ?? false) ? 0.5 : 1.0;
+    final effectiveOpacity = (widget.product.isHidden ?? false) ? 0.5 : 1.0;
     return Opacity(
       opacity: effectiveOpacity,
       child: Padding(
@@ -129,14 +158,14 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                   TextField(
                     controller: _titleController,
                     decoration: InputDecoration(
-                      labelText: "Title".tr(),
+                      labelText: CommonStrings.title,
                       border: const UnderlineInputBorder(),
                       suffixIcon: (!HtmlHelper.isHtmlEmptyOrNull(
-                          widget.product.description))
-                          ? Tooltip(
-                        message: "Has description".tr(),
-                        child: const Icon(Icons.description, size: 20),
-                      )
+                              widget.product.description))
+                          ? DescriptionTooltip(
+                              description: widget.product.description!,
+                              child: const Icon(Icons.description, size: 20),
+                            )
                           : null,
                     ),
                   ),
@@ -148,7 +177,8 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                       const SizedBox(width: 4),
                       SelectableText(
                         TicketEditorWidgets.formatOrderedCount(
-                            widget.product.orderedCount, widget.product.maximum),
+                            widget.product.orderedCount,
+                            widget.product.maximum),
                       ),
                     ],
                   ),
@@ -165,12 +195,33 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                   TextField(
                     controller: _priceController,
                     keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                        const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
-                      labelText: "Price".tr(),
+                      labelText: CommonStrings.price,
                       border: const UnderlineInputBorder(),
                     ),
                   ),
+                  if (FeatureService.isFeatureEnabled(
+                      FeatureConstants.deposit)) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _depositController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: InputDecoration(
+                              labelText: OrdersStrings.gridDeposit,
+                              border: const UnderlineInputBorder(),
+                              isDense: true,
+                              errorText: _depositError,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Row(
                     children: [
@@ -186,8 +237,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
             // Right column: Visibility switch.
             Column(
               children: [
-                Text("Show".tr(),
-                    style: Theme.of(context).textTheme.bodySmall),
+                Text("Show".tr(), style: Theme.of(context).textTheme.bodySmall),
                 Switch(
                   value: !(widget.product.isHidden ?? false),
                   onChanged: (val) {
@@ -211,8 +261,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                   });
                 }
               },
-              itemBuilder: (BuildContext context) =>
-              <PopupMenuEntry<String>>[
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
                   value: 'additional_settings',
                   child: Text("Additional Settings".tr()),

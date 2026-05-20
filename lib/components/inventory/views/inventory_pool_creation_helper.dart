@@ -1,12 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/inventory_pool_bundle.dart';
-import 'package:fstapp/data_services/db_inventory_pools.dart';
+import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
 
 import 'inventory_strings.dart';
 import '../models/inventory_pool_model.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class InventoryPoolCreationHelper {
   static Future<void> showCreatePoolDialog({
@@ -15,7 +16,8 @@ class InventoryPoolCreationHelper {
     required VoidCallback onPoolCreated,
   }) async {
     final formKey = GlobalKey<FormState>();
-    final titleController = TextEditingController(text: InventoryStrings.creationDialogNewPoolTitle);
+    final titleController = TextEditingController(
+        text: InventoryStrings.creationDialogNewPoolTitle);
     bool isCreating = false;
 
     await showDialog(
@@ -52,62 +54,69 @@ class InventoryPoolCreationHelper {
               ),
               actions: <Widget>[
                 TextButton(
-                  onPressed: isCreating ? null : () => Navigator.of(dialogContext).pop(),
-                  child: Text("Storno".tr()),
+                  onPressed: isCreating
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
+                  child: Text(CommonStrings.storno),
                 ),
                 ElevatedButton(
                   onPressed: isCreating
                       ? null
                       : () async {
-                    if (!formKey.currentState!.validate()) {
-                      return;
-                    }
+                          if (!formKey.currentState!.validate()) {
+                            return;
+                          }
 
-                    setState(() {
-                      isCreating = true;
-                    });
+                          setState(() {
+                            isCreating = true;
+                          });
 
-                    final newPool = InventoryPoolModel(
-                      id: null,
-                      title: titleController.text.trim(),
-                      occasionId: occasionId,
-                    );
+                          final newPool = InventoryPoolModel(
+                            id: null,
+                            title: titleController.text.trim(),
+                            occasionId: occasionId,
+                          );
 
-                    final bundle = InventoryPoolBundle(
-                      pool: newPool,
-                      resources: [],
-                      contexts: [],
-                    );
+                          final bundle = InventoryPoolBundle(
+                            pool: newPool,
+                            resources: [],
+                            contexts: [],
+                          );
 
-                    final result = await ExceptionHandler.guard(
-                      dialogContext,
-                      futureFunction: () => DbInventoryPools.updateInventoryPoolBundle(bundle),
-                      defaultErrorMessage: InventoryStrings.creationDialogErrorDefault,
-                    );
+                          final result = await ExceptionHandler.guard(
+                            dialogContext,
+                            futureFunction: () =>
+                                DbInventoryPools.updateInventoryPoolBundle(
+                                    bundle),
+                            defaultErrorMessage:
+                                InventoryStrings.creationDialogErrorDefault,
+                          );
 
-                    // The guard returns null if an error was handled.
-                    // We only proceed if the result is not null (i.e., the call succeeded).
-                    if (result != null) {
-                      if (dialogContext.mounted) {
-                        await ToastHelper.Show(dialogContext, InventoryStrings.creationDialogSuccess, severity: ToastSeverity.Ok);
-                        onPoolCreated();
-                        Navigator.of(dialogContext).pop();
-                      }
-                    }
+                          // The guard returns null if an error was handled.
+                          // We only proceed if the result is not null (i.e., the call succeeded).
+                          if (result != null) {
+                            if (dialogContext.mounted) {
+                              await ToastHelper.Show(dialogContext,
+                                  InventoryStrings.creationDialogSuccess,
+                                  severity: ToastSeverity.Ok);
+                              onPoolCreated();
+                              Navigator.of(dialogContext).pop();
+                            }
+                          }
 
-                    // This replaces the 'finally' block.
-                    if (dialogContext.mounted) {
-                      setState(() {
-                        isCreating = false;
-                      });
-                    }
-                  },
+                          // This replaces the 'finally' block.
+                          if (dialogContext.mounted) {
+                            setState(() {
+                              isCreating = false;
+                            });
+                          }
+                        },
                   child: isCreating
                       ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : Text("Create".tr()),
                 ),
               ],

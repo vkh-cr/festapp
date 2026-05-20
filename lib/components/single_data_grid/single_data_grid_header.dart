@@ -10,6 +10,7 @@ import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'pluto_abstract.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
   final TrinaGridStateManager stateManager;
@@ -22,8 +23,7 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
   });
 
   @override
-  _SingleDataGridHeaderState<T> createState() =>
-      _SingleDataGridHeaderState<T>(
+  _SingleDataGridHeaderState<T> createState() => _SingleDataGridHeaderState<T>(
         controller,
       );
 
@@ -32,43 +32,44 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
     var defaultF = FilterHelper.defaultFilters.toList();
     defaultF.removeAt(0);
     return TrinaGridConfiguration(
-      columnFilter: TrinaGridColumnFilterConfig(
-          filters: [TrinaFilterTypeContainsNoDiacritics(), ...defaultF],
-          resolveDefaultColumnFilter: (column, resolver) {
-            return resolver<TrinaFilterTypeContainsNoDiacritics>();
-          }
-      ),
-      scrollbar: const TrinaGridScrollbarConfig(
-        dragDevices: {
-          PointerDeviceKind.trackpad,
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.touch,
-          PointerDeviceKind.stylus,
-          PointerDeviceKind.invertedStylus,
-          PointerDeviceKind.unknown},
-        thickness: 12.0,
-      ),
-      localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
-      selectingMode: TrinaGridSelectingMode.cell,
-      style: ThemeConfig.isDarkMode(context)
-          ?
-      TrinaGridStyleConfig.dark(
-        rowHeight: 32,
-        cellDefaultColor: Colors.transparent,
-        cellReadonlyColor:  Colors.transparent,
-        cellColorInReadOnlyState: Colors.transparent,
-        cellTextStyle: TextStyle(color: ThemeConfig.blackColor(context)),
-        columnTextStyle:
-        TextStyle(color: ThemeConfig.blackColor(context)),
-      )
-          : TrinaGridStyleConfig(
-          rowHeight: 32,
-          cellDefaultColor: Colors.transparent,
-          cellReadonlyColor:  Colors.transparent,
-          cellColorInReadOnlyState: Colors.transparent,
-          cellTextStyle: TextStyle(color: ThemeConfig.blackColor(context)),
-          columnTextStyle: TextStyle(color: ThemeConfig.blackColor(context))
-    ));
+        columnFilter: TrinaGridColumnFilterConfig(
+            filters: [TrinaFilterTypeContainsNoDiacritics(), ...defaultF],
+            resolveDefaultColumnFilter: (column, resolver) {
+              return resolver<TrinaFilterTypeContainsNoDiacritics>();
+            }),
+        scrollbar: const TrinaGridScrollbarConfig(
+          dragDevices: {
+            PointerDeviceKind.trackpad,
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.touch,
+            PointerDeviceKind.stylus,
+            PointerDeviceKind.invertedStylus,
+            PointerDeviceKind.unknown
+          },
+          thickness: 12.0,
+        ),
+        localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
+        selectingMode: TrinaGridSelectingMode.cell,
+        style: ThemeConfig.isDarkMode(context)
+            ? TrinaGridStyleConfig.dark(
+                rowHeight: 32,
+                cellDefaultColor: Colors.transparent,
+                cellReadonlyColor: Colors.transparent,
+                cellColorInReadOnlyState: Colors.transparent,
+                cellTextStyle:
+                    TextStyle(color: ThemeConfig.blackColor(context)),
+                columnTextStyle:
+                    TextStyle(color: ThemeConfig.blackColor(context)),
+              )
+            : TrinaGridStyleConfig(
+                rowHeight: 32,
+                cellDefaultColor: Colors.transparent,
+                cellReadonlyColor: Colors.transparent,
+                cellColorInReadOnlyState: Colors.transparent,
+                cellTextStyle:
+                    TextStyle(color: ThemeConfig.blackColor(context)),
+                columnTextStyle:
+                    TextStyle(color: ThemeConfig.blackColor(context))));
   }
 }
 
@@ -88,37 +89,37 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
       if (actionsController?.isAddActionPossible?.call() ?? true)
         ElevatedButton(
           onPressed: actionsController != null &&
-              actionsController.areAllActionsEnabled != null &&
-              !actionsController.areAllActionsEnabled!()
+                  actionsController.areAllActionsEnabled != null &&
+                  !actionsController.areAllActionsEnabled!()
               ? null
               : _addRow,
           child: const Text("Add").tr(),
         ),
       ElevatedButton(
         onPressed: actionsController != null &&
-            actionsController.areAllActionsEnabled != null &&
-            !actionsController.areAllActionsEnabled!()
+                actionsController.areAllActionsEnabled != null &&
+                !actionsController.areAllActionsEnabled!()
             ? null
             : _cancelChanges,
         child: const Text("Discard changes").tr(),
       ),
       ElevatedButton(
         onPressed: actionsController != null &&
-            actionsController.areAllActionsEnabled != null &&
-            !actionsController.areAllActionsEnabled!()
+                actionsController.areAllActionsEnabled != null &&
+                !actionsController.areAllActionsEnabled!()
             ? null
             : () {
-          actionsController?.saveAction?.action == null
-              ? _saveChanges()
-              : actionsController!
-              .saveAction!.action!(controller, _saveChanges);
-        },
-        child: Text(actionsController?.saveAction?.name ??
-            "Save changes".tr()),
+                actionsController?.saveAction?.action == null
+                    ? _saveChanges()
+                    : actionsController!.saveAction!.action!(
+                        controller, _saveChanges);
+              },
+        child: Text(actionsController?.saveAction?.name ?? "Save changes".tr()),
       ),
     ]);
 
-    if (controller.headerChildren != null && controller.headerChildren!.isNotEmpty) {
+    if (controller.headerChildren != null &&
+        controller.headerChildren!.isNotEmpty) {
       for (var a in controller.headerChildren!) {
         leftActions.add(
           ElevatedButton(
@@ -169,7 +170,8 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
                       "${"Displayed rows".tr()}: $displayedRowCount",
                       style: TextStyle(
                         fontSize: 13,
-                        color: Theme.of(context).textTheme.bodySmall?.color ?? ThemeConfig.blackColor(context),
+                        color: Theme.of(context).textTheme.bodySmall?.color ??
+                            ThemeConfig.blackColor(context),
                       ),
                     ),
                   );
@@ -198,7 +200,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
 
     if (controller.getNewObject != null) {
       var obj = controller.getNewObject!();
-      TrinaRow<dynamic> newRowReal = obj.toTrinaRow(context)!;
+      TrinaRow<dynamic> newRowReal = obj.toTrinaRow(context);
       for (var c in newRowReal.cells.entries) {
         newRowsGenerated[0].cells[c.key] = newRowReal.cells[c.key]!;
       }
@@ -243,32 +245,23 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
 
     for (var element in deleteList) {
       actions.add(() async {
-        try {
-          await element.deleteMethod(context);
-          ToastHelper.Show(
-              context, "${"Deleted".tr()}: ${element.toBasicString()}");
-        } catch (e) {
-          ToastHelper.Show(context, e.toString(),
-              severity: ToastSeverity.NotOk);
-          rethrow;
-        }
+        await element.deleteMethod(context);
+        if (!mounted) return;
+        ToastHelper.Show(
+            context, "${CommonStrings.deleted}: ${element.toBasicString()}");
       });
     }
 
     for (var element in updatedSet) {
       actions.add(() async {
-        try {
-          await element.updateMethod(context);
-          ToastHelper.Show(
-              context, "${"Saved".tr()}: ${element.toBasicString()}");
-        } catch (e) {
-          ToastHelper.Show(context, e.toString(),
-              severity: ToastSeverity.NotOk);
-          rethrow;
-        }
+        await element.updateMethod(context);
+        if (!mounted) return;
+        ToastHelper.Show(
+            context, "${CommonStrings.saved}: ${element.toBasicString()}");
       });
     }
 
+    if (!mounted) return;
     var success = await DialogHelper.showProgressDialogAsync(
       context,
       "Saving changes".tr(),
@@ -295,13 +288,14 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     // to ensure UI consistency with how save works or loadDataOnly and apply.
     // Or, if loadData() implies full reload and state reset, it's fine.
     // Sticking to original:
-    await controller.reloadData(); // Changed from controller.loadData() to ensure full refresh like after save
+    await controller
+        .reloadData(); // Changed from controller.loadData() to ensure full refresh like after save
   }
 }
 
 class TrinaFilterTypeContainsNoDiacritics implements TrinaFilterType {
-
-  static String name = TrinaFilterTypeContains.name; // This should be unique, e.g. "contains_no_diacritics"
+  static String name = TrinaFilterTypeContains
+      .name; // This should be unique, e.g. "contains_no_diacritics"
   // Or ensure TrinaGridLocaleText is updated if this is used as a key.
   // For now, keeping original if it's a known pattern.
   // PlutoGrid's default is 'Contains'. If this is to be a new type,
@@ -311,7 +305,8 @@ class TrinaFilterTypeContainsNoDiacritics implements TrinaFilterType {
   String get title => TrinaFilterTypeContainsNoDiacritics.name;
 
   @override
-  TrinaCompareFunction get compare => TrinaFilterTypeContainsNoDiacritics.compareContains;
+  TrinaCompareFunction get compare =>
+      TrinaFilterTypeContainsNoDiacritics.compareContains;
 
   const TrinaFilterTypeContainsNoDiacritics();
 
@@ -322,7 +317,7 @@ class TrinaFilterTypeContainsNoDiacritics implements TrinaFilterType {
   }) {
     if (base == null || search == null || search.isEmpty) return false;
 
-    final normalizedBase   = Utilities.removeDiacritics(base.toLowerCase());
+    final normalizedBase = Utilities.removeDiacritics(base.toLowerCase());
     final normalizedSearch = Utilities.removeDiacritics(search.toLowerCase());
 
     final pattern = RegExp.escape(normalizedSearch);
@@ -330,10 +325,10 @@ class TrinaFilterTypeContainsNoDiacritics implements TrinaFilterType {
   }
 
   static bool _compareWithRegExp(
-      String pattern,
-      String value, {
-        bool caseSensitive = false,
-      }) {
+    String pattern,
+    String value, {
+    bool caseSensitive = false,
+  }) {
     return RegExp(pattern, caseSensitive: caseSensitive).hasMatch(value);
   }
 }

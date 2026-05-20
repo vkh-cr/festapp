@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/language_model.dart';
-import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
+import 'package:fstapp/components/app_management/language_model.dart';
+import 'package:fstapp/components/occasion/admin_page.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
@@ -23,8 +23,12 @@ class AppConfig {
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
   static const bool isAppSupported = true;
+  static const bool isWebclientSupported = true;
+  static const bool isContractFeatureEnabled = false;
+  static const bool showBankSupportRole = false;
 
   static const String webLink = "https://jubileum2025.netlify.app";
+  static const String imageWorkerUrl = '';
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;
   static const int imagesMaxBytes = 800000;
@@ -37,7 +41,7 @@ class AppConfig {
   static const String feedbackEmail = "info@festapp.net";
 
   static bool isNotificationsCurrentlySupported() {
-    if(kIsWeb) {
+    if (kIsWeb) {
       return isNotificationsSupported && isWebNotificationsSupported;
     }
     return isNotificationsSupported;
@@ -48,22 +52,21 @@ class AppConfig {
   ];
 
 
+
   /// This is the single definition place for the prefix structure.
   /// It combines the organization ID and the separator (e.g., "2+").
   static String get _prefixBase => "$organization+";
 
-  static String getUserPrefix(String email){
+  static String getUserPrefix(String email) {
     return "$_prefixBase$email";
   }
 
-  static String removeUserPrefix(String emailWithPrefix){
+  static String removeUserPrefix(String emailWithPrefix) {
     if (emailWithPrefix.startsWith(_prefixBase)) {
       return emailWithPrefix.substring(_prefixBase.length);
     }
     return emailWithPrefix;
   }
 
-  static List<String> compatibleUrls() => [
-    AppConfig.webLink
-  ];
+  static List<String> compatibleUrls() => [AppConfig.webLink];
 }

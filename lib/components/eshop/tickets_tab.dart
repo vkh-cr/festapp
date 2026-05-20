@@ -10,9 +10,9 @@ import 'package:fstapp/components/single_data_grid/single_data_grid_controller.d
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_services_eshop/db_tickets.dart';
+import 'package:fstapp/components/eshop/db_tickets.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/services/ticket_code_helper.dart';
+import 'package:fstapp/components/eshop/ticket_code_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/platform_helper.dart'; // Import PlatformHelper
 
@@ -34,7 +34,8 @@ class _TicketsTabState extends State<TicketsTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newOccasionLink = context.routeData.params.getString(AppRouter.linkFormatted);
+    final newOccasionLink =
+        context.routeData.params.getString(AppRouter.linkFormatted);
     // Initialize only once when the link is available
     if (occasionLink == null) {
       occasionLink = newOccasionLink;
@@ -59,7 +60,8 @@ class _TicketsTabState extends State<TicketsTab> {
       EshopColumns.TICKET_SYMBOL,
       EshopColumns.TICKET_CREATED_AT,
       EshopColumns.TICKET_STATE,
-      if (PlatformHelper.isWeb && FeatureService.isFeatureEnabled(FeatureConstants.ticket))
+      if (PlatformHelper.isWeb &&
+          FeatureService.isFeatureEnabled(FeatureConstants.ticket))
         EshopColumns.TICKET_DOWNLOAD,
       EshopColumns.TICKET_CONFIRM,
       EshopColumns.TICKET_TOTAL_PRICE,
@@ -108,6 +110,7 @@ class _TicketsTabState extends State<TicketsTab> {
           EshopColumns.TICKET_DOWNLOAD: null,
         },
       ),
+      exportOptions: ExportOptions(fileName: "$occasionLink-tickets"),
     );
 
     if (mounted) {
@@ -186,7 +189,8 @@ class _TicketsTabState extends State<TicketsTab> {
     }
   }
 
-  List<TicketModel> _getCheckedTickets(SingleDataGridController singleDataGrid) {
+  List<TicketModel> _getCheckedTickets(
+      SingleDataGridController singleDataGrid) {
     return List<TicketModel>.from(
       singleDataGrid.stateManager.refRows.originalList
           .where((row) => row.checked == true)

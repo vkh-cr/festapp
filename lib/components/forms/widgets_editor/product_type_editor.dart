@@ -1,11 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/components/forms/models/form_field_model.dart';
+import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 
@@ -13,32 +13,38 @@ import 'description_with_edit.dart';
 import 'form_fields_generator.dart';
 import 'ticket_editor_widgets.dart';
 import 'ticket_product_editor_row.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'description_tooltip.dart';
 
 class ProductTypeEditorWidgets {
   /// Builds the read-only view for a product type group.
-  static Widget buildProductTypeReadOnly(BuildContext context, FormFieldModel ptField) {
-    ptField.productType ??= ProductTypeModel(title: ptField.title, products: []);
+  static Widget buildProductTypeReadOnly(
+      BuildContext context, FormFieldModel ptField) {
+    ptField.productType ??=
+        ProductTypeModel(title: ptField.title, products: []);
     final group = ptField.productType!;
     group.products ??= [];
     final groupHidden = ptField.isHidden ?? false;
 
     // NOTE: Removed filtering of hidden products. They will be shown with a strikethrough.
 
-    final isSelectMany = ptField.data?[FormHelper.metaSelectionType] == FormHelper.metaSelectionTypeMany;
+    final isSelectMany = ptField.data?[FormHelper.metaSelectionType] ==
+        FormHelper.metaSelectionTypeMany;
 
     final requiredStar = (ptField.isRequired ?? false)
         ? TextSpan(
-      text: ' *',
-      style: TextStyle(color: ThemeConfig.redColor(context)),
-    )
+            text: ' *',
+            style: TextStyle(color: ThemeConfig.redColor(context)),
+          )
         : null;
 
     final groupTitleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-      fontWeight: FontWeight.bold,
-      decoration: groupHidden ? TextDecoration.lineThrough : null,
-    );
+          fontWeight: FontWeight.bold,
+          decoration: groupHidden ? TextDecoration.lineThrough : null,
+        );
 
-    final showCapacityColumn = group.products!.any((product) => (product.maximum ?? 0) != 0);
+    final showCapacityColumn =
+        group.products!.any((product) => (product.maximum ?? 0) != 0);
 
     return Opacity(
       opacity: groupHidden ? kHiddenOpacity : 1.0,
@@ -59,11 +65,12 @@ class ProductTypeEditorWidgets {
                       children: [if (requiredStar != null) requiredStar],
                     ),
                   ),
-                  if (!HtmlHelper.isHtmlEmptyOrNull(ptField.productType?.description))
+                  if (!HtmlHelper.isHtmlEmptyOrNull(
+                      ptField.productType?.description))
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0, right: 4.0),
-                      child: Tooltip(
-                        message: "Has description".tr(),
+                      child: DescriptionTooltip(
+                        description: ptField.productType!.description!,
                         child: const Icon(Icons.description, size: 16),
                       ),
                     ),
@@ -81,18 +88,31 @@ class ProductTypeEditorWidgets {
                       const SizedBox(width: 48), // Space for selection control
                       Expanded(
                         flex: 8,
-                        child: Text("Title".tr(), style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                        child: Text(CommonStrings.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       Expanded(
                         flex: 3,
-                        child: Text("Price".tr(), style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                        child: Text(CommonStrings.price,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       if (showCapacityColumn)
                         Expanded(
                           flex: 3,
                           child: Tooltip(
                             message: "Product Quantity".tr(),
-                            child: Icon(Icons.stacked_bar_chart, size: 16, color: Theme.of(context).textTheme.bodySmall?.color),
+                            child: Icon(Icons.stacked_bar_chart,
+                                size: 16,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.color),
                           ),
                         ),
                     ],
@@ -104,7 +124,8 @@ class ProductTypeEditorWidgets {
                     // UPDATED: Logic to handle hidden product style
                     final productHidden = product.isHidden ?? false;
                     final rowStyle = TextStyle(
-                      decoration: productHidden ? TextDecoration.lineThrough : null,
+                      decoration:
+                          productHidden ? TextDecoration.lineThrough : null,
                     );
 
                     return Opacity(
@@ -118,7 +139,10 @@ class ProductTypeEditorWidgets {
                               width: 48,
                               child: isSelectMany
                                   ? Checkbox(value: false, onChanged: null)
-                                  : Radio<String>(value: product.id.toString(), groupValue: null, onChanged: null),
+                                  : Radio<String>(
+                                      value: product.id.toString(),
+                                      groupValue: null,
+                                      onChanged: null),
                             ),
                             // Product title and description icon
                             Expanded(
@@ -133,12 +157,15 @@ class ProductTypeEditorWidgets {
                                       style: rowStyle, // Apply style
                                     ),
                                   ),
-                                  if (!HtmlHelper.isHtmlEmptyOrNull(product.description))
+                                  if (!HtmlHelper.isHtmlEmptyOrNull(
+                                      product.description))
                                     Padding(
-                                      padding: const EdgeInsets.only(left: 8.0, right: 4.0),
-                                      child: Tooltip(
-                                        message: "Has description".tr(),
-                                        child: const Icon(Icons.description, size: 16),
+                                      padding: const EdgeInsets.only(
+                                          left: 8.0, right: 4.0),
+                                      child: DescriptionTooltip(
+                                        description: product.description!,
+                                        child: const Icon(Icons.description,
+                                            size: 16),
                                       ),
                                     ),
                                 ],
@@ -148,7 +175,9 @@ class ProductTypeEditorWidgets {
                             Expanded(
                               flex: 3,
                               child: Text(
-                                Utilities.formatPrice(context, product.price ?? 0, currencyCode: product.currencyCode),
+                                Utilities.formatPrice(
+                                    context, product.price ?? 0,
+                                    currencyCode: product.currencyCode),
                                 style: rowStyle, // Apply style
                               ),
                             ),
@@ -157,7 +186,8 @@ class ProductTypeEditorWidgets {
                               Expanded(
                                 flex: 3,
                                 child: Text(
-                                  TicketEditorWidgets.formatOrderedCount(product.orderedCount, product.maximum),
+                                  TicketEditorWidgets.formatOrderedCount(
+                                      product.orderedCount, product.maximum),
                                   textAlign: TextAlign.center,
                                   style: rowStyle, // Apply style
                                 ),
@@ -177,7 +207,8 @@ class ProductTypeEditorWidgets {
   }
 
   /// Builds the editor for a product type group.
-  static Widget buildProductTypeEditor(BuildContext context, FormModel form, FormFieldModel ptField, VoidCallback refresh) {
+  static Widget buildProductTypeEditor(BuildContext context, FormModel form,
+      FormFieldModel ptField, VoidCallback refresh) {
     // This static method now delegates to the new StatefulWidget.
     // A key is used to ensure Flutter correctly identifies the widget.
     return ProductTypeEditor(
@@ -189,7 +220,8 @@ class ProductTypeEditorWidgets {
   }
 
   // Helper for building compact controls
-  static Widget _buildControl(BuildContext context, String label, Widget control) {
+  static Widget _buildControl(
+      BuildContext context, String label, Widget control) {
     return Column(
       children: [
         Text(label, style: Theme.of(context).textTheme.bodySmall),
@@ -224,8 +256,10 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
   void initState() {
     super.initState();
     // Initialize the controller in initState to prevent re-creation on build.
-    widget.ptField.productType ??= ProductTypeModel(title: widget.ptField.title, products: []);
-    groupTitleController = TextEditingController(text: widget.ptField.title ?? widget.ptField.productType!.title);
+    widget.ptField.productType ??=
+        ProductTypeModel(title: widget.ptField.title, products: []);
+    groupTitleController = TextEditingController(
+        text: widget.ptField.title ?? widget.ptField.productType!.title);
   }
 
   @override
@@ -245,10 +279,11 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
     final group = ptField.productType!;
     group.products ??= [];
 
-    final defaultDescription = "Description".tr();
+    final defaultDescription = CommonStrings.description;
     final groupIsRequired = ptField.isRequired ?? false;
     final groupIsHidden = ptField.isHidden ?? false;
-    final canSelectMany = ptField.data?[FormHelper.metaSelectionType] == FormHelper.metaSelectionTypeMany;
+    final canSelectMany = ptField.data?[FormHelper.metaSelectionType] ==
+        FormHelper.metaSelectionTypeMany;
 
     return Opacity(
       opacity: groupIsHidden ? kHiddenOpacity : 1.0,
@@ -264,8 +299,11 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: groupTitleController, // Use the stateful controller
-                      decoration: InputDecoration(labelText: "Product Type Title".tr(), border: const UnderlineInputBorder()),
+                      controller:
+                          groupTitleController, // Use the stateful controller
+                      decoration: InputDecoration(
+                          labelText: "Product Type Title".tr(),
+                          border: const UnderlineInputBorder()),
                       onChanged: (val) {
                         // Update the model, but DO NOT call refresh().
                         // The controller handles the UI update.
@@ -275,36 +313,56 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  ProductTypeEditorWidgets._buildControl(context, "Required".tr(), Checkbox(value: groupIsRequired, onChanged: (val) {
-                    ptField.isRequired = val;
-                    refresh();
-                  })),
+                  ProductTypeEditorWidgets._buildControl(
+                      context,
+                      "Required".tr(),
+                      Checkbox(
+                          value: groupIsRequired,
+                          onChanged: (val) {
+                            ptField.isRequired = val;
+                            refresh();
+                          })),
                   const SizedBox(width: 12),
-                  ProductTypeEditorWidgets._buildControl(context, "Multiple Choice".tr(), Switch(value: canSelectMany, onChanged: (val) {
-                    ptField.data ??= {};
-                    if (val) {
-                      ptField.data![FormHelper.metaSelectionType] = FormHelper.metaSelectionTypeMany;
-                    } else {
-                      ptField.data!.remove(FormHelper.metaSelectionType);
-                    }
-                    refresh();
-                  })),
+                  ProductTypeEditorWidgets._buildControl(
+                      context,
+                      "Multiple Choice".tr(),
+                      Switch(
+                          value: canSelectMany,
+                          onChanged: (val) {
+                            ptField.data ??= {};
+                            if (val) {
+                              ptField.data![FormHelper.metaSelectionType] =
+                                  FormHelper.metaSelectionTypeMany;
+                            } else {
+                              ptField.data!
+                                  .remove(FormHelper.metaSelectionType);
+                            }
+                            refresh();
+                          })),
                   const SizedBox(width: 12),
-                  ProductTypeEditorWidgets._buildControl(context, "Show".tr(), Switch(value: !groupIsHidden, onChanged: (val) {
-                    ptField.isHidden = !val;
-                    refresh();
-                  })),
+                  ProductTypeEditorWidgets._buildControl(
+                      context,
+                      "Show".tr(),
+                      Switch(
+                          value: !groupIsHidden,
+                          onChanged: (val) {
+                            ptField.isHidden = !val;
+                            refresh();
+                          })),
                   PopupMenuButton<String>(
                     onSelected: (value) {
                       if (value == "add_description") {
-                        if (HtmlHelper.isHtmlEmptyOrNull(ptField.productType!.description)) {
+                        if (HtmlHelper.isHtmlEmptyOrNull(
+                            ptField.productType!.description)) {
                           ptField.productType!.description = defaultDescription;
                         }
                         refresh();
                       }
                     },
                     itemBuilder: (context) => [
-                      PopupMenuItem<String>(value: "add_description", child: Text("Add description".tr())),
+                      PopupMenuItem<String>(
+                          value: "add_description",
+                          child: Text("Add description".tr())),
                     ],
                     icon: const Icon(Icons.more_vert),
                   ),
@@ -312,14 +370,15 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                     IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () {
-                        form.relatedFields!.remove(ptField);
+                        form.relatedFields.remove(ptField);
                         refresh();
                       },
                     ),
                 ],
               ),
               // Description Editor
-              if (!HtmlHelper.isHtmlEmptyOrNull(ptField.productType?.description))
+              if (!HtmlHelper.isHtmlEmptyOrNull(
+                  ptField.productType?.description))
                 DescriptionWithEdit(
                   description: ptField.productType!.description!,
                   defaultDescription: defaultDescription,
@@ -350,7 +409,10 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                         title: "New Product".tr(),
                         price: 0.0,
                         isHidden: false,
-                        order: (group.products!.isNotEmpty ? group.products!.last.order ?? 0 : 0) + 1,
+                        order: (group.products!.isNotEmpty
+                                ? group.products!.last.order ?? 0
+                                : 0) +
+                            1,
                       ),
                     );
                     refresh();

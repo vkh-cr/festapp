@@ -1,22 +1,24 @@
 import 'package:easy_localization/easy_localization.dart'; // Added for translation support.
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/data_models/form_option_model.dart';
-import 'package:fstapp/data_models/form_option_product_model.dart'; // Importing product model.
+import 'package:fstapp/components/forms/models/form_option_model.dart';
+import 'package:fstapp/components/forms/models/form_option_product_model.dart'; // Importing product model.
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/theme_config.dart';
-import '../models/field_holder.dart';
-import '../models/form_holder.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import '../models/holder_models/field_holder.dart';
+import '../models/holder_models/form_holder.dart';
 import 'form_helper.dart';
 import 'option_field_helper.dart';
 
 class CheckboxFieldBuilder {
   static Widget buildSelectManyField(
-      BuildContext context,
-      FieldHolder fieldHolder,
-      List<FormOptionModel> optionsIn,
-      FormHolder formHolder,
-      ) {
+    BuildContext context,
+    FieldHolder fieldHolder,
+    List<FormOptionModel> optionsIn,
+    FormHolder formHolder,
+  ) {
     if (!FormHelper.isCardDesign(formHolder, fieldHolder)) {
       return _BasicCheckboxFieldWidget(
         fieldHolder: fieldHolder,
@@ -24,16 +26,17 @@ class CheckboxFieldBuilder {
         formHolder: formHolder,
       );
     } else {
-      return _buildCardSelectManyField(context, fieldHolder, optionsIn, formHolder);
+      return _buildCardSelectManyField(
+          context, fieldHolder, optionsIn, formHolder);
     }
   }
 
   static Widget _buildCardSelectManyField(
-      BuildContext context,
-      FieldHolder fieldHolder,
-      List<FormOptionModel> optionsIn,
-      FormHolder formHolder,
-      ) {
+    BuildContext context,
+    FieldHolder fieldHolder,
+    List<FormOptionModel> optionsIn,
+    FormHolder formHolder,
+  ) {
     return FormHelper.buildCardWrapperDesign(
       context: context,
       fieldHolder: fieldHolder,
@@ -44,7 +47,10 @@ class CheckboxFieldBuilder {
           curve: Curves.easeInOut,
           child: FormBuilderField<List<FormOptionModel>>(
             name: fieldHolder.id.toString(),
-            validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+            validator: fieldHolder.isRequired
+                ? FormBuilderValidators.required(
+                    errorText: CommonStrings.fieldCannotBeEmpty)
+                : null,
             initialValue: [],
             builder: (FormFieldState<List<FormOptionModel>> field) {
               return Column(
@@ -52,7 +58,7 @@ class CheckboxFieldBuilder {
                 children: [
                   // Build card for each option.
                   ...optionsIn.map(
-                        (o) => _buildOptionCard(context, field, o, formHolder),
+                    (o) => _buildOptionCard(context, field, o, formHolder),
                   ),
                   // Show error text below the options if validation fails.
                   if (field.errorText != null)
@@ -73,48 +79,62 @@ class CheckboxFieldBuilder {
         ),
       ),
       hasError: formHolder.controller?.globalKey.currentState
-          ?.fields[fieldHolder.id.toString()]?.hasError ??
+              ?.fields[fieldHolder.id.toString()]?.hasError ??
           false,
     );
   }
 
   static Widget _buildOptionCard(
-      BuildContext context,
-      FormFieldState<List<FormOptionModel>> field,
-      FormOptionModel o,
-      FormHolder formHolder,
-      ) {
+    BuildContext context,
+    FormFieldState<List<FormOptionModel>> field,
+    FormOptionModel o,
+    FormHolder formHolder,
+  ) {
     // Determine if this option is a priced product and disabled.
     final bool isDisabled = o is FormOptionProductModel && !o.isAvailable;
     final originalTitle = OptionFieldHelper.buildOptionTitle(context, o);
     final effectiveTitle =
-    isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
+        isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
     final isSelected = field.value?.contains(o) ?? false;
+
+    String? effectiveDescription = o.description;
+    final showDepositInfo =
+        formHolder.getTicket()?.showDepositDescription ?? true;
+    if (showDepositInfo &&
+        FeatureService.isDepositChoiceAvailable() &&
+        o is FormOptionProductModel &&
+        o.depositAmount != null) {
+      final depositText = OptionFieldHelper.buildDepositText(context, o);
+      effectiveDescription =
+          "<span style='font-weight: bold;'>$depositText</span>${effectiveDescription != null ? "<br>$effectiveDescription" : ""}";
+    }
 
     Widget optionCard = OptionFieldHelper.buildOptionCard(
       context: context,
       isSelected: isSelected,
       title: effectiveTitle,
-      description: o.description,
+      priceText: OptionFieldHelper.buildPriceText(context, o),
+      description: effectiveDescription,
       // The leading widget (checkbox) is disabled when needed.
       leading: Checkbox(
         value: isSelected,
+        activeColor: Theme.of(context).primaryColor,
         onChanged: isDisabled
             ? null
             : (val) {
-          _toggleItemInFieldValue(field, o, isSelected);
-          formHolder.controller?.updateTotalPrice?.call();
-          field.validate();
-        },
+                _toggleItemInFieldValue(field, o, isSelected);
+                formHolder.controller?.updateTotalPrice?.call();
+                field.validate();
+              },
       ),
       // Disable onTap for disabled items.
       onTap: isDisabled
           ? null
           : () {
-        _toggleItemInFieldValue(field, o, isSelected);
-        formHolder.controller?.updateTotalPrice?.call();
-        field.validate();
-      },
+              _toggleItemInFieldValue(field, o, isSelected);
+              formHolder.controller?.updateTotalPrice?.call();
+              field.validate();
+            },
     );
 
     // Grey out the card if the option is disabled.
@@ -125,10 +145,10 @@ class CheckboxFieldBuilder {
   }
 
   static void _toggleItemInFieldValue(
-      FormFieldState<List<FormOptionModel>> field,
-      FormOptionModel option,
-      bool isSelected,
-      ) {
+    FormFieldState<List<FormOptionModel>> field,
+    FormOptionModel option,
+    bool isSelected,
+  ) {
     final newValue = List<FormOptionModel>.from(field.value ?? []);
     if (isSelected) {
       newValue.remove(option);
@@ -159,7 +179,7 @@ class _BasicCheckboxFieldWidget extends StatefulWidget {
 
 class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
   final GlobalKey<FormBuilderFieldState> fieldKey =
-  GlobalKey<FormBuilderFieldState>();
+      GlobalKey<FormBuilderFieldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -168,15 +188,50 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
       final bool isDisabled = o is FormOptionProductModel && !o.isAvailable;
       final originalTitle = OptionFieldHelper.buildOptionTitle(context, o);
       final effectiveTitle =
-      isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
+          isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
+
+      final style = OptionFieldHelper.optionTitleTextStyle().copyWith(
+        color: isDisabled ? Theme.of(context).disabledColor : null,
+      );
+
+      final priceText = OptionFieldHelper.buildPriceText(context, o);
+      Widget labelWidget = priceText != null
+          ? Row(
+              children: [
+                Expanded(child: Text(effectiveTitle, style: style)),
+                const SizedBox(width: 8),
+                Text(priceText, style: style.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isDisabled ? null : Theme.of(context).primaryColor,
+                )),
+              ],
+            )
+          : Text(effectiveTitle, style: style);
+
+      final showDepositInfo =
+          widget.formHolder.getTicket()?.showDepositDescription ?? true;
+      if (showDepositInfo &&
+          FeatureService.isDepositChoiceAvailable() &&
+          o is FormOptionProductModel &&
+          o.depositAmount != null) {
+        final depositText = OptionFieldHelper.buildDepositText(context, o);
+        labelWidget = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            labelWidget,
+            const SizedBox(height: 2),
+            Text(depositText,
+                style: style.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500)),
+          ],
+        );
+      }
+
       return FormBuilderFieldOption<FormOptionModel>(
         value: o,
-        child: Text(
-          effectiveTitle,
-          style: OptionFieldHelper.optionTitleTextStyle().copyWith(
-            color: isDisabled ? Theme.of(context).disabledColor : null,
-          ),
-        ),
+        child: labelWidget,
       );
     }).toList();
 
@@ -192,9 +247,11 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
             isRequired: widget.fieldHolder.isRequired,
           ),
           validator: widget.fieldHolder.isRequired
-              ? FormBuilderValidators.required()
+              ? FormBuilderValidators.required(
+                  errorText: CommonStrings.fieldCannotBeEmpty)
               : null,
           options: options,
+          activeColor: Theme.of(context).primaryColor,
           orientation: OptionsOrientation.vertical,
           wrapDirection: Axis.vertical,
           onChanged: (val) {

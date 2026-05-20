@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'js/js_interop.dart';
 
-
 extension ColorString on Color {
   String toHexString({bool includeAlpha = false}) {
     int red = (r * 255).round();
@@ -16,19 +15,21 @@ extension ColorString on Color {
     final blueHex = blue.toRadixString(16).padLeft(2, '0');
     final alphaHex = alpha.toRadixString(16).padLeft(2, '0');
 
-    return '#${includeAlpha ? alphaHex + redHex + greenHex + blueHex : redHex + greenHex + blueHex}'.toUpperCase();
+    return '#${includeAlpha ? alphaHex + redHex + greenHex + blueHex : redHex + greenHex + blueHex}'
+        .toUpperCase();
   }
 }
 
-class WebStylesHelper{
+class WebStylesHelper {
   static final JSInterop jsInterop = JSInterop();
   static void setMetaThemeColor(Color color) {
-    if(kIsWeb) {
+    if (kIsWeb) {
       jsInterop.callMethod("setMetaThemeColor", [color.toHexString()]);
     }
   }
+
   static void setBodyBackgroundColor(Color color) {
-    if(kIsWeb) {
+    if (kIsWeb) {
       jsInterop.callMethod("setBodyBackgroundColor", [color.toHexString()]);
     }
   }

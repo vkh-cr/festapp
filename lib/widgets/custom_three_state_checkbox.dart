@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_services/db_occasions.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/theme_config.dart';
 
 class CustomThreeStateCheckbox extends StatelessWidget {
@@ -40,17 +40,19 @@ class CustomThreeStateCheckbox extends StatelessWidget {
     return GestureDetector(
       onTap: isEnabled
           ? () {
-        String nextState = _getNextState(currentState);
-        onStateChanged(nextState);
-      }
+              String nextState = _getNextState(currentState);
+              onStateChanged(nextState);
+            }
           : null,
       child: Icon(
         currentState == DbOccasions.serviceNone
             ? noneStateIcon ?? Icons.check_box_outline_blank // Default icon
             : currentState == DbOccasions.servicePaid
-            ? paidStateIcon ?? Icons.check_box_outlined // Default icon
-            : usedStateIcon ?? Icons.check_box, // Default icon
-        color: isEnabled ? ThemeConfig.blackColor(context) : Colors.grey, // Optional: Disabled color
+                ? paidStateIcon ?? Icons.check_box_outlined // Default icon
+                : usedStateIcon ?? Icons.check_box, // Default icon
+        color: isEnabled
+            ? ThemeConfig.blackColor(context)
+            : Colors.grey, // Optional: Disabled color
       ),
     );
   }

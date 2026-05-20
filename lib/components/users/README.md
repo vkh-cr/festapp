@@ -1,0 +1,22 @@
+# Users Component
+
+## The User Bundle (CRITICAL)
+
+`get_users_from_occasion_with_orders` RPC returns dictionary-style maps (not nested JSON) to avoid duplication. Dart (`db_users.dart`) manually re-stitches the graph by resolving IDs across: users -> tickets -> orderProductTickets -> orders -> forms -> formFields.
+
+**This re-stitching is fragile.** Schema changes (renaming JSON keys) break it silently.
+
+## Gotchas
+
+- **Hidden Occasions**: If users are "missing" from lists, check `occasions.is_hidden` flag -- it hides the entire occasion, not individual users. There is no per-user `is_hidden` column.
+- **Profile Data from Forms**: Birth date and group features are parsed from dynamic form data -- code matches fields by `type == "birth_date"` (or `"birth_year"`) and by `data["is_group_feature"] == true` in form responses.
+- **Multi-tenancy**: `OccasionUserModel` = user in event context. `UnitUserModel` = user in permanent group context. Different tables, different RPCs.
+
+## SQL RPCs
+
+- `get_users_from_occasion_with_orders` -- full user-ticket-order-form graph as dictionary maps
+- `get_occasion_users_for_edit` -- occasion users with forms for admin editing
+- `create_user_in_organization_with_data_ws` -- creates user account with initial data
+- `add_user_to_occasion` -- adds existing user to an occasion
+- `import_users_from_tickets_ws` -- bulk-creates users from ticket data
+- `update_user` -- updates user profile for an occasion

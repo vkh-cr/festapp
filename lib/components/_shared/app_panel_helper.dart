@@ -7,14 +7,15 @@ import 'package:fstapp/components/_shared/project_picker_widget.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
-import 'package:fstapp/data_models/occasion_link_model.dart';
-import 'package:fstapp/data_models/occasion_model.dart';
-import 'package:fstapp/data_models/unit_model.dart';
+import 'package:fstapp/components/occasion/occasion_link_model.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
+import 'package:fstapp/components/unit/unit_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/forms/views/reservation_page.dart';
-import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
+import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/router_service.dart';
-import 'package:fstapp/services/occasion_creation_helper.dart';
+import 'package:fstapp/components/occasion/occasion_creation_helper.dart';
+import 'package:fstapp/components/unit/unit_creation_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/header/user_header_widget.dart';
 import 'package:fstapp/widgets/logo_widget.dart';
@@ -36,27 +37,22 @@ class _ActionMenuItem {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is _ActionMenuItem &&
-              runtimeType == other.runtimeType &&
-              label == other.label;
+      other is _ActionMenuItem &&
+          runtimeType == other.runtimeType &&
+          label == other.label;
 
   @override
   int get hashCode => label.hashCode;
 }
 
-
 class AppPanelHelper {
   /// This method returns a breadcrumb widget for navigating units and occasions.
   /// This is now primarily used for the desktop layout.
-  static Widget _buildBreadcrumbs(BuildContext originalContext,
-      BuildContext context) {
-    final allUnits = RightsService
-        .currentUser()
-        ?.units ?? [];
+  static Widget _buildBreadcrumbs(
+      BuildContext originalContext, BuildContext context) {
+    final allUnits = RightsService.currentUser()?.units ?? [];
     final currentUnit = RightsService.currentUnit();
-    final occasionsInCurrentUnit = RightsService
-        .currentUser()
-        ?.occasions ?? [];
+    final occasionsInCurrentUnit = RightsService.currentUser()?.occasions ?? [];
     final currentOccasion = RightsService.currentOccasion();
 
     List<Widget> breadcrumbItems = [];
@@ -74,25 +70,39 @@ class AppPanelHelper {
         onItemSelected: (item) async {
           await RouterService.navigateToUnitAdmin(originalContext, item);
         },
-        onCreateNew: null,
-        onTitleTap: () async =>
-        await RouterService.navigateToUnitAdmin(originalContext, currentUnit),
+        onCreateNew: (RightsService
+                    .occasionLinkModel?.organization?.isUnitCreationEnabled ==
+                true)
+            ? () async {
+                final newUnit =
+                    await UnitCreationHelper.createNewUnit(originalContext);
+                if (newUnit != null) {
+                  await RouterService.navigateToUnitAdmin(
+                      originalContext, newUnit);
+                }
+              }
+            : null,
+        onTitleTap: () async => await RouterService.navigateToUnitAdmin(
+            originalContext, currentUnit),
         searchHintText: AdministrationStrings.findUnitHint,
         createNewText: AdministrationStrings.newUnitButton,
       ));
     }
 
     // Separator, Occasion Selector, and new Action Selector
-    if (currentUnit != null && currentOccasion != null) {
-      final onAppBarColor = Theme
-          .of(context)
-          .appBarTheme
-          .foregroundColor ?? Colors.white;
+    // Skip on unit-level pages (e.g. /unit/5/edit) where occasion context is stale
+    final currentRoutePath = context.routeData.path;
+    final isUnitLevelPage = currentRoutePath.contains('/unit/') &&
+        currentRoutePath.contains('/edit');
+    if (currentUnit != null && currentOccasion != null && !isUnitLevelPage) {
+      final onAppBarColor =
+          Theme.of(context).appBarTheme.foregroundColor ?? Colors.white;
       // Separator
       breadcrumbItems.add(Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: Text("/", style: TextStyle(
-            fontSize: 16, color: onAppBarColor.withOpacity(0.4))),
+        child: Text("/",
+            style:
+                TextStyle(fontSize: 16, color: onAppBarColor.withOpacity(0.4))),
       ));
 
       // Occasion Selector
@@ -108,22 +118,28 @@ class AppPanelHelper {
         onItemSelected: (item) async {
           if (item.link != null) {
             await RouterService.navigateToOccasionAdministration(
-                originalContext, occasionLink: item.link!);
+                originalContext,
+                occasion: item);
           }
         },
-        onCreateNew: !RightsService.isUnitEditor() ? null :
-            () async {
-          final newOccasion = await OccasionCreationHelper.createNewOccasion(
-              originalContext, currentUnit, occasionsInCurrentUnit);
-          if (newOccasion != null && newOccasion.link != null) {
-            await RouterService.navigateToOccasionAdministration(
-                originalContext, occasionLink: newOccasion.link!);
-          }
-        },
+        onCreateNew: !RightsService.isUnitEditor()
+            ? null
+            : () async {
+                final newOccasion =
+                    await OccasionCreationHelper.createNewOccasion(
+                        originalContext, currentUnit, occasionsInCurrentUnit);
+                if (newOccasion != null && newOccasion.link != null) {
+                  await RouterService.navigateToOccasionAdministration(
+                      originalContext,
+                      occasionLink: newOccasion.link!);
+                }
+              },
         onTitleTap: () async {
           if (currentOccasion.link != null) {
             await RouterService.navigateToOccasionAdministration(
-                originalContext, occasionLink: currentOccasion.link!);
+                originalContext,
+                occasionLink: currentOccasion.link!,
+                occasion: currentOccasion);
           }
         },
         searchHintText: AdministrationStrings.findOccasionHint,
@@ -136,27 +152,28 @@ class AppPanelHelper {
           label: 'Event management'.tr(),
           icon: Icons.admin_panel_settings,
           onSelect: () async =>
-          await RouterService.navigateOccasion(context, AdminPage.ROUTE),
+              await RouterService.navigateOccasion(context, AdminPage.ROUTE),
         );
 
         final viewAppAction = _ActionMenuItem(
           label: AdministrationStrings.viewApp,
           icon: Icons.visibility,
           onSelect: () async =>
-          await RouterService.navigateOccasion(context, ""),
+              await RouterService.navigateOccasion(context, ""),
         );
 
         final reservationsAction = _ActionMenuItem(
           label: AdministrationStrings.reservations,
           icon: Icons.shopping_cart,
-          onSelect: () async =>
-          await RouterService.navigateOccasion(context, ReservationsPage.ROUTE),
+          onSelect: () async => await RouterService.navigateOccasion(
+              context, ReservationsPage.ROUTE),
         );
 
         final List<_ActionMenuItem> availableActions = [];
 
-        if (FeatureService.isFeatureEnabled(
-            FeatureConstants.form, features: currentOccasion.features) && RightsService.canSeeReservations()) {
+        if (FeatureService.isFeatureEnabled(FeatureConstants.form,
+                features: currentOccasion.features) &&
+            RightsService.canSeeReservations()) {
           availableActions.add(reservationsAction);
         }
 
@@ -167,7 +184,6 @@ class AppPanelHelper {
 
         // View App is always available if the app is supported
         availableActions.add(viewAppAction);
-
 
         final currentPath = context.routeData.path;
         _ActionMenuItem currentAction;
@@ -183,8 +199,9 @@ class AppPanelHelper {
         if (availableActions.length > 1) {
           breadcrumbItems.add(Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: Text("/", style: TextStyle(
-                fontSize: 16, color: onAppBarColor.withOpacity(0.4))),
+            child: Text("/",
+                style: TextStyle(
+                    fontSize: 16, color: onAppBarColor.withOpacity(0.4))),
           ));
           breadcrumbItems.add(_buildActionPickerSegment(
             context: context,
@@ -211,9 +228,7 @@ class AppPanelHelper {
     final theme = Theme.of(context);
     final onAppBarColor = theme.appBarTheme.foregroundColor ?? Colors.white;
     final textStyle = TextStyle(
-        fontSize: 16,
-        color: onAppBarColor,
-        fontWeight: FontWeight.bold);
+        fontSize: 16, color: onAppBarColor, fontWeight: FontWeight.bold);
     final iconColor = onAppBarColor.withOpacity(0.7);
     final hoverColor = Colors.black.withOpacity(0.15);
 
@@ -240,38 +255,35 @@ class AppPanelHelper {
     }
 
     // The entire segment is now the trigger for the custom dialog
-    return Builder(
-        builder: (buttonContext) {
-          return ClipRRect(
+    return Builder(builder: (buttonContext) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            hoverColor: hoverColor,
             borderRadius: BorderRadius.circular(6),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                hoverColor: hoverColor,
-                borderRadius: BorderRadius.circular(6),
-                onTap: () {
-                  _showActionPicker(
-                      buttonContext: buttonContext,
-                      currentAction: currentAction,
-                      availableActions: availableActions
-                  );
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    visiblePart,
-                    Padding(
-                      padding: const EdgeInsets.only(right: 4),
-                      child: Icon(
-                          Icons.arrow_drop_down, color: iconColor, size: 22),
-                    ),
-                  ],
+            onTap: () {
+              _showActionPicker(
+                  buttonContext: buttonContext,
+                  currentAction: currentAction,
+                  availableActions: availableActions);
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                visiblePart,
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child:
+                      Icon(Icons.arrow_drop_down, color: iconColor, size: 22),
                 ),
-              ),
+              ],
             ),
-          );
-        }
-    );
+          ),
+        ),
+      );
+    });
   }
 
   /// Displays a custom rounded dialog for selecting an action.
@@ -287,15 +299,15 @@ class AppPanelHelper {
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
 
-    final menuActions = availableActions.where((action) =>
-    action != currentAction).toList();
+    final menuActions =
+        availableActions.where((action) => action != currentAction).toList();
 
     final theme = Theme.of(buttonContext);
     final isDarkMode = theme.brightness == Brightness.dark;
     final textColor = isDarkMode ? Colors.grey[300] : Colors.grey[800];
     final listIconColor = isDarkMode ? Colors.grey[400] : Colors.grey[600];
-    final titleTextStyle = theme.textTheme.bodyMedium?.copyWith(
-        color: textColor);
+    final titleTextStyle =
+        theme.textTheme.bodyMedium?.copyWith(color: textColor);
 
     overlayEntry = OverlayEntry(
       builder: (context) {
@@ -316,8 +328,7 @@ class AppPanelHelper {
                     ? const Color(0xFF2D2D2D)
                     : Colors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0)
-                ),
+                    borderRadius: BorderRadius.circular(8.0)),
                 child: SizedBox(
                   width: 240,
                   child: ListView(
@@ -352,7 +363,6 @@ class AppPanelHelper {
 
     overlay.insert(overlayEntry);
   }
-
 
   /// Builds a single, hoverable segment of the breadcrumb.
   static Widget _buildBreadcrumbSegment<T>({
@@ -400,10 +410,13 @@ class AppPanelHelper {
             onTap: onTitleTap,
             hoverColor: hoverColor,
             child: Padding(
-              padding: const EdgeInsets.only(
-                  left: 8, right: 6, top: 6, bottom: 6),
+              padding:
+                  const EdgeInsets.only(left: 8, right: 6, top: 6, bottom: 6),
               child: Text(
-                title, style: textStyle, overflow: TextOverflow.ellipsis,),
+                title,
+                style: textStyle,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
           Builder(
@@ -421,13 +434,12 @@ class AppPanelHelper {
                     onCreateNew: onCreateNew,
                     searchHintText: searchHintText,
                     createNewText: createNewText,
-                    happeningNowText: itemDateBuilder != null ? "Happening Now"
-                        .tr() : null,
-                    upcomingText: itemDateBuilder != null ? "Upcoming Events"
-                        .tr() : null,
-                    pastText: itemDateBuilder != null
-                        ? "Past Events".tr()
-                        : null,
+                    happeningNowText:
+                        itemDateBuilder != null ? "Happening Now".tr() : null,
+                    upcomingText:
+                        itemDateBuilder != null ? "Upcoming Events".tr() : null,
+                    pastText:
+                        itemDateBuilder != null ? "Past Events".tr() : null,
                   );
                 },
                 hoverColor: hoverColor,
@@ -436,8 +448,8 @@ class AppPanelHelper {
                       left: 2, right: 4, top: 6, bottom: 6),
                   child: Transform.scale(
                     scaleY: 0.8,
-                    child: Icon(
-                        Icons.unfold_more_rounded, size: 20, color: iconColor),
+                    child: Icon(Icons.unfold_more_rounded,
+                        size: 20, color: iconColor),
                   ),
                 ),
               );
@@ -470,14 +482,8 @@ class AppPanelHelper {
     final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
-    final screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
-    final screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
     final pickerTopPosition = offset.dy + size.height + 8;
     // Calculate available height, leaving some padding at the bottom.
     final availableHeight = screenHeight - pickerTopPosition - 16;
@@ -524,9 +530,7 @@ class AppPanelHelper {
                     ),
                     child: Material(
                       elevation: 4.0,
-                      color: Theme
-                          .of(context)
-                          .brightness == Brightness.dark
+                      color: Theme.of(context).brightness == Brightness.dark
                           ? const Color(0xFF2D2D2D)
                           : Colors.white,
                       shape: RoundedRectangleBorder(
@@ -561,12 +565,8 @@ class AppPanelHelper {
 
   /// This method returns an adaptive AppBar based on the screen width.
   static PreferredSizeWidget buildAdaptiveAdminAppBar(BuildContext context,
-      {List<AdminTabDefinition>? activeTabs,
-        TabController? tabController}) {
-    final screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
+      {List<AdminTabDefinition>? activeTabs, TabController? tabController}) {
+    final screenWidth = MediaQuery.of(context).size.width;
     // Use a more standard breakpoint for mobile vs. desktop layouts.
     if (screenWidth < 720) {
       return buildProfessionalMobileAdminAppBar(
@@ -577,9 +577,11 @@ class AppPanelHelper {
   }
 
   /// Desktop/Tablet version of the AppBar.
-  static PreferredSizeWidget buildDesktopAdminAppBar(BuildContext context,
-      List<AdminTabDefinition>? activeTabs,
-      TabController? tabController,) {
+  static PreferredSizeWidget buildDesktopAdminAppBar(
+    BuildContext context,
+    List<AdminTabDefinition>? activeTabs,
+    TabController? tabController,
+  ) {
     return AppBar(
       toolbarHeight: 60,
       automaticallyImplyLeading: false,
@@ -612,6 +614,7 @@ class AppPanelHelper {
           ),
         ],
       ),
+
       actions: [
         Padding(
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
@@ -619,39 +622,40 @@ class AppPanelHelper {
               appBarIconColor: ThemeConfig.lllBackground,
             ))
       ],
-      bottom: (activeTabs == null) ? null : PreferredSize(
-        preferredSize: const Size.fromHeight(40),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: TabBar(
-            controller: tabController,
-            isScrollable: true,
-            tabs: activeTabs.map((tab) {
-              return Row(
-                children: [
-                  Icon(tab.icon),
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(tab.label),
-                  ),
-                ],
-              );
-            }).toList(),
-          ),
-        ),
-      ),
+      bottom: (activeTabs == null)
+          ? null
+          : PreferredSize(
+              preferredSize: const Size.fromHeight(40),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TabBar(
+                  controller: tabController,
+                  isScrollable: true,
+                  tabs: activeTabs.map((tab) {
+                    return Row(
+                      children: [
+                        Icon(tab.icon),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(tab.label),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
     );
   }
 
   /// A professionally redesigned mobile version of the AppBar with Unit switcher on the left.
   static PreferredSizeWidget buildProfessionalMobileAdminAppBar(
-      BuildContext context,
-      List<AdminTabDefinition>? activeTabs,
-      TabController? tabController,) {
-    final onAppBarColor = Theme
-        .of(context)
-        .appBarTheme
-        .foregroundColor ?? Colors.white;
+    BuildContext context,
+    List<AdminTabDefinition>? activeTabs,
+    TabController? tabController,
+  ) {
+    final onAppBarColor =
+        Theme.of(context).appBarTheme.foregroundColor ?? Colors.white;
     final iconColor = onAppBarColor.withOpacity(0.9);
     final separatorColor = onAppBarColor.withOpacity(0.5);
 
@@ -677,13 +681,9 @@ class AppPanelHelper {
       title: ValueListenableBuilder<OccasionLinkModel?>(
         valueListenable: RightsService.occasionLinkModelNotifier,
         builder: (listenableContext, _, __) {
-          final allUnits = RightsService
-              .currentUser()
-              ?.units ?? [];
+          final allUnits = RightsService.currentUser()?.units ?? [];
           final currentUnit = RightsService.currentUnit();
-          final occasionsInUnit = RightsService
-              .currentUser()
-              ?.occasions ?? [];
+          final occasionsInUnit = RightsService.currentUser()?.occasions ?? [];
           final currentOccasion = RightsService.currentOccasion();
 
           if (currentUnit == null) return const SizedBox.shrink();
@@ -692,54 +692,72 @@ class AppPanelHelper {
             children: [
               Flexible(
                 flex: 2,
-                child: allUnits.length <= 1
+                child: (allUnits.length <= 1 &&
+                        (RightsService.occasionLinkModel?.organization
+                                ?.isUnitCreationEnabled !=
+                            true))
                     ? TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: onAppBarColor,
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    textStyle: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.normal),
-                  ),
-                  onPressed: () async {
-                    await RouterService.navigateToUnitAdmin(context, currentUnit);
-                  },
-                  child: Text(
-                    currentUnit.title ?? '---',
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )
-                // If multiple units, display the picker button.
-                    : Builder(builder: (buttonContext) {
-                  return TextButton(
-                    style: TextButton.styleFrom(
-                      foregroundColor: onAppBarColor,
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      textStyle: const TextStyle(fontWeight: FontWeight.normal),
-                    ),
-                    onPressed: () =>
-                        _showPicker<UnitModel>(
-                          context: buttonContext,
-                          items: allUnits,
-                          selectedItem: currentUnit,
-                          itemTitleBuilder: (i) => i.title ?? '---',
-                          itemIdBuilder: (i) => i.id,
-                          onItemSelected: (item) async =>
-                          await RouterService.navigateToUnitAdmin(context, item),
-                          onCreateNew: null,
-                          searchHintText: AdministrationStrings.findUnitHint,
-                          createNewText: AdministrationStrings.newUnitButton,
+                        style: TextButton.styleFrom(
+                          foregroundColor: onAppBarColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          textStyle: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.normal),
                         ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(child: Text(currentUnit.title ?? '---',
-                            overflow: TextOverflow.ellipsis)),
-                        Icon(Icons.unfold_more_rounded, size: 20,
-                            color: iconColor),
-                      ],
-                    ),
-                  );
-                }),
+                        onPressed: () async {
+                          await RouterService.navigateToUnitAdmin(
+                              context, currentUnit);
+                        },
+                        child: Text(
+                          currentUnit.title ?? '---',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      )
+                    // If multiple units, display the picker button.
+                    : Builder(builder: (buttonContext) {
+                        return TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: onAppBarColor,
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            textStyle:
+                                const TextStyle(fontWeight: FontWeight.normal),
+                          ),
+                          onPressed: () => _showPicker<UnitModel>(
+                            context: buttonContext,
+                            items: allUnits,
+                            selectedItem: currentUnit,
+                            itemTitleBuilder: (i) => i.title ?? '---',
+                            itemIdBuilder: (i) => i.id,
+                            onItemSelected: (item) async =>
+                                await RouterService.navigateToUnitAdmin(
+                                    context, item),
+                            onCreateNew: (RightsService.occasionLinkModel
+                                        ?.organization?.isUnitCreationEnabled ==
+                                    true)
+                                ? () async {
+                                    final newUnit =
+                                        await UnitCreationHelper.createNewUnit(
+                                            context);
+                                    if (newUnit != null) {
+                                      await RouterService.navigateToUnitAdmin(
+                                          context, newUnit);
+                                    }
+                                  }
+                                : null,
+                            searchHintText: AdministrationStrings.findUnitHint,
+                            createNewText: AdministrationStrings.newUnitButton,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                  child: Text(currentUnit.title ?? '---',
+                                      overflow: TextOverflow.ellipsis)),
+                              Icon(Icons.unfold_more_rounded,
+                                  size: 20, color: iconColor),
+                            ],
+                          ),
+                        );
+                      }),
               ),
               if (currentOccasion != null) ...[
                 // Separator
@@ -758,34 +776,35 @@ class AppPanelHelper {
                         padding: const EdgeInsets.symmetric(horizontal: 6),
                         textStyle: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      onPressed: () =>
-                          _showPicker<OccasionModel>(
-                            context: buttonContext,
-                            items: occasionsInUnit,
-                            selectedItem: currentOccasion,
-                            itemTitleBuilder: (i) => i.title ?? '---',
-                            itemIdBuilder: (i) => i.id,
-                            itemDateBuilder: (i) => i.startTime,
-                            onItemSelected: (item) async {
-                              if (item.link != null) {
-                                await RouterService
-                                    .navigateToOccasionAdministration(
-                                    context, occasionLink: item.link!);
-                              }
-                            },
-                            onCreateNew: null,
-                            searchHintText: AdministrationStrings
-                                .findOccasionHint,
-                            createNewText: AdministrationStrings
-                                .newOccasionButton,
-                          ),
+                      onPressed: () => _showPicker<OccasionModel>(
+                        context: buttonContext,
+                        items: occasionsInUnit,
+                        selectedItem: currentOccasion,
+                        itemTitleBuilder: (i) => i.title ?? '---',
+                        itemIdBuilder: (i) => i.id,
+                        itemDateBuilder: (i) => i.startTime,
+                        onItemSelected: (item) async {
+                          if (item.link != null) {
+                            await RouterService
+                                .navigateToOccasionAdministration(context,
+                                    occasionLink: item.link!, occasion: item);
+                          }
+                        },
+                        onCreateNew: null,
+                        searchHintText: AdministrationStrings.findOccasionHint,
+                        createNewText: AdministrationStrings.newOccasionButton,
+                        happeningNowText: "Happening Now".tr(),
+                        upcomingText: "Upcoming Events".tr(),
+                        pastText: "Past Events".tr(),
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Flexible(child: Text(currentOccasion.title ?? '---',
-                              overflow: TextOverflow.ellipsis)),
-                          Icon(Icons.unfold_more_rounded, size: 20,
-                              color: iconColor),
+                          Flexible(
+                              child: Text(currentOccasion.title ?? '---',
+                                  overflow: TextOverflow.ellipsis)),
+                          Icon(Icons.unfold_more_rounded,
+                              size: 20, color: iconColor),
                         ],
                       ),
                     );
@@ -808,24 +827,35 @@ class AppPanelHelper {
             final actions = <_ActionMenuItem>[];
 
             // Condition for Reservations: Feature enabled AND user has order view rights
-            if (FeatureService.isFeatureEnabled(
-                FeatureConstants.form, features: currentOccasion.features) && RightsService.canSeeReservations()) {
+            if (FeatureService.isFeatureEnabled(FeatureConstants.form,
+                    features: currentOccasion.features) &&
+                RightsService.canSeeReservations()) {
               actions.add(_ActionMenuItem(
                   label: AdministrationStrings.reservations,
                   icon: Icons.shopping_cart,
-                  onSelect: () async =>
-                  await RouterService.navigateOccasion(
+                  onSelect: () async => await RouterService.navigateOccasion(
                       context, ReservationsPage.ROUTE)));
             }
 
             // Condition for Event Management: User has editor view rights
-            if(RightsService.canSeeAdministration()) {
+            if (RightsService.canSeeAdministration()) {
               actions.add(_ActionMenuItem(
                   label: 'Event management'.tr(),
                   icon: Icons.admin_panel_settings,
-                  onSelect: () async =>
-                  await RouterService.navigateOccasion(
+                  onSelect: () async => await RouterService.navigateOccasion(
                       context, AdminPage.ROUTE)));
+            }
+
+            if (RightsService.isAdmin()) {
+              final orgId = RightsService.currentUnit()?.organization ??
+                  RightsService.currentUser()?.units?.firstOrNull?.organization;
+              if (orgId != null) {
+                actions.add(_ActionMenuItem(
+                    label: "Organization Settings",
+                    icon: Icons.settings_applications,
+                    onSelect: () async => await RouterService.navigate(
+                        context, "/organizationEdit/$orgId")));
+              }
             }
 
             // View App is always available if the app is supported
@@ -833,7 +863,7 @@ class AppPanelHelper {
                 label: AdministrationStrings.viewApp,
                 icon: Icons.visibility,
                 onSelect: () async =>
-                await RouterService.navigateOccasion(context, "")));
+                    await RouterService.navigateOccasion(context, "")));
 
             if (actions.length <= 1) return const SizedBox.shrink();
 
@@ -849,11 +879,10 @@ class AppPanelHelper {
                     child: Row(
                       children: [
                         if (action.icon != null) ...[
-                          Icon(action.icon, size: 20, color: Theme
-                              .of(context)
-                              .textTheme
-                              .bodyLarge
-                              ?.color),
+                          Icon(action.icon,
+                              size: 20,
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge?.color),
                           const SizedBox(width: 12),
                         ],
                         Text(action.label),
@@ -873,23 +902,23 @@ class AppPanelHelper {
       bottom: (activeTabs == null)
           ? null
           : PreferredSize(
-        preferredSize: const Size.fromHeight(40),
-        child: TabBar(
-          controller: tabController,
-          isScrollable: true,
-          tabs: activeTabs.map((tab) {
-            return Tab(
-              child: Row(
-                children: [
-                  Icon(tab.icon),
-                  const SizedBox(width: 8),
-                  Text(tab.label),
-                ],
+              preferredSize: const Size.fromHeight(40),
+              child: TabBar(
+                controller: tabController,
+                isScrollable: true,
+                tabs: activeTabs.map((tab) {
+                  return Tab(
+                    child: Row(
+                      children: [
+                        Icon(tab.icon),
+                        const SizedBox(width: 8),
+                        Text(tab.label),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
-            );
-          }).toList(),
-        ),
-      ),
+            ),
     );
   }
 }

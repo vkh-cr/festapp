@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
-import 'package:fstapp/theme_config.dart';
 
 import '../seat_reservation/utils/seat_state.dart';
 import '../seat_reservation/widgets/seat_reservation_widget.dart';
@@ -8,12 +7,13 @@ import '../seat_reservation/widgets/seat_widget.dart';
 import 'blueprint_editor_tab.dart';
 
 class BlueprintLegend extends StatelessWidget {
-  final selectionMode currentSelectionMode;
-  final ValueChanged<selectionMode> onModeSelected;
+  final BlueprintSelectionMode currentSelectionMode;
+  final ValueChanged<BlueprintSelectionMode> onModeSelected;
 
   // New properties for the Confirm Button
   final int selectedCount;
   final VoidCallback? onConfirmOrder;
+  final Map<SeatState, int> stateCounts;
 
   const BlueprintLegend({
     super.key,
@@ -21,6 +21,7 @@ class BlueprintLegend extends StatelessWidget {
     required this.onModeSelected,
     this.selectedCount = 0,
     this.onConfirmOrder,
+    this.stateCounts = const {},
   });
 
   @override
@@ -42,9 +43,9 @@ class BlueprintLegend extends StatelessWidget {
   }
 
   String _getHelpText() {
-    if (currentSelectionMode == selectionMode.swapSeats) {
+    if (currentSelectionMode == BlueprintSelectionMode.swapSeats) {
       return BlueprintStrings.swapHelpIntro;
-    } else if (currentSelectionMode == selectionMode.createNewOrder) {
+    } else if (currentSelectionMode == BlueprintSelectionMode.createNewOrder) {
       return BlueprintStrings.createOrderHelp;
     }
     return BlueprintStrings.legendInstruction;
@@ -59,24 +60,26 @@ class BlueprintLegend extends StatelessWidget {
           context: context,
           label: BlueprintStrings.legendBlackArea,
           state: SeatState.black,
-          isActive: currentSelectionMode == selectionMode.addBlack,
-          onTap: () => onModeSelected(selectionMode.addBlack),
+          isActive: currentSelectionMode == BlueprintSelectionMode.addBlack,
+          onTap: () => onModeSelected(BlueprintSelectionMode.addBlack),
         ),
         const SizedBox(height: 8),
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendAvailable,
           state: SeatState.available,
-          isActive: currentSelectionMode == selectionMode.addAvailable,
-          onTap: () => onModeSelected(selectionMode.addAvailable),
+          isActive: currentSelectionMode == BlueprintSelectionMode.addAvailable,
+          onTap: () => onModeSelected(BlueprintSelectionMode.addAvailable),
+          count: stateCounts[SeatState.available],
         ),
         const SizedBox(height: 8),
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendEmpty,
           state: SeatState.empty,
-          isActive: currentSelectionMode == selectionMode.emptyArea,
-          onTap: () => onModeSelected(selectionMode.emptyArea),
+          isActive: currentSelectionMode == BlueprintSelectionMode.emptyArea,
+          onTap: () => onModeSelected(BlueprintSelectionMode.emptyArea),
+          drawBorder: true,
         ),
 
         const SizedBox(height: 16),
@@ -86,9 +89,10 @@ class BlueprintLegend extends StatelessWidget {
           context: context,
           label: BlueprintStrings.legendSwapSeats,
           state: SeatState.empty,
-          isActive: currentSelectionMode == selectionMode.swapSeats,
-          forceHighlight: true, // Keeps orange border for Swap to indicate "special/warning"
-          onTap: () => onModeSelected(selectionMode.swapSeats),
+          isActive: currentSelectionMode == BlueprintSelectionMode.swapSeats,
+          forceHighlight:
+              true, // Keeps orange border for Swap to indicate "special/warning"
+          onTap: () => onModeSelected(BlueprintSelectionMode.swapSeats),
         ),
         const SizedBox(height: 8),
 
@@ -100,42 +104,47 @@ class BlueprintLegend extends StatelessWidget {
               context: context,
               label: BlueprintStrings.legendCreateOrder,
               state: SeatState.selected_by_me,
-              isActive: currentSelectionMode == selectionMode.createNewOrder,
+              isActive:
+                  currentSelectionMode == BlueprintSelectionMode.createNewOrder,
               forceHighlight: false, // REMOVED orange border here
-              onTap: () => onModeSelected(selectionMode.createNewOrder),
+              onTap: () =>
+                  onModeSelected(BlueprintSelectionMode.createNewOrder),
             ),
 
             // The Button appears here if mode is active
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
-              child: currentSelectionMode == selectionMode.createNewOrder
+              child: currentSelectionMode ==
+                      BlueprintSelectionMode.createNewOrder
                   ? Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: selectedCount > 0 ? onConfirmOrder : null,
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      elevation: 4,
-                      shadowColor: Colors.black26,
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      padding: const EdgeInsets.only(top: 12.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: selectedCount > 0 ? onConfirmOrder : null,
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            elevation: 4,
+                            shadowColor: Colors.black26,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon:
+                              const Icon(Icons.check_circle_outline, size: 20),
+                          label: Text(
+                            "${BlueprintStrings.btnCreateOrder} ($selectedCount)",
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    icon: const Icon(Icons.check_circle_outline, size: 20),
-                    label: Text(
-                      "${BlueprintStrings.btnCreateOrder} ($selectedCount)",
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ),
-              )
+                    )
                   : const SizedBox.shrink(),
             ),
           ],
@@ -152,6 +161,7 @@ class BlueprintLegend extends StatelessWidget {
           state: SeatState.used,
           isActive: false,
           grayedOut: true,
+          count: stateCounts[SeatState.used],
         ),
         const SizedBox(height: 8),
         _buildLegendItem(
@@ -160,6 +170,7 @@ class BlueprintLegend extends StatelessWidget {
           state: SeatState.ordered,
           isActive: false,
           grayedOut: true,
+          count: stateCounts[SeatState.ordered],
         )
       ],
     );
@@ -173,17 +184,21 @@ class BlueprintLegend extends StatelessWidget {
     VoidCallback? onTap,
     bool grayedOut = false,
     bool forceHighlight = false,
+    int? count,
+    bool drawBorder = false,
   }) {
     return MouseRegion(
       cursor:
-      grayedOut ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
+          grayedOut ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
       child: GestureDetector(
         onTap: grayedOut ? null : onTap,
         child: Opacity(
-          opacity: grayedOut ? 0.8 : 1.0,
+          opacity: 1.0,
           child: Container(
             decoration: BoxDecoration(
-              color: isActive ? Theme.of(context).colorScheme.primary.withOpacity(0.05) : null,
+              color: isActive
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.05)
+                  : null,
               border: Border.all(
                 color: isActive
                     ? Theme.of(context).colorScheme.primary
@@ -196,17 +211,25 @@ class BlueprintLegend extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SeatWidgetHelper.buildSeat(
-                  context: context,
-                  state: state,
-                  isHighlightedForSwap: forceHighlight,
-                  size: SeatReservationWidget.boxSize.toDouble(),
+                Container(
+                  decoration: drawBorder
+                      ? BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade400),
+                          borderRadius: BorderRadius.circular(4),
+                        )
+                      : null,
+                  child: SeatWidgetHelper.buildSeat(
+                    context: context,
+                    state: state,
+                    isHighlightedForSwap: forceHighlight,
+                    size: SeatReservationWidget.boxSize.toDouble() *
+                        (drawBorder ? 0.7 : 1.0),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  label,
+                  count != null ? "$label ($count)" : label,
                   style: TextStyle(
-                    color: grayedOut ? Colors.grey : null,
                     fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),

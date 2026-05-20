@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/services/time_helper.dart';
-import 'package:intl/intl.dart';
 
 import 'feature.dart';
 import 'feature_constants.dart';
@@ -10,7 +9,8 @@ import 'feature_constants.dart';
 class WorkshopsFeature extends Feature {
   static const String metaStartTime = 'start_time';
   static const String metaWorkshops = 'workshops';
-  static const String metaRegistrationNotOpenMessage = 'registration_not_open_message';
+  static const String metaRegistrationNotOpenMessage =
+      'registration_not_open_message';
 
   DateTime? startTime;
   String? registrationNotOpenMessage;
@@ -27,13 +27,15 @@ class WorkshopsFeature extends Feature {
   factory WorkshopsFeature.fromJson(Map<String, dynamic> json) {
     DateTime? parsed;
     if (json[metaStartTime] != null) {
-      parsed = DateTime.parse(json[metaStartTime] as String).toUtcFromOccasionTime();
+      parsed =
+          DateTime.parse(json[metaStartTime] as String).toUtcFromOccasionTime();
     }
     return WorkshopsFeature(
       code: json[FeatureConstants.metaCode] as String? ?? metaWorkshops,
       isEnabled: json[FeatureConstants.metaIsEnabled] as bool? ?? true,
       startTime: parsed,
-      registrationNotOpenMessage: json[metaRegistrationNotOpenMessage] as String?,
+      registrationNotOpenMessage:
+          json[metaRegistrationNotOpenMessage] as String?,
     );
   }
 
@@ -63,8 +65,10 @@ class WorkshopsFeature extends Feature {
             ? dateFmt.format(startTime!.toOccasionTime())
             : '';
 
-        final startTimeController = TextEditingController(text: displayStartTime);
-        final messageController = TextEditingController(text: registrationNotOpenMessage ?? '');
+        final startTimeController =
+            TextEditingController(text: displayStartTime);
+        final messageController =
+            TextEditingController(text: registrationNotOpenMessage ?? '');
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,10 +122,12 @@ class WorkshopsFeature extends Feature {
               controller: messageController,
               decoration: InputDecoration(
                 labelText: 'Early Registration Attempt Message'.tr(),
-                hintText: 'Enter message for users trying to register too early'.tr(),
+                hintText:
+                    'Enter message for users trying to register too early'.tr(),
               ),
               onSaved: (val) {
-                registrationNotOpenMessage = val != null && val.isNotEmpty ? val : null;
+                registrationNotOpenMessage =
+                    val != null && val.isNotEmpty ? val : null;
               },
             ),
           ],

@@ -8,10 +8,13 @@ class SpotManagementRowReference {
   final ResourceModel resource;
   ResourceSlotModel? slot;
   int? implicitSlotIndex;
+
   /// The original state of spots in the row when the data was loaded. Used for comparison during updates.
   final Map<int, SpotModel?> initialSpotsInRow;
+
   /// The complete map of all available spots, used for lookups in dialogs.
   final Map<int, SpotModel> allSpotsMap;
+
   /// The current state of spots in the row, which can be modified by the user.
   Map<int, SpotModel?> currentSpotsInRow;
 
@@ -21,5 +24,6 @@ class SpotManagementRowReference {
     this.implicitSlotIndex,
     required this.initialSpotsInRow,
     required this.allSpotsMap,
-  }) : currentSpotsInRow = Map.from(initialSpotsInRow); // Initialize current state from initial state
+  }) : currentSpotsInRow = Map.from(
+            initialSpotsInRow); // Initialize current state from initial state
 }

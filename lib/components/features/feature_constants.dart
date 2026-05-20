@@ -23,13 +23,27 @@ class FeatureConstants {
   static const String workshops = "workshops";
   static const String volunteers = "volunteers";
   static const String schedule = "schedule";
+  static const String contract = "contract";
+  static const String deposit = "deposit";
   static const String import = "import"; // New feature
+
+  // Contract Feature
+  static const String contractTransport = "transport";
+  static const String contractDeparturePoint = "departure_point";
+  static const String contractPlaceOfStay = "place_of_stay";
+  static const String contractTourName = "tour_name";
+  static const String contractTourDate = "tour_date";
+  static const String contractNotes = "notes";
+  static const String contractNumberOfDays = "number_of_days";
+  static const String contractPaymentInfo = "payment_info";
 
   // Extra fields for ticket feature
   static const String ticketLightColor = "lightColor";
   static const String ticketDarkColor = "darkColor";
   static const String ticketBackground = "background";
   static const String ticketType = "ticket_type";
+  static const String ticketCanScanManually = "can_scan_manually";
+  static const String ticketShowHiddenNote = "show_hidden_note";
 
   // Extra fields for form feature
   static const String formUseExternal = "use_external_form";
@@ -39,7 +53,6 @@ class FeatureConstants {
   static const String reminderIsEnabled = "reminder_is_enabled";
   static const String reminderIntervalSeconds = "reminder_interval_seconds";
   static const String deadlineDurationSeconds = "deadline_duration_seconds";
-
 
   // Extra field for companions feature
   static const String companionsMax = "max_companions";
@@ -62,6 +75,10 @@ class FeatureConstants {
   static const String mapLogoLink = "logo_link";
   static const String mapTextLink = "text_link";
   static const String mapLayerLink = "layer_link";
+
+  // Deposit Feature
+  static const String depositDeadline = "deposit_deadline";
+  static const String depositDeadlineDays = "deposit_deadline_days";
 
   // Import Feature
   static const String importAutoImport = "auto_import";

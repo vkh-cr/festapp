@@ -50,4 +50,8 @@ class JSInterop {
   String getCurrentUrl() {
     throw UnsupportedError('JS interop is not supported on this platform');
   }
+
+  void navigateExternal(String url) {
+    throw UnsupportedError('JS interop is not supported on this platform');
+  }
 }

@@ -6,20 +6,20 @@ class ScheduleBackButton extends StatelessWidget {
   final double iconSize;
 
   const ScheduleBackButton({
-    Key? key,
+    super.key,
     this.color,
     this.iconSize = 24,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-
     // if (!RouterService.canPop(context)) {
     //   return const SizedBox.shrink();
     // }
 
     // Use the passed-in color if given, otherwise fall back to your theme
-    final iconColor = color ?? Theme.of(context).navigationBarTheme.indicatorColor;
+    final iconColor =
+        color ?? Theme.of(context).navigationBarTheme.indicatorColor;
 
     return IconButton(
       icon: Icon(

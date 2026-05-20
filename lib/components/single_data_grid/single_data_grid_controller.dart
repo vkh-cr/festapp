@@ -8,7 +8,13 @@ import 'pluto_abstract.dart';
 import 'data_grid_action.dart';
 import 'package:file_saver/file_saver.dart';
 
-enum DataGridFirstColumn { none, delete, deleteAndDuplicate, deleteAndCheck, check }
+enum DataGridFirstColumn {
+  none,
+  delete,
+  deleteAndDuplicate,
+  deleteAndCheck,
+  check
+}
 
 /// Options for CSV export.
 class ExportOptions {
@@ -103,6 +109,10 @@ class SingleDataGridController<T extends ITrinaRowModel> {
     stateManager.removeAllRows();
     stateManager.appendRows(rows);
 
+    if (stateManager.hasFilter) {
+      stateManager.setFilterWithFilterRows(stateManager.filterRows);
+    }
+
     if (stateManager.columns.isNotEmpty &&
         stateManager.columns.first.field != firstColumnTypeId &&
         firstColumnType != DataGridFirstColumn.none) {
@@ -116,11 +126,12 @@ class SingleDataGridController<T extends ITrinaRowModel> {
         enableDropToResize: false,
         enableColumnDrag: false,
         enableContextMenu: false,
-        enableRowChecked: firstColumnType == DataGridFirstColumn.deleteAndCheck ||
-            firstColumnType == DataGridFirstColumn.check,
+        enableRowChecked:
+            firstColumnType == DataGridFirstColumn.deleteAndCheck ||
+                firstColumnType == DataGridFirstColumn.check,
         cellPadding: EdgeInsets.zero,
         width: (firstColumnType == DataGridFirstColumn.delete ||
-            firstColumnType == DataGridFirstColumn.check)
+                firstColumnType == DataGridFirstColumn.check)
             ? 50
             : 100,
         renderer: (rendererContext) {
@@ -151,9 +162,12 @@ class SingleDataGridController<T extends ITrinaRowModel> {
                 onPressed: () async {
                   var originRow = rendererContext.row;
                   var newRow = rendererContext.stateManager.getNewRows()[0];
-                  if(this.copyObject != null) {
-                    newRow = copyObject!(fromPlutoJson(originRow.toJson())).toTrinaRow(context);
-                    var defaultRow = {firstColumnTypeId: TrinaCell(value: "delete")};
+                  if (copyObject != null) {
+                    newRow = copyObject!(fromPlutoJson(originRow.toJson()))
+                        .toTrinaRow(context);
+                    var defaultRow = {
+                      firstColumnTypeId: TrinaCell(value: "delete")
+                    };
                     newRow.cells.addAll(defaultRow);
                   } else {
                     var readOnlyColumns = rendererContext.stateManager.columns
@@ -162,13 +176,15 @@ class SingleDataGridController<T extends ITrinaRowModel> {
                         .toList();
                     for (var c in originRow.cells.entries) {
                       if (readOnlyColumns.contains(c.key)) continue;
-                      newRow.cells[c.key]?.value = originRow.cells[c.key]?.value;
+                      newRow.cells[c.key]?.value =
+                          originRow.cells[c.key]?.value;
                     }
                   }
 
                   var currentIndex =
-                  rendererContext.stateManager.rows.indexOf(originRow);
-                  rendererContext.stateManager.insertRows(currentIndex + 1, [newRow]);
+                      rendererContext.stateManager.rows.indexOf(originRow);
+                  rendererContext.stateManager
+                      .insertRows(currentIndex + 1, [newRow]);
                   newRows.add(newRow);
                   rendererContext.stateManager.notifyListeners();
                 },

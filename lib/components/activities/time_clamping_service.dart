@@ -7,7 +7,8 @@ class TimeClampingService {
     required DateTime timelineStart,
     required DateTime timelineEnd,
     required Duration minAllowedDuration,
-    Duration snapStep = const Duration(minutes: 15), // New parameter for snapping
+    Duration snapStep =
+        const Duration(minutes: 15), // New parameter for snapping
   }) {
     // 1. Clamp initialStartTime to the overall timeline bounds
     DateTime newStart = initialStartTime;
@@ -22,9 +23,12 @@ class TimeClampingService {
     // Calculate the difference from timelineStart
     final Duration diffFromTimelineStart = newStart.difference(timelineStart);
     // Determine how many snapSteps fit into this duration
-    final int numSnapSteps = (diffFromTimelineStart.inMicroseconds / snapStep.inMicroseconds).round();
+    final int numSnapSteps =
+        (diffFromTimelineStart.inMicroseconds / snapStep.inMicroseconds)
+            .round();
     // Add the snapped duration back to timelineStart
-    newStart = timelineStart.add(Duration(microseconds: numSnapSteps * snapStep.inMicroseconds));
+    newStart = timelineStart
+        .add(Duration(microseconds: numSnapSteps * snapStep.inMicroseconds));
 
     // 3. Calculate newEnd based on snapped newStart and itemDuration
     DateTime newEnd = newStart.add(itemDuration);
@@ -36,17 +40,24 @@ class TimeClampingService {
       // but ensure it doesn't go before timelineStart.
       if (itemDuration > Duration.zero) {
         DateTime potentialStart = newEnd.subtract(itemDuration);
-        newStart = potentialStart.isBefore(timelineStart) ? timelineStart : potentialStart;
+        newStart = potentialStart.isBefore(timelineStart)
+            ? timelineStart
+            : potentialStart;
       } else {
-        newStart = newEnd; // If duration is zero, start and end should be the same
+        newStart =
+            newEnd; // If duration is zero, start and end should be the same
       }
     }
 
     // 5. Re-snap newStart after potential adjustment from newEnd clamping
     final Duration reDiffFromTimelineStart = newStart.difference(timelineStart);
-    final int reNumSnapSteps = (reDiffFromTimelineStart.inMicroseconds / snapStep.inMicroseconds).round();
-    newStart = timelineStart.add(Duration(microseconds: reNumSnapSteps * snapStep.inMicroseconds));
-    newEnd = newStart.add(itemDuration); // Recalculate newEnd based on the re-snapped newStart
+    final int reNumSnapSteps =
+        (reDiffFromTimelineStart.inMicroseconds / snapStep.inMicroseconds)
+            .round();
+    newStart = timelineStart
+        .add(Duration(microseconds: reNumSnapSteps * snapStep.inMicroseconds));
+    newEnd = newStart.add(
+        itemDuration); // Recalculate newEnd based on the re-snapped newStart
 
     // 6. Ensure newEnd is within timeline bounds after re-snapping newStart
     if (newEnd.isAfter(timelineEnd)) {
@@ -55,12 +66,15 @@ class TimeClampingService {
 
     // 7. Handle minimum allowed duration
     Duration currentEffectiveDuration = newEnd.difference(newStart);
-    if (minAllowedDuration > Duration.zero && currentEffectiveDuration < minAllowedDuration) {
+    if (minAllowedDuration > Duration.zero &&
+        currentEffectiveDuration < minAllowedDuration) {
       DateTime potentialEnd = newStart.add(minAllowedDuration);
       if (potentialEnd.isAfter(timelineEnd)) {
         newEnd = timelineEnd;
         DateTime potentialStart = newEnd.subtract(minAllowedDuration);
-        newStart = potentialStart.isBefore(timelineStart) ? timelineStart : potentialStart;
+        newStart = potentialStart.isBefore(timelineStart)
+            ? timelineStart
+            : potentialStart;
       } else {
         newEnd = potentialEnd;
       }
@@ -72,8 +86,10 @@ class TimeClampingService {
     }
     if (newStart.isBefore(timelineStart)) newStart = timelineStart;
     if (newEnd.isAfter(timelineEnd)) newEnd = timelineEnd;
-    if (newEnd.isBefore(timelineStart)) newEnd = timelineStart; // Should not happen if newStart is clamped
-    if (newStart.isAfter(timelineEnd)) newStart = timelineEnd; // Should not happen if newEnd is clamped
+    if (newEnd.isBefore(timelineStart))
+      newEnd = timelineStart; // Should not happen if newStart is clamped
+    if (newStart.isAfter(timelineEnd))
+      newStart = timelineEnd; // Should not happen if newEnd is clamped
 
     return DateTimeRange(start: newStart, end: newEnd);
   }

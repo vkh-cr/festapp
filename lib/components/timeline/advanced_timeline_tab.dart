@@ -28,11 +28,11 @@ class _AdvancedTimelineTabState extends State<AdvancedTimelineTab> {
   @override
   Widget build(BuildContext context) {
     // 1) Weekday labels
-    final weekdays = List.generate(7, (i) =>
-        DateFormat.E(context.locale.toString())
+    final weekdays = List.generate(
+        7,
+        (i) => DateFormat.E(context.locale.toString())
             .format(DateTime(2020, 1, 6 + i))
-            .toUpperCase()
-    );
+            .toUpperCase());
 
     // 2) Split into days
     final datedEvents = TimeBlockHelper.splitTimeBlocksByDate(
@@ -52,7 +52,8 @@ class _AdvancedTimelineTabState extends State<AdvancedTimelineTab> {
 
     return DefaultTabController(
       length: datedEvents.length,
-      initialIndex:  TimeHelper.getTimeNowIndexFromDays(datedEvents.map((e) => e.events.first.startTime.weekday)),
+      initialIndex: TimeHelper.getTimeNowIndexFromDays(
+          datedEvents.map((e) => e.events.first.startTime.weekday)),
       child: Builder(builder: (ctx) {
         final controller = DefaultTabController.of(ctx);
         return Scaffold(
@@ -86,8 +87,8 @@ class _AdvancedTimelineTabState extends State<AdvancedTimelineTab> {
                         dayGroup: dayGroup,
                         controller: widget.controller,
                         openId: _openId,
-                        onToggle: (id) => setState(
-                                () => _openId = _openId == id ? null : id),
+                        onToggle: (id) =>
+                            setState(() => _openId = _openId == id ? null : id),
                       ),
                   ],
                 ),

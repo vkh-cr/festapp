@@ -6,7 +6,9 @@ import 'schedule_helper.dart'; // Assuming this is a local file
 class AdvancedTimelineController {
   final List<TimeBlockItem> events;
   final void Function(int eventId)? onEventPressed;
-  final void Function(BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEvent)? onAddNewEvent;
+  final void Function(
+          BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEvent)?
+      onAddNewEvent;
   final bool Function()? showAddNewEventButton;
   final Future<void> Function(int eventId)? onSignInEvent;
   final Future<void> Function(int eventId)? onSignOutEvent;
@@ -14,13 +16,15 @@ class AdvancedTimelineController {
   final Future<void> Function(int eventId)? onRemoveFromProgramEvent;
   final void Function(BuildContext, TimeBlockPlace place)? onPlaceTap;
   final void Function(BuildContext, int eventId)? onEditEvent;
-  final List<TimeBlockGroup> Function(Iterable<TimeBlockItem> events, BuildContext context)? customSplitter;
+  final List<TimeBlockGroup> Function(
+      Iterable<TimeBlockItem> events, BuildContext context)? customSplitter;
   final bool animateEventRemoval;
   final Widget? emptyContent;
 
   // New callbacks and properties
   final void Function(BuildContext context, int eventId)? onScanButtonPressed;
-  final void Function(BuildContext context, TimeBlockItem timeBlockItem)? onCompanionButtonPressed;
+  final void Function(BuildContext context, TimeBlockItem timeBlockItem)?
+      onCompanionButtonPressed;
   final bool Function()? isUserApprover;
 
   AdvancedTimelineController({

@@ -2,8 +2,7 @@
 import 'package:timezone/browser.dart' as tzb;
 import 'package:timezone/timezone.dart' as tz;
 
-
-class TimeZoneUniversal{
+class TimeZoneUniversal {
   Future<void> initializeTimeZonePlatform() async {
     await tzb.initializeTimeZone('assets/packages/timezone/data/latest.tzf');
   }

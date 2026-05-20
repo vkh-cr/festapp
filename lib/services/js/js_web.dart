@@ -21,7 +21,7 @@ class JSInterop {
   factory JSInterop() => _instance;
 
   final StreamController<web.PopStateEvent> _popStateController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   JSInterop._internal() {
     web.window.onpopstate = (web.PopStateEvent event) {
@@ -120,5 +120,10 @@ class JSInterop {
   /// Returns window.location.href
   String getCurrentUrl() {
     return web.window.location.href;
+  }
+
+  /// window.location.href = url
+  void navigateExternal(String url) {
+    web.window.location.href = url;
   }
 }

@@ -38,7 +38,8 @@ class InventoryContextsEditor extends StatelessWidget {
       slivers: [
         SliverReorderableList(
           itemBuilder: (context, index) {
-            return _buildContextEditor(context, activeContexts[index], index, isDeleted: false);
+            return _buildContextEditor(context, activeContexts[index], index,
+                isDeleted: false);
           },
           itemCount: activeContexts.length,
           onReorder: onReorder,
@@ -49,14 +50,16 @@ class InventoryContextsEditor extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
-                Text(InventoryStrings.settingsMarkedForDeletion, style: Theme.of(context).textTheme.titleMedium),
+                Text(InventoryStrings.settingsMarkedForDeletion,
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 ListView(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
                     for (final deletedItem in deletedContexts)
-                      _buildContextEditor(context, deletedItem, -1, isDeleted: true)
+                      _buildContextEditor(context, deletedItem, -1,
+                          isDeleted: true)
                   ],
                 )
               ],
@@ -66,16 +69,21 @@ class InventoryContextsEditor extends StatelessWidget {
     );
   }
 
-  Widget _buildContextEditor(BuildContext context, InventoryContextModel contextModel, int index, {required bool isDeleted}) {
+  Widget _buildContextEditor(
+      BuildContext context, InventoryContextModel contextModel, int index,
+      {required bool isDeleted}) {
     contextModel.inventoryPool = pool;
 
     final isNew = originalContexts.firstWhereOrNull((c) =>
-    (c.id != null && c.id == contextModel.id) ||
-        (c.id == null && c == contextModel)) == null;
+            (c.id != null && c.id == contextModel.id) ||
+            (c.id == null && c == contextModel)) ==
+        null;
 
     final subtitleStyle = TextStyle(
       decoration: isDeleted ? TextDecoration.lineThrough : null,
-      color: isDeleted ? Theme.of(context).disabledColor.withOpacity(0.7) : Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+      color: isDeleted
+          ? Theme.of(context).disabledColor.withOpacity(0.7)
+          : Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
     );
 
     return Card(
@@ -84,8 +92,8 @@ class InventoryContextsEditor extends StatelessWidget {
       color: isDeleted
           ? Colors.red.withOpacity(0.05)
           : isNew
-          ? Colors.green.withOpacity(0.05)
-          : null,
+              ? Colors.green.withOpacity(0.05)
+              : null,
       child: Row(
         children: <Widget>[
           ReorderableDragStartListener(
@@ -98,26 +106,26 @@ class InventoryContextsEditor extends StatelessWidget {
                 child: isDeleted
                     ? const SizedBox(width: 12)
                     : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    4,
-                        (_) => Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        2,
-                            (_) => Container(
-                          width: 3.5,
-                          height: 3.5,
-                          margin: const EdgeInsets.all(1),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).disabledColor,
-                            shape: BoxShape.circle,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          4,
+                          (_) => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              2,
+                              (_) => Container(
+                                width: 3.5,
+                                height: 3.5,
+                                margin: const EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).disabledColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
               ),
             ),
           ),
@@ -135,20 +143,23 @@ class InventoryContextsEditor extends StatelessWidget {
               subtitle: contextModel.product == null
                   ? null
                   : Text(
-                contextModel.product!.getFormattedProductTitle(),
-                style: subtitleStyle,
-              ),
+                      contextModel.product!.getFormattedProductTitle(),
+                      style: subtitleStyle,
+                    ),
             ),
           ),
           IconButton(
             icon: const Icon(Icons.category_rounded),
             tooltip: InventoryStrings.settingsProductTooltip,
-            onPressed: isDeleted ? null : () {
-              final assignableProducts = allProducts
-                  .where((p) => p.includedInventories.any((ic)=>ic.inventoryContext!.id! == contextModel.id))
-                  .toList();
-              onEditProduct(contextModel, assignableProducts);
-            },
+            onPressed: isDeleted
+                ? null
+                : () {
+                    final assignableProducts = allProducts
+                        .where((p) => p.includedInventories.any((ic) =>
+                            ic.inventoryContext!.id! == contextModel.id))
+                        .toList();
+                    onEditProduct(contextModel, assignableProducts);
+                  },
           ),
           IconButton(
             icon: const Icon(Icons.edit_outlined),
@@ -158,8 +169,10 @@ class InventoryContextsEditor extends StatelessWidget {
           IconButton(
             icon: isDeleted
                 ? const Icon(Icons.add_circle_outline, color: Colors.green)
-                : Icon(Icons.delete_outline, color: ThemeConfig.redColor(context)),
-            tooltip: isDeleted ? InventoryStrings.restore : InventoryStrings.remove,
+                : Icon(Icons.delete_outline,
+                    color: ThemeConfig.redColor(context)),
+            tooltip:
+                isDeleted ? InventoryStrings.restore : InventoryStrings.remove,
             onPressed: () {
               if (isDeleted) {
                 onRestore(contextModel);

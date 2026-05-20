@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
-import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/database_tables/tb.dart';
+
+import '../../map/place_model.dart';
 
 enum InventoryPoolType {
   accommodation,
@@ -89,7 +90,8 @@ class InventoryPoolModel {
       title: json[t.title],
       sellableCapacity: json[t.sellable_capacity],
       occasionId: json[t.occasion],
-      isAutoResourceAssignment: data[t.data_is_auto_resource_assignment] as bool? ?? true,
+      isAutoResourceAssignment:
+          data[t.data_is_auto_resource_assignment] as bool? ?? true,
       description: json[t.description],
       type: _stringToInventoryPoolType(json[t.type]),
       placeId: data[t.data_place_id] as int?, // ADDED

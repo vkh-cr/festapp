@@ -2,14 +2,15 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/components/forms/models/birth_date_field_holder.dart';
+import 'package:fstapp/components/forms/models/holder_models/birth_date_field_holder.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 
 import 'form_field_builders.dart';
 import 'form_helper.dart';
-import '../models/form_holder.dart';
+import '../models/holder_models/form_holder.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class BirthDateFieldBuilder extends StatefulWidget {
   final BirthDateFieldHolder fieldHolder;
@@ -49,10 +50,12 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
   DateTime? selectedDate;
   String? warningMessage;
   final TextEditingController _dateController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void dispose() {
     _dateController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -71,8 +74,10 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
       effectiveEventDate.month,
       effectiveEventDate.day,
     );
-    final pickerFirstDate = widget.fieldHolder.isHard ? recommendedEarliestDate : DateTime(1900);
-    final pickerLastDate = widget.fieldHolder.isHard ? recommendedLatestDate : DateTime.now();
+    final pickerFirstDate =
+        widget.fieldHolder.isHard ? recommendedEarliestDate : DateTime(1900);
+    final pickerLastDate =
+        widget.fieldHolder.isHard ? recommendedLatestDate : DateTime.now();
     final dateFormat = DateFormat.yMd(context.locale.toString());
 
     Widget fieldWidget = Column(
@@ -80,19 +85,24 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
       children: [
         FormBuilderDateTimePicker(
           controller: _dateController,
+          focusNode: _focusNode,
           name: widget.fieldHolder.id.toString(),
           inputType: InputType.date,
           initialDatePickerMode: DatePickerMode.year,
           format: dateFormat,
           fieldHintText: dateFormat.pattern,
           decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.transparent,
             label: widget.isCardDesign
                 ? null
                 : FormFieldBuilders.buildTitleWidget(
-              widget.fieldHolder.title!,
-              widget.fieldHolder.isRequired,
-              context,
-            ),
+                    widget.fieldHolder.title!,
+                    widget.fieldHolder.isRequired,
+                    context,
+                    focusNode: _focusNode,
+                    controller: _dateController,
+                  ),
             hintText: widget.isCardDesign ? widget.fieldHolder.title : null,
           ),
           helpText: FormHelper.birthDateLabel(),
@@ -102,7 +112,8 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
           inputFormatters: [LocaleDateInputFormatter(dateFormat: dateFormat)],
           validator: (value) {
             if (widget.fieldHolder.isRequired && value == null) {
-              return FormBuilderValidators.required()(value);
+              return FormBuilderValidators.required(
+                  errorText: CommonStrings.fieldCannotBeEmpty)(value);
             }
             if (value != null) {
               if (effectiveMinAge == 0 || effectiveMaxAge == 0) {
@@ -114,34 +125,34 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
                 if (widget.fieldHolder.isHard) {
                   return widget.fieldHolder.message.isNotEmpty
                       ? widget.fieldHolder.message.tr(
-                    namedArgs: {
-                      "minAge": effectiveMinAge.toString(),
-                      "maxAge": effectiveMaxAge.toString()
-                    },
-                  )
+                          namedArgs: {
+                            "minAge": effectiveMinAge.toString(),
+                            "maxAge": effectiveMaxAge.toString()
+                          },
+                        )
                       : "You must be between {minAge} and {maxAge} years old."
-                      .tr(
-                    namedArgs: {
-                      "minAge": effectiveMinAge.toString(),
-                      "maxAge": effectiveMaxAge.toString()
-                    },
-                  );
+                          .tr(
+                          namedArgs: {
+                            "minAge": effectiveMinAge.toString(),
+                            "maxAge": effectiveMaxAge.toString()
+                          },
+                        );
                 } else {
                   setState(() {
                     warningMessage = widget.fieldHolder.message.isNotEmpty
                         ? widget.fieldHolder.message.tr(
-                      namedArgs: {
-                        "minAge": effectiveMinAge.toString(),
-                        "maxAge": effectiveMaxAge.toString()
-                      },
-                    )
+                            namedArgs: {
+                              "minAge": effectiveMinAge.toString(),
+                              "maxAge": effectiveMaxAge.toString()
+                            },
+                          )
                         : "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
-                        .tr(
-                      namedArgs: {
-                        "minAge": effectiveMinAge.toString(),
-                        "maxAge": effectiveMaxAge.toString()
-                      },
-                    );
+                            .tr(
+                            namedArgs: {
+                              "minAge": effectiveMinAge.toString(),
+                              "maxAge": effectiveMaxAge.toString()
+                            },
+                          );
                   });
                 }
               } else {
@@ -156,8 +167,9 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
             setState(() {
               selectedDate = value;
             });
-            widget.formKey.currentState!
-                .fields[widget.fieldHolder.id.toString()]?.validate();
+            widget
+                .formKey.currentState!.fields[widget.fieldHolder.id.toString()]
+                ?.validate();
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _dateController.selection =
                   TextSelection.collapsed(offset: _dateController.text.length);
@@ -180,8 +192,7 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
 
     if (widget.isCardDesign) {
       bool hasError = widget.formKey.currentState
-          ?.fields[widget.fieldHolder.id.toString()]
-          ?.hasError ??
+              ?.fields[widget.fieldHolder.id.toString()]?.hasError ??
           false;
       fieldWidget = FormHelper.buildCardWrapperDesign(
         context: context,

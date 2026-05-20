@@ -27,10 +27,11 @@ class CompanionsFeature extends Feature {
   @override
   Map<String, dynamic> toJson() {
     final data = {
-      FeatureConstants.metaCode:      code,
+      FeatureConstants.metaCode: code,
       FeatureConstants.metaIsEnabled: isEnabled,
     };
-    if (companionsMax != null) data[FeatureConstants.companionsMax] = companionsMax!;
+    if (companionsMax != null)
+      data[FeatureConstants.companionsMax] = companionsMax!;
     return data;
   }
 
@@ -46,7 +47,8 @@ class CompanionsFeature extends Feature {
         if (n == null || n < 1) return 'Enter a number greater than 0'.tr();
         return null;
       },
-      onSaved: (val) => companionsMax = int.tryParse(val ?? '') ?? companionsMax,
+      onSaved: (val) =>
+          companionsMax = int.tryParse(val ?? '') ?? companionsMax,
     );
   }
 }

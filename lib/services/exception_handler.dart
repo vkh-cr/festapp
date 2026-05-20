@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'toast_helper.dart';
 
 // ... (AppError class remains the same) ...
@@ -17,7 +19,6 @@ class AppError {
   });
 }
 
-
 class ExceptionHandler {
   /// **NEW:** Executes an async function and handles any exceptions that occur.
   ///
@@ -27,22 +28,23 @@ class ExceptionHandler {
   /// This is useful for data grids that need to know the operation failed.
   /// - Returns the result of [futureFunction] on success, or `null` on a handled error.
   static Future<T?> guard<T>(
-      BuildContext context, {
-        required Future<T> Function() futureFunction,
-        String? defaultErrorMessage,
-        bool rethrowError = false,
-      }) async {
+    BuildContext context, {
+    required Future<T> Function() futureFunction,
+    String? defaultErrorMessage,
+    bool rethrowError = false,
+    bool showAsDialog = false,
+  }) async {
     try {
       return await futureFunction();
     } catch (e) {
-      // Use the existing handle method to show the UI
-      await handle(
-        context,
-        error: e,
-        defaultMessage: defaultErrorMessage,
-        showAsDialog: true, // Defaults to showing a dialog for guarded actions
-      );
-
+      if (context.mounted) {
+        await handle(
+          context,
+          error: e,
+          defaultMessage: defaultErrorMessage,
+          showAsDialog: showAsDialog,
+        );
+      }
       if (rethrowError) {
         rethrow;
       }
@@ -52,21 +54,24 @@ class ExceptionHandler {
 
   /// Returns `true` on success and `false` on a handled failure.
   static Future<bool> guardVoid(
-      BuildContext context, {
-        required Future<void> Function() futureFunction,
-        String? defaultErrorMessage,
-        bool rethrowError = false,
-      }) async {
+    BuildContext context, {
+    required Future<void> Function() futureFunction,
+    String? defaultErrorMessage,
+    bool rethrowError = false,
+    bool showAsDialog = false,
+  }) async {
     try {
       await futureFunction();
       return true;
     } catch (e) {
-      await handle(
-        context,
-        error: e,
-        defaultMessage: defaultErrorMessage,
-        showAsDialog: true,
-      );
+      if (context.mounted) {
+        await handle(
+          context,
+          error: e,
+          defaultMessage: defaultErrorMessage,
+          showAsDialog: showAsDialog,
+        );
+      }
       if (rethrowError) {
         rethrow;
       }
@@ -77,24 +82,34 @@ class ExceptionHandler {
   /// Handles an error by showing a user-friendly UI.
   /// Returns a Future that completes when the UI (e.g., dialog) is dismissed.
   static Future<void> handle(
-      BuildContext context, {
-        required Object error,
-        String? defaultMessage,
-        bool showAsDialog = false,
-      }) async {
+    BuildContext context, {
+    required Object error,
+    String? defaultMessage,
+    bool showAsDialog = false,
+  }) async {
     final AppError? appError = _parsePostgrestException(error);
 
     if (appError != null) {
       if (showAsDialog) {
         await _showErrorDialog(context, appError);
       } else {
-        ToastHelper.Show(context, appError.message, severity: ToastSeverity.NotOk);
+        ToastHelper.Show(context, appError.message,
+            severity: ToastSeverity.NotOk);
       }
     } else {
-      final message = defaultMessage ?? "An unexpected error occurred.".tr();
+      final message = defaultMessage ?? CommonStrings.unexpectedError;
       ToastHelper.Show(context, message, severity: ToastSeverity.NotOk);
-      debugPrint('Unhandled Exception: ${error.toString()}');
+      AppLogger.error('Unhandled Exception: ${error.toString()}');
     }
+  }
+
+  /// Returns a user-friendly message for any exception. Postgrest errors carrying
+  /// a JSON body are parsed; everything else falls back to [defaultMessage] or a
+  /// generic message.
+  static String toFriendlyMessage(Object error, {String? defaultMessage}) {
+    final parsed = _parsePostgrestException(error);
+    if (parsed != null) return parsed.message;
+    return defaultMessage ?? CommonStrings.unexpectedError;
   }
 
   // Helper methods _parsePostgrestException and _showErrorDialog remain the same...
@@ -108,8 +123,8 @@ class ExceptionHandler {
       final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
       return AppError(
         code: jsonMap['code'] ?? 'N/A',
-        message:
-        jsonMap['message'] as String? ?? 'An unknown database error occurred.'.tr(),
+        message: jsonMap['message'] as String? ??
+            'An unknown database error occurred.'.tr(),
         rawJson: jsonString,
       );
     } catch (e) {
@@ -117,13 +132,19 @@ class ExceptionHandler {
     }
   }
 
-  static Future<void> _showErrorDialog(BuildContext context, AppError appError) {
+  static Future<void> _showErrorDialog(
+      BuildContext context, AppError appError) {
     return showDialog(
       context: context,
       builder: (ctx) {
         final theme = Theme.of(ctx);
+        final scheme = theme.colorScheme;
         return AlertDialog(
-          title: Text('Error (Code: ${appError.code})'.tr()),
+          backgroundColor: scheme.surface,
+          title: Text(
+            'Error (Code: ${appError.code})'.tr(),
+            style: TextStyle(color: scheme.error),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -131,18 +152,31 @@ class ExceptionHandler {
               children: [
                 Text(
                   appError.message,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: scheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 24),
-                Text('Details:'.tr()),
+                Text(
+                  'Details:'.tr(),
+                  style: TextStyle(color: scheme.onSurfaceVariant),
+                ),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.all(8),
-                  color: theme.colorScheme.surfaceVariant,
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                   child: SelectableText(
                     const JsonEncoder.withIndent('  ')
                         .convert(jsonDecode(appError.rawJson)),
-                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],

@@ -1,6 +1,6 @@
 // activity_timeline_controller.dart
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/components/activities/activity_model.dart';
 
 class ActivityTimelineController {
   final List<ActivityUserInfoModel> allUsers;
@@ -18,11 +18,11 @@ class ActivityTimelineController {
   final void Function(ActivityUserInfoModel) onUserDragStarted;
   final VoidCallback onUserDragEnd;
   final VoidCallback hideAssignmentDetailOverlay;
-  final void Function(
-      ActivityUserInfoModel targetUser,
+  final void Function(ActivityUserInfoModel targetUser,
       List<ActivityAssignmentModel> assignmentsToCopy) onCopyAssignments;
   final void Function(List<ActivityAssignmentModel>) onDeleteAssignments;
-  final void Function(ActivityAssignmentModel, dynamic) onRemoveLinkFromAssignment;
+  final void Function(ActivityAssignmentModel, dynamic)
+      onRemoveLinkFromAssignment;
 
   final bool isDark;
 
@@ -44,8 +44,7 @@ class ActivityTimelineController {
     required this.onCopyAssignments,
     required this.onDeleteAssignments,
     required this.onRemoveLinkFromAssignment,
-
-  required this.hideAssignmentDetailOverlay,
+    required this.hideAssignmentDetailOverlay,
     required this.isDark,
   });
 

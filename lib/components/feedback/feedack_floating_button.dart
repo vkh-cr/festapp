@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'feedback_strings.dart';
 
@@ -12,7 +12,8 @@ class FeedbackFloatingButton extends StatefulWidget {
   State<FeedbackFloatingButton> createState() => _FeedbackFloatingButtonState();
 }
 
-class _FeedbackFloatingButtonState extends State<FeedbackFloatingButton> with SingleTickerProviderStateMixin {
+class _FeedbackFloatingButtonState extends State<FeedbackFloatingButton>
+    with SingleTickerProviderStateMixin {
   bool _isOpen = false;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -50,7 +51,8 @@ class _FeedbackFloatingButtonState extends State<FeedbackFloatingButton> with Si
   void _handleOptionSelection(String subject, String bodyHint) {
     _toggleMenu();
 
-    final fullBody = "$bodyHint\n\n\n---\n${FeedbackStrings.sentFrom(AppConfig.appName)}";
+    final fullBody =
+        "$bodyHint\n\n\n---\n${FeedbackStrings.sentFrom(AppConfig.appName)}";
 
     showDialog(
       context: context,
@@ -62,7 +64,8 @@ class _FeedbackFloatingButtonState extends State<FeedbackFloatingButton> with Si
     );
   }
 
-  Widget _buildOptionBadge(String label, IconData icon, String subject, String bodyHint, Color color) {
+  Widget _buildOptionBadge(String label, IconData icon, String subject,
+      String bodyHint, Color color) {
     // Use cardColor for background to ensure it looks good in dark mode
     final bgColor = Theme.of(context).cardColor;
     final textColor = Theme.of(context).textTheme.bodyMedium?.color;
@@ -90,7 +93,10 @@ class _FeedbackFloatingButtonState extends State<FeedbackFloatingButton> with Si
             children: [
               Text(
                 label,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: textColor),
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: textColor),
               ),
               const SizedBox(width: 8),
               Icon(icon, size: 20, color: color),
@@ -152,29 +158,25 @@ class _FeedbackFloatingButtonState extends State<FeedbackFloatingButton> with Si
                       Icons.lightbulb_outline,
                       FeedbackStrings.subjectFeature(appName),
                       FeedbackStrings.hintFeature,
-                      Colors.amber[700]!
-                  ),
+                      Colors.amber[700]!),
                   _buildOptionBadge(
                       FeedbackStrings.reportBug,
                       Icons.bug_report_outlined,
                       FeedbackStrings.subjectBug(appName),
                       FeedbackStrings.hintBug,
-                      Colors.red[400]!
-                  ),
+                      Colors.red[400]!),
                   _buildOptionBadge(
                       FeedbackStrings.support,
                       Icons.help_outline,
                       FeedbackStrings.subjectSupport(appName),
                       FeedbackStrings.hintSupport,
-                      Colors.blue[400]!
-                  ),
+                      Colors.blue[400]!),
                   _buildOptionBadge(
                       FeedbackStrings.other,
                       Icons.chat_bubble_outline,
                       FeedbackStrings.subjectGeneral(appName),
                       FeedbackStrings.hintGeneral,
-                      Colors.grey[600]!
-                  ),
+                      Colors.grey[600]!),
                 ],
               ),
             ),
@@ -182,7 +184,8 @@ class _FeedbackFloatingButtonState extends State<FeedbackFloatingButton> with Si
         FloatingActionButton(
           heroTag: "feedback_fab",
           onPressed: _toggleMenu,
-          backgroundColor: _isOpen ? Colors.grey[200] : Theme.of(context).primaryColor,
+          backgroundColor:
+              _isOpen ? Colors.grey[200] : Theme.of(context).primaryColor,
           foregroundColor: _isOpen ? Colors.black : Colors.white,
           elevation: 4,
           shape: const CircleBorder(),
@@ -217,22 +220,21 @@ class _EmailOptionDialog extends StatelessWidget {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: toEmail,
-      query: _encodeQueryParameters(<String, String>{
-        'subject': subject,
-        'body': body
-      }),
+      query: _encodeQueryParameters(
+          <String, String>{'subject': subject, 'body': body}),
     );
 
     if (await canLaunchUrl(emailLaunchUri)) {
       await launchUrl(emailLaunchUri);
     } else {
-      debugPrint("Could not launch email client");
+      AppLogger.error("Could not launch email client");
     }
   }
 
   String? _encodeQueryParameters(Map<String, String> params) {
     return params.entries
-        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .map((e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
         .join('&');
   }
 
@@ -285,7 +287,8 @@ class _EmailOptionDialog extends StatelessWidget {
             const SizedBox(height: 8),
             _CopyableRow(label: FeedbackStrings.emailSubject, value: subject),
             const SizedBox(height: 8),
-            _CopyableRow(label: FeedbackStrings.emailBody, value: body, maxLines: 5),
+            _CopyableRow(
+                label: FeedbackStrings.emailBody, value: body, maxLines: 5),
           ],
         ),
       ),
@@ -328,7 +331,8 @@ class _CopyableRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
-        crossAxisAlignment: maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           Expanded(
             child: Column(
@@ -339,7 +343,8 @@ class _CopyableRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: theme.textTheme.bodySmall?.color, // Subtle label color
+                    color:
+                        theme.textTheme.bodySmall?.color, // Subtle label color
                   ),
                 ),
                 const SizedBox(height: 4),

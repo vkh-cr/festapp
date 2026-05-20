@@ -1,6 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class EditPriceDialog extends StatefulWidget {
   final double initialPrice;
@@ -22,7 +22,8 @@ class _EditPriceDialogState extends State<EditPriceDialog> {
   @override
   void initState() {
     super.initState();
-    _priceController = TextEditingController(text: widget.initialPrice.toStringAsFixed(2));
+    _priceController =
+        TextEditingController(text: widget.initialPrice.toStringAsFixed(2));
     _focusNode = FocusNode();
 
     // Add a short delay to allow the dialog animation to complete before focusing.
@@ -43,7 +44,8 @@ class _EditPriceDialogState extends State<EditPriceDialog> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      Navigator.of(context).pop(double.parse(_priceController.text.replaceAll(",", ".")));
+      Navigator.of(context)
+          .pop(double.parse(_priceController.text.replaceAll(",", ".")));
     }
   }
 
@@ -70,8 +72,10 @@ class _EditPriceDialogState extends State<EditPriceDialog> {
                   child: TextFormField(
                     focusNode: _focusNode,
                     controller: _priceController,
-                    decoration: InputDecoration(labelText: OrdersStrings.newPriceLabel),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+                    decoration:
+                        InputDecoration(labelText: OrdersStrings.newPriceLabel),
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true, signed: false),
                     onFieldSubmitted: (_) => _submit(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -101,13 +105,13 @@ class _EditPriceDialogState extends State<EditPriceDialog> {
                   ),
                   const Spacer(),
                   TextButton(
-                    child: Text("Storno".tr()),
+                    child: Text(CommonStrings.storno),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _submit,
-                    child: Text("OK".tr()),
+                    child: Text(CommonStrings.ok),
                   ),
                 ],
               ),

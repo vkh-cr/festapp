@@ -14,6 +14,7 @@ class SeatWidgetHelper {
     required SeatState state,
     bool isHighlightedForSwap = false,
     bool isHighlightedForGroup = false,
+    bool isHighlightedForTooltip = false,
     double size = 40.0,
   }) {
     final bool hasPadding = state == SeatState.ordered ||
@@ -21,13 +22,16 @@ class SeatWidgetHelper {
         state == SeatState.selected_by_me ||
         state == SeatState.used ||
         state == SeatState.available ||
-        ((isHighlightedForSwap || isHighlightedForGroup) && state == SeatState.empty);
+        ((isHighlightedForSwap ||
+                isHighlightedForGroup ||
+                isHighlightedForTooltip) &&
+            state == SeatState.empty);
 
     // Logic to determine the border
     Border? border;
     if (isHighlightedForSwap) {
       border = Border.all(color: Colors.orange, width: 2.0);
-    } else if (isHighlightedForGroup) {
+    } else if (isHighlightedForGroup || isHighlightedForTooltip) {
       border = Border.all(
         color: Theme.of(context).colorScheme.primary,
         width: 2.0,
@@ -35,11 +39,15 @@ class SeatWidgetHelper {
     }
 
     return Container(
-      color: hasPadding ? Colors.black.withOpacity(0) : getSeatColor(context, SeatState.empty),
+      color: hasPadding
+          ? Colors.black.withOpacity(0)
+          : getSeatColor(context, SeatState.empty),
       height: size,
       width: size,
       child: Container(
-        margin: EdgeInsets.all(state == SeatState.selected_by_me ? focusedPadding : (hasPadding ? padding : 0.0)),
+        margin: EdgeInsets.all(state == SeatState.selected_by_me
+            ? focusedPadding
+            : (hasPadding ? padding : 0.0)),
         decoration: BoxDecoration(
           color: getSeatColor(context, state),
           borderRadius: BorderRadius.circular(hasPadding ? padding : 0.0),
@@ -47,26 +55,26 @@ class SeatWidgetHelper {
         ),
         child: state == SeatState.selected_by_me
             ? Center(
-          child: Icon(
-            Icons.check,
-            size: size * 0.7,
-            color: Colors.white,
-          ),
-        )
+                child: Icon(
+                  Icons.check,
+                  size: size * 0.7,
+                  color: Colors.white,
+                ),
+              )
             : state == SeatState.ordered
-            ? Center(
-          child: SizedBox(
-            width: size * 0.45,
-            height: size * 0.45,
-            child: CustomPaint(
-              painter: _XPainter(
-                color: Colors.black,
-                strokeWidth: 0.4,
-              ),
-            ),
-          ),
-        )
-            : null,
+                ? Center(
+                    child: SizedBox(
+                      width: size * 0.45,
+                      height: size * 0.45,
+                      child: CustomPaint(
+                        painter: _XPainter(
+                          color: Colors.black,
+                          strokeWidth: 0.4,
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
       ),
     );
   }
@@ -87,8 +95,6 @@ class SeatWidgetHelper {
       case SeatState.ordered:
         return Colors.black12;
       case SeatState.empty:
-        return Colors.black.withOpacity(0);
-      default:
         return Colors.black.withOpacity(0);
     }
   }

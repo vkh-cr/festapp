@@ -5,6 +5,7 @@ import 'package:fstapp/components/groups/game_checkpoints_content.dart';
 import 'package:fstapp/components/groups/game_settings_content.dart';
 import 'package:fstapp/components/groups/game_user_groups_content.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class GameTab extends StatefulWidget {
   const GameTab({super.key});
@@ -41,9 +42,11 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                DataGridHelper.buildTab(context, Icons.gamepad, "Check points".tr()),
+                DataGridHelper.buildTab(
+                    context, Icons.gamepad, "Check points".tr()),
                 DataGridHelper.buildTab(context, Icons.groups, "Groups".tr()),
-                DataGridHelper.buildTab(context, Icons.settings, "Settings".tr()),
+                DataGridHelper.buildTab(
+                    context, Icons.settings, CommonStrings.settings),
               ],
             ),
           ),
@@ -52,9 +55,9 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
               controller: _tabController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                GameCheckPointsContent(),  // Game Check Points content
-                GameUserGroupsContent(),   // Game User Groups content
-                GameSettingsContent(),     // Game Settings content for start and end times
+                GameCheckPointsContent(), // Game Check Points content
+                GameUserGroupsContent(), // Game User Groups content
+                GameSettingsContent(), // Game Settings content for start and end times
               ],
             ),
           ),
@@ -63,4 +66,3 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
     );
   }
 }
-

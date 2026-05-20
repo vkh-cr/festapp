@@ -14,9 +14,9 @@ class UniversalHeader extends StatelessWidget {
 
   const UniversalHeader(
       {super.key,
-        required this.scrollController,
-        this.onSignIn,
-        this.onAdminPressed});
+      required this.scrollController,
+      this.onSignIn,
+      this.onAdminPressed});
 
   @override
   Widget build(BuildContext context) {

@@ -114,4 +114,67 @@ export const csTranslations = {
       generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remaining, lang: 'cs' }),
     ].join('');
   },
+  days_remaining: (days: number) => {
+    return `${days} ${days === 1 ? "den" : (days > 1 && days < 5) ? "dny" : "dní"}`;
+  },
+  depositRequired: (
+    depositAmount: string,
+    remainingAmount: string,
+    depositDeadline: string,
+    accountNumber: string,
+    iban: string | null,
+    variableSymbol: string,
+    tone: Tone
+  ) => {
+    const isOnSite = depositDeadline === 'na místě' || depositDeadline === 'on site';
+    const deadlineText = isOnSite
+      ? `zbývající doplatek ve výši ${bold(remainingAmount)} ${tone === 'formal' ? 'uhradíte' : 'uhradíš'} na místě`
+      : `zbývající doplatek ve výši ${bold(remainingAmount)} ${tone === 'formal' ? 'uhraďte' : 'uhraď'} nejpozději ${bold(depositDeadline)}`;
+
+    return [
+      verticalSpacer(spaceBeforeText),
+      styledParagraph(`Pro zajištění místa ${tone === 'formal' ? 'uhraďte, prosíme, zálohu' : 'uhraď zálohu'} ve výši ${bold(depositAmount)}. Poté ${deadlineText}.`),
+      verticalSpacer('15px'),
+      styledParagraph(`Pro zjednodušení platby přikládáme QR kód.`),
+      verticalSpacer(spaceAfterText),
+      generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: depositAmount, lang: 'cs' }),
+    ].join('');
+  },
+  depositPaid: (
+    depositAmount: string,
+    remainingAmount: string,
+    depositDeadline: string,
+    tone: Tone
+  ) => {
+    const isOnSite = depositDeadline === 'na místě' || depositDeadline === 'on site';
+    const deadlineText = isOnSite ? 'na místě' : `nejpozději ${bold(depositDeadline)}`;
+
+    return [
+      verticalSpacer(spaceBeforeText),
+      styledParagraph(`Děkujeme za úhradu zálohy ve výši ${bold(depositAmount)}. Zbývající doplatek ve výši ${bold(remainingAmount)} ${tone === 'formal' ? 'uhraďte' : 'uhraď'} ${deadlineText}.`),
+      verticalSpacer(spaceAfterText),
+    ].join('');
+  },
+  depositFullyPaid: (totalAmount: string, _tone: Tone) => [
+    verticalSpacer(spaceBeforeText),
+    styledParagraph(`Děkujeme za úhradu celé částky ${bold(totalAmount)}. Objednávka je plně uhrazena.`),
+    verticalSpacer(spaceAfterText),
+  ].join(''),
+  depositReminder: (
+    remainingAmount: string,
+    depositDeadline: string,
+    accountNumber: string,
+    iban: string | null,
+    variableSymbol: string,
+    tone: Tone
+  ) => {
+    return [
+      verticalSpacer(spaceBeforeText),
+      styledParagraph(`Připomínáme, že ${tone === 'formal' ? 'Vaše' : 'Tvá'} objednávka má doplatek ve výši ${bold(remainingAmount)}, který je třeba uhradit do ${bold(depositDeadline)}.`),
+      verticalSpacer('15px'),
+      styledParagraph(`Pro zjednodušení platby přikládáme QR kód.`),
+      verticalSpacer(spaceAfterText),
+      generatePaymentDetails({ accountNumber, iban, variableSymbol, amount: remainingAmount, lang: 'cs' }),
+    ].join('');
+  },
 };

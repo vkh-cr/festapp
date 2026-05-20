@@ -59,14 +59,20 @@ Deno.serve(async (req) => {
       );
     }
 
+
+    const defaultLang = orgConfig.DEFAULT_LANGUAGE || "en";
+    const userLang = reqData.lang || defaultLang || 'cs';
+    const unitTitle = userLang === 'cs' ? 'Moje akce' : 'My events';
+
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Create the user via RPC
-    await supabaseAdmin.rpc("create_user_in_organization_with_data_ws", {
+    const createResult: any = await supabaseAdmin.rpc("create_user_from_registration", {
       org: organizationId,
       email: userEmail,
       password: code,
       data: reqData,
+      unit_title: unitTitle,
     });
 
     // Use the wrapper style to retrieve both the email template and wrapper
@@ -80,7 +86,6 @@ Deno.serve(async (req) => {
     }
 
     const platforms = orgConfig.PLATFORMS || [];
-    const defaultLang = orgConfig.DEFAULT_LANGUAGE || "en";
     const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
 
     // Prepare substitutions for the email template

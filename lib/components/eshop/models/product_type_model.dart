@@ -30,20 +30,20 @@ class ProductTypeModel {
       occasion: json[TbEshop.product_types.occasion],
       products: json[TbEshop.products.table] != null
           ? List<ProductModel>.from(
-          json[TbEshop.products.table].map((p) => ProductModel.fromJson(p)))
+              json[TbEshop.products.table].map((p) => ProductModel.fromJson(p)))
           : null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    TbEshop.product_types.id: id,
-    TbEshop.product_types.title: title,
-    TbEshop.product_types.description: description,
-    TbEshop.product_types.type: type,
-    TbEshop.product_types.data: data,
-    TbEshop.product_types.occasion: occasion,
-    TbEshop.products.table: products,
-  };
+        TbEshop.product_types.id: id,
+        TbEshop.product_types.title: title,
+        TbEshop.product_types.description: description,
+        TbEshop.product_types.type: type,
+        TbEshop.product_types.data: data,
+        TbEshop.product_types.occasion: occasion,
+        TbEshop.products.table: products,
+      };
 
   String toBasicString() => title ?? id.toString();
 }

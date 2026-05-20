@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/data_models/form_option_model.dart';
-import 'package:fstapp/data_models/form_option_product_model.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
+import 'package:fstapp/components/forms/models/form_option_model.dart';
+import 'package:fstapp/components/forms/models/form_option_product_model.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
-import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 
 /// A helper class to centralize all duplicated UI logic for building
 /// label styles, card layouts, etc. used by both Checkbox and Radio fields.
@@ -17,23 +18,34 @@ class OptionFieldHelper {
     return TextStyle(fontSize: 14.0 * FormHelper.fontSizeFactor);
   }
 
-  /// Builds the combined "title (+ price)" string for an option.
+  /// Returns just the option title (without price).
   static String buildOptionTitle(
-      BuildContext context,
-      FormOptionModel option,
-      ) {
-    if (option is FormOptionProductModel && option.price > 0) {
-      return '${option.title} (${Utilities.formatPrice(context, option.price, currencyCode: option.currencyCode)})';
-    }
+    BuildContext context,
+    FormOptionModel option,
+  ) {
     return option.title;
   }
 
+  /// Returns formatted price string like "+ 1 000 CZK", or null if no price.
+  static String? buildPriceText(BuildContext context, FormOptionModel option) {
+    if (option is FormOptionProductModel && option.price > 0) {
+      return '+ ${Utilities.formatPrice(context, option.price, currencyCode: option.currencyCode)}';
+    }
+    return null;
+  }
+
+  /// Formatted deposit label: "záloha: 500 CZK"
+  static String buildDepositText(BuildContext context, FormOptionProductModel option) {
+    final depositStr = Utilities.formatPrice(context, option.depositAmount!, currencyCode: option.currencyCode);
+    return '${FormStrings.depositInfo}: $depositStr';
+  }
   /// Builds a card with a leading widget (checkbox or radio), a title, and an optional HTML description.
   static Widget buildOptionCard({
     required BuildContext context,
     required bool isSelected,
     required Widget leading,
     required String title,
+    String? priceText,
     required String? description,
     required VoidCallback? onTap,
   }) {
@@ -48,7 +60,7 @@ class OptionFieldHelper {
           borderRadius: BorderRadius.circular(8),
           side: BorderSide(
             color: isSelected
-                ? Theme.of(context).colorScheme.primary
+                ? Theme.of(context).primaryColor
                 : ThemeConfig.grey500(context),
             width: isSelected ? 2 : 1,
           ),
@@ -56,8 +68,9 @@ class OptionFieldHelper {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
-            crossAxisAlignment:
-            hasDescription ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+            crossAxisAlignment: hasDescription
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
             children: [
               leading,
               const SizedBox(width: 8),
@@ -65,9 +78,25 @@ class OptionFieldHelper {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: FormHelper.cardOptionTitleTextStyle(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: FormHelper.cardOptionTitleTextStyle(),
+                          ),
+                        ),
+                        if (priceText != null) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            priceText,
+                            style: FormHelper.cardOptionTitleTextStyle().copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     if (hasDescription)
                       Padding(

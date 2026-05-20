@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/app_router.gr.dart';
-import 'package:fstapp/pages/utility/html_editor_page.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_editor_page.dart';
+import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/router_service.dart';
 
 class DescriptionWithEdit extends StatelessWidget {
@@ -21,7 +21,7 @@ class DescriptionWithEdit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    defaultDescription ??= "Description".tr();
+    defaultDescription ??= CommonStrings.description;
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Row(
@@ -33,19 +33,18 @@ class DescriptionWithEdit extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-          SizedBox.square(dimension: 12,),
+          SizedBox.square(
+            dimension: 12,
+          ),
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () async {
               final result = await RouterService.navigatePageInfo(
                 context,
-                HtmlEditorRoute(
-                  content: {
-                    HtmlEditorPage.parContent:
-                    description == defaultDescription ? "" : description,
-                  },
-                  occasionId: occasionId
-                ),
+                HtmlEditorRoute(content: {
+                  HtmlEditorPage.parContent:
+                      description == defaultDescription ? "" : description,
+                }, occasionId: occasionId),
               );
               if (result != null) {
                 onDescriptionChanged(result as String);

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
-import 'package:fstapp/data_models/user_group_info_model.dart';
-import 'package:fstapp/data_services_eshop/db_tickets.dart';
+import 'package:fstapp/components/groups/user_group_info_model.dart';
+import 'package:fstapp/components/eshop/db_tickets.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -31,6 +31,9 @@ class TicketModel extends ITrinaRowModel {
 
   List<UserGroupInfoModel>? relatedGroups;
 
+  // Deposit info from scan response
+  Map<String, dynamic>? depositInfo;
+
   TicketModel({
     this.id,
     this.createdAt,
@@ -44,6 +47,7 @@ class TicketModel extends ITrinaRowModel {
     this.relatedProducts,
     this.relatedOrder,
     this.relatedGroups,
+    this.depositInfo,
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
@@ -64,13 +68,12 @@ class TicketModel extends ITrinaRowModel {
   }
 
   Map<String, dynamic> toJson() => {
-    TbEshop.tickets.state: state,
-    TbEshop.tickets.note_hidden: noteHidden,
-  };
+        TbEshop.tickets.state: state,
+        TbEshop.tickets.note_hidden: noteHidden,
+      };
 
   @override
   TrinaRow toTrinaRow(BuildContext context) {
-
     Map<String, TrinaCell> cells = {
       EshopColumns.TICKET_ID: TrinaCell(value: id ?? 0),
       EshopColumns.TICKET_CREATED_AT: TrinaCell(
@@ -82,41 +85,44 @@ class TicketModel extends ITrinaRowModel {
               ? DateFormat('yyyy-MM-dd HH:mm').format(updatedAt!)
               : ""),
       EshopColumns.TICKET_SYMBOL: TrinaCell(value: ticketSymbol ?? ""),
-      EshopColumns.TICKET_STATE: TrinaCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
+      EshopColumns.TICKET_STATE: TrinaCell(
+          value: OrderModel.formatState(state ?? OrderModel.orderedState)),
       EshopColumns.TICKET_DOWNLOAD: TrinaCell(value: ""),
-      EshopColumns.TICKET_NOTE: TrinaCell(value: note ?? ""),
-      EshopColumns.TICKET_NOTE_HIDDEN: TrinaCell(value: noteHidden ?? ""),
+      EshopColumns.TICKET_NOTE: TrinaCell(
+          value: Utilities.removeTabsAndNewLines(note ?? "")),
+      EshopColumns.TICKET_NOTE_HIDDEN: TrinaCell(
+          value: Utilities.removeTabsAndNewLines(noteHidden ?? "")),
       EshopColumns.ORDER_SYMBOL: TrinaCell(
-          value: relatedOrder != null
-              ? relatedOrder!.toBasicString()
-              : ""),
+          value: relatedOrder != null ? relatedOrder!.toBasicString() : ""),
       EshopColumns.ORDER_DATA: TrinaCell(
-          value: relatedOrder != null
-              ? relatedOrder!.toCustomerData()
-              : ""),
+          value: relatedOrder != null ? relatedOrder!.toCustomerData() : ""),
       EshopColumns.TICKET_PRODUCTS: TrinaCell(
           value: relatedProducts != null
-              ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
+              ? relatedProducts!.map((p) => p.toBasicString()).join(" | ")
               : ""),
       EshopColumns.TICKET_SPOT: TrinaCell(
-          value: relatedSpot != null
-              ? relatedSpot?.toSpotString()
+          value: relatedSpot != null ? relatedSpot?.toSpotString() : ""),
+      EshopColumns.TICKET_TOTAL_PRICE: TrinaCell(
+          value: totalPrice != null
+              ? Utilities.formatPrice(context, totalPrice!,
+                  currencyCode: relatedOrder?.currencyCode)
               : ""),
-      EshopColumns.TICKET_TOTAL_PRICE: TrinaCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
       EshopColumns.TICKET_PRODUCTS_EDIT: TrinaCell(value: ""),
       EshopColumns.TICKET_CONFIRM: TrinaCell(value: ""),
     };
 
-    final productCells = EshopColumns.generateProductTypeCells(relatedProducts ?? []);
+    final productCells =
+        EshopColumns.generateProductTypeCells(relatedProducts ?? []);
     cells.addAll(productCells);
     return TrinaRow(cells: cells);
   }
 
   static TicketModel fromPlutoJson(Map<String, dynamic> json) {
     return TicketModel(
-        id: json[EshopColumns.TICKET_ID] == -1 ? null : json[EshopColumns.TICKET_ID],
-        noteHidden: json[EshopColumns.TICKET_NOTE_HIDDEN]
-    );
+        id: json[EshopColumns.TICKET_ID] == -1
+            ? null
+            : json[EshopColumns.TICKET_ID],
+        noteHidden: json[EshopColumns.TICKET_NOTE_HIDDEN]);
   }
 
   @override

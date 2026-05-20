@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/data_models/form_field_model.dart';
-import 'package:fstapp/data_models/form_option_model.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
+import 'package:fstapp/components/forms/models/form_field_model.dart';
+import 'package:fstapp/components/forms/models/form_option_model.dart';
+import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
+import 'description_tooltip.dart';
 
 class SexEditor {
-  static Widget buildSexFieldReadOnly(BuildContext context, FormFieldModel field) {
+  static Widget buildSexFieldReadOnly(
+      BuildContext context, FormFieldModel field) {
     final options = [
       FormOptionModel(UserInfoModel.sexes[0], FormHelper.maleLabel()),
       FormOptionModel(UserInfoModel.sexes[1], FormHelper.femaleLabel()),
@@ -27,8 +28,8 @@ class SexEditor {
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Row(
                   children: [
-                    Tooltip(
-                      message: "Has description".tr(),
+                    DescriptionTooltip(
+                      description: option.description!,
                       child: const Icon(Icons.description, size: 16),
                     ),
                   ],

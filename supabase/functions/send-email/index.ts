@@ -3,6 +3,7 @@ import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUt
 import { getTicketOrderStornoTemplate } from "./getTicketOrderStornoTemplate.ts";
 import { getTicketOrderUpdateTemplate } from "./getTicketOrderUpdateTemplate.ts";
 import { getTicketOrderReminderTemplate } from "./getTicketOrderReminderTemplate.ts";
+import { getTicketOrderPaidTemplate } from "./getTicketOrderPaidTemplate.ts";
 import { AuthError } from "../_shared/auth.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
@@ -15,6 +16,7 @@ const corsHeaders = {
 const templateHandlers = {
   "TICKET_ORDER_STORNO": getTicketOrderStornoTemplate,
   "TICKET_ORDER_UPDATE": getTicketOrderUpdateTemplate,
+  "TICKET_ORDER_PAYMENT_DONE": getTicketOrderPaidTemplate,
   "TICKET_ORDER_REMINDER": getTicketOrderReminderTemplate,
 };
 

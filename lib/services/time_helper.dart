@@ -22,14 +22,16 @@ class TimeHelper {
     try {
       targetLocation = tz.getLocation(location);
     } catch (e) {
-      print("Error getting location: $location. Defaulting to Europe/Prague. Error: $e");
-      targetLocation = tz.getLocation("Europe/Prague"); // Fallback to a known good default
+      // Error getting location, defaulting to Europe/Prague
+      targetLocation =
+          tz.getLocation("Europe/Prague"); // Fallback to a known good default
     }
 
-    timeZoneUniversal.setTimeZoneLocationPlatform(targetLocation); // Uses conditionally imported method
+    timeZoneUniversal.setTimeZoneLocationPlatform(
+        targetLocation); // Uses conditionally imported method
 
     DateTime nowInTz = tz.TZDateTime.now(tz.local);
-    print('Current time in set timezone ($location): $nowInTz');
+
   }
 
   static List<String> getAvailableTimezoneNames() {
@@ -70,11 +72,14 @@ class TimeHelper {
     );
   }
 
-  static String getMinimalisticDateRange(BuildContext context, DateTime start, DateTime end) {
+  static String getMinimalisticDateRange(
+      BuildContext context, DateTime start, DateTime end) {
     final locale = Localizations.localeOf(context).languageCode;
     final fullFormat = DateFormat.yMMMd(locale);
 
-    if (start.year == end.year && start.month == end.month && start.day == end.day) {
+    if (start.year == end.year &&
+        start.month == end.month &&
+        start.day == end.day) {
       return fullFormat.format(end);
     }
 
@@ -114,7 +119,7 @@ class TimeHelper {
       ...europeanTimezones,
       ...africanTimezones,
       ...availableTimezones.where(
-              (name) => !name.startsWith("Europe/") && !name.startsWith("Africa/"))
+          (name) => !name.startsWith("Europe/") && !name.startsWith("Africa/"))
     ];
 
     for (final locationName in preferredOrderTimezones) {
@@ -125,7 +130,7 @@ class TimeHelper {
           return locationName;
         }
       } catch (e) {
-        print("Error checking timezone $locationName: $e");
+
       }
     }
 

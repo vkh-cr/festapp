@@ -7,12 +7,12 @@ class SupabaseStorageService {
 
   static final _supabase = Supabase.instance.client;
 
-  static Future<bool> uploadFile(BuildContext context, Uint8List data, String format) async {
+  static Future<bool> uploadFile(
+      BuildContext context, Uint8List data, String format) async {
     final path = '${DateTime.now().millisecondsSinceEpoch}.$format';
-    final uploadResponse = await _supabase.storage.from(_bucketName).uploadBinary(path, data);
-    if (uploadResponse.isEmpty) {
-
-    }
+    final uploadResponse =
+        await _supabase.storage.from(_bucketName).uploadBinary(path, data);
+    if (uploadResponse.isEmpty) {}
     return false;
   }
 }

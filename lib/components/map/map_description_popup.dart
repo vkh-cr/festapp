@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/map/map_marker_with_text.dart';
-import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/components/html/html_view.dart';
 
 class MapDescriptionPopup extends StatefulWidget {
   final MapMarkerWithText marker;
@@ -41,10 +41,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
               widget.marker.place.title,
               overflow: TextOverflow.fade,
               softWrap: true,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 18
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             Visibility(
@@ -58,7 +55,10 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
                         ? null
                         : changePositionPressed,
                     label: Text("Change location".tr()))),
-            HtmlView(html: widget.marker.place.description ?? "", isSelectable: true,),
+            HtmlView(
+              html: widget.marker.place.description ?? "",
+              isSelectable: true,
+            ),
           ],
         ),
       ),

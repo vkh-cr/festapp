@@ -24,7 +24,8 @@ class ProductInventoryContextModel {
     return ProductInventoryContextModel(
       id: json[TbEshop.product_inventory_contexts.id],
       productId: json[TbEshop.product_inventory_contexts.product],
-      inventoryContextId: json[TbEshop.product_inventory_contexts.inventory_context],
+      inventoryContextId:
+          json[TbEshop.product_inventory_contexts.inventory_context],
       quantity: json[TbEshop.product_inventory_contexts.quantity],
     );
   }

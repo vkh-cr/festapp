@@ -12,28 +12,31 @@ class HorizontalLineWidget extends StatelessWidget {
   final List<String>? basicStrings;
   final TimetableController controller;
 
-  const HorizontalLineWidget({
-    super.key,
-    required this.startTime,
-    required this.endTime,
-    required this.hourCount,
-    required this.controller,
-    this.basicStrings
-  });
+  const HorizontalLineWidget(
+      {super.key,
+      required this.startTime,
+      required this.endTime,
+      required this.hourCount,
+      required this.controller,
+      this.basicStrings});
 
   @override
   Widget build(BuildContext context) {
     var now = TimeHelper.now();
     return Stack(
       children: [
-        ...(basicStrings == null ?
-        timeList(context) :
-        basicList(context)),
-        if (controller.isTimeHorizontal && now.isAfter(startTime) && now.isBefore(endTime))
+        ...(basicStrings == null ? timeList(context) : basicList(context)),
+        if (controller.isTimeHorizontal &&
+            now.isAfter(startTime) &&
+            now.isBefore(endTime))
           Padding(
             padding: EdgeInsets.fromLTRB(
-                TimeHelper.differenceInHours(startTime, now) * controller.pixelsInHour() - 50,
-                controller.horizontalAxisSpaceHeight() + 6, 0, 0),
+                TimeHelper.differenceInHours(startTime, now) *
+                        controller.pixelsInHour() -
+                    50,
+                controller.horizontalAxisSpaceHeight() + 6,
+                0,
+                0),
             child: TimetableHelper.showTime(context, now, controller),
           )
       ],
@@ -73,11 +76,11 @@ class HorizontalLineWidget extends StatelessWidget {
             // same thin left‐border for every real column after the first:
             border: i > 0
                 ? Border(
-              left: BorderSide(
-                color: ThemeConfig.darkColor(context),
-                width: 0.25,
-              ),
-            )
+                    left: BorderSide(
+                      color: ThemeConfig.darkColor(context),
+                      width: 0.25,
+                    ),
+                  )
                 : null,
           ),
           height: controller.horizontalAxisSpaceHeight(),
@@ -99,9 +102,6 @@ class HorizontalLineWidget extends StatelessWidget {
     return [placeholder, ...columns];
   }
 
-
-
-
   List<Widget> timeList(BuildContext context) {
     return List<Widget>.generate(hourCount + 1, (i) {
       var hour = startTime.hour + i;
@@ -110,7 +110,12 @@ class HorizontalLineWidget extends StatelessWidget {
       }
       return Padding(
         padding: EdgeInsets.fromLTRB(
-            i == 0 ? 0 : i * controller.pixelsInHour() - controller.pixelsInHour() / 2, 0, 0, 0),
+            i == 0
+                ? 0
+                : i * controller.pixelsInHour() - controller.pixelsInHour() / 2,
+            0,
+            0,
+            0),
         child: Container(
           color: ThemeConfig.timetableHorizontalLineColor(context),
           height: controller.horizontalAxisSpaceHeight(),
@@ -120,8 +125,8 @@ class HorizontalLineWidget extends StatelessWidget {
           alignment: i == 0
               ? Alignment.centerLeft
               : i == hourCount
-              ? Alignment.centerRight
-              : Alignment.center,
+                  ? Alignment.centerRight
+                  : Alignment.center,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(

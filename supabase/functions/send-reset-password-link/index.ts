@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  const resetPasswordLink = `${defaultUrl}/#/resetPassword?token=${token}`;
+  const resetPasswordLink = `${defaultUrl}/resetPassword?token=${token}`;
 
   // Prepare substitutions
   const subs = {

@@ -9,19 +9,20 @@ class TimeTravelWidget extends StatefulWidget {
 }
 
 class _TimeTravelWidgetState extends State<TimeTravelWidget> {
-
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
 
   void _incrementYear() {
     setState(() {
-      _selectedDate = DateTime(_selectedDate.year + 1, _selectedDate.month, _selectedDate.day);
+      _selectedDate = DateTime(
+          _selectedDate.year + 1, _selectedDate.month, _selectedDate.day);
     });
   }
 
   void _decrementYear() {
     setState(() {
-      _selectedDate = DateTime(_selectedDate.year - 1, _selectedDate.month, _selectedDate.day);
+      _selectedDate = DateTime(
+          _selectedDate.year - 1, _selectedDate.month, _selectedDate.day);
     });
   }
 
@@ -63,13 +64,15 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
 
   void _incrementHour() {
     setState(() {
-      _selectedTime = TimeOfDay(hour: (_selectedTime.hour + 1) % 24, minute: _selectedTime.minute);
+      _selectedTime = TimeOfDay(
+          hour: (_selectedTime.hour + 1) % 24, minute: _selectedTime.minute);
     });
   }
 
   void _decrementHour() {
     setState(() {
-      _selectedTime = TimeOfDay(hour: (_selectedTime.hour - 1) % 24, minute: _selectedTime.minute);
+      _selectedTime = TimeOfDay(
+          hour: (_selectedTime.hour - 1) % 24, minute: _selectedTime.minute);
     });
   }
 
@@ -127,7 +130,11 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
               children: [
                 const Text(
                   "Time travel",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black, decoration: TextDecoration.none),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      decoration: TextDecoration.none),
                 ),
                 TextButton(
                   onPressed: () {
@@ -138,7 +145,9 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                 ),
               ],
             ),
-            const SizedBox(height: 6,),
+            const SizedBox(
+              height: 6,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -147,7 +156,8 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                     TextButton(
                       onPressed: _incrementYear,
                       style: textButtonStyle,
-                      child: const Icon(Icons.arrow_upward, color: Colors.black),
+                      child:
+                          const Icon(Icons.arrow_upward, color: Colors.black),
                     ),
                     Text(
                       '${_selectedDate.year}',
@@ -156,7 +166,8 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                     TextButton(
                       onPressed: _decrementYear,
                       style: textButtonStyle,
-                      child: const Icon(Icons.arrow_downward, color: Colors.black),
+                      child:
+                          const Icon(Icons.arrow_downward, color: Colors.black),
                     ),
                   ],
                 ),
@@ -168,7 +179,8 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                     TextButton(
                       onPressed: _incrementMonth,
                       style: textButtonStyle,
-                      child: const Icon(Icons.arrow_upward, color: Colors.black),
+                      child:
+                          const Icon(Icons.arrow_upward, color: Colors.black),
                     ),
                     Text(
                       _selectedDate.month.toString().padLeft(2, '0'),
@@ -177,7 +189,8 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                     TextButton(
                       onPressed: _decrementMonth,
                       style: textButtonStyle,
-                      child: const Icon(Icons.arrow_downward, color: Colors.black),
+                      child:
+                          const Icon(Icons.arrow_downward, color: Colors.black),
                     ),
                   ],
                 ),
@@ -189,7 +202,8 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                     TextButton(
                       onPressed: _incrementDay,
                       style: textButtonStyle,
-                      child: const Icon(Icons.arrow_upward, color: Colors.black),
+                      child:
+                          const Icon(Icons.arrow_upward, color: Colors.black),
                     ),
                     Text(
                       _selectedDate.day.toString().padLeft(2, '0'),
@@ -198,7 +212,8 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                     TextButton(
                       onPressed: _decrementDay,
                       style: textButtonStyle,
-                      child: const Icon(Icons.arrow_downward, color: Colors.black),
+                      child:
+                          const Icon(Icons.arrow_downward, color: Colors.black),
                     ),
                   ],
                 ),
@@ -212,7 +227,8 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                     TextButton(
                       onPressed: _incrementHour,
                       style: textButtonStyle,
-                      child: const Icon(Icons.arrow_upward, color: Colors.black),
+                      child:
+                          const Icon(Icons.arrow_upward, color: Colors.black),
                     ),
                     Text(
                       _selectedTime.hour.toString().padLeft(2, '0'),
@@ -221,7 +237,8 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                     TextButton(
                       onPressed: _decrementHour,
                       style: textButtonStyle,
-                      child: const Icon(Icons.arrow_downward, color: Colors.black),
+                      child:
+                          const Icon(Icons.arrow_downward, color: Colors.black),
                     ),
                   ],
                 ),
@@ -230,7 +247,8 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                     TextButton(
                       onPressed: _incrementMinute,
                       style: textButtonStyle,
-                      child: const Icon(Icons.arrow_upward, color: Colors.black),
+                      child:
+                          const Icon(Icons.arrow_upward, color: Colors.black),
                     ),
                     Text(
                       _selectedTime.minute.toString().padLeft(2, '0'),
@@ -239,13 +257,16 @@ class _TimeTravelWidgetState extends State<TimeTravelWidget> {
                     TextButton(
                       onPressed: _decrementMinute,
                       style: textButtonStyle,
-                      child: const Icon(Icons.arrow_downward, color: Colors.black),
+                      child:
+                          const Icon(Icons.arrow_downward, color: Colors.black),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 6,),
+            const SizedBox(
+              height: 6,
+            ),
             ElevatedButton(
               onPressed: () {
                 setState(() {

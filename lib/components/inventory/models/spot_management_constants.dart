@@ -12,7 +12,8 @@ class SpotManagementConstants {
   // Column Field Names
   static const String rowIdentifier = 'row_identifier';
   static const String resourceTitle = 'resource_title';
-  static const String rowReference = 'row_reference'; // New unified reference column
+  static const String rowReference =
+      'row_reference'; // New unified reference column
   static const String contextColumnPrefix = 'context_';
 
   // Value Separators
@@ -20,7 +21,6 @@ class SpotManagementConstants {
 
   // UI Text
   static const String assignActionText = 'Assign';
-
 
   /// Colors for the accent borders in light mode. Slightly more saturated for visibility.
   static List<Color> lightModeResourceColors = [
@@ -53,6 +53,8 @@ class SpotManagementConstants {
   /// Determines if the text on a given background color should be black or white for best contrast.
   /// This is less critical now as our main background is consistent, but still good to have.
   static Color getTextColorForBackground(Color backgroundColor) {
-    return backgroundColor.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
+    return backgroundColor.computeLuminance() > 0.5
+        ? Colors.black87
+        : Colors.white;
   }
 }

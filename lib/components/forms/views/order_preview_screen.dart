@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/data_models/form_option_model.dart';
-import 'package:fstapp/data_models/form_option_product_model.dart';
-import 'package:fstapp/components/forms/models/id_document_data.dart';
+import 'package:fstapp/components/forms/models/form_option_model.dart';
+import 'package:fstapp/components/forms/models/form_option_product_model.dart';
+import 'package:fstapp/components/forms/models/holder_models/id_document_data.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/components/forms/widgets_view/option_field_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -10,22 +9,33 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 
-import '../models/form_holder.dart';
-import '../models/ticket_holder.dart';
+import 'package:collection/collection.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/forms/public_order_strings.dart';
+import '../models/holder_models/form_holder.dart';
+import '../models/holder_models/ticket_holder.dart';
 import '../../eshop/orders_strings.dart';
 
 class OrderPreviewScreen extends StatefulWidget {
   final FormHolder formHolder;
   final double totalPrice;
   final VoidCallback onSendPressed;
+  final VoidCallback? onClose;
+  final String? tone;
+  final bool hasTickets;
 
-  static const double fontSizeFactor = 1.2;
+  static const double fontSizeFactor = 1.1;
 
   const OrderPreviewScreen({
     super.key,
     required this.formHolder,
     required this.totalPrice,
     required this.onSendPressed,
+    this.onClose,
+    this.tone,
+    this.hasTickets = true,
   });
 
   @override
@@ -34,6 +44,7 @@ class OrderPreviewScreen extends StatefulWidget {
 
 class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
   late ScrollController _scrollController;
+  String _paymentType = 'full';
 
   @override
   void initState() {
@@ -51,6 +62,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
       }
     });
   }
+
 
   @override
   void dispose() {
@@ -94,11 +106,15 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                         // Header
                         Center(
                           child: Text(
-                            "Summary".tr(),
-                            style: StylesConfig.textStyleBig.copyWith(
-                              fontSize: 18 * OrderPreviewScreen.fontSizeFactor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            PublicOrderStrings.summary,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontSize:
+                                      18 * OrderPreviewScreen.fontSizeFactor,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -116,6 +132,9 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
 
                         const SizedBox(height: 16),
 
+                        // Payment type choice (deposit vs full), only for on-site deposit
+                        if (_hasDepositProducts() && FeatureService.isDepositChoiceAvailable()) _buildDepositSection(context),
+
                         // Total Price
                         _buildTotalPrice(context),
 
@@ -125,8 +144,12 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                         Center(
                           child: ButtonsHelper.primaryButton(
                             context: context,
-                            onPressed: widget.onSendPressed,
-                            label: "Submit order".tr(),
+                            onPressed: () {
+                              widget.formHolder.paymentType = _paymentType;
+                              widget.onSendPressed();
+                            },
+                            label: PublicOrderStrings.getSubmitButton(
+                                widget.hasTickets, widget.tone),
                             height: 50.0,
                             width: 250.0,
                           ),
@@ -149,9 +172,13 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                 size: 24 * OrderPreviewScreen.fontSizeFactor,
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                if (widget.onClose != null) {
+                  widget.onClose!();
+                } else {
+                  Navigator.of(context).pop();
+                }
               },
-              tooltip: "Close".tr(),
+              tooltip: CommonStrings.close,
             ),
           ),
         ],
@@ -169,7 +196,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
     for (var field in dataFields) {
       var value = field.getValue(widget.formHolder.controller!.globalKey);
       String? valueString = value.toString();
-      if(value is IPreviewable){
+      if (value is IPreviewable) {
         valueString = value.toPreviewString(context: context);
       }
       if (value != null) {
@@ -186,7 +213,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
 
   Widget _buildTicketsSection(BuildContext context) {
     final ticketHolder = widget.formHolder.fields.firstWhere(
-          (field) => field.fieldType == FormHelper.fieldTypeTicket,
+      (field) => field.fieldType == FormHelper.fieldTypeTicket,
     ) as TicketHolder;
 
     return Column(
@@ -200,18 +227,25 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
           ticketHolder.tickets.length > 1
               ? "${OrdersStrings.itemSingular} $ticketIndex"
               : OrdersStrings.itemSingular,
-          style: StylesConfig.textStyleBig.copyWith(
-            fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
+                fontWeight: FontWeight.bold,
+              ),
         ));
 
         // If there is a seat, add it.
         if (ticket.seat != null) {
           ticketInfoRows.add(_buildInfoRow(
             context,
-            "Spot".tr(),
+            FormHelper.spotLabel(),
             ticket.seat!.objectModel.toString(),
+          ));
+        } else if (ticket.seat == null && ticketHolder.hasSpot) {
+          // Add warning if no seat selected but spots are enabled/required
+          ticketInfoRows.add(_buildInfoRow(
+            context,
+            FormHelper.spotLabel(),
+            PublicOrderStrings.selectSeat(widget.tone),
           ));
         }
 
@@ -221,28 +255,33 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
           return value != null && value.toString().isNotEmpty;
         }).map((entry) {
           String s;
+          String? priceText;
           var value = entry.getValue(ticket.ticketKey);
           if (value is FormOptionModel) {
-            s = OptionFieldHelper.buildOptionTitle(
-                context, entry.getValue(ticket.ticketKey));
+            s = OptionFieldHelper.buildOptionTitle(context, value);
+            priceText = OptionFieldHelper.buildPriceText(context, value);
           } else {
-            if(value is Iterable && value.isNotEmpty && value.first is FormOptionProductModel)
-            {
+            if (value is Iterable &&
+                value.isNotEmpty &&
+                value.first is FormOptionProductModel) {
               var sectionPrice = 0.0;
               var products = List<FormOptionProductModel>.from(value);
-              sectionPrice += products.fold(0, (sum, product) => sum + product.price);
-              s = "$value (${Utilities.formatPrice(context, sectionPrice, currencyCode: widget.formHolder.controller!.currencyCode)})";
+              sectionPrice +=
+                  products.fold(0, (sum, product) => sum + product.price);
+              s = value.toString();
+              priceText = '+ ${Utilities.formatPrice(context, sectionPrice, currencyCode: widget.formHolder.controller!.currencyCode)}';
             } else if (value.isEmpty) {
               s = "";
             } else {
               s = value.toString();
             }
           }
-          return _buildInfoRow(context, entry.title!, s, entry.fieldType);
+          return _buildInfoRow(context, entry.title!, s, entry.fieldType, priceText);
         }).toList();
 
         // Combine all ticket info rows with dividers.
-        final List<Widget> combinedRows = _addDividers(ticketInfoRows + ticketDetails);
+        final List<Widget> combinedRows =
+            _addDividers(ticketInfoRows + ticketDetails);
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -267,22 +306,56 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, String label, String value, [String? fieldType]) {
+  Widget _buildInfoRow(BuildContext context, String label, String value,
+      [String? fieldType, String? priceText]) {
+    final labelValueWidget = SelectableText.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: "$label: ",
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 14 * OrderPreviewScreen.fontSizeFactor,
+                    ) ??
+                TextStyle(fontSize: 14 * OrderPreviewScreen.fontSizeFactor),
+          ),
+          TextSpan(
+            text: FormHelper.fieldTypeValue(context, value, fieldType),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 14 * OrderPreviewScreen.fontSizeFactor,
+                      fontWeight: FontWeight.bold,
+                    ) ??
+                TextStyle(
+                    fontSize: 14 * OrderPreviewScreen.fontSizeFactor,
+                    fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+
+    if (priceText == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: labelValueWidget,
+      );
+    }
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: SelectableText.rich(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: "$label: ",
-              style: TextStyle(fontSize: 14 * OrderPreviewScreen.fontSizeFactor),
-            ),
-            TextSpan(
-              text: FormHelper.fieldTypeValue(context, value, fieldType),
-              style: TextStyle(fontSize: 14 * OrderPreviewScreen.fontSizeFactor),
-            ),
-          ],
-        ),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Expanded(child: labelValueWidget),
+          Text(
+            priceText,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 14 * OrderPreviewScreen.fontSizeFactor,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ) ??
+                TextStyle(
+                    fontSize: 14 * OrderPreviewScreen.fontSizeFactor,
+                    fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
@@ -290,14 +363,115 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
   Widget _buildTotalPrice(BuildContext context) {
     return Center(
       child: Text(
-        "Total Price: {price}".tr(namedArgs: {
-          "price": Utilities.formatPrice(context, widget.totalPrice, currencyCode: widget.formHolder.controller!.currencyCode),
-        }),
-        style: StylesConfig.textStyleBig.copyWith(
-          fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
-          fontWeight: FontWeight.bold,
-        ),
+        PublicOrderStrings.totalPrice(
+            context,
+            Utilities.formatPrice(context, widget.totalPrice,
+                currencyCode: widget.formHolder.controller!.currencyCode)),
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
+              fontWeight: FontWeight.bold,
+            ),
       ),
+    );
+  }
+
+  bool _hasDepositProducts() {
+    if (!FeatureService.isFeatureEnabled(FeatureConstants.deposit)) return false;
+    final ticketHolder = widget.formHolder.fields.firstWhereOrNull(
+      (field) => field.fieldType == FormHelper.fieldTypeTicket,
+    ) as TicketHolder?;
+    if (ticketHolder == null) return false;
+    for (final ticket in ticketHolder.tickets) {
+      for (final entry in ticket.ticketValues) {
+        final value = entry.getValue(ticket.ticketKey);
+        if (value is FormOptionProductModel && value.depositAmount != null) {
+          return true;
+        }
+        if (value is Iterable) {
+          for (final item in value) {
+            if (item is FormOptionProductModel && item.depositAmount != null) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  double _calculateDepositTotal() {
+    double total = 0;
+    final ticketHolder = widget.formHolder.fields.firstWhereOrNull(
+      (field) => field.fieldType == FormHelper.fieldTypeTicket,
+    ) as TicketHolder?;
+    if (ticketHolder == null) return total;
+    for (final ticket in ticketHolder.tickets) {
+      for (final entry in ticket.ticketValues) {
+        final value = entry.getValue(ticket.ticketKey);
+        if (value is FormOptionProductModel) {
+          total += value.depositAmount ?? value.price;
+        } else if (value is Iterable) {
+          for (final item in value) {
+            if (item is FormOptionProductModel) {
+              total += item.depositAmount ?? item.price;
+            }
+          }
+        }
+      }
+    }
+    return total;
+  }
+
+  Widget _buildDepositSection(BuildContext context) {
+    final depositTotal = _calculateDepositTotal();
+    final currencyCode = widget.formHolder.controller!.currencyCode;
+    final depositFeature = FeatureService.getDepositFeature();
+    final isOnSite = depositFeature?.depositDeadline == "on_site";
+    final infoText = isOnSite
+        ? PublicOrderStrings.depositInfoOnSite
+        : PublicOrderStrings.depositInfoDaysBefore(depositFeature?.depositDeadlineDays ?? 0);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          PublicOrderStrings.paymentMethod,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontSize: 15 * OrderPreviewScreen.fontSizeFactor,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 8),
+        RadioListTile<String>(
+          value: 'deposit',
+          groupValue: _paymentType,
+          onChanged: (v) => setState(() => _paymentType = v!),
+          title: Text(
+            '${PublicOrderStrings.payWithDeposit} (${Utilities.formatPrice(context, depositTotal, currencyCode: currencyCode)})',
+            style: TextStyle(fontSize: 14 * OrderPreviewScreen.fontSizeFactor),
+          ),
+          subtitle: Text(
+            infoText,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 13 * OrderPreviewScreen.fontSizeFactor,
+                  fontStyle: FontStyle.italic,
+                ),
+          ),
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+        RadioListTile<String>(
+          value: 'full',
+          groupValue: _paymentType,
+          onChanged: (v) => setState(() => _paymentType = v!),
+          title: Text(
+            '${PublicOrderStrings.payFullAmount} (${Utilities.formatPrice(context, widget.totalPrice, currencyCode: currencyCode)})',
+            style: TextStyle(fontSize: 14 * OrderPreviewScreen.fontSizeFactor),
+          ),
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+      ],
     );
   }
 }

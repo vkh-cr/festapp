@@ -26,20 +26,40 @@ class BlueprintGroupModel {
     return BlueprintGroupModel(
       id: json[metaId],
       title: json[metaTitle],
-      objectIds: json[metaItems] != null
-          ? List<int>.from(json[metaItems])
-          : null,
+      objectIds:
+          json[metaItems] != null ? List<int>.from(json[metaItems]) : null,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    metaId: id,
-    metaTitle: title
-  };
+  Map<String, dynamic> toJson() => {metaId: id, metaTitle: title};
 
   List<String> alphabet = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
+    'O',
+    'P',
+    'Q',
+    'R',
+    'S',
+    'T',
+    'U',
+    'V',
+    'W',
+    'X',
+    'Y',
+    'Z'
   ];
 
   String getNextBoxName() {

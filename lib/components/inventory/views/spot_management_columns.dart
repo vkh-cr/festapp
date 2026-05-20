@@ -12,15 +12,17 @@ class UnassignSpotAction {}
 
 class SpotManagementColumns {
   static List<TrinaColumn> generateColumns(
-      BuildContext context,
-      List<InventoryContextModel> inventoryContexts,
-      ValueNotifier<String> dialogSearchNotifier,
-      ) {
+    BuildContext context,
+    List<InventoryContextModel> inventoryContexts,
+    ValueNotifier<String> dialogSearchNotifier,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Widget cellRenderer(TrinaColumnRendererContext rendererContext) {
       final rowRef = rendererContext
-          .row.cells[SpotManagementConstants.rowReference]?.value as SpotManagementRowReference?;
+          .row
+          .cells[SpotManagementConstants.rowReference]
+          ?.value as SpotManagementRowReference?;
       if (rowRef == null) return const SizedBox.shrink();
 
       // The cell value is now purely for display.
@@ -30,7 +32,7 @@ class SpotManagementColumns {
           ? SpotManagementConstants.darkModeResourceColors
           : SpotManagementConstants.lightModeResourceColors;
       final resourceColor =
-      colorList[rowRef.resource.id!.hashCode % colorList.length];
+          colorList[rowRef.resource.id!.hashCode % colorList.length];
 
       Widget cellContent;
       if (displayValue != null && displayValue.isNotEmpty) {
@@ -101,14 +103,16 @@ class SpotManagementColumns {
         width: 250,
         renderer: (rendererContext) {
           final rowRef = rendererContext
-              .row.cells[SpotManagementConstants.rowReference]?.value as SpotManagementRowReference?;
+              .row
+              .cells[SpotManagementConstants.rowReference]
+              ?.value as SpotManagementRowReference?;
           if (rowRef == null) return const SizedBox.shrink();
 
           final colorList = isDark
               ? SpotManagementConstants.darkModeResourceColors
               : SpotManagementConstants.lightModeResourceColors;
           final resourceColor =
-          colorList[rowRef.resource.id!.hashCode % colorList.length];
+              colorList[rowRef.resource.id!.hashCode % colorList.length];
 
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -118,8 +122,8 @@ class SpotManagementColumns {
                 Container(
                   width: 12,
                   height: 12,
-                  decoration:
-                  BoxDecoration(color: resourceColor, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                      color: resourceColor, shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -151,7 +155,8 @@ class SpotManagementColumns {
       columns.add(
         TrinaColumn(
           field: fieldName,
-          title: contextModel.getContextTitle(context), // Assuming this helper exists
+          title: contextModel
+              .getContextTitle(context), // Assuming this helper exists
           type: TrinaColumnType.text(),
           readOnly: true,
           enableEditingMode: false,
@@ -166,12 +171,12 @@ class SpotManagementColumns {
   }
 
   static Future<void> _showSpotSelectionDialog(
-      BuildContext context,
-      TrinaColumnRendererContext rendererContext,
-      SpotManagementRowReference rowReference, // Pass the unified object
-      int contextId,
-      ValueNotifier<String> dialogSearchNotifier,
-      ) async {
+    BuildContext context,
+    TrinaColumnRendererContext rendererContext,
+    SpotManagementRowReference rowReference, // Pass the unified object
+    int contextId,
+    ValueNotifier<String> dialogSearchNotifier,
+  ) async {
     final currentSpot = rowReference.currentSpotsInRow[contextId];
 
     // The dialog now returns a generic Object? to accommodate different return types.
@@ -210,14 +215,12 @@ class SpotManagementColumns {
     // Get the cells that need to be updated.
     final visibleCell = rendererContext.cell;
 
-
     // Trigger updates in the grid's state manager.
     final stateManager = rendererContext.stateManager;
 
     // Update the visible cell with the new display text.
-    stateManager.changeCellValue(visibleCell,
-        selectedSpot?.order?.toCustomerData() ?? '',
+    stateManager.changeCellValue(
+        visibleCell, selectedSpot?.order?.toCustomerData() ?? '',
         force: true, notify: true);
-
   }
 }

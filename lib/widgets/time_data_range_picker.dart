@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/widgets/mouse_detector.dart';
 
 class TimeDateRangePicker extends StatelessWidget {
@@ -48,16 +49,20 @@ class TimeDateRangePicker extends StatelessWidget {
                     enabled: enabled, // Use isEnabled property here
                     readOnly: true,
                     decoration: InputDecoration(
-                      labelText: "Start".tr(),
+                      labelText: CommonStrings.start,
                       labelStyle: TextStyle(
-                        color: isStartValid ? null : ThemeConfig.redColor(context),
+                        color:
+                            isStartValid ? null : ThemeConfig.redColor(context),
                       ),
                     ),
                     controller: TextEditingController(
-                      text: start != null ? TimeOfDay.fromDateTime(start!).format(context) : "",
+                      text: start != null
+                          ? TimeOfDay.fromDateTime(start!).format(context)
+                          : "",
                     ),
                     onTap: () async {
-                      final pickedTime = await TimeHelper.showUniversalTimePicker(
+                      final pickedTime =
+                          await TimeHelper.showUniversalTimePicker(
                         context: context,
                         initialTime: start != null
                             ? TimeOfDay.fromDateTime(start!)
@@ -94,11 +99,15 @@ class TimeDateRangePicker extends StatelessWidget {
                     decoration: InputDecoration(
                       labelText: "Start date".tr(),
                       labelStyle: TextStyle(
-                        color: isStartValid ? null : ThemeConfig.redColor(context),
+                        color:
+                            isStartValid ? null : ThemeConfig.redColor(context),
                       ),
                     ),
                     controller: TextEditingController(
-                      text: start != null ? DateFormat.yMd(context.locale.toString()).format(start!) : "",
+                      text: start != null
+                          ? DateFormat.yMd(context.locale.toString())
+                              .format(start!)
+                          : "",
                     ),
                     onTap: () async {
                       final pickedDate = await showDatePicker(
@@ -140,16 +149,20 @@ class TimeDateRangePicker extends StatelessWidget {
                     enabled: enabled, // Use isEnabled property here
                     readOnly: true,
                     decoration: InputDecoration(
-                      labelText: "End".tr(),
+                      labelText: CommonStrings.end,
                       labelStyle: TextStyle(
-                        color: isEndValid ? null : ThemeConfig.redColor(context),
+                        color:
+                            isEndValid ? null : ThemeConfig.redColor(context),
                       ),
                     ),
                     controller: TextEditingController(
-                      text: end != null ? TimeOfDay.fromDateTime(end!).format(context) : "",
+                      text: end != null
+                          ? TimeOfDay.fromDateTime(end!).format(context)
+                          : "",
                     ),
                     onTap: () async {
-                      final pickedTime = await TimeHelper.showUniversalTimePicker(
+                      final pickedTime =
+                          await TimeHelper.showUniversalTimePicker(
                         context: context,
                         initialTime: end != null
                             ? TimeOfDay.fromDateTime(end!)
@@ -186,11 +199,15 @@ class TimeDateRangePicker extends StatelessWidget {
                     decoration: InputDecoration(
                       labelText: "End date".tr(),
                       labelStyle: TextStyle(
-                        color: isEndValid ? null : ThemeConfig.redColor(context),
+                        color:
+                            isEndValid ? null : ThemeConfig.redColor(context),
                       ),
                     ),
                     controller: TextEditingController(
-                      text: end != null ? DateFormat.yMd(context.locale.toString()).format(end!) : "",
+                      text: end != null
+                          ? DateFormat.yMd(context.locale.toString())
+                              .format(end!)
+                          : "",
                     ),
                     onTap: () async {
                       final pickedDate = await showDatePicker(

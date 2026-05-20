@@ -1,4 +1,4 @@
-import 'package:fstapp/data_models/occasion_model.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/eshop/models/spot_model.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
 import 'inventory_pool_model.dart';
@@ -27,9 +27,7 @@ class InventoryPoolsListBundle {
       inventoryContexts: (json['inventory_contexts'] as List)
           .map((c) => InventoryContextModel.fromJson(c))
           .toList(),
-      spots: (json['spots'] as List)
-          .map((s) => SpotModel.fromJson(s))
-          .toList(),
+      spots: (json['spots'] as List).map((s) => SpotModel.fromJson(s)).toList(),
     );
   }
 }

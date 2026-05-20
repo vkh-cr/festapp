@@ -17,7 +17,8 @@ class TimetableItemsWidget extends StatefulWidget {
   final DateTime endTime;
   final int xyHelpingColumnsCount;
 
-  const TimetableItemsWidget({super.key,
+  const TimetableItemsWidget({
+    super.key,
     required this.usedItems,
     required this.usedPlaces,
     required this.height,
@@ -42,11 +43,11 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
 
   List<Widget> buildTimeline() {
     List<Widget> allItems = [];
-    if(widget.controller.isTimeHorizontal){
+    if (widget.controller.isTimeHorizontal) {
       allItems.add(Row(
         children: List<Widget>.generate(
           widget.xyHelpingColumnsCount,
-              (i) => Container(
+          (i) => Container(
             width: widget.controller.pixelsInHour(),
             height: widget.height,
             decoration: BoxDecoration(
@@ -54,7 +55,9 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
                 left: BorderSide(width: 0.25, color: Colors.grey),
                 right: BorderSide(width: 0.25, color: Colors.grey),
               ),
-              color: i % 2 == 0 ? ThemeConfig.timetableBackground1(context) : ThemeConfig.timetableBackground2(context),
+              color: i % 2 == 0
+                  ? ThemeConfig.timetableBackground1(context)
+                  : ThemeConfig.timetableBackground2(context),
             ),
           ),
         ),
@@ -69,7 +72,7 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
           ),
           ...List<Widget>.generate(
             widget.xyHelpingColumnsCount,
-                (i) => Container(
+            (i) => Container(
               width: widget.width,
               height: widget.controller.pixelsInHour(),
               decoration: BoxDecoration(
@@ -83,17 +86,28 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
       ));
     }
 
-
     for (var p = 0; p < widget.usedPlaces.length; p++) {
       var pItems = widget.usedItems
-          .where((element) => element.timeBlockPlace?.id == widget.usedPlaces[p].id)
+          .where((element) =>
+              element.timeBlockPlace?.id == widget.usedPlaces[p].id)
           .toList();
       for (var i = 0; i < pItems.length; i++) {
         var item = pItems[i];
-        var left = widget.controller.timeRangeLength(widget.startTime, item.startTime) + widget.controller.minimalPadding();
-        var top = (widget.controller.verticalAxisTitleHeight() + widget.controller.itemStaticDimension()) * p + widget.controller.verticalAxisTitleHeight() + widget.controller.horizontalAxisSpaceHeight();
-        var verticalLeft = widget.controller.verticalAxisSpace() + (widget.controller.itemStaticDimension() * p) + widget.controller.minimalPadding();
-        var verticalTop = widget.controller.horizontalAxisSpaceHeight() + widget.controller.timeRangeLength(widget.startTime, item.startTime) + widget.controller.minimalPadding();
+        var left = widget.controller
+                .timeRangeLength(widget.startTime, item.startTime) +
+            widget.controller.minimalPadding();
+        var top = (widget.controller.verticalAxisTitleHeight() +
+                    widget.controller.itemStaticDimension()) *
+                p +
+            widget.controller.verticalAxisTitleHeight() +
+            widget.controller.horizontalAxisSpaceHeight();
+        var verticalLeft = widget.controller.verticalAxisSpace() +
+            (widget.controller.itemStaticDimension() * p) +
+            widget.controller.minimalPadding();
+        var verticalTop = widget.controller.horizontalAxisSpaceHeight() +
+            widget.controller
+                .timeRangeLength(widget.startTime, item.startTime) +
+            widget.controller.minimalPadding();
         var timeBlock = Positioned(
           left: widget.controller.isTimeHorizontal ? left : verticalLeft,
           top: widget.controller.isTimeHorizontal ? top : verticalTop,

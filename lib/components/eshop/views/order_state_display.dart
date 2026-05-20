@@ -75,7 +75,8 @@ class OrderStateDisplay extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
         ),
         child: Center(
-          child: Text(text, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis),
+          child: Text(text,
+              textAlign: TextAlign.center, overflow: TextOverflow.ellipsis),
         ),
       ),
     );
@@ -93,7 +94,8 @@ class OrderStateDisplay extends StatelessWidget {
       return LayoutBuilder(
         builder: (context, constraints) {
           const double arrowAndPaddingWidth = 40;
-          final double requiredWidth = (stateTagWidth ?? 80.0) * 2 + arrowAndPaddingWidth;
+          final double requiredWidth =
+              (stateTagWidth ?? 80.0) * 2 + arrowAndPaddingWidth;
 
           // MODIFIED: The condition now also checks the `enableWrapping` flag.
           // The widget will only wrap if wrapping is enabled AND there isn't enough space.

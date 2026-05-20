@@ -2,11 +2,12 @@ import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { formatCurrency, formatDatetime, formatIBAN } from "../_shared/utilities.ts";
 import { generateFullOrder } from "../_shared/orderOverview.ts";
 import { generateQrCode } from "../_shared/qrCodePayment.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
+
 
 import {
   getEmailTemplateAndWrapper,
   supabaseAdmin,
+  createUserClient,
 } from "../_shared/supabaseUtil.ts";
 import { useFakturoid } from "./fakturoid.ts";
 import { translations } from "../_shared/translations/translations.ts";
@@ -50,22 +51,22 @@ async function handleSupabaseFunctionService(
 
         if (functionResponse.ok) {
           const attachmentData = await functionResponse.json();
-          if (attachmentData.data && attachmentData.contentType) {
-            const binaryString = atob(attachmentData.data);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-              bytes[i] = binaryString.charCodeAt(i);
-            }
-            attachments.push({
-              filename: `smlouva-${ticketOrder.order.payment_info.variable_symbol}.pdf`,
-              content: bytes,
-              contentType: attachmentData.contentType,
-              encoding: "binary",
-            });
-            console.log("Successfully added attachment from SUPABASE_FUNCTION service.");
+          if (attachmentData.file) {
+             const binaryString = atob(attachmentData.file);
+             const len = binaryString.length;
+             const bytes = new Uint8Array(len);
+             for (let i = 0; i < len; i++) {
+               bytes[i] = binaryString.charCodeAt(i);
+             }
+             attachments.push({
+               filename: attachmentData.filename || `contract-${ticketOrder.order.payment_info.variable_symbol}.pdf`,
+               content: bytes,
+               contentType: "application/pdf",
+               encoding: "binary",
+             });
+             console.log("Successfully added attachment from SUPABASE_FUNCTION service.");
           } else {
-            console.error("SUPABASE_FUNCTION service response missing data or contentType:", attachmentData);
+            console.error("SUPABASE_FUNCTION service response missing 'file' property:", attachmentData);
           }
         } else {
           const errorBody = await functionResponse.text();
@@ -97,10 +98,43 @@ Deno.serve(async (req) => {
     const { orderDetails } = await req.json();
     console.log("Order details:", orderDetails);
 
-    const { data: ticketOrder } = await supabaseAdmin.rpc(
-      "create_ticket_order",
-      { input_data: orderDetails },
-    );
+    const authorizationHeader = req.headers.get("Authorization");
+    let ticketOrderResponse: any;
+
+    if (authorizationHeader) {
+      console.log("Creating ticket order via User Scoped Client");
+      const userClient = createUserClient(authorizationHeader);
+      
+      const { data, error } = await userClient.rpc(
+        "create_ticket_order",
+        { input_data: orderDetails },
+      );
+       if (error) {
+        console.error("RPC Error (User Context):", error);
+        ticketOrderResponse = { code: 500, message: error.message }; 
+      } else {
+        ticketOrderResponse = data;
+      }
+    } else {
+      console.log("Creating ticket order via Admin Client");
+      const { data } = await supabaseAdmin.rpc(
+        "create_ticket_order",
+        { input_data: orderDetails },
+      );
+      ticketOrderResponse = data;
+    }
+
+    // Safety check if response is null/undefined
+    if (!ticketOrderResponse) {
+        console.error("Ticket order response is null/undefined");
+         return new Response(JSON.stringify({ error: "Failed to create ticket order (empty response)" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 500,
+        });
+    }
+
+
+    const ticketOrder = ticketOrderResponse;
 
     if (ticketOrder.code !== 200) {
       console.error("Ticket order error:", ticketOrder);
@@ -133,8 +167,12 @@ Deno.serve(async (req) => {
       const occasion = ticketOrder.order.occasion;
       const paymentInfo = ticketOrder.order.payment_info;
       if (paymentInfo.amount > 0) {
+        // For deposit orders, QR code should show deposit amount (not full price)
+        const qrPaymentInfo = paymentInfo.deposit_amount && paymentInfo.deposit_amount < paymentInfo.amount
+          ? { ...paymentInfo, amount: Number(paymentInfo.deposit_amount) }
+          : paymentInfo;
         const qr = await generateQrCode(
-          paymentInfo,
+          qrPaymentInfo,
           ticketOrder.order,
           occasion.title,
         );
@@ -170,16 +208,47 @@ Deno.serve(async (req) => {
     let balanceReasoning = '';
 
     if (paymentInfo.amount > 0) {
-        balanceReasoning = tr.unpaid(
-            formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
-            paymentInfo.account_number_human_readable,
-            formatIBAN(paymentInfo.account_number),
-            paymentInfo.variable_symbol,
-            formatDatetime(paymentInfo.deadline, lang),
-            tone // Pass tone
-        );
+        if (paymentInfo.deposit_amount && paymentInfo.deposit_amount < paymentInfo.amount) {
+            // Deposit scenario: show deposit to pay + remaining amount info
+            const depositAmount = Number(paymentInfo.deposit_amount);
+            const remainingAmount = paymentInfo.amount - depositAmount;
+
+            // Get deposit deadline from the deposit feature in occasion features
+            const features = occasion.features || [];
+            const depositFeature = features.find((f: any) => f.code === 'deposit');
+            let depositDeadline: string;
+            if (depositFeature?.deposit_deadline === 'on_site') {
+                depositDeadline = lang === 'cs' ? 'na místě' : 'on site';
+            } else if (depositFeature?.deposit_deadline_days) {
+                depositDeadline = lang === 'cs'
+                    ? `${depositFeature.deposit_deadline_days} dní před akcí`
+                    : `${depositFeature.deposit_deadline_days} days before the event`;
+            } else {
+                depositDeadline = lang === 'cs' ? 'na místě' : 'on site';  // fallback
+            }
+
+            balanceReasoning = tr.depositRequired(
+                formatCurrency(depositAmount, paymentInfo.currency_code),
+                formatCurrency(remainingAmount, paymentInfo.currency_code),
+                depositDeadline,
+                paymentInfo.account_number_human_readable,
+                formatIBAN(paymentInfo.account_number),
+                paymentInfo.variable_symbol,
+                tone
+            );
+        } else {
+            // No deposit: show full price as today (existing behavior)
+            balanceReasoning = tr.unpaid(
+                formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
+                paymentInfo.account_number_human_readable,
+                formatIBAN(paymentInfo.account_number),
+                paymentInfo.variable_symbol,
+                formatDatetime(paymentInfo.deadline, lang),
+                tone
+            );
+        }
     } else {
-        balanceReasoning = tr.zeroOrder(paymentInfo.currency_code, tone); // Pass tone
+        balanceReasoning = tr.zeroOrder(paymentInfo.currency_code, tone);
     }
 
     const subs = {

@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
@@ -43,7 +46,8 @@ class OfflineMapHelper {
 
   /// Computes the local file path for the offline MBTiles package,
   /// deleting any old .mbtiles files not matching the current file name.
-  static Future<String> getOfflinePackagePath(String offlineMapPackageURL) async {
+  static Future<String> getOfflinePackagePath(
+      String offlineMapPackageURL) async {
     final directory = await getApplicationDocumentsDirectory();
     String fileName = Uri.parse(offlineMapPackageURL).pathSegments.last;
     String filePath = "${directory.path}/$fileName";
@@ -119,26 +123,26 @@ class OfflineMapHelper {
       var vectorTileTheme = jsonDecode(fileContent) as Map<String, dynamic>;
       return ThemeReader().read(vectorTileTheme);
     } catch (e) {
-      print("Error loading offline map style: $e");
+      AppLogger.error("Error loading offline map style: $e");
       return null;
     }
   }
 
   /// Retrieves (or downloads if available) the offline MBTiles package.
-  static Future<File?> getOfflineMapPackage(
-      String offlineMapPackageURL, String filePath, Function(double) onProgress) async {
+  static Future<File?> getOfflineMapPackage(String offlineMapPackageURL,
+      String filePath, Function(double) onProgress) async {
     return await getOrDownloadFile(offlineMapPackageURL, filePath, onProgress);
   }
 
   /// Retrieves (or downloads if available) the sprite JSON file.
-  static Future<File?> getSpriteJson(
-      String spriteJsonUrl, String filePath, Function(double) onProgress) async {
+  static Future<File?> getSpriteJson(String spriteJsonUrl, String filePath,
+      Function(double) onProgress) async {
     return await getOrDownloadFile(spriteJsonUrl, filePath, onProgress);
   }
 
   /// Retrieves (or downloads if available) the sprite image file.
-  static Future<File?> getSpriteImage(
-      String spriteImageUrl, String filePath, Function(double) onProgress) async {
+  static Future<File?> getSpriteImage(String spriteImageUrl, String filePath,
+      Function(double) onProgress) async {
     return await getOrDownloadFile(spriteImageUrl, filePath, onProgress);
   }
 

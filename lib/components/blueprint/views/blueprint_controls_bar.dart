@@ -3,9 +3,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
-import 'package:fstapp/data_services/db_images.dart';
+import 'package:fstapp/components/images/db_images.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/services/image_compression_helper.dart';
+import 'package:fstapp/components/images/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 
 import '../../_shared/common_strings.dart';
@@ -138,8 +138,7 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
               children: [
                 Text(BlueprintStrings.background),
                 const SizedBox(width: 8),
-                Icon(Icons.grid_on,
-                    color: widget.canEdit ? null : Colors.grey),
+                Icon(Icons.grid_on, color: widget.canEdit ? null : Colors.grey),
               ],
             ),
           ),
@@ -180,10 +179,10 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
               // Use the flag here to disable the button
               onPressed: isDecreaseEnabled && widget.canEdit
                   ? () {
-                if (currentValue > 1) {
-                  onChanged(currentValue - 1);
-                }
-              }
+                      if (currentValue > 1) {
+                        onChanged(currentValue - 1);
+                      }
+                    }
                   : null,
             ),
             Text(
@@ -199,8 +198,8 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
               constraints: const BoxConstraints(),
               onPressed: widget.canEdit
                   ? () {
-                onChanged(currentValue + 1);
-              }
+                      onChanged(currentValue + 1);
+                    }
                   : null,
             ),
           ],
@@ -247,8 +246,9 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
     if (file != null) {
       try {
         Uint8List imageData = await file.readAsBytes();
-        var compressedImageData =
-        await ImageCompressionHelper.compress(imageData, 3000, quality: 100);
+        var compressedImageData = await ImageCompressionHelper.compress(
+            imageData, 3000,
+            quality: 100);
         final publicUrl = await DbImages.uploadImage(
             compressedImageData, widget.blueprint!.occasion, null);
         setState(() {

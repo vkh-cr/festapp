@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/spot_management_models_and_constants.dart';
 import 'package:fstapp/components/eshop/models/spot_model.dart';
@@ -8,6 +7,7 @@ import 'package:trina_grid/trina_grid.dart';
 import '../models/spot_management_constants.dart';
 import 'inventory_strings.dart';
 import 'spot_management_columns.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 /// A stateful dialog that allows searching and selecting a spot for a single cell.
 class SpotSearchDialog extends StatefulWidget {
@@ -61,7 +61,8 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
     // Find all spots already assigned in the current context column by inspecting the reference objects of all rows.
     final assignedSpotIdsInContext = <int>{};
     for (final row in widget.rendererContext.stateManager.rows) {
-      final rowRef = row.cells[SpotManagementConstants.rowReference]?.value as SpotManagementRowReference?;
+      final rowRef = row.cells[SpotManagementConstants.rowReference]?.value
+          as SpotManagementRowReference?;
       final spotInCell = rowRef?.currentSpotsInRow[widget.contextId];
       if (spotInCell != null) {
         assignedSpotIdsInContext.add(spotInCell.id!);
@@ -69,7 +70,7 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
     }
 
     final availableSpotsForDialog = <SpotModel>[];
-    widget.rowReference.allSpotsMap.values.forEach((spot) {
+    for (var spot in widget.rowReference.allSpotsMap.values) {
       if (spot.inventoryContextId == widget.contextId && spot.order != null) {
         // A spot is available if it's not assigned elsewhere in this column, OR if it's the one currently in this cell.
         if (!assignedSpotIdsInContext.contains(spot.id) ||
@@ -77,14 +78,15 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
           availableSpotsForDialog.add(spot);
         }
       }
-    });
+    }
 
     // --- SORTING LOGIC ---
     final currentResourceId = widget.rowReference.resource.id;
     final assignedSpotIdsToThisResource = <int>{};
 
     for (final row in widget.rendererContext.stateManager.rows) {
-      final rowRef = row.cells[SpotManagementConstants.rowReference]?.value as SpotManagementRowReference?;
+      final rowRef = row.cells[SpotManagementConstants.rowReference]?.value
+          as SpotManagementRowReference?;
       if (rowRef?.resource.id == currentResourceId) {
         for (final spot in rowRef!.currentSpotsInRow.values) {
           if (spot != null) {
@@ -99,8 +101,7 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
       final isBOnThisResource = assignedSpotIdsToThisResource.contains(b.id);
       if (isAOnThisResource && !isBOnThisResource) return -1;
       if (!isAOnThisResource && isBOnThisResource) return 1;
-      return (a.order!.toCustomerData())
-          .compareTo(b.order!.toCustomerData());
+      return (a.order!.toCustomerData()).compareTo(b.order!.toCustomerData());
     });
 
     setState(() {
@@ -121,7 +122,7 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
         _filteredSpots = _availableSpots.where((spot) {
           final customerData = spot.order!.toCustomerData();
           final normalizedName =
-          Utilities.removeDiacritics(customerData.toLowerCase());
+              Utilities.removeDiacritics(customerData.toLowerCase());
           return normalizedName.contains(normalizedQuery);
         }).toList();
       });
@@ -136,8 +137,8 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
-          InventoryStrings.searchDialogTitle(widget.rendererContext.column.title)),
+      title: Text(InventoryStrings.searchDialogTitle(
+          widget.rendererContext.column.title)),
       contentPadding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 0),
       content: SizedBox(
         width: 350,
@@ -154,9 +155,9 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () => _searchController.clear(),
-                  )
+                          icon: const Icon(Icons.clear),
+                          onPressed: () => _searchController.clear(),
+                        )
                       : null,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0)),
@@ -171,8 +172,8 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
                   // Option to unassign the spot
                   ListTile(
                     title: Text(InventoryStrings.searchDialogUnassign),
-                    onTap: () =>
-                        _selectAndPop(UnassignSpotAction()), // Pop the sentinel object
+                    onTap: () => _selectAndPop(
+                        UnassignSpotAction()), // Pop the sentinel object
                   ),
                   const Divider(height: 1),
                   // List of available spots
@@ -195,7 +196,7 @@ class _SpotSearchDialogState extends State<SpotSearchDialog> {
         // Action: Storno (Cancel)
         TextButton(
           onPressed: () => Navigator.of(context).pop(), // Pops with null
-          child: Text('Storno'.tr()),
+          child: Text(CommonStrings.storno),
         ),
       ],
     );

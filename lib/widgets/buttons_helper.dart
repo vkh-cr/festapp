@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart';
 
 class ButtonsHelper {
-  static getAddToMyProgramButton(
+  static List<Visibility> getAddToMyProgramButton(
       bool? canSaveToMyProgram,
       Future<void> Function() addToMyProgram,
       Future<void> Function() removeFromMyProgram,
-      [Color? colorIn, Color? colorOut]) {
+      [Color? colorIn,
+      Color? colorOut]) {
     return [
       Visibility(
           visible:
@@ -60,7 +61,8 @@ class ButtonsHelper {
     );
   }
 
-  static Widget bottomBarButton({required String text, required VoidCallback? onPressed}) {
+  static Widget bottomBarButton(
+      {required String text, required VoidCallback? onPressed}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: MaterialButton(
@@ -95,19 +97,22 @@ class ButtonsHelper {
           iconAlignment: IconAlignment.end,
           icon: Icon(
             icon ?? Icons.qr_code, // Default to QR code icon if none provided
-            color: iconColor ?? ThemeConfig.blackColor(context), // Set icon color
+            color:
+                iconColor ?? ThemeConfig.blackColor(context), // Set icon color
           ),
           label: Text(
             label,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: textColor ?? ThemeConfig.blackColor(context), // Set label color
+              color: textColor ??
+                  ThemeConfig.blackColor(context), // Set label color
             ),
           ).tr(),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.all(12.0),
-            backgroundColor: buttonColor ?? ThemeConfig.qrButtonColor(context), // Set button color
+            backgroundColor: buttonColor ??
+                ThemeConfig.qrButtonColor(context), // Set button color
             minimumSize: const Size.fromHeight(60),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -150,30 +155,30 @@ class ButtonsHelper {
         ),
         child: isLoading
             ? CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(
-            Theme.of(context).colorScheme.onPrimary,
-          ),
-        )
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.onPrimary,
+                ),
+              )
             : Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (prefixIcon != null) ...[
-              prefixIcon,
-              const SizedBox(width: 8.0),
-            ],
-            Text(
-              label.tr(),
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (prefixIcon != null) ...[
+                    prefixIcon,
+                    const SizedBox(width: 8.0),
+                  ],
+                  Text(
+                    label.tr(),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (suffixIcon != null) ...[
+                    const SizedBox(width: 8.0),
+                    suffixIcon,
+                  ],
+                ],
               ),
-            ),
-            if (suffixIcon != null) ...[
-              const SizedBox(width: 8.0),
-              suffixIcon,
-            ],
-          ],
-        ),
       ),
     );
   }
