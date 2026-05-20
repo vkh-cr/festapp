@@ -52,27 +52,73 @@ cp -r dist/* ../build/web/
 
 cd ..
 
-# 6. Cloudflare-specific overrides (overwrite files copied from web_client/public/)
-cat > build/web/_redirects <<'REDIRECTS'
-# Cloudflare Pages routing (overrides web_client/public/_redirects)
-# Web Client routes (SPA)
-/form/*  /index.html  200
-/        /index.html  200
+# 6. Cloudflare-specific routing via Pages Function (_worker.js).
+#    Reason: Cloudflare Pages applies _redirects BEFORE static assets, so a
+#    "/* /flutter 200" fallback rewrites every URL (including /favicon.ico,
+#    /web-assets/..., /assets/main.dart.js, etc.) and the site collapses to
+#    the Flutter HTML for every request. A worker gives us explicit control:
+#    1) /, /form/*  -> web_client index.html
+#    2) Flutter SPA prefixes -> /flutter (with text/html)
+#    3) Static assets pass through ASSETS
+#    4) 404 -> Flutter SPA fallback
+#
+#    Remove _redirects/_headers copied from web_client/public/ so they don't
+#    shadow the worker.
+rm -f build/web/_redirects build/web/_headers
 
-# Flutter SPA routes — rewrite to /flutter (extension-less file with text/html via _headers)
-/login    /flutter  200
-/admin    /flutter  200
-/transfer /flutter  200
+cat > build/web/_worker.js <<'WORKER'
+const WEB_CLIENT_INDEX = "/index.html";
+const FLUTTER_ENTRY = "/flutter";
 
-# Fallback: everything else goes to Flutter
-/*        /flutter  200
-REDIRECTS
+// Routes handled by the web_client SPA.
+const WEB_CLIENT_PREFIXES = ["/form/"];
+const WEB_CLIENT_EXACT = new Set(["/"]);
 
-cat > build/web/_headers <<'HEADERS'
-# Force HTML mime type on the extension-less Flutter entry point
-/flutter
-  Content-Type: text/html; charset=utf-8
-HEADERS
+// Routes handled by the Flutter SPA.
+const FLUTTER_PREFIXES = ["/login", "/admin", "/transfer"];
+
+function htmlResponse(assetResponse) {
+  const headers = new Headers(assetResponse.headers);
+  headers.set("content-type", "text/html; charset=utf-8");
+  return new Response(assetResponse.body, {
+    status: 200,
+    headers,
+  });
+}
+
+async function serveAsset(env, request, path) {
+  const url = new URL(request.url);
+  url.pathname = path;
+  return env.ASSETS.fetch(new Request(url.toString(), request));
+}
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    if (WEB_CLIENT_EXACT.has(path) || WEB_CLIENT_PREFIXES.some(p => path.startsWith(p))) {
+      const res = await serveAsset(env, request, WEB_CLIENT_INDEX);
+      return htmlResponse(res);
+    }
+
+    if (FLUTTER_PREFIXES.some(p => path === p || path.startsWith(p + "/"))) {
+      const res = await serveAsset(env, request, FLUTTER_ENTRY);
+      return htmlResponse(res);
+    }
+
+    // Try real static asset.
+    const assetRes = await env.ASSETS.fetch(request);
+    if (assetRes.status !== 404) {
+      return assetRes;
+    }
+
+    // Unknown path -> Flutter SPA fallback (lets Flutter router handle it).
+    const fallback = await serveAsset(env, request, FLUTTER_ENTRY);
+    return htmlResponse(fallback);
+  },
+};
+WORKER
 
 echo "Build complete. Output in build/web"
 ls -la build/web | head -25
