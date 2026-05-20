@@ -5,10 +5,18 @@
 #          - web_client/src/app_config.js (Web Client)
 #          - lib/app_config.dart (Flutter App)
 #          - web_client/index.html (Meta tags)
+#          - web/index.html (Flutter web template title + iOS app title)
 #          - web_client/public/CNAME (Domain)
 # Usage: ./automation/apply_config.sh
 # ==============================================================================
 set -e
+
+# Portable in-place sed (GNU on Linux CI, BSD on macOS dev).
+if sed --version >/dev/null 2>&1; then
+    sed_inplace() { sed -i "$@"; }
+else
+    sed_inplace() { sed -i '' "$@"; }
+fi
 
 # Usage: ./scripts/configure_project.sh [optional_config_path]
 
@@ -41,10 +49,29 @@ INDEX_FILE="$PROJECT_ROOT/web_client/index.html"
 if [ -f "$INDEX_FILE" ]; then
     echo "Updating $INDEX_FILE..."
     # Replace content="https://<anything>/" with content="https://$DOMAIN/" in meta tags
-    sed -i '' "s|content=\"https://[^/]*|content=\"https://$DOMAIN|g" "$INDEX_FILE"
+    sed_inplace "s|content=\"https://[^/]*|content=\"https://$DOMAIN|g" "$INDEX_FILE"
     echo "✔ Updated meta tags"
 else
     echo "Warning: $INDEX_FILE not found."
+fi
+
+# 2b. Update Flutter web template (web/index.html): <title> and the
+#     iOS apple-mobile-web-app-title meta tag. Two app-title metas may exist;
+#     only the second (override, self-closing /> variant) is rewritten so the
+#     upstream Flutter default stays put.
+FLUTTER_INDEX="$PROJECT_ROOT/web/index.html"
+if [ -f "$FLUTTER_INDEX" ]; then
+    if [ ! -z "$APP_NAME" ]; then
+        echo "Updating $FLUTTER_INDEX title to '$APP_NAME'..."
+        sed_inplace "s|<title>.*</title>|<title>$APP_NAME</title>|" "$FLUTTER_INDEX"
+    fi
+    if [ ! -z "$APP_TITLE_SHORT" ]; then
+        # Match both `<meta ... content="X">` and `<meta ... content="X" />`.
+        sed_inplace "s|<meta name=\"apple-mobile-web-app-title\" content=\"[^\"]*\"[[:space:]]*/\{0,1\}>|<meta name=\"apple-mobile-web-app-title\" content=\"$APP_TITLE_SHORT\">|g" "$FLUTTER_INDEX"
+    fi
+    echo "✔ Updated web/index.html"
+else
+    echo "Warning: $FLUTTER_INDEX not found."
 fi
 
 # 3. Update CNAME file (Domain)
@@ -61,39 +88,39 @@ if [ -f "$APP_CONFIG" ]; then
 
     # Update Supabase URL
     if [ ! -z "$SUPABASE_URL" ]; then
-        sed -i '' "s|static supabaseUrl = '.*';|static supabaseUrl = '$SUPABASE_URL';|g" "$APP_CONFIG"
+        sed_inplace "s|static supabaseUrl = '.*';|static supabaseUrl = '$SUPABASE_URL';|g" "$APP_CONFIG"
     fi
     
     # Update Anon Key
     if [ ! -z "$SUPABASE_ANON_KEY" ]; then
-        sed -i '' "s|static anonKey = '.*';|static anonKey = '$SUPABASE_ANON_KEY';|g" "$APP_CONFIG"
+        sed_inplace "s|static anonKey = '.*';|static anonKey = '$SUPABASE_ANON_KEY';|g" "$APP_CONFIG"
     fi
 
     # Update Organization
     if [ ! -z "$ORGANIZATION_ID" ]; then
-        sed -i '' "s|static organization = .*;|static organization = $ORGANIZATION_ID;|g" "$APP_CONFIG"
+        sed_inplace "s|static organization = .*;|static organization = $ORGANIZATION_ID;|g" "$APP_CONFIG"
     fi
     
     # Update Flutter App URL
     if [ ! -z "${FLUTTER_APP_URL+x}" ]; then
-         sed -i '' "s|static flutterAppUrl = '.*';|static flutterAppUrl = '$FLUTTER_APP_URL';|g" "$APP_CONFIG"
+         sed_inplace "s|static flutterAppUrl = '.*';|static flutterAppUrl = '$FLUTTER_APP_URL';|g" "$APP_CONFIG"
     fi
 
     # Update Is App Supported
     if [ ! -z "$IS_APP_SUPPORTED" ]; then
-        sed -i '' "s|static isAppSupported = .*;|static isAppSupported = $IS_APP_SUPPORTED;|g" "$APP_CONFIG"
+        sed_inplace "s|static isAppSupported = .*;|static isAppSupported = $IS_APP_SUPPORTED;|g" "$APP_CONFIG"
     fi
 
     # Update Web Link
     if [ ! -z "$WEB_LINK" ]; then
-        sed -i '' "s|static webLink = \".*\";|static webLink = \"$WEB_LINK\";|g" "$APP_CONFIG"
+        sed_inplace "s|static webLink = \".*\";|static webLink = \"$WEB_LINK\";|g" "$APP_CONFIG"
     fi
 
     # Update Force Occasion Link (empty value -> null)
     if [ -z "$FORCE_OCCASION_LINK" ]; then
-        sed -i '' "s|static forceOccasionLink = .*;|static forceOccasionLink = null;|g" "$APP_CONFIG"
+        sed_inplace "s|static forceOccasionLink = .*;|static forceOccasionLink = null;|g" "$APP_CONFIG"
     else
-        sed -i '' "s|static forceOccasionLink = .*;|static forceOccasionLink = \"$FORCE_OCCASION_LINK\";|g" "$APP_CONFIG"
+        sed_inplace "s|static forceOccasionLink = .*;|static forceOccasionLink = \"$FORCE_OCCASION_LINK\";|g" "$APP_CONFIG"
     fi
 
     echo "✔ Updated app_config.js (Url, Key, Org, FlutterUrl, IsAppSupported, WebLink, ForceOccasionLink)"
@@ -110,58 +137,65 @@ if [ -f "$FLUTTER_CONFIG" ]; then
 
     # Update Supabase URL
     if [ ! -z "$SUPABASE_URL" ]; then
-        sed -i '' "s|static const String supabaseUrl = '.*';|static const String supabaseUrl = '$SUPABASE_URL';|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static const String supabaseUrl = '.*';|static const String supabaseUrl = '$SUPABASE_URL';|g" "$FLUTTER_CONFIG"
     fi
 
     # Update Anon Key
     if [ ! -z "$SUPABASE_ANON_KEY" ]; then
-        sed -i '' "s|static const String anonKey = '.*';|static const String anonKey = '$SUPABASE_ANON_KEY';|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static const String anonKey = '.*';|static const String anonKey = '$SUPABASE_ANON_KEY';|g" "$FLUTTER_CONFIG"
     fi
 
     # Update Organization
     if [ ! -z "$ORGANIZATION_ID" ]; then
-        sed -i '' "s|static const int organization = .*;|static const int organization = $ORGANIZATION_ID;|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static const int organization = .*;|static const int organization = $ORGANIZATION_ID;|g" "$FLUTTER_CONFIG"
     fi
 
     # Update Is App Supported
     if [ ! -z "$IS_APP_SUPPORTED" ]; then
-        sed -i '' "s|static const bool isAppSupported = .*;|static const bool isAppSupported = $IS_APP_SUPPORTED;|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static const bool isAppSupported = .*;|static const bool isAppSupported = $IS_APP_SUPPORTED;|g" "$FLUTTER_CONFIG"
     fi
 
     # Update Web Link
     if [ ! -z "$WEB_LINK" ]; then
-        sed -i '' "s|static const String webLink = \".*\";|static const String webLink = \"$WEB_LINK\";|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static const String webLink = \".*\";|static const String webLink = \"$WEB_LINK\";|g" "$FLUTTER_CONFIG"
     fi
 
     # Update Force Occasion Link (empty value -> null)
     if [ -z "$FORCE_OCCASION_LINK" ]; then
-        sed -i '' "s|static const String? forceOccasionLink = .*;|static const String? forceOccasionLink = null;|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static const String? forceOccasionLink = .*;|static const String? forceOccasionLink = null;|g" "$FLUTTER_CONFIG"
     else
-        sed -i '' "s|static const String? forceOccasionLink = .*;|static const String? forceOccasionLink = \"$FORCE_OCCASION_LINK\";|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static const String? forceOccasionLink = .*;|static const String? forceOccasionLink = \"$FORCE_OCCASION_LINK\";|g" "$FLUTTER_CONFIG"
     fi
 
-    # Theme Configuration for Flutter
+    echo "✔ Updated lib/app_config.dart"
+else
+    echo "Warning: $FLUTTER_CONFIG not found."
+fi
+
+# 5b. Update lib/theme_config.dart (Flutter Theme — seed colors live here, not in app_config.dart).
+FLUTTER_THEME="$PROJECT_ROOT/lib/theme_config.dart"
+if [ -f "$FLUTTER_THEME" ]; then
+    echo "Updating $FLUTTER_THEME..."
     # Convert #RRGGBB to 0xFFRRGGBB
     if [ ! -z "$THEME_SEED_1" ]; then
         VAL="0xFF${THEME_SEED_1:1}"
-        sed -i '' "s|static Color seed1 = const Color(.*);|static Color seed1 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static Color seed1 = const Color(.*);|static Color seed1 = const Color($VAL);|g" "$FLUTTER_THEME"
     fi
     if [ ! -z "$THEME_SEED_2" ]; then
         VAL="0xFF${THEME_SEED_2:1}"
-        sed -i '' "s|static Color seed2 = const Color(.*);|static Color seed2 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static Color seed2 = const Color(.*);|static Color seed2 = const Color($VAL);|g" "$FLUTTER_THEME"
     fi
     if [ ! -z "$THEME_SEED_3" ]; then
         VAL="0xFF${THEME_SEED_3:1}"
-        sed -i '' "s|static Color seed3 = const Color(.*);|static Color seed3 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static Color seed3 = const Color(.*);|static Color seed3 = const Color($VAL);|g" "$FLUTTER_THEME"
     fi
-     if [ ! -z "$THEME_SEED_4" ]; then
+    if [ ! -z "$THEME_SEED_4" ]; then
         VAL="0xFF${THEME_SEED_4:1}"
-        sed -i '' "s|static Color seed4 = const Color(.*);|static Color seed4 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static Color seed4 = const Color(.*);|static Color seed4 = const Color($VAL);|g" "$FLUTTER_THEME"
     fi
-
-    echo "✔ Updated lib/app_config.dart (and theme colors)"
+    echo "✔ Updated lib/theme_config.dart seed colors"
 else
-    echo "Warning: $FLUTTER_CONFIG not found."
+    echo "Warning: $FLUTTER_THEME not found."
 fi
 
 # 6. Update web_client/src/theme_config.css (Web Client Theme)
@@ -170,17 +204,17 @@ if [ -f "$WEB_THEME" ]; then
     echo "Updating $WEB_THEME..."
 
     if [ ! -z "$THEME_SEED_1" ]; then
-        sed -i '' "s|--seed-1: .*;|--seed-1: $THEME_SEED_1;|g" "$WEB_THEME"
+        sed_inplace "s|--seed-1: .*;|--seed-1: $THEME_SEED_1;|g" "$WEB_THEME"
     fi
     if [ ! -z "$THEME_SEED_2" ]; then
-        sed -i '' "s|--seed-2: .*;|--seed-2: $THEME_SEED_2;|g" "$WEB_THEME"
+        sed_inplace "s|--seed-2: .*;|--seed-2: $THEME_SEED_2;|g" "$WEB_THEME"
     fi
     if [ ! -z "$THEME_SEED_3" ]; then
-        sed -i '' "s|--seed-3: .*;|--seed-3: $THEME_SEED_3;|g" "$WEB_THEME"
+        sed_inplace "s|--seed-3: .*;|--seed-3: $THEME_SEED_3;|g" "$WEB_THEME"
     fi
 
     if [ ! -z "$FORM_FONT_SCALE" ]; then
-        sed -i '' "s|--font-scale: .*;|--font-scale: $FORM_FONT_SCALE;|g" "$WEB_THEME"
+        sed_inplace "s|--font-scale: .*;|--font-scale: $FORM_FONT_SCALE;|g" "$WEB_THEME"
     fi
 
     echo "✔ Updated web_client/src/theme_config.css"

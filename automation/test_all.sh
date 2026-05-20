@@ -55,6 +55,7 @@ RUN_WEB=false
 RUN_DB=false
 RUN_FLUTTER=false
 RUN_INTEGRATION=false
+RUN_AUTOMATION=false
 
 # If no arguments, run all
 if [ $# -eq 0 ]; then
@@ -62,6 +63,7 @@ if [ $# -eq 0 ]; then
     RUN_DB=true
     RUN_FLUTTER=true
     RUN_INTEGRATION=true
+    RUN_AUTOMATION=true
 else
     # Parse arguments
     for arg in "$@"
@@ -79,9 +81,12 @@ else
             integration)
                 RUN_INTEGRATION=true
                 ;;
+            automation)
+                RUN_AUTOMATION=true
+                ;;
             *)
                 echo "Unknown argument: $arg"
-                echo "Usage: ./automation/test_all.sh [web] [db] [flutter] [integration]"
+                echo "Usage: ./automation/test_all.sh [web] [db] [flutter] [integration] [automation]"
                 exit 1
                 ;;
         esac
@@ -231,6 +236,28 @@ if [ "$RUN_INTEGRATION" = true ]; then
     else
         echo "⚠️  SKIPPING Integration Tests: Missing DATABASE_URL."
     fi
+fi
+
+# 5. Run Automation Tests (deploy.yml, apply_config.sh smoke).
+if [ "$RUN_AUTOMATION" = true ]; then
+    echo ""
+    echo ">>> Automation Scripts Tests..."
+
+    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/deploy_workflow.test.sh"; do
+        if [ -x "$t" ]; then
+            echo "Running $(basename "$t")..."
+            set +e
+            "$t"
+            res=$?
+            set -e
+            if [ $res -ne 0 ]; then
+                echo "⚠️  WARNING: $(basename "$t") FAILED."
+                exit 1
+            fi
+        else
+            echo "Skipping $t (missing or not executable)."
+        fi
+    done
 fi
 
 echo ""
