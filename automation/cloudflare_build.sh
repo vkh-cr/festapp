@@ -31,8 +31,11 @@ echo "Building Flutter App..."
 flutter precache --web
 flutter build web --release --base-href /
 
-# 3. Rename Flutter index.html to flutter.html so Web Client index.html sits at root
-mv build/web/index.html build/web/flutter.html
+# 3. Rename Flutter index.html so Web Client index.html sits at root.
+#    Cloudflare Pages strips ".html" from URLs (/foo.html -> /foo), which would
+#    create a redirect loop with our "/* -> /flutter.html 200" rewrite. Use an
+#    extension-less filename and serve it as text/html via _headers below.
+mv build/web/index.html build/web/flutter
 
 # 4. Build Web Client
 echo "Building Web Client..."
@@ -44,6 +47,28 @@ npm run build
 cp -r dist/* ../build/web/
 
 cd ..
+
+# 6. Cloudflare-specific overrides (overwrite files copied from web_client/public/)
+cat > build/web/_redirects <<'REDIRECTS'
+# Cloudflare Pages routing (overrides web_client/public/_redirects)
+# Web Client routes (SPA)
+/form/*  /index.html  200
+/        /index.html  200
+
+# Flutter SPA routes — rewrite to /flutter (extension-less file with text/html via _headers)
+/login    /flutter  200
+/admin    /flutter  200
+/transfer /flutter  200
+
+# Fallback: everything else goes to Flutter
+/*        /flutter  200
+REDIRECTS
+
+cat > build/web/_headers <<'HEADERS'
+# Force HTML mime type on the extension-less Flutter entry point
+/flutter
+  Content-Type: text/html; charset=utf-8
+HEADERS
 
 echo "Build complete. Output in build/web"
 ls -la build/web | head -25
