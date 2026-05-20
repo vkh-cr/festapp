@@ -56,8 +56,9 @@ else
 fi
 
 # 2b. Update Flutter web template (web/index.html): <title> and the
-#     iOS apple-mobile-web-app-title meta tag. Two app-title metas exist;
-#     only the second (override) is rewritten so the upstream default stays.
+#     iOS apple-mobile-web-app-title meta tag. Two app-title metas may exist;
+#     only the second (override, self-closing /> variant) is rewritten so the
+#     upstream Flutter default stays put.
 FLUTTER_INDEX="$PROJECT_ROOT/web/index.html"
 if [ -f "$FLUTTER_INDEX" ]; then
     if [ ! -z "$APP_NAME" ]; then
@@ -65,8 +66,8 @@ if [ -f "$FLUTTER_INDEX" ]; then
         sed_inplace "s|<title>.*</title>|<title>$APP_NAME</title>|" "$FLUTTER_INDEX"
     fi
     if [ ! -z "$APP_TITLE_SHORT" ]; then
-        # Only rewrite the override (the one with self-closing /> at end).
-        sed_inplace "s|<meta name=\"apple-mobile-web-app-title\" content=\"[^\"]*\" />|<meta name=\"apple-mobile-web-app-title\" content=\"$APP_TITLE_SHORT\" />|" "$FLUTTER_INDEX"
+        # Match both `<meta ... content="X">` and `<meta ... content="X" />`.
+        sed_inplace "s|<meta name=\"apple-mobile-web-app-title\" content=\"[^\"]*\"[[:space:]]*/\{0,1\}>|<meta name=\"apple-mobile-web-app-title\" content=\"$APP_TITLE_SHORT\">|g" "$FLUTTER_INDEX"
     fi
     echo "✔ Updated web/index.html"
 else
@@ -166,28 +167,35 @@ if [ -f "$FLUTTER_CONFIG" ]; then
         sed_inplace "s|static const String? forceOccasionLink = .*;|static const String? forceOccasionLink = \"$FORCE_OCCASION_LINK\";|g" "$FLUTTER_CONFIG"
     fi
 
-    # Theme Configuration for Flutter
+    echo "✔ Updated lib/app_config.dart"
+else
+    echo "Warning: $FLUTTER_CONFIG not found."
+fi
+
+# 5b. Update lib/theme_config.dart (Flutter Theme — seed colors live here, not in app_config.dart).
+FLUTTER_THEME="$PROJECT_ROOT/lib/theme_config.dart"
+if [ -f "$FLUTTER_THEME" ]; then
+    echo "Updating $FLUTTER_THEME..."
     # Convert #RRGGBB to 0xFFRRGGBB
     if [ ! -z "$THEME_SEED_1" ]; then
         VAL="0xFF${THEME_SEED_1:1}"
-        sed_inplace "s|static Color seed1 = const Color(.*);|static Color seed1 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static Color seed1 = const Color(.*);|static Color seed1 = const Color($VAL);|g" "$FLUTTER_THEME"
     fi
     if [ ! -z "$THEME_SEED_2" ]; then
         VAL="0xFF${THEME_SEED_2:1}"
-        sed_inplace "s|static Color seed2 = const Color(.*);|static Color seed2 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static Color seed2 = const Color(.*);|static Color seed2 = const Color($VAL);|g" "$FLUTTER_THEME"
     fi
     if [ ! -z "$THEME_SEED_3" ]; then
         VAL="0xFF${THEME_SEED_3:1}"
-        sed_inplace "s|static Color seed3 = const Color(.*);|static Color seed3 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static Color seed3 = const Color(.*);|static Color seed3 = const Color($VAL);|g" "$FLUTTER_THEME"
     fi
-     if [ ! -z "$THEME_SEED_4" ]; then
+    if [ ! -z "$THEME_SEED_4" ]; then
         VAL="0xFF${THEME_SEED_4:1}"
-        sed_inplace "s|static Color seed4 = const Color(.*);|static Color seed4 = const Color($VAL);|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static Color seed4 = const Color(.*);|static Color seed4 = const Color($VAL);|g" "$FLUTTER_THEME"
     fi
-
-    echo "✔ Updated lib/app_config.dart (and theme colors)"
+    echo "✔ Updated lib/theme_config.dart seed colors"
 else
-    echo "Warning: $FLUTTER_CONFIG not found."
+    echo "Warning: $FLUTTER_THEME not found."
 fi
 
 # 6. Update web_client/src/theme_config.css (Web Client Theme)
