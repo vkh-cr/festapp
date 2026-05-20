@@ -30,9 +30,22 @@ jobs:
       - name: Build (Flutter + Web Client) via shared script
         run: ./automation/cloudflare_build.sh
 
+      - name: Ensure production branch is prod/csmostrava2026
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -e
+          RESP=$(curl -sS -X PATCH \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/pages/projects/csmostrava2026" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data '{"production_branch":"prod/csmostrava2026"}')
+          echo "$RESP" | python3 -c "import json,sys; d=json.load(sys.stdin); print('production_branch=', d.get('result',{}).get('production_branch')); sys.exit(0 if d.get('success') else 1)"
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy build/web --project-name=csmostrava2026 --branch=main
+          command: pages deploy build/web --project-name=csmostrava2026 --branch=prod/csmostrava2026
