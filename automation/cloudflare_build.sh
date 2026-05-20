@@ -57,6 +57,13 @@ cd ..
 #     for /index.html would receive a 308 redirect, breaking the worker route.
 mv build/web/index.html build/web/webclient
 
+# 5c. Rename auth_bridge.html to extension-less /auth_bridge for the same
+#     reason. RouterService still sends users to /auth_bridge.html, so the
+#     worker rewrites that path to the extension-less file.
+if [ -f build/web/auth_bridge.html ]; then
+    mv build/web/auth_bridge.html build/web/auth_bridge
+fi
+
 # 6. Cloudflare-specific routing via Pages Function (_worker.js).
 #    Reason: Cloudflare Pages applies _redirects BEFORE static assets, so a
 #    "/* /flutter 200" fallback rewrites every URL (including /favicon.ico,
@@ -72,10 +79,11 @@ mv build/web/index.html build/web/webclient
 rm -f build/web/_redirects build/web/_headers
 
 cat > build/web/_worker.js <<'WORKER'
-// Both entry-points are stored extension-less so Cloudflare's .html-strip
+// All HTML entry-points are stored extension-less so Cloudflare's .html-strip
 // does not turn the worker's ASSETS.fetch into a 308 redirect.
 const WEB_CLIENT_INDEX = "/webclient";
 const FLUTTER_ENTRY = "/flutter";
+const AUTH_BRIDGE = "/auth_bridge";
 
 // Routes handled by the web_client SPA.
 const WEB_CLIENT_PREFIXES = ["/form/"];
@@ -84,7 +92,14 @@ const WEB_CLIENT_EXACT = new Set(["/"]);
 // Routes handled by the Flutter SPA.
 const FLUTTER_PREFIXES = ["/login", "/admin", "/transfer"];
 
-function htmlResponse(assetResponse) {
+// Paths that should serve the auth_bridge handover page. RouterService still
+// posts users to /auth_bridge.html, so we accept both spellings.
+const AUTH_BRIDGE_PATHS = new Set(["/auth_bridge", "/auth_bridge.html"]);
+
+// Flutter request paths (legacy /flutter.html still arrives from older clients).
+const FLUTTER_DIRECT_PATHS = new Set(["/flutter", "/flutter.html"]);
+
+function htmlResponse(assetResponse, search) {
   const headers = new Headers(assetResponse.headers);
   headers.set("content-type", "text/html; charset=utf-8");
   headers.delete("location");
@@ -97,7 +112,8 @@ function htmlResponse(assetResponse) {
 async function serveAsset(env, request, path) {
   const url = new URL(request.url);
   url.pathname = path;
-  url.search = "";
+  // Preserve the request query (?redirect=...&...) so downstream HTML scripts
+  // (auth_bridge, Flutter loader) can still see their parameters.
   return env.ASSETS.fetch(new Request(url.toString(), { method: "GET" }));
 }
 
@@ -111,14 +127,14 @@ export default {
       return htmlResponse(res);
     }
 
-    if (FLUTTER_PREFIXES.some(p => path === p || path.startsWith(p + "/"))) {
-      const res = await serveAsset(env, request, FLUTTER_ENTRY);
+    if (AUTH_BRIDGE_PATHS.has(path)) {
+      const res = await serveAsset(env, request, AUTH_BRIDGE);
       return htmlResponse(res);
     }
 
-    // Direct hit on the extension-less Flutter entry -> set html content-type.
-    if (path === FLUTTER_ENTRY) {
-      const res = await env.ASSETS.fetch(request);
+    if (FLUTTER_DIRECT_PATHS.has(path) ||
+        FLUTTER_PREFIXES.some(p => path === p || path.startsWith(p + "/"))) {
+      const res = await serveAsset(env, request, FLUTTER_ENTRY);
       return htmlResponse(res);
     }
 
