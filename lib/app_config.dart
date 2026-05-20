@@ -7,19 +7,19 @@ import 'package:fstapp/components/occasion/admin_page.dart';
 class AppConfig {
   static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
   static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3ZnBkanhzZG1rZnlyenFicmxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTEyMjgwNDksImV4cCI6MjAyNjgwNDA0OX0.440P3yf8ZqNjOHEQTn9uJhkKyObhD_7PZ2NwaE9e4J0';
-  static const String appName = 'Jubileum mládeže 2025';
+  static const String appName = 'CSM Ostrava';
   static String mapTitle = "Map".tr();
   static const bool showPWAInstallOption = true;
   static const bool isOwnProgramSupportedWithoutSignIn = true;
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
-  static const String oneSignalAppId = '7140cfd2-280d-4971-a81a-b78503e99e6e';
+  static const String oneSignalAppId = '';
   static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
-  static const int organization = 6;
+  static const int organization = 9;
   //setup occasion id to force occasion
-  static const String? forceOccasionLink = "jm2025";
+  static const String? forceOccasionLink = "csmostrava2026";
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
   static const bool isAppSupported = true;
@@ -27,7 +27,7 @@ class AppConfig {
   static const bool isContractFeatureEnabled = false;
   static const bool showBankSupportRole = false;
 
-  static const String webLink = "https://jubileum2025.netlify.app";
+  static const String webLink = "https://csmostrava2026.netlify.app";
   static const String imageWorkerUrl = '';
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;

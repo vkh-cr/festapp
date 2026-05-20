@@ -1,22 +1,15 @@
 @font-face {
-    font-family: 'Futura PT';
-    src: url('./assets/fonts/FuturaPTBook.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Futura PT';
-    src: url('./assets/fonts/FuturaPTMedium.ttf') format('truetype');
-    font-weight: 500;
+    font-family: 'Gill Sans';
+    src: url('./assets/fonts/GillSansBold.otf') format('opentype');
+    font-weight: 700;
     font-style: normal;
 }
 
 :root {
     /* Colors from properties matches Flutter ThemeConfig */
-    --seed-1: #4785cb;
-    --seed-2: #fab417; /* dddPrimary */
-    --seed-3: #3ea134; /* lllPrimary */
+    --seed-1: #0000f4;
+    --seed-2: #fd6206; /* dddPrimary */
+    --seed-3: #6785b7; /* lllPrimary */
     --white: #ffffff;
 
     /* Light Theme (Default) */
@@ -61,7 +54,7 @@ body.dark-mode {
 }
 
 body {
-    font-family: 'Futura PT', sans-serif; /* Default font from Flutter */
+    font-family: 'Gill Sans', sans-serif; /* Default font from Flutter */
     margin: 0;
     background-color: var(--background-color);
     color: var(--text-color);

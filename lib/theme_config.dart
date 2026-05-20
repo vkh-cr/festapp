@@ -9,7 +9,7 @@ class ThemeConfig {
   static bool isDarkModeEnabled = false;
 
   // Base theme to hold common properties
-  static final fontFamily = "Futura PT";
+  static final fontFamily = "Gill Sans";
   static ThemeData baseTheme() => ThemeData(
       fontFamily: fontFamily,
       useMaterial3: false,
@@ -52,10 +52,10 @@ class ThemeConfig {
       backgroundColor(context);
 
   static Color surfaceColor(BuildContext context) => grey200(context);
-  static Color seed1 = const Color(0xFF4785cb);
-  static Color seed2 = const Color(0xFFfab417); // brighter
-  static Color seed3 = const Color(0xFF3ea134); // darker
-  static Color seed4 = const Color(0xFFdc2732);
+  static Color seed1 = const Color(0xFF0000f4);
+  static Color seed2 = const Color(0xFFfd6206);
+  static Color seed3 = const Color(0xFF6785b7);
+  static Color seed4 = const Color(0xFFffffff);
 
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
