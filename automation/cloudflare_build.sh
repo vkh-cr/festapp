@@ -52,6 +52,11 @@ cp -r dist/* ../build/web/
 
 cd ..
 
+# 5b. Rename Web Client index.html to extension-less /webclient.
+#     Same reason as /flutter: Cloudflare strips .html and the worker fetch
+#     for /index.html would receive a 308 redirect, breaking the worker route.
+mv build/web/index.html build/web/webclient
+
 # 6. Cloudflare-specific routing via Pages Function (_worker.js).
 #    Reason: Cloudflare Pages applies _redirects BEFORE static assets, so a
 #    "/* /flutter 200" fallback rewrites every URL (including /favicon.ico,
@@ -67,7 +72,9 @@ cd ..
 rm -f build/web/_redirects build/web/_headers
 
 cat > build/web/_worker.js <<'WORKER'
-const WEB_CLIENT_INDEX = "/index.html";
+// Both entry-points are stored extension-less so Cloudflare's .html-strip
+// does not turn the worker's ASSETS.fetch into a 308 redirect.
+const WEB_CLIENT_INDEX = "/webclient";
 const FLUTTER_ENTRY = "/flutter";
 
 // Routes handled by the web_client SPA.
@@ -80,6 +87,7 @@ const FLUTTER_PREFIXES = ["/login", "/admin", "/transfer"];
 function htmlResponse(assetResponse) {
   const headers = new Headers(assetResponse.headers);
   headers.set("content-type", "text/html; charset=utf-8");
+  headers.delete("location");
   return new Response(assetResponse.body, {
     status: 200,
     headers,
@@ -89,7 +97,8 @@ function htmlResponse(assetResponse) {
 async function serveAsset(env, request, path) {
   const url = new URL(request.url);
   url.pathname = path;
-  return env.ASSETS.fetch(new Request(url.toString(), request));
+  url.search = "";
+  return env.ASSETS.fetch(new Request(url.toString(), { method: "GET" }));
 }
 
 export default {
@@ -104,6 +113,12 @@ export default {
 
     if (FLUTTER_PREFIXES.some(p => path === p || path.startsWith(p + "/"))) {
       const res = await serveAsset(env, request, FLUTTER_ENTRY);
+      return htmlResponse(res);
+    }
+
+    // Direct hit on the extension-less Flutter entry -> set html content-type.
+    if (path === FLUTTER_ENTRY) {
+      const res = await env.ASSETS.fetch(request);
       return htmlResponse(res);
     }
 
