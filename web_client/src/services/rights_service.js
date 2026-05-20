@@ -25,15 +25,14 @@ export class RightsService {
         // Simple caching logic: if we have context and not forcing, maybe skip?
         // But for now, let's just fetch to be safe and ensure fresh rights.
         
-        // If we don't have a link/formLink, try to infer or just return if nothing to fetch?
-        // In Flutter, it infers from current URL.
-        const effectiveLink = link || (window.location.hash.includes('/') ? null : null); // logic to extract link if needed
+        // Mirror Flutter rights_service.dart: forceOccasionLink overrides when no explicit link given.
+        const effectiveLink = link || AppConfig.forceOccasionLink || null;
 
         try {
             const client = SupabaseService.getClient();
             if (!client) {
                 console.warn("RightsService: Supabase client not initialized. Deferring update.");
-                // Retrying after a short delay or just returning false? 
+                // Retrying after a short delay or just returning false?
                 // Since this is likely the first load, let's retry once after a short delay to let Main.init finish.
                 return new Promise(resolve => {
                     setTimeout(() => resolve(this.updateAppData({ link, unitId, formLink, force })), 100);
@@ -42,10 +41,10 @@ export class RightsService {
 
             const { data, error } = await client.rpc('get_app_config_v218', {
                 data_in: {
-                    link: link, // Can be null
+                    link: effectiveLink,
                     form_link: formLink, // Can be null
                     unit_id: unitId,
-                    organization: AppConfig.organization || 'festapp', 
+                    organization: AppConfig.organization || 'festapp',
                     platform: { platform: 'web' }
                 }
             });
