@@ -1,0 +1,48 @@
+name: Deploy csmostrava2026 to Cloudflare Pages
+
+on:
+  push:
+    branches: [ prod/csmostrava2026 ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.7'
+          channel: 'stable'
+
+      - name: Build Flutter
+        run: |
+          flutter precache
+          flutter build web --release --base-href /
+          mv build/web/index.html build/web/flutter.html
+
+      - name: Build Web Client and Merge
+        run: |
+          cd web_client
+          npm install
+          npm run build
+          cp -r dist/* ../build/web/
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy build/web --project-name=csmostrava2026 --branch=prod/csmostrava2026
