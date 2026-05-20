@@ -89,7 +89,14 @@ if [ -f "$APP_CONFIG" ]; then
         sed -i '' "s|static webLink = \".*\";|static webLink = \"$WEB_LINK\";|g" "$APP_CONFIG"
     fi
 
-    echo "✔ Updated app_config.js (Url, Key, Org, FlutterUrl, IsAppSupported, WebLink)"
+    # Update Force Occasion Link (empty value -> null)
+    if [ -z "$FORCE_OCCASION_LINK" ]; then
+        sed -i '' "s|static forceOccasionLink = .*;|static forceOccasionLink = null;|g" "$APP_CONFIG"
+    else
+        sed -i '' "s|static forceOccasionLink = .*;|static forceOccasionLink = \"$FORCE_OCCASION_LINK\";|g" "$APP_CONFIG"
+    fi
+
+    echo "✔ Updated app_config.js (Url, Key, Org, FlutterUrl, IsAppSupported, WebLink, ForceOccasionLink)"
 else
     echo "Warning: $APP_CONFIG not found."
 fi
@@ -124,6 +131,13 @@ if [ -f "$FLUTTER_CONFIG" ]; then
     # Update Web Link
     if [ ! -z "$WEB_LINK" ]; then
         sed -i '' "s|static const String webLink = \".*\";|static const String webLink = \"$WEB_LINK\";|g" "$FLUTTER_CONFIG"
+    fi
+
+    # Update Force Occasion Link (empty value -> null)
+    if [ -z "$FORCE_OCCASION_LINK" ]; then
+        sed -i '' "s|static const String? forceOccasionLink = .*;|static const String? forceOccasionLink = null;|g" "$FLUTTER_CONFIG"
+    else
+        sed -i '' "s|static const String? forceOccasionLink = .*;|static const String? forceOccasionLink = \"$FORCE_OCCASION_LINK\";|g" "$FLUTTER_CONFIG"
     fi
 
     # Theme Configuration for Flutter
