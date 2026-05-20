@@ -14,7 +14,7 @@ Used for the `csmostrava2026` branch; other `prod/*` branches stay on Netlify.
    - `SUPABASE_URL` = `https://lwfpdjxsdmkfyrzqbrlk.supabase.co`
    - `SUPABASE_ANON_KEY` = (jubileum/csm shared anon key)
    - `ORGANIZATION_ID` = `9`
-4. **Custom domain:** add `csmostrava2026.netlify.app` or your custom domain.
+4. **Custom domain:** add `csmostrava.festapp.net` or your custom domain.
 
 ## How routing works
 

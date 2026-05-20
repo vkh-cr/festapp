@@ -9,7 +9,7 @@ export class AppConfig {
     static isAllUnit = false;
     static isAppSupported = true;
     static flutterAppUrl = '';
-    static webLink = "https://csmostrava2026.netlify.app";
+    static webLink = "https://csmostrava.festapp.net";
     static compatibleUrls = [AppConfig.webLink];
 
     

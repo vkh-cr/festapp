@@ -27,7 +27,7 @@ class AppConfig {
   static const bool isContractFeatureEnabled = false;
   static const bool showBankSupportRole = false;
 
-  static const String webLink = "https://csmostrava2026.netlify.app";
+  static const String webLink = "https://csmostrava.festapp.net";
   static const String imageWorkerUrl = '';
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;
