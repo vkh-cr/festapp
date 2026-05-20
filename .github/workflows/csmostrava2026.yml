@@ -27,22 +27,12 @@ jobs:
           flutter-version: '3.38.7'
           channel: 'stable'
 
-      - name: Build Flutter
-        run: |
-          flutter precache
-          flutter build web --release --base-href /
-          mv build/web/index.html build/web/flutter.html
-
-      - name: Build Web Client and Merge
-        run: |
-          cd web_client
-          npm install
-          npm run build
-          cp -r dist/* ../build/web/
+      - name: Build (Flutter + Web Client) via shared script
+        run: ./automation/cloudflare_build.sh
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy build/web --project-name=csmostrava2026 --branch=prod/csmostrava2026
+          command: pages deploy build/web --project-name=csmostrava2026 --branch=main

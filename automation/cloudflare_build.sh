@@ -26,6 +26,10 @@ fi
 
 flutter --version
 
+# 1b. Apply project.conf to source files (title, app_config.js, app_config.dart, theme, fonts, version).
+echo "Applying project configuration..."
+./automation/apply_config.sh
+
 # 2. Build Flutter Web
 echo "Building Flutter App..."
 flutter precache --web
