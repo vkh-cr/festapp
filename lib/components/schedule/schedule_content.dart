@@ -141,10 +141,13 @@ class _ScheduleContentState extends State<ScheduleContent> {
           renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
               rendererContext, Tb.events.dataIsCancelled),
         ),
-        if ((FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule)
-                    as ScheduleFeature?)
-                ?.scheduleType ==
-            ScheduleFeature.scheduleTypeAdvanced)
+        if (() {
+          final t = (FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule)
+                      as ScheduleFeature?)
+                  ?.scheduleType;
+          return t == ScheduleFeature.scheduleTypeAdvanced ||
+              t == ScheduleFeature.scheduleTypeLight;
+        }())
           TrinaColumn(
             title: "Intro Image".tr(),
             field: Tb.events.dataHeaderImage,

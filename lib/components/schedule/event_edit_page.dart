@@ -405,37 +405,58 @@ class _EventEditPageState extends State<EventEditPage> {
                                       horizontal: 16.0,
                                       vertical:
                                           8.0), // Add padding to align with TextFormFields
-                                  child: DropdownButtonFormField<String?>(
-                                    initialValue:
-                                        type, // Handles null for "No Type" or new event
-                                    decoration: InputDecoration(
-                                      labelText: CommonStrings.type,
-                                      border:
-                                          const OutlineInputBorder(), // Consistent styling
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 10.0,
-                                              vertical: 15.0), // Adjust padding
-                                    ),
-                                    items: [
+                                  child: Builder(builder: (context) {
+                                    // Dedupe items by value: tolerate two EventTypes
+                                    // sharing the same code without tripping the
+                                    // DropdownButton "exactly one item" assert.
+                                    final seenValues = <String?>{};
+                                    final typeItems = <DropdownMenuItem<String?>>[
                                       DropdownMenuItem<String?>(
                                         value: "",
                                         child: Text(FeaturesStrings.noType),
                                       ),
-                                      ..._definedEventTypes.map((eventType) {
-                                        return DropdownMenuItem<String?>(
+                                    ];
+                                    seenValues.add("");
+                                    for (final eventType in _definedEventTypes) {
+                                      if (seenValues.add(eventType.code)) {
+                                        typeItems.add(DropdownMenuItem<String?>(
                                           value: eventType.code,
                                           child: Text(eventType.title),
-                                        );
-                                      }),
-                                    ],
-                                    onChanged: (String? newValue) {
-                                      setState(() {
-                                        type = newValue;
-                                      });
-                                    },
-                                    // onSaved: (value) => type = value, // Not strictly needed as onChanged updates the state variable
-                                  ),
+                                        ));
+                                      }
+                                    }
+                                    // Resolve current value against known codes.
+                                    // Legacy events may store the title instead
+                                    // of the code — try to recover that case.
+                                    String? resolvedType;
+                                    if (type == null || type!.isEmpty) {
+                                      resolvedType = "";
+                                    } else if (seenValues.contains(type)) {
+                                      resolvedType = type;
+                                    } else {
+                                      final byTitle = _definedEventTypes
+                                          .firstWhereOrNull(
+                                              (e) => e.title == type);
+                                      resolvedType = byTitle?.code;
+                                    }
+                                    return DropdownButtonFormField<String?>(
+                                      initialValue: resolvedType,
+                                      decoration: InputDecoration(
+                                        labelText: CommonStrings.type,
+                                        border: const OutlineInputBorder(),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 10.0,
+                                                vertical: 15.0),
+                                      ),
+                                      items: typeItems,
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          type = newValue;
+                                        });
+                                      },
+                                    );
+                                  }),
                                 ),
                                 TextFormField(
                                   initialValue: showInsideEvent,

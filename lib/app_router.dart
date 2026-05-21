@@ -168,9 +168,14 @@ class AppRouter extends RootStackRouter {
   static AutoRoute getSchedulePage() {
     var scheduleFeat =
         FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
-    if (scheduleFeat is ScheduleFeature &&
-        scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced) {
-      return AutoRoute(page: ScheduleRoute.page, path: "", initial: true);
+    if (scheduleFeat is ScheduleFeature) {
+      if (scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced) {
+        return AutoRoute(page: ScheduleRoute.page, path: "", initial: true);
+      }
+      if (scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeLight) {
+        return AutoRoute(
+            page: ScheduleLightRoute.page, path: "", initial: true);
+      }
     }
     return AutoRoute(page: ScheduleBasicRoute.page, path: "", initial: true);
   }

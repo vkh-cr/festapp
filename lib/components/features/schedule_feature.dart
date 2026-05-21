@@ -84,6 +84,7 @@ class ScheduleFeature extends Feature {
   static const String metaSchedule = "schedule";
   static const String scheduleTypeBasic = "basic";
   static const String scheduleTypeAdvanced = "advanced";
+  static const String scheduleTypeLight = "light";
 
   static const String metaBreakDefinition = "break_definition";
   static const String metaAfternoonBreak = "afternoon_break_time";
@@ -255,6 +256,8 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
         return FeaturesStrings.optionBasic.tr();
       case ScheduleFeature.scheduleTypeAdvanced:
         return FeaturesStrings.optionAdvanced.tr();
+      case ScheduleFeature.scheduleTypeLight:
+        return FeaturesStrings.optionLight.tr();
       default:
         return value;
     }
@@ -306,7 +309,8 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
                 labelText: FeaturesStrings.labelScheduleType.tr()),
             items: <String>[
               ScheduleFeature.scheduleTypeBasic,
-              ScheduleFeature.scheduleTypeAdvanced
+              ScheduleFeature.scheduleTypeAdvanced,
+              ScheduleFeature.scheduleTypeLight,
             ]
                 .map((value) => DropdownMenuItem(
                       value: value,

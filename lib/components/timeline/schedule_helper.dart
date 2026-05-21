@@ -159,6 +159,12 @@ class TimeBlockItem {
   }
 
   /// Factory from EventModel as a child event.
+  ///
+  /// Keeps the `data` map populated for the legacy dot ScheduleTimeline view
+  /// (used by the advanced layout for nested children), and also fills the
+  /// structured fields (`title`, `eventType`, `participants`,
+  /// `maxParticipants`, `imageUrl`, `description`) so richer renderers (e.g.
+  /// the light layout's child cards) can show full content.
   factory TimeBlockItem.fromEventModelAsChild(EventModel model) {
     return TimeBlockItem(
       id: model.id!,
@@ -169,10 +175,17 @@ class TimeBlockItem {
         "leftText": model.durationTimeString(),
         "rightText": model.toString()
       },
+      description: model.description,
+      eventType: model.type,
       timeBlockPlace: model.place != null && model.place!.id != null
           ? TimeBlockPlace.fromPlaceModel(model.place!)
           : null,
-      isCancelled: model.isCancelled, // Added
+      title: model.title ?? '',
+      participants: model.currentParticipants ?? 0,
+      maxParticipants: model.maxParticipants ?? 0,
+      imageUrl: model.data?[Tb.events.dataHeaderImage],
+      isCancelled: model.isCancelled,
+      isInMySchedule: model.isInMySchedule ?? false,
     );
   }
 

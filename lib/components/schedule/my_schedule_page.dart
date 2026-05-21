@@ -49,7 +49,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
     var scheduleFeat =
         FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
     if (scheduleFeat is ScheduleFeature &&
-        scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced) {
+        (scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced ||
+            scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeLight)) {
       _isAdvancedTimeline = true;
     }
     await loadDataOffline();
