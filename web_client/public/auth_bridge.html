@@ -40,9 +40,12 @@
 
     <script>
         // Configuration
+        // In production we hand off to Flutter's TransferPage via the /transfer route — it consumes
+        // the sessionStorage handoff and replaces the URL with the actual redirect target, so the
+        // address bar never shows /flutter or /flutter.html.
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const FLUTTER_HOST = 'http://127.0.0.1:5000';
-        const CALLBACK_Path = isLocal ? `${FLUTTER_HOST}/transfer` : '/flutter.html';
+        const CALLBACK_Path = isLocal ? `${FLUTTER_HOST}/transfer` : '/transfer';
         const SUPABASE_KEY = 'sb-kjdpmixlnhntmxjedpxh-auth-token';
 
         function getTokens() {
