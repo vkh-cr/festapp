@@ -24,19 +24,26 @@ echo "Cloudflare Pages build starting..."
 FLUTTER_VERSION="3.38.7"
 FLUTTER_INSTALL_DIR="${HOME}/flutter"
 
-# 1. Install Flutter to ${HOME} (Cloudflare Pages writable area). GitHub
-#    Actions already has Flutter via subosito/flutter-action, so this no-ops
-#    there.
-if ! command -v flutter &> /dev/null; then
+# 1. Resolve Flutter command. Preference order:
+#      1. `flutter` already on PATH (CF Pages CI runs subosito or our prior install).
+#      2. `fvm flutter` (macOS dev box; works on any host with fvm).
+#      3. Download Linux Flutter into ${HOME} (CF Pages Linux build container).
+FLUTTER_CMD=""
+if command -v flutter &> /dev/null; then
+    FLUTTER_CMD="flutter"
+elif command -v fvm &> /dev/null; then
+    FLUTTER_CMD="fvm flutter"
+else
     if [ ! -d "${FLUTTER_INSTALL_DIR}" ]; then
-        echo "Installing Flutter ${FLUTTER_VERSION}..."
+        echo "Installing Flutter ${FLUTTER_VERSION} (linux)..."
         curl -L "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
             | tar -xJf - -C "${HOME}"
     fi
     export PATH="${FLUTTER_INSTALL_DIR}/bin:${PATH}"
+    FLUTTER_CMD="flutter"
 fi
 
-flutter --version
+$FLUTTER_CMD --version
 
 # 1b. Apply project.conf to source files (title, app_config.js, app_config.dart,
 #     theme, fonts, version). Portable sed in apply_config.sh handles Linux/macOS.
@@ -45,8 +52,8 @@ echo "Applying project configuration..."
 
 # 2. Build Flutter Web
 echo "Building Flutter App..."
-flutter precache --web
-flutter build web --release --base-href /
+$FLUTTER_CMD precache --web
+$FLUTTER_CMD build web --release --base-href /
 
 # 3. Rename Flutter index.html so the Web Client index.html sits at root.
 #    Cloudflare strips ".html" from URLs (/foo.html -> 308 /foo). We keep the
@@ -105,9 +112,13 @@ const WEB_CLIENT_EXACT = new Set(["/"]);
 // Flutter SPA routes (login / admin / handover).
 const FLUTTER_PREFIXES = ["/login", "/admin", "/transfer"];
 
-// Aliases accepted from older clients / RouterService (auth_bridge.html, flutter.html).
+// auth_bridge.html alias — RouterService still posts to /auth_bridge.html.
 const AUTH_BRIDGE_PATHS = new Set(["/auth_bridge", "/auth_bridge.html"]);
-const FLUTTER_DIRECT_PATHS = new Set(["/flutter", "/flutter.html"]);
+
+// Internal asset names (extension-less HTML entry points). Cloudflare serves
+// these as application/octet-stream to direct hits, which triggers a browser
+// download. They must never be reachable as a user-facing URL — redirect to /.
+const INTERNAL_ASSET_PATHS = new Set(["/flutter", "/webclient"]);
 
 function htmlResponse(body, originHeaders) {
   const headers = new Headers(originHeaders || {});
@@ -271,6 +282,10 @@ export default {
 
     if (path === "/sitemap.xml") return handleSitemap(request, env);
 
+    if (INTERNAL_ASSET_PATHS.has(path)) {
+      return Response.redirect(new URL("/", url).toString(), 301);
+    }
+
     if (path.startsWith("/form/")) return handleForm(request, env, path);
 
     if (WEB_CLIENT_EXACT.has(path)) {
@@ -283,8 +298,7 @@ export default {
       return htmlResponse(res.body, res.headers);
     }
 
-    if (FLUTTER_DIRECT_PATHS.has(path) ||
-        FLUTTER_PREFIXES.some(p => path === p || path.startsWith(p + "/"))) {
+    if (FLUTTER_PREFIXES.some(p => path === p || path.startsWith(p + "/"))) {
       const res = await serveAsset(env, request, FLUTTER_ENTRY);
       return htmlResponse(res.body, res.headers);
     }
