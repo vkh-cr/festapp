@@ -612,6 +612,7 @@
     "labelScheduleType": "Typ programu",
     "optionBasic": "základní",
     "optionAdvanced": "pokročilý",
+    "optionLight": "light",
     "labelEnableChildren": "Povolit podprogram",
     "subtitleEnableChildren": "Umožňuje přidávat události jako součást nadřazené události.",
     "labelBreakDefinition": "Definice přestávek",

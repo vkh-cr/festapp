@@ -6,6 +6,7 @@ class FeaturesStrings {
       'FeatureSchedule.labelScheduleType'.tr();
   static String get optionBasic => 'FeatureSchedule.optionBasic'.tr();
   static String get optionAdvanced => 'FeatureSchedule.optionAdvanced'.tr();
+  static String get optionLight => 'FeatureSchedule.optionLight'.tr();
 
   // New strings for Enable Children
   static String get labelEnableChildren =>
