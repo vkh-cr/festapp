@@ -168,3 +168,6 @@ automation/image-migration/node_modules/
 # Workers
 workers/*/node_modules/
 **/.wrangler/
+
+# Project-root tool caches (wrangler, vitest)
+/node_modules/
