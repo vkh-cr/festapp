@@ -13,21 +13,29 @@ class LogoWidget extends StatelessWidget {
   /// Force dark mode assets even if the current theme is light.
   final bool? forceDark;
 
+  /// Opt-in alternate asset for schedule/program-style pages.
+  /// Default keeps the normal logo; brand branches may override
+  /// `fstapplogo_program.*` to differentiate the schedule header.
+  final bool programVariant;
+
   const LogoWidget({
     super.key,
     this.onTap,
     this.height,
     this.width,
     this.forceDark,
+    this.programVariant = false,
   });
 
   @override
   Widget build(BuildContext context) {
     // Determine the asset path based on the current theme or forceDark flag.
     // Change these asset paths to match your actual file names.
-    final String logoAsset = ThemeConfig.isDarkMode(context) || forceDark == true
-        ? 'assets/icons/fstapplogo.png'
-        : 'assets/icons/fstapplogo.png';
+    final String logoAsset = programVariant
+        ? 'assets/icons/fstapplogo_program.png'
+        : (ThemeConfig.isDarkMode(context) || forceDark == true
+            ? 'assets/icons/fstapplogo.png'
+            : 'assets/icons/fstapplogo.png');
 
     // If the asset file is an SVG, use SvgPicture; otherwise, use Image.
     final Widget logo = logoAsset.toLowerCase().endsWith('.svg')
