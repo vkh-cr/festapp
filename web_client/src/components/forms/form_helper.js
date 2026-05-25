@@ -1,3 +1,6 @@
+import { FeatureService, DEFAULT_META_SURCHARGE_CURRENCY } from '../features/feature_service.js';
+import { formatPrice } from '../../utils/formatters.js';
+
 export class FormHelper {
     static get metaFields() { return 'fields'; }
     static get metaSecret() { return 'secret'; }
@@ -149,4 +152,81 @@ export class FormHelper {
         return { totalPrice, totalItems, currency };
     }
 
+    /**
+     * Computes meta-surcharge sums grouped by currency across all selected products.
+     * Visual-only — never added to totalPrice. Empty array if DepositFeature is off.
+     * @returns {Array<{currency: string, sum: number}>}
+     */
+    static calculateMetaSurchargeSums(payload, formModel) {
+        const features = formModel && formModel.occasionFeatures;
+        if (!FeatureService.isFeatureEnabled(FeatureService.FeatureConstants.deposit, features)) {
+            return [];
+        }
+
+        // Build a flat list of all fields (top-level + ticket subFields) to resolve product_type defs.
+        const allFields = [];
+        if (formModel.relatedFields) {
+            formModel.relatedFields.forEach(f => {
+                allFields.push(f);
+                if (f.subFields) allFields.push(...f.subFields);
+            });
+        }
+        const findFieldDef = (subFieldId) =>
+            allFields.find(fd => String(fd.id) === String(subFieldId));
+
+        const sumsByCurrency = new Map();
+        const add = (amount, currency) => {
+            if (!Number.isFinite(amount) || amount === 0) return;
+            const key = currency || '';
+            sumsByCurrency.set(key, (sumsByCurrency.get(key) || 0) + amount);
+        };
+
+        const collectFromField = (f) => {
+            const fieldDef = findFieldDef(f._subFieldId);
+            if (!fieldDef || fieldDef.type !== 'product_type') return;
+            // FormFieldModel constructor maps products to fieldDef.options (FormOptionModel with .data carrying meta_surcharge).
+            const options = fieldDef.options || [];
+            if (options.length === 0) return;
+            const selectedRaw = f.product_type !== undefined ? f.product_type : f[fieldDef.type];
+            if (selectedRaw === undefined || selectedRaw === null) return;
+            const parts = String(selectedRaw).split(' | ');
+            parts.forEach(part => {
+                const opt = options.find(o => String(o.id) === String(part));
+                if (!opt || !opt.data || !opt.data.meta_surcharge) return;
+                const ms = opt.data.meta_surcharge;
+                const amount = typeof ms.amount === 'number' ? ms.amount : parseFloat(ms.amount);
+                add(amount, ms.currency || DEFAULT_META_SURCHARGE_CURRENCY);
+            });
+        };
+
+        if (payload.ticket) {
+            payload.ticket.forEach(t => {
+                if (t.fields) t.fields.forEach(collectFromField);
+            });
+        }
+        if (payload.fields) {
+            payload.fields.forEach(collectFromField);
+        }
+
+        return Array.from(sumsByCurrency.entries()).map(([currency, sum]) => ({ currency, sum }));
+    }
+
+    /**
+     * Formats per-currency meta-surcharge sums into display strings.
+     * Zero entries are filtered out so callers can render the result directly.
+     * Used by the price widget (live total) and the order preview (final total).
+     * @param {Array<{currency: string, sum: number}>} sums output of calculateMetaSurchargeSums
+     * @param {string} locale e.g. LocalizationService.currentLocale
+     * @returns {string[]} formatted lines like "+ 200 EUR" / "− 50 EUR"
+     */
+    static formatMetaSurchargeSumLines(sums, locale) {
+        if (!Array.isArray(sums)) return [];
+        return sums
+            .filter(s => s && Number.isFinite(s.sum) && s.sum !== 0)
+            .map(s => {
+                const sign = s.sum < 0 ? '−' : '+';
+                const abs = formatPrice(Math.abs(s.sum), s.currency, 0, locale);
+                return `${sign} ${abs}`;
+            });
+    }
 }

@@ -792,6 +792,10 @@
     "depositOnSiteLabel": "Na místě"
   },
   "FormsFeature": {
+    "showDepositDescription": "Zobrazit popisek zálohy / doplatku u produktů",
+    "defaultSelectionHintSingle": "Klikni na radio vedle volby pro nastavení jako výchozí.",
+    "defaultSelectionHintMulti": "Zaškrtni checkboxy vedle voleb pro předvolení.",
+    "clearDefaultSelection": "Zrušit výchozí volbu",
     "cannotDeleteFormWithResponses": "Formulář nelze smazat, protože již obsahuje odpovědi.",
     "addTicket": "Přidat vstupenku",
     "formsTitle": "Formuláře",
@@ -1320,7 +1324,14 @@
     "depositDeadline": "Termín doplatku",
     "depositDeadlineDaysBefore": "Dní před akcí",
     "depositDeadlineOnSite": "Na místě",
-    "numberOfDays": "Počet dní"
+    "numberOfDays": "Počet dní",
+    "metaSurchargeDescription": "Popisek doplatku (vizuální)",
+    "metaSurchargeDescriptionHelp": "Volný text zobrazený pod cenou produktu (formulář, náhled, e-mail, PDF). Nepřičítá se do objednávky.",
+    "depositModeTitle": "Mód",
+    "depositModeReal": "Skutečná záloha (platební)",
+    "depositModeVirtual": "Doplatek na místě (informativní)",
+    "depositModeRealHelp": "Zákazník platí zálohu předem; zbytek doplatí později nebo na místě.",
+    "depositModeVirtualHelp": "Zobrazí se vedle produktů jako informace; nepřičítá se do součtu objednávky. Lze zadat i záporné hodnoty (slevy)."
   },
   "Feedback": {
     "helpTitle": "Jak můžeme pomoci?",

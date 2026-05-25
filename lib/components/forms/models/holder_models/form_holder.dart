@@ -124,6 +124,9 @@ class FormHolder {
           fieldType: ffm.type!,
           isRequired: ffm.isRequired ?? false,
           options: formOptions,
+          value: ffm.data is Map
+              ? (ffm.data as Map)[FormHelper.metaDefaultValue]
+              : null,
           title: ffm.title ?? "",
           description: ffm.description);
     } else if (fieldType == FormHelper.fieldTypeProductType) {
@@ -137,6 +140,9 @@ class FormHolder {
           fieldType: ffm.type!,
           selectionType: prodSelectionType,
           isRequired: ffm.isRequired ?? false,
+          value: ffm.data is Map
+              ? (ffm.data as Map)[FormHelper.metaDefaultValue]
+              : null,
           productOptions: ffm.productType!.products!
               .map((p) => FormOptionProductModel(
                     p.id.toString(),

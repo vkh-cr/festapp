@@ -226,6 +226,13 @@ body.dark-mode .ticket-header-title {
     color: var(--text-color, #000);
 }
 
+.preview-total-meta-surcharge {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-top: 6px;
+    color: var(--text-color, #000);
+}
+
 /* Actions */
 .preview-actions {
     padding: 16px;

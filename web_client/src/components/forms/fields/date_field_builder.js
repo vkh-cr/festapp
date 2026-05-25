@@ -83,43 +83,6 @@ export class DateFieldBuilder {
             }
         }
 
-        // Initialize Flatpickr
-        flatpickr(input, {
-                dateFormat: 'Y-m-d', // Standard storage format
-                altInput: true,
-                altFormat: LocalizationService.currentLocale === 'cs' ? 'j. n. Y' : 'F j, Y', // Localized format
-                allowInput: true,
-                disableMobile: true, // Force custom picker
-                locale: LocalizationService.currentLocale === 'cs' ? Czech : 'default', // Dynamic locale
-                parseDate: (datestr, format) => {
-                    // Custom parser to allow more flexible input (e.g. "1.1.2000" -> "1. 1. 2000")
-                    try {
-                        // 1. Try default parsing first
-                        const defaultDate = flatpickr.parseDate(datestr, format);
-                        if (defaultDate) return defaultDate;
-                    } catch (e) { }
-
-                    // 2. Try simple fallback for common formats if default failed
-                    if (datestr && typeof datestr === 'string') {
-                        // Fix common "lazy" input: "1.1.2000" -> "2000-01-01"
-                        if (datestr.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
-                            const parts = datestr.split('.');
-                            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                        }
-                        // "1. 1. 2000" check handled by default parser usually, but just in case
-                        if (datestr.match(/^\d{1,2}\. \d{1,2}\. \d{4}$/)) {
-                            const parts = datestr.replace(/ /g, '').split('.');
-                            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                        }
-                    }
-                    return undefined;
-                },
-                // User requested NO limits on calendar picker itself, so we remove minDate/maxDate here
-                // minDate: minDateObj, 
-                maxDate: maxDateObj || 'today',
-                defaultDate: input.value || undefined, 
-        });
-        
         container.appendChild(wrapper);
 
         // Message placeholder (for warnings/errors)
@@ -129,20 +92,23 @@ export class DateFieldBuilder {
         messageContainer.style.marginTop = '4px';
         messageContainer.style.fontSize = '0.85em';
         container.appendChild(messageContainer);
-        
+
         // Native Error placeholder (for standard validation like "required")
         const error = document.createElement('div');
         error.className = 'form-field-error';
         error.style.display = 'none';
         container.appendChild(error);
 
-        // Validation Logic for Age (Custom)
+        // Validation Logic for Age (Custom). Declared before Flatpickr so onChange can call it.
+        let validateAge = null;
         if (minYear > 0 || maxYear > 0) {
-            const validateAge = () => {
+            validateAge = () => {
                 const val = input.value;
                 if (!val) {
                     messageContainer.style.display = 'none';
-                    if (isHard) input.setCustomValidity("");
+                    input.setCustomValidity("");
+                    input.classList.remove('invalid');
+                    input.style.borderColor = '';
                     return;
                 }
 
@@ -150,40 +116,35 @@ export class DateFieldBuilder {
                 const checkDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
 
                 let isOutside = false;
-                if (minDateObj && checkDate < minDateObj) isOutside = true; 
+                if (minDateObj && checkDate < minDateObj) isOutside = true;
                 if (maxDateObj && checkDate > maxDateObj) isOutside = true;
 
                 if (isOutside) {
                     let msg = '';
                     if (customMessage && customMessage.trim() !== '') {
-                        // Simple template replacement
                         msg = customMessage
                             .replace('{minAge}', minYear)
                             .replace('{maxAge}', maxYear);
+                    } else if (isHard) {
+                        msg = FormStrings.birthDateError(minYear, maxYear);
                     } else {
-                        // Default messages
-                        if (isHard) {
-                            msg = FormStrings.birthDateError(minYear, maxYear);
-                        } else {
-                            msg = FormStrings.birthDateWarning(minYear, maxYear);
-                        }
+                        msg = FormStrings.birthDateWarning(minYear, maxYear);
                     }
 
                     messageContainer.textContent = msg;
                     messageContainer.style.display = 'block';
 
                     if (isHard) {
-                        messageContainer.style.color = 'var(--red-color)'; // Error red
-                        messageContainer.classList.add('form-field-error'); // Ensure style match
-                        input.setCustomValidity(msg); // Block submission
+                        messageContainer.style.color = 'var(--red-color)';
+                        messageContainer.classList.add('form-field-error');
+                        input.setCustomValidity(msg);
                         input.classList.add('invalid');
                     } else {
-                         // Use ThemeService for warning color
-                         const warnColor = ThemeService.warningColor || '#ed6c02';
-                         messageContainer.style.color = warnColor;
-                         input.setCustomValidity(""); // Allow submission
-                         input.classList.remove('invalid');
-                         input.style.borderColor = warnColor;
+                        const warnColor = ThemeService.warningColor || '#ed6c02';
+                        messageContainer.style.color = warnColor;
+                        input.setCustomValidity("");
+                        input.classList.remove('invalid');
+                        input.style.borderColor = warnColor;
                     }
                 } else {
                     messageContainer.style.display = 'none';
@@ -192,13 +153,50 @@ export class DateFieldBuilder {
                     input.style.borderColor = '';
                 }
             };
-            
-            // Initial validation if a value is already set
-            if(input.value) validateAge();
+        }
 
+        // Initialize Flatpickr (after validateAge so onChange can reference it)
+        const fpInstance = flatpickr(input, {
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: LocalizationService.currentLocale === 'cs' ? 'j. n. Y' : 'F j, Y',
+                allowInput: true,
+                disableMobile: true,
+                locale: LocalizationService.currentLocale === 'cs' ? Czech : 'default',
+                parseDate: (datestr, format) => {
+                    try {
+                        const defaultDate = flatpickr.parseDate(datestr, format);
+                        if (defaultDate) return defaultDate;
+                    } catch (e) { }
+                    if (datestr && typeof datestr === 'string') {
+                        if (datestr.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
+                            const parts = datestr.split('.');
+                            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        }
+                        if (datestr.match(/^\d{1,2}\. \d{1,2}\. \d{4}$/)) {
+                            const parts = datestr.replace(/ /g, '').split('.');
+                            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        }
+                    }
+                    return undefined;
+                },
+                maxDate: maxDateObj || 'today',
+                defaultDate: input.value || undefined,
+                onChange: () => { if (validateAge) validateAge(); },
+                onClose: () => { if (validateAge) validateAge(); },
+        });
+
+        if (validateAge) {
+            // Initial validation if a value is already set
+            if (input.value) validateAge();
+
+            // Listen on original input (Flatpickr propagates) and altInput (user types here on PC)
             input.addEventListener('input', validateAge);
             input.addEventListener('change', validateAge);
-        } else {
+            if (fpInstance && fpInstance.altInput) {
+                fpInstance.altInput.addEventListener('input', validateAge);
+                fpInstance.altInput.addEventListener('blur', validateAge);
+            }
         }
 
         return container;

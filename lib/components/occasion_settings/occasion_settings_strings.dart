@@ -58,6 +58,23 @@ class OccasionSettingsStrings {
   static String get numberOfDays =>
       'OccasionSettings.numberOfDays'.tr(); // "Number of days"
 
+  // Meta Surcharge (visual-only info, not part of payment)
+  static String get metaSurchargeDescription =>
+      'OccasionSettings.metaSurchargeDescription'.tr(); // "Surcharge description (visual)"
+  static String get metaSurchargeDescriptionHelp =>
+      'OccasionSettings.metaSurchargeDescriptionHelp'
+          .tr(); // "Free-form text shown under product price in form, preview, e-mail, PDF. Not a real charge."
+  static String get depositModeTitle =>
+      'OccasionSettings.depositModeTitle'.tr(); // "Deposit mode"
+  static String get depositModeReal =>
+      'OccasionSettings.depositModeReal'.tr(); // "Real deposit (payment-linked)"
+  static String get depositModeVirtual =>
+      'OccasionSettings.depositModeVirtual'.tr(); // "Virtual surcharge (visual only)"
+  static String get depositModeRealHelp =>
+      'OccasionSettings.depositModeRealHelp'.tr(); // "Customer pays the deposit upfront; the remainder is settled later or on-site."
+  static String get depositModeVirtualHelp =>
+      'OccasionSettings.depositModeVirtualHelp'.tr(); // "Shown next to products as informational; does not affect order total. Negative amounts allowed (discounts)."
+
 
   // Email Settings
   static String get labelReplyToEmail =>

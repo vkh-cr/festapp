@@ -117,9 +117,13 @@ export class TicketFieldBuilder {
                      if (session.state.tickets.length > 0) {
                          ticketData = session.state.tickets[0];
                      }
-                     
-                     // Allow processing even if ticketData is null (to clear inputs)
-                     // if (!ticketData || !ticketData.fields) return;
+
+                     // On the very first sync the DOM already carries defaults applied by
+                     // OptionBuilderHelper.shouldPreselect (radios/checkboxes pre-checked from
+                     // sub-field default_value). Reconciling against an empty state would
+                     // clobber them, so we bail out until a user interaction (or saved-form
+                     // load) writes the first field entry.
+                     if (!ticketData || !ticketData.fields || ticketData.fields.length === 0) return;
 
                      const inputs = container.querySelectorAll('input, select, textarea');
                      inputs.forEach(input => {
@@ -407,7 +411,14 @@ export class TicketFieldBuilder {
                     const inputs = ticketItem.querySelectorAll('input, select, textarea');
                     if (!session || !session.state.tickets[index]) return;
                     const ticketData = session.state.tickets[index];
-                    
+
+                    // On the very first render of a ticket, state.fields is empty but the DOM
+                    // already carries defaults applied by OptionBuilderHelper.shouldPreselect
+                    // (radios/checkboxes pre-checked from sub-field default_value). Reconciling
+                    // against empty state would clobber those defaults, so we bail out until a
+                    // user interaction (or saved-form load) writes the first field entry.
+                    if (!ticketData.fields || ticketData.fields.length === 0) return;
+
                     // Iterate DOM Inputs (Source of UI Truth) -> Sync from State
                     inputs.forEach(input => {
                         const subId = input.dataset.subId;

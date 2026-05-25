@@ -1,5 +1,6 @@
 import { LocalizationService } from '../../../services/localization_service.js';
 import { formatPrice } from '../../../utils/formatters.js';
+import { FeatureService, DEFAULT_META_SURCHARGE_CURRENCY } from '../../features/feature_service.js';
 
 /**
  * Strategy interface:
@@ -46,8 +47,10 @@ class BasePreviewStrategy {
             // Or we assume sum? For now, let's just join titles and existing behavior.
             const mapped = parts.map(part => this._findOption(part, options, context));
             const joinedValue = mapped.map(m => m.value).join(', ');
+            const metas = mapped.map(m => m.metaSurcharge).filter(Boolean);
+            const metaSurcharge = metas.length > 0 ? metas.join('\n') : null;
             // We lose individual prices here, but that's consistent with complex behavior complexity
-            return { value: joinedValue, price: null };
+            return { value: joinedValue, price: null, metaSurcharge };
         }
         
         if (options && options.length > 0) {
@@ -67,14 +70,40 @@ class BasePreviewStrategy {
         if (found) {
             let title = found.title;
             let priceStr = null;
+            const locale = LocalizationService.currentLocale;
             // Extract price if pertinent and available in context
             if (found.price && context && context.currency) {
-                 priceStr = formatPrice(found.price, context.currency, 0, 'cs-CZ');
+                 priceStr = formatPrice(found.price, context.currency, 0, locale);
             }
-            return { value: title, price: priceStr };
+            const metaSurcharge = _buildMetaSurchargeForProduct(found, context);
+            return { value: title, price: priceStr, metaSurcharge };
         }
         return { value: val, price: null };
     }
+}
+
+/**
+ * Visual-only meta-surcharge text for a product in order preview rows.
+ * Returns the string body (no wrapping element), or null when nothing should render.
+ * NEVER affects payment/order totals.
+ */
+function _buildMetaSurchargeForProduct(product, context) {
+    const features = context && context.features;
+    if (!FeatureService.isFeatureEnabled(FeatureService.FeatureConstants.deposit, features)) {
+        return null;
+    }
+    const description = FeatureService.getMetaSurchargeDescription(features);
+    const ms = product && product.data && product.data.meta_surcharge;
+    const amountRaw = ms ? (typeof ms.amount === 'number' ? ms.amount : parseFloat(ms.amount)) : null;
+    const amount = Number.isFinite(amountRaw) && amountRaw !== 0 ? amountRaw : null;
+    // No amount → render nothing. Global description alone is not enough.
+    if (amount === null) return null;
+    // Default currency matches the admin input placeholder ("EUR").
+    const currency = (ms && ms.currency) || DEFAULT_META_SURCHARGE_CURRENCY;
+    const locale = LocalizationService.currentLocale;
+    const sign = amount < 0 ? '− ' : '+ ';
+    const amountText = `${sign}${formatPrice(Math.abs(amount), currency, 0, locale)}`;
+    return description ? `${amountText} — ${description}` : amountText;
 }
 
 class ProductTypePreviewStrategy extends BasePreviewStrategy {

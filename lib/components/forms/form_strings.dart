@@ -278,6 +278,12 @@ class FormStrings {
           .tr(); // "Please enter a valid number (1 or more)."
   static String get showDepositDescription =>
       'FormsFeature.showDepositDescription'.tr();
+  static String get defaultSelectionHintSingle =>
+      'FormsFeature.defaultSelectionHintSingle'.tr();
+  static String get defaultSelectionHintMulti =>
+      'FormsFeature.defaultSelectionHintMulti'.tr();
+  static String get clearDefaultSelection =>
+      'FormsFeature.clearDefaultSelection'.tr();
 
 // --- Create/Copy Dialog (_CreateOrCopyFormDialog) ---
   static String get createFormTitle =>

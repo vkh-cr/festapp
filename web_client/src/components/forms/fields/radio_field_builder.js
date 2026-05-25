@@ -53,7 +53,7 @@ export class RadioFieldBuilder {
         });
 
         const initialChecked = container.querySelector('input:checked');
-        if (field.value !== undefined && field.value !== null && field.value !== '' && initialChecked) {
+        if (initialChecked) {
              clearBtn.style.display = 'inline-block';
         }
 

@@ -25,6 +25,7 @@ class OrderPreviewScreen extends StatefulWidget {
   final VoidCallback? onClose;
   final String? tone;
   final bool hasTickets;
+  final Map<String, double> metaSurchargeSums;
 
   static const double fontSizeFactor = 1.1;
 
@@ -36,6 +37,7 @@ class OrderPreviewScreen extends StatefulWidget {
     this.onClose,
     this.tone,
     this.hasTickets = true,
+    this.metaSurchargeSums = const {},
   });
 
   @override
@@ -260,6 +262,9 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
           if (value is FormOptionModel) {
             s = OptionFieldHelper.buildOptionTitle(context, value);
             priceText = OptionFieldHelper.buildPriceText(context, value);
+            final metaText =
+                OptionFieldHelper.buildMetaSurchargeText(context, value);
+            if (metaText != null) s = '$s\n$metaText';
           } else {
             if (value is Iterable &&
                 value.isNotEmpty &&
@@ -270,6 +275,14 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                   products.fold(0, (sum, product) => sum + product.price);
               s = value.toString();
               priceText = '+ ${Utilities.formatPrice(context, sectionPrice, currencyCode: widget.formHolder.controller!.currencyCode)}';
+              final metaTexts = products
+                  .map((p) =>
+                      OptionFieldHelper.buildMetaSurchargeText(context, p))
+                  .whereType<String>()
+                  .toList();
+              if (metaTexts.isNotEmpty) {
+                s = '$s\n${metaTexts.join('\n')}';
+              }
             } else if (value.isEmpty) {
               s = "";
             } else {
@@ -361,16 +374,36 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
   }
 
   Widget _buildTotalPrice(BuildContext context) {
+    // Visual-only meta-surcharge totals (per currency). Never affect totalPrice.
+    final metaLines = OptionFieldHelper.formatMetaSurchargeSumLines(
+        context, widget.metaSurchargeSums);
+
     return Center(
-      child: Text(
-        PublicOrderStrings.totalPrice(
-            context,
-            Utilities.formatPrice(context, widget.totalPrice,
-                currencyCode: widget.formHolder.controller!.currencyCode)),
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
-              fontWeight: FontWeight.bold,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            PublicOrderStrings.totalPrice(
+                context,
+                Utilities.formatPrice(context, widget.totalPrice,
+                    currencyCode: widget.formHolder.controller!.currencyCode)),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 16 * OrderPreviewScreen.fontSizeFactor,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          for (final line in metaLines)
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Text(
+                line,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontSize: 14 * OrderPreviewScreen.fontSizeFactor,
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
             ),
+        ],
       ),
     );
   }

@@ -79,6 +79,13 @@ class FeatureConstants {
   // Deposit Feature
   static const String depositDeadline = "deposit_deadline";
   static const String depositDeadlineDays = "deposit_deadline_days";
+  static const String metaSurchargeDescription = "meta_surcharge_description";
+  // Mutually exclusive deposit modes:
+  //   "real"    → payment-linked deposit (default, backward-compat)
+  //   "virtual" → visual-only meta doplatek (no payment impact, allows discounts)
+  static const String depositMode = "deposit_mode";
+  static const String depositModeReal = "real";
+  static const String depositModeVirtual = "virtual";
 
   // Import Feature
   static const String importAutoImport = "auto_import";

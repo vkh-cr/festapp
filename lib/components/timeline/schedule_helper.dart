@@ -2,6 +2,7 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
@@ -352,8 +353,15 @@ class TimeBlockHelper {
     final int eveningStartMinutes = timeOfDayToMinutes(eveningStartTime);
 
     // Helper function to get the total minutes from midnight for an event's start time.
+    // Events starting before daySplitHour belong to the previous day's bucket
+    // (see splitTimeBlocksByDate) — shift them by +24h so a 00:30 event lands
+    // in Evening, not Morning.
     int eventTimeToMinutes(TimeBlockItem event) {
-      return event.startTime.hour * 60 + event.startTime.minute;
+      final base = event.startTime.hour * 60 + event.startTime.minute;
+      if (event.startTime.hour < AppConfig.daySplitHour) {
+        return base + 24 * 60;
+      }
+      return base;
     }
 
     // Filter events into their respective time-of-day lists based on minute comparison.

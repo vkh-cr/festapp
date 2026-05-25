@@ -1,6 +1,7 @@
 import { formatPrice } from '../../../utils/formatters.js';
 import { FormStrings } from '../form_strings.js';
-import { FeatureService } from '../../features/feature_service.js';
+import { FeatureService, DEFAULT_META_SURCHARGE_CURRENCY } from '../../features/feature_service.js';
+import { LocalizationService } from '../../../services/localization_service.js';
 
 export class OptionBuilderHelper {
     /**
@@ -57,6 +58,12 @@ export class OptionBuilderHelper {
         input.id = `${field.id}_${(opt.id !== undefined && opt.id !== null) ? opt.id : opt.title}`;
         input.className = 'form-check-input';
 
+        // Apply default selection from field.data.default_value (radio: string, checkbox: list of strings).
+        // Matches by option title or id.
+        if (OptionBuilderHelper.shouldPreselect(field, opt, inputType)) {
+            input.checked = true;
+        }
+
         // Currency tagging
         const currency = opt.currencyCode || opt.currency || opt.currency_code;
         if (currency) {
@@ -101,14 +108,21 @@ export class OptionBuilderHelper {
         );
         const hasDeposit = showDepositDescription && isDepositAvailable && depositData && depositData.amount && depositData.amount > 0;
 
-        if (opt.description || hasDeposit) {
+        const metaSurchargeHtml = OptionBuilderHelper.buildMetaSurchargeHtml(opt, formModel);
+
+        if (opt.description || hasDeposit || metaSurchargeHtml) {
             const optDesc = document.createElement('span');
             optDesc.className = 'option-description';
 
             let descHtml = '';
+            // Order: deposit (bold) → meta surcharge → original description
             if (hasDeposit) {
                 const depositPrice = formatPrice(depositData.amount, currency, 0, 'cs-CZ');
                 descHtml += `<span class="deposit-info">${FormStrings.depositInfo}: ${depositPrice}</span>`;
+                if (metaSurchargeHtml || opt.description) descHtml += '<br>';
+            }
+            if (metaSurchargeHtml) {
+                descHtml += metaSurchargeHtml;
                 if (opt.description) descHtml += '<br>';
             }
             if (opt.description) {
@@ -123,5 +137,53 @@ export class OptionBuilderHelper {
         wrapper.appendChild(contentWrapper);
 
         return wrapper;
+    }
+
+    /**
+     * Visual-only meta-surcharge label rendered above the description (form, preview).
+     * Returns the inner HTML string (wrapped in span.meta-surcharge), or '' when nothing should render.
+     * Negative amounts represent discounts (slevy) and render with a leading "−".
+     * NEVER affects payment totals — purely informational.
+     */
+    static buildMetaSurchargeHtml(opt, formModel) {
+        const features = formModel && formModel.occasionFeatures;
+        if (!FeatureService.isFeatureEnabled(FeatureService.FeatureConstants.deposit, features)) {
+            return '';
+        }
+        // Meta surcharge applies only to product options (has currency or explicit meta_surcharge data).
+        const isProductLike = !!(opt && (opt.currencyCode || opt.currency || opt.currency_code
+            || (opt.data && opt.data.meta_surcharge)));
+        if (!isProductLike) return '';
+
+        const description = FeatureService.getMetaSurchargeDescription(features);
+        const ms = opt && opt.data && opt.data.meta_surcharge;
+        const amountRaw = ms && (typeof ms.amount === 'number' ? ms.amount : parseFloat(ms.amount));
+        const amount = Number.isFinite(amountRaw) && amountRaw !== 0 ? amountRaw : null;
+        // No amount → render nothing. Global description alone is not enough.
+        if (amount === null) return '';
+
+        // Default currency matches the placeholder shown in the admin input ("EUR").
+        // Surcharge doesn't share the product price currency by default.
+        const currency = (ms && ms.currency) || DEFAULT_META_SURCHARGE_CURRENCY;
+        const locale = LocalizationService.currentLocale;
+        const sign = amount < 0 ? '− ' : '+ ';
+        const amountText = `${sign}${formatPrice(Math.abs(amount), currency, 0, locale)}`;
+        const body = description ? `${amountText} — ${description}` : amountText;
+        return `<span class="meta-surcharge">${body}</span>`;
+    }
+
+    static shouldPreselect(field, opt, inputType) {
+        // Existing answer (field.value) takes precedence — defaults only apply to fresh forms.
+        if (inputType === 'radio' && field.value !== undefined && field.value !== null && field.value !== '') {
+            return false;
+        }
+        const def = field && field.data && field.data.default_value;
+        if (def == null) return false;
+        // Match either by option.title (select_one/many) or option.id (product_type).
+        const matches = (key) => key === opt.title || String(key) === String(opt.id);
+        if (inputType === 'checkbox') {
+            return Array.isArray(def) && def.some(matches);
+        }
+        return matches(def);
     }
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 
+import 'default_value_helper.dart';
 import 'option_editor_dialog.dart';
 import 'description_tooltip.dart';
 
@@ -16,12 +18,13 @@ class SelectManyEditor {
         style: Theme.of(context).textTheme.bodyMedium,
       );
     }
+    final defaults = DefaultValueHelper.readList(field);
     return Column(
       children: options.map((option) {
         return Row(
           children: [
             Checkbox(
-              value: false,
+              value: defaults.contains(option.title),
               onChanged: null,
             ),
             Text(option.title),
@@ -43,105 +46,120 @@ class SelectManyEditor {
   static Widget buildSelectManyEditor(
       BuildContext context, FormFieldModel field, int? occasionId) {
     final optionsController = TextEditingController();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Options'.tr(), style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 8),
-        Column(
-          children: field.options.map((FormOptionModel formOption) {
-            final optionController =
-                TextEditingController(text: formOption.title);
-            return Row(
-              children: [
-                Checkbox(
-                  value: false,
-                  onChanged: (_) {},
-                ),
-                Expanded(
-                  child: TextFormField(
-                    controller: optionController,
-                    decoration: InputDecoration(
-                      border: const UnderlineInputBorder(),
-                      suffixIcon: formOption.description != null &&
-                              formOption.description!.trim().isNotEmpty
-                          ? DescriptionTooltip(
-                              description: formOption.description!,
-                              child: Icon(Icons.description, size: 20),
-                            )
-                          : null,
-                    ),
-                    onChanged: (value) {
-                      formOption.title = value;
+    return StatefulBuilder(builder: (ctx, setLocal) {
+      final defaults = DefaultValueHelper.readList(field);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Options'.tr(), style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 2),
+          Text(
+            FormStrings.defaultSelectionHintMulti,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          Column(
+            children: field.options.map((FormOptionModel formOption) {
+              final optionController =
+                  TextEditingController(text: formOption.title);
+              return Row(
+                children: [
+                  Checkbox(
+                    value: defaults.contains(formOption.title),
+                    onChanged: (val) {
+                      DefaultValueHelper.toggleInList(
+                          field, formOption.title, val ?? false);
+                      setLocal(() {});
                     },
                   ),
-                ),
-                // Three-dots popup for additional settings
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'additional_settings') {
-                      showDialog(
-                        context: context,
-                        builder: (context) => OptionDetailEditorDialog(
-                          option: formOption,
-                          occasionId: occasionId,
-                        ),
-                      ).then((_) {
-                        // Refresh the widget when the dialog is closed.
-                        (context as Element).markNeedsBuild();
-                      });
-                    }
-                  },
-                  itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: 'additional_settings',
-                      child: Text("Additional Settings".tr()),
+                  Expanded(
+                    child: TextFormField(
+                      controller: optionController,
+                      decoration: InputDecoration(
+                        border: const UnderlineInputBorder(),
+                        suffixIcon: formOption.description != null &&
+                                formOption.description!.trim().isNotEmpty
+                            ? DescriptionTooltip(
+                                description: formOption.description!,
+                                child: Icon(Icons.description, size: 20),
+                              )
+                            : null,
+                      ),
+                      onChanged: (value) {
+                        final oldTitle = formOption.title;
+                        formOption.title = value;
+                        DefaultValueHelper.rename(field, oldTitle, value);
+                      },
                     ),
-                  ],
-                  icon: const Icon(Icons.more_vert),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    field.options.remove(formOption);
-                    (context as Element).markNeedsBuild();
-                  },
-                ),
-              ],
-            );
-          }).toList(),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: optionsController,
-                decoration: InputDecoration(
-                  hintText: 'Enter option value'.tr(),
-                  border: const UnderlineInputBorder(),
+                  ),
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'additional_settings') {
+                        showDialog(
+                          context: context,
+                          builder: (context) => OptionDetailEditorDialog(
+                            option: formOption,
+                            occasionId: occasionId,
+                          ),
+                        ).then((_) {
+                          setLocal(() {});
+                        });
+                      }
+                    },
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                      PopupMenuItem<String>(
+                        value: 'additional_settings',
+                        child: Text("Additional Settings".tr()),
+                      ),
+                    ],
+                    icon: const Icon(Icons.more_vert),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      final removedTitle = formOption.title;
+                      field.options.remove(formOption);
+                      DefaultValueHelper.remove(field, removedTitle);
+                      setLocal(() {});
+                    },
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: optionsController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter option value'.tr(),
+                    border: const UnderlineInputBorder(),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                if (optionsController.text.isNotEmpty) {
-                  final newOption = FormOptionModel(
-                    optionsController.text,
-                    optionsController.text,
-                  );
-                  field.options.add(newOption);
-                  optionsController.clear();
-                  (context as Element).markNeedsBuild();
-                }
-              },
-            ),
-          ],
-        ),
-      ],
-    );
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  if (optionsController.text.isNotEmpty) {
+                    final newOption = FormOptionModel(
+                      optionsController.text,
+                      optionsController.text,
+                    );
+                    field.options.add(newOption);
+                    optionsController.clear();
+                    setLocal(() {});
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      );
+    });
   }
+
 }

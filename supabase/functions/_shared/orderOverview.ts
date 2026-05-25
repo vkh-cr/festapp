@@ -1,4 +1,10 @@
 import { formatCurrency } from "./utilities.ts";
+import {
+  aggregateMetaSurchargeSums,
+  extractMetaSurcharge,
+  formatSignedMetaSurcharge,
+  MetaSurchargeAmount,
+} from "./metaSurcharge.ts";
 
 export function generateFullOrder(orderData: any, tickets: any[], occasionFeatures: any[], lang: 'cs' | 'en' = 'cs'): string {
     const { name, surname, email, phone, note } = orderData;
@@ -54,6 +60,31 @@ export function generateFullOrder(orderData: any, tickets: any[], occasionFeatur
     const itemLabel = ticketFeature?.is_enabled ? tr.ticket : tr.application;
     const currencyCode = tickets?.[0]?.products?.[0]?.currency_code || "CZK";
 
+    // Visual-only meta surcharge: shown under product (and summed per-currency under
+    // Total Price), NEVER added to overallTotal. Only renders in virtual mode — real
+    // mode uses a payment-linked deposit so meta_surcharge would be misleading.
+    const depositFeatureRaw = occasionFeatures?.find(f => f.code === "deposit");
+    const depositFeature = depositFeatureRaw?.is_enabled ? depositFeatureRaw : null;
+    const isVirtualMode = depositFeature?.deposit_mode === 'virtual';
+    const metaSurchargeDescription = isVirtualMode &&
+            depositFeature?.meta_surcharge_description &&
+            String(depositFeature.meta_surcharge_description).trim().length > 0
+        ? String(depositFeature.meta_surcharge_description).trim()
+        : null;
+
+    // Per-product amounts collected during the tickets loop, summed under Total Price.
+    const metaSurchargeAmounts: MetaSurchargeAmount[] = [];
+
+    function buildMetaSurchargeText(product: any): string | null {
+        const meta = extractMetaSurcharge(product, depositFeature?.deposit_mode);
+        if (!meta) return null;
+        metaSurchargeAmounts.push(meta);
+        const amountText = formatSignedMetaSurcharge(meta.amount, meta.currency, formatCurrency);
+        return metaSurchargeDescription
+            ? `${amountText} — ${metaSurchargeDescription}`
+            : amountText;
+    }
+
     const ticketsDetails = tickets.map((ticket) => {
         const productsRows = ticket.products.map((product: any) => {
             const price = Number(product.price || 0);
@@ -64,11 +95,16 @@ export function generateFullOrder(orderData: any, tickets: any[], occasionFeatur
 
             const rowStyle = 'style="border-bottom: 1px solid #e2e8f0;"';
 
+            const metaText = buildMetaSurchargeText(product);
+            const metaRow = metaText
+                ? `<tr><td colspan="2" style="padding: 0 0 8px 0; color: #555; font-size: 13px; font-style: italic;">${metaText}</td></tr>`
+                : '';
+
             return `
                 <tr ${rowStyle}>
                     <td style="padding: 12px 0; vertical-align: top;">${product.type_title}: ${title}</td>
                     <td style="padding: 12px 0; text-align: right; white-space: nowrap; vertical-align: bottom; padding-left: 16px;"><strong>${formattedPrice}</strong></td>
-                </tr>`;
+                </tr>${metaRow}`;
         }).join("");
 
         const ticketNote = ticket.note ? `
@@ -93,9 +129,23 @@ export function generateFullOrder(orderData: any, tickets: any[], occasionFeatur
     // --- 3. Total Price ---
     const formattedOverallTotal = formatCurrency(overallTotal, currencyCode);
 
+    // Per-currency meta surcharge sums (visual-only, NOT included in overallTotal).
+    // Renders as separate lines under Total Price, one per currency.
+    const metaSumLines = aggregateMetaSurchargeSums(metaSurchargeAmounts).map(
+        ({ currency, sum }) => formatSignedMetaSurcharge(sum, currency, formatCurrency),
+    );
+    const metaSumHtml = metaSumLines.length > 0
+        ? `<div style="margin-top: 4px;">
+             ${metaSumLines.map(line =>
+                 `<span style="font-size: 16px; font-weight: 700;">${line}</span>`
+             ).join('<br>')}
+           </div>`
+        : '';
+
     const totalSection = `
         <div style="text-align: right; padding-top: 16px; margin-top: 8px;">
             <span style="font-size: 18px; font-weight: bold;">${tr.totalPrice}: ${formattedOverallTotal}</span>
+            ${metaSumHtml}
         </div>`;
 
     // --- 4. Final Assembly ---
