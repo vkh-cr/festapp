@@ -115,51 +115,34 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
               return FormBuilderValidators.required(
                   errorText: CommonStrings.fieldCannotBeEmpty)(value);
             }
-            if (value != null) {
-              if (effectiveMinAge == 0 || effectiveMaxAge == 0) {
-                setState(() {
-                  warningMessage = null;
-                });
-              } else if (value.isBefore(recommendedEarliestDate) ||
-                  value.isAfter(recommendedLatestDate)) {
-                if (widget.fieldHolder.isHard) {
-                  return widget.fieldHolder.message.isNotEmpty
-                      ? widget.fieldHolder.message.tr(
-                          namedArgs: {
-                            "minAge": effectiveMinAge.toString(),
-                            "maxAge": effectiveMaxAge.toString()
-                          },
-                        )
-                      : "You must be between {minAge} and {maxAge} years old."
-                          .tr(
-                          namedArgs: {
-                            "minAge": effectiveMinAge.toString(),
-                            "maxAge": effectiveMaxAge.toString()
-                          },
-                        );
-                } else {
-                  setState(() {
-                    warningMessage = widget.fieldHolder.message.isNotEmpty
-                        ? widget.fieldHolder.message.tr(
-                            namedArgs: {
-                              "minAge": effectiveMinAge.toString(),
-                              "maxAge": effectiveMaxAge.toString()
-                            },
-                          )
-                        : "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
-                            .tr(
-                            namedArgs: {
-                              "minAge": effectiveMinAge.toString(),
-                              "maxAge": effectiveMaxAge.toString()
-                            },
-                          );
-                  });
-                }
-              } else {
-                setState(() {
-                  warningMessage = null;
-                });
+            String? nextWarning;
+            if (value != null &&
+                effectiveMinAge != 0 &&
+                effectiveMaxAge != 0 &&
+                (value.isBefore(recommendedEarliestDate) ||
+                    value.isAfter(recommendedLatestDate))) {
+              final namedArgs = {
+                "minAge": effectiveMinAge.toString(),
+                "maxAge": effectiveMaxAge.toString(),
+              };
+              if (widget.fieldHolder.isHard) {
+                return widget.fieldHolder.message.isNotEmpty
+                    ? widget.fieldHolder.message.tr(namedArgs: namedArgs)
+                    : "You must be between {minAge} and {maxAge} years old."
+                        .tr(namedArgs: namedArgs);
               }
+              nextWarning = widget.fieldHolder.message.isNotEmpty
+                  ? widget.fieldHolder.message.tr(namedArgs: namedArgs)
+                  : "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
+                      .tr(namedArgs: namedArgs);
+            }
+            if (warningMessage != nextWarning) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                setState(() {
+                  warningMessage = nextWarning;
+                });
+              });
             }
             return null;
           },

@@ -31,6 +31,19 @@ class RadioFieldBuilder {
     );
   }
 
+  /// Resolves the configured default to a matching FormOptionModel.
+  /// Matches by option.title (select_one stores titles) OR option.id
+  /// (product_type stores product IDs). Returns null if no match.
+  static FormOptionModel? resolveDefault(
+      FieldHolder fieldHolder, List<FormOptionModel> options) {
+    final raw = fieldHolder.defaultValue;
+    if (raw is! String || raw.isEmpty) return null;
+    for (final o in options) {
+      if (o.title == raw || o.id == raw) return o;
+    }
+    return null;
+  }
+
   /// A simple radio group when none of the options have a description.
   static Widget _buildBasicRadioField(
     BuildContext context,
@@ -74,7 +87,7 @@ class RadioFieldBuilder {
               ? FormBuilderValidators.required(
                   errorText: CommonStrings.fieldCannotBeEmpty)
               : null,
-          initialValue: null,
+          initialValue: resolveDefault(fieldHolder, optionsIn),
           builder: (field) {
             // Use the field's error state to update the card wrapper.
             return FormHelper.buildCardWrapperDesign(
@@ -146,6 +159,13 @@ class RadioFieldBuilder {
     final isSelected = (field.value == o);
 
     String? effectiveDescription = o.description;
+    // Meta surcharge sits ABOVE original description.
+    final metaText = OptionFieldHelper.buildMetaSurchargeText(context, o);
+    if (metaText != null) {
+      effectiveDescription = effectiveDescription != null
+          ? "$metaText<br>$effectiveDescription"
+          : metaText;
+    }
     final showDepositInfo =
         formHolder.getTicket()?.showDepositDescription ?? true;
     if (showDepositInfo &&
@@ -390,6 +410,24 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
           ],
         );
       }
+      final metaText = OptionFieldHelper.buildMetaSurchargeText(context, o);
+      if (metaText != null) {
+        labelWidget = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            labelWidget,
+            const SizedBox(height: 2),
+            Text(metaText,
+                style: style.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.7),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500)),
+          ],
+        );
+      }
 
       return FormBuilderFieldOption<FormOptionModel>(
         value: o,
@@ -413,6 +451,8 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
               ? FormBuilderValidators.required(
                   errorText: CommonStrings.fieldCannotBeEmpty)
               : null,
+          initialValue: RadioFieldBuilder.resolveDefault(
+              widget.fieldHolder, widget.optionsIn),
           options: options,
           orientation: OptionsOrientation.vertical,
           wrapDirection: Axis.vertical,

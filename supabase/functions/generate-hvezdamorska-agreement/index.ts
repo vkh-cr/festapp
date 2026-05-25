@@ -2,6 +2,12 @@ import { PDFDocument, rgb, PageSizes, PDFFont } from "npm:pdf-lib";
 import * as fontkit from "npm:fontkit";
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import { authorizeRequest, AuthError } from "../_shared/auth.ts";
+import {
+  aggregateMetaSurchargeSums,
+  extractMetaSurcharge,
+  formatSignedMetaSurcharge,
+  MetaSurchargeAmount,
+} from "../_shared/metaSurcharge.ts";
 import { Buffer } from "node:buffer";
 
 const corsHeaders = {
@@ -16,7 +22,7 @@ const staticOrganizerData = {
     dic: "CZ 23146354",
     address: "Nové Sady 988/2, 602 00 Brno-střed",
     email: "info@hvezdamorska.cz",
-    phone: "+420 774 292 428",
+    phone: "+420 733 356 244",
     account: "CZK - 2303165450/2010, EUR - 2503165455/2010  (Fio Banka a.s.)",
 };
 const staticPaymentClause = "Platba zálohy probíhá převodem na účet, doplatek se hradí v hotovosti v eurech při příjezdu na místo ubytování.";
@@ -256,11 +262,11 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
   page.drawText("CENA A PLATBA", { x: margin, y: y, font: boldFont, size: sectionTitleFontSize, color: colorPrimaryBlue });
   y -= spaceBelowSectionTitle;
 
-  const calculationTableWidth = contentWidth * 0.55;
-  const colDescW = calculationTableWidth * 0.40;
-  const colPrice1W = calculationTableWidth * 0.25;
-  const colNumPersW = calculationTableWidth * 0.15;
-  const colTotalItemW = calculationTableWidth * 0.20;
+  const calculationTableWidth = contentWidth * 0.65;
+  const colDescW = calculationTableWidth * 0.45;
+  const colPrice1W = calculationTableWidth * 0.22;
+  const colNumPersW = calculationTableWidth * 0.11;
+  const colTotalItemW = calculationTableWidth * 0.22;
 
   let leftY = y;
 
@@ -277,16 +283,61 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
   leftY -= (smallFontSize + spaceBelowLabel + 4);
 
   (data.calculation.items || []).forEach((item: any) => {
-    let currentTableX = margin;
     const pricePerPersonText = (item.pricePerPerson ?? 0).toLocaleString('cs-CZ') + ` ${item.currency || 'Kč'}`;
-    drawField(item.description || '', currentTableX, leftY, colDescW, fieldHeight, 'left');
-    currentTableX += colDescW;
-    drawField(pricePerPersonText, currentTableX, leftY, colPrice1W, fieldHeight, 'right');
-    currentTableX += colPrice1W;
-    drawField("1", currentTableX, leftY, colNumPersW, fieldHeight, 'center');
-    currentTableX += colNumPersW;
-    drawField(pricePerPersonText, currentTableX, leftY, colTotalItemW, fieldHeight, 'right');
-    leftY -= (fieldHeight + spaceBetweenRows * 0.6);
+
+    // Wrap any meta surcharge sub-line and compute how much extra height the row needs.
+    // The cell rectangles are drawn at rowHeight (not just fieldHeight) so the main item
+    // text and the meta surcharge text sit inside the same bordered row — reads as one
+    // logical entry rather than overflowing into the gap below.
+    const metaLineHeight = smallFontSize + 2;
+    const metaTopPadding = 3;
+    const metaBottomPadding = 4;
+    const metaLines: string[] = item.metaSurcharge
+      ? wrapText(item.metaSurcharge, font, smallFontSize, calculationTableWidth - 12)
+      : [];
+    const metaExtraHeight = metaLines.length > 0
+      ? metaTopPadding + metaLines.length * metaLineHeight + metaBottomPadding
+      : 0;
+    const rowHeight = fieldHeight + metaExtraHeight;
+
+    const cells: Array<{ x: number; w: number; text: string; align: 'left' | 'center' | 'right' }> = [];
+    let cx = margin;
+    cells.push({ x: cx, w: colDescW,      text: item.description || '', align: 'left'   }); cx += colDescW;
+    cells.push({ x: cx, w: colPrice1W,    text: pricePerPersonText,     align: 'right'  }); cx += colPrice1W;
+    cells.push({ x: cx, w: colNumPersW,   text: '1',                    align: 'center' }); cx += colNumPersW;
+    cells.push({ x: cx, w: colTotalItemW, text: pricePerPersonText,     align: 'right'  });
+
+    for (const cell of cells) {
+      page.drawRectangle({
+        x: cell.x, y: leftY - rowHeight, width: cell.w, height: rowHeight,
+        borderColor: fieldBorderColor, borderWidth: lineThickness,
+      });
+      const tw = font.widthOfTextAtSize(cell.text, dataFontSize);
+      let tx = cell.x + fieldTextPadding;
+      if (cell.align === 'center') tx = cell.x + (cell.w - tw) / 2;
+      else if (cell.align === 'right') tx = cell.x + cell.w - tw - fieldTextPadding;
+      // Main text sits in the TOP fieldHeight band of the (possibly taller) cell.
+      const ty = getTextBaselineInField(leftY, fieldHeight, dataFontSize);
+      page.drawText(cell.text, { x: tx, y: ty, font, size: dataFontSize, color: colorDataText });
+    }
+
+    if (metaLines.length > 0) {
+      // First meta baseline: just below the main text band, offset by top padding.
+      // ~0.75 * fontSize approximates the ascender so visible top sits at the padding line.
+      let metaY = leftY - fieldHeight - metaTopPadding - smallFontSize * 0.75;
+      for (const line of metaLines) {
+        page.drawText(line, {
+          x: margin + 6,
+          y: metaY,
+          font,
+          size: smallFontSize,
+          color: colorLabelText,
+        });
+        metaY -= metaLineHeight;
+      }
+    }
+
+    leftY -= (rowHeight + spaceBetweenRows * 0.6);
   });
 
   const paymentBlockX = margin + calculationTableWidth + 20;
@@ -329,6 +380,20 @@ async function generateAgreement(data: any): Promise<Uint8Array> {
   page.drawText("Celkem:", { x: paymentBlockX, y: rightY, font: boldFont, size: regularFontSize, color: colorDataText });
   const totalPriceString = data.calculation.totalPriceForDisplay || '';
   page.drawText(totalPriceString, { x: paymentValueX, y: rightY, font: boldFont, size: regularFontSize + 1, color: colorBlack });
+
+  // Visual-only meta-surcharge sums per currency, rendered under "Celkem:" so the
+  // customer sees the on-site amount alongside the bank total. NEVER added to totalPrice.
+  const metaSumLines: string[] = data.calculation.metaSurchargeSumLines || [];
+  for (const line of metaSumLines) {
+    rightY -= (paymentLineHeight + 1);
+    page.drawText(line, {
+      x: paymentValueX,
+      y: rightY,
+      font: boldFont,
+      size: regularFontSize,
+      color: colorDataText,
+    });
+  }
 
   y = Math.min(leftY, rightY) - 20; // Increased space
 
@@ -476,21 +541,52 @@ Deno.serve(async (req: Request) => {
         nights: contractFeature?.number_of_days || nights,
     };
 
-    const calculationItems = (rpcOrder?.data?.tickets?.[0]?.products || []).map((p: any) => {
+    const depositFeatureRaw = occasion?.features?.find((f: any) => f.code === 'deposit');
+    const depositFeature = depositFeatureRaw?.is_enabled ? depositFeatureRaw : null;
+    // Meta surcharge data only relevant in virtual mode. Real mode = payment-linked deposit; no per-item surcharge text.
+    const isVirtualMode = depositFeature?.deposit_mode === 'virtual';
+    const metaSurchargeDescription = isVirtualMode &&
+            depositFeature?.meta_surcharge_description &&
+            String(depositFeature.meta_surcharge_description).trim().length > 0
+        ? String(depositFeature.meta_surcharge_description).trim()
+        : null;
+
+    // Flatten products across ALL tickets in the order so multi-person contracts list every item.
+    // Tickets are 1-indexed in the contract label (e.g. "Lístek 1: ...").
+    const allTickets = rpcOrder?.data?.tickets || [];
+    const multipleTickets = allTickets.length > 1;
+    const flatProducts: any[] = allTickets.flatMap((t: any, idx: number) =>
+        (t?.products || []).map((p: any) => ({ ...p, _ticketIndex: idx + 1 }))
+    );
+
+    // Per-product meta surcharge amounts collected during the items.map below.
+    // Aggregated per currency and rendered as sub-lines under "Celkem:".
+    const metaSurchargeAmounts: MetaSurchargeAmount[] = [];
+    // PDF uses raw 3-letter codes ("150 EUR") to match the organizer info section,
+    // unlike the email which prefers Intl currency style ("150 €").
+    const pdfFormatAmount = (abs: number, currency: string) =>
+        `${abs.toLocaleString('cs-CZ')} ${currency}`;
+
+    const calculationItems = flatProducts.map((p: any) => {
         const title = p.title || '';
         const typeTitle = p.type_title || '';
         // Define the absolute maximum character length for the entire description field.
-        const MAX_LENGTH = 30;
+        const MAX_LENGTH = 42;
 
         // 1. Construct the ideal, full description string.
-        const fullDescription = typeTitle ? `${title} (${typeTitle})` : title;
+        //    Multi-ticket orders prepend "Lístek N: " so each row is unambiguous.
+        const ticketPrefix = multipleTickets ? `Lístek ${p._ticketIndex}: ` : '';
+        const fullDescription = typeTitle
+            ? `${ticketPrefix}${title} (${typeTitle})`
+            : `${ticketPrefix}${title}`;
 
         let finalDescription = fullDescription;
 
         // 2. Check if the full description exceeds the maximum length.
         if (fullDescription.length > MAX_LENGTH) {
             const suffix = typeTitle ? ` (${typeTitle})` : '';
-            const maxTitleLength = MAX_LENGTH - suffix.length;
+            // Reserve space for the prefix when truncating.
+            const maxTitleLength = MAX_LENGTH - suffix.length - ticketPrefix.length;
 
             // 3. Decide on the truncation strategy.
             // If the suffix is too long and leaves no meaningful space for the title (e.g., < 5 chars),
@@ -506,21 +602,39 @@ Deno.serve(async (req: Request) => {
                 let raw = title.substring(0, maxTitleLength - 3);
                 // Trim trailing single characters
                 raw = raw.replace(/(\s\S)+$/, "").trim();
-                finalDescription = `${raw}...${suffix}`;
+                finalDescription = `${ticketPrefix}${raw}...${suffix}`;
             }
+        }
+
+        // Visual-only meta surcharge text shown under the item. Only renders in virtual
+        // mode — real mode uses payment-linked deposit so the per-item text is suppressed.
+        // The amount is also collected for the per-currency sum under "Celkem:".
+        let metaSurcharge: string | null = null;
+        const meta = extractMetaSurcharge(p, depositFeature?.deposit_mode);
+        if (meta) {
+            metaSurchargeAmounts.push(meta);
+            const amountText = formatSignedMetaSurcharge(meta.amount, meta.currency, pdfFormatAmount);
+            metaSurcharge = metaSurchargeDescription
+                ? `${amountText} — ${metaSurchargeDescription}`
+                : amountText;
         }
 
         return {
             description: finalDescription,
             pricePerPerson: p.price ?? 0,
-            currency: p.currency_code || 'Kč'
+            currency: p.currency_code || 'Kč',
+            metaSurcharge,
         };
     });
 
     const orderAmount = payment_info?.amount != null ? Number(payment_info.amount) : 0;
     const depositAmount = payment_info?.deposit_amount != null ? Number(payment_info.deposit_amount) : 0;
     const orderCurrency = payment_info?.currency_code || rpcOrder?.currency_code || 'Kč';
-    const isDepositPayment = depositAmount > 0 && depositAmount < orderAmount;
+    // In virtual mode the "doplatek" is purely visual (rendered as a sub-line under each
+    // product via meta_surcharge); there is no payment-linked split. Suppress the
+    // Záloha / Doplatek breakdown even if payment_info.deposit_amount is populated
+    // (e.g. legacy orders created before the mode switch).
+    const isDepositPayment = !isVirtualMode && depositAmount > 0 && depositAmount < orderAmount;
     const doplatekAmount = isDepositPayment ? orderAmount - depositAmount : 0;
 
     // Determine surcharge deadline from payment_info
@@ -538,6 +652,11 @@ Deno.serve(async (req: Request) => {
         ? `${orderAmount.toLocaleString('cs-CZ')} ${orderCurrency}`
         : 'N/A';
 
+    // Format per-currency meta surcharge sums for the PDF.
+    const metaSurchargeSumLines = aggregateMetaSurchargeSums(metaSurchargeAmounts).map(
+        ({ currency, sum }) => formatSignedMetaSurcharge(sum, currency, pdfFormatAmount),
+    );
+
     const calculationData = {
         items: calculationItems,
         zaloha: {
@@ -553,6 +672,7 @@ Deno.serve(async (req: Request) => {
         },
         isDepositPayment,
         totalPriceForDisplay: totalPriceDisplay,
+        metaSurchargeSumLines,
     };
 
     const dataForPdf = {

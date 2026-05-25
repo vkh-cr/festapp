@@ -20,6 +20,7 @@ import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/components/forms/views/order_preview_screen.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
+import 'package:fstapp/components/forms/widgets_view/option_field_helper.dart';
 import '../../features/feature_constants.dart';
 import '../../features/feature_service.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -237,6 +238,10 @@ class _FormPageState extends State<FormPage> {
     if ((formSession?.totalPrice ?? 0) <= 0)
       return SizedBox(); // Do not display if total price is 0
 
+    // Visual-only meta-surcharge totals (per currency). Never affect totalPrice.
+    final metaLines = OptionFieldHelper.formatMetaSurchargeSumLines(
+        context, formSession?.metaSurchargeSums ?? const {});
+
     return Positioned(
       top: 16,
       right: 16,
@@ -249,33 +254,51 @@ class _FormPageState extends State<FormPage> {
           borderRadius: BorderRadius.circular(8.0),
           boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black26)],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "${formSession?.totalTickets ?? 0}x",
-              style: const TextStyle(
-                fontSize: 18, // Increased font size
-                fontWeight: FontWeight.bold,
-                color: Colors.white, // White bold text
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "${formSession?.totalTickets ?? 0}x",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Icon(
+                  Icons.local_activity,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  Utilities.formatPrice(context, formSession?.totalPrice ?? 0,
+                      currencyCode: formHolder!.controller!.currencyCode),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            for (final line in metaLines)
+              Padding(
+                padding: const EdgeInsets.only(top: 2.0),
+                child: Text(
+                  line,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 6), // Increased spacing
-            Icon(
-              Icons.local_activity, // Ticket icon
-              color: Colors.white,
-              size: 24, // Increased icon size
-            ),
-            const SizedBox(width: 10), // Increased spacing
-            Text(
-              Utilities.formatPrice(context, formSession?.totalPrice ?? 0,
-                  currencyCode: formHolder!.controller!.currencyCode),
-              style: const TextStyle(
-                fontSize: 18, // Increased font size
-                fontWeight: FontWeight.bold,
-                color: Colors.white, // White bold text
-              ),
-            ),
           ],
         ),
       ),
@@ -302,6 +325,7 @@ class _FormPageState extends State<FormPage> {
             child: OrderPreviewScreen(
               formHolder: formHolder!,
               totalPrice: formSession?.totalPrice ?? 0,
+              metaSurchargeSums: formSession?.metaSurchargeSums ?? const {},
               onSendPressed: _sendOrder,
               // When user clicks Close in UI, we just pop the sheet.
               // verification of _isOrderPreviewVisible in whenComplete will handle history sync.

@@ -3,6 +3,10 @@ RETURNS jsonb
 SET search_path = public, extensions AS $$
 DECLARE
   v_result JSONB;
+  -- Reminder grace period: TICKET_ORDER_REMINDER entries with target_time older
+  -- than this are treated as stale and dropped during validation. Prevents email
+  -- bursts after extended cron downtime (e.g. send-email auth failure backlog).
+  c_reminder_grace_period CONSTANT INTERVAL := INTERVAL '7 days';
 BEGIN
   -- This function uses Common Table Expressions (CTEs) to first identify all due emails,
   -- then validate them, delete the ones that are no longer valid, and finally return
@@ -22,6 +26,10 @@ BEGIN
         -- For ticket reminders, re-check the original conditions plus feature flags and the form-specific setting.
         WHEN de.code = 'TICKET_ORDER_REMINDER' THEN
           CASE
+            -- Grace period: drop reminder entries whose target_time is older than
+            -- c_reminder_grace_period (declared above). Without this, months-old
+            -- backlog entries would fire all at once for events that already ended.
+            WHEN de.target_time < NOW() - c_reminder_grace_period THEN FALSE
             -- Deposit reminder (has is_deposit_reminder flag)
             WHEN (de.data->>'is_deposit_reminder')::boolean IS TRUE THEN
               (

@@ -2,10 +2,13 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/components/forms/models/form_option_product_model.dart';
 import 'package:fstapp/components/forms/models/holder_models/form_ticket_model.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
+import 'package:fstapp/components/forms/widgets_view/option_field_helper.dart';
 import 'package:fstapp/components/forms/models/holder_models/form_holder.dart';
 import 'package:fstapp/components/forms/models/holder_models/ticket_holder.dart';
 
@@ -18,6 +21,10 @@ class FormSession extends ChangeNotifier {
   int totalTickets = 0;
   int totalProducts = 0;
   String? currencyCode;
+
+  /// Visual-only meta-surcharge totals grouped by currency code. Never affect totalPrice.
+  /// Empty when DepositFeature is off.
+  Map<String, double> metaSurchargeSums = {};
 
   // Snapshot for restoring state if selection is cancelled
   List<FormTicketModel>? _ticketSnapshot;
@@ -79,12 +86,26 @@ class FormSession extends ChangeNotifier {
     totalTickets = 0;
     totalProducts = 0;
 
+    final bool depositOn =
+        FeatureService.isFeatureEnabled(FeatureConstants.deposit);
+    final Map<String, double> metaSums = {};
+    void addMeta(FormOptionProductModel p) {
+      if (!depositOn) return;
+      final amount = p.metaSurchargeAmount;
+      if (amount == null || amount == 0) return;
+      // Surcharge doesn't share the product price currency by default.
+      final curr = p.metaSurchargeCurrency ??
+          OptionFieldHelper.defaultMetaSurchargeCurrency;
+      metaSums.update(curr, (v) => v + amount, ifAbsent: () => amount);
+    }
+
     for (var field in formHolder.fields) {
       if (field.fieldType == FormHelper.fieldTypeProductType) {
         var selectedOption = field.getValue(formHolder.controller!.globalKey);
         if (selectedOption is FormOptionProductModel) {
           totalPrice += selectedOption.price;
           currencyC ??= selectedOption.currencyCode;
+          addMeta(selectedOption);
         }
       }
 
@@ -108,12 +129,16 @@ class FormSession extends ChangeNotifier {
                 totalProducts++;
                 totalPrice += fValue.price;
                 currencyC ??= fValue.currencyCode;
+                addMeta(fValue);
               } else if (fValue is Iterable) {
                 var products = List<FormOptionProductModel>.from(fValue);
                 totalProducts += products.length;
                 totalPrice +=
                     products.fold(0, (sum, product) => sum + product.price);
                 currencyC ??= products.firstOrNull?.currencyCode;
+                for (final p in products) {
+                  addMeta(p);
+                }
               }
             }
           }
@@ -121,6 +146,7 @@ class FormSession extends ChangeNotifier {
       }
     }
     currencyCode = currencyC;
+    metaSurchargeSums = metaSums;
 
     notifyListeners();
   }

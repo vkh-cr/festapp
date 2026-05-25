@@ -30,8 +30,12 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
   late TextEditingController _titleController;
   late TextEditingController _priceController;
   late TextEditingController _depositController;
+  late TextEditingController _metaSurchargeController;
+  late TextEditingController _surchargeCurrencyController;
   late String selectedCurrency;
   String? _depositError;
+
+  bool get _isVirtualMode => FeatureService.isDepositVirtualMode();
 
   @override
   void initState() {
@@ -41,6 +45,10 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
         TextEditingController(text: (widget.product.price ?? 0).toString());
     _depositController = TextEditingController(
         text: widget.product.depositAmount?.toString() ?? "");
+    _metaSurchargeController = TextEditingController(
+        text: widget.product.metaSurchargeAmount?.toString() ?? "");
+    _surchargeCurrencyController = TextEditingController(
+        text: widget.product.metaSurchargeCurrency ?? "");
     _titleController.addListener(() {
       widget.product.title = _titleController.text;
     });
@@ -53,6 +61,8 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
       _validateDeposit();
     });
     _depositController.addListener(_validateDeposit);
+    _metaSurchargeController.addListener(_onMetaSurchargeChanged);
+    _surchargeCurrencyController.addListener(_onSurchargeCurrencyChanged);
     // Initialize the selected currency from the product model or default to the first available.
     selectedCurrency = widget.product.currencyCode ??
         (widget.availableCurrencies.isNotEmpty
@@ -79,21 +89,35 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
     });
   }
 
+  void _onMetaSurchargeChanged() {
+    final t = _metaSurchargeController.text.replaceAll(RegExp(r'\s+'), '');
+    final parsed = t.isEmpty ? null : double.tryParse(t);
+    // Allow negative amounts (slevy / discounts); only null/0 clears the field.
+    widget.product.metaSurchargeAmount =
+        (parsed != null && parsed != 0) ? parsed : null;
+  }
+
+  void _onSurchargeCurrencyChanged() {
+    final raw = _surchargeCurrencyController.text.trim().toUpperCase();
+    final t = raw.length > 3 ? raw.substring(0, 3) : raw;
+    widget.product.metaSurchargeCurrency = t.isEmpty ? null : t;
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
     _priceController.dispose();
     _depositController.dispose();
+    _metaSurchargeController.dispose();
+    _surchargeCurrencyController.dispose();
     super.dispose();
   }
 
-  // This function builds a basic select box for the currency.
-  Widget buildCurrencySelectBox() {
-    // If more than one currency available, make it clickable for selection.
+  // Builds a select box for the given currency value + onSelected callback.
+  Widget _buildCurrencyBox(String value, ValueChanged<String> onSelected) {
     if (widget.availableCurrencies.length > 1) {
       return InkWell(
         onTap: () async {
-          // Show a simple dialog with a list of options.
           final result = await showDialog<String>(
             context: context,
             builder: (context) {
@@ -101,42 +125,57 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                 title: Text("Currency".tr()),
                 children: widget.availableCurrencies.map((currency) {
                   return SimpleDialogOption(
-                    onPressed: () {
-                      Navigator.pop(context, currency);
-                    },
+                    onPressed: () => Navigator.pop(context, currency),
                     child: Text(currency, style: const TextStyle(fontSize: 14)),
                   );
                 }).toList(),
               );
             },
           );
-          if (result != null) {
-            setState(() {
-              selectedCurrency = result;
-              widget.product.currencyCode = selectedCurrency;
-            });
-          }
+          if (result != null) onSelected(result);
         },
         child: Container(
-          // Minimal styling to mimic a simple select box.
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(4.0),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-          child: Text(
-            selectedCurrency,
-            style: const TextStyle(fontSize: 14),
-          ),
+          child: Text(value, style: const TextStyle(fontSize: 14)),
         ),
       );
     } else {
-      // If only one currency is available, just show the text.
-      return Text(
-        selectedCurrency,
-        style: const TextStyle(fontSize: 14),
-      );
+      return Text(value, style: const TextStyle(fontSize: 14));
     }
+  }
+
+  Widget buildCurrencySelectBox() => _buildCurrencyBox(selectedCurrency, (v) {
+        setState(() {
+          selectedCurrency = v;
+          widget.product.currencyCode = selectedCurrency;
+        });
+      });
+
+  /// Free-text ISO currency input for the meta surcharge.
+  /// Unlike the product price currency, this isn't tied to bank-configured
+  /// currencies — surcharge is informational only, so any 3-letter code is valid.
+  Widget buildSurchargeCurrencyField() {
+    return SizedBox(
+      width: 64,
+      child: TextField(
+        controller: _surchargeCurrencyController,
+        maxLength: 3,
+        textCapitalization: TextCapitalization.characters,
+        textAlign: TextAlign.center,
+        decoration: const InputDecoration(
+          hintText: 'EUR',
+          counterText: '',
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+          border: OutlineInputBorder(),
+        ),
+        style: const TextStyle(fontSize: 14),
+      ),
+    );
   }
 
   @override
@@ -201,27 +240,6 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                       border: const UnderlineInputBorder(),
                     ),
                   ),
-                  if (FeatureService.isFeatureEnabled(
-                      FeatureConstants.deposit)) ...[
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _depositController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                            decoration: InputDecoration(
-                              labelText: OrdersStrings.gridDeposit,
-                              border: const UnderlineInputBorder(),
-                              isDense: true,
-                              errorText: _depositError,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                   const SizedBox(height: 4),
                   Row(
                     children: [
@@ -230,6 +248,44 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                       buildCurrencySelectBox(),
                     ],
                   ),
+                  if (FeatureService.isFeatureEnabled(
+                      FeatureConstants.deposit)) ...[
+                    const SizedBox(height: 8),
+                    if (_isVirtualMode) ...[
+                      // Virtual mode: visual-only "doplatek" amount (negative = sleva)
+                      // with its OWN currency (can differ from product price currency).
+                      TextField(
+                        controller: _metaSurchargeController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true, signed: true),
+                        decoration: InputDecoration(
+                          labelText: OrdersStrings.gridSurcharge,
+                          border: const UnderlineInputBorder(),
+                          isDense: true,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.monetization_on, size: 16),
+                          const SizedBox(width: 4),
+                          buildSurchargeCurrencyField(),
+                        ],
+                      ),
+                    ] else
+                      // Real mode: payment-linked deposit (positive only, shares product currency).
+                      TextField(
+                        controller: _depositController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        decoration: InputDecoration(
+                          labelText: OrdersStrings.gridDeposit,
+                          border: const UnderlineInputBorder(),
+                          isDense: true,
+                          errorText: _depositError,
+                        ),
+                      ),
+                  ],
                 ],
               ),
             ),

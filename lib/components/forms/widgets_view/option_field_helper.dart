@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:fstapp/components/forms/models/form_option_product_model.dart';
@@ -38,6 +40,57 @@ class OptionFieldHelper {
   static String buildDepositText(BuildContext context, FormOptionProductModel option) {
     final depositStr = Utilities.formatPrice(context, option.depositAmount!, currencyCode: option.currencyCode);
     return '${FormStrings.depositInfo}: $depositStr';
+  }
+
+  /// Returns the visual meta-surcharge text for a product option, or null when
+  /// nothing should be rendered (DepositFeature off, no amount and no description).
+  /// Format:
+  ///   "+ 200 EUR — popisek" / "+ 200 EUR" — positive amount (surcharge)
+  ///   "− 200 EUR — popisek" / "− 200 EUR" — negative amount (sleva / discount)
+  ///   "popisek" — description only
+  /// NEVER affects payment/order totals.
+  /// Fallback when admin leaves the per-product surcharge currency empty —
+  /// matches the placeholder shown in the inline editor input ("EUR").
+  /// Independent of the product price currency (surcharge doesn't go through
+  /// the bank, so it doesn't share the price currency).
+  static const String defaultMetaSurchargeCurrency = 'EUR';
+
+  static String? buildMetaSurchargeText(
+      BuildContext context, FormOptionModel option) {
+    if (!FeatureService.isFeatureEnabled(FeatureConstants.deposit)) return null;
+    // Meta surcharge applies only to product options.
+    if (option is! FormOptionProductModel) return null;
+    final desc = FeatureService.getMetaSurchargeDescription();
+    final amount = option.metaSurchargeAmount;
+    final currency =
+        option.metaSurchargeCurrency ?? defaultMetaSurchargeCurrency;
+    final hasAmount = amount != null && amount != 0;
+    // No amount → render nothing. Global description alone is not enough.
+    if (!hasAmount) return null;
+    final amountText = formatMetaSurchargeAmount(context, amount!, currency);
+    return desc != null ? '$amountText — $desc' : amountText;
+  }
+
+  /// Formats a single signed meta-surcharge amount in the standard
+  /// "+ 200 EUR" / "− 200 EUR" form. Caller is responsible for filtering
+  /// zero/null amounts.
+  static String formatMetaSurchargeAmount(
+      BuildContext context, double amount, String currency) {
+    final sign = amount < 0 ? '− ' : '+ ';
+    final priceStr =
+        Utilities.formatPrice(context, amount.abs(), currencyCode: currency);
+    return '$sign$priceStr';
+  }
+
+  /// Formats per-currency meta-surcharge sums into display strings.
+  /// Zero entries are filtered out so callers can render the result directly.
+  /// Used by the price widget (live total) and order preview (final total).
+  static List<String> formatMetaSurchargeSumLines(
+      BuildContext context, Map<String, double> sums) {
+    return sums.entries
+        .where((e) => e.value != 0)
+        .map((e) => formatMetaSurchargeAmount(context, e.value, e.key))
+        .toList();
   }
   /// Builds a card with a leading widget (checkbox or radio), a title, and an optional HTML description.
   static Widget buildOptionCard({

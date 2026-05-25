@@ -70,6 +70,7 @@ class EshopColumns {
   static const String PRODUCT_MODEL_REFERENCE = "productModelReference";
   static const String PRODUCT_USED_IN_FORMS = "productUsedInForms";
   static const String PRODUCT_SURCHARGE = "productSurcharge";
+  static const String PRODUCT_SURCHARGE_CURRENCY = "productSurchargeCurrency";
   static const String PRODUCT_DEPOSIT = "productDeposit";
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
@@ -239,6 +240,34 @@ class EshopColumns {
                 locale: context.locale.languageCode),
             textAlign: TrinaColumnTextAlign.end,
             width: 100,
+          ),
+        ],
+        PRODUCT_SURCHARGE: [
+          TrinaColumn(
+            enableAutoEditing: true,
+            title: OrdersStrings.gridSurcharge,
+            field: PRODUCT_SURCHARGE,
+            // Negative amounts allowed (slevy) — only used in virtual mode anyway.
+            type: TrinaColumnType.number(
+                negative: true,
+                format: "#.##",
+                locale: context.locale.languageCode),
+            textAlign: TrinaColumnTextAlign.end,
+            width: 100,
+          ),
+        ],
+        PRODUCT_SURCHARGE_CURRENCY: [
+          TrinaColumn(
+            // Free-text ISO code (3 letters). Surcharge doesn't go through the
+            // bank, so it is NOT restricted to the occasion's bank-supported
+            // currencies. Cell value is normalized to uppercase on save (see
+            // ProductModel.fromPlutoJson).
+            enableAutoEditing: true,
+            title: OrdersStrings.gridCurrency,
+            field: PRODUCT_SURCHARGE_CURRENCY,
+            type: TrinaColumnType.text(),
+            textAlign: TrinaColumnTextAlign.center,
+            width: 80,
           ),
         ],
         PRODUCT_DESCRIPTION: (Map<String, dynamic> data) => [

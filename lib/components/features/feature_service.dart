@@ -117,12 +117,13 @@ class FeatureService {
   }
 
   /// Returns true if deposit payment option should be offered to the customer.
-  /// False when deposit is disabled, or when the deposit deadline has already
-  /// passed (now is less than X days before event start).
+  /// False when deposit is disabled, in virtual mode (no payment),
+  /// or when the deposit deadline has already passed.
   static bool isDepositChoiceAvailable() {
     if (!isFeatureEnabled(FeatureConstants.deposit)) return false;
     final feature = getFeatureDetails(FeatureConstants.deposit);
     if (feature is! DepositFeature) return false;
+    if (feature.isVirtualMode) return false;
 
     // On-site deadline: always available
     if (feature.depositDeadline == "on_site") return true;
@@ -140,6 +141,20 @@ class FeatureService {
   static DepositFeature? getDepositFeature() {
     final feature = getFeatureDetails(FeatureConstants.deposit);
     return feature is DepositFeature ? feature : null;
+  }
+
+  /// True when DepositFeature is enabled and configured in virtual (visual-only) mode.
+  static bool isDepositVirtualMode() {
+    if (!isFeatureEnabled(FeatureConstants.deposit)) return false;
+    return getDepositFeature()?.isVirtualMode ?? false;
+  }
+
+  /// Returns the configured global meta-surcharge description (visual-only),
+  /// or null when DepositFeature is off, in real mode, or description is empty.
+  static String? getMetaSurchargeDescription() {
+    if (!isDepositVirtualMode()) return null;
+    final desc = getDepositFeature()?.metaSurchargeDescription;
+    return (desc != null && desc.trim().isNotEmpty) ? desc : null;
   }
 
   /// Returns the maximum number of companions allowed.

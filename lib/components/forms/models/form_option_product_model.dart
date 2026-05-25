@@ -48,4 +48,30 @@ class FormOptionProductModel extends FormOptionModel {
     }
     return null;
   }
+
+  /// Returns the visual-only meta surcharge amount from data.meta_surcharge.amount,
+  /// or null if not set / is zero. Negative values represent discounts (slevy).
+  /// Has NO impact on order totals.
+  double? get metaSurchargeAmount {
+    if (data == null) return null;
+    final ms = data!['meta_surcharge'];
+    if (ms is! Map) return null;
+    final val = ms['amount'];
+    if (val is num && val != 0) return val.toDouble();
+    if (val is String) {
+      final parsed = double.tryParse(val);
+      if (parsed != null && parsed != 0) return parsed;
+    }
+    return null;
+  }
+
+  /// Returns the meta surcharge currency code (independent of product.currencyCode),
+  /// or null if not set.
+  String? get metaSurchargeCurrency {
+    if (data == null) return null;
+    final ms = data!['meta_surcharge'];
+    if (ms is! Map) return null;
+    final val = ms['currency'];
+    return (val is String && val.isNotEmpty) ? val : null;
+  }
 }

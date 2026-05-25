@@ -57,57 +57,56 @@ class ProductModel extends ITrinaRowModel {
     }
   }
 
-  Map<String, dynamic> get _surchargeMap {
-    if (data != null && data![TbEshop.products.data_surcharge] is Map) {
-      return Map<String, dynamic>.from(data![TbEshop.products.data_surcharge]);
+  Map<String, dynamic> get _metaSurchargeMap {
+    if (data != null && data![TbEshop.products.data_meta_surcharge] is Map) {
+      return Map<String, dynamic>.from(
+          data![TbEshop.products.data_meta_surcharge]);
     }
     return {};
   }
 
-  double? get surchargeAmount {
-    var val = _surchargeMap['amount'];
+  double? get metaSurchargeAmount {
+    var val = _metaSurchargeMap['amount'];
     double? result;
     if (val is num) result = val.toDouble();
     if (val is String) result = double.tryParse(val);
-
     if (result == 0) return null;
     return result;
   }
 
-  set surchargeAmount(double? value) {
+  set metaSurchargeAmount(double? value) {
     data ??= {};
-    if (data![TbEshop.products.data_surcharge] is! Map) {
-      data![TbEshop.products.data_surcharge] = {};
+    if (data![TbEshop.products.data_meta_surcharge] is! Map) {
+      data![TbEshop.products.data_meta_surcharge] = {};
     }
-    var map = data![TbEshop.products.data_surcharge] as Map;
+    var map = data![TbEshop.products.data_meta_surcharge] as Map;
     if (value == null || value == 0) {
       map.remove('amount');
     } else {
       map['amount'] = value;
     }
     if (!map.containsKey('amount')) {
-      data!.remove(TbEshop.products.data_surcharge);
+      data!.remove(TbEshop.products.data_meta_surcharge);
     }
   }
 
-  String? get surchargeCurrency {
-    return _surchargeMap['currency']?.toString();
+  String? get metaSurchargeCurrency {
+    return _metaSurchargeMap['currency']?.toString();
   }
 
-  set surchargeCurrency(String? value) {
+  set metaSurchargeCurrency(String? value) {
     data ??= {};
-    if (data![TbEshop.products.data_surcharge] is! Map) {
-      data![TbEshop.products.data_surcharge] = {};
+    if (data![TbEshop.products.data_meta_surcharge] is! Map) {
+      data![TbEshop.products.data_meta_surcharge] = {};
     }
-    var map = data![TbEshop.products.data_surcharge] as Map;
+    var map = data![TbEshop.products.data_meta_surcharge] as Map;
     if (value == null || value.isEmpty) {
       map.remove('currency');
     } else {
       map['currency'] = value;
     }
-
     if (map.isEmpty || !map.containsKey('amount')) {
-      data!.remove(TbEshop.products.data_surcharge);
+      data!.remove(TbEshop.products.data_meta_surcharge);
     }
   }
 
@@ -194,27 +193,6 @@ class ProductModel extends ITrinaRowModel {
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic>? data = json[TbEshop.products.data];
 
-    if (data != null && data[TbEshop.products.data_surcharge] is Map) {
-      var map = data[TbEshop.products.data_surcharge] as Map;
-      var amount = map['amount'];
-      bool shouldRemove = false;
-      if (amount == null) {
-        shouldRemove = true;
-      } else if (amount is num && amount == 0) {
-        shouldRemove = true;
-      } else if (amount is String) {
-        if (double.tryParse(amount) == 0) shouldRemove = true;
-      }
-
-      if (shouldRemove) {
-        // Create a copy of data to avoid mutating the original JSON map if it's reused
-        // although usually json decode produces fresh maps.
-        // Better safe:
-        data = Map<String, dynamic>.from(data);
-        data.remove(TbEshop.products.data_surcharge);
-      }
-    }
-
     return ProductModel(
       id: json[TbEshop.products.id],
       createdAt: json[TbEshop.products.created_at] != null
@@ -278,6 +256,58 @@ class ProductModel extends ITrinaRowModel {
             data.remove(TbEshop.products.data_deposit);
           } else {
             data[TbEshop.products.data_deposit] = depositMap;
+          }
+        }
+      }
+    }
+    if (json.containsKey(EshopColumns.PRODUCT_SURCHARGE)) {
+      data ??= {};
+      var val = json[EshopColumns.PRODUCT_SURCHARGE];
+      var parsed = val != null ? double.tryParse(val.toString()) : null;
+      // Negative is allowed (slevy) — only 0/null clears the value.
+      if (parsed != null && parsed != 0) {
+        var msMap = data[TbEshop.products.data_meta_surcharge];
+        if (msMap is! Map) msMap = {};
+        msMap = Map<String, dynamic>.from(msMap);
+        msMap['amount'] = parsed;
+        data[TbEshop.products.data_meta_surcharge] = msMap;
+      } else {
+        if (data[TbEshop.products.data_meta_surcharge] is Map) {
+          var msMap = Map<String, dynamic>.from(
+              data[TbEshop.products.data_meta_surcharge]);
+          msMap.remove('amount');
+          if (msMap.isEmpty) {
+            data.remove(TbEshop.products.data_meta_surcharge);
+          } else {
+            data[TbEshop.products.data_meta_surcharge] = msMap;
+          }
+        }
+      }
+    }
+    if (json.containsKey(EshopColumns.PRODUCT_SURCHARGE_CURRENCY)) {
+      data ??= {};
+      var val = json[EshopColumns.PRODUCT_SURCHARGE_CURRENCY];
+      // Normalize: trim + uppercase ISO code. Cap at 3 chars defensively.
+      final raw = val?.toString().trim().toUpperCase() ?? '';
+      final curr = raw.length > 3 ? raw.substring(0, 3) : raw;
+      if (curr.isNotEmpty) {
+        var msMap = data[TbEshop.products.data_meta_surcharge];
+        if (msMap is! Map) msMap = {};
+        msMap = Map<String, dynamic>.from(msMap);
+        msMap['currency'] = curr;
+        // Only persist if there's an amount alongside — currency without amount is meaningless.
+        if (msMap.containsKey('amount')) {
+          data[TbEshop.products.data_meta_surcharge] = msMap;
+        }
+      } else {
+        if (data[TbEshop.products.data_meta_surcharge] is Map) {
+          var msMap = Map<String, dynamic>.from(
+              data[TbEshop.products.data_meta_surcharge]);
+          msMap.remove('currency');
+          if (msMap.isEmpty) {
+            data.remove(TbEshop.products.data_meta_surcharge);
+          } else {
+            data[TbEshop.products.data_meta_surcharge] = msMap;
           }
         }
       }
@@ -416,6 +446,14 @@ class ProductModel extends ITrinaRowModel {
           TrinaCell(value: getInventoryDisplayValue(this, context)),
       EshopColumns.PRODUCT_DEPOSIT: TrinaCell(
         value: depositAmount != null ? depositAmount?.toStringAsFixed(2) : '',
+      ),
+      EshopColumns.PRODUCT_SURCHARGE: TrinaCell(
+        value: metaSurchargeAmount != null
+            ? metaSurchargeAmount?.toStringAsFixed(2)
+            : '',
+      ),
+      EshopColumns.PRODUCT_SURCHARGE_CURRENCY: TrinaCell(
+        value: metaSurchargeCurrency ?? '',
       ),
       EshopColumns.PRODUCT_USED_IN_FORMS: TrinaCell(value: formTitles ?? ''),
       EshopColumns.PRODUCT_MODEL_REFERENCE: TrinaCell(value: this),

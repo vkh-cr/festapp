@@ -1,5 +1,7 @@
 import { ColorUtils } from '../../../utils/color_utils.js';
 import { formatPrice } from '../../../utils/formatters.js';
+import { LocalizationService } from '../../../services/localization_service.js';
+import { FormHelper } from '../form_helper.js';
 
 export class PriceWidget {
     constructor(formSession, container) {
@@ -21,7 +23,7 @@ export class PriceWidget {
     }
 
     render(state = null) {
-        const { totalPrice, totalItems, currency } = state || this.session.currentState;
+        const { totalPrice, totalItems, currency, metaSurchargeSums } = state || this.session.currentState;
 
         // Logic matched from FormPage._renderFloatingPriceWidget
         const formModel = this.session.formModel;
@@ -69,14 +71,15 @@ export class PriceWidget {
                 top: 16px;
                 right: 16px;
                 z-index: 2005; /* Above Blueprint Modal */
-                
+
                 background-color: ${primaryColor};
                 color: ${textColor};
                 padding: 12px 16px;
                 border-radius: 8px;
                 box-shadow: 0 4px 6px rgba(0,0,0,0.3);
                 display: flex;
-                align-items: center;
+                flex-direction: column;
+                align-items: flex-end;
                 font-family: var(--font-family-base);
                 font-weight: 600 !important;
                 font-size: 1.1rem;
@@ -103,12 +106,26 @@ export class PriceWidget {
             };
         }
 
-        const formattedPrice = formatPrice(totalPrice, currency, 0, 'cs-CZ');
+        const locale = LocalizationService.currentLocale;
+        const formattedPrice = formatPrice(totalPrice, currency, 0, locale);
+
+        // Per-currency meta surcharge lines (visual-only, NOT added to totalPrice).
+        // Negative amounts (slevy) render with "−".
+        const metaLines = FormHelper.formatMetaSurchargeSumLines(metaSurchargeSums, locale);
+
+        const metaHtml = metaLines.length > 0
+            ? `<div style="font-size: 0.9rem; font-weight: 700; margin-top: 4px;">
+                 ${metaLines.map(l => `<div>${l}</div>`).join('')}
+               </div>`
+            : '';
 
         this.element.innerHTML = `
-            <span style="margin-right: 6px; font-weight: 600;">${totalItems}x</span>
-            <i class="material-icons" style="font-size: 24px; margin-right: 10px;">local_activity</i>
-            <span style="font-weight: 600;">${formattedPrice}</span>
+            <div style="display: flex; align-items: center;">
+                <span style="margin-right: 6px; font-weight: 600;">${totalItems}x</span>
+                <i class="material-icons" style="font-size: 24px; margin-right: 10px;">local_activity</i>
+                <span style="font-weight: 600;">${formattedPrice}</span>
+            </div>
+            ${metaHtml}
         `;
     }
 

@@ -786,6 +786,10 @@
     "depositOnSiteLabel": "On site"
   },
   "FormsFeature": {
+    "showDepositDescription": "Show deposit / surcharge note on products",
+    "defaultSelectionHintSingle": "Click the radio next to an option to set it as default.",
+    "defaultSelectionHintMulti": "Tick the checkboxes next to options to pre-select them by default.",
+    "clearDefaultSelection": "Clear default",
     "cannotDeleteFormWithResponses": "Form cannot be deleted because it already has responses.",
     "addTicket": "Add Ticket",
     "formsTitle": "Forms",
@@ -1317,7 +1321,14 @@
     "depositDeadline": "Deposit deadline",
     "depositDeadlineDaysBefore": "Days before event",
     "depositDeadlineOnSite": "On site",
-    "numberOfDays": "Number of days"
+    "numberOfDays": "Number of days",
+    "metaSurchargeDescription": "Surcharge note (visual)",
+    "metaSurchargeDescriptionHelp": "Free-form text shown under the product price (form, preview, e-mail, PDF). Not added to the order total.",
+    "depositModeTitle": "Mode",
+    "depositModeReal": "Real deposit (payment-linked)",
+    "depositModeVirtual": "On-site surcharge (informational)",
+    "depositModeRealHelp": "Customer pays the deposit upfront; the remainder is settled later or on-site.",
+    "depositModeVirtualHelp": "Shown next to products as informational; does not affect order total. Negative amounts allowed (discounts)."
   },
   "Feedback": {
     "helpTitle": "How can we help?",

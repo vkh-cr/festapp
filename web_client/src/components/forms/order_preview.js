@@ -9,6 +9,8 @@ import { OrderResult } from './order_result.js';
 import { FeatureService } from '../features/feature_service.js';
 import { FormDataReader } from './form_data_reader.js';
 import { FieldPreviewFactory } from './previews/field_preview_factory.js';
+import { FormHelper } from './form_helper.js';
+import { LocalizationService } from '../../services/localization_service.js';
 
 // Inject CSS
 if (typeof document !== 'undefined') {
@@ -354,10 +356,11 @@ export class OrderPreview {
                            }
 
                            if (val !== undefined) {
-                               const result = FieldPreviewFactory.format(subDef, val, { 
-                                  currency: totalPriceData.currency 
+                               const result = FieldPreviewFactory.format(subDef, val, {
+                                  currency: totalPriceData.currency,
+                                  features: formModel.occasionFeatures,
                                });
-                               tData.rows.push({ label: subDef.title, value: result.value, price: result.price });
+                               tData.rows.push({ label: subDef.title, value: result.value, price: result.price, metaSurcharge: result.metaSurcharge });
                            }
                       }
                  });
@@ -369,6 +372,10 @@ export class OrderPreview {
         // Deposit logic: check if any selected ticket product has deposit data
         const depositInfo = OrderPreview._getDepositInfo(payload, formModel, totalPriceData.currency);
 
+        // Visual-only meta surcharge sums per currency (e.g. on-site EUR doplatek).
+        // Never added to totalPrice — surcharge doesn't go through the bank.
+        const metaSurchargeSums = FormHelper.calculateMetaSurchargeSums(payload, formModel);
+
         return {
             personalInfo,
             tickets,
@@ -376,7 +383,8 @@ export class OrderPreview {
             currency: totalPriceData.currency,
             hasTickets: FeatureService.isFeatureEnabled(FeatureService.FeatureConstants.ticket, formModel.occasionFeatures),
             tone: formModel.communicationTone,
-            deposit: depositInfo
+            deposit: depositInfo,
+            metaSurchargeSums
         };
     }
 
@@ -495,6 +503,9 @@ export class OrderPreview {
                   // Spot/Fields
                   ticket.rows.forEach((row, rIndex) => {
                       const priceHtml = row.price ? `<span class="preview-price">+ ${row.price}</span>` : '';
+                      const metaHtml = row.metaSurcharge
+                          ? `<div class="preview-meta-surcharge">${String(row.metaSurcharge).replace(/\n/g, '<br>')}</div>`
+                          : '';
                       html += `
                         <div class="preview-info-row">
                              <span class="preview-label">${row.label}:</span>
@@ -502,6 +513,7 @@ export class OrderPreview {
                                   <span class="preview-value">${row.value}</span>
                                   ${priceHtml}
                              </div>
+                             ${metaHtml}
                         </div>
                       `;
                       if (rIndex < ticket.rows.length - 1) {
@@ -542,9 +554,21 @@ export class OrderPreview {
         // Total
         const formattedPrice = formatPrice(data.totalPrice, data.currency, 0, 'cs-CZ');
         const totalPriceString = PublicOrderStrings.totalPrice(formattedPrice);
+
+        // Per-currency meta surcharge sums (visual-only, NOT added to totalPrice).
+        // Negative amounts (slevy) render with leading "−".
+        const metaLines = FormHelper.formatMetaSurchargeSumLines(
+            data.metaSurchargeSums, LocalizationService.currentLocale);
+        const metaHtml = metaLines.length > 0
+            ? `<div class="preview-total-meta-surcharge">
+                 ${metaLines.map(l => `<div>${l}</div>`).join('')}
+               </div>`
+            : '';
+
         html += `
              <div class="preview-total-price">
                  ${totalPriceString}
+                 ${metaHtml}
              </div>
         `;
 

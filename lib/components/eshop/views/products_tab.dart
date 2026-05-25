@@ -38,8 +38,13 @@ class _ProductsTabState extends State<ProductsTab> {
         EshopColumns.PRODUCT_IS_HIDDEN,
         EshopColumns.PRODUCT_PRICE,
         EshopColumns.PRODUCT_CURRENCY_CODE,
-        if (FeatureService.isFeatureEnabled(FeatureConstants.deposit))
+        if (FeatureService.isFeatureEnabled(FeatureConstants.deposit) &&
+            !FeatureService.isDepositVirtualMode())
           EshopColumns.PRODUCT_DEPOSIT,
+        if (FeatureService.isDepositVirtualMode())
+          EshopColumns.PRODUCT_SURCHARGE,
+        if (FeatureService.isDepositVirtualMode())
+          EshopColumns.PRODUCT_SURCHARGE_CURRENCY,
         EshopColumns.PRODUCT_PAID_COUNT,
         EshopColumns.PRODUCT_ORDERED_COUNT,
         EshopColumns.PRODUCT_MAXIMUM,

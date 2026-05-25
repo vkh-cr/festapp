@@ -50,7 +50,7 @@ export class FormSession extends EventTarget {
         
         // --- Fix: Request Serialization Queue ---
         this._spotQueue = Promise.resolve();
-        
+
         // Spot Model Cache (Price Robustness)
         this.spotModels = new Map();
     }
@@ -755,11 +755,11 @@ export class FormSession extends EventTarget {
     _recalculate() {
         // Debug Logging
         const priceData = FormHelper.calculatePrice(this.payload, this.formModel);
-        
-        const hasBoundCurrency = this._payloadHasBoundCurrency();
-        
 
-        
+        const hasBoundCurrency = this._payloadHasBoundCurrency();
+
+
+
         if (!hasBoundCurrency && this.state.currency) {
             // Force keep session currency if payload doesn't care
             priceData.currency = this.state.currency;
@@ -767,6 +767,10 @@ export class FormSession extends EventTarget {
             // If calculator returned nothing (no default?), keep session
              priceData.currency = this.state.currency;
         }
+
+        // Visual-only meta-surcharge sums (per currency). Never affect totalPrice.
+        priceData.metaSurchargeSums =
+            FormHelper.calculateMetaSurchargeSums(this.payload, this.formModel);
 
         this.updateState(priceData);
     }
@@ -840,10 +844,13 @@ export class FormSession extends EventTarget {
         // as "User Typed" might not change price but might signify activity.
         // Actually, we only care about price/items for the widget.
         
-        const hasChanged = 
-            newState.totalPrice !== this.state.totalPrice || 
+        const metaChanged = JSON.stringify(newState.metaSurchargeSums || []) !==
+            JSON.stringify(this.state.metaSurchargeSums || []);
+        const hasChanged =
+            newState.totalPrice !== this.state.totalPrice ||
             newState.totalItems !== this.state.totalItems ||
-            newState.currency !== this.state.currency;
+            newState.currency !== this.state.currency ||
+            metaChanged;
 
         if (hasChanged) {
             this.state = { ...this.state, ...newState };

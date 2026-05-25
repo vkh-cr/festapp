@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
@@ -9,6 +10,7 @@ import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 
+import 'default_value_helper.dart';
 import 'description_with_edit.dart';
 import 'form_fields_generator.dart';
 import 'ticket_editor_widgets.dart';
@@ -229,6 +231,43 @@ class ProductTypeEditorWidgets {
       ],
     );
   }
+
+  static void _removeProductFromDefault(FormFieldModel field, int? productId) {
+    if (productId == null) return;
+    DefaultValueHelper.remove(field, productId.toString());
+  }
+
+  /// Leading Radio (single) or Checkbox (multi) per product. Toggles default state.
+  static Widget _buildDefaultSelector({
+    required FormFieldModel ptField,
+    required ProductModel product,
+    required bool isSelectMany,
+    required VoidCallback onChanged,
+  }) {
+    final key = product.id?.toString();
+    if (key == null) {
+      // Unsaved product (no id yet) — placeholder spacer so layout aligns.
+      return const SizedBox(width: 48);
+    }
+    if (isSelectMany) {
+      final selected = DefaultValueHelper.readList(ptField).contains(key);
+      return Checkbox(
+        value: selected,
+        onChanged: (val) {
+          DefaultValueHelper.toggleInList(ptField, key, val == true);
+          onChanged();
+        },
+      );
+    }
+    return Radio<String>(
+      value: key,
+      groupValue: DefaultValueHelper.readString(ptField),
+      onChanged: (val) {
+        DefaultValueHelper.write(ptField, val);
+        onChanged();
+      },
+    );
+  }
 }
 
 /// A stateful widget to manage the editor state for a product type.
@@ -388,16 +427,39 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                   },
                   occasionId: form.occasionId!,
                 ),
-              const SizedBox(height: 16),
-              // List of Product Rows
+              const SizedBox(height: 8),
+              // Hint about marking default-selected product(s)
+              Text(
+                canSelectMany
+                    ? FormStrings.defaultSelectionHintMulti
+                    : FormStrings.defaultSelectionHintSingle,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              // List of Product Rows with leading default selector
               for (int i = 0; i < group.products!.length; i++)
-                TicketProductEditorRow(
-                  product: group.products![i],
-                  onDelete: () {
-                    group.products!.removeAt(i);
-                    refresh();
-                  },
-                  availableCurrencies: form.getSupportedCurrencies(),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ProductTypeEditorWidgets._buildDefaultSelector(
+                      ptField: ptField,
+                      product: group.products![i],
+                      isSelectMany: canSelectMany,
+                      onChanged: refresh,
+                    ),
+                    Expanded(
+                      child: TicketProductEditorRow(
+                        product: group.products![i],
+                        onDelete: () {
+                          group.products!.removeAt(i);
+                          ProductTypeEditorWidgets._removeProductFromDefault(
+                              ptField, group.products![i].id);
+                          refresh();
+                        },
+                        availableCurrencies: form.getSupportedCurrencies(),
+                      ),
+                    ),
+                  ],
                 ),
               // Add Product Button
               Align(

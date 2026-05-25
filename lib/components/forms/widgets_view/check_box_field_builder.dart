@@ -31,6 +31,19 @@ class CheckboxFieldBuilder {
     }
   }
 
+  /// Resolves configured defaults (list of option titles or product IDs).
+  /// Matches by option.title (select_many) OR option.id (product_type).
+  /// Missing options are silently ignored.
+  static List<FormOptionModel> resolveDefaults(
+      FieldHolder fieldHolder, List<FormOptionModel> options) {
+    final raw = fieldHolder.defaultValue;
+    if (raw is! List) return const [];
+    final keys = raw.whereType<String>().toSet();
+    return options
+        .where((o) => keys.contains(o.title) || keys.contains(o.id))
+        .toList();
+  }
+
   static Widget _buildCardSelectManyField(
     BuildContext context,
     FieldHolder fieldHolder,
@@ -51,7 +64,7 @@ class CheckboxFieldBuilder {
                 ? FormBuilderValidators.required(
                     errorText: CommonStrings.fieldCannotBeEmpty)
                 : null,
-            initialValue: [],
+            initialValue: resolveDefaults(fieldHolder, optionsIn),
             builder: (FormFieldState<List<FormOptionModel>> field) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,6 +111,13 @@ class CheckboxFieldBuilder {
     final isSelected = field.value?.contains(o) ?? false;
 
     String? effectiveDescription = o.description;
+    // Meta surcharge sits ABOVE original description.
+    final metaText = OptionFieldHelper.buildMetaSurchargeText(context, o);
+    if (metaText != null) {
+      effectiveDescription = effectiveDescription != null
+          ? "$metaText<br>$effectiveDescription"
+          : metaText;
+    }
     final showDepositInfo =
         formHolder.getTicket()?.showDepositDescription ?? true;
     if (showDepositInfo &&
@@ -228,6 +248,24 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
           ],
         );
       }
+      final metaText = OptionFieldHelper.buildMetaSurchargeText(context, o);
+      if (metaText != null) {
+        labelWidget = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            labelWidget,
+            const SizedBox(height: 2),
+            Text(metaText,
+                style: style.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.7),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500)),
+          ],
+        );
+      }
 
       return FormBuilderFieldOption<FormOptionModel>(
         value: o,
@@ -250,6 +288,8 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
               ? FormBuilderValidators.required(
                   errorText: CommonStrings.fieldCannotBeEmpty)
               : null,
+          initialValue: CheckboxFieldBuilder.resolveDefaults(
+              widget.fieldHolder, widget.optionsIn),
           options: options,
           activeColor: Theme.of(context).primaryColor,
           orientation: OptionsOrientation.vertical,
