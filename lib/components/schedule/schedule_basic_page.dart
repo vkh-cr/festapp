@@ -224,7 +224,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: LogoWidget(width: 64,),
+                          child: LogoWidget(width: 64, programVariant: true),
                         ),
                       ),
                       const Spacer(),

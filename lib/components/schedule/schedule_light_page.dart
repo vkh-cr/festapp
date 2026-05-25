@@ -194,7 +194,7 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
                           child: const Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 4, vertical: 4),
-                            child: LogoWidget(height: 40),
+                            child: LogoWidget(height: 40, programVariant: true),
                           ),
                         ),
                         const Spacer(),
