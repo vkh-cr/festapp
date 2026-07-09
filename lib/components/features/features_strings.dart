@@ -77,6 +77,33 @@ class FeaturesStrings {
   static String get helperAutoImport => 'FeatureImport.helperAutoImport'
       .tr(); // "UUsers will automatically have an account created upon signing up through the form. Default password is '1'."
 
+  // CSV import format description (shown in the drop-file dialog)
+  static String get csvFormatTitle =>
+      'FeatureImport.csvFormatTitle'.tr(); // "Expected file format"
+  static String get csvFormatIntro => 'FeatureImport.csvFormatIntro'
+      .tr(); // Explanation of how the header row is matched.
+  static String get csvFormatRequired =>
+      'FeatureImport.csvFormatRequired'.tr(); // "required"
+  static String get csvColEmail => 'FeatureImport.csvColEmail'.tr();
+  static String get csvColName => 'FeatureImport.csvColName'.tr();
+  static String get csvColSurname => 'FeatureImport.csvColSurname'.tr();
+  static String get csvColSex => 'FeatureImport.csvColSex'.tr();
+  static String get csvColPhone => 'FeatureImport.csvColPhone'.tr();
+  static String get csvColText1 => 'FeatureImport.csvColText1'.tr();
+  static String get csvColText2 => 'FeatureImport.csvColText2'.tr();
+  static String get csvColBirthDate => 'FeatureImport.csvColBirthDate'.tr();
+  static String get csvColNote => 'FeatureImport.csvColNote'.tr();
+  static String get csvColDiet => 'FeatureImport.csvColDiet'.tr();
+  static String get csvColFood => 'FeatureImport.csvColFood'.tr();
+  static String get csvColAccommodation =>
+      'FeatureImport.csvColAccommodation'.tr();
+  static String get csvCopyHeader =>
+      'FeatureImport.csvCopyHeader'.tr(); // "Copy header for pasting"
+  static String get csvCopyTooltip =>
+      'FeatureImport.csvCopyTooltip'.tr(); // "Copy"
+  static String get csvCopiedToast =>
+      'FeatureImport.csvCopiedToast'.tr(); // "Copied to clipboard."
+
   // Feature Contract
   static String get contractTransport => 'FeatureContract.transport'.tr();
   static String get contractDeparturePoint =>

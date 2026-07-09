@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
+import 'package:fstapp/components/search/search_strings.dart';
+import 'package:fstapp/components/event_feedback/event_feedback_strings.dart';
 import 'feature_constants.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'schedule_feature.dart';
@@ -16,6 +18,14 @@ class FeatureMetadata {
         FeatureConstants.deposit: {
           'title': FeaturesStrings.depositTitle,
           'description': FeaturesStrings.depositDescription,
+        },
+        FeatureConstants.globalSearch: {
+          'title': SearchStrings.featureTitle,
+          'description': SearchStrings.featureDescription,
+        },
+        FeatureConstants.eventFeedback: {
+          'title': EventFeedbackStrings.featureTitle,
+          'description': EventFeedbackStrings.featureDescription,
         },
         FeatureConstants.form: {
           'title': 'Form'.tr(),

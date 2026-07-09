@@ -1,0 +1,374 @@
+import 'package:flutter/material.dart';
+import 'package:fstapp/components/event_feedback/db_event_feedback.dart';
+import 'package:fstapp/components/event_feedback/event_feedback_model.dart';
+import 'package:fstapp/components/event_feedback/event_feedback_results.dart';
+import 'package:fstapp/components/event_feedback/event_feedback_strings.dart';
+import 'package:fstapp/services/toast_helper.dart';
+
+/// Smiley rating + optional comment shown on the event detail page when the
+/// EventFeedback feature is enabled for the occasion and the event.
+///
+/// [isOpen] = feedback window is open (now >= event start). When closed and the
+/// viewer is an editor, [isEditorPreview] shows the UI as a preview.
+///
+/// Layout mirrors the deployed csmostrava build 1:1: an outlined rounded
+/// container (not a Card), three equal-width colour-coded smiley tiles laid out
+/// by a LayoutBuilder, and icon buttons for submit/remove.
+class EventFeedbackWidget extends StatefulWidget {
+  final int eventId;
+  final bool isOpen;
+  final bool isEditorPreview;
+
+  /// The event caps participants (max_participants > 0), so only signed-in
+  /// participants may rate it. Mirrors production `T7(event)`.
+  final bool requiresSignIn;
+
+  /// The current viewer is a signed-in participant of this event
+  /// (event.isSignedIn == true). Mirrors production `event.ay`.
+  final bool isParticipant;
+
+  /// Test seam: overrides the initial feedback fetch. Defaults to the live RPC.
+  @visibleForTesting
+  final Future<EventFeedbackModel?> Function(int eventId)? loadFeedbackOverride;
+
+  const EventFeedbackWidget({
+    super.key,
+    required this.eventId,
+    required this.isOpen,
+    this.isEditorPreview = false,
+    this.requiresSignIn = false,
+    this.isParticipant = false,
+    this.loadFeedbackOverride,
+  });
+
+  @override
+  State<EventFeedbackWidget> createState() => _EventFeedbackWidgetState();
+}
+
+class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
+  final TextEditingController _note = TextEditingController();
+  String? _rating;
+  bool _loading = true;
+  bool _saving = false;
+
+  /// True once the user has edited the comment since the last save/load.
+  /// Drives the "Uložit komentář" (saveComment) submit label, matching prod.
+  bool _commentDirty = false;
+  EventFeedbackModel? _existing;
+
+  static const _ratings = [
+    EventFeedbackModel.ratingHappy,
+    EventFeedbackModel.ratingNeutral,
+    EventFeedbackModel.ratingSad,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    try {
+      final load =
+          widget.loadFeedbackOverride ?? DbEventFeedback.getMyFeedback;
+      final fb = await load(widget.eventId);
+      if (!mounted) return;
+      setState(() {
+        _existing = fb;
+        _rating = fb?.rating;
+        _note.text = fb?.note ?? '';
+        _commentDirty = false;
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _submit() async {
+    if (_rating == null) {
+      ToastHelper.Show(context, EventFeedbackStrings.chooseRatingFirst);
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      final fb = await DbEventFeedback.submit(
+        eventId: widget.eventId,
+        rating: _rating!,
+        note: _note.text.trim().isEmpty ? null : _note.text.trim(),
+      );
+      if (!mounted) return;
+      setState(() {
+        _existing = fb;
+        _commentDirty = false;
+        _saving = false;
+      });
+      ToastHelper.Show(context, EventFeedbackStrings.feedbackSavedThankYou);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ToastHelper.Show(context, _errorMessage(e));
+    }
+  }
+
+  /// Maps the RPC error code to its message exactly like the deployed build.
+  String _errorMessage(Object e) {
+    if (e is EventFeedbackException) {
+      switch (e.code) {
+        case 401:
+          return EventFeedbackStrings.signInRequired;
+        case 403:
+          return EventFeedbackStrings.onlySignedInParticipants;
+        case 409:
+          return EventFeedbackStrings.feedbackOpensWhenEventStarts;
+        case 413:
+          return EventFeedbackStrings.feedbackTextTooLong;
+        default:
+          return e.message ?? EventFeedbackStrings.feedbackCouldNotBeSaved;
+      }
+    }
+    return EventFeedbackStrings.feedbackCouldNotBeSaved;
+  }
+
+  Future<void> _remove() async {
+    setState(() => _saving = true);
+    try {
+      await DbEventFeedback.delete(widget.eventId);
+      if (!mounted) return;
+      setState(() {
+        _existing = null;
+        _rating = null;
+        _note.clear();
+        _commentDirty = false;
+        _saving = false;
+      });
+      ToastHelper.Show(context, EventFeedbackStrings.feedbackRemoved);
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  /// Semantic accent colour for a rating (happy = green, neutral = amber,
+  /// sad = red), with light/dark variants. Sad matches the deployed build
+  /// exactly (0xFFD32F2F / 0xFFFF5252).
+  Color _ratingColor(String rating, bool dark) {
+    switch (rating) {
+      case EventFeedbackModel.ratingHappy:
+        return dark ? const Color(0xFF66BB6A) : const Color(0xFF388E3C);
+      case EventFeedbackModel.ratingNeutral:
+        return dark ? const Color(0xFFFFCA28) : const Color(0xFFF9A825);
+      case EventFeedbackModel.ratingSad:
+      default:
+        return dark ? const Color(0xFFFF5252) : const Color(0xFFD32F2F);
+    }
+  }
+
+  IconData _ratingIcon(String rating) {
+    switch (rating) {
+      case EventFeedbackModel.ratingHappy:
+        return Icons.sentiment_very_satisfied;
+      case EventFeedbackModel.ratingSad:
+        return Icons.sentiment_very_dissatisfied;
+      case EventFeedbackModel.ratingNeutral:
+      default:
+        return Icons.sentiment_neutral;
+    }
+  }
+
+  /// One equal-width smiley tile: rounded outlined card with an icon over its
+  /// label. Unselected tiles are neutral grey; the selected tile lights up in
+  /// its semantic colour with a tinted fill and a 2px border.
+  Widget _smileyTile(BuildContext context, String rating, double width) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    final selected = _rating == rating;
+    final accent = _ratingColor(rating, dark);
+    final fg =
+        selected ? accent : (dark ? Colors.white54 : Colors.black54);
+
+    return SizedBox(
+      width: width,
+      child: Material(
+        color: selected ? accent.withValues(alpha: 0.14) : Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: selected
+                ? accent
+                : theme.colorScheme.outline.withValues(alpha: 0.4),
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: InkWell(
+          onTap: _saving ? null : () => setState(() => _rating = rating),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(_ratingIcon(rating), size: 30, color: fg),
+                const SizedBox(height: 4),
+                Text(
+                  EventFeedbackStrings.ratingLabel(rating),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _form(BuildContext context) {
+    final submitLabel = _commentDirty
+        ? EventFeedbackStrings.saveComment
+        : (_existing == null
+            ? EventFeedbackStrings.sendFeedback
+            : EventFeedbackStrings.updateFeedback);
+    final showRemove = _existing != null ||
+        _rating != null ||
+        _note.text.trim().isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LayoutBuilder(
+          builder: (ctx, constraints) {
+            // Two 8px gaps between three tiles.
+            final width = (constraints.maxWidth - 16) / 3;
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _ratings
+                  .map((r) => _smileyTile(ctx, r, width))
+                  .toList(),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _note,
+          maxLength: 2000,
+          minLines: 2,
+          maxLines: 4,
+          onChanged: (_) {
+            if (!_commentDirty) setState(() => _commentDirty = true);
+          },
+          decoration: InputDecoration(
+            labelText: EventFeedbackStrings.optionalComment,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            if (showRemove)
+              TextButton.icon(
+                onPressed: _saving ? null : _remove,
+                icon: const Icon(Icons.delete_outline),
+                label: Text(EventFeedbackStrings.removeFeedback),
+              ),
+            FilledButton.icon(
+              onPressed: (_saving || _rating == null) ? null : _submit,
+              icon: _saving
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.send),
+              label: Text(submitLabel),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Icon + text status row (feedback closed / participants-only), matching the
+  /// deployed build's inline message layout.
+  Widget _messageRow(BuildContext context, IconData icon, String text) {
+    final theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: theme.hintColor),
+        const SizedBox(width: 8),
+        Expanded(child: Text(text)),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (_loading) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final closed = !widget.isOpen && !widget.isEditorPreview;
+    // Capped events only take feedback from signed-in participants; editors
+    // preview regardless. Mirrors production T7(event) && !editor && !event.ay.
+    final participantsOnly = widget.requiresSignIn &&
+        !widget.isEditorPreview &&
+        !widget.isParticipant;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(EventFeedbackStrings.howWasThisEvent,
+                style: theme.textTheme.titleMedium),
+            if (widget.isEditorPreview && !widget.isOpen)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(EventFeedbackStrings.editorPreviewBeforeStart,
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(fontStyle: FontStyle.italic)),
+              ),
+            const SizedBox(height: 12),
+            if (closed)
+              _messageRow(context, Icons.schedule,
+                  EventFeedbackStrings.feedbackOpensWhenEventStarts)
+            else if (participantsOnly)
+              _messageRow(context, Icons.lock_outline,
+                  EventFeedbackStrings.onlySignedInParticipants)
+            else
+              _form(context),
+            // Editors see the aggregated results inline (matches production).
+            if (widget.isEditorPreview) ...[
+              const SizedBox(height: 12),
+              EventFeedbackResults(eventId: widget.eventId),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}

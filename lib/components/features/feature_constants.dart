@@ -26,6 +26,11 @@ class FeatureConstants {
   static const String contract = "contract";
   static const String deposit = "deposit";
   static const String import = "import"; // New feature
+  static const String globalSearch = "global_search";
+  static const String eventFeedback = "event_feedback";
+
+  // Per-event flag (stored in events.data) toggling feedback for one event.
+  static const String feedbackEnabled = "feedback_enabled";
 
   // Contract Feature
   static const String contractTransport = "transport";
@@ -50,6 +55,7 @@ class FeatureConstants {
   static const String formExternalLink = "external_form_link";
   static const String formExternalPrice = "external_price";
   static const String reserveButtonTitle = "reserve_button_title";
+  static const String formShowPaymentQr = "show_payment_qr";
   static const String reminderIsEnabled = "reminder_is_enabled";
   static const String reminderIntervalSeconds = "reminder_interval_seconds";
   static const String deadlineDurationSeconds = "deadline_duration_seconds";
@@ -89,4 +95,15 @@ class FeatureConstants {
 
   // Import Feature
   static const String importAutoImport = "auto_import";
+
+  // Services (Inventory / "Pobyt") Feature
+  // Mutually exclusive modes:
+  //   "stay"            → accommodation and/or food capacity groups (default)
+  //   "capacity_groups" → generic capacity groups only ("other" pool type)
+  static const String servicesMode = "services_mode";
+  static const String servicesModeStay = "stay";
+  static const String servicesModeCapacityGroups = "capacity_groups";
+  // Independent sub-toggles, only relevant in "stay" mode.
+  static const String servicesAllowAccommodation = "allow_accommodation";
+  static const String servicesAllowFood = "allow_food";
 }

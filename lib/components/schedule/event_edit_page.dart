@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/event_feedback/event_feedback_strings.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/router_service.dart';
@@ -48,6 +50,7 @@ class _EventEditPageState extends State<EventEditPage> {
   int? maxParticipants, placeId;
   bool? splitForMenWomen, isGroupEvent;
   bool? isCancelled;
+  bool feedbackEnabled = false;
   bool isFormValid = true;
 
   DateTime? minDate;
@@ -97,6 +100,9 @@ class _EventEditPageState extends State<EventEditPage> {
           originalEvent!.parentEventIds?.map((e) => e.toString()).join(",") ??
               "";
       isCancelled = originalEvent!.isCancelled; // Load isCancelled status
+      feedbackEnabled =
+          originalEvent!.data?[FeatureConstants.feedbackEnabled]?.toString() ==
+              'true';
     }
     validateForm();
     if (mounted) {
@@ -154,6 +160,10 @@ class _EventEditPageState extends State<EventEditPage> {
                       .map((e) => int.parse(e.trim()))
                       .toList()
                   : [];
+        originalEvent!.data = {
+          ...?originalEvent!.data,
+          FeatureConstants.feedbackEnabled: feedbackEnabled,
+        };
 
         await DbEvents.updateEvent(originalEvent!);
         ToastHelper.Show(
@@ -210,6 +220,15 @@ class _EventEditPageState extends State<EventEditPage> {
                                   setState(() => isCancelled = value),
                               activeThumbColor: ThemeConfig.redColor(context),
                             ),
+                            if (FeatureService.isFeatureEnabled(
+                                FeatureConstants.eventFeedback))
+                              SwitchListTile(
+                                title:
+                                    Text(EventFeedbackStrings.enableEventFeedback),
+                                value: feedbackEnabled,
+                                onChanged: (value) =>
+                                    setState(() => feedbackEnabled = value),
+                              ),
                             TextFormField(
                               initialValue: title,
                               decoration: InputDecoration(
