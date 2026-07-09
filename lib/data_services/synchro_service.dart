@@ -10,6 +10,7 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/services/platform_helper.dart';
+import 'package:fstapp/components/search/db_search.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SynchroService {
@@ -68,6 +69,9 @@ class SynchroService {
     }
 
     await DbEvents.synchronizeMySchedule();
+
+    // Refresh the GlobalSearch offline index from the freshly cached data.
+    await DbSearch.rebuildOfflineIndex();
   }
 
   static Future<OccasionLinkModel> getAppConfig(LinkModel link) async {

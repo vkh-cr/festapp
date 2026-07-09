@@ -39,7 +39,7 @@ class _NewsPageState extends State<NewsPage> {
     super.initState();
     context.tabsRouter.addListener(() async {
       if (context.tabsRouter.activeIndex ==
-          OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.news)) {
+          OccasionHomePage.baseTabKeys.indexOf(OccasionTab.news)) {
         _checkAsRead();
         loadData();
       }

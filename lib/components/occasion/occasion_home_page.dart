@@ -18,6 +18,11 @@ import 'package:fstapp/services/notification_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/components/map/map_page.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/search/global_search_dialog.dart';
+import 'package:fstapp/components/search/search_strings.dart';
 
 @RoutePage()
 class OccasionHomePage extends StatefulWidget {
@@ -25,13 +30,15 @@ class OccasionHomePage extends StatefulWidget {
 
   const OccasionHomePage({super.key});
 
-  static final List<String> visibleTabKeys = [
-    OccasionTab.map,
+  /// Base bottom-nav tabs. When the GlobalSearch feature is enabled the "user"
+  /// tab is dropped (profile moves to the app bar) and a "search" tab is
+  /// appended — see [_OccasionHomePageState.visibleTabKeys].
+  static final List<String> baseTabKeys = [
     if (AppConfig.isAllUnit) OccasionTab.unit,
     if (!AppConfig.isAllUnit) OccasionTab.home,
+    OccasionTab.map,
     OccasionTab.news,
     OccasionTab.more,
-    OccasionTab.user,
   ];
 
   @override
@@ -42,6 +49,17 @@ class _OccasionHomePageState extends State<OccasionHomePage>
     with WidgetsBindingObserver {
   int _messageCount = 0;
   late final Map<String, OccasionTab> _availableTabs;
+
+  /// Effective bottom-nav keys: when GlobalSearch is on, the profile ("user")
+  /// tab is replaced by a "search" tab (profile moves to the app bar), matching
+  /// production. Otherwise the default profile tab is shown.
+  List<String> get visibleTabKeys => [
+        ...OccasionHomePage.baseTabKeys,
+        if (FeatureService.isFeatureEnabled(FeatureConstants.globalSearch))
+          OccasionTab.search
+        else
+          OccasionTab.user,
+      ];
 
   @override
   void initState() {
@@ -97,13 +115,18 @@ class _OccasionHomePageState extends State<OccasionHomePage>
   @override
   Widget build(BuildContext context) {
     return AutoTabsRouter(
-      routes: OccasionHomePage.visibleTabKeys
+      routes: visibleTabKeys
           .map((key) => _availableTabs[key]!.route)
           .toList(),
       builder: (tabsContext, child) {
         final tabsRouter = AutoTabsRouter.of(tabsContext);
         return Scaffold(
-          bottomNavigationBar: ValueListenableBuilder<OccasionLinkModel?>(
+          bottomNavigationBar: ValueListenableBuilder<bool>(
+            valueListenable: MapPage.isEditingNotifier,
+            builder: (context, isEditingMap, _) {
+              // Hide the bottom navigation while drawing a path on the map.
+              if (isEditingMap) return const SizedBox.shrink();
+              return ValueListenableBuilder<OccasionLinkModel?>(
             valueListenable: RightsService.occasionLinkModelNotifier,
             builder: (listenableContext, occasionLinkModel, __) {
               return BottomNavigationBar(
@@ -116,8 +139,15 @@ class _OccasionHomePageState extends State<OccasionHomePage>
                 currentIndex: tabsRouter.activeIndex,
                 type: BottomNavigationBarType.fixed,
                 onTap: (int index) async {
-                  final key = OccasionHomePage.visibleTabKeys[index];
+                  final key = visibleTabKeys[index];
                   final tab = _availableTabs[key]!;
+
+                  // Search is a modal overlay, not a real tab — show it and
+                  // keep the current tab active (matches production).
+                  if (key == OccasionTab.search) {
+                    GlobalSearchDialog.show(listenableContext);
+                    return;
+                  }
 
                   if (tab.requiresLogin && !AuthService.isLoggedIn()) {
                     await RouterService.navigate(
@@ -135,7 +165,7 @@ class _OccasionHomePageState extends State<OccasionHomePage>
                     tabsRouter.setActiveIndex(index);
                   }
                 },
-                items: OccasionHomePage.visibleTabKeys.map((key) {
+                items: visibleTabKeys.map((key) {
                   final tab = _availableTabs[key]!;
                   return BottomNavigationBarItem(
                     icon: tab.buildIcon(
@@ -149,6 +179,8 @@ class _OccasionHomePageState extends State<OccasionHomePage>
                   );
                 }).toList(),
               );
+            },
+          );
             },
           ),
           body: child,
@@ -182,6 +214,7 @@ class OccasionTab {
   static const String more = "more";
   static const String user = "user";
   static const String timetable = "timetable";
+  static const String search = "search";
 
   static Map<String, OccasionTab> getAvailableTabs(
           [VoidCallback? onSetAsRead]) =>
@@ -235,6 +268,15 @@ class OccasionTab {
           activeIcon: Icons.account_circle,
           route: UserRoute(),
           requiresLogin: true,
+        ),
+        // "search" opens GlobalSearchDialog on tap (handled in onTap); the
+        // route is a never-displayed placeholder so tab/route counts align.
+        search: OccasionTab(
+          key: search,
+          label: SearchStrings.tooltip,
+          icon: Icons.search,
+          activeIcon: Icons.search,
+          route: UserRoute(),
         ),
       };
 
