@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/map/places_content.dart';
 import 'package:fstapp/components/map/path_groups_content.dart';
+import 'package:fstapp/components/icons/icons_management_widget.dart';
+import 'package:fstapp/components/icons/place_types_content.dart';
+import 'package:fstapp/components/icons/icons_strings.dart';
 import 'package:fstapp/theme_config.dart';
 
 class PlacesTab extends StatefulWidget {
@@ -19,7 +22,7 @@ class _PlacesTabState extends State<PlacesTab>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -43,6 +46,10 @@ class _PlacesTabState extends State<PlacesTab>
               tabs: [
                 DataGridHelper.buildTab(context, Icons.place, "Places".tr()),
                 DataGridHelper.buildTab(context, Icons.timeline, "Paths".tr()),
+                DataGridHelper.buildTab(
+                    context, Icons.category_outlined, IconsStrings.placeTypes),
+                DataGridHelper.buildTab(
+                    context, Icons.emoji_symbols_outlined, IconsStrings.icons),
               ],
             ),
           ),
@@ -50,7 +57,12 @@ class _PlacesTabState extends State<PlacesTab>
             child: TabBarView(
               controller: _tabController,
               physics: const NeverScrollableScrollPhysics(),
-              children: const [PlacesContent(), PathGroupsContent()],
+              children: const [
+                PlacesContent(),
+                PathGroupsContent(),
+                PlaceTypesContent(),
+                IconsManagementWidget(),
+              ],
             ),
           ),
         ],
