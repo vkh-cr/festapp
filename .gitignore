@@ -171,3 +171,7 @@ workers/*/node_modules/
 
 # Project-root tool caches (wrangler, vitest)
 /node_modules/
+
+# Production build backups (mirrored CF Pages deployments — large binaries).
+# NOTE: gitignored, so `git clean -xfd` WOULD delete these. Keep a copy elsewhere too.
+/backups/

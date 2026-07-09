@@ -1,0 +1,224 @@
+(function initFestappUpdatePrompt() {
+  const currentVersion = window.__FESTAPP_BUILD_VERSION__;
+  const dismissedStorageKey = 'festappDismissedVersion';
+  const bannerId = 'festapp-update-banner';
+  let checkInFlight = false;
+
+  async function clearLegacyFlutterCaches() {
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        const flutterRegistrations = registrations.filter(function(registration) {
+          const scriptUrl = registration.active?.scriptURL ||
+            registration.waiting?.scriptURL ||
+            registration.installing?.scriptURL ||
+            '';
+          return scriptUrl.includes('flutter_service_worker.js');
+        });
+
+        await Promise.all(flutterRegistrations.map(function(registration) {
+          return registration.unregister();
+        }));
+      }
+
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames
+          .filter(function(cacheName) {
+            return cacheName.startsWith('flutter-app-cache');
+          })
+          .map(function(cacheName) {
+            return caches.delete(cacheName);
+          }));
+      }
+    } catch (error) {
+      console.warn('Legacy Flutter cache cleanup failed:', error);
+    }
+  }
+
+  function getActiveLanguage() {
+    // Prefer the language the user explicitly picked inside the app
+    // (Flutter easy_localization → flutter.Locale, web client → locale).
+    // Fall back to the browser's navigator.language only if nothing was
+    // saved — otherwise a Czech user with English browser settings would
+    // see the banner in English.
+    try {
+      const flutterRaw = localStorage.getItem('flutter.Locale');
+      if (flutterRaw) {
+        // easy_localization stores e.g. '"cs"', 'cs', or '{"languageCode":"cs"}'
+        const trimmed = flutterRaw.replace(/^"+|"+$/g, '');
+        try {
+          const parsed = JSON.parse(flutterRaw);
+          if (parsed && typeof parsed === 'object' && parsed.languageCode) {
+            return String(parsed.languageCode).toLowerCase();
+          }
+        } catch (_) {}
+        if (trimmed) return trimmed.toLowerCase();
+      }
+      const webClient = localStorage.getItem('locale');
+      if (webClient) return webClient.toLowerCase();
+    } catch (_) {}
+    return (navigator.language || '').toLowerCase();
+  }
+
+  function getUpdateCopy(reason) {
+    const language = getActiveLanguage();
+    if (language.startsWith('cs')) {
+      if (reason === 'legacy-cache') {
+        return {
+          message: 'Aplikace je připravená k obnovení.',
+          reload: 'Obnovit',
+          later: 'Později',
+          loading: 'Obnovuji...'
+        };
+      }
+
+      return {
+        message: 'Je dostupná nová verze aplikace.',
+        reload: 'Načíst',
+        later: 'Později',
+        loading: 'Načítám...'
+      };
+    }
+
+    if (reason === 'legacy-cache') {
+      return {
+        message: 'The app is ready to refresh.',
+        reload: 'Refresh',
+        later: 'Later',
+        loading: 'Refreshing...'
+      };
+    }
+
+    return {
+      message: 'A new version of the app is available.',
+      reload: 'Reload',
+      later: 'Later',
+      loading: 'Reloading...'
+    };
+  }
+
+  function showUpdateBanner(latestVersion, reason) {
+    if (document.getElementById(bannerId) ||
+        sessionStorage.getItem(dismissedStorageKey) === latestVersion) {
+      return;
+    }
+
+    const copy = getUpdateCopy(reason);
+    const banner = document.createElement('div');
+    banner.id = bannerId;
+    banner.setAttribute('role', 'status');
+    banner.style.position = 'fixed';
+    banner.style.left = '16px';
+    banner.style.right = '16px';
+    banner.style.bottom = '16px';
+    banner.style.zIndex = '2147483647';
+    banner.style.display = 'flex';
+    banner.style.alignItems = 'center';
+    banner.style.justifyContent = 'space-between';
+    banner.style.gap = '12px';
+    banner.style.padding = '12px 14px';
+    banner.style.borderRadius = '8px';
+    banner.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.22)';
+    banner.style.background = '#fff';
+    banner.style.color = '#202124';
+    banner.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    banner.style.fontSize = '14px';
+    banner.style.lineHeight = '1.35';
+
+    const message = document.createElement('div');
+    message.textContent = copy.message;
+    message.style.minWidth = '0';
+    message.style.flex = '1 1 auto';
+
+    const actions = document.createElement('div');
+    actions.style.display = 'flex';
+    actions.style.gap = '8px';
+    actions.style.flex = '0 0 auto';
+
+    const laterButton = document.createElement('button');
+    laterButton.type = 'button';
+    laterButton.textContent = copy.later;
+    laterButton.setAttribute('data-festapp-update-action', 'later');
+    laterButton.style.border = '1px solid #dadce0';
+    laterButton.style.borderRadius = '6px';
+    laterButton.style.background = '#fff';
+    laterButton.style.color = '#202124';
+    laterButton.style.padding = '8px 10px';
+    laterButton.style.cursor = 'pointer';
+    laterButton.addEventListener('click', function() {
+      sessionStorage.setItem(dismissedStorageKey, latestVersion);
+      banner.remove();
+    });
+
+    const reloadButton = document.createElement('button');
+    reloadButton.type = 'button';
+    reloadButton.textContent = copy.reload;
+    reloadButton.setAttribute('data-festapp-update-action', 'reload');
+    reloadButton.style.border = '1px solid #0000f4';
+    reloadButton.style.borderRadius = '6px';
+    reloadButton.style.background = '#0000f4';
+    reloadButton.style.color = '#fff';
+    reloadButton.style.padding = '8px 12px';
+    reloadButton.style.cursor = 'pointer';
+    reloadButton.addEventListener('click', async function() {
+      reloadButton.disabled = true;
+      reloadButton.textContent = copy.loading;
+      await clearLegacyFlutterCaches();
+      window.location.reload();
+    });
+
+    actions.append(laterButton, reloadButton);
+    banner.append(message, actions);
+    document.body.appendChild(banner);
+  }
+
+  async function checkVersion() {
+    if (checkInFlight || !currentVersion) {
+      return;
+    }
+    checkInFlight = true;
+
+    try {
+      const response = await fetch('/festapp-version.json?t=' + Date.now(), {
+        cache: 'no-store',
+        headers: {
+          'cache-control': 'no-cache',
+          'pragma': 'no-cache'
+        }
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = await response.json();
+      const latestVersion = data && data.version;
+      if (!latestVersion || latestVersion === currentVersion) {
+        return;
+      }
+
+      showUpdateBanner(latestVersion, 'new-version');
+    } catch (error) {
+      console.warn('Festapp version check failed:', error);
+    } finally {
+      checkInFlight = false;
+    }
+  }
+
+  window.clearLegacyFlutterCaches = clearLegacyFlutterCaches;
+  window.addEventListener('load', function() {
+    window.setTimeout(checkVersion, 3000);
+  });
+  window.addEventListener('focus', checkVersion);
+  window.addEventListener('festapp-update-available', function(event) {
+    const detail = event.detail || {};
+    showUpdateBanner(detail.version || currentVersion, detail.reason);
+  });
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      checkVersion();
+    }
+  });
+  window.setInterval(checkVersion, 5 * 60 * 1000);
+})();

@@ -145,6 +145,11 @@ if [ -f "$FLUTTER_CONFIG" ]; then
         sed_inplace "s|static const String anonKey = '.*';|static const String anonKey = '$SUPABASE_ANON_KEY';|g" "$FLUTTER_CONFIG"
     fi
 
+    # Update App Name (used as the app title / OccasionHomePage.homePageTitle)
+    if [ ! -z "$APP_NAME" ]; then
+        sed_inplace "s|static const String appName = '.*';|static const String appName = '$APP_NAME';|g" "$FLUTTER_CONFIG"
+    fi
+
     # Update Organization
     if [ ! -z "$ORGANIZATION_ID" ]; then
         sed_inplace "s|static const int organization = .*;|static const int organization = $ORGANIZATION_ID;|g" "$FLUTTER_CONFIG"

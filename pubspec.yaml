@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.19.33+273
+version: 0.19.42+290
 
 environment:
   sdk: '>=3.0.0 <3.32.8'
@@ -57,6 +57,9 @@ dependencies:
       url: https://github.com/the-airbender/quill_html_editor.git
       ref: a2beeb5bfd436e86f2635c8db1154b4190eeedb5
   trina_grid: ^2.1.1
+  # trina_grid's select-column popup requires a ShadTheme ancestor; we wrap
+  # our grids in one (see single_table_data_grid.dart).
+  shadcn_ui: ^0.43.0
   url_strategy: ^0.3.0
   desktop_drop: ^0.7.0
   csv: ^6.0.0

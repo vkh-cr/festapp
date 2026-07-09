@@ -55,6 +55,11 @@ echo "Building Flutter App..."
 $FLUTTER_CMD precache --web
 $FLUTTER_CMD build web --release --base-href /
 
+# 2b. Emit the automatic-update manifest (festapp-version.json + stamped
+#     main.dart copy) that powers web/festapp_update_prompt.js. Split into its
+#     own script so it can be unit tested without a Flutter build.
+./automation/emit_version_manifest.sh build/web
+
 # 3. Rename Flutter index.html so the Web Client index.html sits at root.
 #    Cloudflare strips ".html" from URLs (/foo.html -> 308 /foo). We keep the
 #    Flutter entry extension-less so worker fetches don't bounce through a
