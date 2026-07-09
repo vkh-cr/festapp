@@ -3,6 +3,7 @@ import 'dart:core';
 
 import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart'; // Added for UserInventoryBundle
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/speakers/speakers_bundle.dart';
 import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/components/icons/place_type_model.dart';
 import 'package:fstapp/components/information/information_model.dart';
@@ -24,6 +25,7 @@ class OfflineDataService {
   static const String activitiesOfflineStorage = "activities";
   static const String userInventoryBundleOffline =
       "userInventoryBundle"; // Added key for inventory
+  static const String speakersOfflineStorage = "speakers";
 
   static Future<void> saveMyScheduleData(List<int> offlineData) async {
     var encoded = jsonEncode(offlineData);
@@ -163,6 +165,12 @@ class OfflineDataService {
 
   static Future<List<EventModel>> getAllEvents() =>
       getAllOffline(eventsOfflineStorage, EventModel.fromJson);
+
+  static Future<void> saveSpeakers(SpeakersBundle toSave) =>
+      saveOffline(speakersOfflineStorage, toSave);
+
+  static Future<SpeakersBundle?> getSpeakers() =>
+      getOffline(speakersOfflineStorage, SpeakersBundle.fromJson);
 
   static Future<void> saveAllInfo(List<InformationModel> toSave) =>
       saveAllOffline(InformationModel.informationOffline, toSave);

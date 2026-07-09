@@ -71,6 +71,24 @@ BEGIN
     EXECUTE FUNCTION moddatetime(''updated_at'')
   ';
 
+  -- speakers
+  EXECUTE 'DROP TRIGGER IF EXISTS handle_updated_at ON speakers';
+  EXECUTE '
+    CREATE TRIGGER handle_updated_at
+    BEFORE UPDATE ON speakers
+    FOR EACH ROW
+    EXECUTE FUNCTION moddatetime(''updated_at'')
+  ';
+
+  -- speaker_topics
+  EXECUTE 'DROP TRIGGER IF EXISTS handle_updated_at ON speaker_topics';
+  EXECUTE '
+    CREATE TRIGGER handle_updated_at
+    BEFORE UPDATE ON speaker_topics
+    FOR EACH ROW
+    EXECUTE FUNCTION moddatetime(''updated_at'')
+  ';
+
   -- log_notifications HTTP trigger
   EXECUTE 'DROP TRIGGER IF EXISTS push_log_notifications ON log_notifications';
   EXECUTE format($trg$

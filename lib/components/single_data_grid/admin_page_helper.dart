@@ -17,6 +17,8 @@ import 'package:fstapp/components/groups/game_tab.dart';
 import 'package:fstapp/components/information/information_tab.dart';
 import 'package:fstapp/components/map/places_tab.dart';
 import 'package:fstapp/components/schedule/schedule_tab.dart';
+import 'package:fstapp/components/speakers/admin/speakers_tab.dart';
+import 'package:fstapp/components/speakers/speakers_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_strings.dart';
 import 'package:fstapp/components/occasion_services/service_tab.dart';
 import 'package:fstapp/components/groups/user_groups_tab.dart';
@@ -43,6 +45,7 @@ class AdminTabDefinition {
   static const String info = "Info";
   static const String events = "Events";
   static const String places = "Places";
+  static const String speakers = "Speakers";
   static const String groups = "Groups";
   static const String service = "Service";
   static const String users = "Users";
@@ -76,6 +79,10 @@ class AdminTabDefinition {
             label: CommonStrings.places,
             icon: Icons.pin_drop,
             widget: PlacesTab()),
+        speakers: AdminTabDefinition(
+            label: SpeakersStrings.manageSpeakers,
+            icon: Icons.record_voice_over,
+            widget: const SpeakersTab()),
         groups: AdminTabDefinition(
             label: CommonStrings.groups,
             icon: Icons.groups,

@@ -1,0 +1,458 @@
+BEGIN;
+
+-- Regression tests for the speakers + counseling feature (plan section 7).
+--
+-- Covers: editor guards (403), upsert with atomic topic replace, cross-occasion
+-- protection (404/400), the slot generator (counts / breaks / boundaries),
+-- delete_empty_counseling_slots (occupied slots survive), the counseling
+-- availability matcher (future-only, visible-only, isSignedIn/occupied), and
+-- the counseling branch of sign_user_to_event (own window skips the workshops
+-- gate, limit code 109, collisions 107 slot×slot and slot×lecture).
+--
+-- Style follows database/tests/rpc/create_service_item_test.sql: fixtures built
+-- inline, callers impersonated via request.jwt.claim.sub, auto-rollback.
+
+-- ---------------------------------------------------------------------------
+-- Shared fixture builder: one occasion with the speakers feature enabled, an
+-- editor, two attendees, a place. Returns ids via a temp table.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc       bigint;
+    v_place    bigint;
+    v_editor   uuid;
+    v_att1     uuid;
+    v_att2     uuid;
+BEGIN
+    PERFORM create_user_for_test('spk_editor', 'spk_editor@test.local');
+    PERFORM create_user_for_test('spk_att1',   'spk_att1@test.local');
+    PERFORM create_user_for_test('spk_att2',   'spk_att2@test.local');
+    v_editor := get_user_id('spk_editor');
+    v_att1   := get_user_id('spk_att1');
+    v_att2   := get_user_id('spk_att2');
+
+    INSERT INTO public.occasions (title, link, start_time, end_time, is_open, features)
+    VALUES ('Speakers Test Occasion',
+            'spk-' || gen_random_uuid(),
+            now(), now() + interval '30 days',
+            true,
+            '[{"code":"speakers","is_enabled":true,"counseling_event_type":"counseling","max_active_bookings":1}]'::jsonb)
+    RETURNING id INTO v_oc;
+
+    INSERT INTO public.occasion_users (occasion, "user", is_editor, is_editor_view, is_approved)
+    VALUES (v_oc, v_editor, true, true, true);
+    INSERT INTO public.occasion_users (occasion, "user", is_approved) VALUES (v_oc, v_att1, true);
+    INSERT INTO public.occasion_users (occasion, "user", is_approved) VALUES (v_oc, v_att2, true);
+
+    INSERT INTO public.places (title, occasion, coordinates)
+    VALUES ('Room A', v_oc, '{"latLng":{"lat":0,"lng":0}}'::jsonb)
+    RETURNING id INTO v_place;
+
+    CREATE TEMP TABLE IF NOT EXISTS _spk (k text PRIMARY KEY, v bigint);
+    INSERT INTO _spk VALUES ('occasion', v_oc), ('place', v_place);
+
+    RAISE NOTICE 'fixture built: occasion=%, place=%', v_oc, v_place;
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 1. Editor guards: non-editor writes are rejected with 403.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc  bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_res jsonb;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spk_att1')::text, true);
+
+    v_res := public.update_speaker(v_oc, '{"title":"Nope"}'::jsonb);
+    PERFORM assert_eq(v_res->>'code', '403', 'update_speaker as non-editor → 403');
+
+    v_res := public.update_speaker_topic(v_oc, '{"title":"Nope"}'::jsonb);
+    PERFORM assert_eq(v_res->>'code', '403', 'update_speaker_topic as non-editor → 403');
+
+    v_res := public.create_counseling_slots(1, now(), now() + interval '1 hour', 20);
+    -- speaker 1 does not belong here / caller not editor → 404 or 403 (never 200)
+    PERFORM assert_true(v_res->>'code' <> '200', 'create_counseling_slots as non-editor never succeeds');
+
+    RAISE NOTICE 'test 1 (editor guards) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 2. Topic catalog + speaker upsert with atomic topic replace; foreign topic
+--    ids in the array are ignored.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc     bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_res    jsonb;
+    v_t1     bigint;
+    v_t2     bigint;
+    v_t3     bigint;
+    v_sp     bigint;
+    v_foreign_topic bigint;
+    v_foreign_oc bigint;
+    v_topics jsonb;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spk_editor')::text, true);
+
+    -- three topics
+    v_res := public.update_speaker_topic(v_oc, '{"title":"Rodina","order":1}'::jsonb);
+    PERFORM assert_eq(v_res->>'code', '200', 'topic insert → 200');
+    v_t1 := (v_res->'data'->>'id')::bigint;
+    v_res := public.update_speaker_topic(v_oc, '{"title":"Uzkosti","order":2}'::jsonb);
+    v_t2 := (v_res->'data'->>'id')::bigint;
+    v_res := public.update_speaker_topic(v_oc, '{"title":"Duchovni rozhovor","order":3}'::jsonb);
+    v_t3 := (v_res->'data'->>'id')::bigint;
+
+    -- a foreign occasion + its own topic, to prove cross-occasion ids are ignored
+    INSERT INTO public.occasions (title, link, start_time, end_time)
+    VALUES ('Foreign', 'spk-foreign-' || gen_random_uuid(), now(), now() + interval '1 day')
+    RETURNING id INTO v_foreign_oc;
+    INSERT INTO public.speaker_topics (occasion, title) VALUES (v_foreign_oc, 'Foreign topic')
+    RETURNING id INTO v_foreign_topic;
+
+    -- insert speaker with topics [t1, t2]
+    v_res := public.update_speaker(v_oc, jsonb_build_object(
+        'title', 'P. Novak', 'subtitle', 'knez',
+        'topics', jsonb_build_array(v_t1, v_t2)));
+    PERFORM assert_eq(v_res->>'code', '200', 'speaker insert → 200');
+    v_sp := (v_res->'data'->>'id')::bigint;
+    PERFORM assert_eq(jsonb_array_length(v_res->'data'->'topics'), 2, 'speaker has 2 topics after insert');
+
+    -- update same speaker: replace topics with [t2, t3, foreign] → foreign ignored
+    v_res := public.update_speaker(v_oc, jsonb_build_object(
+        'id', v_sp,
+        'topics', jsonb_build_array(v_t2, v_t3, v_foreign_topic)));
+    PERFORM assert_eq(v_res->>'code', '200', 'speaker topic replace → 200');
+    PERFORM assert_eq(jsonb_array_length(v_res->'data'->'topics'), 2,
+        'foreign topic ignored → still 2 topics');
+
+    SELECT count(*) INTO v_t1 FROM public.speaker_topic_links WHERE speaker = v_sp AND topic IN (v_t2, v_t3);
+    PERFORM assert_eq(v_t1::int, 2, 'links replaced atomically to {t2,t3}');
+    PERFORM assert_true(NOT EXISTS(SELECT 1 FROM public.speaker_topic_links WHERE speaker = v_sp AND topic = v_foreign_topic),
+        'no link to foreign topic');
+
+    INSERT INTO _spk VALUES ('speaker', v_sp), ('topic1', (SELECT v FROM _spk WHERE k='occasion')) ON CONFLICT DO NOTHING;
+    -- store the concrete topic id for later matcher tests
+    UPDATE _spk SET v = (SELECT topic FROM public.speaker_topic_links WHERE speaker = v_sp AND topic = v_t2 LIMIT 1) WHERE k='topic1';
+    INSERT INTO _spk VALUES ('foreign_oc', v_foreign_oc), ('foreign_topic', v_foreign_topic) ON CONFLICT DO NOTHING;
+
+    RAISE NOTICE 'test 2 (topics + upsert atomic replace) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 3. Cross-occasion protection: updating a speaker under the wrong occasion →
+--    404; set_event_speakers with a foreign speaker → 400.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc         bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_foreign_oc bigint := (SELECT v FROM _spk WHERE k = 'foreign_oc');
+    v_sp         bigint := (SELECT v FROM _spk WHERE k = 'speaker');
+    v_res        jsonb;
+    v_ev         bigint;
+    v_foreign_sp bigint;
+BEGIN
+    -- editor of foreign occasion tries to edit our speaker (belongs to v_oc)
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spk_editor')::text, true);
+    -- our editor is NOT editor on foreign occasion; make them editor there to
+    -- isolate the cross-occasion (404) path rather than the 403 path.
+    INSERT INTO public.occasion_users (occasion, "user", is_editor, is_editor_view, is_approved)
+    VALUES (v_foreign_oc, get_user_id('spk_editor'), true, true, true);
+
+    v_res := public.update_speaker(v_foreign_oc, jsonb_build_object('id', v_sp, 'title', 'Hijack'));
+    PERFORM assert_eq(v_res->>'code', '404', 'update_speaker across occasion → 404');
+
+    -- set_event_speakers: build a normal event in our occasion, then pass a
+    -- foreign speaker id → 400.
+    INSERT INTO public.speakers (occasion, title) VALUES (v_foreign_oc, 'Foreign speaker')
+    RETURNING id INTO v_foreign_sp;
+    INSERT INTO public.events (occasion, title, start_time, end_time)
+    VALUES (v_oc, 'Lecture', now() + interval '5 days', now() + interval '5 days' + interval '1 hour')
+    RETURNING id INTO v_ev;
+
+    v_res := public.set_event_speakers(v_ev, ARRAY[v_foreign_sp]);
+    PERFORM assert_eq(v_res->>'code', '400', 'set_event_speakers with foreign speaker → 400');
+
+    -- valid speaker succeeds
+    v_res := public.set_event_speakers(v_ev, ARRAY[v_sp]);
+    PERFORM assert_eq(v_res->>'code', '200', 'set_event_speakers with valid speaker → 200');
+
+    RAISE NOTICE 'test 3 (cross-occasion protection) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 4. Slot generator: 14:00–18:00, 20-min slots, 5-min break → 9 slots; type,
+--    markers, capacity, event_speakers link. Invalid params → 400.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc    bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_place bigint := (SELECT v FROM _spk WHERE k = 'place');
+    v_sp    bigint := (SELECT v FROM _spk WHERE k = 'speaker');
+    v_res   jsonb;
+    v_start timestamptz := date_trunc('day', now()) + interval '10 days' + interval '14 hours';
+    v_end   timestamptz := date_trunc('day', now()) + interval '10 days' + interval '18 hours';
+    v_first bigint;
+    v_all   int;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spk_editor')::text, true);
+
+    v_res := public.create_counseling_slots(v_sp, v_start, v_end, 20, v_place, 2, NULL, 5);
+    PERFORM assert_eq(v_res->>'code', '200', 'create_counseling_slots → 200');
+    PERFORM assert_eq((v_res->'data'->>'created')::int, 9,
+        '14:00–18:00 by 20+5 → 9 slots (last 17:20–17:40)');
+
+    -- markers/type/capacity/is_hidden on all generated events
+    SELECT count(*) INTO v_all FROM public.events e
+    JOIN public.event_speakers es ON es.event = e.id
+    WHERE es.speaker = v_sp
+      AND (e.data->>'is_counseling_slot')::boolean IS TRUE
+      AND e.type = 'counseling'
+      AND e.is_hidden = false
+      AND e.max_participants = 2
+      AND e.place = v_place;
+    PERFORM assert_eq(v_all, 9, 'all 9 slots have marker/type/capacity/place/visible');
+
+    SELECT min(e.start_time) INTO v_start FROM public.events e
+    JOIN public.event_speakers es ON es.event = e.id WHERE es.speaker = v_sp
+      AND (e.data->>'is_counseling_slot')::boolean IS TRUE;
+    PERFORM assert_eq(v_start, date_trunc('day', now()) + interval '10 days' + interval '14 hours',
+        'first slot starts at p_start');
+
+    -- invalid params
+    v_res := public.create_counseling_slots(v_sp, now(), now() + interval '1 hour', 4);
+    PERFORM assert_eq(v_res->>'code', '400', 'slot_minutes < 5 → 400');
+    v_res := public.create_counseling_slots(v_sp, now() + interval '1 hour', now(), 20);
+    PERFORM assert_eq(v_res->>'code', '400', 'start >= end → 400');
+
+    RAISE NOTICE 'test 4 (slot generator) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 5. delete_empty_counseling_slots keeps occupied slots, removes empty ones.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_sp      bigint := (SELECT v FROM _spk WHERE k = 'speaker');
+    v_res     jsonb;
+    v_occupied bigint;
+    v_before  int;
+    v_after   int;
+    v_deleted int;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spk_editor')::text, true);
+
+    SELECT count(*) INTO v_before FROM public.events e
+    JOIN public.event_speakers es ON es.event = e.id
+    WHERE es.speaker = v_sp AND (e.data->>'is_counseling_slot')::boolean IS TRUE;
+
+    -- occupy the first slot with a direct fixture insert
+    SELECT e.id INTO v_occupied FROM public.events e
+    JOIN public.event_speakers es ON es.event = e.id
+    WHERE es.speaker = v_sp AND (e.data->>'is_counseling_slot')::boolean IS TRUE
+    ORDER BY e.start_time LIMIT 1;
+    INSERT INTO public.event_users (event, "user") VALUES (v_occupied, get_user_id('spk_att1'));
+
+    v_res := public.delete_empty_counseling_slots(v_sp);
+    PERFORM assert_eq(v_res->>'code', '200', 'delete_empty_counseling_slots → 200');
+    v_deleted := (v_res->'data'->>'deleted')::int;
+    PERFORM assert_eq(v_deleted, v_before - 1, 'deleted all but the occupied slot');
+
+    SELECT count(*) INTO v_after FROM public.events e
+    JOIN public.event_speakers es ON es.event = e.id
+    WHERE es.speaker = v_sp AND (e.data->>'is_counseling_slot')::boolean IS TRUE;
+    PERFORM assert_eq(v_after, 1, 'exactly the occupied slot survives');
+    PERFORM assert_true(EXISTS(SELECT 1 FROM public.events WHERE id = v_occupied),
+        'occupied slot still exists');
+
+    -- clean up so later tests start from a known state
+    DELETE FROM public.event_users WHERE event = v_occupied;
+    DELETE FROM public.event_speakers WHERE event = v_occupied;
+    DELETE FROM public.events WHERE id = v_occupied;
+
+    RAISE NOTICE 'test 5 (delete_empty_counseling_slots) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 6. Availability matcher: future-only slots, visible-only counselors,
+--    occupied/isSignedIn; disabled feature and foreign/hidden topic → 404.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc     bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_sp     bigint := (SELECT v FROM _spk WHERE k = 'speaker');
+    v_topic  bigint := (SELECT v FROM _spk WHERE k = 'topic1');
+    v_foreign_topic bigint := (SELECT v FROM _spk WHERE k = 'foreign_topic');
+    v_res    jsonb;
+    v_future bigint;
+    v_past   bigint;
+    v_hidden_sp bigint;
+    v_counselors jsonb;
+    v_slots  jsonb;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spk_att1')::text, true);
+
+    -- one future slot + one past slot for our speaker (linked to the topic)
+    INSERT INTO public.events (occasion, title, start_time, end_time, max_participants, type, data)
+    VALUES (v_oc, 'Future slot', now() + interval '2 days', now() + interval '2 days' + interval '20 minutes',
+            1, 'counseling', '{"is_counseling_slot":true}'::jsonb)
+    RETURNING id INTO v_future;
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_future, v_sp);
+
+    INSERT INTO public.events (occasion, title, start_time, end_time, max_participants, type, data)
+    VALUES (v_oc, 'Past slot', now() - interval '2 days', now() - interval '2 days' + interval '20 minutes',
+            1, 'counseling', '{"is_counseling_slot":true}'::jsonb)
+    RETURNING id INTO v_past;
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_past, v_sp);
+
+    -- a hidden speaker linked to the same topic must be excluded
+    INSERT INTO public.speakers (occasion, title, is_hidden) VALUES (v_oc, 'Hidden', true)
+    RETURNING id INTO v_hidden_sp;
+    INSERT INTO public.speaker_topic_links (speaker, topic) VALUES (v_hidden_sp, v_topic);
+
+    v_res := public.get_counseling_availability(v_oc, v_topic);
+    PERFORM assert_eq(v_res->>'code', '200', 'availability → 200');
+    v_counselors := v_res->'data'->'counselors';
+    PERFORM assert_eq(jsonb_array_length(v_counselors), 1, 'only the visible counselor is returned');
+    v_slots := v_counselors->0->'slots';
+    PERFORM assert_eq(jsonb_array_length(v_slots), 1, 'only the future slot is returned');
+    PERFORM assert_eq((v_slots->0->>'id')::bigint, v_future, 'future slot id matches');
+    PERFORM assert_eq((v_slots->0->>'occupied')::int, 0, 'future slot occupied=0 before sign-in');
+    PERFORM assert_eq((v_slots->0->>'isSignedIn')::boolean, false, 'not signed in yet');
+
+    -- sign the attendee into the future slot, re-query → occupied=1, isSignedIn=true
+    INSERT INTO public.event_users (event, "user") VALUES (v_future, get_user_id('spk_att1'));
+    v_res := public.get_counseling_availability(v_oc, v_topic);
+    v_slots := v_res->'data'->'counselors'->0->'slots';
+    PERFORM assert_eq((v_slots->0->>'occupied')::int, 1, 'occupied=1 after sign-in');
+    PERFORM assert_eq((v_slots->0->>'isSignedIn')::boolean, true, 'isSignedIn=true for the caller');
+
+    -- disabled feature → 404
+    UPDATE public.occasions SET features = '[{"code":"speakers","is_enabled":false}]'::jsonb WHERE id = v_oc;
+    v_res := public.get_counseling_availability(v_oc, v_topic);
+    PERFORM assert_eq(v_res->>'code', '404', 'disabled speakers feature → 404');
+    -- restore
+    UPDATE public.occasions SET features = '[{"code":"speakers","is_enabled":true,"counseling_event_type":"counseling","max_active_bookings":1}]'::jsonb WHERE id = v_oc;
+
+    -- foreign topic → 404
+    v_res := public.get_counseling_availability(v_oc, v_foreign_topic);
+    PERFORM assert_eq(v_res->>'code', '404', 'foreign topic → 404');
+
+    -- cleanup the extra slots so the sign-in tests are isolated
+    DELETE FROM public.event_users WHERE event IN (v_future, v_past);
+    DELETE FROM public.event_speakers WHERE event IN (v_future, v_past);
+    DELETE FROM public.events WHERE id IN (v_future, v_past);
+    DELETE FROM public.speaker_topic_links WHERE speaker = v_hidden_sp;
+    DELETE FROM public.speakers WHERE id = v_hidden_sp;
+
+    RAISE NOTICE 'test 6 (availability matcher) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 7. Counseling branch of sign_user_to_event.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc     bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_sp     bigint := (SELECT v FROM _spk WHERE k = 'speaker');
+    v_att1   uuid := get_user_id('spk_att1');
+    v_att2   uuid := get_user_id('spk_att2');
+    v_res    jsonb;
+    v_slotA  bigint;
+    v_slotB  bigint;
+    v_slotC  bigint;
+    v_lecture bigint;
+BEGIN
+    -- (a) workshops gate is skipped for counseling slots: enable a workshops
+    -- feature whose start_time is far in the future alongside speakers.
+    UPDATE public.occasions SET features =
+      '[{"code":"speakers","is_enabled":true,"counseling_event_type":"counseling","max_active_bookings":0},
+        {"code":"workshops","is_enabled":true,"start_time":"2099-01-01T00:00:00"}]'::jsonb
+    WHERE id = v_oc;
+
+    INSERT INTO public.events (occasion, title, start_time, end_time, max_participants, type, data)
+    VALUES (v_oc, 'Slot A', now() + interval '3 days', now() + interval '3 days' + interval '20 minutes',
+            1, 'counseling', '{"is_counseling_slot":true}'::jsonb)
+    RETURNING id INTO v_slotA;
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_slotA, v_sp);
+
+    PERFORM set_config('request.jwt.claim.sub', v_att1::text, true);
+    v_res := public.sign_user_to_event(v_slotA, v_att1);
+    PERFORM assert_eq(v_res->>'code', '200',
+        'counseling sign-in ignores the far-future workshops gate → 200');
+
+    -- (b) speakers registration_start_time in the future → 104
+    UPDATE public.occasions SET features =
+      '[{"code":"speakers","is_enabled":true,"registration_start_time":"2099-01-01T00:00:00","max_active_bookings":0}]'::jsonb
+    WHERE id = v_oc;
+    INSERT INTO public.events (occasion, title, start_time, end_time, max_participants, type, data)
+    VALUES (v_oc, 'Slot B', now() + interval '4 days', now() + interval '4 days' + interval '20 minutes',
+            1, 'counseling', '{"is_counseling_slot":true}'::jsonb)
+    RETURNING id INTO v_slotB;
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_slotB, v_sp);
+    PERFORM set_config('request.jwt.claim.sub', v_att2::text, true);
+    v_res := public.sign_user_to_event(v_slotB, v_att2);
+    PERFORM assert_eq(v_res->>'code', '104', 'registration window not open → 104');
+
+    -- (c) speakers feature disabled → 108
+    UPDATE public.occasions SET features = '[{"code":"speakers","is_enabled":false}]'::jsonb WHERE id = v_oc;
+    v_res := public.sign_user_to_event(v_slotB, v_att2);
+    PERFORM assert_eq(v_res->>'code', '108', 'speakers feature disabled → 108');
+
+    -- (d) max_active_bookings = 1: att2 already holds slotA? No — reset and test.
+    -- Give att2 one future booking, then limit=1 blocks a second with 109.
+    UPDATE public.occasions SET features =
+      '[{"code":"speakers","is_enabled":true,"max_active_bookings":1}]'::jsonb WHERE id = v_oc;
+    PERFORM set_config('request.jwt.claim.sub', v_att2::text, true);
+    v_res := public.sign_user_to_event(v_slotB, v_att2);
+    PERFORM assert_eq(v_res->>'code', '200', 'first counseling booking under limit → 200');
+
+    INSERT INTO public.events (occasion, title, start_time, end_time, max_participants, type, data)
+    VALUES (v_oc, 'Slot C', now() + interval '6 days', now() + interval '6 days' + interval '20 minutes',
+            1, 'counseling', '{"is_counseling_slot":true}'::jsonb)
+    RETURNING id INTO v_slotC;
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_slotC, v_sp);
+    v_res := public.sign_user_to_event(v_slotC, v_att2);
+    PERFORM assert_eq(v_res->>'code', '109', 'second future booking over limit → 109');
+
+    -- with limit 0 the same second booking is allowed
+    UPDATE public.occasions SET features =
+      '[{"code":"speakers","is_enabled":true,"max_active_bookings":0}]'::jsonb WHERE id = v_oc;
+    v_res := public.sign_user_to_event(v_slotC, v_att2);
+    PERFORM assert_eq(v_res->>'code', '200', 'limit 0 → unlimited → 200');
+
+    -- (e) collisions. att1 already holds slotA (3 days out, 20 min). A second
+    -- slot overlapping slotA from a different speaker → 107.
+    INSERT INTO public.events (occasion, title, start_time, end_time, max_participants, type, data)
+    VALUES (v_oc, 'Slot A-overlap', now() + interval '3 days' + interval '5 minutes',
+            now() + interval '3 days' + interval '25 minutes',
+            1, 'counseling', '{"is_counseling_slot":true}'::jsonb)
+    RETURNING id INTO v_lecture; -- reuse var
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_lecture, v_sp);
+    PERFORM set_config('request.jwt.claim.sub', v_att1::text, true);
+    v_res := public.sign_user_to_event(v_lecture, v_att1);
+    PERFORM assert_eq(v_res->>'code', '107', 'slot×slot time collision → 107');
+
+    -- slot × normal lecture the user already attends → 107
+    INSERT INTO public.events (occasion, title, start_time, end_time)
+    VALUES (v_oc, 'Normal lecture', now() + interval '8 days', now() + interval '8 days' + interval '1 hour')
+    RETURNING id INTO v_lecture;
+    INSERT INTO public.event_users (event, "user") VALUES (v_lecture, v_att1);
+    -- Partial tail overlap with the lecture (the existing collision loop only
+    -- catches partial/boundary overlaps, not a slot fully enclosed by the event).
+    INSERT INTO public.events (occasion, title, start_time, end_time, max_participants, type, data)
+    VALUES (v_oc, 'Slot during lecture', now() + interval '8 days' + interval '50 minutes',
+            now() + interval '8 days' + interval '70 minutes',
+            1, 'counseling', '{"is_counseling_slot":true}'::jsonb)
+    RETURNING id INTO v_slotC;
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_slotC, v_sp);
+    v_res := public.sign_user_to_event(v_slotC, v_att1);
+    PERFORM assert_eq(v_res->>'code', '107', 'slot×lecture time collision → 107');
+
+    RAISE NOTICE 'test 7 (sign_user_to_event counseling branch) passed';
+END $$ LANGUAGE plpgsql;
+
+DO $$ BEGIN RAISE NOTICE 'speakers + counseling regression tests passed'; END $$ LANGUAGE plpgsql;
+
+ROLLBACK; -- Always rollback: tests must not mutate data

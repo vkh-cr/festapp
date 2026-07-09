@@ -105,6 +105,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
       }
       _dots = _events
           .filterRootEvents()
+          .where((e) => !e.isCounselingSlot)
           .map((e) => TimeBlockItem.fromEventModelBasicTimeline(e))
           .toList();
     }
@@ -128,6 +129,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
 
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModelBasicTimeline(e))
         .toList();
 
@@ -148,6 +150,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
 
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModelBasicTimeline(e))
         .toList();
     await OfflineDataService.saveAllEvents(_events);

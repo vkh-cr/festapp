@@ -21,6 +21,12 @@ declare
   workshops_feature jsonb;
   e RECORD;
 
+  v_occasion bigint;
+  v_is_counseling boolean;
+  speakers_feature jsonb;
+  v_limit integer;
+  v_active integer;
+
 begin
 
   -- Check if the user already exists on the occasion
@@ -52,29 +58,76 @@ begin
       END IF;
   END IF;
 
-  -- Check registration start time from occasions.features for the "workshops" feature
-  SELECT elem
-  INTO workshops_feature
-  FROM occasions,
-       jsonb_array_elements(features) elem
-  WHERE id = (SELECT occasion FROM events WHERE id = ev)
-    AND elem->>'code' = 'workshops'
-  LIMIT 1;
+  -- Resolve the occasion and detect whether this event is a counseling slot.
+  SELECT occasion, (data->>'is_counseling_slot')::boolean IS TRUE
+    INTO v_occasion, v_is_counseling
+  FROM events
+  WHERE id = ev;
 
-  IF workshops_feature IS NOT NULL THEN
-    -- If the workshops feature is not enabled, do not allow sign in
-    IF (workshops_feature->>'is_enabled')::boolean IS NOT TRUE THEN
-      RETURN json_build_object('code', 108, 'message', 'Registration for workshops is not enabled');
+  IF v_is_counseling THEN
+    -- Counseling slots use their own registration window from the "speakers"
+    -- feature; the workshops gate (104/108) does not apply (decision R1).
+    SELECT elem
+      INTO speakers_feature
+    FROM occasions,
+         jsonb_array_elements(features) elem
+    WHERE id = v_occasion
+      AND elem->>'code' = 'speakers'
+    LIMIT 1;
+
+    -- (a) Feature must be present and enabled, else registration is closed.
+    IF speakers_feature IS NULL
+       OR (speakers_feature->>'is_enabled')::boolean IS NOT TRUE THEN
+      RETURN json_build_object('code', 108);
     END IF;
-    -- If start_time is provided, enforce registration start time
-    registration_start := (workshops_feature->>'start_time')::timestamp;
+
+    registration_start := (speakers_feature->>'registration_start_time')::timestamp;
     IF registration_start IS NOT NULL THEN
       IF CURRENT_TIMESTAMP AT TIME ZONE 'UTC' < registration_start THEN
         RETURN json_build_object('code', 104, 'events_registration_start', registration_start AT TIME ZONE 'UTC');
       END IF;
     END IF;
+
+    -- (b) Limit of the user's future counseling bookings (0 = unlimited).
+    v_limit := COALESCE((speakers_feature->>'max_active_bookings')::int, 1);
+    IF v_limit > 0 THEN
+      SELECT count(*)
+        INTO v_active
+      FROM event_users eu
+      JOIN events e2 ON e2.id = eu.event
+      WHERE eu."user" = usr
+        AND e2.occasion = v_occasion
+        AND (e2.data->>'is_counseling_slot')::boolean IS TRUE
+        AND e2.end_time > CURRENT_TIMESTAMP AT TIME ZONE 'UTC';
+      IF v_active >= v_limit THEN
+        RETURN json_build_object('code', 109);
+      END IF;
+    END IF;
+  ELSE
+    -- Check registration start time from occasions.features for the "workshops" feature
+    SELECT elem
+    INTO workshops_feature
+    FROM occasions,
+         jsonb_array_elements(features) elem
+    WHERE id = (SELECT occasion FROM events WHERE id = ev)
+      AND elem->>'code' = 'workshops'
+    LIMIT 1;
+
+    IF workshops_feature IS NOT NULL THEN
+      -- If the workshops feature is not enabled, do not allow sign in
+      IF (workshops_feature->>'is_enabled')::boolean IS NOT TRUE THEN
+        RETURN json_build_object('code', 108, 'message', 'Registration for workshops is not enabled');
+      END IF;
+      -- If start_time is provided, enforce registration start time
+      registration_start := (workshops_feature->>'start_time')::timestamp;
+      IF registration_start IS NOT NULL THEN
+        IF CURRENT_TIMESTAMP AT TIME ZONE 'UTC' < registration_start THEN
+          RETURN json_build_object('code', 104, 'events_registration_start', registration_start AT TIME ZONE 'UTC');
+        END IF;
+      END IF;
+    END IF;
+    -- If the workshops feature is not present or its start_time is null, sign in is enabled
   END IF;
-  -- If the workshops feature is not present or its start_time is null, sign in is enabled
 
   SELECT start_time, end_time INTO event_start_time, event_end_time
   FROM events
@@ -147,8 +200,13 @@ $$;
 -- 101: Event is full
 -- 102: Exclusive event already taken
 -- 103: Already signed in
--- 104: Registration not started yet (workshops_registration_start in response)
+-- 104: Registration not started yet (events_registration_start in response);
+--      for counseling slots the window comes from the "speakers" feature
+--      (registration_start_time) instead of the workshops feature.
 -- 105: Maximum male participants reached
 -- 106: Maximum female participants reached
 -- 107: Conflicting event schedule
--- 108: Registration for workshops is not enabled
+-- 108: Registration is not enabled — workshops feature disabled, or, for a
+--      counseling slot, the "speakers" feature is missing or not enabled.
+-- 109: Counseling booking limit reached (max_active_bookings of the "speakers"
+--      feature; counts the user's future counseling reservations on the occasion).

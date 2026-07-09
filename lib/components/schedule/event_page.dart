@@ -40,6 +40,12 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/images/zoomable_image/zoomable_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fstapp/components/images/image_url_helper.dart';
+import 'package:fstapp/components/speakers/db_speakers.dart';
+import 'package:fstapp/components/speakers/speakers_bundle.dart';
+import 'package:fstapp/components/speakers/speaker_model.dart';
+import 'package:fstapp/components/speakers/speaker_avatar.dart';
+import 'package:fstapp/components/speakers/speakers_strings.dart';
+import 'package:fstapp/components/speakers/counseling_page.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import '../map/map_page.dart';
 
@@ -57,6 +63,7 @@ class EventPage extends StatefulWidget {
 class _EventPageState extends State<EventPage> {
   final List<TimeBlockItem> _childDots = [];
   EventModel? _event;
+  SpeakersBundle? _speakersBundle;
   UserGroupInfoModel? _groupInfoModel;
 
   List<UserInfoModel> _participants = [];
@@ -244,6 +251,10 @@ class _EventPageState extends State<EventPage> {
                     ),
                   ),
                 ),
+                if (_event != null && _event!.isCounselingEntry &&
+                    FeatureService.isCounselingEnabled())
+                  _buildCounselingEntryButton(context),
+                _buildSpeakersSection(context, onPinchStart, onPinchEnd),
                 if (_event != null &&
                     _event!.id != null &&
                     FeatureService.isFeatureEnabled(
@@ -1066,6 +1077,98 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
+  /// Prominent button on the counseling entry event that opens the counseling
+  /// picker (choose area + time). Shown under the description (R5).
+  Widget _buildCounselingEntryButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+      child: SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          onPressed: () {
+            RouterService.navigateOccasion(context, CounselingPage.ROUTE)
+                .then((_) => loadData(_event!.id!));
+          },
+          icon: const Icon(Icons.support_agent),
+          label: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Text(SpeakersStrings.enterCounseling,
+                style: const TextStyle(fontSize: 16)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// The "Speakers" (lecturers) section: a circular avatar + name + subtitle per
+  /// attached speaker; tapping expands a medallion showing the (larger) photo
+  /// inside the detail/text area and the HTML bio — never as a page banner
+  /// (Julie's question #1). Empty (no widget) when the feature is off or the
+  /// event has no attached speakers.
+  Widget _buildSpeakersSection(
+      BuildContext context, VoidCallback onPinchStart, VoidCallback onPinchEnd) {
+    if (_event?.id == null ||
+        _speakersBundle == null ||
+        !FeatureService.isFeatureEnabled(FeatureConstants.speakers)) {
+      return const SizedBox.shrink();
+    }
+    final List<SpeakerModel> speakers =
+        _speakersBundle!.speakersForEvent(_event!.id!);
+    if (speakers.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 4),
+            child: Text(
+              SpeakersStrings.lecturers,
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ...speakers.map((s) => _buildSpeakerMedallion(
+              context, s, onPinchStart, onPinchEnd)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpeakerMedallion(BuildContext context, SpeakerModel s,
+      VoidCallback onPinchStart, VoidCallback onPinchEnd) {
+    final bool hasBio =
+        s.description != null && s.description!.trim().isNotEmpty;
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ExpansionTile(
+        leading: SpeakerAvatar(imageUrl: s.image, radius: 24),
+        title: Text(s.title ?? "",
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: (s.subtitle != null && s.subtitle!.isNotEmpty)
+            ? Text(s.subtitle!)
+            : null,
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Photo rendered IN the detail/text area (not a banner).
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: SpeakerAvatar(imageUrl: s.image, radius: 48),
+          ),
+          if (hasBio)
+            HtmlView(
+              html: s.description!,
+              isSelectable: true,
+              twoFingersOn: onPinchStart,
+              twoFingersOff: onPinchEnd,
+            ),
+        ],
+      ),
+    );
+  }
+
   /// The capacity chip shown in the header meta row as a filled pill.
   Widget _participantPill(
       BuildContext context, Color fg, String text, double iconSize, double fontSize) {
@@ -1135,6 +1238,24 @@ class _EventPageState extends State<EventPage> {
 
     if (RightsService.isEditor()) {
       await loadParticipants(id);
+    }
+
+    await loadSpeakers();
+  }
+
+  /// Loads the speakers bundle for the speaker medallions. Resilient: a failure
+  /// (offline, RPC error) simply leaves the section empty and never breaks the
+  /// event page.
+  Future<void> loadSpeakers() async {
+    if (!FeatureService.isFeatureEnabled(FeatureConstants.speakers)) return;
+    try {
+      final occasionId = RightsService.currentOccasionId();
+      if (occasionId == null) return;
+      final bundle =
+          await DbSpeakers.getSpeakers(occasionId, includeDescription: true);
+      if (mounted) setState(() => _speakersBundle = bundle);
+    } catch (_) {
+      // Non-fatal: keep the event page usable without the speakers section.
     }
   }
 

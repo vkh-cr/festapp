@@ -11,6 +11,7 @@ import 'package:fstapp/components/features/workshop_feature.dart';
 import 'package:fstapp/components/activities/activity_model.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/speakers/speakers_strings.dart';
 import 'package:fstapp/components/schedule/exclusive_group_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
@@ -323,7 +324,11 @@ class DbEvents {
             "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.maxWomenReached}",
             severity: ToastSeverity.NotOk);
         return;
-      //403, 108
+      case 109:
+        ToastHelper.Show(context, SpeakersStrings.bookingLimitReached,
+            severity: ToastSeverity.NotOk);
+        return;
+      //403, 108, 109
       default:
         ToastHelper.Show(context, ScheduleStrings.cannotSignIn,
             severity: ToastSeverity.NotOk);

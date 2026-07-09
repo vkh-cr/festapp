@@ -2,6 +2,7 @@ import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/components/search/search_strings.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_strings.dart';
+import 'package:fstapp/components/speakers/speakers_strings.dart';
 import 'feature_constants.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'schedule_feature.dart';
@@ -23,6 +24,10 @@ class FeatureMetadata {
         FeatureConstants.eventFeedback: {
           'title': EventFeedbackStrings.featureTitle,
           'description': EventFeedbackStrings.featureDescription,
+        },
+        FeatureConstants.speakers: {
+          'title': SpeakersStrings.featureTitle,
+          'description': SpeakersStrings.featureDescription,
         },
         FeatureConstants.form: {
           'title': FeaturesStrings.formTitle,

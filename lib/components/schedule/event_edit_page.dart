@@ -13,6 +13,11 @@ import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/map/db_places.dart';
+import 'package:fstapp/components/speakers/db_speakers.dart';
+import 'package:fstapp/components/speakers/speaker_model.dart';
+import 'package:fstapp/components/speakers/speakers_strings.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -51,7 +56,12 @@ class _EventEditPageState extends State<EventEditPage> {
   bool? splitForMenWomen, isGroupEvent;
   bool? isCancelled;
   bool feedbackEnabled = false;
+  bool counselingEntry = false;
   bool isFormValid = true;
+
+  // Speakers attached to this event (speakers feature).
+  List<SpeakerModel>? _allSpeakers;
+  final Set<int> _selectedSpeakerIds = {};
 
   DateTime? minDate;
   DateTime? maxDate;
@@ -103,7 +113,30 @@ class _EventEditPageState extends State<EventEditPage> {
       feedbackEnabled =
           originalEvent!.data?[FeatureConstants.feedbackEnabled]?.toString() ==
               'true';
+      counselingEntry =
+          originalEvent!.data?[FeatureConstants.counselingEntry]?.toString() ==
+              'true';
     }
+
+    // Load speakers + the set currently attached to this event.
+    if (widget.id != null &&
+        FeatureService.isFeatureEnabled(FeatureConstants.speakers)) {
+      final data = await ExceptionHandler.guard(
+        context,
+        futureFunction: () =>
+            DbSpeakers.getSpeakersForEdit(RightsService.currentOccasionId()!),
+      );
+      if (data != null) {
+        _allSpeakers = data.speakers;
+        _selectedSpeakerIds
+          ..clear()
+          ..addAll(data.speakers
+              .where((s) =>
+                  s.events.any((e) => e.id == widget.id) && s.id != null)
+              .map((s) => s.id!));
+      }
+    }
+
     validateForm();
     if (mounted) {
       setState(() {});
@@ -163,9 +196,21 @@ class _EventEditPageState extends State<EventEditPage> {
         originalEvent!.data = {
           ...?originalEvent!.data,
           FeatureConstants.feedbackEnabled: feedbackEnabled,
+          if (FeatureService.isFeatureEnabled(FeatureConstants.speakers))
+            FeatureConstants.counselingEntry: counselingEntry,
         };
 
         await DbEvents.updateEvent(originalEvent!);
+
+        if (widget.id != null &&
+            FeatureService.isFeatureEnabled(FeatureConstants.speakers)) {
+          await ExceptionHandler.guardVoid(
+            context,
+            futureFunction: () => DbSpeakers.setEventSpeakers(
+                widget.id!, _selectedSpeakerIds.toList()),
+          );
+        }
+
         ToastHelper.Show(
             context, "${CommonStrings.saved}: ${originalEvent!.title!}");
         Navigator.of(context).pop();
@@ -228,6 +273,15 @@ class _EventEditPageState extends State<EventEditPage> {
                                 value: feedbackEnabled,
                                 onChanged: (value) =>
                                     setState(() => feedbackEnabled = value),
+                              ),
+                            if (FeatureService.isFeatureEnabled(
+                                FeatureConstants.speakers))
+                              SwitchListTile(
+                                title: Text(
+                                    SpeakersStrings.counselingEntryToggle),
+                                value: counselingEntry,
+                                onChanged: (value) =>
+                                    setState(() => counselingEntry = value),
                               ),
                             TextFormField(
                               initialValue: title,
@@ -345,6 +399,37 @@ class _EventEditPageState extends State<EventEditPage> {
                                         : int.tryParse(value.trim());
                               },
                             ),
+                            if (FeatureService.isFeatureEnabled(
+                                    FeatureConstants.speakers) &&
+                                widget.id != null &&
+                                _allSpeakers != null &&
+                                _allSpeakers!.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              Text(
+                                SpeakersStrings.speakersOnEvent,
+                                style: Theme.of(context).textTheme.labelMedium,
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _allSpeakers!
+                                    .where((s) => s.id != null)
+                                    .map((s) => FilterChip(
+                                          label: Text(s.title ?? ''),
+                                          selected: _selectedSpeakerIds
+                                              .contains(s.id),
+                                          onSelected: (sel) => setState(() {
+                                            if (sel) {
+                                              _selectedSpeakerIds.add(s.id!);
+                                            } else {
+                                              _selectedSpeakerIds.remove(s.id);
+                                            }
+                                          }),
+                                        ))
+                                    .toList(),
+                              ),
+                            ],
                             const SizedBox(height: 16),
                             Text(
                               CommonStrings.content,

@@ -1647,5 +1647,53 @@
     "reducingImagesSize": "Reducing Images Size...",
     "largeImagesDetected": "Large Images Detected",
     "largeImagesPrompt": "Some images are large and may slow down the app. Press OK to convert them into optimal size."
+  },
+  "FeatureSpeakers": {
+    "title": "Speakers & Counseling",
+    "description": "Manage speakers and counseling slots; a counseling entry point for attendees.",
+    "counselingEnabled": "Enable counseling",
+    "counselingEventType": "Counseling event type code",
+    "maxActiveBookings": "Max active reservations (0 = unlimited)",
+    "registrationStartTime": "Counseling registration start"
+  },
+  "Speakers": {
+    "manageSpeakers": "Manage speakers",
+    "addSpeaker": "Add speaker",
+    "editSpeaker": "Edit speaker",
+    "name": "Name",
+    "roleSubtitle": "Role / titles",
+    "bio": "Bio",
+    "avatar": "Photo",
+    "topics": "Areas",
+    "manageTopics": "Manage areas",
+    "addTopic": "Add area",
+    "topicTitle": "Area title",
+    "topicCode": "Code (optional)",
+    "speakersOnEvent": "Speakers",
+    "counselingSlots": "Counseling slots",
+    "lecturers": "Speakers",
+    "generateSlots": "Generate slots",
+    "slotFrom": "From",
+    "slotTo": "To",
+    "slotLength": "Slot length (min)",
+    "slotBreak": "Break between slots (min)",
+    "slotCapacity": "Slot capacity",
+    "slotPlace": "Place",
+    "deleteEmptySlots": "Delete empty slots",
+    "slotsCreated": "Slots created: {count}",
+    "slotsDeleted": "Slots deleted: {count}",
+    "counselingEntryToggle": "Counseling entry point"
+  },
+  "Counseling": {
+    "title": "Counseling, intercessory prayer and confession",
+    "chooseArea": "Choose an area",
+    "chooseCounselorAndTime": "Choose an area and time",
+    "enterCounseling": "Choose an area and time",
+    "yourReservation": "Your reservation",
+    "cancelReservation": "Cancel reservation",
+    "noCounselorsForArea": "No counselors are currently available for this area.",
+    "slotTaken": "Taken",
+    "signInToReserve": "Please sign in to make a reservation.",
+    "bookingLimitReached": "You have reached the maximum number of reservations."
   }
 }

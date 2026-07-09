@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/material.dart';
@@ -197,6 +198,15 @@ class EventModel extends ITrinaRowModel {
       isCancelled: cancelled, // Added
     );
   }
+
+  /// A generated counseling slot (get_events strips `false` jsonb values, so
+  /// the flag arrives as `true` or absent). Hidden from the main timeline and
+  /// offline search but still shown in "My program".
+  bool get isCounselingSlot => data?[FeatureConstants.isCounselingSlot] == true;
+
+  /// The counseling entry point ("rozcestník") — shows the enter-counseling
+  /// button under its description.
+  bool get isCounselingEntry => data?[FeatureConstants.counselingEntry] == true;
 
   bool isFull() =>
       currentParticipants != null &&

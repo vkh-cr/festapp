@@ -1,0 +1,354 @@
+import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/images/image_url_helper.dart';
+import 'package:fstapp/components/speakers/admin/speaker_editor_dialog.dart';
+import 'package:fstapp/components/speakers/db_speakers.dart';
+import 'package:fstapp/components/speakers/speaker_model.dart';
+import 'package:fstapp/components/speakers/speaker_topic_model.dart';
+import 'package:fstapp/components/speakers/speakers_strings.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/exception_handler.dart';
+import 'package:fstapp/services/toast_helper.dart';
+
+/// Admin tab: manage speakers (lecturers / counselors) and the counseling area
+/// catalog. Data comes from [DbSpeakers.getSpeakersForEdit]; every mutation is
+/// wrapped in [ExceptionHandler.guard] and reloads the tab on success.
+class SpeakersTab extends StatefulWidget {
+  const SpeakersTab({super.key});
+
+  @override
+  State<SpeakersTab> createState() => _SpeakersTabState();
+}
+
+class _SpeakersTabState extends State<SpeakersTab> {
+  List<SpeakerModel> _speakers = [];
+  List<SpeakerTopicModel> _topics = [];
+  bool _loading = true;
+
+  int get _occasionId => RightsService.currentOccasionId()!;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    final data = await ExceptionHandler.guard(
+      context,
+      futureFunction: () => DbSpeakers.getSpeakersForEdit(_occasionId),
+    );
+    if (!mounted) return;
+    setState(() {
+      if (data != null) {
+        _speakers = data.speakers;
+        _topics = data.topics;
+      }
+      _loading = false;
+    });
+  }
+
+  Future<void> _openSpeakerEditor(SpeakerModel speaker) async {
+    final changed = await showDialog<bool>(
+      context: context,
+      builder: (_) => SpeakerEditorDialog(speaker: speaker, topics: _topics),
+    );
+    if (changed == true) await _load();
+  }
+
+  Future<void> _deleteSpeaker(SpeakerModel speaker) async {
+    final confirm = await DialogHelper.showConfirmationDialog(
+      context,
+      CommonStrings.confirmRemoval,
+      speaker.title ?? '',
+    );
+    if (confirm != true) return;
+    final ok = await ExceptionHandler.guardVoid(
+      context,
+      futureFunction: () => DbSpeakers.deleteSpeaker(speaker.id!),
+    );
+    if (ok && mounted) {
+      ToastHelper.Show(context, CommonStrings.deleted);
+      await _load();
+    }
+  }
+
+  Future<void> _openTopicEditor(SpeakerTopicModel topic) async {
+    final changed = await showDialog<bool>(
+      context: context,
+      builder: (_) => _TopicEditorDialog(topic: topic),
+    );
+    if (changed == true) await _load();
+  }
+
+  Future<void> _deleteTopic(SpeakerTopicModel topic) async {
+    final confirm = await DialogHelper.showConfirmationDialog(
+      context,
+      CommonStrings.confirmRemoval,
+      topic.title ?? '',
+    );
+    if (confirm != true) return;
+    final ok = await ExceptionHandler.guardVoid(
+      context,
+      futureFunction: () => DbSpeakers.deleteTopic(topic.id!),
+    );
+    if (ok && mounted) {
+      ToastHelper.Show(context, CommonStrings.deleted);
+      await _load();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Row(
+          children: [
+            Icon(Icons.record_voice_over, color: theme.colorScheme.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                SpeakersStrings.manageSpeakers,
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ),
+            FilledButton.icon(
+              icon: const Icon(Icons.add, size: 18),
+              onPressed: () => _openSpeakerEditor(SpeakerModel()),
+              label: Text(SpeakersStrings.addSpeaker),
+            ),
+          ],
+        ),
+        const Divider(height: 24),
+        if (_speakers.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: Text(SpeakersStrings.manageSpeakers,
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: theme.colorScheme.outline)),
+            ),
+          )
+        else
+          ..._speakers.map(_buildSpeakerTile),
+        const SizedBox(height: 24),
+        _buildTopicsCatalog(theme),
+      ],
+    );
+  }
+
+  Widget _buildSpeakerTile(SpeakerModel speaker) {
+    final theme = Theme.of(context);
+    final image = speaker.image;
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        leading: CircleAvatar(
+          radius: 22,
+          backgroundImage: (image != null && image.isNotEmpty)
+              ? NetworkImage(
+                  ImageUrlHelper.transformImageUrl(image, width: 200))
+              : null,
+          child: (image == null || image.isEmpty)
+              ? const Icon(Icons.person)
+              : null,
+        ),
+        title: Text(speaker.title ?? ''),
+        subtitle: speaker.subtitle != null && speaker.subtitle!.isNotEmpty
+            ? Text(speaker.subtitle!)
+            : null,
+        onTap: () => _openSpeakerEditor(speaker),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (speaker.isHidden)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Icon(Icons.visibility_off,
+                    size: 18, color: theme.colorScheme.outline),
+              ),
+            IconButton(
+              icon: const Icon(Icons.edit),
+              tooltip: CommonStrings.edit,
+              onPressed: () => _openSpeakerEditor(speaker),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: CommonStrings.delete,
+              onPressed: () => _deleteSpeaker(speaker),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopicsCatalog(ThemeData theme) {
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.category_outlined),
+        title: Text(SpeakersStrings.manageTopics,
+            style: theme.textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w600)),
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        children: [
+          ..._topics.map((topic) => ListTile(
+                dense: true,
+                title: Text(topic.title ?? ''),
+                subtitle: topic.code != null && topic.code!.isNotEmpty
+                    ? Text(topic.code!)
+                    : null,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (topic.isHidden)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Icon(Icons.visibility_off,
+                            size: 18, color: theme.colorScheme.outline),
+                      ),
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      tooltip: CommonStrings.edit,
+                      onPressed: () => _openTopicEditor(topic),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      tooltip: CommonStrings.delete,
+                      onPressed: () => _deleteTopic(topic),
+                    ),
+                  ],
+                ),
+              )),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.add_circle_outline, size: 18),
+                onPressed: () =>
+                    _openTopicEditor(SpeakerTopicModel(order: _topics.length)),
+                label: Text(SpeakersStrings.addTopic),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Small dialog for creating/editing a counseling area (topic).
+class _TopicEditorDialog extends StatefulWidget {
+  final SpeakerTopicModel topic;
+  const _TopicEditorDialog({required this.topic});
+
+  @override
+  State<_TopicEditorDialog> createState() => _TopicEditorDialogState();
+}
+
+class _TopicEditorDialogState extends State<_TopicEditorDialog> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _codeController;
+  late final TextEditingController _orderController;
+  bool _isHidden = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.topic.title ?? '');
+    _codeController = TextEditingController(text: widget.topic.code ?? '');
+    _orderController =
+        TextEditingController(text: widget.topic.order.toString());
+    _isHidden = widget.topic.isHidden;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _codeController.dispose();
+    _orderController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final title = _titleController.text.trim();
+    if (title.isEmpty) {
+      ToastHelper.Show(context, CommonStrings.fieldCannotBeEmpty,
+          severity: ToastSeverity.NotOk);
+      return;
+    }
+    final model = widget.topic
+      ..title = title
+      ..code =
+          _codeController.text.trim().isEmpty ? null : _codeController.text.trim()
+      ..order = int.tryParse(_orderController.text.trim()) ?? 0
+      ..isHidden = _isHidden;
+
+    final saved = await ExceptionHandler.guard<SpeakerTopicModel>(
+      context,
+      futureFunction: () =>
+          DbSpeakers.updateTopic(RightsService.currentOccasionId()!, model),
+    );
+    if (saved != null && mounted) {
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.topic.id == null
+          ? SpeakersStrings.addTopic
+          : SpeakersStrings.manageTopics),
+      content: SizedBox(
+        width: 420,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration:
+                  InputDecoration(labelText: SpeakersStrings.topicTitle),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _codeController,
+              decoration: InputDecoration(labelText: SpeakersStrings.topicCode),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _orderController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: CommonStrings.order),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(CommonStrings.hide),
+              value: _isHidden,
+              onChanged: (v) => setState(() => _isHidden = v),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(CommonStrings.storno),
+        ),
+        FilledButton(
+          onPressed: _save,
+          child: Text(CommonStrings.save),
+        ),
+      ],
+    );
+  }
+}

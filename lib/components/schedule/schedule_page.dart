@@ -161,6 +161,7 @@ class _SchedulePageState extends State<SchedulePage>
       }
       _dots = _events
           .filterRootEvents()
+          .where((e) => !e.isCounselingSlot)
           .map((e) => TimeBlockItem.fromEventModel(e))
           .toList();
     }
@@ -170,6 +171,7 @@ class _SchedulePageState extends State<SchedulePage>
       await OfflineDataService.updateEventsWithMySchedule(_events);
       _dots = _events
           .filterRootEvents()
+          .where((e) => !e.isCounselingSlot)
           .map((e) => TimeBlockItem.fromEventModel(e))
           .toList();
     }
@@ -200,6 +202,7 @@ class _SchedulePageState extends State<SchedulePage>
     }
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
 
@@ -225,6 +228,7 @@ class _SchedulePageState extends State<SchedulePage>
 
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
     await OfflineDataService.saveAllEvents(_events);

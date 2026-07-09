@@ -57,6 +57,7 @@ class DbSearch {
       final docs = <_IndexedDoc>[];
 
       for (final e in await OfflineDataService.getAllEvents()) {
+        if (e.isCounselingSlot) continue;
         docs.add(_IndexedDoc(
           entityType: 'event',
           entityId: e.id ?? 0,

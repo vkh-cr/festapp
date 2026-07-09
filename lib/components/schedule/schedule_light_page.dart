@@ -93,6 +93,7 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
       }
       _dots = _events
           .filterRootEvents()
+          .where((e) => !e.isCounselingSlot)
           .map((e) => TimeBlockItem.fromEventModel(e))
           .toList();
     }
@@ -108,6 +109,7 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
     _events = fast;
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
     if (mounted) setState(() {});
@@ -122,6 +124,7 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
     _events = full;
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
     await OfflineDataService.saveAllEvents(_events);

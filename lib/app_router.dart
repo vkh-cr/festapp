@@ -21,6 +21,7 @@ import 'package:fstapp/components/map/map_page.dart';
 import 'package:fstapp/components/news/news_form_page.dart';
 import 'package:fstapp/components/news/news_page.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
+import 'package:fstapp/components/speakers/counseling_page.dart';
 import 'package:fstapp/components/users/views/forgot_password_page.dart';
 import 'package:fstapp/components/scan/scan_page.dart';
 import 'package:fstapp/components/app_management/settings_page.dart';
@@ -140,6 +141,8 @@ class AppRouter extends RootStackRouter {
                     AutoRoute(page: EventRoute.page, path: ":id")
                   ]),
               AutoRoute(page: NewsRoute.page, path: NewsPage.ROUTE),
+              AutoRoute(
+                  page: CounselingRoute.page, path: CounselingPage.ROUTE),
 
               // Use UnitPage for the nested /:occasionLink/unit path
               AutoRoute(

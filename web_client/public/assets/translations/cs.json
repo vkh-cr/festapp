@@ -1647,5 +1647,53 @@
     "reducingImagesSize": "Probíhá zmenšování velikosti obrázků...",
     "largeImagesDetected": "Zjištěny velké obrázky",
     "largeImagesPrompt": "Některé obrázky jsou velké a mohou zpomalit aplikaci. Stiskněte OK pro jejich převod na optimální velikost."
+  },
+  "FeatureSpeakers": {
+    "title": "Přednášející a poradny",
+    "description": "Správa přednášejících a poradenských slotů; poradenský rozcestník pro účastníky.",
+    "counselingEnabled": "Povolit poradenství",
+    "counselingEventType": "Kód typu poradenského bloku",
+    "maxActiveBookings": "Max. počet aktivních rezervací (0 = bez limitu)",
+    "registrationStartTime": "Začátek rezervací poraden"
+  },
+  "Speakers": {
+    "manageSpeakers": "Správa přednášejících",
+    "addSpeaker": "Přidat přednášejícího",
+    "editSpeaker": "Upravit přednášejícího",
+    "name": "Jméno",
+    "roleSubtitle": "Role / tituly",
+    "bio": "Medailonek",
+    "avatar": "Fotka",
+    "topics": "Oblasti",
+    "manageTopics": "Správa oblastí",
+    "addTopic": "Přidat oblast",
+    "topicTitle": "Název oblasti",
+    "topicCode": "Kód (nepovinné)",
+    "speakersOnEvent": "Přednášející",
+    "counselingSlots": "Poradenské sloty",
+    "lecturers": "Přednášející",
+    "generateSlots": "Vygenerovat sloty",
+    "slotFrom": "Od",
+    "slotTo": "Do",
+    "slotLength": "Délka slotu (min)",
+    "slotBreak": "Pauza mezi sloty (min)",
+    "slotCapacity": "Kapacita slotu",
+    "slotPlace": "Místo",
+    "deleteEmptySlots": "Smazat prázdné sloty",
+    "slotsCreated": "Vytvořeno slotů: {count}",
+    "slotsDeleted": "Smazáno slotů: {count}",
+    "counselingEntryToggle": "Poradenský rozcestník"
+  },
+  "Counseling": {
+    "title": "Poradenství, přímluvná modlitba a svátost smíření",
+    "chooseArea": "Vyberte oblast",
+    "chooseCounselorAndTime": "Vyberte oblast a čas",
+    "enterCounseling": "Vybrat oblast a čas",
+    "yourReservation": "Tvoje rezervace",
+    "cancelReservation": "Zrušit rezervaci",
+    "noCounselorsForArea": "Pro tuto oblast nejsou momentálně volní poradci.",
+    "slotTaken": "Obsazeno",
+    "signInToReserve": "Pro rezervaci se prosím přihlaste.",
+    "bookingLimitReached": "Dosáhli jste maximálního počtu rezervací."
   }
 }

@@ -24,6 +24,8 @@ class _AdminPageState extends State<AdminPage>
     AdminTabDefinition.info,
     if (!AppConfig.isAllUnit) AdminTabDefinition.events,
     AdminTabDefinition.places,
+    if (FeatureService.isFeatureEnabled(FeatureConstants.speakers))
+      AdminTabDefinition.speakers,
     if (FeatureService.isFeatureEnabled(FeatureConstants.userGroups))
       AdminTabDefinition.groups,
     if (FeatureService.isFeatureEnabled(FeatureConstants.game))

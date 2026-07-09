@@ -13,6 +13,7 @@ import 'import_feature.dart';
 import 'map_feature.dart';
 import 'schedule_feature.dart';
 import 'services_feature.dart';
+import 'speakers_feature.dart';
 import 'ticket_feature.dart';
 import 'workshop_feature.dart';
 import 'contract_feature.dart';
@@ -34,6 +35,7 @@ class FeatureService {
     FeatureConstants.import,
     FeatureConstants.globalSearch,
     FeatureConstants.eventFeedback,
+    FeatureConstants.speakers,
   ];
 
   /// Checks whether the feature with [featureCode] is enabled.
@@ -90,6 +92,7 @@ class FeatureService {
         ContractFeature(code: FeatureConstants.contract, isEnabled: false),
         SimpleFeature(code: FeatureConstants.globalSearch, isEnabled: false),
         SimpleFeature(code: FeatureConstants.eventFeedback, isEnabled: false),
+        SpeakersFeature(code: FeatureConstants.speakers, isEnabled: false),
       ],
     ];
   }
@@ -186,6 +189,19 @@ class FeatureService {
   static bool isServiceCapacityGroupsEnabled() =>
       isFeatureEnabled(FeatureConstants.services) &&
       (getServicesFeature()?.allowsCapacityGroups ?? true);
+
+  /// Returns the [SpeakersFeature] config, or null when the feature is absent
+  /// or stored as a plain feature.
+  static SpeakersFeature? getSpeakersFeature() {
+    final feature = getFeatureDetails(FeatureConstants.speakers);
+    return feature is SpeakersFeature ? feature : null;
+  }
+
+  /// True when the speakers feature is enabled AND the counseling entry flow
+  /// (rozcestník) is turned on.
+  static bool isCounselingEnabled() =>
+      isFeatureEnabled(FeatureConstants.speakers) &&
+      (getSpeakersFeature()?.counselingEnabled ?? false);
 
   /// Returns the maximum number of companions allowed.
   static int? getMaxCompanions() {
