@@ -8,6 +8,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/components/map/path_group_model.dart';
 import 'package:fstapp/components/map/icon_model.dart';
+import 'package:fstapp/components/icons/place_type_model.dart';
+import 'package:fstapp/components/icons/icons_strings.dart';
+import 'package:fstapp/theme_config.dart';
 
 class MapPageHelper {
   static double _toRadians(double deg) => deg * (pi / 180.0);
@@ -51,12 +54,12 @@ class MapPageHelper {
       final lines = <fm.Polyline>[];
 
       for (var segment in g.pathData!) {
-        // map segment (List<int>) -> List<LatLng>
+        // map segment (List<PathNode>) -> List<LatLng>: place refs are looked
+        // up in placesList, free points use their inline coordinates.
         final pts = List<LatLng>.from(
           segment
-              .map((id) => placesList.firstWhereOrNull((pl) => pl.id == id))
-              .whereType<PlaceModel>()
-              .map((p) => LatLng(p.getLat(), p.getLng())),
+              .map((node) => node.resolve(placesList))
+              .whereType<LatLng>(),
         );
         if (pts.length < 2) continue;
 
@@ -246,6 +249,128 @@ class MapPageHelper {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Bottom-center dark pill with one chip per visible place type plus a
+  /// trailing "Other" chip. Single-select: the caller filters the map markers
+  /// to the tapped type (or the [otherCode] bucket) and re-fits the camera.
+  /// Returns an empty box when there are no place types to show.
+  static Widget buildPlaceTypeFilterBar(
+    BuildContext context,
+    List<PlaceTypeModel> placeTypes,
+    String? selectedCode,
+    String otherCode,
+    void Function(String? code) onTap,
+    List<IconModel> icons,
+  ) {
+    if (placeTypes.isEmpty) return const SizedBox.shrink();
+
+    final chips = <Widget>[
+      for (final type in placeTypes)
+        _buildPlaceTypeChip(
+          code: type.code,
+          iconWidget: _placeTypeIcon(type.icon, icons),
+          isSelected: selectedCode == type.code,
+          onTap: onTap,
+          semanticLabel: type.title ?? '',
+        ),
+      _buildPlaceTypeChip(
+        code: otherCode,
+        iconWidget: const Icon(Icons.more_horiz,
+            size: _chipIconSize, color: Colors.white),
+        isSelected: selectedCode == otherCode,
+        onTap: onTap,
+        semanticLabel: IconsStrings.placeTypesOther,
+      ),
+    ];
+
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 16,
+      child: Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width - 24,
+            ),
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: ThemeConfig.appBarColor(),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: chips,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildPlaceTypeChip({
+    required String? code,
+    required Widget iconWidget,
+    required bool isSelected,
+    required void Function(String? code) onTap,
+    String? semanticLabel,
+  }) {
+    return Tooltip(
+      message: semanticLabel ?? '',
+      child: GestureDetector(
+        onTap: () => onTap(code),
+        child: Container(
+          width: 34,
+          height: 34,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.22)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(child: iconWidget),
+        ),
+      ),
+    );
+  }
+
+  /// Hard cap on a chip icon's rendered width AND height (dp). Icons vary wildly
+  /// in viewBox aspect ratio (wide "bed", tall "church", square "badge"); a
+  /// fixed box + BoxFit.contain keeps every one within the same footprint so
+  /// none reads as oversized.
+  static const double _chipIconSize = 18;
+
+  /// White monochrome rendering of a place type's icon (from the loaded icon
+  /// set), capped to [_chipIconSize] in both dimensions, falling back to a
+  /// generic pin when no icon is configured.
+  static Widget _placeTypeIcon(int? iconId, List<IconModel> icons) {
+    final svg = icons.firstWhereOrNull((i) => i.id == iconId)?.data;
+    if (svg == null) {
+      return const Icon(Icons.place,
+          size: _chipIconSize, color: Colors.white);
+    }
+    return SizedBox(
+      width: _chipIconSize,
+      height: _chipIconSize,
+      child: SvgPicture.string(
+        svg,
+        fit: BoxFit.contain,
+        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
       ),
     );
   }

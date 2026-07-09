@@ -1,6 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
@@ -85,22 +88,35 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
           field: Tb.path_groups.color,
           type: TrinaColumnType.text(defaultValue: ""),
           width: 120,
-          applyFormatterInEditing: true,
+          enableEditingMode: false,
           renderer: (ctx) {
             final hex = (ctx.cell.value as String?) ?? "";
-            Color col;
-            try {
-              col = Color(int.parse(hex.replaceFirst('#', '0x')));
-            } catch (_) {
-              col = Colors.transparent;
-            }
-            return Container(
-              width: 24,
-              height: 24,
-              margin: const EdgeInsets.symmetric(vertical: 4),
-              decoration: BoxDecoration(
-                color: col,
-                border: Border.all(color: Colors.black26),
+            Color? col = _parseHexColor(hex);
+            return InkWell(
+              onTap: () => _pickColor(ctx),
+              child: Row(
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      color: col ?? Colors.transparent,
+                      border: Border.all(color: Colors.black26),
+                    ),
+                    child: col == null
+                        ? const Icon(Icons.add, size: 16, color: Colors.black38)
+                        : null,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      col == null ? "" : hex.toUpperCase(),
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
               ),
             );
           },
@@ -121,6 +137,32 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
               DataGridHelper.mapIconRenderer(context, ctx, svgIcons),
         ),
         TrinaColumn(
+          title: CommonStrings.edit,
+          field: Tb.path_groups.path_data,
+          type: TrinaColumnType.text(),
+          width: 150,
+          enableEditingMode: false,
+          enableFilterMenuItem: false,
+          enableContextMenu: false,
+          enableSorting: false,
+          renderer: (ctx) {
+            return ElevatedButton.icon(
+              onPressed: () async {
+                final pm = PathGroupsModel.fromPlutoJson(ctx.row.toJson());
+                final value = await RouterService.navigatePageInfo(
+                    context, MapRoute(editPathGroup: pm));
+                if (value != null) {
+                  final cell = ctx.row.cells[Tb.places.table]!;
+                  ctx.stateManager
+                      .changeCellValue(cell, value.toString(), force: true);
+                }
+              },
+              icon: const Icon(Icons.edit_location_alt),
+              label: Text(CommonStrings.edit),
+            );
+          },
+        ),
+        TrinaColumn(
           title: "Places".tr(),
           field: Tb.places.table,
           type: TrinaColumnType.text(),
@@ -137,6 +179,112 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
     );
 
     setState(() {});
+  }
+
+  /// Parse a stored "#AARRGGBB" (or "#RRGGBB") hex string into a Color.
+  /// Returns null when empty/invalid so the swatch can show an "empty" state.
+  Color? _parseHexColor(String hex) {
+    final clean = hex.replaceFirst('#', '').trim();
+    if (clean.isEmpty) return null;
+    try {
+      if (clean.length == 6) {
+        return Color(int.parse('FF$clean', radix: 16));
+      }
+      return Color(int.parse(clean, radix: 16));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// "#AARRGGBB" — the format the map renderer expects (alpha first).
+  String _colorToHex(Color c) =>
+      '#${c.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+
+  /// Open a color picker for the tapped cell and write the result back.
+  void _pickColor(TrinaColumnRendererContext ctx) {
+    final current =
+        _parseHexColor((ctx.cell.value as String?) ?? "") ?? Colors.blue;
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        Color pickerColor = current;
+        // Shown without the leading '#'; the prefix icon already renders one.
+        final hexController = TextEditingController(
+            text: _colorToHex(pickerColor).replaceFirst('#', ''));
+        final hexFocus = FocusNode();
+        return AlertDialog(
+          title: Text(CommonStrings.color),
+          content: StatefulBuilder(
+            builder: (context, setDialogState) {
+              return SizedBox(
+                width: 300,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Full picker first: the clickable saturation/value area
+                      // plus the hue (tone) slider row underneath it.
+                      ColorPicker(
+                        pickerColor: pickerColor,
+                        enableAlpha: false,
+                        labelTypes: const [],
+                        portraitOnly: true,
+                        pickerAreaHeightPercent: 0.8,
+                        onColorChanged: (c) {
+                          setDialogState(() {
+                            pickerColor = c;
+                            if (!hexFocus.hasFocus) {
+                              hexController.text =
+                                  _colorToHex(c).replaceFirst('#', '');
+                            }
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      // Hex kept below the picker so it reads as the exact value.
+                      TextField(
+                        controller: hexController,
+                        focusNode: hexFocus,
+                        textCapitalization: TextCapitalization.characters,
+                        decoration: InputDecoration(
+                          labelText: CommonStrings.hex,
+                          hintText: CommonStrings.hexFormat,
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.tag),
+                        ),
+                        onChanged: (val) {
+                          final c = _parseHexColor(val);
+                          if (c != null) {
+                            setDialogState(() => pickerColor = c);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(CommonStrings.storno),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                ctx.stateManager.changeCellValue(
+                  ctx.cell,
+                  _colorToHex(pickerColor),
+                  force: true,
+                );
+                Navigator.of(dialogContext).pop();
+              },
+              child: Text(CommonStrings.ok),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

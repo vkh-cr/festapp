@@ -27,7 +27,14 @@ import 'package:fstapp/components/map/map_marker_with_text.dart';
 import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/components/map/offline_map_style_helper.dart';
 import 'package:fstapp/components/map/icon_model.dart';
+import 'package:fstapp/components/icons/place_type_model.dart';
+import 'package:fstapp/components/icons/db_place_types.dart';
 import 'package:fstapp/components/map/path_group_model.dart';
+import 'package:fstapp/components/map/path_node.dart';
+import 'package:fstapp/components/map/gpx_importer.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/widgets/drop_file.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/groups/db_groups.dart';
 import 'package:fstapp/components/map/db_places.dart';
@@ -59,14 +66,24 @@ class MapPage extends StatefulWidget {
   int? id;
   PlaceModel? place;
 
-  MapPage({@pathParam this.id, this.place, super.key});
+  /// When set, the map opens in path-drawing mode for this group: tapping
+  /// existing place markers appends place-ref nodes, tapping empty map appends
+  /// free-point nodes, and Save returns the drawn path as a CSV string.
+  PathGroupsModel? editPathGroup;
+
+  MapPage({@pathParam this.id, this.place, this.editPathGroup, super.key});
+
+  /// True while the map is in path-drawing mode. The occasion shell listens to
+  /// this to hide its bottom navigation bar during editing.
+  static final ValueNotifier<bool> isEditingNotifier = ValueNotifier(false);
 
   @override
   State<MapPage> createState() => _MapPageState();
 }
 
 class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
-  static const bool _showAllPathsWhenNoGroupSelected = true;
+  // Paths stay hidden until the user selects a group; nothing is drawn by default.
+  static const bool _showAllPathsWhenNoGroupSelected = false;
   late final _animatedMapController = AnimatedMapController(vsync: this);
   final PopupController _popupLayerController = PopupController();
   final JSInterop jsInterop = JSInterop();
@@ -103,13 +120,40 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   bool _showLocation = true;
   bool _isShowingGroupsInEditMode = false;
 
+  /// Visible place types (categories) shown as the bottom filter bar. Loaded
+  /// from the occasion; hidden types are excluded from the chips but their
+  /// places fall into the trailing "Other" bucket.
+  List<PlaceTypeModel> _placeTypes = [];
+
+  /// Sentinel code for the trailing "Other" filter chip (untyped places and
+  /// places whose type is not among the visible chips).
+  static const String _otherPlaceTypeCode = "__other__";
+
+  /// Currently selected place-type filter (a type `code`, [_otherPlaceTypeCode],
+  /// or null while no types are loaded). Single-select.
+  String? _selectedPlaceTypeCode;
+  bool _placeTypeInitialized = false;
+
+  /// Place we were deep-linked to (e.g. from a user's accommodation link). It
+  /// must stay visible on the map regardless of the active category filter.
+  int? _forcedVisiblePlaceId;
+
+  /// Working copy of the path being drawn (mode active when
+  /// `widget.editPathGroup != null`). Each inner list is a segment of nodes.
+  final List<List<PathNode>> _drawSegments = [];
+
+  /// Markers for free points added while drawing (not backed by place rows).
+  final List<fm.Marker> _drawPointMarkers = [];
+
+  bool get _isDrawingPath => widget.editPathGroup != null;
+
   @override
   void initState() {
     super.initState();
     _iconScrollController = ScrollController();
     context.tabsRouter.addListener(() async {
       if (context.tabsRouter.activeIndex ==
-          OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.map)) {
+          OccasionHomePage.baseTabKeys.indexOf(OccasionTab.map)) {
         setState(() => _showLocation = true);
         widget.id = null;
         if (kIsWeb) {
@@ -127,6 +171,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    if (_isDrawingPath) {
+      MapPage.isEditingNotifier.value = false;
+    }
     _iconScrollController.dispose();
     super.dispose();
   }
@@ -151,6 +198,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
+    // Hide the occasion shell's bottom navigation bar while drawing a path.
+    // Deferred to after the frame so we never notify listeners mid-build.
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => MapPage.isEditingNotifier.value = _isDrawingPath);
+
     if (widget.id == null && context.routeData.hasPendingChildren) {
       widget.id = context.routeData.pendingChildren[0].params.getInt("id");
     }
@@ -171,6 +223,17 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     }
 
     selectedMarker = null;
+
+    if (_isDrawingPath) {
+      // Seed the working path from the group being edited (deep copy so undo /
+      // cancel never mutate the caller's model).
+      _drawSegments
+        ..clear()
+        ..addAll((widget.editPathGroup!.pathData ?? [])
+            .map((seg) => List<PathNode>.from(seg)));
+      pageTitle = widget.editPathGroup!.title ?? "Draw path".tr();
+    }
+
     var placeModel = widget.place;
     if (placeModel == null || placeModel.latLng == null) {
       loadData(placeId: widget.id);
@@ -339,8 +402,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
               ? const SizedBox.shrink()
               : mapWidget,
           if (_isDownloading || _downloadCompleted) _buildProgressIndicator(),
-          if (selectedMarker != null) _buildEditControls(),
-          if (selectedMarker == null)
+          if (_isDrawingPath) _buildDrawControls(),
+          if (!_isDrawingPath && selectedMarker != null) _buildEditControls(),
+          if (!_isDrawingPath && selectedMarker == null)
             MapPageHelper.buildGroupIconArea(
               context,
               _pathGroups,
@@ -349,10 +413,19 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
               _icons,
               scrollController: _iconScrollController,
             ),
-          if (selectedMarker == null)
+          if (!_isDrawingPath && selectedMarker == null)
             MapPageHelper.buildSelectedGroupTitle(
               context,
               _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId),
+            ),
+          if (!_isDrawingPath && selectedMarker == null)
+            MapPageHelper.buildPlaceTypeFilterBar(
+              context,
+              _placeTypes,
+              _selectedPlaceTypeCode,
+              _otherPlaceTypeCode,
+              _onPlaceTypeTap,
+              _icons,
             ),
         ],
       ),
@@ -468,9 +541,29 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           .where((m) => m.place.id != selectedMarker!.place.id)
           .toList();
       return [...backgroundMarkers, ..._selectedMarkers];
+    } else if (_isDrawingPath) {
+      // Show every place (so any can be tapped into the path) plus the pins for
+      // the free points added so far.
+      return [..._markers, ..._drawPointMarkers];
     } else {
-      return _markers;
+      return _markers
+          .where((m) =>
+              m.place.id == _forcedVisiblePlaceId ||
+              _placeMatchesSelectedType(m.place))
+          .toList();
     }
+  }
+
+  /// Whether a place passes the active place-type filter. With no filter loaded
+  /// every place matches; the "Other" bucket matches untyped places and places
+  /// whose type is not among the visible chips.
+  bool _placeMatchesSelectedType(MapPlaceModel place) {
+    if (_selectedPlaceTypeCode == null || _placeTypes.isEmpty) return true;
+    if (_selectedPlaceTypeCode == _otherPlaceTypeCode) {
+      final visibleCodes = _placeTypes.map((t) => t.code).toSet();
+      return place.type == null || !visibleCodes.contains(place.type);
+    }
+    return place.type == _selectedPlaceTypeCode;
   }
 
   List<Widget> _buildCommonMapLayers() {
@@ -531,6 +624,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   void onMapTap(LatLng pos) {
+    if (_isDrawingPath) {
+      _addDrawNode(PathNode.point(pos.latitude, pos.longitude));
+      return;
+    }
     if (selectedMarker != null) {
       _selectedMarkers.remove(selectedMarker);
       selectedMarker = selectedMarker!
@@ -734,6 +831,15 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     var onlineIcons = await DbPlaces.getAllIcons();
     _icons = onlineIcons; // Prefer online icons
 
+    try {
+      _placeTypes = (await DbPlaceTypes.getPlaceTypes())
+          .where((t) => !(t.isHidden ?? false))
+          .toList();
+      _initPlaceTypeSelection();
+    } catch (e) {
+      AppLogger.error("Failed to load place types: $e");
+    }
+
     List<PlaceModel> onlineList;
     var placesFromDb = await DbPlaces.getAllPlaces();
     await OfflineDataService.saveAllPlaces(placesFromDb);
@@ -798,6 +904,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         setMapToOnePlaceAndShowPopup(placeId, p);
       }
     }
+
+    if (_isDrawingPath) _rebuildDrawOverlay();
   }
 
   Future<void> addOfflineEventsToPlace(List<PlaceModel> places) async {
@@ -851,8 +959,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       final group =
           _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId);
       if (group != null && group.pathData != null) {
-        placeIdsInSelectedGroup
-            .addAll(group.pathData!.expand((segment) => segment));
+        placeIdsInSelectedGroup.addAll(group.pathData!
+            .expand((segment) => segment)
+            .map((node) => node.placeId)
+            .whereType<int>());
       }
     }
 
@@ -886,6 +996,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   void setMapToOnePlaceAndShowPopup(int placeId, PlaceModel p) {
     var m = _markers.firstWhereOrNull((m) => m.place.id == placeId);
     if (m == null) return;
+
+    // Keep this place visible even if the active category filter excludes it.
+    _forcedVisiblePlaceId = placeId;
 
     _markers.remove(m);
     _markers.add(m);
@@ -936,8 +1049,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       final group =
           _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId);
       if (group != null && group.pathData != null) {
-        placeIdsInSelectedGroup
-            .addAll(group.pathData!.expand((segment) => segment));
+        placeIdsInSelectedGroup.addAll(group.pathData!
+            .expand((segment) => segment)
+            .map((node) => node.placeId)
+            .whereType<int>());
       }
     }
 
@@ -1004,7 +1119,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
               children: [
                 ElevatedButton(
                   onPressed: cancelNewPosition,
-                  child: const Text("Storno").tr(),
+                  child: Text(CommonStrings.storno),
                 ),
                 const Padding(padding: EdgeInsets.all(16.0)),
                 Visibility(
@@ -1034,6 +1149,256 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         ],
       ),
     );
+  }
+
+  Color _drawPathColor() {
+    final hex = widget.editPathGroup?.color;
+    if (hex != null && hex.isNotEmpty) {
+      try {
+        return Color(int.parse(hex.replaceFirst('#', '0x')));
+      } catch (_) {}
+    }
+    return Colors.blue;
+  }
+
+  /// Resolve a draw node to a coordinate: free points use their inline lat/lng,
+  /// place refs are looked up among the loaded markers.
+  LatLng? _resolveDrawNode(PathNode node) {
+    if (node.isPoint) return LatLng(node.lat!, node.lng!);
+    return _markers.firstWhereOrNull((m) => m.place.id == node.placeId)?.point;
+  }
+
+  /// Recompute the live polyline and free-point markers from [_drawSegments].
+  void _rebuildDrawOverlay() {
+    final color = _drawPathColor();
+
+    final lines = <fm.Polyline>[];
+    for (final seg in _drawSegments) {
+      final pts = seg.map(_resolveDrawNode).whereType<LatLng>().toList();
+      if (pts.length >= 2) {
+        lines.add(fm.Polyline(points: pts, color: color, strokeWidth: 3));
+      }
+    }
+
+    _drawPointMarkers
+      ..clear()
+      ..addAll(_drawSegments.expand((seg) => seg).where((n) => n.isPoint).map(
+            (n) => fm.Marker(
+              point: LatLng(n.lat!, n.lng!),
+              width: 22,
+              height: 22,
+              alignment: Alignment.center,
+              child: Icon(Icons.circle, size: 14, color: color),
+            ),
+          ));
+
+    _polylines = lines;
+    if (mounted) setState(() {});
+  }
+
+  void _addDrawNode(PathNode node) {
+    if (_drawSegments.isEmpty) _drawSegments.add(<PathNode>[]);
+    _drawSegments.last.add(node);
+    _rebuildDrawOverlay();
+  }
+
+  /// Remove the most recently added node (from the last non-empty segment).
+  void _undoLastDrawNode() {
+    for (var i = _drawSegments.length - 1; i >= 0; i--) {
+      if (_drawSegments[i].isNotEmpty) {
+        _drawSegments[i].removeLast();
+        break;
+      }
+    }
+    while (_drawSegments.length > 1 && _drawSegments.last.isEmpty) {
+      _drawSegments.removeLast();
+    }
+    _rebuildDrawOverlay();
+  }
+
+  /// Start a fresh segment so the next taps form a disconnected path piece.
+  void _newDrawSegment() {
+    if (_drawSegments.isEmpty || _drawSegments.last.isNotEmpty) {
+      _drawSegments.add(<PathNode>[]);
+    }
+    _rebuildDrawOverlay();
+  }
+
+  /// Replace the working path with imported [segments], redraw, and fit the
+  /// camera to the new geometry.
+  Future<void> _applyImportedSegments(List<List<PathNode>> segments) async {
+    _drawSegments
+      ..clear()
+      ..addAll(segments);
+    _rebuildDrawOverlay();
+
+    final allPoints = _drawSegments
+        .expand((s) => s)
+        .map(_resolveDrawNode)
+        .whereType<LatLng>()
+        .toList();
+    if (allPoints.length == 1) {
+      await _animatedMapController.animateTo(dest: allPoints.single);
+    } else if (allPoints.length > 1) {
+      await _animatedMapController.animatedFitCamera(
+        cameraFit: fm.CameraFit.coordinates(
+          coordinates: allPoints,
+          padding: const EdgeInsets.fromLTRB(48, 48, 48, 120),
+        ),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  /// Import a route from a GPX file (Mapy.com, Strava, Garmin, komoot, …).
+  Future<void> _importGpxFile(XFile file) async {
+    List<List<PathNode>> segments;
+    try {
+      final content = await file.readAsString();
+      segments = GpxImporter.parse(content);
+    } catch (e) {
+      AppLogger.error("Failed to read GPX: $e");
+      segments = [];
+    }
+
+    if (segments.isEmpty) {
+      if (mounted) {
+        ToastHelper.Show(context, "No route found in the GPX file.".tr(),
+            severity: ToastSeverity.NotOk);
+      }
+      return;
+    }
+    await _applyImportedSegments(segments);
+  }
+
+  Future<void> _showImportDialog() async {
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Import route").tr(),
+        content: SizedBox(
+          width: 420,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Export your route from Mapy.com (or Strava, Garmin, komoot…) as GPX and drop it here.",
+              ).tr(),
+              DropFile(
+                height: 180,
+                allowedExtensions: const ['gpx'],
+                onFilePathChanged: (file) async {
+                  Navigator.of(dialogContext).pop();
+                  await _importGpxFile(file);
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(CommonStrings.storno),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Return the drawn path to the caller as the grid's CSV string.
+  void _saveDrawPath() {
+    final segments = _drawSegments.where((s) => s.isNotEmpty).toList();
+    RouterService.goBack(context, PathGroupsModel.pathDataToCsv(segments));
+  }
+
+  Widget _buildDrawControls() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Tap places or the map to add points to the path.",
+              style: TextStyle(color: Colors.black),
+              textAlign: TextAlign.center,
+            ).tr(),
+            const SizedBox(height: 8),
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                // Build tools: import a route, then refine by hand.
+                ElevatedButton.icon(
+                  onPressed: _showImportDialog,
+                  icon: const Icon(Icons.upload_file),
+                  label: const Text("Import route").tr(),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _undoLastDrawNode,
+                  icon: const Icon(Icons.undo),
+                  label: const Text("Undo").tr(),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _newDrawSegment,
+                  icon: const Icon(Icons.linear_scale),
+                  label: const Text("New segment").tr(),
+                ),
+                // Visual gap separating the build tools from the save action.
+                const SizedBox(width: 24),
+                ElevatedButton.icon(
+                  onPressed: _saveDrawPath,
+                  icon: const Icon(Icons.check),
+                  label: const Text("Save route").tr(),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Pick the initial place-type filter once types are available: the default
+  /// type (`is_default`) if any, otherwise the first (order-sorted) type.
+  void _initPlaceTypeSelection() {
+    if (_placeTypeInitialized || _placeTypes.isEmpty) return;
+    final defaultType = _placeTypes.firstWhereOrNull((t) => t.isDefault == true);
+    _selectedPlaceTypeCode = (defaultType ?? _placeTypes.first).code;
+    _placeTypeInitialized = true;
+  }
+
+  Future<void> _onPlaceTypeTap(String? code) async {
+    if (code == null) return;
+    setState(() => _selectedPlaceTypeCode = code);
+
+    final points = _markers
+        .where((m) => _placeMatchesSelectedType(m.place))
+        .map((m) => m.point)
+        .toList();
+
+    if (points.length == 1) {
+      await _animatedMapController.animateTo(
+        dest: points.single,
+        zoom: _mapFeature.defaultMapZoom,
+        curve: Curves.easeInOut,
+      );
+    } else if (points.length > 1) {
+      await _animatedMapController.animatedFitCamera(
+        cameraFit: fm.CameraFit.coordinates(
+          coordinates: points,
+          padding: const EdgeInsets.fromLTRB(48, 48, 48, 96),
+        ),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _setFocusedMarkerLogic(MapMarkerWithText markerToFocus) {
@@ -1081,8 +1446,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId);
               if (group != null &&
                   group.pathData != null &&
-                  group.pathData!.any(
-                      (segment) => segment.contains(_markers[i].place.id))) {
+                  group.pathData!.any((segment) => segment
+                      .any((node) => node.placeId == _markers[i].place.id))) {
                 shouldRetainTitle = true;
               }
             }
@@ -1105,6 +1470,15 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   void showPopupOrDialogFor(
       PopupController controller, fm.Marker markerInstance) async {
+    if (_isDrawingPath) {
+      // In drawing mode a marker tap appends a place-ref node instead of
+      // opening the place popup/dialog.
+      if (markerInstance is MapMarkerWithText &&
+          markerInstance.place.id != null) {
+        _addDrawNode(PathNode.place(markerInstance.place.id!));
+      }
+      return;
+    }
     if (selectedMarker != null &&
         markerInstance is MapMarkerWithText &&
         markerInstance.place.id != selectedMarker!.place.id) {
