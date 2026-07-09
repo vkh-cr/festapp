@@ -36,6 +36,70 @@
     }
   }
 
+  // Detects whether a stale Flutter service worker (or its cache) is still
+  // present. Current builds ship WITHOUT a Flutter service worker, so any
+  // flutter_service_worker.js registration or flutter-app-cache left over from
+  // an older build is stale and will keep serving outdated assets — the exact
+  // cause of the "stuck on an old broken build" freeze.
+  async function hasStaleFlutterServiceWorker() {
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        const hasFlutterSw = registrations.some(function(registration) {
+          const scriptUrl = registration.active?.scriptURL ||
+            registration.waiting?.scriptURL ||
+            registration.installing?.scriptURL ||
+            '';
+          return scriptUrl.includes('flutter_service_worker.js');
+        });
+        if (hasFlutterSw) {
+          return true;
+        }
+      }
+
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        if (cacheNames.some(function(cacheName) {
+          return cacheName.startsWith('flutter-app-cache');
+        })) {
+          return true;
+        }
+      }
+    } catch (error) {
+      console.warn('Festapp stale service worker check failed:', error);
+    }
+    return false;
+  }
+
+  // "Deep refresh": when a stale Flutter service worker/cache is detected the
+  // app is (or is about to be) serving outdated assets, which freezes it. Evict
+  // the service worker + caches and hard-reload ONCE so the browser fetches the
+  // current build straight from the network. This makes the app self-heal
+  // automatically instead of needing a manual hard refresh, so a bad cached
+  // build can never leave a user stuck.
+  //
+  // Guarded per app version via sessionStorage: after eviction the reload loads
+  // a fresh, service-worker-free page (no stale marker) so the guard/early-out
+  // both prevent any reload loop even if the eviction does not fully take.
+  async function deepRefreshIfStale() {
+    const guardKey = 'festappDeepRefreshedVersion';
+    try {
+      if (sessionStorage.getItem(guardKey) === (currentVersion || '1')) {
+        return false;
+      }
+      if (!(await hasStaleFlutterServiceWorker())) {
+        return false;
+      }
+      sessionStorage.setItem(guardKey, currentVersion || '1');
+      await clearLegacyFlutterCaches();
+      window.location.reload();
+      return true;
+    } catch (error) {
+      console.warn('Festapp deep refresh failed:', error);
+      return false;
+    }
+  }
+
   function getActiveLanguage() {
     // Prefer the language the user explicitly picked inside the app
     // (Flutter easy_localization → flutter.Locale, web client → locale).
@@ -267,8 +331,15 @@
   }
 
   window.clearLegacyFlutterCaches = clearLegacyFlutterCaches;
+  window.deepRefreshIfStale = deepRefreshIfStale;
   window.addEventListener('load', function() {
-    window.setTimeout(checkVersion, 3000);
+    // Self-heal first: if a stale build is cached this triggers a one-time
+    // hard reload, so skip the (now moot) passive version check for this load.
+    deepRefreshIfStale().then(function(reloading) {
+      if (!reloading) {
+        window.setTimeout(checkVersion, 3000);
+      }
+    });
   });
   window.addEventListener('focus', checkVersion);
   window.addEventListener('festapp-update-available', function(event) {

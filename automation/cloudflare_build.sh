@@ -125,6 +125,12 @@ const AUTH_BRIDGE_PATHS = new Set(["/auth_bridge", "/auth_bridge.html"]);
 // download. They must never be reachable as a user-facing URL — redirect to /.
 const INTERNAL_ASSET_PATHS = new Set(["/flutter", "/webclient"]);
 
+// Flutter's entry/runtime files use stable, unversioned names that change on
+// every deploy (main.dart.js, its main.dart.js_<n>.part.js deferred chunks,
+// the bootstrap/loader, and the canvaskit/skwasm wasm runtime). These must be
+// revalidated on every load so a client never mixes assets from two builds.
+const MUTABLE_RUNTIME_ASSET = /(?:^|\/)(?:main\.dart\.js(?:_\d+\.part\.js)?|main\.dart\.mjs|flutter_bootstrap\.js|flutter\.js|flutter_service_worker\.js|festapp_update_prompt\.js|(?:canvaskit|skwasm)[\w.]*\.(?:js|mjs|wasm))$/;
+
 function htmlResponse(body, originHeaders) {
   const headers = new Headers(originHeaders || {});
   headers.set("content-type", "text/html; charset=utf-8");
@@ -310,7 +316,25 @@ export default {
 
     // Real static asset (favicon, web-assets/*, canvaskit/*, main.dart.js, ...).
     const assetRes = await env.ASSETS.fetch(request);
-    if (assetRes.status !== 404) return assetRes;
+    if (assetRes.status !== 404) {
+      // Flutter ships main.dart.js, its deferred *.part.js chunks and the wasm
+      // runtime under STABLE, unversioned filenames that are overwritten on every
+      // deploy. Cloudflare Pages serves them with max-age=14400, so after a deploy
+      // a browser can hold e.g. a fresh main.dart.js next to a stale .part.js from
+      // the previous build — an incompatible mix that crashes the app in a
+      // render/paint loop. Force these runtime files to revalidate on every load
+      // (index.html is already no-cache) so the whole JS/wasm graph always matches.
+      if (MUTABLE_RUNTIME_ASSET.test(path)) {
+        const headers = new Headers(assetRes.headers);
+        headers.set("cache-control", "no-cache, must-revalidate");
+        return new Response(assetRes.body, {
+          status: assetRes.status,
+          statusText: assetRes.statusText,
+          headers,
+        });
+      }
+      return assetRes;
+    }
 
     // Unknown path -> Flutter SPA fallback (lets Flutter router handle it).
     const fallback = await serveAsset(env, request, FLUTTER_ENTRY);
