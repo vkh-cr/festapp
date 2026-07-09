@@ -76,11 +76,26 @@
   <meta name="theme-color" content="#e3e2d3">
 
   <title>CSM Ostrava</title>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
 
+    // OneSignal (web push) here uses a single app id that is domain-locked, so
+    // on this instance OneSignal.init() fails on every load and the SDK keeps
+    // injecting <script> tags into the page. Disable the web-push SDK on hosts
+    // that have no valid OneSignal app of their own. Native apps use the Flutter
+    // OneSignal plugin and are unaffected by this web-only guard.
+    var ONESIGNAL_DISABLED_HOSTS = ["csmostrava.festapp.net"];
+    window.__ONESIGNAL_DISABLED__ =
+        ONESIGNAL_DISABLED_HOSTS.indexOf(window.location.hostname) !== -1;
+    if (!window.__ONESIGNAL_DISABLED__) {
+        var _osSdk = document.createElement("script");
+        _osSdk.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
+        _osSdk.defer = true;
+        document.head.appendChild(_osSdk);
+    }
+
    async function initializeOneSignal(callback, errorCallback) {
+       if (window.__ONESIGNAL_DISABLED__) { if (callback) callback(null); return; }
        if (!window.OneSignalInitialized) {
            window.OneSignalInitialized = true;
            OneSignalDeferred.push(async function(OneSignal) {
@@ -195,7 +210,7 @@
     leave a user stuck on the old assets (deepRefreshIfStale()).
   -->
   <script>
-    window.__FESTAPP_BUILD_VERSION__ = "0.19.45+295";
+    window.__FESTAPP_BUILD_VERSION__ = "0.19.46+296";
   </script>
   <script src="festapp_update_prompt.js" defer></script>
 </head>
