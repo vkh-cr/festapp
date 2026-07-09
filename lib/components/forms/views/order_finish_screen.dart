@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/components/forms/public_order_strings.dart';
+import 'package:fstapp/components/forms/widgets_view/payment_qr_card.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
 
 class FinishOrderScreen extends StatefulWidget {
   final Future<FunctionResponse> Function() orderFutureFunction;
@@ -29,6 +31,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
   bool _isLoading = true;
   int? code;
   Map<String, dynamic>? _errorProduct;
+  Map<String, dynamic>? _orderData;
 
   late AnimationController _mainController;
   late AnimationController _loadingController;
@@ -60,6 +63,9 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
               result.data["code"].toString().replaceAll(RegExp(r'\D'), '')) ??
           0;
       _isSuccess = code == 200;
+      _orderData = (result.data is Map)
+          ? (result.data as Map).cast<String, dynamic>()
+          : null;
       if (code == 1017) _errorProduct = result.data["product"];
       if (_isSuccess) {
         widget.onOrderConfirmed?.call();
@@ -138,7 +144,8 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
       title = PublicOrderStrings.orderFailed;
       subtitle = PublicOrderStrings.orderError((code ?? 0).toString());
     }
-    return Column(
+    return SingleChildScrollView(
+      child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ScaleTransition(
@@ -182,6 +189,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
               ),
           textAlign: TextAlign.center,
         ),
+        if (_isSuccess) _buildPaymentQr(),
         const SizedBox(height: 24),
         OutlinedButton(
           onPressed: () {
@@ -196,6 +204,43 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
           child: Text(PublicOrderStrings.backToForm),
         ),
       ],
+      ),
+    );
+  }
+
+  /// Renders the "Scan to pay" card when the form enabled `show_payment_qr`
+  /// and the order response carries a `payment_qr` block (server-built SPD).
+  Widget _buildPaymentQr() {
+    final data = _orderData;
+    if (data == null) return const SizedBox.shrink();
+    final pq = (data['payment_qr'] as Map?)?.cast<String, dynamic>();
+    if (pq == null) return const SizedBox.shrink();
+    final formData =
+        ((data['form'] as Map?)?['data'] as Map?)?.cast<String, dynamic>();
+    final showQr =
+        formData?[FeatureConstants.formShowPaymentQr]?.toString() == 'true';
+    if (!showQr) return const SizedBox.shrink();
+    final spd = pq['spd']?.toString() ?? '';
+    if (spd.isEmpty) return const SizedBox.shrink();
+
+    final amount = pq['amount'];
+    final currency = pq['currency_code']?.toString() ?? '';
+    final amountFormatted =
+        (amount is num) ? '$amount $currency'.trim() : null;
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 420),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: PaymentQrCard(
+          spd: spd,
+          bankAccount: pq['account_number_human_readable']?.toString(),
+          iban: pq['account_number']?.toString(),
+          variableSymbol: pq['variable_symbol']?.toString(),
+          amountFormatted: amountFormatted,
+          note: pq['message']?.toString(),
+        ),
+      ),
     );
   }
 }

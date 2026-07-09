@@ -1,3 +1,9 @@
+-- Fix create_service_item raising PostgrestException 22023
+-- "cannot set path in scalar" when occasions.services is SQL NULL or a JSON
+-- scalar/`null` value. COALESCE(services, '{}') only catches SQL NULL, so a
+-- JSON `null` slipped through into jsonb_set and blew up. Guard with an
+-- explicit jsonb_typeof check for both the container and the per-type array.
+
 CREATE OR REPLACE FUNCTION create_service_item(
   oc BIGINT,
   type TEXT,
@@ -61,3 +67,5 @@ BEGIN
   );
 END;
 $$;
+
+ALTER FUNCTION public.create_service_item(oc bigint, type text, code text, title text, reference bigint) SET search_path = public, extensions;

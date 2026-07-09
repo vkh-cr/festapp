@@ -59,4 +59,16 @@ class PublicOrderStrings {
   static String get depositInfoOnSite => '$_prefix.depositInfoOnSite'.tr();
   static String depositInfoDaysBefore(int days) =>
       '$_prefix.depositInfoDaysBefore'.tr(namedArgs: {"days": days.toString()});
+
+  // Payment QR (shown on the order confirmation when the form enables it).
+  static String get paymentQrTitle => '$_prefix.paymentQrTitle'.tr();
+  static String get paymentQrSubtitle => '$_prefix.paymentQrSubtitle'.tr();
+  static String get amountToPay => '$_prefix.amountToPay'.tr();
+  static String get bankAccount => '$_prefix.bankAccount'.tr();
+  static String get iban => '$_prefix.iban'.tr();
+  static String get variableSymbol => '$_prefix.variableSymbol'.tr();
+  static String get paymentNote => '$_prefix.paymentNote'.tr();
+  static String get orderLabel => '$_prefix.orderLabel'.tr();
+  static String get downloadQr => '$_prefix.downloadQr'.tr();
+  static String get copied => '$_prefix.copied'.tr();
 }

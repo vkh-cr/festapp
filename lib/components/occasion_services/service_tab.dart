@@ -13,6 +13,7 @@ import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/components/occasion_services/service_dialog.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 
 class ServiceTab extends StatefulWidget {
   const ServiceTab({super.key});
@@ -22,18 +23,27 @@ class ServiceTab extends StatefulWidget {
 }
 
 class _ServiceTabState extends State<ServiceTab> {
-  static const List<String> columnIdentifiers = [
-    UserColumns.ID,
-    UserColumns.EMAIL,
-    UserColumns.NAME,
-    UserColumns.SURNAME,
-    UserColumns.TEXT1,
-    UserColumns.TEXT2,
-    UserColumns.ACCOMMODATION,
-    UserColumns.FOOD,
-    UserColumns.DIET,
-    UserColumns.NOTE,
-  ];
+  /// Whether the occasion's ServicesFeature permits accommodation management.
+  bool get _allowAccommodation =>
+      FeatureService.isServiceAccommodationEnabled();
+
+  /// Whether the occasion's ServicesFeature permits food/diet management.
+  bool get _allowFood => FeatureService.isServiceFoodEnabled();
+
+  /// Grid columns limited to what the ServicesFeature permits. Accommodation
+  /// and food/diet columns are only included when their setting is enabled.
+  List<String> get _columnIdentifiers => [
+        UserColumns.ID,
+        UserColumns.EMAIL,
+        UserColumns.NAME,
+        UserColumns.SURNAME,
+        if (_allowAccommodation) UserColumns.ACCOMMODATION,
+        if (_allowFood) ...[
+          UserColumns.FOOD,
+          UserColumns.DIET,
+        ],
+        UserColumns.NOTE,
+      ];
 
   List<ServiceItemModel>? allFood;
   List<ServiceItemModel>? allAccommodation;
@@ -59,7 +69,7 @@ class _ServiceTabState extends State<ServiceTab> {
     // If the controller is already created, update its columns and force a reload.
     if (_controller != null) {
       _controller!.columns = UserColumns.generateColumns(
-        columnIdentifiers,
+        _columnIdentifiers,
         data: {
           UserColumns.FOOD: allFood,
           UserColumns.ACCOMMODATION: allAccommodation,
@@ -88,20 +98,22 @@ class _ServiceTabState extends State<ServiceTab> {
         isAddActionPossible: () => false,
       ),
       headerChildren: [
-        DataGridAction(
-          name: "Accommodation settings".tr(),
-          action: (SingleDataGridController p0, [_]) =>
-              _accommodationDefinition(p0),
-          isEnabled: RightsService.isManager,
-        ),
-        DataGridAction(
-          name: "Food settings".tr(),
-          action: (SingleDataGridController p0, [_]) => _foodDefinition(p0),
-          isEnabled: RightsService.isManager,
-        ),
+        if (_allowAccommodation)
+          DataGridAction(
+            name: "Accommodation settings".tr(),
+            action: (SingleDataGridController p0, [_]) =>
+                _accommodationDefinition(p0),
+            isEnabled: RightsService.isManager,
+          ),
+        if (_allowFood)
+          DataGridAction(
+            name: "Food settings".tr(),
+            action: (SingleDataGridController p0, [_]) => _foodDefinition(p0),
+            isEnabled: RightsService.isManager,
+          ),
       ],
       columns: UserColumns.generateColumns(
-        columnIdentifiers,
+        _columnIdentifiers,
         data: {
           UserColumns.FOOD: allFood,
           UserColumns.ACCOMMODATION: allAccommodation,

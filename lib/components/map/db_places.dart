@@ -133,7 +133,9 @@ class DbPlaces {
       Tb.path_groups.order: model.order,
       Tb.path_groups.data: model.data,
       Tb.path_groups.is_hidden: model.isHidden,
-      Tb.path_groups.path_data: model.pathData,
+      Tb.path_groups.path_data: model.pathData
+          ?.map((seg) => seg.map((n) => n.toJson()).toList())
+          .toList(),
       Tb.path_groups.icon: model.icon,
     };
 
