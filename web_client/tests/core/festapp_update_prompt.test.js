@@ -87,6 +87,33 @@ describe('festapp_update_prompt.js', () => {
         assert.strictEqual(button(window, 'later').textContent, 'Později');
     });
 
+    test('renders localized copy for every app language', () => {
+        const expected = {
+            sk: ['Je dostupná nová verzia aplikácie.', 'Načítať', 'Neskôr'],
+            de: ['Eine neue Version der App ist verfügbar.', 'Laden', 'Später'],
+            pl: ['Dostępna jest nowa wersja aplikacji.', 'Załaduj', 'Później'],
+            uk: ['Доступна нова версія застосунку.', 'Завантажити', 'Пізніше'],
+        };
+        for (const [locale, [message, reload, later]] of Object.entries(expected)) {
+            const { window } = boot({ locale });
+            window.dispatchEvent(new window.CustomEvent('festapp-update-available', {
+                detail: { version: '2.0.0+2', reason: 'new-version' },
+            }));
+            assert.strictEqual(messageText(window), message, locale);
+            assert.strictEqual(button(window, 'reload').textContent, reload, locale);
+            assert.strictEqual(button(window, 'later').textContent, later, locale);
+        }
+    });
+
+    test('unsupported locale falls back to English', () => {
+        const { window } = boot({ locale: 'fr' });
+        window.dispatchEvent(new window.CustomEvent('festapp-update-available', {
+            detail: { version: '2.0.0+2', reason: 'new-version' },
+        }));
+
+        assert.strictEqual(messageText(window), 'A new version of the app is available.');
+    });
+
     test('legacy-cache reason uses the refresh copy', () => {
         const { window } = boot({ locale: 'cs' });
         window.dispatchEvent(new window.CustomEvent('festapp-update-available', {

@@ -61,41 +61,101 @@
     return (navigator.language || '').toLowerCase();
   }
 
-  function getUpdateCopy(reason) {
-    const language = getActiveLanguage();
-    if (language.startsWith('cs')) {
-      if (reason === 'legacy-cache') {
-        return {
-          message: 'Aplikace je připravená k obnovení.',
-          reload: 'Obnovit',
-          later: 'Později',
-          loading: 'Obnovuji...'
-        };
-      }
-
-      return {
+  // One entry per app language (assets/translations); en is the fallback.
+  const UPDATE_COPY = {
+    cs: {
+      'new-version': {
         message: 'Je dostupná nová verze aplikace.',
         reload: 'Načíst',
         later: 'Později',
         loading: 'Načítám...'
-      };
-    }
-
-    if (reason === 'legacy-cache') {
-      return {
+      },
+      'legacy-cache': {
+        message: 'Aplikace je připravená k obnovení.',
+        reload: 'Obnovit',
+        later: 'Později',
+        loading: 'Obnovuji...'
+      }
+    },
+    en: {
+      'new-version': {
+        message: 'A new version of the app is available.',
+        reload: 'Reload',
+        later: 'Later',
+        loading: 'Reloading...'
+      },
+      'legacy-cache': {
         message: 'The app is ready to refresh.',
         reload: 'Refresh',
         later: 'Later',
         loading: 'Refreshing...'
-      };
+      }
+    },
+    sk: {
+      'new-version': {
+        message: 'Je dostupná nová verzia aplikácie.',
+        reload: 'Načítať',
+        later: 'Neskôr',
+        loading: 'Načítavam...'
+      },
+      'legacy-cache': {
+        message: 'Aplikácia je pripravená na obnovenie.',
+        reload: 'Obnoviť',
+        later: 'Neskôr',
+        loading: 'Obnovujem...'
+      }
+    },
+    de: {
+      'new-version': {
+        message: 'Eine neue Version der App ist verfügbar.',
+        reload: 'Laden',
+        later: 'Später',
+        loading: 'Wird geladen...'
+      },
+      'legacy-cache': {
+        message: 'Die App ist bereit zur Aktualisierung.',
+        reload: 'Aktualisieren',
+        later: 'Später',
+        loading: 'Aktualisiere...'
+      }
+    },
+    pl: {
+      'new-version': {
+        message: 'Dostępna jest nowa wersja aplikacji.',
+        reload: 'Załaduj',
+        later: 'Później',
+        loading: 'Ładowanie...'
+      },
+      'legacy-cache': {
+        message: 'Aplikacja jest gotowa do odświeżenia.',
+        reload: 'Odśwież',
+        later: 'Później',
+        loading: 'Odświeżanie...'
+      }
+    },
+    uk: {
+      'new-version': {
+        message: 'Доступна нова версія застосунку.',
+        reload: 'Завантажити',
+        later: 'Пізніше',
+        loading: 'Завантаження...'
+      },
+      'legacy-cache': {
+        message: 'Застосунок готовий до оновлення.',
+        reload: 'Оновити',
+        later: 'Пізніше',
+        loading: 'Оновлення...'
+      }
     }
+  };
 
-    return {
-      message: 'A new version of the app is available.',
-      reload: 'Reload',
-      later: 'Later',
-      loading: 'Reloading...'
-    };
+  function getUpdateCopy(reason) {
+    const language = getActiveLanguage();
+    const langKey = Object.keys(UPDATE_COPY).find(function(code) {
+      return language.startsWith(code);
+    }) || 'en';
+    const variant = reason === 'legacy-cache' ? 'legacy-cache' : 'new-version';
+    return UPDATE_COPY[langKey][variant];
   }
 
   function showUpdateBanner(latestVersion, reason) {
