@@ -7,6 +7,29 @@ class InventoryStrings {
   static String get featureTitle =>
       'Inventory.featureTitle'.tr(); // "Stay (Capacity groups)"
 
+  // --- Feature Settings (allowed pool types) ---
+  static String get featureModeTitle =>
+      'Inventory.featureModeTitle'.tr(); // "What can be managed"
+  static String get featureModeStay =>
+      'Inventory.featureModeStay'.tr(); // "Stay (accommodation & food)"
+  static String get featureModeStayHelp => 'Inventory.featureModeStayHelp'
+      .tr(); // "Manage accommodation and/or meal capacities."
+  static String get featureModeCapacityGroups =>
+      'Inventory.featureModeCapacityGroups'.tr(); // "Capacity groups"
+  static String get featureModeCapacityGroupsHelp =>
+      'Inventory.featureModeCapacityGroupsHelp'
+          .tr(); // "Manage generic capacity groups (e.g. daily program slots)."
+  static String get featureAllowAccommodation =>
+      'Inventory.featureAllowAccommodation'.tr(); // "Accommodation"
+  static String get featureAllowFood =>
+      'Inventory.featureAllowFood'.tr(); // "Food"
+
+  // --- Simple accommodation (single place) on the user profile ---
+  static String get accommodationNotSpecified =>
+      'Inventory.accommodationNotSpecified'.tr(); // "Accommodation not specified."
+  static String get accommodationShowOnMap =>
+      'Inventory.accommodationShowOnMap'.tr(); // "Show on map"
+
   // General / Shared
   static String get edit => 'Inventory.edit'.tr(); // "Edit"
   static String get remove => 'Inventory.remove'.tr(); // "Remove"

@@ -171,8 +171,9 @@ class InputDialogs {
     BuildContext context,
     String titleMessage,
     String confirmButtonMessage,
-    String cancelButtonMessage,
-  ) async {
+    String cancelButtonMessage, {
+    Widget? headerContent,
+  }) async {
     XFile? filePath;
     final dropFileWidget = DropFile(
       onFilePathChanged: (file) => filePath = file,
@@ -189,7 +190,17 @@ class InputDialogs {
             titleMessage,
           ),
           content: SingleChildScrollView(
-            child: dropFileWidget,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (headerContent != null) ...[
+                  headerContent,
+                  const SizedBox(height: 16),
+                ],
+                dropFileWidget,
+              ],
+            ),
           ),
           actions: [
             TextButton(

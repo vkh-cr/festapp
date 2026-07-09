@@ -27,6 +27,9 @@ class CommonStrings {
   static String get currency => 'Currency'.tr(); // "Currency"
   static String get date => 'Date'.tr(); // "Date"
   static String get note => 'Note'.tr(); // "Note"
+  static String get color => 'Color'.tr(); // "Color"
+  static String get hex => 'Hex'.tr(); // "Hex"
+  static String get hexFormat => 'RRGGBB'.tr(); // color hex placeholder
   static String get password => 'FeatureUser.password'
       .tr(); // "Password" (Moved to FeatureUser, but widely used? UserStrings has it too?)
 

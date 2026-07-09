@@ -75,6 +75,7 @@ class InventoryPoolCreationHelper {
                             id: null,
                             title: titleController.text.trim(),
                             occasionId: occasionId,
+                            type: allowedInventoryPoolTypes().first,
                           );
 
                           final bundle = InventoryPoolBundle(

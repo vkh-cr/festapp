@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/database_tables/tb.dart';
 
@@ -8,6 +9,20 @@ enum InventoryPoolType {
   accommodation,
   food,
   other,
+}
+
+/// Pool types the current occasion's ServicesFeature permits, in display order.
+///
+/// Falls back to all types when the feature config is unavailable. Never
+/// returns an empty list.
+List<InventoryPoolType> allowedInventoryPoolTypes() {
+  final feature = FeatureService.getServicesFeature();
+  if (feature == null) return InventoryPoolType.values;
+  if (feature.allowsCapacityGroups) return const [InventoryPoolType.other];
+  final types = <InventoryPoolType>[];
+  if (feature.allowsAccommodation) types.add(InventoryPoolType.accommodation);
+  if (feature.allowsFood) types.add(InventoryPoolType.food);
+  return types.isEmpty ? const [InventoryPoolType.accommodation] : types;
 }
 
 extension InventoryPoolTypeUI on InventoryPoolType {

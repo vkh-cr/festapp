@@ -31,7 +31,7 @@ class _UsersTabState extends State<UsersTab> {
       UserColumns.NAME,
       UserColumns.SURNAME,
       UserColumns.SEX,
-      if (FeatureService.isFeatureEnabled(FeatureConstants.services))
+      if (FeatureService.isServiceAccommodationEnabled())
         UserColumns.ACCOMMODATION,
       if (FeatureService.isFeatureEnabled(FeatureConstants.volunteers))
         UserColumns.IS_VOLUNTEER,

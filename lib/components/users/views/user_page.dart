@@ -32,6 +32,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
 import '../../inventory/views/user_stay_page.dart';
+import '../../map/map_page.dart';
 
 @RoutePage()
 class UserPage extends StatefulWidget {
@@ -346,65 +347,7 @@ class _UserPageState extends State<UserPage> {
                     UserInfoModel.sexToLocale(userData
                         ?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.services))
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // const Text("Accommodation").tr(),
-                        // const SizedBox(height: 4),
-                        // Container(
-                        //   alignment: Alignment.topLeft,
-                        //   child: TextButton(
-                        //     onPressed: userData?.accommodationPlace == null
-                        //         ? null
-                        //         : () => RouterService.navigateOccasion(
-                        //       context,
-                        //       "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}",
-                        //     ),
-                        //     child: userData?.accommodationPlace == null
-                        //         ? Text(
-                        //       userData?.accommodationPlace?.title ?? "Without accommodation".tr(),
-                        //       style: const TextStyle(fontSize: 20),
-                        //     )
-                        //         : IntrinsicWidth(
-                        //       child: Row(
-                        //         children: [
-                        //           const Icon(Icons.place),
-                        //           const SizedBox(width: 4),
-                        //           Text(
-                        //             userData!.accommodationPlace!.title!,
-                        //             style: const TextStyle(fontSize: 20),
-                        //           ),
-                        //           const SizedBox(width: 4),
-                        //         ],
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                        // const SizedBox(height: 16),
-                        ListTile(
-                          tileColor: ThemeConfig.qrButtonColor(
-                              context), // Added this line
-                          leading: Icon(Icons.hotel,
-                              color: Theme.of(context).colorScheme.primary),
-                          title: Text(InventoryStrings.userStayLinkTitle,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(InventoryStrings.userStayLinkSubtitle),
-                          trailing:
-                              const Icon(Icons.arrow_forward_ios, size: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            // The side border has been removed to allow the background color to fill the shape fully without a separate outline.
-                            // If you still want a border, you can keep the 'side' property.
-                          ),
-                          onTap: () => RouterService.navigateOccasion(
-                              context, UserStayPage.ROUTE),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _buildStaySection(context),
                 const SizedBox(height: 16),
                 Visibility(
                   visible: RightsService.canSeeAdmin(),
@@ -523,6 +466,93 @@ class _UserPageState extends State<UserPage> {
   void _redirectToAdminPage() {
     RouterService.navigateOccasion(context, AdminPage.ROUTE)
         .then((value) => loadData());
+  }
+
+  /// Chooses how to present the user's stay/accommodation.
+  ///
+  /// In accommodation ("stay") mode we show the user's single, stable
+  /// accommodation as a direct link to its place on the map (or a
+  /// "not specified" note). In capacity-groups / food modes we keep the link
+  /// to the full stay page, which lists rooms, meals and program slots.
+  Widget _buildStaySection(BuildContext context) {
+    if (FeatureService.isServiceAccommodationEnabled()) {
+      return _buildAccommodationField(context);
+    }
+    return _buildStayDetailsCard(context);
+  }
+
+  /// Simple accommodation field, rendered as a normal read-only profile row
+  /// (label + value with an underline, matching "I am" / "E-mail"). When a
+  /// place is assigned the value is a clickable link to it on the map;
+  /// otherwise it shows a "not specified" note.
+  Widget _buildAccommodationField(BuildContext context) {
+    final theme = Theme.of(context);
+    final place = userData?.accommodationPlace;
+    final hasPlace = place?.id != null;
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.only(bottom: 3),
+          labelText: InventoryStrings.typeAccommodation,
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+        ),
+        child: hasPlace
+            ? Align(
+                alignment: Alignment.centerLeft,
+                // Align keeps the InkWell (and its hover/tap area) sized to the
+                // icon + text content instead of the full row width.
+                child: InkWell(
+                  onTap: () => RouterService.navigateOccasion(
+                      context, "${MapPage.ROUTE}/${place!.id}"),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.place,
+                          size: 20, color: theme.colorScheme.primary),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          place!.title ?? InventoryStrings.typeAccommodation,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: theme.colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            decorationColor: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : Text(
+                InventoryStrings.accommodationNotSpecified,
+                style: const TextStyle(fontSize: 17),
+              ),
+      ),
+    );
+  }
+
+  /// Link to the full stay page (rooms, meals, program) used by the inventory /
+  /// capacity-groups system.
+  Widget _buildStayDetailsCard(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: ListTile(
+        tileColor: ThemeConfig.qrButtonColor(context),
+        leading:
+            Icon(Icons.hotel, color: Theme.of(context).colorScheme.primary),
+        title: Text(InventoryStrings.userStayLinkTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(InventoryStrings.userStayLinkSubtitle),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        onTap: () =>
+            RouterService.navigateOccasion(context, UserStayPage.ROUTE),
+      ),
+    );
   }
 
   Future<void> loadData() async {

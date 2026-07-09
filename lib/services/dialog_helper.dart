@@ -139,13 +139,15 @@ class DialogHelper {
     BuildContext context,
     String titleMessage,
     String confirmButtonMessage,
-    String cancelButtonMessage,
-  ) =>
+    String cancelButtonMessage, {
+    Widget? headerContent,
+  }) =>
       InputDialogs.dropFilesHere(
         context,
         titleMessage,
         confirmButtonMessage,
         cancelButtonMessage,
+        headerContent: headerContent,
       );
 
   static Future<String?> showInputDialog({

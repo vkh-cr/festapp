@@ -52,6 +52,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _checkAutoRedirect() async {
     if (AuthService.isLoggedIn() || await AuthService.tryAuthUser()) {
       var loggedIn = await AuthService.tryAuthUser();
+      if (!mounted) return;
       if (loggedIn) {
         var userUnits = RightsService.currentUser()?.units;
         if (userUnits != null && userUnits.isNotEmpty) {
@@ -152,6 +153,7 @@ class _LoginPageState extends State<LoginPage> {
                               .then(_showToast)
                               .then(_refreshSignedInStatus)
                               .catchError(_onError);
+                          if (!mounted) return;
                           setState(() {
                             _isLoading = false;
                           });
@@ -184,6 +186,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _refreshSignedInStatus(dynamic value) async {
     var loggedIn = await AuthService.tryAuthUser();
+    if (!mounted) return;
     if (loggedIn) {
       await RouterService.handlePostLoginNavigation(context);
     }

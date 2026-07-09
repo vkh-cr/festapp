@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'pluto_abstract.dart';
 import 'single_data_grid_header.dart';
@@ -58,7 +59,18 @@ class _SingleTableDataGridState<T extends ITrinaRowModel>
       decoration: BoxDecoration(
         color: ThemeConfig.whiteColor(widget.controller.context),
       ),
-      child: TrinaGrid(
+      // trina_grid's select-column popup editor calls ShadTheme.of(context),
+      // so the grid must have a ShadTheme ancestor or every dropdown crashes.
+      child: ShadTheme(
+        data: ShadThemeData(
+          brightness: ThemeConfig.isDarkMode(context)
+              ? Brightness.dark
+              : Brightness.light,
+          colorScheme: ThemeConfig.isDarkMode(context)
+              ? const ShadSlateColorScheme.dark()
+              : const ShadSlateColorScheme.light(),
+        ),
+        child: TrinaGrid(
         noRowsWidget: isDataGridLoading
             ? null
             : Center(child: Text("Table does not contain any items").tr()),
@@ -107,6 +119,7 @@ class _SingleTableDataGridState<T extends ITrinaRowModel>
         configuration: SingleDataGridHeader.defaultTrinaGridConfiguration(
           widget.controller.context,
           widget.controller.context.locale.languageCode,
+        ),
         ),
       ),
     );

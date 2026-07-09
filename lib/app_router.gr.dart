@@ -34,6 +34,7 @@ import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart'
 import 'package:fstapp/components/inventory/views/user_stay_page.dart'
     deferred as _i38;
 import 'package:fstapp/components/map/map_page.dart' deferred as _i15;
+import 'package:fstapp/components/map/path_group_model.dart' as _i44;
 import 'package:fstapp/components/map/place_model.dart' as _i43;
 import 'package:fstapp/components/news/news_form_page.dart' deferred as _i17;
 import 'package:fstapp/components/news/news_page.dart' deferred as _i18;
@@ -551,11 +552,17 @@ class MapRoute extends _i39.PageRouteInfo<MapRouteArgs> {
   MapRoute({
     int? id,
     _i43.PlaceModel? place,
+    _i44.PathGroupsModel? editPathGroup,
     _i42.Key? key,
     List<_i39.PageRouteInfo>? children,
   }) : super(
           MapRoute.name,
-          args: MapRouteArgs(id: id, place: place, key: key),
+          args: MapRouteArgs(
+            id: id,
+            place: place,
+            editPathGroup: editPathGroup,
+            key: key,
+          ),
           rawPathParams: {'id': id},
           initialChildren: children,
         );
@@ -571,35 +578,46 @@ class MapRoute extends _i39.PageRouteInfo<MapRouteArgs> {
       );
       return _i39.DeferredWidget(
         _i15.loadLibrary,
-        () => _i15.MapPage(id: args.id, place: args.place, key: args.key),
+        () => _i15.MapPage(
+          id: args.id,
+          place: args.place,
+          editPathGroup: args.editPathGroup,
+          key: args.key,
+        ),
       );
     },
   );
 }
 
 class MapRouteArgs {
-  const MapRouteArgs({this.id, this.place, this.key});
+  const MapRouteArgs({this.id, this.place, this.editPathGroup, this.key});
 
   final int? id;
 
   final _i43.PlaceModel? place;
 
+  final _i44.PathGroupsModel? editPathGroup;
+
   final _i42.Key? key;
 
   @override
   String toString() {
-    return 'MapRouteArgs{id: $id, place: $place, key: $key}';
+    return 'MapRouteArgs{id: $id, place: $place, editPathGroup: $editPathGroup, key: $key}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! MapRouteArgs) return false;
-    return id == other.id && place == other.place && key == other.key;
+    return id == other.id &&
+        place == other.place &&
+        editPathGroup == other.editPathGroup &&
+        key == other.key;
   }
 
   @override
-  int get hashCode => id.hashCode ^ place.hashCode ^ key.hashCode;
+  int get hashCode =>
+      id.hashCode ^ place.hashCode ^ editPathGroup.hashCode ^ key.hashCode;
 }
 
 /// generated route for

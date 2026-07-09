@@ -28,12 +28,16 @@ class DropFile extends StatefulWidget {
   /// List of allowed file extensions (e.g. ['jpg', 'png']).
   final List<String>? allowedExtensions;
 
+  /// Height of the drop area.
+  final double height;
+
   const DropFile({
     super.key,
     required this.onFilePathChanged,
     this.onMultipleFilesChanged,
     this.hint,
     this.allowedExtensions,
+    this.height = 250,
   });
 
   @override
@@ -112,6 +116,9 @@ class _DropFileState extends State<DropFile> {
   @override
   Widget build(BuildContext context) {
     bool isClickable = PlatformHelper.isWeb;
+    bool isCompact = widget.height < 160;
+    double iconSize = isCompact ? 32 : 50;
+    double iconSpacing = isCompact ? 6 : 12;
 
     return DropTarget(
       onDragDone: (detail) async {
@@ -159,7 +166,7 @@ class _DropFileState extends State<DropFile> {
         onTap: isClickable ? _pickFile : null,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          height: 250,
+          height: widget.height,
           width: double.infinity,
           margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
           decoration: BoxDecoration(
@@ -179,12 +186,12 @@ class _DropFileState extends State<DropFile> {
                     children: [
                       Icon(
                         Icons.cloud_upload,
-                        size: 50,
+                        size: iconSize,
                         color: _dragging
                             ? Colors.blue
                             : ThemeConfig.grey600(context),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: iconSpacing),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
                         child: Text(
@@ -223,10 +230,10 @@ class _DropFileState extends State<DropFile> {
                     children: [
                       Icon(
                         Icons.insert_drive_file,
-                        size: 50,
+                        size: iconSize,
                         color: Colors.green,
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: iconSpacing),
                       Text(
                         _fileCount > 1
                             ? '${file!.name} (+${_fileCount - 1})'
