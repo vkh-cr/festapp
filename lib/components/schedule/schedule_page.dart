@@ -24,6 +24,8 @@ import 'package:fstapp/components/schedule/my_schedule_page.dart';
 import 'package:fstapp/components/schedule/timetable_page.dart';
 import 'package:fstapp/components/occasion/occasion_home_page.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/components/users/views/login_page.dart';
+import 'package:fstapp/components/users/views/user_page.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/app_config.dart';
@@ -113,7 +115,7 @@ class _SchedulePageState extends State<SchedulePage>
   Future<void> _onTabSwitch() async {
     final String targetRouteName = ScheduleNavigationRoute.name;
     if (context.tabsRouter.activeIndex ==
-            OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.home) &&
+            OccasionHomePage.baseTabKeys.indexOf(OccasionTab.home) &&
         _isRoutePresent(targetRouteName)) {
       final now = DateTime.now();
       if (_lastQuickLoadTime == null ||
@@ -442,6 +444,27 @@ class _SchedulePageState extends State<SchedulePage>
                               RouterService.navigateOccasion(
                                       context, TimetablePage.ROUTE)
                                   .then((_) => loadData());
+                            },
+                          ),
+                        // GlobalSearch moves the profile/sign-in from the bottom
+                        // nav into the app bar (matches production).
+                        if (FeatureService.isFeatureEnabled(
+                            FeatureConstants.globalSearch))
+                          _IconWithLabel(
+                            icon: AuthService.isLoggedIn()
+                                ? Icons.account_circle
+                                : Icons.account_circle_outlined,
+                            label: AuthService.isLoggedIn()
+                                ? (RightsService.currentUser()?.name ??
+                                    "Profile".tr())
+                                : "Sign in".tr(),
+                            onPressed: () {
+                              final f = AuthService.isLoggedIn()
+                                  ? RouterService.navigateOccasion(
+                                      context, UserPage.ROUTE)
+                                  : RouterService.navigate(
+                                      context, LoginPage.ROUTE);
+                              f.then((_) => loadData());
                             },
                           ),
                       ],

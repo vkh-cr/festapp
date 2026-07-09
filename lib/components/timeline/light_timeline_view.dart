@@ -154,6 +154,235 @@ class _LightTimelineViewState extends State<LightTimelineView> {
 
 
 // ---------------------------------------------------------------------------
+// Flat, non-tabbed list of the same rows — used to render an event's
+// sub-program with the identical look of the main (light) schedule page.
+// ---------------------------------------------------------------------------
+class LightSubprogramList extends StatefulWidget {
+  final List<TimeBlockItem> events;
+  final void Function(int eventId)? onEventPressed;
+  final bool Function()? showAddNewEventButton;
+  final void Function(BuildContext context, List<TimeBlockGroup> groups,
+      TimeBlockItem? parent)? onAddNewEvent;
+
+  const LightSubprogramList({
+    super.key,
+    required this.events,
+    this.onEventPressed,
+    this.showAddNewEventButton,
+    this.onAddNewEvent,
+  });
+
+  @override
+  State<LightSubprogramList> createState() => _LightSubprogramListState();
+}
+
+class _LightSubprogramListState extends State<LightSubprogramList> {
+  int? _openId;
+
+  @override
+  Widget build(BuildContext context) {
+    final sorted = [...widget.events]
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
+    final canAdd =
+        FeatureService.isFeatureEnabled(FeatureConstants.mySchedule) &&
+            (widget.showAddNewEventButton?.call() ?? false) &&
+            widget.onAddNewEvent != null;
+
+    final sections = TimeBlockHelper.groupEventsByFeatureSettings(sorted);
+    final children = <Widget>[];
+    for (final section in sections) {
+      if (section.title.isNotEmpty) {
+        children.add(_SectionHeader(label: section.title));
+      }
+      for (var i = 0; i < section.events.length; i++) {
+        final e = section.events[i];
+        final hasChildren = e.haveChildren();
+        final isOpen = hasChildren && _openId == e.id;
+        children.add(_EventRow(
+          event: e,
+          isOpen: isOpen,
+          onTap: hasChildren
+              ? () => setState(() => _openId = _openId == e.id ? null : e.id)
+              : (widget.onEventPressed != null
+                  ? () => widget.onEventPressed!(e.id)
+                  : null),
+          onChildTap: widget.onEventPressed,
+        ));
+        if (i < section.events.length - 1) {
+          children.add(_RowDivider());
+        }
+      }
+    }
+
+    if (canAdd) {
+      children.add(Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Center(
+          child: _AddEventButton(
+            onPressed: () => widget.onAddNewEvent!(context, sections, null),
+          ),
+        ),
+      ));
+    }
+
+    if (children.isEmpty) return const SizedBox.shrink();
+    return Container(
+      color: ThemeConfig.whiteColor(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Day-grouped, continuously-scrolling light list for the "My program" page.
+// Unlike the main schedule (LightTimelineView) this is NOT tabbed — every day
+// is stacked in one scroll under a left-aligned day header with a trailing
+// hairline rule, matching the production csmostrava layout. Reuses the same
+// `_EventRow` / `_SectionHeader` / `_RowDivider` primitives so a My-program row
+// is visually identical to a main-schedule row.
+// ---------------------------------------------------------------------------
+class LightMyScheduleList extends StatefulWidget {
+  final List<TimeBlockItem> events;
+  final void Function(int eventId)? onEventPressed;
+  final Widget? emptyContent;
+
+  const LightMyScheduleList({
+    super.key,
+    required this.events,
+    this.onEventPressed,
+    this.emptyContent,
+  });
+
+  @override
+  State<LightMyScheduleList> createState() => _LightMyScheduleListState();
+}
+
+class _LightMyScheduleListState extends State<LightMyScheduleList> {
+  int? _openId;
+
+  @override
+  Widget build(BuildContext context) {
+    final sorted = [...widget.events]
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    if (sorted.isEmpty) {
+      return Container(
+        color: ThemeConfig.whiteColor(context),
+        alignment: Alignment.topCenter,
+        child: widget.emptyContent ??
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
+              child: Text("No events".tr(),
+                  style:
+                      TextStyle(color: _mutedText(context), fontSize: 14)),
+            ),
+      );
+    }
+
+    final days = TimeBlockHelper.splitTimeBlocksByDate(
+      sorted,
+      context,
+      AppConfig.daySplitHour,
+    );
+
+    final children = <Widget>[];
+    for (final day in days) {
+      children.add(_LightDayHeader(group: day));
+      final sections = TimeBlockHelper.groupEventsByFeatureSettings(day.events);
+      for (final section in sections) {
+        if (section.title.isNotEmpty) {
+          children.add(_SectionHeader(label: section.title));
+        }
+        for (var i = 0; i < section.events.length; i++) {
+          final e = section.events[i];
+          final hasChildren = e.haveChildren();
+          final isOpen = hasChildren && _openId == e.id;
+          children.add(_EventRow(
+            event: e,
+            isOpen: isOpen,
+            onTap: hasChildren
+                ? () => setState(() => _openId = _openId == e.id ? null : e.id)
+                : (widget.onEventPressed != null
+                    ? () => widget.onEventPressed!(e.id)
+                    : null),
+            onChildTap: widget.onEventPressed,
+          ));
+          if (i < section.events.length - 1) {
+            children.add(_RowDivider());
+          }
+        }
+      }
+    }
+
+    return Container(
+      color: ThemeConfig.whiteColor(context),
+      child: ListView(
+        padding: const EdgeInsets.only(top: 4, bottom: 24),
+        children: children,
+      ),
+    );
+  }
+}
+
+/// Left-aligned day header for the My-program list: bold weekday + smaller
+/// muted "d. M." date, followed by a hairline rule that fills the row.
+class _LightDayHeader extends StatelessWidget {
+  final TimeBlockGroup group;
+  const _LightDayHeader({required this.group});
+
+  @override
+  Widget build(BuildContext context) {
+    final dt = group.dateTime;
+    var weekday = group.title;
+    if (weekday.isNotEmpty) {
+      weekday = weekday[0].toUpperCase() + weekday.substring(1);
+    }
+    final dateLabel = dt != null ? DateFormat('d. M.').format(dt) : '';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 26, 20, 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            weekday,
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.w800,
+              color: _strongText(context),
+              letterSpacing: 0.2,
+            ),
+          ),
+          if (dateLabel.isNotEmpty) ...[
+            const SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Text(
+                dateLabel,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: _mutedText(context),
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(width: 14),
+          Expanded(
+            child: Container(height: 1, color: _hairline(context)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // One day's list of rows.
 // ---------------------------------------------------------------------------
 class _DayList extends StatelessWidget {

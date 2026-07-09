@@ -17,6 +17,9 @@ import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/components/users/views/login_page.dart';
+import 'package:fstapp/components/users/views/user_page.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
@@ -211,6 +214,26 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
                             icon: Icons.calendar_month_outlined,
                             label: "Schedule".tr(),
                             onPressed: _schedulePressed,
+                          ),
+                        // GlobalSearch moves profile/sign-in into the app bar.
+                        if (FeatureService.isFeatureEnabled(
+                            FeatureConstants.globalSearch))
+                          _HeaderIconButton(
+                            icon: AuthService.isLoggedIn()
+                                ? Icons.account_circle
+                                : Icons.account_circle_outlined,
+                            label: AuthService.isLoggedIn()
+                                ? (RightsService.currentUser()?.name ??
+                                    "Profile".tr())
+                                : "Sign in".tr(),
+                            onPressed: () {
+                              final f = AuthService.isLoggedIn()
+                                  ? RouterService.navigateOccasion(
+                                      context, UserPage.ROUTE)
+                                  : RouterService.navigate(
+                                      context, LoginPage.ROUTE);
+                              f.then((_) => loadData());
+                            },
                           ),
                       ],
                     ),

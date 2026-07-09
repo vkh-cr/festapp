@@ -52,7 +52,7 @@ class _TimetablePageState extends State<TimetablePage>
     _tabsRouterListener = () async {
       if (mounted &&
           context.tabsRouter.activeIndex ==
-              OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.timetable)) {
+              OccasionHomePage.baseTabKeys.indexOf(OccasionTab.timetable)) {
         await loadData();
       }
     };

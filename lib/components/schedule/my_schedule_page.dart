@@ -18,6 +18,7 @@ import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
+import 'package:fstapp/components/timeline/light_timeline_view.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/users/companion/companion_dialog.dart';
@@ -40,6 +41,7 @@ class MySchedulePage extends StatefulWidget {
 class _MySchedulePageState extends State<MySchedulePage> {
   bool _fullEventsLoaded = false;
   bool? _isAdvancedTimeline = false;
+  bool _isLightTimeline = false;
   final Map<int, String?> _eventAndActivitiesDescriptions = {};
   int? _openId;
 
@@ -52,6 +54,10 @@ class _MySchedulePageState extends State<MySchedulePage> {
         (scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced ||
             scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeLight)) {
       _isAdvancedTimeline = true;
+    }
+    if (scheduleFeat is ScheduleFeature &&
+        scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeLight) {
+      _isLightTimeline = true;
     }
     await loadDataOffline();
     await loadData();
@@ -243,6 +249,49 @@ class _MySchedulePageState extends State<MySchedulePage> {
         ).tr(),
       ),
     );
+
+    // Light schedule type renders "My program" as a single continuous scroll
+    // of light rows grouped by day (no cards, no day tabs) — matching the
+    // production csmostrava layout and the main light schedule's row style.
+    if (_isLightTimeline) {
+      return Scaffold(
+        backgroundColor: ThemeConfig.whiteColor(context),
+        appBar: AppBar(
+          backgroundColor: ThemeConfig.whiteColorDarker(context),
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          centerTitle: true,
+          title: Text(
+            "My schedule",
+            style: TextStyle(
+              color: ThemeConfig.blackColor(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ).tr(),
+          leading: BackButton(
+            color: ThemeConfig.blackColor(context),
+            onPressed: () => RouterService.popOrHome(context),
+          ),
+        ),
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: _dots == null
+                ? const Center(child: CircularProgressIndicator())
+                : ConstrainedBox(
+                    constraints:
+                        BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                    child: LightMyScheduleList(
+                      events: _dots!,
+                      onEventPressed: _eventPressed,
+                      emptyContent: commonEmptyContent,
+                    ),
+                  ),
+          ),
+        ),
+      );
+    }
 
     Widget body = (_isAdvancedTimeline == true)
         ? DayList(

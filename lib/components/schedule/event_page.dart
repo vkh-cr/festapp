@@ -7,7 +7,7 @@ import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/components/timeline/schedule_timeline.dart';
+import 'package:fstapp/components/timeline/light_timeline_view.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -22,6 +22,7 @@ import 'package:fstapp/components/users/companion/companion_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/event_feedback/event_feedback_widget.dart';
 import 'package:fstapp/components/occasion/add_new_event_dialog.dart';
 import 'package:fstapp/components/schedule/event_edit_page.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
@@ -30,13 +31,15 @@ import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/users/companion/companion_dialog.dart';
 import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/widgets/navigate_back_button.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/images/zoomable_image/zoomable_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fstapp/components/images/image_url_helper.dart';
+import 'package:fstapp/database_tables/tb.dart';
 import '../map/map_page.dart';
 
 @RoutePage()
@@ -61,12 +64,52 @@ class _EventPageState extends State<EventPage> {
 
   bool isLoadingEvent = true;
 
+  final ScrollController _scrollController = ScrollController();
+  bool _blockScroll = false;
+
+  /// Measured (exact) height of the expanded header content, used as the
+  /// SliverAppBar's expandedHeight so it never clips nor overflows.
+  final GlobalKey _headerMeasureKey = GlobalKey();
+  double? _measuredExpandedHeight;
+
+  /// Height of the pinned (fully collapsed) header bar.
+  static const double _collapsedHeaderHeight = 78;
+
   _EventPageState();
+
+  @override
+  void initState() {
+    super.initState();
+    // Web fonts settle after first paint; remeasure the header when they do so
+    // its (taller) real height replaces the fallback-font estimate.
+    PaintingBinding.instance.systemFonts.addListener(_scheduleHeaderMeasure);
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     loadData(widget.id!);
+  }
+
+  @override
+  void dispose() {
+    PaintingBinding.instance.systemFonts.removeListener(_scheduleHeaderMeasure);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scheduleHeaderMeasure() {
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _measureHeader());
+    }
+  }
+
+  void _onPinchStart() {
+    if (!_blockScroll && mounted) setState(() => _blockScroll = true);
+  }
+
+  void _onPinchEnd() {
+    if (mounted) setState(() => _blockScroll = false);
   }
 
   @override
@@ -80,58 +123,50 @@ class _EventPageState extends State<EventPage> {
         (_event?.childEvents.isNotEmpty == true ||
             (RightsService.isEditor() && childrenScheduleIsEnabled));
 
+    final EventType? headerEventType = _currentEventType();
+    final Color headerFg = _headerForeground();
+    final double expandedHeight =
+        _measuredExpandedHeight ?? _expandedHeaderHeight(context);
+    final bool showAddButton = _showAddButton(isEventCancelled);
+    final onPinchStart = _onPinchStart;
+    final onPinchEnd = _onPinchEnd;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measureHeader());
+
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: _event == null
-              ? ThemeConfig.seed1
-              : ThemeConfig.eventTypeToColor(context, _event?.type),
-          title: Text(
-            _event == null ? "Event".tr() : _event.toString(),
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: ThemeConfig.eventTypeToColorNegative(
-                    context, _event?.type)),
-          ),
-          leading: ScheduleBackButton(
-            color: ThemeConfig.eventTypeToColorNegative(context, _event?.type),
-          ),
-          actions: [
-            Visibility(
-              visible: showLoginLogoutButton() &&
-                  RightsService.isApprover() &&
-                  FeatureService.isFeatureEnabled(FeatureConstants.entryCode),
-              child: Padding(
-                padding: const EdgeInsets.all(6),
-                child: IconButton(
-                    onPressed: () async {
-                      RouterService.navigatePageInfo(
-                          context, CheckRoute(id: _event!.id!));
-                    },
-                    icon: Icon(
-                      Icons.qr_code_scanner,
-                      color: ThemeConfig.eventTypeToColorNegative(
-                          context, _event?.type),
-                    )),
-              ),
-            ),
-            if (FeatureService.isFeatureEnabled(FeatureConstants.mySchedule) &&
-                (!(isEventCancelled && !(_event?.isInMySchedule ?? false)) &&
-                    (_event?.childEvents.isEmpty ?? false) &&
-                    ((_event?.maxParticipants ?? 0) == 0)))
-              ...ButtonsHelper.getAddToMyProgramButton(
-                  _event?.canSaveEventToMyProgram() ?? false,
-                  addToMySchedule,
-                  removeFromMySchedule,
-                  ThemeConfig.eventTypeToColorNegative(context, _event?.type),
-                  ThemeConfig.eventTypeToColorNegative(context, _event?.type))
-          ]),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: PinchScrollView(
-            builder: (onPinchStart, onPinchEnd) => Column(
-              children: [
+      backgroundColor: ThemeConfig.whiteColor(context),
+      body: Stack(
+        children: [
+          PinchScrollScope(
+            onPinchStart: _onPinchStart,
+            onPinchEnd: _onPinchEnd,
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: _blockScroll
+                  ? const NeverScrollableScrollPhysics()
+                  : const BouncingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  automaticallyImplyLeading: false,
+                  backgroundColor: _collapsedTint(),
+                  surfaceTintColor: Colors.transparent,
+                  elevation: 1,
+                  expandedHeight: expandedHeight,
+                  collapsedHeight: _collapsedHeaderHeight,
+                  flexibleSpace: _buildFlexibleHeader(context, expandedHeight),
+                ),
+                SliverToBoxAdapter(
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints:
+                          BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                // Small breathing room; a touch more when the "+" overlaps here.
+                SizedBox(height: showAddButton ? 20 : 6),
                 if (isEventCancelled) // Using local variable for clarity
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
@@ -163,156 +198,7 @@ class _EventPageState extends State<EventPage> {
                       ),
                     ),
                   ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: ConstrainedBox(
-                          constraints:
-                              BoxConstraints(minWidth: constraints.maxWidth),
-                          child: IntrinsicWidth(
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Visibility(
-                                      visible: showLoginLogoutButton() &&
-                                          !isEventCancelled && // Modified
-                                          !(_event?.isSignedIn ?? false) &&
-                                          !EventModel.isEventFull(_event),
-                                      child: ElevatedButton(
-                                          onPressed: () => signIn(
-                                              context), // signIn itself might also check, but button hidden
-                                          child: const Text("Sign in").tr())),
-                                  Visibility(
-                                      visible: showLoginLogoutButton() &&
-                                          (_event?.isSignedIn ??
-                                              false), // Sign out always possible if signed in
-                                      child: ElevatedButton(
-                                          onPressed: () => signOut(),
-                                          child: const Text("Sign out").tr())),
-                                  Visibility(
-                                      visible: showLoginLogoutButton() &&
-                                          FeatureService.isFeatureEnabled(
-                                              FeatureConstants.companions),
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            8, 0, 0, 0),
-                                        child: ElevatedButton(
-                                            onPressed: () => signInCompanion(),
-                                            child:
-                                                const Text("Companions").tr()),
-                                      )),
-                                  Visibility(
-                                    visible: showLoginLogoutButton() &&
-                                        (RightsService.isEditor()),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: ElevatedButton(
-                                          onPressed: () async {
-                                            _queriedParticipants = await DbUsers
-                                                .getAllUsersBasics();
-                                            _queriedParticipants
-                                                .forEach((q) => {
-                                                      if (_participants.any(
-                                                          (p) => p.id == q.id))
-                                                        {q.isSignedIn = true}
-                                                    });
-
-                                            // ignore: use_build_context_synchronously
-                                            DialogHelper.chooseUser(context,
-                                                (person) async {
-                                              await signIn(context, person);
-                                              await loadData(_event!.id!);
-                                            }, _queriedParticipants,
-                                                "Sign in someone".tr());
-                                          },
-                                          child:
-                                              const Text("Sign in other").tr()),
-                                    ),
-                                  ),
-                                  if (RightsService.isGroupAdmin() &&
-                                      _event != null &&
-                                      (_event!.isGroupEvent ?? false))
-                                    ElevatedButton(
-                                        onPressed: () =>
-                                            RouterService.navigatePageInfo(
-                                                    context,
-                                                    HtmlEditorRoute(
-                                                        content: {
-                                                          HtmlEditorPage
-                                                                  .parContent:
-                                                              _event!
-                                                                  .description
-                                                        },
-                                                        occasionId: RightsService
-                                                            .currentOccasionId()))
-                                                .then((value) async {
-                                              if (value != null) {
-                                                var changed = value as String;
-                                                if (_groupInfoModel != null) {
-                                                  _groupInfoModel!.description =
-                                                      changed;
-                                                  await DbGroups
-                                                      .updateUserGroupInfo(
-                                                          _groupInfoModel!);
-                                                }
-                                                await loadData(_event!.id!);
-                                                ToastHelper.Show(
-                                                    context,
-                                                    "Content has been changed."
-                                                        .tr());
-                                              }
-                                            }),
-                                        child: const Text("Edit content").tr()),
-                                  if (RightsService.isEditor())
-                                    ElevatedButton(
-                                        onPressed: () =>
-                                            RouterService.navigateOccasion(
-                                                    context,
-                                                    "${EventEditPage.ROUTE}/${_event!.id}")
-                                                .then((value) =>
-                                                    loadData(_event!.id!)),
-                                        child: Text(CommonStrings.edit).tr())
-                                ]),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    alignment: Alignment.topRight,
-                    child: Text(_event?.durationString(context) ?? "",
-                        style: StylesConfig.normalTextStyle),
-                  ),
-                ),
-                Visibility(
-                    visible: _event?.place != null,
-                    child: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.topRight,
-                        child: TextButton(
-                            onPressed: () {
-                              RouterService.navigateOccasion(context,
-                                      "${MapPage.ROUTE}/${_event!.place!.id}")
-                                  .then((value) => loadData(_event!.id!));
-                            },
-                            child: IntrinsicWidth(
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.place),
-                                  SizedBox.fromSize(size: const Size(4.0, 4.0)),
-                                  Text(
-                                    "${CommonStrings.place}: ${_event?.place?.title ?? ""}",
-                                  )
-                                ],
-                              ),
-                            )))),
+                _buildActionButtons(context, isEventCancelled),
                 Visibility(
                   visible: EventModel.isEventSupportingSignIn(_event) &&
                       !AuthService.isLoggedIn() &&
@@ -357,26 +243,37 @@ class _EventPageState extends State<EventPage> {
                     ),
                   ),
                 ),
+                if (_event != null &&
+                    _event!.id != null &&
+                    FeatureService.isFeatureEnabled(
+                        FeatureConstants.eventFeedback) &&
+                    (_event!.data?[FeatureConstants.feedbackEnabled]
+                            ?.toString() ==
+                        'true'))
+                  EventFeedbackWidget(
+                    eventId: _event!.id!,
+                    isOpen: DateTime.now().isAfter(_event!.startTime),
+                    isEditorPreview: RightsService.isEditor(),
+                    requiresSignIn:
+                        EventModel.isEventSupportingSignIn(_event),
+                    isParticipant: _event!.isSignedIn == true,
+                  ),
                 if (showSubScheduleArea)
                   Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: ScheduleTimeline(
-                          eventGroups: TimeBlockHelper.splitTimeBlocksByDay(
-                              _childDots, context),
-                          onEventPressed: _eventPressed,
-                          showAddNewEventButton: () =>
-                              (RightsService.isEditor() &&
-                                  childrenScheduleIsEnabled),
-                          onAddNewEvent: (context, p, parent) =>
-                              AddNewEventDialog.showAddEventDialog(
-                                      context,
-                                      p,
-                                      TimeBlockItem.fromEventModelAsChild(
-                                          _event!))
-                                  .then((_) => loadData(_event!.id!)),
-                          parentEvent:
-                              TimeBlockItem.fromEventModelAsChild(_event!),
-                          nodePosition: 0.3)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: LightSubprogramList(
+                      events: _childDots,
+                      onEventPressed: _eventPressed,
+                      showAddNewEventButton: () =>
+                          RightsService.isEditor() && childrenScheduleIsEnabled,
+                      onAddNewEvent: (context, p, parent) =>
+                          AddNewEventDialog.showAddEventDialog(
+                                  context,
+                                  p,
+                                  TimeBlockItem.fromEventModelAsChild(_event!))
+                              .then((_) => loadData(_event!.id!)),
+                    ),
+                  ),
                 Visibility(
                   visible: RightsService.isEditor() &&
                       _event?.maxParticipants != null,
@@ -465,10 +362,733 @@ class _EventPageState extends State<EventPage> {
                     ],
                   ),
                 )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (showAddButton) _buildFabOverlay(context, expandedHeight),
+          // Offstage twin of the expanded header, measured to size the app bar.
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            child: Offstage(
+              offstage: true,
+              child: KeyedSubtree(
+                key: _headerMeasureKey,
+                child: _buildExpandedHeaderContent(
+                    context, headerFg, headerEventType),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _measureHeader() {
+    final BuildContext? ctx = _headerMeasureKey.currentContext;
+    final Size? size = ctx?.size;
+    if (size == null) return;
+    final double h = size.height;
+    if (h > 0 &&
+        (_measuredExpandedHeight == null ||
+            (_measuredExpandedHeight! - h).abs() > 0.5)) {
+      if (mounted) setState(() => _measuredExpandedHeight = h);
+    }
+  }
+
+  /// Resolves the configured [EventType] (code, title, color) for the current
+  /// event, or null when the event has no matching type (default styling).
+  EventType? _currentEventType() {
+    final type = _event?.type;
+    if (type == null || type.isEmpty) return null;
+    final feature =
+        FeatureService.getFeatureDetails(FeatureConstants.schedule);
+    if (feature is ScheduleFeature) {
+      return feature.eventTypes.firstWhereOrNull((et) => et.code == type);
+    }
+    return null;
+  }
+
+  /// Foreground (text / icon) color for the gradient header. Uses the event
+  /// type's base color lightness so light banners (e.g. concerts) get dark
+  /// content while dark banners get white content.
+  /// The per-event header background image URL (stored in `data.header_image`),
+  /// or null when the event has none and the computed gradient is used instead.
+  String? _headerImageUrl() {
+    final dynamic url = _event?.data?[Tb.events.dataHeaderImage];
+    if (url is String && url.isNotEmpty) return url;
+    return null;
+  }
+
+  Color _headerForeground() {
+    // Image banners always carry a dark scrim, so their content is white.
+    if (_headerImageUrl() != null) return Colors.white;
+    final Color base = ThemeConfig.eventTypeToColor(context, _event?.type);
+    return HSLColor.fromColor(base).lightness > 0.6
+        ? Colors.black
+        : Colors.white;
+  }
+
+  /// Whether the floating / collapsed "add to my program" action applies.
+  bool _showAddButton(bool isEventCancelled) {
+    return _event != null &&
+        AppConfig.isOwnProgramSupported &&
+        FeatureService.isFeatureEnabled(FeatureConstants.mySchedule) &&
+        !(isEventCancelled && !(_event?.isInMySchedule ?? false)) &&
+        (_event?.childEvents.isEmpty ?? false) &&
+        ((_event?.maxParticipants ?? 0) == 0);
+  }
+
+  /// Background tint of the pinned/collapsed bar: a very light shade of the
+  /// event's base colour (light grey for untyped, a pale type tint otherwise).
+  Color _collapsedTint() {
+    final Color base = ThemeConfig.eventTypeToColor(context, _event?.type);
+    return base.changeColorLightness(0.90);
+  }
+
+  double _measureTextWidth(BuildContext context, String text, TextStyle style) {
+    final TextPainter tp = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      maxLines: 1,
+    )..layout();
+    return tp.width;
+  }
+
+  /// Content-driven expanded header height, measured so the collapsing app bar
+  /// fits the (possibly two-line) title, the badge and the wrapping meta row
+  /// exactly — otherwise the flexible space would clip or overflow.
+  double _expandedHeaderHeight(BuildContext context) {
+    final double topInset = MediaQuery.of(context).padding.top;
+    final double screenW = MediaQuery.of(context).size.width;
+    final double contentW = (screenW < StylesConfig.appMaxWidth
+            ? screenW
+            : StylesConfig.appMaxWidth) -
+        40;
+    final double avail = contentW > 0 ? contentW : 200;
+
+    final TextPainter tp = TextPainter(
+      text: TextSpan(
+        text: _event?.title ?? "",
+        style: const TextStyle(
+            fontWeight: FontWeight.bold, fontSize: 30, height: 1.1),
+      ),
+      textDirection: Directionality.of(context),
+      maxLines: 3,
+    )..layout(maxWidth: avail);
+    final double titleH = tp.height;
+
+    final EventType? et = _currentEventType();
+    final double badgeH = et != null ? 38 : 0; // badge + spacing
+
+    // Estimate how many lines the meta Wrap takes by greedily packing items.
+    double metaH = 0;
+    if (_event != null) {
+      const TextStyle metaStyle =
+          TextStyle(fontWeight: FontWeight.bold, fontSize: 15);
+      const double iconAndGap = 26; // icon(20) + gap(6)
+      const double spacing = 22; // Wrap spacing between items
+      final List<String> metaTexts = [];
+      final String dur = _event!.durationString(context);
+      if (dur.isNotEmpty) metaTexts.add(dur);
+      if (_event!.place != null) metaTexts.add(_event!.place!.title ?? "");
+      final int maxP = _event!.maxParticipants ?? 0;
+      if (maxP > 0) {
+        metaTexts.add("${_event!.currentParticipants ?? 0}/$maxP");
+      }
+      int lines = metaTexts.isEmpty ? 0 : 1;
+      double lineW = 0;
+      for (final t in metaTexts) {
+        final double w =
+            iconAndGap + _measureTextWidth(context, t, metaStyle);
+        if (lineW == 0) {
+          lineW = w;
+        } else if (lineW + spacing + w <= avail) {
+          lineW += spacing + w;
+        } else {
+          lines++;
+          lineW = w;
+        }
+      }
+      if (lines > 0) metaH = 14 + lines * 24; // spacing + lines
+    }
+
+    const double topRowH = 52; // back button row
+    const double bottomPad = 20;
+    final double h =
+        topInset + topRowH + badgeH + titleH + metaH + bottomPad;
+    final double min = _collapsedHeaderHeight + topInset + 8;
+    return h > min ? h : min;
+  }
+
+  /// The collapsing app-bar space: cross-fades the full expanded banner (image /
+  /// gradient with title, badge and meta) into the compact pinned bar as the
+  /// user scrolls up, matching production.
+  Widget _buildFlexibleHeader(BuildContext context, double expandedHeight) {
+    final double topInset = MediaQuery.of(context).padding.top;
+    final EventType? eventType = _currentEventType();
+    final Color fg = _headerForeground();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double maxH = expandedHeight;
+        final double minH = _collapsedHeaderHeight + topInset;
+        final double t = maxH > minH
+            ? ((constraints.maxHeight - minH) / (maxH - minH)).clamp(0.0, 1.0)
+            : 0.0;
+        return Stack(
+          fit: StackFit.expand,
+          clipBehavior: Clip.hardEdge,
+          children: [
+            // Natural height (not force-fit): if the measured app-bar height is
+            // momentarily off — e.g. before the web font settles — the banner is
+            // clipped by the Stack rather than throwing a RenderFlex overflow.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Opacity(
+                opacity: Curves.easeIn.transform(t),
+                child: IgnorePointer(
+                  ignoring: t < 0.5,
+                  child: _headerBackground(
+                    eventType,
+                    _buildExpandedHeaderContent(context, fg, eventType),
+                  ),
+                ),
+              ),
+            ),
+            Opacity(
+              opacity: 1 - t,
+              child: IgnorePointer(
+                ignoring: t >= 0.5,
+                child: _buildCollapsedBar(context),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// The expanded banner content (back row, type badge, big title, meta row),
+  /// laid over the [_headerBackground].
+  Widget _buildExpandedHeaderContent(
+      BuildContext context, Color fg, EventType? eventType) {
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+            child: Row(
+              children: [
+                ScheduleBackButton(color: fg),
+                const Spacer(),
+                if (showLoginLogoutButton() &&
+                    RightsService.isApprover() &&
+                    FeatureService.isFeatureEnabled(
+                        FeatureConstants.entryCode) &&
+                    _event != null)
+                  IconButton(
+                    onPressed: () => RouterService.navigatePageInfo(
+                        context, CheckRoute(id: _event!.id!)),
+                    icon: Icon(Icons.qr_code_scanner, color: fg),
+                  ),
               ],
             ),
           ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints:
+                  BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (eventType != null) ...[
+                      _buildTypeBadge(eventType, fg),
+                      const SizedBox(height: 10),
+                    ],
+                    Text(
+                      _event?.title ?? "",
+                      style: TextStyle(
+                        color: fg,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                        height: 1.1,
+                      ),
+                    ),
+                    if (_event != null) ...[
+                      const SizedBox(height: 14),
+                      _buildMetaRow(context, fg),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Compact pinned bar shown when the header is scrolled up: back button,
+  /// single-line title, condensed meta row and the add-to-program action.
+  Widget _buildCollapsedBar(BuildContext context) {
+    final Color fg = ThemeConfig.blackColor(context);
+    final bool showAdd = _showAddButton(_event?.isCancelled ?? false);
+    final bool canSave = _event?.canSaveEventToMyProgram() ?? false;
+    return SafeArea(
+      bottom: false,
+      child: SizedBox(
+        height: _collapsedHeaderHeight,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 4, right: 8),
+          child: Row(
+            children: [
+              ScheduleBackButton(color: fg),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _event?.title ?? "",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: fg, fontWeight: FontWeight.bold, fontSize: 19),
+                    ),
+                    if (_event != null) ...[
+                      const SizedBox(height: 3),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: _joinMeta(_metaItems(context, fg,
+                              iconSize: 15,
+                              fontSize: 13,
+                              timeOnly: true,
+                              includeParticipants: false)),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (showAdd) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () async {
+                    if (canSave) {
+                      await addToMySchedule();
+                    } else {
+                      await removeFromMySchedule();
+                    }
+                  },
+                  icon: Icon(
+                    canSave ? Icons.add_circle_outline : Icons.check_circle,
+                    color: fg,
+                    size: 30,
+                  ),
+                ),
+              ] else if ((_event?.maxParticipants ?? 0) > 0) ...[
+                const SizedBox(width: 8),
+                _metaItem(
+                    Icons.people_alt_outlined,
+                    "${_event?.currentParticipants ?? 0}/${_event?.maxParticipants}",
+                    fg,
+                    18,
+                    14),
+              ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  /// The floating "+" overlay that tracks the header's bottom edge and fades out
+  /// as the header collapses (rendered above the scroll view so it never clips).
+  Widget _buildFabOverlay(BuildContext context, double expandedHeight) {
+    final double topInset = MediaQuery.of(context).padding.top;
+    final double minH = _collapsedHeaderHeight + topInset;
+    return AnimatedBuilder(
+      animation: _scrollController,
+      builder: (context, _) {
+        final double offset = _scrollController.hasClients
+            ? _scrollController.offset.clamp(0.0, double.infinity)
+            : 0.0;
+        final double headerBottom = expandedHeight - offset;
+        final double range = expandedHeight - minH;
+        final double collapseT =
+            range > 0 ? ((expandedHeight - headerBottom) / range).clamp(0.0, 1.0) : 1.0;
+        final double opacity = (1 - collapseT * 1.5).clamp(0.0, 1.0);
+        if (opacity <= 0.01) return const SizedBox.shrink();
+        return Positioned(
+          top: headerBottom - 28,
+          right: _headerActionRightInset(context),
+          child: Opacity(
+            opacity: opacity,
+            child: IgnorePointer(
+              ignoring: opacity < 0.5,
+              child: _buildAddButton(context),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Wraps [child] in the header banner. Priority: a per-event header image
+  /// (rendered cover, under a downward dark scrim so the white content stays
+  /// legible); otherwise a typed event gets a vertical monochrome gradient from
+  /// the type color, and the default (untyped) event gets the brand navy→orange
+  /// diagonal with a downward dark scrim.
+  Widget _headerBackground(EventType? eventType, Widget child) {
+    final String? imageUrl = _headerImageUrl();
+    if (imageUrl != null) {
+      return Stack(
+        children: [
+          Positioned.fill(
+            child: CachedNetworkImage(
+              imageUrl: ImageUrlHelper.transformImageUrl(imageUrl,
+                  width: ImageUrlHelper.fullWidth, quality: 80),
+              fit: BoxFit.cover,
+              errorWidget: (_, __, ___) =>
+                  Container(color: ThemeConfig.appBarColor()),
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.10),
+                    Colors.black.withValues(alpha: 0.35),
+                    Colors.black.withValues(alpha: 0.70),
+                  ],
+                  stops: const [0.0, 0.55, 1.0],
+                ),
+              ),
+            ),
+          ),
+          child,
+        ],
+      );
+    }
+
+    if (_event != null && eventType != null) {
+      final Color base = eventType.getColor();
+      final double l = HSLColor.fromColor(base).lightness;
+      final Color lighter = base.changeColorLightness((l + 0.10).clamp(0.0, 1.0));
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [base, lighter],
+          ),
+        ),
+        child: child,
+      );
+    }
+
+    final Color navy = ThemeConfig.appBarColor().changeColorLightness(0.32);
+    final Color orange = ThemeConfig.seed2.changeColorLightness(0.30);
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [navy, orange],
+        ),
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.black.withValues(alpha: 0.05),
+              Colors.black.withValues(alpha: 0.45),
+            ],
+          ),
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildTypeBadge(EventType eventType, Color fg) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(
+        color: fg.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        eventType.title.toUpperCase(),
+        style: TextStyle(
+          color: fg,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetaRow(BuildContext context, Color fg) {
+    return Wrap(
+        spacing: 22, runSpacing: 8, children: _metaItems(context, fg));
+  }
+
+  /// The meta chips shared by the expanded header (wrapped) and the collapsed
+  /// bar (condensed, single scrolling row): time, place and capacity.
+  List<Widget> _metaItems(BuildContext context, Color fg,
+      {double iconSize = 20,
+      double fontSize = 15,
+      bool timeOnly = false,
+      bool includeParticipants = true}) {
+    final List<Widget> items = [];
+
+    final String duration = timeOnly
+        ? (_event?.durationTimeString() ?? "")
+        : (_event?.durationString(context) ?? "");
+    if (duration.isNotEmpty) {
+      items.add(_metaItem(Icons.access_time, duration, fg, iconSize, fontSize));
+    }
+
+    if (_event?.place != null) {
+      items.add(GestureDetector(
+        onTap: () {
+          RouterService.navigateOccasion(
+                  context, "${MapPage.ROUTE}/${_event!.place!.id}")
+              .then((value) => loadData(_event!.id!));
+        },
+        child: _metaItem(Icons.location_on_outlined,
+            _event?.place?.title ?? "", fg, iconSize, fontSize),
+      ));
+    }
+
+    final int maxParticipants = _event?.maxParticipants ?? 0;
+    if (includeParticipants && maxParticipants > 0) {
+      items.add(_participantPill(
+          context,
+          fg,
+          "${_event?.currentParticipants ?? 0}/$maxParticipants",
+          iconSize,
+          fontSize));
+    }
+
+    return items;
+  }
+
+  /// Interleaves meta chips with fixed spacing for the single-row collapsed bar.
+  List<Widget> _joinMeta(List<Widget> items) {
+    final List<Widget> out = [];
+    for (int i = 0; i < items.length; i++) {
+      if (i > 0) out.add(const SizedBox(width: 14));
+      out.add(items[i]);
+    }
+    return out;
+  }
+
+  Widget _metaItem(IconData icon, String text, Color fg,
+      [double iconSize = 20, double fontSize = 15]) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: fg, size: iconSize),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: TextStyle(
+              color: fg, fontWeight: FontWeight.bold, fontSize: fontSize),
+        ),
+      ],
+    );
+  }
+
+  /// The circular "add to / remove from my program" button overlapping the
+  /// header's bottom edge. Its fill contrasts the banner; the glyph uses the
+  /// event's base color.
+  Widget _buildAddButton(BuildContext context) {
+    final Color fill = _headerForeground();
+    final Color glyph = ThemeConfig.eventTypeToColor(context, _event?.type);
+    final bool canSave = _event?.canSaveEventToMyProgram() ?? false;
+    return Material(
+      color: fill,
+      shape: const CircleBorder(),
+      elevation: 4,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () async {
+          if (canSave) {
+            await addToMySchedule();
+          } else {
+            await removeFromMySchedule();
+          }
+        },
+        child: SizedBox(
+          width: 56,
+          height: 56,
+          child: Icon(canSave ? Icons.add : Icons.check, color: glyph, size: 30),
+        ),
+      ),
+    );
+  }
+
+  /// Right inset for the floating header action so it hugs the centered content
+  /// column edge on wide screens while staying padded on phones.
+  double _headerActionRightInset(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double sideGutter = (screenWidth - StylesConfig.appMaxWidth) / 2;
+    return sideGutter > 16 ? sideGutter + 12 : 16;
+  }
+
+  /// Editor / participant actions as light tonal chips with icons in a
+  /// left-aligned Wrap (matches production's redesigned action row).
+  Widget _buildActionButtons(BuildContext context, bool isEventCancelled) {
+    final List<Widget> buttons = [];
+
+    if (showLoginLogoutButton() &&
+        !isEventCancelled &&
+        !(_event?.isSignedIn ?? false) &&
+        !EventModel.isEventFull(_event)) {
+      buttons.add(
+          _actionButton(Icons.login, "Sign in".tr(), () => signIn(context)));
+    }
+    if (showLoginLogoutButton() && (_event?.isSignedIn ?? false)) {
+      buttons.add(_actionButton(null, "Sign out".tr(), () => signOut()));
+    }
+    if (showLoginLogoutButton() &&
+        FeatureService.isFeatureEnabled(FeatureConstants.companions)) {
+      buttons.add(_actionButton(Icons.group_add_outlined, "Companions".tr(),
+          () => signInCompanion()));
+    }
+    if (showLoginLogoutButton() && RightsService.isEditor()) {
+      buttons.add(
+          _actionButton(Icons.person_add_alt_1, "Sign in other".tr(), () async {
+        _queriedParticipants = await DbUsers.getAllUsersBasics();
+        _queriedParticipants.forEach((q) => {
+              if (_participants.any((p) => p.id == q.id)) {q.isSignedIn = true}
+            });
+        if (!mounted) return;
+        // ignore: use_build_context_synchronously
+        DialogHelper.chooseUser(context, (person) async {
+          await signIn(context, person);
+          await loadData(_event!.id!);
+        }, _queriedParticipants, "Sign in someone".tr());
+      }));
+    }
+    if (RightsService.isGroupAdmin() &&
+        _event != null &&
+        (_event!.isGroupEvent ?? false)) {
+      buttons.add(_actionButton(Icons.edit_note, "Edit content".tr(), () {
+        RouterService.navigatePageInfo(
+                context,
+                HtmlEditorRoute(
+                    content: {HtmlEditorPage.parContent: _event!.description},
+                    occasionId: RightsService.currentOccasionId()))
+            .then((value) async {
+          if (value != null) {
+            var changed = value as String;
+            if (_groupInfoModel != null) {
+              _groupInfoModel!.description = changed;
+              await DbGroups.updateUserGroupInfo(_groupInfoModel!);
+            }
+            await loadData(_event!.id!);
+            if (mounted) {
+              ToastHelper.Show(context, "Content has been changed.".tr());
+            }
+          }
+        });
+      }));
+    }
+    if (RightsService.isEditor()) {
+      buttons.add(_actionButton(Icons.edit, CommonStrings.edit, () {
+        RouterService.navigateOccasion(
+                context, "${EventEditPage.ROUTE}/${_event!.id}")
+            .then((value) => loadData(_event!.id!));
+      }));
+    }
+
+    if (buttons.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+      child: Wrap(spacing: 10, runSpacing: 10, children: buttons),
+    );
+  }
+
+  Widget _actionButton(IconData? icon, String label, VoidCallback onPressed) {
+    final Color fg = ThemeConfig.blackColor(context);
+    return Material(
+      color: ThemeConfig.bigButtonColor(context),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 20, color: fg),
+                const SizedBox(width: 8),
+              ],
+              Text(label,
+                  style: TextStyle(
+                      color: fg, fontWeight: FontWeight.bold, fontSize: 15)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// The capacity chip shown in the header meta row as a filled pill.
+  Widget _participantPill(
+      BuildContext context, Color fg, String text, double iconSize, double fontSize) {
+    final bool darkHeader = fg == Colors.white;
+    // Dark banners get a translucent "glassy" white pill; light banners get a
+    // solid brand-blue pill (matches production).
+    final Color pillBg =
+        darkHeader ? fg.withValues(alpha: 0.22) : ThemeConfig.seed1;
+    final Color pillFg = darkHeader ? Colors.white : Colors.white;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(
+        color: pillBg,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(text,
+              style: TextStyle(
+                  color: pillFg, fontWeight: FontWeight.bold, fontSize: fontSize)),
+          const SizedBox(width: 6),
+          Icon(Icons.people_alt_outlined, color: pillFg, size: iconSize),
+        ],
       ),
     );
   }
@@ -500,6 +1120,8 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> loadData(int id) async {
+    // New event → its header content differs, so remeasure from scratch.
+    _measuredExpandedHeight = null;
     await loadOfflineData(widget.id!);
 
     await loadEvent(id);
