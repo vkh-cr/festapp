@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
@@ -11,6 +10,7 @@ import 'birth_date_field_holder.dart';
 import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
+import 'package:fstapp/components/_shared/person_fields_strings.dart';
 
 import 'ticket_holder.dart';
 
@@ -184,7 +184,7 @@ class FormHolder {
             ffm.data?[IdDocumentFieldHolder.metaShowExpiryDate] ?? false,
         expiryDateLabel:
             ffm.data?[IdDocumentFieldHolder.metaExpiryDateLabel]?.toString() ??
-                "Expiry Date".tr(),
+                PersonFieldsStrings.expiryDate,
       );
     } else {
       return FieldHolder(

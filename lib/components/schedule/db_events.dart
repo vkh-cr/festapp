@@ -10,6 +10,7 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/workshop_feature.dart';
 import 'package:fstapp/components/activities/activity_model.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/schedule/exclusive_group_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
@@ -208,41 +209,42 @@ class DbEvents {
           if (participant == null) {
             var trPrefix = RightsService.currentUser()?.getGenderPrefix();
             ToastHelper.Show(
-                context, "${trPrefix}You have been signed in.".tr());
+                context, ScheduleStrings.youHaveBeenSignedIn(trPrefix));
           } else {
             var trPrefix = participant.getGenderPrefix();
             ToastHelper.Show(
                 context,
-                "$trPrefix{user} has been signed in."
-                    .tr(namedArgs: {"user": participant.toString()}));
+                ScheduleStrings.userHasBeenSignedIn(trPrefix,
+                    user: participant.toString()));
           }
           return;
         }
       case 100:
         ToastHelper.Show(
-            context, "${"Cannot sign in!".tr()} ${"Event is over.".tr()}",
+            context,
+            "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.eventOver}",
             severity: ToastSeverity.NotOk);
         return;
       case 101:
         ToastHelper.Show(
-            context, "${"Cannot sign in!".tr()} ${"Event is full.".tr()}",
+            context,
+            "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.eventFull}",
             severity: ToastSeverity.NotOk);
         return;
       case 102:
         {
           if (participant == null) {
             var trPrefix = RightsService.currentUser()?.getGenderPrefix();
-            var message =
-                "${trPrefix}You are already signed in at an event of this type."
-                    .tr();
-            ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message",
+            var message = ScheduleStrings.alreadySignedInSameType(trPrefix);
+            ToastHelper.Show(
+                context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           } else {
             var trPrefix = participant.getGenderPrefix();
-            var message =
-                "$trPrefix{user} is already signed in at an event of this type."
-                    .tr(namedArgs: {"user": participant.toString()});
-            ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message",
+            var message = ScheduleStrings.userAlreadySignedInSameType(trPrefix,
+                user: participant.toString());
+            ToastHelper.Show(
+                context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           }
           return;
@@ -251,14 +253,16 @@ class DbEvents {
         {
           if (participant == null) {
             var trPrefix = RightsService.currentUser()?.getGenderPrefix();
-            var message = "${trPrefix}You are already signed in.".tr();
-            ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message",
+            var message = ScheduleStrings.alreadySignedIn(trPrefix);
+            ToastHelper.Show(
+                context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           } else {
             var trPrefix = participant.getGenderPrefix();
-            var message = "$trPrefix{user} is already signed in."
-                .tr(namedArgs: {"user": participant.toString()});
-            ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message",
+            var message = ScheduleStrings.userAlreadySignedIn(trPrefix,
+                user: participant.toString());
+            ToastHelper.Show(
+                context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           }
           return;
@@ -267,23 +271,22 @@ class DbEvents {
         {
           if (participant == null) {
             var trPrefix = RightsService.currentUser()?.getGenderPrefix();
-            var message =
-                "${trPrefix}You are already signed in at another event at the same time."
-                    .tr();
-            ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message",
+            var message = ScheduleStrings.alreadySignedInSameTime(trPrefix);
+            ToastHelper.Show(
+                context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           } else {
             var trPrefix = participant.getGenderPrefix();
             ToastHelper.Show(
                 context,
-                "$trPrefix{user} is already signed in at another event at the same time."
-                    .tr(namedArgs: {"user": participant.toString()}));
+                ScheduleStrings.userAlreadySignedInSameTime(trPrefix,
+                    user: participant.toString()));
           }
           return;
         }
       case 104:
         {
-          String answerWhy = "It's too soon!".tr();
+          String answerWhy = ScheduleStrings.tooSoon;
           if (result["events_registration_start"] != null) {
             var start = DateTime.parse(result["events_registration_start"])
                 .toOccasionTime();
@@ -292,8 +295,7 @@ class DbEvents {
             var timePart =
                 DateFormat.Hm(context.locale.languageCode).format(start);
             String startString = "$datePart $timePart";
-            answerWhy = "You can sign in from {time}."
-                .tr(namedArgs: {"time": startString});
+            answerWhy = ScheduleStrings.signInFrom(time: startString);
           }
 
           var workshopsFeature =
@@ -306,23 +308,24 @@ class DbEvents {
             return;
           }
 
-          ToastHelper.Show(context, "${"Cannot sign in!".tr()} $answerWhy",
+          ToastHelper.Show(
+              context, "${ScheduleStrings.cannotSignIn} $answerWhy",
               severity: ToastSeverity.NotOk);
           return;
         }
       case 105:
         ToastHelper.Show(context,
-            "${"Cannot sign in!".tr()} ${"There is already the maximum of men.".tr()}",
+            "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.maxMenReached}",
             severity: ToastSeverity.NotOk);
         return;
       case 106:
         ToastHelper.Show(context,
-            "${"Cannot sign in!".tr()} ${"There is already the maximum of women.".tr()}",
+            "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.maxWomenReached}",
             severity: ToastSeverity.NotOk);
         return;
       //403, 108
       default:
-        ToastHelper.Show(context, "Cannot sign in!".tr(),
+        ToastHelper.Show(context, ScheduleStrings.cannotSignIn,
             severity: ToastSeverity.NotOk);
         return;
     }
@@ -348,14 +351,14 @@ class DbEvents {
               AuthService.currentUserId());
     }
     await OfflineDataService.removeFromMySchedule(id);
-    ToastHelper.Show(context, "Removed from My schedule.".tr());
+    ToastHelper.Show(context, ScheduleStrings.removedFromMySchedule);
   }
 
   static Future<bool> addToMySchedule(BuildContext context, int id) async {
     if (!AppConfig.isOwnProgramSupportedWithoutSignIn &&
         !AuthService.isLoggedIn()) {
-      ToastHelper.Show(context,
-          "Before adding to 'My schedule', please sign in first.".tr());
+      ToastHelper.Show(
+          context, ScheduleStrings.signInBeforeAddingToMySchedule);
       return false;
     }
     if (AuthService.isLoggedIn()) {
@@ -365,7 +368,7 @@ class DbEvents {
       });
     }
     await OfflineDataService.addToMySchedule(id);
-    ToastHelper.Show(context, "Added to My schedule.".tr());
+    ToastHelper.Show(context, ScheduleStrings.addedToMySchedule);
     return true;
   }
 
@@ -555,7 +558,7 @@ class DbEvents {
           var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           if (context != null) {
             ToastHelper.Show(
-                context, "${trPrefix}You have been signed out.".tr());
+                context, ScheduleStrings.youHaveBeenSignedOut(trPrefix));
           }
           return;
         } else {
@@ -563,17 +566,14 @@ class DbEvents {
           if (context != null) {
             ToastHelper.Show(
                 context,
-                "$trPrefix{user} has been signed out."
-                    .tr(namedArgs: {"user": participant.toString()}));
+                ScheduleStrings.userHasBeenSignedOut(trPrefix,
+                    user: participant.toString()));
           }
         }
         return;
       case 201:
         if (context != null) {
-          ToastHelper.Show(
-              context,
-              "It is not possible to sign out from an event that has already taken place."
-                  .tr(),
+          ToastHelper.Show(context, ScheduleStrings.cannotSignOutPastEvent,
               severity: ToastSeverity.NotOk);
         }
         return;

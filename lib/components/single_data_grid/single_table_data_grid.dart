@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:trina_grid/trina_grid.dart';
+import 'data_grid_strings.dart';
 import 'pluto_abstract.dart';
 import 'single_data_grid_header.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -73,7 +74,7 @@ class _SingleTableDataGridState<T extends ITrinaRowModel>
         child: TrinaGrid(
         noRowsWidget: isDataGridLoading
             ? null
-            : Center(child: Text("Table does not contain any items").tr()),
+            : Center(child: Text(DataGridStrings.noItems)),
         columns: widget.controller.columns,
         rows: [],
         onChanged: (TrinaGridOnChangedEvent event) {

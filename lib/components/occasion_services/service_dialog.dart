@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/components/inventory/views/place_search_dialog.dart';
 import 'package:fstapp/components/inventory/views/quick_search_dialog.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/components/map/place_model.dart';
+import 'package:fstapp/components/occasion_services/occasion_services_strings.dart';
 import 'package:fstapp/components/occasion_services/service_item_model.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -96,7 +96,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
     if (_titleController.text.trim().isEmpty ||
         _codeController.text.trim().isEmpty ||
         _currentReference == null) {
-      ToastHelper.Show(context, "Please fill in all fields.".tr(),
+      ToastHelper.Show(context, OccasionServicesStrings.fillAllFields,
           severity: ToastSeverity.NotOk);
       return;
     }
@@ -112,7 +112,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
 
     if (!mounted) return;
     if (!created) {
-      ToastHelper.Show(context, "Failed to create the item.".tr(),
+      ToastHelper.Show(context, OccasionServicesStrings.createItemFailed,
           severity: ToastSeverity.NotOk);
       return;
     }
@@ -141,9 +141,8 @@ class _ServiceDialogState extends State<ServiceDialog> {
     if (!await DbOccasions.deleteService(widget.type, companion)) {
       var answer = await DialogHelper.showConfirmationDialog(
         context,
-        "Really delete service?".tr(),
-        "At least one user has this service. You can find them in the grid. Are you sure you want to delete it? Deletion cannot be undone."
-            .tr(),
+        OccasionServicesStrings.deleteServiceConfirmTitle,
+        OccasionServicesStrings.deleteServiceConfirmText,
       );
       if (answer) {
         await DbOccasions.deleteService(widget.type, companion, true);
@@ -207,7 +206,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
           suffixIcon: const Icon(Icons.search),
         ),
         child: Text(
-          selected?.title ?? "No place selected".tr(),
+          selected?.title ?? OccasionServicesStrings.noPlaceSelected,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: selected == null
@@ -308,7 +307,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
                 child: TextField(
                   controller: _codeController,
                   decoration: InputDecoration(
-                    labelText: "Code".tr(),
+                    labelText: OccasionServicesStrings.code,
                     border: const OutlineInputBorder(),
                     isDense: true,
                   ),
@@ -332,7 +331,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
             child: FilledButton.icon(
               onPressed: _createService,
               icon: const Icon(Icons.add),
-              label: const Text("Create").tr(),
+              label: Text(CommonStrings.create),
             ),
           ),
         ],
@@ -429,7 +428,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.title.tr()),
+      title: Text(widget.title),
       contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       content: SizedBox(
         width: 480,

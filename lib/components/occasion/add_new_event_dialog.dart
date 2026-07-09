@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
@@ -9,6 +8,7 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/mouse_detector.dart';
 import 'package:fstapp/widgets/time_data_range_picker.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
+import 'package:fstapp/components/occasion/occasion_home_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
 import '../map/place_model.dart';
@@ -71,7 +71,7 @@ class AddNewEventDialog {
                 }
 
                 return AlertDialog(
-                  title: Text("Add To Schedule").tr(),
+                  title: Text(OccasionHomeStrings.addToSchedule),
                   content: Form(
                     key: formKey,
                     child: Column(
@@ -177,7 +177,7 @@ class AddNewEventDialog {
                               }
                             }
                           : null,
-                      child: Text("Add").tr(),
+                      child: Text(CommonStrings.add),
                     ),
                   ],
                 );

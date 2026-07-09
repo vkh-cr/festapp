@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:fstapp/app_router.gr.dart';
@@ -60,7 +59,7 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
       columns: [
         TrinaColumn(
           hide: true,
-          title: "Id".tr(),
+          title: CommonStrings.id,
           field: Tb.path_groups.id,
           type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
@@ -84,7 +83,7 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
           width: 300,
         ),
         TrinaColumn(
-          title: "Color".tr(),
+          title: CommonStrings.color,
           field: Tb.path_groups.color,
           type: TrinaColumnType.text(defaultValue: ""),
           width: 120,
@@ -122,7 +121,7 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
           },
         ),
         TrinaColumn(
-          title: "Icon".tr(),
+          title: CommonStrings.icon,
           field: Tb.path_groups.icon,
           applyFormatterInEditing: true,
           formatter: (d) =>
@@ -163,13 +162,13 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
           },
         ),
         TrinaColumn(
-          title: "Places".tr(),
+          title: CommonStrings.places,
           field: Tb.places.table,
           type: TrinaColumnType.text(),
           width: 500,
         ),
         TrinaColumn(
-          title: "Order".tr(),
+          title: CommonStrings.order,
           field: Tb.places.order,
           type: TrinaColumnType.number(defaultValue: null),
           applyFormatterInEditing: true,

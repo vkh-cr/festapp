@@ -1,6 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/dialogs/dialogs_strings.dart';
 import 'package:fstapp/styles/styles_config.dart';
 
 class ResponsiveSearchDialog<T> extends StatefulWidget {
@@ -176,7 +176,7 @@ class _ResponsiveSearchDialogState<T> extends State<ResponsiveSearchDialog<T>> {
     }
 
     if (_filteredItems.isEmpty) {
-      return widget.failure ?? Center(child: Text("No results.".tr()));
+      return widget.failure ?? Center(child: Text(DialogsStrings.noResults));
     }
 
     return ListView.builder(

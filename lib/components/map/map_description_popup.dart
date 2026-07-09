@@ -1,7 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/map/map_marker_with_text.dart';
+import 'package:fstapp/components/map/map_strings.dart';
 import 'package:fstapp/components/html/html_view.dart';
 
 class MapDescriptionPopup extends StatefulWidget {
@@ -54,7 +54,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
                     onPressed: widget.selectedMarker != null
                         ? null
                         : changePositionPressed,
-                    label: Text("Change location".tr()))),
+                    label: Text(MapStrings.changeLocation))),
             HtmlView(
               html: widget.marker.place.description ?? "",
               isSelectable: true,

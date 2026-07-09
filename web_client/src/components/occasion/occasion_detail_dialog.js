@@ -35,7 +35,7 @@ export class OccasionDetailDialog {
         
         // Feature Details for Button Title
         const formFeature = FeatureService.getFeatureDetails(FeatureConstants.form, occasion.features);
-        let reserveTitle = LocalizationService.tr("Reserve a spot");
+        let reserveTitle = LocalizationService.tr("Common.reserveASpot");
         if (formFeature && formFeature.reserveButtonTitle) {
             reserveTitle = formFeature.reserveButtonTitle;
         }

@@ -77,4 +77,70 @@ class UserStrings {
   static String get createPasswordToContinue =>
       'FeatureUser.createPasswordToContinue'.tr();
   static String get iAm => 'FeatureUser.iAm'.tr();
+  static String get admin => 'FeatureUser.admin'.tr(); // "Admin"
+  static String get profile => 'FeatureUser.profile'.tr(); // "Profile"
+  static String get invite => 'FeatureUser.invite'.tr(); // "Invite"
+  static String get inviteInfo => 'FeatureUser.inviteInfo'
+      .tr(); // "Users will get a sign-in code via e-mail."
+  static String get reinviteConfirm => 'FeatureUser.reinviteConfirm'
+      .tr(); // "Some users have already been invited. Do you want to invite them again and send a new sign-in code?"
+  static String invitedUser({required String user}) => 'FeatureUser.invitedUser'
+      .tr(namedArgs: {'user': user}); // "Invited: {user}."
+  static String inviteFailed(
+          {required String user, required String retries}) =>
+      'FeatureUser.inviteFailed'.tr(namedArgs: {
+        'user': user,
+        'retries': retries
+      }); // "Failed to invite {user}. Number of retries: ({retries})."
+  static String passwordChangeFailed(
+          {required String user, required String error}) =>
+      'FeatureUser.passwordChangeFailed'.tr(namedArgs: {
+        'user': user,
+        'error': error
+      }); // "Failed for user {user}: {error}"
+  static String get changePasswordInstructions =>
+      'FeatureUser.changePasswordInstructions'
+          .tr(); // "Change Password Instructions"
+  static String get resetPasswordProceedConfirm =>
+      'FeatureUser.resetPasswordProceedConfirm'
+          .tr(); // "You'll receive an email with a link to reset your password. Do you want to proceed?"
+  static String passwordResetLinkSent({required String email}) =>
+      'FeatureUser.passwordResetLinkSent'.tr(namedArgs: {
+        'email': email
+      }); // "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
+  static String get insertHere =>
+      'FeatureUser.insertHere'.tr(); // "Input here"
+  static String get deleteAccount =>
+      'FeatureUser.deleteAccount'.tr(); // "Delete account"
+  static String get deleteAccountInstructions =>
+      'FeatureUser.deleteAccountInstructions'
+          .tr(); // "Request account deletion by sending email with your credentials to info@festapp.net."
+  static String get showMyCode =>
+      'FeatureUser.showMyCode'.tr(); // "Show my code"
+  static String get showCode => 'FeatureUser.showCode'.tr(); // "Show Code"
+  static String signedInEvents({required String count}) =>
+      'FeatureUser.signedInEvents'
+          .tr(namedArgs: {'count': count}); // "Signed in events: {count}"
+  static String welcomeIn({required String name}) => 'FeatureUser.welcomeIn'
+      .tr(namedArgs: {'name': name}); // "Welcome in {name}!"
+
+  // Companions
+  static String get companionName =>
+      'FeatureUser.companionName'.tr(); // "Companion Name"
+  static String get companionOf =>
+      'FeatureUser.companionOf'.tr(); // "Companion of"
+  static String get createCompanion =>
+      'FeatureUser.createCompanion'.tr(); // "Create Companion"
+  static String companionInfo({required String maxCompanions}) =>
+      'FeatureUser.companionInfo'.tr(namedArgs: {
+        'max_companions': maxCompanions
+      }); // "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}."
+  static String get companionEventsEmpty =>
+      'FeatureUser.companionEventsEmpty'
+          .tr(); // "Companion's events will appear here."
+  static String get deleteCompanion =>
+      'FeatureUser.deleteCompanion'.tr(); // "Delete companion"
+  static String get deleteCompanionConfirm =>
+      'FeatureUser.deleteCompanionConfirm'
+          .tr(); // "By deleting your companion you will also sign him/her out of all signed in sessions."
 }

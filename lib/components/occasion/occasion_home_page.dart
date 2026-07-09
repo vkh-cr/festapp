@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/occasion/occasion_home_strings.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
@@ -221,42 +222,42 @@ class OccasionTab {
       {
         unit: OccasionTab(
           key: unit,
-          label: "Home".tr(),
+          label: OccasionHomeStrings.home,
           icon: Icons.home_outlined,
           activeIcon: Icons.home,
           route: UnitRoute(),
         ),
         home: OccasionTab(
           key: home,
-          label: "Schedule".tr(),
+          label: CommonStrings.schedule,
           icon: Icons.calendar_month_outlined,
           activeIcon: Icons.calendar_month,
           route: ScheduleNavigationRoute(),
         ),
         timetable: OccasionTab(
           key: home,
-          label: "Schedule".tr(),
+          label: CommonStrings.schedule,
           icon: Icons.calendar_month_outlined,
           activeIcon: Icons.calendar_month,
           route: TimetableRoute(),
         ),
         news: OccasionTab(
           key: news,
-          label: "News".tr(),
+          label: OccasionHomeStrings.news,
           icon: Icons.notifications_none_outlined,
           activeIcon: Icons.notifications,
           route: NewsRoute(onSetAsRead: onSetAsRead),
         ),
         map: OccasionTab(
           key: map,
-          label: "Map".tr(),
+          label: CommonStrings.map,
           icon: Icons.map_outlined,
           activeIcon: Icons.map,
           route: MapRoute(),
         ),
         more: OccasionTab(
           key: more,
-          label: "More".tr(),
+          label: OccasionHomeStrings.more,
           icon: Icons.info_outline,
           activeIcon: Icons.info,
           route: InfoRoute(),

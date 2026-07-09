@@ -3,6 +3,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/app_management/app_management_strings.dart';
 import 'package:fstapp/components/app_management/language_model.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/notification_helper.dart';
@@ -80,9 +82,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Settings",
-                style: TextStyle(color: ThemeConfig.appBarColorNegative()))
-            .tr(),
+        title: Text(CommonStrings.settings,
+            style: TextStyle(color: ThemeConfig.appBarColorNegative())),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrInitial(context),
           color: ThemeConfig.appBarColorNegative(),
@@ -98,17 +99,15 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (AppConfig.availableLanguages().length > 1) ...[
-                  const Text("Language Settings",
-                          style: TextStyle(fontSize: 20))
-                      .tr(),
+                  Text(CommonStrings.languageSettings,
+                      style: const TextStyle(fontSize: 20)),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Current Language: {language}".tr(namedArgs: {
-                          "language": _currentLanguage?.name ?? '---'
-                        }),
+                        CommonStrings.currentLanguage(
+                            language: _currentLanguage?.name ?? '---'),
                         style: const TextStyle(fontSize: 16),
                       ),
                       IconButton(
@@ -123,16 +122,14 @@ class _SettingsPageState extends State<SettingsPage> {
                   const SizedBox(height: 24),
                 ],
                 if (AppConfig.isNotificationsCurrentlySupported()) ...[
-                  const Text("Notification Settings",
-                          style: TextStyle(fontSize: 20))
-                      .tr(),
+                  Text(AppManagementStrings.notificationSettings,
+                      style: const TextStyle(fontSize: 20)),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Enable Notifications",
-                              style: TextStyle(fontSize: 16))
-                          .tr(),
+                      Text(AppManagementStrings.enableNotifications,
+                          style: const TextStyle(fontSize: 16)),
                       Switch(
                         value: _notificationsEnabled,
                         onChanged: (value) async {
@@ -158,10 +155,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        "Failed to enable notifications.",
+                        AppManagementStrings.enableNotificationsFailed,
                         style: TextStyle(color: ThemeConfig.redColor(context)),
                         textAlign: TextAlign.center,
-                      ).tr(),
+                      ),
                     ),
                 ],
                 const SizedBox(height: 24),
@@ -169,8 +166,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Appearance", style: TextStyle(fontSize: 20))
-                          .tr(),
+                      Text(CommonStrings.appearance,
+                          style: const TextStyle(fontSize: 20)),
                       const SizedBox(height: 16),
                       ToggleButtons(
                         isSelected: [
@@ -190,16 +187,19 @@ class _SettingsPageState extends State<SettingsPage> {
                         borderRadius: BorderRadius.circular(8.0),
                         children: [
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: const Text("Dark").tr(),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Text(CommonStrings.dark),
                           ),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Text("Auto").tr(),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Text(CommonStrings.auto),
                           ),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Text("Light").tr(),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Text(CommonStrings.light),
                           ),
                         ],
                       ),
@@ -212,7 +212,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         ButtonsHelper.bigButton(
                           context: context,
-                          label: "Install App".tr(),
+                          label: AppManagementStrings.installApp,
                           onPressed:
                               _canInstallPWA ? handleInstallButtonPress : null,
                           color: _canInstallPWA
@@ -224,22 +224,22 @@ class _SettingsPageState extends State<SettingsPage> {
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
-                              "This platform or browser does not support the PWA install prompt or the app is already installed.",
+                              AppManagementStrings.pwaPromptNotSupported,
                               style: TextStyle(
                                   color: ThemeConfig.redColor(context)),
                               textAlign: TextAlign.center,
-                            ).tr(),
+                            ),
                           ),
                         if (_isAppInstalled || !_isPromptEnabled)
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
-                              "The app is already installed.",
+                              AppManagementStrings.appAlreadyInstalled,
                               style: TextStyle(
                                   fontSize: 16,
                                   color: ThemeConfig.blackColor(context)),
                               textAlign: TextAlign.center,
-                            ).tr(),
+                            ),
                           ),
                       ],
                     ),

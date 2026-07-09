@@ -1,6 +1,7 @@
 // companions_feature.dart
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
 
@@ -40,11 +41,13 @@ class CompanionsFeature extends Feature {
   Widget buildFormField(BuildContext context) {
     return TextFormField(
       initialValue: companionsMax?.toString(),
-      decoration: InputDecoration(labelText: 'Max'.tr()),
+      decoration: InputDecoration(labelText: CommonStrings.max),
       keyboardType: TextInputType.number,
       validator: (val) {
         final n = int.tryParse(val ?? '');
-        if (n == null || n < 1) return 'Enter a number greater than 0'.tr();
+        if (n == null || n < 1) {
+          return FeaturesStrings.enterNumberGreaterThanZero;
+        }
         return null;
       },
       onSaved: (val) =>

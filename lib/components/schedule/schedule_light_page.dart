@@ -1,8 +1,10 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
@@ -205,14 +207,14 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
                             FeatureConstants.mySchedule))
                           _HeaderIconButton(
                             icon: Icons.favorite_border,
-                            label: "My schedule".tr(),
+                            label: CommonStrings.mySchedule,
                             onPressed: _mySchedulePressed,
                           ),
                         if (FeatureService.isFeatureEnabled(
                             FeatureConstants.timetable))
                           _HeaderIconButton(
                             icon: Icons.calendar_month_outlined,
-                            label: "Schedule".tr(),
+                            label: CommonStrings.schedule,
                             onPressed: _schedulePressed,
                           ),
                         // GlobalSearch moves profile/sign-in into the app bar.
@@ -224,8 +226,8 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
                                 : Icons.account_circle_outlined,
                             label: AuthService.isLoggedIn()
                                 ? (RightsService.currentUser()?.name ??
-                                    "Profile".tr())
-                                : "Sign in".tr(),
+                                    ScheduleStrings.profile)
+                                : UserStrings.signIn,
                             onPressed: () {
                               final f = AuthService.isLoggedIn()
                                   ? RouterService.navigateOccasion(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/features/form_feature.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
@@ -53,8 +52,8 @@ class OccasionDetailDialog extends StatelessWidget {
       features: occasion.features,
     );
     final reserveTitle = formDetails is FormFeature
-        ? formDetails.reserveButtonTitle ?? "Reserve a spot".tr()
-        : "Reserve a spot".tr();
+        ? formDetails.reserveButtonTitle ?? CommonStrings.reserveASpot
+        : CommonStrings.reserveASpot;
     final unifiedButtonStyle = OutlinedButton.styleFrom(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 16),

@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart';
@@ -108,7 +107,7 @@ class ButtonsHelper {
               color: textColor ??
                   ThemeConfig.blackColor(context), // Set label color
             ),
-          ).tr(),
+          ),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.all(12.0),
             backgroundColor: buttonColor ??
@@ -167,7 +166,7 @@ class ButtonsHelper {
                     const SizedBox(width: 8.0),
                   ],
                   Text(
-                    label.tr(),
+                    label,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/activities/activity_data_helper.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -15,6 +14,8 @@ import 'package:fstapp/components/map/map_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
@@ -243,10 +244,10 @@ class _MySchedulePageState extends State<MySchedulePage> {
     final Widget commonEmptyContent = Center(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
-        child: const Text(
-          "There will appear your events.",
-          style: TextStyle(fontSize: 20),
-        ).tr(),
+        child: Text(
+          ScheduleStrings.myScheduleEmpty,
+          style: const TextStyle(fontSize: 20),
+        ),
       ),
     );
 
@@ -263,12 +264,12 @@ class _MySchedulePageState extends State<MySchedulePage> {
           scrolledUnderElevation: 0,
           centerTitle: true,
           title: Text(
-            "My schedule",
+            CommonStrings.mySchedule,
             style: TextStyle(
               color: ThemeConfig.blackColor(context),
               fontWeight: FontWeight.w700,
             ),
-          ).tr(),
+          ),
           leading: BackButton(
             color: ThemeConfig.blackColor(context),
             onPressed: () => RouterService.popOrHome(context),
@@ -329,9 +330,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text("My schedule",
-                  style: TextStyle(color: ThemeConfig.appBarColorNegative()))
-              .tr(),
+          title: Text(CommonStrings.mySchedule,
+              style: TextStyle(color: ThemeConfig.appBarColorNegative())),
           leading: BackButton(
             color: ThemeConfig.appBarColorNegative(),
             onPressed: () => RouterService.popOrHome(context),

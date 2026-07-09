@@ -1,7 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/schedule/exclusivity_content.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/schedule/schedule_content.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_admin_content.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_strings.dart';
@@ -51,9 +52,9 @@ class _ScheduleTabState extends State<ScheduleTab>
               isScrollable: true,
               tabs: [
                 DataGridHelper.buildTab(
-                    context, Icons.calendar_month, "Schedule".tr()),
-                DataGridHelper.buildTab(
-                    context, Icons.punch_clock_rounded, "Exclusivity".tr()),
+                    context, Icons.calendar_month, CommonStrings.schedule),
+                DataGridHelper.buildTab(context, Icons.punch_clock_rounded,
+                    ScheduleStrings.exclusivity),
                 if (_feedbackEnabled)
                   DataGridHelper.buildTab(context,
                       Icons.sentiment_satisfied_alt, EventFeedbackStrings.featureTitle),

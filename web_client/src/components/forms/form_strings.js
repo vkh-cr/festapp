@@ -98,8 +98,8 @@ export class FormStrings {
     static get publicView() { return LocalizationService.tr('FeatureFormSettings.publicView'); }
     static get editorPreview() { return LocalizationService.tr('FeatureFormSettings.editorPreview'); }
     static get addTicket() { return LocalizationService.tr('FormsFeature.addTicket') || "Add ticket"; }
-    static get ticket() { return LocalizationService.tr('Ticket') || "Ticket"; }
-    static get buttonContinue() { return LocalizationService.tr('Continue'); }
+    static get ticket() { return LocalizationService.tr('Common.ticket') || "Ticket"; }
+    static get buttonContinue() { return LocalizationService.tr('Common.continueAction'); }
 
     // --- Form Fields (General) ---
     static get noOptionsForCurrency() { return LocalizationService.tr('FormsFeature.noOptionsForCurrency'); }
@@ -111,27 +111,27 @@ export class FormStrings {
 
 
     // Auto-Titles
-    static get fieldName() { return LocalizationService.tr('Name'); }
-    static get fieldSurname() { return LocalizationService.tr('Surname'); }
-    static get fieldEmail() { return LocalizationService.tr('Email'); }
-    static get fieldPhone() { return LocalizationService.tr('Phone'); }
-    static get fieldCity() { return LocalizationService.tr('City'); }
-    static get fieldBirthYear() { return LocalizationService.tr('Birth year'); }
-    static get fieldNote() { return LocalizationService.tr('Note'); }
-    static get fieldAddress() { return LocalizationService.tr('Address'); }
-    static get fieldNationality() { return LocalizationService.tr('Nationality'); }
-    static get fieldIdDocument() { return LocalizationService.tr('Identification document'); }
-    static get fieldBirthDate() { return LocalizationService.tr('Birth Date'); }
-    static birthDateError(minAge, maxAge) { return LocalizationService.tr('You must be between {minAge} and {maxAge} years old.', { minAge, maxAge }); }
-    static birthDateWarning(minAge, maxAge) { return LocalizationService.tr('Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old).', { minAge, maxAge }); }
+    static get fieldName() { return LocalizationService.tr('Common.name'); }
+    static get fieldSurname() { return LocalizationService.tr('PersonFields.surname'); }
+    static get fieldEmail() { return LocalizationService.tr('PersonFields.email'); }
+    static get fieldPhone() { return LocalizationService.tr('PersonFields.phone'); }
+    static get fieldCity() { return LocalizationService.tr('PersonFields.city'); }
+    static get fieldBirthYear() { return LocalizationService.tr('PersonFields.birthYear'); }
+    static get fieldNote() { return LocalizationService.tr('Common.note'); }
+    static get fieldAddress() { return LocalizationService.tr('PersonFields.address'); }
+    static get fieldNationality() { return LocalizationService.tr('PersonFields.nationality'); }
+    static get fieldIdDocument() { return LocalizationService.tr('PersonFields.identificationDocument'); }
+    static get fieldBirthDate() { return LocalizationService.tr('PersonFields.birthDate'); }
+    static birthDateError(minAge, maxAge) { return LocalizationService.tr('PersonFields.ageRestriction', { minAge, maxAge }); }
+    static birthDateWarning(minAge, maxAge) { return LocalizationService.tr('PersonFields.ageOutsideRecommendedRange', { minAge, maxAge }); }
     static get birthDateFormatHint() { return LocalizationService.currentLocale === 'cs' ? 'D. M. RRRR' : 'MM/DD/YYYY'; }
-    static get expiryDate() { return LocalizationService.tr('Expiry Date'); }
-    static get expiryDatePastError() { return LocalizationService.tr('Expiry date cannot be in the past.'); }
+    static get expiryDate() { return LocalizationService.tr('PersonFields.expiryDate'); }
+    static get expiryDatePastError() { return LocalizationService.tr('PersonFields.expiryDateInPast'); }
 
-    static get sexLabel() { return LocalizationService.tr('I am'); }
-    static get maleLabel() { return LocalizationService.tr('Male'); }
-    static get femaleLabel() { return LocalizationService.tr('Female'); }
-    static get notSpecifiedLabel() { return LocalizationService.tr('Not specified'); }
+    static get sexLabel() { return LocalizationService.tr('PersonFields.sexLabel'); }
+    static get maleLabel() { return LocalizationService.tr('PersonFields.male'); }
+    static get femaleLabel() { return LocalizationService.tr('PersonFields.female'); }
+    static get notSpecifiedLabel() { return LocalizationService.tr('PersonFields.notSpecified'); }
 
 
     // --- FormsTab (Main Grid View) ---
@@ -198,6 +198,6 @@ export class FormStrings {
     static numberOfResponsesTooltip(count) { return LocalizationService.tr('FormsFeature.numberOfResponsesTooltip', [count]); }
     
     // Validations (General)
-    static get fieldCannotBeEmpty() { return LocalizationService.tr('fieldCannotBeEmpty') || "Field cannot be empty"; }
-    static get invalidFormat() { return LocalizationService.tr('invalidFormat') || "Invalid format"; }
+    static get fieldCannotBeEmpty() { return LocalizationService.tr('Common.fieldCannotBeEmpty') || "Field cannot be empty"; }
+    static get invalidFormat() { return LocalizationService.tr('Common.invalidFormat') || "Invalid format"; }
 }

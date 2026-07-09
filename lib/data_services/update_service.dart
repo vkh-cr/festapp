@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/launch_url_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -30,9 +30,9 @@ class UpdateService {
       if (_isVersionOutdated(currentVersion, versionRecommended!)) {
         bool updateConfirmed = await DialogHelper.showConfirmationDialog(
             context,
-            "New Version Available".tr(),
-            "Update the app to the latest version to access all features.".tr(),
-            confirmButtonMessage: "Update".tr());
+            CommonStrings.newVersionAvailable,
+            CommonStrings.updateAppPrompt,
+            confirmButtonMessage: CommonStrings.update);
 
         if (updateConfirmed) {
           _redirectToUpdate();

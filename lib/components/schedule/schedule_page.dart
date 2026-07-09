@@ -11,6 +11,9 @@ import 'package:fstapp/components/timeline/advanced_timeline_day_list.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_view.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/users/user_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
@@ -428,7 +431,7 @@ class _SchedulePageState extends State<SchedulePage>
                             FeatureConstants.mySchedule))
                           _IconWithLabel(
                             icon: Icons.favorite,
-                            label: "My schedule".tr(),
+                            label: CommonStrings.mySchedule,
                             onPressed: () {
                               RouterService.navigateOccasion(
                                       context, MySchedulePage.ROUTE)
@@ -439,7 +442,7 @@ class _SchedulePageState extends State<SchedulePage>
                             FeatureConstants.timetable))
                           _IconWithLabel(
                             icon: Icons.calendar_month,
-                            label: "Schedule".tr(),
+                            label: CommonStrings.schedule,
                             onPressed: () {
                               RouterService.navigateOccasion(
                                       context, TimetablePage.ROUTE)
@@ -456,8 +459,8 @@ class _SchedulePageState extends State<SchedulePage>
                                 : Icons.account_circle_outlined,
                             label: AuthService.isLoggedIn()
                                 ? (RightsService.currentUser()?.name ??
-                                    "Profile".tr())
-                                : "Sign in".tr(),
+                                    ScheduleStrings.profile)
+                                : UserStrings.signIn,
                             onPressed: () {
                               final f = AuthService.isLoggedIn()
                                   ? RouterService.navigateOccasion(

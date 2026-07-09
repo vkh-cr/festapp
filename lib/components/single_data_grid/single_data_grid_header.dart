@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -9,6 +8,7 @@ import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
+import 'data_grid_strings.dart';
 import 'pluto_abstract.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
@@ -93,7 +93,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
                   !actionsController.areAllActionsEnabled!()
               ? null
               : _addRow,
-          child: const Text("Add").tr(),
+          child: Text(CommonStrings.add),
         ),
       ElevatedButton(
         onPressed: actionsController != null &&
@@ -101,7 +101,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
                 !actionsController.areAllActionsEnabled!()
             ? null
             : _cancelChanges,
-        child: const Text("Discard changes").tr(),
+        child: Text(DataGridStrings.discardChanges),
       ),
       ElevatedButton(
         onPressed: actionsController != null &&
@@ -114,7 +114,8 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
                     : actionsController!.saveAction!.action!(
                         controller, _saveChanges);
               },
-        child: Text(actionsController?.saveAction?.name ?? "Save changes".tr()),
+        child: Text(
+            actionsController?.saveAction?.name ?? CommonStrings.saveChanges),
       ),
     ]);
 
@@ -139,7 +140,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
         ElevatedButton.icon(
           onPressed: () => controller.downloadCsv(context),
           icon: const Icon(Icons.file_download),
-          label: Text("Download Table".tr()),
+          label: Text(DataGridStrings.downloadTable),
         ),
       );
     }
@@ -167,7 +168,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      "${"Displayed rows".tr()}: $displayedRowCount",
+                      "${DataGridStrings.displayedRows}: $displayedRowCount",
                       style: TextStyle(
                         fontSize: 13,
                         color: Theme.of(context).textTheme.bodySmall?.color ??
@@ -223,8 +224,8 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     if (deleteList.isNotEmpty) {
       var result = await DialogHelper.showConfirmationDialog(
         context,
-        "Confirm removal".tr(),
-        "${"Items".tr()}:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",
+        CommonStrings.confirmRemoval,
+        "${DataGridStrings.items}:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",
       );
       if (!result) {
         return;
@@ -264,7 +265,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     if (!mounted) return;
     var success = await DialogHelper.showProgressDialogAsync(
       context,
-      "Saving changes".tr(),
+      DataGridStrings.savingChanges,
       actions.length,
       futures: actions,
       isBasic: true,
@@ -278,8 +279,8 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
   Future<void> _cancelChanges() async {
     var result = await DialogHelper.showConfirmationDialog(
       context,
-      "Discard changes".tr(),
-      "Really discard all changes?".tr(),
+      DataGridStrings.discardChanges,
+      DataGridStrings.discardChangesConfirm,
     );
     if (!result) {
       return;

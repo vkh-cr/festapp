@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
@@ -12,6 +11,7 @@ import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/components/occasion_services/service_dialog.dart';
+import 'package:fstapp/components/occasion_services/occasion_services_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 
@@ -100,14 +100,14 @@ class _ServiceTabState extends State<ServiceTab> {
       headerChildren: [
         if (_allowAccommodation)
           DataGridAction(
-            name: "Accommodation settings".tr(),
+            name: OccasionServicesStrings.accommodationSettings,
             action: (SingleDataGridController p0, [_]) =>
                 _accommodationDefinition(p0),
             isEnabled: RightsService.isManager,
           ),
         if (_allowFood)
           DataGridAction(
-            name: "Food settings".tr(),
+            name: OccasionServicesStrings.foodSettings,
             action: (SingleDataGridController p0, [_]) => _foodDefinition(p0),
             isEnabled: RightsService.isManager,
           ),
@@ -131,10 +131,8 @@ class _ServiceTabState extends State<ServiceTab> {
       builder: (BuildContext context) {
         return ServiceDialog(
           type: DbOccasions.serviceTypeAccommodation,
-          title: "Accommodation".tr(),
-          description:
-              "To create accommodation, fill in the title, unique code, and the reference of the place."
-                  .tr(),
+          title: OccasionServicesStrings.accommodation,
+          description: OccasionServicesStrings.accommodationCreateHint,
           referenceString: CommonStrings.place,
         );
       },
@@ -151,11 +149,9 @@ class _ServiceTabState extends State<ServiceTab> {
       builder: (BuildContext context) {
         return ServiceDialog(
           type: DbOccasions.serviceTypeFood,
-          title: "Food".tr(),
-          description:
-              "To create food, fill in the title, unique code, and the reference of the event."
-                  .tr(),
-          referenceString: "Event".tr(),
+          title: CommonStrings.food,
+          description: OccasionServicesStrings.foodCreateHint,
+          referenceString: CommonStrings.event,
         );
       },
     );

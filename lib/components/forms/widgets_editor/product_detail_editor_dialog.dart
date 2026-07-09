@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/router_service.dart';
@@ -9,6 +8,8 @@ import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class ProductDetailEditorDialog extends StatefulWidget {
   final ProductModel product;
@@ -95,15 +96,15 @@ class _ProductDetailEditorDialogState extends State<ProductDetailEditorDialog> {
               controller: _quantityController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: "Product Quantity".tr(),
-                helperText: "Enter 0 for unlimited".tr(),
+                labelText: FormStrings.productQuantity,
+                helperText: FormStrings.enterZeroForUnlimited,
                 border: const UnderlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
             // Product Description Title
             Text(
-              "Description".tr(),
+              CommonStrings.description,
             ),
             const SizedBox(height: 8),
             // Full HTML description (no height limit)
@@ -116,7 +117,7 @@ class _ProductDetailEditorDialogState extends State<ProductDetailEditorDialog> {
             Center(
               child: ElevatedButton(
                 onPressed: _editContent,
-                child: Text("Edit content".tr()),
+                child: Text(CommonStrings.editContent),
               ),
             ),
             const SizedBox(height: 24),

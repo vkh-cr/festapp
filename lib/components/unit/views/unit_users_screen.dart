@@ -7,8 +7,9 @@ import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/users/user_columns.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/users/views/users_tab_helper.dart';
 
 class UnitUsersScreen extends StatefulWidget {
@@ -55,7 +56,7 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
         headerChildren: [
           if (RightsService.isUnitManager())
             DataGridAction(
-              name: "Add existing".tr(),
+              name: CommonStrings.addExisting,
               action: (SingleDataGridController p0, [_]) async {
                 var users = await DbUsers.getAllUsersFromUnit(widget.unit.id!);
                 await UsersTabHelper.addExistingToUnit(
@@ -68,7 +69,7 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
               },
             ),
           DataGridAction(
-            name: "Change password".tr(),
+            name: UserStrings.changePassword,
             action: (SingleDataGridController p0, [_]) =>
                 UsersTabHelper.setPassword(context, p0),
             isEnabled: RightsService.canUpdateUnitUsers,

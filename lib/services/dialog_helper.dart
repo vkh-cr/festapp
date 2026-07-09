@@ -38,8 +38,8 @@ class DialogHelper {
     String titleMessage, {
     required bool showCsvImport,
     required bool showTicketImport,
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
+    String? confirmButtonMessage,
+    String? cancelButtonMessage,
   }) =>
       InputDialogs.showImportDialog(
         context,
@@ -52,7 +52,7 @@ class DialogHelper {
 
   static Future<void> showInformationDialog(
           BuildContext context, String titleMessage, String textMessage,
-          [String buttonMessage = "Ok"]) =>
+          [String? buttonMessage]) =>
       ConfirmationDialogs.showInformationDialog(
           context, titleMessage, textMessage, buttonMessage);
 
@@ -60,8 +60,8 @@ class DialogHelper {
     BuildContext context,
     String titleMessage,
     String textMessage, {
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
+    String? confirmButtonMessage,
+    String? cancelButtonMessage,
   }) =>
       ConfirmationDialogs.showScanTicketCode(
         context,
@@ -75,8 +75,8 @@ class DialogHelper {
     BuildContext context,
     String titleMessage,
     String textMessage, {
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
+    String? confirmButtonMessage,
+    String? cancelButtonMessage,
   }) =>
       ConfirmationDialogs.showConfirmationDialog(
         context,
@@ -90,8 +90,8 @@ class DialogHelper {
     BuildContext context,
     String titleMessage,
     Text textMessage, {
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
+    String? confirmButtonMessage,
+    String? cancelButtonMessage,
   }) =>
       ConfirmationDialogs.showConfirmationDialogRichText(
         context,
@@ -105,8 +105,8 @@ class DialogHelper {
     required BuildContext context,
     required String title,
     required Widget content,
-    String confirmButtonText = "Ok",
-    String cancelButtonText = "Storno",
+    String? confirmButtonText,
+    String? cancelButtonText,
   }) =>
       ConfirmationDialogs.showConfirmationDialogRich(
         context: context,
@@ -124,8 +124,8 @@ class DialogHelper {
     BuildContext context,
     String titleMessage,
     String hint, [
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
+    String? confirmButtonMessage,
+    String? cancelButtonMessage,
   ]) =>
       InputDialogs.showPasswordInputDialog(
         context,
@@ -200,7 +200,7 @@ class DialogHelper {
       context: context,
       builder: (context) => ResponsiveSearchDialog<UserInfoModel>(
         items: allUsers,
-        searchLabel: "Search participants".tr(),
+        searchLabel: CommonStrings.searchParticipants,
         filter: (person, query) {
           final q = query.toLowerCase().withoutDiacriticalMarks;
           return (person.name
@@ -242,7 +242,7 @@ class DialogHelper {
     UserGroupInfoModel? selectedGroup;
     await SelectDialog.showModal<UserGroupInfoModel>(
       context,
-      label: "Add to group".tr(),
+      label: CommonStrings.addToGroup,
       items: userGroups,
       searchBoxDecoration: InputDecoration(hintText: CommonStrings.search),
       selectedValue: selectedGroup,
@@ -278,7 +278,7 @@ class DialogHelper {
     LanguageModel? selectedLocale;
     await SelectDialog.showModal<LanguageModel>(
       context,
-      label: "Choose language".tr(),
+      label: CommonStrings.chooseLanguage,
       items: locales,
       showSearchBox: false,
       selectedValue: selectedLocale,
@@ -312,10 +312,8 @@ class DialogHelper {
     );
     if (selectedLocale != null) {
       context.setLocale(selectedLocale!.locale);
-      ToastHelper.Show(
-          context,
-          "Language was set to {language}."
-              .tr(namedArgs: {"language": selectedLocale!.name}));
+      ToastHelper.Show(context,
+          CommonStrings.languageSetTo(language: selectedLocale!.name));
     }
     return selectedLocale;
   }

@@ -11,6 +11,7 @@ import 'form_field_builders.dart';
 import 'form_helper.dart';
 import '../models/holder_models/form_holder.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/_shared/person_fields_strings.dart';
 
 class BirthDateFieldBuilder extends StatefulWidget {
   final BirthDateFieldHolder fieldHolder;
@@ -128,13 +129,15 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
               if (widget.fieldHolder.isHard) {
                 return widget.fieldHolder.message.isNotEmpty
                     ? widget.fieldHolder.message.tr(namedArgs: namedArgs)
-                    : "You must be between {minAge} and {maxAge} years old."
-                        .tr(namedArgs: namedArgs);
+                    : PersonFieldsStrings.ageRestriction(
+                        minAge: effectiveMinAge.toString(),
+                        maxAge: effectiveMaxAge.toString());
               }
               nextWarning = widget.fieldHolder.message.isNotEmpty
                   ? widget.fieldHolder.message.tr(namedArgs: namedArgs)
-                  : "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
-                      .tr(namedArgs: namedArgs);
+                  : PersonFieldsStrings.ageOutsideRecommendedRange(
+                      minAge: effectiveMinAge.toString(),
+                      maxAge: effectiveMaxAge.toString());
             }
             if (warningMessage != nextWarning) {
               WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -19,7 +19,7 @@ export class SettingsWidget {
         
         // Theme Section
         this.renderSection({
-            title: LocalizationService.tr('Appearance') || 'Vzhled', // Fallback trans
+            title: LocalizationService.tr('Common.appearance') || 'Vzhled', // Fallback trans
             options: [
                 { id: 'dark', label: CommonStrings.dark },
                 { id: 'auto', label: CommonStrings.auto },

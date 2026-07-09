@@ -64,7 +64,7 @@ class _FormEditorContentState extends State<FormEditorContent>
 
     if (form.startTime != null && form.endTime != null) {
       if (form.endTime!.isBefore(form.startTime!)) {
-        ToastHelper.Show(context, "End time must be after start time.".tr(),
+        ToastHelper.Show(context, FormStrings.errorEndTimeBeforeStartTime,
             severity: ToastSeverity.NotOk);
         return;
       }
@@ -149,7 +149,7 @@ class _FormEditorContentState extends State<FormEditorContent>
                               ?.copyWith(fontWeight: FontWeight.bold)),
                       _buildAvailabilityStatusBanner(form),
                       /*
-                        (form.isOpen ?? true) ? "Form is OPEN & accepting responses.".tr() : "Form is CLOSED.".tr(),
+                        (form.isOpen ?? true) ? FormStrings.formOpenMessage : FormStrings.formClosedMessage,
                         style: TextStyle(
                             color: (form.isOpen ?? true) 
                                 ? Theme.of(context).primaryColor 

@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/inventory/models/product_inventory_context_model.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
@@ -416,11 +416,11 @@ class ProductModel extends ITrinaRowModel {
   static String typeToLocale(String type) {
     switch (type) {
       case foodType:
-        return 'Food'.tr();
+        return CommonStrings.food;
       case spotType:
-        return 'Spot'.tr();
+        return CommonStrings.spot;
       default:
-        return 'Products'.tr();
+        return CommonStrings.products;
     }
   }
 

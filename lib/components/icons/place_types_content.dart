@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -60,7 +59,7 @@ class _PlaceTypesContentState extends State<PlaceTypesContent> {
       columns: [
         TrinaColumn(
           hide: true,
-          title: "Id".tr(),
+          title: CommonStrings.id,
           field: Tb.place_types.id,
           type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
@@ -100,7 +99,7 @@ class _PlaceTypesContentState extends State<PlaceTypesContent> {
           width: 280,
         ),
         TrinaColumn(
-          title: "Icon".tr(),
+          title: CommonStrings.icon,
           field: Tb.place_types.icon,
           applyFormatterInEditing: true,
           formatter: (d) =>
@@ -115,7 +114,7 @@ class _PlaceTypesContentState extends State<PlaceTypesContent> {
               DataGridHelper.mapIconRenderer(context, ctx, svgIcons),
         ),
         TrinaColumn(
-          title: "Order".tr(),
+          title: CommonStrings.order,
           field: Tb.place_types.order,
           type: TrinaColumnType.number(defaultValue: null),
           applyFormatterInEditing: true,

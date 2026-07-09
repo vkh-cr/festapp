@@ -1,11 +1,11 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/app_panel_helper.dart';
 import 'package:fstapp/components/_shared/red_strip_widget.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/unit/unit_model.dart';
+import 'package:fstapp/components/unit/unit_strings.dart';
 import 'package:fstapp/data_services/update_service.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/unit/db_units.dart';
@@ -130,7 +130,7 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
       }
     } else if (mounted) {
       setState(() {
-        _currentScreen = Center(child: Text("Failed to load unit data.".tr()));
+        _currentScreen = Center(child: Text(UnitStrings.loadUnitFailed));
       });
     }
   }
@@ -294,10 +294,10 @@ class _SideMenuState extends State<SideMenu> {
                     _buildMenuItem(
                       context: context,
                       icon: Icons.format_quote,
-                      label: "Quotes".tr(),
+                      label: UnitStrings.quotes,
                       isSelected: widget.currentMenu == "Quotes",
                       isExpanded: _isExpanded,
-                      isHovered: _hoveredLabel == "Quotes".tr(),
+                      isHovered: _hoveredLabel == UnitStrings.quotes,
                       onHover: (label) => setState(() => _hoveredLabel = label),
                       onTap: () {
                         widget.onMenuItemSelected(
@@ -310,10 +310,10 @@ class _SideMenuState extends State<SideMenu> {
                     _buildMenuItem(
                       context: context,
                       icon: Icons.email,
-                      label: "Email Templates".tr(),
+                      label: UnitStrings.emailTemplates,
                       isSelected: widget.currentMenu == "EmailTemplates",
                       isExpanded: _isExpanded,
-                      isHovered: _hoveredLabel == "Email Templates".tr(),
+                      isHovered: _hoveredLabel == UnitStrings.emailTemplates,
                       onHover: (label) => setState(() => _hoveredLabel = label),
                       onTap: () {
                         if (widget.unit != null) {

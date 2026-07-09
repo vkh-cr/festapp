@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
@@ -90,8 +89,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               child: Column(
                 children: <Widget>[
                   Text(
-                    "Welcome in {name}!"
-                        .tr(namedArgs: {"name": AppConfig.appName}),
+                    UserStrings.welcomeIn(name: AppConfig.appName),
                     style: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.bold),
                   ),

@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -13,6 +12,7 @@ import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/map/map_strings.dart';
 
 import 'place_model.dart';
 
@@ -59,7 +59,7 @@ class _PlacesContentState extends State<PlacesContent> {
       idColumn: Tb.places.id,
       columns: [
         TrinaColumn(
-          title: "Id".tr(),
+          title: CommonStrings.id,
           field: Tb.places.id,
           type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
@@ -100,7 +100,7 @@ class _PlacesContentState extends State<PlacesContent> {
           },
         ),
         TrinaColumn(
-          title: "Icon".tr(),
+          title: CommonStrings.icon,
           field: Tb.places.icon,
           applyFormatterInEditing: true,
           formatter: (d) =>
@@ -116,7 +116,7 @@ class _PlacesContentState extends State<PlacesContent> {
               DataGridHelper.mapIconRenderer(context, ctx, svgIcons),
         ),
         TrinaColumn(
-          title: "Location on map".tr(),
+          title: MapStrings.locationOnMap,
           field: Tb.places.coordinates,
           type: TrinaColumnType.text(
             defaultValue: FeatureService.getDefaultLocation(),
@@ -153,7 +153,7 @@ class _PlacesContentState extends State<PlacesContent> {
           },
         ),
         TrinaColumn(
-          title: "Order".tr(),
+          title: CommonStrings.order,
           field: Tb.places.order,
           type: TrinaColumnType.number(defaultValue: null),
           applyFormatterInEditing: true,

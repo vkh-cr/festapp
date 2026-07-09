@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/occasion_settings/occasion_settings_tab.dart';
 import 'package:fstapp/components/activities/activities_content.dart';
@@ -18,6 +17,7 @@ import 'package:fstapp/components/groups/game_tab.dart';
 import 'package:fstapp/components/information/information_tab.dart';
 import 'package:fstapp/components/map/places_tab.dart';
 import 'package:fstapp/components/schedule/schedule_tab.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_strings.dart';
 import 'package:fstapp/components/occasion_services/service_tab.dart';
 import 'package:fstapp/components/groups/user_groups_tab.dart';
 import 'package:fstapp/components/users/views/users_tab.dart';
@@ -65,37 +65,45 @@ class AdminTabDefinition {
   // For example: isEnabled: RightsService.canSeeGameTab()
   static Map<String, AdminTabDefinition> get availableTabs => {
         info: AdminTabDefinition(
-            label: "Info".tr(), icon: Icons.info, widget: InformationTab()),
+            label: DataGridStrings.tabInfo,
+            icon: Icons.info,
+            widget: InformationTab()),
         events: AdminTabDefinition(
-            label: "Schedule".tr(),
+            label: CommonStrings.schedule,
             icon: Icons.calendar_month,
             widget: ScheduleTab()),
         places: AdminTabDefinition(
-            label: "Places".tr(), icon: Icons.pin_drop, widget: PlacesTab()),
+            label: CommonStrings.places,
+            icon: Icons.pin_drop,
+            widget: PlacesTab()),
         groups: AdminTabDefinition(
-            label: "Groups".tr(), icon: Icons.groups, widget: UserGroupsTab()),
+            label: CommonStrings.groups,
+            icon: Icons.groups,
+            widget: UserGroupsTab()),
         service: AdminTabDefinition(
-            label: "Service".tr(), icon: Icons.food_bank, widget: ServiceTab()),
+            label: DataGridStrings.tabService,
+            icon: Icons.food_bank,
+            widget: ServiceTab()),
         // Added new tab for Inclusion Types
         inventoryPools: AdminTabDefinition(
             label: InventoryStrings.tabTitle,
             icon: Icons.view_module_outlined,
             widget: InventoryPoolsTab()),
         volunteers: AdminTabDefinition(
-            label: "Volunteers".tr(),
+            label: CommonStrings.volunteers,
             icon: Icons.view_timeline,
             widget: ActivitiesContent(
                 occasionId: RightsService.currentOccasionId()!)),
         users: AdminTabDefinition(
             label: CommonStrings.users, icon: Icons.people, widget: UsersTab()),
         game: AdminTabDefinition(
-            label: "Game".tr(), icon: Icons.gamepad, widget: GameTab()),
+            label: CommonStrings.game, icon: Icons.gamepad, widget: GameTab()),
         form: AdminTabDefinition(
             label: FormStrings.formsTitle,
             icon: Icons.list,
             widget: FormsTab()),
         blueprint: AdminTabDefinition(
-            label: "Blueprint".tr(),
+            label: CommonStrings.blueprint,
             icon: Icons.grid_on,
             widget: BlueprintTab()),
         tickets: AdminTabDefinition(
@@ -103,15 +111,15 @@ class AdminTabDefinition {
             icon: Icons.local_activity,
             widget: TicketsTab()),
         orders: AdminTabDefinition(
-            label: "Orders".tr(),
+            label: DataGridStrings.tabOrders,
             icon: Icons.shopping_cart,
             widget: OrdersTab()),
         products: AdminTabDefinition(
-            label: "Products".tr(),
+            label: CommonStrings.products,
             icon: Icons.category,
             widget: ProductsTab()),
         report: AdminTabDefinition(
-            label: "Report".tr(),
+            label: DataGridStrings.tabReport,
             icon: Icons.stacked_bar_chart,
             widget: ReportTab()),
         emailTemplates: AdminTabDefinition(

@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/groups/group_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/information/information_model.dart';
@@ -116,7 +116,7 @@ class UserGroupInfoModel extends ITrinaRowModel {
 
   String getParticipantsDisplayValue() {
     if (participants == null || participants!.isEmpty) {
-      return "No one assigned".tr();
+      return GroupsStrings.noOneAssigned;
     }
     final leader = participants!.firstWhereOrNull((p) => p.isAdmin == true);
     final members = participants!.where((p) => p.isAdmin != true);

@@ -4,6 +4,7 @@ import 'dart:core';
 import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart'; // Added for UserInventoryBundle
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/map/icon_model.dart';
+import 'package:fstapp/components/icons/place_type_model.dart';
 import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/components/news/news_model.dart';
 import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
@@ -111,6 +112,9 @@ class OfflineDataService {
   static Future<void> saveAllIcons(List<IconModel> toSave) =>
       saveAllOffline(IconModel.iconsOffline, toSave);
 
+  static Future<void> saveAllPlaceTypes(List<PlaceTypeModel> toSave) =>
+      saveAllOffline(PlaceTypeModel.placeTypesOffline, toSave);
+
   static Future<List<PlaceModel>> getAllPlaces() =>
       getAllOffline(PlaceModel.placesOffline, PlaceModel.fromJson);
 
@@ -119,6 +123,18 @@ class OfflineDataService {
 
   static Future<List<IconModel>> getAllIcons() =>
       getAllOffline(IconModel.iconsOffline, IconModel.fromJson);
+
+  static Future<List<PlaceTypeModel>> getAllPlaceTypes() =>
+      getAllOffline(PlaceTypeModel.placeTypesOffline, PlaceTypeModel.fromJson);
+
+  /// Last place-type filter selected on the map, restored on the next visit.
+  static const String selectedPlaceTypeOffline = "selectedPlaceType";
+
+  static Future<void> saveSelectedPlaceType(String code) =>
+      StorageHelper.set(selectedPlaceTypeOffline, code);
+
+  static Future<String?> getSelectedPlaceType() =>
+      StorageHelper.get(selectedPlaceTypeOffline);
 
   static Future<void> saveInfoDescription(InformationModel toSave) =>
       saveOffline(toSave.id!.toString(), toSave, informationOfflineStorage);

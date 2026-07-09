@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -14,6 +13,7 @@ import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/html/html_editor_widget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/news/news_strings.dart';
 
 @RoutePage()
 class NewsFormPage extends StatefulWidget {
@@ -89,7 +89,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text("Create news").tr(),
+          title: Text(NewsStrings.createNews),
           leading: BackButton(
             onPressed: () => RouterService.popOrHome(context),
           ),
@@ -110,7 +110,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
                           name: "heading",
                           focusNode: _toFocusNode,
                           decoration: InputDecoration(
-                              labelText: "Heading".tr(),
+                              labelText: NewsStrings.heading,
                               hintText: _currentUser?.name,
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always),
@@ -118,7 +118,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
                         FormBuilderCheckbox(
                           name: 'with_notification',
                           initialValue: _sendWithNotification,
-                          title: const Text("Send with notification").tr(),
+                          title: Text(NewsStrings.sendWithNotification),
                         ),
                       ],
                     ),
@@ -146,11 +146,11 @@ class _NewsFormPageState extends State<NewsFormPage> {
                   ),
                   ButtonsHelper.bottomBarButton(
                     onPressed: _processAndSendTest,
-                    text: "Test",
+                    text: NewsStrings.test,
                   ),
                   ButtonsHelper.bottomBarButton(
                     onPressed: () => _sendPressed(process: true),
-                    text: "Send".tr(),
+                    text: CommonStrings.send,
                   ),
                 ],
               ),

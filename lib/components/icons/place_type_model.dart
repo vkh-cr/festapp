@@ -7,6 +7,8 @@ import 'package:trina_grid/trina_grid.dart';
 /// Occasion place type (category), managed in the "Place types" data grid under
 /// the Places admin tab. Columns: Id, Hide, Default, Code, Title, Icon, Order.
 class PlaceTypeModel extends ITrinaRowModel {
+  static String placeTypesOffline = Tb.place_types.table;
+
   @override
   int? id;
   int? occasion;

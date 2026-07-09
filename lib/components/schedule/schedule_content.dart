@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/features_strings.dart';
@@ -9,6 +8,7 @@ import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
@@ -106,7 +106,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
       idColumn: Tb.events.id,
       columns: [
         TrinaColumn(
-          title: "Id".tr(),
+          title: CommonStrings.id,
           field: Tb.events.id,
           type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
@@ -125,7 +125,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
               rendererContext, Tb.events.is_hidden),
         ),
         TrinaColumn(
-          title: "Interest".tr(),
+          title: ScheduleStrings.interest,
           field: Tb.event_users.table,
           readOnly: true,
           type: TrinaColumnType.number(negative: false, defaultValue: 0),
@@ -149,7 +149,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
               t == ScheduleFeature.scheduleTypeLight;
         }())
           TrinaColumn(
-            title: "Intro Image".tr(),
+            title: ScheduleStrings.introImage,
             field: Tb.events.dataHeaderImage,
             type: TrinaColumnType.text(defaultValue: null),
             width: 140,
@@ -166,7 +166,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
                         horizontal: 40.0,
                         vertical: 24.0,
                       ),
-                      title: Text("Intro Image".tr()),
+                      title: Text(ScheduleStrings.introImage),
                       content: SizedBox(
                         width: 200.0,
                         height: 250.0,
@@ -186,7 +186,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
                                 ctx.cell, publicUrl,
                                 force: true);
                             ToastHelper.Show(
-                                context, "Image uploaded successfully".tr());
+                                context, ScheduleStrings.imageUploaded);
                             return publicUrl;
                           },
                           onRemove: () async {
@@ -194,7 +194,8 @@ class _ScheduleContentState extends State<ScheduleContent> {
                               await DbImages.removeImage(imageUrl);
                               ctx.stateManager
                                   .changeCellValue(ctx.cell, "", force: true);
-                              ToastHelper.Show(context, "Image removed".tr());
+                              ToastHelper.Show(
+                                  context, ScheduleStrings.imageRemoved);
                             }
                           },
                         ),
@@ -259,7 +260,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           width: 250,
         ),
         TrinaColumn(
-          title: "Start date".tr(),
+          title: CommonStrings.startDate,
           field: EventModel.startDateColumn,
           type: TrinaColumnType.date(defaultValue: occasionModel?.startTime),
           width: 110,
@@ -271,7 +272,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           width: 80,
         ),
         TrinaColumn(
-          title: "End date".tr(),
+          title: CommonStrings.endDate,
           field: EventModel.endDateColumn,
           type: TrinaColumnType.date(defaultValue: occasionModel?.startTime),
           width: 110,
@@ -283,7 +284,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           width: 80,
         ),
         TrinaColumn(
-          title: "Max".tr(),
+          title: CommonStrings.max,
           field: EventModel.maxParticipantsColumn,
           type: TrinaColumnType.number(negative: false, defaultValue: null),
           width: 70,
@@ -384,7 +385,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           },
         ),
         TrinaColumn(
-          title: "M/F 50/50".tr(),
+          title: ScheduleStrings.splitMenWomen,
           field: EventModel.splitForMenWomenColumn,
           type: TrinaColumnType.text(),
           applyFormatterInEditing: true,
@@ -394,7 +395,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
               rendererContext, EventModel.splitForMenWomenColumn),
         ),
         TrinaColumn(
-          title: "Group".tr(),
+          title: ScheduleStrings.group,
           field: EventModel.isGroupEventColumn,
           type: TrinaColumnType.text(),
           applyFormatterInEditing: true,
@@ -404,13 +405,13 @@ class _ScheduleContentState extends State<ScheduleContent> {
               rendererContext, EventModel.isGroupEventColumn),
         ),
         TrinaColumn(
-          title: "Show inside event".tr(),
+          title: ScheduleStrings.showInsideEvent,
           field: EventModel.parentEventColumn,
           type: TrinaColumnType.text(),
           width: 300,
         ),
         TrinaColumn(
-          title: "Roles".tr(),
+          title: ScheduleStrings.roles,
           field: Tb.event_roles.role,
           type: TrinaColumnType.text(),
           width: 100,
@@ -427,7 +428,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
     }
     if (controller == null) {
       // This can happen if initController is called before _loadInitialData completes or if an error occurs
-      return Center(child: Text("Initializing...".tr()));
+      return Center(child: Text(ScheduleStrings.initializing));
     }
     return SingleTableDataGrid<EventModel>(controller!);
   }

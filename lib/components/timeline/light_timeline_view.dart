@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
@@ -60,7 +61,7 @@ class _LightTimelineViewState extends State<LightTimelineView> {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Text(
-            "No events".tr(),
+            ScheduleStrings.noEvents,
             style: TextStyle(color: _mutedText(context), fontSize: 14),
           ),
         ),
@@ -276,7 +277,7 @@ class _LightMyScheduleListState extends State<LightMyScheduleList> {
         child: widget.emptyContent ??
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
-              child: Text("No events".tr(),
+              child: Text(ScheduleStrings.noEvents,
                   style:
                       TextStyle(color: _mutedText(context), fontSize: 14)),
             ),
@@ -418,7 +419,7 @@ class _DayList extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("No events".tr(),
+              Text(ScheduleStrings.noEvents,
                   style:
                       TextStyle(color: _mutedText(context), fontSize: 14)),
               if (canAdd) ...[
@@ -491,7 +492,7 @@ class _AddEventButton extends StatelessWidget {
       onPressed: onPressed,
       icon: Icon(Icons.add_circle_outline, size: 20, color: accent),
       label: Text(
-        "Add To Schedule".tr(),
+        ScheduleStrings.addToSchedule,
         style: TextStyle(
           color: accent,
           fontSize: 14,

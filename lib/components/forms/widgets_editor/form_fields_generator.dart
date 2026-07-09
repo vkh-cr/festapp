@@ -309,7 +309,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
               ),
             const Spacer(),
             if (isTicket) ...[
-              Text("Note".tr(), style: Theme.of(context).textTheme.bodySmall),
+              Text(CommonStrings.note, style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(width: 4),
               TicketEditorWidgets.buildTicketNoteCheckbox(context, form, () {
                 setState(() {});
@@ -318,7 +318,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
             ],
             Row(
               children: [
-                Text('Required'.tr(),
+                Text(FormStrings.requiredLabel,
                     style: Theme.of(context).textTheme.bodySmall),
                 Checkbox(
                   value: FormHelper.isAlwaysRequired(field.type ?? '') ||
@@ -332,7 +332,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
             const SizedBox(width: 16),
             Row(
               children: [
-                Text('Show'.tr(), style: Theme.of(context).textTheme.bodySmall),
+                Text(FormStrings.show, style: Theme.of(context).textTheme.bodySmall),
                 Switch(
                   value: !(field.isHidden ?? false),
                   onChanged:
@@ -367,7 +367,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                 // Add Description Option
                 items.add(PopupMenuItem<String>(
                   value: "add_description",
-                  child: Text("Add description".tr()),
+                  child: Text(FormStrings.addDescription),
                 ));
 
                 // Ticket Specific Options
@@ -447,7 +447,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
             child: TextFormField(
               decoration: InputDecoration(
                 border: const UnderlineInputBorder(),
-                hintText: 'Answer text'.tr(),
+                hintText: FormStrings.answerText,
                 contentPadding: const EdgeInsets.symmetric(vertical: 8),
               ),
               style: Theme.of(context).textTheme.bodyLarge,
@@ -455,7 +455,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
           );
         } else {
           return Text(
-            'Answer text'.tr(),
+            FormStrings.answerText,
             style: Theme.of(context)
                 .textTheme
                 .bodyLarge

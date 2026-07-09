@@ -1,7 +1,8 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/information/information_model.dart';
+import 'package:fstapp/components/information/information_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -213,43 +214,42 @@ class DbInformation {
 
     switch (result["code"]) {
       case 200: // Correct answer
-        ToastHelper.Show(context, "Correct!".tr());
+        ToastHelper.Show(context, InformationStrings.gameCorrect);
         return true;
 
       case 4031: // User not in occasion
-        ToastHelper.Show(context, "You are not part of this occasion.".tr(),
+        ToastHelper.Show(context, InformationStrings.gameNotInOccasion,
             severity: ToastSeverity.NotOk);
         break;
 
       case 4032: // User not part of a game group
-        ToastHelper.Show(context, "You are not part of a game group.".tr(),
+        ToastHelper.Show(context, InformationStrings.gameNotInGroup,
             severity: ToastSeverity.NotOk);
         break;
 
       case 4033: // Guessing outside allowed time window
-        ToastHelper.Show(
-            context, "Guessing is only allowed within the game time window.",
+        ToastHelper.Show(context, InformationStrings.gameOutsideWindow,
             severity: ToastSeverity.NotOk);
         break;
 
       case 4041: // Correct reference not found
         ToastHelper.Show(
-            context, "Correct answer for this check point was not set.".tr(),
+            context, InformationStrings.gameAnswerNotSetForCheckPoint,
             severity: ToastSeverity.NotOk);
         break;
 
       case 4042: // Hidden info not found
-        ToastHelper.Show(context, "Correct answer was not set.".tr(),
+        ToastHelper.Show(context, InformationStrings.gameAnswerNotSet,
             severity: ToastSeverity.NotOk);
         break;
 
       case 4001: // Incorrect guess
-        ToastHelper.Show(context, "Incorrect, try again!".tr(),
+        ToastHelper.Show(context, InformationStrings.gameIncorrect,
             severity: ToastSeverity.NotOk);
         break;
 
       default:
-        ToastHelper.Show(context, "An unexpected error occurred.".tr(),
+        ToastHelper.Show(context, CommonStrings.unexpectedError,
             severity: ToastSeverity.NotOk);
         break;
     }

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:file_saver/file_saver.dart'; // Added for file saving
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
@@ -779,7 +780,7 @@ class EshopColumns {
                         // Using a generic success message structure
                         ToastHelper.Show(
                           context,
-                          "$ticketSymbol: ${"OK".tr()}",
+                          "$ticketSymbol: ${CommonStrings.ok}",
                         );
                         var afterFunction = data[TICKET_CONFIRM];
                         if (afterFunction is Future<void> Function()?) {

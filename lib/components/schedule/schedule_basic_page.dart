@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/timeline/schedule_tab_view.dart';
@@ -241,7 +241,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                                     color: ThemeConfig.profileButtonTextColor(
                                         context)),
                               ),
-                              Text("My schedule".tr()),
+                              Text(CommonStrings.mySchedule),
                             ]),
                       if (FeatureService.isFeatureEnabled(
                           FeatureConstants.timetable))
@@ -256,7 +256,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                                     color: ThemeConfig.profileButtonTextColor(
                                         context)),
                               ),
-                              Text("Schedule".tr()),
+                              Text(CommonStrings.schedule),
                             ]),
                     ]),
               ),

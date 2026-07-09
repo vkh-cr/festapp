@@ -1,6 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/users/companion/db_companions.dart';
 import 'package:fstapp/components/users/companion/companion_model.dart';
 import 'package:fstapp/components/users/user_strings.dart';
@@ -48,11 +48,8 @@ class _CompanionDialogState extends State<CompanionDialog> {
   }
 
   Future<void> _deleteCompanion(CompanionModel companion) async {
-    var answer = await DialogHelper.showConfirmationDialog(
-        context,
-        "Delete companion".tr(),
-        "By deleting your companion you will also sign him/her out of all signed in sessions."
-            .tr());
+    var answer = await DialogHelper.showConfirmationDialog(context,
+        UserStrings.deleteCompanion, UserStrings.deleteCompanionConfirm);
     if (!answer) {
       return;
     }
@@ -82,18 +79,18 @@ class _CompanionDialogState extends State<CompanionDialog> {
   Widget build(BuildContext context) {
     bool currentCanSignIn = widget.canSignIn?.call() ?? false;
     return AlertDialog(
-      title: const Text("Companions").tr(),
+      title: Text(CommonStrings.companions),
       content: SingleChildScrollView(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.",
-              ).tr(namedArgs: {
-                "max_companions": FeatureService.getMaxCompanions().toString()
-              }),
+              Text(
+                UserStrings.companionInfo(
+                    maxCompanions:
+                        FeatureService.getMaxCompanions().toString()),
+              ),
               const SizedBox(height: 20),
               Visibility(
                 visible: _companions.length < widget.maxCompanions,
@@ -101,8 +98,8 @@ class _CompanionDialogState extends State<CompanionDialog> {
                   children: [
                     TextField(
                       controller: _nameController,
-                      decoration:
-                          InputDecoration(labelText: "Companion Name".tr()),
+                      decoration: InputDecoration(
+                          labelText: UserStrings.companionName),
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(30),
                       ],
@@ -110,7 +107,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: _createCompanion,
-                      child: const Text("Create Companion").tr(),
+                      child: Text(UserStrings.createCompanion),
                     ),
                   ],
                 ),
@@ -165,7 +162,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text("Ok").tr(),
+          child: Text(CommonStrings.ok),
         ),
       ],
     );

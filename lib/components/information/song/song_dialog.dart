@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/information/information_strings.dart';
 import '../../html/html_view.dart';
 
 class SongDialog extends StatefulWidget {
@@ -149,7 +149,7 @@ class _SongDialogState extends State<SongDialog> {
                                     size: 28,
                                     color: ThemeConfig.whiteTextColor(context)),
                                 const SizedBox(width: 8),
-                                Text("Smaller".tr(),
+                                Text(InformationStrings.fontSmaller,
                                     style: TextStyle(
                                         color:
                                             ThemeConfig.whiteTextColor(context),
@@ -177,7 +177,7 @@ class _SongDialogState extends State<SongDialog> {
                             ),
                             child: Row(
                               children: [
-                                Text("Larger".tr(),
+                                Text(InformationStrings.fontLarger,
                                     style: TextStyle(
                                         color:
                                             ThemeConfig.whiteTextColor(context),

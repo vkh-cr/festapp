@@ -51,7 +51,7 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/pop_button.dart';
 import 'package:collection/collection.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/map/map_strings.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mbtiles/mbtiles.dart';
@@ -231,7 +231,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         ..clear()
         ..addAll((widget.editPathGroup!.pathData ?? [])
             .map((seg) => List<PathNode>.from(seg)));
-      pageTitle = widget.editPathGroup!.title ?? "Draw path".tr();
+      pageTitle = widget.editPathGroup!.title ?? MapStrings.drawPath;
     }
 
     var placeModel = widget.place;
@@ -323,8 +323,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         _downloadCompleted = true;
       });
       _mbtiles = MbTiles(mbtilesPath: _offlinePackagePath!, gzip: true);
-      ToastHelper.Show(
-          context, "Offline map downloaded and ready for offline use".tr());
+      ToastHelper.Show(context, MapStrings.offlineMapReady);
       Timer(const Duration(seconds: 2), () {
         setState(() {
           _downloadCompleted = false;
@@ -692,7 +691,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     }
     await DbPlaces.saveLocation(selectedMarker!.place.id!,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
-    ToastHelper.Show(context, "Place has been changed.".tr());
+    ToastHelper.Show(context, MapStrings.placeChanged);
 
     // We keep selectedMarker assigned until after potentially reloading places
     final savedMarkerPlaceId = selectedMarker!.place.id;
@@ -785,6 +784,24 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     _markers.clear();
     var offlinePlaces = await OfflineDataService.getAllPlaces();
     _icons = await OfflineDataService.getAllIcons();
+
+    // Load cached place types and pick the filter BEFORE the first render, so
+    // cached places don't flash unfiltered while the online types are still
+    // loading. The last selection is restored from offline storage; if there is
+    // none (or it is no longer valid), _initPlaceTypeSelection falls back to
+    // the default type.
+    _placeTypes = (await OfflineDataService.getAllPlaceTypes())
+        .where((t) => !(t.isHidden ?? false))
+        .toList();
+    if (!_placeTypeInitialized) {
+      final savedCode = await OfflineDataService.getSelectedPlaceType();
+      if (savedCode != null) {
+        _selectedPlaceTypeCode = savedCode;
+        _placeTypeInitialized = true;
+      }
+    }
+    _initPlaceTypeSelection();
+
     offlinePlaces.sortPlaces(false);
     var offlineList = loadOtherGroups
         ? offlinePlaces
@@ -832,9 +849,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     _icons = onlineIcons; // Prefer online icons
 
     try {
-      _placeTypes = (await DbPlaceTypes.getPlaceTypes())
-          .where((t) => !(t.isHidden ?? false))
-          .toList();
+      var placeTypesFromDb = await DbPlaceTypes.getPlaceTypes();
+      await OfflineDataService.saveAllPlaceTypes(placeTypesFromDb);
+      _placeTypes =
+          placeTypesFromDb.where((t) => !(t.isHidden ?? false)).toList();
       _initPlaceTypeSelection();
     } catch (e) {
       AppLogger.error("Failed to load place types: $e");
@@ -1127,23 +1145,23 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   child: ElevatedButton(
                     onPressed:
                         showAllGroups, // This now handles being in edit mode
-                    child: const Text("Show groups").tr(),
+                    child: Text(MapStrings.showGroups),
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(16.0)),
                 ElevatedButton(
                   onPressed: saveNewPosition,
-                  child: const Text("Save location").tr(),
+                  child: Text(MapStrings.saveLocation),
                 ),
               ],
             ),
           ),
           Container(
             color: Colors.white,
-            child: const Text(
-              "You can change location by tapping on the map.",
-              style: TextStyle(color: Colors.black),
-            ).tr(),
+            child: Text(
+              MapStrings.changeLocationHint,
+              style: const TextStyle(color: Colors.black),
+            ),
           ),
           Expanded(child: Container()),
         ],
@@ -1263,7 +1281,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
     if (segments.isEmpty) {
       if (mounted) {
-        ToastHelper.Show(context, "No route found in the GPX file.".tr(),
+        ToastHelper.Show(context, MapStrings.noRouteInGpx,
             severity: ToastSeverity.NotOk);
       }
       return;
@@ -1275,16 +1293,14 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     await showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text("Import route").tr(),
+        title: Text(MapStrings.importRoute),
         content: SizedBox(
           width: 420,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Export your route from Mapy.com (or Strava, Garmin, komoot…) as GPX and drop it here.",
-              ).tr(),
+              Text(MapStrings.importRouteHint),
               DropFile(
                 height: 180,
                 allowedExtensions: const ['gpx'],
@@ -1323,11 +1339,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              "Tap places or the map to add points to the path.",
-              style: TextStyle(color: Colors.black),
+            Text(
+              MapStrings.drawPathHint,
+              style: const TextStyle(color: Colors.black),
               textAlign: TextAlign.center,
-            ).tr(),
+            ),
             const SizedBox(height: 8),
             Wrap(
               alignment: WrapAlignment.center,
@@ -1339,24 +1355,24 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                 ElevatedButton.icon(
                   onPressed: _showImportDialog,
                   icon: const Icon(Icons.upload_file),
-                  label: const Text("Import route").tr(),
+                  label: Text(MapStrings.importRoute),
                 ),
                 ElevatedButton.icon(
                   onPressed: _undoLastDrawNode,
                   icon: const Icon(Icons.undo),
-                  label: const Text("Undo").tr(),
+                  label: Text(MapStrings.undo),
                 ),
                 ElevatedButton.icon(
                   onPressed: _newDrawSegment,
                   icon: const Icon(Icons.linear_scale),
-                  label: const Text("New segment").tr(),
+                  label: Text(MapStrings.newSegment),
                 ),
                 // Visual gap separating the build tools from the save action.
                 const SizedBox(width: 24),
                 ElevatedButton.icon(
                   onPressed: _saveDrawPath,
                   icon: const Icon(Icons.check),
-                  label: const Text("Save route").tr(),
+                  label: Text(MapStrings.saveRoute),
                 ),
               ],
             ),
@@ -1367,9 +1383,16 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   /// Pick the initial place-type filter once types are available: the default
-  /// type (`is_default`) if any, otherwise the first (order-sorted) type.
+  /// type (`is_default`) if any, otherwise the first (order-sorted) type. Keeps
+  /// an existing selection unless it no longer matches any visible chip (e.g.
+  /// initialized from a stale offline cache).
   void _initPlaceTypeSelection() {
-    if (_placeTypeInitialized || _placeTypes.isEmpty) return;
+    if (_placeTypes.isEmpty) return;
+    if (_placeTypeInitialized &&
+        (_selectedPlaceTypeCode == _otherPlaceTypeCode ||
+            _placeTypes.any((t) => t.code == _selectedPlaceTypeCode))) {
+      return;
+    }
     final defaultType = _placeTypes.firstWhereOrNull((t) => t.isDefault == true);
     _selectedPlaceTypeCode = (defaultType ?? _placeTypes.first).code;
     _placeTypeInitialized = true;
@@ -1378,6 +1401,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   Future<void> _onPlaceTypeTap(String? code) async {
     if (code == null) return;
     setState(() => _selectedPlaceTypeCode = code);
+    await OfflineDataService.saveSelectedPlaceType(code);
 
     final points = _markers
         .where((m) => _placeMatchesSelectedType(m.place))

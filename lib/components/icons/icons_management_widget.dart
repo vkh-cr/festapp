@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:easy_localization/easy_localization.dart';
-
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +84,7 @@ class _IconsManagementWidgetState extends State<IconsManagementWidget> {
             actions: [
               TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: Text("Close".tr())),
+                  child: Text(CommonStrings.close)),
             ],
           ),
         );
@@ -294,7 +292,7 @@ class _IconCardState extends State<_IconCard> {
                           size: 16, color: theme.colorScheme.outline),
                     )
                   : Tooltip(
-                      message: "Common.delete".tr(),
+                      message: CommonStrings.delete,
                       child: InkWell(
                         customBorder: const CircleBorder(),
                         onTap: widget.onDelete,

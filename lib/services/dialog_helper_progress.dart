@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -36,7 +35,7 @@ class ProgressDialogs {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("${"Progress".tr()}: $progress/$total"),
+                  Text("${CommonStrings.progress}: $progress/$total"),
                   SizedBox(height: 20),
                   LinearProgressIndicator(
                       value: total > 0 ? progress / total : 0),
@@ -77,8 +76,8 @@ class ProgressDialogs {
                                                 isStornoActive.value = false;
                                                 isOkActive.value = true;
                                                 statusMessage.value =
-                                                    "The processing has been cancelled."
-                                                        .tr();
+                                                    CommonStrings
+                                                        .processingCancelled;
                                               }
                                             : null,
                                         child: Text(CommonStrings.storno),
@@ -125,7 +124,7 @@ class ProgressDialogs {
       for (var future in futures) {
         if (isCancelled.value) break;
         try {
-          statusMessage.value = "Processing...".tr();
+          statusMessage.value = CommonStrings.processing;
           await future.call();
           progressNotifier.value++;
           if (delay != null) {
@@ -145,7 +144,7 @@ class ProgressDialogs {
     isOkActive.value = true;
     isStornoActive.value = false;
     if (hasError.value) {
-      statusMessage.value = "The processing has finished with error.".tr();
+      statusMessage.value = CommonStrings.processingFailed;
       // In basic mode the error toast is shown by the upstream caller; auto-dismiss
       // the progress dialog so the user isn't shown an extra error UI on top of it.
       if (isBasic && context.mounted) {
@@ -153,9 +152,9 @@ class ProgressDialogs {
         completer.complete(false);
       }
     } else if (isCancelled.value) {
-      statusMessage.value = "The processing has been cancelled.".tr();
+      statusMessage.value = CommonStrings.processingCancelled;
     } else {
-      statusMessage.value = "The processing has completed successfully.".tr();
+      statusMessage.value = CommonStrings.processingCompleted;
       if (isBasic && context.mounted) {
         Navigator.of(context).pop();
         completer.complete(true);
@@ -185,7 +184,7 @@ class ProgressDialogs {
             children: [
               const LinearProgressIndicator(),
               const SizedBox(height: 20),
-              Text("Processing...".tr()),
+              Text(CommonStrings.processing),
             ],
           ),
         );

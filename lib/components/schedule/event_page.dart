@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_router.gr.dart';
@@ -9,6 +8,8 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/timeline/light_timeline_view.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/users/companion/db_companions.dart';
@@ -208,9 +209,9 @@ class _EventPageState extends State<EventPage> {
                     child: HtmlView(
                       html: '''
                       <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
-                        <div>${"An account is required to join this event.".tr()}</div>
+                        <div>${ScheduleStrings.accountRequiredToJoin}</div>
                         <a href="${AppConfig.webLink}/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
-                          ${"Click here to sign in.".tr()}
+                          ${ScheduleStrings.clickHereToSignIn}
                         </a>
                       </div>
                     ''',
@@ -227,9 +228,9 @@ class _EventPageState extends State<EventPage> {
                         !isEventCancelled,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: const Text(
-                        "This event is fully booked.",
-                      ).tr(),
+                      child: Text(
+                        ScheduleStrings.eventFullyBooked,
+                      ),
                     )),
                 Visibility(
                   visible: _event != null && _event?.description != null,
@@ -286,10 +287,10 @@ class _EventPageState extends State<EventPage> {
                                     .map((e) => e.toFullNameString())
                                     .join("\n")));
                             ToastHelper.Show(
-                                context, "Participants have been copied.".tr());
+                                context, ScheduleStrings.participantsCopied);
                           },
                           icon: const Icon(Icons.copy)),
-                      Text("${"Participants".tr()}:")
+                      Text("${CommonStrings.participants}:")
                     ]),
                     children: [
                       ListView.builder(
@@ -334,13 +335,13 @@ class _EventPageState extends State<EventPage> {
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 8.0, horizontal: 16),
                                 child: Text(
-                                    "${"Moderator".tr()}: ${_groupInfoModel?.participants?.firstWhereOrNull((p) => p.isAdmin!)?.userInfo?.name ?? ""}",
+                                    "${ScheduleStrings.moderator}: ${_groupInfoModel?.participants?.firstWhereOrNull((p) => p.isAdmin!)?.userInfo?.name ?? ""}",
                                     style: StylesConfig.normalTextStyle)),
                           ),
                           Padding(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 8.0, horizontal: 16),
-                              child: Text("${"Participants".tr()}:",
+                              child: Text("${CommonStrings.participants}:",
                                   style: StylesConfig.normalTextStyle)),
                           ListView.builder(
                               shrinkWrap: true,
@@ -974,19 +975,19 @@ class _EventPageState extends State<EventPage> {
         !(_event?.isSignedIn ?? false) &&
         !EventModel.isEventFull(_event)) {
       buttons.add(
-          _actionButton(Icons.login, "Sign in".tr(), () => signIn(context)));
+          _actionButton(Icons.login, UserStrings.signIn, () => signIn(context)));
     }
     if (showLoginLogoutButton() && (_event?.isSignedIn ?? false)) {
-      buttons.add(_actionButton(null, "Sign out".tr(), () => signOut()));
+      buttons.add(_actionButton(null, UserStrings.signOut, () => signOut()));
     }
     if (showLoginLogoutButton() &&
         FeatureService.isFeatureEnabled(FeatureConstants.companions)) {
-      buttons.add(_actionButton(Icons.group_add_outlined, "Companions".tr(),
+      buttons.add(_actionButton(Icons.group_add_outlined, CommonStrings.companions,
           () => signInCompanion()));
     }
     if (showLoginLogoutButton() && RightsService.isEditor()) {
       buttons.add(
-          _actionButton(Icons.person_add_alt_1, "Sign in other".tr(), () async {
+          _actionButton(Icons.person_add_alt_1, ScheduleStrings.signInOther, () async {
         _queriedParticipants = await DbUsers.getAllUsersBasics();
         _queriedParticipants.forEach((q) => {
               if (_participants.any((p) => p.id == q.id)) {q.isSignedIn = true}
@@ -996,13 +997,13 @@ class _EventPageState extends State<EventPage> {
         DialogHelper.chooseUser(context, (person) async {
           await signIn(context, person);
           await loadData(_event!.id!);
-        }, _queriedParticipants, "Sign in someone".tr());
+        }, _queriedParticipants, ScheduleStrings.signInSomeone);
       }));
     }
     if (RightsService.isGroupAdmin() &&
         _event != null &&
         (_event!.isGroupEvent ?? false)) {
-      buttons.add(_actionButton(Icons.edit_note, "Edit content".tr(), () {
+      buttons.add(_actionButton(Icons.edit_note, CommonStrings.editContent, () {
         RouterService.navigatePageInfo(
                 context,
                 HtmlEditorRoute(
@@ -1017,7 +1018,7 @@ class _EventPageState extends State<EventPage> {
             }
             await loadData(_event!.id!);
             if (mounted) {
-              ToastHelper.Show(context, "Content has been changed.".tr());
+              ToastHelper.Show(context, CommonStrings.contentChanged);
             }
           }
         });
@@ -1261,17 +1262,15 @@ class _EventPageState extends State<EventPage> {
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: const Text("Sign out participant").tr(),
-              content: const Text(
-                      "Do you want to sign out participant {participant} from {event}?")
-                  .tr(namedArgs: {
-                "participant": participant.toString(),
-                "event": _event!.toString()
-              }),
+              title: Text(ScheduleStrings.signOutParticipant),
+              content: Text(ScheduleStrings.signOutParticipantConfirm(
+                participant: participant.toString(),
+                event: _event!.toString(),
+              )),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => RouterService.goBack(context),
-                  child: const Text("Storno").tr(),
+                  child: Text(CommonStrings.storno),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -1280,7 +1279,7 @@ class _EventPageState extends State<EventPage> {
                         context, _event!.id!, participant);
                     await loadData(_event!.id!);
                   },
-                  child: const Text("Sign out someone").tr(),
+                  child: Text(ScheduleStrings.signOutSomeone),
                 ),
               ],
             ));

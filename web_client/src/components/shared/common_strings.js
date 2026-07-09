@@ -3,7 +3,7 @@ import { LocalizationService } from '../../services/localization_service.js';
 export class CommonStrings {
     static get signIn() { return LocalizationService.tr("FeatureUser.signIn"); }
     static get signOut() { return LocalizationService.tr("FeatureUser.signOut"); }
-    static get admin() { return LocalizationService.tr("Admin"); }
+    static get admin() { return LocalizationService.tr("FeatureUser.admin"); }
     static get email() { return LocalizationService.tr("FeatureUser.email"); }
     static get password() { return LocalizationService.tr("FeatureUser.password"); }
     static get login() { return LocalizationService.tr("FeatureUser.logIn"); }
@@ -13,14 +13,14 @@ export class CommonStrings {
     static get forgotYourPassword() { return LocalizationService.tr("FeatureUser.forgotYourPassword"); }
     static get sendResetEmail() { return LocalizationService.tr("FeatureUser.sendResetEmail"); }
     static get iAm() { return LocalizationService.tr("FeatureUser.iAm"); }
-    static get language() { return LocalizationService.tr("Language Settings"); }
+    static get language() { return LocalizationService.tr("Common.languageSettings"); }
     static get resetPassword() { return LocalizationService.tr("FeatureUser.resetPassword"); }
     static get enterEmail() { return LocalizationService.tr("FeatureUser.enterEmailReset"); }
-    static get firstName() { return LocalizationService.tr("Name"); }
-    static get lastName() { return LocalizationService.tr("Surname"); }
+    static get firstName() { return LocalizationService.tr("Common.name"); }
+    static get lastName() { return LocalizationService.tr("PersonFields.surname"); }
     static get confirmPassword() { return LocalizationService.tr("FeatureUser.confirmPassword"); }
     static get back() { return LocalizationService.tr("Common.back"); }
-    static get send() { return LocalizationService.tr("Send"); }
+    static get send() { return LocalizationService.tr("Common.send"); }
     static get emailRequired() { return LocalizationService.tr("FeatureUser.emailInvalid"); }
     static get passwordRequired() { return LocalizationService.tr("FeatureUser.fillPassword"); }
     static get passwordMismatch() { return LocalizationService.tr("FeatureUser.passwordsDoNotMatch"); }
@@ -33,9 +33,9 @@ export class CommonStrings {
     static get error() { return LocalizationService.tr("Common.error"); }
     
     // New additions
-    static get light() { return LocalizationService.tr("Light"); }
-    static get dark() { return LocalizationService.tr("Dark"); }
-    static get auto() { return LocalizationService.tr("Auto"); }
+    static get light() { return LocalizationService.tr("Common.light"); }
+    static get dark() { return LocalizationService.tr("Common.dark"); }
+    static get auto() { return LocalizationService.tr("Common.auto"); }
     static get newPassword() { return LocalizationService.tr("FeatureUser.newPassword"); }
     static get changePassword() { return LocalizationService.tr("FeatureUser.changePasswordTitle"); }
     static get passwordChanged() { return LocalizationService.tr("FeatureUser.passwordChanged"); }
@@ -49,5 +49,5 @@ export class CommonStrings {
     static get delete() { return LocalizationService.tr("Common.delete"); }
     static get save() { return LocalizationService.tr("Common.save"); }
     static get reset() { return LocalizationService.tr("Common.reset"); }
-    static get processing() { return LocalizationService.tr("Processing..."); }
+    static get processing() { return LocalizationService.tr("Common.processing"); }
 }

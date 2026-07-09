@@ -1,6 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
+import 'package:fstapp/components/map/map_strings.dart';
 import 'package:fstapp/components/map/places_content.dart';
 import 'package:fstapp/components/map/path_groups_content.dart';
 import 'package:fstapp/components/icons/icons_management_widget.dart';
@@ -44,8 +45,10 @@ class _PlacesTabState extends State<PlacesTab>
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                DataGridHelper.buildTab(context, Icons.place, "Places".tr()),
-                DataGridHelper.buildTab(context, Icons.timeline, "Paths".tr()),
+                DataGridHelper.buildTab(
+                    context, Icons.place, CommonStrings.places),
+                DataGridHelper.buildTab(
+                    context, Icons.timeline, MapStrings.paths),
                 DataGridHelper.buildTab(
                     context, Icons.category_outlined, IconsStrings.placeTypes),
                 DataGridHelper.buildTab(

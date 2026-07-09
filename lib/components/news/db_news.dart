@@ -1,7 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/news/news_model.dart';
+import 'package:fstapp/components/news/news_strings.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -104,12 +104,12 @@ class DbNews {
         Tb.log_notifications.organization: AppConfig.organization,
       });
 
-      ToastHelper.Show(context, "Message has been sent.".tr());
+      ToastHelper.Show(context, NewsStrings.messageSent);
       return;
     }
 
     if (addToNews) {
-      ToastHelper.Show(context, "Message has been created.".tr());
+      ToastHelper.Show(context, NewsStrings.messageCreated);
     }
   }
 

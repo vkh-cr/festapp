@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class FormStrings {
 // Form Settings Feature
@@ -179,7 +180,7 @@ class FormStrings {
   static String get editorPreview =>
       'FeatureFormSettings.editorPreview'.tr(); // "Editor Preview"
   static String get buttonContinue =>
-      'Continue'.tr(); // "Continue" (Global key)
+      CommonStrings.continueAction; // "Continue" (Global key)
 
   // --- Form Fields (General) ---
   static String get noOptionsForCurrency =>
@@ -302,4 +303,59 @@ class FormStrings {
   static String numberOfResponsesTooltip(int count) =>
       'FormsFeature.numberOfResponsesTooltip'
           .tr(namedArgs: {'count': count.toString()}); // "Number of responses: {count}"
+
+// --- Field & Product Editors (widgets_editor) ---
+  static String get addProduct =>
+      'FormsFeature.addProduct'.tr(); // "Add Product"
+  static String get addDescription =>
+      'FormsFeature.addDescription'.tr(); // "Add description"
+  static String get additionalSettings =>
+      'FormsFeature.additionalSettings'.tr(); // "Additional Settings"
+  static String get answerText =>
+      'FormsFeature.answerText'.tr(); // "Answer text"
+  static String get constraints =>
+      'FormsFeature.constraints'.tr(); // "Constraints"
+  static String get enterZeroForUnlimited =>
+      'FormsFeature.enterZeroForUnlimited'.tr(); // "Enter 0 for unlimited"
+  static String get enterOptionValue =>
+      'FormsFeature.enterOptionValue'.tr(); // "Enter option value"
+  static String get expiryDateLabel =>
+      'FormsFeature.expiryDateLabel'.tr(); // "Expiry Date Label"
+  static String get idCardPassportNumber =>
+      'FormsFeature.idCardPassportNumber'.tr(); // "ID Card / Passport Number"
+  static String get minAge => 'FormsFeature.minAge'.tr(); // "Min Age"
+  static String get maxAge => 'FormsFeature.maxAge'.tr(); // "Max Age"
+  static String get maxAgeLowerThanMinAge =>
+      'FormsFeature.maxAgeLowerThanMinAge'
+          .tr(); // "Max age cannot be lower than min age."
+  static String get multipleChoice =>
+      'FormsFeature.multipleChoice'.tr(); // "Multiple Choice"
+  static String get singleChoice =>
+      'FormsFeature.singleChoice'.tr(); // "Single Choice"
+  static String get newProduct =>
+      'FormsFeature.newProduct'.tr(); // "New Product"
+  static String get noProducts =>
+      'FormsFeature.noProducts'.tr(); // "No Products"
+  static String get noOptions => 'FormsFeature.noOptions'.tr(); // "No options"
+  static String get options => 'FormsFeature.options'.tr(); // "Options"
+  static String get productQuantity =>
+      'FormsFeature.productQuantity'.tr(); // "Product Quantity"
+  static String get productType =>
+      'FormsFeature.productType'.tr(); // "Product Type"
+  static String get productTypeTitle =>
+      'FormsFeature.productTypeTitle'.tr(); // "Product Type Title"
+  static String get requiredLabel =>
+      'FormsFeature.requiredLabel'.tr(); // "Required"
+  static String get show => 'FormsFeature.show'.tr(); // "Show"
+  static String get showExpiryDate =>
+      'FormsFeature.showExpiryDate'.tr(); // "Show Expiry Date"
+  static String get strict => 'FormsFeature.strict'.tr(); // "Strict"
+  static String get strictValidation =>
+      'FormsFeature.strictValidation'.tr(); // "Strict Validation"
+  static String get validationMode =>
+      'FormsFeature.validationMode'.tr(); // "Validation Mode"
+  static String get textFieldType =>
+      'FormsFeature.textFieldType'.tr(); // "Text"
+  static String get viewMore => 'FormsFeature.viewMore'.tr(); // "View more"
+  static String get tabDesign => 'FormsFeature.tabDesign'.tr(); // "Design"
 }

@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart' show Uint8List;
@@ -17,6 +16,7 @@ import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/app_management/settings_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/components/users/views/login_page.dart';
@@ -27,6 +27,7 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/_shared/person_fields_strings.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
@@ -154,9 +155,8 @@ class _UserPageState extends State<UserPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Profile",
-                style: TextStyle(color: ThemeConfig.appBarColorNegative()))
-            .tr(),
+        title: Text(UserStrings.profile,
+            style: TextStyle(color: ThemeConfig.appBarColorNegative())),
         leading: BackButton(
           color: ThemeConfig.appBarColorNegative(),
           onPressed: () => RouterService.popOrHome(context),
@@ -184,7 +184,7 @@ class _UserPageState extends State<UserPage> {
                         userData?.occasionUser!.user ?? "",
                       ),
                       icon: Icons.qr_code,
-                      label: "Show my code".tr(),
+                      label: UserStrings.showMyCode,
                     ),
                   ),
                 if (FeatureService.isFeatureEnabled(
@@ -206,12 +206,12 @@ class _UserPageState extends State<UserPage> {
                         if (index == 0) {
                           return ListTile(
                             title: Text(
-                              "Companions",
+                              CommonStrings.companions,
                               style: TextStyle(
                                 color: ThemeConfig.blackColor(context),
                                 fontWeight: FontWeight.bold,
                               ),
-                            ).tr(),
+                            ),
                           );
                         }
                         final companion = userData?.companions![index - 1];
@@ -237,11 +237,10 @@ class _UserPageState extends State<UserPage> {
                                     ),
                                   ),
                                   subtitle: Text(
-                                    "Signed in events: {count}".tr(namedArgs: {
-                                      "count": companion.schedule?.length
-                                              .toString() ??
-                                          "0"
-                                    }),
+                                    UserStrings.signedInEvents(
+                                        count: companion.schedule?.length
+                                                .toString() ??
+                                            "0"),
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -258,7 +257,7 @@ class _UserPageState extends State<UserPage> {
                                       companion.id,
                                     ),
                                     icon: Icons.qr_code,
-                                    label: "Show Code".tr(),
+                                    label: UserStrings.showCode,
                                   ),
                                   expandedCrossAxisAlignment:
                                       CrossAxisAlignment.center,
@@ -284,12 +283,12 @@ class _UserPageState extends State<UserPage> {
                                         nodePosition: 0.3,
                                         emptyContent: Center(
                                           child: Text(
-                                            "Companion's events will appear here.",
+                                            UserStrings.companionEventsEmpty,
                                             style: TextStyle(
                                               color:
                                                   ThemeConfig.grey600(context),
                                             ),
-                                          ).tr(),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -303,9 +302,10 @@ class _UserPageState extends State<UserPage> {
                                             var answer = await DialogHelper
                                                 .showConfirmationDialog(
                                                     context,
-                                                    "Delete companion".tr(),
-                                                    "By deleting your companion you will also sign him/her out of all signed in sessions."
-                                                        .tr());
+                                                    UserStrings
+                                                        .deleteCompanion,
+                                                    UserStrings
+                                                        .deleteCompanionConfirm);
                                             if (!answer) {
                                               return;
                                             }
@@ -313,7 +313,8 @@ class _UserPageState extends State<UserPage> {
                                                 companion);
                                             await loadData();
                                           },
-                                          child: Text("Delete companion").tr(),
+                                          child: Text(
+                                              UserStrings.deleteCompanion),
                                         ),
                                       ],
                                     ),
@@ -333,17 +334,17 @@ class _UserPageState extends State<UserPage> {
                             ?.data![Tb.occasion_users.data_name] ??
                         ""),
                 buildTextField(
-                    "Surname".tr(),
+                    PersonFieldsStrings.surname,
                     userData?.occasionUser
                             ?.data![Tb.occasion_users.data_surname] ??
                         ""),
                 buildTextField(
-                    "E-mail".tr(),
+                    PersonFieldsStrings.email,
                     userData?.occasionUser
                             ?.data![Tb.occasion_users.data_email] ??
                         ""),
                 buildTextField(
-                    "I am".tr(),
+                    PersonFieldsStrings.sexLabel,
                     UserInfoModel.sexToLocale(userData
                         ?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.services))
@@ -354,14 +355,14 @@ class _UserPageState extends State<UserPage> {
                   child: ButtonsHelper.bigButton(
                     context: context,
                     onPressed: () async => _redirectToAdminPage(),
-                    label: "Event management".tr(),
+                    label: CommonStrings.eventManagement,
                   ),
                 ),
                 const SizedBox(height: 16),
                 ButtonsHelper.bigButton(
                   context: context,
                   onPressed: () async => _logout(),
-                  label: "Sign out".tr(),
+                  label: UserStrings.signOut,
                   color: ThemeConfig.seed1,
                   textColor: Colors.white,
                 ),
@@ -372,9 +373,8 @@ class _UserPageState extends State<UserPage> {
                     onPressed: () async {
                       var answer = await DialogHelper.showConfirmationDialog(
                         context,
-                        "Change Password Instructions".tr(),
-                        "You'll receive an email with a link to reset your password. Do you want to proceed?"
-                            .tr(),
+                        UserStrings.changePasswordInstructions,
+                        UserStrings.resetPasswordProceedConfirm,
                         confirmButtonMessage: CommonStrings.proceed,
                       );
                       if (answer) {
@@ -386,21 +386,19 @@ class _UserPageState extends State<UserPage> {
                               context, UserStrings.passwordResetSent);
                           DialogHelper.showInformationDialog(
                             context,
-                            "Change Password Instructions".tr(),
-                            "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
-                                .tr(namedArgs: {
-                              "email": userData!.occasionUser!
-                                  .data![Tb.occasion_users.data_email]
-                            }),
+                            UserStrings.changePasswordInstructions,
+                            UserStrings.passwordResetLinkSent(
+                                email: userData!.occasionUser!
+                                    .data![Tb.occasion_users.data_email]),
                           );
                         });
                       }
                     },
                     child: Text(
-                      "Change password".tr(),
+                      UserStrings.changePassword,
                       style: TextStyle(
                           fontSize: StylesConfig.normalClickableFontSize),
-                    ).tr(),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -409,15 +407,14 @@ class _UserPageState extends State<UserPage> {
                   child: TextButton(
                     onPressed: () => DialogHelper.showInformationDialog(
                       context,
-                      "Delete account".tr(),
-                      "Request account deletion by sending email with your credentials to info@festapp.net."
-                          .tr(),
+                      UserStrings.deleteAccount,
+                      UserStrings.deleteAccountInstructions,
                     ),
                     child: Text(
-                      "Delete account".tr(),
+                      UserStrings.deleteAccount,
                       style: TextStyle(
                           fontSize: StylesConfig.normalClickableFontSize),
-                    ).tr(),
+                    ),
                   ),
                 )
               ],
@@ -459,7 +456,7 @@ class _UserPageState extends State<UserPage> {
   Future<void> _logout() async {
     var trPrefix = RightsService.currentUser()?.getGenderPrefix();
     await AuthService.logout();
-    ToastHelper.Show(context, "${trPrefix}You have been signed out.".tr());
+    ToastHelper.Show(context, ScheduleStrings.youHaveBeenSignedOut(trPrefix));
     RouterService.popOrHome(context);
   }
 

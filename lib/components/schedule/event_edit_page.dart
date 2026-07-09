@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.gr.dart';
@@ -11,6 +10,7 @@ import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
@@ -123,8 +123,8 @@ class _EventEditPageState extends State<EventEditPage> {
   Future<void> deleteEvent() async {
     final confirmation = await DialogHelper.showConfirmationDialog(
       context,
-      "Confirm removal".tr(),
-      "Are you sure you want to delete this event?".tr(),
+      CommonStrings.confirmRemoval,
+      ScheduleStrings.deleteEventConfirm,
     );
     if (confirmation) {
       await originalEvent!.deleteMethod(context);
@@ -208,7 +208,7 @@ class _EventEditPageState extends State<EventEditPage> {
                         child: ListView(
                           children: [
                             SwitchListTile(
-                              title: Text("Hide").tr(),
+                              title: Text(CommonStrings.hide),
                               value: isHidden ?? false,
                               onChanged: (value) =>
                                   setState(() => isHidden = value),
@@ -324,7 +324,7 @@ class _EventEditPageState extends State<EventEditPage> {
                                   ? maxParticipants.toString()
                                   : "",
                               decoration: InputDecoration(
-                                labelText: "Maximum of participants".tr(),
+                                labelText: ScheduleStrings.maxParticipants,
                               ),
                               keyboardType: TextInputType.number,
                               validator: (value) {
@@ -370,7 +370,7 @@ class _EventEditPageState extends State<EventEditPage> {
                                     }
                                   });
                                 },
-                                child: Text("Edit content").tr(),
+                                child: Text(CommonStrings.editContent),
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -400,7 +400,7 @@ class _EventEditPageState extends State<EventEditPage> {
                             const SizedBox(height: 16),
                             ExpansionTile(
                               title: Text(
-                                "Advanced Settings".tr(),
+                                CommonStrings.advancedSettings,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -408,13 +408,13 @@ class _EventEditPageState extends State<EventEditPage> {
                               ),
                               children: [
                                 SwitchListTile(
-                                  title: Text("Group").tr(),
+                                  title: Text(ScheduleStrings.group),
                                   value: isGroupEvent ?? false,
                                   onChanged: (value) =>
                                       setState(() => isGroupEvent = value),
                                 ),
                                 SwitchListTile(
-                                  title: Text("M/F 50/50").tr(),
+                                  title: Text(ScheduleStrings.splitMenWomen),
                                   value: splitForMenWomen ?? false,
                                   onChanged: (value) =>
                                       setState(() => splitForMenWomen = value),
@@ -480,7 +480,7 @@ class _EventEditPageState extends State<EventEditPage> {
                                 TextFormField(
                                   initialValue: showInsideEvent,
                                   decoration: InputDecoration(
-                                      labelText: "Show inside event".tr()),
+                                      labelText: ScheduleStrings.showInsideEvent),
                                   onSaved: (value) => showInsideEvent = value,
                                 ),
                               ],

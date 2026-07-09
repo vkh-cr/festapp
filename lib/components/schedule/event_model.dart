@@ -39,7 +39,7 @@ class EventModel extends ITrinaRowModel {
   List<int>? childEventIds;
   int? currentParticipants;
   int? currentUsersSaved;
-  String? title = "Event".tr();
+  String? title = CommonStrings.event;
   String? description = "";
   bool? isSignedIn = false;
   bool? splitForMenWomen = false;

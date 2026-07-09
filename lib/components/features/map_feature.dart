@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 
 import 'feature.dart';
 import 'feature_constants.dart';
@@ -104,7 +104,7 @@ class MapFeature extends Feature {
             // zoom
             TextFormField(
               controller: zoomCtrl,
-              decoration: InputDecoration(labelText: 'Map Zoom'.tr()),
+              decoration: InputDecoration(labelText: FeaturesStrings.mapZoom),
               keyboardType: TextInputType.numberWithOptions(decimal: true),
               onSaved: (val) =>
                   defaultMapZoom = double.tryParse(val ?? '') ?? defaultMapZoom,
@@ -116,7 +116,8 @@ class MapFeature extends Feature {
               Expanded(
                 child: TextFormField(
                   controller: latCtrl,
-                  decoration: InputDecoration(labelText: 'Latitude'.tr()),
+                  decoration:
+                      InputDecoration(labelText: FeaturesStrings.latitude),
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   onSaved: (val) {
                     final lat =
@@ -130,7 +131,8 @@ class MapFeature extends Feature {
               Expanded(
                 child: TextFormField(
                   controller: lngCtrl,
-                  decoration: InputDecoration(labelText: 'Longitude'.tr()),
+                  decoration:
+                      InputDecoration(labelText: FeaturesStrings.longitude),
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   onSaved: (val) {
                     final lng =
@@ -144,7 +146,7 @@ class MapFeature extends Feature {
 
             const SizedBox(height: 16),
             ExpansionTile(
-              title: Text('Map Layer Settings'.tr()),
+              title: Text(FeaturesStrings.mapLayerSettings),
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -154,35 +156,38 @@ class MapFeature extends Feature {
                       TextFormField(
                         controller: onlineLogo,
                         decoration:
-                            InputDecoration(labelText: 'Map Layer Logo'.tr()),
+                            InputDecoration(
+                                labelText: FeaturesStrings.mapLayerLogo),
                         onSaved: (val) => onlineMapLayer.logo = val ?? '',
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: onlineText,
                         decoration:
-                            InputDecoration(labelText: 'Map Layer Text'.tr()),
+                            InputDecoration(
+                                labelText: FeaturesStrings.mapLayerText),
                         onSaved: (val) => onlineMapLayer.text = val ?? '',
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: onlineLogoLink,
                         decoration: InputDecoration(
-                            labelText: 'Map Layer Logo Link'.tr()),
+                            labelText: FeaturesStrings.mapLayerLogoLink),
                         onSaved: (val) => onlineMapLayer.logoLink = val ?? '',
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: onlineTextLink,
                         decoration: InputDecoration(
-                            labelText: 'Map Layer Text Link'.tr()),
+                            labelText: FeaturesStrings.mapLayerTextLink),
                         onSaved: (val) => onlineMapLayer.textLink = val ?? '',
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: onlineLayerLink,
                         decoration:
-                            InputDecoration(labelText: 'Map Layer URL'.tr()),
+                            InputDecoration(
+                                labelText: FeaturesStrings.mapLayerUrl),
                         onSaved: (val) => onlineMapLayer.layerLink = val ?? '',
                       ),
                     ],
@@ -193,7 +198,7 @@ class MapFeature extends Feature {
 
             const SizedBox(height: 16),
             ExpansionTile(
-              title: Text('Offline Map Layer Settings'.tr()),
+              title: Text(FeaturesStrings.offlineMapLayerSettings),
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -203,33 +208,35 @@ class MapFeature extends Feature {
                       TextFormField(
                         controller: offlineLogo,
                         decoration:
-                            InputDecoration(labelText: 'Map Layer Logo'.tr()),
+                            InputDecoration(
+                                labelText: FeaturesStrings.mapLayerLogo),
                         onSaved: (val) => offlineMapLayer.logo = val ?? '',
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: offlineText,
                         decoration:
-                            InputDecoration(labelText: 'Map Layer Text'.tr()),
+                            InputDecoration(
+                                labelText: FeaturesStrings.mapLayerText),
                         onSaved: (val) => offlineMapLayer.text = val ?? '',
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: offlineLogoLink,
                         decoration: InputDecoration(
-                            labelText: 'Map Layer Logo Link'.tr()),
+                            labelText: FeaturesStrings.mapLayerLogoLink),
                         onSaved: (val) => offlineMapLayer.logoLink = val ?? '',
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: offlineTextLink,
                         decoration: InputDecoration(
-                            labelText: 'Map Layer Text Link'.tr()),
+                            labelText: FeaturesStrings.mapLayerTextLink),
                         onSaved: (val) => offlineMapLayer.textLink = val ?? '',
                       ),
                       const SizedBox(height: 16),
                       SwitchListTile(
-                        title: Text('Force offline map'.tr()),
+                        title: Text(FeaturesStrings.forceOfflineMap),
                         value: autoOffline,
                         onChanged: (v) => setLocalState(() {
                           autoOffline = v;
@@ -240,7 +247,7 @@ class MapFeature extends Feature {
                       TextFormField(
                         controller: pkgCtrl,
                         decoration: InputDecoration(
-                            labelText: 'Offline Map Package URL'.tr()),
+                            labelText: FeaturesStrings.offlineMapPackageUrl),
                         onSaved: (val) =>
                             offlineMapLayer.offlineMapPackageURL = val ?? '',
                       ),
@@ -248,7 +255,7 @@ class MapFeature extends Feature {
                       TextFormField(
                         controller: styleCtrl,
                         decoration: InputDecoration(
-                            labelText: 'Offline Map Style URL'.tr()),
+                            labelText: FeaturesStrings.offlineMapStyleUrl),
                         onSaved: (val) =>
                             offlineMapLayer.offlineMapStyleURL = val ?? '',
                       ),
@@ -256,7 +263,7 @@ class MapFeature extends Feature {
                       TextFormField(
                         controller: layerNameCtrl,
                         decoration: InputDecoration(
-                            labelText: 'Offline Map Layer Name'.tr()),
+                            labelText: FeaturesStrings.offlineMapLayerName),
                         onSaved: (val) =>
                             offlineMapLayer.offlineMapLayerName = val ?? '',
                       ),

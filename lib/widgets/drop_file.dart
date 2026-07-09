@@ -1,8 +1,8 @@
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/platform_helper.dart';
 import 'package:fstapp/theme_config.dart';
 
@@ -196,8 +196,8 @@ class _DropFileState extends State<DropFile> {
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
                         child: Text(
                           isClickable
-                              ? "Drop file here or click to upload".tr()
-                              : "Drop file here".tr(),
+                              ? CommonStrings.dropFileHereOrClick
+                              : CommonStrings.dropFileHere,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16,

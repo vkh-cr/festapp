@@ -64,17 +64,15 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (languages.length > 1) ...[
-          Text("Language Settings",
-                  style: TextStyle(
-                      fontSize: 16, color: ThemeConfig.blackColor(context)))
-              .tr(),
+          Text(CommonStrings.languageSettings,
+              style: TextStyle(
+                  fontSize: 16, color: ThemeConfig.blackColor(context))),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Current Language: {language}"
-                    .tr(namedArgs: {"language": currentLanguage.name}),
+                CommonStrings.currentLanguage(language: currentLanguage.name),
                 style: TextStyle(
                     fontSize: 14, color: ThemeConfig.blackColor(context)),
               ),
@@ -96,10 +94,9 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Appearance",
-                      style: TextStyle(
-                          fontSize: 16, color: ThemeConfig.blackColor(context)))
-                  .tr(),
+              Text(CommonStrings.appearance,
+                  style: TextStyle(
+                      fontSize: 16, color: ThemeConfig.blackColor(context))),
               const SizedBox(height: 8),
               ToggleButtons(
                 isSelected: [
@@ -125,24 +122,21 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Text("Dark",
-                            style: TextStyle(
-                                color: ThemeConfig.blackColor(context)))
-                        .tr(),
+                    child: Text(CommonStrings.dark,
+                        style:
+                            TextStyle(color: ThemeConfig.blackColor(context))),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Text("Auto",
-                            style: TextStyle(
-                                color: ThemeConfig.blackColor(context)))
-                        .tr(),
+                    child: Text(CommonStrings.auto,
+                        style:
+                            TextStyle(color: ThemeConfig.blackColor(context))),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Text("Light",
-                            style: TextStyle(
-                                color: ThemeConfig.blackColor(context)))
-                        .tr(),
+                    child: Text(CommonStrings.light,
+                        style:
+                            TextStyle(color: ThemeConfig.blackColor(context))),
                   ),
                 ],
               ),
@@ -222,7 +216,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
           child: StatefulBuilder(
             builder: (context, localSetState) {
               final user = RightsService.currentUser();
-              final String fullName = user?.name ?? "User".tr();
+              final String fullName = user?.name ?? CommonStrings.user;
               final String surname = user?.surname ?? "";
               final String email = user?.email ?? "";
 
@@ -303,11 +297,11 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                         color: Theme.of(context).primaryColor,
                       ),
                       title: Text(
-                        "Sign out",
+                        UserStrings.signOut,
                         style: TextStyle(
                             fontSize: 16,
                             color: ThemeConfig.blackColor(context)),
-                      ).tr(),
+                      ),
                       onTap: () async {
                         final unitId = RightsService.currentUnit()?.id;
                         Navigator.pop(context);
@@ -429,7 +423,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
             size: 32,
             color: iconColor,
           ),
-          tooltip: "Admin".tr(),
+          tooltip: UserStrings.admin,
           onPressed: widget.onAdminPressed,
         );
       } else {
@@ -440,7 +434,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
             Icons.edit_calendar, // Added icon back
             color: iconColor,
           ),
-          label: const Text("Admin").tr(),
+          label: Text(UserStrings.admin),
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(28),

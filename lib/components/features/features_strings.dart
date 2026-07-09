@@ -105,6 +105,8 @@ class FeaturesStrings {
       'FeatureImport.csvCopiedToast'.tr(); // "Copied to clipboard."
 
   // Feature Contract
+  static String get contractTitle => 'FeatureContract.title'.tr();
+  static String get contractDescription => 'FeatureContract.description'.tr();
   static String get contractTransport => 'FeatureContract.transport'.tr();
   static String get contractDeparturePoint =>
       'FeatureContract.departurePoint'.tr();
@@ -139,4 +141,121 @@ class FeaturesStrings {
   static String get selectTicket => 'FeatureTicket.selectTicket'.tr();
   static String get unknown => 'FeatureTicket.unknown'.tr();
   static String get noData => 'FeatureTicket.noData'.tr();
+  static String get ticketDescription =>
+      'FeatureTicket.description'
+          .tr(); // "After payment, a ticket is sent to the user. The ticket can have a custom background and text color."
+  static String get ticketType =>
+      'FeatureTicket.ticketType'.tr(); // "Ticket Type"
+  static String get backgroundColor =>
+      'FeatureTicket.backgroundColor'.tr(); // "Background color"
+  static String get fontColor => 'FeatureTicket.fontColor'.tr(); // "Font color"
+  static String get backgroundImageHint =>
+      'FeatureTicket.backgroundImageHint'.tr(); // "(1600x900 px)"
+  static String get uploadImageSuccess =>
+      'FeatureTicket.uploadImageSuccess'.tr(); // "File uploaded successfully."
+  static String get uploadImageError =>
+      'FeatureTicket.uploadImageError'.tr(); // "Failed to upload image."
+  static String get deleteImageConfirm => 'FeatureTicket.deleteImageConfirm'
+      .tr(); // "Are you sure you want to delete this image?"
+  static String get removeImageSuccess =>
+      'FeatureTicket.removeImageSuccess'.tr(); // "Image removed successfully."
+  static String get removeImageError =>
+      'FeatureTicket.removeImageError'.tr(); // "Failed to remove image."
+
+  // Feature Form
+  static String get formTitle => 'FeatureForm.title'.tr(); // "Form"
+  static String get formDescription => 'FeatureForm.description'
+      .tr(); // "Allows creating a form to reserve one or more seats at an event."
+
+  // Feature Companions
+  static String get companionsDescription => 'FeatureCompanions.description'
+      .tr(); // "Allows adding companions (partner, child, or friend without a phone) and signing them up for workshops."
+  static String get enterNumberGreaterThanZero =>
+      'FeatureCompanions.enterNumberGreaterThanZero'
+          .tr(); // "Enter a number greater than 0"
+
+  // Feature Songbook
+  static String get songbookDescription => 'FeatureSongbook.description'
+      .tr(); // "Displays a songbook and allows adding custom songs."
+
+  // Feature Game
+  static String get gameDescription => 'FeatureGame.description'
+      .tr(); // "Allows defining teams, stations, and playing a game where team members enter a code to complete a station."
+
+  // Feature Groups
+  static String get groupsDescription => 'FeatureGroups.description'
+      .tr(); // "Allows creating groups and scheduling meetings for them."
+
+  // Feature My Schedule
+  static String get myScheduleDescription => 'FeatureMySchedule.description'
+      .tr(); // "Enables adding program items to favorites."
+
+  // Feature Entry Code
+  static String get entryCodeTitle =>
+      'FeatureEntryCode.title'.tr(); // "Entry Code"
+  static String get entryCodeDescription => 'FeatureEntryCode.description'
+      .tr(); // "It is possible to verify users via QR code on workshops or other limited events."
+
+  // Feature Blueprint
+  static String get blueprintDescription => 'FeatureBlueprint.description'
+      .tr(); // "This feature lets you create a seating blueprint with a limited number of seats for the reservation form. For example, you can design a seating chart for a bus or a layout of a hall with assigned seats."
+
+  // Feature Timetable
+  static String get timetableTitle =>
+      'FeatureTimetable.title'.tr(); // "Timetable"
+  static String get timetableDescription => 'FeatureTimetable.description'
+      .tr(); // "Allows displaying the program in a table."
+
+  // Feature Volunteers
+  static String get volunteersDescription => 'FeatureVolunteers.description'
+      .tr(); // "Allows management of activities for volunteers."
+
+  // Feature Schedule (feature list metadata)
+  static String get scheduleDescription => 'FeatureSchedule.description'
+      .tr(); // "Allows customizing event schedule display settings."
+
+  // Feature Workshops
+  static String get workshopsTitle =>
+      'FeatureWorkshops.title'.tr(); // "Workshops"
+  static String get workshopsDescription => 'FeatureWorkshops.description'
+      .tr(); // "Indicates the start time from when people can sign in for workshops."
+  static String get registrationStartTime => 'FeatureWorkshops.registrationStartTime'
+      .tr(); // "Workshop Registration Start Time"
+  static String get selectStartTime =>
+      'FeatureWorkshops.selectStartTime'.tr(); // "Select start time"
+  static String get earlyRegistrationMessage =>
+      'FeatureWorkshops.earlyRegistrationMessage'
+          .tr(); // "Early Registration Attempt Message"
+  static String get earlyRegistrationMessageHint =>
+      'FeatureWorkshops.earlyRegistrationMessageHint'
+          .tr(); // "Enter message for users trying to register too early"
+
+  // Feature Map
+  static String get mapDescription => 'FeatureMap.description'
+      .tr(); // "Various settings for map inside the app."
+  static String get mapZoom => 'FeatureMap.mapZoom'.tr(); // "Map Zoom"
+  static String get latitude => 'FeatureMap.latitude'.tr(); // "Latitude"
+  static String get longitude => 'FeatureMap.longitude'.tr(); // "Longitude"
+  static String get mapLayerSettings =>
+      'FeatureMap.mapLayerSettings'.tr(); // "Map Layer Settings"
+  static String get mapLayerLogo =>
+      'FeatureMap.mapLayerLogo'.tr(); // "Map Layer Logo"
+  static String get mapLayerText =>
+      'FeatureMap.mapLayerText'.tr(); // "Map Layer Text"
+  static String get mapLayerLogoLink =>
+      'FeatureMap.mapLayerLogoLink'.tr(); // "Map Layer Logo Link"
+  static String get mapLayerTextLink =>
+      'FeatureMap.mapLayerTextLink'.tr(); // "Map Layer Text Link"
+  static String get mapLayerUrl =>
+      'FeatureMap.mapLayerUrl'.tr(); // "Map Layer URL"
+  static String get offlineMapLayerSettings =>
+      'FeatureMap.offlineMapLayerSettings'.tr(); // "Offline Map Layer Settings"
+  static String get forceOfflineMap =>
+      'FeatureMap.forceOfflineMap'.tr(); // "Force offline map"
+  static String get offlineMapPackageUrl =>
+      'FeatureMap.offlineMapPackageUrl'.tr(); // "Offline Map Package URL"
+  static String get offlineMapStyleUrl =>
+      'FeatureMap.offlineMapStyleUrl'.tr(); // "Offline Map Style URL"
+  static String get offlineMapLayerName =>
+      'FeatureMap.offlineMapLayerName'.tr(); // "Offline Map Layer Name"
 }

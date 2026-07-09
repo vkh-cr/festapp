@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/components/html/html_strings.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
@@ -123,11 +123,9 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (_progress == null) ...[
-                          const Text(
-                                  'Processing content and detecting large images...',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16))
-                              .tr(),
+                          Text(HtmlStrings.processingContent,
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16)),
                         ] else ...[
                           Container(
                             padding: const EdgeInsets.all(16),
@@ -135,10 +133,9 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Text('Reducing Images Size...',
-                                        style: TextStyle(
-                                            color: Colors.black, fontSize: 16))
-                                    .tr(),
+                                Text(HtmlStrings.reducingImagesSize,
+                                    style: const TextStyle(
+                                        color: Colors.black, fontSize: 16)),
                                 const SizedBox(height: 20),
                                 LinearProgressIndicator(value: _progress),
                                 const SizedBox(height: 10),
@@ -228,9 +225,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
         barrierDismissible: false,
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Large Images Detected"),
-          content: const Text(
-              "Some images are large and may slow down the app. Press OK to convert them into optimal size."),
+          title: Text(HtmlStrings.largeImagesDetected),
+          content: Text(HtmlStrings.largeImagesPrompt),
           actions: [
             TextButton(
               child: Text(CommonStrings.ok),

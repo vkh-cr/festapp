@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 
 class PasswordField extends StatefulWidget {
   final String label;
@@ -39,7 +39,7 @@ class _PasswordFieldState extends State<PasswordField> {
       autofillHints: [widget.passwordType],
       validator: (String? value) {
         if (value!.isEmpty) {
-          return "Fill the password!".tr();
+          return UserStrings.fillPassword;
         }
         return null;
       },

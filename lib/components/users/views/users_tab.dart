@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -14,6 +13,7 @@ import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/users/views/users_tab_helper.dart';
 
 class UsersTab extends StatefulWidget {
@@ -79,7 +79,7 @@ class _UsersTabState extends State<UsersTab> {
       final headerActions = [
         if (RightsService.isManager())
           DataGridAction(
-            name: "Add existing".tr(),
+            name: CommonStrings.addExisting,
             action: (SingleDataGridController p0, [_]) async {
               await UsersTabHelper.addExisting(
                   context,
@@ -89,14 +89,14 @@ class _UsersTabState extends State<UsersTab> {
             },
           ),
         DataGridAction(
-          name: "Invite".tr(),
+          name: UserStrings.invite,
           action: (SingleDataGridController p0, [_]) async {
             await UsersTabHelper.invite(context, p0, refreshData);
           },
           isEnabled: RightsService.canUpdateUsers,
         ),
         DataGridAction(
-          name: "Change password".tr(),
+          name: UserStrings.changePassword,
           action: (SingleDataGridController p0, [_]) =>
               UsersTabHelper.setPassword(context, p0),
           isEnabled: RightsService.canUpdateUsers,

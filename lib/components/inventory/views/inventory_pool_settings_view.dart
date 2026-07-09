@@ -591,7 +591,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                             Center(
                               child: ElevatedButton.icon(
                                 icon: const Icon(Icons.edit),
-                                label: Text("Edit content".tr()),
+                                label: Text(CommonStrings.editContent),
                                 onPressed: () async {
                                   final result =
                                       await RouterService.navigatePageInfo(

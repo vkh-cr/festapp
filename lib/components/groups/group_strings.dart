@@ -38,4 +38,14 @@ class GroupsStrings {
       'GroupStrings.assignLeaderTooltip'.tr(); // "Assign as leader"
   static String get removeParticipantTooltip =>
       'GroupStrings.removeParticipantTooltip'.tr(); // "Remove participant"
+
+  // --- GameTab / game contents ---
+  static String get checkPoints =>
+      'GroupStrings.checkPoints'.tr(); // "Check points"
+  static String get correctAnswer =>
+      'GroupStrings.correctAnswer'.tr(); // "Correct answer"
+  static String get startBeforeEnd => 'GroupStrings.startBeforeEnd'
+      .tr(); // "Start time must be earlier than end time."
+  static String get noOneAssigned =>
+      'GroupStrings.noOneAssigned'.tr(); // "No one assigned"
 }

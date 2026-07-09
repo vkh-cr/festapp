@@ -1,7 +1,7 @@
 import 'dart:async' as notification_helper;
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/news/news_page.dart';
 import 'package:fstapp/router_service.dart';
@@ -83,16 +83,16 @@ class NotificationHelper {
         await StorageHelper.set(notificationAllowedAsked, false.toString());
 
         if (!dialogResult) {
-          ToastHelper.Show(context, "Notifications have been disabled.".tr());
+          ToastHelper.Show(context, CommonStrings.notificationsDisabled);
           return;
         }
         var requestResult = await requestNotificationPermission();
         await StorageHelper.set(
             notificationAllowedAsked, requestResult.toString());
         if (requestResult) {
-          ToastHelper.Show(context, "Notifications have been allowed.".tr());
+          ToastHelper.Show(context, CommonStrings.notificationsAllowed);
         } else {
-          ToastHelper.Show(context, "Notifications have been disabled.".tr());
+          ToastHelper.Show(context, CommonStrings.notificationsDisabled);
         }
       }
     }

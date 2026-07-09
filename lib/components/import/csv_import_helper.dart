@@ -1,7 +1,6 @@
 // file: lib/helpers/csv_import_helper.dart
 
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -10,6 +9,7 @@ import 'package:fstapp/components/users/occasion_user_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/components/import/import_strings.dart';
 import 'package:fstapp/components/users/import_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
@@ -115,8 +115,8 @@ class CsvImportHelper {
 
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
-      "Creating users".tr(),
-      "${"New users found. Do you want to create them?".tr()}\n${CommonStrings.users} (${toBeCreated.length}):\n${toBeCreated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
+      ImportStrings.creatingUsers,
+      "${ImportStrings.createUsersConfirm}\n${CommonStrings.users} (${toBeCreated.length}):\n${toBeCreated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
       confirmButtonMessage: CommonStrings.proceed,
     );
 
@@ -124,7 +124,7 @@ class CsvImportHelper {
 
     await DialogHelper.showProgressDialogAsync(
       context,
-      "Creating users".tr(),
+      ImportStrings.creatingUsers,
       toBeCreated.length,
       futures: toBeCreated
           .map((u) => () async {
@@ -132,8 +132,8 @@ class CsvImportHelper {
                     OccasionUserModel.fromImportedJson(u));
                 ToastHelper.Show(
                     context,
-                    "Created {item}.".tr(
-                        namedArgs: {"item": u[Tb.occasion_users.data_email]}));
+                    ImportStrings.createdItem(
+                        item: u[Tb.occasion_users.data_email]));
               })
           .toList(),
     );
@@ -148,8 +148,8 @@ class CsvImportHelper {
 
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
-      "Updating users".tr(),
-      "${"These users have some changes. Do you want to update them?".tr()}\n${CommonStrings.users} (${toBeUpdated.length}):\n${toBeUpdated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
+      ImportStrings.updatingUsers,
+      "${ImportStrings.updateUsersConfirm}\n${CommonStrings.users} (${toBeUpdated.length}):\n${toBeUpdated.map((u) => u[Tb.occasion_users.data_email]).join(",\n")}",
       confirmButtonMessage: CommonStrings.proceed,
     );
 
@@ -157,7 +157,7 @@ class CsvImportHelper {
 
     await DialogHelper.showProgressDialogAsync(
       context,
-      "Updating users".tr(),
+      ImportStrings.updatingUsers,
       toBeUpdated.length,
       futures: toBeUpdated
           .map((u) => () async {
@@ -171,8 +171,8 @@ class CsvImportHelper {
                 await DbUsers.updateExistingImportedOccasionUser(fromExisting);
                 ToastHelper.Show(
                     context,
-                    "Updated {item}.".tr(
-                        namedArgs: {"item": u[Tb.occasion_users.data_email]}));
+                    CommonStrings.updatedItem(
+                        item: u[Tb.occasion_users.data_email]));
               })
           .toList(),
     );
@@ -336,8 +336,8 @@ class CsvImportHelper {
 
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
-      "Removing users".tr(),
-      "${"These users have been removed, but they still exist in the application. Do you want to remove them?".tr()}\n${CommonStrings.users} (${toBeDeleted.length}):\n${toBeDeleted.map((u) => u.toBasicString()).join(",\n")}",
+      ImportStrings.removingUsers,
+      "${ImportStrings.removeUsersConfirm}\n${CommonStrings.users} (${toBeDeleted.length}):\n${toBeDeleted.map((u) => u.toBasicString()).join(",\n")}",
       confirmButtonMessage: CommonStrings.proceed,
     );
 
@@ -345,16 +345,14 @@ class CsvImportHelper {
 
     await DialogHelper.showProgressDialogAsync(
       context,
-      "Removing users".tr(),
+      ImportStrings.removingUsers,
       toBeDeleted.length,
       futures: toBeDeleted
           .map((existing) => () async {
                 await DbUsers.deleteOccasionUser(
                     existing.user!, existing.occasion!);
-                ToastHelper.Show(
-                    context,
-                    "Removed {item}."
-                        .tr(namedArgs: {"item": existing.toBasicString()}));
+                ToastHelper.Show(context,
+                    ImportStrings.removedItem(item: existing.toBasicString()));
               })
           .toList(),
     );

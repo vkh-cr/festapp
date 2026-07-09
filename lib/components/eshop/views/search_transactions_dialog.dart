@@ -135,7 +135,7 @@ class _SearchTransactionsDialogState extends State<SearchTransactionsDialog> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(CommonStrings.confirm),
-        content: Text("Are you sure you want to add this transaction?".tr()),
+        content: Text(OrdersStrings.addTransactionConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -158,7 +158,7 @@ class _SearchTransactionsDialogState extends State<SearchTransactionsDialog> {
         widget.paymentInfoId,
       );
 
-      ToastHelper.Show(context, "Transaction added successfully.".tr());
+      ToastHelper.Show(context, OrdersStrings.transactionAddedSuccess);
       Navigator.of(context).pop(true);
     }
   }
@@ -176,8 +176,7 @@ class _SearchTransactionsDialogState extends State<SearchTransactionsDialog> {
               controller: _searchController,
               decoration: InputDecoration(
                 labelText: CommonStrings.search,
-                hintText:
-                    "Search by message, account, symbol, name, or amount".tr(),
+                hintText: OrdersStrings.searchTransactionsHint,
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -199,7 +198,7 @@ class _SearchTransactionsDialogState extends State<SearchTransactionsDialog> {
                               final counterAccountName =
                                   transaction.counterAccountName ??
                                       transaction.performedBy ??
-                                      "N/A".tr();
+                                      OrdersStrings.notAvailable;
 
                               return Card(
                                 margin: EdgeInsets.symmetric(vertical: 4),
@@ -289,7 +288,7 @@ class _SearchTransactionsDialogState extends State<SearchTransactionsDialog> {
                                         if (transaction.vs != null &&
                                             transaction.vs!.isNotEmpty)
                                           Text(
-                                            '${'Variable symbol'.tr()}: ${transaction.vs!}',
+                                            '${OrdersStrings.variableSymbol}: ${transaction.vs!}',
                                             style: TextStyle(
                                                 fontSize: 12,
                                                 color:
@@ -300,7 +299,7 @@ class _SearchTransactionsDialogState extends State<SearchTransactionsDialog> {
                                             transaction
                                                 .messageForRecipient!.isNotEmpty)
                                           Text(
-                                            '${'Message'.tr()}: ${transaction.messageForRecipient!}',
+                                            '${OrdersStrings.message}: ${transaction.messageForRecipient!}',
                                             style: TextStyle(
                                                 fontSize: 12,
                                                 color:

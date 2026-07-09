@@ -7,6 +7,7 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/news/news_form_page.dart';
+import 'package:fstapp/components/news/news_strings.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -112,9 +113,8 @@ class _NewsPageState extends State<NewsPage> {
     return Scaffold(
       backgroundColor: ThemeConfig.newsPageColor(context),
       appBar: AppBar(
-        title: Text("News",
-                style: TextStyle(color: ThemeConfig.appBarColorNegative()))
-            .tr(),
+        title: Text(NewsStrings.news,
+            style: TextStyle(color: ThemeConfig.appBarColorNegative())),
         leading: PopButton(),
       ),
       body: Align(
@@ -134,7 +134,7 @@ class _NewsPageState extends State<NewsPage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        tr('No news messages yet'),
+                        NewsStrings.noMessagesYet,
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -239,7 +239,7 @@ class _NewsPageState extends State<NewsPage> {
                                     if (choice == ContextMenuChoice.delete) {
                                       await DbNews.deleteNewsMessage(message);
                                       ToastHelper.Show(context,
-                                          "Message has been removed.".tr());
+                                          NewsStrings.messageRemoved);
                                     } else {
                                       await RouterService.navigatePageInfo(
                                         context,
@@ -258,7 +258,7 @@ class _NewsPageState extends State<NewsPage> {
                                           await DbNews.updateNewsMessage(
                                               message);
                                           ToastHelper.Show(context,
-                                              "Message has been changed.".tr());
+                                              NewsStrings.messageChanged);
                                         }
                                       });
                                     }
@@ -269,11 +269,11 @@ class _NewsPageState extends State<NewsPage> {
                                       <PopupMenuEntry<ContextMenuChoice>>[
                                     PopupMenuItem<ContextMenuChoice>(
                                       value: ContextMenuChoice.edit,
-                                      child: Text(CommonStrings.edit).tr(),
+                                      child: Text(CommonStrings.edit),
                                     ),
                                     PopupMenuItem<ContextMenuChoice>(
                                       value: ContextMenuChoice.delete,
-                                      child: const Text("Delete").tr(),
+                                      child: Text(CommonStrings.delete),
                                     )
                                   ],
                                 ),

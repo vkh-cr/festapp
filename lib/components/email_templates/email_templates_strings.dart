@@ -101,4 +101,17 @@ class EmailTemplatesStrings {
       'EmailTemplates.settings.statusUnitInherited'.tr();
   static String get statusNoBanner =>
       'EmailTemplates.settings.statusNoBanner'.tr();
+
+  // --- Template editor dialog ---
+  static String get availableSubstitutions =>
+      'EmailTemplates.availableSubstitutions'
+          .tr(); // "Available Substitutions:"
+  static String get subject => 'EmailTemplates.subject'.tr(); // "Subject"
+  static String get subjectRequired =>
+      'EmailTemplates.subjectRequired'.tr(); // "Subject is required"
+  static String get emailTemplateContent =>
+      'EmailTemplates.emailTemplateContent'.tr(); // "Email Template Content"
+
+  // --- Template card ---
+  static String get template => 'EmailTemplates.template'.tr(); // "Template"
 }

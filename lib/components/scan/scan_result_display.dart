@@ -13,6 +13,7 @@ import 'package:fstapp/components/features/ticket_feature.dart';
 import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/components/scan/scan_field_mappings.dart';
 import 'package:fstapp/components/scan/scan_page.dart';
+import 'package:fstapp/components/scan/scan_strings.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 
@@ -76,7 +77,7 @@ class ScanResultDisplay extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
-              child: Text(OrdersStrings.scanCameraInstruction),
+              child: Text(ScanStrings.scanCameraInstruction),
             ),
             if (AppConfig.isAppSupported)
               AnimatedOpacity(
@@ -381,7 +382,7 @@ class ScanResultDisplay extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 16.0),
               child: ElevatedButton(
                 onPressed: onConfirm,
-                child: Text(OrdersStrings.confirmTicketAction),
+                child: Text(ScanStrings.confirmTicket),
               ),
             ),
 

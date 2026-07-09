@@ -1,9 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/app_management/app_management_strings.dart';
 import 'package:fstapp/components/organization/organization_model.dart';
 import 'package:fstapp/components/organization/db_organizations.dart';
 import 'package:fstapp/router_service.dart';
@@ -63,7 +64,7 @@ class _InstallPageState extends State<InstallPage> {
     } catch (e) {
       AppLogger.error("Failed to load platforms: $e");
       if (mounted) {
-        ToastHelper.Show(context, "Failed to load installation options.".tr(),
+        ToastHelper.Show(context, AppManagementStrings.installOptionsLoadFailed,
             severity: ToastSeverity.NotOk);
       }
     }
@@ -124,7 +125,7 @@ class _InstallPageState extends State<InstallPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Install App").tr(),
+        title: Text(AppManagementStrings.installApp),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrInitial(context),
         ),
@@ -162,15 +163,13 @@ class _InstallPageState extends State<InstallPage> {
                             const SizedBox(width: 22),
                             Expanded(
                               child: Text(
-                                "Install {title} to get notifications, offline functionality, and a quick launch icon."
-                                    .tr(namedArgs: {
-                                  "title": AppConfig.appName
-                                }),
+                                AppManagementStrings.installBenefits(
+                                    title: AppConfig.appName),
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: ThemeConfig.blackColor(context),
                                 ),
-                              ).tr(),
+                              ),
                             ),
                           ],
                         ),
@@ -180,25 +179,24 @@ class _InstallPageState extends State<InstallPage> {
                       if (appleLink != null && appleLink.isNotEmpty)
                         buildInstallSection(
                           context,
-                          "Install for Apple".tr(),
+                          AppManagementStrings.installForApple,
                           Icons.apple,
                           appleLink,
                           0,
                         ),
                       buildInstallSection(
                         context,
-                        "Install for Android".tr(),
+                        AppManagementStrings.installForAndroid,
                         Icons.android,
                         androidLink,
                         1,
                         notice: androidLink == null || androidLink.isEmpty
-                            ? "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button."
-                                .tr()
+                            ? AppManagementStrings.androidInstallHint
                             : null,
                       ),
                       buildInstallSection(
                         context,
-                        "Install for PC/Mac".tr(),
+                        AppManagementStrings.installForPcMac,
                         Icons.desktop_windows,
                         null,
                         2,
@@ -245,7 +243,7 @@ class _InstallPageState extends State<InstallPage> {
               notice,
               style: TextStyle(
                   color: ThemeConfig.blackColor(context).withOpacity(0.8)),
-            ).tr(),
+            ),
           ),
           const SizedBox(height: 10),
         ],
@@ -255,7 +253,9 @@ class _InstallPageState extends State<InstallPage> {
             children: [
               ButtonsHelper.bigButton(
                 context: context,
-                label: hasNativeLink ? "Download App".tr() : "Install Now".tr(),
+                label: hasNativeLink
+                    ? AppManagementStrings.downloadApp
+                    : AppManagementStrings.installNow,
                 onPressed: hasNativeLink
                     ? () => InstallPage.jsInterop.openLinkInNewTab(link)
                     : _canInstallPWA
@@ -271,21 +271,21 @@ class _InstallPageState extends State<InstallPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
-                      "The app is already installed.",
+                      AppManagementStrings.appAlreadyInstalled,
                       style: TextStyle(fontSize: 16, color: ThemeConfig.seed1),
                       textAlign: TextAlign.center,
-                    ).tr(),
+                    ),
                   ),
                 if (_installFailed)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Column(
                       children: [
-                        const Text(
-                          "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",
-                          style: TextStyle(color: Colors.red),
+                        Text(
+                          AppManagementStrings.installFailedHint,
+                          style: const TextStyle(color: Colors.red),
                           textAlign: TextAlign.center,
-                        ).tr(),
+                        ),
                         const SizedBox(height: 8.0),
                         Row(
                           children: [
@@ -301,10 +301,10 @@ class _InstallPageState extends State<InstallPage> {
                                 Clipboard.setData(
                                     ClipboardData(text: _urlController.text));
                                 ToastHelper.Show(
-                                    context, "Copied to clipboard".tr());
+                                    context, CommonStrings.copiedToClipboard);
                               },
                               icon: const Icon(Icons.copy),
-                              label: const Text("Copy Link").tr(),
+                              label: Text(AppManagementStrings.copyLink),
                             ),
                           ],
                         ),

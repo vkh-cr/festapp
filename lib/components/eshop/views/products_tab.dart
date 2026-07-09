@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -123,7 +123,7 @@ class _ProductsTabState extends State<ProductsTab> {
     // If loading is finished but the controller is still null,
     // it means initialization failed or there was no data.
     if (_controller == null) {
-      return Center(child: Text("No data to display.".tr()));
+      return Center(child: Text(OrdersStrings.noDataToDisplay));
     }
 
     // Pass the state-managed controller to the grid

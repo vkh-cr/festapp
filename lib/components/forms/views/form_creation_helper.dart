@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/forms/db_forms.dart';
@@ -183,7 +182,7 @@ class FormCreationHelper {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text("Create".tr()),
+                      : Text(CommonStrings.create),
                 ),
               ],
             );
