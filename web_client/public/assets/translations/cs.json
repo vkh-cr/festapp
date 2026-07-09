@@ -1467,7 +1467,8 @@
     "profileMovedTitle": "Profil se přesunul",
     "profileMovedBody": "Otevřete svůj profil ikonou v horním panelu.",
     "featureTitle": "Vyhledávání",
-    "featureDescription": "Umožní globální vyhledávání napříč programem, místy, informacemi, písněmi a dalším obsahem v aplikaci."
+    "featureDescription": "Umožní globální vyhledávání napříč programem, místy, informacemi, písněmi a dalším obsahem v aplikaci.",
+    "groupSpeaker": "Přednášející"
   },
   "OccasionServices": {
     "accommodation": "Ubytování",

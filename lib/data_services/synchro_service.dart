@@ -11,6 +11,9 @@ import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/services/platform_helper.dart';
 import 'package:fstapp/components/search/db_search.dart';
+import 'package:fstapp/components/speakers/db_speakers.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SynchroService {
@@ -62,6 +65,13 @@ class SynchroService {
 
     var messages = await DbNews.getAllNewsMessages();
     await OfflineDataService.saveAllMessages(messages);
+
+    if (occasionId != null &&
+        FeatureService.isFeatureEnabled(FeatureConstants.speakers)) {
+      final speakers = await DbSpeakers.getSpeakers(occasionId,
+          includeDescription: true);
+      await OfflineDataService.saveSpeakers(speakers);
+    }
 
     if (PlatformHelper.isPwaInstalledOrNative()) {
       var events = await DbEvents.getAllEvents(occasionId!, true);

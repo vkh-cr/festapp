@@ -28,6 +28,8 @@ class SearchStrings {
         return 'GlobalSearch.groupGame'.tr();
       case 'news':
         return 'GlobalSearch.groupNews'.tr();
+      case 'speaker':
+        return 'GlobalSearch.groupSpeaker'.tr();
       case 'info':
       default:
         return 'GlobalSearch.groupInfo'.tr();
@@ -37,6 +39,7 @@ class SearchStrings {
   /// Stable ordering of result groups in the UI.
   static const List<String> groupOrder = [
     'event',
+    'speaker',
     'place',
     'info',
     'song',

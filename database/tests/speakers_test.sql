@@ -453,6 +453,51 @@ BEGIN
     RAISE NOTICE 'test 7 (sign_user_to_event counseling branch) passed';
 END $$ LANGUAGE plpgsql;
 
+-- ---------------------------------------------------------------------------
+-- 8. GlobalSearch: speakers are searchable (name/role/bio), gated on feature,
+--    and hidden speakers are excluded. Slots stay out of search (tested via the
+--    events branch elsewhere). Needs public.f_unaccent + speakers.search_doc
+--    (migration 20260710120000_speakers_searchable.sql).
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc  bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_n   int;
+BEGIN
+    -- Ensure the speakers feature is enabled for this occasion.
+    UPDATE public.occasions SET features =
+      '[{"code":"speakers","is_enabled":true}]'::jsonb WHERE id = v_oc;
+
+    INSERT INTO public.speakers (occasion, title, subtitle, description, is_hidden)
+    VALUES (v_oc, 'Vyhledatelný Řehoř', 'psycholog', 'Medailonek o úzkostech', false);
+    INSERT INTO public.speakers (occasion, title, subtitle, is_hidden)
+    VALUES (v_oc, 'Skrytý Poradce', 'knez', true);
+
+    SELECT count(*) INTO v_n FROM public.search_occasion_content(v_oc, 'rehor', 50)
+      WHERE entity_type = 'speaker';
+    PERFORM assert_true(v_n >= 1, 'speaker found by name (diacritics-insensitive)');
+
+    SELECT count(*) INTO v_n FROM public.search_occasion_content(v_oc, 'psycholog', 50)
+      WHERE entity_type = 'speaker';
+    PERFORM assert_true(v_n >= 1, 'speaker found by role/subtitle');
+
+    SELECT count(*) INTO v_n FROM public.search_occasion_content(v_oc, 'uzkost', 50)
+      WHERE entity_type = 'speaker';
+    PERFORM assert_true(v_n >= 1, 'speaker found by bio text');
+
+    SELECT count(*) INTO v_n FROM public.search_occasion_content(v_oc, 'Skrytý', 50)
+      WHERE entity_type = 'speaker';
+    PERFORM assert_eq(v_n, 0, 'hidden speaker is not searchable');
+
+    -- Feature disabled → no speaker results.
+    UPDATE public.occasions SET features = '[{"code":"speakers","is_enabled":false}]'::jsonb WHERE id = v_oc;
+    SELECT count(*) INTO v_n FROM public.search_occasion_content(v_oc, 'rehor', 50)
+      WHERE entity_type = 'speaker';
+    PERFORM assert_eq(v_n, 0, 'speakers not searchable when feature disabled');
+
+    RAISE NOTICE 'test 8 (speaker search) passed';
+END $$ LANGUAGE plpgsql;
+
 DO $$ BEGIN RAISE NOTICE 'speakers + counseling regression tests passed'; END $$ LANGUAGE plpgsql;
 
 ROLLBACK; -- Always rollback: tests must not mutate data

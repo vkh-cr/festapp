@@ -113,6 +113,33 @@ class DbSearch {
         ));
       }
 
+      // Speakers / counselors — gated on the speakers feature, same as the
+      // server-side branch. parentId carries the speaker's first non-slot event
+      // so the offline result opens a page where the medallion shows.
+      if (FeatureService.isFeatureEnabled(FeatureConstants.speakers)) {
+        final bundle = await OfflineDataService.getSpeakers();
+        if (bundle != null) {
+          for (final s in bundle.speakers) {
+            if (s.isHidden || s.id == null) continue;
+            final firstEvent = bundle.speakersByEvent.entries
+                .firstWhere((e) => e.value.contains(s.id),
+                    orElse: () => const MapEntry(-1, []))
+                .key;
+            docs.add(_IndexedDoc(
+              entityType: 'speaker',
+              entityId: s.id!,
+              title: s.title,
+              snippet: (s.subtitle?.isNotEmpty ?? false)
+                  ? s.subtitle
+                  : s.description,
+              parentId: firstEvent > 0 ? firstEvent : null,
+              searchDoc: _normalize(
+                  '${s.title ?? ''} ${s.subtitle ?? ''} ${s.description ?? ''}'),
+            ));
+          }
+        }
+      }
+
       _offlineIndex = docs;
     } catch (e) {
       // Keep any previously built index on failure.
@@ -140,6 +167,7 @@ class DbSearch {
                       ? d.snippet!.substring(0, 120)
                       : d.snippet),
               startTime: d.startTime,
+              parentId: d.parentId,
               rank: 1,
             ))
         .take(_limit)
@@ -173,6 +201,7 @@ class _IndexedDoc {
   final String? title;
   final String? snippet;
   final DateTime? startTime;
+  final int? parentId;
   final String searchDoc;
 
   _IndexedDoc({
@@ -181,6 +210,7 @@ class _IndexedDoc {
     this.title,
     this.snippet,
     this.startTime,
+    this.parentId,
     required this.searchDoc,
   });
 }

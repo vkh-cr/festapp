@@ -1,3 +1,20 @@
+-- =============================================================================
+-- Make speakers/counselors searchable in GlobalSearch.
+--   1. search_terms (editable keywords) + generated search_doc column on
+--      public.speakers (mirrors events/places; needs public.f_unaccent) + trgm index.
+--   2. search_occasion_content gains a 'speaker' branch gated on the "speakers"
+--      feature (parent_id = the speaker's first non-hidden, non-slot event).
+-- Idempotent. Apply after 20260709130000_speakers_counseling.sql.
+-- =============================================================================
+
+ALTER TABLE public.speakers ADD COLUMN IF NOT EXISTS search_terms text;
+ALTER TABLE public.speakers ADD COLUMN IF NOT EXISTS search_doc text
+  GENERATED ALWAYS AS (public.f_unaccent(
+    (((COALESCE(title, '') || ' ') || COALESCE(subtitle, '')) || ' '
+      || COALESCE(description, '')) || ' ' || COALESCE(search_terms, ''))) STORED;
+CREATE INDEX IF NOT EXISTS speakers_search_doc_trgm_idx
+  ON public.speakers USING gin (search_doc extensions.gin_trgm_ops);
+
 -- search_occasion_content — GlobalSearch backend across events / places /
 -- information / news / speakers for an occasion.
 --

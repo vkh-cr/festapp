@@ -1467,7 +1467,8 @@
     "profileMovedTitle": "Profile moved here",
     "profileMovedBody": "Open your profile from the icon in the top app bar.",
     "featureTitle": "Search",
-    "featureDescription": "Enables a global search across the schedule, places, information, songs, and other content in the app."
+    "featureDescription": "Enables a global search across the schedule, places, information, songs, and other content in the app.",
+    "groupSpeaker": "Speakers"
   },
   "OccasionServices": {
     "accommodation": "Accommodation",

@@ -92,6 +92,15 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
       case 'news':
         RouterService.navigateOccasion(context, "news");
         break;
+      case 'speaker':
+        // No standalone speaker page — open an event where the speaker's
+        // medallion is shown (parent_id = their first non-slot event). If they
+        // have no such event (e.g. counselor-only), there is nowhere to go.
+        if (r.parentId != null) {
+          RouterService.navigateOccasion(
+              context, "${EventPage.ROUTE}/${r.parentId}");
+        }
+        break;
     }
   }
 
