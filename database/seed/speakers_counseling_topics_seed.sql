@@ -1,51 +1,47 @@
 -- =============================================================================
--- SEED (TEMPLATE, NOT auto-applied): counseling topic catalog for the speakers
--- feature (public.speaker_topics).
+-- SEED (data, NOT auto-applied): counseling area catalog (public.speaker_topics).
 --
--- The plan (docs/plans/2026-07-09_speakers_counseling_plan.md, §1/§6.5) calls
--- for ~20 counseling areas taken from Julie Adltová's e-mail. That e-mail lists
--- only three verbatim examples in the plan ("vztahy v rodině", "úzkosti,
--- deprese", "duchovní rozhovor"); the catalog below is a representative
--- starting set for a Catholic youth festival (csmostrava) built around those
--- examples. BEFORE using it, reconcile the titles/codes with the real e-mail.
+-- The exact 20 areas for csmostrava as provided by the organizer (2026-07-10).
+-- Use ONLY these. Areas have NO code/key — the only identifier is the hidden
+-- primary key id (see migration 20260710160000_drop_speaker_topic_code.sql).
 --
--- This script is DATA, not schema — it is intentionally NOT wired into
--- migrations and MUST NOT be applied to the live database automatically. Run it
--- deliberately against the intended occasion, or enter the areas through the
--- admin "Správa oblastí" editor instead.
+-- This is DATA, not schema — intentionally NOT wired into migrations and MUST
+-- NOT be applied to the live database automatically. It is a FULL REPLACE for
+-- the given occasion: it deletes the occasion's existing areas (and, by CASCADE,
+-- any speaker↔area links) and re-inserts the list below. Run it deliberately.
 --
 -- Usage (psql). The occasion is looked up by link; pass it as a variable:
 --   psql "$DATABASE_URL" -v occasion_link=csmostrava2026 \
 --     -f database/seed/speakers_counseling_topics_seed.sql
--- Re-running is safe: existing (occasion, code) rows are updated, not duplicated.
 -- =============================================================================
 
-INSERT INTO public.speaker_topics (occasion, code, title, "order", is_hidden)
-SELECT o.id, t.code, t.title, t.ord, false
+DELETE FROM public.speaker_topics
+WHERE occasion = (SELECT id FROM public.occasions WHERE link = :'occasion_link');
+
+INSERT INTO public.speaker_topics (occasion, title, "order", is_hidden)
+SELECT o.id, t.title, t.ord, false
 FROM public.occasions o
 CROSS JOIN (
     VALUES
-        ('rodina',             'Vztahy v rodině',                              1),
-        ('partnerstvi',        'Partnerské vztahy a vztahy před manželstvím',  2),
-        ('manzelstvi',         'Manželství',                                   3),
-        ('vychova',            'Výchova dětí',                                 4),
-        ('uzkosti_deprese',    'Úzkosti, deprese',                             5),
-        ('psychicke_zdravi',   'Psychické zdraví a těžké životní situace',     6),
-        ('sebeprijeti',        'Sebepřijetí a sebevědomí',                     7),
-        ('zavislosti',         'Závislosti',                                   8),
-        ('ztrata_truchleni',   'Ztráta blízkého a truchlení',                  9),
-        ('odpusteni',          'Odpuštění a smíření',                         10),
-        ('duchovni_rozhovor',  'Duchovní rozhovor',                          11),
-        ('vira_pochybnosti',   'Víra a pochybnosti',                         12),
-        ('modlitba',           'Modlitba a duchovní život',                  13),
-        ('smysl_zivota',       'Smysl života a povolání',                    14),
-        ('rozlisovani',        'Rozlišování životního povolání',             15),
-        ('sexualita_cistota',  'Sexualita a čistota',                        16),
-        ('identita',           'Identita a hledání sebe sama',               17),
-        ('studium_prace',      'Studium a práce',                            18),
-        ('primluvna_modlitba', 'Přímluvná modlitba',                         19),
-        ('svatost_smireni',    'Svátost smíření',                            20)
-) AS t(code, title, ord)
-WHERE o.link = :'occasion_link'
-ON CONFLICT (occasion, code) WHERE (code IS NOT NULL)
-DO UPDATE SET title = EXCLUDED.title, "order" = EXCLUDED."order";
+        ('Vztahy v rodině',                                                                1),
+        ('Vztahy - komunikace s prarodiči',                                                2),
+        ('Obtíže ve vztazích ve školním kolektivu, šikana',                                3),
+        ('Volba životního povolání',                                                       4),
+        ('Období známosti',                                                                5),
+        ('Partnerské vztahy',                                                              6),
+        ('Sexualita, plodnost, Symptotermální metoda přirozeného plánování rodičovství',   7),
+        ('Pochybnosti ve víře',                                                            8),
+        ('Duchovní rozhovor',                                                              9),
+        ('Úzkosti, deprese',                                                              10),
+        ('Obavy a nejistoty',                                                             11),
+        ('Sebepoškozování',                                                               12),
+        ('Sebepřijetí',                                                                   13),
+        ('Pochybnosti o pohlavní identitě',                                               14),
+        ('Závislosti (např. drogy, internet, pornografie…)',                              15),
+        ('Smrt blízkého člověka',                                                         16),
+        ('Magie, esoterika a okultismus',                                                 17),
+        ('Zneužívání sexuální',                                                           18),
+        ('Zneužívání moci',                                                               19),
+        ('Zneužívání duchovní/manipulace v církvi',                                       20)
+) AS t(title, ord)
+WHERE o.link = :'occasion_link';

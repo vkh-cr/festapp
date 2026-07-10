@@ -19,7 +19,6 @@ BEGIN
         v_topic_id := (p_topic->>'id')::BIGINT;
 
         UPDATE public.speaker_topics t SET
-            code      = CASE WHEN p_topic ? 'code'      THEN p_topic->>'code'                  ELSE t.code      END,
             title     = COALESCE(p_topic->>'title', t.title),
             "order"   = CASE WHEN p_topic ? 'order'     THEN (p_topic->>'order')::BIGINT        ELSE t."order"   END,
             is_hidden = CASE WHEN p_topic ? 'is_hidden' THEN (p_topic->>'is_hidden')::BOOLEAN   ELSE t.is_hidden END
@@ -30,16 +29,16 @@ BEGIN
             RETURN jsonb_build_object('code', 404);
         END IF;
     ELSE
-        -- INSERT — a non-empty title is required.
+        -- INSERT — a non-empty title is required. Areas have no code/key; the
+        -- only identifier is the hidden primary key id.
         v_title := p_topic->>'title';
         IF v_title IS NULL OR btrim(v_title) = '' THEN
             RETURN jsonb_build_object('code', 400);
         END IF;
 
-        INSERT INTO public.speaker_topics (occasion, code, title, "order", is_hidden)
+        INSERT INTO public.speaker_topics (occasion, title, "order", is_hidden)
         VALUES (
             p_occasion,
-            p_topic->>'code',
             v_title,
             COALESCE((p_topic->>'order')::BIGINT, 0),
             COALESCE((p_topic->>'is_hidden')::BOOLEAN, FALSE)
@@ -48,9 +47,5 @@ BEGIN
     END IF;
 
     RETURN jsonb_build_object('code', 200, 'data', to_jsonb(v_row));
-EXCEPTION
-    WHEN unique_violation THEN
-        -- (occasion, code) must be unique.
-        RETURN jsonb_build_object('code', 400);
 END;
 $$;

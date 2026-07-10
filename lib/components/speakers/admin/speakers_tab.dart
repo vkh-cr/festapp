@@ -209,9 +209,6 @@ class _SpeakersTabState extends State<SpeakersTab> {
           ..._topics.map((topic) => ListTile(
                 dense: true,
                 title: Text(topic.title ?? ''),
-                subtitle: topic.code != null && topic.code!.isNotEmpty
-                    ? Text(topic.code!)
-                    : null,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -263,7 +260,6 @@ class _TopicEditorDialog extends StatefulWidget {
 
 class _TopicEditorDialogState extends State<_TopicEditorDialog> {
   late final TextEditingController _titleController;
-  late final TextEditingController _codeController;
   late final TextEditingController _orderController;
   bool _isHidden = false;
 
@@ -271,7 +267,6 @@ class _TopicEditorDialogState extends State<_TopicEditorDialog> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.topic.title ?? '');
-    _codeController = TextEditingController(text: widget.topic.code ?? '');
     _orderController =
         TextEditingController(text: widget.topic.order.toString());
     _isHidden = widget.topic.isHidden;
@@ -280,7 +275,6 @@ class _TopicEditorDialogState extends State<_TopicEditorDialog> {
   @override
   void dispose() {
     _titleController.dispose();
-    _codeController.dispose();
     _orderController.dispose();
     super.dispose();
   }
@@ -294,8 +288,6 @@ class _TopicEditorDialogState extends State<_TopicEditorDialog> {
     }
     final model = widget.topic
       ..title = title
-      ..code =
-          _codeController.text.trim().isEmpty ? null : _codeController.text.trim()
       ..order = int.tryParse(_orderController.text.trim()) ?? 0
       ..isHidden = _isHidden;
 
@@ -324,11 +316,6 @@ class _TopicEditorDialogState extends State<_TopicEditorDialog> {
               controller: _titleController,
               decoration:
                   InputDecoration(labelText: SpeakersStrings.topicTitle),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _codeController,
-              decoration: InputDecoration(labelText: SpeakersStrings.topicCode),
             ),
             const SizedBox(height: 12),
             TextField(

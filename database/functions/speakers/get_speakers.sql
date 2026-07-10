@@ -31,7 +31,6 @@ BEGIN
     -- (b) visible topic catalog
     SELECT jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
         'id',    t.id,
-        'code',  t.code,
         'title', t.title,
         'order', t."order"
     )) ORDER BY t."order", t.title)

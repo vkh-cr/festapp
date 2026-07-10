@@ -28,7 +28,6 @@ class SpeakersStrings {
   static String get manageTopics => 'Speakers.manageTopics'.tr();
   static String get addTopic => 'Speakers.addTopic'.tr();
   static String get topicTitle => 'Speakers.topicTitle'.tr();
-  static String get topicCode => 'Speakers.topicCode'.tr();
   static String get speakersOnEvent => 'Speakers.speakersOnEvent'.tr();
   static String get selectSpeakers => 'Speakers.selectSpeakers'.tr();
   static String get searchSpeakers => 'Speakers.searchSpeakers'.tr();

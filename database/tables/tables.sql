@@ -1010,7 +1010,6 @@ create table if not exists public.speaker_topics (
   created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   occasion    BIGINT NOT NULL,
-  code        TEXT NULL,
   title       TEXT NOT NULL,
   "order"     BIGINT NOT NULL DEFAULT 0,
   is_hidden   BOOLEAN NOT NULL DEFAULT false,
@@ -1018,8 +1017,6 @@ create table if not exists public.speaker_topics (
   CONSTRAINT speaker_topics_occasion_fkey FOREIGN KEY (occasion) REFERENCES public.occasions (id) ON DELETE CASCADE
 ) TABLESPACE pg_default;
 CREATE INDEX IF NOT EXISTS speaker_topics_occasion_idx ON public.speaker_topics (occasion);
-CREATE UNIQUE INDEX IF NOT EXISTS speaker_topics_occasion_code_uidx
-  ON public.speaker_topics (occasion, code) WHERE (code IS NOT NULL);
 
 create table if not exists public.speaker_topic_links (
   speaker BIGINT NOT NULL,
