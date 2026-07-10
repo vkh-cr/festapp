@@ -159,7 +159,9 @@
     "initializing": "Inicializace...",
     "noEvents": "Žádné události",
     "scan": "Skenovat",
-    "today": "Dnes"
+    "today": "Dnes",
+    "selectEvents": "Vybrat události",
+    "searchEvents": "Hledat události"
   },
   "FeatureImport": {
     "importFeatureDescription": "Umožňuje import uživatelů z různých zdrojů, jako jsou soubory CSV nebo vstupenky.",

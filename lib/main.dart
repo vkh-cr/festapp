@@ -17,7 +17,11 @@ import 'package:fstapp/components/occasion/occasion_home_page.dart';
 import 'package:fstapp/services/notification_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/search/global_search_dialog.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/services/app_logger.dart';
@@ -152,6 +156,17 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   Offset _offset = Offset.zero;
 
+  /// Ctrl+F opens Global Search when the feature is enabled. Uses the root
+  /// navigator's context because the shortcut lives above the Navigator.
+  void _openGlobalSearch() {
+    if (!FeatureService.isFeatureEnabled(FeatureConstants.globalSearch)) {
+      return;
+    }
+    final context = RouterService.router.navigatorKey.currentContext;
+    if (context == null) return;
+    GlobalSearchDialog.show(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     TimeHelper.toggleTimeTravel = () {
@@ -174,22 +189,28 @@ class _MyAppState extends State<MyApp> {
             .config(navigatorObservers: () => [RoutingObserver()]),
         debugShowCheckedModeBanner: false,
         builder: (context, child) {
-          return Stack(
-            children: [
-              child!,
-              Positioned(
-                left: _offset.dx,
-                top: _offset.dy,
-                child: GestureDetector(
-                  onPanUpdate: (d) =>
-                      setState(() => _offset += Offset(d.delta.dx, d.delta.dy)),
-                  child: Visibility(
-                    visible: widget.isTimeTravelVisible,
-                    child: TimeTravelWidget(),
+          return CallbackShortcuts(
+            bindings: {
+              const SingleActivator(LogicalKeyboardKey.keyF, control: true):
+                  _openGlobalSearch,
+            },
+            child: Stack(
+              children: [
+                child!,
+                Positioned(
+                  left: _offset.dx,
+                  top: _offset.dy,
+                  child: GestureDetector(
+                    onPanUpdate: (d) => setState(
+                        () => _offset += Offset(d.delta.dx, d.delta.dy)),
+                    child: Visibility(
+                      visible: widget.isTimeTravelVisible,
+                      child: TimeTravelWidget(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
         localizationsDelegates: [

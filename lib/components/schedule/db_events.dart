@@ -499,6 +499,18 @@ class DbEvents {
     }
   }
 
+  /// Lightweight id/title/time list of all occasion events (hidden included),
+  /// for pickers like the exclusivity editor. Editor-guarded server-side.
+  static Future<List<EventModel>> getAllEventsBasic() async {
+    final res = await _supabase.rpc('get_events_catalog',
+        params: {'p_occasion': RightsService.currentOccasionId()!});
+    if (res['code'] != 200) {
+      throw Exception('get_events_catalog failed with code ${res['code']}');
+    }
+    return List<EventModel>.from((res['data'] as List)
+        .map((x) => EventModel.fromJson((x as Map).cast<String, dynamic>())));
+  }
+
   static Future<List<ExclusiveGroupModel>> getAllExclusiveGroups() async {
     var data = await _supabase
         .from(Tb.exclusive_groups.table)

@@ -168,9 +168,40 @@ class _ScheduleContentState extends State<ScheduleContent> {
       futureFunction: () => DbSpeakers.setEventSpeakers(eventId, speakerIds),
     );
     _eventSpeakerIds[eventId] = List.of(speakerIds);
+    // Keep the column's searchable value current so filtering reflects the
+    // inline edit without a full grid reload.
+    final row = controller?.stateManager.rows.firstWhereOrNull(
+        (r) => r.cells[EventModel.idColumn]?.value == eventId);
+    row?.cells[EventModel.speakersColumn]?.value =
+        _speakerNamesFor(speakerIds) ?? '';
     if (mounted) {
       ToastHelper.Show(context, CommonStrings.saved);
     }
+  }
+
+  /// Joins the given speakers' names into a searchable string (or null when
+  /// none), used to populate the "Přednášející" column's filterable cell value.
+  String? _speakerNamesFor(Iterable<int> speakerIds) {
+    final names = speakerIds
+        .map((id) => _allSpeakers.firstWhereOrNull((s) => s.id == id)?.title)
+        .whereType<String>()
+        .where((n) => n.isNotEmpty)
+        .toList();
+    return names.isEmpty ? null : names.join(', ');
+  }
+
+  /// Loads the grid's events and stamps each with its attached speakers' names
+  /// so the "Přednášející" column's text filter can match by speaker. Speaker
+  /// data is already loaded into `_allSpeakers` / `_eventSpeakerIds` before the
+  /// grid mounts.
+  Future<List<EventModel>> _loadEventsForGrid() async {
+    final events = await DbEvents.getAllEventsForDatagrid();
+    for (final e in events) {
+      final ids = e.id == null ? null : _eventSpeakerIds[e.id];
+      e.speakerNamesSearch =
+          (ids == null || ids.isEmpty) ? null : _speakerNamesFor(ids);
+    }
+    return events;
   }
 
   void initController() {
@@ -178,7 +209,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
 
     controller = SingleDataGridController<EventModel>(
       context: context,
-      loadData: DbEvents.getAllEventsForDatagrid,
+      loadData: _loadEventsForGrid,
       fromPlutoJson: EventModel.fromPlutoJson,
       firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
       idColumn: Tb.events.id,
@@ -343,13 +374,15 @@ class _ScheduleContentState extends State<ScheduleContent> {
           type: TrinaColumnType.text(),
           readOnly: true,
           enableEditingMode: false,
-          enableFilterMenuItem: false,
+          // The cell value carries the attached speakers' names (see
+          // EventModel.speakerNamesSearch) so the default column filter can
+          // search by speaker — like the place/title columns. Leaving
+          // enableFilterMenuItem at its default keeps that filter field enabled.
           enableSorting: false,
           width: 180,
           renderer: (rendererContext) {
             final eventId =
-                rendererContext.row.cells[EventModel.speakersColumn]?.value
-                    as int?;
+                rendererContext.row.cells[EventModel.idColumn]?.value as int?;
             return EventSpeakersCell(
               // Trina reuses cell widgets across rows on scroll — key by event
               // id so the correct selection binds after a scroll/rebuild.

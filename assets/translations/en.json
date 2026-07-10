@@ -159,7 +159,9 @@
     "initializing": "Initializing...",
     "noEvents": "No events",
     "scan": "Scan",
-    "today": "Today"
+    "today": "Today",
+    "selectEvents": "Select events",
+    "searchEvents": "Search events"
   },
   "FeatureImport": {
     "importFeatureDescription": "Enables importing users from various sources like CSV files or from tickets.",

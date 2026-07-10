@@ -54,6 +54,12 @@ class EventModel extends ITrinaRowModel {
   int? occasionId;
   bool isCancelled;
 
+  /// Transient, grid-only: a searchable string of the attached speakers' names.
+  /// The schedule grid stamps this after load so the "Přednášející" column's
+  /// text filter can match events by speaker name. Never persisted, never read
+  /// back from JSON.
+  String? speakerNamesSearch;
+
   bool? canSaveEventToMyProgram() {
     var canSave = (maxParticipants == null || maxParticipants == 0) &&
         !isGroupEvent! &&
@@ -269,7 +275,9 @@ class EventModel extends ITrinaRowModel {
 
   /// Synthetic grid column: attaching speakers to the event. Not persisted via
   /// the row upsert — the schedule grid saves it directly through
-  /// set_event_speakers. The cell just carries the event id for the renderer.
+  /// set_event_speakers. The cell value holds the attached speakers' names so
+  /// the column's text filter can search by speaker; the renderer keys off the
+  /// id column instead.
   static const String speakersColumn = "speakers";
 
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
@@ -381,7 +389,7 @@ class EventModel extends ITrinaRowModel {
       Tb.events.dataIsCancelled: TrinaCell(value: isCancelled.toString()),
       FeatureConstants.counselingEntry:
           TrinaCell(value: isCounselingEntry.toString()),
-      speakersColumn: TrinaCell(value: id),
+      speakersColumn: TrinaCell(value: speakerNamesSearch ?? ''),
     });
   }
 

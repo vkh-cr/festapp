@@ -36,6 +36,10 @@ class ScheduleStrings {
   static String get showInsideEvent =>
       'FeatureSchedule.showInsideEvent'.tr(); // "Show inside event"
   static String get roles => 'FeatureSchedule.roles'.tr(); // "Roles"
+  static String get selectEvents =>
+      'FeatureSchedule.selectEvents'.tr(); // "Select events"
+  static String get searchEvents =>
+      'FeatureSchedule.searchEvents'.tr(); // "Search events"
 
   // --- Event edit ---
   static String get deleteEventConfirm => 'FeatureSchedule.deleteEventConfirm'

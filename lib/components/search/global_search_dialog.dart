@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:fstapp/components/images/image_url_helper.dart';
 import 'package:fstapp/components/information/info_page.dart';
 import 'package:fstapp/components/map/map_page.dart';
@@ -25,12 +25,22 @@ import 'package:fstapp/theme_config.dart';
 class GlobalSearchDialog extends StatefulWidget {
   const GlobalSearchDialog({super.key});
 
-  static Future<void> show(BuildContext context) {
-    return showDialog(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.5),
-      builder: (_) => const GlobalSearchDialog(),
-    );
+  /// Guards against stacking dialogs when opened repeatedly (e.g. Ctrl+F
+  /// pressed while the search is already showing).
+  static bool _isShowing = false;
+
+  static Future<void> show(BuildContext context) async {
+    if (_isShowing) return;
+    _isShowing = true;
+    try {
+      await showDialog(
+        context: context,
+        barrierColor: Colors.black.withValues(alpha: 0.5),
+        builder: (_) => const GlobalSearchDialog(),
+      );
+    } finally {
+      _isShowing = false;
+    }
   }
 
   @override
@@ -378,6 +388,10 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
     final timeStr = model != null
         ? model.durationTimeString()
         : (r.startTime != null ? DateFormat.Hm().format(r.startTime!) : '');
+    final start = model?.startTime ?? r.startTime;
+    final dateStr = start != null
+        ? DateFormat("EEE d.M.", context.locale.languageCode).format(start)
+        : '';
     final placeTitle =
         model?.place?.title ?? (r.extra['place_title'] as String?);
     final supportsSignIn =
@@ -419,7 +433,7 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
           ),
           const SizedBox(height: 3),
           _eventMetaLine(theme, timeStr, placeTitle,
-              isNow: isNow, isPast: isPast),
+              dateStr: dateStr, isNow: isNow, isPast: isPast),
         ],
       ),
     );
@@ -448,10 +462,11 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
     );
   }
 
-  /// "17:30 - 19:30 · Place" meta line for a program result, optionally
-  /// prefixed with the red "RIGHT NOW" or grey "ENDED" badge.
+  /// "pá 14.8. 17:30 - 19:30 · Place" meta line for a program result: a small
+  /// day chip, then the time range, optionally prefixed with the red
+  /// "RIGHT NOW" or grey "ENDED" badge.
   Widget _eventMetaLine(ThemeData theme, String timeStr, String? place,
-      {bool isNow = false, bool isPast = false}) {
+      {String dateStr = '', bool isNow = false, bool isPast = false}) {
     final color = theme.colorScheme.onSurfaceVariant;
     final style = theme.textTheme.bodySmall?.copyWith(color: color);
     final children = <Widget>[];
@@ -464,6 +479,24 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
     } else if (isPast) {
       children
         ..add(_metaBadge(Colors.grey.shade600, ScheduleStrings.ended))
+        ..add(const SizedBox(width: 6));
+    }
+    if (dateStr.isNotEmpty) {
+      children
+        ..add(Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            dateStr,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ))
         ..add(const SizedBox(width: 6));
     }
     if (timeStr.isNotEmpty) {
