@@ -1,23 +1,30 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
+import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/components/images/db_images.dart';
 import 'package:fstapp/components/images/image_area.dart';
 import 'package:fstapp/components/images/image_compression_helper.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/components/map/place_model.dart';
+import 'package:fstapp/components/schedule/db_events.dart';
+import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/speakers/admin/counseling_slot_dialog.dart';
 import 'package:fstapp/components/speakers/db_speakers.dart';
 import 'package:fstapp/components/speakers/speaker_model.dart';
 import 'package:fstapp/components/speakers/speaker_topic_model.dart';
 import 'package:fstapp/components/speakers/speakers_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/exception_handler.dart';
+import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/services/toast_helper.dart';
 
 /// Admin dialog to create or edit a speaker (lecturer / counselor).
@@ -42,7 +49,6 @@ class SpeakerEditorDialog extends StatefulWidget {
 
 class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
   late final TextEditingController _nameController;
-  late final TextEditingController _subtitleController;
   late final TextEditingController _orderController;
 
   String? _image;
@@ -51,16 +57,7 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
   late Set<int> _selectedTopics;
   bool _changed = false;
 
-  // Slot generator state.
-  DateTime? _slotFrom;
-  DateTime? _slotTo;
-  final TextEditingController _slotLengthController =
-      TextEditingController(text: '20');
-  final TextEditingController _slotBreakController =
-      TextEditingController(text: '0');
-  final TextEditingController _slotCapacityController =
-      TextEditingController(text: '1');
-  int? _slotPlaceId;
+  // Places catalog, loaded for the slot dialog's place picker.
   List<PlaceModel> _places = [];
 
   int get _occasionId => RightsService.currentOccasionId()!;
@@ -72,7 +69,6 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
     super.initState();
     final s = widget.speaker;
     _nameController = TextEditingController(text: s.title ?? '');
-    _subtitleController = TextEditingController(text: s.subtitle ?? '');
     _orderController = TextEditingController(text: s.order.toString());
     _image = s.image;
     _description = s.description;
@@ -86,11 +82,7 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
   @override
   void dispose() {
     _nameController.dispose();
-    _subtitleController.dispose();
     _orderController.dispose();
-    _slotLengthController.dispose();
-    _slotBreakController.dispose();
-    _slotCapacityController.dispose();
     super.dispose();
   }
 
@@ -127,9 +119,6 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
 
     final model = widget.speaker
       ..title = name
-      ..subtitle = _subtitleController.text.trim().isEmpty
-          ? null
-          : _subtitleController.text.trim()
       ..description = _description
       ..image = _image
       ..order = int.tryParse(_orderController.text.trim()) ?? 0
@@ -149,78 +138,105 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
     }
   }
 
-  Future<void> _pickDateTime(bool isFrom) async {
-    final now = DateTime.now();
-    final initial = (isFrom ? _slotFrom : _slotTo) ?? now;
-    final date = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (date == null || !mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(initial),
-    );
-    if (time == null || !mounted) return;
-    final picked =
-        DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    setState(() {
-      if (isFrom) {
-        _slotFrom = picked;
-      } else {
-        _slotTo = picked;
-      }
-    });
-  }
+  /// Adds a single slot via the quick dialog (mirrors "Add to schedule").
+  /// One slot is created by asking [createCounselingSlots] for a slot length
+  /// equal to the whole picked range.
+  Future<void> _addSlot() async {
+    final res = await CounselingSlotDialog.show(context, places: _places);
+    if (res == null || !mounted) return;
 
-  Future<void> _generateSlots() async {
-    if (_slotFrom == null || _slotTo == null) {
-      ToastHelper.Show(context, CommonStrings.fieldCannotBeEmpty,
+    final minutes = res.end.difference(res.start).inMinutes;
+    if (minutes < 5) {
+      ToastHelper.Show(context, SpeakersStrings.slotTooShort,
           severity: ToastSeverity.NotOk);
       return;
     }
-    final slotMinutes = int.tryParse(_slotLengthController.text.trim()) ?? 0;
-    final breakMinutes = int.tryParse(_slotBreakController.text.trim()) ?? 0;
-    final capacity = int.tryParse(_slotCapacityController.text.trim()) ?? 1;
 
     final result = await ExceptionHandler.guard<({int created, List<int> eventIds})>(
       context,
       futureFunction: () => DbSpeakers.createCounselingSlots(
         speakerId: widget.speaker.id!,
-        // The pickers yield occasion-local wall-clock times; convert to UTC
+        // The picker yields occasion-local wall-clock times; convert to UTC
         // through the occasion timezone (same convention as event editing).
-        start: _slotFrom!.toUtcFromOccasionTime(),
-        end: _slotTo!.toUtcFromOccasionTime(),
-        slotMinutes: slotMinutes,
-        placeId: _slotPlaceId,
-        capacity: capacity,
-        breakMinutes: breakMinutes,
+        start: res.start.toUtcFromOccasionTime(),
+        end: res.end.toUtcFromOccasionTime(),
+        slotMinutes: minutes,
+        placeId: res.placeId,
+        capacity: res.capacity,
       ),
     );
     if (result != null && mounted) {
       _changed = true;
-      ToastHelper.Show(context, SpeakersStrings.slotsCreated(result.created));
+      ToastHelper.Show(context, CommonStrings.saved);
       await _reloadSpeaker();
     }
   }
 
-  Future<void> _deleteEmptySlots() async {
+  /// Edits an existing slot in place. Loads the full event (the admin slot
+  /// grid carries no place/type/data), lets the user re-pick, then updates —
+  /// preserving the counseling tag, type and speaker link.
+  Future<void> _editSlot(SpeakerEventRef slot) async {
+    final event = await ExceptionHandler.guard<EventModel>(
+      context,
+      futureFunction: () => DbEvents.getEvent(slot.id),
+    );
+    if (event == null || !mounted) return;
+
+    final res = await CounselingSlotDialog.show(
+      context,
+      places: _places,
+      initialStart: event.startTime,
+      initialEnd: event.endTime,
+      initialPlaceId: event.place?.id,
+      initialCapacity: event.maxParticipants ?? 1,
+    );
+    if (res == null || !mounted) return;
+
+    final minutes = res.end.difference(res.start).inMinutes;
+    if (minutes < 5) {
+      ToastHelper.Show(context, SpeakersStrings.slotTooShort,
+          severity: ToastSeverity.NotOk);
+      return;
+    }
+
+    event
+      ..startTime = res.start
+      ..endTime = res.end
+      ..maxParticipants = res.capacity
+      ..place = _places.firstWhereOrNull((p) => p.id == res.placeId);
+
+    final saved = await ExceptionHandler.guard<EventModel>(
+      context,
+      futureFunction: () => DbEvents.updateEvent(event),
+    );
+    if (saved != null && mounted) {
+      _changed = true;
+      ToastHelper.Show(context, CommonStrings.saved);
+      await _reloadSpeaker();
+    }
+  }
+
+  Future<void> _deleteSlot(SpeakerEventRef slot) async {
     final confirm = await DialogHelper.showConfirmationDialog(
       context,
-      SpeakersStrings.deleteEmptySlots,
+      SpeakersStrings.counselingSlots,
       CommonStrings.confirmRemoval,
     );
-    if (confirm != true) return;
-    final deleted = await ExceptionHandler.guard<int>(
+    if (confirm != true || !mounted) return;
+
+    final ok = await ExceptionHandler.guardVoid(
       context,
-      futureFunction: () =>
-          DbSpeakers.deleteEmptyCounselingSlots(widget.speaker.id!),
+      // delete_event unbinds any sign-ups server-side, so booked slots delete
+      // cleanly too.
+      futureFunction: () => DbEvents.deleteEvent(EventModel(
+        id: slot.id,
+        startTime: slot.startTime ?? DateTime.now(),
+        endTime: slot.endTime ?? DateTime.now(),
+      )),
     );
-    if (deleted != null && mounted) {
+    if (ok && mounted) {
       _changed = true;
-      ToastHelper.Show(context, SpeakersStrings.slotsDeleted(deleted));
+      ToastHelper.Show(context, CommonStrings.deleted);
       await _reloadSpeaker();
     }
   }
@@ -251,15 +267,16 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(CommonStrings.hide),
+                value: _isHidden,
+                onChanged: (v) => setState(() => _isHidden = v),
+              ),
+              const SizedBox(height: 8),
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(labelText: SpeakersStrings.name),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _subtitleController,
-                decoration:
-                    InputDecoration(labelText: SpeakersStrings.roleSubtitle),
               ),
               const SizedBox(height: 16),
               Text(SpeakersStrings.avatar, style: theme.textTheme.labelLarge),
@@ -276,6 +293,7 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
                     if (mounted) setState(() => _image = url);
                     return url;
                   } catch (e) {
+                    AppLogger.error('Speaker avatar upload failed: $e');
                     if (mounted) {
                       ToastHelper.Show(context, CommonStrings.unexpectedError,
                           severity: ToastSeverity.NotOk);
@@ -300,20 +318,39 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(SpeakersStrings.bio,
-                        style: theme.textTheme.labelLarge),
-                  ),
-                  TextButton.icon(
-                    icon: const Icon(Icons.edit),
-                    onPressed: _editBio,
-                    label: Text(CommonStrings.editContent),
-                  ),
-                ],
+              Text(SpeakersStrings.bio, style: theme.textTheme.labelMedium),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _editBio,
+                  child: Text(CommonStrings.editContent),
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
+              if ((_description ?? '').isNotEmpty)
+                ClipRect(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 400),
+                    child: ShaderMask(
+                      shaderCallback: (bounds) {
+                        return const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white,
+                            Colors.transparent,
+                          ],
+                          stops: [0.9, 1.0],
+                        ).createShader(bounds);
+                      },
+                      blendMode: BlendMode.dstIn,
+                      child: HtmlView(
+                        html: _description ?? "",
+                        isSelectable: true,
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 16),
               // Counseling competence areas only matter when counseling is on (R5).
               if (FeatureService.isCounselingEnabled()) ...[
                 Text(SpeakersStrings.topics, style: theme.textTheme.labelLarge),
@@ -341,12 +378,6 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
                 controller: _orderController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(labelText: CommonStrings.order),
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(CommonStrings.hide),
-                value: _isHidden,
-                onChanged: (v) => setState(() => _isHidden = v),
               ),
               // The counseling slot generator is gated on the counseling
               // feature (R5); an unsaved speaker has no id to attach slots to.
@@ -377,99 +408,32 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
         .toList()
       ..sort((a, b) => (a.startTime ?? DateTime(0))
           .compareTo(b.startTime ?? DateTime(0)));
-    final fmt = DateFormat.MMMd().add_Hm();
+    final fmt = DateFormat.MMMd(context.locale.languageCode).add_Hm();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(SpeakersStrings.counselingSlots,
-            style: theme.textTheme.titleSmall
-                ?.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
-              child: _dateTimeField(
-                  SpeakersStrings.slotFrom, _slotFrom, () => _pickDateTime(true)),
+              child: Text(SpeakersStrings.counselingSlots,
+                  style: theme.textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold)),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _dateTimeField(
-                  SpeakersStrings.slotTo, _slotTo, () => _pickDateTime(false)),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _slotLengthController,
-                keyboardType: TextInputType.number,
-                decoration:
-                    InputDecoration(labelText: SpeakersStrings.slotLength),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextField(
-                controller: _slotBreakController,
-                keyboardType: TextInputType.number,
-                decoration:
-                    InputDecoration(labelText: SpeakersStrings.slotBreak),
-              ),
+            TextButton.icon(
+              icon: const Icon(Icons.add, size: 18),
+              onPressed: _addSlot,
+              label: Text(SpeakersStrings.addSlot),
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _slotCapacityController,
-                keyboardType: TextInputType.number,
-                decoration:
-                    InputDecoration(labelText: SpeakersStrings.slotCapacity),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DropdownButtonFormField<int?>(
-                initialValue: _slotPlaceId,
-                isExpanded: true,
-                decoration:
-                    InputDecoration(labelText: SpeakersStrings.slotPlace),
-                items: [
-                  DropdownMenuItem<int?>(value: null, child: Text('—')),
-                  ..._places.map((p) => DropdownMenuItem<int?>(
-                        value: p.id,
-                        child: Text(p.title ?? '???'),
-                      )),
-                ],
-                onChanged: (v) => setState(() => _slotPlaceId = v),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          children: [
-            FilledButton.icon(
-              icon: const Icon(Icons.add_circle_outline, size: 18),
-              onPressed: _generateSlots,
-              label: Text(SpeakersStrings.generateSlots),
-            ),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.delete_sweep_outlined, size: 18),
-              onPressed: _deleteEmptySlots,
-              label: Text(SpeakersStrings.deleteEmptySlots),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (slots.isNotEmpty)
+        const SizedBox(height: 8),
+        if (slots.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Text('—', style: theme.textTheme.bodySmall),
+          )
+        else
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -479,26 +443,29 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
                   : '${slot.occupied}/${slot.maxParticipants ?? 1}';
               final full = slot.maxParticipants != null &&
                   slot.occupied >= slot.maxParticipants!;
-              return Chip(
+              final chipColor = full
+                  ? ThemeConfig.redColor(context)
+                  : ThemeConfig.appBarColor();
+              return InputChip(
                 label: Text(label),
-                backgroundColor: full
-                    ? theme.colorScheme.errorContainer
-                    : theme.colorScheme.secondaryContainer,
+                labelStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+                onPressed: () => _editSlot(slot),
+                onDeleted: () => _deleteSlot(slot),
+                deleteIcon: const Icon(Icons.close, size: 18),
+                deleteIconColor: Colors.white70,
+                deleteButtonTooltipMessage: CommonStrings.delete,
+                backgroundColor: chipColor,
+                side: BorderSide(color: chipColor),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
               );
             }).toList(),
           ),
       ],
-    );
-  }
-
-  Widget _dateTimeField(String label, DateTime? value, VoidCallback onTap) {
-    final fmt = DateFormat.yMd().add_Hm();
-    return TextField(
-      readOnly: true,
-      controller: TextEditingController(
-          text: value != null ? fmt.format(value) : ''),
-      decoration: InputDecoration(labelText: label),
-      onTap: onTap,
     );
   }
 }

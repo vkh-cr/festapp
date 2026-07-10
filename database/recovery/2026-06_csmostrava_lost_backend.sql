@@ -24,6 +24,8 @@ CREATE OR REPLACE FUNCTION public.f_unaccent(t text)
  IMMUTABLE PARALLEL SAFE STRICT
  SET search_path TO 'public', 'extensions'
 AS $function$
+  SELECT lower(extensions.unaccent('extensions.unaccent'::regdictionary, t));
+$function$;
 
 -- ---------------------------------------------------------------------------
 -- Full-text-ish search columns: search_terms (editable keywords) + search_doc
@@ -131,7 +133,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS event_feedback_event_client_uidx ON public.eve
 CREATE INDEX        IF NOT EXISTS event_feedback_event_idx         ON public.event_feedback USING btree (event);
 ALTER TABLE public.event_feedback ENABLE ROW LEVEL SECURITY; -- access via SECURITY DEFINER RPCs only
 
+DROP TRIGGER IF EXISTS handle_updated_at ON public.icons;
 CREATE TRIGGER handle_updated_at BEFORE UPDATE ON public.icons          FOR EACH ROW EXECUTE FUNCTION extensions.moddatetime('updated_at');
+DROP TRIGGER IF EXISTS handle_updated_at ON public.place_types;
 CREATE TRIGGER handle_updated_at BEFORE UPDATE ON public.place_types    FOR EACH ROW EXECUTE FUNCTION extensions.moddatetime('updated_at');
 
 -- ---------------------------------------------------------------------------
@@ -242,7 +246,7 @@ BEGIN
         )
     );
 END;
-$function$
+$function$;
 
 
 
@@ -311,7 +315,7 @@ BEGIN
         )
     );
 END;
-$function$
+$function$;
 
 
 
@@ -382,7 +386,7 @@ BEGIN
         )
     );
 END;
-$function$
+$function$;
 
 
 
@@ -431,7 +435,7 @@ BEGIN
 
     RETURN jsonb_build_object('code', 200, 'data', v_items);
 END;
-$function$
+$function$;
 
 
 
@@ -468,7 +472,7 @@ BEGIN
         'data', jsonb_build_object('deleted', v_deleted)
     );
 END;
-$function$
+$function$;
 
 
 
@@ -487,109 +491,16 @@ AS $function$
       AND feature->>'code' = 'event_feedback'
       AND LOWER(COALESCE(feature->>'is_enabled', 'false')) = 'true'
   );
-$function$
+$function$;
 
 
 
 -- ===== search_occasion_content =====
-CREATE OR REPLACE FUNCTION public.search_occasion_content(p_occasion bigint, p_query text, p_limit integer DEFAULT 50)
- RETURNS TABLE(entity_type text, entity_id bigint, title text, snippet text, rank real, start_time timestamp with time zone, parent_id bigint, extra jsonb)
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public', 'extensions'
-AS $function$
-DECLARE
-    v_features        JSONB;
-    v_norm_query      TEXT;
-    v_effective_limit INT;
-BEGIN
-    SELECT o.features INTO v_features
-    FROM public.occasions o
-    WHERE o.id = p_occasion;
-
-    IF v_features IS NULL THEN
-        v_features := '[]'::jsonb;
-    END IF;
-
-    v_norm_query := public.f_unaccent(coalesce(p_query, ''));
-
-    IF v_norm_query IS NULL OR length(trim(v_norm_query)) = 0 THEN
-        RETURN;
-    END IF;
-
-    v_effective_limit := LEAST(GREATEST(coalesce(p_limit, 50), 1), 200);
-
-    RETURN QUERY
-    SELECT 'event'::TEXT AS entity_type, e.id::BIGINT AS entity_id, e.title,
-           LEFT(coalesce(e.description, ''), 120) AS snippet,
-           GREATEST(extensions.similarity(e.search_doc, v_norm_query), 0.0)::REAL AS rank,
-           e.start_time, e.place AS parent_id,
-           jsonb_strip_nulls(jsonb_build_object(
-             'end_time', e.end_time,
-             'max_participants', e.max_participants,
-             'place_title', p.title
-           )) AS extra
-    FROM public.events e
-    LEFT JOIN public.places p ON p.id = e.place
-    WHERE e.occasion = p_occasion
-      AND e.is_hidden = FALSE
-      AND e.search_doc ILIKE '%' || v_norm_query || '%'
-
-    UNION ALL
-
-    SELECT 'place'::TEXT, p.id::BIGINT, p.title,
-           LEFT(coalesce(p.description, ''), 120),
-           GREATEST(extensions.similarity(p.search_doc, v_norm_query), 0.0)::REAL,
-           NULL::TIMESTAMPTZ, NULL::BIGINT, NULL::JSONB
-    FROM public.places p
-    WHERE p.occasion = p_occasion
-      AND p.is_hidden = FALSE
-      AND p.search_doc ILIKE '%' || v_norm_query || '%'
-
-    UNION ALL
-
-    SELECT
-      CASE
-        WHEN i.type = 'song' THEN 'song'
-        WHEN i.type = 'game' THEN 'game'
-        ELSE 'info'
-      END::TEXT,
-      i.id::BIGINT, i.title,
-      LEFT(coalesce(i.description, ''), 120),
-      GREATEST(extensions.similarity(i.search_doc, v_norm_query), 0.0)::REAL,
-      NULL::TIMESTAMPTZ, NULL::BIGINT, NULL::JSONB
-    FROM public.information i
-    WHERE i.occasion = p_occasion
-      AND i.is_hidden = FALSE
-      AND i.search_doc ILIKE '%' || v_norm_query || '%'
-      AND (
-        (i.type = 'song' AND EXISTS (
-          SELECT 1 FROM jsonb_array_elements(v_features) f
-          WHERE f->>'code' = 'songbook' AND (f->>'is_enabled')::boolean = TRUE
-        ))
-        OR
-        (i.type = 'game' AND EXISTS (
-          SELECT 1 FROM jsonb_array_elements(v_features) f
-          WHERE f->>'code' = 'game' AND (f->>'is_enabled')::boolean = TRUE
-        ))
-        OR
-        (i.type IS NULL OR i.type NOT IN ('song', 'game'))
-      )
-
-    UNION ALL
-
-    SELECT 'news'::TEXT, n.id::BIGINT, NULL::TEXT,
-           LEFT(coalesce(n.message, ''), 120),
-           GREATEST(extensions.similarity(n.search_doc, v_norm_query), 0.0)::REAL,
-           n.created_at, NULL::BIGINT, NULL::JSONB
-    FROM public.news n
-    WHERE n.occasion = p_occasion
-      AND n.search_doc ILIKE '%' || v_norm_query || '%'
-
-    ORDER BY rank DESC
-    LIMIT v_effective_limit;
-END;
-$function$
+-- SUPERSEDED: the live/current definition lives in
+-- database/functions/others/search_occasion_content.sql (it additionally
+-- excludes counseling slots and searches speakers). It is NOT duplicated here
+-- so that re-running this recovery file can never regress the newer function.
+-- Apply that file after this one when bootstrapping a fresh database.
 
 
 
@@ -665,6 +576,6 @@ BEGIN
     DELETE FROM public.icons WHERE id = p_icon_id;
     RETURN jsonb_build_object('code', 200);
 END;
-$function$
+$function$;
 
 

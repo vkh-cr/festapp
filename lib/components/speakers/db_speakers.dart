@@ -23,16 +23,38 @@ class DbSpeakers {
     return SpeakersBundle.fromJson((res['data'] as Map).cast<String, dynamic>());
   }
 
-  /// Counselors competent in [topicId] and their future slots.
+  /// Counselors competent in [topicId] and their future slots, optionally
+  /// scoped to a [from, to) window (the parent rozcestník event's day).
   static Future<CounselingAvailability> getCounselingAvailability(
-      int occasionId, int topicId) async {
+      int occasionId, int topicId,
+      {DateTime? from, DateTime? to}) async {
     final res = await _supabase.rpc('get_counseling_availability', params: {
       'p_occasion': occasionId,
       'p_topic': topicId,
+      if (from != null) 'p_from': from.toUtc().toIso8601String(),
+      if (to != null) 'p_to': to.toUtc().toIso8601String(),
     });
     _ensureOk(res);
     return CounselingAvailability.fromJson(
         (res['data'] as Map).cast<String, dynamic>());
+  }
+
+  /// Per-area availability (free / total future slots) for the rozcestník, so
+  /// the client can grey out areas with nothing bookable
+  /// (get_counseling_topics_overview).
+  static Future<List<CounselingTopicOverview>> getCounselingTopicsOverview(
+      int occasionId,
+      {DateTime? from, DateTime? to}) async {
+    final res = await _supabase.rpc('get_counseling_topics_overview', params: {
+      'p_occasion': occasionId,
+      if (from != null) 'p_from': from.toUtc().toIso8601String(),
+      if (to != null) 'p_to': to.toUtc().toIso8601String(),
+    });
+    _ensureOk(res);
+    return (((res['data'] as Map)['topics'] as List?) ?? const [])
+        .map((e) =>
+            CounselingTopicOverview.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
   }
 
   // --- Admin reads ---

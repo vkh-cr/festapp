@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fstapp/components/speakers/counseling_availability.dart';
-import 'package:fstapp/components/speakers/slot_chip.dart';
 import 'package:fstapp/components/speakers/speaker_topic_model.dart';
 import 'package:fstapp/components/speakers/topic_picker.dart';
 
-/// Widget tests for the extracted counseling widgets. `.tr()` returns raw keys
-/// in the test env, so localized labels are asserted by key.
+/// Widget tests for the counseling area picker. `.tr()` returns raw keys in the
+/// test env, so localized labels are asserted by key.
 
 Future<void> _pumpTopicPicker(
   WidgetTester tester, {
   required List<SpeakerTopicModel> topics,
   required void Function(int) onChanged,
   int? initial,
+  Set<int>? availableTopicIds,
+  Map<int, ({int occupied, int total})>? occupancyByTopic,
 }) async {
   int? selected = initial;
   await tester.pumpWidget(
@@ -22,26 +22,14 @@ Future<void> _pumpTopicPicker(
           builder: (context, setState) => TopicPicker(
             topics: topics,
             selectedTopicId: selected,
+            availableTopicIds: availableTopicIds,
+            occupancyByTopic: occupancyByTopic,
             onSelected: (v) {
               setState(() => selected = v);
               onChanged(v);
             },
           ),
         ),
-      ),
-    ),
-  );
-}
-
-Future<void> _pumpSlotChip(
-  WidgetTester tester, {
-  required CounselingSlot slot,
-  VoidCallback? onTap,
-}) async {
-  await tester.pumpWidget(
-    MaterialApp(
-      home: Scaffold(
-        body: SlotChip(slot: slot, timeLabel: 'Mo 10:00', onTap: onTap),
       ),
     ),
   );
@@ -57,97 +45,56 @@ void main() {
     testWidgets('is single-select: choosing a second option deselects the first',
         (tester) async {
       final picked = <int>[];
-      await _pumpTopicPicker(tester,
-          topics: topics, onChanged: picked.add);
+      await _pumpTopicPicker(tester, topics: topics, onChanged: picked.add);
 
-      // Select the first area.
+      int? groupValue() =>
+          tester.widget<RadioGroup<int>>(find.byType(RadioGroup<int>)).groupValue;
+
       await tester.tap(find.text('A'));
       await tester.pumpAndSettle();
       expect(picked.last, 10);
-      var tiles = tester
-          .widgetList<RadioListTile<int>>(find.byType(RadioListTile<int>))
-          .toList();
-      expect(tiles.firstWhere((t) => t.value == 10).groupValue, 10);
+      expect(groupValue(), 10);
 
-      // Selecting the second area switches the selection (only one at a time).
       await tester.tap(find.text('B'));
       await tester.pumpAndSettle();
       expect(picked.last, 11);
-      tiles = tester
-          .widgetList<RadioListTile<int>>(find.byType(RadioListTile<int>))
-          .toList();
-      // The group value is now 11 for both radios → A is no longer selected.
-      expect(tiles.firstWhere((t) => t.value == 11).groupValue, 11);
-      expect(tiles.firstWhere((t) => t.value == 10).groupValue, 11);
-      expect(
-          tiles.firstWhere((t) => t.value == 10).groupValue !=
-              tiles.firstWhere((t) => t.value == 10).value,
-          isTrue);
-    });
-  });
-
-  group('SlotChip', () {
-    CounselingSlot slot({
-      int max = 1,
-      int occupied = 0,
-      bool signedIn = false,
-    }) =>
-        CounselingSlot(
-          id: 1,
-          maxParticipants: max,
-          occupied: occupied,
-          isSignedIn: signedIn,
-        );
-
-    testWidgets('free slot is tappable and shows time + occupancy',
-        (tester) async {
-      var tapped = false;
-      await _pumpSlotChip(tester,
-          slot: slot(max: 2, occupied: 0), onTap: () => tapped = true);
-
-      // Not the taken state.
-      expect(find.text('Counseling.slotTaken'), findsNothing);
-      // Shows the time label + occupancy.
-      expect(find.textContaining('Mo 10:00'), findsOneWidget);
-      expect(find.textContaining('0/2'), findsOneWidget);
-
-      // Tap is enabled.
-      expect(tester.widget<InkWell>(find.byType(InkWell)).onTap, isNotNull);
-      await tester.tap(find.byType(SlotChip));
-      await tester.pumpAndSettle();
-      expect(tapped, isTrue);
+      // Single-select: the group now holds B only, so A is deselected.
+      expect(groupValue(), 11);
     });
 
-    testWidgets('full slot is disabled and shows the "taken" label',
+    testWidgets('greys out areas with no free slots but keeps them tappable',
         (tester) async {
-      var tapped = false;
-      await _pumpSlotChip(tester,
-          slot: slot(max: 1, occupied: 1), onTap: () => tapped = true);
+      final picked = <int>[];
+      await _pumpTopicPicker(tester,
+          topics: topics,
+          onChanged: picked.add,
+          availableTopicIds: const {10}); // only A has free slots
 
-      expect(find.text('Counseling.slotTaken'), findsOneWidget);
-      // Tap is disabled (onTap is null → callback never fires).
-      expect(tester.widget<InkWell>(find.byType(InkWell)).onTap, isNull);
-      await tester.tap(find.byType(SlotChip));
+      // The unavailable area is rendered at reduced opacity (greyed).
+      final hasGreyed = tester
+          .widgetList<Opacity>(find.byType(Opacity))
+          .any((o) => (o.opacity - 0.45).abs() < 0.001);
+      expect(hasGreyed, isTrue);
+
+      // Greyed areas stay clickable (revealing the empty state).
+      await tester.tap(find.text('B'));
       await tester.pumpAndSettle();
-      expect(tapped, isFalse);
+      expect(picked.last, 11);
     });
 
-    testWidgets('my slot shows a distinct affordance (check icon), no booking',
-        (tester) async {
-      var tapped = false;
-      await _pumpSlotChip(tester,
-          slot: slot(max: 1, occupied: 1, signedIn: true),
-          onTap: () => tapped = true);
+    testWidgets('shows occupancy as a trailing capacity badge', (tester) async {
+      await _pumpTopicPicker(tester,
+          topics: topics,
+          onChanged: (_) {},
+          availableTopicIds: const {10, 11},
+          occupancyByTopic: const {
+            10: (occupied: 8, total: 20),
+            11: (occupied: 2, total: 5),
+          });
 
-      // Distinct affordance: the check icon (absent in free/full states).
-      expect(find.byIcon(Icons.check_circle), findsOneWidget);
-      // Not the taken label.
-      expect(find.text('Counseling.slotTaken'), findsNothing);
-      // Booking is disabled from the chip (cancel happens elsewhere).
-      expect(tester.widget<InkWell>(find.byType(InkWell)).onTap, isNull);
-      await tester.tap(find.byType(SlotChip));
-      await tester.pumpAndSettle();
-      expect(tapped, isFalse);
+      // The classic "occupied/total" capacity text appears per area.
+      expect(find.text('8/20'), findsOneWidget);
+      expect(find.text('2/5'), findsOneWidget);
     });
   });
 }

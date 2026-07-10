@@ -13,6 +13,7 @@ import 'package:fstapp/services/js/js_interop.dart';
 import 'dart:async';
 
 import 'package:fstapp/components/forms/views/form_page.dart';
+import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -132,10 +133,15 @@ class RouterService {
   }
 
   static void scheduleBack(BuildContext context) {
-    //if(context.router.canPop()){
-    context.router.replace(ScheduleRoute());
-    context.router.maybePopTop();
-    //}
+    if (context.router.canPop()) {
+      context.router.maybePop();
+    } else {
+      // No history (e.g. event page opened directly via URL): replace with
+      // the occasion schedule. Navigate by path so the router resolves the
+      // schedule variant configured for this occasion (basic/light/advanced);
+      // replace(ScheduleRoute()) throws on occasions not using "advanced".
+      context.router.replacePath(getCurrentLink() + EventPage.ROUTE);
+    }
   }
 
   static bool canPop(BuildContext context) => context.router.canPop();

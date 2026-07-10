@@ -53,7 +53,7 @@ BEGIN
         FROM public.forms f
         JOIN public.occasions o ON f.occasion = o.id
         WHERE f.link = form_link
-          AND occasions.organization = org_id;
+          AND o.organization = org_id;
     END IF;
 
     -- 2. If no occasion found yet, try via link_txt

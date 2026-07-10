@@ -202,6 +202,7 @@ class _LightSubprogramListState extends State<LightSubprogramList> {
         children.add(_EventRow(
           event: e,
           isOpen: isOpen,
+          showEndTime: true,
           onTap: hasChildren
               ? () => setState(() => _openId = _openId == e.id ? null : e.id)
               : (widget.onEventPressed != null
@@ -305,6 +306,7 @@ class _LightMyScheduleListState extends State<LightMyScheduleList> {
           children.add(_EventRow(
             event: e,
             isOpen: isOpen,
+            showEndTime: true,
             onTap: hasChildren
                 ? () => setState(() => _openId = _openId == e.id ? null : e.id)
                 : (widget.onEventPressed != null
@@ -352,7 +354,7 @@ class _LightDayHeader extends StatelessWidget {
           Text(
             weekday,
             style: TextStyle(
-              fontSize: 21,
+              fontSize: 23,
               fontWeight: FontWeight.w800,
               color: _strongText(context),
               letterSpacing: 0.2,
@@ -551,12 +553,14 @@ class _EventRow extends StatelessWidget {
   final bool isOpen;
   final VoidCallback? onTap;
   final void Function(int eventId)? onChildTap;
+  final bool showEndTime;
 
   const _EventRow({
     required this.event,
     required this.isOpen,
     required this.onTap,
     required this.onChildTap,
+    this.showEndTime = false,
   });
 
   @override
@@ -564,12 +568,28 @@ class _EventRow extends StatelessWidget {
     final hasChildren = event.haveChildren();
     final strong = _strongText(context);
     final muted = _mutedText(context);
-    final accent = _accent(context);
-    final time = DateFormat.Hm().format(event.startTime);
-
     final now = TimeHelper.now();
-    final isNow =
-        event.startTime.isBefore(now) && event.endTime.isAfter(now);
+    final isNow = !event.isCancelled &&
+        event.startTime.isBefore(now) &&
+        event.endTime.isAfter(now);
+
+    // Variant C (My schedule): start over end in a narrow column — the end
+    // time a step smaller and muted so the start keeps the visual weight.
+    final showTimeRange = showEndTime && event.endTime.isAfter(event.startTime);
+    final startStyle = TextStyle(
+      color: strong,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      letterSpacing: 0.2,
+    );
+    final endStyle = TextStyle(
+      color: muted,
+      fontSize: 12.5,
+      fontWeight: FontWeight.w500,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      letterSpacing: 0.2,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -586,34 +606,55 @@ class _EventRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      width: 56,
-                      child: Text(
-                        time,
-                        style: TextStyle(
-                          color: isNow ? accent : strong,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          fontFeatures: const [
-                            FontFeature.tabularFigures(),
-                          ],
-                          letterSpacing: 0.2,
-                        ),
-                      ),
+                      width: showEndTime ? 64 : 56,
+                      child: showTimeRange
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    DateFormat.Hm().format(event.startTime),
+                                    style: startStyle),
+                                const SizedBox(height: 2),
+                                Text(DateFormat.Hm().format(event.endTime),
+                                    style: endStyle),
+                              ],
+                            )
+                          : Text(DateFormat.Hm().format(event.startTime),
+                              style: startStyle),
                     ),
                     Expanded(
-                      child: Text(
-                        event.title.isNotEmpty
-                            ? event.title
-                            : (event.data?.toString() ?? ''),
-                        style: TextStyle(
-                          color: strong,
-                          fontSize: 15,
-                          height: 1.3,
-                          fontWeight: FontWeight.w600,
-                          decoration: event.isCancelled
-                              ? TextDecoration.lineThrough
-                              : TextDecoration.none,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (isNow)
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 4),
+                              child: _RightNowBadge(),
+                            ),
+                          Text(
+                            event.title.isNotEmpty
+                                ? event.title
+                                : (event.data?.toString() ?? ''),
+                            style: TextStyle(
+                              color: strong,
+                              fontSize: 16,
+                              height: 1.3,
+                              fontWeight: FontWeight.w600,
+                              decoration: event.isCancelled
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                            ),
+                          ),
+                          // With the wider from–to time column (My schedule)
+                          // the place moves under the title as a second line.
+                          if (showEndTime && event.timeBlockPlace != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: _PlaceChip(
+                                  label: event.timeBlockPlace!.title,
+                                  maxWidth: double.infinity),
+                            ),
+                        ],
                       ),
                     ),
                     if (event.isSupportingSignIn())
@@ -621,7 +662,7 @@ class _EventRow extends StatelessWidget {
                         padding: const EdgeInsets.only(left: 10),
                         child: _CapacityChip(event: event),
                       ),
-                    if (event.timeBlockPlace != null)
+                    if (!showEndTime && event.timeBlockPlace != null)
                       Padding(
                         padding: const EdgeInsets.only(left: 10),
                         child: _PlaceChip(label: event.timeBlockPlace!.title),
@@ -640,8 +681,8 @@ class _EventRow extends StatelessWidget {
                 ),
               ),
             ),
-            // Left accent strip for the currently-running event — soft cue
-            // without dominating the row.
+            // Left strip for the currently-running event — soft cue
+            // without dominating the row; red to match the badge.
             if (isNow)
               Positioned(
                 left: 0,
@@ -650,7 +691,7 @@ class _EventRow extends StatelessWidget {
                 child: Container(
                   width: 3,
                   decoration: BoxDecoration(
-                    color: accent,
+                    color: ThemeConfig.redColor(context),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -969,37 +1010,48 @@ class _LightDayTabBar extends StatelessWidget {
                                       ? group.title
                                       : weekdays[dt.weekday - 1],
                                   style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
                                     color: labelColor,
                                     letterSpacing: 0.5,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
-                                if (dt != null)
+                                // Today swaps its date for a small "TODAY"
+                                // label — always full-strength so the marker
+                                // reads even when another day is selected.
+                                if (isToday)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 5, vertical: 1.5),
+                                    decoration: BoxDecoration(
+                                      color: ThemeConfig.redColor(context),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      ScheduleStrings.today.toUpperCase(),
+                                      style: const TextStyle(
+                                        fontSize: 8.5,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  )
+                                else if (dt != null)
                                   Text(
                                     DateFormat.Md(
                                             context.locale.toString())
                                         .format(dt),
                                     style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
                                       color: labelColor,
                                       fontFeatures: const [
                                         FontFeature.tabularFigures()
                                       ],
                                     ),
                                   ),
-                                if (isToday) ...[
-                                  const SizedBox(height: 4),
-                                  Container(
-                                    width: 5,
-                                    height: 5,
-                                    decoration: BoxDecoration(
-                                      color: accent,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ],
                               ],
                             );
                           },
@@ -1071,10 +1123,11 @@ class _RoundedUnderlinePainter extends BoxPainter {
 }
 
 /// Place rendered as a subtle chip with a leading dot — keeps the place
-/// visible without competing with the title weight, ellipsised at 140 px.
+/// visible without competing with the title weight, ellipsised at [maxWidth].
 class _PlaceChip extends StatelessWidget {
   final String label;
-  const _PlaceChip({required this.label});
+  final double maxWidth;
+  const _PlaceChip({required this.label, this.maxWidth = 140});
 
   @override
   Widget build(BuildContext context) {
@@ -1091,16 +1144,18 @@ class _PlaceChip extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 140),
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: muted,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.1,
+        Flexible(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: muted,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.1,
+              ),
             ),
           ),
         ),
@@ -1119,6 +1174,32 @@ List<String> _weekdays(BuildContext context) => List.generate(7, (i) {
           .format(DateTime(2020, 1, 6 + i))
           .toUpperCase();
     });
+
+/// Red "RIGHT NOW" pill marking a currently running event — same look as the
+/// badge in the advanced schedule view.
+class _RightNowBadge extends StatelessWidget {
+  const _RightNowBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: ThemeConfig.redColor(context),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        ScheduleStrings.rightNow.toUpperCase(),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+}
 
 Color _strongText(BuildContext context) => ThemeConfig.blackColor(context);
 Color _mutedText(BuildContext context) =>

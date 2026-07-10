@@ -1,5 +1,6 @@
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/components/search/search_result_model.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
@@ -160,11 +161,11 @@ class DbSearch {
               entityType: d.entityType,
               entityId: d.entityId,
               title: d.title,
+              // Clean, word-boundary snippet (mirrors the server's
+              // f_html_snippet): strips HTML and ellipsizes only when cut.
               snippet: d.snippet == null
                   ? null
-                  : (d.snippet!.length > 120
-                      ? d.snippet!.substring(0, 120)
-                      : d.snippet),
+                  : HtmlHelper.htmlToSnippet(d.snippet),
               startTime: d.startTime,
               parentId: d.parentId,
               rank: 1,

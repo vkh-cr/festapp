@@ -80,24 +80,21 @@ class CounselingFeature extends Feature {
             : '';
 
         final startController = TextEditingController(text: displayStart);
-        final typeController =
-            TextEditingController(text: counselingEventType);
         final maxController =
             TextEditingController(text: maxActiveBookings.toString());
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // The slot event type is fixed — generated slots rely on this
+            // exact value.
             TextFormField(
-              controller: typeController,
+              initialValue: counselingEventType,
+              readOnly: true,
+              enabled: false,
               decoration: InputDecoration(
                 labelText: SpeakersStrings.counselingEventType,
               ),
-              onSaved: (val) {
-                counselingEventType = (val != null && val.trim().isNotEmpty)
-                    ? val.trim()
-                    : FeatureConstants.counselingDefaultEventType;
-              },
             ),
             const SizedBox(height: 16),
             TextFormField(

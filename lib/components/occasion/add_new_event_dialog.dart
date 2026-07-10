@@ -12,6 +12,7 @@ import 'package:fstapp/components/occasion/occasion_home_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
 import '../map/place_model.dart';
+import '../map/place_picker_field.dart';
 
 class AddNewEventDialog {
   static Future<void> showAddEventDialog(
@@ -120,30 +121,16 @@ class AddNewEventDialog {
                         ),
                         const SizedBox(height: 16),
                         // Place selection
-                        DropdownButtonFormField<PlaceModel?>(
-                          initialValue:
-                              places?.firstWhereOrNull((p) => p.id == placeId),
-                          items: [
-                            DropdownMenuItem<PlaceModel?>(
-                              value: null,
-                              child: Text("---"),
-                            ),
-                            if (places != null)
-                              ...places.map((place) {
-                                return DropdownMenuItem<PlaceModel?>(
-                                  value: place,
-                                  child: Text(place.title ?? "???"),
-                                );
-                              }),
-                          ],
-                          onChanged: (selectedPlace) {
+                        PlacePickerField(
+                          places: places ?? [],
+                          selectedPlaceId: placeId,
+                          labelText: CommonStrings.place,
+                          placeholder: "---",
+                          onChanged: (id) {
                             setState(() {
-                              placeId = selectedPlace?.id;
+                              placeId = id;
                             });
                           },
-                          decoration: InputDecoration(
-                            labelText: CommonStrings.place,
-                          ),
                         ),
                       ],
                     ),

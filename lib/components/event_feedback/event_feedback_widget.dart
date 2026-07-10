@@ -334,7 +334,11 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          // Neutral grey background, independent of the theme's (brownish)
+          // surface colour, so the feedback card reads calmly on the event page.
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF2A2A2C)
+              : const Color(0xFFF2F2F2),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
               color: theme.colorScheme.outline.withValues(alpha: 0.5)),

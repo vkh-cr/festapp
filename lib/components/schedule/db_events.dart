@@ -131,6 +131,7 @@ class DbEvents {
               "${Tb.events.end_time},"
               "${Tb.events.max_participants},"
               "${Tb.events.data},"
+              "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
               "${Tb.event_users.table}(count)")
           .inFilter(Tb.events.id, event.childEventIds!)
           .eq(Tb.events.is_hidden, false);

@@ -1,19 +1,40 @@
--- search_occasion_content — GlobalSearch backend across events / places /
--- information / news / speakers for an occasion.
+-- Migration: clean plain-text snippets for GlobalSearch.
 --
--- Speakers/counselors are searchable by name, role (subtitle) and bio. Speakers
--- are a core concept (no feature gate — decision R3/R7); only the is_hidden
--- filter applies. Their search_doc column + trigram index are added by migration
--- 20260710120000_speakers_searchable.sql.
+-- search_occasion_content previously truncated raw HTML descriptions with
+-- LEFT(description, 120), which cut mid-tag (leaving a stray "<"), cut
+-- mid-word, and — because markup ate into the 120-char budget — returned
+-- wildly variable amounts of real text (sometimes almost none). This adds a
+-- reusable f_html_snippet() helper (strip tags -> collapse whitespace ->
+-- word-boundary truncate -> ellipsis only when actually cut) and switches
+-- every snippet column in the search RPC to use it.
 --
--- This file is now the repo home of the function; it supersedes the verbatim
--- copy in database/recovery/2026-06_csmostrava_lost_backend.sql (which was
--- recovered from the live catalog). The only functional change versus that copy
--- is in the events branch: counseling slots (data.is_counseling_slot = true)
--- are excluded from search results. Slots are ordinary, non-hidden events
--- (decision R8), so without this filter the hundreds of generated mini-events
--- would flood GlobalSearch (plan 2.1). The check is NULL-safe:
--- `... IS NOT TRUE` keeps normal events where the marker is absent/NULL.
+-- Additive/idempotent: two CREATE OR REPLACE FUNCTION statements, no data or
+-- signature changes.
+
+CREATE OR REPLACE FUNCTION public.f_html_snippet(p_html text, p_limit integer DEFAULT 160)
+ RETURNS text
+ LANGUAGE sql
+ IMMUTABLE
+ PARALLEL SAFE
+AS $function$
+    WITH cleaned AS (
+        SELECT btrim(
+                 regexp_replace(
+                   regexp_replace(
+                     regexp_replace(coalesce(p_html, ''), '<[^>]*>', ' ', 'g'),
+                     '<[^>]*$', '', 'g'
+                   ),
+                   '\s+', ' ', 'g'
+                 )
+               ) AS t
+    )
+    SELECT CASE
+             WHEN length(t) <= p_limit THEN t
+             ELSE btrim(regexp_replace(LEFT(t, p_limit), '\s\S*$', '')) || '…'
+           END
+    FROM cleaned;
+$function$;
+
 CREATE OR REPLACE FUNCTION public.search_occasion_content(p_occasion bigint, p_query text, p_limit integer DEFAULT 50)
  RETURNS TABLE(entity_type text, entity_id bigint, title text, snippet text, rank real, start_time timestamp with time zone, parent_id bigint, extra jsonb)
  LANGUAGE plpgsql

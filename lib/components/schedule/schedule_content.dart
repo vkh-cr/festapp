@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
@@ -21,6 +22,13 @@ import 'package:fstapp/components/images/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/images/image_area.dart';
+import 'package:fstapp/components/speakers/admin/event_speakers_cell.dart';
+import 'package:fstapp/components/speakers/admin/speaker_editor_dialog.dart';
+import 'package:fstapp/components/speakers/db_speakers.dart';
+import 'package:fstapp/components/speakers/speaker_model.dart';
+import 'package:fstapp/components/speakers/speaker_topic_model.dart';
+import 'package:fstapp/components/speakers/speakers_strings.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import '../map/place_model.dart';
@@ -45,6 +53,13 @@ class _ScheduleContentState extends State<ScheduleContent> {
       ""; // Represents "No Type", saved as empty string
 
   bool _isLoading = true; // Unified loading state
+
+  // Loaded once for the occasion; `_eventSpeakerIds` maps event id -> attached
+  // speaker ids so each grid cell can render its current selection without a
+  // per-row fetch.
+  final List<SpeakerModel> _allSpeakers = [];
+  List<SpeakerTopicModel> _allTopics = [];
+  final Map<int, List<int>> _eventSpeakerIds = {};
 
   SingleDataGridController<EventModel>? controller;
 
@@ -83,6 +98,8 @@ class _ScheduleContentState extends State<ScheduleContent> {
       for (var et in _definedEventTypes) {
         _eventTypeSelectOptions.add(et.code);
       }
+
+      await _loadSpeakers();
     } catch (e) {
       AppLogger.error("Error loading initial data for ScheduleContent: $e");
     } finally {
@@ -92,6 +109,67 @@ class _ScheduleContentState extends State<ScheduleContent> {
           initController();
         }
       }
+    }
+  }
+
+  /// Loads all speakers + the topic catalog for the occasion and rebuilds the
+  /// event -> speaker-ids map. `_allSpeakers` is mutated in place elsewhere so
+  /// inline-created speakers stay visible to every open cell.
+  Future<void> _loadSpeakers() async {
+    final data = await ExceptionHandler.guard(
+      context,
+      futureFunction: () =>
+          DbSpeakers.getSpeakersForEdit(RightsService.currentOccasionId()!),
+    );
+    if (data == null) return;
+    _allSpeakers
+      ..clear()
+      ..addAll(data.speakers);
+    _allTopics = data.topics;
+    _eventSpeakerIds.clear();
+    for (final s in data.speakers) {
+      if (s.id == null) continue;
+      for (final e in s.events) {
+        (_eventSpeakerIds[e.id] ??= []).add(s.id!);
+      }
+    }
+  }
+
+  /// Opens the speaker editor to create a new speaker, appends it to the shared
+  /// `_allSpeakers` list and returns its id so the picker can pre-select it.
+  /// Mirrors event_edit_page._addSpeaker (RPC lives in SpeakerEditorDialog).
+  Future<int?> _addSpeaker() async {
+    final result = await showDialog<Object?>(
+      context: context,
+      builder: (_) =>
+          SpeakerEditorDialog(speaker: SpeakerModel(), topics: _allTopics),
+    );
+    if (result is! SpeakerModel) return null;
+
+    final data = await ExceptionHandler.guard(
+      context,
+      futureFunction: () =>
+          DbSpeakers.getSpeakersForEdit(RightsService.currentOccasionId()!),
+    );
+    if (data != null) {
+      _allSpeakers
+        ..clear()
+        ..addAll(data.speakers);
+      _allTopics = data.topics;
+    }
+    return result.id;
+  }
+
+  /// Persists the speaker selection for one event and keeps the local map in
+  /// sync so re-opening the cell shows the saved set.
+  Future<void> _saveEventSpeakers(int eventId, List<int> speakerIds) async {
+    await ExceptionHandler.guardVoid(
+      context,
+      futureFunction: () => DbSpeakers.setEventSpeakers(eventId, speakerIds),
+    );
+    _eventSpeakerIds[eventId] = List.of(speakerIds);
+    if (mounted) {
+      ToastHelper.Show(context, CommonStrings.saved);
     }
   }
 
@@ -260,6 +338,32 @@ class _ScheduleContentState extends State<ScheduleContent> {
           width: 250,
         ),
         TrinaColumn(
+          title: SpeakersStrings.lecturers,
+          field: EventModel.speakersColumn,
+          type: TrinaColumnType.text(),
+          readOnly: true,
+          enableEditingMode: false,
+          enableFilterMenuItem: false,
+          enableSorting: false,
+          width: 180,
+          renderer: (rendererContext) {
+            final eventId =
+                rendererContext.row.cells[EventModel.speakersColumn]?.value
+                    as int?;
+            return EventSpeakersCell(
+              // Trina reuses cell widgets across rows on scroll — key by event
+              // id so the correct selection binds after a scroll/rebuild.
+              key: ValueKey('event-speakers-$eventId'),
+              eventId: eventId,
+              allSpeakers: _allSpeakers,
+              initialSelectedIds:
+                  eventId == null ? const [] : (_eventSpeakerIds[eventId] ?? const []),
+              onSave: _saveEventSpeakers,
+              onAddSpeaker: _addSpeaker,
+            );
+          },
+        ),
+        TrinaColumn(
           title: CommonStrings.startDate,
           field: EventModel.startDateColumn,
           type: TrinaColumnType.date(defaultValue: occasionModel?.startTime),
@@ -404,6 +508,17 @@ class _ScheduleContentState extends State<ScheduleContent> {
           renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
               rendererContext, EventModel.isGroupEventColumn),
         ),
+        if (FeatureService.isCounselingEnabled())
+          TrinaColumn(
+            title: SpeakersStrings.counselingEntryColumn,
+            field: FeatureConstants.counselingEntry,
+            type: TrinaColumnType.text(),
+            applyFormatterInEditing: true,
+            enableEditingMode: false,
+            width: 100,
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+                rendererContext, FeatureConstants.counselingEntry),
+          ),
         TrinaColumn(
           title: ScheduleStrings.showInsideEvent,
           field: EventModel.parentEventColumn,

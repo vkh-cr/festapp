@@ -12,6 +12,7 @@ class ScheduleStrings {
   static String get addToSchedule =>
       'FeatureSchedule.addToSchedule'.tr(); // "Add To Schedule"
   static String get rightNow => 'FeatureSchedule.rightNow'.tr(); // "Right Now"
+  static String get ended => 'FeatureSchedule.ended'.tr(); // "Ended"
   static String get afternoon =>
       'FeatureSchedule.afternoon'.tr(); // "Afternoon"
   static String get evening => 'FeatureSchedule.evening'.tr(); // "Evening"

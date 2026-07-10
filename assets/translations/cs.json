@@ -122,9 +122,6 @@
     "userAlreadySignedInSameTimeF": "{user} je již přihlášena na jiné události ve stejný čas.",
     "userAlreadySignedInF": "{user} je již přihlášena.",
     "group": "Skupina",
-    "imageRemoved": "Obrázek odstraněn",
-    "imageUploaded": "Obrázek byl úspěšně nahrán",
-    "initializing": "Inicializace...",
     "interest": "Zájem",
     "introImage": "Úvodní obrázek",
     "cannotSignOutPastEvent": "Není možné se přihlásit na událost, která už proběhla.",
@@ -142,12 +139,11 @@
     "userAlreadySignedInSameTypeM": "{user} je již přihlášen na událost tohoto typu.",
     "userAlreadySignedInSameTimeM": "{user} je již přihlášen na jiné události ve stejný čas.",
     "userAlreadySignedInM": "{user} je již přihlášen.",
-    "noEvents": "Žádné události",
     "participantsCopied": "Účastníci byli zkopírováni.",
     "removedFromMySchedule": "Odebráno z Mého programu.",
     "rightNow": "Právě Teď",
+    "ended": "Proběhlo",
     "roles": "Role",
-    "scan": "Skenovat",
     "showInsideEvent": "Zobrazit uvnitř události",
     "signInOther": "Přihlásit někoho",
     "signInSomeone": "Přihlásit",
@@ -158,6 +154,11 @@
     "myScheduleEmpty": "Zde se zobrazí tvé události.",
     "eventFullyBooked": "Tato událost je plně obsazena.",
     "signInFrom": "Můžeš se přihlásit od času {time}.",
+    "imageRemoved": "Obrázek odstraněn",
+    "imageUploaded": "Obrázek byl úspěšně nahrán",
+    "initializing": "Inicializace...",
+    "noEvents": "Žádné události",
+    "scan": "Skenovat",
     "today": "Dnes"
   },
   "FeatureImport": {
@@ -297,9 +298,9 @@
     "notSet": "Nenastaveno",
     "publicView": "Veřejný pohled",
     "editorPreview": "Náhled editora",
-    "seatSelection": "Výběr místa",
     "labelShowPaymentQr": "Zobrazit QR platbu po objednávce",
-    "helperShowPaymentQr": "Po dokončení objednávky zobrazí platební QR kód a údaje přímo na potvrzovací obrazovce."
+    "helperShowPaymentQr": "Po dokončení objednávky zobrazí platební QR kód a údaje přímo na potvrzovací obrazovce.",
+    "seatSelection": "Výběr místa"
   },
   "OrderGridColumns": {
     "id": "Id",
@@ -413,7 +414,6 @@
     "additionalSettings": "Další nastavení",
     "answerText": "Text odpovědi",
     "constraints": "Omezení",
-    "tabDesign": "Design",
     "enterZeroForUnlimited": "Zadejte 0 pro neomezeno",
     "enterOptionValue": "Zadejte možnost",
     "expiryDateLabel": "Popisek data platnosti",
@@ -435,8 +435,9 @@
     "singleChoice": "Jedna možnost",
     "strict": "Přísný",
     "strictValidation": "Přísná validace",
-    "textFieldType": "Text",
     "validationMode": "Režim validace",
+    "tabDesign": "Design",
+    "textFieldType": "Text",
     "viewMore": "Zobrazit více"
   },
   "FeatureOrders": {
@@ -514,21 +515,21 @@
     "scanDepositCollect": "Vybrat doplatek",
     "addTransactionConfirmation": "Jste si jisti, že chcete přidat tuto transakci?",
     "generateNewCodeWarning": "Vygenerováním nového kódu bude starý nahrazen a již nebude fungovat.",
-    "searchProductsHint": "Podle názvu, typu nebo ceny",
     "copy": "Kopírovat",
     "copyLink": "Kopírovat odkaz",
     "generateNewCode": "Generovat nový kód",
     "message": "Zpráva",
     "notAvailable": "N/A",
-    "noDataToDisplay": "Žádná data k zobrazení.",
-    "noProductsFound": "Nebyly nalezeny žádné produkty.",
-    "stateNotSet": "Nenastaveno",
     "stateOrdered": "Objednáno",
     "provideScanLinkInstruction": "Předejte následující odkaz nebo kód lidem, kteří budou kontrolovat vstupenky.",
     "searchTransactionsHint": "Vyhledat podle zprávy, účtu, symbolu, jména nebo částky",
     "stateSent": "Odesláno",
     "transactionAddedSuccess": "Transakce byla úspěšně přidána.",
     "stateUsed": "Využito",
+    "searchProductsHint": "Podle názvu, typu nebo ceny",
+    "noDataToDisplay": "Žádná data k zobrazení.",
+    "noProductsFound": "Nebyly nalezeny žádné produkty.",
+    "stateNotSet": "Nenastaveno",
     "bigGameLabel": "Velká hra: ",
     "fieldTypeParticipant": "Typ účastníka",
     "fieldMemberAnima": "Člen Anima Iuventutis",
@@ -810,7 +811,6 @@
     "downloadApp": "Stáhnout aplikaci",
     "enableNotifications": "Povolit oznámení",
     "enableNotificationsFailed": "Nepodařilo se povolit oznámení.",
-    "installOptionsLoadFailed": "Nepodařilo se načíst možnosti instalace.",
     "installApp": "Instalovat aplikaci",
     "installNow": "Nainstalovat teď",
     "installForAndroid": "Nainstalovat pro Android",
@@ -821,7 +821,8 @@
     "notificationSettings": "Nastavení oznámení",
     "androidInstallHint": "Otevři tuto webovou stránku na svém telefonu s Androidem v prohlížeči, jako je Chrome nebo Edge, a klikni na tlačítko Nainstalovat teď.",
     "appAlreadyInstalled": "Aplikace je již nainstalována.",
-    "pwaPromptNotSupported": "Tato platforma nebo prohlížeč nepodporuje instalaci PWA nebo je aplikace již nainstalována."
+    "pwaPromptNotSupported": "Tato platforma nebo prohlížeč nepodporuje instalaci PWA nebo je aplikace již nainstalována.",
+    "installOptionsLoadFailed": "Nepodařilo se načíst možnosti instalace."
   },
   "GroupStrings": {
     "newGroup": "Nová skupina",
@@ -845,8 +846,8 @@
     "removeParticipantTooltip": "Odebrat účastníka",
     "checkPoints": "Stanoviště",
     "correctAnswer": "Správná odpověď",
-    "noOneAssigned": "Nikdo není přiřazen",
-    "startBeforeEnd": "Čas začátku musí být dřívější než čas konce."
+    "startBeforeEnd": "Čas začátku musí být dřívější než čas konce.",
+    "noOneAssigned": "Nikdo není přiřazen"
   },
   "FeatureBlueprint": {
     "maxTicketsReached": "Bylo dosaženo maximálního počtu vstupenek.",
@@ -1082,7 +1083,6 @@
     "noData": "Žádná data",
     "labelShowHiddenNote": "Skrytá poznámka",
     "descriptionShowHiddenNote": "Zobrazí skrytou poznámku ve výsledku skenování.",
-    "backgroundImageHint": "(1600x900 px)",
     "description": "Uživateli se po zaplacení rezervace pošle vstupenka. Vstupence je možné určit vlastní pozadí a barvu písma.",
     "deleteImageConfirm": "Opravdu chcete smazat tento obrázek?",
     "backgroundColor": "Barva pozadí",
@@ -1090,14 +1090,15 @@
     "enterScanCode": "Vložte kód ke skenování",
     "removeImageError": "Nepodařilo se odstranit obrázek.",
     "uploadImageError": "Nepodařilo se nahrát soubor.",
-    "uploadImageSuccess": "Soubor byl úspěšně nahrán.",
     "fontColor": "Barva písma",
     "removeImageSuccess": "Obrázek byl úspěšně odstraněn.",
     "scanCameraInstruction": "Nasměrujte kameru na kód účastníka pro ověření vstupu.",
     "resetPassword": "Obnovit heslo",
     "scanCode": "Kód ke skenování",
     "signedInCompanions": "Přihlášení společníci",
-    "ticketType": "Typ vstupenky"
+    "ticketType": "Typ vstupenky",
+    "backgroundImageHint": "(1600x900 px)",
+    "uploadImageSuccess": "Soubor byl úspěšně nahrán."
   },
   "FeatureUser": {
     "credentialsSent": "Přihlašovací údaje byly odeslány na",
@@ -1184,7 +1185,6 @@
     "addNew": "Přidat nové",
     "advancedSettings": "Pokročilá nastavení",
     "amount": "Částka",
-    "unknownDatabaseError": "Došlo k neznámé chybě databáze.",
     "appearance": "Vzhled",
     "auto": "Automaticky",
     "blueprint": "Plánek",
@@ -1207,7 +1207,6 @@
     "date": "Datum",
     "deleted": "Smazáno",
     "description": "Popis",
-    "detailsLabel": "Podrobnosti:",
     "disable": "Zakázat",
     "dropFileHere": "Přetáhněte soubor sem",
     "dropFileHereOrClick": "Přetáhněte soubor sem nebo klikněte pro nahrání",
@@ -1234,7 +1233,6 @@
     "light": "Světlý",
     "map": "Mapa",
     "max": "Max",
-    "moreOptions": "Další možnosti",
     "mySchedule": "Můj program",
     "name": "Jméno",
     "newVersionAvailable": "Dostupná nová verze",
@@ -1281,12 +1279,15 @@
     "update": "Aktualizovat",
     "updateAppPrompt": "Aktualizujte aplikaci na nejnovější verzi pro přístup ke všem funkcím.",
     "updatedItem": "Aktualizováno: {item}.",
-    "user": "Uživatel",
     "users": "Uživatelé",
     "volunteers": "Dobrovolníci",
     "defaultLabel": "výchozí",
     "success": "Úspěch",
-    "error": "Chyba"
+    "error": "Chyba",
+    "unknownDatabaseError": "Došlo k neznámé chybě databáze.",
+    "detailsLabel": "Podrobnosti:",
+    "moreOptions": "Další možnosti",
+    "user": "Uživatel"
   },
   "BankAccount": {
     "settingsTitle": "Nastavení bankovního účtu",
@@ -1388,9 +1389,9 @@
     "regenerateTokenConfirmation": "Opravdu chcete přegenerovat token? Stará e-mailová adresa přestane fungovat a pro fungování párování budete muset nastavit přeposílání e-mailů na novou adresu.",
     "bankConnectionTab": "Propojení s bankou",
     "maskedEmailExplanation": "Emailová adresa je z bezpečnostních důvodů skryta. Pokud ji potřebujete vidět, požádejte prosím administrátora tohoto bankovního účtu.",
+    "setupConnectionNow": "Nastavit připojení nyní",
     "safeSenderInfo": "Tato adresa je bezpečná. Je to speciální robot, který čte pouze e-maily o platbách a nic jiného.",
-    "forwardingEmailWarning": "Upozornění: Prosím, udržujte tento e-mail v tajnosti. S nikým jej nesdílejte.",
-    "setupConnectionNow": "Nastavit připojení nyní"
+    "forwardingEmailWarning": "Upozornění: Prosím, udržujte tento e-mail v tajnosti. S nikým jej nesdílejte."
   },
   "FeatureContract": {
     "title": "Smlouva",
@@ -1485,15 +1486,15 @@
   },
   "Unit": {
     "addNewEvent": "Vytvořit novou událost",
-    "loadEventFailed": "Nepodařilo se načíst událost. Zkuste to prosím znovu.",
     "createCopy": "Vytvořit kopii",
     "createCopyConfirm": "Chcete vytvořit kopii této události?",
     "emailTemplates": "Šablony e-mailů",
     "createCopySuccess": "Kopie události byla úspěšně vytvořena.",
     "createCopyFailed": "Nepodařilo se vytvořit kopii události.",
+    "quotes": "Citáty",
+    "loadEventFailed": "Nepodařilo se načíst událost. Zkuste to prosím znovu.",
     "loadUnitFailed": "Nepodařilo se načíst data jednotky.",
     "noEventsFound": "Nebyly nalezeny žádné události.",
-    "quotes": "Citáty",
     "unit": "Jednotka"
   },
   "OccasionHome": {
@@ -1565,7 +1566,6 @@
     "offlineMapLayerSettings": "Nastavení offline mapových vrstev",
     "offlineMapPackageUrl": "URL offline balíčku map",
     "offlineMapStyleUrl": "URL stylu offline mapy",
-    "offlineMapReady": "Offline mapa byla stažena a je připravena k použití offline",
     "paths": "Cesty",
     "placeChanged": "Místo bylo změněno.",
     "saveLocation": "Uložit pozici",
@@ -1574,12 +1574,11 @@
     "drawPathHint": "Klepnutím na místa nebo mapu přidáte body cesty.",
     "undo": "Zpět",
     "description": "Různá nastavení mapy v aplikaci.",
-    "changeLocationHint": "Pozici lze změnit klepnutím na mapu."
+    "changeLocationHint": "Pozici lze změnit klepnutím na mapu.",
+    "offlineMapReady": "Offline mapa byla stažena a je připravena k použití offline"
   },
   "FeatureInformation": {
     "gameCheckPoint": "Stanoviště {title}",
-    "gameAnswerNotSetForCheckPoint": "Správná odpověď pro toto stanoviště nebyla nastavena.",
-    "gameAnswerNotSet": "Správná odpověď nebyla nastavena.",
     "gameCorrect": "Správně!",
     "gameNeedsGroup": "Pro hraní hry musíš být přiřazen do herní skupiny",
     "gameEnded": "Hra skončila",
@@ -1593,9 +1592,11 @@
     "fontSmaller": "Menší",
     "gameTakeAGuess": "Hádej",
     "gameTimeLeft": "Zbývající čas: {time}",
+    "offlineWarning": "Jsi offline. Zkontroluj své internetové připojení.",
+    "gameAnswerNotSetForCheckPoint": "Správná odpověď pro toto stanoviště nebyla nastavena.",
+    "gameAnswerNotSet": "Správná odpověď nebyla nastavena.",
     "gameNotInGroup": "Nejsi členem herní skupiny.",
-    "gameNotInOccasion": "Nejsi součástí této akce.",
-    "offlineWarning": "Jsi offline. Zkontroluj své internetové připojení."
+    "gameNotInOccasion": "Nejsi součástí této akce."
   },
   "FeatureNews": {
     "createNews": "Vytvořit novinku",
@@ -1651,7 +1652,7 @@
   },
   "FeatureCounseling": {
     "title": "Poradny",
-    "description": "Poradenský rozcestník, oblasti a generátor slotů. Přednášející jsou dostupní vždy.",
+    "description": "Poradenský rozcestník, oblasti a generátor slotů.",
     "counselingEventType": "Kód typu poradenského bloku",
     "maxActiveBookings": "Max. počet aktivních rezervací (0 = bez limitu)",
     "registrationStartTime": "Začátek rezervací poraden"
@@ -1683,7 +1684,11 @@
     "deleteEmptySlots": "Smazat prázdné sloty",
     "slotsCreated": "Vytvořeno slotů: {count}",
     "slotsDeleted": "Smazáno slotů: {count}",
-    "counselingEntryToggle": "Poradenský rozcestník"
+    "counselingEntryToggle": "Poradenský rozcestník",
+    "addSlot": "Přidat slot",
+    "editSlot": "Upravit slot",
+    "slotTooShort": "Slot musí trvat alespoň 5 minut.",
+    "counselingEntryColumn": "Rozcestník"
   },
   "Counseling": {
     "title": "Poradenství, přímluvná modlitba a svátost smíření",
@@ -1695,6 +1700,9 @@
     "noCounselorsForArea": "Pro tuto oblast nejsou momentálně volní poradci.",
     "slotTaken": "Obsazeno",
     "signInToReserve": "Pro rezervaci se prosím přihlaste.",
-    "bookingLimitReached": "Dosáhli jste maximálního počtu rezervací."
+    "bookingLimitReached": "Dosáhli jste maximálního počtu rezervací.",
+    "slotFree": "Volno",
+    "reserved": "Rezervováno",
+    "signUp": "Přihlásit se"
   }
 }

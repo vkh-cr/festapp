@@ -31,6 +31,7 @@ import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/widgets/mouse_detector.dart';
 import 'package:fstapp/widgets/time_data_range_picker.dart';
 import '../map/place_model.dart';
+import '../map/place_picker_field.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
 @RoutePage()
@@ -379,30 +380,16 @@ class _EventEditPageState extends State<EventEditPage> {
                               maxDate: maxDate!,
                             ),
                             const SizedBox(height: 16),
-                            DropdownButtonFormField<PlaceModel?>(
-                              initialValue: places
-                                  ?.firstWhereOrNull((p) => p.id == placeId),
-                              items: [
-                                DropdownMenuItem<PlaceModel?>(
-                                  value: null,
-                                  child: Text("---"),
-                                ),
-                                if (places != null)
-                                  ...places!.map((place) {
-                                    return DropdownMenuItem<PlaceModel?>(
-                                      value: place,
-                                      child: Text(place.title ?? "???"),
-                                    );
-                                  }),
-                              ],
-                              onChanged: (selectedPlace) {
+                            PlacePickerField(
+                              places: places ?? [],
+                              selectedPlaceId: placeId,
+                              labelText: CommonStrings.place,
+                              placeholder: "---",
+                              onChanged: (id) {
                                 setState(() {
-                                  placeId = selectedPlace?.id;
+                                  placeId = id;
                                 });
                               },
-                              decoration: InputDecoration(
-                                labelText: CommonStrings.place,
-                              ),
                             ),
                             const SizedBox(height: 16),
                             TextFormField(

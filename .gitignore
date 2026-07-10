@@ -165,6 +165,9 @@ automation/image-migration/node_modules/
 # GSD Planning
 .planning/
 
+# Kickoff prompts (scratch task briefs, not shared docs)
+docs/plans/*_kickoff.md
+
 # Workers
 workers/*/node_modules/
 **/.wrangler/

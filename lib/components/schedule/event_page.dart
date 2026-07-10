@@ -28,6 +28,7 @@ import 'package:fstapp/components/occasion/add_new_event_dialog.dart';
 import 'package:fstapp/components/schedule/event_edit_page.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -43,9 +44,9 @@ import 'package:fstapp/components/images/image_url_helper.dart';
 import 'package:fstapp/components/speakers/db_speakers.dart';
 import 'package:fstapp/components/speakers/speakers_bundle.dart';
 import 'package:fstapp/components/speakers/speaker_model.dart';
-import 'package:fstapp/components/speakers/speaker_avatar.dart';
-import 'package:fstapp/components/speakers/speakers_strings.dart';
+import 'package:fstapp/components/speakers/speaker_medallion.dart';
 import 'package:fstapp/components/speakers/counseling_page.dart';
+import 'package:fstapp/components/speakers/counseling_picker.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import '../map/map_page.dart';
 
@@ -239,6 +240,16 @@ class _EventPageState extends State<EventPage> {
                         ScheduleStrings.eventFullyBooked,
                       ),
                     )),
+                // Counseling rozcestník: the area picker + booking flow is
+                // shown inline, ABOVE the description, on the entry event.
+                if (_event != null &&
+                    _event!.isCounselingEntry &&
+                    FeatureService.isCounselingEnabled())
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    // Scope the flow to this rozcestník event's day.
+                    child: CounselingPicker(day: _event!.startTime),
+                  ),
                 Visibility(
                   visible: _event != null && _event?.description != null,
                   child: Padding(
@@ -251,9 +262,6 @@ class _EventPageState extends State<EventPage> {
                     ),
                   ),
                 ),
-                if (_event != null && _event!.isCounselingEntry &&
-                    FeatureService.isCounselingEnabled())
-                  _buildCounselingEntryButton(context),
                 _buildSpeakersSection(context, onPinchStart, onPinchEnd),
                 if (_event != null &&
                     _event!.id != null &&
@@ -264,7 +272,7 @@ class _EventPageState extends State<EventPage> {
                         'true'))
                   EventFeedbackWidget(
                     eventId: _event!.id!,
-                    isOpen: DateTime.now().isAfter(_event!.startTime),
+                    isOpen: TimeHelper.now().isAfter(_event!.startTime),
                     isEditorPreview: RightsService.isEditor(),
                     requiresSignIn:
                         EventModel.isEventSupportingSignIn(_event),
@@ -692,7 +700,7 @@ class _EventPageState extends State<EventPage> {
                           children: _joinMeta(_metaItems(context, fg,
                               iconSize: 15,
                               fontSize: 13,
-                              timeOnly: true,
+                              compact: true,
                               includeParticipants: false)),
                         ),
                       ),
@@ -877,27 +885,20 @@ class _EventPageState extends State<EventPage> {
   List<Widget> _metaItems(BuildContext context, Color fg,
       {double iconSize = 20,
       double fontSize = 15,
-      bool timeOnly = false,
+      bool compact = false,
       bool includeParticipants = true}) {
     final List<Widget> items = [];
 
-    final String duration = timeOnly
-        ? (_event?.durationTimeString() ?? "")
+    final String duration = compact
+        ? (_event?.durationCompactString(context) ?? "")
         : (_event?.durationString(context) ?? "");
     if (duration.isNotEmpty) {
       items.add(_metaItem(Icons.access_time, duration, fg, iconSize, fontSize));
     }
 
     if (_event?.place != null) {
-      items.add(GestureDetector(
-        onTap: () {
-          RouterService.navigateOccasion(
-                  context, "${MapPage.ROUTE}/${_event!.place!.id}")
-              .then((value) => loadData(_event!.id!));
-        },
-        child: _metaItem(Icons.location_on_outlined,
-            _event?.place?.title ?? "", fg, iconSize, fontSize),
-      ));
+      items.add(_placeItem(context, fg, _event?.place?.title ?? "",
+          iconSize, fontSize));
     }
 
     final int maxParticipants = _event?.maxParticipants ?? 0;
@@ -1077,34 +1078,11 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  /// Prominent button on the counseling entry event that opens the counseling
-  /// picker (choose area + time). Shown under the description (R5).
-  Widget _buildCounselingEntryButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
-      child: SizedBox(
-        width: double.infinity,
-        child: FilledButton.icon(
-          onPressed: () {
-            RouterService.navigateOccasion(context, CounselingPage.ROUTE)
-                .then((_) => loadData(_event!.id!));
-          },
-          icon: const Icon(Icons.support_agent),
-          label: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Text(SpeakersStrings.enterCounseling,
-                style: const TextStyle(fontSize: 16)),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// The "Speakers" (lecturers) section: a circular avatar + name + subtitle per
-  /// attached speaker; tapping expands a medallion showing the (larger) photo
-  /// inside the detail/text area and the HTML bio — never as a page banner
-  /// (Julie's question #1). Empty (no widget) when the feature is off or the
-  /// event has no attached speakers.
+  /// The "Speakers" (lecturers) section: a centered profile card per attached
+  /// speaker — large circular photo, name and subtitle centered, HTML bio
+  /// always visible below (no expansion) — never as a page banner (Julie's
+  /// question #1). Empty (no widget) when the feature is off or the event has
+  /// no attached speakers.
   Widget _buildSpeakersSection(
       BuildContext context, VoidCallback onPinchStart, VoidCallback onPinchEnd) {
     // Speakers are core: the section shows whenever the event has speakers
@@ -1116,21 +1094,21 @@ class _EventPageState extends State<EventPage> {
         _speakersBundle!.speakersForEvent(_event!.id!);
     if (speakers.isEmpty) return const SizedBox.shrink();
 
+    // Borderless section: a hairline separates it from the description above,
+    // and further hairlines separate multiple speaker profiles from each other.
+    final divider = Divider(
+        height: 24, thickness: 1, color: ThemeConfig.grey300(context));
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 4),
-            child: Text(
-              SpeakersStrings.lecturers,
-              style:
-                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          ...speakers.map((s) => _buildSpeakerMedallion(
-              context, s, onPinchStart, onPinchEnd)),
+          divider,
+          for (var i = 0; i < speakers.length; i++) ...[
+            if (i > 0) divider,
+            _buildSpeakerMedallion(
+                context, speakers[i], onPinchStart, onPinchEnd),
+          ],
         ],
       ),
     );
@@ -1138,38 +1116,58 @@ class _EventPageState extends State<EventPage> {
 
   Widget _buildSpeakerMedallion(BuildContext context, SpeakerModel s,
       VoidCallback onPinchStart, VoidCallback onPinchEnd) {
-    final bool hasBio =
-        s.description != null && s.description!.trim().isNotEmpty;
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: ExpansionTile(
-        leading: SpeakerAvatar(imageUrl: s.image, radius: 24),
-        title: Text(s.title ?? "",
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: (s.subtitle != null && s.subtitle!.isNotEmpty)
-            ? Text(s.subtitle!)
-            : null,
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        expandedCrossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Photo rendered IN the detail/text area (not a banner).
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: SpeakerAvatar(imageUrl: s.image, radius: 48),
-          ),
-          if (hasBio)
-            HtmlView(
-              html: s.description!,
-              isSelectable: true,
-              twoFingersOn: onPinchStart,
-              twoFingersOff: onPinchEnd,
-            ),
-        ],
+    // Borderless, flat (2D — no shadows or elevation) profile that flows with
+    // the page content: a large centered photo, the name beneath it, the
+    // subtitle split into role pills and the bio always visible below —
+    // nothing to expand or tap.
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 12),
+      child: SpeakerMedallion(
+        imageUrl: s.image,
+        name: s.title,
+        pills: splitSpeakerRoles(s.subtitle),
+        bioHtml: s.description,
+        photoRadius: 110,
+        onPinchStart: onPinchStart,
+        onPinchEnd: onPinchEnd,
       ),
     );
   }
 
   /// The capacity chip shown in the header meta row as a filled pill.
+  /// The place item. Unlike the plain time meta text this is tappable (it
+  /// navigates to the place on the map), so its label is underlined and it
+  /// carries a trailing chevron to read as a link. It keeps the same
+  /// icon+text height as the time item so both align on the meta row.
+  Widget _placeItem(BuildContext context, Color fg, String text,
+      double iconSize, double fontSize) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(6),
+      onTap: () {
+        RouterService.navigateOccasion(
+                context, "${MapPage.ROUTE}/${_event!.place!.id}")
+            .then((value) => loadData(_event!.id!));
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.location_on_outlined, color: fg, size: iconSize),
+          const SizedBox(width: 6),
+          Text(text,
+              style: TextStyle(
+                  color: fg,
+                  fontWeight: FontWeight.bold,
+                  fontSize: fontSize,
+                  decoration: TextDecoration.underline,
+                  decorationColor: fg.withValues(alpha: 0.7),
+                  decorationThickness: 2.0)),
+          const SizedBox(width: 2),
+          Icon(Icons.chevron_right, color: fg, size: iconSize),
+        ],
+      ),
+    );
+  }
+
   Widget _participantPill(
       BuildContext context, Color fg, String text, double iconSize, double fontSize) {
     final bool darkHeader = fg == Colors.white;
@@ -1227,8 +1225,10 @@ class _EventPageState extends State<EventPage> {
     // New event → its header content differs, so remeasure from scratch.
     _measuredExpandedHeight = null;
     await loadOfflineData(widget.id!);
+    if (_redirectIfCounselingSlot()) return;
 
     await loadEvent(id);
+    if (_redirectIfCounselingSlot()) return;
     if (mounted) {
       // isLoadingEvent should be set after loadEvent completes
       setState(() {
@@ -1241,6 +1241,46 @@ class _EventPageState extends State<EventPage> {
     }
 
     await loadSpeakers();
+  }
+
+  /// Counseling events have no meaningful detail page — the rozcestník owns
+  /// the whole flow (area picker, reservation, cancellation, counselor info).
+  /// This covers both generated counseling slots and any event carrying the
+  /// configured counseling event type (e.g. "Psychologické poradny"). Any
+  /// navigation to such an event (timeline tap, my program, search, deep
+  /// link) lands on the slot's ORIGINAL entry event (its parent), which hosts
+  /// the picker inline — the standalone counseling page is only the fallback
+  /// when there is no parent. Replace (not push) so back does not loop
+  /// through the redirect.
+  ///
+  /// The rozcestník entry event itself is exempt — it *hosts* the picker
+  /// inline above its description, so it must render its own page.
+  bool _redirectIfCounselingSlot() {
+    final event = _event;
+    if (event == null) return false;
+    // The rozcestník entry event hosts the picker inline — never bounce it.
+    if (event.isCounselingEntry) return false;
+    final counselingType =
+        FeatureService.getCounselingFeature()?.counselingEventType;
+    final isCounselingTyped = counselingType != null &&
+        counselingType.isNotEmpty &&
+        event.type == counselingType;
+    // A counseling slot / counseling-typed event is authoritative on its own:
+    // don't gate on isCounselingEnabled(), which can still be false on a fresh
+    // deep link before the occasion features finish loading.
+    if (!event.isCounselingSlot && !isCounselingTyped) {
+      return false;
+    }
+    if (mounted) {
+      final parents = event.parentEventIds;
+      if (parents != null && parents.isNotEmpty) {
+        RouterService.pushReplacementOccasion(
+            context, "${EventPage.ROUTE}/${parents.first}");
+      } else {
+        RouterService.pushReplacementOccasion(context, CounselingPage.ROUTE);
+      }
+    }
+    return true;
   }
 
   /// Loads the speakers bundle for the speaker medallions. Resilient: a failure
@@ -1287,6 +1327,16 @@ class _EventPageState extends State<EventPage> {
           .where((e) => event.childEventIds?.contains(e.id) ?? false)
           .toList()
           .sortEvents();
+      // The subprogram rows show the place — resolve the children's id-only
+      // offline places to full models, same as the parent's place above.
+      var offlinePlaces = await OfflineDataService.getAllPlaces();
+      for (var child in childEvents) {
+        if (child.place?.id != null) {
+          child.place = offlinePlaces
+                  .firstWhereOrNull((p) => p.id == child.place!.id) ??
+              child.place;
+        }
+      }
       event.childEvents = childEvents;
       _childDots.clear();
       _childDots.addAll(

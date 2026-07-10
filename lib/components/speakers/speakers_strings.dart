@@ -32,8 +32,13 @@ class SpeakersStrings {
   static String get selectSpeakers => 'Speakers.selectSpeakers'.tr();
   static String get searchSpeakers => 'Speakers.searchSpeakers'.tr();
   static String get counselingSlots => 'Speakers.counselingSlots'.tr();
+  static String get addSlot => 'Speakers.addSlot'.tr();
+  static String get editSlot => 'Speakers.editSlot'.tr();
+  static String get slotTooShort => 'Speakers.slotTooShort'.tr();
   static String get counselingEntryToggle =>
       'Speakers.counselingEntryToggle'.tr();
+  static String get counselingEntryColumn =>
+      'Speakers.counselingEntryColumn'.tr();
 
   // Admin — slot generator
   static String get generateSlots => 'Speakers.generateSlots'.tr();
@@ -60,6 +65,9 @@ class SpeakersStrings {
   static String get noCounselorsForArea =>
       'Counseling.noCounselorsForArea'.tr();
   static String get slotTaken => 'Counseling.slotTaken'.tr();
+  static String get slotFree => 'Counseling.slotFree'.tr();
+  static String get reserved => 'Counseling.reserved'.tr();
+  static String get signUp => 'Counseling.signUp'.tr();
   static String get signInToReserve => 'Counseling.signInToReserve'.tr();
   static String get lecturers => 'Speakers.lecturers'.tr(); // section title on event page
 

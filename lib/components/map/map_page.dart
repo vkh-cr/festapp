@@ -134,6 +134,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   String? _selectedPlaceTypeCode;
   bool _placeTypeInitialized = false;
 
+  /// True once we know the place-type situation authoritatively enough to filter
+  /// without flashing: either cached types were loaded (offline) or the online
+  /// load finished. Until then the default marker view is held back so an empty
+  /// offline type cache can't briefly paint *every* place unfiltered before the
+  /// category filter kicks in.
+  bool _placeTypesResolved = false;
+
   /// Place we were deep-linked to (e.g. from a user's accommodation link). It
   /// must stay visible on the map regardless of the active category filter.
   int? _forcedVisiblePlaceId;
@@ -544,6 +551,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       // Show every place (so any can be tapped into the path) plus the pins for
       // the free points added so far.
       return [..._markers, ..._drawPointMarkers];
+    } else if (!_placeTypesResolved) {
+      // Types not loaded yet: show only a deep-linked place (if any) and hold the
+      // rest back rather than flashing every place unfiltered for a frame.
+      return _markers
+          .where((m) => m.place.id == _forcedVisiblePlaceId)
+          .toList();
     } else {
       return _markers
           .where((m) =>
@@ -801,6 +814,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       }
     }
     _initPlaceTypeSelection();
+    // Cached types are enough to filter the first paint; if there are none we
+    // wait for the online pass so we don't flash every place unfiltered.
+    if (_placeTypes.isNotEmpty) _placeTypesResolved = true;
 
     offlinePlaces.sortPlaces(false);
     var offlineList = loadOtherGroups
@@ -857,6 +873,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     } catch (e) {
       AppLogger.error("Failed to load place types: $e");
     }
+    // Online pass is authoritative: from here the filter is known even when the
+    // occasion legitimately has no place types (all places then show).
+    _placeTypesResolved = true;
 
     List<PlaceModel> onlineList;
     var placesFromDb = await DbPlaces.getAllPlaces();

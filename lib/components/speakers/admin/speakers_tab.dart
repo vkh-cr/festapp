@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/components/images/image_url_helper.dart';
 import 'package:fstapp/components/speakers/admin/speaker_editor_dialog.dart';
 import 'package:fstapp/components/speakers/db_speakers.dart';
+import 'package:fstapp/components/speakers/speaker_avatar.dart';
 import 'package:fstapp/components/speakers/speaker_model.dart';
 import 'package:fstapp/components/speakers/speaker_topic_model.dart';
 import 'package:fstapp/components/speakers/speakers_strings.dart';
@@ -11,6 +11,7 @@ import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/theme_config.dart';
 
 /// Admin tab: manage speakers (lecturers / counselors) and the counseling area
 /// catalog. Data comes from [DbSpeakers.getSpeakersForEdit]; every mutation is
@@ -137,7 +138,7 @@ class _SpeakersTabState extends State<SpeakersTab> {
             child: Center(
               child: Text(SpeakersStrings.manageSpeakers,
                   style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: theme.colorScheme.outline)),
+                      ?.copyWith(color: ThemeConfig.grey700(context))),
             ),
           )
         else
@@ -152,25 +153,26 @@ class _SpeakersTabState extends State<SpeakersTab> {
   }
 
   Widget _buildSpeakerTile(SpeakerModel speaker) {
-    final theme = Theme.of(context);
-    final image = speaker.image;
+    final mutedIcon = ThemeConfig.grey700(context);
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 8),
+      color: ThemeConfig.whiteColor(context),
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: ThemeConfig.grey300(context)),
+      ),
       child: ListTile(
-        leading: CircleAvatar(
-          radius: 22,
-          backgroundImage: (image != null && image.isNotEmpty)
-              ? NetworkImage(
-                  ImageUrlHelper.transformImageUrl(image, width: 200))
-              : null,
-          child: (image == null || image.isEmpty)
-              ? const Icon(Icons.person)
-              : null,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        leading: SpeakerAvatar(imageUrl: speaker.image, radius: 22),
+        title: Text(
+          speaker.title ?? '',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: speaker.isHidden ? mutedIcon : null,
+          ),
         ),
-        title: Text(speaker.title ?? ''),
-        subtitle: speaker.subtitle != null && speaker.subtitle!.isNotEmpty
-            ? Text(speaker.subtitle!)
-            : null,
         onTap: () => _openSpeakerEditor(speaker),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -178,17 +180,18 @@ class _SpeakersTabState extends State<SpeakersTab> {
             if (speaker.isHidden)
               Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: Icon(Icons.visibility_off,
-                    size: 18, color: theme.colorScheme.outline),
+                child: Icon(Icons.visibility_off, size: 18, color: mutedIcon),
               ),
             IconButton(
-              icon: const Icon(Icons.edit),
+              icon: const Icon(Icons.edit_outlined),
               tooltip: CommonStrings.edit,
+              color: mutedIcon,
               onPressed: () => _openSpeakerEditor(speaker),
             ),
             IconButton(
               icon: const Icon(Icons.delete_outline),
               tooltip: CommonStrings.delete,
+              color: mutedIcon,
               onPressed: () => _deleteSpeaker(speaker),
             ),
           ],
@@ -208,7 +211,12 @@ class _SpeakersTabState extends State<SpeakersTab> {
         children: [
           ..._topics.map((topic) => ListTile(
                 dense: true,
-                title: Text(topic.title ?? ''),
+                title: Text(
+                  topic.title ?? '',
+                  style: topic.isHidden
+                      ? TextStyle(color: ThemeConfig.grey700(context))
+                      : null,
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -216,16 +224,18 @@ class _SpeakersTabState extends State<SpeakersTab> {
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: Icon(Icons.visibility_off,
-                            size: 18, color: theme.colorScheme.outline),
+                            size: 18, color: ThemeConfig.grey700(context)),
                       ),
                     IconButton(
-                      icon: const Icon(Icons.edit),
+                      icon: const Icon(Icons.edit_outlined),
                       tooltip: CommonStrings.edit,
+                      color: ThemeConfig.grey700(context),
                       onPressed: () => _openTopicEditor(topic),
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete_outline),
                       tooltip: CommonStrings.delete,
+                      color: ThemeConfig.grey700(context),
                       onPressed: () => _deleteTopic(topic),
                     ),
                   ],

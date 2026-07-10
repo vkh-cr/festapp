@@ -4,6 +4,7 @@ import 'package:fstapp/components/speakers/speaker_avatar.dart';
 import 'package:fstapp/components/speakers/speaker_model.dart';
 import 'package:fstapp/components/speakers/speakers_strings.dart';
 import 'package:fstapp/services/utilities_all.dart';
+import 'package:fstapp/theme_config.dart';
 
 /// A form-style field for attaching speakers to an event (decision R6).
 ///
@@ -40,13 +41,11 @@ class SpeakerPickerField extends StatelessWidget {
       .toList();
 
   Future<void> _openDialog(BuildContext context) async {
-    final result = await showDialog<List<int>>(
-      context: context,
-      builder: (_) => _SpeakerPickerDialog(
-        allSpeakers: allSpeakers,
-        initialSelected: selectedIds,
-        onAddSpeaker: onAddSpeaker,
-      ),
+    final result = await showSpeakerPickerDialog(
+      context,
+      allSpeakers: allSpeakers,
+      selectedIds: selectedIds,
+      onAddSpeaker: onAddSpeaker,
     );
     if (result != null) onChanged(result);
   }
@@ -71,14 +70,14 @@ class SpeakerPickerField extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              border: Border.all(color: theme.colorScheme.outlineVariant),
+              border: Border.all(color: ThemeConfig.grey500(context)),
               borderRadius: BorderRadius.circular(8),
             ),
             child: selected.isEmpty
                 ? Text(
                     SpeakersStrings.selectSpeakers,
                     style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: theme.colorScheme.outline),
+                        ?.copyWith(color: ThemeConfig.grey700(context)),
                   )
                 : Wrap(
                     spacing: 8,
@@ -99,6 +98,26 @@ class SpeakerPickerField extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Opens the searchable multi-select speaker dialog and returns the chosen id
+/// list, or null if cancelled. Shared by [SpeakerPickerField] (the event
+/// editor) and the schedule grid's speaker cell so both use the exact same
+/// picker, search and "add speaker" affordances.
+Future<List<int>?> showSpeakerPickerDialog(
+  BuildContext context, {
+  required List<SpeakerModel> allSpeakers,
+  required List<int> selectedIds,
+  Future<int?> Function()? onAddSpeaker,
+}) {
+  return showDialog<List<int>>(
+    context: context,
+    builder: (_) => _SpeakerPickerDialog(
+      allSpeakers: allSpeakers,
+      initialSelected: selectedIds,
+      onAddSpeaker: onAddSpeaker,
+    ),
+  );
 }
 
 /// Searchable multi-select dialog. Pops the chosen id list (or null on cancel).
@@ -131,8 +150,7 @@ class _SpeakerPickerDialogState extends State<_SpeakerPickerDialog> {
     final q = Utilities.removeDiacritics(_query.trim().toLowerCase());
     if (q.isEmpty) return widget.allSpeakers;
     return widget.allSpeakers.where((s) {
-      final hay = Utilities.removeDiacritics(
-          '${s.title ?? ''} ${s.subtitle ?? ''}'.toLowerCase());
+      final hay = Utilities.removeDiacritics((s.title ?? '').toLowerCase());
       return hay.contains(q);
     }).toList();
   }
@@ -180,9 +198,6 @@ class _SpeakerPickerDialogState extends State<_SpeakerPickerDialog> {
                                 secondary:
                                     SpeakerAvatar(imageUrl: s.image, radius: 18),
                                 title: Text(s.title ?? ''),
-                                subtitle: (s.subtitle?.isNotEmpty ?? false)
-                                    ? Text(s.subtitle!)
-                                    : null,
                                 onChanged: (v) => setState(() {
                                   if (v == true) {
                                     _selected.add(s.id!);

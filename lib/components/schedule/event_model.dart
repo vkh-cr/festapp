@@ -19,6 +19,8 @@ class EventModel extends ITrinaRowModel {
       "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
   String durationString(BuildContext context) =>
       "${DateFormat("EEEE, MMM d, HH:mm", context.locale.languageCode).format(startTime)} - ${DateFormat.Hm().format(endTime)}";
+  String durationCompactString(BuildContext context) =>
+      "${DateFormat("EEEE d. M. HH:mm", context.locale.languageCode).format(startTime)} - ${DateFormat.Hm().format(endTime)}";
   Duration duration() => startTime.isBefore(endTime)
       ? (DateTimeRange(start: startTime, end: endTime)).duration
       : Duration.zero;
@@ -265,6 +267,11 @@ class EventModel extends ITrinaRowModel {
   static const String isSignedInColumn = "isSignedIn";
   static const String isEventInMyProgramColumn = "isEventInMyProgram";
 
+  /// Synthetic grid column: attaching speakers to the event. Not persisted via
+  /// the row upsert — the schedule grid saves it directly through
+  /// set_event_speakers. The cell just carries the event id for the renderer.
+  static const String speakersColumn = "speakers";
+
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
     var startTimeString = json[startDateColumn] + "-" + json[startTimeColumn];
     var endTimeString = json[endDateColumn] + "-" + json[endTimeColumn];
@@ -303,6 +310,14 @@ class EventModel extends ITrinaRowModel {
       }
     }
     dataFromTab[Tb.events.dataIsCancelled] = resolvedIsCancelled;
+
+    // Rozcestník flag lives in the data jsonb; the grid cell round-trips it as
+    // a "true"/"false" string (missing when the counseling column is hidden,
+    // which resolves to the existing value staying untouched below).
+    if (json.containsKey(FeatureConstants.counselingEntry)) {
+      dataFromTab[FeatureConstants.counselingEntry] =
+          json[FeatureConstants.counselingEntry]?.toString() == 'true';
+    }
 
     return EventModel(
       startTime: dateFormat.parse(startTimeString),
@@ -364,6 +379,9 @@ class EventModel extends ITrinaRowModel {
       Tb.events.dataHeaderImage:
           TrinaCell(value: data?[Tb.events.dataHeaderImage]),
       Tb.events.dataIsCancelled: TrinaCell(value: isCancelled.toString()),
+      FeatureConstants.counselingEntry:
+          TrinaCell(value: isCounselingEntry.toString()),
+      speakersColumn: TrinaCell(value: id),
     });
   }
 

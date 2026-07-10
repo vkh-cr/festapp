@@ -44,11 +44,36 @@ class CounselorModel {
   }
 }
 
+/// Per-area availability summary from get_counseling_topics_overview: how many
+/// future counseling slots an area has and how many are still free. Drives the
+/// greyed-out state of areas that currently have nothing bookable.
+class CounselingTopicOverview {
+  final int topicId;
+  final int totalFutureSlots;
+  final int freeFutureSlots;
+
+  const CounselingTopicOverview({
+    required this.topicId,
+    this.totalFutureSlots = 0,
+    this.freeFutureSlots = 0,
+  });
+
+  bool get hasFree => freeFutureSlots > 0;
+
+  factory CounselingTopicOverview.fromJson(Map<String, dynamic> json) =>
+      CounselingTopicOverview(
+        topicId: (json['id'] as num).toInt(),
+        totalFutureSlots: (json['total_future_slots'] as num?)?.toInt() ?? 0,
+        freeFutureSlots: (json['free_future_slots'] as num?)?.toInt() ?? 0,
+      );
+}
+
 class CounselingSlot {
   final int id;
   final DateTime? startTime;
   final DateTime? endTime;
   final int? place;
+  final String? placeTitle;
   final int maxParticipants;
   final int occupied;
   final bool isSignedIn;
@@ -58,6 +83,7 @@ class CounselingSlot {
     this.startTime,
     this.endTime,
     this.place,
+    this.placeTitle,
     this.maxParticipants = 1,
     this.occupied = 0,
     this.isSignedIn = false,
@@ -75,6 +101,7 @@ class CounselingSlot {
           ? DateTime.tryParse(json['end_time'].toString())?.toLocal()
           : null,
       place: (json['place'] as num?)?.toInt(),
+      placeTitle: json['place_title'] as String?,
       maxParticipants: (json['max_participants'] as num?)?.toInt() ?? 1,
       occupied: (json['occupied'] as num?)?.toInt() ?? 0,
       isSignedIn: json['isSignedIn'] as bool? ?? false,

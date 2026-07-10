@@ -203,6 +203,30 @@ class HtmlHelper {
         RegExp(r'<(?!img\b)[^>]*>', caseSensitive: false), '');
   }
 
+  /// Converts an HTML fragment to a single-line, plain-text snippet suitable
+  /// for list subtitles: decodes entities, drops every tag (tolerating
+  /// truncated or malformed markup such as a dangling "<" left by a naive
+  /// substring), and collapses runs of whitespace to single spaces.
+  static String htmlToPlainText(String htmlText) {
+    final document = html_parser.parse(htmlText);
+    final text = document.body?.text ?? '';
+    return text.replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
+  /// Plain-text snippet for list subtitles: strips markup (via
+  /// [htmlToPlainText]) and, when the text is longer than [maxLen], truncates
+  /// at a word boundary and appends an ellipsis. Text at or under the limit is
+  /// returned unchanged, so short snippets never get a dangling "…".
+  static String htmlToSnippet(String? htmlText, {int maxLen = 160}) {
+    if (htmlText == null || htmlText.isEmpty) return '';
+    final text = htmlToPlainText(htmlText);
+    if (text.length <= maxLen) return text;
+    var cut = text.substring(0, maxLen);
+    final lastSpace = cut.lastIndexOf(' ');
+    if (lastSpace > maxLen ~/ 2) cut = cut.substring(0, lastSpace);
+    return '${cut.trimRight()}…';
+  }
+
   static bool isHtmlEmptyOrNull(String? htmlText) {
     if (htmlText == null) {
       return true;

@@ -142,6 +142,7 @@
     "participantsCopied": "Participants have been copied.",
     "removedFromMySchedule": "Removed from My schedule.",
     "rightNow": "Right Now",
+    "ended": "Ended",
     "roles": "Roles",
     "showInsideEvent": "Show inside event",
     "signInOther": "Sign in other",
@@ -1651,7 +1652,7 @@
   },
   "FeatureCounseling": {
     "title": "Counseling",
-    "description": "Counseling entry point, areas, and the slot generator. Speakers are always available.",
+    "description": "Counseling entry point, areas, and the slot generator.",
     "counselingEventType": "Counseling event type code",
     "maxActiveBookings": "Max active reservations (0 = unlimited)",
     "registrationStartTime": "Counseling registration start"
@@ -1683,7 +1684,11 @@
     "deleteEmptySlots": "Delete empty slots",
     "slotsCreated": "Slots created: {count}",
     "slotsDeleted": "Slots deleted: {count}",
-    "counselingEntryToggle": "Counseling entry point"
+    "counselingEntryToggle": "Counseling entry point",
+    "addSlot": "Add slot",
+    "editSlot": "Edit slot",
+    "slotTooShort": "A slot must be at least 5 minutes long.",
+    "counselingEntryColumn": "Entry point"
   },
   "Counseling": {
     "title": "Counseling, intercessory prayer and confession",
@@ -1695,6 +1700,9 @@
     "noCounselorsForArea": "No counselors are currently available for this area.",
     "slotTaken": "Taken",
     "signInToReserve": "Please sign in to make a reservation.",
-    "bookingLimitReached": "You have reached the maximum number of reservations."
+    "bookingLimitReached": "You have reached the maximum number of reservations.",
+    "slotFree": "Free",
+    "reserved": "Reserved",
+    "signUp": "Sign up"
   }
 }

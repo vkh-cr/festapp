@@ -10,7 +10,16 @@ class SpeakerAvatar extends StatelessWidget {
   final String? imageUrl;
   final double radius;
 
-  const SpeakerAvatar({super.key, this.imageUrl, this.radius = 24});
+  /// Width of the requested image transform. The default thumbnail (300px)
+  /// covers small avatars; large profile photos should pass
+  /// [ImageUrlHelper.mediumWidth] to stay sharp on high-DPI screens.
+  final int imageWidth;
+
+  const SpeakerAvatar(
+      {super.key,
+      this.imageUrl,
+      this.radius = 24,
+      this.imageWidth = ImageUrlHelper.thumbnailWidth});
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +35,7 @@ class SpeakerAvatar extends StatelessWidget {
       radius: radius,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       backgroundImage: CachedNetworkImageProvider(
-        ImageUrlHelper.transformImageUrl(url,
-            width: ImageUrlHelper.thumbnailWidth, quality: 80),
+        ImageUrlHelper.transformImageUrl(url, width: imageWidth, quality: 80),
       ),
     );
   }

@@ -108,6 +108,14 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
             page: MyScheduleRoute.page,
             path: "/:$linkFormatted/${MySchedulePage.ROUTE}"),
+        // Counseling rozcestník is a full-screen page (own Scaffold + back
+        // button), NOT a bottom-nav tab — so it must be a top-level occasion
+        // route. As a child of the tabbed OccasionHomeRoute it could not be
+        // resolved by the AutoTabsRouter (which only knows its tab routes), so
+        // deep links / redirects to it fell back to the default Program tab.
+        AutoRoute(
+            page: CounselingRoute.page,
+            path: "/:$linkFormatted/${CounselingPage.ROUTE}"),
         AutoRoute(
             page: TimetableRoute.page,
             path: "/:$linkFormatted/${TimetablePage.ROUTE}"),
@@ -141,8 +149,6 @@ class AppRouter extends RootStackRouter {
                     AutoRoute(page: EventRoute.page, path: ":id")
                   ]),
               AutoRoute(page: NewsRoute.page, path: NewsPage.ROUTE),
-              AutoRoute(
-                  page: CounselingRoute.page, path: CounselingPage.ROUTE),
 
               // Use UnitPage for the nested /:occasionLink/unit path
               AutoRoute(
