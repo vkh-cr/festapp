@@ -9,7 +9,7 @@ DECLARE
     v_counselors JSONB;
 BEGIN
     -- Feature gate.
-    IF NOT public.get_is_speakers_enabled_on_occasion(p_occasion) THEN
+    IF NOT public.get_is_counseling_enabled_on_occasion(p_occasion) THEN
         RETURN jsonb_build_object('code', 404);
     END IF;
 

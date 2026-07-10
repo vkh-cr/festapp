@@ -5,9 +5,12 @@ BEGIN;
 -- Covers: editor guards (403), upsert with atomic topic replace, cross-occasion
 -- protection (404/400), the slot generator (counts / breaks / boundaries),
 -- delete_empty_counseling_slots (occupied slots survive), the counseling
--- availability matcher (future-only, visible-only, isSignedIn/occupied), and
--- the counseling branch of sign_user_to_event (own window skips the workshops
--- gate, limit code 109, collisions 107 slot×slot and slot×lecture).
+-- availability matcher (future-only, visible-only, isSignedIn/occupied), the
+-- counseling branch of sign_user_to_event (own window skips the workshops gate,
+-- missing/legacy gate → 108, limit code 109, collisions 107), speaker search
+-- (ungated — speakers are core), and the features migration transform (block 9).
+--
+-- Speakers are core; the "counseling" feature gates the counseling flow only.
 --
 -- Style follows database/tests/rpc/create_service_item_test.sql: fixtures built
 -- inline, callers impersonated via request.jwt.claim.sub, auto-rollback.
@@ -36,7 +39,7 @@ BEGIN
             'spk-' || gen_random_uuid(),
             now(), now() + interval '30 days',
             true,
-            '[{"code":"speakers","is_enabled":true,"counseling_event_type":"counseling","max_active_bookings":1}]'::jsonb)
+            '[{"code":"counseling","is_enabled":true,"counseling_event_type":"counseling","max_active_bookings":1}]'::jsonb)
     RETURNING id INTO v_oc;
 
     INSERT INTO public.occasion_users (occasion, "user", is_editor, is_editor_view, is_approved)
@@ -329,11 +332,11 @@ BEGIN
     PERFORM assert_eq((v_slots->0->>'isSignedIn')::boolean, true, 'isSignedIn=true for the caller');
 
     -- disabled feature → 404
-    UPDATE public.occasions SET features = '[{"code":"speakers","is_enabled":false}]'::jsonb WHERE id = v_oc;
+    UPDATE public.occasions SET features = '[{"code":"counseling","is_enabled":false}]'::jsonb WHERE id = v_oc;
     v_res := public.get_counseling_availability(v_oc, v_topic);
-    PERFORM assert_eq(v_res->>'code', '404', 'disabled speakers feature → 404');
+    PERFORM assert_eq(v_res->>'code', '404', 'disabled counseling feature → 404');
     -- restore
-    UPDATE public.occasions SET features = '[{"code":"speakers","is_enabled":true,"counseling_event_type":"counseling","max_active_bookings":1}]'::jsonb WHERE id = v_oc;
+    UPDATE public.occasions SET features = '[{"code":"counseling","is_enabled":true,"counseling_event_type":"counseling","max_active_bookings":1}]'::jsonb WHERE id = v_oc;
 
     -- foreign topic → 404
     v_res := public.get_counseling_availability(v_oc, v_foreign_topic);
@@ -365,9 +368,9 @@ DECLARE
     v_lecture bigint;
 BEGIN
     -- (a) workshops gate is skipped for counseling slots: enable a workshops
-    -- feature whose start_time is far in the future alongside speakers.
+    -- feature whose start_time is far in the future alongside counseling.
     UPDATE public.occasions SET features =
-      '[{"code":"speakers","is_enabled":true,"counseling_event_type":"counseling","max_active_bookings":0},
+      '[{"code":"counseling","is_enabled":true,"counseling_event_type":"counseling","max_active_bookings":0},
         {"code":"workshops","is_enabled":true,"start_time":"2099-01-01T00:00:00"}]'::jsonb
     WHERE id = v_oc;
 
@@ -382,9 +385,9 @@ BEGIN
     PERFORM assert_eq(v_res->>'code', '200',
         'counseling sign-in ignores the far-future workshops gate → 200');
 
-    -- (b) speakers registration_start_time in the future → 104
+    -- (b) counseling registration_start_time in the future → 104
     UPDATE public.occasions SET features =
-      '[{"code":"speakers","is_enabled":true,"registration_start_time":"2099-01-01T00:00:00","max_active_bookings":0}]'::jsonb
+      '[{"code":"counseling","is_enabled":true,"registration_start_time":"2099-01-01T00:00:00","max_active_bookings":0}]'::jsonb
     WHERE id = v_oc;
     INSERT INTO public.events (occasion, title, start_time, end_time, max_participants, type, data)
     VALUES (v_oc, 'Slot B', now() + interval '4 days', now() + interval '4 days' + interval '20 minutes',
@@ -395,15 +398,27 @@ BEGIN
     v_res := public.sign_user_to_event(v_slotB, v_att2);
     PERFORM assert_eq(v_res->>'code', '104', 'registration window not open → 104');
 
-    -- (c) speakers feature disabled → 108
-    UPDATE public.occasions SET features = '[{"code":"speakers","is_enabled":false}]'::jsonb WHERE id = v_oc;
+    -- (c) counseling feature disabled → 108
+    UPDATE public.occasions SET features = '[{"code":"counseling","is_enabled":false}]'::jsonb WHERE id = v_oc;
     v_res := public.sign_user_to_event(v_slotB, v_att2);
-    PERFORM assert_eq(v_res->>'code', '108', 'speakers feature disabled → 108');
+    PERFORM assert_eq(v_res->>'code', '108', 'counseling feature disabled → 108');
+
+    -- (c2) counseling element missing entirely → 108.
+    UPDATE public.occasions SET features = '[]'::jsonb WHERE id = v_oc;
+    v_res := public.sign_user_to_event(v_slotB, v_att2);
+    PERFORM assert_eq(v_res->>'code', '108', 'counseling feature absent → 108');
+
+    -- (c3) legacy "speakers" element alone (enabled) does NOT open the window:
+    -- the retired code is ignored, so the counseling gate is still closed → 108.
+    UPDATE public.occasions SET features =
+      '[{"code":"speakers","is_enabled":true,"max_active_bookings":0}]'::jsonb WHERE id = v_oc;
+    v_res := public.sign_user_to_event(v_slotB, v_att2);
+    PERFORM assert_eq(v_res->>'code', '108', 'legacy speakers element does not gate counseling → 108');
 
     -- (d) max_active_bookings = 1: att2 already holds slotA? No — reset and test.
     -- Give att2 one future booking, then limit=1 blocks a second with 109.
     UPDATE public.occasions SET features =
-      '[{"code":"speakers","is_enabled":true,"max_active_bookings":1}]'::jsonb WHERE id = v_oc;
+      '[{"code":"counseling","is_enabled":true,"max_active_bookings":1}]'::jsonb WHERE id = v_oc;
     PERFORM set_config('request.jwt.claim.sub', v_att2::text, true);
     v_res := public.sign_user_to_event(v_slotB, v_att2);
     PERFORM assert_eq(v_res->>'code', '200', 'first counseling booking under limit → 200');
@@ -418,7 +433,7 @@ BEGIN
 
     -- with limit 0 the same second booking is allowed
     UPDATE public.occasions SET features =
-      '[{"code":"speakers","is_enabled":true,"max_active_bookings":0}]'::jsonb WHERE id = v_oc;
+      '[{"code":"counseling","is_enabled":true,"max_active_bookings":0}]'::jsonb WHERE id = v_oc;
     v_res := public.sign_user_to_event(v_slotC, v_att2);
     PERFORM assert_eq(v_res->>'code', '200', 'limit 0 → unlimited → 200');
 
@@ -454,19 +469,18 @@ BEGIN
 END $$ LANGUAGE plpgsql;
 
 -- ---------------------------------------------------------------------------
--- 8. GlobalSearch: speakers are searchable (name/role/bio), gated on feature,
---    and hidden speakers are excluded. Slots stay out of search (tested via the
---    events branch elsewhere). Needs public.f_unaccent + speakers.search_doc
---    (migration 20260710120000_speakers_searchable.sql).
+-- 8. GlobalSearch: speakers are core — searchable by name/role/bio WITHOUT any
+--    feature (decision R3/R7). Hidden speakers stay excluded. Slots stay out of
+--    search (tested via the events branch elsewhere). Needs public.f_unaccent +
+--    speakers.search_doc (migration 20260710120000_speakers_searchable.sql).
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
     v_oc  bigint := (SELECT v FROM _spk WHERE k = 'occasion');
     v_n   int;
 BEGIN
-    -- Ensure the speakers feature is enabled for this occasion.
-    UPDATE public.occasions SET features =
-      '[{"code":"speakers","is_enabled":true}]'::jsonb WHERE id = v_oc;
+    -- No speakers/counseling feature at all — speakers must still be searchable.
+    UPDATE public.occasions SET features = '[]'::jsonb WHERE id = v_oc;
 
     INSERT INTO public.speakers (occasion, title, subtitle, description, is_hidden)
     VALUES (v_oc, 'Vyhledatelný Řehoř', 'psycholog', 'Medailonek o úzkostech', false);
@@ -475,7 +489,7 @@ BEGIN
 
     SELECT count(*) INTO v_n FROM public.search_occasion_content(v_oc, 'rehor', 50)
       WHERE entity_type = 'speaker';
-    PERFORM assert_true(v_n >= 1, 'speaker found by name (diacritics-insensitive)');
+    PERFORM assert_true(v_n >= 1, 'speaker found by name without any feature (diacritics-insensitive)');
 
     SELECT count(*) INTO v_n FROM public.search_occasion_content(v_oc, 'psycholog', 50)
       WHERE entity_type = 'speaker';
@@ -489,13 +503,189 @@ BEGIN
       WHERE entity_type = 'speaker';
     PERFORM assert_eq(v_n, 0, 'hidden speaker is not searchable');
 
-    -- Feature disabled → no speaker results.
-    UPDATE public.occasions SET features = '[{"code":"speakers","is_enabled":false}]'::jsonb WHERE id = v_oc;
+    -- Even with the counseling feature disabled, speakers remain searchable.
+    UPDATE public.occasions SET features = '[{"code":"counseling","is_enabled":false}]'::jsonb WHERE id = v_oc;
     SELECT count(*) INTO v_n FROM public.search_occasion_content(v_oc, 'rehor', 50)
       WHERE entity_type = 'speaker';
-    PERFORM assert_eq(v_n, 0, 'speakers not searchable when feature disabled');
+    PERFORM assert_true(v_n >= 1, 'speakers still searchable with counseling disabled');
 
-    RAISE NOTICE 'test 8 (speaker search) passed';
+    RAISE NOTICE 'test 8 (speaker search, ungated) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 9. Migration transform (decision R2): the idempotent UPDATE that rewrites a
+--    legacy "speakers" feature element into a "counseling" element. This runs
+--    the SAME statement body as
+--    supabase/migrations/20260710140000_counseling_feature_split.sql (the CASE
+--    expression is identical), scoped to the test occasions.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc1        bigint;  -- speakers enabled, counseling_enabled:false
+    v_oc2        bigint;  -- speakers enabled, counseling_enabled:true
+    v_oc3        bigint;  -- no speakers element (untouched)
+    v_counseling jsonb;
+    v_before     jsonb;
+    v_after      jsonb;
+BEGIN
+    INSERT INTO public.occasions (title, link, start_time, end_time, features)
+    VALUES ('Mig1', 'spk-mig1-' || gen_random_uuid(), now(), now() + interval '1 day',
+            '[{"code":"speakers","is_enabled":true,"counseling_enabled":false,"counseling_event_type":"poradna","max_active_bookings":3,"registration_start_time":"2099-01-01T00:00:00"},
+              {"code":"map","is_enabled":true}]'::jsonb)
+    RETURNING id INTO v_oc1;
+
+    INSERT INTO public.occasions (title, link, start_time, end_time, features)
+    VALUES ('Mig2', 'spk-mig2-' || gen_random_uuid(), now(), now() + interval '1 day',
+            '[{"code":"speakers","is_enabled":true,"counseling_enabled":true}]'::jsonb)
+    RETURNING id INTO v_oc2;
+
+    INSERT INTO public.occasions (title, link, start_time, end_time, features)
+    VALUES ('Mig3', 'spk-mig3-' || gen_random_uuid(), now(), now() + interval '1 day',
+            '[{"code":"map","is_enabled":true}]'::jsonb)
+    RETURNING id INTO v_oc3;
+
+    v_before := (SELECT features FROM public.occasions WHERE id = v_oc3);
+
+    -- The migration transform (identical CASE), scoped to these occasions.
+    UPDATE public.occasions o
+    SET features = (
+        SELECT COALESCE(jsonb_agg(
+            CASE
+                WHEN elem->>'code' = 'speakers' THEN
+                    jsonb_strip_nulls(jsonb_build_object(
+                        'code', 'counseling',
+                        'is_enabled', (
+                            COALESCE((elem->>'is_enabled')::boolean, false)
+                            AND COALESCE((elem->>'counseling_enabled')::boolean, false)
+                        ),
+                        'counseling_event_type',    elem->'counseling_event_type',
+                        'registration_start_time',  elem->'registration_start_time',
+                        'max_active_bookings',      elem->'max_active_bookings'
+                    ))
+                ELSE elem
+            END
+        ), '[]'::jsonb)
+        FROM jsonb_array_elements(o.features) elem
+    )
+    WHERE o.id IN (v_oc1, v_oc2, v_oc3)
+      AND o.features IS NOT NULL
+      AND jsonb_typeof(o.features) = 'array'
+      AND EXISTS (
+          SELECT 1 FROM jsonb_array_elements(o.features) e2
+          WHERE e2->>'code' = 'speakers'
+      );
+
+    -- oc1: speakers → counseling; is_enabled = true AND false = false; config kept.
+    SELECT elem INTO v_counseling
+    FROM public.occasions o, jsonb_array_elements(o.features) elem
+    WHERE o.id = v_oc1 AND elem->>'code' = 'counseling';
+    PERFORM assert_true(v_counseling IS NOT NULL, 'oc1: counseling element created');
+    PERFORM assert_eq((v_counseling->>'is_enabled')::boolean, false,
+        'oc1: is_enabled = enabled AND counseling_enabled = false');
+    PERFORM assert_eq(v_counseling->>'counseling_event_type', 'poradna', 'oc1: event type carried over');
+    PERFORM assert_eq((v_counseling->>'max_active_bookings')::int, 3, 'oc1: limit carried over');
+    PERFORM assert_eq(v_counseling->>'registration_start_time', '2099-01-01T00:00:00', 'oc1: window carried over');
+    PERFORM assert_true(NOT EXISTS (
+        SELECT 1 FROM public.occasions o, jsonb_array_elements(o.features) elem
+        WHERE o.id = v_oc1 AND elem->>'code' = 'speakers'), 'oc1: speakers element removed');
+    PERFORM assert_true(EXISTS (
+        SELECT 1 FROM public.occasions o, jsonb_array_elements(o.features) elem
+        WHERE o.id = v_oc1 AND elem->>'code' = 'map' AND (elem->>'is_enabled')::boolean IS TRUE),
+        'oc1: other features untouched');
+
+    -- oc2: counseling_enabled:true → is_enabled:true.
+    SELECT elem INTO v_counseling
+    FROM public.occasions o, jsonb_array_elements(o.features) elem
+    WHERE o.id = v_oc2 AND elem->>'code' = 'counseling';
+    PERFORM assert_eq((v_counseling->>'is_enabled')::boolean, true, 'oc2: enabled AND counseling_enabled → true');
+
+    -- oc3: no speakers element → unchanged.
+    v_after := (SELECT features FROM public.occasions WHERE id = v_oc3);
+    PERFORM assert_true(v_after = v_before, 'oc3: occasion without speakers element unchanged');
+
+    -- Idempotency: a second run changes nothing.
+    v_before := (SELECT features FROM public.occasions WHERE id = v_oc1);
+    UPDATE public.occasions o
+    SET features = (
+        SELECT COALESCE(jsonb_agg(
+            CASE
+                WHEN elem->>'code' = 'speakers' THEN
+                    jsonb_strip_nulls(jsonb_build_object(
+                        'code', 'counseling',
+                        'is_enabled', (
+                            COALESCE((elem->>'is_enabled')::boolean, false)
+                            AND COALESCE((elem->>'counseling_enabled')::boolean, false)
+                        ),
+                        'counseling_event_type',    elem->'counseling_event_type',
+                        'registration_start_time',  elem->'registration_start_time',
+                        'max_active_bookings',      elem->'max_active_bookings'
+                    ))
+                ELSE elem
+            END
+        ), '[]'::jsonb)
+        FROM jsonb_array_elements(o.features) elem
+    )
+    WHERE o.id IN (v_oc1, v_oc2, v_oc3)
+      AND o.features IS NOT NULL
+      AND jsonb_typeof(o.features) = 'array'
+      AND EXISTS (
+          SELECT 1 FROM jsonb_array_elements(o.features) e2
+          WHERE e2->>'code' = 'speakers'
+      );
+    v_after := (SELECT features FROM public.occasions WHERE id = v_oc1);
+    PERFORM assert_true(v_after = v_before, 'idempotent: second run leaves features unchanged');
+
+    RAISE NOTICE 'test 9 (features migration transform) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 10. delete_event unbinds sign-ups (event_users) and saved rows
+--     (event_users_saved) before deleting — counseling slots are ordinary
+--     events with attendees. Editor guard (403); missing event (404).
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc    bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_sp    bigint := (SELECT v FROM _spk WHERE k = 'speaker');
+    v_att1  uuid := get_user_id('spk_att1');
+    v_att2  uuid := get_user_id('spk_att2');
+    v_slot  bigint;
+    v_res   jsonb;
+BEGIN
+    -- A counseling slot with an attendee, a saved row, and a speaker link.
+    INSERT INTO public.events (occasion, title, start_time, end_time, max_participants, type, data)
+    VALUES (v_oc, 'Slot to delete', now() + interval '9 days', now() + interval '9 days' + interval '20 minutes',
+            2, 'counseling', '{"is_counseling_slot":true}'::jsonb)
+    RETURNING id INTO v_slot;
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_slot, v_sp);
+    INSERT INTO public.event_users (event, "user")       VALUES (v_slot, v_att1), (v_slot, v_att2);
+    INSERT INTO public.event_users_saved (event, "user") VALUES (v_slot, v_att1);
+
+    -- (a) non-editor cannot delete → 403, event survives.
+    PERFORM set_config('request.jwt.claim.sub', v_att1::text, true);
+    v_res := public.delete_event(v_slot);
+    PERFORM assert_eq(v_res->>'code', '403', 'delete_event as non-editor → 403');
+    PERFORM assert_true(EXISTS(SELECT 1 FROM public.events WHERE id = v_slot),
+        'event still present after rejected delete');
+
+    -- (b) editor deletes → 200; event and all child rows gone (no FK error).
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spk_editor')::text, true);
+    v_res := public.delete_event(v_slot);
+    PERFORM assert_eq(v_res->>'code', '200', 'delete_event as editor unbinds sign-ups → 200');
+    PERFORM assert_true(NOT EXISTS(SELECT 1 FROM public.events WHERE id = v_slot),
+        'event deleted');
+    PERFORM assert_true(NOT EXISTS(SELECT 1 FROM public.event_users WHERE event = v_slot),
+        'event_users unbound');
+    PERFORM assert_true(NOT EXISTS(SELECT 1 FROM public.event_users_saved WHERE event = v_slot),
+        'event_users_saved unbound');
+    PERFORM assert_true(NOT EXISTS(SELECT 1 FROM public.event_speakers WHERE event = v_slot),
+        'event_speakers cascaded');
+
+    -- (c) missing event → 404.
+    v_res := public.delete_event(v_slot);
+    PERFORM assert_eq(v_res->>'code', '404', 'delete_event on missing event → 404');
+
+    RAISE NOTICE 'test 10 (delete_event unbinds sign-ups) passed';
 END $$ LANGUAGE plpgsql;
 
 DO $$ BEGIN RAISE NOTICE 'speakers + counseling regression tests passed'; END $$ LANGUAGE plpgsql;

@@ -53,12 +53,12 @@ BEGIN
         END IF;
     END IF;
 
-    -- Event type comes from the "speakers" feature config (default 'counseling').
+    -- Event type comes from the "counseling" feature config (default 'counseling').
     SELECT COALESCE(elem->>'counseling_event_type', 'counseling')
     INTO v_type
     FROM public.occasions o
     CROSS JOIN LATERAL jsonb_array_elements(COALESCE(o.features, '[]'::jsonb)) elem
-    WHERE o.id = v_occasion AND elem->>'code' = 'speakers'
+    WHERE o.id = v_occasion AND elem->>'code' = 'counseling'
     LIMIT 1;
 
     IF v_type IS NULL THEN

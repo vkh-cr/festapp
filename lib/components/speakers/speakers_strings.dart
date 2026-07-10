@@ -1,22 +1,20 @@
 import 'package:easy_localization/easy_localization.dart';
 
-/// Localized strings for the speakers + counseling feature.
-/// Keys live under "FeatureSpeakers" / "Speakers" / "Counseling" in translations
-/// (cs + en; de/pl/sk/uk intentionally partial). Follows the namespaced
+/// Localized strings for speakers (core) + the counseling feature.
+/// Keys live under "FeatureCounseling" / "Speakers" / "Counseling" in
+/// translations (cs + en only, permanently). Follows the namespaced
 /// Strings-class pattern — never `'literal'.tr()` at call sites.
 class SpeakersStrings {
-  // Feature metadata + config form
-  static String get featureTitle => 'FeatureSpeakers.title'.tr(); // "Speakers"
-  static String get featureDescription =>
-      'FeatureSpeakers.description'.tr();
-  static String get counselingEnabled =>
-      'FeatureSpeakers.counselingEnabled'.tr(); // "Enable counseling"
+  // Counseling feature metadata + config form ("Poradny").
+  static String get counselingFeatureTitle => 'FeatureCounseling.title'.tr();
+  static String get counselingFeatureDescription =>
+      'FeatureCounseling.description'.tr();
   static String get counselingEventType =>
-      'FeatureSpeakers.counselingEventType'.tr(); // "Counseling event type code"
+      'FeatureCounseling.counselingEventType'.tr(); // "Counseling event type code"
   static String get maxActiveBookings =>
-      'FeatureSpeakers.maxActiveBookings'.tr(); // "Max active reservations (0 = unlimited)"
+      'FeatureCounseling.maxActiveBookings'.tr(); // "Max active reservations (0 = unlimited)"
   static String get registrationStartTime =>
-      'FeatureSpeakers.registrationStartTime'.tr();
+      'FeatureCounseling.registrationStartTime'.tr();
 
   // Admin — speakers management
   static String get manageSpeakers => 'Speakers.manageSpeakers'.tr();
@@ -32,6 +30,8 @@ class SpeakersStrings {
   static String get topicTitle => 'Speakers.topicTitle'.tr();
   static String get topicCode => 'Speakers.topicCode'.tr();
   static String get speakersOnEvent => 'Speakers.speakersOnEvent'.tr();
+  static String get selectSpeakers => 'Speakers.selectSpeakers'.tr();
+  static String get searchSpeakers => 'Speakers.searchSpeakers'.tr();
   static String get counselingSlots => 'Speakers.counselingSlots'.tr();
   static String get counselingEntryToggle =>
       'Speakers.counselingEntryToggle'.tr();

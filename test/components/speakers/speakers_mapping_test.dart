@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
-import 'package:fstapp/components/features/speakers_feature.dart';
+import 'package:fstapp/components/features/counseling_feature.dart';
 import 'package:fstapp/components/speakers/counseling_availability.dart';
 import 'package:fstapp/components/speakers/speaker_model.dart';
 import 'package:fstapp/components/speakers/speakers_bundle.dart';
@@ -117,28 +117,51 @@ void main() {
     });
   });
 
-  group('SpeakersFeature config', () {
-    test('defaults: disabled, counseling on, type "counseling", limit 1', () {
-      final f = SpeakersFeature(code: FeatureConstants.speakers);
+  group('CounselingFeature config', () {
+    test('defaults: disabled, type "counseling", limit 1', () {
+      final f = CounselingFeature(code: FeatureConstants.counseling);
       expect(f.isEnabled, isFalse);
-      expect(f.counselingEnabled, isTrue);
       expect(f.counselingEventType, FeatureConstants.counselingDefaultEventType);
       expect(f.maxActiveBookings, 1);
     });
 
-    test('fromJson via Feature factory returns a SpeakersFeature', () {
+    test('fromJson via Feature factory returns a CounselingFeature', () {
       final f = Feature.fromJson({
-        FeatureConstants.metaCode: FeatureConstants.speakers,
+        FeatureConstants.metaCode: FeatureConstants.counseling,
         FeatureConstants.metaIsEnabled: true,
-        FeatureConstants.speakersMaxActiveBookings: 0,
-        FeatureConstants.speakersCounselingEventType: 'poradna',
+        FeatureConstants.counselingMaxActiveBookings: 0,
+        FeatureConstants.counselingEventType: 'poradna',
       });
-      expect(f, isA<SpeakersFeature>());
-      final sf = f as SpeakersFeature;
-      expect(sf.isEnabled, isTrue);
-      expect(sf.maxActiveBookings, 0);
-      expect(sf.counselingEventType, 'poradna');
-      expect(sf.toJson()[FeatureConstants.speakersMaxActiveBookings], 0);
+      expect(f, isA<CounselingFeature>());
+      final cf = f as CounselingFeature;
+      expect(cf.isEnabled, isTrue);
+      expect(cf.maxActiveBookings, 0);
+      expect(cf.counselingEventType, 'poradna');
+      expect(cf.toJson()[FeatureConstants.counselingMaxActiveBookings], 0);
+    });
+
+    test('toJson round-trips through Feature.fromJson', () {
+      final original = CounselingFeature(
+        code: FeatureConstants.counseling,
+        isEnabled: true,
+        counselingEventType: 'poradna',
+        maxActiveBookings: 0,
+      );
+      final again = Feature.fromJson(original.toJson()) as CounselingFeature;
+      expect(again.isEnabled, isTrue);
+      expect(again.counselingEventType, 'poradna');
+      expect(again.maxActiveBookings, 0);
+    });
+
+    test('legacy "speakers" code has no special class → SimpleFeature', () {
+      // Regression guard: the retired feature code must not resurrect a
+      // dedicated class; it decodes as a plain SimpleFeature.
+      final f = Feature.fromJson({
+        FeatureConstants.metaCode: 'speakers',
+        FeatureConstants.metaIsEnabled: true,
+      });
+      expect(f, isA<SimpleFeature>());
+      expect(f, isNot(isA<CounselingFeature>()));
     });
   });
 }

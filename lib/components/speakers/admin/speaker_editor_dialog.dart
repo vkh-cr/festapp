@@ -6,6 +6,7 @@ import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/components/images/db_images.dart';
 import 'package:fstapp/components/images/image_area.dart';
 import 'package:fstapp/components/images/image_compression_helper.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/components/speakers/db_speakers.dart';
@@ -141,7 +142,10 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
     );
     if (saved != null && mounted) {
       ToastHelper.Show(context, CommonStrings.saved);
-      Navigator.of(context).pop(true);
+      // Pop the saved model so callers (e.g. the event edit speaker picker) can
+      // pre-select the freshly created speaker (decision R6b). The close button
+      // still pops _changed (bool); callers treat any truthy result as reload.
+      Navigator.of(context).pop(saved);
     }
   }
 
@@ -310,26 +314,29 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
                 ],
               ),
               const SizedBox(height: 8),
-              Text(SpeakersStrings.topics, style: theme.textTheme.labelLarge),
-              if (widget.topics.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text('—', style: theme.textTheme.bodySmall),
-                ),
-              ...widget.topics.map((t) => CheckboxListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    value: _selectedTopics.contains(t.id),
-                    title: Text(t.title ?? ''),
-                    onChanged: (v) => setState(() {
-                      if (v == true) {
-                        _selectedTopics.add(t.id!);
-                      } else {
-                        _selectedTopics.remove(t.id);
-                      }
-                    }),
-                  )),
-              const SizedBox(height: 12),
+              // Counseling competence areas only matter when counseling is on (R5).
+              if (FeatureService.isCounselingEnabled()) ...[
+                Text(SpeakersStrings.topics, style: theme.textTheme.labelLarge),
+                if (widget.topics.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text('—', style: theme.textTheme.bodySmall),
+                  ),
+                ...widget.topics.map((t) => CheckboxListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      value: _selectedTopics.contains(t.id),
+                      title: Text(t.title ?? ''),
+                      onChanged: (v) => setState(() {
+                        if (v == true) {
+                          _selectedTopics.add(t.id!);
+                        } else {
+                          _selectedTopics.remove(t.id);
+                        }
+                      }),
+                    )),
+                const SizedBox(height: 12),
+              ],
               TextField(
                 controller: _orderController,
                 keyboardType: TextInputType.number,
@@ -341,7 +348,9 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
                 value: _isHidden,
                 onChanged: (v) => setState(() => _isHidden = v),
               ),
-              if (_isExisting) ...[
+              // The counseling slot generator is gated on the counseling
+              // feature (R5); an unsaved speaker has no id to attach slots to.
+              if (_isExisting && FeatureService.isCounselingEnabled()) ...[
                 const Divider(height: 32),
                 _buildCounselingSection(theme),
               ],

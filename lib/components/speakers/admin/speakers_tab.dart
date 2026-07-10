@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/images/image_url_helper.dart';
 import 'package:fstapp/components/speakers/admin/speaker_editor_dialog.dart';
 import 'package:fstapp/components/speakers/db_speakers.dart';
@@ -51,11 +52,13 @@ class _SpeakersTabState extends State<SpeakersTab> {
   }
 
   Future<void> _openSpeakerEditor(SpeakerModel speaker) async {
-    final changed = await showDialog<bool>(
+    final result = await showDialog<Object?>(
       context: context,
       builder: (_) => SpeakerEditorDialog(speaker: speaker, topics: _topics),
     );
-    if (changed == true) await _load();
+    // _save pops the saved SpeakerModel; the close button pops _changed (bool).
+    // Reload on any truthy signal (decision R6b).
+    if (result == true || result is SpeakerModel) await _load();
   }
 
   Future<void> _deleteSpeaker(SpeakerModel speaker) async {
@@ -139,8 +142,11 @@ class _SpeakersTabState extends State<SpeakersTab> {
           )
         else
           ..._speakers.map(_buildSpeakerTile),
-        const SizedBox(height: 24),
-        _buildTopicsCatalog(theme),
+        // The counseling areas catalog only matters when counseling is on (R5).
+        if (FeatureService.isCounselingEnabled()) ...[
+          const SizedBox(height: 24),
+          _buildTopicsCatalog(theme),
+        ],
       ],
     );
   }

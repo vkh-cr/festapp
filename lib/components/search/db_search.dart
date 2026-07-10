@@ -113,30 +113,29 @@ class DbSearch {
         ));
       }
 
-      // Speakers / counselors — gated on the speakers feature, same as the
-      // server-side branch. parentId carries the speaker's first non-slot event
-      // so the offline result opens a page where the medallion shows.
-      if (FeatureService.isFeatureEnabled(FeatureConstants.speakers)) {
-        final bundle = await OfflineDataService.getSpeakers();
-        if (bundle != null) {
-          for (final s in bundle.speakers) {
-            if (s.isHidden || s.id == null) continue;
-            final firstEvent = bundle.speakersByEvent.entries
-                .firstWhere((e) => e.value.contains(s.id),
-                    orElse: () => const MapEntry(-1, []))
-                .key;
-            docs.add(_IndexedDoc(
-              entityType: 'speaker',
-              entityId: s.id!,
-              title: s.title,
-              snippet: (s.subtitle?.isNotEmpty ?? false)
-                  ? s.subtitle
-                  : s.description,
-              parentId: firstEvent > 0 ? firstEvent : null,
-              searchDoc: _normalize(
-                  '${s.title ?? ''} ${s.subtitle ?? ''} ${s.description ?? ''}'),
-            ));
-          }
+      // Speakers / counselors are core: always indexed (no feature gate,
+      // matching the server-side branch — decision R7). parentId carries the
+      // speaker's first non-slot event so the offline result opens a page where
+      // the medallion shows.
+      final bundle = await OfflineDataService.getSpeakers();
+      if (bundle != null) {
+        for (final s in bundle.speakers) {
+          if (s.isHidden || s.id == null) continue;
+          final firstEvent = bundle.speakersByEvent.entries
+              .firstWhere((e) => e.value.contains(s.id),
+                  orElse: () => const MapEntry(-1, []))
+              .key;
+          docs.add(_IndexedDoc(
+            entityType: 'speaker',
+            entityId: s.id!,
+            title: s.title,
+            snippet: (s.subtitle?.isNotEmpty ?? false)
+                ? s.subtitle
+                : s.description,
+            parentId: firstEvent > 0 ? firstEvent : null,
+            searchDoc: _normalize(
+                '${s.title ?? ''} ${s.subtitle ?? ''} ${s.description ?? ''}'),
+          ));
         }
       }
 

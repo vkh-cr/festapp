@@ -7,50 +7,49 @@ import 'package:fstapp/services/time_helper.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
 
-/// Speakers + counseling feature configuration (plan section 3).
+/// Counseling feature configuration (plan 2026-07-10, decision R4).
 ///
-/// Config (occasions.features element):
-///   counseling_enabled       — offer the counseling entry flow (rozcestník)
+/// The feature toggle itself is the "enable counseling" switch — there is no
+/// separate `counseling_enabled` flag anymore. Speakers are core and never
+/// gated; only the counseling flow depends on this feature.
+///
+/// Config (occasions.features "counseling" element):
 ///   counseling_event_type    — event type code used for generated slots
 ///   registration_start_time  — own booking window for counseling slots
 ///   max_active_bookings      — max future counseling reservations per user
 ///                              (default 1, 0 = unlimited)
-class SpeakersFeature extends Feature {
-  bool counselingEnabled;
+class CounselingFeature extends Feature {
   String counselingEventType;
   DateTime? registrationStartTime;
   int maxActiveBookings;
 
-  SpeakersFeature({
-    super.code = FeatureConstants.speakers,
+  CounselingFeature({
+    super.code = FeatureConstants.counseling,
     super.isEnabled = false,
     super.title,
     super.description,
-    this.counselingEnabled = true,
     this.counselingEventType = FeatureConstants.counselingDefaultEventType,
     this.registrationStartTime,
     this.maxActiveBookings = 1,
   });
 
-  factory SpeakersFeature.fromJson(Map<String, dynamic> json) {
+  factory CounselingFeature.fromJson(Map<String, dynamic> json) {
     DateTime? parsed;
-    final rawStart = json[FeatureConstants.speakersRegistrationStartTime];
+    final rawStart = json[FeatureConstants.counselingRegistrationStartTime];
     if (rawStart != null) {
       parsed = DateTime.parse(rawStart as String).toUtcFromOccasionTime();
     }
-    final rawType = json[FeatureConstants.speakersCounselingEventType] as String?;
-    return SpeakersFeature(
+    final rawType = json[FeatureConstants.counselingEventType] as String?;
+    return CounselingFeature(
       code: json[FeatureConstants.metaCode] as String? ??
-          FeatureConstants.speakers,
+          FeatureConstants.counseling,
       isEnabled: json[FeatureConstants.metaIsEnabled] as bool? ?? false,
-      counselingEnabled:
-          json[FeatureConstants.speakersCounselingEnabled] as bool? ?? true,
       counselingEventType: (rawType != null && rawType.isNotEmpty)
           ? rawType
           : FeatureConstants.counselingDefaultEventType,
       registrationStartTime: parsed,
       maxActiveBookings:
-          (json[FeatureConstants.speakersMaxActiveBookings] as num?)?.toInt() ??
+          (json[FeatureConstants.counselingMaxActiveBookings] as num?)?.toInt() ??
               1,
     );
   }
@@ -60,12 +59,11 @@ class SpeakersFeature extends Feature {
     final data = <String, dynamic>{
       FeatureConstants.metaCode: code,
       FeatureConstants.metaIsEnabled: isEnabled,
-      FeatureConstants.speakersCounselingEnabled: counselingEnabled,
-      FeatureConstants.speakersCounselingEventType: counselingEventType,
-      FeatureConstants.speakersMaxActiveBookings: maxActiveBookings,
+      FeatureConstants.counselingEventType: counselingEventType,
+      FeatureConstants.counselingMaxActiveBookings: maxActiveBookings,
     };
     if (registrationStartTime != null) {
-      data[FeatureConstants.speakersRegistrationStartTime] =
+      data[FeatureConstants.counselingRegistrationStartTime] =
           registrationStartTime!.toIso8601String();
     }
     return data;
@@ -90,13 +88,6 @@ class SpeakersFeature extends Feature {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(SpeakersStrings.counselingEnabled),
-              value: counselingEnabled,
-              onChanged: (v) => setLocalState(() => counselingEnabled = v),
-            ),
-            const SizedBox(height: 8),
             TextFormField(
               controller: typeController,
               decoration: InputDecoration(

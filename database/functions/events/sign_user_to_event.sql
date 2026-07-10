@@ -23,7 +23,7 @@ declare
 
   v_occasion bigint;
   v_is_counseling boolean;
-  speakers_feature jsonb;
+  counseling_feature jsonb;
   v_limit integer;
   v_active integer;
 
@@ -65,23 +65,23 @@ begin
   WHERE id = ev;
 
   IF v_is_counseling THEN
-    -- Counseling slots use their own registration window from the "speakers"
+    -- Counseling slots use their own registration window from the "counseling"
     -- feature; the workshops gate (104/108) does not apply (decision R1).
     SELECT elem
-      INTO speakers_feature
+      INTO counseling_feature
     FROM occasions,
          jsonb_array_elements(features) elem
     WHERE id = v_occasion
-      AND elem->>'code' = 'speakers'
+      AND elem->>'code' = 'counseling'
     LIMIT 1;
 
     -- (a) Feature must be present and enabled, else registration is closed.
-    IF speakers_feature IS NULL
-       OR (speakers_feature->>'is_enabled')::boolean IS NOT TRUE THEN
+    IF counseling_feature IS NULL
+       OR (counseling_feature->>'is_enabled')::boolean IS NOT TRUE THEN
       RETURN json_build_object('code', 108);
     END IF;
 
-    registration_start := (speakers_feature->>'registration_start_time')::timestamp;
+    registration_start := (counseling_feature->>'registration_start_time')::timestamp;
     IF registration_start IS NOT NULL THEN
       IF CURRENT_TIMESTAMP AT TIME ZONE 'UTC' < registration_start THEN
         RETURN json_build_object('code', 104, 'events_registration_start', registration_start AT TIME ZONE 'UTC');
@@ -89,7 +89,7 @@ begin
     END IF;
 
     -- (b) Limit of the user's future counseling bookings (0 = unlimited).
-    v_limit := COALESCE((speakers_feature->>'max_active_bookings')::int, 1);
+    v_limit := COALESCE((counseling_feature->>'max_active_bookings')::int, 1);
     IF v_limit > 0 THEN
       SELECT count(*)
         INTO v_active
@@ -201,12 +201,12 @@ $$;
 -- 102: Exclusive event already taken
 -- 103: Already signed in
 -- 104: Registration not started yet (events_registration_start in response);
---      for counseling slots the window comes from the "speakers" feature
+--      for counseling slots the window comes from the "counseling" feature
 --      (registration_start_time) instead of the workshops feature.
 -- 105: Maximum male participants reached
 -- 106: Maximum female participants reached
 -- 107: Conflicting event schedule
 -- 108: Registration is not enabled — workshops feature disabled, or, for a
---      counseling slot, the "speakers" feature is missing or not enabled.
--- 109: Counseling booking limit reached (max_active_bookings of the "speakers"
+--      counseling slot, the "counseling" feature is missing or not enabled.
+-- 109: Counseling booking limit reached (max_active_bookings of the "counseling"
 --      feature; counts the user's future counseling reservations on the occasion).

@@ -28,16 +28,18 @@ class FeatureConstants {
   static const String import = "import"; // New feature
   static const String globalSearch = "global_search";
   static const String eventFeedback = "event_feedback";
-  static const String speakers = "speakers";
+  // Counseling feature. Speakers themselves are core (no feature); the
+  // "counseling" feature gates only the counseling flow (areas, slots,
+  // rozcestník, booking window/limit). Replaces the retired "speakers" feature.
+  static const String counseling = "counseling";
 
   // Per-event flag (stored in events.data) toggling feedback for one event.
   static const String feedbackEnabled = "feedback_enabled";
 
-  // Speakers / counseling feature config keys (occasions.features element).
-  static const String speakersCounselingEnabled = "counseling_enabled";
-  static const String speakersCounselingEventType = "counseling_event_type";
-  static const String speakersRegistrationStartTime = "registration_start_time";
-  static const String speakersMaxActiveBookings = "max_active_bookings";
+  // Counseling feature config keys (occasions.features "counseling" element).
+  static const String counselingEventType = "counseling_event_type";
+  static const String counselingRegistrationStartTime = "registration_start_time";
+  static const String counselingMaxActiveBookings = "max_active_bookings";
 
   // Per-event flags (stored in events.data).
   //   is_counseling_slot → generated counseling slot (filtered from timeline).

@@ -1,9 +1,10 @@
 -- search_occasion_content — GlobalSearch backend across events / places /
 -- information / news / speakers for an occasion.
 --
--- Speakers/counselors are searchable by name, role (subtitle) and bio, gated on
--- the "speakers" feature (like songs/games); their search_doc column + trigram
--- index are added by migration 20260710120000_speakers_searchable.sql.
+-- Speakers/counselors are searchable by name, role (subtitle) and bio. Speakers
+-- are a core concept (no feature gate — decision R3/R7); only the is_hidden
+-- filter applies. Their search_doc column + trigram index are added by migration
+-- 20260710120000_speakers_searchable.sql.
 --
 -- This file is now the repo home of the function; it supersedes the verbatim
 -- copy in database/recovery/2026-06_csmostrava_lost_backend.sql (which was
@@ -110,7 +111,7 @@ BEGIN
 
     UNION ALL
 
-    -- Speakers / counselors, gated on the "speakers" feature (like song/game).
+    -- Speakers / counselors are core: always searchable, only is_hidden filters.
     -- parent_id carries the speaker's first non-hidden, non-slot event so the
     -- client can open a page where the speaker's medallion is shown.
     SELECT 'speaker'::TEXT, s.id::BIGINT, s.title,
@@ -130,10 +131,6 @@ BEGIN
     WHERE s.occasion = p_occasion
       AND s.is_hidden = FALSE
       AND s.search_doc ILIKE '%' || v_norm_query || '%'
-      AND EXISTS (
-        SELECT 1 FROM jsonb_array_elements(v_features) f
-        WHERE f->>'code' = 'speakers' AND (f->>'is_enabled')::boolean = TRUE
-      )
 
     ORDER BY rank DESC
     LIMIT v_effective_limit;

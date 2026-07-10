@@ -25,9 +25,9 @@ class FeatureMetadata {
           'title': EventFeedbackStrings.featureTitle,
           'description': EventFeedbackStrings.featureDescription,
         },
-        FeatureConstants.speakers: {
-          'title': SpeakersStrings.featureTitle,
-          'description': SpeakersStrings.featureDescription,
+        FeatureConstants.counseling: {
+          'title': SpeakersStrings.counselingFeatureTitle,
+          'description': SpeakersStrings.counselingFeatureDescription,
         },
         FeatureConstants.form: {
           'title': FeaturesStrings.formTitle,

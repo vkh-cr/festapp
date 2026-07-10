@@ -13,8 +13,11 @@ import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/map/db_places.dart';
+import 'package:fstapp/components/speakers/admin/speaker_editor_dialog.dart';
+import 'package:fstapp/components/speakers/admin/speaker_picker_field.dart';
 import 'package:fstapp/components/speakers/db_speakers.dart';
 import 'package:fstapp/components/speakers/speaker_model.dart';
+import 'package:fstapp/components/speakers/speaker_topic_model.dart';
 import 'package:fstapp/components/speakers/speakers_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
@@ -59,8 +62,10 @@ class _EventEditPageState extends State<EventEditPage> {
   bool counselingEntry = false;
   bool isFormValid = true;
 
-  // Speakers attached to this event (speakers feature).
+  // Speakers attached to this event. Speakers are core (no feature gate); the
+  // picker shows for any saved event (decision R6).
   List<SpeakerModel>? _allSpeakers;
+  List<SpeakerTopicModel>? _allTopics;
   final Set<int> _selectedSpeakerIds = {};
 
   DateTime? minDate;
@@ -118,23 +123,23 @@ class _EventEditPageState extends State<EventEditPage> {
               'true';
     }
 
-    // Load speakers + the set currently attached to this event.
-    if (widget.id != null &&
-        FeatureService.isFeatureEnabled(FeatureConstants.speakers)) {
-      final data = await ExceptionHandler.guard(
-        context,
-        futureFunction: () =>
-            DbSpeakers.getSpeakersForEdit(RightsService.currentOccasionId()!),
-      );
-      if (data != null) {
-        _allSpeakers = data.speakers;
-        _selectedSpeakerIds
-          ..clear()
-          ..addAll(data.speakers
-              .where((s) =>
-                  s.events.any((e) => e.id == widget.id) && s.id != null)
-              .map((s) => s.id!));
-      }
+    // Load speakers + the set currently attached to this event. Speakers are
+    // core (no feature gate) and the load needs only the occasion, so it runs
+    // for every event; the current selection is matched by event id (R6a).
+    final speakerData = await ExceptionHandler.guard(
+      context,
+      futureFunction: () =>
+          DbSpeakers.getSpeakersForEdit(RightsService.currentOccasionId()!),
+    );
+    if (speakerData != null) {
+      _allSpeakers = speakerData.speakers;
+      _allTopics = speakerData.topics;
+      _selectedSpeakerIds
+        ..clear()
+        ..addAll(speakerData.speakers
+            .where((s) =>
+                s.events.any((e) => e.id == widget.id) && s.id != null)
+            .map((s) => s.id!));
     }
 
     validateForm();
@@ -196,18 +201,19 @@ class _EventEditPageState extends State<EventEditPage> {
         originalEvent!.data = {
           ...?originalEvent!.data,
           FeatureConstants.feedbackEnabled: feedbackEnabled,
-          if (FeatureService.isFeatureEnabled(FeatureConstants.speakers))
+          if (FeatureService.isCounselingEnabled())
             FeatureConstants.counselingEntry: counselingEntry,
         };
 
-        await DbEvents.updateEvent(originalEvent!);
+        // updateEvent returns an EventModel carrying the id even after an
+        // insert, so speaker attachment never relies on widget.id (decision R6a).
+        final updatedEvent = await DbEvents.updateEvent(originalEvent!);
 
-        if (widget.id != null &&
-            FeatureService.isFeatureEnabled(FeatureConstants.speakers)) {
+        if (updatedEvent.id != null) {
           await ExceptionHandler.guardVoid(
             context,
             futureFunction: () => DbSpeakers.setEventSpeakers(
-                widget.id!, _selectedSpeakerIds.toList()),
+                updatedEvent.id!, _selectedSpeakerIds.toList()),
           );
         }
 
@@ -220,6 +226,34 @@ class _EventEditPageState extends State<EventEditPage> {
 
   void cancelEdit() {
     Navigator.of(context).pop();
+  }
+
+  /// Opens the speaker editor to create a new speaker, reloads the list, and
+  /// returns the newly created speaker's id so the picker can pre-select it.
+  /// RPC lives here, not in [SpeakerPickerField] (decision R6).
+  Future<int?> _addSpeaker() async {
+    final result = await showDialog<Object?>(
+      context: context,
+      builder: (_) =>
+          SpeakerEditorDialog(speaker: SpeakerModel(), topics: _allTopics ?? []),
+    );
+    // _save pops the freshly saved SpeakerModel (decision R6b); a bool from the
+    // close button or null means nothing was created.
+    if (result is! SpeakerModel) return null;
+
+    // Reload so the picker's list includes the new speaker.
+    final data = await ExceptionHandler.guard(
+      context,
+      futureFunction: () =>
+          DbSpeakers.getSpeakersForEdit(RightsService.currentOccasionId()!),
+    );
+    if (data != null) {
+      setState(() {
+        _allSpeakers = data.speakers;
+        _allTopics = data.topics;
+      });
+    }
+    return result.id;
   }
 
   @override
@@ -274,8 +308,7 @@ class _EventEditPageState extends State<EventEditPage> {
                                 onChanged: (value) =>
                                     setState(() => feedbackEnabled = value),
                               ),
-                            if (FeatureService.isFeatureEnabled(
-                                FeatureConstants.speakers))
+                            if (FeatureService.isCounselingEnabled())
                               SwitchListTile(
                                 title: Text(
                                     SpeakersStrings.counselingEntryToggle),
@@ -399,35 +432,20 @@ class _EventEditPageState extends State<EventEditPage> {
                                         : int.tryParse(value.trim());
                               },
                             ),
-                            if (FeatureService.isFeatureEnabled(
-                                    FeatureConstants.speakers) &&
-                                widget.id != null &&
-                                _allSpeakers != null &&
-                                _allSpeakers!.isNotEmpty) ...[
+                            // Speakers are core: the picker shows whenever the
+                            // speaker list has loaded — no feature gate and no
+                            // widget.id condition (decision R6).
+                            if (_allSpeakers != null) ...[
                               const SizedBox(height: 16),
-                              Text(
-                                SpeakersStrings.speakersOnEvent,
-                                style: Theme.of(context).textTheme.labelMedium,
-                              ),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: _allSpeakers!
-                                    .where((s) => s.id != null)
-                                    .map((s) => FilterChip(
-                                          label: Text(s.title ?? ''),
-                                          selected: _selectedSpeakerIds
-                                              .contains(s.id),
-                                          onSelected: (sel) => setState(() {
-                                            if (sel) {
-                                              _selectedSpeakerIds.add(s.id!);
-                                            } else {
-                                              _selectedSpeakerIds.remove(s.id);
-                                            }
-                                          }),
-                                        ))
-                                    .toList(),
+                              SpeakerPickerField(
+                                allSpeakers: _allSpeakers!,
+                                selectedIds: _selectedSpeakerIds.toList(),
+                                onChanged: (ids) => setState(() {
+                                  _selectedSpeakerIds
+                                    ..clear()
+                                    ..addAll(ids);
+                                }),
+                                onAddSpeaker: _addSpeaker,
                               ),
                             ],
                             const SizedBox(height: 16),

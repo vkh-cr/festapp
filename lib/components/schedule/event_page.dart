@@ -1107,9 +1107,9 @@ class _EventPageState extends State<EventPage> {
   /// event has no attached speakers.
   Widget _buildSpeakersSection(
       BuildContext context, VoidCallback onPinchStart, VoidCallback onPinchEnd) {
-    if (_event?.id == null ||
-        _speakersBundle == null ||
-        !FeatureService.isFeatureEnabled(FeatureConstants.speakers)) {
+    // Speakers are core: the section shows whenever the event has speakers
+    // attached, regardless of any feature (decision R7).
+    if (_event?.id == null || _speakersBundle == null) {
       return const SizedBox.shrink();
     }
     final List<SpeakerModel> speakers =
@@ -1247,7 +1247,7 @@ class _EventPageState extends State<EventPage> {
   /// (offline, RPC error) simply leaves the section empty and never breaks the
   /// event page.
   Future<void> loadSpeakers() async {
-    if (!FeatureService.isFeatureEnabled(FeatureConstants.speakers)) return;
+    // Speakers are core — always loaded (decision R7).
     try {
       final occasionId = RightsService.currentOccasionId();
       if (occasionId == null) return;

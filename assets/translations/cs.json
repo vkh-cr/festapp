@@ -1649,10 +1649,9 @@
     "largeImagesDetected": "Zjištěny velké obrázky",
     "largeImagesPrompt": "Některé obrázky jsou velké a mohou zpomalit aplikaci. Stiskněte OK pro jejich převod na optimální velikost."
   },
-  "FeatureSpeakers": {
-    "title": "Přednášející a poradny",
-    "description": "Správa přednášejících a poradenských slotů; poradenský rozcestník pro účastníky.",
-    "counselingEnabled": "Povolit poradenství",
+  "FeatureCounseling": {
+    "title": "Poradny",
+    "description": "Poradenský rozcestník, oblasti a generátor slotů. Přednášející jsou dostupní vždy.",
     "counselingEventType": "Kód typu poradenského bloku",
     "maxActiveBookings": "Max. počet aktivních rezervací (0 = bez limitu)",
     "registrationStartTime": "Začátek rezervací poraden"
@@ -1671,6 +1670,8 @@
     "topicTitle": "Název oblasti",
     "topicCode": "Kód (nepovinné)",
     "speakersOnEvent": "Přednášející",
+    "selectSpeakers": "Vybrat přednášející",
+    "searchSpeakers": "Hledat podle jména nebo role",
     "counselingSlots": "Poradenské sloty",
     "lecturers": "Přednášející",
     "generateSlots": "Vygenerovat sloty",
