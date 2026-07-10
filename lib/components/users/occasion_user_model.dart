@@ -28,6 +28,7 @@ class OccasionUserModel extends ITrinaRowModel {
   bool? isEditorView = false;
   bool? isEditorOrder = false;
   bool? isEditorOrderView = false;
+  bool? isCleaningCrew = false;
   bool? isManager = false;
   bool? isApprover = false;
   bool? isApproved = false;
@@ -53,6 +54,7 @@ class OccasionUserModel extends ITrinaRowModel {
       this.isEditorView,
       this.isEditorOrder,
       this.isEditorOrderView,
+      this.isCleaningCrew,
       this.isManager,
       this.isApprover,
       this.isApproved,
@@ -80,6 +82,7 @@ class OccasionUserModel extends ITrinaRowModel {
         isEditorView: json[Tb.occasion_users.is_editor_view],
         isEditorOrder: json[Tb.occasion_users.is_editor_order],
         isEditorOrderView: json[Tb.occasion_users.is_editor_order_view],
+        isCleaningCrew: json[Tb.occasion_users.is_cleaning_crew],
         isApprover: json[Tb.occasion_users.is_approver],
         isApproved: json[Tb.occasion_users.is_approved],
         isManager: json[Tb.occasion_users.is_manager],
@@ -101,6 +104,7 @@ class OccasionUserModel extends ITrinaRowModel {
       Tb.occasion_users.is_editor_view: isEditorView ?? false,
       Tb.occasion_users.is_editor_order: isEditorOrder ?? false,
       Tb.occasion_users.is_editor_order_view: isEditorOrderView ?? false,
+      Tb.occasion_users.is_cleaning_crew: isCleaningCrew ?? false,
       Tb.occasion_users.is_approver: isApprover ?? false,
       Tb.occasion_users.is_approved: isApproved ?? false,
       Tb.occasion_users.is_manager: isManager ?? false,
@@ -217,6 +221,7 @@ class OccasionUserModel extends ITrinaRowModel {
       UserColumns.EDITOR_ORDER: TrinaCell(value: isEditorOrder.toString()),
       UserColumns.EDITOR_ORDER_VIEW:
           TrinaCell(value: isEditorOrderView.toString()),
+      UserColumns.CLEANING_CREW: TrinaCell(value: isCleaningCrew.toString()),
       UserColumns.MANAGER: TrinaCell(value: isManager.toString()),
       UserColumns.APPROVED: TrinaCell(value: isApproved.toString()),
       UserColumns.APPROVER: TrinaCell(value: isApprover.toString()),
@@ -306,6 +311,8 @@ class OccasionUserModel extends ITrinaRowModel {
       isEditorOrder: json[UserColumns.EDITOR_ORDER] == "true" ? true : false,
       isEditorOrderView:
           json[UserColumns.EDITOR_ORDER_VIEW] == "true" ? true : false,
+      isCleaningCrew:
+          json[UserColumns.CLEANING_CREW] == "true" ? true : false,
       role: int.tryParse(json[UserColumns.ROLE] ?? ""),
       services: services,
       data: {

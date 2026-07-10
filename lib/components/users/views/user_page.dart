@@ -17,6 +17,8 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/cleaning/cleaning_page.dart';
+import 'package:fstapp/components/cleaning/cleaning_strings.dart';
 import 'package:fstapp/components/app_management/settings_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/components/users/views/login_page.dart';
@@ -349,6 +351,8 @@ class _UserPageState extends State<UserPage> {
                         ?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.services))
                   _buildStaySection(context),
+                if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
+                  _buildCleaningSection(context),
                 const SizedBox(height: 16),
                 Visibility(
                   visible: RightsService.canSeeAdmin(),
@@ -528,6 +532,26 @@ class _UserPageState extends State<UserPage> {
                 InventoryStrings.accommodationNotSpecified,
                 style: const TextStyle(fontSize: 17),
               ),
+      ),
+    );
+  }
+
+  /// Entry point to the Cleaning service page (visible to every participant when
+  /// the feature is enabled — anyone can report; Q7).
+  Widget _buildCleaningSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: ListTile(
+        tileColor: ThemeConfig.qrButtonColor(context),
+        leading: Icon(Icons.cleaning_services,
+            color: Theme.of(context).colorScheme.primary),
+        title: Text(CleaningStrings.pageTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(CleaningStrings.tapToReport),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        onTap: () =>
+            RouterService.navigateOccasion(context, CleaningPage.ROUTE),
       ),
     );
   }

@@ -23,6 +23,9 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/map/map_description_popup.dart';
 import 'package:fstapp/components/map/map_location_pin_helper.dart';
+import 'package:fstapp/components/cleaning/cleaning_status.dart';
+import 'package:fstapp/components/cleaning/db_cleaning.dart';
+import 'package:fstapp/components/cleaning/cleaning_report_flow.dart';
 import 'package:fstapp/components/map/map_marker_with_text.dart';
 import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/components/map/offline_map_style_helper.dart';
@@ -89,6 +92,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   final JSInterop jsInterop = JSInterop();
 
   List<IconModel> _icons = [];
+  // Derived cleaning status per toilet place id (empty unless the cleaning
+  // feature is enabled). Colors the toilet pins for everyone.
+  Map<int, CleaningStatus> _cleaningStatus = {};
   final List<MapMarkerWithText> _markers = [];
   final List<MapMarkerWithText> _selectedMarkers = [];
   static MapMarkerWithText? focusedMarker;
@@ -594,7 +600,20 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
             snap: PopupSnap.markerTop,
             builder: (BuildContext context, fm.Marker marker) {
               if (marker is MapMarkerWithText) {
-                return MapDescriptionPopup(marker, selectedMarker);
+                final isToilet = marker.place.type ==
+                        CleaningStatusHelper.toiletPlaceTypeCode &&
+                    FeatureService.isFeatureEnabled(FeatureConstants.cleaning);
+                return MapDescriptionPopup(
+                  marker,
+                  selectedMarker,
+                  cleaningStatus: isToilet
+                      ? (_cleaningStatus[marker.place.id] ??
+                          CleaningStatus.green)
+                      : null,
+                  onReportCleaning: isToilet
+                      ? () => _reportCleaningForPlace(marker.place)
+                      : null,
+                );
               }
               return const SizedBox.shrink();
             },
@@ -907,6 +926,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     _markers
         .clear(); // Clear again before final population with online/merged data
     await addEventsToPlace(onlineList);
+    await _loadCleaningStatus();
     addPlacesToMap(
         onlineList); // This will use the _isShowingGroupsInEditMode flag correctly
 
@@ -987,6 +1007,44 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     return false; // Default: do not show title.
   }
 
+  /// Loads the derived cleaning status for toilet places (feature-gated).
+  /// Non-fatal: the map still works without colors if the RPC fails.
+  Future<void> _loadCleaningStatus() async {
+    if (!FeatureService.isFeatureEnabled(FeatureConstants.cleaning)) {
+      _cleaningStatus = {};
+      return;
+    }
+    final oc = RightsService.currentOccasionId();
+    if (oc == null) return;
+    try {
+      final statuses = await DbCleaning.getStatus(oc);
+      _cleaningStatus = {for (final s in statuses) s.place: s.status};
+    } catch (_) {
+      // ignore — map remains usable without cleaning colors
+    }
+  }
+
+  /// Status color for a place if it is a toilet and the feature is on, else null.
+  Color? _cleaningPinColorFor(MapPlaceModel place) {
+    if (place.type != CleaningStatusHelper.toiletPlaceTypeCode ||
+        !FeatureService.isFeatureEnabled(FeatureConstants.cleaning)) {
+      return null;
+    }
+    final status = _cleaningStatus[place.id] ?? CleaningStatus.green;
+    return CleaningStatusHelper.color(status);
+  }
+
+  /// Opens the report dialog from a toilet popup and refreshes colors.
+  Future<void> _reportCleaningForPlace(MapPlaceModel place) async {
+    if (place.id == null) return;
+    final changed = await CleaningReportFlow.report(
+      context,
+      placeId: place.id!,
+      placeTitle: place.title,
+    );
+    if (changed && mounted) await loadData();
+  }
+
   void addPlacesToMap(List<PlaceModel> places) {
     var currentFocusedId = focusedMarker?.place.id;
     var editingMarkerId = selectedMarker?.place.id;
@@ -1005,8 +1063,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
     var mappedMarkers = places.map((place) {
       var mapPlace = MapPlaceModel.fromPlaceModel(place);
+      var pinColor = _cleaningPinColorFor(mapPlace);
       var iconWidget = isIconVisible(place)
-          ? MapLocationPinHelper.type2icon(context, mapPlace, _icons)
+          ? MapLocationPinHelper.type2icon(context, mapPlace, _icons,
+              pinColor: pinColor)
           : null;
 
       bool displayTitle = _shouldShowMarkerTitle(mapPlace.id, currentFocusedId,
@@ -1022,6 +1082,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         alignment: Alignment.topCenter,
         editAction: runEditPositionMode,
         showTitle: displayTitle,
+        pinColor: pinColor,
       );
     }).toList();
 

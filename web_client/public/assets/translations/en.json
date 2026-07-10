@@ -564,7 +564,8 @@
     "readOrders": "Read Orders",
     "approver": "Approver",
     "approved": "Approved",
-    "invited": "Invited"
+    "invited": "Invited",
+    "cleaningCrew": "Cleaning crew"
   },
   "OrderHistory": {
     "noHistoryFound": "No history found.",
@@ -1704,5 +1705,34 @@
     "slotFree": "Free",
     "reserved": "Reserved",
     "signUp": "Sign up"
+  },
+  "Cleaning": {
+    "pageTitle": "Cleaning",
+    "noToilets": "There are no toilets here yet.",
+    "tapToReport": "Tap a toilet to report a problem.",
+    "refresh": "Refresh",
+    "showOnMap": "On map",
+    "reportProblem": "Report a problem",
+    "reportDialogTitle": "Report a problem: {toilet}",
+    "noteHint": "Note (optional)",
+    "send": "Send",
+    "cancel": "Cancel",
+    "problemPaper": "Out of toilet paper",
+    "problemHygiene": "Out of hygiene supplies",
+    "problemContamination": "Heavily soiled",
+    "reportSuccess": "The cleaning crew has been called.",
+    "reportDuplicate": "Someone already reported this, the crew knows about it.",
+    "reportRateLimited": "Too many reports. Please try again in a moment.",
+    "reportError": "The report could not be sent.",
+    "statusOk": "OK",
+    "markCleaned": "Cleaned",
+    "cleanedConfirm": "The toilet has been marked as cleaned.",
+    "reportedBy": "Reported by",
+    "reportedAt": "Reported {time}",
+    "anonymous": "Anonymous"
+  },
+  "FeatureCleaning": {
+    "title": "Cleaning service",
+    "description": "Participants report toilet status (paper, hygiene, contamination); the cleaning crew is notified and resolves it."
   }
 }

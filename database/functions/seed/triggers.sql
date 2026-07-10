@@ -89,6 +89,15 @@ BEGIN
     EXECUTE FUNCTION moddatetime(''updated_at'')
   ';
 
+  -- cleaning_reports
+  EXECUTE 'DROP TRIGGER IF EXISTS handle_updated_at ON cleaning_reports';
+  EXECUTE '
+    CREATE TRIGGER handle_updated_at
+    BEFORE UPDATE ON cleaning_reports
+    FOR EACH ROW
+    EXECUTE FUNCTION moddatetime(''updated_at'')
+  ';
+
   -- log_notifications HTTP trigger
   EXECUTE 'DROP TRIGGER IF EXISTS push_log_notifications ON log_notifications';
   EXECUTE format($trg$

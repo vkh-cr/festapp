@@ -11,6 +11,10 @@ class MapMarkerWithText extends Marker {
   final Widget? icon;
   final bool showTitle;
 
+  /// Optional override for the fallback pin color (used by the cleaning feature
+  /// to color toilet pins by status). When null the theme map-pin color is used.
+  final Color? pinColor;
+
   MapMarkerWithText({
     required BuildContext context,
     required super.point,
@@ -24,6 +28,7 @@ class MapMarkerWithText extends Marker {
     this.editAction,
     this.showTitle = false,
     this.oldPoint,
+    this.pinColor,
   }) : super(
           child: showTitle
               ? Stack(
@@ -32,7 +37,9 @@ class MapMarkerWithText extends Marker {
                   children: [
                     icon ??
                         Icon(Icons.location_pin,
-                            size: 36, color: ThemeConfig.mapPinColor(context)),
+                            size: 36,
+                            color: pinColor ??
+                                ThemeConfig.mapPinColor(context)),
                     Positioned(
                       top:
                           0, // Adjust as needed for vertical alignment with the pin
@@ -83,7 +90,8 @@ class MapMarkerWithText extends Marker {
                 )
               : icon ??
                   Icon(Icons.location_pin,
-                      size: 36, color: ThemeConfig.mapPinColor(context)),
+                      size: 36,
+                      color: pinColor ?? ThemeConfig.mapPinColor(context)),
         );
 
   MapMarkerWithText cloneWithNewPoint(BuildContext context, LatLng point) {
@@ -98,6 +106,7 @@ class MapMarkerWithText extends Marker {
       alignment: alignment,
       editAction: editAction,
       showTitle: showTitle,
+      pinColor: pinColor,
     );
   }
 
@@ -113,6 +122,7 @@ class MapMarkerWithText extends Marker {
       alignment: alignment,
       editAction: editAction,
       showTitle: isFocused,
+      pinColor: pinColor,
     );
   }
 }

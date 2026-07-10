@@ -1,0 +1,50 @@
+-- Cleaning service — public toilet status for an occasion (any signed-in user).
+-- Powers the participant tile grid and the coloured map pins. Returns one row
+-- per non-hidden toilet with the derived status (highest open-report severity:
+-- paper < hygiene < contamination; none open -> green) and the last report time.
+-- No notes or reporter names here — those are crew-only (get_cleaning_reports).
+CREATE OR REPLACE FUNCTION get_cleaning_status(oc bigint) RETURNS jsonb
+  LANGUAGE plpgsql
+  STABLE
+  SECURITY DEFINER
+  SET search_path = public, extensions
+AS $$
+DECLARE
+  v_data jsonb;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN jsonb_build_object('code', 401, 'message', 'Sign in is required');
+  END IF;
+
+  SELECT COALESCE(jsonb_agg(t ORDER BY t.title), '[]'::jsonb)
+  INTO v_data
+  FROM (
+    SELECT
+      p.id AS place,
+      p.title AS title,
+      CASE COALESCE(MAX(
+        CASE r.problem_type
+          WHEN 'contamination' THEN 3
+          WHEN 'hygiene'       THEN 2
+          WHEN 'paper'         THEN 1
+          ELSE 0
+        END), 0)
+        WHEN 3 THEN 'contamination'
+        WHEN 2 THEN 'hygiene'
+        WHEN 1 THEN 'paper'
+        ELSE 'green'
+      END AS status,
+      MAX(r.created_at) AS last_reported_at
+    FROM public.places p
+    JOIN public.place_types pt
+      ON pt.occasion = p.occasion AND pt.code = p.type AND pt.code = 'toilet'
+    LEFT JOIN public.cleaning_reports r
+      ON r.place = p.id AND r.resolved_at IS NULL
+    WHERE p.occasion = oc
+      AND p.is_hidden = false
+    GROUP BY p.id, p.title
+  ) t;
+
+  RETURN jsonb_build_object('code', 200, 'data', v_data);
+END;
+$$;

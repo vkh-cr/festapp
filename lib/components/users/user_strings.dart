@@ -29,6 +29,7 @@ class UserStrings {
   static String get readOnly => 'UserColumns.readOnly'.tr();
   static String get editOrders => 'UserColumns.editOrders'.tr();
   static String get readOrders => 'UserColumns.readOrders'.tr();
+  static String get cleaningCrew => 'UserColumns.cleaningCrew'.tr();
   static String get approver => 'UserColumns.approver'.tr();
   static String get approved => 'UserColumns.approved'.tr();
   static String get invited => 'UserColumns.invited'.tr();

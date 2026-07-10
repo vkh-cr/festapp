@@ -7,7 +7,8 @@ import 'package:fstapp/theme_config.dart';
 
 class MapLocationPinHelper {
   static Widget? type2icon(
-      BuildContext context, MapPlaceModel placeType, List<IconModel> source) {
+      BuildContext context, MapPlaceModel placeType, List<IconModel> source,
+      {Color? pinColor}) {
     SvgPicture? fill;
 
     var iconData = source.firstWhereOrNull((i) => i.id == placeType.icon)?.data;
@@ -23,7 +24,8 @@ class MapLocationPinHelper {
           iconTop: 12,
           iconLeft: 19,
           iconWidth: 19,
-          iconHeight: 19);
+          iconHeight: 19,
+          pinColor: pinColor);
     }
 
     return null;
@@ -35,11 +37,12 @@ class MapLocationPinHelper {
       required double iconTop,
       required double iconLeft,
       required double iconWidth,
-      required double iconHeight}) {
+      required double iconHeight,
+      Color? pinColor}) {
     return Stack(
       children: [
         Icon(Icons.location_pin,
-            size: 58, color: ThemeConfig.mapPinColor(context)),
+            size: 58, color: pinColor ?? ThemeConfig.mapPinColor(context)),
         Positioned(
           top: top,
           left: left,

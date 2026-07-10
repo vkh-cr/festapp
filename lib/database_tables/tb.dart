@@ -104,6 +104,7 @@ class OccasionUsersTb {
   String get is_editor_view => "is_editor_view";
   String get is_editor_order => "is_editor_order";
   String get is_editor_order_view => "is_editor_order_view";
+  String get is_cleaning_crew => "is_cleaning_crew";
   String get is_editor => "is_editor";
   String get is_manager => "is_manager";
   String get is_approved => "is_approved";

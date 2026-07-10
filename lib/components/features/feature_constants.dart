@@ -32,6 +32,9 @@ class FeatureConstants {
   // "counseling" feature gates only the counseling flow (areas, slots,
   // rozcestník, booking window/limit). Replaces the retired "speakers" feature.
   static const String counseling = "counseling";
+  // Cleaning service (úklidová služba): participants report toilet status,
+  // the cleaning crew is notified and resolves reports. SimpleFeature (on/off).
+  static const String cleaning = "cleaning";
 
   // Per-event flag (stored in events.data) toggling feedback for one event.
   static const String feedbackEnabled = "feedback_enabled";

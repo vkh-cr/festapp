@@ -36,6 +36,7 @@ class FeatureService {
     FeatureConstants.globalSearch,
     FeatureConstants.eventFeedback,
     FeatureConstants.counseling,
+    FeatureConstants.cleaning,
   ];
 
   /// Checks whether the feature with [featureCode] is enabled.
@@ -93,6 +94,7 @@ class FeatureService {
         SimpleFeature(code: FeatureConstants.globalSearch, isEnabled: false),
         SimpleFeature(code: FeatureConstants.eventFeedback, isEnabled: false),
         CounselingFeature(code: FeatureConstants.counseling, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.cleaning, isEnabled: false),
       ],
     ];
   }

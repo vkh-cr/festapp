@@ -1,0 +1,293 @@
+-- Cleaning service (úklidová služba) regression tests.
+-- Covers report_cleaning_issue (happy path + crew notification, dedup, rate
+-- limit, non-toilet / foreign-occasion errors), get_cleaning_status (derived
+-- severity), get_cleaning_reports / resolve_cleaning_place (crew-only), and the
+-- get_is_cleaning_crew_on_occasion helper (flag vs editor).
+-- Auto-rollback runner; impersonation via request.jwt.claim.sub.
+
+-- ---------------------------------------------------------------------------
+-- Fixture: one occasion with the cleaning feature enabled, a toilet place_type,
+-- two toilets (WC 01 / WC 02) + a non-toilet place, and users:
+--   reporter (plain attendee), crew + crew2 (is_cleaning_crew), editor,
+--   outsider (attendee, no crew). Plus a second occasion WITHOUT the feature.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc        bigint;
+    v_oc2       bigint;
+    v_wc1       bigint;
+    v_wc2       bigint;
+    v_room      bigint;
+    v_wc_other  bigint;
+BEGIN
+    PERFORM create_user_for_test('cln_reporter', 'cln_reporter@test.local');
+    PERFORM create_user_for_test('cln_crew',     'cln_crew@test.local');
+    PERFORM create_user_for_test('cln_crew2',    'cln_crew2@test.local');
+    PERFORM create_user_for_test('cln_editor',   'cln_editor@test.local');
+    PERFORM create_user_for_test('cln_outsider', 'cln_outsider@test.local');
+    PERFORM create_user_for_test('cln_rl',       'cln_rl@test.local');
+
+    INSERT INTO public.occasions (title, link, start_time, end_time, is_open, features)
+    VALUES ('Cleaning Test Occasion', 'cln-' || gen_random_uuid(),
+            now(), now() + interval '30 days', true,
+            '[{"code":"cleaning","is_enabled":true}]'::jsonb)
+    RETURNING id INTO v_oc;
+
+    -- Second occasion: cleaning feature NOT enabled.
+    INSERT INTO public.occasions (title, link, start_time, end_time, is_open, features)
+    VALUES ('Cleaning Test Occasion 2', 'cln2-' || gen_random_uuid(),
+            now(), now() + interval '30 days', true, '[]'::jsonb)
+    RETURNING id INTO v_oc2;
+
+    INSERT INTO public.occasion_users (occasion, "user", is_editor, is_editor_view, is_approved)
+    VALUES (v_oc, get_user_id('cln_editor'), true, true, true);
+    INSERT INTO public.occasion_users (occasion, "user", is_cleaning_crew, is_approved)
+    VALUES (v_oc, get_user_id('cln_crew'), true, true);
+    INSERT INTO public.occasion_users (occasion, "user", is_cleaning_crew, is_approved)
+    VALUES (v_oc, get_user_id('cln_crew2'), true, true);
+    INSERT INTO public.occasion_users (occasion, "user", is_approved)
+    VALUES (v_oc, get_user_id('cln_reporter'), true);
+    INSERT INTO public.occasion_users (occasion, "user", is_approved)
+    VALUES (v_oc, get_user_id('cln_outsider'), true);
+    INSERT INTO public.occasion_users (occasion, "user", is_approved)
+    VALUES (v_oc, get_user_id('cln_rl'), true);
+
+    -- Toilet place_type on both occasions.
+    INSERT INTO public.place_types (occasion, code, title) VALUES (v_oc, 'toilet', 'WC');
+    INSERT INTO public.place_types (occasion, code, title) VALUES (v_oc2, 'toilet', 'WC');
+
+    INSERT INTO public.places (title, occasion, type, coordinates)
+    VALUES ('WC 01', v_oc, 'toilet', '{"latLng":{"lat":0,"lng":0}}'::jsonb) RETURNING id INTO v_wc1;
+    INSERT INTO public.places (title, occasion, type, coordinates)
+    VALUES ('WC 02', v_oc, 'toilet', '{"latLng":{"lat":0,"lng":0}}'::jsonb) RETURNING id INTO v_wc2;
+    INSERT INTO public.places (title, occasion, type, coordinates)
+    VALUES ('Room A', v_oc, NULL, '{"latLng":{"lat":0,"lng":0}}'::jsonb) RETURNING id INTO v_room;
+    INSERT INTO public.places (title, occasion, type, coordinates)
+    VALUES ('WC 01', v_oc2, 'toilet', '{"latLng":{"lat":0,"lng":0}}'::jsonb) RETURNING id INTO v_wc_other;
+
+    CREATE TEMP TABLE IF NOT EXISTS _cln (k text PRIMARY KEY, v bigint);
+    INSERT INTO _cln VALUES
+        ('occasion', v_oc), ('occasion2', v_oc2),
+        ('wc1', v_wc1), ('wc2', v_wc2), ('room', v_room), ('wc_other', v_wc_other);
+
+    RAISE NOTICE 'fixture built: occasion=%, wc1=%, wc2=%', v_oc, v_wc1, v_wc2;
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 1. Happy path: a report is created AND a crew notification is logged with
+--    data.path='cleaning' and "to" listing both crew members.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc   bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_wc1  bigint := (SELECT v FROM _cln WHERE k = 'wc1');
+    v_res  jsonb;
+    v_note jsonb;
+    v_open int;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
+
+    v_res := public.report_cleaning_issue(v_wc1, 'paper', 'Doslel papir');
+    PERFORM assert_eq(v_res->>'code', '200', 'report happy path → 200');
+    PERFORM assert_eq(v_res->'data'->>'duplicate', 'false', 'first report is not a duplicate');
+
+    SELECT count(*) INTO v_open FROM public.cleaning_reports
+     WHERE place = v_wc1 AND problem_type = 'paper' AND resolved_at IS NULL;
+    PERFORM assert_eq(v_open::text, '1', 'exactly one open paper report on WC 01');
+
+    SELECT data INTO v_note FROM public.log_notifications
+     WHERE occasion = v_oc ORDER BY created_at DESC LIMIT 1;
+    PERFORM assert_not_null(v_note::text, 'a notification row was inserted');
+    PERFORM assert_eq(v_note->>'path', 'cleaning', 'notification data.path = cleaning');
+
+    PERFORM assert_true(
+      (SELECT "to" ? get_user_id('cln_crew')::text  FROM public.log_notifications WHERE occasion = v_oc ORDER BY created_at DESC LIMIT 1),
+      'notification addressed to crew');
+    PERFORM assert_true(
+      (SELECT "to" ? get_user_id('cln_crew2')::text FROM public.log_notifications WHERE occasion = v_oc ORDER BY created_at DESC LIMIT 1),
+      'notification addressed to crew2');
+
+    RAISE NOTICE 'test 1 (happy path + notification) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 2. Dedup: a second identical report inserts nothing, sends no new
+--    notification, and returns duplicate=true. The dup note is preserved.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc    bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_wc1   bigint := (SELECT v FROM _cln WHERE k = 'wc1');
+    v_res   jsonb;
+    v_reports_before int;
+    v_reports_after  int;
+    v_notif_before int;
+    v_notif_after  int;
+    v_extra jsonb;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
+
+    SELECT count(*) INTO v_reports_before FROM public.cleaning_reports WHERE occasion = v_oc;
+    SELECT count(*) INTO v_notif_before   FROM public.log_notifications WHERE occasion = v_oc;
+
+    v_res := public.report_cleaning_issue(v_wc1, 'paper', 'Fakt tam neni papir');
+    PERFORM assert_eq(v_res->>'code', '200', 'dedup report → 200');
+    PERFORM assert_eq(v_res->'data'->>'duplicate', 'true', 'second identical report is a duplicate');
+
+    SELECT count(*) INTO v_reports_after FROM public.cleaning_reports WHERE occasion = v_oc;
+    SELECT count(*) INTO v_notif_after   FROM public.log_notifications WHERE occasion = v_oc;
+    PERFORM assert_eq(v_reports_after::text, v_reports_before::text, 'dedup inserts no new report');
+    PERFORM assert_eq(v_notif_after::text,   v_notif_before::text,   'dedup sends no new notification');
+
+    SELECT data->'extra_notes' INTO v_extra FROM public.cleaning_reports
+     WHERE place = v_wc1 AND problem_type = 'paper' AND resolved_at IS NULL;
+    PERFORM assert_true(v_extra @> '["Fakt tam neni papir"]'::jsonb, 'dup note appended to existing report');
+
+    RAISE NOTICE 'test 2 (dedup) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 3. Status derives the highest open severity; other toilets stay green.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc   bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_wc1  bigint := (SELECT v FROM _cln WHERE k = 'wc1');
+    v_wc2  bigint := (SELECT v FROM _cln WHERE k = 'wc2');
+    v_res  jsonb;
+    v_status jsonb;
+    v_s_wc1 text;
+    v_s_wc2 text;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
+
+    -- WC 01 already has an open paper report; add hygiene then contamination.
+    PERFORM public.report_cleaning_issue(v_wc1, 'hygiene', NULL);
+    PERFORM public.report_cleaning_issue(v_wc1, 'contamination', NULL);
+
+    v_res := public.get_cleaning_status(v_oc);
+    PERFORM assert_eq(v_res->>'code', '200', 'get_cleaning_status → 200');
+    v_status := v_res->'data';
+
+    SELECT elem->>'status' INTO v_s_wc1
+      FROM jsonb_array_elements(v_status) elem WHERE (elem->>'place')::bigint = v_wc1;
+    SELECT elem->>'status' INTO v_s_wc2
+      FROM jsonb_array_elements(v_status) elem WHERE (elem->>'place')::bigint = v_wc2;
+
+    PERFORM assert_eq(v_s_wc1, 'contamination', 'WC 01 status = highest severity (contamination)');
+    PERFORM assert_eq(v_s_wc2, 'green', 'WC 02 with no reports = green');
+
+    RAISE NOTICE 'test 3 (status severity) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 4. Report on a non-toilet place → 400; report on a place whose occasion has
+--    the feature disabled (foreign occasion) → 404.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_room     bigint := (SELECT v FROM _cln WHERE k = 'room');
+    v_wc_other bigint := (SELECT v FROM _cln WHERE k = 'wc_other');
+    v_res jsonb;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
+
+    v_res := public.report_cleaning_issue(v_room, 'paper', NULL);
+    PERFORM assert_eq(v_res->>'code', '400', 'report on non-toilet → 400');
+
+    v_res := public.report_cleaning_issue(v_wc_other, 'paper', NULL);
+    PERFORM assert_eq(v_res->>'code', '404', 'report on feature-disabled occasion → 404');
+
+    v_res := public.report_cleaning_issue(v_wc_other, 'nonsense', NULL);
+    PERFORM assert_eq(v_res->>'code', '400', 'invalid problem_type → 400');
+
+    RAISE NOTICE 'test 4 (validation errors) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 5. get_is_cleaning_crew_on_occasion: crew flag → true, editor → true,
+--    plain attendee → false. get_cleaning_reports is crew-only.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_res jsonb;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_crew')::text, true);
+    PERFORM assert_true(public.get_is_cleaning_crew_on_occasion(v_oc), 'crew flag → crew');
+
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_editor')::text, true);
+    PERFORM assert_true(public.get_is_cleaning_crew_on_occasion(v_oc), 'editor → crew (implicit)');
+
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_outsider')::text, true);
+    PERFORM assert_true(NOT public.get_is_cleaning_crew_on_occasion(v_oc), 'plain attendee → not crew');
+
+    -- non-crew cannot read detailed reports
+    v_res := public.get_cleaning_reports(v_oc);
+    PERFORM assert_eq(v_res->>'code', '403', 'get_cleaning_reports as non-crew → 403');
+
+    -- crew can, and sees the open reports with notes
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_crew')::text, true);
+    v_res := public.get_cleaning_reports(v_oc);
+    PERFORM assert_eq(v_res->>'code', '200', 'get_cleaning_reports as crew → 200');
+    PERFORM assert_true(jsonb_array_length(v_res->'data') >= 1, 'crew sees open reports');
+
+    RAISE NOTICE 'test 5 (crew permission helper) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 6. Resolve: non-crew → 403; crew resolves the whole place → all open reports
+--    closed and the toilet goes back to green.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc   bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_wc1  bigint := (SELECT v FROM _cln WHERE k = 'wc1');
+    v_res  jsonb;
+    v_open int;
+    v_s_wc1 text;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
+    v_res := public.resolve_cleaning_place(v_wc1);
+    PERFORM assert_eq(v_res->>'code', '403', 'resolve as non-crew → 403');
+
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_crew')::text, true);
+    v_res := public.resolve_cleaning_place(v_wc1);
+    PERFORM assert_eq(v_res->>'code', '200', 'resolve as crew → 200');
+    PERFORM assert_true((v_res->'data'->>'resolved')::int >= 1, 'resolve closed at least one report');
+
+    SELECT count(*) INTO v_open FROM public.cleaning_reports
+     WHERE place = v_wc1 AND resolved_at IS NULL;
+    PERFORM assert_eq(v_open::text, '0', 'no open reports remain on WC 01');
+
+    SELECT elem->>'status' INTO v_s_wc1
+      FROM jsonb_array_elements(public.get_cleaning_status(v_oc)->'data') elem
+     WHERE (elem->>'place')::bigint = v_wc1;
+    PERFORM assert_eq(v_s_wc1, 'green', 'resolved toilet is green again');
+
+    RAISE NOTICE 'test 6 (resolve) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 7. Rate limit: the 6th report from one user within 15 minutes → 429.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_wc1 bigint := (SELECT v FROM _cln WHERE k = 'wc1');
+    v_wc2 bigint := (SELECT v FROM _cln WHERE k = 'wc2');
+    v_res jsonb;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_rl')::text, true);
+
+    -- 5 distinct (place, type) reports succeed (WC 01 was just resolved → open again).
+    PERFORM assert_eq((public.report_cleaning_issue(v_wc1, 'paper', NULL))->>'code',         '200', 'rl #1 → 200');
+    PERFORM assert_eq((public.report_cleaning_issue(v_wc1, 'hygiene', NULL))->>'code',       '200', 'rl #2 → 200');
+    PERFORM assert_eq((public.report_cleaning_issue(v_wc1, 'contamination', NULL))->>'code', '200', 'rl #3 → 200');
+    PERFORM assert_eq((public.report_cleaning_issue(v_wc2, 'paper', NULL))->>'code',         '200', 'rl #4 → 200');
+    PERFORM assert_eq((public.report_cleaning_issue(v_wc2, 'hygiene', NULL))->>'code',       '200', 'rl #5 → 200');
+
+    v_res := public.report_cleaning_issue(v_wc2, 'contamination', NULL);
+    PERFORM assert_eq(v_res->>'code', '429', 'rl #6 → 429 (rate limited)');
+
+    RAISE NOTICE 'test 7 (rate limit) passed';
+END $$ LANGUAGE plpgsql;

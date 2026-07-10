@@ -3,6 +3,7 @@ import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/components/search/search_strings.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_strings.dart';
 import 'package:fstapp/components/speakers/speakers_strings.dart';
+import 'package:fstapp/components/cleaning/cleaning_strings.dart';
 import 'feature_constants.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'schedule_feature.dart';
@@ -28,6 +29,10 @@ class FeatureMetadata {
         FeatureConstants.counseling: {
           'title': SpeakersStrings.counselingFeatureTitle,
           'description': SpeakersStrings.counselingFeatureDescription,
+        },
+        FeatureConstants.cleaning: {
+          'title': CleaningStrings.featureTitle,
+          'description': CleaningStrings.featureDescription,
         },
         FeatureConstants.form: {
           'title': FeaturesStrings.formTitle,

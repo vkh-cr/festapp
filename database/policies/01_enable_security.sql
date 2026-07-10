@@ -76,3 +76,5 @@ ALTER TABLE public.speakers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.speaker_topics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.speaker_topic_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.event_speakers ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE public.cleaning_reports ENABLE ROW LEVEL SECURITY; -- writes via SECURITY DEFINER RPCs; direct SELECT for editors only

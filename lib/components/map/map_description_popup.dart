@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/cleaning/cleaning_status.dart';
+import 'package:fstapp/components/cleaning/cleaning_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/map/map_marker_with_text.dart';
 import 'package:fstapp/components/map/map_strings.dart';
@@ -8,7 +10,18 @@ class MapDescriptionPopup extends StatefulWidget {
   final MapMarkerWithText marker;
   final MapMarkerWithText? selectedMarker;
 
-  const MapDescriptionPopup(this.marker, this.selectedMarker, {super.key});
+  /// For toilet places with the cleaning feature on: the derived status (drives
+  /// a colored chip) and the "report a problem" action. Null for other places.
+  final CleaningStatus? cleaningStatus;
+  final VoidCallback? onReportCleaning;
+
+  const MapDescriptionPopup(
+    this.marker,
+    this.selectedMarker, {
+    this.cleaningStatus,
+    this.onReportCleaning,
+    super.key,
+  });
 
   @override
   State<StatefulWidget> createState() => _MapDescriptionPopupState();
@@ -44,6 +57,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
               style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
+            if (widget.cleaningStatus != null) _buildCleaningSection(context),
             Visibility(
                 visible: RightsService.isEditor() ||
                     (RightsService.isGroupAdmin() &&
@@ -63,6 +77,57 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
         ),
       ),
     );
+  }
+
+  Widget _buildCleaningSection(BuildContext context) {
+    final status = widget.cleaningStatus!;
+    final color = CleaningStatusHelper.color(status);
+    final isOk = status == CleaningStatus.green;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                isOk
+                    ? CleaningStrings.statusOk
+                    : CleaningStrings.problemLabel(_statusToType(status)),
+                style: TextStyle(color: color, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          if (widget.onReportCleaning != null)
+            TextButton.icon(
+              icon: const Icon(Icons.report_problem_outlined),
+              onPressed: widget.onReportCleaning,
+              label: Text(CleaningStrings.reportProblem),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _statusToType(CleaningStatus status) {
+    switch (status) {
+      case CleaningStatus.paper:
+        return CleaningStatusHelper.codePaper;
+      case CleaningStatus.hygiene:
+        return CleaningStatusHelper.codeHygiene;
+      case CleaningStatus.contamination:
+        return CleaningStatusHelper.codeContamination;
+      case CleaningStatus.green:
+        return CleaningStatusHelper.codeGreen;
+    }
   }
 
   void changePositionPressed() => widget.marker.editAction!(widget.marker);

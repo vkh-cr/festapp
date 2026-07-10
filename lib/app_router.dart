@@ -22,6 +22,7 @@ import 'package:fstapp/components/news/news_form_page.dart';
 import 'package:fstapp/components/news/news_page.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
 import 'package:fstapp/components/speakers/counseling_page.dart';
+import 'package:fstapp/components/cleaning/cleaning_page.dart';
 import 'package:fstapp/components/users/views/forgot_password_page.dart';
 import 'package:fstapp/components/scan/scan_page.dart';
 import 'package:fstapp/components/app_management/settings_page.dart';
@@ -116,6 +117,15 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
             page: CounselingRoute.page,
             path: "/:$linkFormatted/${CounselingPage.ROUTE}"),
+        // Cleaning page: top-level occasion route (own Scaffold like Counseling)
+        // with an optional `:id` self-child so `cleaning/:placeId` deep-links
+        // straight into the report dialog (same idiom as EventEditPage).
+        AutoRoute(
+            page: CleaningRoute.page,
+            path: "/:$linkFormatted/${CleaningPage.ROUTE}",
+            children: [
+              AutoRoute(path: ':id', page: CleaningRoute.page),
+            ]),
         AutoRoute(
             page: TimetableRoute.page,
             path: "/:$linkFormatted/${TimetablePage.ROUTE}"),

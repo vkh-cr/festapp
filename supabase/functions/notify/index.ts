@@ -57,13 +57,20 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Optional deep-link target path within the occasion (e.g. "cleaning").
+  // Falls back to "news" so existing notifications are unaffected.
+  const targetPath =
+    (record.data && typeof record.data.path === 'string' && record.data.path)
+      ? record.data.path
+      : 'news';
+
   // Construct payload for OneSignal notification
   let payload: Record<string, any> = {};
 
   if (record.to) {
     payload = {
       app_id: onesignalAppId,
-      web_url: `${defaultUrl}/#/${currentLink.data.link}/news`,
+      web_url: `${defaultUrl}/#/${currentLink.data.link}/${targetPath}`,
       include_aliases: { "external_id": record.to },
       target_channel: "push",
       headings: { en: record.heading },

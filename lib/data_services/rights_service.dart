@@ -160,6 +160,16 @@ class RightsService {
     return isEditorOrder() || isAdmin() || isUnitEditor();
   }
 
+  /// Cleaning crew rights on the current occasion: the per-occasion
+  /// is_cleaning_crew flag, or editor/admin (who see everything implicitly).
+  /// Mirrors get_is_cleaning_crew_on_occasion on the backend.
+  static bool isCleaningCrew() {
+    return (occasionLinkModelNotifier.value?.occasionUser?.isCleaningCrew ??
+            false) ||
+        isEditor() ||
+        isAdmin();
+  }
+
   static bool canSeeUnitUsers() {
     return isUnitEditor() || isUnitManager() || isAdmin();
   }

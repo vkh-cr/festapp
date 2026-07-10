@@ -551,6 +551,19 @@ TO authenticated
 USING (get_is_editor_view_on_occasion(occasion));
 
 ----------------------------------------------------------------
+-- public.cleaning_reports
+--   Writes go exclusively through SECURITY DEFINER RPCs
+--   (report_cleaning_issue / resolve_cleaning_place); the cleaning crew
+--   reads via get_cleaning_reports. Direct SELECT is limited to editors.
+----------------------------------------------------------------
+
+DROP POLICY IF EXISTS "Enable select for editors" ON public.cleaning_reports;
+CREATE POLICY "Enable select for editors" ON public.cleaning_reports
+AS PERMISSIVE FOR SELECT
+TO authenticated
+USING (get_is_editor_view_on_occasion(occasion));
+
+----------------------------------------------------------------
 -- public.role_info
 ----------------------------------------------------------------
 

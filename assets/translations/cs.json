@@ -566,7 +566,8 @@
     "readOrders": "Čtení objednávky",
     "approver": "Schvalovatel",
     "approved": "Schváleno",
-    "invited": "Pozván"
+    "invited": "Pozván",
+    "cleaningCrew": "Úklidová služba"
   },
   "OrderHistory": {
     "noHistoryFound": "Nebyla nalezena žádná historie.",
@@ -1706,5 +1707,34 @@
     "slotFree": "Volno",
     "reserved": "Rezervováno",
     "signUp": "Přihlásit se"
+  },
+  "Cleaning": {
+    "pageTitle": "Úklid",
+    "noToilets": "Zatím tu nejsou žádné záchody.",
+    "tapToReport": "Klepnutím na záchod nahlásíš problém.",
+    "refresh": "Obnovit",
+    "showOnMap": "Na mapě",
+    "reportProblem": "Nahlásit problém",
+    "reportDialogTitle": "Nahlásit problém: {toilet}",
+    "noteHint": "Poznámka (nepovinné)",
+    "send": "Odeslat",
+    "cancel": "Zrušit",
+    "problemPaper": "Nedostatek toaletního papíru",
+    "problemHygiene": "Nedostatek hygienických potřeb",
+    "problemContamination": "Totální znečištění",
+    "reportSuccess": "Výjezdová jednotka byla přivolána.",
+    "reportDuplicate": "Tenhle problém už někdo nahlásil, úklid o něm ví.",
+    "reportRateLimited": "Příliš mnoho hlášení. Zkus to prosím za chvíli.",
+    "reportError": "Hlášení se nepodařilo odeslat.",
+    "statusOk": "V pořádku",
+    "markCleaned": "Uklizeno",
+    "cleanedConfirm": "Záchod byl označen jako uklizený.",
+    "reportedBy": "Nahlásil(a)",
+    "reportedAt": "Nahlášeno {time}",
+    "anonymous": "Anonym"
+  },
+  "FeatureCleaning": {
+    "title": "Úklidová služba",
+    "description": "Účastníci hlásí stav záchodů (papír, hygiena, znečištění), úklidová četa dostane upozornění a stav vyřeší."
   }
 }
