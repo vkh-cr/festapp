@@ -485,7 +485,17 @@ class DbEvents {
   }
 
   static Future<void> deleteEvent(EventModel data) async {
-    await _supabase.from(Tb.events.table).delete().eq(Tb.events.id, data.id!);
+    // Editor-guarded server-side delete that unbinds sign-ups and other child
+    // rows (event_users, event_users_saved, exclusive/roles/groups) atomically,
+    // so events with attendees — including counseling slots — delete cleanly.
+    final res =
+        await _supabase.rpc('delete_event', params: {'p_event': data.id});
+    final code = (res is Map && res['code'] != null)
+        ? (res['code'] as num).toInt()
+        : null;
+    if (code != 200) {
+      throw Exception('delete_event failed with code $code');
+    }
   }
 
   static Future<List<ExclusiveGroupModel>> getAllExclusiveGroups() async {

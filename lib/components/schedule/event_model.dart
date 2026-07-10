@@ -388,12 +388,10 @@ class EventModel extends ITrinaRowModel {
 
   @override
   Future<void> deleteMethod(BuildContext context) async {
-    var participants = await DbEvents.getParticipantsPerEvent(id!);
-    for (var p in participants) {
-      await DbEvents.signOutFromEvent(null, id!, p);
-    }
-    await DbEvents.removeEventFromSaved(this);
-    await DbEvents.removeEventFromEventGroups(this);
+    // delete_event unbinds sign-ups, saved rows and group/exclusive/role links
+    // server-side in one editor-guarded transaction, so we no longer sign out
+    // each participant from the client (which also couldn't touch other users'
+    // rows under RLS). Works for ordinary events and counseling slots alike.
     await DbEvents.deleteEvent(this);
   }
 
