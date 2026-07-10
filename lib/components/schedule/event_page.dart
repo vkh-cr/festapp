@@ -36,6 +36,7 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/users/companion/companion_dialog.dart';
 import 'package:fstapp/components/html/html_view.dart';
+import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/widgets/navigate_back_button.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/images/zoomable_image/zoomable_image.dart';
@@ -98,6 +99,21 @@ class _EventPageState extends State<EventPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     loadData(widget.id!);
+  }
+
+  @override
+  void didUpdateWidget(covariant EventPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Same-route navigation (event/A → event/B, e.g. the counseling-slot →
+    // entry-event redirect) reuses this State; didChangeDependencies does NOT
+    // fire again, so reload explicitly when the id changes.
+    if (oldWidget.id != widget.id && widget.id != null) {
+      setState(() {
+        isLoadingEvent = true;
+        _event = null;
+      });
+      loadData(widget.id!);
+    }
   }
 
   @override
@@ -1051,32 +1067,9 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Widget _actionButton(IconData? icon, String label, VoidCallback onPressed) {
-    final Color fg = ThemeConfig.blackColor(context);
-    return Material(
-      color: ThemeConfig.bigButtonColor(context),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 20, color: fg),
-                const SizedBox(width: 8),
-              ],
-              Text(label,
-                  style: TextStyle(
-                      color: fg, fontWeight: FontWeight.bold, fontSize: 15)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _actionButton(IconData? icon, String label, VoidCallback onPressed) =>
+      ButtonsHelper.actionButton(
+          context: context, icon: icon, label: label, onPressed: onPressed);
 
   /// The "Speakers" (lecturers) section: a centered profile card per attached
   /// speaker — large circular photo, name and subtitle centered, HTML bio
@@ -1225,10 +1218,10 @@ class _EventPageState extends State<EventPage> {
     // New event → its header content differs, so remeasure from scratch.
     _measuredExpandedHeight = null;
     await loadOfflineData(widget.id!);
-    if (_redirectIfCounselingSlot()) return;
+    if (await _redirectIfCounselingSlot()) return;
 
     await loadEvent(id);
-    if (_redirectIfCounselingSlot()) return;
+    if (await _redirectIfCounselingSlot()) return;
     if (mounted) {
       // isLoadingEvent should be set after loadEvent completes
       setState(() {
@@ -1255,7 +1248,7 @@ class _EventPageState extends State<EventPage> {
   ///
   /// The rozcestník entry event itself is exempt — it *hosts* the picker
   /// inline above its description, so it must render its own page.
-  bool _redirectIfCounselingSlot() {
+  Future<bool> _redirectIfCounselingSlot() async {
     final event = _event;
     if (event == null) return false;
     // The rozcestník entry event hosts the picker inline — never bounce it.
@@ -1271,11 +1264,41 @@ class _EventPageState extends State<EventPage> {
     if (!event.isCounselingSlot && !isCounselingTyped) {
       return false;
     }
+    // Slots are not linked to the rozcestník entry via event_groups, so find
+    // the entry event by DAY: the rozcestník entry (counselingEntry flag) on
+    // the same occasion-day as the slot. Falls back to any entry, and only
+    // then to the standalone counseling page (normally unreachable).
+    int? entryId;
+    try {
+      // Offline events already carry the counseling_entry flag and are
+      // instant; hit the network only when no entry is cached (fresh
+      // browser / not yet synced).
+      var all = await OfflineDataService.getAllEvents();
+      if (!all.any((e) => e.isCounselingEntry)) {
+        final occasionId = RightsService.currentOccasionId();
+        all = occasionId != null
+            ? await DbEvents.getAllEvents(occasionId, false)
+            : const [];
+      }
+      final entries = all.where((e) => e.isCounselingEntry).toList();
+      final slotDay = event.startTime.toOccasionTime();
+      final sameDay = entries.firstWhereOrNull((e) {
+        final d = e.startTime.toOccasionTime();
+        return d.year == slotDay.year &&
+            d.month == slotDay.month &&
+            d.day == slotDay.day;
+      });
+      entryId = (sameDay ?? entries.firstOrNull)?.id;
+    } catch (_) {
+      // Offline / RPC failure → the standalone page fallback below.
+    }
     if (mounted) {
-      final parents = event.parentEventIds;
-      if (parents != null && parents.isNotEmpty) {
-        RouterService.pushReplacementOccasion(
-            context, "${EventPage.ROUTE}/${parents.first}");
+      if (entryId != null) {
+        // Replace within the schedule's nested stack router (typed route).
+        // An absolute replacePath would resolve the scope at the ROOT router,
+        // pop the whole occasion shell and die on the '*' redirect — the URL
+        // then stays on the slot (or falls back to "/").
+        context.router.replace(EventRoute(id: entryId));
       } else {
         RouterService.pushReplacementOccasion(context, CounselingPage.ROUTE);
       }

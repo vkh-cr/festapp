@@ -49,6 +49,7 @@ class SpeakerEditorDialog extends StatefulWidget {
 
 class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
   late final TextEditingController _nameController;
+  late final TextEditingController _subtitleController;
   late final TextEditingController _orderController;
 
   String? _image;
@@ -69,6 +70,7 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
     super.initState();
     final s = widget.speaker;
     _nameController = TextEditingController(text: s.title ?? '');
+    _subtitleController = TextEditingController(text: s.subtitle ?? '');
     _orderController = TextEditingController(text: s.order.toString());
     _image = s.image;
     _description = s.description;
@@ -82,6 +84,7 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
   @override
   void dispose() {
     _nameController.dispose();
+    _subtitleController.dispose();
     _orderController.dispose();
     super.dispose();
   }
@@ -117,8 +120,10 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
       return;
     }
 
+    final subtitle = _subtitleController.text.trim();
     final model = widget.speaker
       ..title = name
+      ..subtitle = subtitle.isEmpty ? null : subtitle
       ..description = _description
       ..image = _image
       ..order = int.tryParse(_orderController.text.trim()) ?? 0
@@ -277,6 +282,12 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(labelText: SpeakersStrings.name),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _subtitleController,
+                decoration:
+                    InputDecoration(labelText: SpeakersStrings.roleSubtitle),
               ),
               const SizedBox(height: 16),
               Text(SpeakersStrings.avatar, style: theme.textTheme.labelLarge),
@@ -445,17 +456,18 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
                   slot.occupied >= slot.maxParticipants!;
               final chipColor = full
                   ? ThemeConfig.redColor(context)
-                  : ThemeConfig.appBarColor();
+                  : ThemeConfig.indicatorColor(context);
+              final onChip = ThemeConfig.textColorForBackground(chipColor);
               return InputChip(
                 label: Text(label),
-                labelStyle: const TextStyle(
-                  color: Colors.white,
+                labelStyle: TextStyle(
+                  color: onChip,
                   fontWeight: FontWeight.w600,
                 ),
                 onPressed: () => _editSlot(slot),
                 onDeleted: () => _deleteSlot(slot),
                 deleteIcon: const Icon(Icons.close, size: 18),
-                deleteIconColor: Colors.white70,
+                deleteIconColor: onChip.withValues(alpha: 0.7),
                 deleteButtonTooltipMessage: CommonStrings.delete,
                 backgroundColor: chipColor,
                 side: BorderSide(color: chipColor),

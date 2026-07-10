@@ -20,6 +20,7 @@ import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/buttons_helper.dart';
 
 /// The counseling rozcestník flow, as an inline (non-scrolling) Column so it can
 /// live directly on the entry event page (above the description) as well as on a
@@ -331,20 +332,13 @@ class _CounselingPickerState extends State<CounselingPicker> {
                   placeId: e.place?.id,
                   placeTitle: e.place?.title,
                   timeText: e.durationString(context),
-                  footerBuilder: (ctx) => SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
+                  footerBuilder: (ctx) => Center(
+                    child: TextButton(
                       onPressed: () {
                         Navigator.of(ctx).pop();
                         _cancelReservation(e.id!);
                       },
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        textStyle: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      icon: const Icon(Icons.close, size: 20),
-                      label: Text(SpeakersStrings.cancelReservation),
+                      child: Text(SpeakersStrings.cancelReservation),
                     ),
                   ),
                 ),
@@ -798,20 +792,15 @@ class _CounselorSlotTile extends StatelessWidget {
   Widget _dialogAction(BuildContext ctx) {
     final s = slot;
     if (s.isSignedIn) {
-      return SizedBox(
-        width: double.infinity,
-        child: OutlinedButton.icon(
+      // The anti-action stays quiet — a plain text button like the one on
+      // the reservation card, not a big filled bar.
+      return Center(
+        child: TextButton(
           onPressed: () {
             Navigator.of(ctx).pop();
             onCancel();
           },
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            textStyle:
-                const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-          ),
-          icon: const Icon(Icons.close, size: 20),
-          label: Text(SpeakersStrings.cancelReservation),
+          child: Text(SpeakersStrings.cancelReservation),
         ),
       );
     }
@@ -821,21 +810,15 @@ class _CounselorSlotTile extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(color: ThemeConfig.redColor(ctx)));
     }
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton.icon(
-        onPressed: () {
-          Navigator.of(ctx).pop();
-          onBook();
-        },
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          textStyle:
-              const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        ),
-        icon: const Icon(Icons.check, size: 20),
-        label: Text(SpeakersStrings.signUp),
-      ),
+    return ButtonsHelper.actionButton(
+      context: ctx,
+      icon: Icons.login,
+      label: SpeakersStrings.signUp,
+      expand: true,
+      onPressed: () {
+        Navigator.of(ctx).pop();
+        onBook();
+      },
     );
   }
 

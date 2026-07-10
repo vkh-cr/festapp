@@ -32,6 +32,45 @@ class ButtonsHelper {
     ];
   }
 
+  /// The app's standard in-page action button (the event page's sign-in /
+  /// sign-out style): a [ThemeConfig.bigButtonColor] pill with rounded
+  /// corners, optional leading icon and bold label. [expand] stretches it to
+  /// the available width (anchored dialog actions); default hugs the content
+  /// (button rows).
+  static Widget actionButton({
+    required BuildContext context,
+    required String label,
+    required VoidCallback onPressed,
+    IconData? icon,
+    bool expand = false,
+  }) {
+    final Color fg = ThemeConfig.blackColor(context);
+    return Material(
+      color: ThemeConfig.bigButtonColor(context),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          child: Row(
+            mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 20, color: fg),
+                const SizedBox(width: 8),
+              ],
+              Text(label,
+                  style: TextStyle(
+                      color: fg, fontWeight: FontWeight.bold, fontSize: 15)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   static Widget bigButton({
     required BuildContext context,
     required String label,
