@@ -58,8 +58,10 @@ void main() {
     expect(changed!.contains(2), isTrue);
   });
 
-  testWidgets('dialog search filters by name and role (diacritics-insensitive)',
+  testWidgets('dialog search filters by name (diacritics-insensitive)',
       (tester) async {
+    // Areas/speakers are matched by NAME only — role is not part of the search
+    // (organizer decision 2026-07-10).
     await tester.pumpWidget(_wrap(SpeakerPickerField(
       allSpeakers: _speakers,
       selectedIds: const [],
@@ -76,8 +78,8 @@ void main() {
     expect(find.byType(CheckboxListTile), findsOneWidget);
     expect(find.text('Řehoř Novák'), findsOneWidget);
 
-    // Role/subtitle match: 'knez' → 'kněz' (Jan Dvořák).
-    await tester.enterText(find.byType(TextField), 'knez');
+    // Another name match (diacritics-insensitive): 'dvorak' → 'Jan Dvořák'.
+    await tester.enterText(find.byType(TextField), 'dvorak');
     await tester.pumpAndSettle();
     expect(find.byType(CheckboxListTile), findsOneWidget);
     expect(find.text('Jan Dvořák'), findsOneWidget);
