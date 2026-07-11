@@ -26,6 +26,8 @@ import 'package:fstapp/components/map/map_location_pin_helper.dart';
 import 'package:fstapp/components/cleaning/cleaning_status.dart';
 import 'package:fstapp/components/cleaning/db_cleaning.dart';
 import 'package:fstapp/components/cleaning/cleaning_report_flow.dart';
+import 'package:fstapp/components/cleaning/cleaning_review_flow.dart';
+import 'package:fstapp/components/cleaning/models/cleaning_place_status.dart';
 import 'package:fstapp/components/map/map_marker_with_text.dart';
 import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/components/map/offline_map_style_helper.dart';
@@ -102,9 +104,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   final JSInterop jsInterop = JSInterop();
 
   List<IconModel> _icons = [];
-  // Derived cleaning status per toilet place id (empty unless the cleaning
-  // feature is enabled). Colors the toilet pins for everyone.
-  Map<int, CleaningStatus> _cleaningStatus = {};
+  // Derived cleaning status + rating aggregate per toilet place id (empty unless
+  // the cleaning feature is enabled). Colors the toilet pins for everyone.
+  Map<int, CleaningPlaceStatus> _cleaningByPlace = {};
   final List<MapMarkerWithText> _markers = [];
   final List<MapMarkerWithText> _selectedMarkers = [];
   static MapMarkerWithText? focusedMarker;
@@ -627,16 +629,22 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                 final isToilet = marker.place.type ==
                         CleaningStatusHelper.toiletPlaceTypeCode &&
                     FeatureService.isFeatureEnabled(FeatureConstants.cleaning);
+                final cleaning =
+                    isToilet ? _cleaningByPlace[marker.place.id] : null;
                 return MapDescriptionPopup(
                   marker,
                   selectedMarker,
                   cleaningStatus: isToilet
-                      ? (_cleaningStatus[marker.place.id] ??
-                          CleaningStatus.green)
+                      ? (cleaning?.status ?? CleaningStatus.green)
                       : null,
                   onReportCleaning: isToilet
                       ? () => _reportCleaningForPlace(marker.place)
                       : null,
+                  onRateCleaning: isToilet
+                      ? () => _rateCleaningForPlace(marker.place)
+                      : null,
+                  ratingAvg: cleaning?.ratingAvg,
+                  ratingCount: cleaning?.ratingCount ?? 0,
                 );
               }
               return const SizedBox.shrink();
@@ -1035,14 +1043,14 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   /// Non-fatal: the map still works without colors if the RPC fails.
   Future<void> _loadCleaningStatus() async {
     if (!FeatureService.isFeatureEnabled(FeatureConstants.cleaning)) {
-      _cleaningStatus = {};
+      _cleaningByPlace = {};
       return;
     }
     final oc = RightsService.currentOccasionId();
     if (oc == null) return;
     try {
       final statuses = await DbCleaning.getStatus(oc);
-      _cleaningStatus = {for (final s in statuses.places) s.place: s.status};
+      _cleaningByPlace = {for (final s in statuses.places) s.place: s};
     } catch (_) {
       // ignore — map remains usable without cleaning colors
     }
@@ -1054,7 +1062,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         !FeatureService.isFeatureEnabled(FeatureConstants.cleaning)) {
       return null;
     }
-    final status = _cleaningStatus[place.id] ?? CleaningStatus.green;
+    final status = _cleaningByPlace[place.id]?.status ?? CleaningStatus.green;
     return CleaningStatusHelper.color(status);
   }
 
@@ -1062,6 +1070,17 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   Future<void> _reportCleaningForPlace(MapPlaceModel place) async {
     if (place.id == null) return;
     final changed = await CleaningReportFlow.report(
+      context,
+      placeId: place.id!,
+      placeTitle: place.title,
+    );
+    if (changed && mounted) await loadData();
+  }
+
+  /// Opens the quality-rating dialog from a toilet popup and refreshes.
+  Future<void> _rateCleaningForPlace(MapPlaceModel place) async {
+    if (place.id == null) return;
+    final changed = await CleaningReviewFlow.rate(
       context,
       placeId: place.id!,
       placeTitle: place.title,

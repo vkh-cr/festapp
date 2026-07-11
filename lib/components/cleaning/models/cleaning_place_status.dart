@@ -8,11 +8,18 @@ class CleaningPlaceStatus {
   final CleaningStatus status;
   final DateTime? lastReportedAt;
 
+  /// Public quality-review aggregate (feature C): average smiley rating (1..3)
+  /// and how many people rated. ratingAvg is null when nobody has rated yet.
+  final double? ratingAvg;
+  final int ratingCount;
+
   CleaningPlaceStatus({
     required this.place,
     required this.title,
     required this.status,
     this.lastReportedAt,
+    this.ratingAvg,
+    this.ratingCount = 0,
   });
 
   factory CleaningPlaceStatus.fromJson(Map<String, dynamic> json) {
@@ -23,6 +30,8 @@ class CleaningPlaceStatus {
       lastReportedAt: json['last_reported_at'] != null
           ? DateTime.tryParse(json['last_reported_at'].toString())?.toLocal()
           : null,
+      ratingAvg: (json['rating_avg'] as num?)?.toDouble(),
+      ratingCount: (json['rating_count'] as num?)?.toInt() ?? 0,
     );
   }
 }

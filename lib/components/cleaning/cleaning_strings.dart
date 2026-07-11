@@ -79,6 +79,14 @@ class CleaningStrings {
       'Cleaning.historyCleanedAt'.tr(namedArgs: {'time': time});
   static String get download => 'Cleaning.download'.tr();
 
+  // Quality reviews (feature C)
+  static String get rateQuality => 'Cleaning.rateQuality'.tr();
+  static String rateDialogTitle(String toilet) =>
+      'Cleaning.rateDialogTitle'.tr(namedArgs: {'toilet': toilet});
+  static String get reviewSuccess => 'Cleaning.reviewSuccess'.tr();
+  static String ratingSummary(String avg, int count) =>
+      'Cleaning.ratingSummary'.tr(namedArgs: {'avg': avg, 'count': '$count'});
+
   // Blocking reporters (feature B)
   static String get blockReporter => 'Cleaning.blockReporter'.tr();
   static String blockReporterConfirm(String name) =>

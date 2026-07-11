@@ -41,14 +41,21 @@ BEGIN
         WHEN 1 THEN 'paper'
         ELSE 'green'
       END AS status,
-      MAX(r.created_at) AS last_reported_at
+      MAX(r.created_at) AS last_reported_at,
+      rv.rating_avg,
+      COALESCE(rv.rating_count, 0) AS rating_count
     FROM public.places p
     LEFT JOIN public.cleaning_reports r
       ON r.place = p.id AND r.resolved_at IS NULL
+    LEFT JOIN (
+      SELECT place, round(avg(rating)::numeric, 2) AS rating_avg, count(*) AS rating_count
+      FROM public.cleaning_reviews
+      GROUP BY place
+    ) rv ON rv.place = p.id
     WHERE p.occasion = oc
       AND p.is_hidden = false
       AND p.type = 'toilet'
-    GROUP BY p.id, p.title
+    GROUP BY p.id, p.title, rv.rating_avg, rv.rating_count
   ) t;
 
   RETURN jsonb_build_object('code', 200, 'data', v_data, 'is_blocked', v_blocked);

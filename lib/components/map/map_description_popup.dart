@@ -11,15 +11,22 @@ class MapDescriptionPopup extends StatefulWidget {
   final MapMarkerWithText? selectedMarker;
 
   /// For toilet places with the cleaning feature on: the derived status (drives
-  /// a colored chip) and the "report a problem" action. Null for other places.
+  /// a colored chip), the "report a problem" action and the "rate quality"
+  /// action (feature C), plus the public rating aggregate. Null for other places.
   final CleaningStatus? cleaningStatus;
   final VoidCallback? onReportCleaning;
+  final VoidCallback? onRateCleaning;
+  final double? ratingAvg;
+  final int ratingCount;
 
   const MapDescriptionPopup(
     this.marker,
     this.selectedMarker, {
     this.cleaningStatus,
     this.onReportCleaning,
+    this.onRateCleaning,
+    this.ratingAvg,
+    this.ratingCount = 0,
     super.key,
   });
 
@@ -100,34 +107,57 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
               Text(
                 isOk
                     ? CleaningStrings.statusOk
-                    : CleaningStrings.problemLabel(_statusToType(status)),
+                    : CleaningStrings.problemLabel(
+                        CleaningStatusHelper.codeOf(status)),
                 style: TextStyle(color: color, fontWeight: FontWeight.w600),
               ),
             ],
           ),
+          if (widget.ratingCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.sentiment_satisfied_alt,
+                      size: 15, color: Color(0xFF2E7D32)),
+                  const SizedBox(width: 4),
+                  Text(
+                    CleaningStrings.ratingSummary(
+                        widget.ratingAvg?.toStringAsFixed(1) ?? '-',
+                        widget.ratingCount),
+                    style: TextStyle(
+                        fontSize: 12, color: Theme.of(context).hintColor),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 4),
           if (widget.onReportCleaning != null)
             TextButton.icon(
               icon: const Icon(Icons.report_problem_outlined),
               onPressed: widget.onReportCleaning,
               label: Text(CleaningStrings.reportProblem),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: const Size(0, 36),
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          if (widget.onRateCleaning != null)
+            TextButton.icon(
+              icon: const Icon(Icons.star_outline),
+              onPressed: widget.onRateCleaning,
+              label: Text(CleaningStrings.rateQuality),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: const Size(0, 36),
+                visualDensity: VisualDensity.compact,
+              ),
             ),
         ],
       ),
     );
-  }
-
-  String _statusToType(CleaningStatus status) {
-    switch (status) {
-      case CleaningStatus.paper:
-        return CleaningStatusHelper.codePaper;
-      case CleaningStatus.hygiene:
-        return CleaningStatusHelper.codeHygiene;
-      case CleaningStatus.contamination:
-        return CleaningStatusHelper.codeContamination;
-      case CleaningStatus.green:
-        return CleaningStatusHelper.codeGreen;
-    }
   }
 
   void changePositionPressed() => widget.marker.editAction!(widget.marker);
