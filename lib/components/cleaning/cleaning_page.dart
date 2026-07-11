@@ -257,6 +257,11 @@ class _CleaningPageState extends State<CleaningPage> {
         title: Text(CleaningStrings.pageTitle),
         actions: [
           IconButton(
+            icon: const Icon(Icons.map_outlined),
+            tooltip: CleaningStrings.toiletsOnMap,
+            onPressed: _openMapFiltered,
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: CleaningStrings.refresh,
             onPressed: () => _loadData(),
@@ -294,11 +299,15 @@ class _CleaningPageState extends State<CleaningPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       children: [
-        _SummaryBanner(places: _places),
-        if (_isBlocked && !_isCrew) ...[
-          const SizedBox(height: 12),
-          const _BlockedBanner(),
-        ],
+        // Crew get the operational overview; a plain participant gets a simple
+        // "pick a toilet and report" hint (or the blocked notice) — nothing
+        // crew-oriented.
+        if (_isCrew)
+          _SummaryBanner(places: _places)
+        else if (_isBlocked)
+          const _BlockedBanner()
+        else
+          const _ReportHint(),
         const SizedBox(height: 18),
         GridView.builder(
           shrinkWrap: true,
@@ -320,22 +329,6 @@ class _CleaningPageState extends State<CleaningPage> {
           const SizedBox(height: 28),
           _buildCrewSection(context, problemPlaces, reportsByPlace),
         ],
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.tonalIcon(
-            onPressed: _openMapFiltered,
-            icon: const Icon(Icons.map_outlined),
-            label: Text(CleaningStrings.toiletsOnMap),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(StylesConfig.eventItemRoundness),
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -779,6 +772,39 @@ class _CrewReportCard extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Calm one-line hint for a plain participant: tap a toilet to report a problem.
+/// Keeps the participant view simple (no operational summary / counts).
+class _ReportHint extends StatelessWidget {
+  const _ReportHint();
+
+  @override
+  Widget build(BuildContext context) {
+    final color = CleaningStatusHelper.color(CleaningStatus.green);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.touch_app_outlined, color: color, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              CleaningStrings.tapToReport,
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
   }
