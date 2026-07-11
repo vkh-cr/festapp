@@ -11,6 +11,16 @@ import 'package:fstapp/components/cleaning/db_cleaning.dart';
 import 'package:fstapp/components/cleaning/models/cleaning_place_status.dart';
 import 'package:fstapp/components/cleaning/cleaning_report_flow.dart';
 import 'package:fstapp/components/cleaning/models/cleaning_report.dart';
+import 'package:fstapp/components/cleaning/models/cleaning_data.dart';
+import 'package:fstapp/components/cleaning/widgets/cleaning_blocked_banner.dart';
+import 'package:fstapp/components/cleaning/widgets/cleaning_crew_report_card.dart';
+import 'package:fstapp/components/cleaning/widgets/cleaning_history_row.dart';
+import 'package:fstapp/components/cleaning/widgets/cleaning_legend.dart';
+import 'package:fstapp/components/cleaning/widgets/cleaning_report_hint.dart';
+import 'package:fstapp/components/cleaning/widgets/cleaning_summary_banner.dart';
+import 'package:fstapp/components/cleaning/widgets/cleaning_tile.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/map/map_page.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
@@ -48,6 +58,7 @@ class _CleaningPageState extends State<CleaningPage> {
   List<CleaningReport> _reports = [];
   bool _loading = true;
   bool _isBlocked = false;
+  bool _notificationsMuted = false;
   bool _showHistory = false;
   bool _exportingHistory = false;
   bool _deepLinkHandled = false;
@@ -73,16 +84,17 @@ class _CleaningPageState extends State<CleaningPage> {
   }
 
   Future<void> _loadData({bool silent = false}) async {
-    Future<_CleaningData> fetch() async {
+    Future<CleaningData> fetch() async {
       final status = await DbCleaning.getStatus(_occasionId);
       // The crew fetches resolved reports too so the History tab needs no reload.
       final reports = _isCrew
           ? await DbCleaning.getReports(_occasionId, includeResolved: true)
           : <CleaningReport>[];
-      return _CleaningData(status.places, reports, status.isBlocked);
+      return CleaningData(
+          status.places, reports, status.isBlocked, status.notificationsMuted);
     }
 
-    _CleaningData? data;
+    CleaningData? data;
     if (silent) {
       // Background poll: swallow transient errors instead of popping UI.
       try {
@@ -99,6 +111,7 @@ class _CleaningPageState extends State<CleaningPage> {
         _places = data.places;
         _reports = data.reports;
         _isBlocked = data.isBlocked;
+        _notificationsMuted = data.notificationsMuted;
       }
       _loading = false;
     });
@@ -158,6 +171,21 @@ class _CleaningPageState extends State<CleaningPage> {
         await _loadData();
       },
     );
+  }
+
+  /// Toggles the current user's cleaning-notification opt-out (self-service).
+  Future<void> _setNotificationsMuted(bool muted) async {
+    // Optimistic: reflect the switch immediately, revert on failure.
+    setState(() => _notificationsMuted = muted);
+    try {
+      await DbCleaning.setNotificationsMuted(
+          occasionId: _occasionId, muted: muted);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _notificationsMuted = !muted);
+      ToastHelper.Show(context, CleaningStrings.reportError,
+          severity: ToastSeverity.NotOk);
+    }
   }
 
   /// Crew blocks a repeat offender straight from their report (confirm first).
@@ -282,6 +310,11 @@ class _CleaningPageState extends State<CleaningPage> {
   }
 
   Widget _buildBody(BuildContext context) {
+    // Feature gate: the page is reachable via deep-link even when the occasion
+    // has the cleaning feature turned off — show a plain notice instead of data.
+    if (!FeatureService.isFeatureEnabled(FeatureConstants.cleaning)) {
+      return _buildFeatureDisabled(context);
+    }
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -303,11 +336,11 @@ class _CleaningPageState extends State<CleaningPage> {
         // "pick a toilet and report" hint (or the blocked notice) — nothing
         // crew-oriented.
         if (_isCrew)
-          _SummaryBanner(places: _places)
+          CleaningSummaryBanner(places: _places)
         else if (_isBlocked)
-          const _BlockedBanner()
+          const CleaningBlockedBanner()
         else
-          const _ReportHint(),
+          const CleaningReportHint(),
         const SizedBox(height: 18),
         GridView.builder(
           shrinkWrap: true,
@@ -320,10 +353,10 @@ class _CleaningPageState extends State<CleaningPage> {
           ),
           itemCount: _places.length,
           itemBuilder: (context, index) =>
-              _CleaningTile(place: _places[index], onTap: _openReportDialog),
+              CleaningTile(place: _places[index], onTap: _openReportDialog),
         ),
         const SizedBox(height: 16),
-        const _Legend(),
+        const CleaningLegend(),
         // Crew-only: "Current / History" tabs over the detailed reports.
         if (_isCrew) ...[
           const SizedBox(height: 28),
@@ -344,6 +377,23 @@ class _CleaningPageState extends State<CleaningPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Self-service opt-out: each crew member can turn cleaning push
+        // notifications off for themselves.
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          dense: true,
+          secondary: Icon(
+            _notificationsMuted
+                ? Icons.notifications_off_outlined
+                : Icons.notifications_active_outlined,
+            color: ThemeConfig.grey600(context),
+          ),
+          title: Text(CleaningStrings.notifyOnReports),
+          value: !_notificationsMuted,
+          onChanged: (on) => _setNotificationsMuted(!on),
+        ),
+        const Divider(height: 8),
+        const SizedBox(height: 8),
         Center(
           child: SegmentedButton<bool>(
             segments: [
@@ -390,7 +440,7 @@ class _CleaningPageState extends State<CleaningPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final place in problemPlaces)
-          _CrewReportCard(
+          CleaningCrewReportCard(
             place: place,
             // Only open reports are actionable in the Current tab.
             reports: (reportsByPlace[place.place] ?? const [])
@@ -434,7 +484,7 @@ class _CleaningPageState extends State<CleaningPage> {
           ),
         ),
         const SizedBox(height: 12),
-        for (final r in history) _HistoryRow(report: r),
+        for (final r in history) CleaningHistoryRow(report: r),
       ],
     );
   }
@@ -460,447 +510,26 @@ class _CleaningPageState extends State<CleaningPage> {
       ],
     );
   }
-}
 
-/// Top-of-page status summary: calm green "all clean" or an alert pill colored
-/// by the most severe open problem, with the problem count.
-class _SummaryBanner extends StatelessWidget {
-  final List<CleaningPlaceStatus> places;
-  const _SummaryBanner({required this.places});
-
-  @override
-  Widget build(BuildContext context) {
-    final problems =
-        places.where((p) => p.status != CleaningStatus.green).toList();
-    final allOk = problems.isEmpty;
-    var worst = CleaningStatus.green;
-    for (final p in problems) {
-      if (p.status.index > worst.index) worst = p.status;
-    }
-    final accent = CleaningStatusHelper.color(allOk ? CleaningStatus.green : worst);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness),
-        border: Border.all(color: accent.withValues(alpha: 0.45)),
-      ),
-      child: Row(
-        children: [
-          Icon(allOk ? Icons.verified_rounded : Icons.warning_amber_rounded,
-              color: accent, size: 28),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              allOk
-                  ? CleaningStrings.allClean
-                  : '${problems.length} · ${CleaningStrings.needsAttention}',
-              style: TextStyle(
-                  color: accent, fontWeight: FontWeight.w700, fontSize: 17),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Small colour legend under the grid.
-class _Legend extends StatelessWidget {
-  const _Legend();
-
-  @override
-  Widget build(BuildContext context) {
-    Widget item(String label, CleaningStatus status) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 11,
-            height: 11,
-            decoration: BoxDecoration(
-                color: CleaningStatusHelper.color(status),
-                shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 12, color: ThemeConfig.grey600(context))),
-        ],
-      );
-    }
-
-    return Wrap(
-      spacing: 18,
-      runSpacing: 8,
-      alignment: WrapAlignment.center,
+  Widget _buildFeatureDisabled(BuildContext context) {
+    return ListView(
       children: [
-        item(CleaningStrings.statusOk, CleaningStatus.green),
-        item(CleaningStrings.shortPaper, CleaningStatus.paper),
-        item(CleaningStrings.shortHygiene, CleaningStatus.hygiene),
-        item(CleaningStrings.shortContamination, CleaningStatus.contamination),
-      ],
-    );
-  }
-}
-
-class _CleaningData {
-  final List<CleaningPlaceStatus> places;
-  final List<CleaningReport> reports;
-  final bool isBlocked;
-  _CleaningData(this.places, this.reports, this.isBlocked);
-}
-
-class _CleaningTile extends StatelessWidget {
-  final CleaningPlaceStatus place;
-  final void Function(CleaningPlaceStatus) onTap;
-
-  const _CleaningTile({required this.place, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final status = place.status;
-    final isOk = status == CleaningStatus.green;
-    final statusColor = CleaningStatusHelper.color(status);
-    final biohazard = CleaningStatusHelper.showsBiohazard(status);
-
-    // OK tiles stay calm/neutral so the problem tiles are the ones that pop.
-    final bg = isOk
-        ? ThemeConfig.qrButtonColor(context)
-        : statusColor.withValues(alpha: 0.14);
-
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: bg,
-      shape: RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.circular(StylesConfig.eventItemRoundness),
-        side: BorderSide(
-          color: isOk ? Theme.of(context).dividerColor : statusColor,
-          width: isOk ? 1 : 2,
-        ),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness),
-        onTap: () => onTap(place),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 9, 10, 9),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.wc, size: 19, color: statusColor),
-                  const Spacer(),
-                  if (biohazard)
-                    const Text('☣️', style: TextStyle(fontSize: 15)),
-                ],
-              ),
-              Expanded(
-                child: Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      place.title,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: scheme.onSurface,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // Only problem tiles carry a label, so a wall of OK tiles stays
-              // clean and scannable when there are many toilets.
-              if (!isOk)
-                Text(
-                  CleaningStrings.statusLabelShort(
-                      CleaningStatusHelper.codeOf(status)),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: statusColor,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Crew card for one problematic toilet: its open reports (type, note(s),
-/// reporter, time) and a "Cleaned" button resolving them all at once.
-class _CrewReportCard extends StatelessWidget {
-  final CleaningPlaceStatus place;
-  final List<CleaningReport> reports;
-  final VoidCallback onResolve;
-  final void Function(CleaningReport) onBlock;
-
-  const _CrewReportCard({
-    required this.place,
-    required this.reports,
-    required this.onResolve,
-    required this.onBlock,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = CleaningStatusHelper.color(place.status);
-    final timeFmt = DateFormat.Hm();
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: color, width: 2),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.wc, color: color),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    place.title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                ),
-                FilledButton.icon(
-                  onPressed: onResolve,
-                  icon: const Icon(Icons.check),
-                  label: Text(CleaningStrings.markCleaned),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            for (final r in reports)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: CleaningStatusHelper.colorForType(
-                                r.problemType),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            CleaningStrings.problemLabel(r.problemType),
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        Text(
-                          "${timeFmt.format(r.createdAt)} · ${r.createdByName ?? CleaningStrings.anonymous}",
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: ThemeConfig.grey600(context)),
-                        ),
-                        // Blocked reporters get a chip; others an overflow menu
-                        // with the (destructive) "block reporter" action.
-                        if (r.createdByBlocked)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 6),
-                            child: Icon(Icons.block,
-                                size: 16,
-                                color: Theme.of(context).colorScheme.error),
-                          )
-                        else if (r.createdBy != null)
-                          SizedBox(
-                            width: 32,
-                            height: 32,
-                            child: PopupMenuButton<String>(
-                              tooltip: CleaningStrings.blockReporter,
-                              icon: const Icon(Icons.more_vert, size: 18),
-                              padding: EdgeInsets.zero,
-                              onSelected: (_) => onBlock(r),
-                              itemBuilder: (_) => [
-                                PopupMenuItem(
-                                  value: 'block',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.block,
-                                          size: 18,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .error),
-                                      const SizedBox(width: 8),
-                                      Text(CleaningStrings.blockReporter),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                    for (final note in [
-                      if (r.note != null) r.note!,
-                      ...r.extraNotes
-                    ])
-                      Padding(
-                        padding: const EdgeInsets.only(left: 18, top: 2),
-                        child: Text('„$note"',
-                            style: const TextStyle(
-                                fontStyle: FontStyle.italic)),
-                      ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Calm one-line hint for a plain participant: tap a toilet to report a problem.
-/// Keeps the participant view simple (no operational summary / counts).
-class _ReportHint extends StatelessWidget {
-  const _ReportHint();
-
-  @override
-  Widget build(BuildContext context) {
-    final color = CleaningStatusHelper.color(CleaningStatus.green);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.touch_app_outlined, color: color, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
+        const SizedBox(height: 90),
+        Icon(Icons.cleaning_services_outlined,
+            size: 56, color: ThemeConfig.grey600(context)),
+        const SizedBox(height: 16),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              CleaningStrings.tapToReport,
+              CleaningStrings.featureDisabled,
+              textAlign: TextAlign.center,
               style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontWeight: FontWeight.w600),
+                  color: ThemeConfig.grey600(context), fontSize: 16),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Info banner shown to a participant whose reporting has been blocked: they can
-/// still see the page (colours) but the report action is disabled.
-class _BlockedBanner extends StatelessWidget {
-  const _BlockedBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.error;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness),
-        border: Border.all(color: color.withValues(alpha: 0.40)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.block, color: color, size: 22),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              CleaningStrings.blockedMessage,
-              style: TextStyle(color: color, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// One compact text line in the crew History tab: date · WC · type · reporter ·
-/// state, with any notes indented beneath.
-class _HistoryRow extends StatelessWidget {
-  final CleaningReport report;
-  const _HistoryRow({required this.report});
-
-  @override
-  Widget build(BuildContext context) {
-    final dateFmt = DateFormat('d.M. HH:mm');
-    final resolved = report.resolvedAt != null;
-    final typeColor = CleaningStatusHelper.colorForType(report.problemType);
-    final notes = <String>[
-      if (report.note != null && report.note!.isNotEmpty) report.note!,
-      ...report.extraNotes,
-    ];
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 4, right: 8),
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                      color: typeColor, shape: BoxShape.circle),
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${dateFmt.format(report.createdAt)} · ${report.placeTitle} · ${CleaningStrings.problemLabel(report.problemType)}',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      '${report.createdByName ?? CleaningStrings.anonymous} · ${resolved ? CleaningStrings.historyCleanedAt(dateFmt.format(report.resolvedAt!)) : CleaningStrings.historyOpen}',
-                      style: TextStyle(
-                          fontSize: 12, color: ThemeConfig.grey600(context)),
-                    ),
-                    for (final note in notes)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text('„$note"',
-                            style:
-                                const TextStyle(fontStyle: FontStyle.italic)),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const Divider(height: 14),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

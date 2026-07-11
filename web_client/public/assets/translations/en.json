@@ -1742,6 +1742,7 @@
     "shortHygiene": "Out of hygiene",
     "shortContamination": "Soiled",
     "toiletsOnMap": "Show toilets on map",
+    "notifyOnReports": "Get notified about new reports",
     "tabCurrent": "Current",
     "tabHistory": "History",
     "historyTitle": "Report history",
@@ -1752,7 +1753,8 @@
     "blockReporter": "Block reporter",
     "blockReporterConfirm": "Really block cleaning reports for {name}? This participant will no longer be able to report a problem.",
     "reporterBlocked": "Reporter has been blocked.",
-    "blockedMessage": "Your cleaning reports have been temporarily disabled."
+    "blockedMessage": "Your cleaning reports have been temporarily disabled.",
+    "featureDisabled": "Cleaning service is not enabled for this event."
   },
   "FeatureCleaning": {
     "title": "Cleaning service",

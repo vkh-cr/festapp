@@ -13,6 +13,9 @@ class CleaningStrings {
   static String get placeIsToilet => 'Cleaning.placeIsToilet'.tr();
 
   static String get noToilets => 'Cleaning.noToilets'.tr();
+
+  /// Shown when the page is reached but the cleaning feature is disabled.
+  static String get featureDisabled => 'Cleaning.featureDisabled'.tr();
   static String get tapToReport => 'Cleaning.tapToReport'.tr();
   static String get refresh => 'Cleaning.refresh'.tr();
   static String get showOnMap => 'Cleaning.showOnMap'.tr();
@@ -68,6 +71,9 @@ class CleaningStrings {
   static String reportedAt(String time) =>
       'Cleaning.reportedAt'.tr(namedArgs: {'time': time});
   static String get anonymous => 'Cleaning.anonymous'.tr();
+
+  /// Self-service notification opt-out toggle (crew).
+  static String get notifyOnReports => 'Cleaning.notifyOnReports'.tr();
 
   // Crew tabs + history (feature A)
   static String get tabCurrent => 'Cleaning.tabCurrent'.tr();

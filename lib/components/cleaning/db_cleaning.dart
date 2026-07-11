@@ -44,7 +44,22 @@ class DbCleaning {
     return CleaningStatusResult(
       places: places,
       isBlocked: res is Map && res['is_blocked'] == true,
+      notificationsMuted: res is Map && res['notifications_muted'] == true,
     );
+  }
+
+  /// Mutes/unmutes cleaning push notifications for the current user on the
+  /// occasion (self-service opt-out). Throws [CleaningException] on a non-200
+  /// envelope.
+  static Future<void> setNotificationsMuted({
+    required int occasionId,
+    required bool muted,
+  }) async {
+    final res = await _supabase.rpc('set_cleaning_notifications_muted', params: {
+      'p_occasion': occasionId,
+      'p_muted': muted,
+    });
+    _ensureOk(res);
   }
 
   /// Crew blocks (or editor unblocks) a repeat offender on the occasion.
@@ -106,7 +121,16 @@ class CleaningReportResult {
 class CleaningStatusResult {
   final List<CleaningPlaceStatus> places;
   final bool isBlocked;
-  CleaningStatusResult({required this.places, required this.isBlocked});
+
+  /// Whether the current user has muted cleaning push notifications for
+  /// themselves on this occasion (crew self-service opt-out).
+  final bool notificationsMuted;
+
+  CleaningStatusResult({
+    required this.places,
+    required this.isBlocked,
+    this.notificationsMuted = false,
+  });
 }
 
 /// Carries the RPC error code so the UI can show the matching message

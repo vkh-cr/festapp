@@ -17,6 +17,7 @@ DECLARE
     v_oc2       bigint;
     v_wc1       bigint;
     v_wc2       bigint;
+    v_wc3       bigint;
     v_room      bigint;
     v_wc_other  bigint;
 BEGIN
@@ -59,6 +60,8 @@ BEGIN
     INSERT INTO public.places (title, occasion, type, coordinates)
     VALUES ('WC 02', v_oc, 'toilet', '{"latLng":{"lat":0,"lng":0}}'::jsonb) RETURNING id INTO v_wc2;
     INSERT INTO public.places (title, occasion, type, coordinates)
+    VALUES ('WC 03', v_oc, 'toilet', '{"latLng":{"lat":0,"lng":0}}'::jsonb) RETURNING id INTO v_wc3;
+    INSERT INTO public.places (title, occasion, type, coordinates)
     VALUES ('Room A', v_oc, NULL, '{"latLng":{"lat":0,"lng":0}}'::jsonb) RETURNING id INTO v_room;
     INSERT INTO public.places (title, occasion, type, coordinates)
     VALUES ('WC 01', v_oc2, 'toilet', '{"latLng":{"lat":0,"lng":0}}'::jsonb) RETURNING id INTO v_wc_other;
@@ -66,7 +69,8 @@ BEGIN
     CREATE TEMP TABLE IF NOT EXISTS _cln (k text PRIMARY KEY, v bigint);
     INSERT INTO _cln VALUES
         ('occasion', v_oc), ('occasion2', v_oc2),
-        ('wc1', v_wc1), ('wc2', v_wc2), ('room', v_room), ('wc_other', v_wc_other);
+        ('wc1', v_wc1), ('wc2', v_wc2), ('wc3', v_wc3),
+        ('room', v_room), ('wc_other', v_wc_other);
 
     RAISE NOTICE 'fixture built: occasion=%, wc1=%, wc2=%', v_oc, v_wc1, v_wc2;
 END $$ LANGUAGE plpgsql;
@@ -391,4 +395,55 @@ BEGIN
     PERFORM assert_eq(v_row->>'created_by_blocked', 'true', 'report flags a blocked reporter');
 
     RAISE NOTICE 'test 9 (report exposes created_by + blocked) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 10. Notification opt-out: a crew member mutes cleaning notifications for
+--     themselves; a fresh report then addresses only the non-muted crew.
+--     get_cleaning_status reports notifications_muted; unmuting restores them.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc   bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_wc3  bigint := (SELECT v FROM _cln WHERE k = 'wc3');
+    v_res  jsonb;
+    v_to   jsonb;
+BEGIN
+    -- Crew member mutes their own cleaning notifications.
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_crew')::text, true);
+    v_res := public.set_cleaning_notifications_muted(v_oc, true);
+    PERFORM assert_eq(v_res->>'code', '200', 'mute → 200');
+    PERFORM assert_eq(v_res->'data'->>'muted', 'true', 'result reports muted=true');
+
+    v_res := public.get_cleaning_status(v_oc);
+    PERFORM assert_eq(v_res->>'notifications_muted', 'true', 'status reports notifications_muted for the muter');
+
+    -- crew2 (not muted) still sees notifications_muted=false.
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_crew2')::text, true);
+    v_res := public.get_cleaning_status(v_oc);
+    PERFORM assert_eq(v_res->>'notifications_muted', 'false', 'non-muter sees notifications_muted=false');
+
+    -- A fresh report (WC 03 paper) notifies only the non-muted crew.
+    -- (log_notifications.id is a UUID, so we identify the row by its heading,
+    -- not by id/created_at ordering.)
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_outsider')::text, true);
+    PERFORM public.report_cleaning_issue(v_wc3, 'paper', NULL);
+    SELECT "to" INTO v_to FROM public.log_notifications
+     WHERE occasion = v_oc AND heading LIKE 'WC 03%papír%';
+    PERFORM assert_not_null(v_to::text, 'WC 03 paper notification exists');
+    PERFORM assert_true(NOT (v_to ? get_user_id('cln_crew')::text), 'muted crew is NOT notified');
+    PERFORM assert_true(v_to ? get_user_id('cln_crew2')::text, 'non-muted crew IS notified');
+
+    -- Unmute → back among the recipients.
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_crew')::text, true);
+    v_res := public.set_cleaning_notifications_muted(v_oc, false);
+    PERFORM assert_eq(v_res->>'code', '200', 'unmute → 200');
+
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_outsider')::text, true);
+    PERFORM public.report_cleaning_issue(v_wc3, 'hygiene', NULL);
+    SELECT "to" INTO v_to FROM public.log_notifications
+     WHERE occasion = v_oc AND heading LIKE 'WC 03%hygien%';
+    PERFORM assert_true(v_to ? get_user_id('cln_crew')::text, 'unmuted crew is notified again');
+
+    RAISE NOTICE 'test 10 (notification opt-out) passed';
 END $$ LANGUAGE plpgsql;

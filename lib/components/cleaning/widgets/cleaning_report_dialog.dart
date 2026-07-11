@@ -33,6 +33,8 @@ class _CleaningReportDialogState extends State<CleaningReportDialog> {
   String? _selectedType;
   final _noteController = TextEditingController();
 
+  // Problem types offered to the reporter — keep in sync with the problem_type
+  // list in report_cleaning_issue.sql and the cleaning_reports CHECK.
   static const _types = [
     CleaningStatusHelper.codePaper,
     CleaningStatusHelper.codeHygiene,

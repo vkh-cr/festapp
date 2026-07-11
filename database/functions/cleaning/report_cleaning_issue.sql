@@ -36,6 +36,9 @@ BEGIN
     RETURN jsonb_build_object('code', 401, 'message', 'Sign in is required to report a cleaning issue');
   END IF;
 
+  -- Problem types — keep in sync with: cleaning_reports.problem_type CHECK
+  -- (database/tables/tables.sql), CleaningStatusHelper (cleaning_status.dart)
+  -- and the report dialog (cleaning_report_dialog.dart).
   IF problem_type NOT IN ('paper', 'hygiene', 'contamination') THEN
     RETURN jsonb_build_object('code', 400, 'message', 'Invalid problem type');
   END IF;
@@ -91,6 +94,9 @@ BEGIN
     RETURN jsonb_build_object('code', 429, 'message', 'Too many reports, please wait a moment');
   END IF;
 
+  -- Push-notification labels are deliberately Czech-only (the crew is Czech;
+  -- localizing push messages is out of scope). Keep the type list in sync — see
+  -- the problem_type check above.
   v_type_label := CASE problem_type
     WHEN 'paper'         THEN 'Nedostatek toaletního papíru'
     WHEN 'hygiene'       THEN 'Nedostatek hygienických potřeb'
@@ -125,18 +131,24 @@ BEGIN
   VALUES (v_occasion, place_id, problem_type, v_note, v_user)
   RETURNING * INTO v_report;
 
-  -- Notify the crew (uuid array of is_cleaning_crew users on this occasion).
+  -- Notify the crew (uuid array of is_cleaning_crew users on this occasion),
+  -- excluding anyone who muted cleaning notifications for themselves
+  -- (occasion_users.data.cleaning_notifications_off).
   SELECT jsonb_agg("user"::text) INTO v_crew
   FROM public.occasion_users
-  WHERE occasion = v_occasion AND is_cleaning_crew = true;
+  WHERE occasion = v_occasion
+    AND is_cleaning_crew = true
+    AND COALESCE((data->>'cleaning_notifications_off')::boolean, false) = false;
 
   IF v_crew IS NOT NULL AND jsonb_array_length(v_crew) > 0 THEN
+    -- organization comes straight from the occasion row (occasions.organization
+    -- is NOT NULL) — no magic fallback needed.
     SELECT organization INTO v_organization FROM public.occasions WHERE id = v_occasion;
 
     INSERT INTO public.log_notifications (occasion, organization, user_id, "to", heading, content, data)
     VALUES (
       v_occasion,
-      COALESCE(v_organization, 1),
+      v_organization,
       v_user,
       v_crew,
       v_place.title || ' — ' || v_type_label,

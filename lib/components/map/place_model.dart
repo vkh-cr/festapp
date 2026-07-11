@@ -6,6 +6,11 @@ import 'package:fstapp/components/map/db_places.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class PlaceModel extends ITrinaRowModel {
+  /// Raw `{"lat": .., "lng": ..}` map (may be null). It is stored unwrapped:
+  /// [fromJson] reads `coordinates["latLng"]`, [fromPlutoJson] reads the cell
+  /// value directly, and [toJson] wraps it back into `{"latLng": ...}`.
+  /// Do not change one side without the other. Use [hasCoordinates] before
+  /// calling [getLat]/[getLng] — a place may legitimately have no coordinates.
   dynamic latLng;
   @override
   int? id;
@@ -25,6 +30,11 @@ class PlaceModel extends ITrinaRowModel {
 
   double getLat() => latLng["lat"];
   double getLng() => latLng["lng"];
+
+  /// Whether this place has usable map coordinates. A place without them must
+  /// be filtered out before building a [MapPlaceModel] (which force-reads lat/lng).
+  bool get hasCoordinates =>
+      latLng != null && latLng?["lat"] != null && latLng?["lng"] != null;
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(

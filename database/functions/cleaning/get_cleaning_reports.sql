@@ -2,6 +2,9 @@
 -- Returns open reports (optionally including resolved history) with notes, times
 -- and the reporter's name. Grouped per place so the crew sees each toilet with its
 -- outstanding problems. Envelope {code, message, data}.
+-- Deliberately does NOT check the "cleaning" feature flag: the crew must still be
+-- able to read and resolve outstanding reports after the feature is turned off.
+-- Only new reports are gated — in report_cleaning_issue.
 CREATE OR REPLACE FUNCTION get_cleaning_reports(
   oc bigint,
   p_include_resolved boolean DEFAULT false

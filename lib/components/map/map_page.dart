@@ -12,6 +12,7 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/services/app_logger.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
@@ -1071,6 +1072,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   void addPlacesToMap(List<PlaceModel> places) {
+    // A place without coordinates or a title can't become a map marker
+    // (MapPlaceModel force-reads lat/lng and title). Skip it silently — a place
+    // with no coordinates simply doesn't belong on the map.
+    places = places.where((p) => p.hasCoordinates && p.title != null).toList();
     var currentFocusedId = focusedMarker?.place.id;
     var editingMarkerId = selectedMarker?.place.id;
 
@@ -1269,7 +1274,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                 ),
                 const Padding(padding: EdgeInsets.all(16.0)),
                 ElevatedButton(
-                  onPressed: saveNewPosition,
+                  onPressed: () => ExceptionHandler.guardVoid(context,
+                      futureFunction: saveNewPosition),
                   child: Text(MapStrings.saveLocation),
                 ),
               ],

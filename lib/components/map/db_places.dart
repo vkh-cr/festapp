@@ -92,16 +92,23 @@ class DbPlaces {
   }
 
   static Future<void> saveLocation(int placeId, double lat, double lng) async {
+    // Fast UX guard mirroring the RPC's permission check (editor OR group admin
+    // of this place). The RPC save_place_location is the source of truth — a
+    // group admin who isn't an editor cannot move a place via a direct RLS
+    // UPDATE (it silently touches 0 rows), so the write must go through it.
     if (!(RightsService.isEditor() ||
         (RightsService.isGroupAdmin() &&
             RightsService.currentUserGroup()!.place!.id == placeId))) {
       throw Exception("You cannot change this place.");
     }
-    await _supabase.from(Tb.places.table).update({
-      Tb.places.coordinates: {
-        "latLng": {"lat": lat, "lng": lng}
-      }
-    }).eq(Tb.places.id, placeId);
+    final res = await _supabase.rpc('save_place_location', params: {
+      'p_place_id': placeId,
+      'p_lat': lat,
+      'p_lng': lng,
+    });
+    if (res is Map && res['code'] != null && res['code'] != 200) {
+      throw Exception(res['message'] ?? 'Failed to move place');
+    }
   }
 
   /// Fetch all path‑groups, including their List<List<int>> `path_data`

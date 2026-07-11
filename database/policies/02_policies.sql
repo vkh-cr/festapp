@@ -551,6 +551,36 @@ TO authenticated
 USING (get_is_editor_view_on_occasion(occasion));
 
 ----------------------------------------------------------------
+-- public.place_types
+--   Per-occasion place categories: public read, editor write.
+----------------------------------------------------------------
+
+DROP POLICY IF EXISTS "Enable read for all" ON public.place_types;
+CREATE POLICY "Enable read for all" ON public.place_types
+AS PERMISSIVE FOR SELECT
+TO public
+USING (true);
+
+DROP POLICY IF EXISTS "Enable insert for editors" ON public.place_types;
+CREATE POLICY "Enable insert for editors" ON public.place_types
+AS PERMISSIVE FOR INSERT
+TO authenticated
+WITH CHECK (get_is_editor_on_occasion(occasion));
+
+DROP POLICY IF EXISTS "Enable update for editors" ON public.place_types;
+CREATE POLICY "Enable update for editors" ON public.place_types
+AS PERMISSIVE FOR UPDATE
+TO authenticated
+USING (get_is_editor_on_occasion(occasion))
+WITH CHECK (get_is_editor_on_occasion(occasion));
+
+DROP POLICY IF EXISTS "Enable delete for editors" ON public.place_types;
+CREATE POLICY "Enable delete for editors" ON public.place_types
+AS PERMISSIVE FOR DELETE
+TO authenticated
+USING (get_is_editor_on_occasion(occasion));
+
+----------------------------------------------------------------
 -- public.cleaning_reports
 --   Writes go exclusively through SECURITY DEFINER RPCs
 --   (report_cleaning_issue / resolve_cleaning_place); the cleaning crew

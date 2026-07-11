@@ -2,6 +2,9 @@
 -- reports at once, decision Q3). Sets resolved_by/resolved_at on every open
 -- report of the place so its derived status goes back to green.
 -- Crew-only (get_is_cleaning_crew_on_occasion). Envelope {code, message, data}.
+-- Deliberately does NOT check the "cleaning" feature flag: the crew must still be
+-- able to resolve outstanding reports after the feature is turned off. Only new
+-- reports are gated — in report_cleaning_issue.
 CREATE OR REPLACE FUNCTION resolve_cleaning_place(place_id bigint) RETURNS jsonb
   LANGUAGE plpgsql
   SECURITY DEFINER
