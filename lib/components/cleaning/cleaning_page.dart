@@ -10,7 +10,6 @@ import 'package:fstapp/components/cleaning/cleaning_strings.dart';
 import 'package:fstapp/components/cleaning/db_cleaning.dart';
 import 'package:fstapp/components/cleaning/models/cleaning_place_status.dart';
 import 'package:fstapp/components/cleaning/cleaning_report_flow.dart';
-import 'package:fstapp/components/cleaning/cleaning_review_flow.dart';
 import 'package:fstapp/components/cleaning/models/cleaning_report.dart';
 import 'package:fstapp/components/map/map_page.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -138,17 +137,6 @@ class _CleaningPageState extends State<CleaningPage> {
       placeTitle: place.title,
       onShowOnMap: () => RouterService.navigateOccasion(
           context, "${MapPage.ROUTE}/${place.place}"),
-      onRate: () => _ratePlace(place),
-    );
-    if (changed && mounted) await _loadData();
-  }
-
-  /// Opens the quality-rating dialog for a toilet (feature C) and refreshes.
-  Future<void> _ratePlace(CleaningPlaceStatus place) async {
-    final changed = await CleaningReviewFlow.rate(
-      context,
-      placeId: place.place,
-      placeTitle: place.title,
     );
     if (changed && mounted) await _loadData();
   }

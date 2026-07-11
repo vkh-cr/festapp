@@ -19,14 +19,9 @@ class CleaningReportDialog extends StatefulWidget {
   /// from the map popup itself). Closes the dialog, then runs the callback.
   final VoidCallback? onShowOnMap;
 
-  /// Optional "rate quality" action (feature C). Closes the dialog, then runs
-  /// the callback (opens the smiley rating dialog).
-  final VoidCallback? onRate;
-
   const CleaningReportDialog({
     required this.placeTitle,
     this.onShowOnMap,
-    this.onRate,
     super.key,
   });
 
@@ -76,15 +71,6 @@ class _CleaningReportDialogState extends State<CleaningReportDialog> {
         ),
       ),
       actions: [
-        if (widget.onRate != null)
-          TextButton.icon(
-            icon: const Icon(Icons.star_outline),
-            onPressed: () {
-              Navigator.of(context).pop();
-              widget.onRate!();
-            },
-            label: Text(CleaningStrings.rateQuality),
-          ),
         if (widget.onShowOnMap != null)
           TextButton.icon(
             icon: const Icon(Icons.map_outlined),

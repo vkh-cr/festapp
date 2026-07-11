@@ -1752,11 +1752,7 @@
     "blockReporter": "Block reporter",
     "blockReporterConfirm": "Really block cleaning reports for {name}? This participant will no longer be able to report a problem.",
     "reporterBlocked": "Reporter has been blocked.",
-    "blockedMessage": "Your cleaning reports have been temporarily disabled.",
-    "rateQuality": "Rate",
-    "rateDialogTitle": "Rate: {toilet}",
-    "reviewSuccess": "Thanks for your rating!",
-    "ratingSummary": "Average {avg} · {count} ratings"
+    "blockedMessage": "Your cleaning reports have been temporarily disabled."
   },
   "FeatureCleaning": {
     "title": "Cleaning service",

@@ -15,14 +15,12 @@ class CleaningReportFlow {
     required int placeId,
     required String placeTitle,
     VoidCallback? onShowOnMap,
-    VoidCallback? onRate,
   }) async {
     final result = await showDialog<CleaningReportOutcome>(
       context: context,
       builder: (_) => CleaningReportDialog(
         placeTitle: placeTitle,
         onShowOnMap: onShowOnMap,
-        onRate: onRate,
       ),
     );
     if (result == null || !context.mounted) return false;
