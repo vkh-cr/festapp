@@ -160,14 +160,16 @@ class RightsService {
     return isEditorOrder() || isAdmin() || isUnitEditor();
   }
 
-  /// Cleaning crew rights on the current occasion: the per-occasion
-  /// is_cleaning_crew flag, or editor/admin (who see everything implicitly).
-  /// Mirrors get_is_cleaning_crew_on_occasion on the backend.
+  /// Whether the current user is on the cleaning crew — the per-occasion
+  /// is_cleaning_crew flag ONLY. Editors/admins are deliberately NOT treated as
+  /// implicit crew: only actual crew receive the report push notifications, so
+  /// only they should see the crew section on the Cleaning page (tabs, reports,
+  /// "Cleaned", the notification opt-out). The backend get_cleaning_reports /
+  /// resolve_cleaning_place still permit editors for oversight, but the UI is
+  /// intentionally stricter.
   static bool isCleaningCrew() {
-    return (occasionLinkModelNotifier.value?.occasionUser?.isCleaningCrew ??
-            false) ||
-        isEditor() ||
-        isAdmin();
+    return occasionLinkModelNotifier.value?.occasionUser?.isCleaningCrew ??
+        false;
   }
 
   static bool canSeeUnitUsers() {

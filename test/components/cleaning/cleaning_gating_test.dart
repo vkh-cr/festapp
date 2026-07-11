@@ -7,10 +7,11 @@ import 'package:fstapp/data_services/rights_service.dart';
 ///
 /// [RightsService.isCleaningCrew] is the single predicate that gates every
 /// crew-only piece of UI on the Cleaning page: the "Current / History" tabs,
-/// the report history + .txt export, the "block reporter" overflow action and
-/// the "Cleaned" button. A plain participant must get `false` (so they see only
-/// the simple report view); the per-occasion `is_cleaning_crew` flag, an editor
-/// or an admin must get `true`.
+/// the report history + .txt export, the "block reporter" overflow action, the
+/// "Cleaned" button and the notification opt-out. Only the per-occasion
+/// `is_cleaning_crew` flag grants it; a plain participant — AND an editor/admin
+/// who is not on the crew — must get `false` (they see only the simple report
+/// view, since only actual crew receive the report notifications).
 ///
 /// This mirrors the pure-predicate style of counseling_gating_test.dart — it
 /// drives RightsService via its occasionLinkModel notifier, no Supabase needed.
@@ -58,14 +59,14 @@ void main() {
       expect(RightsService.isCleaningCrew(), isTrue);
     });
 
-    test('editor (without the crew flag) → crew implicitly', () {
+    test('editor (without the crew flag) → NOT crew', () {
       setContext(isCleaningCrew: false, isEditor: true);
-      expect(RightsService.isCleaningCrew(), isTrue);
+      expect(RightsService.isCleaningCrew(), isFalse);
     });
 
-    test('admin (without the crew flag) → crew implicitly', () {
+    test('admin (without the crew flag) → NOT crew', () {
       setContext(isCleaningCrew: false, isEditor: false, isAdmin: true);
-      expect(RightsService.isCleaningCrew(), isTrue);
+      expect(RightsService.isCleaningCrew(), isFalse);
     });
   });
 }
