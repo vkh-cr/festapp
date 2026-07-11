@@ -29,16 +29,38 @@ class DbCleaning {
     );
   }
 
-  /// Public per-toilet status list (drives the tile grid and map colors).
-  static Future<List<CleaningPlaceStatus>> getStatus(int occasionId) async {
+  /// Public per-toilet status (drives the tile grid and map colors). Also carries
+  /// is_blocked for the caller so a banned reporter's UI can grey the report
+  /// action out without an extra round-trip.
+  static Future<CleaningStatusResult> getStatus(int occasionId) async {
     final res = await _supabase.rpc('get_cleaning_status', params: {
       'oc': occasionId,
     });
     _ensureOk(res);
-    return ((res['data'] as List?) ?? const [])
+    final places = ((res['data'] as List?) ?? const [])
         .map((e) =>
             CleaningPlaceStatus.fromJson((e as Map).cast<String, dynamic>()))
         .toList();
+    return CleaningStatusResult(
+      places: places,
+      isBlocked: res is Map && res['is_blocked'] == true,
+    );
+  }
+
+  /// Crew blocks (or editor unblocks) a repeat offender on the occasion.
+  /// Throws [CleaningException] on a non-200 envelope (403 when the caller lacks
+  /// the rights: crew may block, only editors may unblock).
+  static Future<void> setReporterBlocked({
+    required int occasionId,
+    required String userId,
+    required bool blocked,
+  }) async {
+    final res = await _supabase.rpc('set_cleaning_reporter_blocked', params: {
+      'p_occasion': occasionId,
+      'p_user': userId,
+      'p_blocked': blocked,
+    });
+    _ensureOk(res);
   }
 
   /// Crew-only detailed reports (notes, times, reporter).
@@ -77,6 +99,14 @@ class DbCleaning {
 class CleaningReportResult {
   final bool duplicate;
   CleaningReportResult({required this.duplicate});
+}
+
+/// Result of get_cleaning_status: the per-toilet statuses plus whether the
+/// current caller is blocked from reporting on this occasion.
+class CleaningStatusResult {
+  final List<CleaningPlaceStatus> places;
+  final bool isBlocked;
+  CleaningStatusResult({required this.places, required this.isBlocked});
 }
 
 /// Carries the RPC error code so the UI can show the matching message

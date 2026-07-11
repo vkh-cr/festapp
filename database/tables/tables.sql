@@ -763,6 +763,7 @@ create table if not exists public.occasion_users (
   is_editor_order boolean NOT NULL DEFAULT false,
   is_editor_order_view boolean NOT NULL DEFAULT false,
   is_cleaning_crew boolean NOT NULL DEFAULT false,
+  is_cleaning_blocked boolean NOT NULL DEFAULT false,
   ticket bigint null,
   CONSTRAINT public_occasion_users_occasion_fkey FOREIGN KEY (occasion) REFERENCES public.occasions (id),
   constraint occasion_users_ticket_fkey foreign KEY (ticket) references eshop.tickets (id),

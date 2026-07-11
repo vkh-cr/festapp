@@ -52,10 +52,8 @@ BEGIN
     INSERT INTO public.occasion_users (occasion, "user", is_approved)
     VALUES (v_oc, get_user_id('cln_rl'), true);
 
-    -- Toilet place_type on both occasions.
-    INSERT INTO public.place_types (occasion, code, title) VALUES (v_oc, 'toilet', 'WC');
-    INSERT INTO public.place_types (occasion, code, title) VALUES (v_oc2, 'toilet', 'WC');
-
+    -- Toilets are flagged purely via places.type = 'toilet' (the admin "WC"
+    -- checkbox) — no place_types catalog row is required.
     INSERT INTO public.places (title, occasion, type, coordinates)
     VALUES ('WC 01', v_oc, 'toilet', '{"latLng":{"lat":0,"lng":0}}'::jsonb) RETURNING id INTO v_wc1;
     INSERT INTO public.places (title, occasion, type, coordinates)
@@ -290,4 +288,107 @@ BEGIN
     PERFORM assert_eq(v_res->>'code', '429', 'rl #6 → 429 (rate limited)');
 
     RAISE NOTICE 'test 7 (rate limit) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 8. Blocking (feature B): a plain attendee cannot block; the crew can block a
+--    reporter (with audit into occasion_users.data); a blocked reporter gets 403
+--    from report_cleaning_issue and is_blocked=true in get_cleaning_status;
+--    only an editor can unblock (crew unblock → 403); after unblock reporting
+--    works again and is_blocked=false.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc    bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_wc2   bigint := (SELECT v FROM _cln WHERE k = 'wc2');
+    v_res   jsonb;
+    v_blocked boolean;
+    v_data  jsonb;
+BEGIN
+    -- A plain attendee (outsider) must not be able to block anyone.
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_outsider')::text, true);
+    v_res := public.set_cleaning_reporter_blocked(v_oc, get_user_id('cln_reporter'), true);
+    PERFORM assert_eq(v_res->>'code', '403', 'non-crew cannot block a reporter');
+
+    -- Crew blocks the reporter.
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_crew')::text, true);
+    v_res := public.set_cleaning_reporter_blocked(v_oc, get_user_id('cln_reporter'), true);
+    PERFORM assert_eq(v_res->>'code', '200', 'crew blocks reporter → 200');
+    PERFORM assert_eq(v_res->'data'->>'blocked', 'true', 'result reports blocked=true');
+
+    SELECT is_cleaning_blocked, data INTO v_blocked, v_data
+      FROM public.occasion_users
+     WHERE occasion = v_oc AND "user" = get_user_id('cln_reporter');
+    PERFORM assert_true(v_blocked, 'flag is set on occasion_users');
+    PERFORM assert_eq(v_data->>'cleaning_blocked_by', get_user_id('cln_crew')::text, 'audit records who blocked');
+    PERFORM assert_not_null(v_data->>'cleaning_blocked_at', 'audit records when blocked');
+
+    -- Blocked reporter cannot report and sees is_blocked=true in the status.
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
+    v_res := public.report_cleaning_issue(v_wc2, 'paper', 'still spamming');
+    PERFORM assert_eq(v_res->>'code', '403', 'blocked reporter → 403');
+
+    v_res := public.get_cleaning_status(v_oc);
+    PERFORM assert_eq(v_res->>'is_blocked', 'true', 'status reports is_blocked=true for blocked reporter');
+
+    -- A non-blocked attendee sees is_blocked=false.
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_outsider')::text, true);
+    v_res := public.get_cleaning_status(v_oc);
+    PERFORM assert_eq(v_res->>'is_blocked', 'false', 'status reports is_blocked=false for others');
+
+    -- Crew cannot UNblock (editor-only, asymmetric rights).
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_crew')::text, true);
+    v_res := public.set_cleaning_reporter_blocked(v_oc, get_user_id('cln_reporter'), false);
+    PERFORM assert_eq(v_res->>'code', '403', 'crew cannot unblock (editor-only)');
+
+    -- Editor unblocks; audit keys are cleared and reporting works again.
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_editor')::text, true);
+    v_res := public.set_cleaning_reporter_blocked(v_oc, get_user_id('cln_reporter'), false);
+    PERFORM assert_eq(v_res->>'code', '200', 'editor unblocks → 200');
+
+    SELECT is_cleaning_blocked, data INTO v_blocked, v_data
+      FROM public.occasion_users
+     WHERE occasion = v_oc AND "user" = get_user_id('cln_reporter');
+    PERFORM assert_true(NOT v_blocked, 'flag cleared on unblock');
+    PERFORM assert_true(NOT (v_data ? 'cleaning_blocked_by'), 'audit blocked_by cleared on unblock');
+
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
+    v_res := public.get_cleaning_status(v_oc);
+    PERFORM assert_eq(v_res->>'is_blocked', 'false', 'unblocked reporter is_blocked=false');
+
+    RAISE NOTICE 'test 8 (blocking) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 9. get_cleaning_reports exposes created_by (uuid) and created_by_blocked so
+--    the crew card can offer/label the block action.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc   bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_wc2  bigint := (SELECT v FROM _cln WHERE k = 'wc2');
+    v_res  jsonb;
+    v_row  jsonb;
+BEGIN
+    -- Fresh open report by the reporter (wc2 contamination has no open report —
+    -- test 7's 6th report was rate-limited, not created), then block them.
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
+    PERFORM public.report_cleaning_issue(v_wc2, 'contamination', 'reporter note');
+
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_crew')::text, true);
+    PERFORM public.set_cleaning_reporter_blocked(v_oc, get_user_id('cln_reporter'), true);
+
+    v_res := public.get_cleaning_reports(v_oc, true);
+    PERFORM assert_eq(v_res->>'code', '200', 'get_cleaning_reports → 200');
+
+    SELECT elem INTO v_row
+      FROM jsonb_array_elements(v_res->'data') elem
+     WHERE elem->>'created_by' = get_user_id('cln_reporter')::text
+       AND (elem->>'place')::bigint = v_wc2 AND elem->>'problem_type' = 'contamination'
+     LIMIT 1;
+    PERFORM assert_not_null(v_row::text, 'report row present');
+    PERFORM assert_eq(v_row->>'created_by', get_user_id('cln_reporter')::text, 'report exposes created_by uuid');
+    PERFORM assert_eq(v_row->>'created_by_blocked', 'true', 'report flags a blocked reporter');
+
+    RAISE NOTICE 'test 9 (report exposes created_by + blocked) passed';
 END $$ LANGUAGE plpgsql;

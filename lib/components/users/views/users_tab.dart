@@ -48,6 +48,8 @@ class _UsersTabState extends State<UsersTab> {
         UserColumns.APPROVED,
       if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
         UserColumns.CLEANING_CREW,
+      if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
+        UserColumns.CLEANING_BLOCKED,
       UserColumns.INVITED,
       UserColumns.CREATED_AT,
       UserColumns.LAST_SIGN_IN_AT,

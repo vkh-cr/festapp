@@ -3,6 +3,8 @@
 -- per non-hidden toilet with the derived status (highest open-report severity:
 -- paper < hygiene < contamination; none open -> green) and the last report time.
 -- No notes or reporter names here — those are crew-only (get_cleaning_reports).
+-- Also returns is_blocked for the caller (anti-spam ban) so the participant UI
+-- can grey the report action out without an extra round-trip.
 CREATE OR REPLACE FUNCTION get_cleaning_status(oc bigint) RETURNS jsonb
   LANGUAGE plpgsql
   STABLE
@@ -11,10 +13,15 @@ CREATE OR REPLACE FUNCTION get_cleaning_status(oc bigint) RETURNS jsonb
 AS $$
 DECLARE
   v_data jsonb;
+  v_blocked boolean;
 BEGIN
   IF auth.uid() IS NULL THEN
     RETURN jsonb_build_object('code', 401, 'message', 'Sign in is required');
   END IF;
+
+  SELECT COALESCE(bool_or(is_cleaning_blocked), false) INTO v_blocked
+  FROM public.occasion_users
+  WHERE occasion = oc AND "user" = auth.uid();
 
   SELECT COALESCE(jsonb_agg(t ORDER BY t.title), '[]'::jsonb)
   INTO v_data
@@ -36,15 +43,14 @@ BEGIN
       END AS status,
       MAX(r.created_at) AS last_reported_at
     FROM public.places p
-    JOIN public.place_types pt
-      ON pt.occasion = p.occasion AND pt.code = p.type AND pt.code = 'toilet'
     LEFT JOIN public.cleaning_reports r
       ON r.place = p.id AND r.resolved_at IS NULL
     WHERE p.occasion = oc
       AND p.is_hidden = false
+      AND p.type = 'toilet'
     GROUP BY p.id, p.title
   ) t;
 
-  RETURN jsonb_build_object('code', 200, 'data', v_data);
+  RETURN jsonb_build_object('code', 200, 'data', v_data, 'is_blocked', v_blocked);
 END;
 $$;

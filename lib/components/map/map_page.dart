@@ -74,7 +74,17 @@ class MapPage extends StatefulWidget {
   /// free-point nodes, and Save returns the drawn path as a CSV string.
   PathGroupsModel? editPathGroup;
 
-  MapPage({@pathParam this.id, this.place, this.editPathGroup, super.key});
+  /// Optional deep-link place-type filter (e.g. `map?placeType=toilet` from the
+  /// Cleaning page) — opens the map showing only that category.
+  final String? placeType;
+
+  MapPage({
+    @pathParam this.id,
+    this.place,
+    this.editPathGroup,
+    @QueryParam('placeType') this.placeType,
+    super.key,
+  });
 
   /// True while the map is in path-drawing mode. The occasion shell listens to
   /// this to hide its bottom navigation bar during editing.
@@ -140,6 +150,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   String? _selectedPlaceTypeCode;
   bool _placeTypeInitialized = false;
 
+  /// Deep-link place-type filter (from `map?placeType=…`). When set it wins over
+  /// the saved/default selection and filters even if that code is not a catalog
+  /// place_type chip (e.g. toilets marked only via the "WC" checkbox).
+  String? _deepLinkPlaceType;
+
   /// True once we know the place-type situation authoritatively enough to filter
   /// without flashing: either cached types were loaded (offline) or the online
   /// load finished. Until then the default marker view is held back so an empty
@@ -163,6 +178,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    if (widget.placeType != null && widget.placeType!.isNotEmpty) {
+      _deepLinkPlaceType = widget.placeType;
+      _selectedPlaceTypeCode = widget.placeType;
+      _placeTypeInitialized = true;
+    }
     _iconScrollController = ScrollController();
     context.tabsRouter.addListener(() async {
       if (context.tabsRouter.activeIndex ==
@@ -576,6 +596,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   /// every place matches; the "Other" bucket matches untyped places and places
   /// whose type is not among the visible chips.
   bool _placeMatchesSelectedType(MapPlaceModel place) {
+    // A deep-link filter (e.g. toilets) applies even with no catalog place_types.
+    if (_deepLinkPlaceType != null) {
+      return place.type == _deepLinkPlaceType;
+    }
     if (_selectedPlaceTypeCode == null || _placeTypes.isEmpty) return true;
     if (_selectedPlaceTypeCode == _otherPlaceTypeCode) {
       final visibleCodes = _placeTypes.map((t) => t.code).toSet();
@@ -1018,7 +1042,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     if (oc == null) return;
     try {
       final statuses = await DbCleaning.getStatus(oc);
-      _cleaningStatus = {for (final s in statuses) s.place: s.status};
+      _cleaningStatus = {for (final s in statuses.places) s.place: s.status};
     } catch (_) {
       // ignore — map remains usable without cleaning colors
     }
@@ -1061,7 +1085,21 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       }
     }
 
+    final wcIconId = FeatureService.isFeatureEnabled(FeatureConstants.cleaning)
+        ? _icons
+            .firstWhereOrNull((i) =>
+                i.link == CleaningStatusHelper.toiletPlaceTypeCode ||
+                i.link == 'wc')
+            ?.id
+        : null;
+
     var mappedMarkers = places.map((place) {
+      // Toilets without their own icon still show the shared "wc" icon.
+      if (wcIconId != null &&
+          place.type == CleaningStatusHelper.toiletPlaceTypeCode &&
+          place.icon == null) {
+        place.icon = wcIconId;
+      }
       var mapPlace = MapPlaceModel.fromPlaceModel(place);
       var pinColor = _cleaningPinColorFor(mapPlace);
       var iconWidget = isIconVisible(place)
@@ -1467,6 +1505,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   /// an existing selection unless it no longer matches any visible chip (e.g.
   /// initialized from a stale offline cache).
   void _initPlaceTypeSelection() {
+    // A deep-link filter wins and must not be overridden by saved/default type.
+    if (_deepLinkPlaceType != null) {
+      _selectedPlaceTypeCode = _deepLinkPlaceType;
+      _placeTypeInitialized = true;
+      return;
+    }
     if (_placeTypes.isEmpty) return;
     if (_placeTypeInitialized &&
         (_selectedPlaceTypeCode == _otherPlaceTypeCode ||
@@ -1480,6 +1524,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   Future<void> _onPlaceTypeTap(String? code) async {
     if (code == null) return;
+    // Tapping a chip returns to normal filtering, dropping any deep-link filter.
+    _deepLinkPlaceType = null;
     setState(() => _selectedPlaceTypeCode = code);
     await OfflineDataService.saveSelectedPlaceType(code);
 

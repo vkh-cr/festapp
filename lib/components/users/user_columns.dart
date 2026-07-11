@@ -30,6 +30,7 @@ class UserColumns {
   static const String EDITOR_ORDER = "editorOrder";
   static const String EDITOR_ORDER_VIEW = "editorOrderView";
   static const String CLEANING_CREW = "cleaningCrew";
+  static const String CLEANING_BLOCKED = "cleaningBlocked";
   static const String UNIT_MANAGER = "unitManager";
   static const String UNIT_EDITOR = "unitEditor";
   static const String UNIT_EDITOR_VIEW = "unitEditorView";
@@ -248,6 +249,9 @@ class UserColumns {
           _statusColumn(UserStrings.readOrders, EDITOR_ORDER_VIEW)
         ],
         CLEANING_CREW: [_statusColumn(UserStrings.cleaningCrew, CLEANING_CREW)],
+        CLEANING_BLOCKED: [
+          _statusColumn(UserStrings.cleaningBlocked, CLEANING_BLOCKED)
+        ],
         UNIT_MANAGER: [
           _statusColumn(UserStrings.administrator, UNIT_MANAGER,
               canUpdateUser: RightsService.canUpdateUnitUsers)

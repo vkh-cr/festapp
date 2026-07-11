@@ -8,7 +8,9 @@ class CleaningReport {
   final String? note;
   final List<String> extraNotes;
   final DateTime createdAt;
+  final String? createdBy;
   final String? createdByName;
+  final bool createdByBlocked;
   final DateTime? resolvedAt;
 
   CleaningReport({
@@ -19,7 +21,9 @@ class CleaningReport {
     this.note,
     this.extraNotes = const [],
     required this.createdAt,
+    this.createdBy,
     this.createdByName,
+    this.createdByBlocked = false,
     this.resolvedAt,
   });
 
@@ -42,7 +46,9 @@ class CleaningReport {
       createdAt:
           DateTime.tryParse(json['created_at'].toString())?.toLocal() ??
               DateTime.now(),
+      createdBy: (json['created_by'] as String?),
       createdByName: (name == null || name.isEmpty) ? null : name,
+      createdByBlocked: json['created_by_blocked'] == true,
       resolvedAt: json['resolved_at'] != null
           ? DateTime.tryParse(json['resolved_at'].toString())?.toLocal()
           : null,

@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart' show Uint8List;
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/cleaning/cleaning_status.dart';
 import 'package:fstapp/components/cleaning/cleaning_strings.dart';
@@ -44,6 +47,9 @@ class _CleaningPageState extends State<CleaningPage> {
   List<CleaningPlaceStatus> _places = [];
   List<CleaningReport> _reports = [];
   bool _loading = true;
+  bool _isBlocked = false;
+  bool _showHistory = false;
+  bool _exportingHistory = false;
   bool _deepLinkHandled = false;
   Timer? _pollTimer;
 
@@ -68,11 +74,12 @@ class _CleaningPageState extends State<CleaningPage> {
 
   Future<void> _loadData({bool silent = false}) async {
     Future<_CleaningData> fetch() async {
-      final places = await DbCleaning.getStatus(_occasionId);
+      final status = await DbCleaning.getStatus(_occasionId);
+      // The crew fetches resolved reports too so the History tab needs no reload.
       final reports = _isCrew
-          ? await DbCleaning.getReports(_occasionId)
+          ? await DbCleaning.getReports(_occasionId, includeResolved: true)
           : <CleaningReport>[];
-      return _CleaningData(places, reports);
+      return _CleaningData(status.places, reports, status.isBlocked);
     }
 
     _CleaningData? data;
@@ -91,6 +98,7 @@ class _CleaningPageState extends State<CleaningPage> {
       if (data != null) {
         _places = data.places;
         _reports = data.reports;
+        _isBlocked = data.isBlocked;
       }
       _loading = false;
     });
@@ -117,6 +125,12 @@ class _CleaningPageState extends State<CleaningPage> {
   }
 
   Future<void> _openReportDialog(CleaningPlaceStatus place) async {
+    // Blocked reporters (anti-spam ban) still see the page but cannot report.
+    if (_isBlocked && !_isCrew) {
+      ToastHelper.Show(context, CleaningStrings.blockedMessage,
+          severity: ToastSeverity.NotOk);
+      return;
+    }
     final changed = await CleaningReportFlow.report(
       context,
       placeId: place.place,
@@ -125,6 +139,13 @@ class _CleaningPageState extends State<CleaningPage> {
           context, "${MapPage.ROUTE}/${place.place}"),
     );
     if (changed && mounted) await _loadData();
+  }
+
+  void _openMapFiltered() {
+    RouterService.navigateOccasion(
+      context,
+      "${MapPage.ROUTE}?placeType=${CleaningStatusHelper.toiletPlaceTypeCode}",
+    );
   }
 
   Future<void> _resolvePlace(int placeId) async {
@@ -137,6 +158,95 @@ class _CleaningPageState extends State<CleaningPage> {
         await _loadData();
       },
     );
+  }
+
+  /// Crew blocks a repeat offender straight from their report (confirm first).
+  Future<void> _blockReporter(CleaningReport report) async {
+    final userId = report.createdBy;
+    if (userId == null) return;
+    final name = report.createdByName ?? CleaningStrings.anonymous;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(CleaningStrings.blockReporter),
+        content: Text(CleaningStrings.blockReporterConfirm(name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(CleaningStrings.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(CleaningStrings.blockReporter),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    await ExceptionHandler.guardVoid(
+      context,
+      futureFunction: () async {
+        await DbCleaning.setReporterBlocked(
+          occasionId: _occasionId,
+          userId: userId,
+          blocked: true,
+        );
+        if (!mounted) return;
+        ToastHelper.Show(context, CleaningStrings.reporterBlocked);
+        await _loadData();
+      },
+    );
+  }
+
+  /// Builds a plain-text export of the whole report history and saves it.
+  Future<void> _exportHistory(List<CleaningReport> history) async {
+    setState(() => _exportingHistory = true);
+    try {
+      final occasionTitle =
+          RightsService.currentOccasion()?.title ?? CleaningStrings.pageTitle;
+      final text = _buildHistoryText(occasionTitle, history);
+      final bytes = <int>[0xEF, 0xBB, 0xBF, ...utf8.encode(text)];
+      await FileSaver.instance.saveFile(
+        name: 'cleaning_history',
+        bytes: Uint8List.fromList(bytes),
+        fileExtension: 'txt',
+        mimeType: MimeType.text,
+      );
+    } finally {
+      if (mounted) setState(() => _exportingHistory = false);
+    }
+  }
+
+  /// One line per report: `date time · WC · type · "note" · reporter · state`,
+  /// extra (duplicate) notes indented below. Header = occasion + export date.
+  String _buildHistoryText(String occasionTitle, List<CleaningReport> history) {
+    final dateFmt = DateFormat('yyyy-MM-dd HH:mm');
+    final buf = StringBuffer();
+    buf.writeln(occasionTitle);
+    buf.writeln(
+        '${CleaningStrings.historyTitle} · ${dateFmt.format(DateTime.now())}');
+    buf.writeln('');
+    for (final r in history) {
+      final reporter = r.createdByName ?? CleaningStrings.anonymous;
+      final state = r.resolvedAt != null
+          ? CleaningStrings.historyCleanedAt(dateFmt.format(r.resolvedAt!))
+          : CleaningStrings.historyOpen;
+      final parts = <String>[
+        dateFmt.format(r.createdAt),
+        r.placeTitle,
+        CleaningStrings.problemLabel(r.problemType),
+        if (r.note != null && r.note!.isNotEmpty) '„${r.note}"',
+        reporter,
+        state,
+      ];
+      buf.writeln(parts.join(' · '));
+      for (final note in r.extraNotes) {
+        buf.writeln('    „$note"');
+      }
+    }
+    return buf.toString();
   }
 
   @override
@@ -171,21 +281,7 @@ class _CleaningPageState extends State<CleaningPage> {
       return const Center(child: CircularProgressIndicator());
     }
     if (_places.isEmpty) {
-      return ListView(
-        children: [
-          const SizedBox(height: 80),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                CleaningStrings.noToilets,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: ThemeConfig.grey600(context)),
-              ),
-            ),
-          ),
-        ],
-      );
+      return _buildEmptyState(context);
     }
 
     final reportsByPlace = <int, List<CleaningReport>>{};
@@ -196,31 +292,261 @@ class _CleaningPageState extends State<CleaningPage> {
         _places.where((p) => p.status != CleaningStatus.green).toList();
 
     return ListView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       children: [
+        _SummaryBanner(places: _places),
+        if (_isBlocked && !_isCrew) ...[
+          const SizedBox(height: 12),
+          const _BlockedBanner(),
+        ],
+        const SizedBox(height: 18),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 140,
-            childAspectRatio: 1,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            maxCrossAxisExtent: 118,
+            childAspectRatio: 1.02,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
           ),
           itemCount: _places.length,
           itemBuilder: (context, index) =>
               _CleaningTile(place: _places[index], onTap: _openReportDialog),
         ),
-        // Crew-only: detailed open reports with notes/times + "Cleaned".
-        if (_isCrew && problemPlaces.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          for (final place in problemPlaces)
-            _CrewReportCard(
-              place: place,
-              reports: reportsByPlace[place.place] ?? const [],
-              onResolve: () => _resolvePlace(place.place),
-            ),
+        const SizedBox(height: 16),
+        const _Legend(),
+        // Crew-only: "Current / History" tabs over the detailed reports.
+        if (_isCrew) ...[
+          const SizedBox(height: 28),
+          _buildCrewSection(context, problemPlaces, reportsByPlace),
         ],
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.tonalIcon(
+            onPressed: _openMapFiltered,
+            icon: const Icon(Icons.map_outlined),
+            label: Text(CleaningStrings.toiletsOnMap),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(StylesConfig.eventItemRoundness),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Crew section: "Current / History" tabs. Current shows the actionable
+  /// problem cards; History lists every report (incl. resolved) with a .txt
+  /// export.
+  Widget _buildCrewSection(
+    BuildContext context,
+    List<CleaningPlaceStatus> problemPlaces,
+    Map<int, List<CleaningReport>> reportsByPlace,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(
+          child: SegmentedButton<bool>(
+            segments: [
+              ButtonSegment(
+                value: false,
+                icon: const Icon(Icons.assignment_outlined),
+                label: Text(CleaningStrings.tabCurrent),
+              ),
+              ButtonSegment(
+                value: true,
+                icon: const Icon(Icons.history),
+                label: Text(CleaningStrings.tabHistory),
+              ),
+            ],
+            selected: {_showHistory},
+            onSelectionChanged: (s) =>
+                setState(() => _showHistory = s.first),
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (!_showHistory)
+          _buildCurrentReports(problemPlaces, reportsByPlace)
+        else
+          _buildHistory(context),
+      ],
+    );
+  }
+
+  Widget _buildCurrentReports(
+    List<CleaningPlaceStatus> problemPlaces,
+    Map<int, List<CleaningReport>> reportsByPlace,
+  ) {
+    if (problemPlaces.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Text(
+          CleaningStrings.allClean,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: ThemeConfig.grey600(context)),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final place in problemPlaces)
+          _CrewReportCard(
+            place: place,
+            // Only open reports are actionable in the Current tab.
+            reports: (reportsByPlace[place.place] ?? const [])
+                .where((r) => r.resolvedAt == null)
+                .toList(),
+            onResolve: () => _resolvePlace(place.place),
+            onBlock: _blockReporter,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildHistory(BuildContext context) {
+    final history = _reports; // already sorted newest-first by the RPC
+    if (history.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Text(
+          CleaningStrings.historyEmpty,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: ThemeConfig.grey600(context)),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.tonalIcon(
+            onPressed:
+                _exportingHistory ? null : () => _exportHistory(history),
+            icon: _exportingHistory
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.download),
+            label: Text(CleaningStrings.download),
+          ),
+        ),
+        const SizedBox(height: 12),
+        for (final r in history) _HistoryRow(report: r),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return ListView(
+      children: [
+        const SizedBox(height: 90),
+        Icon(Icons.cleaning_services_outlined,
+            size: 56, color: ThemeConfig.grey600(context)),
+        const SizedBox(height: 16),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              CleaningStrings.noToilets,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: ThemeConfig.grey600(context), fontSize: 16),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Top-of-page status summary: calm green "all clean" or an alert pill colored
+/// by the most severe open problem, with the problem count.
+class _SummaryBanner extends StatelessWidget {
+  final List<CleaningPlaceStatus> places;
+  const _SummaryBanner({required this.places});
+
+  @override
+  Widget build(BuildContext context) {
+    final problems =
+        places.where((p) => p.status != CleaningStatus.green).toList();
+    final allOk = problems.isEmpty;
+    var worst = CleaningStatus.green;
+    for (final p in problems) {
+      if (p.status.index > worst.index) worst = p.status;
+    }
+    final accent = CleaningStatusHelper.color(allOk ? CleaningStatus.green : worst);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness),
+        border: Border.all(color: accent.withValues(alpha: 0.45)),
+      ),
+      child: Row(
+        children: [
+          Icon(allOk ? Icons.verified_rounded : Icons.warning_amber_rounded,
+              color: accent, size: 28),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              allOk
+                  ? CleaningStrings.allClean
+                  : '${problems.length} · ${CleaningStrings.needsAttention}',
+              style: TextStyle(
+                  color: accent, fontWeight: FontWeight.w700, fontSize: 17),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Small colour legend under the grid.
+class _Legend extends StatelessWidget {
+  const _Legend();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget item(String label, CleaningStatus status) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 11,
+            height: 11,
+            decoration: BoxDecoration(
+                color: CleaningStatusHelper.color(status),
+                shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 12, color: ThemeConfig.grey600(context))),
+        ],
+      );
+    }
+
+    return Wrap(
+      spacing: 18,
+      runSpacing: 8,
+      alignment: WrapAlignment.center,
+      children: [
+        item(CleaningStrings.statusOk, CleaningStatus.green),
+        item(CleaningStrings.shortPaper, CleaningStatus.paper),
+        item(CleaningStrings.shortHygiene, CleaningStatus.hygiene),
+        item(CleaningStrings.shortContamination, CleaningStatus.contamination),
       ],
     );
   }
@@ -229,7 +555,8 @@ class _CleaningPageState extends State<CleaningPage> {
 class _CleaningData {
   final List<CleaningPlaceStatus> places;
   final List<CleaningReport> reports;
-  _CleaningData(this.places, this.reports);
+  final bool isBlocked;
+  _CleaningData(this.places, this.reports, this.isBlocked);
 }
 
 class _CleaningTile extends StatelessWidget {
@@ -240,34 +567,77 @@ class _CleaningTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = CleaningStatusHelper.color(place.status);
-    final biohazard = CleaningStatusHelper.showsBiohazard(place.status);
-    return Material(
-      color: color,
-      borderRadius: BorderRadius.circular(16),
+    final scheme = Theme.of(context).colorScheme;
+    final status = place.status;
+    final isOk = status == CleaningStatus.green;
+    final statusColor = CleaningStatusHelper.color(status);
+    final biohazard = CleaningStatusHelper.showsBiohazard(status);
+
+    // OK tiles stay calm/neutral so the problem tiles are the ones that pop.
+    final bg = isOk
+        ? ThemeConfig.qrButtonColor(context)
+        : statusColor.withValues(alpha: 0.14);
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: bg,
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.circular(StylesConfig.eventItemRoundness),
+        side: BorderSide(
+          color: isOk ? Theme.of(context).dividerColor : statusColor,
+          width: isOk ? 1 : 2,
+        ),
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness),
         onTap: () => onTap(place),
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.fromLTRB(10, 9, 10, 9),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (biohazard) const Text('☣️', style: TextStyle(fontSize: 22)),
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    place.title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+              Row(
+                children: [
+                  Icon(Icons.wc, size: 19, color: statusColor),
+                  const Spacer(),
+                  if (biohazard)
+                    const Text('☣️', style: TextStyle(fontSize: 15)),
+                ],
+              ),
+              Expanded(
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      place.title,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: scheme.onSurface,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.3,
+                      ),
                     ),
                   ),
                 ),
               ),
+              // Only problem tiles carry a label, so a wall of OK tiles stays
+              // clean and scannable when there are many toilets.
+              if (!isOk)
+                Text(
+                  CleaningStrings.statusLabelShort(
+                      CleaningStatusHelper.codeOf(status)),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
+                  ),
+                ),
             ],
           ),
         ),
@@ -282,11 +652,13 @@ class _CrewReportCard extends StatelessWidget {
   final CleaningPlaceStatus place;
   final List<CleaningReport> reports;
   final VoidCallback onResolve;
+  final void Function(CleaningReport) onBlock;
 
   const _CrewReportCard({
     required this.place,
     required this.reports,
     required this.onResolve,
+    required this.onBlock,
   });
 
   @override
@@ -354,6 +726,42 @@ class _CrewReportCard extends StatelessWidget {
                               fontSize: 12,
                               color: ThemeConfig.grey600(context)),
                         ),
+                        // Blocked reporters get a chip; others an overflow menu
+                        // with the (destructive) "block reporter" action.
+                        if (r.createdByBlocked)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 6),
+                            child: Icon(Icons.block,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.error),
+                          )
+                        else if (r.createdBy != null)
+                          SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: PopupMenuButton<String>(
+                              tooltip: CleaningStrings.blockReporter,
+                              icon: const Icon(Icons.more_vert, size: 18),
+                              padding: EdgeInsets.zero,
+                              onSelected: (_) => onBlock(r),
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: 'block',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.block,
+                                          size: 18,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .error),
+                                      const SizedBox(width: 8),
+                                      Text(CleaningStrings.blockReporter),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                     for (final note in [
@@ -371,6 +779,101 @@ class _CrewReportCard extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Info banner shown to a participant whose reporting has been blocked: they can
+/// still see the page (colours) but the report action is disabled.
+class _BlockedBanner extends StatelessWidget {
+  const _BlockedBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.error;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness),
+        border: Border.all(color: color.withValues(alpha: 0.40)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.block, color: color, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              CleaningStrings.blockedMessage,
+              style: TextStyle(color: color, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One compact text line in the crew History tab: date · WC · type · reporter ·
+/// state, with any notes indented beneath.
+class _HistoryRow extends StatelessWidget {
+  final CleaningReport report;
+  const _HistoryRow({required this.report});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFmt = DateFormat('d.M. HH:mm');
+    final resolved = report.resolvedAt != null;
+    final typeColor = CleaningStatusHelper.colorForType(report.problemType);
+    final notes = <String>[
+      if (report.note != null && report.note!.isNotEmpty) report.note!,
+      ...report.extraNotes,
+    ];
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 4, right: 8),
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                      color: typeColor, shape: BoxShape.circle),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${dateFmt.format(report.createdAt)} · ${report.placeTitle} · ${CleaningStrings.problemLabel(report.problemType)}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      '${report.createdByName ?? CleaningStrings.anonymous} · ${resolved ? CleaningStrings.historyCleanedAt(dateFmt.format(report.resolvedAt!)) : CleaningStrings.historyOpen}',
+                      style: TextStyle(
+                          fontSize: 12, color: ThemeConfig.grey600(context)),
+                    ),
+                    for (final note in notes)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text('„$note"',
+                            style:
+                                const TextStyle(fontStyle: FontStyle.italic)),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 14),
+        ],
       ),
     );
   }

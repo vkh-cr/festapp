@@ -159,7 +159,9 @@
     "initializing": "Inicializace...",
     "noEvents": "Žádné události",
     "scan": "Skenovat",
-    "today": "Dnes"
+    "today": "Dnes",
+    "selectEvents": "Vybrat události",
+    "searchEvents": "Hledat události"
   },
   "FeatureImport": {
     "importFeatureDescription": "Umožňuje import uživatelů z různých zdrojů, jako jsou soubory CSV nebo vstupenky.",
@@ -565,7 +567,8 @@
     "approver": "Schvalovatel",
     "approved": "Schváleno",
     "invited": "Pozván",
-    "cleaningCrew": "Úklidová služba"
+    "cleaningCrew": "Úklidová služba",
+    "cleaningBlocked": "Zákaz hlášení úklidu"
   },
   "OrderHistory": {
     "noHistoryFound": "Nebyla nalezena žádná historie.",
@@ -1478,6 +1481,8 @@
     "deleteServiceConfirmText": "Nejméně jeden uživatel má tuto službu. Můžete ho najít v tabulce. Opravdu ji chcete smazat? Smazání nelze vrátit.",
     "code": "Kód",
     "createItemFailed": "Položku se nepodařilo vytvořit.",
+    "codeMustBeUnique": "Tento kód už je použitý. Zvol jiný, unikátní.",
+    "noManagerRight": "Toto může nastavovat jen manažer akce.",
     "foodSettings": "Nastavení jídla",
     "noPlaceSelected": "Není vybráno místo",
     "fillAllFields": "Vyplňte prosím všechna pole.",
@@ -1729,7 +1734,25 @@
     "cleanedConfirm": "Záchod byl označen jako uklizený.",
     "reportedBy": "Nahlásil(a)",
     "reportedAt": "Nahlášeno {time}",
-    "anonymous": "Anonym"
+    "anonymous": "Anonym",
+    "placeIsToilet": "WC (úklid)",
+    "allClean": "Vše v pořádku",
+    "needsAttention": "Vyžaduje pozornost",
+    "shortPaper": "Chybí papír",
+    "shortHygiene": "Chybí hygiena",
+    "shortContamination": "Znečištěno",
+    "toiletsOnMap": "Zobrazit toalety na mapě",
+    "tabCurrent": "Aktuální",
+    "tabHistory": "Historie",
+    "historyTitle": "Historie hlášení",
+    "historyEmpty": "Zatím žádná hlášení.",
+    "historyOpen": "otevřené",
+    "historyCleanedAt": "uklizeno {time}",
+    "download": "Stáhnout",
+    "blockReporter": "Zablokovat ohlašovatele",
+    "blockReporterConfirm": "Opravdu zablokovat hlášení úklidu pro {name}? Tento účastník už nebude moci nahlásit problém.",
+    "reporterBlocked": "Ohlašovatel byl zablokován.",
+    "blockedMessage": "Hlášení úklidu máš dočasně zakázané."
   },
   "FeatureCleaning": {
     "title": "Úklidová služba",

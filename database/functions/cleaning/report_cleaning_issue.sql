@@ -51,13 +51,22 @@ BEGIN
 
   v_occasion := v_place.occasion;
 
-  -- Place must be a toilet (place_types.code = 'toilet') on this occasion.
-  IF NOT EXISTS (
-    SELECT 1 FROM public.place_types pt
-    WHERE pt.occasion = v_occasion
-      AND pt.code = 'toilet'
-      AND pt.code = v_place.type
+  -- Blocked reporters (anti-spam hard ban) cannot file reports on this occasion.
+  -- This is the source of truth; the UI also greys the report action out via the
+  -- is_blocked flag returned by get_cleaning_status.
+  IF EXISTS (
+    SELECT 1 FROM public.occasion_users
+    WHERE occasion = v_occasion
+      AND "user" = v_user
+      AND is_cleaning_blocked = true
   ) THEN
+    RETURN jsonb_build_object('code', 403, 'message', 'Reporting has been disabled for your account');
+  END IF;
+
+  -- Place must be flagged as a toilet (places.type = 'toilet'). This is set by
+  -- the "WC / Úklid" checkbox in the admin Places grid — no place_types catalog
+  -- row is required.
+  IF v_place.type IS DISTINCT FROM 'toilet' THEN
     RETURN jsonb_build_object('code', 400, 'message', 'Place is not a toilet');
   END IF;
 

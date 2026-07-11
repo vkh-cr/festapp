@@ -9,10 +9,14 @@ class CleaningStrings {
 
   static String get pageTitle => 'Cleaning.pageTitle'.tr();
 
+  /// Column header of the "mark this place as a toilet" checkbox in admin Places.
+  static String get placeIsToilet => 'Cleaning.placeIsToilet'.tr();
+
   static String get noToilets => 'Cleaning.noToilets'.tr();
   static String get tapToReport => 'Cleaning.tapToReport'.tr();
   static String get refresh => 'Cleaning.refresh'.tr();
   static String get showOnMap => 'Cleaning.showOnMap'.tr();
+  static String get toiletsOnMap => 'Cleaning.toiletsOnMap'.tr();
 
   // Report dialog
   static String get reportProblem => 'Cleaning.reportProblem'.tr();
@@ -35,6 +39,27 @@ class CleaningStrings {
 
   // Status labels
   static String get statusOk => 'Cleaning.statusOk'.tr();
+  static String get allClean => 'Cleaning.allClean'.tr();
+  static String get needsAttention => 'Cleaning.needsAttention'.tr();
+
+  // Short status labels for the compact tiles.
+  static String get shortPaper => 'Cleaning.shortPaper'.tr();
+  static String get shortHygiene => 'Cleaning.shortHygiene'.tr();
+  static String get shortContamination => 'Cleaning.shortContamination'.tr();
+
+  /// Short label for a status shown on a tile.
+  static String statusLabelShort(String type) {
+    switch (type) {
+      case 'paper':
+        return shortPaper;
+      case 'hygiene':
+        return shortHygiene;
+      case 'contamination':
+        return shortContamination;
+      default:
+        return statusOk;
+    }
+  }
 
   // Crew view
   static String get markCleaned => 'Cleaning.markCleaned'.tr();
@@ -43,6 +68,23 @@ class CleaningStrings {
   static String reportedAt(String time) =>
       'Cleaning.reportedAt'.tr(namedArgs: {'time': time});
   static String get anonymous => 'Cleaning.anonymous'.tr();
+
+  // Crew tabs + history (feature A)
+  static String get tabCurrent => 'Cleaning.tabCurrent'.tr();
+  static String get tabHistory => 'Cleaning.tabHistory'.tr();
+  static String get historyTitle => 'Cleaning.historyTitle'.tr();
+  static String get historyEmpty => 'Cleaning.historyEmpty'.tr();
+  static String get historyOpen => 'Cleaning.historyOpen'.tr();
+  static String historyCleanedAt(String time) =>
+      'Cleaning.historyCleanedAt'.tr(namedArgs: {'time': time});
+  static String get download => 'Cleaning.download'.tr();
+
+  // Blocking reporters (feature B)
+  static String get blockReporter => 'Cleaning.blockReporter'.tr();
+  static String blockReporterConfirm(String name) =>
+      'Cleaning.blockReporterConfirm'.tr(namedArgs: {'name': name});
+  static String get reporterBlocked => 'Cleaning.reporterBlocked'.tr();
+  static String get blockedMessage => 'Cleaning.blockedMessage'.tr();
 
   /// Human label for a problem-type code (paper|hygiene|contamination).
   static String problemLabel(String type) {

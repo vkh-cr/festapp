@@ -35,11 +35,13 @@ BEGIN
       r.created_at,
       r.created_by,
       TRIM(BOTH ' ' FROM COALESCE(ui.name, '') || ' ' || COALESCE(ui.surname, '')) AS created_by_name,
+      COALESCE(ou.is_cleaning_blocked, false) AS created_by_blocked,
       r.resolved_at,
       r.resolved_by
     FROM public.cleaning_reports r
     JOIN public.places p ON p.id = r.place
     LEFT JOIN public.user_info ui ON ui.id = r.created_by
+    LEFT JOIN public.occasion_users ou ON ou."user" = r.created_by AND ou.occasion = r.occasion
     WHERE r.occasion = oc
       AND (p_include_resolved OR r.resolved_at IS NULL)
   ) t;

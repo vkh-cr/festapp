@@ -159,7 +159,9 @@
     "initializing": "Initializing...",
     "noEvents": "No events",
     "scan": "Scan",
-    "today": "Today"
+    "today": "Today",
+    "selectEvents": "Select events",
+    "searchEvents": "Search events"
   },
   "FeatureImport": {
     "importFeatureDescription": "Enables importing users from various sources like CSV files or from tickets.",
@@ -565,7 +567,8 @@
     "approver": "Approver",
     "approved": "Approved",
     "invited": "Invited",
-    "cleaningCrew": "Cleaning crew"
+    "cleaningCrew": "Cleaning crew",
+    "cleaningBlocked": "Cleaning report ban"
   },
   "OrderHistory": {
     "noHistoryFound": "No history found.",
@@ -1478,6 +1481,8 @@
     "deleteServiceConfirmText": "At least one user has this service. You can find them in the grid. Are you sure you want to delete it? Deletion cannot be undone.",
     "code": "Code",
     "createItemFailed": "Failed to create the item.",
+    "codeMustBeUnique": "This code is already used. Choose a unique one.",
+    "noManagerRight": "Only an occasion manager can manage this.",
     "foodSettings": "Food settings",
     "noPlaceSelected": "No place selected",
     "fillAllFields": "Please fill in all fields.",
@@ -1729,7 +1734,25 @@
     "cleanedConfirm": "The toilet has been marked as cleaned.",
     "reportedBy": "Reported by",
     "reportedAt": "Reported {time}",
-    "anonymous": "Anonymous"
+    "anonymous": "Anonymous",
+    "placeIsToilet": "Toilet (cleaning)",
+    "allClean": "All clean",
+    "needsAttention": "Needs attention",
+    "shortPaper": "Out of paper",
+    "shortHygiene": "Out of hygiene",
+    "shortContamination": "Soiled",
+    "toiletsOnMap": "Show toilets on map",
+    "tabCurrent": "Current",
+    "tabHistory": "History",
+    "historyTitle": "Report history",
+    "historyEmpty": "No reports yet.",
+    "historyOpen": "open",
+    "historyCleanedAt": "cleaned {time}",
+    "download": "Download",
+    "blockReporter": "Block reporter",
+    "blockReporterConfirm": "Really block cleaning reports for {name}? This participant will no longer be able to report a problem.",
+    "reporterBlocked": "Reporter has been blocked.",
+    "blockedMessage": "Your cleaning reports have been temporarily disabled."
   },
   "FeatureCleaning": {
     "title": "Cleaning service",
