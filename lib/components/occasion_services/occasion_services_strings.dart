@@ -23,6 +23,11 @@ class OccasionServicesStrings {
       'OccasionServices.fillAllFields'.tr(); // "Please fill in all fields."
   static String get createItemFailed =>
       'OccasionServices.createItemFailed'.tr(); // "Failed to create the item."
+  static String get codeMustBeUnique =>
+      'OccasionServices.codeMustBeUnique'
+          .tr(); // "This code is already used. Choose a unique one."
+  static String get noManagerRight => 'OccasionServices.noManagerRight'
+      .tr(); // "Only an occasion manager can manage this."
   static String get deleteServiceConfirmTitle =>
       'OccasionServices.deleteServiceConfirmTitle'
           .tr(); // "Really delete service?"

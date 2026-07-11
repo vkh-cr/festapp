@@ -10,6 +10,9 @@ import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/cleaning/cleaning_status.dart';
+import 'package:fstapp/components/cleaning/cleaning_strings.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/map/map_strings.dart';
@@ -115,6 +118,49 @@ class _PlacesContentState extends State<PlacesContent> {
           renderer: (ctx) =>
               DataGridHelper.mapIconRenderer(context, ctx, svgIcons),
         ),
+        // Cleaning service: mark a place as a toilet (sets places.type='toilet').
+        // Shown only when the "cleaning" feature is enabled on the occasion.
+        if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
+          TrinaColumn(
+            title: CleaningStrings.placeIsToilet,
+            field: Tb.places.type,
+            type: TrinaColumnType.text(),
+            applyFormatterInEditing: true,
+            enableEditingMode: false,
+            width: 110,
+            renderer: (ctx) {
+              final isToilet =
+                  ctx.cell.value == CleaningStatusHelper.toiletPlaceTypeCode;
+              return Checkbox(
+                value: isToilet,
+                onChanged: (v) {
+                  final checked = v ?? false;
+                  final cell = ctx.row.cells[Tb.places.type]!;
+                  final newVal = checked
+                      ? CleaningStatusHelper.toiletPlaceTypeCode
+                      : PlaceModel.WithoutValue;
+                  ctx.stateManager.changeCellValue(cell, newVal, force: true);
+                  ctx.cell.value = newVal;
+
+                  // On check, auto-assign the "wc" icon when none is set yet, so
+                  // toilets get the toilet icon without a manual step.
+                  if (checked) {
+                    final wcIcon = svgIcons.firstWhereOrNull((i) =>
+                        i.link == CleaningStatusHelper.toiletPlaceTypeCode ||
+                        i.link == 'wc');
+                    final iconCell = ctx.row.cells[Tb.places.icon];
+                    if (wcIcon != null &&
+                        iconCell != null &&
+                        iconCell.value == null) {
+                      ctx.stateManager
+                          .changeCellValue(iconCell, wcIcon.id, force: true);
+                      iconCell.value = wcIcon.id;
+                    }
+                  }
+                },
+              );
+            },
+          ),
         TrinaColumn(
           title: MapStrings.locationOnMap,
           field: Tb.places.coordinates,

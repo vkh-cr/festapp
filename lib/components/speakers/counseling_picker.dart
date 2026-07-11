@@ -213,7 +213,7 @@ class _CounselingPickerState extends State<CounselingPicker> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _sectionTitle(SpeakersStrings.chooseArea),
+        _sectionTitle(SpeakersStrings.chooseAreaPrompt),
         TopicPicker(
           topics: visibleTopics,
           selectedTopicId: null,

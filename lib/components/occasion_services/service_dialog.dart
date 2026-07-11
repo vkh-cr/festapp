@@ -101,7 +101,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
       return;
     }
 
-    final created = await DbOccasions.createService(
+    final result = await DbOccasions.createService(
       widget.type,
       ServiceItemModel(
         title: _titleController.text.trim(),
@@ -111,9 +111,15 @@ class _ServiceDialogState extends State<ServiceDialog> {
     );
 
     if (!mounted) return;
-    if (!created) {
-      ToastHelper.Show(context, OccasionServicesStrings.createItemFailed,
-          severity: ToastSeverity.NotOk);
+    if (result['code'] != 200) {
+      // Surface the specific reason instead of a generic failure so the
+      // manager can tell a duplicate code from a permission problem.
+      final message = switch (result['code']) {
+        400 => OccasionServicesStrings.codeMustBeUnique,
+        403 => OccasionServicesStrings.noManagerRight,
+        _ => OccasionServicesStrings.createItemFailed,
+      };
+      ToastHelper.Show(context, message, severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -281,11 +287,13 @@ class _ServiceDialogState extends State<ServiceDialog> {
   }
 
   Widget _buildCreateForm() {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: onSurface.withOpacity(0.03),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: onSurface.withOpacity(0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,6 +347,31 @@ class _ServiceDialogState extends State<ServiceDialog> {
     );
   }
 
+  /// A small, understated identifier tag for a service item's code. Neutral
+  /// tones make it read as quiet metadata rather than a loud accent chip.
+  Widget _buildCodeTag(String code) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: onSurface.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: onSurface.withOpacity(0.12)),
+      ),
+      child: Text(
+        code,
+        style: TextStyle(
+          fontFamily: 'monospace',
+          fontSize: 11,
+          height: 1.1,
+          letterSpacing: 0.2,
+          fontWeight: FontWeight.w500,
+          color: onSurface.withOpacity(0.65),
+        ),
+      ),
+    );
+  }
+
   Widget _buildItemsList() {
     if (widget.items.isEmpty) {
       return Padding(
@@ -360,62 +393,63 @@ class _ServiceDialogState extends State<ServiceDialog> {
       itemBuilder: (context, index) {
         final companion = widget.items[index];
         final refLabel = _referenceLabel(companion.reference);
+        final onSurface = Theme.of(context).colorScheme.onSurface;
         return ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-          dense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          minVerticalPadding: 8,
           title: Text(
             companion.title ?? '',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          subtitle: Row(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  companion.code,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Row(
-                  children: [
-                    if (_isPlaceReference) ...[
-                      const Icon(Icons.place_outlined, size: 14),
-                      const SizedBox(width: 2),
-                    ],
-                    Flexible(
-                      child: Text(
-                        refLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(
+              children: [
+                _buildCodeTag(companion.code),
+                const SizedBox(width: 10),
+                if (refLabel.isNotEmpty)
+                  Expanded(
+                    child: Row(
+                      children: [
+                        if (_isPlaceReference) ...[
+                          Icon(Icons.place_outlined,
+                              size: 15, color: onSurface.withOpacity(0.5)),
+                          const SizedBox(width: 3),
+                        ],
+                        Flexible(
+                          child: Text(
+                            refLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: onSurface.withOpacity(0.6),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+              ],
+            ),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.edit),
+                tooltip: CommonStrings.edit,
+                color: onSurface.withOpacity(0.6),
+                icon: const Icon(Icons.edit_outlined, size: 20),
                 onPressed: () => _showEditDialog(companion),
               ),
               IconButton(
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.delete_outline),
+                tooltip: OccasionServicesStrings.deleteServiceConfirmTitle,
+                color: onSurface.withOpacity(0.6),
+                icon: const Icon(Icons.delete_outline, size: 20),
                 onPressed: () => _deleteService(companion),
               ),
             ],

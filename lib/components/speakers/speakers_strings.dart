@@ -57,6 +57,7 @@ class SpeakersStrings {
   // User — counseling flow
   static String get counselingTitle => 'Counseling.title'.tr();
   static String get chooseArea => 'Counseling.chooseArea'.tr();
+  static String get chooseAreaPrompt => 'Counseling.chooseAreaPrompt'.tr();
   static String get chooseCounselorAndTime =>
       'Counseling.chooseCounselorAndTime'.tr();
   static String get enterCounseling => 'Counseling.enterCounseling'.tr();

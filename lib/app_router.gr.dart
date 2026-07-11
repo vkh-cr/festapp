@@ -623,6 +623,7 @@ class MapRoute extends _i41.PageRouteInfo<MapRouteArgs> {
     int? id,
     _i45.PlaceModel? place,
     _i46.PathGroupsModel? editPathGroup,
+    String? placeType,
     _i44.Key? key,
     List<_i41.PageRouteInfo>? children,
   }) : super(
@@ -631,9 +632,11 @@ class MapRoute extends _i41.PageRouteInfo<MapRouteArgs> {
             id: id,
             place: place,
             editPathGroup: editPathGroup,
+            placeType: placeType,
             key: key,
           ),
           rawPathParams: {'id': id},
+          rawQueryParams: {'placeType': placeType},
           initialChildren: children,
         );
 
@@ -643,8 +646,12 @@ class MapRoute extends _i41.PageRouteInfo<MapRouteArgs> {
     name,
     builder: (data) {
       final pathParams = data.inheritedPathParams;
+      final queryParams = data.queryParams;
       final args = data.argsAs<MapRouteArgs>(
-        orElse: () => MapRouteArgs(id: pathParams.optInt('id')),
+        orElse: () => MapRouteArgs(
+          id: pathParams.optInt('id'),
+          placeType: queryParams.optString('placeType'),
+        ),
       );
       return _i41.DeferredWidget(
         _i17.loadLibrary,
@@ -652,6 +659,7 @@ class MapRoute extends _i41.PageRouteInfo<MapRouteArgs> {
           id: args.id,
           place: args.place,
           editPathGroup: args.editPathGroup,
+          placeType: args.placeType,
           key: args.key,
         ),
       );
@@ -660,7 +668,13 @@ class MapRoute extends _i41.PageRouteInfo<MapRouteArgs> {
 }
 
 class MapRouteArgs {
-  const MapRouteArgs({this.id, this.place, this.editPathGroup, this.key});
+  const MapRouteArgs({
+    this.id,
+    this.place,
+    this.editPathGroup,
+    this.placeType,
+    this.key,
+  });
 
   final int? id;
 
@@ -668,11 +682,13 @@ class MapRouteArgs {
 
   final _i46.PathGroupsModel? editPathGroup;
 
+  final String? placeType;
+
   final _i44.Key? key;
 
   @override
   String toString() {
-    return 'MapRouteArgs{id: $id, place: $place, editPathGroup: $editPathGroup, key: $key}';
+    return 'MapRouteArgs{id: $id, place: $place, editPathGroup: $editPathGroup, placeType: $placeType, key: $key}';
   }
 
   @override
@@ -682,12 +698,17 @@ class MapRouteArgs {
     return id == other.id &&
         place == other.place &&
         editPathGroup == other.editPathGroup &&
+        placeType == other.placeType &&
         key == other.key;
   }
 
   @override
   int get hashCode =>
-      id.hashCode ^ place.hashCode ^ editPathGroup.hashCode ^ key.hashCode;
+      id.hashCode ^
+      place.hashCode ^
+      editPathGroup.hashCode ^
+      placeType.hashCode ^
+      key.hashCode;
 }
 
 /// generated route for

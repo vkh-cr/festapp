@@ -1699,6 +1699,7 @@
   "Counseling": {
     "title": "Poradenství, přímluvná modlitba a svátost smíření",
     "chooseArea": "Vyberte oblast",
+    "chooseAreaPrompt": "Vyber prosím hlavní oblast, kterou bys chtěl řešit.",
     "chooseCounselorAndTime": "Vyberte oblast a čas",
     "enterCounseling": "Vybrat oblast a čas",
     "yourReservation": "Tvoje rezervace",

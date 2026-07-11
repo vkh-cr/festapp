@@ -29,7 +29,11 @@ class DbOccasions {
     return items;
   }
 
-  static Future<bool> createService(String type, ServiceItemModel item) async {
+  /// Creates a service item and returns the raw RPC result so callers can
+  /// distinguish the outcome: 200 = created, 400 = duplicate code,
+  /// 403 = not a manager on the occasion.
+  static Future<Map<String, dynamic>> createService(
+      String type, ServiceItemModel item) async {
     var result = await _supabase.rpc("create_service_item", params: {
       'oc': RightsService.currentOccasionId(),
       'type': type,
@@ -37,7 +41,7 @@ class DbOccasions {
       'title': item.title,
       'reference': item.reference,
     });
-    return result["code"] == 200;
+    return Map<String, dynamic>.from(result as Map);
   }
 
   static Future<bool> updateService(String type, ServiceItemModel item) async {

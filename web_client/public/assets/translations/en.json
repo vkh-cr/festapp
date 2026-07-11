@@ -1699,6 +1699,7 @@
   "Counseling": {
     "title": "Counseling, intercessory prayer and confession",
     "chooseArea": "Choose an area",
+    "chooseAreaPrompt": "Please choose the main area you'd like to address.",
     "chooseCounselorAndTime": "Choose an area and time",
     "enterCounseling": "Choose an area and time",
     "yourReservation": "Your reservation",

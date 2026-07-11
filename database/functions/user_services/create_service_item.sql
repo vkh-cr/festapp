@@ -7,6 +7,11 @@ CREATE OR REPLACE FUNCTION create_service_item(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
+-- SECURITY DEFINER: the function self-gates on get_is_manager_on_occasion below,
+-- then writes occasions.services. The occasions RLS write policy only allows org
+-- admins, so as INVOKER a plain manager's UPDATE silently matches 0 rows (no error)
+-- and the item is never saved. DEFINER lets the manager-gated write bypass RLS.
+SECURITY DEFINER
 SET search_path = public, extensions
 AS $$
 DECLARE

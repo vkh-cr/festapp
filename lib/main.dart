@@ -191,7 +191,11 @@ class _MyAppState extends State<MyApp> {
         builder: (context, child) {
           return CallbackShortcuts(
             bindings: {
+              // Ctrl+F on Windows/Linux, Cmd+F on macOS (Command maps to meta,
+              // not control) — bind both so global search opens on every OS.
               const SingleActivator(LogicalKeyboardKey.keyF, control: true):
+                  _openGlobalSearch,
+              const SingleActivator(LogicalKeyboardKey.keyF, meta: true):
                   _openGlobalSearch,
             },
             child: Stack(
