@@ -1760,5 +1760,14 @@
   "FeatureCleaning": {
     "title": "Úklidová služba",
     "description": "Účastníci hlásí stav záchodů (papír, hygiena, znečištění), úklidová četa dostane upozornění a stav vyřeší."
+  },
+  "Offline": {
+    "youAreOffline": "Jsi offline — zobrazují se naposledy stažená data.",
+    "offline": "Offline",
+    "updatedAt": "naposledy aktualizováno {time}",
+    "lastUpdated": "Naposledy aktualizováno {time}.",
+    "writeRequiresConnection": "Bez připojení nelze odeslat. Zkus to prosím znovu, až budeš u signálu.",
+    "counselingNeedsConnection": "Dostupnost poraden a rezervace vyžadují připojení k internetu.",
+    "feedbackStateUnknown": "Bez připojení nelze zjistit stav zpětné vazby."
   }
 }

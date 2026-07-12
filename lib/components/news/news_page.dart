@@ -11,6 +11,7 @@ import 'package:fstapp/components/news/news_strings.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/components/html/html_view.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -34,22 +35,52 @@ class NewsPage extends StatefulWidget {
 class _NewsPageState extends State<NewsPage> {
   List<NewsModel> newsMessages = [];
   bool _isSetAsReadCalled = false;
+  bool _isLoading = false;
+
+  // The tabs router this page is subscribed to, plus the last active index we
+  // saw. Kept as fields so the listener can be removed in dispose() — otherwise
+  // every time this page is recreated (tab switches, navigatePath re-resolves
+  // the hierarchy) another listener leaks, and each one reloads news on *every*
+  // tab notification, snowballing into a flood of `news` requests.
+  TabsRouter? _tabsRouter;
+  int _lastActiveIndex = -1;
 
   @override
   void initState() {
     super.initState();
-    context.tabsRouter.addListener(() async {
-      if (context.tabsRouter.activeIndex ==
-          OccasionHomePage.baseTabKeys.indexOf(OccasionTab.news)) {
-        _checkAsRead();
-        loadData();
-      }
-    });
     loadData();
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final tabsRouter = context.tabsRouter;
+    if (!identical(_tabsRouter, tabsRouter)) {
+      _tabsRouter?.removeListener(_onTabChanged);
+      _tabsRouter = tabsRouter;
+      _lastActiveIndex = tabsRouter.activeIndex;
+      tabsRouter.addListener(_onTabChanged);
+    }
+  }
+
+  /// Reload only when the News tab *becomes* active (a real transition), not on
+  /// every tabs-router notification — the latter refetched on each rebuild.
+  void _onTabChanged() {
+    final router = _tabsRouter;
+    if (router == null) return;
+    final newsIndex =
+        OccasionHomePage.baseTabKeys.indexOf(OccasionTab.news);
+    final active = router.activeIndex;
+    if (active == newsIndex && _lastActiveIndex != newsIndex) {
+      _checkAsRead();
+      loadData();
+    }
+    _lastActiveIndex = active;
+  }
+
+  @override
   void dispose() {
+    _tabsRouter?.removeListener(_onTabChanged);
     super.dispose();
   }
 
@@ -102,10 +133,17 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   Future<void> loadData() async {
-    await loadOfflineData();
-    await loadNewsMessages();
-    await OfflineDataService.saveAllMessages(newsMessages);
-    _checkAsRead();
+    // Coalesce concurrent/rapid triggers so we never stack overlapping loads.
+    if (_isLoading) return;
+    _isLoading = true;
+    try {
+      await loadOfflineData();
+      await loadNewsMessages();
+      await OfflineDataService.saveAllMessages(newsMessages);
+      _checkAsRead();
+    } finally {
+      _isLoading = false;
+    }
   }
 
   @override
@@ -175,11 +213,34 @@ class _NewsPageState extends State<NewsPage> {
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 12),
-                                child: Text(
-                                  message.createdBy ?? "",
-                                  style: message.isRead
-                                      ? readTextStyle()
-                                      : unReadTextStyle(),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        message.createdBy ?? "",
+                                        style: message.isRead
+                                            ? readTextStyle()
+                                            : unReadTextStyle(),
+                                      ),
+                                    ),
+                                    // How long ago the message was sent, as a
+                                    // humanized "… ago" (shared with the offline
+                                    // banner).
+                                    if (message.createdAt != null)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 8),
+                                        child: Text(
+                                          TimeHelper.timeAgo(
+                                              message.createdAt!,
+                                              context.locale.languageCode),
+                                          style: TextStyle(
+                                            color: ThemeConfig.grey600(context),
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                               Padding(

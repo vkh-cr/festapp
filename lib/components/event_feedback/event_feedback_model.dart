@@ -35,6 +35,16 @@ class EventFeedbackModel {
           : null,
     );
   }
+
+  /// Mirror of [fromJson] for the offline "already sent" cache.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'event': event,
+        'rating': rating,
+        'note': note,
+        'created_at': createdAt?.toUtc().toIso8601String(),
+        'updated_at': updatedAt?.toUtc().toIso8601String(),
+      };
 }
 
 /// Aggregated counts for an event's feedback (admin view).

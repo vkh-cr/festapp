@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/occasion/occasion_home_strings.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
+import 'package:fstapp/components/offline/offline_banner.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
@@ -55,6 +56,7 @@ class OccasionHomePage extends StatefulWidget {
 class _OccasionHomePageState extends State<OccasionHomePage>
     with WidgetsBindingObserver {
   int _messageCount = 0;
+  bool _isLoadingData = false;
   late final Map<String, OccasionTab> _availableTabs;
 
   /// Effective bottom-nav keys: when GlobalSearch is on, the profile ("user")
@@ -105,15 +107,23 @@ class _OccasionHomePageState extends State<OccasionHomePage>
   }
 
   Future<void> loadData() async {
-    await UpdateService.versionCheck(context);
-    if (AuthService.isLoggedIn()) {
-      DbNews.countNewMessages().then((count) {
-        if (mounted) {
-          setState(() => _messageCount = count);
-        }
-      });
+    // Coalesce rapid/overlapping triggers (lifecycle resumes, tab notifications)
+    // so we never fire concurrent version checks + countNewMessages() bursts.
+    if (_isLoadingData) return;
+    _isLoadingData = true;
+    try {
+      await UpdateService.versionCheck(context);
+      if (AuthService.isLoggedIn()) {
+        DbNews.countNewMessages().then((count) {
+          if (mounted) {
+            setState(() => _messageCount = count);
+          }
+        });
+      }
+      await NotificationHelper.checkForNotificationPermission(context);
+    } finally {
+      _isLoadingData = false;
     }
-    await NotificationHelper.checkForNotificationPermission(context);
   }
 
   String messageCountString() =>
@@ -206,7 +216,13 @@ class _OccasionHomePageState extends State<OccasionHomePage>
           );
             },
           ),
-          body: child,
+          body: Column(
+            children: [
+              // Offline indicator for every tab; renders nothing when online.
+              const OfflineBanner(),
+              Expanded(child: child),
+            ],
+          ),
         );
       },
     );

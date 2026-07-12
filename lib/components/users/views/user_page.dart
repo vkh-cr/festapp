@@ -351,6 +351,13 @@ class _UserPageState extends State<UserPage> {
                         ?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.services))
                   _buildStaySection(context),
+                // The user's own group, right under accommodation, rendered as
+                // a plain read-only profile field (same style as name / email).
+                // Reads userData.eventUserGroup, part of the cached offline
+                // user info — so it works offline too.
+                if (userData?.eventUserGroup != null)
+                  buildTextField(
+                      ScheduleStrings.group, userData!.eventUserGroup!.title),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
                   _buildCleaningSection(context),
                 const SizedBox(height: 16),
@@ -508,6 +515,7 @@ class _UserPageState extends State<UserPage> {
                       context, "${MapPage.ROUTE}/${place!.id}"),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Icon(Icons.place,
                           size: 20, color: theme.colorScheme.primary),
@@ -518,6 +526,7 @@ class _UserPageState extends State<UserPage> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 17,
+                            height: 1.0,
                             color: theme.colorScheme.primary,
                             decoration: TextDecoration.underline,
                             decorationColor: theme.colorScheme.primary,

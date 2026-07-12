@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/app_logger.dart';
@@ -100,6 +101,24 @@ class ExceptionHandler {
       ToastHelper.Show(context, message, severity: ToastSeverity.NotOk);
       AppLogger.error('Unhandled Exception: ${error.toString()}');
     }
+  }
+
+  /// True when [e] is a network-level failure (no connection / server
+  /// unreachable) rather than a server-side error. The supabase client
+  /// surfaces these as http.ClientException — "Failed to fetch" on web,
+  /// a wrapped SocketException on native (matched by message; dart:io is
+  /// off-limits in shared code). Server responses (PostgrestException with a
+  /// code, RPC envelopes) never match.
+  static bool isNetworkError(Object e) {
+    if (e is http.ClientException) return true;
+    if (e is AuthRetryableFetchException) return true;
+    final message = e.toString();
+    return message.contains('SocketException') ||
+        message.contains('Failed to fetch') ||
+        message.contains('Failed host lookup') ||
+        message.contains('Connection refused') ||
+        message.contains('Network is unreachable') ||
+        message.contains('Connection timed out');
   }
 
   /// Returns a user-friendly message for any exception. Postgrest errors carrying

@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/time_utils/platform_timezone_universal.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:timezone/timezone.dart' as tz;
 
 class TimeHelper {
@@ -8,6 +9,20 @@ class TimeHelper {
   static TimeZoneUniversal timeZoneUniversal = TimeZoneUniversal();
 
   static void Function()? toggleTimeTravel;
+
+  static bool _timeagoLocalesReady = false;
+
+  /// Humanized relative time ("před 4 hodinami" / "4 hours ago") for the given
+  /// language code. Registers the non-default locale messages once (English is
+  /// timeago's built-in default; other languages fall back to it). Shared by the
+  /// offline banner and the news list so "how long ago" reads consistently.
+  static String timeAgo(DateTime time, String langCode) {
+    if (!_timeagoLocalesReady) {
+      timeago.setLocaleMessages('cs', timeago.CsMessages());
+      _timeagoLocalesReady = true;
+    }
+    return timeago.format(time.toLocal(), locale: langCode);
+  }
 
   static DateTime now() {
     if (currentTime != null) {

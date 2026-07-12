@@ -1,4 +1,7 @@
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/cleaning/db_cleaning.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
 import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
@@ -69,10 +72,26 @@ class SynchroService {
       final speakers = await DbSpeakers.getSpeakers(occasionId,
           includeDescription: true);
       await OfflineDataService.saveSpeakers(speakers);
+
+      // Cleaning statuses are public data — cache them so the toilet list and
+      // map pin colors survive offline (R2.2). Own try/catch: a cleaning
+      // failure must not break the rest of the sync chain.
+      if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning)) {
+        try {
+          final status = await DbCleaning.getStatus(occasionId);
+          await OfflineDataService.saveCleaningStatus(
+              status.places, DateTime.now());
+        } catch (_) {
+          // Best-effort cache only.
+        }
+      }
     }
 
-    if (PlatformHelper.isPwaInstalledOrNative()) {
-      var events = await DbEvents.getAllEvents(occasionId!, true);
+    // Full event list (incl. HTML descriptions) — cached on every platform,
+    // plain browser tabs included (R5). Guarded: an anonymous web visit
+    // without an occasion used to hit `occasionId!` here.
+    if (occasionId != null) {
+      var events = await DbEvents.getAllEvents(occasionId, true);
       await OfflineDataService.saveAllEvents(events);
     }
 
@@ -80,6 +99,9 @@ class SynchroService {
 
     // Refresh the GlobalSearch offline index from the freshly cached data.
     await DbSearch.rebuildOfflineIndex();
+
+    // One "last synced" stamp for the whole bundle (the offline banner).
+    await OfflineDataService.saveLastSyncedAt(DateTime.now());
   }
 
   static Future<OccasionLinkModel> getAppConfig(LinkModel link) async {

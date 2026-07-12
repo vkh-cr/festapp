@@ -1318,7 +1318,12 @@ class _EventPageState extends State<EventPage> {
           await DbSpeakers.getSpeakers(occasionId, includeDescription: true);
       if (mounted) setState(() => _speakersBundle = bundle);
     } catch (_) {
-      // Non-fatal: keep the event page usable without the speakers section.
+      // Offline / RPC failure: fall back to the synced speakers cache so the
+      // section still renders; with no cache it stays hidden as before.
+      final cached = await OfflineDataService.getSpeakers();
+      if (cached != null && mounted) {
+        setState(() => _speakersBundle = cached);
+      }
     }
   }
 

@@ -873,6 +873,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         offlineList.add(p);
     }
     await addOfflineEventsToPlace(offlineList);
+    // Cache-first paint of the toilet colors, so they show without network;
+    // the online pass below overwrites them with the live statuses.
+    await _seedCleaningStatusFromCache();
     addPlacesToMap(offlineList);
 
     _pathGroups = (await OfflineDataService.getAllPathGroups())
@@ -1045,8 +1048,22 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     try {
       final statuses = await DbCleaning.getStatus(oc);
       _cleaningByPlace = {for (final s in statuses.places) s.place: s};
+      // Refresh-on-read: keep the offline copy of the public statuses fresh.
+      await OfflineDataService.saveCleaningStatus(
+          statuses.places, DateTime.now());
     } catch (_) {
-      // ignore — map remains usable without cleaning colors
+      // Offline / RPC failure: color the pins from the cached statuses.
+      await _seedCleaningStatusFromCache();
+    }
+  }
+
+  /// Seeds the toilet pin colors from the cached statuses so the offline
+  /// render shows the last known colors (feature-gated like the live load).
+  Future<void> _seedCleaningStatusFromCache() async {
+    if (!FeatureService.isFeatureEnabled(FeatureConstants.cleaning)) return;
+    final cached = await OfflineDataService.getCleaningStatus();
+    if (cached != null) {
+      _cleaningByPlace = {for (final s in cached.places) s.place: s};
     }
   }
 

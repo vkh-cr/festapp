@@ -14,6 +14,8 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
 import 'package:fstapp/components/occasion/occasion_home_page.dart';
+import 'package:fstapp/services/connectivity_service.dart';
+import 'package:fstapp/services/health_tracking_http_client.dart';
 import 'package:fstapp/services/notification_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -69,6 +71,13 @@ Future<void> initializeEverything() async {
   }
 
   try {
+    await ConnectivityService.initialize();
+    AppLogger.debug('Connectivity service initialized');
+  } catch (e) {
+    AppLogger.error('Connectivity service initialization failed: $e');
+  }
+
+  try {
     await initializeDateFormatting();
     AppLogger.debug('Date formatting initialized');
   } catch (e) {
@@ -86,6 +95,10 @@ Future<void> initializeEverything() async {
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
       anonKey: AppConfig.anonKey,
+      // Observe every backend request's outcome so ConnectivityService can tell
+      // when the server is unreachable (weak signal / outage), not just when the
+      // network interface is down.
+      httpClient: HealthTrackingHttpClient(),
     ).timeout(const Duration(seconds: 2));
     AppLogger.debug('Supabase initialized');
     if (!AuthService.isLoggedIn()) {

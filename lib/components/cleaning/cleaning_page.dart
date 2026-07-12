@@ -22,6 +22,8 @@ import 'package:fstapp/components/cleaning/widgets/cleaning_tile.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/map/map_page.dart';
+import 'package:fstapp/components/offline/offline_strings.dart';
+import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
@@ -64,6 +66,10 @@ class _CleaningPageState extends State<CleaningPage> {
   bool _deepLinkHandled = false;
   Timer? _pollTimer;
 
+  /// Set when the page renders from the offline cache (live fetch failed);
+  /// carries the cache age for the banner. Null = live data.
+  DateTime? _cacheFetchedAt;
+
   bool get _isCrew => RightsService.isCleaningCrew();
   int get _occasionId => RightsService.currentOccasionId()!;
 
@@ -86,6 +92,9 @@ class _CleaningPageState extends State<CleaningPage> {
   Future<void> _loadData({bool silent = false}) async {
     Future<CleaningData> fetch() async {
       final status = await DbCleaning.getStatus(_occasionId);
+      // Refresh-on-read: keep the offline copy of the public statuses fresh.
+      await OfflineDataService.saveCleaningStatus(
+          status.places, DateTime.now());
       // The crew fetches resolved reports too so the History tab needs no reload.
       final reports = _isCrew
           ? await DbCleaning.getReports(_occasionId, includeResolved: true)
@@ -103,7 +112,26 @@ class _CleaningPageState extends State<CleaningPage> {
         return;
       }
     } else {
-      data = await ExceptionHandler.guard(context, futureFunction: fetch);
+      try {
+        data = await fetch();
+      } catch (e) {
+        // Live fetch failed (typically offline): render the cached public
+        // statuses with their age instead. Crew controls need live data and
+        // are hidden in this mode. With no cache, keep today's error UI.
+        final cached = await OfflineDataService.getCleaningStatus();
+        if (!mounted) return;
+        if (cached != null) {
+          setState(() {
+            _places = cached.places;
+            _reports = [];
+            _cacheFetchedAt = cached.fetchedAt;
+            _loading = false;
+          });
+          _maybeHandleDeepLink();
+          return;
+        }
+        await ExceptionHandler.handle(context, error: e);
+      }
     }
     if (!mounted) return;
     setState(() {
@@ -112,6 +140,7 @@ class _CleaningPageState extends State<CleaningPage> {
         _reports = data.reports;
         _isBlocked = data.isBlocked;
         _notificationsMuted = data.notificationsMuted;
+        _cacheFetchedAt = null;
       }
       _loading = false;
     });
@@ -332,6 +361,11 @@ class _CleaningPageState extends State<CleaningPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       children: [
+        // Cached statuses: say how old they are (freshness matters here).
+        if (_cacheFetchedAt != null) ...[
+          _buildCacheAgeBanner(context),
+          const SizedBox(height: 12),
+        ],
         // Crew get the operational overview; a plain participant gets a simple
         // "pick a toilet and report" hint (or the blocked notice) — nothing
         // crew-oriented.
@@ -358,11 +392,38 @@ class _CleaningPageState extends State<CleaningPage> {
         const SizedBox(height: 16),
         const CleaningLegend(),
         // Crew-only: "Current / History" tabs over the detailed reports.
-        if (_isCrew) ...[
+        // Hidden when rendering from cache — mute/block/resolve/history all
+        // need live data.
+        if (_isCrew && _cacheFetchedAt == null) ...[
           const SizedBox(height: 28),
           _buildCrewSection(context, problemPlaces, reportsByPlace),
         ],
       ],
+    );
+  }
+
+  /// "Last updated {time}" strip shown above cached (offline) statuses.
+  Widget _buildCacheAgeBanner(BuildContext context) {
+    final time = DateFormat('d. M. HH:mm').format(_cacheFetchedAt!);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: ThemeConfig.grey300(context).withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.cloud_off, size: 18, color: ThemeConfig.grey600(context)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              "${OfflineStrings.youAreOffline} ${OfflineStrings.lastUpdated(time)}",
+              style: TextStyle(
+                  color: ThemeConfig.grey600(context), fontSize: 13),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

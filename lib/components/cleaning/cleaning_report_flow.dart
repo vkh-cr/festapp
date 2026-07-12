@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/cleaning/cleaning_strings.dart';
 import 'package:fstapp/components/cleaning/db_cleaning.dart';
 import 'package:fstapp/components/cleaning/widgets/cleaning_report_dialog.dart';
+import 'package:fstapp/components/offline/offline_strings.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
 
 /// Shared "report a toilet problem" flow used by both the Cleaning page tiles
@@ -51,9 +53,14 @@ class CleaningReportFlow {
         );
       }
       return false;
-    } catch (_) {
+    } catch (e) {
       if (context.mounted) {
-        ToastHelper.Show(context, CleaningStrings.reportError,
+        // Offline gets the unified readable message instead of the generic one.
+        ToastHelper.Show(
+            context,
+            ExceptionHandler.isNetworkError(e)
+                ? OfflineStrings.writeRequiresConnection
+                : CleaningStrings.reportError,
             severity: ToastSeverity.NotOk);
       }
       return false;

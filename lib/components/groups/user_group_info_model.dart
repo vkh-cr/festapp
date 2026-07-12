@@ -144,6 +144,11 @@ class UserGroupInfoModel extends ITrinaRowModel {
           ?.map((p) => {
                 "user_id": p.userInfo?.id,
                 "is_admin": p.isAdmin ?? false,
+                // Full user info so the offline cache round-trip keeps the
+                // member names (this json is only consumed by the offline
+                // cache — DbGroups builds its own payloads for backend
+                // writes; GroupParticipantModel.fromJson reads this key).
+                Tb.user_info.table: p.userInfo?.toJson(),
               })
           .toList(),
     };

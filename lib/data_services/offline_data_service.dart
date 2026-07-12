@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:fstapp/components/cleaning/models/cleaning_place_status.dart';
 import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart'; // Added for UserInventoryBundle
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/speakers/speakers_bundle.dart';
@@ -26,6 +27,8 @@ class OfflineDataService {
   static const String userInventoryBundleOffline =
       "userInventoryBundle"; // Added key for inventory
   static const String speakersOfflineStorage = "speakers";
+  static const String cleaningStatusOfflineStorage = "cleaningStatus";
+  static const String eventFeedbackOfflineStorage = "eventFeedback";
 
   static Future<void> saveMyScheduleData(List<int> offlineData) async {
     var encoded = jsonEncode(offlineData);
@@ -129,6 +132,18 @@ class OfflineDataService {
   static Future<List<PlaceTypeModel>> getAllPlaceTypes() =>
       getAllOffline(PlaceTypeModel.placeTypesOffline, PlaceTypeModel.fromJson);
 
+  /// Timestamp of the last completed refreshOfflineData run — one stamp for
+  /// the whole bundle, shown by the offline banner.
+  static const String lastSyncedAtOffline = "lastSyncedAt";
+
+  static Future<void> saveLastSyncedAt(DateTime time) =>
+      StorageHelper.set(lastSyncedAtOffline, time.toUtc().toIso8601String());
+
+  static Future<DateTime?> getLastSyncedAt() async {
+    final raw = await StorageHelper.get(lastSyncedAtOffline);
+    return raw == null ? null : DateTime.tryParse(raw)?.toLocal();
+  }
+
   /// Last place-type filter selected on the map, restored on the next visit.
   static const String selectedPlaceTypeOffline = "selectedPlaceType";
 
@@ -172,6 +187,31 @@ class OfflineDataService {
   static Future<SpeakersBundle?> getSpeakers() =>
       getOffline(speakersOfflineStorage, SpeakersBundle.fromJson);
 
+  /// Caches the public per-toilet cleaning statuses together with the time
+  /// they were fetched. Public data only — not part of [clearUserData].
+  static Future<void> saveCleaningStatus(
+          List<CleaningPlaceStatus> places, DateTime fetchedAt) =>
+      saveOffline(cleaningStatusOfflineStorage, {
+        "places": places.map((p) => p.toJson()).toList(),
+        "fetchedAt": fetchedAt.toUtc().toIso8601String(),
+      });
+
+  /// The cached cleaning statuses with their fetch time, or null when the
+  /// cache is empty or unreadable.
+  static Future<({List<CleaningPlaceStatus> places, DateTime fetchedAt})?>
+      getCleaningStatus() async {
+    final json = await getOffline<Map<String, dynamic>>(
+        cleaningStatusOfflineStorage, (j) => j);
+    if (json == null) return null;
+    final fetchedAt = DateTime.tryParse(json["fetchedAt"]?.toString() ?? "");
+    if (fetchedAt == null) return null;
+    final places = ((json["places"] as List?) ?? const [])
+        .map((e) =>
+            CleaningPlaceStatus.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
+    return (places: places, fetchedAt: fetchedAt.toLocal());
+  }
+
   static Future<void> saveAllInfo(List<InformationModel> toSave) =>
       saveAllOffline(InformationModel.informationOffline, toSave);
 
@@ -183,6 +223,31 @@ class OfflineDataService {
 
   static Future<List<ActivityModel>> getAllActivities() =>
       getAllOffline(activitiesOfflineStorage, ActivityModel.fromJson);
+
+  /// Caches "my feedback" for one event (one `{eventId: feedbackJson}` object
+  /// for all events) so the widget can show the submitted state offline.
+  /// Per-user data — cleared by [clearUserData]. A null [json] removes the
+  /// event's entry (feedback deleted).
+  static Future<void> saveMyEventFeedback(
+      int eventId, Map<String, dynamic>? json) async {
+    final all = await getOffline<Map<String, dynamic>>(
+            eventFeedbackOfflineStorage, (j) => j) ??
+        <String, dynamic>{};
+    if (json == null) {
+      all.remove(eventId.toString());
+    } else {
+      all[eventId.toString()] = json;
+    }
+    await saveOffline(eventFeedbackOfflineStorage, all);
+  }
+
+  /// The cached "my feedback" json for an event, or null when none is cached.
+  static Future<Map<String, dynamic>?> getMyEventFeedback(int eventId) async {
+    final all = await getOffline<Map<String, dynamic>>(
+        eventFeedbackOfflineStorage, (j) => j);
+    final entry = all?[eventId.toString()];
+    return entry is Map ? entry.cast<String, dynamic>() : null;
+  }
 
   /// **Saves the entire `UserInventoryBundle` to offline storage.**
   static Future<void> saveUserInventoryBundle(UserInventoryBundle toSave) =>
@@ -202,6 +267,7 @@ class OfflineDataService {
     await deleteOffline(myScheduleOffline);
     await deleteOffline(activitiesOfflineStorage);
     await deleteOffline(userInventoryBundleOffline);
+    await deleteOffline(eventFeedbackOfflineStorage);
   }
 
   static Future<void> saveAllOffline<T>(

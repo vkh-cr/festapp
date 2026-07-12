@@ -25,4 +25,13 @@ class CleaningPlaceStatus {
           : null,
     );
   }
+
+  /// Mirror of [fromJson] for the offline cache; the enum's name equals its
+  /// status code, so a cached entry round-trips through fromJson unchanged.
+  Map<String, dynamic> toJson() => {
+        'place': place,
+        'title': title,
+        'status': status.name,
+        'last_reported_at': lastReportedAt?.toUtc().toIso8601String(),
+      };
 }

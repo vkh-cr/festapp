@@ -13,8 +13,11 @@ import 'package:fstapp/components/speakers/speaker_model.dart';
 import 'package:fstapp/components/speakers/speakers_bundle.dart';
 import 'package:fstapp/components/speakers/speakers_strings.dart';
 import 'package:fstapp/components/speakers/topic_picker.dart';
+import 'package:fstapp/components/offline/offline_strings.dart';
 import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/time_helper.dart';
@@ -48,6 +51,10 @@ class _CounselingPickerState extends State<CounselingPicker> {
   List<CounselingTopicOverview> _topicOverview = [];
   int? _selectedTopicId;
   CounselingAvailability? _availability;
+
+  /// Live counseling data (overview / availability) failed while offline —
+  /// the slot step shows OfflineStrings.counselingNeedsConnection instead.
+  bool _liveDataOffline = false;
 
   int get _occasionId => RightsService.currentOccasionId()!;
 
@@ -92,7 +99,14 @@ class _CounselingPickerState extends State<CounselingPicker> {
   }
 
   Future<void> _loadInitial() async {
-    await ExceptionHandler.guard(context, futureFunction: () async {
+    // Paint-from-cache: seed the areas and counselor medallions from the
+    // synced speakers cache so they are visible offline; the live pass below
+    // overwrites them when it succeeds.
+    final cached = await OfflineDataService.getSpeakers();
+    if (cached != null && mounted) {
+      setState(() => _bundle = cached);
+    }
+    try {
       // includeDescription: the expanded counselor medallion shows the bio.
       final bundle =
           await DbSpeakers.getSpeakers(_occasionId, includeDescription: true);
@@ -106,9 +120,23 @@ class _CounselingPickerState extends State<CounselingPicker> {
           _bundle = bundle;
           _myReservations = reservations;
           _topicOverview = overview;
+          _liveDataOffline = false;
         });
       }
-    });
+    } catch (e) {
+      // Slot availability is live-only by design. Treat a failed request as
+      // offline whenever it's a network/timeout/server-unreachable error OR the
+      // device reports no connection — a weak signal or a server outage counts
+      // as offline too, not just a missing interface. The cached areas stay
+      // usable and the slot step shows a readable notice; genuine server errors
+      // keep today's toast.
+      if (ExceptionHandler.isNetworkError(e) ||
+          await ConnectivityService.isOffline()) {
+        if (mounted) setState(() => _liveDataOffline = true);
+      } else if (mounted) {
+        await ExceptionHandler.handle(context, error: e);
+      }
+    }
     if (mounted) setState(() => _isLoading = false);
   }
 
@@ -126,13 +154,24 @@ class _CounselingPickerState extends State<CounselingPicker> {
       _selectedTopicId = topicId;
       _availability = null;
       _isLoadingAvailability = true;
+      _liveDataOffline = false;
     });
-    final avail = await ExceptionHandler.guard(
-      context,
-      futureFunction: () => DbSpeakers.getCounselingAvailability(
+    CounselingAvailability? avail;
+    try {
+      avail = await DbSpeakers.getCounselingAvailability(
           _occasionId, topicId,
-          from: _windowFrom, to: _windowTo),
-    );
+          from: _windowFrom, to: _windowTo);
+    } catch (e) {
+      // Network/timeout/server-unreachable error or no connection → readable
+      // inline notice in the slot area (weak signal & server outage count as
+      // offline); genuine server errors keep today's toast.
+      if (ExceptionHandler.isNetworkError(e) ||
+          await ConnectivityService.isOffline()) {
+        _liveDataOffline = true;
+      } else if (mounted) {
+        await ExceptionHandler.handle(context, error: e);
+      }
+    }
     if (mounted) {
       setState(() {
         _availability = avail;
@@ -159,7 +198,7 @@ class _CounselingPickerState extends State<CounselingPicker> {
   /// Refresh reservations, the per-area overview (greying) and the currently
   /// shown availability after a booking / cancellation.
   Future<void> _reloadAfterChange() async {
-    await ExceptionHandler.guard(context, futureFunction: () async {
+    try {
       final reservations = await _loadReservations();
       final overview = await DbSpeakers.getCounselingTopicsOverview(
           _occasionId,
@@ -178,7 +217,14 @@ class _CounselingPickerState extends State<CounselingPicker> {
           _availability = avail;
         });
       }
-    });
+    } catch (e) {
+      // Offline the sign-in/out itself already showed the offline message —
+      // keep the current state quietly instead of a second toast or a
+      // refresh into a lying state. Online errors keep today's toast.
+      if (!ExceptionHandler.isNetworkError(e) && mounted) {
+        await ExceptionHandler.handle(context, error: e);
+      }
+    }
   }
 
   @override
@@ -429,6 +475,14 @@ class _CounselingPickerState extends State<CounselingPicker> {
       return const Padding(
         padding: EdgeInsets.all(24),
         child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    // Slots are live-only: offline the picker degrades to this readable notice.
+    if (_liveDataOffline) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Text(OfflineStrings.counselingNeedsConnection,
+            style: TextStyle(color: ThemeConfig.grey700(context))),
       );
     }
     final counselors = _availability?.counselors ?? const [];

@@ -1760,5 +1760,14 @@
   "FeatureCleaning": {
     "title": "Cleaning service",
     "description": "Participants report toilet status (paper, hygiene, contamination); the cleaning crew is notified and resolves it."
+  },
+  "Offline": {
+    "youAreOffline": "You are offline — showing the last downloaded data.",
+    "offline": "Offline",
+    "updatedAt": "last updated {time}",
+    "lastUpdated": "Last updated {time}.",
+    "writeRequiresConnection": "Cannot send without a connection. Please try again once you have signal.",
+    "counselingNeedsConnection": "Counseling availability and reservations require an internet connection.",
+    "feedbackStateUnknown": "Cannot check the feedback status without a connection."
   }
 }

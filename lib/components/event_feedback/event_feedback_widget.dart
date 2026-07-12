@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/event_feedback/db_event_feedback.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_model.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_results.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_strings.dart';
+import 'package:fstapp/components/offline/offline_strings.dart';
+import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/services/connectivity_service.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/toast_helper.dart';
 
 /// Smiley rating + optional comment shown on the event detail page when the
@@ -56,6 +62,10 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
   bool _commentDirty = false;
   EventFeedbackModel? _existing;
 
+  /// Offline with no cached feedback record: the submitted state is genuinely
+  /// unknown — show a notice instead of pretending "not sent yet".
+  bool _stateUnknownOffline = false;
+
   static const _ratings = [
     EventFeedbackModel.ratingHappy,
     EventFeedbackModel.ratingNeutral,
@@ -79,16 +89,49 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
       final load =
           widget.loadFeedbackOverride ?? DbEventFeedback.getMyFeedback;
       final fb = await load(widget.eventId);
+      // Keep the offline "already sent" cache in sync with the live answer
+      // (null clears a stale entry after a deletion elsewhere). Fire-and-
+      // forget: a cache write must never block or break the UI.
+      unawaited(OfflineDataService.saveMyEventFeedback(
+              widget.eventId, fb?.toJson())
+          .catchError((_) {}));
       if (!mounted) return;
       setState(() {
         _existing = fb;
         _rating = fb?.rating;
         _note.text = fb?.note ?? '';
         _commentDirty = false;
+        _stateUnknownOffline = false;
         _loading = false;
       });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      // Live fetch failed: a cached record still shows the honest "sent"
+      // state; with no cache while offline the state is unknown — never lie
+      // with an empty form.
+      final cached =
+          await OfflineDataService.getMyEventFeedback(widget.eventId);
+      if (!mounted) return;
+      if (cached != null) {
+        final fb = EventFeedbackModel.fromJson(cached);
+        setState(() {
+          _existing = fb;
+          _rating = fb.rating;
+          _note.text = fb.note ?? '';
+          _commentDirty = false;
+          _loading = false;
+        });
+        return;
+      }
+      // Weak signal / timeout / server outage counts as offline too, not just a
+      // missing interface — so a failed load with no cache shows the "unknown"
+      // notice rather than a misleading empty form.
+      final offline = ExceptionHandler.isNetworkError(e) ||
+          await ConnectivityService.isOffline();
+      if (!mounted) return;
+      setState(() {
+        _stateUnknownOffline = offline;
+        _loading = false;
+      });
     }
   }
 
@@ -104,6 +147,10 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
         rating: _rating!,
         note: _note.text.trim().isEmpty ? null : _note.text.trim(),
       );
+      // Fire-and-forget cache write — never fail a successful submit.
+      unawaited(OfflineDataService.saveMyEventFeedback(
+              widget.eventId, fb.toJson())
+          .catchError((_) {}));
       if (!mounted) return;
       setState(() {
         _existing = fb;
@@ -134,6 +181,10 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
           return e.message ?? EventFeedbackStrings.feedbackCouldNotBeSaved;
       }
     }
+    // Offline gets the unified readable message instead of the generic one.
+    if (ExceptionHandler.isNetworkError(e)) {
+      return OfflineStrings.writeRequiresConnection;
+    }
     return EventFeedbackStrings.feedbackCouldNotBeSaved;
   }
 
@@ -141,6 +192,9 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
     setState(() => _saving = true);
     try {
       await DbEventFeedback.delete(widget.eventId);
+      // Fire-and-forget cache removal — never fail a successful delete.
+      unawaited(OfflineDataService.saveMyEventFeedback(widget.eventId, null)
+          .catchError((_) {}));
       if (!mounted) return;
       setState(() {
         _existing = null;
@@ -150,8 +204,11 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
         _saving = false;
       });
       ToastHelper.Show(context, EventFeedbackStrings.feedbackRemoved);
-    } catch (_) {
-      if (mounted) setState(() => _saving = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ToastHelper.Show(context, _errorMessage(e),
+          severity: ToastSeverity.NotOk);
     }
   }
 
@@ -363,6 +420,9 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
             else if (participantsOnly)
               _messageRow(context, Icons.lock_outline,
                   EventFeedbackStrings.onlySignedInParticipants)
+            else if (_stateUnknownOffline)
+              _messageRow(context, Icons.cloud_off,
+                  OfflineStrings.feedbackStateUnknown)
             else
               _form(context),
             // Editors see the aggregated results inline (matches production).

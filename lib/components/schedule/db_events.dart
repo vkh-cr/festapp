@@ -19,7 +19,9 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/components/offline/offline_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -202,8 +204,22 @@ class DbEvents {
       [UserInfoModel? participant]) async {
     var userId = participant?.id ?? AuthService.currentUserId();
 
-    var result = await _supabase
-        .rpc("sign_user_to_event", params: {"ev": eventId, "usr": userId});
+    dynamic result;
+    try {
+      result = await _supabase
+          .rpc("sign_user_to_event", params: {"ev": eventId, "usr": userId});
+    } catch (e) {
+      // Offline: say so readably and behave like the non-200 branches
+      // (toast + return); other errors keep today's behavior.
+      if (ExceptionHandler.isNetworkError(e)) {
+        if (context.mounted) {
+          ToastHelper.Show(context, OfflineStrings.writeRequiresConnection,
+              severity: ToastSeverity.NotOk);
+        }
+        return;
+      }
+      rethrow;
+    }
 
     switch (result["code"]) {
       case 200:
@@ -578,8 +594,22 @@ class DbEvents {
     AuthService.ensureUserIsLoggedIn();
     var userId = participant?.id ?? AuthService.currentUserId();
 
-    var result = await _supabase
-        .rpc("sign_user_out_of_event", params: {"ev": eventId, "usr": userId});
+    dynamic result;
+    try {
+      result = await _supabase.rpc("sign_user_out_of_event",
+          params: {"ev": eventId, "usr": userId});
+    } catch (e) {
+      // Offline: say so readably and behave like the non-200 branches
+      // (toast + return); other errors keep today's behavior.
+      if (ExceptionHandler.isNetworkError(e)) {
+        if (context != null && context.mounted) {
+          ToastHelper.Show(context, OfflineStrings.writeRequiresConnection,
+              severity: ToastSeverity.NotOk);
+        }
+        return;
+      }
+      rethrow;
+    }
     switch (result["code"]) {
       case 200:
         if (participant == null) {
