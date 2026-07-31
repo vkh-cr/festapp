@@ -186,30 +186,9 @@ class _NewsPageState extends State<NewsPage> {
                         if (i != 0) const Divider(),
                         Builder(builder: (context) {
                           final message = newsMessages[i];
-                          final previous = i > 0 ? newsMessages[i - 1] : null;
-                          final isSameDay = previous != null &&
-                              message.createdAt!.year ==
-                                  previous.createdAt!.year &&
-                              message.createdAt!.month ==
-                                  previous.createdAt!.month &&
-                              message.createdAt!.day == previous.createdAt!.day;
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              if (i == 0 || !isSameDay)
-                                Container(
-                                  padding: const EdgeInsets.only(
-                                      top: 8.0, right: 16.0, left: 16.0),
-                                  alignment: Alignment.topRight,
-                                  child: Text(
-                                    DateFormat("EEEE d.M.y",
-                                            context.locale.languageCode)
-                                        .format(message.createdAt!),
-                                    style: message.isRead
-                                        ? readTextStyle()
-                                        : unReadTextStyle(),
-                                  ),
-                                ),
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 12),
