@@ -14,6 +14,7 @@ import 'package:fstapp/components/occasion_services/service_dialog.dart';
 import 'package:fstapp/components/occasion_services/occasion_services_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class ServiceTab extends StatefulWidget {
   const ServiceTab({super.key});
@@ -45,85 +46,65 @@ class _ServiceTabState extends State<ServiceTab> {
         UserColumns.NOTE,
       ];
 
-  List<ServiceItemModel>? allFood;
-  List<ServiceItemModel>? allAccommodation;
-  List<OccasionUserModel> _users = [];
+  List<ServiceItemModel> allFood = [];
+  List<ServiceItemModel> allAccommodation = [];
   SingleDataGridController<OccasionUserModel>? _controller;
 
   @override
-  void initState() {
-    super.initState();
-    loadData();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _controller ??= _createController();
   }
 
-  /// Loads service data for food and accommodation and updates the grid.
-  Future<void> loadData() async {
+  /// Loads the complete editor bundle in one RPC call for every grid reload.
+  Future<List<OccasionUserModel>> _loadUsersForGrid() async {
     final bundle = await DbUsers.getOccasionEditorDataBundle();
-    final af = bundle.services[DbOccasions.serviceTypeFood] ?? [];
-    final aa = bundle.services[DbOccasions.serviceTypeAccommodation] ?? [];
+    allFood = bundle.services[DbOccasions.serviceTypeFood] ?? [];
+    allAccommodation =
+        bundle.services[DbOccasions.serviceTypeAccommodation] ?? [];
+    _controller!.columns = _buildColumns();
+    return bundle.users;
+  }
 
-    if (!mounted) return;
-    setState(() {
-      allFood = af;
-      allAccommodation = aa;
-      _users = bundle.users;
-    });
-
-    // If the controller is already created, update its columns and force a reload.
-    if (_controller != null) {
-      _controller!.columns = UserColumns.generateColumns(
+  List<TrinaColumn> _buildColumns() => UserColumns.generateColumns(
         _columnIdentifiers,
         data: {
           UserColumns.FOOD: allFood,
           UserColumns.ACCOMMODATION: allAccommodation,
         },
       );
-      await _controller!.forceReload();
-    }
-  }
+
+  SingleDataGridController<OccasionUserModel> _createController() =>
+      SingleDataGridController<OccasionUserModel>(
+        context: context,
+        loadData: _loadUsersForGrid,
+        fromPlutoJson: OccasionUserModel.fromPlutoJson,
+        firstColumnType: DataGridFirstColumn.none,
+        idColumn: Tb.occasion_users.user,
+        actionsExtended: DataGridActionsController(
+          areAllActionsEnabled: RightsService.canUpdateUsers,
+          isAddActionPossible: () => false,
+        ),
+        headerChildren: [
+          if (_allowAccommodation)
+            DataGridAction(
+              name: OccasionServicesStrings.accommodationSettings,
+              action: (SingleDataGridController p0, [_]) =>
+                  _accommodationDefinition(p0),
+              isEnabled: RightsService.isManager,
+            ),
+          if (_allowFood)
+            DataGridAction(
+              name: OccasionServicesStrings.foodSettings,
+              action: (SingleDataGridController p0, [_]) => _foodDefinition(p0),
+              isEnabled: RightsService.isManager,
+            ),
+        ],
+        columns: _buildColumns(),
+      );
 
   @override
   Widget build(BuildContext context) {
-    // Show a loading indicator until the data is available.
-    if (allFood == null || allAccommodation == null) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    // Create the controller only once.
-    _controller ??= SingleDataGridController<OccasionUserModel>(
-      context: context,
-      loadData: () async => _users,
-      fromPlutoJson: OccasionUserModel.fromPlutoJson,
-      firstColumnType: DataGridFirstColumn.none,
-      idColumn: Tb.occasion_users.user,
-      actionsExtended: DataGridActionsController(
-        areAllActionsEnabled: RightsService.canUpdateUsers,
-        isAddActionPossible: () => false,
-      ),
-      headerChildren: [
-        if (_allowAccommodation)
-          DataGridAction(
-            name: OccasionServicesStrings.accommodationSettings,
-            action: (SingleDataGridController p0, [_]) =>
-                _accommodationDefinition(p0),
-            isEnabled: RightsService.isManager,
-          ),
-        if (_allowFood)
-          DataGridAction(
-            name: OccasionServicesStrings.foodSettings,
-            action: (SingleDataGridController p0, [_]) => _foodDefinition(p0),
-            isEnabled: RightsService.isManager,
-          ),
-      ],
-      columns: UserColumns.generateColumns(
-        _columnIdentifiers,
-        data: {
-          UserColumns.FOOD: allFood,
-          UserColumns.ACCOMMODATION: allAccommodation,
-        },
-      ),
-    );
-
     return SingleTableDataGrid<OccasionUserModel>(_controller!);
   }
 
@@ -141,8 +122,7 @@ class _ServiceTabState extends State<ServiceTab> {
       },
     );
 
-    // Reload the service data and refresh the grid.
-    await loadData();
+    await _controller!.forceReload();
   }
 
   Future<void> _foodDefinition(
@@ -159,7 +139,6 @@ class _ServiceTabState extends State<ServiceTab> {
       },
     );
 
-    // Reload the service data and refresh the grid.
-    await loadData();
+    await _controller!.forceReload();
   }
 }

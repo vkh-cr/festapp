@@ -74,44 +74,30 @@ class _UsersTabState extends State<UsersTab> {
   }
 
   SingleDataGridController<OccasionUserModel>? controller;
-  List<OccasionUserModel> _users = [];
   List<ServiceItemModel> _accommodations = [];
-  bool _isLoading = false;
 
   Future<void> refreshData() async {
-    await _loadEditorData(refreshGrid: true);
+    await controller?.forceReload();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (controller == null && !_isLoading) {
-      _loadEditorData();
-    }
+    controller ??= _createController();
   }
 
-  Future<void> _loadEditorData({bool refreshGrid = false}) async {
-    _isLoading = true;
+  Future<List<OccasionUserModel>> _loadUsersForGrid() async {
     final bundle = await DbUsers.getOccasionEditorDataBundle();
-    if (!mounted) return;
-    _users = bundle.users;
     _accommodations =
         bundle.services[DbOccasions.serviceTypeAccommodation] ?? [];
-
-    if (controller == null) {
-      _createController();
-      setState(() {});
-    } else if (refreshGrid) {
-      controller!.columns = UserColumns.generateColumns(
-        getColumnIdentifiers(),
-        data: {UserColumns.ACCOMMODATION: _accommodations},
-      );
-      await controller!.forceReload();
-    }
-    _isLoading = false;
+    controller!.columns = UserColumns.generateColumns(
+      getColumnIdentifiers(),
+      data: {UserColumns.ACCOMMODATION: _accommodations},
+    );
+    return bundle.users;
   }
 
-  void _createController() {
+  SingleDataGridController<OccasionUserModel> _createController() {
     final headerActions = [
       if (RightsService.isManager())
         DataGridAction(
@@ -148,9 +134,9 @@ class _UsersTabState extends State<UsersTab> {
         ),
     ];
 
-    controller = SingleDataGridController<OccasionUserModel>(
+    return SingleDataGridController<OccasionUserModel>(
       context: context,
-      loadData: () async => _users,
+      loadData: _loadUsersForGrid,
       fromPlutoJson: OccasionUserModel.fromPlutoJson,
       getNewObject: () =>
           OccasionUserModel.newRow(RightsService.currentOccasionId()!),
@@ -169,9 +155,6 @@ class _UsersTabState extends State<UsersTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (controller == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
     return SingleTableDataGrid<OccasionUserModel>(controller!);
   }
 }
