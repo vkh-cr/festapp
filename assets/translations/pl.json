@@ -330,6 +330,7 @@
     "sendWithNotification": "Wyślij z notyfikacją"
   },
   "FeatureImport": {
+    "csvColGroup": "Jedyna grupa uczestnika; brakująca grupa zostanie utworzona, poprzednia zastąpiona, a pusta wartość usunie członkostwo.",
     "createdItem": "Utworzono: {item}.",
     "creatingUsers": "Tworzenie użytkowników",
     "createUsersConfirm": "Znaleziono nowych użytkowników. Czy chcesz ich utworzyć?",

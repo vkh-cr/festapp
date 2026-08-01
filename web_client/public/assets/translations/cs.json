@@ -195,6 +195,7 @@
     "csvColDiet": "Stravovací omezení (volný text).",
     "csvColFood": "Kód(y) stravy podle definice v akci; více oddělte čárkou.",
     "csvColAccommodation": "Kód(y) ubytování podle definice v akci; více oddělte čárkou.",
+    "csvColGroup": "Název jediné skupiny účastníka; chybějící skupina se vytvoří, dosavadní se nahradí a prázdná hodnota účastníka ze skupiny odebere.",
     "csvCopyHeader": "Zkopírovat hlavičku pro vložení",
     "csvCopyTooltip": "Zkopírovat",
     "csvCopiedToast": "Zkopírováno do schránky.",

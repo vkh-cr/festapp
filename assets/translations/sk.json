@@ -330,6 +330,7 @@
     "sendWithNotification": "Odoslať s notifikáciou"
   },
   "FeatureImport": {
+    "csvColGroup": "Jediná skupina účastníka; chýbajúca skupina sa vytvorí, pôvodná sa nahradí a prázdna hodnota členstvo odstráni.",
     "createdItem": "Vytvorené: {item}.",
     "creatingUsers": "Vytváranie užívateľov",
     "createUsersConfirm": "Našli sa noví užívatelia. Chcete ich vytvoriť?",

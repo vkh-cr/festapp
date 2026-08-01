@@ -97,6 +97,7 @@ class FeaturesStrings {
   static String get csvColFood => 'FeatureImport.csvColFood'.tr();
   static String get csvColAccommodation =>
       'FeatureImport.csvColAccommodation'.tr();
+  static String get csvColGroup => 'FeatureImport.csvColGroup'.tr();
   static String get csvCopyHeader =>
       'FeatureImport.csvCopyHeader'.tr(); // "Copy header for pasting"
   static String get csvCopyTooltip =>

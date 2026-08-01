@@ -119,6 +119,25 @@ class DbGroups {
     }
   }
 
+  /// Atomically makes the CSV group column authoritative for imported users.
+  /// The RPC replaces standard-group membership and leaves typed groups alone.
+  static Future<void> replaceImportedUserGroups(
+      Map<String, String?> groupTitleByUserId) async {
+    if (!RightsService.isEditor()) {
+      throw Exception("Must be editor to import groups.");
+    }
+
+    await _supabase.rpc('import_user_group_assignments', params: {
+      'p_occasion_id': RightsService.currentOccasionId()!,
+      'p_assignments': groupTitleByUserId.entries
+          .map((entry) => {
+                'user_id': entry.key,
+                'group_title': entry.value,
+              })
+          .toList(),
+    });
+  }
+
   static Future<void> deleteUserGroupInfo(UserGroupInfoModel model) async {
     await _supabase
         .from(Tb.user_groups.table)

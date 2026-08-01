@@ -74,7 +74,7 @@ SQL functions organized by domain:
 | `units/` | Unit management | Unit CRUD, user-unit linking |
 | `user_permissions/` | RBAC | `get_is_*` permission checks (boolean returns) |
 | `user_services/` | Service assignments | User-service linking |
-| `users/` | User management | `create_user_in_organization_with_data_pure`, `delete_user` |
+| `users/` | User management | `create_user_in_organization_with_data_pure`, `delete_user`, `import_user_group_assignments` |
 | `utilities/` | Shared utilities | Helper functions |
 | `utils/` | Additional utils | Format helpers |
 

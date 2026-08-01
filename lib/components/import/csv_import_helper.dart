@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/users/occasion_user_model.dart';
+import 'package:fstapp/components/groups/db_groups.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -47,18 +48,65 @@ class CsvImportHelper {
     if (!proceed) return;
 
     var existingUsers = await DbUsers.getOccasionUsers();
-    var toBeCreated = _getUsersToBeCreated(addOrUpdateUsers, existingUsers);
-    var toBeUpdated = _getUsersToBeUpdated(addOrUpdateUsers, existingUsers);
+    var toBeCreated = getUsersToBeCreated(addOrUpdateUsers, existingUsers);
+    var toBeUpdated = getUsersToBeUpdated(addOrUpdateUsers, existingUsers);
     var toBeDeleted =
         _getUsersToBeDeleted(deleteUsers, addOrUpdateUsers, existingUsers);
 
-    await _handleCreateUsers(context, toBeCreated);
-    await _handleUpdateUsers(context, toBeUpdated, existingUsers);
+    final created = await _handleCreateUsers(context, toBeCreated);
+    final updated =
+        await _handleUpdateUsers(context, toBeUpdated, existingUsers);
     await _handleDeleteUsers(context, toBeDeleted);
+
+    final skippedGroupEmails = <String>{
+      if (!created)
+        ...toBeCreated
+            .map((user) => user[Tb.occasion_users.data_email] as String),
+      if (!updated)
+        ...toBeUpdated
+            .map((user) => user[Tb.occasion_users.data_email] as String),
+    };
+    await _handleGroups(addOrUpdateUsers.where((user) => !skippedGroupEmails
+        .contains(user[Tb.occasion_users.data_email] as String)));
+  }
+
+  static Future<void> _handleGroups(
+      Iterable<Map<String, dynamic>> importedUsers) async {
+    final usersWithGroupColumn = importedUsers
+        .where((user) => user.containsKey(ImportHelper.groupColumn))
+        .toList();
+    if (usersWithGroupColumn.isEmpty) return;
+
+    final usersByEmail = {
+      for (final user in await DbUsers.getOccasionUsers())
+        if (user.user != null)
+          (user.data?[Tb.occasion_users.data_email] as String?)
+                  ?.trim()
+                  .toLowerCase() ??
+              '': user.user!,
+    }..remove('');
+
+    final groupTitleByUserId = <String, String?>{};
+    for (final importedUser in usersWithGroupColumn) {
+      final groupTitle =
+          (importedUser[ImportHelper.groupColumn] as String?)?.trim();
+      final email = (importedUser[Tb.occasion_users.data_email] as String?)
+          ?.trim()
+          .toLowerCase();
+      final userId = email == null ? null : usersByEmail[email];
+      if (userId == null) continue;
+      groupTitleByUserId[userId] =
+          groupTitle == null || groupTitle.isEmpty ? null : groupTitle;
+    }
+
+    if (groupTitleByUserId.isNotEmpty) {
+      await DbGroups.replaceImportedUserGroups(groupTitleByUserId);
+    }
   }
 
   // Helper to get users to be created
-  static List<Map<String, dynamic>> _getUsersToBeCreated(
+  @visibleForTesting
+  static List<Map<String, dynamic>> getUsersToBeCreated(
       Iterable<Map<String, dynamic>> users,
       List<OccasionUserModel> existingUsers) {
     return users.where((u) {
@@ -72,7 +120,8 @@ class CsvImportHelper {
   }
 
   // Helper to get users to be updated
-  static List<Map<String, dynamic>> _getUsersToBeUpdated(
+  @visibleForTesting
+  static List<Map<String, dynamic>> getUsersToBeUpdated(
       Iterable<Map<String, dynamic>> users,
       List<OccasionUserModel> existingUsers) {
     return users.where((u) {
@@ -104,14 +153,14 @@ class CsvImportHelper {
           );
           return (existing != null && duplicated == null) ? existing : null;
         })
-        .whereNotNull()
+        .nonNulls
         .toList();
   }
 
   // Handle creating users with progress dialog
-  static Future<void> _handleCreateUsers(
+  static Future<bool> _handleCreateUsers(
       BuildContext context, List<Map<String, dynamic>> toBeCreated) async {
-    if (toBeCreated.isEmpty) return;
+    if (toBeCreated.isEmpty) return true;
 
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
@@ -120,7 +169,7 @@ class CsvImportHelper {
       confirmButtonMessage: CommonStrings.proceed,
     );
 
-    if (!proceed) return;
+    if (!proceed) return false;
 
     await DialogHelper.showProgressDialogAsync(
       context,
@@ -137,14 +186,15 @@ class CsvImportHelper {
               })
           .toList(),
     );
+    return true;
   }
 
   // Handle updating users with progress dialog
-  static Future<void> _handleUpdateUsers(
+  static Future<bool> _handleUpdateUsers(
       BuildContext context,
       List<Map<String, dynamic>> toBeUpdated,
       List<OccasionUserModel> existingUsers) async {
-    if (toBeUpdated.isEmpty) return;
+    if (toBeUpdated.isEmpty) return true;
 
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
@@ -153,7 +203,7 @@ class CsvImportHelper {
       confirmButtonMessage: CommonStrings.proceed,
     );
 
-    if (!proceed) return;
+    if (!proceed) return false;
 
     await DialogHelper.showProgressDialogAsync(
       context,
@@ -163,8 +213,8 @@ class CsvImportHelper {
           .map((u) => () async {
                 var existing = existingUsers.firstWhere(
                   (e) =>
-                      e.data?[Tb.occasion_users.data_email] ==
-                      u[Tb.occasion_users.data_email],
+                      e.data?[Tb.occasion_users.data_email]?.toLowerCase() ==
+                      u[Tb.occasion_users.data_email]?.toLowerCase(),
                 );
                 var fromExisting =
                     OccasionUserModel.fromImportedJson(u, existing);
@@ -176,6 +226,7 @@ class CsvImportHelper {
               })
           .toList(),
     );
+    return true;
   }
 
   /// Builds a collapsed help section (shown above the drop area) that, when
@@ -189,8 +240,7 @@ class CsvImportHelper {
     final headers = ImportHelper.migrateColumns;
 
     final columns = <_CsvColumnInfo>[
-      _CsvColumnInfo(
-          Tb.occasion_users.data_email, FeaturesStrings.csvColEmail,
+      _CsvColumnInfo(Tb.occasion_users.data_email, FeaturesStrings.csvColEmail,
           isRequired: true),
       _CsvColumnInfo(Tb.occasion_users.data_name, FeaturesStrings.csvColName,
           isRequired: true),
@@ -198,24 +248,21 @@ class CsvImportHelper {
           Tb.occasion_users.data_surname, FeaturesStrings.csvColSurname,
           isRequired: true),
       _CsvColumnInfo(Tb.occasion_users.data_sex, FeaturesStrings.csvColSex),
-      _CsvColumnInfo(
-          Tb.occasion_users.data_phone, FeaturesStrings.csvColPhone),
-      _CsvColumnInfo(
-          Tb.occasion_users.data_text1, FeaturesStrings.csvColText1),
-      _CsvColumnInfo(
-          Tb.occasion_users.data_text2, FeaturesStrings.csvColText2),
+      _CsvColumnInfo(Tb.occasion_users.data_phone, FeaturesStrings.csvColPhone),
+      _CsvColumnInfo(Tb.occasion_users.data_text1, FeaturesStrings.csvColText1),
+      _CsvColumnInfo(Tb.occasion_users.data_text2, FeaturesStrings.csvColText2),
       _CsvColumnInfo(
           Tb.occasion_users.data_birthDate, FeaturesStrings.csvColBirthDate),
       _CsvColumnInfo(Tb.occasion_users.data_note, FeaturesStrings.csvColNote),
       if (FeatureService.isServiceFoodEnabled())
-        _CsvColumnInfo(
-            Tb.occasion_users.data_diet, FeaturesStrings.csvColDiet),
+        _CsvColumnInfo(Tb.occasion_users.data_diet, FeaturesStrings.csvColDiet),
       if (FeatureService.isServiceFoodEnabled())
         _CsvColumnInfo(
             Tb.occasion_users.services_food, FeaturesStrings.csvColFood),
       if (FeatureService.isServiceAccommodationEnabled())
         _CsvColumnInfo(Tb.occasion_users.services_accommodation,
             FeaturesStrings.csvColAccommodation),
+      _CsvColumnInfo(ImportHelper.groupColumn, FeaturesStrings.csvColGroup),
     ];
 
     return ConstrainedBox(
@@ -270,8 +317,8 @@ class CsvImportHelper {
                           message: FeaturesStrings.csvCopyTooltip,
                           child: InkWell(
                             borderRadius: BorderRadius.circular(4),
-                            onTap: () => _copyToClipboard(
-                                context, headers[col.headerKey] ?? col.headerKey),
+                            onTap: () => _copyToClipboard(context,
+                                headers[col.headerKey] ?? col.headerKey),
                             child: Container(
                               padding: const EdgeInsets.fromLTRB(6, 2, 4, 2),
                               decoration: BoxDecoration(

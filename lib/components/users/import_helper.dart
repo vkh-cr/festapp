@@ -1,10 +1,13 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:csv/csv.dart';
+import 'package:csv/csv_settings_autodetection.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:intl/intl.dart';
 
 class ImportHelper {
+  static const String groupColumn = 'group';
+
   static Map<String, String> get migrateColumns => {
         Tb.occasion_users.data_email: "E-mailová adresa",
         Tb.occasion_users.data_sex: "Jsi:",
@@ -18,6 +21,7 @@ class ImportHelper {
         Tb.occasion_users.data_note: "Poznámka:",
         Tb.occasion_users.data_diet: "Stravovací omezení:",
         Tb.occasion_users.services_food: "Stravování:",
+        groupColumn: "Skupina:",
       };
 
   static int getIndex(String s, List<String> row) {
@@ -26,7 +30,14 @@ class ImportHelper {
 
   static Future<List<Map<String, dynamic>>> getUsersFromFile(XFile file) async {
     final rawData = await file.readAsString();
-    final fields = const CsvToListConverter().convert(rawData);
+    return getUsersFromCsv(rawData);
+  }
+
+  static List<Map<String, dynamic>> getUsersFromCsv(String rawData) {
+    final fields = const CsvToListConverter(
+      csvSettingsDetector:
+          FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']),
+    ).convert(rawData);
 
     List<Map<String, dynamic>> userList = [];
 
@@ -34,6 +45,10 @@ class ImportHelper {
     Map<String, int> userColumnIndex = {};
     for (var keyValue in migrateColumns.entries) {
       var index = firstRow.indexOf(keyValue.value);
+      if (index == -1 && keyValue.key == groupColumn) {
+        index = firstRow
+            .indexWhere((header) => header.trim().toLowerCase() == 'skupina');
+      }
       if (index == -1) {
         continue;
       }

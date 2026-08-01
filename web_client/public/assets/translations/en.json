@@ -195,6 +195,7 @@
     "csvColDiet": "Dietary restrictions (free text).",
     "csvColFood": "Meal code(s) as defined in the event; separate multiple with commas.",
     "csvColAccommodation": "Accommodation code(s) as defined in the event; separate multiple with commas.",
+    "csvColGroup": "The participant's single group; a missing group is created, the previous one is replaced, and an empty value removes group membership.",
     "csvCopyHeader": "Copy header for pasting",
     "csvCopyTooltip": "Copy",
     "csvCopiedToast": "Copied to clipboard.",
