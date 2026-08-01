@@ -14,13 +14,20 @@ import 'package:fstapp/components/users/unit_user_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
+import 'package:fstapp/components/occasion_services/service_item_model.dart';
+import 'package:fstapp/components/users/occasion_editor_payload.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OccasionEditorData {
   final List<OccasionUserModel> users;
   final List<FormModel> forms;
-  OccasionEditorData({required this.users, required this.forms});
+  final Map<String, List<ServiceItemModel>> services;
+  OccasionEditorData({
+    required this.users,
+    required this.forms,
+    required this.services,
+  });
 }
 
 class OccasionUsersBundle {
@@ -49,20 +56,41 @@ class DbUsers {
   static const String lastSignInAtKey = 'last_sign_in_at';
   static const String groupTitleKey = 'group_title';
 
-  static Future<List<OccasionUserModel>> getOccasionEditorData() async {
-    var result = await _supabase.rpc('get_occasion_users_for_edit',
+  static Future<OccasionEditorData> getOccasionEditorDataBundle() async {
+    final result = await _supabase.rpc('get_occasion_users_for_edit',
         params: {'p_occasion_id': RightsService.currentOccasionId()!});
+    return parseOccasionEditorData(result);
+  }
 
-    if (result != null && result["code"] == 200) {
-      var data = result["data"];
-      var users = List<OccasionUserModel>.from(
-          data["occasion_users"].map((x) => OccasionUserModel.fromJson(x)));
-      var forms =
-          List<FormModel>.from(data["forms"].map((x) => FormModel.fromJson(x)));
+  static OccasionEditorData parseOccasionEditorData(dynamic result) {
+    final payload = OccasionEditorPayload.fromRpc(result);
+    if (payload.isSuccess) {
+      final users = List<OccasionUserModel>.from(
+          payload.users.map((x) => OccasionUserModel.fromJson(x)));
+      final forms =
+          List<FormModel>.from(payload.forms.map((x) => FormModel.fromJson(x)));
+      final services = <String, List<ServiceItemModel>>{
+        for (final type in [
+          DbOccasions.serviceTypeAccommodation,
+          DbOccasions.serviceTypeFood,
+        ])
+          type: List<ServiceItemModel>.from(
+            (payload.services[type] ?? const [])
+                .map((item) => ServiceItemModel.fromJson(item)),
+          ),
+      };
 
       final formMap = {for (var form in forms) form.key: form};
 
       for (final user in users) {
+        user.services ??= {};
+        final food = user.services!.putIfAbsent(
+          DbOccasions.serviceTypeFood,
+          () => <String, dynamic>{},
+        ) as Map<String, dynamic>;
+        for (final item in services[DbOccasions.serviceTypeFood] ?? const []) {
+          food.putIfAbsent(item.code, () => DbOccasions.serviceNone);
+        }
         if (user.formId != null && formMap.containsKey(user.formId)) {
           user.form = formMap[user.formId];
         }
@@ -85,12 +113,13 @@ class DbUsers {
         return dateA.compareTo(dateB);
       });
 
-      return users;
+      return OccasionEditorData(
+        users: users,
+        forms: forms,
+        services: services,
+      );
     }
-    if (result != null && result["code"] == 403) {
-      // Authorization error
-    }
-    return [];
+    return OccasionEditorData(users: [], forms: [], services: {});
   }
 
   static Future<OccasionUsersBundle> getOccasionUsersWithOrdersBundle() async {
@@ -325,9 +354,7 @@ class DbUsers {
 
     if (result != null && result["code"] == 200) {
       return UnitModel.fromJson(result["data"]);
-    } else if (result != null && result["code"] == 403) {
-
-    }
+    } else if (result != null && result["code"] == 403) {}
 
     // Return null if no organization data is found or unauthorized
     return null;
@@ -345,6 +372,20 @@ class DbUsers {
 
   static Future<void> updateOccasionUser(OccasionUserModel oum) async {
     await AuthService.ensureCanUpdateUsers(oum);
+
+    // Existing occasion users are updated atomically by one authoritative RPC.
+    // This is the path used by both the Users and Stay grids.
+    if (oum.user != null) {
+      final response = await _supabase.rpc(
+        'save_occasion_user_for_edit',
+        params: {'input_data': oum.toUpdateJson()},
+      );
+      final code = response['code'];
+      if (code != 200) {
+        throw Exception(response['message']);
+      }
+      return;
+    }
 
     final response = await _supabase.rpc("update_user", params: {
       "input_data": {
@@ -435,34 +476,6 @@ class DbUsers {
         .from(Tb.occasion_users.table)
         .select()
         .eq(Tb.occasion_users.occasion, RightsService.currentOccasionId()!);
-    return List<OccasionUserModel>.from(
-            data.map((x) => OccasionUserModel.fromJson(x)))
-        .sortedBy((ou) => ou.createdAt!);
-  }
-
-  static Future<List<OccasionUserModel>> getOccasionUsersServiceTab() async {
-    var allFood = await DbOccasions.getAllServices("food");
-    var data = await _supabase
-        .from(Tb.occasion_users.table)
-        .select()
-        .eq(Tb.occasion_users.occasion, RightsService.currentOccasionId()!);
-    for (var ou in data) {
-      for (var f in allFood) {
-        if (ou[Tb.occasion_users.services] == null) {
-          ou[Tb.occasion_users.services] = {DbOccasions.serviceTypeFood: {}};
-        }
-        if (ou[Tb.occasion_users.services][DbOccasions.serviceTypeFood] ==
-            null) {
-          ou[Tb.occasion_users.services][DbOccasions.serviceTypeFood] = {};
-        }
-        if (ou[Tb.occasion_users.services][DbOccasions.serviceTypeFood]
-                [f.code] ==
-            null) {
-          ou[Tb.occasion_users.services][DbOccasions.serviceTypeFood][f.code] =
-              DbOccasions.serviceNone;
-        }
-      }
-    }
     return List<OccasionUserModel>.from(
             data.map((x) => OccasionUserModel.fromJson(x)))
         .sortedBy((ou) => ou.createdAt!);

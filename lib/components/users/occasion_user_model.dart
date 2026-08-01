@@ -305,11 +305,19 @@ class OccasionUserModel extends ITrinaRowModel {
     }
     Map<String, dynamic> services = {};
     mapJsonToServices(json, services, DbOccasions.serviceTypeFood);
-    var value = json[UserColumns.ACCOMMODATION]?.isEmpty ?? true
-        ? DbOccasions.serviceNone
-        : DbOccasions.servicePaid;
-    mapOneToServices(services, DbOccasions.serviceTypeAccommodation,
-        json[UserColumns.ACCOMMODATION], value);
+    final accommodationCode = json[UserColumns.ACCOMMODATION]?.toString() ?? '';
+    // Presence of the accommodation object is intentional: an empty object
+    // clears the current assignment, while missing service types are preserved
+    // by save_occasion_user_for_edit.
+    services[DbOccasions.serviceTypeAccommodation] = <String, dynamic>{};
+    if (accommodationCode.isNotEmpty) {
+      mapOneToServices(
+        services,
+        DbOccasions.serviceTypeAccommodation,
+        accommodationCode,
+        DbOccasions.servicePaid,
+      );
+    }
     return OccasionUserModel(
       occasion: RightsService.currentOccasionId(),
       user: json[UserColumns.ID]?.isEmpty == true ? null : json[UserColumns.ID],
@@ -321,8 +329,7 @@ class OccasionUserModel extends ITrinaRowModel {
       isEditorOrder: json[UserColumns.EDITOR_ORDER] == "true" ? true : false,
       isEditorOrderView:
           json[UserColumns.EDITOR_ORDER_VIEW] == "true" ? true : false,
-      isCleaningCrew:
-          json[UserColumns.CLEANING_CREW] == "true" ? true : false,
+      isCleaningCrew: json[UserColumns.CLEANING_CREW] == "true" ? true : false,
       isCleaningBlocked:
           json[UserColumns.CLEANING_BLOCKED] == "true" ? true : false,
       role: int.tryParse(json[UserColumns.ROLE] ?? ""),

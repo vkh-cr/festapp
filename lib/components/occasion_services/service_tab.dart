@@ -47,6 +47,7 @@ class _ServiceTabState extends State<ServiceTab> {
 
   List<ServiceItemModel>? allFood;
   List<ServiceItemModel>? allAccommodation;
+  List<OccasionUserModel> _users = [];
   SingleDataGridController<OccasionUserModel>? _controller;
 
   @override
@@ -57,13 +58,15 @@ class _ServiceTabState extends State<ServiceTab> {
 
   /// Loads service data for food and accommodation and updates the grid.
   Future<void> loadData() async {
-    var af = await DbOccasions.getAllServices(DbOccasions.serviceTypeFood);
-    var aa =
-        await DbOccasions.getAllServices(DbOccasions.serviceTypeAccommodation);
+    final bundle = await DbUsers.getOccasionEditorDataBundle();
+    final af = bundle.services[DbOccasions.serviceTypeFood] ?? [];
+    final aa = bundle.services[DbOccasions.serviceTypeAccommodation] ?? [];
 
+    if (!mounted) return;
     setState(() {
       allFood = af;
       allAccommodation = aa;
+      _users = bundle.users;
     });
 
     // If the controller is already created, update its columns and force a reload.
@@ -75,7 +78,7 @@ class _ServiceTabState extends State<ServiceTab> {
           UserColumns.ACCOMMODATION: allAccommodation,
         },
       );
-      _controller!.forceReload();
+      await _controller!.forceReload();
     }
   }
 
@@ -89,7 +92,7 @@ class _ServiceTabState extends State<ServiceTab> {
     // Create the controller only once.
     _controller ??= SingleDataGridController<OccasionUserModel>(
       context: context,
-      loadData: DbUsers.getOccasionUsersServiceTab,
+      loadData: () async => _users,
       fromPlutoJson: OccasionUserModel.fromPlutoJson,
       firstColumnType: DataGridFirstColumn.none,
       idColumn: Tb.occasion_users.user,

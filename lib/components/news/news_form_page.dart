@@ -14,6 +14,8 @@ import 'package:fstapp/components/html/html_editor_widget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/news/news_strings.dart';
+import 'package:fstapp/components/news/news_send_confirmation_dialog.dart';
+import 'package:fstapp/components/news/news_notification_audience_selector.dart';
 
 @RoutePage()
 class NewsFormPage extends StatefulWidget {
@@ -28,7 +30,7 @@ class NewsFormPage extends StatefulWidget {
 class _NewsFormPageState extends State<NewsFormPage> {
   final _formKey = GlobalKey<FormBuilderState>();
   late QuillEditorController _controller;
-  final bool _sendWithNotification = true;
+  NewsNotificationAudience? _audience;
   final FocusNode _toFocusNode = FocusNode();
   UserInfoModel? _currentUser;
 
@@ -58,19 +60,45 @@ class _NewsFormPageState extends State<NewsFormPage> {
 
   Future<void> _sendPressed({bool isTest = false, bool process = false}) async {
     var htmlContent = await _controller.getText();
+    if (!mounted) return;
     htmlContent = HtmlHelper.removeColor(htmlContent);
     if (process == true) {
       htmlContent = HtmlHelper.detectAndReplaceLinks(htmlContent);
     }
     if (htmlContent.isNotEmpty) {
+      final heading =
+          _formKey.currentState?.fields["heading"]?.value as String?;
+      final headingForNotification = heading?.trim().isNotEmpty == true
+          ? heading!.trim()
+          : _currentUser!.name;
+      final sendsNotification =
+          isTest || _audience != NewsNotificationAudience.none;
+      final sendsToSelf = isTest ||
+          _audience == NewsNotificationAudience.self ||
+          AppConfig.isPublicNotificationSendingDisabled;
+
+      if (sendsNotification) {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => NewsSendConfirmationDialog(
+            isTest: isTest,
+            isSelfOnly: sendsToSelf,
+            recipientIdentity: _currentUserIdentity,
+            heading: headingForNotification ?? '',
+            htmlContent: htmlContent,
+          ),
+        );
+        if (confirmed != true || !mounted) return;
+      }
+
       var toReturn = {
         "content": htmlContent,
-        "heading": _formKey.currentState?.fields["heading"]!.value,
+        "heading": heading,
         "heading_default": _currentUser!.name,
-        "with_notification":
-            _formKey.currentState?.fields["with_notification"]!.value,
-        if (isTest || AppConfig.isPublicNotificationSendingDisabled)
-          "to": [AuthService.currentUserId()],
+        // A test always means a real push to the current user, independently
+        // of the audience chosen for the eventual published news item.
+        "with_notification": sendsNotification,
+        if (sendsToSelf) "to": [AuthService.currentUserId()],
         if (isTest) "add_to_news": false,
       };
       Navigator.pop(context, toReturn);
@@ -82,6 +110,21 @@ class _NewsFormPageState extends State<NewsFormPage> {
   Future<void> _processAndSendTest() async {
     _sendPressed(isTest: true, process: true);
   }
+
+  String get _currentUserIdentity {
+    final name = _currentUser?.toFullNameString() ?? '';
+    final email = _currentUser?.email ?? '';
+    if (name.isNotEmpty && email.isNotEmpty) return '$name · $email';
+    if (name.isNotEmpty) return name;
+    return email;
+  }
+
+  String get _publishButtonText => switch (_audience) {
+        NewsNotificationAudience.none => NewsStrings.publishWithoutNotification,
+        NewsNotificationAudience.self => NewsStrings.publishAndSendSelf,
+        NewsNotificationAudience.everyone => NewsStrings.publishAndSendEveryone,
+        null => NewsStrings.selectRecipients,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -115,11 +158,15 @@ class _NewsFormPageState extends State<NewsFormPage> {
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always),
                         ),
-                        FormBuilderCheckbox(
-                          name: 'with_notification',
-                          initialValue: _sendWithNotification,
-                          title: Text(NewsStrings.sendWithNotification),
+                        NewsNotificationAudienceSelector(
+                          selected: _audience,
+                          currentUserIdentity: _currentUserIdentity,
+                          allowEveryone:
+                              !AppConfig.isPublicNotificationSendingDisabled,
+                          onChanged: (value) =>
+                              setState(() => _audience = value),
                         ),
+                        const SizedBox(height: 12),
                       ],
                     ),
                   ),
@@ -146,11 +193,13 @@ class _NewsFormPageState extends State<NewsFormPage> {
                   ),
                   ButtonsHelper.bottomBarButton(
                     onPressed: _processAndSendTest,
-                    text: NewsStrings.test,
+                    text: NewsStrings.sendTestToMe,
                   ),
                   ButtonsHelper.bottomBarButton(
-                    onPressed: () => _sendPressed(process: true),
-                    text: CommonStrings.send,
+                    onPressed: _audience == null
+                        ? null
+                        : () => _sendPressed(process: true),
+                    text: _publishButtonText,
                   ),
                 ],
               ),

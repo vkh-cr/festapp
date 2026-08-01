@@ -11,8 +11,9 @@ import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
-import 'package:fstapp/components/cleaning/cleaning_status.dart';
-import 'package:fstapp/components/cleaning/cleaning_strings.dart';
+import 'package:fstapp/components/icons/db_place_types.dart';
+import 'package:fstapp/components/icons/place_type_model.dart';
+import 'package:fstapp/components/map/place_type_column_builder.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/map/map_strings.dart';
@@ -29,22 +30,29 @@ class PlacesContent extends StatefulWidget {
 class _PlacesContentState extends State<PlacesContent> {
   List<IconModel> svgIcons = [];
   List<int?> mapIcons = [];
+  List<PlaceTypeModel> placeTypes = [];
   bool isLoading = true;
   SingleDataGridController<PlaceModel>? controller;
 
   @override
   void initState() {
     super.initState();
-    loadIcons();
+    loadOptions();
   }
 
-  Future<void> loadIcons() async {
+  Future<void> loadOptions() async {
     try {
-      var icons = await DbPlaces.getAllIcons();
+      final results = await Future.wait([
+        DbPlaces.getAllIcons(),
+        DbPlaceTypes.getPlaceTypes(),
+      ]);
+      final icons = results[0] as List<IconModel>;
+      final loadedPlaceTypes = results[1] as List<PlaceTypeModel>;
       setState(() {
         svgIcons = icons;
         mapIcons = svgIcons.map((icon) => icon.id).toList();
         mapIcons.add(null); // "no icon" option
+        placeTypes = loadedPlaceTypes;
         isLoading = false;
       });
       if (controller == null) initController();
@@ -118,49 +126,11 @@ class _PlacesContentState extends State<PlacesContent> {
           renderer: (ctx) =>
               DataGridHelper.mapIconRenderer(context, ctx, svgIcons),
         ),
-        // Cleaning service: mark a place as a toilet (sets places.type='toilet').
-        // Shown only when the "cleaning" feature is enabled on the occasion.
-        if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
-          TrinaColumn(
-            title: CleaningStrings.placeIsToilet,
-            field: Tb.places.type,
-            type: TrinaColumnType.text(),
-            applyFormatterInEditing: true,
-            enableEditingMode: false,
-            width: 110,
-            renderer: (ctx) {
-              final isToilet =
-                  ctx.cell.value == CleaningStatusHelper.toiletPlaceTypeCode;
-              return Checkbox(
-                value: isToilet,
-                onChanged: (v) {
-                  final checked = v ?? false;
-                  final cell = ctx.row.cells[Tb.places.type]!;
-                  final newVal = checked
-                      ? CleaningStatusHelper.toiletPlaceTypeCode
-                      : PlaceModel.WithoutValue;
-                  ctx.stateManager.changeCellValue(cell, newVal, force: true);
-                  ctx.cell.value = newVal;
-
-                  // On check, auto-assign the "wc" icon when none is set yet, so
-                  // toilets get the toilet icon without a manual step.
-                  if (checked) {
-                    final wcIcon = svgIcons.firstWhereOrNull((i) =>
-                        i.link == CleaningStatusHelper.toiletPlaceTypeCode ||
-                        i.link == 'wc');
-                    final iconCell = ctx.row.cells[Tb.places.icon];
-                    if (wcIcon != null &&
-                        iconCell != null &&
-                        iconCell.value == null) {
-                      ctx.stateManager
-                          .changeCellValue(iconCell, wcIcon.id, force: true);
-                      iconCell.value = wcIcon.id;
-                    }
-                  }
-                },
-              );
-            },
-          ),
+        buildPlaceTypeColumn(
+          placeTypes: placeTypes,
+          includeToilet:
+              FeatureService.isFeatureEnabled(FeatureConstants.cleaning),
+        ),
         TrinaColumn(
           title: MapStrings.locationOnMap,
           field: Tb.places.coordinates,

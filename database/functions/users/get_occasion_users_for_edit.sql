@@ -9,6 +9,7 @@ AS $$
 DECLARE
     users_data JSONB;
     forms_data JSONB;
+    services_data JSONB;
     org_id BIGINT;
 BEGIN
     -- 0. Retrieve the Organization ID
@@ -81,13 +82,51 @@ BEGIN
     FROM public.forms f
     WHERE f.occasion = p_occasion_id;
 
+    -- 3. Return the service catalog in the same RPC response. Both the Users
+    -- and Stay tabs need these options to render editable accommodation/food
+    -- columns; keeping them here avoids extra requests and PostgREST's 1000-row
+    -- cap on direct occasion_users queries.
+    SELECT catalog.services || jsonb_build_object(
+        'accommodation',
+        COALESCE((
+            SELECT jsonb_agg(
+                service_item.item || jsonb_build_object('place_title', p.title)
+                ORDER BY service_item.position
+            )
+            FROM jsonb_array_elements(
+                CASE
+                    WHEN jsonb_typeof(catalog.services->'accommodation') = 'array'
+                        THEN catalog.services->'accommodation'
+                    ELSE '[]'::jsonb
+                END
+            ) WITH ORDINALITY AS service_item(item, position)
+            LEFT JOIN public.places p
+              ON p.id = CASE
+                  WHEN service_item.item->>'reference' ~ '^[0-9]+$'
+                      THEN (service_item.item->>'reference')::bigint
+                  ELSE NULL
+              END
+             AND p.occasion = p_occasion_id
+        ), '[]'::jsonb)
+    )
+    INTO services_data
+    FROM (
+        SELECT CASE
+            WHEN jsonb_typeof(o.services) = 'object' THEN o.services
+            ELSE '{}'::jsonb
+        END AS services
+        FROM public.occasions o
+        WHERE o.id = p_occasion_id
+    ) catalog;
+
     -- Assemble the final JSONB object.
     RETURN jsonb_build_object(
         'code', 200,
         'message', 'Occasion users and forms retrieved successfully.',
         'data', jsonb_build_object(
             'occasion_users', COALESCE(users_data, '[]'::jsonb),
-            'forms',          COALESCE(forms_data, '[]'::jsonb)
+            'forms',          COALESCE(forms_data, '[]'::jsonb),
+            'services',       COALESCE(services_data, '{}'::jsonb)
         )
     );
 END;

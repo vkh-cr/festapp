@@ -2,11 +2,13 @@ class ServiceItemModel {
   String? title;
   final String code;
   int? reference;
+  final String? placeTitle;
 
   ServiceItemModel({
     required this.title,
     required this.code,
     required this.reference,
+    this.placeTitle,
   });
 
   @override
@@ -19,6 +21,7 @@ class ServiceItemModel {
       title: json["title"],
       code: json["code"],
       reference: json["reference"],
+      placeTitle: json["place_title"],
     );
   }
 }

@@ -15,6 +15,8 @@ import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/users/views/users_tab_helper.dart';
+import 'package:fstapp/components/occasion_services/service_item_model.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
 
 class UsersTab extends StatefulWidget {
   const UsersTab({super.key});
@@ -72,66 +74,97 @@ class _UsersTabState extends State<UsersTab> {
   }
 
   SingleDataGridController<OccasionUserModel>? controller;
+  List<OccasionUserModel> _users = [];
+  List<ServiceItemModel> _accommodations = [];
+  bool _isLoading = false;
 
   Future<void> refreshData() async {
-    await controller?.reloadData();
+    await _loadEditorData(refreshGrid: true);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (controller == null && !_isLoading) {
+      _loadEditorData();
+    }
+  }
+
+  Future<void> _loadEditorData({bool refreshGrid = false}) async {
+    _isLoading = true;
+    final bundle = await DbUsers.getOccasionEditorDataBundle();
+    if (!mounted) return;
+    _users = bundle.users;
+    _accommodations =
+        bundle.services[DbOccasions.serviceTypeAccommodation] ?? [];
+
     if (controller == null) {
-      final headerActions = [
-        if (RightsService.isManager())
-          DataGridAction(
-            name: CommonStrings.addExisting,
-            action: (SingleDataGridController p0, [_]) async {
-              await UsersTabHelper.addExisting(
-                  context,
-                  p0,
-                  (await DbUsers.getAllUsersBasics()).cast<IHasId>(),
-                  refreshData);
-            },
-          ),
+      _createController();
+      setState(() {});
+    } else if (refreshGrid) {
+      controller!.columns = UserColumns.generateColumns(
+        getColumnIdentifiers(),
+        data: {UserColumns.ACCOMMODATION: _accommodations},
+      );
+      await controller!.forceReload();
+    }
+    _isLoading = false;
+  }
+
+  void _createController() {
+    final headerActions = [
+      if (RightsService.isManager())
         DataGridAction(
-          name: UserStrings.invite,
+          name: CommonStrings.addExisting,
           action: (SingleDataGridController p0, [_]) async {
-            await UsersTabHelper.invite(context, p0, refreshData);
+            await UsersTabHelper.addExisting(
+                context,
+                p0,
+                (await DbUsers.getAllUsersBasics()).cast<IHasId>(),
+                refreshData);
+          },
+        ),
+      DataGridAction(
+        name: UserStrings.invite,
+        action: (SingleDataGridController p0, [_]) async {
+          await UsersTabHelper.invite(context, p0, refreshData);
+        },
+        isEnabled: RightsService.canUpdateUsers,
+      ),
+      DataGridAction(
+        name: UserStrings.changePassword,
+        action: (SingleDataGridController p0, [_]) =>
+            UsersTabHelper.setPassword(context, p0),
+        isEnabled: RightsService.canUpdateUsers,
+      ),
+      if (FeatureService.isFeatureEnabled(FeatureConstants.import))
+        DataGridAction(
+          name: CommonStrings.import,
+          action: (SingleDataGridController p0, [_]) async {
+            await ImportDialogHelper.import(context);
+            await refreshData();
           },
           isEnabled: RightsService.canUpdateUsers,
         ),
-        DataGridAction(
-          name: UserStrings.changePassword,
-          action: (SingleDataGridController p0, [_]) =>
-              UsersTabHelper.setPassword(context, p0),
-          isEnabled: RightsService.canUpdateUsers,
-        ),
-        if (FeatureService.isFeatureEnabled(FeatureConstants.import))
-          DataGridAction(
-            name: CommonStrings.import,
-            action: (SingleDataGridController p0, [_]) async {
-              await ImportDialogHelper.import(context);
-              await refreshData();
-            },
-            isEnabled: RightsService.canUpdateUsers,
-          ),
-      ];
+    ];
 
-      controller = SingleDataGridController<OccasionUserModel>(
-        context: context,
-        loadData: DbUsers.getOccasionEditorData,
-        fromPlutoJson: OccasionUserModel.fromPlutoJson,
-        getNewObject: () =>
-            OccasionUserModel.newRow(RightsService.currentOccasionId()!),
-        firstColumnType: DataGridFirstColumn.deleteAndCheck,
-        idColumn: Tb.occasion_users.user,
-        actionsExtended: DataGridActionsController(
-          areAllActionsEnabled: RightsService.canUpdateUsers,
-        ),
-        headerChildren: headerActions,
-        columns: UserColumns.generateColumns(getColumnIdentifiers()),
-      );
-    }
+    controller = SingleDataGridController<OccasionUserModel>(
+      context: context,
+      loadData: () async => _users,
+      fromPlutoJson: OccasionUserModel.fromPlutoJson,
+      getNewObject: () =>
+          OccasionUserModel.newRow(RightsService.currentOccasionId()!),
+      firstColumnType: DataGridFirstColumn.deleteAndCheck,
+      idColumn: Tb.occasion_users.user,
+      actionsExtended: DataGridActionsController(
+        areAllActionsEnabled: RightsService.canUpdateUsers,
+      ),
+      headerChildren: headerActions,
+      columns: UserColumns.generateColumns(
+        getColumnIdentifiers(),
+        data: {UserColumns.ACCOMMODATION: _accommodations},
+      ),
+    );
   }
 
   @override

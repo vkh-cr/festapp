@@ -104,12 +104,19 @@ class DbNews {
         Tb.log_notifications.organization: AppConfig.organization,
       });
 
-      ToastHelper.Show(context, NewsStrings.messageSent);
+      ToastHelper.Show(
+        context,
+        addToNews
+            ? (to == null
+                ? NewsStrings.messageSentToEveryone
+                : NewsStrings.messageSentToSelf)
+            : NewsStrings.testSentToSelf,
+      );
       return;
     }
 
     if (addToNews) {
-      ToastHelper.Show(context, NewsStrings.messageCreated);
+      ToastHelper.Show(context, NewsStrings.messageCreatedWithoutNotification);
     }
   }
 

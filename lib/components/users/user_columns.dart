@@ -235,19 +235,47 @@ class UserColumns {
           return columns;
         },
         ACCOMMODATION: (Map<String, dynamic> data) {
-          var select = data[DbOccasions.serviceTypeAccommodation]
-              ?.map((a) => a.code)
-              .toList();
-          select ??= [];
-          select.add("");
+          final items = List<ServiceItemModel>.from(
+            data[DbOccasions.serviceTypeAccommodation] ?? const [],
+          );
+          final labels = {
+            for (final item in items)
+              item.code: [
+                if (item.title?.trim().isNotEmpty == true) item.title!.trim(),
+                if (item.placeTitle?.trim().isNotEmpty == true &&
+                    item.placeTitle!.trim() != item.title?.trim())
+                  item.placeTitle!.trim(),
+              ].join(' — '),
+          };
+          final select = <String>["", ...items.map((item) => item.code)];
+          String labelFor(dynamic code) {
+            if (code == null || code.toString().isEmpty) return "—";
+            final title = labels[code];
+            return title == null || title.isEmpty
+                ? code.toString()
+                : '$title (${code.toString()})';
+          }
+
           return [
             TrinaColumn(
-                title: UserStrings.accommodation,
-                field: ACCOMMODATION,
-                type: TrinaColumnType.select(select),
-                applyFormatterInEditing: true,
-                enableEditingMode: RightsService.canUpdateUsers(),
-                width: 100)
+              title: UserStrings.accommodation,
+              field: ACCOMMODATION,
+              type: TrinaColumnType.select<String>(
+                select,
+                itemToString: labelFor,
+                menuItemBuilder: (code) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(labelFor(code)),
+                  ),
+                ),
+              ),
+              formatter: labelFor,
+              applyFormatterInEditing: true,
+              enableEditingMode: RightsService.canUpdateUsers(),
+              width: 190,
+            )
           ];
         },
         IS_VOLUNTEER: [_statusColumn(UserStrings.volunteer, IS_VOLUNTEER)],
