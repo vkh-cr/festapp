@@ -839,7 +839,6 @@
     "columnPlace": "Place",
     "manageParticipantsTooltip": "Manage Participants",
     "buttonEdit": "Edit",
-    "buttonLocation": "Location",
     "dialogTitle": "Manage Participants: {groupTitle} ({count})",
     "sectionLeader": "Leader",
     "noLeaderSelected": "No leader selected.",
@@ -853,7 +852,15 @@
     "checkPoints": "Check points",
     "correctAnswer": "Correct answer",
     "startBeforeEnd": "Start time must be earlier than end time.",
-    "noOneAssigned": "No one assigned"
+    "noOneAssigned": "No one assigned",
+    "choosePlace": "Choose place",
+    "placeDialogTitle": "Group location",
+    "currentPlace": "Currently: {place}",
+    "chooseExistingPlace": "Choose an existing place",
+    "chooseExistingPlaceHint": "Links the group to a place that is already on the map.",
+    "customGroupLocation": "Custom point on the map",
+    "customGroupLocationHint": "Creates a separate map point used only by this group.",
+    "removePlace": "Remove place assignment"
   },
   "FeatureBlueprint": {
     "maxTicketsReached": "Maximum number of tickets reached",

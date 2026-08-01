@@ -22,24 +22,35 @@ class PlaceModel extends ITrinaRowModel {
   bool isHidden = false;
 
   static const String WithoutValue = "---";
+  static const String groupType = 'group';
+  static const String coordinatesLatLngKey = 'latLng';
+  static const String latitudeKey = 'lat';
+  static const String longitudeKey = 'lng';
 
   static const String placesOffline = "places";
   static const String placeObjectColumn = "placeObject";
 
   List<EventModel> events = [];
 
-  double getLat() => latLng["lat"];
-  double getLng() => latLng["lng"];
+  double getLat() => latLng[latitudeKey];
+  double getLng() => latLng[longitudeKey];
 
   /// Whether this place has usable map coordinates. A place without them must
   /// be filtered out before building a [MapPlaceModel] (which force-reads lat/lng).
   bool get hasCoordinates =>
-      latLng != null && latLng?["lat"] != null && latLng?["lng"] != null;
+      latLng != null &&
+      latLng?[latitudeKey] != null &&
+      latLng?[longitudeKey] != null;
+
+  /// A hidden `group` place is an implementation-owned point created solely
+  /// for one group. Visible catalog places are shared references and must never
+  /// be updated or deleted as a side effect of editing that group.
+  bool get isPrivateGroupLocation => type == groupType && isHidden;
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(
       latLng: json.containsKey(Tb.places.coordinates)
-          ? json[Tb.places.coordinates]["latLng"]
+          ? json[Tb.places.coordinates][coordinatesLatLngKey]
           : null,
       id: json[Tb.places.id],
       title: json.containsKey(Tb.places.title) ? json[Tb.places.title] : null,
@@ -73,7 +84,7 @@ class PlaceModel extends ITrinaRowModel {
   Map<String, dynamic> toJson() => {
         Tb.places.id: id,
         Tb.places.title: title,
-        Tb.places.coordinates: {"latLng": latLng},
+        Tb.places.coordinates: {coordinatesLatLngKey: latLng},
         Tb.places.description: description,
         Tb.places.type: type,
         Tb.places.is_hidden: isHidden,

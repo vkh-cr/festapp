@@ -419,7 +419,15 @@
   "GroupStrings": {
     "checkPoints": "Станції",
     "correctAnswer": "Правильна відповідь",
-    "startBeforeEnd": "Час початку має бути раніше за час завершення."
+    "startBeforeEnd": "Час початку має бути раніше за час завершення.",
+    "choosePlace": "Вибрати місце",
+    "placeDialogTitle": "Місце групи",
+    "currentPlace": "Зараз: {place}",
+    "chooseExistingPlace": "Вибрати наявне місце",
+    "chooseExistingPlaceHint": "Пов’язує групу з місцем, яке вже є на карті.",
+    "customGroupLocation": "Власна точка на карті",
+    "customGroupLocationHint": "Створює окрему точку на карті лише для цієї групи.",
+    "removePlace": "Прибрати призначення місця"
   },
   "Administration": {
     "copyLink": "Скопіювати посилання",

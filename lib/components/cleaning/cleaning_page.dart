@@ -22,6 +22,7 @@ import 'package:fstapp/components/cleaning/widgets/cleaning_tile.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/map/map_page.dart';
+import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/components/offline/offline_strings.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -177,8 +178,7 @@ class _CleaningPageState extends State<CleaningPage> {
       context,
       placeId: place.place,
       placeTitle: place.title,
-      onShowOnMap: () => RouterService.navigateOccasion(
-          context, "${MapPage.ROUTE}/${place.place}"),
+      onShowOnMap: () => MapNavigation.openPlace(context, place.place),
     );
     if (changed && mounted) await _loadData();
   }

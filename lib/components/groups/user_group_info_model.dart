@@ -19,6 +19,21 @@ class UserGroupInfoModel extends ITrinaRowModel {
   static const String isAdminColumn = "is_admin";
   static const String modelReference = "modelReference";
 
+  /// Grid cells store the complete place object so saving can retain both the
+  /// selected ID and the immediately renderable title. A text column rejects
+  /// that object before Trina can mark the row as changed.
+  static TrinaColumnType placeColumnType() => TrinaColumnType.custom(
+        defaultValue: null,
+        isValid: (value) => value == null || value is PlaceModel,
+        compare: (a, b) {
+          final aTitle = a is PlaceModel ? a.title ?? '' : '';
+          final bTitle = b is PlaceModel ? b.title ?? '' : '';
+          return aTitle.compareTo(bTitle);
+        },
+        toDisplayString: (value) =>
+            value is PlaceModel ? value.toBasicString() : '',
+      );
+
   @override
   int? id;
   String title;
@@ -29,6 +44,9 @@ class UserGroupInfoModel extends ITrinaRowModel {
   Map<String, dynamic>? data;
   Set<GroupParticipantModel>? participants = {};
   bool? isAdmin;
+  int? persistedPlaceId;
+  bool persistedPlaceWasPrivate;
+  bool shouldSavePlace = false;
 
   UserGroupInfoModel({
     required this.id,
@@ -40,20 +58,25 @@ class UserGroupInfoModel extends ITrinaRowModel {
     this.placeId,
     this.participants,
     this.isAdmin,
+    this.persistedPlaceId,
+    this.persistedPlaceWasPrivate = false,
   });
 
   factory UserGroupInfoModel.fromJson(Map<String, dynamic> json) {
+    final place = json[Tb.places.table] != null
+        ? PlaceModel.fromJson(json[Tb.places.table])
+        : json[PlaceModel.placeObjectColumn] != null
+            ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
+            : null;
     return UserGroupInfoModel(
       id: json[Tb.user_group_info.id],
       title: json[Tb.user_group_info.title],
       type: json[Tb.user_group_info.type],
       data: json[Tb.user_group_info.data],
       placeId: json[Tb.user_group_info.place],
-      place: json[Tb.places.table] != null
-          ? PlaceModel.fromJson(json[Tb.places.table])
-          : json[PlaceModel.placeObjectColumn] != null
-              ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
-              : null,
+      place: place,
+      persistedPlaceId: json[Tb.user_group_info.place] ?? place?.id,
+      persistedPlaceWasPrivate: place?.isPrivateGroupLocation ?? false,
       description: json[Tb.user_group_info.description],
       participants: json.containsKey(Tb.user_groups.table)
           ? Set<GroupParticipantModel>.from(json[Tb.user_groups.table]
@@ -129,6 +152,11 @@ class UserGroupInfoModel extends ITrinaRowModel {
       parts.add(members.map((p) => p.userInfo!.toFullNameString()).join(', '));
     }
     return parts.join(' | ');
+  }
+
+  void setPlaceForEditing(PlaceModel? value, {bool savePlace = false}) {
+    place = value;
+    shouldSavePlace = savePlace;
   }
 
   Map<String, dynamic> toJson() {

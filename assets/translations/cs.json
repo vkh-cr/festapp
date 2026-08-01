@@ -839,7 +839,6 @@
     "columnPlace": "Místo",
     "manageParticipantsTooltip": "Spravovat účastníky",
     "buttonEdit": "Upravit",
-    "buttonLocation": "Místo",
     "dialogTitle": "Správa účastníků: {groupTitle} ({count})",
     "sectionLeader": "Vedoucí",
     "noLeaderSelected": "Není vybrán žádný vedoucí.",
@@ -853,7 +852,15 @@
     "checkPoints": "Stanoviště",
     "correctAnswer": "Správná odpověď",
     "startBeforeEnd": "Čas začátku musí být dřívější než čas konce.",
-    "noOneAssigned": "Nikdo není přiřazen"
+    "noOneAssigned": "Nikdo není přiřazen",
+    "choosePlace": "Vybrat místo",
+    "placeDialogTitle": "Místo skupinky",
+    "currentPlace": "Aktuálně: {place}",
+    "chooseExistingPlace": "Vybrat existující místo",
+    "chooseExistingPlaceHint": "Propojí skupinku s místem, které už je v mapě.",
+    "customGroupLocation": "Vlastní bod na mapě",
+    "customGroupLocationHint": "Vytvoří samostatný bod určený pouze pro tuto skupinku.",
+    "removePlace": "Odebrat přiřazení místa"
   },
   "FeatureBlueprint": {
     "maxTicketsReached": "Bylo dosaženo maximálního počtu vstupenek.",

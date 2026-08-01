@@ -14,7 +14,7 @@ import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/html/html_view.dart';
-import '../../map/map_page.dart';
+import '../../map/map_navigation.dart';
 
 @RoutePage()
 class UserStayPage extends StatefulWidget {
@@ -199,9 +199,9 @@ class _UserStayPageState extends State<UserStayPage> {
                               color: Theme.of(context).colorScheme.secondary),
                           label: Text(pool.place!.title!),
                           onPressed: () {
-                            RouterService.navigateOccasion(
+                            MapNavigation.openPlace(
                               context,
-                              "${MapPage.ROUTE}/${pool.place!.id}",
+                              pool.place!.id!,
                             );
                           },
                           shape: StadiumBorder(

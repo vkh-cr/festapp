@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/map/map_page.dart';
+import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
@@ -18,7 +18,6 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/connectivity_service.dart';
-import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -654,8 +653,7 @@ Widget _placeLink(BuildContext context, int? placeId, String? placeTitle) {
   }
   return InkWell(
     borderRadius: BorderRadius.circular(6),
-    onTap: () =>
-        RouterService.navigateOccasion(context, "${MapPage.ROUTE}/$placeId"),
+    onTap: () => MapNavigation.openPlace(context, placeId),
     child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(

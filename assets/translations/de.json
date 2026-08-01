@@ -300,7 +300,15 @@
   "GroupStrings": {
     "checkPoints": "Stationen",
     "correctAnswer": "Richtige Antwort",
-    "startBeforeEnd": "Der Startzeitpunkt muss früher als der Endzeitpunkt sein."
+    "startBeforeEnd": "Der Startzeitpunkt muss früher als der Endzeitpunkt sein.",
+    "choosePlace": "Ort auswählen",
+    "placeDialogTitle": "Gruppenstandort",
+    "currentPlace": "Aktuell: {place}",
+    "chooseExistingPlace": "Vorhandenen Ort auswählen",
+    "chooseExistingPlaceHint": "Verknüpft die Gruppe mit einem Ort, der bereits auf der Karte ist.",
+    "customGroupLocation": "Eigener Punkt auf der Karte",
+    "customGroupLocationHint": "Erstellt einen separaten Kartenpunkt nur für diese Gruppe.",
+    "removePlace": "Ortszuweisung entfernen"
   },
   "Administration": {
     "copyLink": "Link kopieren",

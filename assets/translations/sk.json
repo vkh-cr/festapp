@@ -300,7 +300,15 @@
   "GroupStrings": {
     "checkPoints": "Stanovištia",
     "correctAnswer": "Správna odpoveď",
-    "startBeforeEnd": "Čas začiatku musí byť skorší ako čas konca."
+    "startBeforeEnd": "Čas začiatku musí byť skorší ako čas konca.",
+    "choosePlace": "Vybrať miesto",
+    "placeDialogTitle": "Miesto skupinky",
+    "currentPlace": "Aktuálne: {place}",
+    "chooseExistingPlace": "Vybrať existujúce miesto",
+    "chooseExistingPlaceHint": "Prepojí skupinku s miestom, ktoré už je na mape.",
+    "customGroupLocation": "Vlastný bod na mape",
+    "customGroupLocationHint": "Vytvorí samostatný bod určený iba pre túto skupinku.",
+    "removePlace": "Odobrať priradenie miesta"
   },
   "Administration": {
     "copyLink": "Kopírovať odkaz",

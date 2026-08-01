@@ -62,7 +62,10 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
                 visible: RightsService.isEditor() ||
                     (RightsService.isGroupAdmin() &&
                         RightsService.currentUserGroup()!.place!.id ==
-                            widget.marker.place.id),
+                            widget.marker.place.id &&
+                        RightsService.currentUserGroup()!
+                            .place!
+                            .isPrivateGroupLocation),
                 child: TextButton.icon(
                     icon: const Icon(Icons.edit),
                     onPressed: widget.selectedMarker != null

@@ -10,7 +10,7 @@ import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/schedule/event_edit_page.dart';
-import 'package:fstapp/components/map/map_page.dart';
+import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
@@ -197,7 +197,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   void _goToMap(int placeId) {
-    RouterService.navigateOccasion(context, "${MapPage.ROUTE}/$placeId")
+    MapNavigation.openPlace(context, placeId)
         .then((_) => loadData());
   }
 

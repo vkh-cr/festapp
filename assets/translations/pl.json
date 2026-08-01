@@ -300,7 +300,15 @@
   "GroupStrings": {
     "checkPoints": "Stanowiska",
     "correctAnswer": "Poprawna odpowiedź",
-    "startBeforeEnd": "Czas rozpoczęcia musi być wcześniejszy niż czas zakończenia."
+    "startBeforeEnd": "Czas rozpoczęcia musi być wcześniejszy niż czas zakończenia.",
+    "choosePlace": "Wybierz miejsce",
+    "placeDialogTitle": "Miejsce grupy",
+    "currentPlace": "Obecnie: {place}",
+    "chooseExistingPlace": "Wybierz istniejące miejsce",
+    "chooseExistingPlaceHint": "Łączy grupę z miejscem, które już znajduje się na mapie.",
+    "customGroupLocation": "Własny punkt na mapie",
+    "customGroupLocationHint": "Tworzy osobny punkt na mapie tylko dla tej grupy.",
+    "removePlace": "Usuń przypisanie miejsca"
   },
   "Administration": {
     "copyLink": "Kopiuj link",

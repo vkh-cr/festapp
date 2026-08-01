@@ -13,8 +13,19 @@ class GroupsStrings {
   static String get manageParticipantsTooltip =>
       'GroupStrings.manageParticipantsTooltip'.tr(); // "Manage Participants"
   static String get buttonEdit => 'GroupStrings.buttonEdit'.tr(); // "Edit"
-  static String get buttonLocation =>
-      'GroupStrings.buttonLocation'.tr(); // "Location"
+  static String get choosePlace => 'GroupStrings.choosePlace'.tr();
+  static String get placeDialogTitle => 'GroupStrings.placeDialogTitle'.tr();
+  static String currentPlace(String place) =>
+      'GroupStrings.currentPlace'.tr(namedArgs: {'place': place});
+  static String get chooseExistingPlace =>
+      'GroupStrings.chooseExistingPlace'.tr();
+  static String get chooseExistingPlaceHint =>
+      'GroupStrings.chooseExistingPlaceHint'.tr();
+  static String get customGroupLocation =>
+      'GroupStrings.customGroupLocation'.tr();
+  static String get customGroupLocationHint =>
+      'GroupStrings.customGroupLocationHint'.tr();
+  static String get removePlace => 'GroupStrings.removePlace'.tr();
 
   // --- ParticipantsManagementDialog ---
   static String dialogTitle(String groupTitle, int count) =>

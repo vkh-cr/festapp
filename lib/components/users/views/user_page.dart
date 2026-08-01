@@ -19,6 +19,7 @@ import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/cleaning/cleaning_page.dart';
 import 'package:fstapp/components/cleaning/cleaning_strings.dart';
+import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/components/app_management/settings_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/components/users/views/login_page.dart';
@@ -31,11 +32,11 @@ import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/_shared/person_fields_strings.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
+import 'package:fstapp/components/users/widgets/profile_place_field.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
 import '../../inventory/views/user_stay_page.dart';
-import '../../map/map_page.dart';
 
 @RoutePage()
 class UserPage extends StatefulWidget {
@@ -351,13 +352,8 @@ class _UserPageState extends State<UserPage> {
                         ?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.services))
                   _buildStaySection(context),
-                // The user's own group, right under accommodation, rendered as
-                // a plain read-only profile field (same style as name / email).
-                // Reads userData.eventUserGroup, part of the cached offline
-                // user info — so it works offline too.
                 if (userData?.eventUserGroup != null)
-                  buildTextField(
-                      ScheduleStrings.group, userData!.eventUserGroup!.title),
+                  _buildGroupField(context),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
                   _buildCleaningSection(context),
                 const SizedBox(height: 16),
@@ -494,54 +490,24 @@ class _UserPageState extends State<UserPage> {
   /// place is assigned the value is a clickable link to it on the map;
   /// otherwise it shows a "not specified" note.
   Widget _buildAccommodationField(BuildContext context) {
-    final theme = Theme.of(context);
     final place = userData?.accommodationPlace;
-    final hasPlace = place?.id != null;
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.only(bottom: 3),
-          labelText: InventoryStrings.typeAccommodation,
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-        ),
-        child: hasPlace
-            ? Align(
-                alignment: Alignment.centerLeft,
-                // Align keeps the InkWell (and its hover/tap area) sized to the
-                // icon + text content instead of the full row width.
-                child: InkWell(
-                  onTap: () => RouterService.navigateOccasion(
-                      context, "${MapPage.ROUTE}/${place!.id}"),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(Icons.place,
-                          size: 20, color: theme.colorScheme.primary),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          place!.title ?? InventoryStrings.typeAccommodation,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 17,
-                            height: 1.0,
-                            color: theme.colorScheme.primary,
-                            decoration: TextDecoration.underline,
-                            decorationColor: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            : Text(
-                InventoryStrings.accommodationNotSpecified,
-                style: const TextStyle(fontSize: 17),
-              ),
-      ),
+    return ProfilePlaceField(
+      label: InventoryStrings.typeAccommodation,
+      value: place?.title ?? InventoryStrings.accommodationNotSpecified,
+      place: place,
+      icon: Icons.place,
+      onOpenPlace: (placeId) => MapNavigation.openPlace(context, placeId),
+    );
+  }
+
+  Widget _buildGroupField(BuildContext context) {
+    final group = userData!.eventUserGroup!;
+    return ProfilePlaceField(
+      label: ScheduleStrings.group,
+      value: group.title,
+      place: group.place,
+      icon: Icons.groups_outlined,
+      onOpenPlace: (placeId) => MapNavigation.openPlace(context, placeId),
     );
   }
 

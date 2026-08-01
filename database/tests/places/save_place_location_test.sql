@@ -1,7 +1,8 @@
 -- save_place_location regression tests.
 -- Covers the permission model of the move-a-place RPC: an editor may move any
--- place of the occasion; a group admin may move only the place assigned to their
--- own group (user_group_info.place); everyone else is refused. Also the 401
+-- place of the occasion; a group admin may move only their private hidden group
+-- point, never a shared catalog place linked to the group. Everyone else is
+-- refused. Also the 401
 -- (signed out) and 404 (missing place) envelopes.
 -- Auto-rollback runner; impersonation via request.jwt.claim.sub.
 
@@ -40,8 +41,12 @@ BEGIN
     -- Two places; both start at lat/lng = 1.
     INSERT INTO public.places (title, occasion, coordinates)
     VALUES ('Generic', v_oc, '{"latLng":{"lat":1,"lng":1}}'::jsonb) RETURNING id INTO v_generic;
-    INSERT INTO public.places (title, occasion, coordinates)
-    VALUES ('Own WC', v_oc, '{"latLng":{"lat":1,"lng":1}}'::jsonb) RETURNING id INTO v_own;
+    INSERT INTO public.places
+        (title, occasion, coordinates, type, is_hidden)
+    VALUES
+        (gen_random_uuid()::text, v_oc, '{"latLng":{"lat":1,"lng":1}}'::jsonb,
+         'group', true)
+    RETURNING id INTO v_own;
 
     -- Group whose assigned place is "Own WC"; spl_gadmin is its admin.
     INSERT INTO public.user_group_info (title, occasion, place)
@@ -56,9 +61,13 @@ BEGIN
     INSERT INTO public.user_groups ("user", "group", is_admin)
     VALUES (get_user_id('spl_gadmin2'), v_group2, true);
 
-    CREATE TEMP TABLE IF NOT EXISTS _spl (k text PRIMARY KEY, v bigint);
-    INSERT INTO _spl VALUES
-        ('occasion', v_oc), ('generic', v_generic), ('own', v_own);
+    CREATE TEMP TABLE IF NOT EXISTS _spl (
+        occasion bigint,
+        generic_place bigint,
+        private_place bigint,
+        group_id bigint
+    );
+    INSERT INTO _spl VALUES (v_oc, v_generic, v_own, v_group);
 
     RAISE NOTICE 'fixture built: occasion=%, generic=%, own=%', v_oc, v_generic, v_own;
 END $$ LANGUAGE plpgsql;
@@ -68,7 +77,7 @@ END $$ LANGUAGE plpgsql;
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
-    v_generic bigint := (SELECT v FROM _spl WHERE k = 'generic');
+    v_generic bigint := (SELECT generic_place FROM _spl);
     v_res jsonb;
     v_lat float;
     v_lng float;
@@ -92,7 +101,7 @@ END $$ LANGUAGE plpgsql;
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
-    v_own bigint := (SELECT v FROM _spl WHERE k = 'own');
+    v_own bigint := (SELECT private_place FROM _spl);
     v_res jsonb;
     v_lat float;
 BEGIN
@@ -108,19 +117,22 @@ BEGIN
 END $$ LANGUAGE plpgsql;
 
 -- ---------------------------------------------------------------------------
--- c) A group admin tries a place that is NOT their group's place → 403 and the
---    coordinates are unchanged (still lat=10 from test a).
+-- c) Linking a shared catalog place to the group does not grant its admin the
+--    right to move that shared place → 403 and coordinates stay unchanged.
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
-    v_generic bigint := (SELECT v FROM _spl WHERE k = 'generic');
+    v_generic bigint := (SELECT generic_place FROM _spl);
+    v_group bigint := (SELECT group_id FROM _spl);
     v_res jsonb;
     v_lat float;
 BEGIN
     PERFORM set_config('request.jwt.claim.sub', get_user_id('spl_gadmin')::text, true);
 
+    UPDATE public.user_group_info SET place = v_generic WHERE id = v_group;
+
     v_res := public.save_place_location(v_generic, 99, 99);
-    PERFORM assert_eq(v_res->>'code', '403', 'group admin moving a foreign place → 403');
+    PERFORM assert_eq(v_res->>'code', '403', 'group admin moving a linked shared place → 403');
 
     SELECT (coordinates->'latLng'->>'lat')::float INTO v_lat FROM public.places WHERE id = v_generic;
     PERFORM assert_eq(v_lat, 10::float, 'foreign place coordinates left unchanged');
@@ -138,7 +150,7 @@ END $$ LANGUAGE plpgsql;
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
-    v_generic bigint := (SELECT v FROM _spl WHERE k = 'generic');
+    v_generic bigint := (SELECT generic_place FROM _spl);
     v_res jsonb;
 BEGIN
     PERFORM set_config('request.jwt.claim.sub', get_user_id('spl_plain')::text, true);
@@ -153,7 +165,7 @@ END $$ LANGUAGE plpgsql;
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
-    v_generic bigint := (SELECT v FROM _spl WHERE k = 'generic');
+    v_generic bigint := (SELECT generic_place FROM _spl);
     v_res jsonb;
 BEGIN
     PERFORM set_config('request.jwt.claim.sub', '', true);
@@ -165,4 +177,49 @@ BEGIN
     PERFORM assert_eq(v_res->>'code', '404', 'missing place → 404');
 
     RAISE NOTICE 'test e (401 + 404) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- f) The group-editor RPC returns only visible, map-capable places from the
+--    requested occasion and keeps its editor-view authorization boundary.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc bigint := (SELECT occasion FROM _spl);
+    v_generic bigint := (SELECT generic_place FROM _spl);
+    v_private bigint := (SELECT private_place FROM _spl);
+    v_payload jsonb;
+    v_rejected boolean := false;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spl_editor')::text, true);
+    v_payload := public.get_all_user_groups(v_oc, NULL);
+
+    PERFORM assert_eq(
+        jsonb_typeof(v_payload->'places'),
+        'array',
+        'group editor returns a places array');
+    PERFORM assert_eq(
+        EXISTS (
+            SELECT 1
+            FROM jsonb_array_elements(v_payload->'places') place_item
+            WHERE (place_item->>'id')::bigint = v_generic
+        ),
+        true,
+        'visible place with coordinates is included');
+    PERFORM assert_eq(
+        EXISTS (
+            SELECT 1
+            FROM jsonb_array_elements(v_payload->'places') place_item
+            WHERE (place_item->>'id')::bigint = v_private
+        ),
+        false,
+        'private hidden group point is excluded');
+
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spl_plain')::text, true);
+    BEGIN
+        PERFORM public.get_all_user_groups(v_oc, NULL);
+    EXCEPTION WHEN OTHERS THEN
+        v_rejected := SQLERRM = 'NOT_AUTHORIZED';
+    END;
+    PERFORM assert_eq(v_rejected, true, 'non-editor-view user is rejected');
 END $$ LANGUAGE plpgsql;

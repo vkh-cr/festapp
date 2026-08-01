@@ -3,12 +3,16 @@ import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/components/map/db_places.dart';
+import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbGroups {
   static final _supabase = Supabase.instance.client;
+  static const editorGroupsKey = 'groups';
+  static const editorGameDefinitionsKey = 'game_definitions';
+  static const editorPlacesKey = 'places';
 
   static Future<List<UserGroupInfoModel>> getGroupsWithPlaces() async {
     var data = await _supabase
@@ -18,7 +22,7 @@ class DbGroups {
         data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
 
-  static Future<List<UserGroupInfoModel>> getAllUserGroupInfo(
+  static Future<UserGroupsEditorData> getUserGroupsEditorData(
       [String? type]) async {
     final response = await _supabase.rpc(
       'get_all_user_groups',
@@ -28,8 +32,14 @@ class DbGroups {
       },
     );
 
-    final List<dynamic> groupData = response['groups'];
-    final Map<String, dynamic>? gameDefsData = response['game_definitions'];
+    return parseUserGroupsEditorData(response, type);
+  }
+
+  static UserGroupsEditorData parseUserGroupsEditorData(dynamic response,
+      [String? type]) {
+    final List<dynamic> groupData = response[editorGroupsKey];
+    final Map<String, dynamic>? gameDefsData =
+        response[editorGameDefinitionsKey];
 
     var toReturn = List<UserGroupInfoModel>.from(
         groupData.map((x) => UserGroupInfoModel.fromJson(x)));
@@ -47,8 +57,19 @@ class DbGroups {
       return Utilities.naturalCompare(a.title, b.title);
     });
 
-    return toReturn;
+    final places = List<PlaceModel>.from(
+      (response[editorPlacesKey] ?? const [])
+          .map((x) => PlaceModel.fromJson(x)),
+    );
+    places.sort((a, b) =>
+        (a.title ?? '').toLowerCase().compareTo((b.title ?? '').toLowerCase()));
+
+    return UserGroupsEditorData(groups: toReturn, places: places);
   }
+
+  static Future<List<UserGroupInfoModel>> getAllUserGroupInfo(
+          [String? type]) async =>
+      (await getUserGroupsEditorData(type)).groups;
 
   static Future<UserGroupInfoModel?> getUserGroupInfo(int id) async {
     final response = await _supabase.rpc(
@@ -61,28 +82,37 @@ class DbGroups {
     return UserGroupInfoModel.fromJson(response);
   }
 
+  /// Canonical payload for persisting the editable group fields.
+  ///
+  /// A custom place must be saved before this is called so its generated ID
+  /// can cross the persistence boundary just like an existing catalog place.
+  static Map<String, dynamic> buildUserGroupUpsert(
+    UserGroupInfoModel model,
+  ) {
+    return {
+      Tb.user_group_info.title: model.title,
+      if (model.type != null) Tb.user_group_info.type: model.type,
+      if (model.description != null)
+        Tb.user_group_info.description: model.description,
+      Tb.user_group_info.place: model.place?.id,
+    };
+  }
+
   static Future<void> updateUserGroupInfo(UserGroupInfoModel model) async {
     if (!(RightsService.isEditor() || (model.isAdmin ?? false))) {
       throw Exception("Must be leader or admin to change the group.");
     }
 
-    Map<String, dynamic> upsertObj = {
-      Tb.user_group_info.title: model.title,
-    };
-
-    if (model.type != null) {
-      upsertObj.addAll({Tb.user_group_info.type: model.type});
-    }
-    if (model.description != null) {
-      upsertObj.addAll({Tb.user_group_info.description: model.description});
-    }
+    final previousPrivatePlaceId =
+        model.persistedPlaceWasPrivate ? model.persistedPlaceId : null;
     if (model.place != null) {
-      model.place = await DbPlaces.updatePlace(model.place!);
-      upsertObj.addAll({Tb.user_group_info.place: model.place!.id.toString()});
+      if (model.place!.id == null || model.shouldSavePlace) {
+        model.place = await DbPlaces.updatePlace(model.place!);
+      }
     }
+    final upsertObj = buildUserGroupUpsert(model);
     dynamic eventData;
     if (model.id != null) {
-      upsertObj.addAll({Tb.user_group_info.id: model.id.toString()});
       eventData = await _supabase
           .from(Tb.user_group_info.table)
           .update(upsertObj)
@@ -101,6 +131,16 @@ class DbGroups {
 
     var updated = UserGroupInfoModel.fromJson(eventData);
     await updateUserGroupParticipants(updated, model.participants!);
+
+    final assignedPlaceId = model.place?.id;
+    if (previousPrivatePlaceId != null &&
+        previousPrivatePlaceId != assignedPlaceId) {
+      await DbPlaces.deletePlace(PlaceModel(id: previousPrivatePlaceId));
+    }
+    model.persistedPlaceId = assignedPlaceId;
+    model.persistedPlaceWasPrivate =
+        model.place?.isPrivateGroupLocation ?? false;
+    model.shouldSavePlace = false;
   }
 
   static Future<void> updateUserGroupParticipants(
@@ -148,11 +188,8 @@ class DbGroups {
         .delete()
         .eq(Tb.user_group_info.id, model.id!);
 
-    if (model.place != null) {
-      await _supabase
-          .from(Tb.places.table)
-          .delete()
-          .eq(Tb.places.id, model.place!.id!);
+    if (model.place?.isPrivateGroupLocation ?? false) {
+      await DbPlaces.deletePlace(model.place!);
     }
   }
 
@@ -175,4 +212,14 @@ class DbGroups {
     return Set.from(response.values.map((groupJson) =>
         UserGroupInfoModel.fromJson(groupJson as Map<String, dynamic>)));
   }
+}
+
+class UserGroupsEditorData {
+  final List<UserGroupInfoModel> groups;
+  final List<PlaceModel> places;
+
+  const UserGroupsEditorData({
+    required this.groups,
+    required this.places,
+  });
 }

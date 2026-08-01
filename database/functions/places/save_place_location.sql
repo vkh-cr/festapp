@@ -32,16 +32,20 @@ BEGIN
   END IF;
 
   -- Editor on the place's occasion, OR admin of a group whose assigned place is
-  -- exactly this one (user_group_info.place). Nothing else may move a place.
+  -- exactly this one and is a private hidden group point. A group may also link
+  -- to a shared catalog place; that link must never grant permission to move it.
   IF NOT (
     get_is_editor_on_occasion(v_occasion)
     OR EXISTS (
       SELECT 1
       FROM public.user_groups ug
       JOIN public.user_group_info ugi ON ugi.id = ug."group"
+      JOIN public.places p ON p.id = ugi.place
       WHERE ug."user" = v_user
         AND ug.is_admin
         AND ugi.place = p_place_id
+        AND p.type = 'group'
+        AND p.is_hidden
     )
   ) THEN
     RETURN jsonb_build_object('code', 403, 'message', 'You cannot change this place');

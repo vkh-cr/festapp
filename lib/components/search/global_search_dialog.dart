@@ -5,7 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/images/image_url_helper.dart';
 import 'package:fstapp/components/information/info_page.dart';
-import 'package:fstapp/components/map/map_page.dart';
+import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
@@ -143,8 +143,7 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
             context, "${EventPage.ROUTE}/${r.entityId}");
         break;
       case 'place':
-        RouterService.navigateOccasion(
-            context, "${MapPage.ROUTE}/${r.entityId}");
+        MapNavigation.openPlace(context, r.entityId);
         break;
       case 'info':
         RouterService.navigateOccasion(

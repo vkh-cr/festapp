@@ -49,7 +49,7 @@ import 'package:fstapp/components/speakers/speaker_medallion.dart';
 import 'package:fstapp/components/speakers/counseling_page.dart';
 import 'package:fstapp/components/speakers/counseling_picker.dart';
 import 'package:fstapp/database_tables/tb.dart';
-import '../map/map_page.dart';
+import '../map/map_navigation.dart';
 
 @RoutePage()
 class EventPage extends StatefulWidget {
@@ -1137,8 +1137,7 @@ class _EventPageState extends State<EventPage> {
     return InkWell(
       borderRadius: BorderRadius.circular(6),
       onTap: () {
-        RouterService.navigateOccasion(
-                context, "${MapPage.ROUTE}/${_event!.place!.id}")
+        MapNavigation.openPlace(context, _event!.place!.id!)
             .then((value) => loadData(_event!.id!));
       },
       child: Row(
