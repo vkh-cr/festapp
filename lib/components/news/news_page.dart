@@ -182,6 +182,7 @@ class _NewsPageState extends State<NewsPage> {
                   builder: (onPinchStart, onPinchEnd) => Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      const SizedBox(height: 12),
                       for (var i = 0; i < newsMessages.length; i++) ...[
                         if (i != 0) const Divider(),
                         Builder(builder: (context) {

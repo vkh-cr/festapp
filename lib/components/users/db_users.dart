@@ -47,6 +47,7 @@ class DbUsers {
   static const String formIdKey = 'form_id';
   static const String orderCreatedAtKey = 'order_created_at';
   static const String lastSignInAtKey = 'last_sign_in_at';
+  static const String groupTitleKey = 'group_title';
 
   static Future<List<OccasionUserModel>> getOccasionEditorData() async {
     var result = await _supabase.rpc('get_occasion_users_for_edit',

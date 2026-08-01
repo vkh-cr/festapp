@@ -30,6 +30,7 @@ class _UsersTabState extends State<UsersTab> {
       UserColumns.EMAIL,
       UserColumns.NAME,
       UserColumns.SURNAME,
+      UserColumns.GROUP,
       UserColumns.SEX,
       if (FeatureService.isServiceAccommodationEnabled())
         UserColumns.ACCOMMODATION,

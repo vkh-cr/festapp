@@ -29,7 +29,8 @@ BEGIN
         jsonb_build_object(
             'form_id', order_info.form_id,
             'order_created_at', order_info.created_at,
-            'last_sign_in_at', au.last_sign_in_at
+            'last_sign_in_at', au.last_sign_in_at,
+            'group_title', standard_groups.titles
         )
     )
     INTO users_data
@@ -50,6 +51,15 @@ BEGIN
         WHERE opt.ticket = t.id
         LIMIT 1
     ) AS order_info ON true
+
+    LEFT JOIN LATERAL (
+        SELECT string_agg(ugi.title, ', ' ORDER BY ugi.title) AS titles
+        FROM public.user_groups ug
+        JOIN public.user_group_info ugi ON ugi.id = ug."group"
+        WHERE ug."user" = ou."user"
+          AND ugi.occasion = p_occasion_id
+          AND ugi.type IS NULL
+    ) AS standard_groups ON true
 
     WHERE ou.occasion = p_occasion_id
 

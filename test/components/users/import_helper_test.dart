@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/import/csv_import_helper.dart';
 import 'package:fstapp/components/users/import_helper.dart';
 import 'package:fstapp/components/users/occasion_user_model.dart';
+import 'package:fstapp/components/users/db_users.dart';
+import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/database_tables/tb.dart';
 
 void main() {
@@ -54,5 +57,26 @@ void main() {
     expect(CsvImportHelper.getUsersToBeCreated([updated], [existing]), isEmpty);
     expect(
         CsvImportHelper.getUsersToBeUpdated([updated], [existing]), [updated]);
+  });
+
+  testWidgets('user table exposes the imported group as read only',
+      (tester) async {
+    late BuildContext context;
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(builder: (builderContext) {
+        context = builderContext;
+        return const SizedBox();
+      }),
+    ));
+
+    final user = OccasionUserModel.fromJson({
+      DbUsers.groupTitleKey: 'Testovací skupina CSV',
+      Tb.occasion_users.data: <String, dynamic>{},
+    });
+    final groupColumn = UserColumns.generateColumns([UserColumns.GROUP]).single;
+
+    expect(user.toTrinaRow(context).cells[UserColumns.GROUP]?.value,
+        'Testovací skupina CSV');
+    expect(groupColumn.readOnly, isTrue);
   });
 }

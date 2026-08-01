@@ -569,7 +569,8 @@
     "approved": "Approved",
     "invited": "Invited",
     "cleaningCrew": "Cleaning crew",
-    "cleaningBlocked": "Cleaning report ban"
+    "cleaningBlocked": "Cleaning report ban",
+    "group": "Group"
   },
   "OrderHistory": {
     "noHistoryFound": "No history found.",

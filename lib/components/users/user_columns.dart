@@ -13,6 +13,7 @@ class UserColumns {
   static const String EMAIL = "email";
   static const String NAME = "name";
   static const String SURNAME = "surname";
+  static const String GROUP = "group";
   static const String SEX = "sex";
   static const String ACCOMMODATION = "accommodation";
   static const String PHONE = "phone";
@@ -89,6 +90,15 @@ class UserColumns {
             field: SURNAME,
             type: TrinaColumnType.text(),
             width: 120,
+          ),
+        ],
+        GROUP: [
+          TrinaColumn(
+            title: UserStrings.group,
+            field: GROUP,
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            width: 160,
           ),
         ],
         SEX: [

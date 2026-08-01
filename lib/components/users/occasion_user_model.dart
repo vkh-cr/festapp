@@ -22,6 +22,7 @@ class OccasionUserModel extends ITrinaRowModel {
   int? role;
   int? unit;
   String? formId;
+  String? groupTitle;
   FormModel? form;
 
   bool? isEditor = false;
@@ -63,6 +64,7 @@ class OccasionUserModel extends ITrinaRowModel {
       this.services,
       this.unit,
       this.formId,
+      this.groupTitle,
       this.form});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
@@ -80,6 +82,7 @@ class OccasionUserModel extends ITrinaRowModel {
         user: json[Tb.occasion_users.user],
         unit: json[Tb.unit_users.unit],
         formId: json[DbUsers.formIdKey],
+        groupTitle: json[DbUsers.groupTitleKey],
         isEditor: json[Tb.occasion_users.is_editor],
         isEditorView: json[Tb.occasion_users.is_editor_view],
         isEditorOrder: json[Tb.occasion_users.is_editor_order],
@@ -238,6 +241,7 @@ class OccasionUserModel extends ITrinaRowModel {
           TrinaCell(value: data?[Tb.occasion_users.data_name] ?? ""),
       UserColumns.SURNAME:
           TrinaCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
+      UserColumns.GROUP: TrinaCell(value: groupTitle ?? ""),
       UserColumns.SEX: TrinaCell(value: data?[Tb.occasion_users.data_sex]),
       UserColumns.PHONE:
           TrinaCell(value: data?[Tb.occasion_users.data_phone] ?? ""),

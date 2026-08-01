@@ -7,6 +7,7 @@ class UserStrings {
   static String get email => 'UserColumns.email'.tr();
   static String get name => 'UserColumns.name'.tr();
   static String get surname => 'UserColumns.surname'.tr();
+  static String get group => 'UserColumns.group'.tr();
   static String get sex => 'UserColumns.sex'.tr();
   static String get accommodation => 'UserColumns.accommodation'.tr();
   static String get phone => 'UserColumns.phone'.tr();

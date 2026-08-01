@@ -569,7 +569,8 @@
     "approved": "Schváleno",
     "invited": "Pozván",
     "cleaningCrew": "Úklidová služba",
-    "cleaningBlocked": "Zákaz hlášení úklidu"
+    "cleaningBlocked": "Zákaz hlášení úklidu",
+    "group": "Skupina"
   },
   "OrderHistory": {
     "noHistoryFound": "Nebyla nalezena žádná historie.",

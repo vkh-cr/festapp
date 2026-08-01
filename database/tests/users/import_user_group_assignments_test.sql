@@ -112,6 +112,14 @@ BEGIN
         1::bigint,
         'user was inserted into the requested group');
     PERFORM assert_eq(
+        (SELECT imported_user->>'group_title'
+         FROM jsonb_array_elements(
+             public.get_occasion_users_for_edit(v_occasion)
+                 #> '{data,occasion_users}') AS imported_user
+         WHERE imported_user->>'id' = v_user::text),
+        'Přesunutá testovací skupina CSV',
+        'users editor exposes the standard group title');
+    PERFORM assert_eq(
         (SELECT count(*) FROM public.user_groups
          WHERE "user" = v_user AND "group" = (SELECT game_group FROM _iuga)),
         1::bigint,
