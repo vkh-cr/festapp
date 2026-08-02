@@ -1,5 +1,5 @@
-import { sendEmailWithSubs } from "../_shared/emailClient.ts";
-import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
+import { deliverEmail } from "../_shared/emailDelivery.ts";
+import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import { getTicketOrderStornoTemplate } from "./getTicketOrderStornoTemplate.ts";
 import { getTicketOrderUpdateTemplate } from "./getTicketOrderUpdateTemplate.ts";
 import { getTicketOrderReminderTemplate } from "./getTicketOrderReminderTemplate.ts";
@@ -45,34 +45,17 @@ async function processEmailTask(taskData: any, authorization: string | null) {
 
   const { subs, sender, receiver, context, attachments = [], reply_to } = await handler(taskData, authorization!);
 
-  // --- Email Template Fetching ---
-  const templateAndWrapper: any = await getEmailTemplateAndWrapper(code, context);
-  if (!templateAndWrapper || !templateAndWrapper.template) {
-    throw new Error(`Template not found for code ${code}`);
-  }
-
-  // --- Email Sending ---
   console.log(`Sending email to ${receiver} with ${attachments.length} attachments.`);
-  await sendEmailWithSubs({
+  await deliverEmail({
     to: receiver,
-    subject: templateAndWrapper.template.subject,
-    content: templateAndWrapper.template.html,
-    subs,
+    templateCode: code,
+    context,
+    substitutions: subs,
     from: `${sender || "Festapp"} | Festapp <${_DEFAULT_EMAIL}>`,
-    wrapper: templateAndWrapper.wrapper ? templateAndWrapper.wrapper.html : null,
     attachments,
     replyTo: reply_to,
   });
   console.log(`Email for template ${code} sent successfully to ${receiver}.`);
-
-  // --- Logging ---
-  await supabaseAdmin.from("log_emails").insert({
-    from: _DEFAULT_EMAIL,
-    to: receiver,
-    template: templateAndWrapper.template.id,
-    organization: context.organization,
-    occasion: context.occasion,
-  });
 
   // --- Post-Action ---
   if ((code === "TICKET_ORDER_UPDATE" || code === "TICKET_ORDER_REMINDER") && context?.orderHistoryId) {

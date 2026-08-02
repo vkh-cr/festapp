@@ -7,8 +7,8 @@ Utility modules shared across Supabase Edge Functions.
 ### `auth.ts`
 Request authorization via shared secret (system/admin) or user token + editor role check. Exports `authorizeRequest` and `AuthError`.
 
-### `emailClient.ts`
-Email delivery via `nodemailer`. `sendEmail` for raw sends; `sendEmailWithSubs` for template placeholder substitution with optional wrapper.
+### `emailDelivery.ts`
+Canonical email delivery module. `deliverEmail` resolves the stored template and wrapper, applies substitutions, sends through `nodemailer`, and records accepted delivery in `log_emails`. Editor-provided template snapshots use the same path and still receive the centrally resolved wrapper.
 
 ### `supabaseUtil.ts`
 `supabaseAdmin` (service-role client), `createUserClient` (RLS-scoped client from a Bearer token), `getSupabaseUser`, `isUserEditor`, `isUserEditorOrder`, `getEmailTemplateAndWrapper` (resolves templates via Occasion > Unit > Organization hierarchy).

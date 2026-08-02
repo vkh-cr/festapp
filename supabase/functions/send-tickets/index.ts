@@ -1,7 +1,7 @@
-import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { deliverEmail, EmailTemplateNotFoundError } from "../_shared/emailDelivery.ts";
 import { generateTicketImage, fetchTicketResources } from "../_shared/generateTicket.ts";
 import { generateNamedTicketImage, fetchNamedTicketResources } from "../_shared/generateNamedTicket.ts";
-import { getEmailTemplateAndWrapper, supabaseAdmin, createUserClient } from "../_shared/supabaseUtil.ts";
+import { supabaseAdmin, createUserClient } from "../_shared/supabaseUtil.ts";
 import { authorizeRequest, AuthError } from "../_shared/auth.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
@@ -72,17 +72,8 @@ Deno.serve(async (req) => {
             });
     }
 
-    // Get email template and wrapper via RPC.
     const organizationId = occasion.organization;
     const context = { organization: organizationId, occasion: occasion.id, unit: occasion.unit};
-    const templateAndWrapper: any = await getEmailTemplateAndWrapper("TICKET_ORDER_PAYMENT_DONE", context);
-    if (!templateAndWrapper || !templateAndWrapper.template) {
-      console.error("Email template not found for code TICKET_ORDER_PAYMENT_DONE.");
-      return new Response(JSON.stringify({ error: "Email template not found" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 404,
-      });
-    }
 
     let attachments: Array<{
       filename: string;
@@ -121,25 +112,25 @@ Deno.serve(async (req) => {
     }
 
     console.log("Sending email...");
-    await sendEmailWithSubs({
-      to: email,
-      subject: templateAndWrapper.template.subject,
-      content: templateAndWrapper.template.html,
-      subs: { occasionTitle },
-      from: `${occasionTitle} | Festapp <${_DEFAULT_EMAIL}>`,
-      attachments,
-      wrapper: templateAndWrapper.wrapper ? templateAndWrapper.wrapper.html : null,
-      replyTo: reply_to,
-    });
-
-    // Log the email sending in the database.
-    await supabaseAdmin.from("log_emails").insert({
-      from: _DEFAULT_EMAIL,
-      to: email,
-      template: templateAndWrapper.template.id,
-      organization: organizationId,
-      occasion: occasion.id,
-    });
+    try {
+      await deliverEmail({
+        to: email,
+        templateCode: "TICKET_ORDER_PAYMENT_DONE",
+        context,
+        substitutions: { occasionTitle },
+        from: `${occasionTitle} | Festapp <${_DEFAULT_EMAIL}>`,
+        attachments,
+        replyTo: reply_to,
+      });
+    } catch (error) {
+      if (error instanceof EmailTemplateNotFoundError) {
+        return new Response(JSON.stringify({ error: "Email template not found" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404,
+        });
+      }
+      throw error;
+    }
 
     const ticketIds = tickets.map((ticket) => ticket.id);
     let updateError = null;

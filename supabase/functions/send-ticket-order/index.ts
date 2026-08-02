@@ -1,11 +1,10 @@
-import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { deliverEmail } from "../_shared/emailDelivery.ts";
 import { formatCurrency, formatDatetime, formatIBAN } from "../_shared/utilities.ts";
 import { generateFullOrder } from "../_shared/orderOverview.ts";
 import { generateQrCode } from "../_shared/qrCodePayment.ts";
 
 
 import {
-  getEmailTemplateAndWrapper,
   supabaseAdmin,
   createUserClient,
 } from "../_shared/supabaseUtil.ts";
@@ -197,11 +196,6 @@ Deno.serve(async (req) => {
       unit: occasion.unit,
       occasion: occasion.id,
     };
-    const { template, wrapper } = await getEmailTemplateAndWrapper(
-      "TICKET_ORDER_CONFIRMATION",
-      context,
-    );
-
     const lang = orderDetails.lang || 'cs';
     const tone: Tone = (ticketOrder?.order.form.data?.communication_tone === 'informal') ? 'informal' : 'formal';
     const tr = translations[lang];
@@ -269,23 +263,14 @@ Deno.serve(async (req) => {
       ),
     };
 
-    await sendEmailWithSubs({
+    await deliverEmail({
       to: ticketOrder.order.data.email,
-      subject: template.subject,
-      content: template.html,
-      subs,
+      templateCode: "TICKET_ORDER_CONFIRMATION",
+      context,
+      substitutions: subs,
       from: `${occasion.title} | Festapp <${_DEFAULT_EMAIL}>`,
       attachments,
-      wrapper: wrapper?.html ?? null,
       replyTo: ticketOrder.order.reply_to,
-    });
-
-    await supabaseAdmin.from("log_emails").insert({
-      from: _DEFAULT_EMAIL,
-      to: ticketOrder.order.data.email,
-      template: template.id,
-      organization: occasion.organization,
-      occasion: occasion.id,
     });
 
     return new Response(

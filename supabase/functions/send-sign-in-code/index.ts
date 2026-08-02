@@ -1,7 +1,6 @@
-import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { deliverEmail, EmailTemplateNotFoundError } from "../_shared/emailDelivery.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
-import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -87,23 +86,14 @@ Deno.serve(async (req) => {
       .eq("id", organizationId)
       .single();
 
-    const orgConfig = orgData.data.data;
+    const orgConfig = orgData.data!.data;
     const appName = orgConfig.APP_NAME || "DefaultAppName";
     const defaultLang = orgConfig.DEFAULT_LANGUAGE || "en";
     const platforms = orgConfig.PLATFORMS || [];
 
     const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
 
-    // Instead of directly selecting an email template, use the RPC procedure.
     const context = { organization: organizationId, occasion: occasionId };
-    const templateAndWrapper: any = await getEmailTemplateAndWrapper("SIGN_IN_CODE", context);
-    if (!templateAndWrapper || !templateAndWrapper.template) {
-      console.error("Email template not found for SIGN_IN_CODE.");
-      return new Response(JSON.stringify({ error: "Email template not found" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 404,
-      });
-    }
 
     const subs = {
         name: occasionUser.data.data.name,
@@ -124,23 +114,23 @@ Deno.serve(async (req) => {
       });
     }
 
-    await sendEmailWithSubs({
-      to: userEmail,
-      subject: templateAndWrapper.template.subject,
-      content: templateAndWrapper.template.html,
-      subs,
-      wrapper: templateAndWrapper.wrapper ? templateAndWrapper.wrapper.html : null,
-      from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
-    });
-
-    await supabaseAdmin
-      .from("log_emails")
-      .insert({
-        "from": _DEFAULT_EMAIL,
-        "to": userEmail,
-        "template": templateAndWrapper.template.id,
-        "organization": organizationId
+    try {
+      await deliverEmail({
+        to: userEmail,
+        templateCode: "SIGN_IN_CODE",
+        context,
+        substitutions: subs,
+        from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
       });
+    } catch (error) {
+      if (error instanceof EmailTemplateNotFoundError) {
+        return new Response(JSON.stringify({ error: "Email template not found" }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 404,
+        });
+      }
+      throw error;
+    }
 
     // Mark user as invited.
     const { error: updateError } = await supabaseAdmin

@@ -1,6 +1,6 @@
-import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { deliverEmail, EmailTemplateNotFoundError } from "../_shared/emailDelivery.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
-import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
+import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
@@ -71,19 +71,7 @@ Deno.serve(async (req) => {
       "token": token,
     });
 
-  // Build the context for template selection.
-  // For a reset password email, we may only need organization.
   const context = { organization: organizationId };
-
-  // Call the stored procedure to get both the email template and the wrapper.
-  const templateAndWrapper: any = await getEmailTemplateAndWrapper("RESET_PASSWORD", context);
-  if (!templateAndWrapper || !templateAndWrapper.template) {
-    console.error("Template not found for code RESET_PASSWORD.");
-    return new Response(JSON.stringify({ error: "Template not found" }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 404,
-    });
-  }
 
   const resetPasswordLink = `${defaultUrl}/resetPassword?token=${token}`;
 
@@ -96,16 +84,20 @@ Deno.serve(async (req) => {
   };
 
   try {
-    await sendEmailWithSubs({
+    await deliverEmail({
       to: userEmail,
-      subject: templateAndWrapper.template.subject,
-      content: templateAndWrapper.template.html,
-      subs,
-      wrapper: templateAndWrapper.wrapper.html,
+      templateCode: "RESET_PASSWORD",
+      context,
+      substitutions: subs,
       from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
-      throwOnError: true,
     });
-  } catch (_) {
+  } catch (error) {
+    if (error instanceof EmailTemplateNotFoundError) {
+      return new Response(JSON.stringify({ error: "Template not found" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 404,
+      });
+    }
     return new Response(
       JSON.stringify({ error: "Failed to send reset password email" }),
       {
@@ -114,15 +106,6 @@ Deno.serve(async (req) => {
       },
     );
   }
-
-  await supabaseAdmin
-    .from("log_emails")
-    .insert({
-      "from": _DEFAULT_EMAIL,
-      "to": userEmail,
-      "template": templateAndWrapper.template.id,
-      "organization": organizationId
-    });
 
   return new Response(JSON.stringify({ "email": userEmail }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
