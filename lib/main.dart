@@ -5,6 +5,7 @@ import 'package:fstapp/config/url_strategy_noop.dart'
     if (dart.library.html) 'package:fstapp/config/url_strategy_web.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.dart';
+import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
@@ -19,6 +20,7 @@ import 'package:fstapp/services/health_tracking_http_client.dart';
 import 'package:fstapp/services/notification_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -101,9 +103,12 @@ Future<void> initializeEverything() async {
       httpClient: HealthTrackingHttpClient(),
     ).timeout(const Duration(seconds: 2));
     AppLogger.debug('Supabase initialized');
-    if (!AuthService.isLoggedIn()) {
+    if (AuthService.isLoggedIn()) {
       await AuthService.refreshSession().timeout(const Duration(seconds: 2));
       AppLogger.debug('Session refreshed');
+    } else {
+      await AuthService.tryAuthUser().timeout(const Duration(seconds: 2));
+      AppLogger.debug('Stored session recovery completed');
     }
   } catch (e) {
     AppLogger.error('Supabase initialization failed: $e');
@@ -136,7 +141,10 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    await RightsService.updateAppData();
+    // Tabs own their existing online/cache refresh flow. Blocking first paint
+    // on a serial refresh of every offline bundle leaves the app blank when
+    // any backend endpoint is slow.
+    await RightsService.updateAppData(refreshOffline: false);
     AppLogger.debug('Occasion loaded');
   } catch (e) {
     AppLogger.error('Occasion loading failed: $e');

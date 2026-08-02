@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/occasion/occasion_home_strings.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
+import 'package:fstapp/components/occasion/news_badge_controller.dart';
 import 'package:fstapp/components/offline/offline_banner.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
@@ -171,14 +172,16 @@ class _OccasionHomePageState extends State<OccasionHomePage>
                         listenableContext, LoginPage.ROUTE);
                     await loadData();
                   } else {
-                    if (AuthService.isLoggedIn() &&
-                        context.widget is OccasionHomePage) {
-                      DbNews.countNewMessages().then((count) {
+                    handleNewsBadgeTabTap(
+                      isNewsTab: key == OccasionTab.news,
+                      isLoggedIn: AuthService.isLoggedIn(),
+                      loadUnreadCount: DbNews.countNewMessages,
+                      setUnreadCount: (count) {
                         if (mounted) {
                           setState(() => _messageCount = count);
                         }
-                      });
-                    }
+                      },
+                    );
                     // A bottom-bar tap must always land on the section's
                     // homepage, even when the user is deep in a nested detail
                     // page (e.g. an event opened directly via URL / reload /

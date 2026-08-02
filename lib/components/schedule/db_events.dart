@@ -200,7 +200,7 @@ class DbEvents {
     return result.count > 0;
   }
 
-  static Future<void> signInToEvent(BuildContext context, int eventId,
+  static Future<bool> signInToEvent(BuildContext context, int eventId,
       [UserInfoModel? participant]) async {
     var userId = participant?.id ?? AuthService.currentUserId();
 
@@ -216,7 +216,7 @@ class DbEvents {
           ToastHelper.Show(context, OfflineStrings.writeRequiresConnection,
               severity: ToastSeverity.NotOk);
         }
-        return;
+        return false;
       }
       rethrow;
     }
@@ -235,20 +235,18 @@ class DbEvents {
                 ScheduleStrings.userHasBeenSignedIn(trPrefix,
                     user: participant.toString()));
           }
-          return;
+          return true;
         }
       case 100:
-        ToastHelper.Show(
-            context,
+        ToastHelper.Show(context,
             "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.eventOver}",
             severity: ToastSeverity.NotOk);
-        return;
+        return false;
       case 101:
-        ToastHelper.Show(
-            context,
+        ToastHelper.Show(context,
             "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.eventFull}",
             severity: ToastSeverity.NotOk);
-        return;
+        return false;
       case 102:
         {
           if (participant == null) {
@@ -265,7 +263,7 @@ class DbEvents {
                 context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           }
-          return;
+          return false;
         }
       case 103:
         {
@@ -283,7 +281,7 @@ class DbEvents {
                 context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           }
-          return;
+          return false;
         }
       case 107:
         {
@@ -300,7 +298,7 @@ class DbEvents {
                 ScheduleStrings.userAlreadySignedInSameTime(trPrefix,
                     user: participant.toString()));
           }
-          return;
+          return false;
         }
       case 104:
         {
@@ -323,33 +321,33 @@ class DbEvents {
           if (message != null && message.isNotEmpty) {
             answerWhy = workshopsFeature.registrationNotOpenMessage!;
             ToastHelper.Show(context, answerWhy, severity: ToastSeverity.NotOk);
-            return;
+            return false;
           }
 
           ToastHelper.Show(
               context, "${ScheduleStrings.cannotSignIn} $answerWhy",
               severity: ToastSeverity.NotOk);
-          return;
+          return false;
         }
       case 105:
         ToastHelper.Show(context,
             "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.maxMenReached}",
             severity: ToastSeverity.NotOk);
-        return;
+        return false;
       case 106:
         ToastHelper.Show(context,
             "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.maxWomenReached}",
             severity: ToastSeverity.NotOk);
-        return;
+        return false;
       case 109:
         ToastHelper.Show(context, SpeakersStrings.bookingLimitReached,
             severity: ToastSeverity.NotOk);
-        return;
+        return false;
       //403, 108, 109
       default:
         ToastHelper.Show(context, ScheduleStrings.cannotSignIn,
             severity: ToastSeverity.NotOk);
-        return;
+        return false;
     }
   }
 
@@ -379,14 +377,13 @@ class DbEvents {
   static Future<bool> addToMySchedule(BuildContext context, int id) async {
     if (!AppConfig.isOwnProgramSupportedWithoutSignIn &&
         !AuthService.isLoggedIn()) {
-      ToastHelper.Show(
-          context, ScheduleStrings.signInBeforeAddingToMySchedule);
+      ToastHelper.Show(context, ScheduleStrings.signInBeforeAddingToMySchedule);
       return false;
     }
     if (AuthService.isLoggedIn()) {
-      await _supabase.from(Tb.event_users_saved.table).insert({
-        Tb.event_users_saved.event: id,
-        EventModel.eventUsersSavedUserColumn: AuthService.currentUserId()
+      await _supabase.rpc('synchronize_my_schedule', params: {
+        'p_event_ids': [id],
+        'p_join_mode': true,
       });
     }
     await OfflineDataService.addToMySchedule(id);
@@ -734,7 +731,8 @@ class DbEvents {
       final code = response is Map ? response['code'] : 'N/A';
       final message =
           response is Map ? response['message'] : response.toString();
-      AppLogger.error('Failed to load my events bundle. Code: $code, Message: $message');
+      AppLogger.error(
+          'Failed to load my events bundle. Code: $code, Message: $message');
       return null;
     }
 

@@ -6,7 +6,7 @@ DECLARE
     v_game_group bigint;
 BEGIN
     PERFORM create_user_for_test('iuga_editor', 'iuga_editor@test.local');
-    PERFORM create_user_for_test('iuga_user', 'bujnmi@gmail.com');
+    PERFORM create_user_for_test('iuga_user', 'iuga_user@test.local');
     PERFORM create_user_for_test('iuga_plain', 'iuga_plain@test.local');
 
     INSERT INTO public.occasions (title, link, start_time, end_time, is_open)

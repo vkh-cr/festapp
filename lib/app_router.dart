@@ -245,19 +245,13 @@ class AppRouter extends RootStackRouter {
 /// Observer to monitor routing events for debugging or analytics purposes.
 class RoutingObserver extends AutoRouteObserver {
   @override
-  void didPush(Route route, Route? previousRoute) {
-
-  }
+  void didPush(Route route, Route? previousRoute) {}
 
   @override
-  void didInitTabRoute(TabPageRoute route, TabPageRoute? previousRoute) {
-
-  }
+  void didInitTabRoute(TabPageRoute route, TabPageRoute? previousRoute) {}
 
   @override
-  void didChangeTabRoute(TabPageRoute route, TabPageRoute previousRoute) {
-
-  }
+  void didChangeTabRoute(TabPageRoute route, TabPageRoute previousRoute) {}
 }
 
 /// This guard checks if the app is supported when landing on the root '/'.

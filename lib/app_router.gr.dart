@@ -10,8 +10,8 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i41;
-import 'package:collection/collection.dart' as _i43;
-import 'package:flutter/foundation.dart' as _i44;
+import 'package:collection/collection.dart' as _i44;
+import 'package:flutter/foundation.dart' as _i43;
 import 'package:flutter/material.dart' as _i42;
 import 'package:fstapp/components/app_management/install_page.dart'
     deferred as _i13;
@@ -153,7 +153,7 @@ class CheckRouteArgs {
 /// generated route for
 /// [_i3.CleaningPage]
 class CleaningRoute extends _i41.PageRouteInfo<CleaningRouteArgs> {
-  CleaningRoute({int? id, _i42.Key? key, List<_i41.PageRouteInfo>? children})
+  CleaningRoute({int? id, _i43.Key? key, List<_i41.PageRouteInfo>? children})
       : super(
           CleaningRoute.name,
           args: CleaningRouteArgs(id: id, key: key),
@@ -183,7 +183,7 @@ class CleaningRouteArgs {
 
   final int? id;
 
-  final _i42.Key? key;
+  final _i43.Key? key;
 
   @override
   String toString() {
@@ -480,7 +480,7 @@ class HtmlEditorRouteArgs {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! HtmlEditorRouteArgs) return false;
-    return const _i43.MapEquality<String, dynamic>().equals(
+    return const _i44.MapEquality<String, dynamic>().equals(
           content,
           other.content,
         ) &&
@@ -490,7 +490,7 @@ class HtmlEditorRouteArgs {
 
   @override
   int get hashCode =>
-      const _i43.MapEquality<String, dynamic>().hash(content) ^
+      const _i44.MapEquality<String, dynamic>().hash(content) ^
       occasionId.hashCode ^
       key.hashCode;
 }
@@ -498,7 +498,7 @@ class HtmlEditorRouteArgs {
 /// generated route for
 /// [_i12.InfoPage]
 class InfoRoute extends _i41.PageRouteInfo<InfoRouteArgs> {
-  InfoRoute({int? id, _i44.Key? key, List<_i41.PageRouteInfo>? children})
+  InfoRoute({int? id, _i43.Key? key, List<_i41.PageRouteInfo>? children})
       : super(
           InfoRoute.name,
           args: InfoRouteArgs(id: id, key: key),
@@ -528,7 +528,7 @@ class InfoRouteArgs {
 
   final int? id;
 
-  final _i44.Key? key;
+  final _i43.Key? key;
 
   @override
   String toString() {
@@ -624,7 +624,7 @@ class MapRoute extends _i41.PageRouteInfo<MapRouteArgs> {
     _i45.PlaceModel? place,
     _i46.PathGroupsModel? editPathGroup,
     String? placeType,
-    _i44.Key? key,
+    _i43.Key? key,
     List<_i41.PageRouteInfo>? children,
   }) : super(
           MapRoute.name,
@@ -684,7 +684,7 @@ class MapRouteArgs {
 
   final String? placeType;
 
-  final _i44.Key? key;
+  final _i43.Key? key;
 
   @override
   String toString() {
@@ -985,7 +985,7 @@ class ResetPasswordRoute extends _i41.PageRouteInfo<void> {
 class ScanRoute extends _i41.PageRouteInfo<ScanRouteArgs> {
   ScanRoute({
     String? scanCode,
-    _i44.Key? key,
+    _i43.Key? key,
     List<_i41.PageRouteInfo>? children,
   }) : super(
           ScanRoute.name,
@@ -1016,7 +1016,7 @@ class ScanRouteArgs {
 
   final String? scanCode;
 
-  final _i44.Key? key;
+  final _i43.Key? key;
 
   @override
   String toString() {

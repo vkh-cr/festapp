@@ -422,13 +422,19 @@ class DbUsers {
     });
   }
 
-  static Future<void> updateExistingImportedOccasionUser(
-      OccasionUserModel oum) async {
-    await AuthService.ensureCanUpdateUsers(oum);
-    await _supabase
-        .from(Tb.occasion_users.table)
-        .upsert(oum.toImportedUpdateJson());
-    await DbUsers.updateUserInfo(oum);
+  static Future<void> importOccasionUsersFromCsv(
+      List<Map<String, dynamic>> rows, List<String> deleteUserIds) async {
+    final response = await _supabase.rpc(
+      'import_occasion_users_from_csv',
+      params: {
+        'p_occasion_id': RightsService.currentOccasionId()!,
+        'p_rows': rows,
+        'p_delete_user_ids': deleteUserIds,
+      },
+    );
+    if (response['code'] != 200) {
+      throw Exception(response['message'] ?? 'CSV import failed');
+    }
   }
 
   static Future<void> deleteUnitUser(String user, int unit) async {

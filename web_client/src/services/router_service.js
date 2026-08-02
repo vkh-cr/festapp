@@ -294,20 +294,14 @@ export class RouterService {
     static normalizeUrl(url) {
         let path = url;
 
-        // 1. Determine base to strip (Configured URL or dynamic localhost origin)
-        const matchedBase = AppConfig.compatibleUrls.find(u => u && url.startsWith(u));
-
-        if (matchedBase) {
-            path = url.substring(matchedBase.length);
-        } else if (url.includes("localhost")) {
-            try {
-                const uri = new URL(url);
-                if (url.startsWith(uri.origin)) {
-                    path = url.substring(uri.origin.length);
-                }
-            } catch (e) {
-                // Ignore invalid URLs
-            }
+        // Absolute URLs can come from any valid deployment origin, including
+        // Cloudflare preview domains. Routing depends on their path, never on
+        // whether the origin happens to be listed in compatibleUrls.
+        try {
+            const uri = new URL(url);
+            path = `${uri.pathname}${uri.search}${uri.hash}`;
+        } catch (_) {
+            // Relative and legacy malformed paths are normalized below.
         }
 
         // Handle malformed paths e.g. /https://domain.com/path

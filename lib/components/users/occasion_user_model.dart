@@ -121,30 +121,6 @@ class OccasionUserModel extends ITrinaRowModel {
     };
   }
 
-  factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json,
-      [OccasionUserModel? original]) {
-    return OccasionUserModel(
-        occasion: RightsService.currentOccasionId()!,
-        user: original?.user ?? json[UserColumns.ID],
-        role: json[UserColumns.ROLE],
-        data: {
-          Tb.occasion_users.data_email: json[UserColumns.EMAIL],
-          Tb.occasion_users.data_name: json[UserColumns.NAME],
-          Tb.occasion_users.data_surname: json[UserColumns.SURNAME],
-          Tb.occasion_users.data_sex: json[UserColumns.SEX],
-          Tb.occasion_users.data_phone: json[UserColumns.PHONE],
-          Tb.occasion_users.data_text1: json[UserColumns.TEXT1],
-          Tb.occasion_users.data_text2: json[UserColumns.TEXT2],
-          Tb.occasion_users.data_text3: json[UserColumns.TEXT3],
-          Tb.occasion_users.data_birthDate: json[UserColumns.BIRTHDAY],
-          Tb.occasion_users.data_note: json[UserColumns.NOTE],
-          Tb.occasion_users.data_diet: json[UserColumns.DIET],
-          Tb.occasion_users.data_isInvited:
-              original?.data?[Tb.occasion_users.data_isInvited],
-        },
-        services: json[Tb.occasion_users.services]);
-  }
-
   factory OccasionUserModel.newRow(int occasionId) {
     return OccasionUserModel(occasion: occasionId);
   }
@@ -158,17 +134,6 @@ class OccasionUserModel extends ITrinaRowModel {
       }
     });
     return map;
-  }
-
-  Map<String, dynamic> toImportedUpdateJson() {
-    return {
-      Tb.occasion_users.occasion: occasion,
-      Tb.occasion_users.user: user,
-      Tb.occasion_users.role: role,
-      Tb.occasion_users.is_editor_view: isEditorView ?? false,
-      Tb.occasion_users.data: data,
-      Tb.occasion_users.services: services,
-    };
   }
 
   Map<String, TrinaCell> serviceToOneColumnTrinaRow(
@@ -372,38 +337,40 @@ class OccasionUserModel extends ITrinaRowModel {
   }
 
   bool importedEquals(Map<String, dynamic> iu) {
-    return compareField(
-            iu, Tb.occasion_users.data_email, Tb.occasion_users.data_email) &&
-        compareField(
-            iu, Tb.occasion_users.data_name, Tb.occasion_users.data_name) &&
-        compareField(iu, Tb.occasion_users.data_surname,
-            Tb.occasion_users.data_surname) &&
-        compareField(
-            iu, Tb.occasion_users.data_sex, Tb.occasion_users.data_sex) &&
-        iu[Tb.user_info.role] == role &&
-        compareField(
-            iu, Tb.occasion_users.data_phone, Tb.occasion_users.data_phone) &&
-        compareField(
-            iu, Tb.occasion_users.data_text1, Tb.occasion_users.data_text1) &&
-        compareField(
-            iu, Tb.occasion_users.data_text2, Tb.occasion_users.data_text2) &&
-        compareField(
-            iu, Tb.occasion_users.data_text3, Tb.occasion_users.data_text3) &&
-        compareField(
-            iu, Tb.occasion_users.data_text4, Tb.occasion_users.data_text4) &&
-        compareField(
-            iu, Tb.occasion_users.data_diet, Tb.occasion_users.data_diet) &&
-        compareField(
-            iu, Tb.occasion_users.data_note, Tb.occasion_users.data_note) &&
-        compareServicesJson(iu[Tb.occasion_users.services], services, [
-          DbOccasions.serviceTypeFood,
-          DbOccasions.serviceTypeAccommodation
-        ]) &&
-        iu[Tb.occasion_users.data_birthDate] ==
-            data?[Tb.occasion_users.data_birthDate];
+    final importedDataFields = [
+      Tb.occasion_users.data_email,
+      Tb.occasion_users.data_name,
+      Tb.occasion_users.data_surname,
+      Tb.occasion_users.data_sex,
+      Tb.occasion_users.data_phone,
+      Tb.occasion_users.data_text1,
+      Tb.occasion_users.data_text2,
+      Tb.occasion_users.data_text3,
+      Tb.occasion_users.data_text4,
+      Tb.occasion_users.data_diet,
+      Tb.occasion_users.data_note,
+      Tb.occasion_users.data_birthDate,
+    ];
 
-    // Uncomment and adjust for additional fields
-    // && (u[Tb.user_info.sex].toString().trim().toLowerCase().startsWith("m") ? "male" : "female") == data?[Tb.occasion_users.data_sex];
+    for (final field in importedDataFields) {
+      if (iu.containsKey(field) && !compareField(iu, field, field)) {
+        return false;
+      }
+    }
+
+    if (iu.containsKey(Tb.occasion_users.role) &&
+        iu[Tb.occasion_users.role] != role) {
+      return false;
+    }
+
+    final importedServices = iu[Tb.occasion_users.services];
+    if (iu.containsKey(Tb.occasion_users.services) &&
+        importedServices is Map<String, dynamic>) {
+      return compareServicesJson(
+          importedServices, services, importedServices.keys.toList());
+    }
+
+    return true;
   }
 
   static bool compareJson(

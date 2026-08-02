@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/users/occasion_user_model.dart';
-import 'package:fstapp/components/groups/db_groups.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -17,6 +16,10 @@ import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/theme_config.dart';
 
 class CsvImportHelper {
+  static const String payloadUserId = 'user_id';
+  static const String payloadData = 'data';
+  static const String payloadGroupTitle = 'group_title';
+
   static Future<void> importFromCsv(BuildContext context) async {
     // Replaced the direct file picker with a dialog that allows drag-and-drop.
     var file = await DialogHelper.dropFilesHere(
@@ -53,55 +56,63 @@ class CsvImportHelper {
     var toBeDeleted =
         _getUsersToBeDeleted(deleteUsers, addOrUpdateUsers, existingUsers);
 
-    final created = await _handleCreateUsers(context, toBeCreated);
-    final updated =
-        await _handleUpdateUsers(context, toBeUpdated, existingUsers);
-    await _handleDeleteUsers(context, toBeDeleted);
+    final createApproved = await _confirmCreateUsers(context, toBeCreated);
+    final updateApproved = await _confirmUpdateUsers(context, toBeUpdated);
+    final deleteApproved = await _confirmDeleteUsers(context, toBeDeleted);
 
-    final skippedGroupEmails = <String>{
-      if (!created)
-        ...toBeCreated
-            .map((user) => user[Tb.occasion_users.data_email] as String),
-      if (!updated)
-        ...toBeUpdated
-            .map((user) => user[Tb.occasion_users.data_email] as String),
-    };
-    await _handleGroups(addOrUpdateUsers.where((user) => !skippedGroupEmails
-        .contains(user[Tb.occasion_users.data_email] as String)));
+    final createdEmails = toBeCreated
+        .map((user) => user[Tb.occasion_users.data_email] as String)
+        .toSet();
+    final updatedEmails = toBeUpdated
+        .map((user) => user[Tb.occasion_users.data_email] as String)
+        .toSet();
+    final acceptedUsers = addOrUpdateUsers.where((user) {
+      final email = user[Tb.occasion_users.data_email] as String;
+      if (createdEmails.contains(email) && !createApproved) return false;
+      if (updatedEmails.contains(email) && !updateApproved) return false;
+      return createdEmails.contains(email) ||
+          updatedEmails.contains(email) ||
+          user.containsKey(ImportHelper.groupColumn);
+    });
+    final importRows = buildImportRows(acceptedUsers, existingUsers);
+    final deleteIds = deleteApproved
+        ? toBeDeleted.map((user) => user.user!).toList()
+        : <String>[];
+
+    if (importRows.isEmpty && deleteIds.isEmpty) return;
+
+    await DialogHelper.showProgressDialogAsync(
+      context,
+      FeaturesStrings.labelImportFromCsv,
+      1,
+      futures: [
+        () => DbUsers.importOccasionUsersFromCsv(importRows, deleteIds),
+      ],
+    );
   }
 
-  static Future<void> _handleGroups(
-      Iterable<Map<String, dynamic>> importedUsers) async {
-    final usersWithGroupColumn = importedUsers
-        .where((user) => user.containsKey(ImportHelper.groupColumn))
-        .toList();
-    if (usersWithGroupColumn.isEmpty) return;
+  @visibleForTesting
+  static List<Map<String, dynamic>> buildImportRows(
+      Iterable<Map<String, dynamic>> importedUsers,
+      List<OccasionUserModel> existingUsers) {
+    return importedUsers.map((imported) {
+      final email =
+          (imported[Tb.occasion_users.data_email] as String).toLowerCase();
+      final existing = existingUsers.firstWhereOrNull((user) =>
+          user.data?[Tb.occasion_users.data_email]?.toLowerCase() == email);
+      final dataPatch = Map<String, dynamic>.from(imported)
+        ..remove(ImportHelper.groupColumn)
+        ..remove(Tb.occasion_users.services);
 
-    final usersByEmail = {
-      for (final user in await DbUsers.getOccasionUsers())
-        if (user.user != null)
-          (user.data?[Tb.occasion_users.data_email] as String?)
-                  ?.trim()
-                  .toLowerCase() ??
-              '': user.user!,
-    }..remove('');
-
-    final groupTitleByUserId = <String, String?>{};
-    for (final importedUser in usersWithGroupColumn) {
-      final groupTitle =
-          (importedUser[ImportHelper.groupColumn] as String?)?.trim();
-      final email = (importedUser[Tb.occasion_users.data_email] as String?)
-          ?.trim()
-          .toLowerCase();
-      final userId = email == null ? null : usersByEmail[email];
-      if (userId == null) continue;
-      groupTitleByUserId[userId] =
-          groupTitle == null || groupTitle.isEmpty ? null : groupTitle;
-    }
-
-    if (groupTitleByUserId.isNotEmpty) {
-      await DbGroups.replaceImportedUserGroups(groupTitleByUserId);
-    }
+      return <String, dynamic>{
+        payloadUserId: existing?.user,
+        payloadData: dataPatch,
+        if (imported.containsKey(Tb.occasion_users.services))
+          Tb.occasion_users.services: imported[Tb.occasion_users.services],
+        if (imported.containsKey(ImportHelper.groupColumn))
+          payloadGroupTitle: imported[ImportHelper.groupColumn],
+      };
+    }).toList();
   }
 
   // Helper to get users to be created
@@ -157,8 +168,7 @@ class CsvImportHelper {
         .toList();
   }
 
-  // Handle creating users with progress dialog
-  static Future<bool> _handleCreateUsers(
+  static Future<bool> _confirmCreateUsers(
       BuildContext context, List<Map<String, dynamic>> toBeCreated) async {
     if (toBeCreated.isEmpty) return true;
 
@@ -171,29 +181,11 @@ class CsvImportHelper {
 
     if (!proceed) return false;
 
-    await DialogHelper.showProgressDialogAsync(
-      context,
-      ImportStrings.creatingUsers,
-      toBeCreated.length,
-      futures: toBeCreated
-          .map((u) => () async {
-                await DbUsers.updateOccasionUser(
-                    OccasionUserModel.fromImportedJson(u));
-                ToastHelper.Show(
-                    context,
-                    ImportStrings.createdItem(
-                        item: u[Tb.occasion_users.data_email]));
-              })
-          .toList(),
-    );
     return true;
   }
 
-  // Handle updating users with progress dialog
-  static Future<bool> _handleUpdateUsers(
-      BuildContext context,
-      List<Map<String, dynamic>> toBeUpdated,
-      List<OccasionUserModel> existingUsers) async {
+  static Future<bool> _confirmUpdateUsers(
+      BuildContext context, List<Map<String, dynamic>> toBeUpdated) async {
     if (toBeUpdated.isEmpty) return true;
 
     var proceed = await DialogHelper.showConfirmationDialog(
@@ -205,27 +197,6 @@ class CsvImportHelper {
 
     if (!proceed) return false;
 
-    await DialogHelper.showProgressDialogAsync(
-      context,
-      ImportStrings.updatingUsers,
-      toBeUpdated.length,
-      futures: toBeUpdated
-          .map((u) => () async {
-                var existing = existingUsers.firstWhere(
-                  (e) =>
-                      e.data?[Tb.occasion_users.data_email]?.toLowerCase() ==
-                      u[Tb.occasion_users.data_email]?.toLowerCase(),
-                );
-                var fromExisting =
-                    OccasionUserModel.fromImportedJson(u, existing);
-                await DbUsers.updateExistingImportedOccasionUser(fromExisting);
-                ToastHelper.Show(
-                    context,
-                    CommonStrings.updatedItem(
-                        item: u[Tb.occasion_users.data_email]));
-              })
-          .toList(),
-    );
     return true;
   }
 
@@ -376,10 +347,9 @@ class CsvImportHelper {
         severity: ToastSeverity.Ok);
   }
 
-  // Handle deleting users with progress dialog
-  static Future<void> _handleDeleteUsers(
+  static Future<bool> _confirmDeleteUsers(
       BuildContext context, List<OccasionUserModel> toBeDeleted) async {
-    if (toBeDeleted.isEmpty) return;
+    if (toBeDeleted.isEmpty) return true;
 
     var proceed = await DialogHelper.showConfirmationDialog(
       context,
@@ -388,21 +358,7 @@ class CsvImportHelper {
       confirmButtonMessage: CommonStrings.proceed,
     );
 
-    if (!proceed) return;
-
-    await DialogHelper.showProgressDialogAsync(
-      context,
-      ImportStrings.removingUsers,
-      toBeDeleted.length,
-      futures: toBeDeleted
-          .map((existing) => () async {
-                await DbUsers.deleteOccasionUser(
-                    existing.user!, existing.occasion!);
-                ToastHelper.Show(context,
-                    ImportStrings.removedItem(item: existing.toBasicString()));
-              })
-          .toList(),
-    );
+    return proceed;
   }
 }
 

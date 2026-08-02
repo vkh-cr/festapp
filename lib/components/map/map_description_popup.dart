@@ -2,22 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/cleaning/cleaning_status.dart';
 import 'package:fstapp/components/cleaning/cleaning_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/components/map/map_marker_with_text.dart';
+import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/components/map/map_strings.dart';
 import 'package:fstapp/components/html/html_view.dart';
 
 class MapDescriptionPopup extends StatefulWidget {
-  final MapMarkerWithText marker;
-  final MapMarkerWithText? selectedMarker;
+  final MapPlaceModel place;
+  final bool isEditing;
+  final VoidCallback? onChangePosition;
 
   /// For toilet places with the cleaning feature on: the derived status (drives
   /// a colored chip) and the "report a problem" action. Null for other places.
   final CleaningStatus? cleaningStatus;
   final VoidCallback? onReportCleaning;
 
-  const MapDescriptionPopup(
-    this.marker,
-    this.selectedMarker, {
+  const MapDescriptionPopup({
+    required this.place,
+    required this.isEditing,
+    this.onChangePosition,
     this.cleaningStatus,
     this.onReportCleaning,
     super.key,
@@ -51,7 +53,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              widget.marker.place.title,
+              widget.place.title,
               overflow: TextOverflow.fade,
               softWrap: true,
               style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
@@ -62,18 +64,19 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
                 visible: RightsService.isEditor() ||
                     (RightsService.isGroupAdmin() &&
                         RightsService.currentUserGroup()!.place!.id ==
-                            widget.marker.place.id &&
+                            widget.place.id &&
                         RightsService.currentUserGroup()!
                             .place!
                             .isPrivateGroupLocation),
                 child: TextButton.icon(
                     icon: const Icon(Icons.edit),
-                    onPressed: widget.selectedMarker != null
-                        ? null
-                        : changePositionPressed,
+                    onPressed:
+                        widget.isEditing || widget.onChangePosition == null
+                            ? null
+                            : widget.onChangePosition,
                     label: Text(MapStrings.changeLocation))),
             HtmlView(
-              html: widget.marker.place.description ?? "",
+              html: widget.place.description ?? "",
               isSelectable: true,
             ),
           ],
@@ -120,6 +123,4 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
       ),
     );
   }
-
-  void changePositionPressed() => widget.marker.editAction!(widget.marker);
 }

@@ -14,6 +14,45 @@ The required columns are:
 E-mail is the participant identifier. Reimporting a row with the same e-mail
 updates that occasion user instead of creating a duplicate.
 
+## Update semantics and transaction
+
+The import is a patch, not a replacement:
+
+- An omitted optional column leaves its existing value unchanged.
+- A present column updates its value. For service columns, an explicitly empty
+  cell clears only that service family.
+- Accommodation and food are independent service families. Importing one never
+  removes the other.
+- CSV import never changes roles or editor/manager/cleaning permissions.
+
+The client sends one confirmed batch to
+`public.import_occasion_users_from_csv`. That database module validates and
+executes user creation or assignment, field patches, group changes, and
+deletions in one PostgreSQL transaction. Any invalid row rolls back the entire
+batch. Imports for the same occasion are serialized with a transaction-level
+advisory lock, so two concurrent imports cannot interleave.
+
+The RPC accepts rows shaped as follows:
+
+```json
+{
+  "user_id": "optional existing UUID",
+  "data": { "email": "person@example.com", "name": "..." },
+  "services": { "accommodation": { "room-a": "paid" } },
+  "group_title": "optional authoritative standard group"
+}
+```
+
+Only keys present in `data`, `services`, and the outer row are authoritative.
+This presence-based contract is the canonical seam for CSV imports; callers
+must not upsert `occasion_users` directly.
+
+This behavior intentionally lives at the CSV RPC boundary rather than in a
+table trigger. A global merge trigger cannot distinguish an omitted import
+field from an intentional key removal by another workflow. Older clients must
+therefore be upgraded before using the patch-based CSV import; direct
+`occasion_users` upserts are not a supported import contract.
+
 ## Group column
 
 `Skupina:` is optional. `Skupina` without the colon is accepted as well.
@@ -29,8 +68,8 @@ standard group on the current occasion:
 
 An imported participant can belong to only one standard group. Typed groups,
 such as game groups, are not changed by the CSV import. Group synchronization
-is performed atomically by `public.import_user_group_assignments`, so a failed
-group-synchronization call does not leave membership half-updated.
+is part of the same bulk-import transaction, so a failed group change does not
+leave any other row in the batch half-updated.
 
 ## Example
 

@@ -4,6 +4,10 @@ import 'package:fstapp/components/icons/icons_strings.dart';
 import 'package:fstapp/components/icons/place_type_model.dart';
 import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
+import 'package:fstapp/components/map/map_scene.dart';
+import 'package:fstapp/components/map/path_group_model.dart';
+import 'package:fstapp/components/map/path_node.dart';
+import 'package:fstapp/components/map/place_model.dart';
 
 /// The place-type filter bar shown at the bottom of the map: one chip per
 /// visible place type plus a trailing "Other" chip, single-select.
@@ -116,5 +120,38 @@ void main() {
     // Selected chip has a visible (non-transparent) fill; an unselected one is transparent.
     expect(chipColor("Hlavní programy"), isNot(Colors.transparent));
     expect(chipColor("Ubytování"), Colors.transparent);
+  });
+
+  test('group paths stay semantic before direction-marker layout', () async {
+    final places = [
+      PlaceModel(
+        id: 1,
+        title: 'Start',
+        latLng: {'lat': 49.82, 'lng': 18.26},
+      ),
+      PlaceModel(
+        id: 2,
+        title: 'End',
+        latLng: {'lat': 49.8205, 'lng': 18.2605},
+      ),
+    ];
+    final groups = [
+      PathGroupsModel(
+        id: 7,
+        color: '#ff3366',
+        pathData: [
+          [PathNode.place(1), PathNode.place(2)],
+        ],
+      ),
+    ];
+
+    final paths = await MapPageHelper.loadGroupPaths(places, groups);
+
+    expect(paths.keys, [7]);
+    expect(paths[7], hasLength(1));
+    expect(paths[7]!.first.kind, MapPathKind.main);
+    expect(paths[7]!.first.points, hasLength(2));
+    expect(paths[7]!.first.colorValue, const Color(0xffff3366).toARGB32());
+    expect(paths[7]!.every((path) => path.kind == MapPathKind.main), isTrue);
   });
 }

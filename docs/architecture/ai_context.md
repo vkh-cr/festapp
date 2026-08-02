@@ -24,6 +24,18 @@ Every `SECURITY DEFINER` function MUST:
 
 Permission patterns: `check_is_*` raises exception (for writes), `get_is_*` returns boolean (for reads).
 
+## Critical: No Persistent Application Triggers
+
+Do not implement application behavior with persistent PostgreSQL triggers.
+Prefer explicit RPC/service boundaries whose callers and transaction semantics
+are visible in code. A temporary operational trigger is allowed only when its
+removal is part of the same release workflow and is verified immediately after
+the replacement client or RPC is deployed. Never leave a compatibility merge
+trigger behind after cutover. Narrow technical triggers that maintain purely
+mechanical metadata such as `updated_at` or audit timestamps are allowed; they
+must not encode domain decisions, permissions, patch semantics, or workflow
+transitions.
+
 ## Data Hierarchy
 
 Organization (tenant/domain) > Unit (real-world org) > Occasion (event instance). Features configured per Occasion. "Unit" is used because "Organization" was reserved for the domain level.

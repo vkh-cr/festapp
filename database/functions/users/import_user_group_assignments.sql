@@ -14,12 +14,26 @@ DECLARE
     v_group_id bigint;
     v_group_title text;
     v_keep_admin boolean;
+    v_unit_id bigint;
 BEGIN
-    IF public.get_is_editor_on_occasion(p_occasion_id) IS NOT TRUE THEN
+    SELECT o.unit INTO v_unit_id
+    FROM public.occasions o
+    WHERE o.id = p_occasion_id;
+
+    IF v_unit_id IS NULL THEN
+        RAISE EXCEPTION 'OCCASION_NOT_FOUND';
+    END IF;
+
+    IF NOT (
+        public.get_is_editor_on_occasion(p_occasion_id)
+        OR public.get_is_manager_on_occasion(p_occasion_id)
+        OR public.get_is_admin_on_occasion(p_occasion_id)
+        OR public.get_is_editor_on_unit(v_unit_id)
+    ) THEN
         RAISE EXCEPTION 'NOT_AUTHORIZED';
     END IF;
 
-    IF jsonb_typeof(p_assignments) <> 'array' THEN
+    IF COALESCE(jsonb_typeof(p_assignments), 'null') <> 'array' THEN
         RAISE EXCEPTION 'INVALID_ASSIGNMENTS';
     END IF;
 

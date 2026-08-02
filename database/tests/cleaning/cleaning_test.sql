@@ -182,6 +182,30 @@ BEGIN
     RAISE NOTICE 'test 3 (status severity) passed';
 END $$ LANGUAGE plpgsql;
 
+-- Hidden toilets disappear from the map but remain actionable in the cleaning
+-- workflow, so the status RPC must continue returning them.
+DO $$
+DECLARE
+    v_oc bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_wc2 bigint := (SELECT v FROM _cln WHERE k = 'wc2');
+    v_res jsonb;
+BEGIN
+    UPDATE public.places SET is_hidden = true WHERE id = v_wc2;
+    PERFORM set_config(
+        'request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
+
+    v_res := public.get_cleaning_status(v_oc);
+    PERFORM assert_true(
+        EXISTS (
+            SELECT 1
+            FROM jsonb_array_elements(v_res->'data') elem
+            WHERE (elem->>'place')::bigint = v_wc2
+        ),
+        'hidden toilet remains visible to the cleaning workflow');
+
+    UPDATE public.places SET is_hidden = false WHERE id = v_wc2;
+END $$ LANGUAGE plpgsql;
+
 -- ---------------------------------------------------------------------------
 -- 4. Report on a non-toilet place → 400; report on a place whose occasion has
 --    the feature disabled (foreign occasion) → 404.

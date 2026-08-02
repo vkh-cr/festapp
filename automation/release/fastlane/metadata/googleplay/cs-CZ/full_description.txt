@@ -1,0 +1,21 @@
+CSM Ostrava je oficiální mobilní aplikace Celostátního setkání mládeže, které se koná 11.–16. srpna 2026 v Ostravě. Aplikace tě provede celým programem, pomůže ti zorientovat se ve městě a mít po ruce všechny důležité informace – online i offline.
+
+CO APLIKACE UMÍ
+
+• Program po dnech – přehledný harmonogram den po dni. U každého bodu najdeš čas, místo, popis i medailonek přednášejícího s fotkou a životopisem.
+• Registrace na programy s omezenou kapacitou – k vybraným workshopům, poradnám a aktivitám se přihlásíš přímo v aplikaci a hned vidíš, kolik zbývá volných míst.
+• Můj program – oblíbené body si přidáš k sobě a máš je vždy po ruce.
+• Mapa Ostravy – interaktivní mapa všech míst setkání: sály a pódia programu, kostely, ubytování, diecézní centra i hygienické zázemí. Filtrem si zobrazíš jen to, co tě zajímá.
+• Novinky a oznámení – aktuální informace a změny programu ti přijdou jako oznámení (push notifikace).
+• Poradny a duchovní pomoc – rozcestník témat (vztahy, úzkosti, víra, závislosti a další) s kontaktem na připravené poradce, psychology a kněze.
+• Rychlé hledání – v jednom poli najdeš program, místa i informace (například „kostel", „mše", „registrace").
+• Můj profil – na jednom místě vidíš své ubytování, svou skupinu i osobní údaje.
+• Hygienické zázemí – přehled stavu toalet a jednoduché nahlášení problému, aby areál zůstal v pořádku.
+• Offline režim – jednou načtená data (program, mapa, informace) máš dostupná i bez připojení k internetu.
+
+Aplikace je vícejazyčná (čeština, angličtina a další) a je zdarma. Základní obsah (program, mapa, informace) je dostupný bez přihlášení; některé funkce (registrace na aktivity, osobní profil) vyžadují bezplatné přihlášení e-mailem.
+
+Aplikace vzniká nad otevřenou platformou Festapp: https://github.com/vkh-cr/festapp
+
+Pořadatel: Asociace křesťanských spolků mládeže, z. s.
+Zásady zpracování osobních údajů: https://aksm.cz/informace-o-zpracovani-osobnich-udaju/

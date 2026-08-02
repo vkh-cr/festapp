@@ -12,8 +12,7 @@ class MapStrings {
       'FeatureMap.locationOnMap'.tr(); // "Location on map"
   static String get placeChanged =>
       'FeatureMap.placeChanged'.tr(); // "Place has been changed."
-  static String get showGroups =>
-      'FeatureMap.showGroups'.tr(); // "Show groups"
+  static String get showGroups => 'FeatureMap.showGroups'.tr(); // "Show groups"
   static String get saveLocation =>
       'FeatureMap.saveLocation'.tr(); // "Save location"
 
@@ -27,13 +26,24 @@ class MapStrings {
   static String get importRouteHint => 'FeatureMap.importRouteHint'
       .tr(); // "Export your route from Mapy.com (or Strava, Garmin, komoot…) as GPX and drop it here."
   static String get undo => 'FeatureMap.undo'.tr(); // "Undo"
-  static String get newSegment =>
-      'FeatureMap.newSegment'.tr(); // "New segment"
+  static String get newSegment => 'FeatureMap.newSegment'.tr(); // "New segment"
   static String get saveRoute => 'FeatureMap.saveRoute'.tr(); // "Save route"
-  static String get noRouteInGpx => 'FeatureMap.noRouteInGpx'
-      .tr(); // "No route found in the GPX file."
+  static String get noRouteInGpx =>
+      'FeatureMap.noRouteInGpx'.tr(); // "No route found in the GPX file."
 
   // Offline map
   static String get offlineMapReady => 'FeatureMap.offlineMapReady'
       .tr(); // "Offline map downloaded and ready for offline use"
+  static String get offlineMapConfigurationIncomplete =>
+      'FeatureMap.offlineMapConfigurationIncomplete'.tr();
+  static String get mapLibreManifestNotConfigured =>
+      'FeatureMap.mapLibreManifestNotConfigured'.tr();
+  static String get mapLibreNotDownloaded =>
+      'FeatureMap.mapLibreNotDownloaded'.tr();
+  static String get downloadMapAgain => 'FeatureMap.downloadMapAgain'.tr();
+  static String get legacyMapOpenFailed =>
+      'FeatureMap.legacyMapOpenFailed'.tr();
+  static String get mapLibreBundleDownloadFailed =>
+      'FeatureMap.mapLibreBundleDownloadFailed'.tr();
+  static const openStreetMapAttribution = '© OpenStreetMap contributors';
 }

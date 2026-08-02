@@ -162,6 +162,12 @@ supabase/.env
 automation/image-migration/.env
 automation/image-migration/node_modules/
 
+# Generated offline map packages and preview artifacts
+automation/offline-map/out/
+
+# Local Codex diagnostics, screenshots, and tool environments
+.codex-local/
+
 # GSD Planning
 .planning/
 

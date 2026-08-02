@@ -74,14 +74,14 @@ class ImportHelper {
           trimmedString = trimmedString.toLowerCase();
         } else if (entry.key == Tb.occasion_users.role) {
           if (trimmedString.isEmpty) {
-            break;
+            continue;
           }
           var role = trimmedString.toLowerCase().startsWith("p") ? 1 : 2;
           userJsonObject[entry.key] = role;
           continue;
         } else if (entry.key == Tb.occasion_users.data_sex) {
           if (trimmedString.isEmpty) {
-            break;
+            continue;
           }
           trimmedString = (trimmedString.toLowerCase().startsWith("m") ||
                   trimmedString.toLowerCase().startsWith("k"))
@@ -132,7 +132,11 @@ class ImportHelper {
 
   static Map<String, dynamic> createServicesJson(
       String data, String serviceType) {
-    List<String> items = data.split(',').map((item) => item.trim()).toList();
+    final items = data
+        .split(',')
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .toList();
 
     Map<String, String> servicesMap = {
       for (var item in items) item: DbOccasions.servicePaid,

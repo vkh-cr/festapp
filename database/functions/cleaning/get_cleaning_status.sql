@@ -1,7 +1,10 @@
 -- Cleaning service — public toilet status for an occasion (any signed-in user).
 -- Powers the participant tile grid and the coloured map pins. Returns one row
--- per non-hidden toilet with the derived status (highest open-report severity:
+-- per toilet with the derived status (highest open-report severity:
 -- paper < hygiene < contamination; none open -> green) and the last report time.
+-- Hidden toilets (places.is_hidden = true) are INCLUDED here on purpose: marking a
+-- toilet hidden only removes its pin from the map (the map filters is_hidden), but
+-- it must still be reportable/serviceable in the cleaning list.
 -- No notes or reporter names here — those are crew-only (get_cleaning_reports).
 -- Also returns is_blocked for the caller (anti-spam ban) so the participant UI
 -- can grey the report action out without an extra round-trip.
@@ -56,7 +59,6 @@ BEGIN
     LEFT JOIN public.cleaning_reports r
       ON r.place = p.id AND r.resolved_at IS NULL
     WHERE p.occasion = oc
-      AND p.is_hidden = false
       AND p.type = 'toilet'
     GROUP BY p.id, p.title
   ) t;

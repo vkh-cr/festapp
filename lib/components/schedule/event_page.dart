@@ -189,49 +189,52 @@ class _EventPageState extends State<EventPage> {
                           BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                // Small breathing room; a touch more when the "+" overlaps here.
-                SizedBox(height: showAddButton ? 20 : 6),
-                if (isEventCancelled) // Using local variable for clarity
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: ThemeConfig.grey700(context),
-                        borderRadius:
-                            BorderRadius.circular(StylesConfig.commonRoundness),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.cancel_outlined,
-                              color: ThemeConfig.whiteColor(context), size: 22),
-                          const SizedBox(width: 10),
-                          Text(
-                            CommonStrings.cancelled.toUpperCase(),
-                            style: TextStyle(
-                              color: ThemeConfig.whiteColor(context),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              letterSpacing: 0.5,
+                          // Small breathing room; a touch more when the "+" overlaps here.
+                          SizedBox(height: showAddButton ? 20 : 6),
+                          if (isEventCancelled) // Using local variable for clarity
+                            Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: ThemeConfig.grey700(context),
+                                  borderRadius: BorderRadius.circular(
+                                      StylesConfig.commonRoundness),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.cancel_outlined,
+                                        color: ThemeConfig.whiteColor(context),
+                                        size: 22),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      CommonStrings.cancelled.toUpperCase(),
+                                      style: TextStyle(
+                                        color: ThemeConfig.whiteColor(context),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                _buildActionButtons(context, isEventCancelled),
-                Visibility(
-                  visible: EventModel.isEventSupportingSignIn(_event) &&
-                      !AuthService.isLoggedIn() &&
-                      !isEventCancelled, // Hide if cancelled
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: HtmlView(
-                      html: '''
+                          _buildActionButtons(context, isEventCancelled),
+                          Visibility(
+                            visible:
+                                EventModel.isEventSupportingSignIn(_event) &&
+                                    !AuthService.isLoggedIn() &&
+                                    !isEventCancelled, // Hide if cancelled
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: HtmlView(
+                                html: '''
                       <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
                         <div>${ScheduleStrings.accountRequiredToJoin}</div>
                         <a href="${AppConfig.webLink}/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
@@ -239,173 +242,189 @@ class _EventPageState extends State<EventPage> {
                         </a>
                       </div>
                     ''',
-                      isSelectable: true,
-                      fontSize: 16,
-                      twoFingersOn: onPinchStart,
-                      twoFingersOff: onPinchEnd,
-                    ),
-                  ),
-                ),
-                Visibility(
-                    visible: EventModel.isEventFull(_event) &&
-                        AuthService.isLoggedIn() &&
-                        !isEventCancelled,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        ScheduleStrings.eventFullyBooked,
-                      ),
-                    )),
-                // Counseling rozcestník: the area picker + booking flow is
-                // shown inline, ABOVE the description, on the entry event.
-                if (_event != null &&
-                    _event!.isCounselingEntry &&
-                    FeatureService.isCounselingEnabled())
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    // Scope the flow to this rozcestník event's day.
-                    child: CounselingPicker(day: _event!.startTime),
-                  ),
-                Visibility(
-                  visible: _event != null && _event?.description != null,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: HtmlView(
-                      html: _event?.description ?? "",
-                      isSelectable: true,
-                      twoFingersOn: onPinchStart,
-                      twoFingersOff: onPinchEnd,
-                    ),
-                  ),
-                ),
-                _buildSpeakersSection(context, onPinchStart, onPinchEnd),
-                if (_event != null &&
-                    _event!.id != null &&
-                    FeatureService.isFeatureEnabled(
-                        FeatureConstants.eventFeedback) &&
-                    (_event!.data?[FeatureConstants.feedbackEnabled]
-                            ?.toString() ==
-                        'true'))
-                  EventFeedbackWidget(
-                    eventId: _event!.id!,
-                    isOpen: TimeHelper.now().isAfter(_event!.startTime),
-                    isEditorPreview: RightsService.isEditor(),
-                    requiresSignIn:
-                        EventModel.isEventSupportingSignIn(_event),
-                    isParticipant: _event!.isSignedIn == true,
-                  ),
-                if (showSubScheduleArea)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: LightSubprogramList(
-                      events: _childDots,
-                      onEventPressed: _eventPressed,
-                      showAddNewEventButton: () =>
-                          RightsService.isEditor() && childrenScheduleIsEnabled,
-                      onAddNewEvent: (context, p, parent) =>
-                          AddNewEventDialog.showAddEventDialog(
-                                  context,
-                                  p,
-                                  TimeBlockItem.fromEventModelAsChild(_event!))
-                              .then((_) => loadData(_event!.id!)),
-                    ),
-                  ),
-                Visibility(
-                  visible: RightsService.isEditor() &&
-                      _event?.maxParticipants != null,
-                  child: ExpansionTile(
-                    title: Row(children: [
-                      IconButton(
-                          onPressed: () async {
-                            await Clipboard.setData(ClipboardData(
-                                text: _participants
-                                    .map((e) => e.toFullNameString())
-                                    .join("\n")));
-                            ToastHelper.Show(
-                                context, ScheduleStrings.participantsCopied);
-                          },
-                          icon: const Icon(Icons.copy)),
-                      Text("${CommonStrings.participants}:")
-                    ]),
-                    children: [
-                      ListView.builder(
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.all(8),
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _participants.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                      onPressed: () =>
-                                          signOutOther(_participants[index]),
-                                      icon: const Icon(
-                                          Icons.remove_circle_outline)),
-                                  Text("${_participants[index]}"),
-                                ],
+                                isSelectable: true,
+                                fontSize: 16,
+                                twoFingersOn: onPinchStart,
+                                twoFingersOff: onPinchEnd,
                               ),
-                            );
-                          })
-                    ],
-                  ),
-                ),
-                Visibility(
-                  visible: _groupInfoModel != null,
-                  child: ExpansionTile(
-                    title: Text(_groupInfoModel?.title ?? ""),
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.all(8.0),
+                            ),
                           ),
                           Visibility(
-                            visible: _groupInfoModel?.participants
-                                    ?.firstWhereOrNull((p) => p.isAdmin!) !=
-                                null,
-                            child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 16),
+                              visible: EventModel.isEventFull(_event) &&
+                                  AuthService.isLoggedIn() &&
+                                  !isEventCancelled,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                    "${ScheduleStrings.moderator}: ${_groupInfoModel?.participants?.firstWhereOrNull((p) => p.isAdmin!)?.userInfo?.name ?? ""}",
-                                    style: StylesConfig.normalTextStyle)),
+                                  ScheduleStrings.eventFullyBooked,
+                                ),
+                              )),
+                          // Counseling rozcestník: the area picker + booking flow is
+                          // shown inline, ABOVE the description, on the entry event.
+                          if (_event != null &&
+                              _event!.isCounselingEntry &&
+                              FeatureService.isCounselingEnabled())
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              // Scope the flow to this rozcestník event's day.
+                              child: CounselingPicker(day: _event!.startTime),
+                            ),
+                          Visibility(
+                            visible:
+                                _event != null && _event?.description != null,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: HtmlView(
+                                html: _event?.description ?? "",
+                                isSelectable: true,
+                                twoFingersOn: onPinchStart,
+                                twoFingersOff: onPinchEnd,
+                              ),
+                            ),
                           ),
-                          Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0, horizontal: 16),
-                              child: Text("${CommonStrings.participants}:",
-                                  style: StylesConfig.normalTextStyle)),
-                          ListView.builder(
-                              shrinkWrap: true,
-                              padding: const EdgeInsets.all(8),
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount:
-                                  _groupInfoModel?.participants!.length ?? 0,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0, vertical: 4.0),
-                                  child: Text(
-                                      "${_groupInfoModel?.participants!.toList()[index].userInfo?.name}",
-                                      style: StylesConfig.normalTextStyle),
-                                );
-                              })
+                          _buildSpeakersSection(
+                              context, onPinchStart, onPinchEnd),
+                          if (_event != null &&
+                              _event!.id != null &&
+                              FeatureService.isFeatureEnabled(
+                                  FeatureConstants.eventFeedback) &&
+                              (_event!.data?[FeatureConstants.feedbackEnabled]
+                                      ?.toString() ==
+                                  'true'))
+                            EventFeedbackWidget(
+                              eventId: _event!.id!,
+                              isOpen:
+                                  TimeHelper.now().isAfter(_event!.startTime),
+                              isEditorPreview: RightsService.isEditor(),
+                              requiresSignIn:
+                                  EventModel.isEventSupportingSignIn(_event),
+                              isParticipant: _event!.isSignedIn == true,
+                            ),
+                          if (showSubScheduleArea)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: LightSubprogramList(
+                                events: _childDots,
+                                onEventPressed: _eventPressed,
+                                showAddNewEventButton: () =>
+                                    RightsService.isEditor() &&
+                                    childrenScheduleIsEnabled,
+                                onAddNewEvent: (context, p, parent) =>
+                                    AddNewEventDialog.showAddEventDialog(
+                                            context,
+                                            p,
+                                            TimeBlockItem.fromEventModelAsChild(
+                                                _event!))
+                                        .then((_) => loadData(_event!.id!)),
+                              ),
+                            ),
+                          Visibility(
+                            visible: RightsService.isEditor() &&
+                                _event?.maxParticipants != null,
+                            child: ExpansionTile(
+                              title: Row(children: [
+                                IconButton(
+                                    onPressed: () async {
+                                      await Clipboard.setData(ClipboardData(
+                                          text: _participants
+                                              .map((e) => e.toFullNameString())
+                                              .join("\n")));
+                                      ToastHelper.Show(context,
+                                          ScheduleStrings.participantsCopied);
+                                    },
+                                    icon: const Icon(Icons.copy)),
+                                Text("${CommonStrings.participants}:")
+                              ]),
+                              children: [
+                                ListView.builder(
+                                    shrinkWrap: true,
+                                    padding: const EdgeInsets.all(8),
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: _participants.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          children: [
+                                            IconButton(
+                                                onPressed: () => signOutOther(
+                                                    _participants[index]),
+                                                icon: const Icon(Icons
+                                                    .remove_circle_outline)),
+                                            Text("${_participants[index]}"),
+                                          ],
+                                        ),
+                                      );
+                                    })
+                              ],
+                            ),
+                          ),
+                          Visibility(
+                            visible: _groupInfoModel != null,
+                            child: ExpansionTile(
+                              title: Text(_groupInfoModel?.title ?? ""),
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                    ),
+                                    Visibility(
+                                      visible: _groupInfoModel?.participants
+                                              ?.firstWhereOrNull(
+                                                  (p) => p.isAdmin!) !=
+                                          null,
+                                      child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8.0, horizontal: 16),
+                                          child: Text(
+                                              "${ScheduleStrings.moderator}: ${_groupInfoModel?.participants?.firstWhereOrNull((p) => p.isAdmin!)?.userInfo?.name ?? ""}",
+                                              style: StylesConfig
+                                                  .normalTextStyle)),
+                                    ),
+                                    Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0, horizontal: 16),
+                                        child: Text(
+                                            "${CommonStrings.participants}:",
+                                            style:
+                                                StylesConfig.normalTextStyle)),
+                                    ListView.builder(
+                                        shrinkWrap: true,
+                                        padding: const EdgeInsets.all(8),
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount: _groupInfoModel
+                                                ?.participants!.length ??
+                                            0,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16.0,
+                                                vertical: 4.0),
+                                            child: Text(
+                                                "${_groupInfoModel?.participants!.toList()[index].userInfo?.name}",
+                                                style: StylesConfig
+                                                    .normalTextStyle),
+                                          );
+                                        })
+                                  ],
+                                )
+                              ],
+                            ),
+                          )
                         ],
-                      )
-                    ],
-                  ),
-                )
-                          ],
-                        ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
           if (showAddButton) _buildFabOverlay(context, expandedHeight),
           // Offstage twin of the expanded header, measured to size the app bar.
           Positioned(
@@ -443,8 +462,7 @@ class _EventPageState extends State<EventPage> {
   EventType? _currentEventType() {
     final type = _event?.type;
     if (type == null || type.isEmpty) return null;
-    final feature =
-        FeatureService.getFeatureDetails(FeatureConstants.schedule);
+    final feature = FeatureService.getFeatureDetails(FeatureConstants.schedule);
     if (feature is ScheduleFeature) {
       return feature.eventTypes.firstWhereOrNull((et) => et.code == type);
     }
@@ -541,8 +559,7 @@ class _EventPageState extends State<EventPage> {
       int lines = metaTexts.isEmpty ? 0 : 1;
       double lineW = 0;
       for (final t in metaTexts) {
-        final double w =
-            iconAndGap + _measureTextWidth(context, t, metaStyle);
+        final double w = iconAndGap + _measureTextWidth(context, t, metaStyle);
         if (lineW == 0) {
           lineW = w;
         } else if (lineW + spacing + w <= avail) {
@@ -557,8 +574,7 @@ class _EventPageState extends State<EventPage> {
 
     const double topRowH = 52; // back button row
     const double bottomPad = 20;
-    final double h =
-        topInset + topRowH + badgeH + titleH + metaH + bottomPad;
+    final double h = topInset + topRowH + badgeH + titleH + metaH + bottomPad;
     final double min = _collapsedHeaderHeight + topInset + 8;
     return h > min ? h : min;
   }
@@ -644,8 +660,7 @@ class _EventPageState extends State<EventPage> {
           Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints:
-                  BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+              constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -769,8 +784,9 @@ class _EventPageState extends State<EventPage> {
             : 0.0;
         final double headerBottom = expandedHeight - offset;
         final double range = expandedHeight - minH;
-        final double collapseT =
-            range > 0 ? ((expandedHeight - headerBottom) / range).clamp(0.0, 1.0) : 1.0;
+        final double collapseT = range > 0
+            ? ((expandedHeight - headerBottom) / range).clamp(0.0, 1.0)
+            : 1.0;
         final double opacity = (1 - collapseT * 1.5).clamp(0.0, 1.0);
         if (opacity <= 0.01) return const SizedBox.shrink();
         return Positioned(
@@ -831,7 +847,8 @@ class _EventPageState extends State<EventPage> {
     if (_event != null && eventType != null) {
       final Color base = eventType.getColor();
       final double l = HSLColor.fromColor(base).lightness;
-      final Color lighter = base.changeColorLightness((l + 0.10).clamp(0.0, 1.0));
+      final Color lighter =
+          base.changeColorLightness((l + 0.10).clamp(0.0, 1.0));
       return Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -892,8 +909,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Widget _buildMetaRow(BuildContext context, Color fg) {
-    return Wrap(
-        spacing: 22, runSpacing: 8, children: _metaItems(context, fg));
+    return Wrap(spacing: 22, runSpacing: 8, children: _metaItems(context, fg));
   }
 
   /// The meta chips shared by the expanded header (wrapped) and the collapsed
@@ -913,8 +929,8 @@ class _EventPageState extends State<EventPage> {
     }
 
     if (_event?.place != null) {
-      items.add(_placeItem(context, fg, _event?.place?.title ?? "",
-          iconSize, fontSize));
+      items.add(_placeItem(
+          context, fg, _event?.place?.title ?? "", iconSize, fontSize));
     }
 
     final int maxParticipants = _event?.maxParticipants ?? 0;
@@ -979,7 +995,8 @@ class _EventPageState extends State<EventPage> {
         child: SizedBox(
           width: 56,
           height: 56,
-          child: Icon(canSave ? Icons.add : Icons.check, color: glyph, size: 30),
+          child:
+              Icon(canSave ? Icons.add : Icons.check, color: glyph, size: 30),
         ),
       ),
     );
@@ -1002,20 +1019,20 @@ class _EventPageState extends State<EventPage> {
         !isEventCancelled &&
         !(_event?.isSignedIn ?? false) &&
         !EventModel.isEventFull(_event)) {
-      buttons.add(
-          _actionButton(Icons.login, UserStrings.signIn, () => signIn(context)));
+      buttons.add(_actionButton(
+          Icons.login, UserStrings.signIn, () => signIn(context)));
     }
     if (showLoginLogoutButton() && (_event?.isSignedIn ?? false)) {
       buttons.add(_actionButton(null, UserStrings.signOut, () => signOut()));
     }
     if (showLoginLogoutButton() &&
         FeatureService.isFeatureEnabled(FeatureConstants.companions)) {
-      buttons.add(_actionButton(Icons.group_add_outlined, CommonStrings.companions,
-          () => signInCompanion()));
+      buttons.add(_actionButton(Icons.group_add_outlined,
+          CommonStrings.companions, () => signInCompanion()));
     }
     if (showLoginLogoutButton() && RightsService.isEditor()) {
-      buttons.add(
-          _actionButton(Icons.person_add_alt_1, ScheduleStrings.signInOther, () async {
+      buttons.add(_actionButton(
+          Icons.person_add_alt_1, ScheduleStrings.signInOther, () async {
         _queriedParticipants = await DbUsers.getAllUsersBasics();
         _queriedParticipants.forEach((q) => {
               if (_participants.any((p) => p.id == q.id)) {q.isSignedIn = true}
@@ -1076,8 +1093,8 @@ class _EventPageState extends State<EventPage> {
   /// always visible below (no expansion) — never as a page banner (Julie's
   /// question #1). Empty (no widget) when the feature is off or the event has
   /// no attached speakers.
-  Widget _buildSpeakersSection(
-      BuildContext context, VoidCallback onPinchStart, VoidCallback onPinchEnd) {
+  Widget _buildSpeakersSection(BuildContext context, VoidCallback onPinchStart,
+      VoidCallback onPinchEnd) {
     // Speakers are core: the section shows whenever the event has speakers
     // attached, regardless of any feature (decision R7).
     if (_event?.id == null || _speakersBundle == null) {
@@ -1089,8 +1106,8 @@ class _EventPageState extends State<EventPage> {
 
     // Borderless section: a hairline separates it from the description above,
     // and further hairlines separate multiple speaker profiles from each other.
-    final divider = Divider(
-        height: 24, thickness: 1, color: ThemeConfig.grey300(context));
+    final divider =
+        Divider(height: 24, thickness: 1, color: ThemeConfig.grey300(context));
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
       child: Column(
@@ -1160,8 +1177,8 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Widget _participantPill(
-      BuildContext context, Color fg, String text, double iconSize, double fontSize) {
+  Widget _participantPill(BuildContext context, Color fg, String text,
+      double iconSize, double fontSize) {
     final bool darkHeader = fg == Colors.white;
     // Dark banners get a translucent "glassy" white pill; light banners get a
     // solid brand-blue pill (matches production).
@@ -1179,7 +1196,9 @@ class _EventPageState extends State<EventPage> {
         children: [
           Text(text,
               style: TextStyle(
-                  color: pillFg, fontWeight: FontWeight.bold, fontSize: fontSize)),
+                  color: pillFg,
+                  fontWeight: FontWeight.bold,
+                  fontSize: fontSize)),
           const SizedBox(width: 6),
           Icon(Icons.people_alt_outlined, color: pillFg, size: iconSize),
         ],
@@ -1209,7 +1228,6 @@ class _EventPageState extends State<EventPage> {
 
   bool showLoginLogoutButton() {
     return AuthService.isLoggedIn() &&
-        !isLoadingEvent &&
         EventModel.isEventSupportingSignIn(_event);
   }
 
@@ -1359,9 +1377,9 @@ class _EventPageState extends State<EventPage> {
       var offlinePlaces = await OfflineDataService.getAllPlaces();
       for (var child in childEvents) {
         if (child.place?.id != null) {
-          child.place = offlinePlaces
-                  .firstWhereOrNull((p) => p.id == child.place!.id) ??
-              child.place;
+          child.place =
+              offlinePlaces.firstWhereOrNull((p) => p.id == child.place!.id) ??
+                  child.place;
         }
       }
       event.childEvents = childEvents;
@@ -1418,8 +1436,13 @@ class _EventPageState extends State<EventPage> {
 
   Future<void> signIn(BuildContext context,
       [UserInfoModel? participant]) async {
-    await DbEvents.signInToEvent(context, _event!.id!, participant);
-    await loadData(_event!.id!);
+    final didSignIn =
+        await DbEvents.signInToEvent(context, _event!.id!, participant);
+    if (!didSignIn || participant != null || !mounted) return;
+
+    setState(() {
+      _event!.updateCurrentUserRegistration(isRegistered: true);
+    });
   }
 
   Future<void> signOut() async {

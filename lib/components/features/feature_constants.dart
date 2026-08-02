@@ -41,7 +41,8 @@ class FeatureConstants {
 
   // Counseling feature config keys (occasions.features "counseling" element).
   static const String counselingEventType = "counseling_event_type";
-  static const String counselingRegistrationStartTime = "registration_start_time";
+  static const String counselingRegistrationStartTime =
+      "registration_start_time";
   static const String counselingMaxActiveBookings = "max_active_bookings";
 
   // Per-event flags (stored in events.data).
@@ -92,6 +93,9 @@ class FeatureConstants {
   static const String offlineMapPackageURL = "offlineMapPackageURL";
   static const String offlineMapStyleURL = "offlineMapStyleURL";
   static const String offlineMapLayerName = "offlineMapLayerName";
+  static const String offlineMapRenderer = "offlineMapRenderer";
+  static const String offlineMapBundleManifestURL =
+      "offlineMapBundleManifestURL";
   static const String forceOfflineMap = "forceOfflineMap";
 
   // MapLayer inner keys (for online map layer)

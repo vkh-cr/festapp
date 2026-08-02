@@ -51,6 +51,16 @@ test('RouterService.normalizeUrl', async (t) => {
         assert.strictEqual(result, "/form/custom");
     });
 
+    await t.test('should use the path from an unconfigured deployment origin', () => {
+        const route = '/form/preview';
+        const unconfiguredOrigin = new URL(AppConfig.webLink);
+        unconfiguredOrigin.hostname = `preview-${process.pid}.${unconfiguredOrigin.hostname}`;
+
+        const result = RouterService.normalizeUrl(new URL(route, unconfiguredOrigin).toString());
+
+        assert.strictEqual(result, route);
+    });
+
     await t.test('should handle malformed path starting with https prefix (stripped by browser but left in path)', () => {
         // Case: /https://vstupenky.online/form/test
         const input = "/https://vstupenky.online/form/test";
@@ -432,5 +442,4 @@ test('RouterService.handleInitialLoad', async (t) => {
         assert.strictEqual(replaceStateCalled, false, 'Should NOT sanitize URL if preview=true is present mixed with others');
     });
 });
-
 

@@ -142,9 +142,8 @@ class FeaturesStrings {
   static String get selectTicket => 'FeatureTicket.selectTicket'.tr();
   static String get unknown => 'FeatureTicket.unknown'.tr();
   static String get noData => 'FeatureTicket.noData'.tr();
-  static String get ticketDescription =>
-      'FeatureTicket.description'
-          .tr(); // "After payment, a ticket is sent to the user. The ticket can have a custom background and text color."
+  static String get ticketDescription => 'FeatureTicket.description'
+      .tr(); // "After payment, a ticket is sent to the user. The ticket can have a custom background and text color."
   static String get ticketType =>
       'FeatureTicket.ticketType'.tr(); // "Ticket Type"
   static String get backgroundColor =>
@@ -220,8 +219,9 @@ class FeaturesStrings {
       'FeatureWorkshops.title'.tr(); // "Workshops"
   static String get workshopsDescription => 'FeatureWorkshops.description'
       .tr(); // "Indicates the start time from when people can sign in for workshops."
-  static String get registrationStartTime => 'FeatureWorkshops.registrationStartTime'
-      .tr(); // "Workshop Registration Start Time"
+  static String get registrationStartTime =>
+      'FeatureWorkshops.registrationStartTime'
+          .tr(); // "Workshop Registration Start Time"
   static String get selectStartTime =>
       'FeatureWorkshops.selectStartTime'.tr(); // "Select start time"
   static String get earlyRegistrationMessage =>
@@ -253,6 +253,21 @@ class FeaturesStrings {
       'FeatureMap.offlineMapLayerSettings'.tr(); // "Offline Map Layer Settings"
   static String get forceOfflineMap =>
       'FeatureMap.forceOfflineMap'.tr(); // "Force offline map"
+  static String get mapBaseMode => 'FeatureMap.mapBaseMode'.tr();
+  static String get mapBaseModeDescription =>
+      'FeatureMap.mapBaseModeDescription'.tr();
+  static String get mapBaseModeOnline => 'FeatureMap.mapBaseModeOnline'.tr();
+  static String get mapBaseModeLegacy => 'FeatureMap.mapBaseModeLegacy'.tr();
+  static String get mapBaseModeMapLibre =>
+      'FeatureMap.mapBaseModeMapLibre'.tr();
+  static String get offlineMapBundleManifestUrl =>
+      'FeatureMap.offlineMapBundleManifestUrl'.tr();
+  static String get mapLibreBundleManifestRequired =>
+      'FeatureMap.mapLibreBundleManifestRequired'.tr();
+  static String get offlineMapRendererFieldRequired =>
+      'FeatureMap.offlineMapRendererFieldRequired'.tr();
+  static String get offlineMapHttpsUrlRequired =>
+      'FeatureMap.offlineMapHttpsUrlRequired'.tr();
   static String get offlineMapPackageUrl =>
       'FeatureMap.offlineMapPackageUrl'.tr(); // "Offline Map Package URL"
   static String get offlineMapStyleUrl =>

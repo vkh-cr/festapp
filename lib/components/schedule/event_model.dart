@@ -75,6 +75,15 @@ class EventModel extends ITrinaRowModel {
         currentParticipants! < maxParticipants!;
   }
 
+  void updateCurrentUserRegistration({required bool isRegistered}) {
+    if (isSignedIn == isRegistered) return;
+
+    final participantDelta = isRegistered ? 1 : -1;
+    currentParticipants =
+        ((currentParticipants ?? 0) + participantDelta).clamp(0, 1 << 31);
+    isSignedIn = isRegistered;
+  }
+
   DateTime startTime;
   DateTime endTime;
 

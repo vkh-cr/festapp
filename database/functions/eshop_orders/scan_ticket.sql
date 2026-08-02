@@ -12,6 +12,7 @@ DECLARE
     groups_json JSONB; -- New variable for groups
     order_id BIGINT;
     occasion_id BIGINT;
+    hide_price BOOLEAN := FALSE;
     target_user_id UUID; -- New variable to store the resolved User ID
     expected_scan_code TEXT;
     is_uuid BOOLEAN;
@@ -80,8 +81,10 @@ BEGIN
     -----------------------------------------------------
     -- 3. Retrieve the occasion ID from the order
     -----------------------------------------------------
-    SELECT o.occasion INTO occasion_id
+    SELECT o.occasion, occ.link = 'r48vetrkovice2026'
+      INTO occasion_id, hide_price
     FROM eshop.orders o
+    JOIN public.occasions occ ON occ.id = o.occasion
     WHERE o.id = order_id
     LIMIT 1;
 
@@ -127,20 +130,71 @@ BEGIN
     -----------------------------------------------------
 
     -- A. Fetch Order
-    SELECT row_to_json(o) INTO order_json
+    SELECT CASE
+             WHEN hide_price THEN
+               (to_jsonb(o) - 'price') || jsonb_build_object(
+                 'data',
+                 CASE
+                   WHEN jsonb_typeof(o.data->'tickets') = 'array' THEN
+                     jsonb_set(
+                       o.data,
+                       '{tickets}',
+                       COALESCE(
+                         (
+                           SELECT jsonb_agg(
+                             CASE
+                               WHEN jsonb_typeof(ticket->'products') = 'array' THEN
+                                 jsonb_set(
+                                   ticket,
+                                   '{products}',
+                                   COALESCE(
+                                     (
+                                       SELECT jsonb_agg(product - 'price')
+                                       FROM jsonb_array_elements(ticket->'products') AS product
+                                     ),
+                                     '[]'::jsonb
+                                   ),
+                                   FALSE
+                                 )
+                               ELSE ticket
+                             END
+                           )
+                           FROM jsonb_array_elements(o.data->'tickets') AS ticket
+                         ),
+                         '[]'::jsonb
+                       ),
+                       FALSE
+                     )
+                   ELSE o.data
+                 END
+               )
+             ELSE to_jsonb(o)
+           END
+      INTO order_json
     FROM eshop.orders o
     WHERE o.id = order_id;
 
     -- B. Fetch Products
     SELECT jsonb_agg(
-             jsonb_build_object(
-               'id', p.id,
-               'title', p.title,
-               'price', p.price,
-               'order', p."order",
-               'description', p.description,
-               'currency_code', p.currency_code
-             )
+             CASE
+               WHEN hide_price THEN
+                 jsonb_build_object(
+                   'id', p.id,
+                   'title', p.title,
+                   'order', p."order",
+                   'description', p.description,
+                   'currency_code', p.currency_code
+                 )
+               ELSE
+                 jsonb_build_object(
+                   'id', p.id,
+                   'title', p.title,
+                   'price', p.price,
+                   'order', p."order",
+                   'description', p.description,
+                   'currency_code', p.currency_code
+                 )
+             END
            )
       INTO products_json
     FROM eshop.products p
