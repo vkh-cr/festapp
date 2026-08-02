@@ -163,7 +163,16 @@
     "selectEvents": "Select events",
     "searchEvents": "Search events",
     "suspiciousEvents": "Suspicious events",
-    "suspiciousEventsDescription": "These events have invalid or multi-day timing, fall outside the occasion, or are exact duplicates by title, time, and place. Check that they are configured correctly."
+    "suspiciousEventsDescription": "These events have invalid or multi-day timing, fall outside the occasion, or are exact duplicates by title, time, and place. Check that they are configured correctly.",
+    "suspiciousReason": "Reason",
+    "suspiciousReasonInvalidTiming": "Invalid time",
+    "suspiciousReasonMultiDay": "Multi-day event",
+    "suspiciousReasonOutsideOccasion": "Outside occasion dates",
+    "suspiciousReasonExactDuplicate": "Exact duplicate",
+    "suspiciousReasonInvalidTimingDetail": "The end ({end}) is not later than the start ({start}).",
+    "suspiciousReasonMultiDayDetail": "The event starts at {start} and ends at {end}, so it spans multiple calendar days.",
+    "suspiciousReasonOutsideOccasionDetail": "The event time ({eventRange}) extends beyond the occasion dates ({occasionRange}).",
+    "suspiciousReasonExactDuplicateDetail": "At least one other event has the same title “{title}”, time {time}, and place “{place}”."
   },
   "FeatureImport": {
     "importFeatureDescription": "Enables importing users from various sources like CSV files or from tickets.",

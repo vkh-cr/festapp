@@ -69,4 +69,32 @@ void main() {
 
     expect(detect([invalid]), [invalid]);
   });
+
+  test('reports every applicable reason for an event', () {
+    final first = event(
+      title: 'Duplicate',
+      start: DateTime(2026, 8, 9, 23),
+      end: DateTime(2026, 8, 11, 1),
+    );
+    final second = event(
+      title: 'duplicate',
+      start: first.startTime,
+      end: first.endTime,
+    );
+
+    final analysis = SuspiciousEventDetector.analyze(
+      [first, second],
+      occasionStart: occasionStart,
+      occasionEnd: occasionEnd,
+    );
+
+    expect(
+      analysis[first],
+      [
+        SuspiciousEventReason.multiDay,
+        SuspiciousEventReason.outsideOccasion,
+        SuspiciousEventReason.exactDuplicate,
+      ],
+    );
+  });
 }

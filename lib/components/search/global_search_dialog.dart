@@ -12,6 +12,8 @@ import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/search/db_search.dart';
 import 'package:fstapp/components/search/search_result_model.dart';
 import 'package:fstapp/components/search/search_strings.dart';
+import 'package:fstapp/components/speakers/speaker_medallion.dart';
+import 'package:fstapp/components/speakers/speaker_model.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/database_tables/tb.dart';
@@ -23,7 +25,12 @@ import 'package:fstapp/theme_config.dart';
 /// program / places / info / songs / games / news. Online uses the
 /// `search_occasion_content` RPC; offline falls back to the local index.
 class GlobalSearchDialog extends StatefulWidget {
-  const GlobalSearchDialog({super.key});
+  final Future<List<SearchResultModel>> Function(String query) search;
+
+  GlobalSearchDialog({
+    super.key,
+    Future<List<SearchResultModel>> Function(String query)? search,
+  }) : search = search ?? DbSearch.search;
 
   /// Guards against stacking dialogs when opened repeatedly (e.g. Ctrl+F
   /// pressed while the search is already showing).
@@ -36,7 +43,7 @@ class GlobalSearchDialog extends StatefulWidget {
       await showDialog(
         context: context,
         barrierColor: Colors.black.withValues(alpha: 0.5),
-        builder: (_) => const GlobalSearchDialog(),
+        builder: (_) => GlobalSearchDialog(),
       );
     } finally {
       _isShowing = false;
@@ -60,9 +67,10 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
   /// current user's sign-in state — none of which the search RPC returns.
   final Map<int, EventModel> _eventsById = {};
 
-  /// Custom speaker avatars (by id) from the offline speaker bundle, so a
-  /// speaker result can show their photo. The search RPC doesn't return it.
-  final Map<int, String> _speakerImageById = {};
+  /// Full speaker records from the offline bundle. Search results only carry a
+  /// name and short snippet; the cached record adds the photo, roles and bio
+  /// needed by the profile dialog.
+  final Map<int, SpeakerModel> _speakersById = {};
 
   @override
   void initState() {
@@ -78,9 +86,8 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
       setState(() {
         _eventsById
           ..clear()
-          ..addEntries(events
-              .where((e) => e.id != null)
-              .map((e) => MapEntry(e.id!, e)));
+          ..addEntries(
+              events.where((e) => e.id != null).map((e) => MapEntry(e.id!, e)));
       });
     } catch (_) {
       // No cache available → program rows fall back to RPC fields only.
@@ -92,11 +99,11 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
       final bundle = await OfflineDataService.getSpeakers();
       if (!mounted || bundle == null) return;
       setState(() {
-        _speakerImageById
+        _speakersById
           ..clear()
           ..addEntries(bundle.speakers
-              .where((s) => s.id != null && (s.image?.isNotEmpty ?? false))
-              .map((s) => MapEntry(s.id!, s.image!)));
+              .where((s) => s.id != null)
+              .map((s) => MapEntry(s.id!, s)));
       });
     } catch (_) {
       // No cache available → speaker rows fall back to the type icon.
@@ -124,7 +131,7 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
       if (q.isEmpty) _results = [];
     });
     if (q.isEmpty) return;
-    final res = await DbSearch.search(q);
+    final res = await widget.search(q);
     if (!mounted || reqId != _requestId) return;
     setState(() {
       _results = res;
@@ -133,6 +140,11 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
   }
 
   void _openResult(SearchResultModel r) {
+    if (r.entityType == 'speaker') {
+      _showSpeakerProfile(r);
+      return;
+    }
+
     Navigator.of(context).pop();
     // Routes mirror the deployed build exactly (SearchService nav switch):
     //   event -> event/<id>, place -> map/<id>, info -> info/<id>,
@@ -158,16 +170,48 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
       case 'news':
         RouterService.navigateOccasion(context, "news");
         break;
-      case 'speaker':
-        // No standalone speaker page — open an event where the speaker's
-        // medallion is shown (parent_id = their first non-slot event). If they
-        // have no such event (e.g. counselor-only), there is nowhere to go.
-        if (r.parentId != null) {
-          RouterService.navigateOccasion(
-              context, "${EventPage.ROUTE}/${r.parentId}");
-        }
-        break;
     }
+  }
+
+  Future<void> _showSpeakerProfile(SearchResultModel result) {
+    final speaker = _speakersById[result.entityId];
+    final fallbackDetail = _plainSnippet(result.snippet);
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        key: const Key('speaker-profile-dialog'),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480, maxHeight: 640),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                  child: SpeakerMedallion(
+                    imageUrl: speaker?.image,
+                    name: speaker?.title ?? result.title,
+                    detailText: speaker == null ? fallbackDetail : null,
+                    pills: splitSpeakerRoles(speaker?.subtitle),
+                    bioHtml: speaker?.description,
+                    photoRadius: 82,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -380,9 +424,8 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
 
   Widget _eventTile(ThemeData theme, SearchResultModel r) {
     final model = _eventsById[r.entityId];
-    final titleText = (model?.title?.isNotEmpty ?? false)
-        ? model!.title!
-        : (r.title ?? '');
+    final titleText =
+        (model?.title?.isNotEmpty ?? false) ? model!.title! : (r.title ?? '');
     final cancelled = model?.isCancelled ?? false;
     final timeStr = model != null
         ? model.durationTimeString()
@@ -393,8 +436,9 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
         : '';
     final placeTitle =
         model?.place?.title ?? (r.extra['place_title'] as String?);
-    final supportsSignIn =
-        model != null && EventModel.isEventSupportingSignIn(model) && !cancelled;
+    final supportsSignIn = model != null &&
+        EventModel.isEventSupportingSignIn(model) &&
+        !cancelled;
     final now = TimeHelper.now();
     final isNow = model != null &&
         !cancelled &&
@@ -472,8 +516,8 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
     if (isNow) {
       children
         ..add(Builder(
-            builder: (context) =>
-                _metaBadge(ThemeConfig.redColor(context), ScheduleStrings.rightNow)))
+            builder: (context) => _metaBadge(
+                ThemeConfig.redColor(context), ScheduleStrings.rightNow)))
         ..add(const SizedBox(width: 6));
     } else if (isPast) {
       children
@@ -574,7 +618,7 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
         final img = _eventsById[r.entityId]?.data?[Tb.events.dataHeaderImage];
         return (img is String && img.isNotEmpty) ? img : null;
       case 'speaker':
-        return _speakerImageById[r.entityId];
+        return _speakersById[r.entityId]?.image;
       default:
         return null;
     }

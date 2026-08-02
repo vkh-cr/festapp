@@ -296,6 +296,7 @@ class EventModel extends ITrinaRowModel {
   /// the column's text filter can search by speaker; the renderer keys off the
   /// id column instead.
   static const String speakersColumn = "speakers";
+  static const String suspiciousReasonColumn = "suspicious_reason";
 
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
     var startTimeString = json[startDateColumn] + "-" + json[startTimeColumn];
@@ -407,6 +408,7 @@ class EventModel extends ITrinaRowModel {
       FeatureConstants.counselingEntry:
           TrinaCell(value: isCounselingEntry.toString()),
       speakersColumn: TrinaCell(value: speakerNamesSearch ?? ''),
+      suspiciousReasonColumn: TrinaCell(value: ''),
     });
   }
 

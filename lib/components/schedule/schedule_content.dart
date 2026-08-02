@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -63,6 +64,8 @@ class ScheduleContentState extends State<ScheduleContent> {
   final List<SpeakerModel> _allSpeakers = [];
   List<SpeakerTopicModel> _allTopics = [];
   final Map<int, List<int>> _eventSpeakerIds = {};
+  final Map<int, ({EventModel event, List<SuspiciousEventReason> reasons})>
+      _suspiciousEventDetails = {};
 
   SingleDataGridController<EventModel>? controller;
 
@@ -212,11 +215,21 @@ class ScheduleContentState extends State<ScheduleContent> {
   Future<List<EventModel>> _loadEventsForGrid() async {
     var events = await DbEvents.getAllEventsForDatagrid();
     if (widget.suspiciousOnly) {
-      events = SuspiciousEventDetector.find(
+      final analysis = SuspiciousEventDetector.analyze(
         events,
         occasionStart: occasionModel?.startTime,
         occasionEnd: occasionModel?.endTime,
       );
+      _suspiciousEventDetails
+        ..clear()
+        ..addEntries(
+            analysis.entries.where((entry) => entry.key.id != null).map(
+                  (entry) => MapEntry(
+                    entry.key.id!,
+                    (event: entry.key, reasons: entry.value),
+                  ),
+                ));
+      events = analysis.keys.toList();
     }
     for (final e in events) {
       final ids = e.id == null ? null : _eventSpeakerIds[e.id];
@@ -224,6 +237,302 @@ class ScheduleContentState extends State<ScheduleContent> {
           (ids == null || ids.isEmpty) ? null : _speakerNamesFor(ids);
     }
     return events;
+  }
+
+  String _formatDateTime(DateTime value) => DateFormat(
+        'd. M. yyyy HH:mm',
+        context.locale.languageCode,
+      ).format(value);
+
+  String _formatRange(DateTime start, DateTime end) =>
+      '${_formatDateTime(start)} – ${_formatDateTime(end)}';
+
+  String _suspiciousReasonLabel(SuspiciousEventReason reason) {
+    return switch (reason) {
+      SuspiciousEventReason.invalidTiming =>
+        ScheduleStrings.suspiciousReasonInvalidTiming,
+      SuspiciousEventReason.multiDay =>
+        ScheduleStrings.suspiciousReasonMultiDay,
+      SuspiciousEventReason.outsideOccasion =>
+        ScheduleStrings.suspiciousReasonOutsideOccasion,
+      SuspiciousEventReason.exactDuplicate =>
+        ScheduleStrings.suspiciousReasonExactDuplicate,
+    };
+  }
+
+  ({Color background, Color foreground, IconData icon, int priority})
+      _suspiciousReasonStyle(
+    BuildContext context,
+    SuspiciousEventReason reason,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    return switch (reason) {
+      SuspiciousEventReason.invalidTiming => (
+          background: colors.errorContainer,
+          foreground: colors.onErrorContainer,
+          icon: Icons.error_outline_rounded,
+          priority: 4,
+        ),
+      SuspiciousEventReason.outsideOccasion => (
+          background: colors.tertiaryContainer,
+          foreground: colors.onTertiaryContainer,
+          icon: Icons.event_busy_outlined,
+          priority: 3,
+        ),
+      SuspiciousEventReason.exactDuplicate => (
+          background: colors.primaryContainer,
+          foreground: colors.onPrimaryContainer,
+          icon: Icons.content_copy_rounded,
+          priority: 2,
+        ),
+      SuspiciousEventReason.multiDay => (
+          background: colors.secondaryContainer,
+          foreground: colors.onSecondaryContainer,
+          icon: Icons.date_range_outlined,
+          priority: 1,
+        ),
+    };
+  }
+
+  String _suspiciousReasonDetail(
+    EventModel event,
+    SuspiciousEventReason reason,
+  ) {
+    return switch (reason) {
+      SuspiciousEventReason.invalidTiming =>
+        ScheduleStrings.suspiciousReasonInvalidTimingDetail(
+          start: _formatDateTime(event.startTime),
+          end: _formatDateTime(event.endTime),
+        ),
+      SuspiciousEventReason.multiDay =>
+        ScheduleStrings.suspiciousReasonMultiDayDetail(
+          start: _formatDateTime(event.startTime),
+          end: _formatDateTime(event.endTime),
+        ),
+      SuspiciousEventReason.outsideOccasion =>
+        ScheduleStrings.suspiciousReasonOutsideOccasionDetail(
+          eventRange: _formatRange(event.startTime, event.endTime),
+          occasionRange:
+              occasionModel?.startTime != null && occasionModel?.endTime != null
+                  ? _formatRange(
+                      occasionModel!.startTime!,
+                      occasionModel!.endTime!,
+                    )
+                  : '—',
+        ),
+      SuspiciousEventReason.exactDuplicate =>
+        ScheduleStrings.suspiciousReasonExactDuplicateDetail(
+          title: event.title ?? '',
+          time: _formatRange(event.startTime, event.endTime),
+          place: event.place?.title ?? FeaturesStrings.none,
+        ),
+    };
+  }
+
+  void _showSuspiciousReasonDialog(
+    EventModel event,
+    List<SuspiciousEventReason> reasons,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(ScheduleStrings.suspiciousReason),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                event.title ?? CommonStrings.event,
+                style: Theme.of(dialogContext).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+              ...reasons.map(
+                (reason) => Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        _suspiciousReasonStyle(dialogContext, reason).icon,
+                        size: 20,
+                        color: _suspiciousReasonStyle(dialogContext, reason)
+                            .foreground,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _suspiciousReasonLabel(reason),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(_suspiciousReasonDetail(event, reason)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(CommonStrings.close),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _suspiciousReasonRenderer(TrinaColumnRendererContext rendererContext) {
+    final eventId =
+        rendererContext.row.cells[EventModel.idColumn]?.value as int?;
+    final details = eventId == null ? null : _suspiciousEventDetails[eventId];
+    if (details == null || details.reasons.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final dominantReason = details.reasons.reduce((current, candidate) =>
+        _suspiciousReasonStyle(context, candidate).priority >
+                _suspiciousReasonStyle(context, current).priority
+            ? candidate
+            : current);
+    final dominantStyle = _suspiciousReasonStyle(context, dominantReason);
+    final firstLabel = _suspiciousReasonLabel(dominantReason);
+    final extraCount = details.reasons.length - 1;
+    final chipLabel =
+        extraCount == 0 ? firstLabel : '$firstLabel  +$extraCount';
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+        child: Tooltip(
+          showDuration: const Duration(seconds: 15),
+          preferBelow: true,
+          verticalOffset: 28,
+          padding: EdgeInsets.zero,
+          decoration: const BoxDecoration(color: Colors.transparent),
+          richMessage: WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 340),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.14),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: details.reasons.mapIndexed((index, reason) {
+                    final style = _suspiciousReasonStyle(context, reason);
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index == details.reasons.length - 1 ? 0 : 12,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: style.background,
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            child: Icon(
+                              style.icon,
+                              size: 16,
+                              color: style.foreground,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _suspiciousReasonLabel(reason),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _suspiciousReasonDetail(
+                                    details.event,
+                                    reason,
+                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                        height: 1.35,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+          child: ActionChip(
+            avatar: Icon(
+              dominantStyle.icon,
+              size: 16,
+              color: dominantStyle.foreground,
+            ),
+            label: Text(
+              chipLabel,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: dominantStyle.foreground,
+                fontSize: 11,
+              ),
+            ),
+            backgroundColor: dominantStyle.background,
+            side: BorderSide.none,
+            visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onPressed: () => _showSuspiciousReasonDialog(
+              details.event,
+              details.reasons,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void initController() {
@@ -236,6 +545,15 @@ class ScheduleContentState extends State<ScheduleContent> {
       firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
       idColumn: Tb.events.id,
       columns: [
+        if (widget.suspiciousOnly)
+          TrinaColumn(
+            title: ScheduleStrings.suspiciousReason,
+            field: EventModel.suspiciousReasonColumn,
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            width: 210,
+            renderer: _suspiciousReasonRenderer,
+          ),
         TrinaColumn(
           title: CommonStrings.id,
           field: Tb.events.id,
@@ -609,20 +927,21 @@ class ScheduleContentState extends State<ScheduleContent> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Container(
-          color: Theme.of(context).colorScheme.errorContainer,
+          color:
+              Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.45),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
               Icon(
                 Icons.warning_amber_rounded,
-                color: Theme.of(context).colorScheme.onErrorContainer,
+                color: Theme.of(context).colorScheme.onTertiaryContainer,
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   ScheduleStrings.suspiciousEventsDescription,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onErrorContainer,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),

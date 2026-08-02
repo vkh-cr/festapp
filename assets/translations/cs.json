@@ -163,7 +163,16 @@
     "selectEvents": "Vybrat události",
     "searchEvents": "Hledat události",
     "suspiciousEvents": "Podezřelé události",
-    "suspiciousEventsDescription": "Zobrazené události mají neplatný nebo vícedenní čas, leží mimo dobu konání celé akce nebo jsou přesnou duplicitou podle názvu, času a místa. Zkontrolujte, zda jsou nastavené správně."
+    "suspiciousEventsDescription": "Zobrazené události mají neplatný nebo vícedenní čas, leží mimo dobu konání celé akce nebo jsou přesnou duplicitou podle názvu, času a místa. Zkontrolujte, zda jsou nastavené správně.",
+    "suspiciousReason": "Důvod",
+    "suspiciousReasonInvalidTiming": "Neplatný čas",
+    "suspiciousReasonMultiDay": "Vícedenní událost",
+    "suspiciousReasonOutsideOccasion": "Mimo termín akce",
+    "suspiciousReasonExactDuplicate": "Přesná duplicita",
+    "suspiciousReasonInvalidTimingDetail": "Konec ({end}) není později než začátek ({start}).",
+    "suspiciousReasonMultiDayDetail": "Událost začíná {start} a končí {end}, takže zasahuje do více kalendářních dnů.",
+    "suspiciousReasonOutsideOccasionDetail": "Čas události ({eventRange}) přesahuje termín celé akce ({occasionRange}).",
+    "suspiciousReasonExactDuplicateDetail": "Nejméně jedna další událost má stejný název „{title}“, čas {time} a místo „{place}“."
   },
   "FeatureImport": {
     "importFeatureDescription": "Umožňuje import uživatelů z různých zdrojů, jako jsou soubory CSV nebo vstupenky.",

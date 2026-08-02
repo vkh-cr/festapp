@@ -10,6 +10,45 @@ class ScheduleStrings {
       'FeatureSchedule.suspiciousEvents'.tr(); // "Suspicious events"
   static String get suspiciousEventsDescription =>
       'FeatureSchedule.suspiciousEventsDescription'.tr();
+  static String get suspiciousReason => 'FeatureSchedule.suspiciousReason'.tr();
+  static String get suspiciousReasonInvalidTiming =>
+      'FeatureSchedule.suspiciousReasonInvalidTiming'.tr();
+  static String get suspiciousReasonMultiDay =>
+      'FeatureSchedule.suspiciousReasonMultiDay'.tr();
+  static String get suspiciousReasonOutsideOccasion =>
+      'FeatureSchedule.suspiciousReasonOutsideOccasion'.tr();
+  static String get suspiciousReasonExactDuplicate =>
+      'FeatureSchedule.suspiciousReasonExactDuplicate'.tr();
+  static String suspiciousReasonInvalidTimingDetail({
+    required String start,
+    required String end,
+  }) =>
+      'FeatureSchedule.suspiciousReasonInvalidTimingDetail'
+          .tr(namedArgs: {'start': start, 'end': end});
+  static String suspiciousReasonMultiDayDetail({
+    required String start,
+    required String end,
+  }) =>
+      'FeatureSchedule.suspiciousReasonMultiDayDetail'
+          .tr(namedArgs: {'start': start, 'end': end});
+  static String suspiciousReasonOutsideOccasionDetail({
+    required String eventRange,
+    required String occasionRange,
+  }) =>
+      'FeatureSchedule.suspiciousReasonOutsideOccasionDetail'.tr(namedArgs: {
+        'eventRange': eventRange,
+        'occasionRange': occasionRange,
+      });
+  static String suspiciousReasonExactDuplicateDetail({
+    required String title,
+    required String time,
+    required String place,
+  }) =>
+      'FeatureSchedule.suspiciousReasonExactDuplicateDetail'.tr(namedArgs: {
+        'title': title,
+        'time': time,
+        'place': place,
+      });
   static String get profile => 'FeatureUser.profile'.tr(); // "Profile"
   static String get noEvents => 'FeatureSchedule.noEvents'.tr(); // "No events"
   static String get today => 'FeatureSchedule.today'.tr(); // "Today"
