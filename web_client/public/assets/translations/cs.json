@@ -163,7 +163,7 @@
     "selectEvents": "Vybrat události",
     "searchEvents": "Hledat události",
     "suspiciousEvents": "Podezřelé události",
-    "suspiciousEventsDescription": "Zobrazené události končí nejpozději v čase začátku nebo jejich začátek a konec spadají do různých kalendářních dnů. Zkontrolujte, zda jsou jejich časy nastavené správně."
+    "suspiciousEventsDescription": "Zobrazené události mají neplatný nebo vícedenní čas, leží mimo dobu konání celé akce nebo jsou přesnou duplicitou podle názvu, času a místa. Zkontrolujte, zda jsou nastavené správně."
   },
   "FeatureImport": {
     "importFeatureDescription": "Umožňuje import uživatelů z různých zdrojů, jako jsou soubory CSV nebo vstupenky.",

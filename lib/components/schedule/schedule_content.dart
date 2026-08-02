@@ -10,6 +10,7 @@ import 'package:fstapp/components/single_data_grid/single_data_grid_controller.d
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/schedule/suspicious_event_detector.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
@@ -211,7 +212,11 @@ class ScheduleContentState extends State<ScheduleContent> {
   Future<List<EventModel>> _loadEventsForGrid() async {
     var events = await DbEvents.getAllEventsForDatagrid();
     if (widget.suspiciousOnly) {
-      events = events.where((event) => event.hasSuspiciousTiming).toList();
+      events = SuspiciousEventDetector.find(
+        events,
+        occasionStart: occasionModel?.startTime,
+        occasionEnd: occasionModel?.endTime,
+      );
     }
     for (final e in events) {
       final ids = e.id == null ? null : _eventSpeakerIds[e.id];

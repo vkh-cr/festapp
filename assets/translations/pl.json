@@ -210,7 +210,7 @@
     "eventOver": "Wydarzenie się zakończyło.",
     "exclusivity": "Wyłączność",
     "suspiciousEvents": "Podejrzane wydarzenia",
-    "suspiciousEventsDescription": "Te wydarzenia kończą się nie później niż się zaczynają albo ich początek i koniec przypadają na różne dni kalendarzowe. Sprawdź, czy godziny są ustawione prawidłowo.",
+    "suspiciousEventsDescription": "Te wydarzenia mają nieprawidłowy lub wielodniowy czas, wypadają poza okresem całej imprezy albo są dokładnymi duplikatami według nazwy, czasu i miejsca. Sprawdź ich ustawienia.",
     "alreadySignedInSameTypeF": "Jesteś już zalogowana na wydarzenie tego typu.",
     "alreadySignedInSameTimeF": "Jesteś już zalogowana na inne wydarzenie o tej samej porze.",
     "alreadySignedInF": "Jesteś już zalogowana.",

@@ -163,7 +163,7 @@
     "selectEvents": "Select events",
     "searchEvents": "Search events",
     "suspiciousEvents": "Suspicious events",
-    "suspiciousEventsDescription": "These events end no later than they start, or their start and end fall on different calendar days. Check that their times are set correctly."
+    "suspiciousEventsDescription": "These events have invalid or multi-day timing, fall outside the occasion, or are exact duplicates by title, time, and place. Check that they are configured correctly."
   },
   "FeatureImport": {
     "importFeatureDescription": "Enables importing users from various sources like CSV files or from tickets.",
