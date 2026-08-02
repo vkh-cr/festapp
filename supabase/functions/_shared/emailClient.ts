@@ -28,14 +28,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendEmail({
-  to,
-  subject,
-  html,
-  attachments = [],
-  from = _DEFAULT_EMAIL,
-  replyTo = _DEFAULT_EMAIL,
-}: {
+type EmailTransporter = {
+  sendMail(message: Record<string, unknown>): Promise<unknown>;
+};
+
+type SendEmailInput = {
   to: string;
   subject: string;
   html: string;
@@ -47,9 +44,20 @@ export async function sendEmail({
   }>;
   from?: string;
   replyTo?: string;
-}) {
+  throwOnError?: boolean;
+};
+
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  attachments = [],
+  from = _DEFAULT_EMAIL,
+  replyTo = _DEFAULT_EMAIL,
+  throwOnError = false,
+}: SendEmailInput, emailTransporter: EmailTransporter = transporter) {
   try {
-    await transporter.sendMail({
+    await emailTransporter.sendMail({
       from,
       to,
       subject,
@@ -65,19 +73,11 @@ export async function sendEmail({
     console.log("Email sent successfully to:", to);
   } catch (error) {
     console.error("Failed to send email:", error);
+    if (throwOnError) throw error;
   }
 }
 
-export async function sendEmailWithSubs({
-  to,
-  subject,
-  content,
-  subs,
-  attachments = [],
-  from = _DEFAULT_EMAIL,
-  replyTo = _DEFAULT_EMAIL,
-  wrapper = null,
-}: {
+type SendEmailWithSubsInput = {
   to: string;
   subject: string;
   content: string;
@@ -91,7 +91,20 @@ export async function sendEmailWithSubs({
   from?: string;
   replyTo?: string;
   wrapper?: string | null;
-}) {
+  throwOnError?: boolean;
+};
+
+export async function sendEmailWithSubs({
+  to,
+  subject,
+  content,
+  subs,
+  attachments = [],
+  from = _DEFAULT_EMAIL,
+  replyTo = _DEFAULT_EMAIL,
+  wrapper = null,
+  throwOnError = false,
+}: SendEmailWithSubsInput, emailSender = sendEmail) {
   // Replace placeholders in subject and content with values from subs
   let processedSubject = subject;
   let processedHtml = content;
@@ -111,12 +124,13 @@ export async function sendEmailWithSubs({
   const sanitizedHtml = sanitizeHtml(processedHtml);
 
   // Send the email using the processed and sanitized content
-  await sendEmail({
+  await emailSender({
     to,
     subject: processedSubject,
     html: sanitizedHtml,
     attachments,
     from,
     replyTo,
+    throwOnError,
   });
 }

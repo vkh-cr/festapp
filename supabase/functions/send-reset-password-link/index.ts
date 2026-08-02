@@ -95,14 +95,25 @@ Deno.serve(async (req) => {
     appName: appName,
   };
 
-  await sendEmailWithSubs({
-    to: userEmail,
-    subject: templateAndWrapper.template.subject,
-    content: templateAndWrapper.template.html,
-    subs,
-    wrapper: templateAndWrapper.wrapper.html,
-    from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
-  });
+  try {
+    await sendEmailWithSubs({
+      to: userEmail,
+      subject: templateAndWrapper.template.subject,
+      content: templateAndWrapper.template.html,
+      subs,
+      wrapper: templateAndWrapper.wrapper.html,
+      from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
+      throwOnError: true,
+    });
+  } catch (_) {
+    return new Response(
+      JSON.stringify({ error: "Failed to send reset password email" }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      },
+    );
+  }
 
   await supabaseAdmin
     .from("log_emails")
