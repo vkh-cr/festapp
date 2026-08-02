@@ -35,13 +35,15 @@ import '../map/place_model.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
 class ScheduleContent extends StatefulWidget {
-  const ScheduleContent({super.key});
+  final bool suspiciousOnly;
+
+  const ScheduleContent({super.key, this.suspiciousOnly = false});
 
   @override
-  _ScheduleContentState createState() => _ScheduleContentState();
+  ScheduleContentState createState() => ScheduleContentState();
 }
 
-class _ScheduleContentState extends State<ScheduleContent> {
+class ScheduleContentState extends State<ScheduleContent> {
   OccasionModel? occasionModel;
   List<String> places = [];
 
@@ -62,6 +64,18 @@ class _ScheduleContentState extends State<ScheduleContent> {
   final Map<int, List<int>> _eventSpeakerIds = {};
 
   SingleDataGridController<EventModel>? controller;
+
+  /// Refreshes a review list only when doing so cannot discard local edits.
+  Future<void> reloadIfClean() async {
+    final currentController = controller;
+    if (currentController == null ||
+        currentController.updatedRows.isNotEmpty ||
+        currentController.deletedRows.isNotEmpty ||
+        currentController.newRows.isNotEmpty) {
+      return;
+    }
+    await currentController.reloadData();
+  }
 
   @override
   void initState() {
@@ -195,7 +209,10 @@ class _ScheduleContentState extends State<ScheduleContent> {
   /// data is already loaded into `_allSpeakers` / `_eventSpeakerIds` before the
   /// grid mounts.
   Future<List<EventModel>> _loadEventsForGrid() async {
-    final events = await DbEvents.getAllEventsForDatagrid();
+    var events = await DbEvents.getAllEventsForDatagrid();
+    if (widget.suspiciousOnly) {
+      events = events.where((event) => event.hasSuspiciousTiming).toList();
+    }
     for (final e in events) {
       final ids = e.id == null ? null : _eventSpeakerIds[e.id];
       e.speakerNamesSearch =
@@ -251,7 +268,8 @@ class _ScheduleContentState extends State<ScheduleContent> {
               rendererContext, Tb.events.dataIsCancelled),
         ),
         if (() {
-          final t = (FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule)
+          final t =
+              (FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule)
                       as ScheduleFeature?)
                   ?.scheduleType;
           return t == ScheduleFeature.scheduleTypeAdvanced ||
@@ -389,8 +407,9 @@ class _ScheduleContentState extends State<ScheduleContent> {
               key: ValueKey('event-speakers-$eventId'),
               eventId: eventId,
               allSpeakers: _allSpeakers,
-              initialSelectedIds:
-                  eventId == null ? const [] : (_eventSpeakerIds[eventId] ?? const []),
+              initialSelectedIds: eventId == null
+                  ? const []
+                  : (_eventSpeakerIds[eventId] ?? const []),
               onSave: _saveEventSpeakers,
               onAddSpeaker: _addSpeaker,
             );
@@ -578,6 +597,35 @@ class _ScheduleContentState extends State<ScheduleContent> {
       // This can happen if initController is called before _loadInitialData completes or if an error occurs
       return Center(child: Text(ScheduleStrings.initializing));
     }
-    return SingleTableDataGrid<EventModel>(controller!);
+    final grid = SingleTableDataGrid<EventModel>(controller!);
+    if (!widget.suspiciousOnly) return grid;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          color: Theme.of(context).colorScheme.errorContainer,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Theme.of(context).colorScheme.onErrorContainer,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  ScheduleStrings.suspiciousEventsDescription,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(child: grid),
+      ],
+    );
   }
 }

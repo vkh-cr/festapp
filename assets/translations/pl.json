@@ -209,6 +209,8 @@
     "eventFull": "Wydarzenie jest pełne.",
     "eventOver": "Wydarzenie się zakończyło.",
     "exclusivity": "Wyłączność",
+    "suspiciousEvents": "Podejrzane wydarzenia",
+    "suspiciousEventsDescription": "Te wydarzenia kończą się nie później niż się zaczynają albo ich początek i koniec przypadają na różne dni kalendarzowe. Sprawdź, czy godziny są ustawione prawidłowo.",
     "alreadySignedInSameTypeF": "Jesteś już zalogowana na wydarzenie tego typu.",
     "alreadySignedInSameTimeF": "Jesteś już zalogowana na inne wydarzenie o tej samej porze.",
     "alreadySignedInF": "Jesteś już zalogowana.",

@@ -20,6 +20,7 @@ class ScheduleTab extends StatefulWidget {
 class _ScheduleTabState extends State<ScheduleTab>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final _suspiciousEventsKey = GlobalKey<ScheduleContentState>();
   // Feedback subtab is present only when the EventFeedback feature is on —
   // matches the deployed ScheduleTab.
   late final bool _feedbackEnabled =
@@ -29,7 +30,7 @@ class _ScheduleTabState extends State<ScheduleTab>
   void initState() {
     super.initState();
     _tabController =
-        TabController(length: _feedbackEnabled ? 3 : 2, vsync: this);
+        TabController(length: _feedbackEnabled ? 4 : 3, vsync: this);
   }
 
   @override
@@ -50,14 +51,23 @@ class _ScheduleTabState extends State<ScheduleTab>
             child: TabBar(
               controller: _tabController,
               isScrollable: true,
+              onTap: (index) {
+                if (index == 1) {
+                  _suspiciousEventsKey.currentState?.reloadIfClean();
+                }
+              },
               tabs: [
                 DataGridHelper.buildTab(
                     context, Icons.calendar_month, CommonStrings.schedule),
+                DataGridHelper.buildTab(context, Icons.warning_amber_rounded,
+                    ScheduleStrings.suspiciousEvents),
                 DataGridHelper.buildTab(context, Icons.punch_clock_rounded,
                     ScheduleStrings.exclusivity),
                 if (_feedbackEnabled)
-                  DataGridHelper.buildTab(context,
-                      Icons.sentiment_satisfied_alt, EventFeedbackStrings.featureTitle),
+                  DataGridHelper.buildTab(
+                      context,
+                      Icons.sentiment_satisfied_alt,
+                      EventFeedbackStrings.featureTitle),
               ],
             ),
           ),
@@ -67,6 +77,10 @@ class _ScheduleTabState extends State<ScheduleTab>
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 ScheduleContent(),
+                ScheduleContent(
+                  key: _suspiciousEventsKey,
+                  suspiciousOnly: true,
+                ),
                 ExclusivityContent(),
                 if (_feedbackEnabled) const EventFeedbackAdminContent(),
               ],

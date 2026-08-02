@@ -209,6 +209,8 @@
     "eventFull": "Udalosť je plná.",
     "eventOver": "Udalosť skončila.",
     "exclusivity": "Exkluzivita",
+    "suspiciousEvents": "Podozrivé udalosti",
+    "suspiciousEventsDescription": "Tieto udalosti sa končia najneskôr v čase začiatku alebo ich začiatok a koniec pripadajú na rôzne kalendárne dni. Skontrolujte, či sú ich časy nastavené správne.",
     "alreadySignedInSameTypeF": "Už si prihlásená na udalosti tohto typu.",
     "alreadySignedInSameTimeF": "Už si prihlásená na inej udalosti v rovnakom čase.",
     "alreadySignedInF": "Už si prihlásená.",

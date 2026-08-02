@@ -18,4 +18,32 @@ void main() {
     expect(event.currentParticipants, participantsBefore + 1);
   });
 
+  group('suspicious timing', () {
+    test('accepts an event ending later on the same day', () {
+      final event = EventModel(
+        startTime: DateTime(2026, 8, 2, 10),
+        endTime: DateTime(2026, 8, 2, 11),
+      );
+
+      expect(event.hasSuspiciousTiming, isFalse);
+    });
+
+    test('flags an event spanning calendar days', () {
+      final event = EventModel(
+        startTime: DateTime(2026, 8, 2, 23),
+        endTime: DateTime(2026, 8, 3, 1),
+      );
+
+      expect(event.hasSuspiciousTiming, isTrue);
+    });
+
+    test('flags an event whose end is not after its start', () {
+      final event = EventModel(
+        startTime: DateTime(2026, 8, 2, 11),
+        endTime: DateTime(2026, 8, 2, 10),
+      );
+
+      expect(event.hasSuspiciousTiming, isTrue);
+    });
+  });
 }

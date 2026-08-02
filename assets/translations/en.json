@@ -161,7 +161,9 @@
     "scan": "Scan",
     "today": "Today",
     "selectEvents": "Select events",
-    "searchEvents": "Search events"
+    "searchEvents": "Search events",
+    "suspiciousEvents": "Suspicious events",
+    "suspiciousEventsDescription": "These events end no later than they start, or their start and end fall on different calendar days. Check that their times are set correctly."
   },
   "FeatureImport": {
     "importFeatureDescription": "Enables importing users from various sources like CSV files or from tickets.",

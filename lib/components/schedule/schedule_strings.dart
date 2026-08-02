@@ -6,6 +6,10 @@ class ScheduleStrings {
   // --- Schedule pages & timeline ---
   static String get exclusivity =>
       'FeatureSchedule.exclusivity'.tr(); // "Exclusivity"
+  static String get suspiciousEvents =>
+      'FeatureSchedule.suspiciousEvents'.tr(); // "Suspicious events"
+  static String get suspiciousEventsDescription =>
+      'FeatureSchedule.suspiciousEventsDescription'.tr();
   static String get profile => 'FeatureUser.profile'.tr(); // "Profile"
   static String get noEvents => 'FeatureSchedule.noEvents'.tr(); // "No events"
   static String get today => 'FeatureSchedule.today'.tr(); // "Today"
@@ -19,8 +23,8 @@ class ScheduleStrings {
   static String get scan => 'FeatureSchedule.scan'.tr(); // "Scan"
   static String get initializing =>
       'FeatureSchedule.initializing'.tr(); // "Initializing..."
-  static String get myScheduleEmpty =>
-      'FeatureSchedule.myScheduleEmpty'.tr(); // "There will appear your events."
+  static String get myScheduleEmpty => 'FeatureSchedule.myScheduleEmpty'
+      .tr(); // "There will appear your events."
 
   // --- Schedule datagrid (admin) ---
   static String get interest => 'FeatureSchedule.interest'.tr(); // "Interest"
@@ -48,12 +52,13 @@ class ScheduleStrings {
       'FeatureSchedule.maxParticipants'.tr(); // "Maximum of participants"
 
   // --- Event page ---
-  static String get accountRequiredToJoin => 'FeatureSchedule.accountRequiredToJoin'
-      .tr(); // "An account is required to join this event."
+  static String get accountRequiredToJoin =>
+      'FeatureSchedule.accountRequiredToJoin'
+          .tr(); // "An account is required to join this event."
   static String get clickHereToSignIn =>
       'FeatureSchedule.clickHereToSignIn'.tr(); // "Click here to sign in."
-  static String get eventFullyBooked => 'FeatureSchedule.eventFullyBooked'
-      .tr(); // "This event is fully booked."
+  static String get eventFullyBooked =>
+      'FeatureSchedule.eventFullyBooked'.tr(); // "This event is fully booked."
   static String get moderator =>
       'FeatureSchedule.moderator'.tr(); // "Moderator"
   static String get participantsCopied => 'FeatureSchedule.participantsCopied'
@@ -62,8 +67,8 @@ class ScheduleStrings {
       'FeatureSchedule.signInOther'.tr(); // "Sign in other"
   static String get signInSomeone =>
       'FeatureSchedule.signInSomeone'.tr(); // "Sign in"
-  static String get signOutParticipant => 'FeatureSchedule.signOutParticipant'
-      .tr(); // "Sign out participant"
+  static String get signOutParticipant =>
+      'FeatureSchedule.signOutParticipant'.tr(); // "Sign out participant"
   static String signOutParticipantConfirm(
           {required String participant, required String event}) =>
       'FeatureSchedule.signOutParticipantConfirm'.tr(namedArgs: {
@@ -76,8 +81,9 @@ class ScheduleStrings {
   // --- My schedule ---
   static String get addedToMySchedule =>
       'FeatureSchedule.addedToMySchedule'.tr(); // "Added to My schedule."
-  static String get removedFromMySchedule => 'FeatureSchedule.removedFromMySchedule'
-      .tr(); // "Removed from My schedule."
+  static String get removedFromMySchedule =>
+      'FeatureSchedule.removedFromMySchedule'
+          .tr(); // "Removed from My schedule."
   static String get signInBeforeAddingToMySchedule =>
       'FeatureSchedule.signInBeforeAddingToMySchedule'
           .tr(); // "Before adding to 'My schedule', please sign in first."
@@ -146,11 +152,11 @@ class ScheduleStrings {
         'user': user
       }); // "{user} is already signed in at an event of this type."
 
-  static String alreadySignedInSameTime(String? genderPrefix) =>
-      (genderPrefix == 'F'
-              ? 'FeatureSchedule.alreadySignedInSameTimeF'
-              : 'FeatureSchedule.alreadySignedInSameTimeM')
-          .tr(); // "You are already signed in at another event at the same time."
+  static String alreadySignedInSameTime(String? genderPrefix) => (genderPrefix ==
+              'F'
+          ? 'FeatureSchedule.alreadySignedInSameTimeF'
+          : 'FeatureSchedule.alreadySignedInSameTimeM')
+      .tr(); // "You are already signed in at another event at the same time."
 
   static String userAlreadySignedInSameTime(String? genderPrefix,
           {required String user}) =>

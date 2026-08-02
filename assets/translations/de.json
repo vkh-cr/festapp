@@ -209,6 +209,8 @@
     "eventFull": "Die Veranstaltung ist voll.",
     "eventOver": "Die Veranstaltung ist vorbei.",
     "exclusivity": "Exklusivität",
+    "suspiciousEvents": "Verdächtige Veranstaltungen",
+    "suspiciousEventsDescription": "Diese Veranstaltungen enden nicht nach ihrem Beginn oder ihr Beginn und Ende liegen an verschiedenen Kalendertagen. Prüfen Sie, ob die Zeiten korrekt eingestellt sind.",
     "alreadySignedInSameTypeF": "Sie sind bereits bei einer Veranstaltung dieses Typs angemeldet.",
     "alreadySignedInSameTimeF": "Sie sind bereits zu gleicher Zeit bei einer anderen Veranstaltung angemeldet.",
     "alreadySignedInF": "Sie sind bereits angemeldet.",

@@ -25,6 +25,14 @@ class EventModel extends ITrinaRowModel {
       ? (DateTimeRange(start: startTime, end: endTime)).duration
       : Duration.zero;
 
+  /// Flags timing that deserves an editor's attention without preventing
+  /// legitimate overnight events from being saved.
+  bool get hasSuspiciousTiming =>
+      !endTime.isAfter(startTime) ||
+      startTime.year != endTime.year ||
+      startTime.month != endTime.month ||
+      startTime.day != endTime.day;
+
   int? maxParticipants;
   int maxParticipantsNumber() => maxParticipants == null ? 0 : maxParticipants!;
 
