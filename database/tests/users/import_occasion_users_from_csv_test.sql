@@ -131,6 +131,10 @@ BEGIN
          WHERE occasion = v_context.occasion AND "user" = v_context.existing_user),
         'Poznámka z atomického importu',
         'present CSV data is updated');
+    PERFORM assert_false(
+        (SELECT COALESCE(data, '{}'::jsonb) ? 'note' FROM public.user_info
+         WHERE id = v_context.existing_user),
+        'occasion CSV notes are not copied into the canonical profile');
     PERFORM assert_eq(
         (SELECT data->>'sex' FROM public.occasion_users
          WHERE occasion = v_context.occasion AND "user" = v_context.existing_user),

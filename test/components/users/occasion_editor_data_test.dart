@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
+import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/components/users/occasion_editor_payload.dart';
 
 void main() {
@@ -41,6 +43,55 @@ void main() {
     );
     expect(
       bundle.services['accommodation']?.first['place_title'],
+      'Budova Orion',
+    );
+  });
+
+  test('shared bundle preserves the Stay tab user and service contract', () {
+    final result = {
+      'code': 200,
+      'data': {
+        'occasion_users': [
+          {
+            'user': '00000000-0000-0000-0000-000000000001',
+            'data': {'email': 'stay@test.local'},
+            'services': {
+              'accommodation': {'A1': DbOccasions.servicePaid},
+              'food': <String, dynamic>{},
+            },
+          },
+        ],
+        'forms': <dynamic>[],
+        'services': {
+          'accommodation': [
+            {
+              'code': 'A1',
+              'title': 'Hotel',
+              'reference': 10,
+              'place_title': 'Budova Orion',
+            },
+          ],
+          'food': [
+            {'code': 'F1', 'title': 'Oběd'},
+          ],
+        },
+      },
+    };
+
+    final bundle = DbUsers.parseOccasionEditorData(result);
+
+    expect(bundle.users, hasLength(1));
+    expect(
+      bundle.users.single.services?[DbOccasions.serviceTypeAccommodation]
+          ?['A1'],
+      DbOccasions.servicePaid,
+    );
+    expect(
+      bundle.users.single.services?[DbOccasions.serviceTypeFood]?['F1'],
+      DbOccasions.serviceNone,
+    );
+    expect(
+      bundle.services[DbOccasions.serviceTypeAccommodation]?.single.placeTitle,
       'Budova Orion',
     );
   });

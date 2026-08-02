@@ -1,5 +1,3 @@
-DROP FUNCTION IF EXISTS public.import_occasion_users_from_csv(bigint, jsonb, jsonb);
-
 CREATE OR REPLACE FUNCTION public.import_occasion_users_from_csv(
     p_occasion_id bigint,
     p_rows jsonb,
@@ -163,7 +161,8 @@ BEGIN
         END IF;
 
         UPDATE public.user_info ui
-           SET data = COALESCE(ui.data, '{}'::jsonb) || v_data_patch,
+           SET data = COALESCE(ui.data, '{}'::jsonb)
+                      || public.get_user_profile_data_patch(v_data_patch),
                name = CASE WHEN v_data_patch ? 'name'
                            THEN v_data_patch->>'name' ELSE ui.name END,
                surname = CASE WHEN v_data_patch ? 'surname'

@@ -72,10 +72,20 @@ BEGIN
     END LOOP;
 
     UPDATE public.user_info
-       SET data = COALESCE(user_info.data, '{}'::jsonb) || v_data,
+       SET data = COALESCE(user_info.data, '{}'::jsonb)
+                  || public.get_user_profile_data_patch(v_data),
            name = COALESCE(v_data->>'name', user_info.name),
            surname = COALESCE(v_data->>'surname', user_info.surname),
-           sex = COALESCE(v_data->>'sex', user_info.sex)
+           sex = COALESCE(v_data->>'sex', user_info.sex),
+           phone = CASE
+               WHEN v_data ? 'phone' THEN v_data->>'phone'
+               ELSE user_info.phone
+           END,
+           birth_date = CASE
+               WHEN v_data ? 'birthDate'
+                   THEN NULLIF(v_data->>'birthDate', '')::date
+               ELSE user_info.birth_date
+           END
      WHERE id = v_user;
 
     UPDATE public.occasion_users

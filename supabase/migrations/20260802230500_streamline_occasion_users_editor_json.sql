@@ -1,4 +1,8 @@
-CREATE OR REPLACE FUNCTION public.get_occasion_users_for_edit(
+-- Stream the shared Users/Stay editor roster as JSON in one pass. This avoids
+-- duplicating user_info and reparsing the complete response as JSONB.
+DROP FUNCTION public.get_occasion_users_for_edit(BIGINT);
+
+CREATE FUNCTION public.get_occasion_users_for_edit(
     p_occasion_id BIGINT
 )
 RETURNS JSON
@@ -12,20 +16,18 @@ DECLARE
     services_data JSONB;
     org_id BIGINT;
 BEGIN
-    -- 0. Retrieve the Organization ID
-    -- We need this to check against the organization_users table later
     SELECT organization INTO org_id
     FROM public.occasions
     WHERE id = p_occasion_id;
 
-    -- Authorization check: Ensure the user has editor rights for the occasion.
-    IF (SELECT get_is_editor_view_on_occasion(p_occasion_id)) <> TRUE AND (SELECT get_is_editor_order_view_on_occasion(p_occasion_id)) <> TRUE THEN
-        RETURN json_build_object('code', 403, 'message', 'User is not authorized to view this occasion''s data');
+    IF (SELECT get_is_editor_view_on_occasion(p_occasion_id)) <> TRUE
+       AND (SELECT get_is_editor_order_view_on_occasion(p_occasion_id)) <> TRUE THEN
+        RETURN json_build_object(
+            'code', 403,
+            'message', 'User is not authorized to view this occasion''s data'
+        );
     END IF;
 
-    -- 1. Get all users associated with the occasion. Resolve order and group
-    -- metadata once for the whole occasion instead of running correlated
-    -- subqueries for every user.
     WITH visible_users AS MATERIALIZED (
         SELECT ou.*
         FROM public.occasion_users ou
@@ -60,49 +62,17 @@ BEGIN
     INTO users_data
     FROM (
         SELECT
-            vu.occasion,
-            vu.created_at,
-            vu."user",
-            vu.is_editor,
-            vu.is_manager,
-            vu.is_approved,
-            vu.is_approver,
-            -- Occasion data remains authoritative for event-specific fields.
-            -- Overlay only the dedicated global profile columns; user_info.data
-            -- also contains historical occasion fields and must not leak across
-            -- events. A LEFT JOIN preserves legacy occasion rows without a
-            -- matching user_info record.
-            COALESCE(vu.data, '{}'::jsonb) || jsonb_strip_nulls(jsonb_build_object(
-                'email', ui.email_readonly,
-                'name', ui.name,
-                'surname', ui.surname,
-                'sex', ui.sex,
-                'phone', COALESCE(ui.phone, ui.data->>'phone'),
-                'birthDate', COALESCE(
-                    to_char(ui.birth_date, 'YYYY-MM-DD'),
-                    ui.data->>'birthDate'
-                )
-            )) AS data,
-            vu.role,
-            vu.services,
-            vu.is_editor_view,
-            vu.is_editor_order,
-            vu.is_editor_order_view,
-            vu.is_cleaning_crew,
-            vu.is_cleaning_blocked,
-            vu.ticket,
+            vu.*,
             order_info.form_id,
             order_info.created_at AS order_created_at,
             au.last_sign_in_at,
             standard_groups.titles AS group_title
         FROM visible_users vu
-        LEFT JOIN public.user_info ui ON ui.id = vu."user"
         LEFT JOIN auth.users au ON au.id = vu."user"
         LEFT JOIN order_info ON order_info.ticket = vu.ticket
         LEFT JOIN standard_groups ON standard_groups."user" = vu."user"
     ) user_row;
 
-    -- 2. Get all forms associated with the occasion, selecting only the specified fields.
     SELECT json_agg(
         json_build_object(
             'key', f.key,
@@ -116,10 +86,6 @@ BEGIN
     FROM public.forms f
     WHERE f.occasion = p_occasion_id;
 
-    -- 3. Return the service catalog in the same RPC response. Both the Users
-    -- and Stay tabs need these options to render editable accommodation/food
-    -- columns; keeping them here avoids extra requests and PostgREST's 1000-row
-    -- cap on direct occasion_users queries.
     SELECT catalog.services || jsonb_build_object(
         'accommodation',
         COALESCE((
@@ -153,16 +119,17 @@ BEGIN
         WHERE o.id = p_occasion_id
     ) catalog;
 
-    -- Assemble the final JSON object without reparsing the complete roster as
-    -- JSONB. Both the Users and Stay tabs consume this same bundle.
     RETURN json_build_object(
         'code', 200,
         'message', 'Occasion users and forms retrieved successfully.',
         'data', json_build_object(
             'occasion_users', COALESCE(users_data, '[]'::json),
-            'forms',          COALESCE(forms_data, '[]'::json),
-            'services',       COALESCE(services_data, '{}'::jsonb)
+            'forms', COALESCE(forms_data, '[]'::json),
+            'services', COALESCE(services_data, '{}'::jsonb)
         )
     );
 END;
 $$;
+
+GRANT EXECUTE ON FUNCTION public.get_occasion_users_for_edit(BIGINT)
+TO PUBLIC, anon, authenticated, service_role;

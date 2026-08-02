@@ -20,3 +20,28 @@
 - `add_user_to_occasion` -- adds existing user to an occasion
 - `import_users_from_tickets_ws` -- bulk-creates users from ticket data
 - `update_user` -- updates user profile for an occasion
+
+## Users Editor Performance
+
+The Users admin tab intentionally loads the complete occasion roster. Keep
+`get_occasion_users_for_edit` set-based: order metadata and standard-group
+titles must be aggregated once per occasion and joined back to visible users.
+Do not reintroduce per-user correlated/LATERAL lookups. Ticket-to-order lookups
+depend on `eshop.order_product_ticket (ticket, id)`.
+
+Both the Users and Stay tabs consume this same bundle. Build its roster with
+`json_agg(row_to_json(...))` from the `occasion_users` editor contract. The
+effective `data` object starts with `occasion_users.data`, then overlays only
+the dedicated canonical profile columns from `user_info` (email, name, surname,
+sex, phone, and birth date). Never merge the complete `user_info` row or
+`user_info.data`: it contains historical occasion-specific fields, adds
+substantial payload, and can leak values between occasions. Keep the profile
+join optional so legacy `occasion_users` rows without `user_info` remain
+visible.
+
+Profile writers use `get_user_profile_data_patch` to copy only name, surname,
+sex, phone, and birth date into the legacy `user_info.data` mirror while the
+dedicated `user_info` columns remain authoritative. Occasion notes, invitations,
+diet, arbitrary form answers, and `occasion_users.services` must never be copied
+into the profile. Existing legacy JSON is retained as a registration snapshot;
+it is not an implicit current-profile override.

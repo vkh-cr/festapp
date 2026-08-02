@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/users/companion/db_companions.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
@@ -181,10 +180,9 @@ class _UserPageState extends State<UserPage> {
                       context: context,
                       onPressed: () => _showFullScreenDialog(
                         context,
-                        userData
-                            ?.occasionUser!.data![Tb.occasion_users.data_name],
+                        userData?.name ?? "",
                         AppConfig.appName,
-                        userData?.occasionUser!.user ?? "",
+                        userData?.id ?? "",
                       ),
                       icon: Icons.qr_code,
                       label: UserStrings.showMyCode,
@@ -305,8 +303,7 @@ class _UserPageState extends State<UserPage> {
                                             var answer = await DialogHelper
                                                 .showConfirmationDialog(
                                                     context,
-                                                    UserStrings
-                                                        .deleteCompanion,
+                                                    UserStrings.deleteCompanion,
                                                     UserStrings
                                                         .deleteCompanionConfirm);
                                             if (!answer) {
@@ -316,8 +313,8 @@ class _UserPageState extends State<UserPage> {
                                                 companion);
                                             await loadData();
                                           },
-                                          child: Text(
-                                              UserStrings.deleteCompanion),
+                                          child:
+                                              Text(UserStrings.deleteCompanion),
                                         ),
                                       ],
                                     ),
@@ -331,29 +328,16 @@ class _UserPageState extends State<UserPage> {
                     ),
                   ),
                 const SizedBox(height: 15),
+                buildTextField(CommonStrings.name, userData?.name ?? ""),
                 buildTextField(
-                    CommonStrings.name,
-                    userData?.occasionUser
-                            ?.data![Tb.occasion_users.data_name] ??
-                        ""),
+                    PersonFieldsStrings.surname, userData?.surname ?? ""),
                 buildTextField(
-                    PersonFieldsStrings.surname,
-                    userData?.occasionUser
-                            ?.data![Tb.occasion_users.data_surname] ??
-                        ""),
-                buildTextField(
-                    PersonFieldsStrings.email,
-                    userData?.occasionUser
-                            ?.data![Tb.occasion_users.data_email] ??
-                        ""),
-                buildTextField(
-                    PersonFieldsStrings.sexLabel,
-                    UserInfoModel.sexToLocale(userData
-                        ?.occasionUser?.data![Tb.occasion_users.data_sex])),
+                    PersonFieldsStrings.email, userData?.email ?? ""),
+                buildTextField(PersonFieldsStrings.sexLabel,
+                    UserInfoModel.sexToLocale(userData?.sex)),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.services))
                   _buildStaySection(context),
-                if (userData?.eventUserGroup != null)
-                  _buildGroupField(context),
+                if (userData?.eventUserGroup != null) _buildGroupField(context),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
                   _buildCleaningSection(context),
                 const SizedBox(height: 16),
@@ -385,18 +369,16 @@ class _UserPageState extends State<UserPage> {
                         confirmButtonMessage: CommonStrings.proceed,
                       );
                       if (answer) {
-                        await AuthService.resetPasswordForEmail(userData!
-                                .occasionUser!
-                                .data![Tb.occasion_users.data_email])
+                        final email = userData?.email;
+                        if (email == null || email.isEmpty) return;
+                        await AuthService.resetPasswordForEmail(email)
                             .then((value) {
                           ToastHelper.Show(
                               context, UserStrings.passwordResetSent);
                           DialogHelper.showInformationDialog(
                             context,
                             UserStrings.changePasswordInstructions,
-                            UserStrings.passwordResetLinkSent(
-                                email: userData!.occasionUser!
-                                    .data![Tb.occasion_users.data_email]),
+                            UserStrings.passwordResetLinkSent(email: email),
                           );
                         });
                       }

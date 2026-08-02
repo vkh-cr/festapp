@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION create_user_in_organization_with_data_pure(org bigint, email text, password text, data jsonb)
+CREATE OR REPLACE FUNCTION public.create_user_in_organization_with_data_pure(org bigint, email text, password text, data jsonb)
 RETURNS uuid
 LANGUAGE plpgsql
 SET search_path = public, extensions
@@ -45,8 +45,21 @@ BEGIN
       (gen_random_uuid(), usr, usr, format('{"sub":"%s","email":"%s"}', usr::text, email)::jsonb, 'email', NULL, now(), now());
 
     -- Insert into user_info with the original email (without prefix)
-    INSERT INTO user_info (id, email_readonly, name, surname, sex, data, organization)
-    VALUES (usr, original_email, COALESCE(trimmed_data->>'name', ''), COALESCE(trimmed_data->>'surname', ''), COALESCE(trimmed_data->>'sex', ''), trimmed_data, org);
+    INSERT INTO user_info (
+      id, email_readonly, name, surname, sex, phone, birth_date, data,
+      organization
+    )
+    VALUES (
+      usr,
+      original_email,
+      COALESCE(trimmed_data->>'name', ''),
+      COALESCE(trimmed_data->>'surname', ''),
+      COALESCE(trimmed_data->>'sex', ''),
+      trimmed_data->>'phone',
+      NULLIF(trimmed_data->>'birthDate', '')::date,
+      trimmed_data,
+      org
+    );
 
     RETURN usr;
 END;

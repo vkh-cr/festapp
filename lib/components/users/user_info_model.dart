@@ -91,6 +91,39 @@ class UserInfoModel extends IHasId {
     this.groupFeatureAnswer,
   });
 
+  /// Combines the current organization-wide profile with one occasion's
+  /// participation. Profile identity stays owned by this model; roles,
+  /// services and other occasion-specific state stay on [occasionUser].
+  UserInfoModel withOccasionParticipation(OccasionUserModel participation) {
+    final combined = UserInfoModel(
+      id: id,
+      email: email,
+      name: name,
+      surname: surname,
+      sex: sex,
+      birthDate: birthDate,
+      role: role,
+      isAdmin: isAdmin,
+      isEditor: isEditor,
+      phone: phone,
+      accommodationPlace: accommodationPlace,
+      eventUserGroup: eventUserGroup,
+      occasionUser: participation,
+      roleString: roleString,
+      companions: companions,
+      companionParent: companionParent,
+      units: units,
+      occasions: occasions,
+      eventIds: eventIds,
+      userGroups: userGroups,
+      ticketId: ticketId,
+      ticket: ticket,
+      groupFeatureAnswer: groupFeatureAnswer,
+    );
+    combined.isSignedIn = isSignedIn;
+    return combined;
+  }
+
   static UserInfoModel fromJson(Map<String, dynamic> json) {
     return UserInfoModel(
       id: json[idColumn],
@@ -126,6 +159,7 @@ class UserInfoModel extends IHasId {
           ? List<String>.from(json[scheduleColumn]!.map((s) => s))
           : null,
       sex: json[sexColumn],
+      phone: json[phoneColumn],
       birthDate: json[birthDateColumn] != null
           ? DateTime.tryParse(json[birthDateColumn] as String)
           : null,
@@ -227,8 +261,7 @@ class UserInfoModel extends IHasId {
 
     if (trimmedVal == PersonFieldsStrings.female || trimmedVal == "Female") {
       return "female";
-    } else if (trimmedVal == PersonFieldsStrings.male ||
-        trimmedVal == "Male") {
+    } else if (trimmedVal == PersonFieldsStrings.male || trimmedVal == "Male") {
       return "male";
     }
 

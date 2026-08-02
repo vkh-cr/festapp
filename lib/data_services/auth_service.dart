@@ -60,9 +60,10 @@ class AuthService {
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {
-    var user = UserInfoModel();
-    user.occasionUser =
+    final participation =
         await DbUsers.getOccasionUser(AuthService.currentUserId());
+    var user = (RightsService.currentUser() ?? UserInfoModel())
+        .withOccasionParticipation(participation);
     if (RightsService.currentOccasionUser()?.role != null) {
       user.roleString =
           await getRoleInfo(RightsService.currentOccasionUser()!.role!);

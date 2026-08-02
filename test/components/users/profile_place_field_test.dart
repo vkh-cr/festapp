@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
+import 'package:fstapp/components/users/occasion_user_model.dart';
+import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/components/users/widgets/profile_place_field.dart';
 import 'package:fstapp/database_tables/tb.dart';
 
@@ -66,5 +68,84 @@ void main() {
 
     expect(restored.eventUserGroup?.place?.id, placeId);
     expect(restored.eventUserGroup?.place?.title, Tb.places.title);
+  });
+
+  test('current profile stays canonical while occasion stay stays contextual',
+      () {
+    final profile = UserInfoModel.fromJson({
+      'id': '00000000-0000-0000-0000-000000000001',
+      'email_readonly': 'canonical@test.local',
+      'name': 'Canonical',
+      'surname': 'Person',
+      'sex': 'female',
+      'phone': 'canonical-phone',
+      'birth_date': '2000-02-03',
+      'occasionUser': {
+        'occasion': 643,
+        'user': '00000000-0000-0000-0000-000000000001',
+        'data': {
+          'email': 'historic@test.local',
+          'name': 'Historic',
+          'phone': 'historic-phone',
+        },
+        'services': {
+          DbOccasions.serviceTypeAccommodation: {'room-a': 'paid'},
+        },
+      },
+    });
+
+    expect(profile.email, 'canonical@test.local');
+    expect(profile.name, 'Canonical');
+    expect(profile.phone, 'canonical-phone');
+    expect(profile.birthDate, DateTime(2000, 2, 3));
+    expect(profile.occasionUser?.data?['name'], 'Historic');
+    expect(
+      profile.occasionUser?.services?[DbOccasions.serviceTypeAccommodation],
+      {'room-a': 'paid'},
+    );
+
+    final restored = UserInfoModel.fromJson(profile.toJson());
+    expect(restored.phone, 'canonical-phone');
+    expect(
+      restored.occasionUser?.services?[DbOccasions.serviceTypeAccommodation]
+          ?['room-a'],
+      'paid',
+    );
+  });
+
+  test('attaching participation cannot replace the current profile identity',
+      () {
+    final profile = UserInfoModel(
+      id: '00000000-0000-0000-0000-000000000001',
+      email: 'canonical@test.local',
+      name: 'Canonical',
+      surname: 'Person',
+      sex: 'female',
+      phone: 'canonical-phone',
+      birthDate: DateTime(2000, 2, 3),
+    );
+    final participation = OccasionUserModel(
+      occasion: 643,
+      user: profile.id,
+      data: {
+        'email': 'historic@test.local',
+        'name': 'Historic',
+      },
+      services: {
+        DbOccasions.serviceTypeAccommodation: {'room-a': 'paid'},
+      },
+    );
+
+    final combined = profile.withOccasionParticipation(participation);
+
+    expect(combined.email, 'canonical@test.local');
+    expect(combined.name, 'Canonical');
+    expect(combined.phone, 'canonical-phone');
+    expect(combined.occasionUser, same(participation));
+    expect(
+      combined.occasionUser?.services?[DbOccasions.serviceTypeAccommodation]
+          ?['room-a'],
+      'paid',
+    );
   });
 }

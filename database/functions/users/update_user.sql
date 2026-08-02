@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_user(
+CREATE OR REPLACE FUNCTION public.update_user(
   input_data jsonb
 ) RETURNS jsonb
 SECURITY DEFINER
@@ -91,7 +91,10 @@ BEGIN
     IF existing_user_id IS NOT NULL THEN
       -- Create profile if missing
       IF NOT EXISTS (SELECT 1 FROM public.user_info WHERE id = existing_user_id) THEN
-        INSERT INTO public.user_info (id, organization, email_readonly, data, name, surname, sex)
+        INSERT INTO public.user_info (
+          id, organization, email_readonly, data, name, surname, sex, phone,
+          birth_date
+        )
         VALUES (
             existing_user_id,
             v_org,
@@ -99,7 +102,9 @@ BEGIN
             v_data,
             v_data->>'name',
             v_data->>'surname',
-            v_data->>'sex'
+            v_data->>'sex',
+            v_data->>'phone',
+            NULLIF(v_data->>'birthDate', '')::date
         );
       END IF;
 
@@ -131,10 +136,20 @@ BEGIN
   -- Update existing user logic
   UPDATE public.user_info
   SET
-    data = user_info.data || v_data,
+    data = COALESCE(user_info.data, '{}'::jsonb)
+           || public.get_user_profile_data_patch(v_data),
     name = COALESCE(v_data->>'name', user_info.name),
     surname = COALESCE(v_data->>'surname', user_info.surname),
-    sex = COALESCE(v_data->>'sex', user_info.sex)
+    sex = COALESCE(v_data->>'sex', user_info.sex),
+    phone = CASE
+      WHEN v_data ? 'phone' THEN v_data->>'phone'
+      ELSE user_info.phone
+    END,
+    birth_date = CASE
+      WHEN v_data ? 'birthDate'
+        THEN NULLIF(v_data->>'birthDate', '')::date
+      ELSE user_info.birth_date
+    END
   WHERE id = v_user;
 
   RETURN jsonb_build_object(
