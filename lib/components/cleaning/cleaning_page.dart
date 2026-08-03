@@ -81,7 +81,7 @@ class _CleaningPageState extends State<CleaningPage> {
     super.initState();
     _loadData();
     // Live data matters for the crew; poll quietly while the page is open.
-    if (_isCrew) {
+    if (_isCrew && !ClientSyncRuntime.isV1Selected) {
       _pollTimer =
           Timer.periodic(_pollInterval, (_) => _loadData(silent: true));
     }
