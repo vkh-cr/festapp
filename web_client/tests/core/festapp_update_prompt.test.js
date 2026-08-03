@@ -33,6 +33,7 @@ function boot({
     latestVersion,
     fetchOk = true,
     waitingWorker = false,
+    activeWorkerWithoutUpdate = false,
     appReady = false,
 } = {}) {
     const dom = new JSDOM('<!DOCTYPE html><html><head></head><body></body></html>', {
@@ -54,7 +55,7 @@ function boot({
                 return { ok: fetchOk, json: async () => ({ version: latestVersion }) };
             };
 
-            if (waitingWorker) {
+            if (waitingWorker || activeWorkerWithoutUpdate) {
                 window.__skipWaitingMessages = [];
                 const candidate = {
                     state: 'installed',
@@ -69,7 +70,7 @@ function boot({
                 serviceWorker.getRegistrations = async () => [];
                 serviceWorker.getRegistration = async () => ({
                     active: { scriptURL: 'https://csmostrava.festapp.net/festapp_service_worker.js' },
-                    waiting: candidate,
+                    waiting: waitingWorker ? candidate : null,
                     installing: null,
                     update: async () => {},
                 });
@@ -194,6 +195,19 @@ describe('festapp_update_prompt.js', () => {
 
         assert.deepStrictEqual([...window.__skipWaitingMessages], []);
         assert.ok(banner(window), 'a running app should let the user choose when to reload');
+    });
+
+    test('active old worker without an installed update never triggers a false reload', async () => {
+        const { window } = boot({
+            buildVersion: '1.0.0+1',
+            latestVersion: '1.0.0+2',
+            activeWorkerWithoutUpdate: true,
+        });
+        window.dispatchEvent(new window.Event('focus'));
+        await flush();
+
+        assert.strictEqual(window.sessionStorage.getItem('festappCutoverVersion'), null);
+        assert.ok(banner(window), 'failed activation must leave a retry path visible');
     });
 
     test('version check stays silent when the server build matches', async () => {

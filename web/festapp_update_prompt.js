@@ -283,8 +283,12 @@
       reloadButton.disabled = true;
       reloadButton.textContent = copy.loading;
       await clearLegacyFlutterCaches();
-      await activateWaitingFestappWorker();
-      window.location.reload();
+      if (await activateWaitingFestappWorker()) {
+        window.location.reload();
+        return;
+      }
+      reloadButton.disabled = false;
+      reloadButton.textContent = copy.reload;
     });
 
     actions.append(laterButton, reloadButton);
@@ -301,9 +305,12 @@
       }
       await registration.update();
       let candidate = registration.waiting || registration.installing;
+      if (!candidate) return false;
       if (candidate && candidate.state !== 'installed' && candidate.state !== 'activated') {
         await new Promise(function(resolve) {
-          const timeout = window.setTimeout(resolve, 30000);
+          // The complete offline shell is intentionally large. A cold mobile
+          // cache can legitimately need longer than 30 seconds to install.
+          const timeout = window.setTimeout(resolve, 120000);
           candidate.addEventListener('statechange', function onStateChange() {
             if (candidate.state === 'installed' || candidate.state === 'activated' || candidate.state === 'redundant') {
               window.clearTimeout(timeout);
@@ -316,18 +323,17 @@
       candidate = registration.waiting || candidate;
       if (candidate && candidate.state === 'installed') {
         const changed = new Promise(function(resolve) {
-          const timeout = window.setTimeout(resolve, 5000);
+          const timeout = window.setTimeout(function() { resolve(false); }, 15000);
           navigator.serviceWorker.addEventListener('controllerchange', function onChange() {
             window.clearTimeout(timeout);
             navigator.serviceWorker.removeEventListener('controllerchange', onChange);
-            resolve();
+            resolve(true);
           });
         });
         candidate.postMessage('SKIP_WAITING');
-        await changed;
-        return true;
+        return await changed;
       }
-      return registration.active?.scriptURL.includes('festapp_service_worker.js') === true;
+      return candidate?.state === 'activated';
     } catch (error) {
       console.warn('Festapp service worker activation failed:', error);
       return false;
