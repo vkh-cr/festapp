@@ -7,8 +7,48 @@ import 'package:fstapp/components/search/search_result_model.dart';
 import 'package:fstapp/components/speakers/speaker_avatar.dart';
 import 'package:fstapp/components/speakers/speaker_model.dart';
 import 'package:fstapp/components/speakers/speakers_bundle.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 
 void main() {
+  testWidgets('open search refreshes when a new projection is activated',
+      (tester) async {
+    var title = 'Původní program';
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(builder: (context) {
+        return TextButton(
+          onPressed: () => showDialog<void>(
+            context: context,
+            builder: (_) => GlobalSearchDialog(
+              search: (_) async => [
+                SearchResultModel(
+                  entityType: 'info',
+                  entityId: 1,
+                  title: title,
+                ),
+              ],
+              loadSpeakers: () async => null,
+            ),
+          ),
+          child: const Text('Search'),
+        );
+      }),
+    ));
+
+    await tester.tap(find.text('Search'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'program');
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    expect(find.text('Původní program'), findsOneWidget);
+
+    title = 'Nově synchronizovaný program';
+    ClientSyncRuntime.projectionEpoch.value++;
+    await tester.pumpAndSettle();
+
+    expect(find.text('Původní program'), findsNothing);
+    expect(find.text('Nově synchronizovaný program'), findsOneWidget);
+  });
+
   testWidgets('speaker without an event still opens a profile', (tester) async {
     final speakers = Completer<SpeakersBundle?>();
     await tester.pumpWidget(MaterialApp(

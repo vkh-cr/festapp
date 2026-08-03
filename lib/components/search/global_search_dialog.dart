@@ -16,20 +16,20 @@ import 'package:fstapp/components/speakers/speaker_medallion.dart';
 import 'package:fstapp/components/speakers/speaker_model.dart';
 import 'package:fstapp/components/speakers/speakers_bundle.dart';
 import 'package:fstapp/components/html/html_helper.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
 
-/// Global search overlay: a search field plus grouped, ranked results across
-/// program / places / info / songs / games / news. Online uses the
-/// `search_occasion_content` RPC; offline falls back to the local index.
+/// Global search overlay across locally cached program, places, information,
+/// songs, games, news and speakers.
 class GlobalSearchDialog extends StatefulWidget {
   final Future<List<SearchResultModel>> Function(String query) search;
   final Future<SpeakersBundle?> Function() loadSpeakers;
 
-  GlobalSearchDialog({
+  const GlobalSearchDialog({
     super.key,
     Future<List<SearchResultModel>> Function(String query)? search,
     Future<SpeakersBundle?> Function()? loadSpeakers,
@@ -75,13 +75,22 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
   /// name and short snippet; the cached record adds the photo, roles and bio
   /// needed by the profile dialog.
   final Map<int, SpeakerModel> _speakersById = {};
-  late final Future<void> _speakersLoaded;
+  Future<void> _speakersLoaded = Future.value();
 
   @override
   void initState() {
     super.initState();
     _loadEvents();
     _speakersLoaded = _loadSpeakers();
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
+  }
+
+  void _onProjectionChanged() {
+    _loadEvents();
+    _speakersLoaded = _loadSpeakers();
+    if (_controller.text.trim().isNotEmpty) {
+      _run(_controller.text);
+    }
   }
 
   Future<void> _loadEvents() async {
@@ -117,6 +126,7 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
 
   @override
   void dispose() {
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
     _debounce?.cancel();
     _controller.dispose();
     super.dispose();
