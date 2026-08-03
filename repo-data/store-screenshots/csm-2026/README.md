@@ -33,20 +33,22 @@ scale factor. Výsledné PNG mají 1179 × 2556 px.
 
 ## Tabletové zdroje
 
-Adresář `source-tablet-apple/` obsahuje čtyři skutečné obrazovky aplikace v
+Adresář `source-tablet-apple/` obsahuje šest skutečných obrazovek aplikace v
 portrétním rozměru 2064 × 2752 px pro 13″ iPad:
 
 - `01-information-photo.png` — informace s fotografií
 - `02-lecture-speaker-photo.png` — přednáška s fotografií řečníka
 - `03-map-dark-route.png` — tmavě hnědá trasa Pražské arcidiecéze
-- `04-program.png` — hlavní program
+- `04-program.png` — nabitý čtvrteční program
+- `05-my-program-full.png` — zaplněný Můj program přihlášeného Jana
+- `06-program-saturday.png` — bohatý sobotní program
 
 Exportní rozměry a způsob přípravy odvozených verzí jsou v `store-formats.json`.
 Apple používá výše uvedený nativní 13″ iPad formát. Pro Google Play se z
 marketingové kompozice exportuje samostatný portrét 1440 × 2560 px (9:16), bez
 ořezu či deformace skutečného UI.
 
-Adresář `source-tablet-google/` už obsahuje čtyři odpovídající skutečné
+Adresář `source-tablet-google/` už obsahuje šest odpovídajících skutečných
 obrazovky aplikace v rozměru 1440 × 2560 px. Stejná sada je použitelná pro 7″ i
 10″ tabletovou sekci Play Console:
 
@@ -54,14 +56,17 @@ obrazovky aplikace v rozměru 1440 × 2560 px. Stejná sada je použitelná pro 
 - `02-map-dark-route.png`
 - `03-lecture-speaker-photo.png`
 - `04-information-photo.png`
+- `05-my-program-full.png`
+- `06-program-saturday.png`
 
 Pro screenshoty přihlášených stavů je použit schválený běžný účastnický účet
 `test@test.com` s profilem Jan Novák. Účet nemá redakční ani administrátorská
 oprávnění.
 
-Jan je pro demonstrační stav přihlášený na čtyři kapacitní programy od středy
-do soboty. Registrace prošly stejnými kapacitními, časovými a kolizními pravidly
-jako běžné uživatelské přihlášení.
+Jan je pro demonstrační stav přihlášený na šest kapacitních programů od středy
+do soboty. Nově přibyly „Poklad k odhalení“ ve čtvrtek a „Jaké vzdělání
+potřebujeme v době AI, aby to nebolelo?“ v sobotu. Registrace prošly stejnými
+kapacitními, časovými a kolizními pravidly jako běžné uživatelské přihlášení.
 
 ## Marketingový koncept
 
