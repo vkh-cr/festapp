@@ -4,6 +4,28 @@ Zdrojové snímky byly pořízeny 3. srpna 2026 z produkční webové aplikace
 `https://csmostrava.festapp.net` v mobilním viewportu 393 × 852 při 3× device
 scale factor. Výsledné PNG mají 1179 × 2556 px.
 
+## Výběr a store obaly
+
+`preview.html` je zároveň interaktivní výběrová stránka. Každý kandidát má
+zaškrtávací volbu **Použít** a spodní lišta vede samostatné počty pro smartphone,
+iPad a Android tablet. Výběr se průběžně ukládá do `localStorage` prohlížeče a
+lze jej zkopírovat nebo stáhnout jako `csm-2026-vyber-screenshotu.json`.
+
+Po označení alespoň jednoho telefonního snímku stránka zpřístupní dva živé
+náhledy v `store-shot.html`:
+
+- Apple / iPhone — cílový export 1260 × 2736 px, CSM grafika a zřetelný rám
+  iPhonu s Dynamic Islandem
+- Google Play / Android — cílový export 1440 × 2560 px, CSM grafika a neutrální
+  zaoblený rám bez imitace konkrétního modelu zařízení
+
+Oba obaly používají přesné PNG loga a nezměněný skutečný screenshot aplikace.
+Text titulku se automaticky volí podle typu označené obrazovky.
+
+`wrapper-preview-iphone.png` a `wrapper-preview-android.png` jsou kontrolní
+ukázky obou obalů v přesných cílových rozměrech a jsou vidět také přímo v
+`preview.html`.
+
 ## Zdrojové snímky
 
 - `source/01-program.png` — hlavní program

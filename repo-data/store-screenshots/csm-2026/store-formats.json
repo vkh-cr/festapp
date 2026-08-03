@@ -4,6 +4,7 @@
     "tabletApple": { "viewport": [1032, 1376], "deviceScaleFactor": 2 }
   },
   "exports": {
+    "applePhone69": { "width": 1260, "height": 2736, "count": "1-10" },
     "applePhone63": { "width": 1179, "height": 2556, "count": "1-10" },
     "appleTablet13": { "width": 2064, "height": 2752, "count": "1-10" },
     "googlePhone": { "width": 1440, "height": 2560, "count": "4-8" },

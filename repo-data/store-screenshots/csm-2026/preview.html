@@ -18,6 +18,7 @@
 
       body {
         margin: 0;
+        padding-bottom: 118px;
       }
 
       header {
@@ -61,6 +62,7 @@
       }
 
       figure {
+        position: relative;
         margin: 0;
         overflow: hidden;
         border: 2px solid #fd6206;
@@ -110,6 +112,166 @@
         font-size: 12px;
         vertical-align: 2px;
       }
+
+      .selection-bar {
+        position: fixed;
+        z-index: 50;
+        right: 18px;
+        bottom: 18px;
+        left: 18px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 13px 15px;
+        border: 2px solid #101010;
+        border-radius: 20px;
+        background: rgba(245, 244, 237, 0.97);
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(12px);
+      }
+
+      .selection-title {
+        margin-right: 4px;
+        font-weight: 900;
+      }
+
+      .selection-count {
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: white;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .selection-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-left: auto;
+      }
+
+      button,
+      .preview-button {
+        min-height: 38px;
+        padding: 8px 13px;
+        border: 2px solid #101010;
+        border-radius: 999px;
+        background: #101010;
+        color: white;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: transparent;
+        color: #101010;
+      }
+
+      button:disabled,
+      .preview-button[aria-disabled="true"] {
+        opacity: 0.4;
+        pointer-events: none;
+      }
+
+      .select-toggle {
+        position: absolute;
+        z-index: 3;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 12px;
+        border: 2px solid #101010;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.96);
+        color: #101010;
+        font-size: 14px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+      }
+
+      .select-toggle input {
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        accent-color: #0000f4;
+      }
+
+      figure.is-selected {
+        outline: 7px solid #fd6206;
+        outline-offset: 3px;
+        box-shadow: 0 0 0 12px rgba(0, 0, 244, 0.22);
+      }
+
+      figure.is-selected .select-toggle {
+        background: #0000f4;
+        color: white;
+      }
+
+      .format-note {
+        max-width: 920px;
+        margin: -12px 0 26px;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .wrapper-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 22px;
+        max-width: 820px;
+        margin: 0 0 44px;
+      }
+
+      .wrapper-card {
+        padding: 24px;
+        border: 2px solid #101010;
+        border-radius: 26px;
+        background: white;
+      }
+
+      .wrapper-card h3 {
+        margin: 0 0 9px;
+        font-size: 23px;
+      }
+
+      .wrapper-card p {
+        min-height: 66px;
+        margin: 0 0 18px;
+        line-height: 1.45;
+      }
+
+      .wrapper-card > img {
+        display: block;
+        width: 100%;
+        margin: 0 0 18px;
+        border: 1px solid #d8d6ca;
+        border-radius: 18px;
+        background: #f5f4ed;
+      }
+
+      @media (max-width: 760px) {
+        body {
+          padding-bottom: 210px;
+        }
+
+        .selection-bar {
+          align-items: flex-start;
+        }
+
+        .selection-actions {
+          width: 100%;
+          margin-left: 0;
+        }
+      }
     </style>
   </head>
   <body>
@@ -123,7 +285,7 @@
     </header>
     <main>
       <h2>Hlavní kandidáti <span class="badge">NOVÉ</span></h2>
-      <div class="grid featured">
+      <div class="grid featured selectable-grid" data-selection-group="smartphone">
         <figure>
           <a href="source/15-lecture-speaker-photo.png"><img src="source/15-lecture-speaker-photo.png" alt="Přednáška s fotografií řečníka" /></a>
           <figcaption>Přednáška — Jak žít sportem a zdravým stylem</figcaption>
@@ -163,7 +325,7 @@
       </div>
 
       <h2>Tablet — 13″ iPad <span class="badge">2064 × 2752</span></h2>
-      <div class="grid tablet-grid featured">
+      <div class="grid tablet-grid featured selectable-grid" data-selection-group="ipad">
         <figure>
           <a href="source-tablet-apple/04-program.png"><img src="source-tablet-apple/04-program.png" alt="Program na tabletu" /></a>
           <figcaption>Tablet 1 — nabitý čtvrteční program</figcaption>
@@ -191,7 +353,7 @@
       </div>
 
       <h2>Tablet — Google Play <span class="badge">1440 × 2560 · 9:16</span></h2>
-      <div class="grid tablet-grid featured">
+      <div class="grid tablet-grid featured selectable-grid" data-selection-group="android-tablet">
         <figure>
           <a href="source-tablet-google/01-program.png"><img src="source-tablet-google/01-program.png" alt="Program pro tablet na Google Play" /></a>
           <figcaption>Google tablet 1 — nabitý čtvrteční program</figcaption>
@@ -219,7 +381,7 @@
       </div>
 
       <h2>Zdrojové screenshoty</h2>
-      <div class="grid">
+      <div class="grid selectable-grid" data-selection-group="smartphone">
         <figure>
           <a href="source/01-program.png"><img src="source/01-program.png" alt="Program" /></a>
           <figcaption>1. Program</figcaption>
@@ -247,12 +409,191 @@
       </div>
 
       <h2>Marketingová úvodka</h2>
-      <figure class="concept">
+      <figure class="concept selectable" data-selection-group="smartphone">
         <a href="marketing-intro-v2.png">
           <img src="marketing-intro-v2.png" alt="Marketingová úvodka s přesným logem CSM" />
         </a>
         <figcaption>Úvodní panel — přesné logo a skutečný screenshot</figcaption>
       </figure>
+
+      <h2>Jak budou vypadat finální obaly</h2>
+      <p class="format-note">
+        Označ jeden telefonní screenshot a otevři si ho rovnou v obou variantách.
+        Apple výstup má rozměr 1260 × 2736 px a jasný iPhone rám. Android výstup
+        má 1440 × 2560 px a čistý neutrální rám bez imitace konkrétního telefonu.
+      </p>
+      <div class="wrapper-preview">
+        <article class="wrapper-card">
+          <h3>Apple · iPhone</h3>
+          <p>CSM vizuál, skutečný screenshot a rozpoznatelný iPhone včetně Dynamic Islandu.</p>
+          <img src="wrapper-preview-iphone.png" alt="Ukázka finálního iPhone obalu" />
+          <a id="iphonePreview" class="preview-button" href="store-shot.html?platform=iphone" aria-disabled="true">Otevřít iPhone náhled</a>
+        </article>
+        <article class="wrapper-card">
+          <h3>Google Play · Android</h3>
+          <p>Stejný CSM styl, ale bez konkrétního zařízení, aby grafika působila čistě.</p>
+          <img src="wrapper-preview-android.png" alt="Ukázka finálního Android obalu" />
+          <a id="androidPreview" class="preview-button" href="store-shot.html?platform=android" aria-disabled="true">Otevřít Android náhled</a>
+        </article>
+      </div>
     </main>
+
+    <aside class="selection-bar" aria-label="Výběr screenshotů">
+      <span class="selection-title">Vybráno:</span>
+      <span id="smartphoneCount" class="selection-count">Smartphone 0/10</span>
+      <span id="ipadCount" class="selection-count">iPad 0/10</span>
+      <span id="androidTabletCount" class="selection-count">Android tablet 0/8</span>
+      <div class="selection-actions">
+        <button id="copySelection" type="button">Kopírovat výběr</button>
+        <button id="downloadSelection" type="button">Stáhnout JSON</button>
+        <button id="clearSelection" class="secondary" type="button">Zrušit výběr</button>
+      </div>
+    </aside>
+
+    <script>
+      (() => {
+        const storageKey = "csm-2026-store-selection-v1";
+        const groupLabels = {
+          smartphone: "Smartphone",
+          ipad: "iPad",
+          "android-tablet": "Android tablet",
+        };
+        const limits = { smartphone: 10, ipad: 10, "android-tablet": 8 };
+        let selected = {};
+
+        try {
+          selected = JSON.parse(localStorage.getItem(storageKey) || "{}") || {};
+        } catch (_) {
+          selected = {};
+        }
+
+        const selectableFigures = [
+          ...document.querySelectorAll(".selectable-grid figure, figure.selectable"),
+        ];
+
+        selectableFigures.forEach((figure, index) => {
+          const parentGroup = figure.closest("[data-selection-group]");
+          const group = parentGroup.dataset.selectionGroup;
+          const image = figure.querySelector("img");
+          const caption = figure.querySelector("figcaption")?.textContent.trim() || image.alt;
+          const key = `${group}:${image.getAttribute("src")}`;
+          figure.dataset.selectionKey = key;
+          figure.dataset.selectionGroup = group;
+          figure.dataset.selectionCaption = caption;
+
+          const label = document.createElement("label");
+          label.className = "select-toggle";
+          label.title = `Zařadit do výběru: ${caption}`;
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = Boolean(selected[key]);
+          checkbox.setAttribute("aria-label", `Použít ${caption}`);
+          checkbox.id = `select-shot-${index}`;
+          const text = document.createElement("span");
+          text.textContent = checkbox.checked ? "Vybráno" : "Použít";
+          label.append(checkbox, text);
+          figure.prepend(label);
+          figure.classList.toggle("is-selected", checkbox.checked);
+
+          checkbox.addEventListener("change", () => {
+            if (checkbox.checked) {
+              selected[key] = { group, src: image.getAttribute("src"), caption };
+            } else {
+              delete selected[key];
+            }
+            figure.classList.toggle("is-selected", checkbox.checked);
+            text.textContent = checkbox.checked ? "Vybráno" : "Použít";
+            saveAndRender();
+          });
+        });
+
+        function valuesFor(group) {
+          return Object.values(selected).filter((item) => item.group === group);
+        }
+
+        function selectedPayload() {
+          return {
+            event: "CSM Ostrava 2026",
+            generatedAt: new Date().toISOString(),
+            smartphone: valuesFor("smartphone"),
+            ipad: valuesFor("ipad"),
+            androidTablet: valuesFor("android-tablet"),
+          };
+        }
+
+        function plainText() {
+          const payload = selectedPayload();
+          return [
+            "CSM Ostrava 2026 — vybrané screenshoty",
+            ...["smartphone", "ipad", "androidTablet"].flatMap((group) => [
+              `\n${group}:`,
+              ...(payload[group].length
+                ? payload[group].map((item) => `- ${item.src} — ${item.caption}`)
+                : ["- nic"]),
+            ]),
+          ].join("\n");
+        }
+
+        function setPreviewLink(element, platform, item) {
+          element.setAttribute("aria-disabled", item ? "false" : "true");
+          element.href = item
+            ? `store-shot.html?platform=${platform}&src=${encodeURIComponent(item.src)}&title=${encodeURIComponent(item.caption)}`
+            : `store-shot.html?platform=${platform}`;
+        }
+
+        function render() {
+          document.getElementById("smartphoneCount").textContent = `Smartphone ${valuesFor("smartphone").length}/${limits.smartphone}`;
+          document.getElementById("ipadCount").textContent = `iPad ${valuesFor("ipad").length}/${limits.ipad}`;
+          document.getElementById("androidTabletCount").textContent = `Android tablet ${valuesFor("android-tablet").length}/${limits["android-tablet"]}`;
+          const firstPhone = valuesFor("smartphone")[0];
+          setPreviewLink(document.getElementById("iphonePreview"), "iphone", firstPhone);
+          setPreviewLink(document.getElementById("androidPreview"), "android", firstPhone);
+        }
+
+        function saveAndRender() {
+          localStorage.setItem(storageKey, JSON.stringify(selected));
+          render();
+        }
+
+        document.getElementById("copySelection").addEventListener("click", async (event) => {
+          const button = event.currentTarget;
+          try {
+            await navigator.clipboard.writeText(plainText());
+          } catch (_) {
+            const textarea = document.createElement("textarea");
+            textarea.value = plainText();
+            document.body.append(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            textarea.remove();
+          }
+          const original = button.textContent;
+          button.textContent = "Zkopírováno ✓";
+          setTimeout(() => (button.textContent = original), 1600);
+        });
+
+        document.getElementById("downloadSelection").addEventListener("click", () => {
+          const blob = new Blob([JSON.stringify(selectedPayload(), null, 2)], { type: "application/json" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "csm-2026-vyber-screenshotu.json";
+          link.click();
+          URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById("clearSelection").addEventListener("click", () => {
+          selected = {};
+          selectableFigures.forEach((figure) => {
+            const checkbox = figure.querySelector(".select-toggle input");
+            checkbox.checked = false;
+            figure.classList.remove("is-selected");
+            figure.querySelector(".select-toggle span").textContent = "Použít";
+          });
+          saveAndRender();
+        });
+
+        render();
+      })();
+    </script>
   </body>
 </html>
