@@ -277,9 +277,11 @@ with capability off → release/load/privacy gates → atomic capability enablem
 → immediate online/offline/reconnect/login/mutation/audit smoke → monitoring and
 tested kill switch.
 
-The known production setting `log_statement = ddl` without `pgaudit` does
-not satisfy privileged-DML evidence. Capability activation remains blocked
-until an external audit source and retention are configured and verified.
+Production now has pgaudit write logging for `postgres` and `authenticator`.
+The owner explicitly declined a paid external Log Drain on 2026-08-03 and
+accepted hosted-only audit retention plus fingerprint reconciliation for this
+web-only cutover. Do not provision an external drain; record and preserve this
+exception when executing the guarded activation.
 
 At handoff report:
 

@@ -201,9 +201,12 @@ prezentovat jako živý stav.
   handshake a full-component velikosti projdou produkčně podobným load/size
   testem. Pokud ne, cutover se blokuje a mění se komponentizace nebo interval,
   nikoli se potají přidá druhá cesta.
-- **Blocker:** před capability cutoverem musí být zapnutý a ověřený externě
-  uchovávaný privileged DML audit s domluvenou retention; dnešní nastavení loguje
-  pouze DDL. Samotné `pg_stat_statements` není auditní ledger.
+- **Owner-approved exception (2026-08-03):** vlastník odmítl placený externí
+  Supabase Log Drain. Produkce má pgaudit `write` aktivní pro `postgres` a
+  `authenticator` a zůstává fingerprint reconciliation, ale auditní evidence
+  není nezávisle dlouhodobě uchovávaná mimo Supabase. Toto zbytkové riziko je
+  pro web-only CSM cutover výslovně přijato; `pg_stat_statements` se nadále
+  nepovažuje za auditní ledger.
 - **Blocker:** `sync.festapp.net` Worker/DNS ještě neexistuje a musí vzniknout v
   autorizované release wave. `festapp-public` a `assets.festapp.net` jsou již
   read-only ověřené.
@@ -1083,9 +1086,10 @@ external infrastructure and are deliberately not inferred from local tests.
       business rejection mají pouze replayovatelnou receipt.
 - [x] Každá synchronizovaná source tabulka a každý app/RPC/cron/service writer je
       v jediném registry; inventory diff nemá neklasifikované položky.
-- [ ] **Operationally blocked:** ordinary-role grants, explicit RPC/service
-      boundaries a absence persistentních aplikačních triggerů jsou ověřené;
-      externě uchovávaný production break-glass audit zatím není nakonfigurován.
+- [x] Ordinary-role revocation má atomický registry-driven cutover, explicitní
+      RPC/service boundaries a absence persistentních aplikačních triggerů jsou
+      ověřené. Externí auditní retence je vědomě odmítnutá výjimka popsaná výše;
+      hosted pgaudit a fingerprint reconciliation zůstávají aktivní.
 - [x] `Admin → Změny` je permission-gated, keyset paginated a online-only.
 - [x] Staré aplikace fungují na nezměněné explicitní compatibility hranici.
 - [x] Každá položka deletion ledgeru je odstraněná nebo pojmenovaná externí

@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  activationMissingConfirmations,
   buildActivateSql,
   buildDisableSql,
   buildPreflightSql,
@@ -36,3 +37,21 @@ test('kill switch only disables the target capability', () => {
   assert.match(sql, /expected one target occasion/);
   assert.doesNotMatch(sql, /cutover_ready\s*=\s*false/i);
 });
+
+test('activation accepts an explicit audit-retention risk decision', () => {
+  expectMissing(
+    [
+      '--audit-risk-accepted',
+      '--legacy-writer-gate-confirmed',
+      '--confirm=occasion-under-test',
+    ],
+    [],
+  );
+});
+
+function expectMissing(args, expected) {
+  assert.deepEqual(
+    activationMissingConfirmations(args, target.occasionLink),
+    expected,
+  );
+}

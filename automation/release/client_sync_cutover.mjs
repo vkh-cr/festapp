@@ -249,6 +249,23 @@ $client_sync_disable$;
 `;
 }
 
+export function activationMissingConfirmations(args, occasionLink) {
+  const missing = [];
+  if (
+    !args.includes('--audit-gate-confirmed') &&
+    !args.includes('--audit-risk-accepted')
+  ) {
+    missing.push('--audit-gate-confirmed or --audit-risk-accepted');
+  }
+  if (!args.includes('--legacy-writer-gate-confirmed')) {
+    missing.push('--legacy-writer-gate-confirmed');
+  }
+  if (!args.includes(`--confirm=${occasionLink}`)) {
+    missing.push(`--confirm=${occasionLink}`);
+  }
+  return missing;
+}
+
 function parseMode(args) {
   const modes = ['--apply', '--disable'].filter((flag) => args.includes(flag));
   if (modes.length > 1) throw new Error('choose only one operation');
@@ -264,12 +281,7 @@ export async function main(args = process.argv.slice(2)) {
   };
 
   if (mode === '--apply') {
-    const required = [
-      '--audit-gate-confirmed',
-      '--legacy-writer-gate-confirmed',
-      `--confirm=${target.occasionLink}`,
-    ];
-    const missing = required.filter((flag) => !args.includes(flag));
+    const missing = activationMissingConfirmations(args, target.occasionLink);
     if (missing.length > 0) {
       throw new Error(`activation refused; missing ${missing.join(', ')}`);
     }
