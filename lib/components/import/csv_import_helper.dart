@@ -1,6 +1,5 @@
 // file: lib/helpers/csv_import_helper.dart
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -50,7 +49,10 @@ class CsvImportHelper {
 
     if (!proceed) return;
 
-    var existingUsers = await DbUsers.getOccasionUsers();
+    // Use the same complete, canonical payload as the users editor. A direct
+    // PostgREST occasion_users select is capped at 1000 rows and does not
+    // overlay user_info.email_readonly, so it cannot safely classify imports.
+    var existingUsers = (await DbUsers.getOccasionEditorDataBundle()).users;
     var toBeCreated = getUsersToBeCreated(addOrUpdateUsers, existingUsers);
     var toBeUpdated = getUsersToBeUpdated(addOrUpdateUsers, existingUsers);
     var toBeDeleted =
@@ -95,11 +97,12 @@ class CsvImportHelper {
   static List<Map<String, dynamic>> buildImportRows(
       Iterable<Map<String, dynamic>> importedUsers,
       List<OccasionUserModel> existingUsers) {
+    final existingByEmail = _existingByEmail(existingUsers);
     return importedUsers.map((imported) {
-      final email =
-          (imported[Tb.occasion_users.data_email] as String).toLowerCase();
-      final existing = existingUsers.firstWhereOrNull((user) =>
-          user.data?[Tb.occasion_users.data_email]?.toLowerCase() == email);
+      final email = _normalizedEmail(
+        imported[Tb.occasion_users.data_email],
+      );
+      final existing = existingByEmail[email];
       final dataPatch = Map<String, dynamic>.from(imported)
         ..remove(ImportHelper.groupColumn)
         ..remove(Tb.occasion_users.services);
@@ -120,14 +123,12 @@ class CsvImportHelper {
   static List<Map<String, dynamic>> getUsersToBeCreated(
       Iterable<Map<String, dynamic>> users,
       List<OccasionUserModel> existingUsers) {
-    return users.where((u) {
-      return existingUsers.firstWhereOrNull(
-            (e) =>
-                e.data?[Tb.occasion_users.data_email]?.toLowerCase() ==
-                u[Tb.occasion_users.data_email]?.toLowerCase(),
-          ) ==
-          null;
-    }).toList();
+    final existingByEmail = _existingByEmail(existingUsers);
+    return users
+        .where((user) => !existingByEmail.containsKey(
+              _normalizedEmail(user[Tb.occasion_users.data_email]),
+            ))
+        .toList();
   }
 
   // Helper to get users to be updated
@@ -135,12 +136,10 @@ class CsvImportHelper {
   static List<Map<String, dynamic>> getUsersToBeUpdated(
       Iterable<Map<String, dynamic>> users,
       List<OccasionUserModel> existingUsers) {
+    final existingByEmail = _existingByEmail(existingUsers);
     return users.where((u) {
-      var existing = existingUsers.firstWhereOrNull(
-        (e) =>
-            e.data?[Tb.occasion_users.data_email]?.toLowerCase() ==
-            u[Tb.occasion_users.data_email]?.toLowerCase(),
-      );
+      final existing =
+          existingByEmail[_normalizedEmail(u[Tb.occasion_users.data_email])];
       return existing != null && !existing.importedEquals(u);
     }).toList();
   }
@@ -150,22 +149,37 @@ class CsvImportHelper {
       Iterable<Map<String, dynamic>> deleteUsers,
       Iterable<Map<String, dynamic>> addOrUpdateUsers,
       List<OccasionUserModel> existingUsers) {
+    final existingByEmail = _existingByEmail(existingUsers);
+    final retainedEmails = addOrUpdateUsers
+        .map((user) => _normalizedEmail(
+              user[Tb.occasion_users.data_email],
+            ))
+        .toSet();
     return deleteUsers
         .map((u) {
-          var existing = existingUsers.firstWhereOrNull(
-            (e) =>
-                e.data?[Tb.occasion_users.data_email] ==
-                u[Tb.occasion_users.data_email],
-          );
-          var duplicated = addOrUpdateUsers.firstWhereOrNull(
-            (e) =>
-                e[Tb.occasion_users.data_email] ==
-                u[Tb.occasion_users.data_email],
-          );
-          return (existing != null && duplicated == null) ? existing : null;
+          final email = _normalizedEmail(u[Tb.occasion_users.data_email]);
+          final existing = existingByEmail[email];
+          return existing != null && !retainedEmails.contains(email)
+              ? existing
+              : null;
         })
         .nonNulls
         .toList();
+  }
+
+  static String _normalizedEmail(Object? value) =>
+      value?.toString().trim().toLowerCase() ?? '';
+
+  static Map<String, OccasionUserModel> _existingByEmail(
+      Iterable<OccasionUserModel> users) {
+    final result = <String, OccasionUserModel>{};
+    for (final user in users) {
+      final email = _normalizedEmail(
+        user.data?[Tb.occasion_users.data_email],
+      );
+      if (email.isNotEmpty) result.putIfAbsent(email, () => user);
+    }
+    return result;
   }
 
   static Future<bool> _confirmCreateUsers(

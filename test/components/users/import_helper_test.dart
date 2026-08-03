@@ -87,6 +87,44 @@ void main() {
         CsvImportHelper.getUsersToBeUpdated([updated], [existing]), [updated]);
   });
 
+  test('full editor payload matches existing users beyond row 1000', () {
+    final existing = List.generate(
+      3135,
+      (index) => OccasionUserModel(
+        user: 'user-$index',
+        data: {
+          Tb.occasion_users.data_email: ' person$index@example.com ',
+          Tb.occasion_users.data_name: 'Person',
+          Tb.occasion_users.data_surname: '$index',
+        },
+      ),
+    );
+    final imported = List.generate(
+      2431,
+      (index) => {
+        Tb.occasion_users.data_email: 'PERSON${index + 704}@EXAMPLE.COM',
+        Tb.occasion_users.data_name: 'Person',
+        Tb.occasion_users.data_surname: '${index + 704}',
+        ImportHelper.groupColumn: 'Skupina ${index % 20}',
+      },
+    );
+
+    expect(
+      CsvImportHelper.getUsersToBeCreated(imported, existing),
+      isEmpty,
+    );
+    final rows = CsvImportHelper.buildImportRows(imported, existing);
+    expect(rows, hasLength(2431));
+    expect(rows.first[CsvImportHelper.payloadUserId], 'user-704');
+    expect(rows.last[CsvImportHelper.payloadUserId], 'user-3134');
+    expect(rows.every((row) => row[CsvImportHelper.payloadUserId] != null),
+        isTrue);
+    expect(
+      rows.every((row) => row.containsKey(CsvImportHelper.payloadGroupTitle)),
+      isTrue,
+    );
+  });
+
   test('group-only reimport does not schedule a general user update', () {
     final imported = fixture('test/fixtures/bujnmi_group_only_import.csv');
 
