@@ -14,7 +14,6 @@ class NewsStrings {
   static String get heading => 'FeatureNews.heading'.tr(); // "Heading"
   static String get sendWithNotification =>
       'FeatureNews.sendWithNotification'.tr(); // "Send with notification"
-  static String get sendTestToMe => 'FeatureNews.sendTestToMe'.tr();
   static String get publishAndSend => 'FeatureNews.publishAndSend'.tr();
   static String get publishWithoutNotification =>
       'FeatureNews.publishWithoutNotification'.tr();
@@ -46,14 +45,10 @@ class NewsStrings {
       'FeatureNews.notificationAudienceSelf'.tr();
   static String get notificationPreviewTitle =>
       'FeatureNews.notificationPreviewTitle'.tr();
-  static String get confirmTestTitle => 'FeatureNews.confirmTestTitle'.tr();
   static String get confirmSendTitle => 'FeatureNews.confirmSendTitle'.tr();
-  static String get testExplanation => 'FeatureNews.testExplanation'.tr();
   static String get sendExplanation => 'FeatureNews.sendExplanation'.tr();
-  static String get testNotPublished => 'FeatureNews.testNotPublished'.tr();
   static String get notificationCannotBeRecalled =>
       'FeatureNews.notificationCannotBeRecalled'.tr();
-  static String get confirmTest => 'FeatureNews.confirmTest'.tr();
   static String get confirmSend => 'FeatureNews.confirmSend'.tr();
   static String get cancel => 'FeatureNews.cancel'.tr();
 

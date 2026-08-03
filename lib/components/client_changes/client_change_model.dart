@@ -6,6 +6,7 @@ class ClientChangeSummary {
     required this.actorKind,
     required this.source,
     required this.changeClass,
+    required this.itemCount,
     required this.components,
   });
 
@@ -15,6 +16,7 @@ class ClientChangeSummary {
   final String actorKind;
   final String source;
   final String changeClass;
+  final int itemCount;
   final List<Map<String, dynamic>> components;
 
   factory ClientChangeSummary.fromJson(Map<String, dynamic> json) =>
@@ -25,6 +27,7 @@ class ClientChangeSummary {
         actorKind: json['actorKind'] as String,
         source: json['source'] as String,
         changeClass: json['changeClass'] as String,
+        itemCount: (json['itemCount'] as num?)?.toInt() ?? 0,
         components: ((json['components'] as List?) ?? const [])
             .map((item) => (item as Map).cast<String, dynamic>())
             .toList(growable: false),

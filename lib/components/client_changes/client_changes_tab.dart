@@ -18,15 +18,21 @@ class ClientChangesTab extends StatefulWidget {
 
 class _ClientChangesTabState extends State<ClientChangesTab> {
   late final DbClientChanges _repository;
+  final _actorController = TextEditingController();
   final _items = <ClientChangeSummary>[];
   DateTime? _cursorTime;
   String? _cursorId;
+  final _pageTimes = <DateTime?>[null];
+  final _pageIds = <String?>[null];
+  int _pageIndex = 0;
+  int _loadEpoch = 0;
   bool _error = false;
   bool _offline = false;
   bool _loading = false;
   bool _hasMore = true;
   String? _componentFilter;
   String? _classFilter;
+  String? _actorFilter;
 
   static const _components = <String>[
     'occasion_config',
@@ -58,10 +64,16 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
     }
   }
 
+  @override
+  void dispose() {
+    _actorController.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
-    if (_loading || !_hasMore) return;
+    final epoch = ++_loadEpoch;
     final isOffline = await ConnectivityService.isOffline();
-    if (!mounted) return;
+    if (!mounted || epoch != _loadEpoch) return;
     if (isOffline) {
       setState(() {
         _error = true;
@@ -83,16 +95,19 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
         filters: {
           if (_componentFilter != null) 'component': _componentFilter,
           if (_classFilter != null) 'changeClass': _classFilter,
+          if (_actorFilter != null) 'actor': _actorFilter,
         },
       ),
     );
-    if (!mounted) return;
+    if (!mounted || epoch != _loadEpoch) return;
     setState(() {
       if (page != null) {
-        _items.addAll(page.items);
+        _items
+          ..clear()
+          ..addAll(page.items);
         _cursorTime = page.nextTime;
         _cursorId = page.nextId;
-        _hasMore = page.items.length == 50;
+        _hasMore = page.hasMore;
       } else {
         _error = true;
       }
@@ -158,10 +173,53 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
     setState(() {
       _componentFilter = component;
       _classFilter = changeClass;
+      _actorFilter = _normalizedActorFilter;
       _items.clear();
       _cursorTime = null;
       _cursorId = null;
+      _pageIndex = 0;
+      _pageTimes
+        ..clear()
+        ..add(null);
+      _pageIds
+        ..clear()
+        ..add(null);
       _hasMore = true;
+    });
+    _load();
+  }
+
+  String? get _normalizedActorFilter {
+    final value = _actorController.text.trim();
+    return value.isEmpty ? null : value;
+  }
+
+  void _applyActorFilter() =>
+      _setFilters(component: _componentFilter, changeClass: _classFilter);
+
+  void _nextPage() {
+    if (!_hasMore || _loading || _cursorTime == null || _cursorId == null) {
+      return;
+    }
+    final nextIndex = _pageIndex + 1;
+    if (_pageTimes.length == nextIndex) {
+      _pageTimes.add(_cursorTime);
+      _pageIds.add(_cursorId);
+    }
+    setState(() {
+      _pageIndex = nextIndex;
+      _cursorTime = _pageTimes[nextIndex];
+      _cursorId = _pageIds[nextIndex];
+    });
+    _load();
+  }
+
+  void _previousPage() {
+    if (_pageIndex == 0 || _loading) return;
+    setState(() {
+      _pageIndex--;
+      _cursorTime = _pageTimes[_pageIndex];
+      _cursorId = _pageIds[_pageIndex];
     });
     _load();
   }
@@ -195,68 +253,102 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
     if (_items.isEmpty && _loading) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (_items.isEmpty) {
+    if (_items.isEmpty &&
+        _componentFilter == null &&
+        _classFilter == null &&
+        _actorFilter == null) {
       return Center(child: Text(ClientChangesStrings.empty));
     }
     return Column(children: [
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(children: [
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Wrap(spacing: 12, runSpacing: 4, children: [
           const Icon(Icons.filter_list),
-          const SizedBox(width: 8),
-          Expanded(
+          SizedBox(
+              width: 240,
               child: DropdownButton<String?>(
-            isExpanded: true,
-            value: _componentFilter,
-            hint: Text(ClientChangesStrings.component),
-            items: [
-              DropdownMenuItem<String?>(
-                  value: null, child: Text(ClientChangesStrings.all)),
-              ..._components.map((value) =>
-                  DropdownMenuItem<String?>(value: value, child: Text(value))),
-            ],
-            onChanged: (value) =>
-                _setFilters(component: value, changeClass: _classFilter),
-          )),
-          const SizedBox(width: 12),
-          Expanded(
+                isExpanded: true,
+                value: _componentFilter,
+                hint: Text(ClientChangesStrings.component),
+                items: [
+                  DropdownMenuItem<String?>(
+                      value: null, child: Text(ClientChangesStrings.all)),
+                  ..._components.map((value) => DropdownMenuItem<String?>(
+                      value: value, child: Text(value))),
+                ],
+                onChanged: (value) =>
+                    _setFilters(component: value, changeClass: _classFilter),
+              )),
+          SizedBox(
+              width: 220,
               child: DropdownButton<String?>(
-            isExpanded: true,
-            value: _classFilter,
-            hint: Text(ClientChangesStrings.changeClass),
-            items: [
-              DropdownMenuItem<String?>(
-                  value: null, child: Text(ClientChangesStrings.all)),
-              ..._classes.map((value) =>
-                  DropdownMenuItem<String?>(value: value, child: Text(value))),
-            ],
-            onChanged: (value) =>
-                _setFilters(component: _componentFilter, changeClass: value),
-          )),
+                isExpanded: true,
+                value: _classFilter,
+                hint: Text(ClientChangesStrings.changeClass),
+                items: [
+                  DropdownMenuItem<String?>(
+                      value: null, child: Text(ClientChangesStrings.all)),
+                  ..._classes.map((value) => DropdownMenuItem<String?>(
+                      value: value, child: Text(value))),
+                ],
+                onChanged: (value) => _setFilters(
+                    component: _componentFilter, changeClass: value),
+              )),
+          SizedBox(
+            width: 280,
+            child: TextField(
+              controller: _actorController,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: ClientChangesStrings.actorSearch,
+                prefixIcon: const Icon(Icons.person_search),
+                suffixIcon: IconButton(
+                  onPressed: _applyActorFilter,
+                  icon: const Icon(Icons.search),
+                ),
+              ),
+              onSubmitted: (_) => _applyActorFilter(),
+            ),
+          ),
         ]),
       ),
+      if (_loading) const LinearProgressIndicator(),
       Expanded(
-          child: ListView.builder(
-        itemCount: _items.length + (_hasMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == _items.length) {
-            _load();
-            return const Center(
-                child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: CircularProgressIndicator()));
-          }
-          final change = _items[index];
-          return ListTile(
-            onTap: () => _showDetail(change),
-            leading: const Icon(Icons.history),
-            title: Text(change.source),
-            subtitle:
-                Text(change.actorDisplay ?? ClientChangesStrings.deletedActor),
-            trailing: Text(DateFormat.yMd().add_Hm().format(change.occurredAt)),
-          );
-        },
-      )),
+          child: _items.isEmpty
+              ? Center(child: Text(ClientChangesStrings.empty))
+              : ListView.builder(
+                  itemCount: _items.length,
+                  itemBuilder: (context, index) {
+                    final change = _items[index];
+                    return ListTile(
+                      onTap: () => _showDetail(change),
+                      leading: const Icon(Icons.history),
+                      title: Text(
+                          '${change.source} · ${ClientChangesStrings.itemCount(change.itemCount)}'),
+                      subtitle: Text(change.actorDisplay ??
+                          ClientChangesStrings.deletedActor),
+                      trailing: Text(
+                          DateFormat.yMd().add_Hm().format(change.occurredAt)),
+                    );
+                  },
+                )),
+      SafeArea(
+        top: false,
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          IconButton(
+            tooltip: ClientChangesStrings.previousPage,
+            onPressed: _pageIndex > 0 && !_loading ? _previousPage : null,
+            icon: const Icon(Icons.chevron_left),
+          ),
+          Text(ClientChangesStrings.page(_pageIndex + 1)),
+          IconButton(
+            tooltip: ClientChangesStrings.nextPage,
+            onPressed: _hasMore && !_loading ? _nextPage : null,
+            icon: const Icon(Icons.chevron_right),
+          ),
+        ]),
+      ),
     ]);
   }
 }

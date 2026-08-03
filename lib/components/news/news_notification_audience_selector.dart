@@ -90,16 +90,22 @@ class _AudienceOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final selectedBackground = Color.alphaBlend(
+      colors.primary.withAlpha(18),
+      colors.surface,
+    );
     return Semantics(
       button: true,
       selected: selected,
       child: Material(
-        color: selected ? colors.secondaryContainer : colors.surface,
+        color: selected ? selectedBackground : colors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: selected ? colors.primary : colors.outlineVariant,
-            width: selected ? 2 : 1,
+            color: selected
+                ? colors.primary.withAlpha(150)
+                : colors.outlineVariant,
+            width: selected ? 1.5 : 1,
           ),
         ),
         clipBehavior: Clip.antiAlias,
@@ -110,7 +116,21 @@ class _AudienceOption extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon, color: selected ? colors.primary : null),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? colors.primary.withAlpha(24)
+                        : colors.onSurface.withAlpha(10),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 22,
+                    color: selected ? colors.primary : colors.onSurfaceVariant,
+                  ),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -120,19 +140,22 @@ class _AudienceOption extends StatelessWidget {
                         title,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: selected ? colors.primary : null,
                             ),
                       ),
                       const SizedBox(height: 3),
-                      Text(detail,
-                          style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        detail,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 8),
                 Icon(
-                  selected
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
+                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
                   color: selected ? colors.primary : colors.onSurfaceVariant,
                 ),
               ],

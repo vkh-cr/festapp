@@ -9,14 +9,12 @@ import 'package:fstapp/components/news/news_strings.dart';
 /// information an editor needs at the decision point together: what will
 /// happen, who the audience is, and what the notification will look like.
 class NewsSendConfirmationDialog extends StatelessWidget {
-  final bool isTest;
   final bool isSelfOnly;
   final String recipientIdentity;
   final String heading;
   final String htmlContent;
 
   const NewsSendConfirmationDialog({
-    required this.isTest,
     required this.isSelfOnly,
     required this.recipientIdentity,
     required this.heading,
@@ -31,21 +29,15 @@ class NewsSendConfirmationDialog extends StatelessWidget {
 
     return AlertDialog(
       icon: Icon(
-        isTest ? Icons.science_outlined : Icons.notifications_active_outlined,
+        Icons.notifications_active_outlined,
       ),
-      title: Text(
-        isTest ? NewsStrings.confirmTestTitle : NewsStrings.confirmSendTitle,
-      ),
+      title: Text(NewsStrings.confirmSendTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              isTest
-                  ? NewsStrings.testExplanation
-                  : NewsStrings.sendExplanation,
-            ),
+            Text(NewsStrings.sendExplanation),
             const SizedBox(height: 16),
             _InfoCard(
               icon: isSelfOnly ? Icons.person_outline : Icons.groups_outlined,
@@ -101,9 +93,7 @@ class NewsSendConfirmationDialog extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    isTest
-                        ? NewsStrings.testNotPublished
-                        : NewsStrings.notificationCannotBeRecalled,
+                    NewsStrings.notificationCannotBeRecalled,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -121,10 +111,8 @@ class NewsSendConfirmationDialog extends StatelessWidget {
         ),
         FilledButton.icon(
           onPressed: () => Navigator.of(context).pop(true),
-          icon: Icon(isTest ? Icons.send_outlined : Icons.campaign_outlined),
-          label: Text(
-            isTest ? NewsStrings.confirmTest : NewsStrings.confirmSend,
-          ),
+          icon: const Icon(Icons.campaign_outlined),
+          label: Text(NewsStrings.confirmSend),
         ),
       ],
     );
@@ -147,16 +135,21 @@ class _InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final background = Color.alphaBlend(
+      colorScheme.primary.withAlpha(18),
+      colorScheme.surface,
+    );
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: colorScheme.secondaryContainer,
+        color: background,
+        border: Border.all(color: colorScheme.primary.withAlpha(90)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: colorScheme.onSecondaryContainer),
+          Icon(icon, color: colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -165,14 +158,14 @@ class _InfoCard extends StatelessWidget {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSecondaryContainer,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: colorScheme.onSecondaryContainer,
+                        color: colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
@@ -180,7 +173,7 @@ class _InfoCard extends StatelessWidget {
                 Text(
                   detail,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSecondaryContainer,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                 ),
               ],

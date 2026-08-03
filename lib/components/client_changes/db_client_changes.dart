@@ -2,13 +2,16 @@ import 'package:fstapp/components/client_changes/client_change_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ClientChangesPage {
-  const ClientChangesPage(this.items, this.nextTime, this.nextId);
+  const ClientChangesPage(this.items, this.nextTime, this.nextId, this.hasMore);
   final List<ClientChangeSummary> items;
   final DateTime? nextTime;
   final String? nextId;
+  final bool hasMore;
 }
 
 class DbClientChanges {
+  static const pageSize = 500;
+
   DbClientChanges([SupabaseClient? client])
       : _client = client ?? Supabase.instance.client;
   final SupabaseClient _client;
@@ -23,19 +26,23 @@ class DbClientChanges {
       'p_occasion': occasionId,
       'p_before_time': beforeTime?.toUtc().toIso8601String(),
       'p_before_id': beforeId,
-      'p_limit': 50,
+      // Fetch one extra row so the UI knows whether a next page exists without
+      // issuing a probe request after the last full page.
+      'p_limit': pageSize + 1,
       'p_filters': filters,
     });
     final json = (raw as Map).cast<String, dynamic>();
     if (json['code'] != 200) {
       throw StateError('Commit audit returned ${json['code']}');
     }
-    final items = ((json['data'] as List?) ?? const [])
+    final fetched = ((json['data'] as List?) ?? const [])
         .map((item) =>
             ClientChangeSummary.fromJson((item as Map).cast<String, dynamic>()))
-        .toList(growable: false);
+        .toList();
+    final hasMore = fetched.length > pageSize;
+    final items = fetched.take(pageSize).toList(growable: false);
     final last = items.isEmpty ? null : items.last;
-    return ClientChangesPage(items, last?.occurredAt, last?.commitId);
+    return ClientChangesPage(items, last?.occurredAt, last?.commitId, hasMore);
   }
 
   Future<ClientChangeDetail> detail(String commitId) async {

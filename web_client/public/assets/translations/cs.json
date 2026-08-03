@@ -1189,7 +1189,16 @@
     "welcomeIn": "Vítejte v aplikaci {name}!",
     "resetPasswordProceedConfirm": "Obdržíte e-mail s odkazem na resetování hesla. Chcete pokračovat?",
     "logIn": "Přihlásit se",
-    "register": "Registrovat se"
+    "register": "Registrovat se",
+    "deleteAccountScope": "Smazáním odstraníte celý účet, profil, účastnická data, uložený program a propojenou push identitu. Zákonem vyžadované záznamy mohou zůstat pouze bez přímé identity.",
+    "deleteAccountConfirm": "Na adresu účtu odešleme jednorázový odkaz. Pouhé otevření odkazu nic nesmaže; smazání spustíte až závěrečným potvrzením. Pokračovat?",
+    "accountDeletionEmailSent": "Potvrzovací odkaz byl odeslán na {email}. Platí 24 hodin.",
+    "accountDeletionFailed": "Žádost se nepodařilo odeslat. Zkuste to prosím později.",
+    "privacy": "Ochrana osobních údajů",
+    "privacyChoices": "Volby a smazání údajů",
+    "terms": "Podmínky a licence",
+    "support": "Podpora",
+    "signupPrivacyNotice": "Před registrací si přečtěte, jak CSM Ostrava zpracovává osobní údaje. Nejde o náhradu samostatného souhlasu s pravidly konkrétní akce."
   },
   "Common": {
     "fieldCannotBeEmpty": "Pole nemůže být prázdné",
@@ -1652,7 +1661,6 @@
     "noMessagesYet": "Zatím žádné novinky",
     "sendWithNotification": "Odeslat s notifikací",
     "test": "Test",
-    "sendTestToMe": "Poslat test sobě",
     "publishAndSend": "Zveřejnit a odeslat",
     "publishWithoutNotification": "Zveřejnit bez notifikace",
     "newsWithoutNotification": "Bez push notifikace",
@@ -1662,13 +1670,9 @@
     "notificationAudienceEveryoneDetail": "Odešle se na všechna zařízení s povolenými notifikacemi. Výběr není omezen jen na účastníky této akce.",
     "notificationAudienceSelf": "Pouze vy",
     "notificationPreviewTitle": "Náhled notifikace",
-    "confirmTestTitle": "Poslat testovací notifikaci?",
     "confirmSendTitle": "Zveřejnit novinku a odeslat notifikaci?",
-    "testExplanation": "Skutečná push notifikace se odešle pouze vám na zařízení, kde máte notifikace povolené.",
     "sendExplanation": "Novinka se zveřejní v aplikaci a push notifikace se ihned odešle uvedenému publiku.",
-    "testNotPublished": "Jde pouze o zkoušku doručení. Novinka se nezveřejní.",
     "notificationCannotBeRecalled": "Odeslanou push notifikaci už nelze vzít zpět.",
-    "confirmTest": "Poslat test",
     "confirmSend": "Zveřejnit a odeslat",
     "cancel": "Zrušit",
     "recipientChoiceTitle": "Komu poslat push notifikaci?",
@@ -1835,5 +1839,31 @@
     "writeRequiresConnection": "Bez připojení nelze odeslat. Zkus to prosím znovu, až budeš u signálu.",
     "counselingNeedsConnection": "Dostupnost poraden a rezervace vyžadují připojení k internetu.",
     "feedbackStateUnknown": "Bez připojení nelze zjistit stav zpětné vazby."
+  },
+  "ClientChanges": {
+    "title": "Změny",
+    "onlineOnly": "Historie změn je dostupná pouze online.",
+    "empty": "Zatím nejsou zaznamenány žádné změny.",
+    "notActive": "Historie začne zaznamenávat nové změny po aktivaci nového synchronizačního režimu. Existující stav databáze se jako historie změn zpětně nevytváří.",
+    "retry": "Zkusit znovu",
+    "loadError": "Historii změn se nepodařilo načíst.",
+    "publicationPending": "Čeká na publikaci",
+    "published": "Publikováno",
+    "deletedActor": "Smazaný nebo neznámý uživatel",
+    "filters": "Filtry",
+    "all": "Vše",
+    "component": "Komponenta",
+    "changeClass": "Třída změny",
+    "publication": "Publikace",
+    "details": "Podrobnosti",
+    "actorSearch": "Hledat podle uživatele",
+    "previousPage": "Předchozí stránka",
+    "nextPage": "Další stránka",
+    "page": "Strana {page}",
+    "itemCount": {
+      "one": "1 změna",
+      "other": "{count} změn",
+      "few": "{count} změny"
+    }
   }
 }

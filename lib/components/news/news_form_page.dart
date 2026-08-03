@@ -9,7 +9,6 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
-import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/html/html_editor_widget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
@@ -58,7 +57,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
     Navigator.pop(context);
   }
 
-  Future<void> _sendPressed({bool isTest = false, bool process = false}) async {
+  Future<void> _sendPressed({bool process = false}) async {
     var htmlContent = await _controller.getText();
     if (!mounted) return;
     htmlContent = HtmlHelper.removeColor(htmlContent);
@@ -71,17 +70,14 @@ class _NewsFormPageState extends State<NewsFormPage> {
       final headingForNotification = heading?.trim().isNotEmpty == true
           ? heading!.trim()
           : _currentUser!.name;
-      final sendsNotification =
-          isTest || _audience != NewsNotificationAudience.none;
-      final sendsToSelf = isTest ||
-          _audience == NewsNotificationAudience.self ||
+      final sendsNotification = _audience != NewsNotificationAudience.none;
+      final sendsToSelf = _audience == NewsNotificationAudience.self ||
           AppConfig.isPublicNotificationSendingDisabled;
 
       if (sendsNotification) {
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (dialogContext) => NewsSendConfirmationDialog(
-            isTest: isTest,
             isSelfOnly: sendsToSelf,
             recipientIdentity: _currentUserIdentity,
             heading: headingForNotification ?? '',
@@ -95,20 +91,13 @@ class _NewsFormPageState extends State<NewsFormPage> {
         "content": htmlContent,
         "heading": heading,
         "heading_default": _currentUser!.name,
-        // A test always means a real push to the current user, independently
-        // of the audience chosen for the eventual published news item.
         "with_notification": sendsNotification,
         if (sendsToSelf) "to": [AuthService.currentUserId()],
-        if (isTest) "add_to_news": false,
       };
       Navigator.pop(context, toReturn);
     } else {
       AppLogger.debug('Content is required');
     }
-  }
-
-  Future<void> _processAndSendTest() async {
-    _sendPressed(isTest: true, process: true);
   }
 
   String get _currentUserIdentity {
@@ -179,27 +168,76 @@ class _NewsFormPageState extends State<NewsFormPage> {
             ),
           ),
         ),
-        bottomNavigationBar: Container(
-          width: double.maxFinite,
-          color: Colors.grey.shade200,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: IntrinsicWidth(
-              child: Row(
+        bottomNavigationBar: _NewsFormActions(
+          onCancel: _stornoPressed,
+          onPublish:
+              _audience == null ? null : () => _sendPressed(process: true),
+          publishLabel: _publishButtonText,
+        ),
+      ),
+    );
+  }
+}
+
+class _NewsFormActions extends StatelessWidget {
+  final VoidCallback onCancel;
+  final VoidCallback? onPublish;
+  final String publishLabel;
+
+  const _NewsFormActions({
+    required this.onCancel,
+    required this.onPublish,
+    required this.publishLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      color: colors.surface,
+      elevation: 8,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+            child: SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 12,
+                runSpacing: 8,
                 children: [
-                  ButtonsHelper.bottomBarButton(
-                    onPressed: _stornoPressed,
-                    text: CommonStrings.storno,
+                  TextButton(
+                    onPressed: onCancel,
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.onSurfaceVariant,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 14,
+                      ),
+                    ),
+                    child: Text(CommonStrings.storno),
                   ),
-                  ButtonsHelper.bottomBarButton(
-                    onPressed: _processAndSendTest,
-                    text: NewsStrings.sendTestToMe,
-                  ),
-                  ButtonsHelper.bottomBarButton(
-                    onPressed: _audience == null
-                        ? null
-                        : () => _sendPressed(process: true),
-                    text: _publishButtonText,
+                  ElevatedButton.icon(
+                    onPressed: onPublish,
+                    icon: const Icon(Icons.publish_outlined, size: 20),
+                    label: Text(publishLabel),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primary,
+                      foregroundColor: colors.onPrimary,
+                      disabledBackgroundColor: colors.onSurface.withAlpha(30),
+                      disabledForegroundColor: colors.onSurface.withAlpha(95),
+                      elevation: onPublish == null ? 0 : 2,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
                 ],
               ),

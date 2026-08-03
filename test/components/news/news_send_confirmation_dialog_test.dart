@@ -4,14 +4,12 @@ import 'package:fstapp/components/news/news_send_confirmation_dialog.dart';
 
 Future<void> _pumpDialog(
   WidgetTester tester, {
-  required bool isTest,
   required bool isSelfOnly,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
         body: NewsSendConfirmationDialog(
-          isTest: isTest,
           isSelfOnly: isSelfOnly,
           recipientIdentity: 'Marie Nováková · marie@example.com',
           heading: 'Změna programu',
@@ -23,24 +21,27 @@ Future<void> _pumpDialog(
 }
 
 void main() {
-  testWidgets('test confirmation makes self-only delivery explicit',
+  testWidgets('self-only confirmation makes recipient explicit',
       (tester) async {
-    await _pumpDialog(tester, isTest: true, isSelfOnly: true);
+    await _pumpDialog(tester, isSelfOnly: true);
 
-    expect(find.byIcon(Icons.science_outlined), findsOneWidget);
-    expect(find.text('FeatureNews.confirmTestTitle'), findsOneWidget);
+    expect(find.byIcon(Icons.notifications_active_outlined), findsOneWidget);
+    expect(find.text('FeatureNews.confirmSendTitle'), findsOneWidget);
     expect(find.text('FeatureNews.notificationAudienceSelf'), findsOneWidget);
     expect(
       find.text('Marie Nováková · marie@example.com'),
       findsOneWidget,
     );
-    expect(find.text('FeatureNews.testNotPublished'), findsOneWidget);
+    expect(
+      find.text('FeatureNews.notificationCannotBeRecalled'),
+      findsOneWidget,
+    );
     expect(find.text('Začínáme o hodinu dříve.'), findsOneWidget);
   });
 
   testWidgets('public send confirmation identifies the broad audience',
       (tester) async {
-    await _pumpDialog(tester, isTest: false, isSelfOnly: false);
+    await _pumpDialog(tester, isSelfOnly: false);
 
     expect(find.byIcon(Icons.notifications_active_outlined), findsOneWidget);
     expect(find.text('FeatureNews.confirmSendTitle'), findsOneWidget);

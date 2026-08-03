@@ -39,7 +39,7 @@ void main() {
       find.text('FeatureNews.notificationAudienceEveryone'),
       findsOneWidget,
     );
-    expect(find.byIcon(Icons.radio_button_checked), findsNothing);
+    expect(find.byIcon(Icons.check_circle), findsNothing);
 
     await tester.tap(find.text('FeatureNews.notificationAudienceSelf'));
     expect(chosen, NewsNotificationAudience.self);
@@ -54,7 +54,7 @@ void main() {
       onChanged: (_) {},
     );
 
-    expect(find.byIcon(Icons.radio_button_checked), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle), findsOneWidget);
     expect(
       find.text('FeatureNews.notificationAudienceEveryone'),
       findsNothing,

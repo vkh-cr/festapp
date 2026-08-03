@@ -86,6 +86,10 @@ BEGIN
   WHERE NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
     WHERE n.nspname='public' AND p.proname=expected.name);
   PERFORM assert_true(v_missing IS NULL,'all client_sync_v1 RPCs exist in public');
+  PERFORM assert_true(pg_get_functiondef(
+      'public.get_client_commits_v1(bigint,timestamptz,uuid,integer,jsonb)'::regprocedure)
+      LIKE '%LEAST(GREATEST(p_limit,1),501)%',
+    'commit audit supports one 500-row page plus a next-page probe');
 
   SELECT array_agg(c.relname) INTO v_unsecured
   FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
