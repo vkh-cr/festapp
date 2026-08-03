@@ -177,7 +177,8 @@ Future<void> initializeEverything() async {
               services: settings.services));
       TimeHelper.setTimeZoneLocation(
           RightsService.currentOccasion()?.data?["timezone"]);
-      final cachedLink = AppConfig.forceOccasionLink;
+      final cachedLink =
+          AppConfig.forceOccasionLink ?? cachedSyncModel?.occasion?.link;
       if (cachedLink != null) {
         RightsService.currentLink = cachedLink;
         RouterService.currentOccasionLink = cachedLink;

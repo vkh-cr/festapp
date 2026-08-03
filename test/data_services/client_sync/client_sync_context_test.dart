@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_store.dart';
 
 void main() {
@@ -26,5 +28,21 @@ void main() {
       }),
       isNull,
     );
+  });
+
+  test('offline bootstrap requires an activated catalog generation', () {
+    const context = StoredSyncContext(
+      organizationId: 7,
+      occasionId: 42,
+      occasionLink: 'festival-2026',
+    );
+    final generation = StoredSyncGeneration(
+      pointer: 'catalog-sha',
+      revisions: const {ClientSyncComponent.contentCatalog: 3},
+      updatedAt: DateTime.utc(2026, 8, 3),
+    );
+
+    expect(isRestorableSyncContext(context, null), isFalse);
+    expect(isRestorableSyncContext(context, generation), isTrue);
   });
 }

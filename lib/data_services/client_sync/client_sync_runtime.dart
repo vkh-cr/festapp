@@ -64,6 +64,15 @@ class ClientSyncRuntime {
   static Future<OccasionLinkModel?> restoreLastContext() async {
     final stored = await _store.readLastContext();
     if (stored == null) return null;
+    final publicScope = '${stored.organizationId}/${stored.occasionId}';
+    final catalog = await _store.activeGeneration(
+      publicScope,
+      SyncFreshnessClass.catalog,
+    );
+    if (!isRestorableSyncContext(stored, catalog)) {
+      await _store.clearLastContext();
+      return null;
+    }
     final model = OccasionLinkModel(
       code: 200,
       clientSyncV1: true,
@@ -108,11 +117,6 @@ class ClientSyncRuntime {
       userId: Supabase.instance.client.auth.currentUser?.id,
       identityEpoch: _identityEpoch,
     );
-    await _store.saveLastContext(StoredSyncContext(
-      organizationId: context.organizationId,
-      occasionId: context.occasionId,
-      occasionLink: context.occasionLink,
-    ));
     _context = context;
     final opened = Completer<void>();
     _subscription = service.open(context).listen(
@@ -138,6 +142,17 @@ class ClientSyncRuntime {
       await service.start();
     } else {
       unawaited(service.start());
+    }
+    final activated = await _store.activeGeneration(
+      context.publicScope,
+      SyncFreshnessClass.catalog,
+    );
+    if (activated != null) {
+      await _store.saveLastContext(StoredSyncContext(
+        organizationId: context.organizationId,
+        occasionId: context.occasionId,
+        occasionLink: context.occasionLink,
+      ));
     }
   }
 
@@ -312,3 +327,9 @@ class ClientSyncRuntime {
     if (_v1Selected) _service?.setForeground(foreground);
   }
 }
+
+bool isRestorableSyncContext(
+  StoredSyncContext? context,
+  StoredSyncGeneration? catalog,
+) =>
+    context != null && catalog != null;
