@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * { box-sizing: border-box; }
+      html, body { width: 393px; height: 852px; margin: 0; overflow: hidden; }
+      body {
+        position: relative;
+        background: #faf9f3;
+        color: #101010;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .blue-blob {
+        position: absolute;
+        left: -140px;
+        top: 390px;
+        width: 360px;
+        height: 570px;
+        border-radius: 52% 48% 22% 10%;
+        background: #0000f4;
+        transform: rotate(12deg);
+      }
+      .orange-blob {
+        position: absolute;
+        right: -150px;
+        top: 225px;
+        width: 320px;
+        height: 520px;
+        border-radius: 60% 10% 42% 46%;
+        background: #fd6206;
+        transform: rotate(-9deg);
+      }
+      .top {
+        position: relative;
+        z-index: 3;
+        padding: 19px 22px 0;
+      }
+      .brand-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .logo {
+        display: block;
+        width: 154px;
+        height: auto;
+      }
+      .place {
+        margin-top: 4px;
+        padding: 9px 12px;
+        border: 1.5px solid #fd6206;
+        border-radius: 10px;
+        background: rgba(255,255,255,.88);
+        color: #101010;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.25;
+        transform: rotate(-4deg);
+      }
+      h1 {
+        margin: 18px 0 0;
+        max-width: 360px;
+        font-size: 43px;
+        line-height: .91;
+        letter-spacing: -2.4px;
+      }
+      h1 span { color: #0000f4; }
+      .rule {
+        width: 42px;
+        height: 4px;
+        margin-top: 17px;
+        background: #fd6206;
+      }
+      .sub {
+        margin: 12px 0 0;
+        font-size: 15px;
+        line-height: 1.25;
+      }
+      .phone {
+        position: absolute;
+        z-index: 4;
+        left: 66px;
+        top: 340px;
+        width: 286px;
+        height: 620px;
+        padding: 7px;
+        overflow: hidden;
+        border: 2px solid white;
+        border-radius: 31px;
+        background: #0b1628;
+        box-shadow: 0 13px 28px rgba(0,0,0,.24);
+        transform: perspective(900px) rotateY(-10deg) rotateX(1.5deg) rotateZ(-3deg);
+        transform-origin: 50% 12%;
+      }
+      .phone img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        border-radius: 23px;
+      }
+      .date-card {
+        position: absolute;
+        z-index: 5;
+        right: 13px;
+        top: 290px;
+        padding: 9px 12px;
+        border: 1.5px solid #0000f4;
+        border-radius: 10px;
+        background: white;
+        color: #0000f4;
+        font-size: 11px;
+        font-weight: 900;
+        line-height: 1.25;
+        transform: rotate(4deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blue-blob"></div>
+    <div class="orange-blob"></div>
+    <div class="top">
+      <div class="brand-row">
+        <img class="logo" src="csm-logo-program.png" alt="CSM Ostrava 2026" />
+        <div class="place">OSTRAVA<br />ČERNÁ LOUKA</div>
+      </div>
+      <h1>Všechno důležité<br /><span>na jednom místě</span></h1>
+      <div class="rule"></div>
+      <p class="sub">Program, mapa, novinky i vlastní plán</p>
+    </div>
+    <div class="date-card">11.–16. SRPNA<br />2026</div>
+    <div class="phone">
+      <img src="source/09-program-happening-now.png" alt="Program CSM Ostrava" />
+    </div>
+  </body>
+</html>

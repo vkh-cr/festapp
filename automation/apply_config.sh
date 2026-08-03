@@ -37,6 +37,13 @@ if [ -z "$DOMAIN" ]; then
     exit 1
 fi
 
+EXPECTED_IOS_BUNDLE_ID="festapp.jm2025"
+IOS_PROJECT_FILE="$PROJECT_ROOT/ios/Runner.xcodeproj/project.pbxproj"
+if [ -f "$IOS_PROJECT_FILE" ] && ! grep -q "PRODUCT_BUNDLE_IDENTIFIER = $EXPECTED_IOS_BUNDLE_ID;" "$IOS_PROJECT_FILE"; then
+    echo "Error: immutable iOS bundle identifier is not $EXPECTED_IOS_BUNDLE_ID"
+    exit 1
+fi
+
 echo "Detailed Configuration:"
 echo "  - Domain: $DOMAIN"
 echo "  - Supabase URL: $SUPABASE_URL"
@@ -72,6 +79,14 @@ if [ -f "$FLUTTER_INDEX" ]; then
     echo "✔ Updated web/index.html"
 else
     echo "Warning: $FLUTTER_INDEX not found."
+fi
+
+# 3. Update CNAME file (Domain)
+# Generate the installable PWA identity from the same brand source.
+PWA_MANIFEST="$PROJECT_ROOT/web/site.webmanifest"
+if [ -f "$PWA_MANIFEST" ] && [ -n "$APP_NAME" ] && [ -n "$APP_DESCRIPTION" ]; then
+    node -e 'const fs=require("fs");const p=process.argv[1];const m=JSON.parse(fs.readFileSync(p,"utf8"));m.name=process.argv[2];m.short_name=process.argv[3];m.description=process.argv[4];fs.writeFileSync(p,JSON.stringify(m,null,2)+"\n")' "$PWA_MANIFEST" "$APP_NAME" "$APP_TITLE_SHORT" "$APP_DESCRIPTION"
+    echo "✔ Updated PWA manifest"
 fi
 
 # 3. Update CNAME file (Domain)
@@ -183,6 +198,15 @@ if [ -f "$FLUTTER_CONFIG" ]; then
     echo "✔ Updated lib/app_config.dart"
 else
     echo "Warning: $FLUTTER_CONFIG not found."
+fi
+
+# 5b. Update lib/theme_config.dart (Flutter Theme — seed colors live here, not in app_config.dart).
+# Generate visible/internal iOS names while preserving the bundle ID.
+IOS_INFO_PLIST="$PROJECT_ROOT/ios/Runner/Info.plist"
+if [ -f "$IOS_INFO_PLIST" ] && [ -n "$APP_NAME" ] && [ -n "$IOS_BUNDLE_NAME" ]; then
+    /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName $APP_NAME" "$IOS_INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :CFBundleName $IOS_BUNDLE_NAME" "$IOS_INFO_PLIST"
+    echo "✔ Updated iOS display and bundle names"
 fi
 
 # 5b. Update lib/theme_config.dart (Flutter Theme — seed colors live here, not in app_config.dart).

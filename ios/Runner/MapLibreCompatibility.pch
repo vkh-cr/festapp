@@ -1,5 +1,0 @@
-#ifdef __OBJC__
-// maplibre_ios 0.3.5 does not expose its Swift plugin class through the
-// CocoaPods umbrella header expected by Flutter's generated registrant.
-#import <maplibre_ios/maplibre_ios-Swift.h>
-#endif

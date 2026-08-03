@@ -1,7 +1,7 @@
 {
-  "name": "Jubileum mládeže 2025",
-  "short_name": "Jubileum mládeže 2025",
-  "description": "Aplikace pro Jubileum mládeže 2025.",
+  "name": "CSM Ostrava",
+  "short_name": "CSM 2026",
+  "description": "Oficiální průvodce Celostátním setkáním mládeže Ostrava 2026.",
   "start_url": ".",
   "orientation": "portrait-primary",
   "icons": [

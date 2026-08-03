@@ -1,3 +1,2 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
 #include "Generated.xcconfig"
-GCC_PREFIX_HEADER = $(PROJECT_DIR)/Runner/MapLibreCompatibility.pch

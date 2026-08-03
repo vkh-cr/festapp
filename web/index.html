@@ -124,19 +124,38 @@
 
    async function logout(callback, errorCallback) {
        OneSignalDeferred.push(async function(OneSignal) {
-           await OneSignal.logout();
-           console.log("User has been logged out from OneSignal.");
+           try {
+             await OneSignal.logout();
+             if (callback) callback(null);
+           } catch (error) {
+             if (errorCallback) errorCallback(error);
+           }
        });
-       if (callback) callback(null);
    }
 
    async function login(externalId, callback, errorCallback) {
-       console.log("User is logging to OneSignal with Id:", externalId);
        OneSignalDeferred.push(async function(OneSignal) {
-           await OneSignal.login(externalId);
-           console.log("User has been logged in to OneSignal successfully with externalId:", externalId);
+           try {
+             await OneSignal.login(externalId);
+             if (callback) callback(null);
+           } catch (error) {
+             if (errorCallback) errorCallback(error);
+           }
        });
-       if (callback) callback(null);
+   }
+
+   async function tagCurrentSubscription(callback, errorCallback) {
+       OneSignalDeferred.push(async function(OneSignal) {
+           try {
+             await OneSignal.User.addTags({
+               app_generation: 'csm_ostrava_2026_v1',
+               occasion: 'csmostrava2026'
+             });
+             if (callback) callback(null);
+           } catch (error) {
+             if (errorCallback) errorCallback(error);
+           }
+       });
    }
 
    function getNotificationPermission() {
@@ -195,7 +214,7 @@
     leave a user stuck on the old assets (deepRefreshIfStale()).
   -->
   <script>
-    window.__FESTAPP_BUILD_VERSION__ = "0.19.82+332";
+    window.__FESTAPP_BUILD_VERSION__ = "0.19.82+333";
   </script>
   <script src="festapp_update_prompt.js" defer></script>
 </head>

@@ -15,21 +15,29 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
-### ios publish_ipa
-
-```sh
-[bundle exec] fastlane ios publish_ipa
-```
-
-
-
 ### ios asc_check
 
 ```sh
 [bundle exec] fastlane ios asc_check
 ```
 
+Read-only numeric identity and version inspection
 
+### ios upload_build
+
+```sh
+[bundle exec] fastlane ios upload_build
+```
+
+Upload one already-built IPA; never submit or release
+
+### ios upload_metadata
+
+```sh
+[bundle exec] fastlane ios upload_metadata
+```
+
+Upload canonical metadata only; never submit or release
 
 ### ios upload_screenshots
 
@@ -37,7 +45,31 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 [bundle exec] fastlane ios upload_screenshots
 ```
 
+Upload canonical screenshots only; never submit or release
 
+### ios submission_check
+
+```sh
+[bundle exec] fastlane ios submission_check
+```
+
+Read-only submission completeness summary
+
+### ios submit_for_review
+
+```sh
+[bundle exec] fastlane ios submit_for_review
+```
+
+Explicitly gated submission with manual release selected
+
+### ios release_approved_version
+
+```sh
+[bundle exec] fastlane ios release_approved_version
+```
+
+Separate approval gate; release itself remains a manual ASC action
 
 ----
 

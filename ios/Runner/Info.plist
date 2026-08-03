@@ -23,7 +23,7 @@
 		<string>de</string>
 	</array>
 	<key>CFBundleName</key>
-	<string>festapp.jm2025</string>
+	<string>CSMOstrava</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -49,16 +49,10 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to scan QR codes.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Your location is used to provide a customized map experience, showing relevant information and navigation based on your position.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Your location is used to provide a customized map experience, showing relevant information and navigation based on your position.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Your location is used to provide a customized map experience, showing relevant information and navigation based on your position.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app does not require access to the microphone.</string>
+	<string>Poloha se používá pouze při otevřené mapě pro zobrazení vaší pozice a navigaci.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app requires access to the photo library to upload profile image.</string>
+	<string>Přístup k fotkám je potřeba pouze při výběru profilového obrázku.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
