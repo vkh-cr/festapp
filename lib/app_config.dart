@@ -13,7 +13,8 @@ class AppConfig {
   static const bool isOwnProgramSupportedWithoutSignIn = true;
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
-  static const bool isWebNotificationsSupported = true;
+  // Re-enable only after the OneSignal web configuration allows [webLink].
+  static const bool isWebNotificationsSupported = false;
   static const String oneSignalAppId = '7140cfd2-280d-4971-a81a-b78503e99e6e';
   static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
