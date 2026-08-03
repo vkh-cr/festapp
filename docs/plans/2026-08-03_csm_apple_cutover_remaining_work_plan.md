@@ -105,7 +105,7 @@ finds a concrete defect:
 | Web auth does not establish notification identity. | `web_client/src/services/auth_service.js:84-92` only comments about `NotificationHelper.login`. | Bound web work to the actual shipping notification surface and explicitly prove or exclude it from the Apple broadcast contract. |
 | Account deletion has a real disposable fixture. | `web_client/scripts/account_deletion_disposable_integration.mjs` creates an Auth user and occasion, seeds organization/occasion/event/feedback rows, confirms deletion and tests replay. | Run it against disposable local infrastructure; fix failures instead of inventing another flow. |
 | Local deletion execution is currently blocked by tooling. | Supabase CLI was unavailable during the last validation pass. | Install/use the repository-supported CLI before claiming end-to-end deletion proof. |
-| Read-only ASC evidence could not be refreshed. | `fastlane ios asc_check` on 2026-08-03 failed before API access because `~/.appstoreconnect/private_keys/AuthKey_YDHHRL6ZVG.p8` is absent. A focused search found no `.p8` in `~/Downloads` or `~/.appstoreconnect`. | Search the other likely user locations at execution time, then persist a stable key path in the gitignored release environment file; treat the old ASC observation as stale until the check passes. |
+| Read-only ASC evidence was refreshed during execution on 2026-08-03. | The existing key was recovered at gitignored `automation/release/AuthKey_YDHHRL6ZVG.p8`, validated, and copied byte-for-byte with mode `0600` to `~/.appstoreconnect/private_keys/AuthKey_YDHHRL6ZVG.p8`. `fastlane ios asc_check` then reported Apple ID `6745415882`, bundle `festapp.jm2025`, live `0.14.25`, and no editable version. | Use the explicit canonical key path for later gated operations. Retain the original gitignored copy until its owner explicitly authorizes removal. |
 | Targeted local code validation has already passed. | Four cutover Flutter tests, ten Deno tests, Edge typecheck, plist/JSON/shell/diff checks and browser smoke with zero axe violations passed in the prior execution. | Do not rerun these until affected code changes; validate by changed wave. |
 
 ## Target architecture and invariants
@@ -200,9 +200,9 @@ finds a concrete defect:
 
 ### Blockers
 
-- **B1:** The App Store Connect private key file is missing from its configured
-  location and was not found in the initial `~/Downloads`/`~/.appstoreconnect`
-  search; current external state cannot yet be attested.
+- **B1 resolved 2026-08-03:** The App Store Connect private key was recovered
+  from the gitignored release directory, copied with mode `0600` to the explicit
+  canonical path, and the read-only ASC check passed.
 - **B2:** Supabase CLI/local stack is unavailable for the real disposable-user
   deletion test.
 - **B3:** Production OneSignal app configuration, tag population and deployed

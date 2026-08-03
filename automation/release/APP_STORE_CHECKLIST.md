@@ -4,7 +4,7 @@ Target: existing Apple ID `6745415882`, bundle ID `festapp.jm2025`, version `0.1
 
 | Gate | Status | Owner | Evidence / required action |
 |---|---|---|---|
-| Numeric app, bundle and team identity | locally pinned; ASC readback blocked 2026-08-03 | Release engineer | `app_store_cutover.json`; configured ASC key was not found in Downloads, Desktop, Documents or `~/.appstoreconnect`; recover it, then run read-only `fastlane ios asc_check` |
+| Numeric app, bundle and team identity | ASC readback passed 2026-08-03 | Release engineer | `fastlane ios asc_check`: Apple ID `6745415882`, bundle `festapp.jm2025`, live `0.14.25`, no editable version. Existing key recovered from the gitignored release directory and copied byte-for-byte to the permission-restricted canonical key path |
 | Reproducible unsigned archive | passed 2026-08-03 | Release engineer | Clean dependency/Pods regeneration plus `fvm flutter build ipa --release --no-codesign`; `Runner.xcarchive` reports CSM Ostrava `0.19.82` (333), `festapp.jm2025`, and the existing OneSignal extension bundle |
 | Isolated OneSignal audience contract | local code proof passed; external observation pending | Release + backend owner | Subscription tags are independent of login; exact generation+occasion AND and legacy/wrong-tag negative tests pass. Production dashboard/device matrix and disposable vendor deletion still require separate authority |
 | Editable existing-app version | pending external | App Store Account Holder | Create version `0.19.82` only on Apple ID `6745415882` |
