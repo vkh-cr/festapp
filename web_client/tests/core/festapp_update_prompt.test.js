@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import { JSDOM } from 'jsdom';
+import { JSDOM, VirtualConsole } from 'jsdom';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -27,12 +27,21 @@ const BANNER_ID = 'festapp-update-banner';
  * Timers are captured (not fired) so the 3s load poll and 5-min interval never
  * run mid-test — we drive checkVersion explicitly via the 'focus' listener.
  */
-function boot({ buildVersion = '1.0.0+1', locale, latestVersion, fetchOk = true } = {}) {
+function boot({
+    buildVersion = '1.0.0+1',
+    locale,
+    latestVersion,
+    fetchOk = true,
+    waitingWorker = false,
+    appReady = false,
+} = {}) {
     const dom = new JSDOM('<!DOCTYPE html><html><head></head><body></body></html>', {
         url: 'https://csmostrava.festapp.net/',
         runScripts: 'dangerously',
+        virtualConsole: new VirtualConsole(),
         beforeParse(window) {
             window.__FESTAPP_BUILD_VERSION__ = buildVersion;
+            window.__FESTAPP_APP_READY__ = appReady;
             if (locale) window.localStorage.setItem('flutter.Locale', JSON.stringify(locale));
 
             // Deterministic timers: record calls, never auto-run.
@@ -44,6 +53,31 @@ function boot({ buildVersion = '1.0.0+1', locale, latestVersion, fetchOk = true 
                 window.__fetchCalls.push(String(url));
                 return { ok: fetchOk, json: async () => ({ version: latestVersion }) };
             };
+
+            if (waitingWorker) {
+                window.__skipWaitingMessages = [];
+                const candidate = {
+                    state: 'installed',
+                    postMessage(message) {
+                        window.__skipWaitingMessages.push(message);
+                        window.navigator.serviceWorker.dispatchEvent(
+                            new window.Event('controllerchange')
+                        );
+                    },
+                };
+                const serviceWorker = new window.EventTarget();
+                serviceWorker.getRegistrations = async () => [];
+                serviceWorker.getRegistration = async () => ({
+                    active: { scriptURL: 'https://csmostrava.festapp.net/festapp_service_worker.js' },
+                    waiting: candidate,
+                    installing: null,
+                    update: async () => {},
+                });
+                Object.defineProperty(window.navigator, 'serviceWorker', {
+                    configurable: true,
+                    value: serviceWorker,
+                });
+            }
         },
     });
 
@@ -132,6 +166,34 @@ describe('festapp_update_prompt.js', () => {
         assert.ok(window.__fetchCalls.some((u) => u.includes('/festapp-version.json')),
             'should poll /festapp-version.json');
         assert.ok(banner(window), 'newer server version should surface the banner');
+    });
+
+    test('newer build atomically activates its waiting worker before fallback UI', async () => {
+        const { window } = boot({
+            buildVersion: '1.0.0+1',
+            latestVersion: '1.0.0+2',
+            waitingWorker: true,
+        });
+        window.dispatchEvent(new window.Event('focus'));
+        await flush();
+
+        assert.deepStrictEqual([...window.__skipWaitingMessages], ['SKIP_WAITING']);
+        assert.strictEqual(window.sessionStorage.getItem('festappCutoverVersion'), '1.0.0+2');
+        assert.strictEqual(banner(window), null, 'successful atomic cutover needs no banner');
+    });
+
+    test('running app keeps edits safe and offers the update instead of auto-cutover', async () => {
+        const { window } = boot({
+            buildVersion: '1.0.0+1',
+            latestVersion: '1.0.0+2',
+            waitingWorker: true,
+            appReady: true,
+        });
+        window.dispatchEvent(new window.Event('focus'));
+        await flush();
+
+        assert.deepStrictEqual([...window.__skipWaitingMessages], []);
+        assert.ok(banner(window), 'a running app should let the user choose when to reload');
     });
 
     test('version check stays silent when the server build matches', async () => {

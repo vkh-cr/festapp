@@ -333,6 +333,7 @@
             useColorEmoji: true
           });
           await appRunner.runApp();
+          window.__FESTAPP_APP_READY__ = true;
           const loader = document.getElementById('loader-content');
           if (loader) {
             loader.style.opacity = '0';

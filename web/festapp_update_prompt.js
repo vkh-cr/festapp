@@ -1,6 +1,7 @@
 (function initFestappUpdatePrompt() {
   const currentVersion = window.__FESTAPP_BUILD_VERSION__;
   const dismissedStorageKey = 'festappDismissedVersion';
+  const cutoverStorageKey = 'festappCutoverVersion';
   const bannerId = 'festapp-update-banner';
   let checkInFlight = false;
 
@@ -292,11 +293,11 @@
   }
 
   async function activateWaitingFestappWorker() {
-    if (!('serviceWorker' in navigator)) return;
+    if (!('serviceWorker' in navigator)) return false;
     try {
       const registration = await navigator.serviceWorker.getRegistration('/');
       if (!registration || !registration.active?.scriptURL.includes('festapp_service_worker.js')) {
-        return;
+        return false;
       }
       await registration.update();
       let candidate = registration.waiting || registration.installing;
@@ -324,10 +325,27 @@
         });
         candidate.postMessage('SKIP_WAITING');
         await changed;
+        return true;
       }
+      return registration.active?.scriptURL.includes('festapp_service_worker.js') === true;
     } catch (error) {
       console.warn('Festapp service worker activation failed:', error);
+      return false;
     }
+  }
+
+  async function cutOverToVersion(latestVersion) {
+    if (!latestVersion || sessionStorage.getItem(cutoverStorageKey) === latestVersion) {
+      return false;
+    }
+    sessionStorage.setItem(cutoverStorageKey, latestVersion);
+    const ready = await activateWaitingFestappWorker();
+    if (!ready) {
+      sessionStorage.removeItem(cutoverStorageKey);
+      return false;
+    }
+    window.location.reload();
+    return true;
   }
 
   async function checkVersion() {
@@ -355,6 +373,11 @@
         return;
       }
 
+      // A page still on its loader may already have hit an incomplete stale
+      // shell, so recover it automatically. Once Flutter is running, preserve
+      // in-progress form edits and let the user choose when to reload.
+      if (window.__FESTAPP_APP_READY__ !== true &&
+          await cutOverToVersion(latestVersion)) return;
       showUpdateBanner(latestVersion, 'new-version');
     } catch (error) {
       console.warn('Festapp version check failed:', error);
@@ -365,6 +388,7 @@
 
   window.clearLegacyFlutterCaches = clearLegacyFlutterCaches;
   window.deepRefreshIfStale = deepRefreshIfStale;
+  window.cutOverToVersion = cutOverToVersion;
   window.addEventListener('load', function() {
     // Self-heal first: if a stale build is cached this triggers a one-time
     // hard reload, so skip the (now moot) passive version check for this load.

@@ -114,6 +114,13 @@ function cachedNavigationTarget(pathname) {
   return FLUTTER_ENTRY;
 }
 
+function isFlutterExecutable(pathname) {
+  return pathname === '/main.dart.js' ||
+    /^\\/main\\.dart\\.js_\\d+\\.part\\.js$/.test(pathname) ||
+    pathname === '/flutter.js' ||
+    pathname === '/flutter_bootstrap.js';
+}
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
@@ -161,6 +168,13 @@ self.addEventListener('fetch', (event) => {
       const entry = await cache.match(cachedNavigationTarget(url.pathname));
       if (entry) return entry;
     }
+
+
+    // A Flutter main bundle and its deferred parts are one indivisible build.
+    // Fetching a cache miss from the currently deployed (newer) build mixes
+    // generations and can leave the page stuck on the loader. The update
+    // prompt performs the atomic worker activation/reload instead.
+    if (isFlutterExecutable(url.pathname)) return Response.error();
 
     // Same-origin resources not known at build time may still work online.
     // They are intentionally not written into the immutable app-shell cache.

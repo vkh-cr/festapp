@@ -108,6 +108,16 @@ try {
   assert.equal(versionResponse.type, 'error');
   assert.equal(networkCalls, 0);
 
+  // An incomplete/stale app-shell must never fill an executable Flutter chunk
+  // from a newer deployment. Mixing main.dart.js generations leaves the app
+  // permanently stuck on its loader; the version cutover owns recovery.
+  context.self.navigator.onLine = true;
+  const missingChunkResponse = await dispatchFetch(
+    new Request('https://app.test/main.dart.js_99.part.js'),
+  );
+  assert.equal(missingChunkResponse.type, 'error');
+  assert.equal(networkCalls, 0);
+
   const webClientIndex = await readFile(
     path.join(projectRoot, 'web_client/index.html'),
     'utf8',
