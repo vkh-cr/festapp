@@ -4,6 +4,13 @@
 SET lock_timeout = '5s';
 SET statement_timeout = '120s';
 
+-- Older hosted installations were created before this base column was added
+-- to database/tables/tables.sql and have no timestamped migration for it.
+-- Materializers and aggregate responses require one deterministic ordering
+-- value, so close that drift idempotently before defining any functions.
+ALTER TABLE public.events
+  ADD COLUMN IF NOT EXISTS "order" bigint NOT NULL DEFAULT 0;
+
 -- Unit ownership is part of the canonical icon contract. Older installations
 -- may still have organization-only icon rows; NULL unit keeps those rows as
 -- read-only compatibility data.
