@@ -10,9 +10,7 @@ class ClientChangesPage {
 }
 
 class DbClientChanges {
-  // The public audit contract is capped at 200 rows. Reserve the final row as
-  // a next-page probe so navigation never needs an extra request.
-  static const pageSize = 199;
+  static const pageSize = 500;
 
   DbClientChanges([SupabaseClient? client])
       : _client = client ?? Supabase.instance.client;

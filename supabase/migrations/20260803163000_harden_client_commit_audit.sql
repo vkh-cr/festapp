@@ -1,6 +1,6 @@
--- Keep audit pagination within the authoritative 200-row contract and prevent
--- occasion managers from seeing sibling-occasion commits through shared
--- unit/organization columns.
+-- Prevent occasion managers from seeing sibling-occasion commits through
+-- shared unit/organization columns while retaining the approved 500-row UI
+-- page plus one next-page probe.
 CREATE OR REPLACE FUNCTION public.get_client_commits_v1(
   p_occasion bigint, p_before_time timestamptz DEFAULT NULL,
   p_before_id uuid DEFAULT NULL, p_limit integer DEFAULT 50,
@@ -76,7 +76,7 @@ AS $$
             WHERE fc.commit_id=c.commit_id
               AND fc.component=p_filters->>'component'))
         ORDER BY c.occurred_at DESC,c.commit_id DESC
-        LIMIT LEAST(GREATEST(p_limit,1),200)
+        LIMIT LEAST(GREATEST(p_limit,1),501)
       ) page
     ), '[]'))
   END
