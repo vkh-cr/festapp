@@ -28,7 +28,11 @@ function shouldPrecache(relativePath) {
   }
   // emit_version_manifest.sh keeps this diagnostic copy next to main.dart.js.
   // Caching both would waste several MB without adding an executable resource.
-  if (/^main\.dart\..+\.js$/.test(name)) return false;
+  // Deferred `main.dart.js_<n>.part.js` files are executable and must remain
+  // in the app shell; otherwise an installed PWA stalls when a deferred route
+  // is opened offline.
+  if (/^main\.dart\..+\.js$/.test(name) &&
+      !/^main\.dart\.js_\d+\.part\.js$/.test(name)) return false;
   return true;
 }
 

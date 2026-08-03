@@ -15,6 +15,7 @@ try {
   await writeFile(path.join(tempRoot, 'flutter'), '<html>flutter</html>');
   await writeFile(path.join(tempRoot, 'webclient'), '<html>web</html>');
   await writeFile(path.join(tempRoot, 'main.dart.js'), 'main');
+  await writeFile(path.join(tempRoot, 'main.dart.js_7.part.js'), 'deferred');
   await writeFile(path.join(tempRoot, 'main.dart.1.2.3-4.js'), 'duplicate');
   await writeFile(path.join(tempRoot, 'flutter_service_worker.js'), 'obsolete');
   await writeFile(path.join(tempRoot, '_worker.js'), 'server only');
@@ -32,6 +33,7 @@ try {
   assert.match(worker, /"\/flutter\?pwa-cache=1"/);
   assert.match(worker, /"\/webclient\?pwa-cache=1"/);
   assert.match(worker, /"\/main\.dart\.js"/);
+  assert.match(worker, /"\/main\.dart\.js_7\.part\.js"/);
   assert.match(worker, /"\/assets\/translation\.json"/);
   assert.doesNotMatch(worker, /main\.dart\.1\.2\.3-4\.js/);
   assert.doesNotMatch(worker, /"\/flutter_service_worker\.js"/);
