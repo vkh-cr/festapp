@@ -39,18 +39,9 @@ class SynchroService {
   }
 
   static Future<void> refreshOfflineData() async {
-    final occasionId = _getCurrentOccasionId();
-    if (_isLoggedIn() && occasionId != null) {
-      var userInfo = await _getFullUserInfo();
-      await OfflineDataService.saveUserInfo(userInfo);
-      var bundle = await DbEvents.getMyEventsAndActivities(occasionId, true);
-      await OfflineDataService.saveAllActivities(bundle!.activities);
-      var userInventoryBundle = await DbInventoryPools.getUserInventory();
-      await OfflineDataService.saveUserInventoryBundle(userInventoryBundle);
-    } else {
-      await OfflineDataService.deleteUserInfo();
-    }
+    await refreshUserOfflineData();
 
+    final occasionId = _getCurrentOccasionId();
     var places = await DbPlaces.getAllPlaces();
     await OfflineDataService.saveAllPlaces(places);
 
@@ -101,6 +92,23 @@ class SynchroService {
 
     // One "last synced" stamp for the whole bundle (the offline banner).
     await OfflineDataService.saveLastSyncedAt(DateTime.now());
+  }
+
+  /// Refreshes the signed-in user's profile, activities, and stay assignment.
+  /// Kept separate so startup can make this private offline snapshot available
+  /// without blocking first paint on the complete public-data refresh.
+  static Future<void> refreshUserOfflineData() async {
+    final occasionId = _getCurrentOccasionId();
+    if (_isLoggedIn() && occasionId != null) {
+      var userInfo = await _getFullUserInfo();
+      await OfflineDataService.saveUserInfo(userInfo);
+      var bundle = await DbEvents.getMyEventsAndActivities(occasionId, true);
+      await OfflineDataService.saveAllActivities(bundle!.activities);
+      var userInventoryBundle = await DbInventoryPools.getUserInventory();
+      await OfflineDataService.saveUserInventoryBundle(userInventoryBundle);
+    } else {
+      await OfflineDataService.deleteUserInfo();
+    }
   }
 
   static Future<OccasionLinkModel> getAppConfig(LinkModel link) async {

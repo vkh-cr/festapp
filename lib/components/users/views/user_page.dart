@@ -24,6 +24,7 @@ import 'package:fstapp/components/app_management/settings_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/components/users/views/login_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/launch_url_service.dart';
@@ -595,7 +596,8 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> loadData() async {
-    loadDataOffline();
+    await loadDataOffline();
+    if (ConnectivityService.isOfflineNotifier.value) return;
     var userInfo = await AuthService.getFullUserInfo();
     await OfflineDataService.saveUserInfo(userInfo);
     await addOfflineEventsToCompanions(userInfo);

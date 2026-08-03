@@ -148,13 +148,19 @@ Future<void> initializeEverything() async {
         : null;
     if (settings != null) {
       SynchroService.globalSettingsModel = settings;
+      final cachedUser = AuthService.isLoggedIn()
+          ? await OfflineDataService.getUserInfo()
+          : null;
       RightsService.occasionLinkModelNotifier.value = OccasionLinkModel(
+          userInfo: cachedUser,
+          occasionUser: cachedUser?.occasionUser,
           occasion: OccasionModel(
               features: settings.features,
               isOpen: true,
               isHidden: false,
               isPromoted: false,
-              data: settings.data));
+              data: settings.data,
+              services: settings.services));
       TimeHelper.setTimeZoneLocation(
           RightsService.currentOccasion()?.data?["timezone"]);
       final cachedLink = AppConfig.forceOccasionLink;
@@ -178,6 +184,13 @@ Future<void> initializeEverything() async {
     } else {
       await RightsService.updateAppData(refreshOffline: false);
       AppLogger.debug('Occasion loaded');
+      if (AuthService.isLoggedIn()) {
+        unawaited(SynchroService.refreshUserOfflineData().then((_) {
+          AppLogger.debug('Private offline snapshot refreshed');
+        }, onError: (Object error) {
+          AppLogger.error('Private offline snapshot refresh failed: $error');
+        }));
+      }
     }
   } catch (e) {
     AppLogger.error('Occasion loading failed: $e');
