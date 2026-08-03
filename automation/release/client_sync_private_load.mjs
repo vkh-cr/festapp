@@ -4,6 +4,7 @@ import path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import https from 'node:https';
 import {
   managementQuery,
   parseKeyValueFile,
@@ -28,6 +29,7 @@ const managementToken =
   process.env.SUPABASE_ACCESS_TOKEN ||
   localEnvironment.get('SUPABASE_ACCESS_TOKEN');
 const timeoutMs = 10000;
+const maxSockets = Math.min(clients, 256);
 
 if (
   !supabaseUrl ||
@@ -83,6 +85,12 @@ function increment(target, value) {
 const userId = decodeJwtSubject(accessToken);
 const endpoint = `${supabaseUrl}/rest/v1/rpc/get_private_client_sync_v1`;
 const context = { organizationId: organization, occasionId };
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets,
+  maxFreeSockets: Math.min(maxSockets, 64),
+  scheduling: 'fifo',
+});
 
 async function stateFingerprint() {
   const rows = await managementQuery({
@@ -104,23 +112,44 @@ async function stateFingerprint() {
 }
 
 async function handshake(knownVector) {
-  const started = performance.now();
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      apikey: anonKey,
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      p_context: context,
-      p_known_private_vector: knownVector,
-    }),
-    signal: AbortSignal.timeout(timeoutMs),
+  const body = JSON.stringify({
+    p_context: context,
+    p_known_private_vector: knownVector,
   });
-  const latency = performance.now() - started;
-  const payload = await response.json().catch(() => null);
-  return { response, latency, payload };
+  const started = performance.now();
+  return new Promise((resolve, reject) => {
+    const request = https.request(endpoint, {
+      method: 'POST',
+      agent: httpsAgent,
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+      timeout: timeoutMs,
+    }, (response) => {
+      const chunks = [];
+      response.on('data', (chunk) => chunks.push(chunk));
+      response.on('end', () => {
+        const latency = performance.now() - started;
+        let payload = null;
+        try {
+          payload = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        } catch {
+          // The caller reports only the HTTP status, never a private body.
+        }
+        resolve({
+          response: { status: response.statusCode ?? 0 },
+          latency,
+          payload,
+        });
+      });
+    });
+    request.on('timeout', () => request.destroy(new Error('request timeout')));
+    request.on('error', reject);
+    request.end(body);
+  });
 }
 
 const beforeState = await stateFingerprint();
@@ -167,6 +196,7 @@ const stateUnchanged = JSON.stringify(beforeState) === JSON.stringify(afterState
 const result = {
   occasionId,
   clients,
+  max_sockets: maxSockets,
   duration_ms: Number(durationMs.toFixed(1)),
   average_rps: Number((latencies.length / (durationMs / 1000)).toFixed(1)),
   initial: {
@@ -186,6 +216,7 @@ const result = {
 };
 
 console.log(JSON.stringify(result, null, 2));
+httpsAgent.destroy();
 if (errors.length || statuses.get(200) !== clients || !stateUnchanged) {
   process.exitCode = 1;
 }
