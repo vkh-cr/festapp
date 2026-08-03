@@ -74,6 +74,13 @@ class OfflineDataService {
   }
 
   static Future<bool> isEventSaved(int id) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final program = await ClientSyncRuntime.readPrivate(
+        ClientSyncComponent.privateProgram,
+      );
+      return program is Map &&
+          ((program['saved'] as List?) ?? const []).contains(id);
+    }
     var offlineData = await getMyScheduleData();
     return offlineData.contains(id);
   }

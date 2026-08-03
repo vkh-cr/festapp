@@ -95,6 +95,10 @@ BEGIN
       LIKE '%s.can_occasion AND c.occasion=p_occasion%',
     'occasion audit permission cannot expose sibling occasion commits');
   PERFORM assert_true(pg_get_functiondef(
+      'public.get_client_commit_v1(uuid)'::regprocedure)
+      LIKE '%get_is_manager_on_unit(c.unit)%',
+    'audit detail accepts the same unit-manager scope as the list');
+  PERFORM assert_true(pg_get_functiondef(
       'public.save_speaker_client_sync_v1(bigint,uuid,bigint,jsonb)'::regprocedure)
       LIKE '%requested_topic.topic_id%',
     'speaker aggregate qualifies topic references');

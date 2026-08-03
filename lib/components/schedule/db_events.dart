@@ -428,8 +428,10 @@ class DbEvents {
           .eq(Tb.event_users_saved.event, id)
           .eq(EventModel.eventUsersSavedUserColumn,
               AuthService.currentUserId());
+      await OfflineDataService.removeFromMySchedule(id);
+    } else {
+      await OfflineDataService.removeFromMySchedule(id);
     }
-    await OfflineDataService.removeFromMySchedule(id);
     ToastHelper.Show(context, ScheduleStrings.removedFromMySchedule);
   }
 
@@ -447,9 +449,11 @@ class DbEvents {
           'p_event_ids': [id],
           'p_join_mode': true,
         });
+        await OfflineDataService.addToMySchedule(id);
       }
+    } else {
+      await OfflineDataService.addToMySchedule(id);
     }
-    await OfflineDataService.addToMySchedule(id);
     ToastHelper.Show(context, ScheduleStrings.addedToMySchedule);
     return true;
   }

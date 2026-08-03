@@ -88,3 +88,51 @@ REVOKE ALL ON FUNCTION public.get_client_commits_v1(
 GRANT EXECUTE ON FUNCTION public.get_client_commits_v1(
   bigint,timestamptz,uuid,integer,jsonb
 ) TO authenticated;
+
+-- Keep detail authorization identical to the list: the manager who can see a
+-- unit/organization row must also be able to open that row even when the
+-- commit additionally carries an occasion id.
+CREATE OR REPLACE FUNCTION public.get_client_commit_v1(p_commit_id uuid)
+RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = '' AS $$
+  SELECT CASE WHEN c.commit_id IS NULL THEN jsonb_build_object('code',404)
+    WHEN NOT (
+      (c.occasion IS NOT NULL AND (
+        public.get_is_manager_on_occasion(c.occasion)
+        OR public.get_is_admin_on_occasion(c.occasion)))
+      OR (c.unit IS NOT NULL AND public.get_is_manager_on_unit(c.unit))
+      OR (c.organization IS NOT NULL
+        AND public.get_is_admin_on_organization(c.organization))
+    ) THEN jsonb_build_object('code',403)
+    ELSE jsonb_build_object('code',200,'data',jsonb_build_object(
+      'commitId',c.commit_id,'occurredAt',c.occurred_at,
+      'actorDisplay',c.actor_display,'actorKind',c.actor_kind,
+      'source',c.source,'changeClass',c.change_class,'reason',c.reason,
+      'items',(SELECT COALESCE(jsonb_agg(jsonb_build_object(
+        'entityType',i.entity_type,'entityId',i.entity_id,
+        'operation',i.operation,'safeLabel',i.safe_label,
+        'changedFields',i.changed_fields) ORDER BY i.item_index),'[]')
+        FROM public.client_commit_items i WHERE i.commit_id=c.commit_id),
+      'components',(SELECT COALESCE(jsonb_agg(jsonb_build_object(
+        'component',cc.component,'scopeType',cc.scope_type,
+        'scopeId',cc.scope_id,'revision',cc.resulting_revision,
+        'publishedRevision',p.published_revision,
+        'publicationStatus',CASE
+          WHEN p.published_revision>=cc.resulting_revision
+            THEN 'published' ELSE 'pending' END)
+        ORDER BY cc.component),'[]')
+        FROM public.client_commit_components cc
+        LEFT JOIN LATERAL (
+          SELECT max(cp.published_revision) published_revision
+          FROM public.client_sync_publications cp
+          WHERE cp.component=cc.component
+            AND cp.scope_type=cc.scope_type
+            AND cp.scope_id=cc.scope_id
+        ) p ON true
+        WHERE cc.commit_id=c.commit_id))) END
+  FROM (SELECT * FROM public.client_commits WHERE commit_id=p_commit_id) c
+  RIGHT JOIN (SELECT 1) seed ON true;
+$$;
+REVOKE ALL ON FUNCTION public.get_client_commit_v1(uuid)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.get_client_commit_v1(uuid) TO authenticated;

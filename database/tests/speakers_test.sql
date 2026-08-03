@@ -144,6 +144,38 @@ BEGIN
 END $$ LANGUAGE plpgsql;
 
 -- ---------------------------------------------------------------------------
+-- 2b. The canonical v1 command accepts a non-empty topic array. This guards
+--     against ambiguous aliases in both validation and link replacement.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc      bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_sp      bigint := (SELECT v FROM _spk WHERE k = 'speaker');
+    v_payload jsonb;
+    v_res     jsonb;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spk_editor')::text, true);
+    SELECT jsonb_build_object(
+        'id', s.id, 'title', s.title, 'subtitle', 'v1 command',
+        'description', s.description, 'image', s.image, 'order', s."order",
+        'is_hidden', s.is_hidden, 'data', s.data,
+        'topics', COALESCE((SELECT jsonb_agg(l.topic ORDER BY l.topic)
+            FROM public.speaker_topic_links l WHERE l.speaker=s.id), '[]'::jsonb))
+      INTO v_payload
+      FROM public.speakers s WHERE s.id=v_sp;
+
+    v_res := public.save_speaker_client_sync_v1(
+        v_oc, gen_random_uuid(), 0, v_payload);
+    PERFORM assert_eq(v_res->>'status', 'applied',
+        'v1 speaker save with non-empty topics is applied');
+    PERFORM assert_eq((v_res->'data'->>'version')::int, 1,
+        'v1 speaker save advances the aggregate version');
+    PERFORM assert_eq((SELECT count(*)::int
+        FROM public.speaker_topic_links WHERE speaker=v_sp), 2,
+        'v1 speaker save preserves both topic links');
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
 -- 3. Cross-occasion protection: updating a speaker under the wrong occasion →
 --    404; set_event_speakers with a foreign speaker → 400.
 -- ---------------------------------------------------------------------------
