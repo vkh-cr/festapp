@@ -108,8 +108,7 @@ class RightsService {
 
       // Update global state from the fetched object
       RightsService.currentLink = checkedObject.occasion?.link;
-      UpdateService.versionRecommended = checkedObject.versionRecommended;
-      UpdateService.versionLink = checkedObject.versionLink;
+      UpdateService.configurePlatforms(checkedObject.organization?.platforms);
 
       // Handle access denied or not found cases
       if (checkedObject.isAccessDenied() || checkedObject.isNotFound()) {
@@ -277,8 +276,6 @@ class RightsService {
         occasion: valid.occasion,
         unit: valid.unit,
         isAdmin: valid.isAdmin,
-        versionRecommended: valid.versionRecommended,
-        versionLink: valid.versionLink,
         organization: newOrg,
         clientSyncV1: valid.clientSyncV1,
       );
