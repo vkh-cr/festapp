@@ -76,6 +76,7 @@ class _EventPageState extends State<EventPage> {
   List<CompanionModel> _companions = [];
 
   bool isLoadingEvent = true;
+  bool _isUpdatingSavedProgram = false;
 
   final ScrollController _scrollController = ScrollController();
   bool _blockScroll = false;
@@ -765,17 +766,17 @@ class _EventPageState extends State<EventPage> {
               if (showAdd) ...[
                 const SizedBox(width: 8),
                 IconButton(
-                  onPressed: () async {
-                    if (canSave) {
-                      await addToMySchedule();
-                    } else {
-                      await removeFromMySchedule();
-                    }
-                  },
-                  icon: Icon(
-                    canSave ? Icons.add_circle_outline : Icons.check_circle,
-                    color: fg,
-                    size: 30,
+                  onPressed: _isUpdatingSavedProgram
+                      ? null
+                      : () => _setSavedProgram(canSave),
+                  icon: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 150),
+                    child: Icon(
+                      canSave ? Icons.add_circle_outline : Icons.check_circle,
+                      key: ValueKey(canSave),
+                      color: fg,
+                      size: 30,
+                    ),
                   ),
                 ),
               ] else if ((_event?.maxParticipants ?? 0) > 0) ...[
@@ -841,9 +842,8 @@ class _EventPageState extends State<EventPage> {
   /// the type color, and the default (untyped) event gets the brand navy→orange
   /// diagonal with a downward dark scrim.
   Widget _headerBackground(EventType? eventType, Widget child) {
-    final String? imageUrl = ConnectivityService.isOfflineNotifier.value
-        ? null
-        : _headerImageUrl();
+    final String? imageUrl =
+        ConnectivityService.isOfflineNotifier.value ? null : _headerImageUrl();
     if (imageUrl != null) {
       return Stack(
         children: [
@@ -1016,18 +1016,19 @@ class _EventPageState extends State<EventPage> {
       elevation: 4,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: () async {
-          if (canSave) {
-            await addToMySchedule();
-          } else {
-            await removeFromMySchedule();
-          }
-        },
+        onTap: _isUpdatingSavedProgram ? null : () => _setSavedProgram(canSave),
         child: SizedBox(
           width: 56,
           height: 56,
-          child:
-              Icon(canSave ? Icons.add : Icons.check, color: glyph, size: 30),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 150),
+            child: Icon(
+              canSave ? Icons.add : Icons.check,
+              key: ValueKey(canSave),
+              color: glyph,
+              size: 30,
+            ),
+          ),
         ),
       ),
     );
@@ -1237,23 +1238,34 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Future<void> addToMySchedule() async {
-    if (!await DbEvents.addToMySchedule(context, _event!.id!)) {
-      return;
-    }
+  /// Updates both header actions immediately and keeps them locked until the
+  /// authoritative command finishes. A failed command restores the previous
+  /// state, avoiding the delayed check/plus flicker and accidental double tap.
+  Future<void> _setSavedProgram(bool saved) async {
+    final event = _event;
+    if (event?.id == null || _isUpdatingSavedProgram) return;
+    final previous = event!.isInMySchedule ?? false;
     if (mounted) {
       setState(() {
-        _event!.isInMySchedule = true;
+        event.isInMySchedule = saved;
+        _isUpdatingSavedProgram = true;
       });
     }
-  }
-
-  Future<void> removeFromMySchedule() async {
-    await DbEvents.removeFromMySchedule(context, _event!.id!);
-    if (mounted) {
-      setState(() {
-        _event!.isInMySchedule = false;
-      });
+    try {
+      var completed = true;
+      if (saved) {
+        completed = await DbEvents.addToMySchedule(context, event.id!);
+      } else {
+        await DbEvents.removeFromMySchedule(context, event.id!);
+      }
+      if (!completed && mounted) {
+        setState(() => event.isInMySchedule = previous);
+      }
+    } catch (_) {
+      if (mounted) setState(() => event.isInMySchedule = previous);
+      rethrow;
+    } finally {
+      if (mounted) setState(() => _isUpdatingSavedProgram = false);
     }
   }
 

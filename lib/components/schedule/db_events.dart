@@ -421,10 +421,7 @@ class DbEvents {
   static Future<void> removeFromMySchedule(BuildContext context, int id) async {
     if (ClientSyncRuntime.isV1Selected && AuthService.isLoggedIn()) {
       await _savedProgramCommands.update([id], SavedProgramMode.remove);
-      ToastHelper.Show(context, ScheduleStrings.removedFromMySchedule);
-      return;
-    }
-    if (AuthService.isLoggedIn()) {
+    } else if (AuthService.isLoggedIn()) {
       await _supabase
           .from(Tb.event_users_saved.table)
           .delete()
