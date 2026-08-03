@@ -204,8 +204,18 @@ fi
 # Generate visible/internal iOS names while preserving the bundle ID.
 IOS_INFO_PLIST="$PROJECT_ROOT/ios/Runner/Info.plist"
 if [ -f "$IOS_INFO_PLIST" ] && [ -n "$APP_NAME" ] && [ -n "$IOS_BUNDLE_NAME" ]; then
-    /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName $APP_NAME" "$IOS_INFO_PLIST"
-    /usr/libexec/PlistBuddy -c "Set :CFBundleName $IOS_BUNDLE_NAME" "$IOS_INFO_PLIST"
+    python3 - "$IOS_INFO_PLIST" "$APP_NAME" "$IOS_BUNDLE_NAME" <<'PY'
+import plistlib
+import sys
+
+path, display_name, bundle_name = sys.argv[1:]
+with open(path, "rb") as source:
+    plist = plistlib.load(source)
+plist["CFBundleDisplayName"] = display_name
+plist["CFBundleName"] = bundle_name
+with open(path, "wb") as destination:
+    plistlib.dump(plist, destination, sort_keys=False)
+PY
     echo "✔ Updated iOS display and bundle names"
 fi
 
