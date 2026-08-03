@@ -7,6 +7,7 @@ import 'package:fstapp/database_tables/tb.dart';
 void main() {
   testWidgets('admin grid preserves profile version and accommodation',
       (tester) async {
+    const expectedAggregateVersion = 7;
     late BuildContext context;
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder: (builderContext) {
@@ -23,14 +24,14 @@ void main() {
           'room-a': DbOccasions.servicePaid,
         },
       },
-      OccasionUserModel.aggregateVersionColumn: 7,
+      OccasionUserModel.aggregateVersionColumn: expectedAggregateVersion,
     });
 
     final edited = OccasionUserModel.fromPlutoJson(
       loaded.toTrinaRow(context).toJson(),
     );
 
-    expect(edited.aggregateVersion, 7);
+    expect(edited.aggregateVersion, expectedAggregateVersion);
     expect(edited.services?[DbOccasions.serviceTypeAccommodation], {
       'room-a': DbOccasions.servicePaid,
     });
