@@ -43,6 +43,16 @@ describe('public sync head', () => {
     expect(await response.text()).toBe('');
   });
 
+  it('accepts the weak ETag emitted after Cloudflare content encoding', async () => {
+    const response = await handleRequest(
+      new Request('https://sync.festapp.net/v1/public-sync/7/42/head', {
+        headers: { 'If-None-Match': 'W/"head-digest"' },
+      }),
+      environment(),
+    );
+    expect(response.status).toBe(304);
+  });
+
   it('does not expose an arbitrary bucket key', async () => {
     const env = environment();
     const response = await handleRequest(

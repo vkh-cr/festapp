@@ -18,6 +18,14 @@ function responseHeaders(etag: string): Headers {
   });
 }
 
+function matchesEtag(header: string | null, current: string): boolean {
+  if (!header) return false;
+  return header.split(',').some((candidate) => {
+    const normalized = candidate.trim().replace(/^W\//, '');
+    return normalized === '*' || normalized === current;
+  });
+}
+
 export async function handleRequest(request: Request, env: Env): Promise<Response> {
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: responseHeaders('"options"') });
@@ -42,7 +50,7 @@ export async function handleRequest(request: Request, env: Env): Promise<Respons
 
   const etag = object.httpEtag;
   const headers = responseHeaders(etag);
-  if (request.headers.get('If-None-Match') === etag) {
+  if (matchesEtag(request.headers.get('If-None-Match'), etag)) {
     return new Response(null, { status: 304, headers });
   }
   return new Response(request.method === 'HEAD' ? null : object.body, {

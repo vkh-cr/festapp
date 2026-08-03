@@ -1,5 +1,10 @@
-import { describe, expect, it, vi } from 'vitest';
-import { ClientSyncPublisher, R2S3ObjectStore, REQUIRED_CATALOGS, type Descriptor, type ObjectStore, type PublisherDatabase } from '../src/publisher.js';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ClientSyncPublisher, REQUIRED_CATALOGS, type Descriptor, type ObjectStore, type PublisherDatabase } from '../src/publisher.js';
+import { R2NativeObjectStore } from '../src/r2_object_store.js';
+import { R2S3ObjectStore } from '../src/s3_object_store.js';
+import { SupabasePublisherDatabase } from '../src/supabase_database.js';
+
+afterEach(() => vi.unstubAllGlobals());
 
 const descriptor = (revision: number, name = 'old'): Descriptor => ({
   revision, mediaType: 'application/json', url: `https://assets.test/${name}.json`,
@@ -94,5 +99,59 @@ describe('R2S3ObjectStore head recovery', () => {
         },
       });
     expect(send).toHaveBeenCalledOnce();
+  });
+});
+
+describe('R2NativeObjectStore head recovery', () => {
+  it('returns the concurrent monotonic winner after a conditional write loses', async () => {
+    const winner = {
+      catalog: { revision: 12 },
+      live: { revision: 4 },
+      serverTime: '2026-08-03T10:00:02Z',
+    };
+    const get = vi.fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        etag: 'winner',
+        httpEtag: '"winner"',
+        arrayBuffer: async () => new TextEncoder().encode(JSON.stringify(winner)).buffer,
+      });
+    const put = vi.fn(async () => null);
+    const store = new R2NativeObjectStore({ get, put } as unknown as R2Bucket);
+    const pending = new TextEncoder().encode(JSON.stringify({
+      catalog: { revision: 11 },
+      live: { revision: 3 },
+    }));
+
+    await expect(store.putHead('head.json', pending)).resolves.toEqual({
+      etag: '"winner"',
+      head: winner,
+    });
+    expect(put).toHaveBeenCalledWith('head.json', pending, expect.objectContaining({
+      onlyIf: { etagDoesNotMatch: '*' },
+    }));
+  });
+});
+
+describe('SupabasePublisherDatabase', () => {
+  it('accepts an empty successful response from void RPCs', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 204 })));
+    const database = new SupabasePublisherDatabase('https://database.test', 'service-key');
+    await expect(database.refreshCleaning(42)).resolves.toBeUndefined();
+  });
+
+  it('claims only explicitly configured production scopes', async () => {
+    const fetchMock = vi.fn(async () => new Response('[]', { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const database = new SupabasePublisherDatabase(
+      'https://database.test',
+      'service-key',
+      [643],
+    );
+    await database.claim(1000);
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://database.test/rest/v1/rpc/claim_client_projection_dirty_scopes_v1',
+      expect.objectContaining({ body: JSON.stringify({ p_scope_ids: [643], p_limit: 1000 }) }),
+    );
   });
 });
