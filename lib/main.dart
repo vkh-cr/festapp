@@ -220,9 +220,7 @@ class _MyAppState extends State<MyApp> {
       dark: ThemeConfig.isDarkModeEnabled
           ? ThemeConfig.darkTheme(baseTheme)
           : baseTheme,
-      initial: ThemeConfig.isDarkModeEnabled
-          ? AdaptiveThemeMode.system
-          : AdaptiveThemeMode.light,
+      initial: ThemeConfig.defaultThemeMode,
       builder: (theme, darkTheme) => MaterialApp.router(
         routerConfig: RouterService.router
             .config(navigatorObservers: () => [RoutingObserver()]),

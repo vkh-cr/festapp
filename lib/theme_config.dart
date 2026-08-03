@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -5,8 +6,10 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 
 class ThemeConfig {
-  static bool isDarkMode(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
-  static bool isDarkModeEnabled = false;
+  static bool isDarkMode(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark;
+  static const bool isDarkModeEnabled = true;
+  static const AdaptiveThemeMode defaultThemeMode = AdaptiveThemeMode.light;
 
   // Base theme to hold common properties
   static final fontFamily = "Gill Sans";
