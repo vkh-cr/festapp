@@ -10,47 +10,28 @@ every registry writer exists in repository SQL, generic writer names are
 absent, v1 mutation names stay inside typed command adapters, and structural
 component materialization is reachable only through the shared finalizer.
 
-## Known pre-activation blockers (repository state 2026-08-03)
+## Known pre-activation blockers (production state 2026-08-03)
 
-The registry deliberately contains five `boundary` rows, so capability
-activation cannot pass yet:
-
-- `private_profile/public.occasion_users`: cancellation, account deletion and
-  other cross-domain writers must advance every affected private scope.
-  Ticket-profile import and service deletion are already receipted;
-- the four `private_inventory` commerce sources (`spots`, `products`, product
-  contexts and ticket-product links): order, form, blueprint, allocation, cron,
-  duplication and cancellation roots must advance the affected users' private
-  inventory revisions in their owning transactions. Spot-assignment batches
-  and product-context replacement already use the shared transactional helper.
-
-Unit-scoped receipts/commits, visible-occasion fan-out, occasion
-duplicate/delete and anonymous/authenticated feedback are repository-complete
-and no longer registry boundaries.
-
-Do not mark these rows ready merely because their function names are known.
-Each root needs a scope/owner resolver, lock-order test, exactly-one revision
-effect and a measured production usage/retirement decision. The retained
-cleaning-report handler and other legacy facades also require the supported
-client usage gate before grants can be revoked.
+The repository registry has 39 rows and no unresolved `boundary` disposition.
+Production activation remains blocked until externally retained pgaudit events
+and the supported legacy-writer retirement gate are evidenced. Ordinary-role
+direct DML grants are global across occasions, so they must not be revoked for
+only one occasion while a supported legacy editor still depends on them.
 
 1. Verify a restorable database backup and record the legacy request baseline.
-2. Verify externally retained PostgreSQL privileged-DML audit events end to end.
+2. Apply the expansion migration with its bounded lock and statement timeouts.
+   It is additive and leaves the capability and every registry readiness row
+   off.
+3. Verify externally retained PostgreSQL privileged-DML audit events end to end.
    `pg_stat_statements` does not satisfy this gate.
-3. Produce a supported-client writer inventory from Flutter, Edge/JS, SQL,
+4. Produce a supported-client writer inventory from Flutter, Edge/JS, SQL,
    cron and operational scripts. Every registry writer must be either routed
    through its named canonical command or tied to a measured external legacy
    contract with an owner and retirement condition. Force-upgrade every
    supported client that still performs direct PostgREST DML.
-4. Verify from `information_schema.role_table_grants` and `pg_proc` that
-   `anon`/`authenticated` have no direct DML path to canonical source tables.
-   Record the query output with the release evidence; any unclassified grant or
-   dynamically registered writer blocks the cutover.
-   In the same reviewed transaction that records this evidence, mark every row
-   of the latest `client_sync_component_sources` registry `cutover_ready=true`.
-   `get_app_config_v219` otherwise keeps the capability off even if occasion
-   configuration was changed accidentally.
-5. Apply the expansion migration with its bounded lock and statement timeouts.
+5. Run `node automation/release/client_sync_cutover.mjs`. Its default dry-run
+   reports the target, registry, pgaudit configuration and remaining ordinary
+   direct-DML tables without writing.
 6. Deploy the publisher with one active instance, generate every required
    component, and verify immutable object SHA-256 and byte lengths. Supply
    `R2_BUCKET` and `SYNC_ASSET_ORIGIN` from the target deployment configuration;
@@ -59,9 +40,23 @@ client usage gate before grants can be revoked.
    `sync.festapp.net`, and verify ETag/304 plus zero Supabase subrequests.
 8. Deploy the transition client with `client_sync_v1` off. Run privacy, 5,000
    client polling, offline cold-start, reconnect, identity-isolation and
-   commit-audit gates.
-9. Enable the capability for `csmostrava2026` in one atomic configuration
-   change. Immediately smoke online/offline/resume/login/logout/mutation/audit.
+   commit-audit gates. The private production-like handshake gate uses a
+   legitimate, occasion-scoped test account without logging its token:
+
+   ```bash
+   FESTAPP_TEST_ACCESS_TOKEN='<session JWT>' \
+     node automation/release/client_sync_private_load.mjs <occasion-id>
+   ```
+
+   The harness warms one complete private response, spreads 5,000 unchanged
+   handshakes over 60 seconds, reports p50/p95/p99, and verifies that the test
+   user's receipts, commits and private revision state did not change.
+9. Run the reviewed cutover command with `--apply`, both evidence confirmations
+   and `--confirm=<occasion-link>`. It derives the table set from the latest
+   registry and atomically revokes ordinary DML, marks that registry ready,
+   enables the configured occasion and verifies v219. Never replace these
+   confirmations with a hardcoded production ID. Immediately smoke
+   online/offline/resume/login/logout/mutation/audit.
 
 ## Monitoring
 
@@ -75,6 +70,12 @@ by platform/version.
 Disable `client_sync_v1` for new sessions. Do not delete additive schema or the
 last verified artifacts. Active sessions finish on the mode selected at their
 context bootstrap; require a context restart if an immediate switch is needed.
+The guarded command is:
+
+```bash
+node automation/release/client_sync_cutover.mjs \
+  --disable --confirm="$(sed -n 's/^FORCE_OCCASION_LINK=//p' automation/project.conf)"
+```
 
 ## Visibility contraction
 
