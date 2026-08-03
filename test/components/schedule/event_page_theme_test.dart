@@ -22,10 +22,8 @@ void main() {
     const onPrimary = Color(0xfffefefe);
 
     final colors = EventPageTheme.participantPillColors(
-      headerForeground: Colors.white,
       primary: primary,
       onPrimary: onPrimary,
-      isSignedIn: true,
     );
 
     expect(colors.background, primary);

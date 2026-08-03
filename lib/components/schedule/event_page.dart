@@ -431,8 +431,7 @@ class _EventPageState extends State<EventPage> {
               ],
             ),
           ),
-          if (showAddButton)
-            _buildFabOverlay(context, expandedContentHeight),
+          if (showAddButton) _buildFabOverlay(context, expandedContentHeight),
           // Offstage twin of the expanded header, measured to size the app bar.
           Positioned(
             left: 0,
@@ -953,12 +952,10 @@ class _EventPageState extends State<EventPage> {
 
     final int maxParticipants = _event?.maxParticipants ?? 0;
     if (includeParticipants && maxParticipants > 0) {
-      items.add(_participantPill(
-          context,
-          fg,
-          "${_event?.currentParticipants ?? 0}/$maxParticipants",
-          iconSize,
-          fontSize));
+      final text = "${_event?.currentParticipants ?? 0}/$maxParticipants";
+      items.add(_event?.isSignedIn == true
+          ? _participantPill(context, fg, text, iconSize, fontSize)
+          : _metaItem(Icons.people_alt_outlined, text, fg, iconSize, fontSize));
     }
 
     return items;
@@ -1199,10 +1196,8 @@ class _EventPageState extends State<EventPage> {
       double iconSize, double fontSize) {
     final colorScheme = Theme.of(context).colorScheme;
     final pill = EventPageTheme.participantPillColors(
-      headerForeground: fg,
       primary: colorScheme.primary,
       onPrimary: colorScheme.onPrimary,
-      isSignedIn: _event?.isSignedIn == true,
     );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
