@@ -1,15 +1,25 @@
 {
-    "name": "Festapp",
-    "short_name": "Festapp",
-    "icons": [
-        {
-            "src": "/favicon.ico",
-            "sizes": "64x64 32x32 24x24 16x16",
-            "type": "image/x-icon"
-        }
-    ],
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#ffffff"
+  "name": "CSM Ostrava",
+  "short_name": "CSM 2026",
+  "description": "Oficiální průvodce Celostátním setkáním mládeže Ostrava 2026.",
+  "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "id": "/csmostrava2026/",
+  "start_url": "/csmostrava2026/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
 }

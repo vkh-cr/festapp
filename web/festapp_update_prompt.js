@@ -36,11 +36,8 @@
     }
   }
 
-  // Detects whether a stale Flutter service worker (or its cache) is still
-  // present. Current builds ship WITHOUT a Flutter service worker, so any
-  // flutter_service_worker.js registration or flutter-app-cache left over from
-  // an older build is stale and will keep serving outdated assets — the exact
-  // cause of the "stuck on an old broken build" freeze.
+  // Detects the obsolete Flutter-generated worker/cache. Current builds use
+  // festapp_service_worker.js; it must never be removed by this migration.
   async function hasStaleFlutterServiceWorker() {
     try {
       if ('serviceWorker' in navigator) {
@@ -71,16 +68,12 @@
     return false;
   }
 
-  // "Deep refresh": when a stale Flutter service worker/cache is detected the
-  // app is (or is about to be) serving outdated assets, which freezes it. Evict
-  // the service worker + caches and hard-reload ONCE so the browser fetches the
-  // current build straight from the network. This makes the app self-heal
-  // automatically instead of needing a manual hard refresh, so a bad cached
-  // build can never leave a user stuck.
+  // "Deep refresh": evict only the obsolete worker/cache and reload once so
+  // the new Festapp worker can take ownership of the installation.
   //
-  // Guarded per app version via sessionStorage: after eviction the reload loads
-  // a fresh, service-worker-free page (no stale marker) so the guard/early-out
-  // both prevent any reload loop even if the eviction does not fully take.
+  // Guarded per app version via sessionStorage: after eviction the reload is
+  // handled by the current Festapp worker, and the guard prevents a loop even
+  // if the obsolete registration does not disappear immediately.
   async function deepRefreshIfStale() {
     const guardKey = 'festappDeepRefreshedVersion';
     try {
@@ -289,6 +282,7 @@
       reloadButton.disabled = true;
       reloadButton.textContent = copy.loading;
       await clearLegacyFlutterCaches();
+      await activateWaitingFestappWorker();
       window.location.reload();
     });
 
@@ -297,8 +291,47 @@
     document.body.appendChild(banner);
   }
 
+  async function activateWaitingFestappWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    try {
+      const registration = await navigator.serviceWorker.getRegistration('/');
+      if (!registration || !registration.active?.scriptURL.includes('festapp_service_worker.js')) {
+        return;
+      }
+      await registration.update();
+      let candidate = registration.waiting || registration.installing;
+      if (candidate && candidate.state !== 'installed' && candidate.state !== 'activated') {
+        await new Promise(function(resolve) {
+          const timeout = window.setTimeout(resolve, 30000);
+          candidate.addEventListener('statechange', function onStateChange() {
+            if (candidate.state === 'installed' || candidate.state === 'activated' || candidate.state === 'redundant') {
+              window.clearTimeout(timeout);
+              candidate.removeEventListener('statechange', onStateChange);
+              resolve();
+            }
+          });
+        });
+      }
+      candidate = registration.waiting || candidate;
+      if (candidate && candidate.state === 'installed') {
+        const changed = new Promise(function(resolve) {
+          const timeout = window.setTimeout(resolve, 5000);
+          navigator.serviceWorker.addEventListener('controllerchange', function onChange() {
+            window.clearTimeout(timeout);
+            navigator.serviceWorker.removeEventListener('controllerchange', onChange);
+            resolve();
+          });
+        });
+        candidate.postMessage('SKIP_WAITING');
+        await changed;
+      }
+    } catch (error) {
+      console.warn('Festapp service worker activation failed:', error);
+    }
+  }
+
   async function checkVersion() {
-    if (checkInFlight || !currentVersion) {
+    if (checkInFlight || !currentVersion || navigator.onLine === false) {
       return;
     }
     checkInFlight = true;

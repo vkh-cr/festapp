@@ -76,13 +76,16 @@ Why a worker (instead of `_redirects` + Pages Functions):
 2. Run `automation/apply_config.sh` — propagates `project.conf` into Flutter
    `lib/app_config.dart`, web client `app_config.js`, `web/index.html` title /
    `apple-mobile-web-app-title`, CNAME, theme, fonts, version.
-3. `flutter build web --release --base-href /`.
+3. `flutter build web --release --base-href / --no-web-resources-cdn` so the
+   installed PWA always uses its bundled renderer.
 4. Rename `build/web/index.html` -> `build/web/flutter`.
 5. `npm run build` in `web_client/`, copy `dist/*` over `build/web/`.
 6. Rename merged `build/web/index.html` -> `build/web/webclient`.
 7. Rename `build/web/auth_bridge.html` -> `build/web/auth_bridge`.
-8. Remove any `_redirects` / `_headers` shipped from `web_client/public/`.
-9. Emit `build/web/_worker.js` (see above).
+8. Replace Flutter's deprecated worker with the versioned Festapp app-shell
+   worker after both frontends have been merged.
+9. Remove any `_redirects` / `_headers` shipped from `web_client/public/`.
+10. Emit `build/web/_worker.js` (see above).
 
 ## Adding a new CF Pages project
 

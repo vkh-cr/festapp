@@ -53,7 +53,7 @@ echo "Applying project configuration..."
 # 2. Build Flutter Web
 echo "Building Flutter App..."
 $FLUTTER_CMD precache --web
-$FLUTTER_CMD build web --release --base-href /
+$FLUTTER_CMD build web --release --base-href / --no-web-resources-cdn
 
 # 2b. Emit the automatic-update manifest (festapp-version.json + stamped
 #     main.dart copy) that powers web/festapp_update_prompt.js. Split into its
@@ -85,6 +85,11 @@ mv build/web/index.html build/web/webclient
 if [ -f build/web/auth_bridge.html ]; then
     mv build/web/auth_bridge.html build/web/auth_bridge
 fi
+
+# 5d. Replace Flutter's deprecated self-unregistering worker with a versioned,
+#     complete app-shell cache after both frontends have been merged.
+rm -f build/web/flutter_service_worker.js
+node automation/generate_pwa_service_worker.mjs build/web "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')"
 
 # 6. Cloudflare-specific routing via Pages Function (_worker.js).
 #    Cloudflare Pages applies _redirects BEFORE static assets, so a catch-all
@@ -129,7 +134,7 @@ const INTERNAL_ASSET_PATHS = new Set(["/flutter", "/webclient"]);
 // every deploy (main.dart.js, its main.dart.js_<n>.part.js deferred chunks,
 // the bootstrap/loader, and the canvaskit/skwasm wasm runtime). These must be
 // revalidated on every load so a client never mixes assets from two builds.
-const MUTABLE_RUNTIME_ASSET = /(?:^|\/)(?:main\.dart\.js(?:_\d+\.part\.js)?|main\.dart\.mjs|flutter_bootstrap\.js|flutter\.js|flutter_service_worker\.js|festapp_update_prompt\.js|(?:canvaskit|skwasm)[\w.]*\.(?:js|mjs|wasm))$/;
+const MUTABLE_RUNTIME_ASSET = /(?:^|\/)(?:main\.dart\.js(?:_\d+\.part\.js)?|main\.dart\.mjs|flutter_bootstrap\.js|flutter\.js|flutter_service_worker\.js|festapp_service_worker\.js|festapp_update_prompt\.js|(?:canvaskit|skwasm)[\w.]*\.(?:js|mjs|wasm))$/;
 
 function htmlResponse(body, originHeaders) {
   const headers = new Headers(originHeaders || {});
@@ -294,6 +299,10 @@ export default {
     if (path === "/sitemap.xml") return handleSitemap(request, env);
 
     if (INTERNAL_ASSET_PATHS.has(path)) {
+      if (url.searchParams.get("pwa-cache") === "1") {
+        const res = await serveAsset(env, request, path);
+        return htmlResponse(res.body, res.headers);
+      }
       return Response.redirect(new URL("/", url).toString(), 301);
     }
 

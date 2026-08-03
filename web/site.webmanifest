@@ -2,20 +2,22 @@
   "name": "CSM Ostrava",
   "short_name": "CSM 2026",
   "description": "Oficiální průvodce Celostátním setkáním mládeže Ostrava 2026.",
-  "start_url": ".",
+  "id": "/csmostrava2026/",
+  "start_url": "/csmostrava2026/",
+  "scope": "/",
   "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
       "src": "/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "theme_color": "#ffffff",

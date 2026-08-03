@@ -24,7 +24,7 @@ if ! command -v flutter &> /dev/null; then
 fi
 
 flutter precache
-flutter build web --release --base-href /
+flutter build web --release --base-href / --no-web-resources-cdn
 
 # 2. Prepare Flutter Build for Merge
 echo "Preparing Flutter build..."
@@ -44,6 +44,9 @@ echo "Merging Web Client into Flutter build..."
 cp -r dist/* ../build/web/
 
 cd ..
+
+rm -f build/web/flutter_service_worker.js
+node automation/generate_pwa_service_worker.mjs build/web "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')"
 
 echo "Build Complete. Output in build/web"
 ls -la build/web

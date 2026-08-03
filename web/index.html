@@ -76,9 +76,26 @@
   <meta name="theme-color" content="#e3e2d3">
 
   <title>CSM Ostrava</title>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
+
+   let oneSignalSdkPromise;
+   function loadOneSignalSdk() {
+       if (window.OneSignal) return Promise.resolve();
+       if (oneSignalSdkPromise) return oneSignalSdkPromise;
+       oneSignalSdkPromise = new Promise(function(resolve, reject) {
+           const script = document.createElement('script');
+           script.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+           script.async = true;
+           script.onload = resolve;
+           script.onerror = function() {
+             oneSignalSdkPromise = null;
+             reject(new Error('OneSignal SDK could not be loaded'));
+           };
+           document.head.appendChild(script);
+       });
+       return oneSignalSdkPromise;
+   }
 
    async function initializeOneSignal(callback, errorCallback) {
        if (!window.OneSignalInitialized) {
@@ -100,7 +117,6 @@
 
                    OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
                        console.log("Received notification: ", event.notification.title, event.notification.body);
-                       // Show SnackBar or do async work
                    });
                } catch (error) {
                  console.log("OneSignal initialization failed:", error);
@@ -108,6 +124,13 @@
 
                if (callback) callback(null);
            });
+           try {
+             await loadOneSignalSdk();
+           } catch (error) {
+             window.OneSignalInitialized = false;
+             if (errorCallback) errorCallback(error);
+             throw error;
+           }
        }
    }
 
@@ -209,9 +232,9 @@
     emits /festapp-version.json (via automation/cloudflare_build.sh). The
     festapp_update_prompt.js script polls that file and offers a reload banner
     when a newer build is live, AND performs a "deep refresh" on load: if a
-    stale Flutter service worker / cache from an older build is still present it
-    is evicted and the page hard-reloads once, so a bad cached build can never
-    leave a user stuck on the old assets (deepRefreshIfStale()).
+    stale pre-PWA Flutter service worker / cache is evicted once. Current builds
+    use festapp_service_worker.js, which keeps a complete versioned app shell for
+    atomic updates and offline cold starts.
   -->
   <script>
     window.__FESTAPP_BUILD_VERSION__ = "0.19.84+335";
@@ -254,6 +277,19 @@
     } else {
       window.appLaunchedInBrowser();
     }
+  }
+</script>
+
+<script>
+  // Register before Flutter starts so installability and app-shell caching do
+  // not depend on Dart initialization or backend availability.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/festapp_service_worker.js', {
+      scope: '/',
+      updateViaCache: 'none'
+    }).catch(function(error) {
+      console.warn('Festapp offline service worker registration failed:', error);
+    });
   }
 </script>
 

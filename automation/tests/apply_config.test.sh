@@ -42,7 +42,9 @@ cp "$FIXTURE_CONF" "$TMP_ROOT/automation/project.conf"
 
 # Snapshot real templates the script edits.
 cp "$PROJECT_ROOT/web/index.html"            "$TMP_ROOT/web/index.html"
+cp "$PROJECT_ROOT/web/site.webmanifest"      "$TMP_ROOT/web/site.webmanifest"
 cp "$PROJECT_ROOT/web_client/index.html"     "$TMP_ROOT/web_client/index.html"
+cp "$PROJECT_ROOT/web_client/public/site.webmanifest" "$TMP_ROOT/web_client/public/site.webmanifest"
 cp "$PROJECT_ROOT/web_client/src/app_config.js" "$TMP_ROOT/web_client/src/app_config.js"
 cp "$PROJECT_ROOT/lib/app_config.dart"       "$TMP_ROOT/lib/app_config.dart"
 cp "$PROJECT_ROOT/lib/theme_config.dart"     "$TMP_ROOT/lib/theme_config.dart"
@@ -91,6 +93,15 @@ echo
 echo "--- web/index.html (Flutter template) ---"
 assert_contains "$TMP_ROOT/web/index.html" "<title>Test App Name</title>"
 assert_contains "$TMP_ROOT/web/index.html" '<meta name="apple-mobile-web-app-title" content="TST">'
+
+echo
+echo "--- installable PWA manifests ---"
+for manifest in "$TMP_ROOT/web/site.webmanifest" "$TMP_ROOT/web_client/public/site.webmanifest"; do
+    assert_contains "$manifest" '"name": "Test App Name"'
+    assert_contains "$manifest" '"id": "/test-occasion/"'
+    assert_contains "$manifest" '"start_url": "/test-occasion/"'
+    assert_contains "$manifest" '"scope": "/"'
+done
 
 echo
 echo "--- web_client/index.html ---"

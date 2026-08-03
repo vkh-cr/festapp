@@ -253,7 +253,7 @@ if [ "$RUN_AUTOMATION" = true ]; then
     echo ""
     echo ">>> Automation Scripts Tests..."
 
-    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/deploy_workflow.test.sh" "$SCRIPT_DIR/tests/update_prompt.test.sh" "$SCRIPT_DIR/tests/client_sync_cutover.test.mjs"; do
+    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/deploy_workflow.test.sh" "$SCRIPT_DIR/tests/update_prompt.test.sh" "$SCRIPT_DIR/tests/client_sync_cutover.test.mjs" "$SCRIPT_DIR/tests/pwa_offline.test.mjs"; do
         if [ -x "$t" ]; then
             echo "Running $(basename "$t")..."
             set +e

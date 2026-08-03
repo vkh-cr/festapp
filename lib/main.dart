@@ -89,6 +89,7 @@ Future<void> initializeEverything() async {
   } catch (e) {
     AppLogger.error('Connectivity service initialization failed: $e');
   }
+  final startOffline = ConnectivityService.isOfflineNotifier.value;
 
   try {
     await initializeDateFormatting();
@@ -115,16 +116,20 @@ Future<void> initializeEverything() async {
     ).timeout(const Duration(seconds: 2));
     ClientSyncRuntime.configure(Supabase.instance.client);
     AppLogger.debug('Supabase initialized');
-    if (AuthService.isLoggedIn()) {
-      await AuthService.refreshSession().timeout(const Duration(seconds: 2));
-      AppLogger.debug('Session refreshed');
+    if (!startOffline) {
+      if (AuthService.isLoggedIn()) {
+        await AuthService.refreshSession().timeout(const Duration(seconds: 2));
+        AppLogger.debug('Session refreshed');
+      } else {
+        await AuthService.tryAuthUser().timeout(const Duration(seconds: 2));
+        AppLogger.debug('Stored session recovery completed');
+      }
+      if (AuthService.isLoggedIn()) {
+        await AuthService.validateCurrentOrganization()
+            .timeout(const Duration(seconds: 2));
+      }
     } else {
-      await AuthService.tryAuthUser().timeout(const Duration(seconds: 2));
-      AppLogger.debug('Stored session recovery completed');
-    }
-    if (AuthService.isLoggedIn()) {
-      await AuthService.validateCurrentOrganization()
-          .timeout(const Duration(seconds: 2));
+      AppLogger.debug('Offline start: skipped remote session validation');
     }
   } catch (e) {
     AppLogger.error('Supabase initialization failed: $e');
@@ -152,6 +157,11 @@ Future<void> initializeEverything() async {
               data: settings.data));
       TimeHelper.setTimeZoneLocation(
           RightsService.currentOccasion()?.data?["timezone"]);
+      final cachedLink = AppConfig.forceOccasionLink;
+      if (cachedLink != null) {
+        RightsService.currentLink = cachedLink;
+        RouterService.currentOccasionLink = cachedLink;
+      }
       AppLogger.debug('Global settings loaded');
     }
   } catch (e) {
@@ -162,8 +172,13 @@ Future<void> initializeEverything() async {
     // Tabs own their existing online/cache refresh flow. Blocking first paint
     // on a serial refresh of every offline bundle leaves the app blank when
     // any backend endpoint is slow.
-    await RightsService.updateAppData(refreshOffline: false);
-    AppLogger.debug('Occasion loaded');
+    if (startOffline) {
+      RightsService.useOfflineVersion = true;
+      AppLogger.debug('Offline start: using cached occasion data');
+    } else {
+      await RightsService.updateAppData(refreshOffline: false);
+      AppLogger.debug('Occasion loaded');
+    }
   } catch (e) {
     AppLogger.error('Occasion loading failed: $e');
     RightsService.useOfflineVersion = true;
