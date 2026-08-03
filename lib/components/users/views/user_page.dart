@@ -51,6 +51,7 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
+  bool _didStartLoading = false;
   void _showFullScreenDialog(
     BuildContext context,
     String name,
@@ -431,8 +432,11 @@ class _UserPageState extends State<UserPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_didStartLoading) return;
+    _didStartLoading = true;
     if (!AuthService.isLoggedIn()) {
       RouterService.navigateOccasion(context, LoginPage.ROUTE);
+      return;
     }
     loadData();
   }
@@ -464,7 +468,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   Widget _legalLink(String label, String url) => TextButton(
-        onPressed: () => LaunchUrlService.launchURL(url),
+        onPressed: () => LaunchUrlService.launchURL('$url/', true),
         child: Text(label),
       );
 
@@ -596,19 +600,20 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> loadData() async {
-    await loadDataOffline();
-    if (ConnectivityService.isOfflineNotifier.value) return;
-    var userInfo = await AuthService.getFullUserInfo();
-    await OfflineDataService.saveUserInfo(userInfo);
+    UserInfoModel? userInfo;
+    if (ConnectivityService.isOfflineNotifier.value) {
+      userInfo = await OfflineDataService.getUserInfo();
+    } else {
+      try {
+        userInfo = await AuthService.getFullUserInfo();
+        await OfflineDataService.saveUserInfo(userInfo);
+      } catch (_) {
+        userInfo = await OfflineDataService.getUserInfo();
+        if (userInfo == null) rethrow;
+      }
+    }
     await addOfflineEventsToCompanions(userInfo);
-    setState(() {
-      userData = userInfo;
-    });
-  }
-
-  Future<void> loadDataOffline() async {
-    var userInfo = await OfflineDataService.getUserInfo();
-    addOfflineEventsToCompanions(userInfo);
+    if (!mounted) return;
     setState(() {
       userData = userInfo;
     });
@@ -617,6 +622,8 @@ class _UserPageState extends State<UserPage> {
   Future<void> addOfflineEventsToCompanions(UserInfoModel? userInfo) async {
     var events = await OfflineDataService.getAllEvents();
     userInfo?.companions?.forEach((c) {
+      c.schedule?.clear();
+      c.timeBlocks.clear();
       for (var ei in c.eventIds) {
         var match = events.firstWhereOrNull((e) => e.id == ei);
         if (match != null) {
