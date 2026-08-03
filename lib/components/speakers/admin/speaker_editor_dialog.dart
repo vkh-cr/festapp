@@ -157,7 +157,8 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
       return;
     }
 
-    final result = await ExceptionHandler.guard<({int created, List<int> eventIds})>(
+    final result =
+        await ExceptionHandler.guard<({int created, List<int> eventIds})>(
       context,
       futureFunction: () => DbSpeakers.createCounselingSlots(
         speakerId: widget.speaker.id!,
@@ -237,6 +238,8 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
         id: slot.id,
         startTime: slot.startTime ?? DateTime.now(),
         endTime: slot.endTime ?? DateTime.now(),
+        occasionId: _occasionId,
+        aggregateVersion: slot.aggregateVersion,
       )),
     );
     if (ok && mounted) {
@@ -253,7 +256,8 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
       futureFunction: () => DbSpeakers.getSpeakersForEdit(_occasionId),
     );
     if (data == null || !mounted) return;
-    final fresh = data.speakers.where((s) => s.id == widget.speaker.id).toList();
+    final fresh =
+        data.speakers.where((s) => s.id == widget.speaker.id).toList();
     if (fresh.isNotEmpty) {
       setState(() => widget.speaker.events = fresh.first.events);
     }
@@ -263,8 +267,9 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AlertDialog(
-      title: Text(
-          _isExisting ? SpeakersStrings.editSpeaker : SpeakersStrings.addSpeaker),
+      title: Text(_isExisting
+          ? SpeakersStrings.editSpeaker
+          : SpeakersStrings.addSpeaker),
       content: SizedBox(
         width: 520,
         child: SingleChildScrollView(
@@ -417,8 +422,8 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
     final slots = widget.speaker.events
         .where((e) => e.isCounselingSlot)
         .toList()
-      ..sort((a, b) => (a.startTime ?? DateTime(0))
-          .compareTo(b.startTime ?? DateTime(0)));
+      ..sort((a, b) =>
+          (a.startTime ?? DateTime(0)).compareTo(b.startTime ?? DateTime(0)));
     final fmt = DateFormat.MMMd(context.locale.languageCode).add_Hm();
 
     return Column(
