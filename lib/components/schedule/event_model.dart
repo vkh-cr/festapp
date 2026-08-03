@@ -193,7 +193,7 @@ class EventModel extends ITrinaRowModel {
       data: eventData,
       place: (json.containsKey(placesTable) && json[placesTable] != null)
           ? PlaceModel.fromJson(json[placesTable])
-          : json.containsKey(placeColumn)
+          : json[placeColumn] != null
               ? PlaceModel(
                   id: json[placeColumn],
                   title: null,

@@ -24,4 +24,16 @@ void main() {
     expect(event.childEventIds, [2608, 2609]);
     expect(event.aggregateVersion, 7);
   });
+
+  test('editor DTO with no assigned place keeps place null', () {
+    final event = EventModel.fromCommandJson({
+      'id': 2933,
+      'title': 'Event without a place',
+      'startTime': '2026-08-11T14:00:00Z',
+      'endTime': '2026-08-11T16:00:00Z',
+      'placeId': null,
+    }, 7);
+
+    expect(event.place, isNull);
+  });
 }

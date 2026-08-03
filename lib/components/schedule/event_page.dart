@@ -572,7 +572,9 @@ class _EventPageState extends State<EventPage> {
       final List<String> metaTexts = [];
       final String dur = _event!.durationString(context);
       if (dur.isNotEmpty) metaTexts.add(dur);
-      if (_event!.place != null) metaTexts.add(_event!.place!.title ?? "");
+      if (_event!.place?.id != null) {
+        metaTexts.add(_event!.place!.title ?? "");
+      }
       final int maxP = _event!.maxParticipants ?? 0;
       if (maxP > 0) {
         metaTexts.add("${_event!.currentParticipants ?? 0}/$maxP");
@@ -959,7 +961,7 @@ class _EventPageState extends State<EventPage> {
       items.add(_metaItem(Icons.access_time, duration, fg, iconSize, fontSize));
     }
 
-    if (_event?.place != null) {
+    if (_event?.place?.id != null) {
       items.add(_placeItem(
           context, fg, _event?.place?.title ?? "", iconSize, fontSize));
     }
