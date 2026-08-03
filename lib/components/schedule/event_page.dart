@@ -9,6 +9,7 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/timeline/light_timeline_view.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/event_page_theme.dart';
+import 'package:fstapp/components/schedule/saved_program_ui.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
@@ -77,6 +78,7 @@ class _EventPageState extends State<EventPage> {
 
   bool isLoadingEvent = true;
   bool _isUpdatingSavedProgram = false;
+  int _savedProgramMutationRevision = 0;
 
   final ScrollController _scrollController = ScrollController();
   bool _blockScroll = false;
@@ -769,14 +771,12 @@ class _EventPageState extends State<EventPage> {
                   onPressed: _isUpdatingSavedProgram
                       ? null
                       : () => _setSavedProgram(canSave),
-                  icon: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 150),
-                    child: Icon(
-                      canSave ? Icons.add_circle_outline : Icons.check_circle,
-                      key: ValueKey(canSave),
-                      color: fg,
-                      size: 30,
-                    ),
+                  icon: SavedProgramActionIcon(
+                    canSave: canSave,
+                    color: fg,
+                    addIcon: Icons.add_circle_outline,
+                    savedIcon: Icons.check_circle,
+                    size: 30,
                   ),
                 ),
               ] else if ((_event?.maxParticipants ?? 0) > 0) ...[
@@ -1020,14 +1020,12 @@ class _EventPageState extends State<EventPage> {
         child: SizedBox(
           width: 56,
           height: 56,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 150),
-            child: Icon(
-              canSave ? Icons.add : Icons.check,
-              key: ValueKey(canSave),
-              color: glyph,
-              size: 30,
-            ),
+          child: SavedProgramActionIcon(
+            canSave: canSave,
+            color: glyph,
+            addIcon: Icons.add,
+            savedIcon: Icons.check,
+            size: 30,
           ),
         ),
       ),
@@ -1249,6 +1247,7 @@ class _EventPageState extends State<EventPage> {
       setState(() {
         event.isInMySchedule = saved;
         _isUpdatingSavedProgram = true;
+        _savedProgramMutationRevision++;
       });
     }
     try {
@@ -1265,7 +1264,12 @@ class _EventPageState extends State<EventPage> {
       if (mounted) setState(() => event.isInMySchedule = previous);
       rethrow;
     } finally {
-      if (mounted) setState(() => _isUpdatingSavedProgram = false);
+      if (mounted) {
+        setState(() {
+          _isUpdatingSavedProgram = false;
+          _savedProgramMutationRevision++;
+        });
+      }
     }
   }
 
@@ -1395,6 +1399,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> loadOfflineData(int id) async {
+    final savedProgramRevisionAtLoadStart = _savedProgramMutationRevision;
     var allEvents = await OfflineDataService.getAllEvents();
     var event = allEvents.firstWhereOrNull((element) => element.id == id);
     if (event != null) {
@@ -1415,7 +1420,14 @@ class _EventPageState extends State<EventPage> {
         } else {
           event.place = null;
         }
-        event.isInMySchedule = await OfflineDataService.isEventSaved(id);
+        final loadedSaved = await OfflineDataService.isEventSaved(id);
+        event.isInMySchedule = reconcileLoadedSavedProgramState(
+          incoming: loadedSaved,
+          visible: _event?.id == id ? _event?.isInMySchedule : null,
+          mutationInFlight: _isUpdatingSavedProgram,
+          loadRevision: savedProgramRevisionAtLoadStart,
+          currentRevision: _savedProgramMutationRevision,
+        );
       }
 
       var childEvents = allEvents
