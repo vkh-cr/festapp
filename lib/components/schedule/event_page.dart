@@ -767,12 +767,20 @@ class _EventPageState extends State<EventPage> {
                 ),
               ] else if ((_event?.maxParticipants ?? 0) > 0) ...[
                 const SizedBox(width: 8),
-                _metaItem(
-                    Icons.people_alt_outlined,
-                    "${_event?.currentParticipants ?? 0}/${_event?.maxParticipants}",
-                    fg,
-                    18,
-                    14),
+                if (_event?.isSignedIn == true)
+                  _participantPill(
+                      context,
+                      fg,
+                      "${_event?.currentParticipants ?? 0}/${_event?.maxParticipants}",
+                      18,
+                      14)
+                else
+                  _metaItem(
+                      Icons.people_alt_outlined,
+                      "${_event?.currentParticipants ?? 0}/${_event?.maxParticipants}",
+                      fg,
+                      18,
+                      14),
               ],
             ],
           ),
@@ -1189,16 +1197,17 @@ class _EventPageState extends State<EventPage> {
 
   Widget _participantPill(BuildContext context, Color fg, String text,
       double iconSize, double fontSize) {
-    final bool darkHeader = fg == Colors.white;
-    // Dark banners get a translucent "glassy" white pill; light banners get a
-    // solid brand-blue pill (matches production).
-    final Color pillBg =
-        darkHeader ? fg.withValues(alpha: 0.22) : ThemeConfig.seed1;
-    final Color pillFg = darkHeader ? Colors.white : Colors.white;
+    final colorScheme = Theme.of(context).colorScheme;
+    final pill = EventPageTheme.participantPillColors(
+      headerForeground: fg,
+      primary: colorScheme.primary,
+      onPrimary: colorScheme.onPrimary,
+      isSignedIn: _event?.isSignedIn == true,
+    );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
-        color: pillBg,
+        color: pill.background,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -1206,11 +1215,12 @@ class _EventPageState extends State<EventPage> {
         children: [
           Text(text,
               style: TextStyle(
-                  color: pillFg,
+                  color: pill.foreground,
                   fontWeight: FontWeight.bold,
                   fontSize: fontSize)),
           const SizedBox(width: 6),
-          Icon(Icons.people_alt_outlined, color: pillFg, size: iconSize),
+          Icon(Icons.people_alt_outlined,
+              color: pill.foreground, size: iconSize),
         ],
       ),
     );

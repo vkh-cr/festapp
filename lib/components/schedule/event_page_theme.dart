@@ -14,4 +14,21 @@ class EventPageTheme {
     }
     return base.changeColorLightness(0.90);
   }
+
+  static ({Color background, Color foreground}) participantPillColors({
+    required Color headerForeground,
+    required Color primary,
+    required Color onPrimary,
+    required bool isSignedIn,
+  }) {
+    if (isSignedIn) {
+      return (background: primary, foreground: onPrimary);
+    }
+    return (
+      background: headerForeground == Colors.white
+          ? headerForeground.withValues(alpha: 0.22)
+          : ThemeConfig.seed1,
+      foreground: Colors.white,
+    );
+  }
 }

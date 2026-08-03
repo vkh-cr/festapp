@@ -135,6 +135,15 @@ class DbEvents {
         (data['event'] as Map).cast<String, dynamic>(),
         (data['version'] as num).toInt(),
       );
+      final placeId = event.place?.id;
+      if (placeId != null) {
+        for (final place in await OfflineDataService.getAllPlaces()) {
+          if (place.id == placeId) {
+            event.place = place;
+            break;
+          }
+        }
+      }
       event.occasionId = RightsService.currentOccasionId();
     } else {
       var data = await _supabase

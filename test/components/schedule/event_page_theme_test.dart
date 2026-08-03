@@ -16,4 +16,19 @@ void main() {
     expect(light.computeLuminance(), greaterThan(0.7));
     expect(dark.computeLuminance(), lessThan(0.2));
   });
+
+  test('signed-in participant pill uses the active primary theme colors', () {
+    const primary = Color(0xff123456);
+    const onPrimary = Color(0xfffefefe);
+
+    final colors = EventPageTheme.participantPillColors(
+      headerForeground: Colors.white,
+      primary: primary,
+      onPrimary: onPrimary,
+      isSignedIn: true,
+    );
+
+    expect(colors.background, primary);
+    expect(colors.foreground, onPrimary);
+  });
 }
