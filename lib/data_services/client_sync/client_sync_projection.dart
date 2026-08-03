@@ -16,6 +16,7 @@ import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_model.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:flutter/foundation.dart';
 
 class ClientSyncProjection {
   static Future<Map<String, dynamic>> occasionConfig() async =>
@@ -180,6 +181,15 @@ class ClientSyncProjection {
         await ClientSyncRuntime.readPublic(ClientSyncComponent.livePublic);
     final marker =
         await ClientSyncRuntime.readPrivate(ClientSyncComponent.privateNews);
+    return projectNews(content: content, live: live, marker: marker);
+  }
+
+  @visibleForTesting
+  static List<NewsModel> projectNews({
+    required Map<String, dynamic> content,
+    Map<String, dynamic>? live,
+    Object? marker,
+  }) {
     final viewsByNewsId = <int, int>{
       for (final item
           in ((live?['newsViews'] as List?) ?? const []).whereType<Map>())
@@ -199,7 +209,8 @@ class ClientSyncProjection {
       });
       item.isRead = item.id <= lastRead;
       return item;
-    }).toList(growable: false);
+    }).toList()
+      ..sort((a, b) => b.id.compareTo(a.id));
   }
 
   static Future<int> unreadNewsCount() async =>
