@@ -29,6 +29,7 @@ import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
+import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -343,9 +344,12 @@ class _CleaningPageState extends State<CleaningPage> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: RefreshIndicator(
-            onRefresh: () => _loadData(),
-            child: _buildBody(context),
+          child: ValueListenableBuilder<bool>(
+            valueListenable: ConnectivityService.isOfflineNotifier,
+            builder: (context, _, __) => RefreshIndicator(
+              onRefresh: () => _loadData(),
+              child: _buildBody(context),
+            ),
           ),
         ),
       ),
@@ -376,7 +380,10 @@ class _CleaningPageState extends State<CleaningPage> {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       children: [
         // Cached statuses: say how old they are (freshness matters here).
-        if (_cacheFetchedAt != null) ...[
+        if (shouldShowCleaningOfflineBanner(
+          cacheFetchedAt: _cacheFetchedAt,
+          isOffline: ConnectivityService.isOfflineNotifier.value,
+        )) ...[
           _buildCacheAgeBanner(context),
           const SizedBox(height: 12),
         ],
