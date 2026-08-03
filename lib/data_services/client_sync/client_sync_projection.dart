@@ -42,9 +42,8 @@ class ClientSyncProjection {
         ((catalog?['eventGroups'] as List?) ?? const []).whereType<Map>();
     final roles =
         ((catalog?['eventRoles'] as List?) ?? const []).whereType<Map>();
-    return ((catalog?['events'] as List?) ?? const [])
-        .whereType<Map>()
-        .map((raw) {
+    final events =
+        ((catalog?['events'] as List?) ?? const []).whereType<Map>().map((raw) {
       final id = (raw['id'] as num).toInt();
       final liveEvent = liveById[id];
       return EventModel.fromJson({
@@ -78,6 +77,17 @@ class ClientSyncProjection {
         ],
       });
     }).toList(growable: false);
+    final eventsById = <int, EventModel>{
+      for (final event in events)
+        if (event.id case final id?) id: event,
+    };
+    for (final event in events) {
+      event.childEvents = [
+        for (final childId in event.childEventIds ?? const <int>[])
+          if (eventsById[childId] case final child?) child,
+      ];
+    }
+    return events;
   }
 
   static Set<int> _ids(Object? value) => value is List
@@ -166,8 +176,16 @@ class ClientSyncProjection {
 
   static Future<List<NewsModel>> _newsWithMarkers() async {
     final content = await _content();
+    final live =
+        await ClientSyncRuntime.readPublic(ClientSyncComponent.livePublic);
     final marker =
         await ClientSyncRuntime.readPrivate(ClientSyncComponent.privateNews);
+    final viewsByNewsId = <int, int>{
+      for (final item
+          in ((live?['newsViews'] as List?) ?? const []).whereType<Map>())
+        if (item['newsId'] case final num newsId)
+          newsId.toInt(): (item['views'] as num?)?.toInt() ?? 0,
+    };
     final lastRead = marker is List && marker.isNotEmpty
         ? ((marker.first as Map)['newsId'] as num?)?.toInt() ?? 0
         : 0;
@@ -176,7 +194,7 @@ class ClientSyncProjection {
         'id': raw['id'],
         'message': raw['message'],
         'created_at': raw['createdAt'],
-        'views': 0,
+        'views': viewsByNewsId[(raw['id'] as num).toInt()] ?? 0,
         'aggregate_version': raw['aggregateVersion'],
       });
       item.isRead = item.id <= lastRead;

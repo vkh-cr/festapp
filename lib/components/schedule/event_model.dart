@@ -246,6 +246,8 @@ class EventModel extends ITrinaRowModel {
       'event_groups': [
         for (final id in (json['parentEventIds'] as List?) ?? const [])
           {'event_parent': id},
+        for (final id in (json['childEventIds'] as List?) ?? const [])
+          {'event_child': id},
       ],
       'event_roles': [
         for (final id in (json['eventRoleIds'] as List?) ?? const [])
