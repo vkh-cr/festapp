@@ -15,11 +15,48 @@ class StoredSyncGeneration {
   final DateTime updatedAt;
 }
 
+class StoredSyncContext {
+  const StoredSyncContext({
+    required this.organizationId,
+    required this.occasionId,
+    required this.occasionLink,
+  });
+
+  final int organizationId;
+  final int occasionId;
+  final String occasionLink;
+
+  Map<String, dynamic> toJson() => {
+        'organizationId': organizationId,
+        'occasionId': occasionId,
+        'occasionLink': occasionLink,
+      };
+
+  static StoredSyncContext? fromJson(Object? value) {
+    if (value is! Map) return null;
+    final organizationId = (value['organizationId'] as num?)?.toInt();
+    final occasionId = (value['occasionId'] as num?)?.toInt();
+    final occasionLink = value['occasionLink'] as String?;
+    if (organizationId == null ||
+        occasionId == null ||
+        occasionLink == null ||
+        occasionLink.isEmpty) {
+      return null;
+    }
+    return StoredSyncContext(
+      organizationId: organizationId,
+      occasionId: occasionId,
+      occasionLink: occasionLink,
+    );
+  }
+}
+
 /// Content-addressed client cache with scoped, atomically activated pointers.
 class ClientSyncStore {
   ClientSyncStore({this.databasePath = 'client_sync_v1.db'});
 
   final String databasePath;
+  static const _lastContextKey = 'context/last';
 
   String _blobKey(String digest) => 'blob/$digest';
   String _pointerKey(String scope, SyncFreshnessClass type) =>
@@ -97,4 +134,23 @@ class ClientSyncStore {
         'generation/$scope/${SyncFreshnessClass.privateIdentity.name}/',
         databasePath);
   }
+
+  Future<void> saveLastContext(StoredSyncContext context) => StorageHelper.set(
+        _lastContextKey,
+        jsonEncode(context.toJson()),
+        databasePath,
+      );
+
+  Future<StoredSyncContext?> readLastContext() async {
+    final raw = await StorageHelper.get(_lastContextKey, databasePath);
+    if (raw == null) return null;
+    try {
+      return StoredSyncContext.fromJson(jsonDecode(raw));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> clearLastContext() =>
+      StorageHelper.remove(_lastContextKey, databasePath);
 }

@@ -17,6 +17,8 @@ import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:fstapp/components/timeline/light_timeline_view.dart';
@@ -61,6 +63,10 @@ class _MySchedulePageState extends State<MySchedulePage> {
       _isLightTimeline = true;
     }
     await loadDataOffline();
+    if (ClientSyncRuntime.isV1Selected ||
+        ConnectivityService.isOfflineNotifier.value) {
+      return;
+    }
     await loadData();
   }
 
@@ -197,8 +203,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   void _goToMap(int placeId) {
-    MapNavigation.openPlace(context, placeId)
-        .then((_) => loadData());
+    MapNavigation.openPlace(context, placeId).then((_) => loadData());
   }
 
   bool _isUserApprover() => RightsService.isApprover();

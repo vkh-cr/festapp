@@ -149,12 +149,20 @@ class OfflineDataService {
   /// the whole bundle, shown by the offline banner.
   static const String lastSyncedAtOffline = "lastSyncedAt";
 
-  static Future<void> saveLastSyncedAt(DateTime time) =>
-      StorageHelper.set(lastSyncedAtOffline, time.toUtc().toIso8601String());
+  static Future<void> saveLastSyncedAt(DateTime time) async {
+    final normalized = time.toUtc();
+    final stored = await StorageHelper.get(lastSyncedAtOffline);
+    final previous = stored == null ? null : DateTime.tryParse(stored)?.toUtc();
+    if (previous != null && previous.isAfter(normalized)) return;
+    await StorageHelper.set(lastSyncedAtOffline, normalized.toIso8601String());
+  }
 
   static Future<DateTime?> getLastSyncedAt() async {
     final raw = await StorageHelper.get(lastSyncedAtOffline);
-    return raw == null ? null : DateTime.tryParse(raw)?.toLocal();
+    return resolveOfflineBannerTimestamp(
+      legacyTimestamp: raw == null ? null : DateTime.tryParse(raw),
+      clientSyncTimestamp: ClientSyncRuntime.latestLastSuccess,
+    )?.toLocal();
   }
 
   /// Last place-type filter selected on the map, restored on the next visit.
@@ -185,9 +193,11 @@ class OfflineDataService {
   static Future<void> saveGlobalSettings(OccasionSettingsModel toSave) =>
       saveOffline(OccasionSettingsModel.globalSettingsOffline, toSave);
 
-  static Future<OccasionSettingsModel?> getGlobalSettings() => getOffline(
-      OccasionSettingsModel.globalSettingsOffline,
-      OccasionSettingsModel.fromJson);
+  static Future<OccasionSettingsModel?> getGlobalSettings() =>
+      ClientSyncRuntime.isV1Selected
+          ? ClientSyncProjection.occasionSettings()
+          : getOffline(OccasionSettingsModel.globalSettingsOffline,
+              OccasionSettingsModel.fromJson);
 
   static Future<void> saveAllEvents(List<EventModel> toSave) =>
       saveAllOffline(eventsOfflineStorage, toSave);
@@ -286,7 +296,8 @@ class OfflineDataService {
   static Future<UserInventoryBundle?> getUserInventoryBundle() =>
       ClientSyncRuntime.isV1Selected
           ? ClientSyncProjection.userInventory()
-          : getOffline(userInventoryBundleOffline, UserInventoryBundle.fromJson);
+          : getOffline(
+              userInventoryBundleOffline, UserInventoryBundle.fromJson);
 
   /// **Deletes the `UserInventoryBundle` from offline storage.**
   static Future<void> deleteUserInventoryBundle() =>
@@ -354,4 +365,15 @@ class OfflineDataService {
     }
     return toReturn;
   }
+}
+
+DateTime? resolveOfflineBannerTimestamp({
+  required DateTime? legacyTimestamp,
+  required DateTime? clientSyncTimestamp,
+}) {
+  if (legacyTimestamp == null) return clientSyncTimestamp;
+  if (clientSyncTimestamp == null) return legacyTimestamp;
+  return clientSyncTimestamp.isAfter(legacyTimestamp)
+      ? clientSyncTimestamp
+      : legacyTimestamp;
 }

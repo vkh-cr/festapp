@@ -114,7 +114,10 @@ Future<void> initializeEverything() async {
       // network interface is down.
       httpClient: HealthTrackingHttpClient(),
     ).timeout(const Duration(seconds: 2));
-    ClientSyncRuntime.configure(Supabase.instance.client);
+    ClientSyncRuntime.configure(
+      Supabase.instance.client,
+      onLastSuccess: OfflineDataService.saveLastSyncedAt,
+    );
     AppLogger.debug('Supabase initialized');
     if (!startOffline) {
       if (AuthService.isLoggedIn()) {
@@ -143,6 +146,12 @@ Future<void> initializeEverything() async {
   }
 
   try {
+    final cachedSyncModel = allowPersistedOccasionData
+        ? await ClientSyncRuntime.restoreLastContext()
+        : null;
+    if (cachedSyncModel != null) {
+      AppLogger.debug('Restored cached client sync context');
+    }
     var settings = allowPersistedOccasionData
         ? await OfflineDataService.getGlobalSettings()
         : null;
@@ -152,9 +161,14 @@ Future<void> initializeEverything() async {
           ? await OfflineDataService.getUserInfo()
           : null;
       RightsService.occasionLinkModelNotifier.value = OccasionLinkModel(
+          code: 200,
+          clientSyncV1: cachedSyncModel != null,
           userInfo: cachedUser,
           occasionUser: cachedUser?.occasionUser,
           occasion: OccasionModel(
+              id: cachedSyncModel?.occasion?.id,
+              link: cachedSyncModel?.occasion?.link,
+              organization: cachedSyncModel?.occasion?.organization,
               features: settings.features,
               isOpen: true,
               isHidden: false,
@@ -182,9 +196,9 @@ Future<void> initializeEverything() async {
       RightsService.useOfflineVersion = true;
       AppLogger.debug('Offline start: using cached occasion data');
     } else {
-      await RightsService.updateAppData(refreshOffline: false);
+      await RightsService.updateAppData(force: true, refreshOffline: false);
       AppLogger.debug('Occasion loaded');
-      if (AuthService.isLoggedIn()) {
+      if (AuthService.isLoggedIn() && !ClientSyncRuntime.isV1Selected) {
         unawaited(SynchroService.refreshUserOfflineData().then((_) {
           AppLogger.debug('Private offline snapshot refreshed');
         }, onError: (Object error) {

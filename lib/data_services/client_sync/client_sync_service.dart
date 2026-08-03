@@ -66,6 +66,12 @@ class ClientSyncService {
     _scheduleNextTick();
   }
 
+  Future<void> reconnect() async {
+    if (_context == null) return;
+    await refresh(reason: SyncReason.reconnect, privateConsumer: true);
+    _scheduleNextTick();
+  }
+
   void setForeground(bool foreground) {
     _foreground = foreground;
     _timer?.cancel();

@@ -57,6 +57,24 @@ void main() {
     await service.dispose();
   });
 
+  test('reconnect refreshes immediately and resumes periodic synchronization',
+      () async {
+    final fixture = _PublicFixture(validMapClosure: true);
+    final service = ClientSyncService(
+      publicHeadRemote: fixture,
+      publicComponentRemote: fixture,
+      privateRemote: _NoPrivateRemote(),
+      store: _MemoryStore(),
+      clock: () => DateTime.utc(2026, 8, 3),
+    );
+
+    await service.open(context).first;
+    await service.reconnect();
+
+    expect(fixture.headCalls, 1);
+    await service.dispose();
+  });
+
   test('failed public activations do not advance the private-tick cadence',
       () async {
     final fixture = _PublicFixture(validMapClosure: false);
@@ -194,6 +212,7 @@ class _PublicFixture implements PublicSyncHeadRemote, PublicComponentRemote {
   static final _manifestUri = Uri.parse('https://assets.test/manifest.json');
   final Map<Uri, List<int>> _bytes = {};
   late final PublicSyncHead _head;
+  int headCalls = 0;
 
   static Map<String, dynamic> _descriptor(
           Uri uri, int bytes, int revision, String digest) =>
@@ -206,8 +225,10 @@ class _PublicFixture implements PublicSyncHeadRemote, PublicComponentRemote {
       };
 
   @override
-  Future<PublicHeadResult> getHead(SyncContext context) async =>
-      PublicHeadResult(notModified: false, head: _head);
+  Future<PublicHeadResult> getHead(SyncContext context) async {
+    headCalls++;
+    return PublicHeadResult(notModified: false, head: _head);
+  }
 
   @override
   Future<List<int>> download(ArtifactDescriptor descriptor,

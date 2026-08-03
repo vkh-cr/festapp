@@ -76,6 +76,12 @@ class OfflineMapBundleManager {
         useReadyCache: false,
       );
 
+  /// Opens and verifies an installed bundle without issuing a network request.
+  Future<OfflineMapBundleInstallation?> openCached(Uri manifestUri) async {
+    _requireAllowedUri(manifestUri);
+    return _openCachedForManifestUri(manifestUri);
+  }
+
   Future<OfflineMapBundleInstallation> _install(
     Uri manifestUri, {
     required bool useReadyCache,

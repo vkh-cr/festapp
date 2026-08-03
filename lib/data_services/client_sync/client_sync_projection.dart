@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:fstapp/components/icons/place_type_model.dart';
 import 'package:fstapp/components/cleaning/models/cleaning_place_status.dart';
 import 'package:fstapp/components/information/information_model.dart';
@@ -14,6 +15,8 @@ import 'package:fstapp/components/activities/activity_data_helper.dart';
 import 'package:fstapp/components/activities/activity_model.dart';
 import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_model.dart';
+import 'package:fstapp/components/features/feature.dart';
+import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:flutter/foundation.dart';
@@ -23,6 +26,26 @@ class ClientSyncProjection {
       (await ClientSyncRuntime.readPublic(ClientSyncComponent.occasionConfig) ??
               const <String, dynamic>{})
           .cast<String, dynamic>();
+
+  static Future<OccasionSettingsModel?> occasionSettings() async {
+    final config = await occasionConfig();
+    if (config.isEmpty) return null;
+    return OccasionSettingsModel(
+      eventStartTime: DateTime.tryParse(config['startTime']?.toString() ?? ''),
+      eventEndTime: DateTime.tryParse(config['endTime']?.toString() ?? ''),
+      services: config['services'] is Map
+          ? Map<String, dynamic>.from(config['services'] as Map)
+          : null,
+      features: ((config['features'] as List?) ?? const [])
+          .whereType<Map>()
+          .map((raw) => Feature.fromJson(Map<String, dynamic>.from(raw)))
+          .toList(growable: false),
+      data: config['data'] is Map
+          ? Map<String, dynamic>.from(config['data'] as Map)
+          : null,
+      isHidden: false,
+    );
+  }
 
   static Future<List<EventModel>> events() async {
     final catalog =
@@ -280,7 +303,9 @@ class ClientSyncProjection {
         await ClientSyncRuntime.readPrivate(ClientSyncComponent.privateProfile);
     if (profile is! Map || profile['user'] is! Map) return null;
     final user = (profile['user'] as Map).cast<String, dynamic>();
-    return UserInfoModel.fromJson({
+    final occasion = profile['occasion'];
+    final occasionMap = occasion is Map ? occasion : const <String, dynamic>{};
+    final result = UserInfoModel.fromJson({
       'id': user['id'],
       'email_readonly': user['email'],
       'name': user['name'],
@@ -288,8 +313,48 @@ class ClientSyncProjection {
       'sex': user['sex'],
       'phone': user['phone'],
       'birth_date': user['birthDate'],
-      'occasionUser': profile['occasion'],
+      'occasionUser': {
+        'role': occasionMap['role'],
+        'services': occasionMap['services'],
+        'data': occasionMap['data'],
+        'is_cleaning_blocked': occasionMap['isCleaningBlocked'],
+        'is_cleaning_crew': occasionMap['isCleaningCrew'],
+      },
     });
+    final projectedGroups = await groups();
+    result.userGroups = projectedGroups.toSet();
+    result.eventUserGroup =
+        projectedGroups.where((group) => group.type == null).firstOrNull;
+    result.companions = await companions();
+
+    final userServices = occasion is Map ? occasion['services'] : null;
+    final accommodationCodes =
+        userServices is Map ? userServices['accommodation'] as Map? : null;
+    final accommodationCode = accommodationCodes?.keys
+        .whereType<String>()
+        .where((code) => code.isNotEmpty)
+        .firstOrNull;
+    if (accommodationCode != null) {
+      final config = await occasionConfig();
+      final services = config['services'];
+      final accommodation =
+          services is Map ? services['accommodation'] as List? : null;
+      final service = accommodation
+          ?.whereType<Map>()
+          .firstWhereOrNull((item) => item['code'] == accommodationCode);
+      final reference = (service?['reference'] as num?)?.toInt();
+      if (reference != null) {
+        result.accommodationPlace = (await places())
+                .firstWhereOrNull((place) => place.id == reference) ??
+            PlaceModel(
+              id: reference,
+              title: service?['title'] as String?,
+              description: '',
+              type: '',
+            );
+      }
+    }
+    return result;
   }
 
   static Future<List<UserGroupInfoModel>> groups() async {

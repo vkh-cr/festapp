@@ -57,7 +57,7 @@ class InstallationCutoverService {
     // also safely handles development builds installed before this marker;
     // content-addressed blobs are harmless and may be reused after bootstrap.
     await _removePrefixes(
-      const ['pointer/', 'generation/'],
+      const ['pointer/', 'generation/', 'context/'],
       clientSyncDatabase,
     );
     await _writeAtomic({

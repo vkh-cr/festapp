@@ -14,6 +14,7 @@ import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/services/notification_helper.dart';
@@ -74,6 +75,11 @@ class AuthService {
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      return await ClientSyncProjection.userInfo() ??
+          RightsService.currentUser() ??
+          UserInfoModel();
+    }
     final participation =
         await DbUsers.getOccasionUser(AuthService.currentUserId());
     var user = (RightsService.currentUser() ?? UserInfoModel())

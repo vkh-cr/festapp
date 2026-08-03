@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:http/http.dart' as http;
 
@@ -105,8 +104,7 @@ class ConnectivityService {
     final wasOffline = isOfflineNotifier.value;
     isOfflineNotifier.value = _interfaceOffline || _backendUnreachable;
     if (wasOffline && !isOfflineNotifier.value) {
-      unawaited(ClientSyncRuntime.refresh(SyncReason.reconnect,
-          privateConsumer: true));
+      unawaited(ClientSyncRuntime.connectivityRestored());
     }
   }
 

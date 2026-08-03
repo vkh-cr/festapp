@@ -140,6 +140,15 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
   }
 
   Widget _buildAttribution() {
+    if (widget.offline) {
+      final text = widget.layer.text;
+      if (text == null || text.isEmpty) return const SizedBox.shrink();
+      return fm.RichAttributionWidget(
+        showFlutterMapAttribution: false,
+        animationConfig: const fm.ScaleRAWA(),
+        attributions: [fm.TextSourceAttribution(text)],
+      );
+    }
     if ((widget.layer.logo?.isNotEmpty ?? false) ||
         (widget.layer.text?.isNotEmpty ?? false)) {
       return fm.RichAttributionWidget(

@@ -9,6 +9,26 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
+  test('offline cache lookup never falls through to the network', () async {
+    final root = await Directory.systemTemp.createTemp('bundle-offline-test');
+    addTearDown(() => root.delete(recursive: true));
+    var requests = 0;
+    final manager = OfflineMapBundleManager(
+      rootDirectory: root,
+      client: MockClient((request) async {
+        requests++;
+        return http.Response('unexpected', 500);
+      }),
+    );
+
+    final cached = await manager.openCached(
+      Uri.parse('https://example.test/manifest.json'),
+    );
+
+    expect(cached, isNull);
+    expect(requests, 0);
+  });
+
   test('downloads, verifies, publishes, and reuses a ready bundle', () async {
     final root = await Directory.systemTemp.createTemp('bundle-manager-test');
     addTearDown(() => root.delete(recursive: true));

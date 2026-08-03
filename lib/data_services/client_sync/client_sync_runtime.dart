@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
+import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_remote.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_service.dart';
@@ -17,6 +18,7 @@ class ClientSyncRuntime {
   static final state = ValueNotifier<ClientSyncState?>(null);
   static final projectionEpoch = ValueNotifier<int>(0);
   static ClientSyncService? _service;
+  static Future<void> Function(DateTime)? _onLastSuccess;
   static StreamSubscription<ClientSyncState>? _subscription;
   static OccasionLinkModel? _selectedModel;
   static bool _v1Selected = false;
@@ -25,12 +27,28 @@ class ClientSyncRuntime {
   static String? _projectionSignature;
 
   static bool get isV1Selected => _v1Selected;
+  static DateTime? get latestLastSuccess {
+    DateTime? latest;
+    for (final classState
+        in state.value?.classes.values ?? const <SyncClassState>[]) {
+      final candidate = classState.lastSuccess;
+      if (candidate != null && (latest == null || candidate.isAfter(latest))) {
+        latest = candidate;
+      }
+    }
+    return latest;
+  }
+
   static DateTime? lastSuccess(SyncFreshnessClass type) =>
       state.value?.classes[type]?.lastSuccess;
   static ClientSyncStore get store => _store;
   static final ClientSyncStore _store = ClientSyncStore();
 
-  static void configure(SupabaseClient supabase) {
+  static void configure(
+    SupabaseClient supabase, {
+    Future<void> Function(DateTime)? onLastSuccess,
+  }) {
+    _onLastSuccess = onLastSuccess;
     final publicRemote = HttpPublicSyncRemote(
       headOrigin: Uri.parse(AppConfig.syncHeadOrigin),
       artifactOrigin: Uri.parse(AppConfig.syncAssetOrigin),
@@ -43,7 +61,29 @@ class ClientSyncRuntime {
     );
   }
 
-  static Future<void> bootstrap(OccasionLinkModel model) async {
+  static Future<OccasionLinkModel?> restoreLastContext() async {
+    final stored = await _store.readLastContext();
+    if (stored == null) return null;
+    final model = OccasionLinkModel(
+      code: 200,
+      clientSyncV1: true,
+      occasion: OccasionModel(
+        id: stored.occasionId,
+        link: stored.occasionLink,
+        organization: stored.organizationId,
+        isOpen: true,
+        isHidden: false,
+        isPromoted: false,
+      ),
+    );
+    await bootstrap(model, networkAvailable: false);
+    return model;
+  }
+
+  static Future<void> bootstrap(
+    OccasionLinkModel model, {
+    bool networkAvailable = true,
+  }) async {
     final service = _service;
     final occasion = model.occasion;
     if (service == null || occasion?.id == null || occasion?.link == null) {
@@ -58,6 +98,7 @@ class ClientSyncRuntime {
     projectionEpoch.value++;
     state.value = null;
     if (!_v1Selected) {
+      if (networkAvailable) await _store.clearLastContext();
       return;
     }
     final context = SyncContext(
@@ -67,11 +108,21 @@ class ClientSyncRuntime {
       userId: Supabase.instance.client.auth.currentUser?.id,
       identityEpoch: _identityEpoch,
     );
+    await _store.saveLastContext(StoredSyncContext(
+      organizationId: context.organizationId,
+      occasionId: context.occasionId,
+      occasionLink: context.occasionLink,
+    ));
     _context = context;
     final opened = Completer<void>();
     _subscription = service.open(context).listen(
       (value) {
         state.value = value;
+        final latest = latestLastSuccess;
+        final persist = _onLastSuccess;
+        if (latest != null && persist != null) {
+          unawaited(persist(latest));
+        }
         unawaited(_updateProjectionEpoch());
         if (!opened.isCompleted) opened.complete();
       },
@@ -80,6 +131,7 @@ class ClientSyncRuntime {
       },
     );
     await opened.future;
+    if (!networkAvailable) return;
     final existing = await _store.activeGeneration(
         context.publicScope, SyncFreshnessClass.catalog);
     if (existing == null) {
@@ -103,6 +155,11 @@ class ClientSyncRuntime {
       {bool privateConsumer = false}) async {
     if (!_v1Selected) return;
     await _service?.refresh(reason: reason, privateConsumer: privateConsumer);
+  }
+
+  static Future<void> connectivityRestored() async {
+    if (!_v1Selected) return;
+    await _service?.reconnect();
   }
 
   static Future<Map<String, dynamic>?> readPublic(

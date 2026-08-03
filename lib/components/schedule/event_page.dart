@@ -19,6 +19,7 @@ import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/groups/db_groups.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/companion/companion_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
@@ -30,6 +31,7 @@ import 'package:fstapp/components/schedule/event_edit_page.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/time_helper.dart';
+import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -140,6 +142,16 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_event == null) {
+      return Scaffold(
+        appBar: AppBar(leading: const ScheduleBackButton()),
+        body: Center(
+          child: isLoadingEvent
+              ? const CircularProgressIndicator()
+              : Text(ScheduleStrings.noEvents),
+        ),
+      );
+    }
     final bool isEventCancelled = _event?.isCancelled ?? false;
     final scheduleFeature =
         FeatureService.getFeatureDetails(FeatureConstants.schedule);
@@ -827,7 +839,9 @@ class _EventPageState extends State<EventPage> {
   /// the type color, and the default (untyped) event gets the brand navy→orange
   /// diagonal with a downward dark scrim.
   Widget _headerBackground(EventType? eventType, Widget child) {
-    final String? imageUrl = _headerImageUrl();
+    final String? imageUrl = ConnectivityService.isOfflineNotifier.value
+        ? null
+        : _headerImageUrl();
     if (imageUrl != null) {
       return Stack(
         children: [
@@ -1249,23 +1263,28 @@ class _EventPageState extends State<EventPage> {
   Future<void> loadData(int id) async {
     // New event → its header content differs, so remeasure from scratch.
     _measuredExpandedHeight = null;
-    await loadOfflineData(widget.id!);
-    if (await _redirectIfCounselingSlot()) return;
+    try {
+      await loadOfflineData(widget.id!);
+      if (await _redirectIfCounselingSlot()) return;
 
-    await loadEvent(id);
-    if (await _redirectIfCounselingSlot()) return;
-    if (mounted) {
-      // isLoadingEvent should be set after loadEvent completes
-      setState(() {
-        isLoadingEvent = false;
-      });
+      final localOnly = ClientSyncRuntime.isV1Selected ||
+          ConnectivityService.isOfflineNotifier.value;
+      if (!localOnly) {
+        await loadEvent(id);
+        if (await _redirectIfCounselingSlot()) return;
+        if (RightsService.isEditor()) await loadParticipants(id);
+      }
+      if (localOnly) {
+        final cachedSpeakers = await OfflineDataService.getSpeakers();
+        if (cachedSpeakers != null && mounted) {
+          setState(() => _speakersBundle = cachedSpeakers);
+        }
+      } else {
+        await loadSpeakers();
+      }
+    } finally {
+      if (mounted) setState(() => isLoadingEvent = false);
     }
-
-    if (RightsService.isEditor()) {
-      await loadParticipants(id);
-    }
-
-    await loadSpeakers();
   }
 
   /// Counseling events have no meaningful detail page — the rozcestník owns
@@ -1306,7 +1325,9 @@ class _EventPageState extends State<EventPage> {
       // instant; hit the network only when no entry is cached (fresh
       // browser / not yet synced).
       var all = await OfflineDataService.getAllEvents();
-      if (!all.any((e) => e.isCounselingEntry)) {
+      if (!all.any((e) => e.isCounselingEntry) &&
+          !ClientSyncRuntime.isV1Selected &&
+          !ConnectivityService.isOfflineNotifier.value) {
         final occasionId = RightsService.currentOccasionId();
         all = occasionId != null
             ? await DbEvents.getAllEvents(occasionId, false)
