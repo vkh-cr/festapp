@@ -11,6 +11,7 @@ import '../map/place_model.dart';
 import 'group_participant_model.dart';
 
 class UserGroupInfoModel extends ITrinaRowModel {
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
   Map<int, String> checkpointTitlesDict = {};
 
   static const String progressColumn = "progress";
@@ -89,7 +90,7 @@ class UserGroupInfoModel extends ITrinaRowModel {
                   .map((p) => GroupParticipantModel.fromJson(p)))
               : {},
       isAdmin: json[isAdminColumn],
-      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
+      aggregateVersion: TrinaRowVersion.read(json),
     );
   }
 
@@ -102,12 +103,14 @@ class UserGroupInfoModel extends ITrinaRowModel {
     model.description =
         DataGridHelper.getValueOrNull(json[Tb.user_group_info.description]);
     model.place = json[Tb.user_group_info.place] as PlaceModel?;
+    model.aggregateVersion = TrinaRowVersion.read(json);
     return model;
   }
 
   static UserGroupInfoModel fromGamePlutoJson(Map<String, dynamic> json) {
     return UserGroupInfoModel(
         id: json[Tb.user_group_info.id],
+        aggregateVersion: TrinaRowVersion.read(json),
         title: json[Tb.user_group_info.title],
         description: json[Tb.user_group_info.description],
         type: InformationModel.gameType,
@@ -128,6 +131,7 @@ class UserGroupInfoModel extends ITrinaRowModel {
     var progressText = "${checkpoints.length} [${checkpoints.join(",")}]";
 
     return TrinaRow(cells: {
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       Tb.user_group_info.id: TrinaCell(value: id),
       Tb.user_group_info.title: TrinaCell(value: title),
       Tb.user_group_info.description: TrinaCell(value: description),

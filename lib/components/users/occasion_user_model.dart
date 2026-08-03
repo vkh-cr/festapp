@@ -13,7 +13,7 @@ import 'package:trina_grid/trina_grid.dart';
 
 class OccasionUserModel extends ITrinaRowModel {
   static const String birthDateJsonFormat = "yyyy-MM-dd";
-  static const String aggregateVersionColumn = 'aggregate_version';
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
 
   DateTime? createdAt;
   DateTime? lastSignInAt;
@@ -98,7 +98,7 @@ class OccasionUserModel extends ITrinaRowModel {
         role: json[Tb.occasion_users.role],
         data: json[Tb.occasion_users.data],
         services: json[Tb.occasion_users.services],
-        aggregateVersion: (json[aggregateVersionColumn] as num?)?.toInt() ?? 0);
+        aggregateVersion: TrinaRowVersion.read(json));
   }
 
   dynamic toUpdateJson() {
@@ -191,7 +191,7 @@ class OccasionUserModel extends ITrinaRowModel {
     json.addAll(servicesToOneColumnTrinaRow(
         services, DbOccasions.serviceTypeAccommodation));
     json.addAll({
-      aggregateVersionColumn: TrinaCell(value: aggregateVersion),
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       UserColumns.ID: TrinaCell(value: user),
       UserColumns.EDITOR: TrinaCell(value: isEditor.toString()),
       UserColumns.EDITOR_VIEW: TrinaCell(value: isEditorView.toString()),
@@ -290,7 +290,7 @@ class OccasionUserModel extends ITrinaRowModel {
     }
     return OccasionUserModel(
       occasion: RightsService.currentOccasionId(),
-      aggregateVersion: (json[aggregateVersionColumn] as num?)?.toInt() ?? 0,
+      aggregateVersion: TrinaRowVersion.read(json),
       user: json[UserColumns.ID]?.isEmpty == true ? null : json[UserColumns.ID],
       isApprover: json[UserColumns.APPROVER] == "true" ? true : false,
       isApproved: json[UserColumns.APPROVED] == "true" ? true : false,

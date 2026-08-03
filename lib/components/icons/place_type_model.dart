@@ -7,6 +7,7 @@ import 'package:trina_grid/trina_grid.dart';
 /// Occasion place type (category), managed in the "Place types" data grid under
 /// the Places admin tab. Columns: Id, Hide, Default, Code, Title, Icon, Order.
 class PlaceTypeModel extends ITrinaRowModel {
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
   static String placeTypesOffline = Tb.place_types.table;
 
   @override
@@ -43,7 +44,7 @@ class PlaceTypeModel extends ITrinaRowModel {
       order: (json[Tb.place_types.order] as num?)?.toInt(),
       isHidden: json[Tb.place_types.is_hidden] as bool? ?? false,
       isDefault: json[Tb.place_types.is_default] as bool? ?? false,
-      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
+      aggregateVersion: TrinaRowVersion.read(json),
     );
   }
 
@@ -55,6 +56,7 @@ class PlaceTypeModel extends ITrinaRowModel {
         v == null || v.toString().isEmpty ? null : int.tryParse(v.toString());
     return PlaceTypeModel(
       id: asInt(json[Tb.place_types.id]),
+      aggregateVersion: TrinaRowVersion.read(json),
       code: json[Tb.place_types.code]?.toString(),
       title: json[Tb.place_types.title]?.toString(),
       icon: asInt(json[Tb.place_types.icon]),
@@ -78,6 +80,7 @@ class PlaceTypeModel extends ITrinaRowModel {
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       Tb.place_types.id: TrinaCell(value: id),
       Tb.place_types.is_hidden:
           TrinaCell(value: (isHidden ?? false).toString()),

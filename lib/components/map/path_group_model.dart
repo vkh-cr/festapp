@@ -9,6 +9,7 @@ import 'package:trina_grid/trina_grid.dart';
 
 class PathGroupsModel extends ITrinaRowModel {
   static const String pathsOffline = "pathsOffline";
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
 
   @override
   int? id;
@@ -56,7 +57,7 @@ class PathGroupsModel extends ITrinaRowModel {
       isHidden: hidden,
       icon: json[Tb.path_groups.icon] as int?,
       order: json[Tb.path_groups.order] as int?, // extract order
-      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
+      aggregateVersion: TrinaRowVersion.read(json),
     );
   }
 
@@ -117,6 +118,7 @@ class PathGroupsModel extends ITrinaRowModel {
       id: json[Tb.path_groups.id] == -1
           ? null
           : json[Tb.path_groups.id] as int?,
+      aggregateVersion: TrinaRowVersion.read(json),
       title: json[Tb.path_groups.title] as String?,
       data: parsedData,
       pathData: pathData,
@@ -147,6 +149,7 @@ class PathGroupsModel extends ITrinaRowModel {
     final placesCsv = pathDataToCsv(pathData);
 
     return TrinaRow(cells: {
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       Tb.path_groups.id: TrinaCell(value: id),
       Tb.path_groups.title: TrinaCell(value: title),
       Tb.path_groups.data:

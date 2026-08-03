@@ -5,6 +5,7 @@ import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class ExclusiveGroupModel extends ITrinaRowModel {
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
   @override
   int? id;
   String? title;
@@ -28,7 +29,7 @@ class ExclusiveGroupModel extends ITrinaRowModel {
           ? List<int>.from(
               json[Tb.exclusive_events.table].map((e) => e["event"]))
           : null,
-      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
+      aggregateVersion: TrinaRowVersion.read(json),
     );
   }
 
@@ -46,6 +47,7 @@ class ExclusiveGroupModel extends ITrinaRowModel {
         id: json[Tb.exclusive_groups.id] == -1
             ? null
             : json[Tb.exclusive_groups.id],
+        aggregateVersion: TrinaRowVersion.read(json),
         title: json[Tb.exclusive_groups.title],
         events: events);
   }
@@ -53,6 +55,7 @@ class ExclusiveGroupModel extends ITrinaRowModel {
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       Tb.exclusive_groups.id: TrinaCell(value: id),
       Tb.exclusive_groups.title: TrinaCell(value: title),
       Tb.events.table:

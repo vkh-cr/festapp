@@ -6,6 +6,7 @@ import 'package:fstapp/components/information/db_information.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class InformationModel extends ITrinaRowModel {
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
   static const String gameType = "game";
   static const String songType = "song";
   static const String quoteType = "quote";
@@ -44,7 +45,7 @@ class InformationModel extends ITrinaRowModel {
             ? DateTime.parse(json[Tb.occasions.updated_at])
             : null,
         data: json[Tb.information.data],
-        aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
+        aggregateVersion: TrinaRowVersion.read(json),
         informationHidden: json[Tb.information_hidden.table] != null
             ? InformationHiddenModel(
                 id: json[Tb.information_hidden.table][Tb.information_hidden.id],
@@ -73,6 +74,7 @@ class InformationModel extends ITrinaRowModel {
   static InformationModel fromPlutoJson(Map<String, dynamic> json) {
     return InformationModel(
       id: json[Tb.information.id] == -1 ? null : json[Tb.information.id],
+      aggregateVersion: TrinaRowVersion.read(json),
       title: json[Tb.information.title],
       description: json[Tb.information.description],
       type: json[Tb.information.type],
@@ -85,6 +87,7 @@ class InformationModel extends ITrinaRowModel {
   static InformationModel fromPlutoJsonGame(Map<String, dynamic> json) {
     return InformationModel(
         id: json[Tb.information.id] == -1 ? null : json[Tb.information.id],
+        aggregateVersion: TrinaRowVersion.read(json),
         title: json[Tb.information.title],
         description: json[Tb.information.description],
         type: InformationModel.gameType,
@@ -105,6 +108,7 @@ class InformationModel extends ITrinaRowModel {
         : null;
     return InformationModel(
       id: json[Tb.information.id] == -1 ? null : json[Tb.information.id],
+      aggregateVersion: TrinaRowVersion.read(json),
       title: json[Tb.information.title],
       description: json[Tb.information.description],
       type: type,
@@ -120,6 +124,7 @@ class InformationModel extends ITrinaRowModel {
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       Tb.information.id: TrinaCell(value: id ?? -1),
       Tb.information.title: TrinaCell(value: title ?? ""),
       Tb.information.description: TrinaCell(value: description),

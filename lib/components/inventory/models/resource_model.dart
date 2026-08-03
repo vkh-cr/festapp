@@ -8,6 +8,7 @@ import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 
 class ResourceModel implements ITrinaRowModel {
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
   @override
   int? id;
   String? title;
@@ -34,7 +35,7 @@ class ResourceModel implements ITrinaRowModel {
       capacity: json[t.capacity] ?? 1,
       bookingRules: json[t.booking_rules],
       inventoryPoolId: json[t.inventory_pool],
-      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
+      aggregateVersion: TrinaRowVersion.read(json),
     );
   }
 
@@ -46,9 +47,7 @@ class ResourceModel implements ITrinaRowModel {
       title: json[ResourceEditorView.RESOURCE_TITLE] as String?,
       capacity: json[ResourceEditorView.RESOURCE_CAPACITY],
       inventoryPoolId: json[ResourceEditorView.INVENTORY_POOL_ID_FIELD] as int,
-      aggregateVersion:
-          (json[ResourceEditorView.AGGREGATE_VERSION_FIELD] as num?)?.toInt() ??
-              0,
+      aggregateVersion: TrinaRowVersion.read(json),
     );
   }
 
@@ -90,7 +89,7 @@ class ResourceModel implements ITrinaRowModel {
       ResourceEditorView.INVENTORY_POOL_ID_FIELD:
           TrinaCell(value: inventoryPoolId),
       ResourceEditorView.AGGREGATE_VERSION_FIELD:
-          TrinaCell(value: aggregateVersion),
+          TrinaRowVersion.cell(aggregateVersion),
     });
   }
 

@@ -6,6 +6,8 @@ import 'package:fstapp/components/map/db_places.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class PlaceModel extends ITrinaRowModel {
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
+
   /// Raw `{"lat": .., "lng": ..}` map (may be null). It is stored unwrapped:
   /// [fromJson] reads `coordinates["latLng"]`, [fromPlutoJson] reads the cell
   /// value directly, and [toJson] wraps it back into `{"latLng": ...}`.
@@ -64,7 +66,7 @@ class PlaceModel extends ITrinaRowModel {
           : false,
       order: json[Tb.places.order],
       icon: json[Tb.places.icon],
-      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
+      aggregateVersion: TrinaRowVersion.read(json),
     );
   }
 
@@ -72,6 +74,7 @@ class PlaceModel extends ITrinaRowModel {
     return PlaceModel(
         latLng: json[Tb.places.coordinates],
         id: json[Tb.places.id] == -1 ? null : json[Tb.places.id],
+        aggregateVersion: TrinaRowVersion.read(json),
         title: json[Tb.places.title],
         description: json[Tb.places.description].isEmpty
             ? null
@@ -120,6 +123,7 @@ class PlaceModel extends ITrinaRowModel {
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       Tb.places.id: TrinaCell(value: id),
       Tb.places.title: TrinaCell(value: title),
       Tb.places.description: TrinaCell(value: description ?? ""),

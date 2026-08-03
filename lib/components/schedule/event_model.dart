@@ -320,7 +320,7 @@ class EventModel extends ITrinaRowModel {
   static const String isGroupEventColumn = "is_group_event";
 
   static const String currentParticipantsColumn = "currentParticipants";
-  static const String aggregateVersionColumn = "aggregate_version";
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
   static const String isSignedInColumn = "isSignedIn";
   static const String isEventInMyProgramColumn = "isEventInMyProgram";
 
@@ -391,7 +391,7 @@ class EventModel extends ITrinaRowModel {
       description: json[descriptionColumn],
       maxParticipants:
           json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
-      aggregateVersion: (json[aggregateVersionColumn] as num?)?.toInt() ?? 0,
+      aggregateVersion: TrinaRowVersion.read(json),
       data: dataFromTab,
       place: placeId == null
           ? null
@@ -413,7 +413,7 @@ class EventModel extends ITrinaRowModel {
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
       idColumn: TrinaCell(value: id),
-      aggregateVersionColumn: TrinaCell(value: aggregateVersion),
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       isHiddenColumn: TrinaCell(value: isHidden.toString()),
       titleColumn: TrinaCell(value: title),
       descriptionColumn: TrinaCell(value: description),

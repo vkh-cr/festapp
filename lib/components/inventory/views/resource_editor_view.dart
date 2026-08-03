@@ -14,7 +14,8 @@ class ResourceEditorView extends StatefulWidget {
   static const String RESOURCE_CAPACITY = "resourceCapacity";
   // Hidden fields
   static const String INVENTORY_POOL_ID_FIELD = "inventoryPoolId";
-  static const String AGGREGATE_VERSION_FIELD = "aggregateVersion";
+  static const String AGGREGATE_VERSION_FIELD =
+      ResourceModel.aggregateVersionColumn;
   static const String OCCASION_ID_FIELD = "occasionId";
 
   final int inventoryPoolId;
