@@ -81,7 +81,7 @@ class _CleaningPageState extends State<CleaningPage> {
     super.initState();
     _loadData();
     // Live data matters for the crew; poll quietly while the page is open.
-    if (_isCrew && !ClientSyncRuntime.isV1Selected) {
+    if (_isCrew) {
       _pollTimer =
           Timer.periodic(_pollInterval, (_) => _loadData(silent: true));
     }
@@ -94,12 +94,17 @@ class _CleaningPageState extends State<CleaningPage> {
   }
 
   Future<void> _loadData({bool silent = false}) async {
-    if (ClientSyncRuntime.isV1Selected) {
+    if (!shouldLoadLiveCleaningData(
+      isClientSyncV1: ClientSyncRuntime.isV1Selected,
+      isCleaningCrew: _isCrew,
+    )) {
       final cached = await OfflineDataService.getCleaningStatus();
       if (!mounted) return;
       setState(() {
         _places = cached?.places ?? [];
         _reports = [];
+        _isBlocked =
+            RightsService.currentOccasionUser()?.isCleaningBlocked ?? false;
         _cacheFetchedAt = cached?.fetchedAt;
         _loading = false;
       });
