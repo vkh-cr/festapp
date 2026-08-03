@@ -154,4 +154,21 @@ void main() {
     expect(paths[7]!.first.colorValue, const Color(0xffff3366).toARGB32());
     expect(paths[7]!.every((path) => path.kind == MapPathKind.main), isTrue);
   });
+
+  test('place popup requires meaningful HTML content', () {
+    expect(MapPageHelper.hasMeaningfulPlaceDescription(null), isFalse);
+    expect(MapPageHelper.hasMeaningfulPlaceDescription(''), isFalse);
+    expect(
+      MapPageHelper.hasMeaningfulPlaceDescription('<p><br></p>'),
+      isFalse,
+    );
+    expect(
+      MapPageHelper.hasMeaningfulPlaceDescription('<p>Stage details</p>'),
+      isTrue,
+    );
+    expect(
+      MapPageHelper.hasMeaningfulPlaceDescription('<p><img src="map.jpg"></p>'),
+      isTrue,
+    );
+  });
 }

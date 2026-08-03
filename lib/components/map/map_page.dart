@@ -861,7 +861,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         FeatureService.isFeatureEnabled(FeatureConstants.cleaning);
     final hasLongDescription = HtmlHelper.isHtmlLong(place.description);
     final hasEvents = place.events?.isNotEmpty ?? false;
-    final descriptionIsEmpty = place.description?.isEmpty ?? true;
+    final descriptionIsEmpty =
+        !MapPageHelper.hasMeaningfulPlaceDescription(place.description);
 
     if (isToilet) {
       setState(() => _popupPlaceId = placeId);
@@ -915,6 +916,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       child: MapDescriptionPopup(
         place: marker.place,
         isEditing: selectedPlace != null,
+        onClose: () => setState(() => _popupPlaceId = null),
         onChangePosition: () => runEditPositionMode(marker),
         cleaningStatus: isToilet
             ? (_cleaningByPlace[marker.place.id]?.status ??

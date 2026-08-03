@@ -9,6 +9,7 @@ import 'package:fstapp/components/html/html_view.dart';
 class MapDescriptionPopup extends StatefulWidget {
   final MapPlaceModel place;
   final bool isEditing;
+  final VoidCallback onClose;
   final VoidCallback? onChangePosition;
 
   /// For toilet places with the cleaning feature on: the derived status (drives
@@ -19,6 +20,7 @@ class MapDescriptionPopup extends StatefulWidget {
   const MapDescriptionPopup({
     required this.place,
     required this.isEditing,
+    required this.onClose,
     this.onChangePosition,
     this.cleaningStatus,
     this.onReportCleaning,
@@ -52,11 +54,27 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text(
-              widget.place.title,
-              overflow: TextOverflow.fade,
-              softWrap: true,
-              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.place.title,
+                    overflow: TextOverflow.fade,
+                    softWrap: true,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  onPressed: widget.onClose,
+                  icon: const Icon(Icons.close),
+                ),
+              ],
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             if (widget.cleaningStatus != null) _buildCleaningSection(context),

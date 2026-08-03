@@ -8,6 +8,7 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/timeline/light_timeline_view.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/event_page_theme.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
@@ -150,8 +151,12 @@ class _EventPageState extends State<EventPage> {
 
     final EventType? headerEventType = _currentEventType();
     final Color headerFg = _headerForeground();
-    final double expandedHeight =
+    final double expandedContentHeight =
         _measuredExpandedHeight ?? _expandedHeaderHeight(context);
+    final double expandedHeight = EventPageTheme.sliverExpandedHeight(
+      expandedContentHeight,
+      MediaQuery.paddingOf(context).top,
+    );
     final bool showAddButton = _showAddButton(isEventCancelled);
     final onPinchStart = _onPinchStart;
     final onPinchEnd = _onPinchEnd;
@@ -179,7 +184,8 @@ class _EventPageState extends State<EventPage> {
                   elevation: 1,
                   expandedHeight: expandedHeight,
                   collapsedHeight: _collapsedHeaderHeight,
-                  flexibleSpace: _buildFlexibleHeader(context, expandedHeight),
+                  flexibleSpace:
+                      _buildFlexibleHeader(context, expandedContentHeight),
                 ),
                 SliverToBoxAdapter(
                   child: Align(
@@ -425,7 +431,8 @@ class _EventPageState extends State<EventPage> {
               ],
             ),
           ),
-          if (showAddButton) _buildFabOverlay(context, expandedHeight),
+          if (showAddButton)
+            _buildFabOverlay(context, expandedContentHeight),
           // Offstage twin of the expanded header, measured to size the app bar.
           Positioned(
             left: 0,
@@ -503,7 +510,10 @@ class _EventPageState extends State<EventPage> {
   /// event's base colour (light grey for untyped, a pale type tint otherwise).
   Color _collapsedTint() {
     final Color base = ThemeConfig.eventTypeToColor(context, _event?.type);
-    return base.changeColorLightness(0.90);
+    return EventPageTheme.collapsedTint(
+      base,
+      Theme.of(context).brightness,
+    );
   }
 
   double _measureTextWidth(BuildContext context, String text, TextStyle style) {

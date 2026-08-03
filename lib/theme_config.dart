@@ -38,8 +38,8 @@ class ThemeConfig {
           primaryColor: dddPrimary,
           colorScheme: ColorScheme.fromSwatch(
             primarySwatch: ThemeConfig.dddPrimary.getMaterialColorFromColor(),
-          ).copyWith(
             brightness: Brightness.dark,
+          ).copyWith(
             surface: dddPrimary
                 .changeColorSaturation(0.06)
                 .changeColorLightness(0.20),

@@ -14,6 +14,7 @@ import 'package:fstapp/components/search/search_result_model.dart';
 import 'package:fstapp/components/search/search_strings.dart';
 import 'package:fstapp/components/speakers/speaker_medallion.dart';
 import 'package:fstapp/components/speakers/speaker_model.dart';
+import 'package:fstapp/components/speakers/speakers_bundle.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/database_tables/tb.dart';
@@ -26,11 +27,14 @@ import 'package:fstapp/theme_config.dart';
 /// `search_occasion_content` RPC; offline falls back to the local index.
 class GlobalSearchDialog extends StatefulWidget {
   final Future<List<SearchResultModel>> Function(String query) search;
+  final Future<SpeakersBundle?> Function() loadSpeakers;
 
   GlobalSearchDialog({
     super.key,
     Future<List<SearchResultModel>> Function(String query)? search,
-  }) : search = search ?? DbSearch.search;
+    Future<SpeakersBundle?> Function()? loadSpeakers,
+  })  : search = search ?? DbSearch.search,
+        loadSpeakers = loadSpeakers ?? OfflineDataService.getSpeakers;
 
   /// Guards against stacking dialogs when opened repeatedly (e.g. Ctrl+F
   /// pressed while the search is already showing).
@@ -71,12 +75,13 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
   /// name and short snippet; the cached record adds the photo, roles and bio
   /// needed by the profile dialog.
   final Map<int, SpeakerModel> _speakersById = {};
+  late final Future<void> _speakersLoaded;
 
   @override
   void initState() {
     super.initState();
     _loadEvents();
-    _loadSpeakers();
+    _speakersLoaded = _loadSpeakers();
   }
 
   Future<void> _loadEvents() async {
@@ -96,7 +101,7 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
 
   Future<void> _loadSpeakers() async {
     try {
-      final bundle = await OfflineDataService.getSpeakers();
+      final bundle = await widget.loadSpeakers();
       if (!mounted || bundle == null) return;
       setState(() {
         _speakersById
@@ -139,9 +144,10 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
     });
   }
 
-  void _openResult(SearchResultModel r) {
+  Future<void> _openResult(SearchResultModel r) async {
     if (r.entityType == 'speaker') {
-      _showSpeakerProfile(r);
+      await _speakersLoaded;
+      if (mounted) await _showSpeakerProfile(r);
       return;
     }
 

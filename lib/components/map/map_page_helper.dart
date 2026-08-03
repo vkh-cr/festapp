@@ -9,9 +9,13 @@ import 'package:fstapp/components/map/path_group_model.dart';
 import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/components/icons/place_type_model.dart';
 import 'package:fstapp/components/icons/icons_strings.dart';
+import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 
 class MapPageHelper {
+  static bool hasMeaningfulPlaceDescription(String? description) =>
+      !HtmlHelper.isHtmlEmptyOrNull(description);
+
   static Color _parsePathColor(String? value) {
     final hex = value?.replaceFirst('#', '');
     if (hex == null || (hex.length != 6 && hex.length != 8)) {
