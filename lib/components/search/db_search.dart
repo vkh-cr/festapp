@@ -10,13 +10,13 @@ import 'package:fstapp/data_services/rights_service.dart';
 /// Data access for the GlobalSearch feature.
 ///
 /// Queries always use local cached projections. The index lazily rebuilds on
-/// first use and whenever [ClientSyncRuntime.projectionEpoch] changes, so a
-/// cold offline start and every activated sync revision share one path.
+/// first use and whenever [ClientSyncRuntime.searchProjectionEpoch] changes.
+/// Per-user and live-state changes do not invalidate searchable text.
 class DbSearch {
   static const int _limit = 50;
   static final OfflineSearchIndexCache _offlineIndex = OfflineSearchIndexCache(
     loadDocuments: _loadDocuments,
-    readEpoch: () => ClientSyncRuntime.projectionEpoch.value,
+    readEpoch: () => ClientSyncRuntime.searchProjectionEpoch.value,
     limit: _limit,
   );
 

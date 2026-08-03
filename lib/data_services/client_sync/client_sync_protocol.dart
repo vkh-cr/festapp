@@ -33,9 +33,33 @@ extension ClientSyncComponentWireName on ClientSyncComponent {
 
   bool get isPrivate => wireName.startsWith('private_');
 
+  /// Whether replacing this component changes text or relationships indexed
+  /// by global search. Occasion configuration participates because feature
+  /// flags decide which content types are searchable. Live counters and
+  /// per-user state deliberately do not.
+  bool get affectsSearchIndex => switch (this) {
+        ClientSyncComponent.occasionConfig ||
+        ClientSyncComponent.programCatalog ||
+        ClientSyncComponent.mapCatalog ||
+        ClientSyncComponent.contentCatalog =>
+          true,
+        _ => false,
+      };
+
   static ClientSyncComponent parse(String value) =>
       ClientSyncComponent.values.firstWhere((item) => item.wireName == value);
 }
+
+String clientSyncSearchProjectionSignature(
+  String publicScope,
+  Map<ClientSyncComponent, int> revisions,
+) =>
+    [
+      publicScope,
+      for (final component in ClientSyncComponent.values)
+        if (component.affectsSearchIndex)
+          '${component.wireName}:${revisions[component] ?? -1}',
+    ].join('|');
 
 class SyncContext {
   const SyncContext({

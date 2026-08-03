@@ -17,6 +17,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ClientSyncRuntime {
   static final state = ValueNotifier<ClientSyncState?>(null);
   static final projectionEpoch = ValueNotifier<int>(0);
+  static final searchProjectionEpoch = ValueNotifier<int>(0);
   static ClientSyncService? _service;
   static Future<void> Function(DateTime)? _onLastSuccess;
   static StreamSubscription<ClientSyncState>? _subscription;
@@ -25,6 +26,7 @@ class ClientSyncRuntime {
   static int _identityEpoch = 0;
   static SyncContext? _context;
   static String? _projectionSignature;
+  static String? _searchProjectionSignature;
 
   static bool get isV1Selected => _v1Selected;
   static DateTime? get latestLastSuccess {
@@ -98,6 +100,11 @@ class ClientSyncRuntime {
     if (service == null || occasion?.id == null || occasion?.link == null) {
       return;
     }
+    final previousSearchScope = _v1Selected ? _context?.publicScope : null;
+    final nextSearchScope = model.clientSyncV1
+        ? '${occasion?.organization ?? AppConfig.organization}/${occasion!.id!}'
+        : null;
+    final searchContextChanged = previousSearchScope != nextSearchScope;
     await _subscription?.cancel();
     await service.closeContext();
     _selectedModel = model;
@@ -105,6 +112,10 @@ class ClientSyncRuntime {
     _context = null;
     _projectionSignature = null;
     projectionEpoch.value++;
+    if (searchContextChanged) {
+      _searchProjectionSignature = null;
+      searchProjectionEpoch.value++;
+    }
     state.value = null;
     if (!_v1Selected) {
       if (networkAvailable) await _store.clearLastContext();
@@ -287,7 +298,7 @@ class ClientSyncRuntime {
       revisions: revisions,
       payloads: payloads,
     );
-    _notifyProjectionChanged();
+    _notifyProjectionChanged(searchIndexChanged: component.affectsSearchIndex);
   }
 
   static Future<void> applyLiveReplacement({
@@ -313,7 +324,7 @@ class ClientSyncRuntime {
     _notifyProjectionChanged();
   }
 
-  static void _notifyProjectionChanged() {
+  static void _notifyProjectionChanged({bool searchIndexChanged = false}) {
     final current = state.value;
     if (current == null) return;
     state.value = ClientSyncState(
@@ -322,6 +333,10 @@ class ClientSyncRuntime {
     );
     _projectionSignature = null;
     projectionEpoch.value++;
+    if (searchIndexChanged) {
+      _searchProjectionSignature = null;
+      searchProjectionEpoch.value++;
+    }
   }
 
   static Future<void> _updateProjectionEpoch() async {
@@ -344,9 +359,19 @@ class ClientSyncRuntime {
       privateScope ?? '-',
       private?.pointer ?? '-',
     ].join('|');
-    if (_projectionSignature == signature) return;
-    _projectionSignature = signature;
-    projectionEpoch.value++;
+    if (_projectionSignature != signature) {
+      _projectionSignature = signature;
+      projectionEpoch.value++;
+    }
+
+    final searchSignature = clientSyncSearchProjectionSignature(
+      context.publicScope,
+      catalog?.revisions ?? const {},
+    );
+    if (_searchProjectionSignature != searchSignature) {
+      _searchProjectionSignature = searchSignature;
+      searchProjectionEpoch.value++;
+    }
   }
 
   static void setForeground(bool foreground) {
