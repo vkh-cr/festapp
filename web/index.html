@@ -256,8 +256,11 @@
     return false;
   });
 
-  function promptInstall(){
-     deferredPrompt.prompt();
+  async function promptInstall(){
+     if (!deferredPrompt) return;
+     // ready resolves only after the complete app-shell install succeeded.
+     if (window.festappOfflineReady) await window.festappOfflineReady;
+     await deferredPrompt.prompt();
   }
 
   // Listen for app install event
@@ -281,13 +284,39 @@
 </script>
 
 <script>
+  async function persistUsedFontResources() {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) {
+      await new Promise(function(resolve) {
+        navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true });
+      });
+    }
+    if (document.readyState !== 'complete') {
+      await new Promise(function(resolve) {
+        window.addEventListener('load', resolve, { once: true });
+      });
+    }
+    const fontUrls = performance.getEntriesByType('resource')
+      .map(function(entry) { return entry.name; })
+      .filter(function(resourceUrl) {
+        const origin = new URL(resourceUrl).origin;
+        return origin === 'https://fonts.googleapis.com' ||
+          origin === 'https://fonts.gstatic.com';
+      });
+    await Promise.allSettled([...new Set(fontUrls)].map(function(resourceUrl) {
+      // Re-fetch through the now-active worker. This also persists Flutter's
+      // demand-loaded Noto Color Emoji shards, but no unused font catalog.
+      return fetch(resourceUrl, { mode: 'cors', cache: 'force-cache' });
+    }));
+  }
+
   // Register before Flutter starts so installability and app-shell caching do
   // not depend on Dart initialization or backend availability.
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/festapp_service_worker.js', {
+    window.festappOfflineReady = navigator.serviceWorker.register('/festapp_service_worker.js', {
       scope: '/',
       updateViaCache: 'none'
-    }).catch(function(error) {
+    }).then(persistUsedFontResources).catch(function(error) {
       console.warn('Festapp offline service worker registration failed:', error);
     });
   }

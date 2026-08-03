@@ -5,6 +5,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import vm from 'node:vm';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const tempRoot = await mkdtemp(path.join(tmpdir(), 'festapp-pwa-'));
@@ -40,8 +41,81 @@ try {
   assert.match(worker, /event\.data === 'SKIP_WAITING'/);
   assert.match(worker, /url\.pathname === '\/festapp-version\.json'/);
   assert.match(worker, /url\.origin === 'https:\/\/fonts\.gstatic\.com'/);
+  assert.match(worker, /url\.origin === 'https:\/\/fonts\.googleapis\.com'/);
   assert.match(worker, /festapp-used-fonts-v1/);
   assert.match(worker, /cache\.put\(request, response\.clone\(\)\)/);
+
+  const handlers = {};
+  const fontUrl = 'https://fonts.gstatic.com/s/notocoloremoji/test.woff2';
+  const cachedFont = new Response('cached emoji font');
+  const cachedShell = new Response('<html>offline shell</html>');
+  let networkCalls = 0;
+  const cache = {
+    addAll: async () => {},
+    put: async () => {},
+    match: async (request) => {
+      const url = typeof request === 'string' ? request : request.url;
+      if (url === fontUrl) return cachedFont.clone();
+      if (url.includes('/flutter?pwa-cache=1')) return cachedShell.clone();
+      return undefined;
+    },
+  };
+  const context = {
+    URL,
+    Request,
+    Response,
+    Promise,
+    caches: {
+      open: async () => cache,
+      keys: async () => [],
+      delete: async () => true,
+    },
+    fetch: async () => {
+      networkCalls++;
+      throw new Error('network must not be used');
+    },
+    self: {
+      location: { origin: 'https://app.test' },
+      navigator: { onLine: false },
+      clients: { claim: async () => {} },
+      skipWaiting: async () => {},
+      addEventListener: (type, handler) => { handlers[type] = handler; },
+    },
+  };
+  vm.runInNewContext(worker, context);
+
+  async function dispatchFetch(request) {
+    let responsePromise;
+    handlers.fetch({
+      request,
+      respondWith: (promise) => { responsePromise = promise; },
+    });
+    assert.ok(responsePromise, `worker did not handle ${request.url}`);
+    return responsePromise;
+  }
+
+  const fontResponse = await dispatchFetch(new Request(fontUrl));
+  assert.equal(await fontResponse.text(), 'cached emoji font');
+  const navigation = new Request('https://app.test/csmostrava2026/');
+  Object.defineProperty(navigation, 'mode', { value: 'navigate' });
+  const shellResponse = await dispatchFetch(navigation);
+  assert.equal(await shellResponse.text(), '<html>offline shell</html>');
+  const versionResponse = await dispatchFetch(
+    new Request('https://app.test/festapp-version.json?t=offline'),
+  );
+  assert.equal(versionResponse.type, 'error');
+  assert.equal(networkCalls, 0);
+
+  const webClientIndex = await readFile(
+    path.join(projectRoot, 'web_client/index.html'),
+    'utf8',
+  );
+  assert.match(webClientIndex, /serviceWorker\.register\('\/festapp_service_worker\.js'/);
+  assert.doesNotMatch(webClientIndex, /serviceWorker\.getRegistrations\(\)/);
+  assert.match(webClientIndex, /performance\.getEntriesByType\('resource'\)/);
+  const flutterIndex = await readFile(path.join(projectRoot, 'web/index.html'), 'utf8');
+  assert.match(flutterIndex, /await window\.festappOfflineReady/);
+  assert.match(flutterIndex, /performance\.getEntriesByType\('resource'\)/);
   console.log('pwa_offline.test: ok');
 } finally {
   await rm(tempRoot, { recursive: true, force: true });

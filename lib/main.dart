@@ -186,11 +186,15 @@ Future<void> initializeEverything() async {
 
   AppLogger.debug('Notification helper initializing');
 
-  NotificationHelper.initialize().then((f) {
-    AppLogger.debug('Notification helper initialized');
-  }, onError: (e) {
-    AppLogger.error('Notification helper initialization failed: $e');
-  });
+  if (!startOffline) {
+    NotificationHelper.initialize().then((f) {
+      AppLogger.debug('Notification helper initialized');
+    }, onError: (e) {
+      AppLogger.error('Notification helper initialization failed: $e');
+    });
+  } else {
+    AppLogger.debug('Offline start: skipped notification initialization');
+  }
 
   AppLogger.debug('Initialization completed');
 

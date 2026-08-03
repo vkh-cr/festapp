@@ -115,11 +115,16 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
-  if (url.origin === 'https://fonts.gstatic.com') {
+  // Cache only font resources the application actually requests. This covers
+  // Google Fonts stylesheets/binaries and Flutter's demand-loaded Noto Color
+  // Emoji shards without downloading either provider's unused catalog.
+  if (url.origin === 'https://fonts.googleapis.com' ||
+      url.origin === 'https://fonts.gstatic.com') {
     event.respondWith((async () => {
       const cache = await caches.open(FONT_CACHE_NAME);
       const cached = await cache.match(request);
       if (cached) return cached;
+      if (self.navigator.onLine === false) return Response.error();
       const response = await fetch(request);
       if (response.ok || response.type === 'opaque') {
         await cache.put(request, response.clone());
@@ -132,6 +137,11 @@ self.addEventListener('fetch', (event) => {
 
   // This is the network truth used to discover a newer completed deployment.
   if (url.pathname === '/festapp-version.json') {
+    if (self.navigator.onLine === false) {
+      event.respondWith(caches.open(CACHE_NAME).then(async (cache) =>
+        (await cache.match('/festapp-version.json')) || Response.error()));
+      return;
+    }
     event.respondWith(fetch(request));
     return;
   }
@@ -150,6 +160,7 @@ self.addEventListener('fetch', (event) => {
 
     // Same-origin resources not known at build time may still work online.
     // They are intentionally not written into the immutable app-shell cache.
+    if (self.navigator.onLine === false) return Response.error();
     return fetch(request);
   })());
 });
