@@ -8,13 +8,16 @@ import 'package:fstapp/services/exception_handler.dart';
 import 'package:intl/intl.dart';
 
 class ClientChangesTab extends StatefulWidget {
-  const ClientChangesTab({super.key});
+  const ClientChangesTab({super.key, this.clientSyncEnabled});
+
+  final bool? clientSyncEnabled;
+
   @override
   State<ClientChangesTab> createState() => _ClientChangesTabState();
 }
 
 class _ClientChangesTabState extends State<ClientChangesTab> {
-  final _repository = DbClientChanges();
+  late final DbClientChanges _repository;
   final _items = <ClientChangeSummary>[];
   DateTime? _cursorTime;
   String? _cursorId;
@@ -41,10 +44,18 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
   ];
   static const _classes = <String>['structural', 'live', 'private', 'bulk'];
 
+  bool get _clientSyncEnabled =>
+      widget.clientSyncEnabled ??
+      RightsService.occasionLinkModel?.clientSyncV1 ??
+      false;
+
   @override
   void initState() {
     super.initState();
-    _load();
+    if (_clientSyncEnabled) {
+      _repository = DbClientChanges();
+      _load();
+    }
   }
 
   Future<void> _load() async {
@@ -157,6 +168,21 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_clientSyncEnabled) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.history_toggle_off),
+            const SizedBox(height: 8),
+            Text(
+              ClientChangesStrings.notActive,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
     if (_error && _items.isEmpty) {
       return Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [

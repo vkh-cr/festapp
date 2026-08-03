@@ -4,6 +4,7 @@ class ClientChangesStrings {
   static String get title => 'ClientChanges.title'.tr();
   static String get onlineOnly => 'ClientChanges.onlineOnly'.tr();
   static String get empty => 'ClientChanges.empty'.tr();
+  static String get notActive => 'ClientChanges.notActive'.tr();
   static String get retry => 'ClientChanges.retry'.tr();
   static String get loadError => 'ClientChanges.loadError'.tr();
   static String get publicationPending =>

@@ -3,6 +3,7 @@
     "title": "Changes",
     "onlineOnly": "Change history is available online only.",
     "empty": "No changes have been recorded yet.",
+    "notActive": "The history will start recording new changes after the new sync mode is activated. Existing database state is not reconstructed as change history.",
     "retry": "Try again",
     "loadError": "Change history could not be loaded.",
     "publicationPending": "Awaiting publication",

@@ -3,6 +3,7 @@
     "title": "Změny",
     "onlineOnly": "Historie změn je dostupná pouze online.",
     "empty": "Zatím nejsou zaznamenány žádné změny.",
+    "notActive": "Historie začne zaznamenávat nové změny po aktivaci nového synchronizačního režimu. Existující stav databáze se jako historie změn zpětně nevytváří.",
     "retry": "Zkusit znovu",
     "loadError": "Historii změn se nepodařilo načíst.",
     "publicationPending": "Čeká na publikaci",
