@@ -18,6 +18,7 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/occasion/add_new_event_dialog.dart';
 import 'package:fstapp/components/schedule/event_edit_page.dart';
@@ -72,8 +73,12 @@ class _SchedulePageState extends State<SchedulePage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    context.tabsRouter.addListener(_onTabSwitch);
+    if (!ClientSyncRuntime.isV1Selected) {
+      WidgetsBinding.instance.addObserver(this);
+    }
+    if (!ClientSyncRuntime.isV1Selected) {
+      context.tabsRouter.addListener(_onTabSwitch);
+    }
     loadData();
   }
 
@@ -180,6 +185,8 @@ class _SchedulePageState extends State<SchedulePage>
       setState(() {});
     }
 
+    if (ClientSyncRuntime.isV1Selected) return;
+
     final fast = await DbEvents.getAllEvents(
       RightsService.currentOccasionId()!,
       false,
@@ -263,8 +270,7 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   void _goToMap(int placeId) {
-    MapNavigation.openPlace(context, placeId)
-        .then((_) => loadData());
+    MapNavigation.openPlace(context, placeId).then((_) => loadData());
   }
 
   void _openAddDialog(
@@ -427,7 +433,10 @@ class _SchedulePageState extends State<SchedulePage>
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: LogoWidget(height: 64, forceDark: true, programVariant: true),
+                            child: LogoWidget(
+                                height: 64,
+                                forceDark: true,
+                                programVariant: true),
                           ),
                         ),
                         const Spacer(),

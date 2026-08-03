@@ -14,6 +14,7 @@ class ResourceModel implements ITrinaRowModel {
   int? capacity;
   Map<String, dynamic>? bookingRules;
   int inventoryPoolId;
+  int aggregateVersion;
 
   ResourceModel({
     this.id,
@@ -21,6 +22,7 @@ class ResourceModel implements ITrinaRowModel {
     this.capacity = 1,
     this.bookingRules,
     required this.inventoryPoolId,
+    this.aggregateVersion = 0,
   });
 
   // All other methods (fromJson, toJson, etc.) remain the same...
@@ -32,6 +34,7 @@ class ResourceModel implements ITrinaRowModel {
       capacity: json[t.capacity] ?? 1,
       bookingRules: json[t.booking_rules],
       inventoryPoolId: json[t.inventory_pool],
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -43,6 +46,9 @@ class ResourceModel implements ITrinaRowModel {
       title: json[ResourceEditorView.RESOURCE_TITLE] as String?,
       capacity: json[ResourceEditorView.RESOURCE_CAPACITY],
       inventoryPoolId: json[ResourceEditorView.INVENTORY_POOL_ID_FIELD] as int,
+      aggregateVersion:
+          (json[ResourceEditorView.AGGREGATE_VERSION_FIELD] as num?)?.toInt() ??
+              0,
     );
   }
 
@@ -63,6 +69,7 @@ class ResourceModel implements ITrinaRowModel {
     int? capacity,
     Map<String, dynamic>? bookingRules,
     int? inventoryPoolId,
+    int? aggregateVersion,
   }) {
     return ResourceModel(
       id: id ?? this.id,
@@ -70,6 +77,7 @@ class ResourceModel implements ITrinaRowModel {
       capacity: capacity ?? this.capacity,
       bookingRules: bookingRules ?? this.bookingRules,
       inventoryPoolId: inventoryPoolId ?? this.inventoryPoolId,
+      aggregateVersion: aggregateVersion ?? this.aggregateVersion,
     );
   }
 
@@ -81,6 +89,8 @@ class ResourceModel implements ITrinaRowModel {
       ResourceEditorView.RESOURCE_CAPACITY: TrinaCell(value: capacity),
       ResourceEditorView.INVENTORY_POOL_ID_FIELD:
           TrinaCell(value: inventoryPoolId),
+      ResourceEditorView.AGGREGATE_VERSION_FIELD:
+          TrinaCell(value: aggregateVersion),
     });
   }
 
@@ -89,7 +99,7 @@ class ResourceModel implements ITrinaRowModel {
     if (id == null) return;
     await ExceptionHandler.guard(
       context,
-      futureFunction: () => DbInventoryPools.deleteResource(id!),
+      futureFunction: () => DbInventoryPools.deleteResource(this),
       defaultErrorMessage: "Failed to delete resource.",
       rethrowError: true,
     );

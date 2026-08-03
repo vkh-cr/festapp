@@ -12,6 +12,8 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/services/notification_helper.dart';
@@ -28,19 +30,31 @@ class AuthService {
   static Future<void> login(String email, String password) async {
     var data = await _supabase.auth
         .signInWithPassword(email: email, password: password);
+    if (!await validateCurrentOrganization()) {
+      throw Exception('Account is not available for this organization.');
+    }
     await _secureStorage.write(
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
     if (AppConfig.isAppSupported) {
-      DbEvents.synchronizeMySchedule(join: true);
-      SynchroService.refreshOfflineData();
+      if (ClientSyncRuntime.isV1Selected) {
+        await RightsService.updateAppData(force: true, refreshOffline: false);
+        await ClientSyncRuntime.identityChanged();
+        await ClientSyncRuntime.refresh(SyncReason.login,
+            privateConsumer: true);
+      } else {
+        DbEvents.synchronizeMySchedule(join: true);
+        SynchroService.refreshOfflineData();
+      }
     }
-    await NotificationHelper.login();
+    await NotificationHelper.loginCurrentUser();
   }
 
   static Future<void> logout() async {
-    await NotificationHelper.logout().timeout(const Duration(seconds: 2));
+    await NotificationHelper.logoutCurrentUser()
+        .timeout(const Duration(seconds: 2));
     await OfflineDataService.clearUserData();
     await _supabase.auth.signOut(scope: SignOutScope.local);
+    await ClientSyncRuntime.identityChanged();
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     RightsService.occasionLinkModel?.occasionUser = null;
     RightsService.occasionLinkModel?.unitUser = null;
@@ -119,10 +133,38 @@ class AuthService {
             value: _supabase.auth.currentSession!.refreshToken.toString());
         return true;
       } else {
-        await NotificationHelper.logout();
+        await NotificationHelper.logoutCurrentUser();
       }
     } catch (e) {
       //invalid refresh token
+    }
+    return false;
+  }
+
+  /// Rejects a recovered identity that belongs to a different Festapp tenant.
+  /// A network failure is not treated as proof of mismatch: the cutover has
+  /// already removed private cache, so the session can be revalidated online.
+  static Future<bool> validateCurrentOrganization() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return true;
+    Map<String, dynamic>? profile;
+    try {
+      profile = await _supabase
+          .from(Tb.user_info.table)
+          .select(Tb.user_info.id)
+          .eq(Tb.user_info.id, user.id)
+          .eq(Tb.user_info.organization, AppConfig.organization)
+          .maybeSingle();
+    } catch (_) {
+      return true;
+    }
+    if (profile != null) return true;
+    try {
+      await logout();
+    } catch (_) {
+      await _supabase.auth.signOut(scope: SignOutScope.local);
+      await _secureStorage.delete(key: REFRESH_TOKEN_KEY);
+      await OfflineDataService.clearUserData();
     }
     return false;
   }

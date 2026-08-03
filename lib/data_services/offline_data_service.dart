@@ -13,6 +13,9 @@ import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart
 import 'package:fstapp/components/map/path_group_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/services/storage_helper.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 
 import 'package:fstapp/components/activities/activity_model.dart';
 
@@ -106,7 +109,9 @@ class OfflineDataService {
       saveAllOffline(NewsModel.newsOffline, toSave);
 
   static Future<List<NewsModel>> getAllMessages() =>
-      getAllOffline(NewsModel.newsOffline, NewsModel.fromJson);
+      ClientSyncRuntime.isV1Selected
+          ? ClientSyncProjection.news()
+          : getAllOffline(NewsModel.newsOffline, NewsModel.fromJson);
 
   static Future<void> saveAllPlaces(List<PlaceModel> toSave) =>
       saveAllOffline(PlaceModel.placesOffline, toSave);
@@ -121,16 +126,24 @@ class OfflineDataService {
       saveAllOffline(PlaceTypeModel.placeTypesOffline, toSave);
 
   static Future<List<PlaceModel>> getAllPlaces() =>
-      getAllOffline(PlaceModel.placesOffline, PlaceModel.fromJson);
+      ClientSyncRuntime.isV1Selected
+          ? ClientSyncProjection.places()
+          : getAllOffline(PlaceModel.placesOffline, PlaceModel.fromJson);
 
-  static Future<List<PathGroupsModel>> getAllPathGroups() =>
-      getAllOffline(PathGroupsModel.pathsOffline, PathGroupsModel.fromJson);
+  static Future<List<PathGroupsModel>> getAllPathGroups() => ClientSyncRuntime
+          .isV1Selected
+      ? ClientSyncProjection.paths()
+      : getAllOffline(PathGroupsModel.pathsOffline, PathGroupsModel.fromJson);
 
-  static Future<List<IconModel>> getAllIcons() =>
-      getAllOffline(IconModel.iconsOffline, IconModel.fromJson);
+  static Future<List<IconModel>> getAllIcons() => ClientSyncRuntime.isV1Selected
+      ? ClientSyncProjection.icons()
+      : getAllOffline(IconModel.iconsOffline, IconModel.fromJson);
 
   static Future<List<PlaceTypeModel>> getAllPlaceTypes() =>
-      getAllOffline(PlaceTypeModel.placeTypesOffline, PlaceTypeModel.fromJson);
+      ClientSyncRuntime.isV1Selected
+          ? ClientSyncProjection.placeTypes()
+          : getAllOffline(
+              PlaceTypeModel.placeTypesOffline, PlaceTypeModel.fromJson);
 
   /// Timestamp of the last completed refreshOfflineData run — one stamp for
   /// the whole bundle, shown by the offline banner.
@@ -165,8 +178,9 @@ class OfflineDataService {
   static Future<void> deleteUserInfo() =>
       deleteOffline(UserInfoModel.userInfoOffline);
 
-  static Future<UserInfoModel?> getUserInfo() =>
-      getOffline(UserInfoModel.userInfoOffline, UserInfoModel.fromJson);
+  static Future<UserInfoModel?> getUserInfo() => ClientSyncRuntime.isV1Selected
+      ? ClientSyncProjection.userInfo()
+      : getOffline(UserInfoModel.userInfoOffline, UserInfoModel.fromJson);
 
   static Future<void> saveGlobalSettings(OccasionSettingsModel toSave) =>
       saveOffline(OccasionSettingsModel.globalSettingsOffline, toSave);
@@ -179,13 +193,16 @@ class OfflineDataService {
       saveAllOffline(eventsOfflineStorage, toSave);
 
   static Future<List<EventModel>> getAllEvents() =>
-      getAllOffline(eventsOfflineStorage, EventModel.fromJson);
+      ClientSyncRuntime.isV1Selected
+          ? ClientSyncProjection.events()
+          : getAllOffline(eventsOfflineStorage, EventModel.fromJson);
 
   static Future<void> saveSpeakers(SpeakersBundle toSave) =>
       saveOffline(speakersOfflineStorage, toSave);
 
-  static Future<SpeakersBundle?> getSpeakers() =>
-      getOffline(speakersOfflineStorage, SpeakersBundle.fromJson);
+  static Future<SpeakersBundle?> getSpeakers() => ClientSyncRuntime.isV1Selected
+      ? ClientSyncProjection.speakers()
+      : getOffline(speakersOfflineStorage, SpeakersBundle.fromJson);
 
   /// Caches the public per-toilet cleaning statuses together with the time
   /// they were fetched. Public data only — not part of [clearUserData].
@@ -200,6 +217,13 @@ class OfflineDataService {
   /// cache is empty or unreadable.
   static Future<({List<CleaningPlaceStatus> places, DateTime fetchedAt})?>
       getCleaningStatus() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      return (
+        places: await ClientSyncProjection.cleaningStatus(),
+        fetchedAt: ClientSyncRuntime.lastSuccess(SyncFreshnessClass.live) ??
+            DateTime.fromMillisecondsSinceEpoch(0),
+      );
+    }
     final json = await getOffline<Map<String, dynamic>>(
         cleaningStatusOfflineStorage, (j) => j);
     if (json == null) return null;
@@ -215,14 +239,19 @@ class OfflineDataService {
   static Future<void> saveAllInfo(List<InformationModel> toSave) =>
       saveAllOffline(InformationModel.informationOffline, toSave);
 
-  static Future<List<InformationModel>> getAllInfo() => getAllOffline(
-      InformationModel.informationOffline, InformationModel.fromJson);
+  static Future<List<InformationModel>> getAllInfo() =>
+      ClientSyncRuntime.isV1Selected
+          ? ClientSyncProjection.information()
+          : getAllOffline(
+              InformationModel.informationOffline, InformationModel.fromJson);
 
   static Future<void> saveAllActivities(List<ActivityModel> toSave) =>
       saveAllOffline(activitiesOfflineStorage, toSave);
 
   static Future<List<ActivityModel>> getAllActivities() =>
-      getAllOffline(activitiesOfflineStorage, ActivityModel.fromJson);
+      ClientSyncRuntime.isV1Selected
+          ? ClientSyncProjection.activities()
+          : getAllOffline(activitiesOfflineStorage, ActivityModel.fromJson);
 
   /// Caches "my feedback" for one event (one `{eventId: feedbackJson}` object
   /// for all events) so the widget can show the submitted state offline.
@@ -255,7 +284,9 @@ class OfflineDataService {
 
   /// **Retrieves the `UserInventoryBundle` from offline storage.**
   static Future<UserInventoryBundle?> getUserInventoryBundle() =>
-      getOffline(userInventoryBundleOffline, UserInventoryBundle.fromJson);
+      ClientSyncRuntime.isV1Selected
+          ? ClientSyncProjection.userInventory()
+          : getOffline(userInventoryBundleOffline, UserInventoryBundle.fromJson);
 
   /// **Deletes the `UserInventoryBundle` from offline storage.**
   static Future<void> deleteUserInventoryBundle() =>

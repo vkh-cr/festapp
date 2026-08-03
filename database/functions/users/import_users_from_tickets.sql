@@ -233,7 +233,7 @@ BEGIN
 --                    IF v_birthDate IS NOT NULL THEN user_data := user_data || jsonb_build_object('birthDate', v_birthDate); END IF;
 
                     v_user_id := create_user_in_organization_with_data_pure(v_organization_id, new_email, gen_random_uuid()::text, user_data);
-                    PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
+                    PERFORM public.add_user_to_occasion_internal_v1(p_occasion_id, v_user_id);
                     UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
 
                     inserted_users := array_append(inserted_users, jsonb_build_object('id', v_user_id, 'email', new_email, 'name', user_name, 'surname', user_surname));
@@ -256,7 +256,7 @@ BEGIN
 
                     IF v_occasion_user_row."user" IS NULL THEN
                         -- Link to occasion
-                        PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
+                        PERFORM public.add_user_to_occasion_internal_v1(p_occasion_id, v_user_id);
                     END IF;
 
                     -- Update Occasion Data & Ticket
@@ -276,7 +276,7 @@ BEGIN
 --                IF v_birthDate IS NOT NULL THEN user_data := user_data || jsonb_build_object('birthDate', v_birthDate); END IF;
 
                 v_user_id := create_user_in_organization_with_data_pure(v_organization_id, user_email, gen_random_uuid()::text, user_data);
-                PERFORM add_user_to_occasion(p_occasion_id, v_user_id);
+                PERFORM public.add_user_to_occasion_internal_v1(p_occasion_id, v_user_id);
                 UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
 
                 inserted_users := array_append(inserted_users, jsonb_build_object('id', v_user_id, 'email', user_email, 'name', user_name, 'surname', user_surname));

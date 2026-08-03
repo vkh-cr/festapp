@@ -36,7 +36,8 @@ begin
       IF (SELECT is_open FROM occasions WHERE id = (SELECT occasion FROM events WHERE id = ev)) = TRUE THEN
 
           -- Add the user to the occasion
-          PERFORM add_user_to_occasion((SELECT occasion FROM events WHERE id = ev), usr);
+          PERFORM public.add_user_to_occasion_internal_v1(
+            (SELECT occasion FROM events WHERE id = ev), usr);
 
           -- Recheck if the user now exists on the occasion
           IF (SELECT get_exists_on_occasion_user(usr, (SELECT occasion FROM events WHERE id = ev))) <> TRUE THEN

@@ -1,4 +1,4 @@
-export function formatCurrency(amount, currencyCode = "CZK") {
+export function formatCurrency(amount: number, currencyCode = "CZK") {
   return new Intl.NumberFormat("cs-CZ", {
     style: "currency",
     currency: currencyCode,
@@ -7,7 +7,10 @@ export function formatCurrency(amount, currencyCode = "CZK") {
   }).format(amount);
 }
 
-export function formatDatetime(datetime: string | null): string | null {
+export function formatDatetime(
+  datetime: string | null,
+  language = "cs",
+): string | null {
   // Check if the datetime is null, undefined, or an empty string.
   // If it is, return null immediately.
   if (!datetime) {
@@ -15,7 +18,7 @@ export function formatDatetime(datetime: string | null): string | null {
   }
 
   // If datetime is a valid string, proceed with the original formatting.
-  return new Intl.DateTimeFormat("cs-CZ", {
+  return new Intl.DateTimeFormat(language === "cs" ? "cs-CZ" : language, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -24,7 +27,7 @@ export function formatDatetime(datetime: string | null): string | null {
 
 // Formats an IBAN string by inserting spaces for readability, e.g., "CZ59 2010 0000 0020 0280 8176"
 export function formatIBAN(iban: string | undefined | null): string {
-  if (!iban || typeof iban !== 'string' || iban.length < 4) {
+  if (!iban || typeof iban !== "string" || iban.length < 4) {
     // Return original value or empty string if it's not a valid string or too short
     return iban || "";
   }

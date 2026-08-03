@@ -1,15 +1,20 @@
+import 'package:collection/collection.dart';
 import 'package:fstapp/components/groups/group_participant_model.dart';
+import 'package:fstapp/components/groups/group_commands.dart';
 import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbGroups {
   static final _supabase = Supabase.instance.client;
+  static final GroupCommands _commands = SupabaseGroupCommands(_supabase);
   static const editorGroupsKey = 'groups';
   static const editorGameDefinitionsKey = 'game_definitions';
   static const editorPlacesKey = 'places';
@@ -25,9 +30,12 @@ class DbGroups {
   static Future<UserGroupsEditorData> getUserGroupsEditorData(
       [String? type]) async {
     final response = await _supabase.rpc(
-      'get_all_user_groups',
+      ClientSyncRuntime.isV1Selected
+          ? 'get_user_groups_editor_bundle_v1'
+          : 'get_all_user_groups',
       params: {
-        'p_occasion_id': RightsService.currentOccasionId()!,
+        ClientSyncRuntime.isV1Selected ? 'p_occasion' : 'p_occasion_id':
+            RightsService.currentOccasionId()!,
         'p_type': type,
       },
     );
@@ -103,6 +111,25 @@ class DbGroups {
       throw Exception("Must be leader or admin to change the group.");
     }
 
+    if (ClientSyncRuntime.isV1Selected) {
+      final result =
+          await _commands.save(RightsService.currentOccasionId()!, model);
+      if (result.status == GroupCommandStatus.conflict) {
+        throw StateError('Group was changed by another editor');
+      }
+      if (result.status == GroupCommandStatus.rejected ||
+          result.group == null) {
+        throw StateError('Group save was rejected');
+      }
+      model
+        ..aggregateVersion = result.version
+        ..persistedPlaceId = result.group!.place?.id
+        ..persistedPlaceWasPrivate =
+            result.group!.place?.isPrivateGroupLocation ?? false
+        ..shouldSavePlace = false;
+      return;
+    }
+
     final previousPrivatePlaceId =
         model.persistedPlaceWasPrivate ? model.persistedPlaceId : null;
     if (model.place != null) {
@@ -167,6 +194,20 @@ class DbGroups {
       throw Exception("Must be editor to import groups.");
     }
 
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.replaceAssignments(
+        RightsService.currentOccasionId()!,
+        groupTitleByUserId,
+      );
+      if (result.status == GroupCommandStatus.rejected) {
+        throw StateError('Group assignment import was rejected');
+      }
+      if (result.status == GroupCommandStatus.conflict) {
+        throw StateError('Group assignment import conflicted');
+      }
+      return;
+    }
+
     await _supabase.rpc('import_user_group_assignments', params: {
       'p_occasion_id': RightsService.currentOccasionId()!,
       'p_assignments': groupTitleByUserId.entries
@@ -179,6 +220,17 @@ class DbGroups {
   }
 
   static Future<void> deleteUserGroupInfo(UserGroupInfoModel model) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result =
+          await _commands.delete(RightsService.currentOccasionId()!, model);
+      if (result.status == GroupCommandStatus.conflict) {
+        throw StateError('Group was changed by another editor');
+      }
+      if (result.status == GroupCommandStatus.rejected) {
+        throw StateError('Group delete was rejected');
+      }
+      return;
+    }
     await _supabase
         .from(Tb.user_groups.table)
         .delete()
@@ -194,8 +246,19 @@ class DbGroups {
   }
 
   static Future<List<int>> getCorrectlyGuessedCheckpoints() async {
-    var response = await await _supabase.rpc(
-        'game_get_correctly_guessed_checkpoints',
+    if (ClientSyncRuntime.isV1Selected) {
+      final groups = await ClientSyncProjection.groups();
+      final gameGroup = groups.firstWhereOrNull(
+        (group) => group.type == InformationModel.gameType,
+      );
+      return List<int>.from(
+        (gameGroup?.data?['game'] as List? ?? const [])
+            .map((entry) => (entry as Map)['check_point'])
+            .whereType<num>()
+            .map((value) => value.toInt()),
+      );
+    }
+    var response = await _supabase.rpc('game_get_correctly_guessed_checkpoints',
         params: {'oc': RightsService.currentOccasionId()});
     if (response == null || response["code"] != 200) {
       return [];
@@ -207,6 +270,9 @@ class DbGroups {
   }
 
   static Future<Set<UserGroupInfoModel>> getUserGroups() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      return (await ClientSyncProjection.groups()).toSet();
+    }
     final response = await _supabase.rpc('get_user_groups',
         params: {'p_occasion_id': RightsService.currentOccasionId()!});
     return Set.from(response.values.map((groupJson) =>

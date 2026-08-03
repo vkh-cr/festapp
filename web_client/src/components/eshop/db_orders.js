@@ -8,14 +8,35 @@ export class DbOrders {
 
         // Calls the Supabase Edge Function "send-ticket-order"
         // Flutter: final edgeResponse = await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": orderDetails});
+        const clientIdKey = 'client_command_client_id';
+        let clientId = localStorage.getItem(clientIdKey);
+        if (!clientId) {
+            clientId = crypto.randomUUID();
+            localStorage.setItem(clientIdKey, clientId);
+        }
+        const pendingKey = 'client_command_pending:ticket_order';
+        const serializedOrder = JSON.stringify(orderData);
+        const pending = JSON.parse(localStorage.getItem(pendingKey) || 'null');
+        const commandId = pending?.payload === serializedOrder
+            ? pending.commandId
+            : crypto.randomUUID();
+        localStorage.setItem(pendingKey, JSON.stringify({
+            payload: serializedOrder,
+            commandId,
+        }));
         const { data, error } = await client.functions.invoke('send-ticket-order', {
-            body: { orderDetails: orderData }
+            body: {
+                orderDetails: orderData,
+                commandId,
+                clientId,
+            }
         });
 
         if (error) {
             console.error("Error sending order:", error);
             return { success: false, message: error.message };
         }
+        localStorage.removeItem(pendingKey);
 
         // Edge Functions return data directly in `data` (if successful HTTP status), 
         // but sometimes we wrap it. 

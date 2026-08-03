@@ -1,24 +1,19 @@
 import 'package:fstapp/components/event_feedback/event_feedback_model.dart';
+import 'package:fstapp/components/event_feedback/event_feedback_commands.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/services/storage_helper.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/client_sync/client_command_identity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:uuid/uuid.dart';
 
 /// Data access for the EventFeedback feature. Backed by the SECURITY DEFINER
 /// RPCs submit/get/delete_event_feedback (+ admin for_edit / export_for_edit).
 class DbEventFeedback {
   static final _supabase = Supabase.instance.client;
-  static const String _clientIdKey = 'event_feedback_client_id';
-
-  /// Stable per-device id used to attribute anonymous feedback.
-  static Future<String> _clientId() async {
-    var id = await StorageHelper.get(_clientIdKey);
-    if (id == null || id.isEmpty) {
-      id = const Uuid().v4();
-      await StorageHelper.set(_clientIdKey, id);
-    }
-    return id;
-  }
+  static EventFeedbackCommands get _commands =>
+      SupabaseEventFeedbackCommands(_supabase);
+  static Future<String> _clientId() => ClientCommandIdentity.clientId();
 
   static Future<bool> isEnabledOnOccasion(int occasionId) async {
     final res = await _supabase.rpc(
@@ -30,6 +25,9 @@ class DbEventFeedback {
 
   /// Current viewer's feedback for [eventId], or null.
   static Future<EventFeedbackModel?> getMyFeedback(int eventId) async {
+    if (ClientSyncRuntime.isV1Selected && AuthService.isLoggedIn()) {
+      return ClientSyncProjection.feedback(eventId);
+    }
     final params = <String, dynamic>{'p_event': eventId};
     if (!AuthService.isLoggedIn()) {
       params['p_client_id'] = await _clientId();
@@ -46,6 +44,15 @@ class DbEventFeedback {
     required String rating,
     String? note,
   }) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      return _commands.submit(
+        occasionId: RightsService.currentOccasionId()!,
+        eventId: eventId,
+        rating: rating,
+        note: note,
+        anonymousClientId: AuthService.isLoggedIn() ? null : await _clientId(),
+      );
+    }
     final params = <String, dynamic>{
       'p_event': eventId,
       'p_rating': rating,
@@ -61,6 +68,14 @@ class DbEventFeedback {
   }
 
   static Future<void> delete(int eventId) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.delete(
+        occasionId: RightsService.currentOccasionId()!,
+        eventId: eventId,
+        anonymousClientId: AuthService.isLoggedIn() ? null : await _clientId(),
+      );
+      return;
+    }
     final params = <String, dynamic>{'p_event': eventId};
     if (!AuthService.isLoggedIn()) {
       params['p_client_id'] = await _clientId();
@@ -96,12 +111,4 @@ class DbEventFeedback {
           (res['code'] as num).toInt(), res['message'] as String?);
     }
   }
-}
-
-/// Carries the RPC error code so the UI can show the matching message
-/// (mirrors the deployed app's per-code mapping).
-class EventFeedbackException implements Exception {
-  final int code;
-  final String? message;
-  EventFeedbackException(this.code, this.message);
 }

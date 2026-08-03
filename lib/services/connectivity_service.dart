@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:http/http.dart' as http;
 
 /// Global connectivity state shared by the offline banner and the pre-write
@@ -100,7 +102,12 @@ class ConnectivityService {
   static void _recompute() {
     // ValueNotifier only notifies listeners when the value actually changes, so
     // the frequent reportSuccess() calls cause no spurious rebuilds.
+    final wasOffline = isOfflineNotifier.value;
     isOfflineNotifier.value = _interfaceOffline || _backendUnreachable;
+    if (wasOffline && !isOfflineNotifier.value) {
+      unawaited(ClientSyncRuntime.refresh(SyncReason.reconnect,
+          privateConsumer: true));
+    }
   }
 
   static void _startProbe() {

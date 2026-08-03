@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.import_occasion_users_from_csv(
+CREATE OR REPLACE FUNCTION public.import_occasion_users_from_csv_internal_v1(
     p_occasion_id bigint,
     p_rows jsonb,
     p_delete_user_ids jsonb DEFAULT '[]'::jsonb
@@ -135,7 +135,7 @@ BEGIN
             IF v_is_occasion_member THEN
                 v_updated := v_updated + 1;
             ELSE
-                v_response := public.add_user_to_occasion(p_occasion_id, v_user_id);
+                v_response := public.add_user_to_occasion_internal_v1(p_occasion_id, v_user_id);
                 IF COALESCE((v_response->>'code')::integer, 500) <> 200 THEN
                     RAISE EXCEPTION 'ADD_USER_TO_OCCASION_FAILED: %',
                         COALESCE(v_response->>'message',
@@ -213,7 +213,30 @@ BEGIN
         ) THEN
             RAISE EXCEPTION 'DELETE_USER_NOT_ON_OCCASION';
         END IF;
-        PERFORM public.delete_occasion_user(v_user_id, p_occasion_id);
+        UPDATE public.news
+           SET created_by = NULL
+         WHERE created_by = v_user_id
+           AND occasion = p_occasion_id;
+        DELETE FROM public.user_groups
+         WHERE "user" = v_user_id
+           AND "group" IN (
+               SELECT id FROM public.user_group_info
+                WHERE occasion = p_occasion_id
+           );
+        DELETE FROM public.event_users
+         WHERE "user" = v_user_id
+           AND event IN (
+               SELECT id FROM public.events WHERE occasion = p_occasion_id
+           );
+        DELETE FROM public.user_news
+         WHERE "user" = v_user_id AND occasion = p_occasion_id;
+        DELETE FROM public.event_users_saved
+         WHERE "user" = v_user_id
+           AND event IN (
+               SELECT id FROM public.events WHERE occasion = p_occasion_id
+           );
+        DELETE FROM public.occasion_users
+         WHERE "user" = v_user_id AND occasion = p_occasion_id;
         v_deleted := v_deleted + 1;
     END LOOP;
 
@@ -232,4 +255,13 @@ BEGIN
         'groups', jsonb_array_length(v_group_assignments)
     );
 END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.import_occasion_users_from_csv(
+    p_occasion_id bigint,
+    p_rows jsonb,
+    p_delete_user_ids jsonb DEFAULT '[]'::jsonb
+) RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = '' AS $$
+  SELECT public.import_occasion_users_from_csv_internal_v1(
+    p_occasion_id,p_rows,p_delete_user_ids);
 $$;

@@ -5,7 +5,7 @@
 -- Deliberately does NOT check the "cleaning" feature flag: the crew must still be
 -- able to resolve outstanding reports after the feature is turned off. Only new
 -- reports are gated — in report_cleaning_issue.
-CREATE OR REPLACE FUNCTION resolve_cleaning_place(place_id bigint) RETURNS jsonb
+CREATE OR REPLACE FUNCTION resolve_cleaning_place_internal_v1(place_id bigint) RETURNS jsonb
   LANGUAGE plpgsql
   SECURITY DEFINER
   SET search_path = public, extensions
@@ -43,4 +43,9 @@ BEGIN
     'data', jsonb_build_object('resolved', v_count)
   );
 END;
+$$;
+
+CREATE OR REPLACE FUNCTION resolve_cleaning_place(place_id bigint) RETURNS jsonb
+LANGUAGE sql SECURITY DEFINER SET search_path = public, extensions AS $$
+  SELECT public.resolve_cleaning_place_internal_v1(place_id);
 $$;

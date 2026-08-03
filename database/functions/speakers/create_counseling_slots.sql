@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION create_counseling_slots(
+CREATE OR REPLACE FUNCTION create_counseling_slots_internal_v1(
     p_speaker       BIGINT,
     p_start         TIMESTAMPTZ,
     p_end           TIMESTAMPTZ,
@@ -102,4 +102,14 @@ BEGIN
         )
     );
 END;
+$$;
+
+CREATE OR REPLACE FUNCTION create_counseling_slots(
+    p_speaker bigint, p_start timestamptz, p_end timestamptz,
+    p_slot_minutes int, p_place bigint DEFAULT NULL, p_capacity int DEFAULT 1,
+    p_title text DEFAULT NULL, p_break_minutes int DEFAULT 0
+) RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = public, extensions AS $$
+  SELECT public.create_counseling_slots_internal_v1(
+    p_speaker,p_start,p_end,p_slot_minutes,p_place,p_capacity,p_title,p_break_minutes
+  );
 $$;

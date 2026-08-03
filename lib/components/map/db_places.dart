@@ -1,8 +1,11 @@
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/components/map/path_group_model.dart';
+import 'package:fstapp/components/map/map_commands.dart';
+import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -10,6 +13,7 @@ import 'place_model.dart';
 
 class DbPlaces {
   static final _supabase = Supabase.instance.client;
+  static final MapCommands _commands = SupabaseMapCommands(_supabase);
 
   static Future<List<PlaceModel>> getMapPlaces() async {
     var data = await _supabase
@@ -24,6 +28,17 @@ class DbPlaces {
   }
 
   static Future<List<PlaceModel>> getAllPlaces() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final response = await _supabase.rpc('get_map_editor_bundle_v1', params: {
+        'p_occasion': RightsService.currentOccasionId()!,
+      });
+      final data = (response as Map).cast<String, dynamic>();
+      final places = ((data['places'] as List?) ?? const [])
+          .map((x) => PlaceModel.fromJson((x as Map).cast<String, dynamic>()))
+          .toList();
+      places.sortPlaces();
+      return places;
+    }
     var data = await _supabase
         .from(Tb.places.table)
         .select()
@@ -63,6 +78,17 @@ class DbPlaces {
   }
 
   static Future<void> deletePlace(PlaceModel placeModel) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.deletePlace(
+          RightsService.currentOccasionId()!, placeModel);
+      if (result.status == MapCommandStatus.conflict) {
+        throw StateError('Place was changed by another editor');
+      }
+      if (result.status == MapCommandStatus.rejected) {
+        throw StateError('Place delete was rejected');
+      }
+      return;
+    }
     await _supabase
         .from(Tb.places.table)
         .delete()
@@ -70,6 +96,17 @@ class DbPlaces {
   }
 
   static Future<PlaceModel> updatePlace(PlaceModel placeModel) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.savePlace(
+          RightsService.currentOccasionId()!, placeModel);
+      if (result.status == MapCommandStatus.conflict) {
+        throw StateError('Place was changed by another editor');
+      }
+      if (result.status == MapCommandStatus.rejected || result.entity == null) {
+        throw StateError('Place save was rejected');
+      }
+      return result.entity!;
+    }
     var upsertObj = placeModel.toJson();
     dynamic data;
     if (placeModel.id != null) {
@@ -91,18 +128,34 @@ class DbPlaces {
     return PlaceModel.fromJson(data);
   }
 
-  static Future<void> saveLocation(int placeId, double lat, double lng) async {
+  static Future<void> saveLocation(
+      MapPlaceModel place, double lat, double lng) async {
     // Fast UX guard mirroring the RPC's permission check (editor OR group admin
     // of this place). The RPC save_place_location is the source of truth — a
     // group admin who isn't an editor cannot move a place via a direct RLS
     // UPDATE (it silently touches 0 rows), so the write must go through it.
     if (!(RightsService.isEditor() ||
         (RightsService.isGroupAdmin() &&
-            RightsService.currentUserGroup()!.place!.id == placeId))) {
+            RightsService.currentUserGroup()!.place!.id == place.id))) {
       throw Exception("You cannot change this place.");
     }
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.movePlace(
+          RightsService.currentOccasionId()!,
+          PlaceModel(id: place.id, aggregateVersion: place.aggregateVersion),
+          lat,
+          lng);
+      if (result.status == MapCommandStatus.conflict) {
+        throw StateError('Place was changed by another editor');
+      }
+      if (result.status == MapCommandStatus.rejected || result.entity == null) {
+        throw StateError('Place move was rejected');
+      }
+      place.aggregateVersion = result.version;
+      return;
+    }
     final res = await _supabase.rpc('save_place_location', params: {
-      'p_place_id': placeId,
+      'p_place_id': place.id,
       'p_lat': lat,
       'p_lng': lng,
     });
@@ -111,8 +164,20 @@ class DbPlaces {
     }
   }
 
-  /// Fetch all path‑groups, including their List<List<int>> `path_data`
+  /// Fetch all path-groups, including their `List<List<int>>` `path_data`.
   static Future<List<PathGroupsModel>> getAllPathGroups() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final response = await _supabase.rpc('get_map_editor_bundle_v1', params: {
+        'p_occasion': RightsService.currentOccasionId()!,
+      });
+      final data = (response as Map).cast<String, dynamic>();
+      final paths = ((data['paths'] as List?) ?? const [])
+          .map((x) =>
+              PathGroupsModel.fromJson((x as Map).cast<String, dynamic>()))
+          .toList();
+      paths.sortPathGroups();
+      return paths;
+    }
     final data = await _supabase
         .from(Tb.path_groups.table)
         .select('${Tb.path_groups.id},'
@@ -134,6 +199,23 @@ class DbPlaces {
   /// Insert or update a path‑group, writing its `pathData` directly into
   /// the `path_data` JSON column.
   static Future<void> updatePathGroup(PathGroupsModel model) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result =
+          await _commands.savePath(RightsService.currentOccasionId()!, model);
+      if (result.status == MapCommandStatus.conflict) {
+        throw StateError('Path was changed by another editor');
+      }
+      if (result.status == MapCommandStatus.rejected || result.entity == null) {
+        throw StateError('Path save was rejected');
+      }
+      final updated = result.entity!;
+      model
+        ..id = updated.id
+        ..data = updated.data
+        ..pathData = updated.pathData
+        ..aggregateVersion = updated.aggregateVersion;
+      return;
+    }
     // build our upsert object
     final upsertObj = <String, dynamic>{
       Tb.path_groups.title: model.title,
@@ -176,6 +258,17 @@ class DbPlaces {
 
   /// Delete a path‑group (now only needs to remove the row itself)
   static Future<void> deletePathGroup(PathGroupsModel model) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result =
+          await _commands.deletePath(RightsService.currentOccasionId()!, model);
+      if (result.status == MapCommandStatus.conflict) {
+        throw StateError('Path was changed by another editor');
+      }
+      if (result.status == MapCommandStatus.rejected) {
+        throw StateError('Path delete was rejected');
+      }
+      return;
+    }
     await _supabase
         .from(Tb.path_groups.table)
         .delete()

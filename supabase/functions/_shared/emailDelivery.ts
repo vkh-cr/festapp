@@ -4,6 +4,8 @@ const _SMTP_HOSTNAME = Deno.env.get("SMTP_HOSTNAME") || "";
 const _SMTP_USER_NAME = Deno.env.get("SMTP_USER_NAME") || "";
 const _SMTP_USER_PASSWORD = Deno.env.get("SMTP_USER_PASSWORD") || "";
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL") || "";
+const _SMTP_PORT = Number(Deno.env.get("SMTP_PORT") || "465");
+const _SMTP_SECURE = (Deno.env.get("SMTP_SECURE") || "true") === "true";
 
 export type EmailContext = {
   organization: number;
@@ -43,6 +45,8 @@ export type DeliverEmailInput = {
   attachments?: EmailAttachment[];
   from?: string;
   replyTo?: string;
+  /** Stable RFC Message-ID used by durable workers across delivery retries. */
+  messageId?: string;
   /**
    * Preserves editor-provided template snapshots while the wrapper is still
    * resolved centrally from templateCode and context.
@@ -94,12 +98,11 @@ export function sanitizeEmailHtml(html: string) {
 
 const transporter = nodemailer.createTransport({
   host: _SMTP_HOSTNAME,
-  port: 465,
-  secure: true,
-  auth: {
-    user: _SMTP_USER_NAME,
-    pass: _SMTP_USER_PASSWORD,
-  },
+  port: _SMTP_PORT,
+  secure: _SMTP_SECURE,
+  ...(_SMTP_USER_NAME && _SMTP_USER_PASSWORD
+    ? { auth: { user: _SMTP_USER_NAME, pass: _SMTP_USER_PASSWORD } }
+    : {}),
 });
 
 const defaultDependencies: EmailDeliveryDependencies = {
@@ -135,6 +138,7 @@ export function createEmailDelivery(
       attachments = [],
       from = _DEFAULT_EMAIL,
       replyTo = _DEFAULT_EMAIL,
+      messageId,
       template: templateOverride,
     }: DeliverEmailInput,
   ): Promise<EmailDeliveryResult> {
@@ -163,6 +167,7 @@ export function createEmailDelivery(
         subject,
         html: sanitizeEmailHtml(html),
         replyTo,
+        ...(messageId ? { messageId } : {}),
         attachments: attachments.map((attachment) => ({
           filename: attachment.filename,
           content: attachment.content,
@@ -171,11 +176,11 @@ export function createEmailDelivery(
         })),
       });
     } catch (error) {
-      console.error("Failed to send email:", error);
+      console.error("Email transport failed");
       throw new EmailDeliveryError(error);
     }
 
-    console.log("Email sent successfully to:", to);
+    console.log("Email accepted by transport");
 
     let logged = true;
     try {
@@ -192,7 +197,7 @@ export function createEmailDelivery(
       // cause a retry and duplicate delivery, so evidence failure is reported
       // separately without turning a successful delivery into an error.
       logged = false;
-      console.error("Email sent, but logging failed:", error);
+      console.error("Email accepted, but delivery evidence logging failed");
     }
 
     return { templateId: template.id, logged };

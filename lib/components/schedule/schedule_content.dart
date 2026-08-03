@@ -180,11 +180,14 @@ class ScheduleContentState extends State<ScheduleContent> {
 
   /// Persists the speaker selection for one event and keeps the local map in
   /// sync so re-opening the cell shows the saved set.
-  Future<void> _saveEventSpeakers(int eventId, List<int> speakerIds) async {
-    await ExceptionHandler.guardVoid(
+  Future<int?> _saveEventSpeakers(
+      int eventId, int expectedVersion, List<int> speakerIds) async {
+    final version = await ExceptionHandler.guard(
       context,
-      futureFunction: () => DbSpeakers.setEventSpeakers(eventId, speakerIds),
+      futureFunction: () =>
+          DbSpeakers.setEventSpeakers(eventId, speakerIds, expectedVersion),
     );
+    if (version == null) return null;
     _eventSpeakerIds[eventId] = List.of(speakerIds);
     // Keep the column's searchable value current so filtering reflects the
     // inline edit without a full grid reload.
@@ -192,9 +195,11 @@ class ScheduleContentState extends State<ScheduleContent> {
         (r) => r.cells[EventModel.idColumn]?.value == eventId);
     row?.cells[EventModel.speakersColumn]?.value =
         _speakerNamesFor(speakerIds) ?? '';
+    row?.cells[EventModel.aggregateVersionColumn]?.value = version;
     if (mounted) {
       ToastHelper.Show(context, CommonStrings.saved);
     }
+    return version;
   }
 
   /// Joins the given speakers' names into a searchable string (or null when
@@ -724,11 +729,18 @@ class ScheduleContentState extends State<ScheduleContent> {
           renderer: (rendererContext) {
             final eventId =
                 rendererContext.row.cells[EventModel.idColumn]?.value as int?;
+            final aggregateVersion = (rendererContext
+                        .row
+                        .cells[EventModel.aggregateVersionColumn]
+                        ?.value as num?)
+                    ?.toInt() ??
+                0;
             return EventSpeakersCell(
               // Trina reuses cell widgets across rows on scroll — key by event
               // id so the correct selection binds after a scroll/rebuild.
               key: ValueKey('event-speakers-$eventId'),
               eventId: eventId,
+              aggregateVersion: aggregateVersion,
               allSpeakers: _allSpeakers,
               initialSelectedIds: eventId == null
                   ? const []

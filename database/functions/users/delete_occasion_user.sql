@@ -11,11 +11,6 @@ BEGIN
     SET created_by = null
     WHERE created_by = usr AND occasion = oc;
 
-    -- Set leader to null for groups led by the user on this occasion
-    UPDATE public.user_group_info
-    SET leader = null
-    WHERE leader = usr AND occasion = oc;
-
     -- Delete user from groups on this occasion
     DELETE FROM public.user_groups
     WHERE "user" = usr

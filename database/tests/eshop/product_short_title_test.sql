@@ -24,25 +24,6 @@ BEGIN
     -- 1. Setup: Create Hierarchy
     -- Mocking Permission Functions to bypass Auth/User dependencies
     
-    -- Mock check_is_editor_order_on_occasion (used by update_product)
-    -- Mock check_is_editor_order_on_occasion (used by update_product)
-    EXECUTE 'CREATE OR REPLACE FUNCTION public.check_is_editor_order_on_occasion(oc bigint)
-    RETURNS void AS ''
-    BEGIN
-        -- No-op: assert failure if we wanted to test negative cases, but here we emulate "authorized"
-        RETURN;
-    END;
-    '' LANGUAGE plpgsql';
-
-    -- Mock get_is_editor_order_view_on_occasion (used by get_products_and_types_for_edit)
-    EXECUTE 'CREATE OR REPLACE FUNCTION public.get_is_editor_order_view_on_occasion(oc bigint)
-    RETURNS boolean AS ''
-    BEGIN
-        RETURN true;
-    END;
-    '' LANGUAGE plpgsql';
-
-    
     -- Insert Org
     INSERT INTO public.organizations (title) VALUES ('Persistence Test Org') RETURNING id INTO v_org_id;
     
@@ -53,6 +34,13 @@ BEGIN
     INSERT INTO public.occasions (organization, unit, title, link, start_time, end_time, is_hidden)
     VALUES (v_org_id, v_unit_id, 'Persistence Test Occasion', v_occasion_link, now(), now() + interval '1 day', false)
     RETURNING id INTO v_occasion_id;
+
+    SELECT id INTO v_user_id FROM auth.users LIMIT 1;
+    PERFORM assert_not_null(v_user_id, 'An auth fixture user is required');
+    PERFORM set_config('request.jwt.claim.sub', v_user_id::text, true);
+    INSERT INTO public.occasion_users (
+        occasion, "user", is_editor_order, is_editor_order_view
+    ) VALUES (v_occasion_id, v_user_id, true, true);
 
 
     -- 2. CREATE Product Type

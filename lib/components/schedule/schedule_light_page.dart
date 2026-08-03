@@ -17,6 +17,7 @@ import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/unit/views/unit_page.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -50,7 +51,9 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    if (!ClientSyncRuntime.isV1Selected) {
+      WidgetsBinding.instance.addObserver(this);
+    }
     loadData();
   }
 
@@ -99,8 +102,10 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
     }
     if (mounted) setState(() {});
 
-    final fast = await DbEvents.getAllEvents(
-        RightsService.currentOccasionId()!, false);
+    if (ClientSyncRuntime.isV1Selected) return;
+
+    final fast =
+        await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
     for (var e in fast) {
       if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
         e.description = _eventDescriptions[e.id!];
@@ -116,8 +121,8 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
   }
 
   Future<void> _loadFullData() async {
-    final full = await DbEvents.getAllEvents(
-        RightsService.currentOccasionId()!, true);
+    final full =
+        await DbEvents.getAllEvents(RightsService.currentOccasionId()!, true);
     for (var e in full) {
       if (e.id != null) _eventDescriptions[e.id!] = e.description;
     }
@@ -247,8 +252,8 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
                   // (also white). Keeps the airy feel but separates the two.
                   Container(
                     height: 1,
-                    color: ThemeConfig.blackColor(context)
-                        .withValues(alpha: 0.06),
+                    color:
+                        ThemeConfig.blackColor(context).withValues(alpha: 0.06),
                   ),
                 ],
               ),

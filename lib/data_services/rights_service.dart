@@ -12,6 +12,7 @@ import 'package:fstapp/data_services/update_service.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/users/occasion_user_model.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -55,12 +56,13 @@ class RightsService {
       bool refreshOffline = AppConfig.isAppSupported,
       String? formLink}) {
     final previous = _lastUpdate;
-    final current = previous.catchError((_) => false).then((_) => _doUpdateAppData(
-        unitId: unitId,
-        link: link,
-        force: force,
-        refreshOffline: refreshOffline,
-        formLink: formLink));
+    final current = previous.catchError((_) => false).then((_) =>
+        _doUpdateAppData(
+            unitId: unitId,
+            link: link,
+            force: force,
+            refreshOffline: refreshOffline,
+            formLink: formLink));
     _lastUpdate = current;
     return current;
   }
@@ -94,7 +96,6 @@ class RightsService {
         var occasionLink = link ?? RouterService.currentOccasionLink;
         if (occasionLink.isEmpty) {
           model = LinkModel.extractOccasionLink(Uri.base.toString());
-
         }
       }
 
@@ -120,6 +121,7 @@ class RightsService {
       // This is the key change: update the notifier's value,
       // which will automatically alert any listening widgets.
       occasionLinkModelNotifier.value = checkedObject;
+      await ClientSyncRuntime.bootstrap(checkedObject);
 
       // Update other dependent services
       TimeHelper.setTimeZoneLocation(
@@ -131,7 +133,7 @@ class RightsService {
             OccasionSettingsModel.fromOccasion(occasionLinkModel!.occasion!);
         SynchroService.globalSettingsModel = globalSettings;
         await OfflineDataService.saveGlobalSettings(globalSettings);
-        if (refreshOffline) {
+        if (refreshOffline && !ClientSyncRuntime.isV1Selected) {
           await SynchroService.refreshOfflineData();
         }
       } else {
@@ -278,6 +280,7 @@ class RightsService {
         versionRecommended: valid.versionRecommended,
         versionLink: valid.versionLink,
         organization: newOrg,
+        clientSyncV1: valid.clientSyncV1,
       );
     }
   }

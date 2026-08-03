@@ -4,7 +4,7 @@
 -- non-crew caller toggling their flag is harmless). Stored in
 -- occasion_users.data.cleaning_notifications_off; report_cleaning_issue excludes
 -- muted crew from the notification recipients. Envelope {code, message, data}.
-CREATE OR REPLACE FUNCTION set_cleaning_notifications_muted(
+CREATE OR REPLACE FUNCTION set_cleaning_notifications_muted_internal_v1(
   p_occasion bigint,
   p_muted boolean
 ) RETURNS jsonb
@@ -35,4 +35,11 @@ BEGIN
     'data', jsonb_build_object('muted', COALESCE(p_muted, false))
   );
 END;
+$$;
+
+CREATE OR REPLACE FUNCTION set_cleaning_notifications_muted(
+  p_occasion bigint,
+  p_muted boolean
+) RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = public, extensions AS $$
+  SELECT public.set_cleaning_notifications_muted_internal_v1(p_occasion, p_muted);
 $$;

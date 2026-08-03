@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.save_occasion_user_for_edit(input_data jsonb)
+CREATE OR REPLACE FUNCTION public.save_occasion_user_for_edit_internal_v1(input_data jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -110,4 +110,9 @@ BEGIN
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object('code', 500, 'message', SQLERRM);
 END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.save_occasion_user_for_edit(input_data jsonb)
+RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = '' AS $$
+  SELECT public.save_occasion_user_for_edit_internal_v1(input_data);
 $$;

@@ -19,6 +19,7 @@ class PlaceModel extends ITrinaRowModel {
   String? type;
   int? order;
   int? icon;
+  int aggregateVersion;
   bool isHidden = false;
 
   static const String WithoutValue = "---";
@@ -63,6 +64,7 @@ class PlaceModel extends ITrinaRowModel {
           : false,
       order: json[Tb.places.order],
       icon: json[Tb.places.icon],
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -100,6 +102,7 @@ class PlaceModel extends ITrinaRowModel {
       this.type,
       this.order,
       this.icon,
+      this.aggregateVersion = 0,
       this.isHidden = false});
 
   String toPlutoSelectString() => "$id:$title";
@@ -130,6 +133,8 @@ class PlaceModel extends ITrinaRowModel {
 
   @override
   Future<void> updateMethod(BuildContext context) async {
-    await DbPlaces.updatePlace(this);
+    final updated = await DbPlaces.updatePlace(this);
+    id = updated.id;
+    aggregateVersion = updated.aggregateVersion;
   }
 }

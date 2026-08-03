@@ -1,5 +1,7 @@
+import 'package:fstapp/components/cleaning/cleaning_commands.dart';
 import 'package:fstapp/components/cleaning/models/cleaning_place_status.dart';
 import 'package:fstapp/components/cleaning/models/cleaning_report.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Data access for the Cleaning service. Backed exclusively by the SECURITY
@@ -9,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Online-only (no offline caching): the crew needs live data.
 class DbCleaning {
   static final _supabase = Supabase.instance.client;
+  static final CleaningCommands _commands = SupabaseCleaningCommands(_supabase);
 
   /// Reports a problem on a toilet. Returns the parsed result (with the
   /// duplicate flag). Throws [CleaningException] on any non-200 envelope.
@@ -17,6 +20,15 @@ class DbCleaning {
     required String problemType,
     String? note,
   }) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.report(
+        placeId: placeId,
+        problemType: problemType,
+        note: note,
+      );
+      _ensureCommandOk(result);
+      return CleaningReportResult(duplicate: result.data['duplicate'] == true);
+    }
     final res = await _supabase.rpc('report_cleaning_issue', params: {
       'place_id': placeId,
       'problem_type': problemType,
@@ -55,7 +67,13 @@ class DbCleaning {
     required int occasionId,
     required bool muted,
   }) async {
-    final res = await _supabase.rpc('set_cleaning_notifications_muted', params: {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.setNotificationsMuted(occasionId, muted);
+      _ensureCommandOk(result);
+      return;
+    }
+    final res =
+        await _supabase.rpc('set_cleaning_notifications_muted', params: {
       'p_occasion': occasionId,
       'p_muted': muted,
     });
@@ -70,6 +88,12 @@ class DbCleaning {
     required String userId,
     required bool blocked,
   }) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result =
+          await _commands.setReporterBlocked(occasionId, userId, blocked);
+      _ensureCommandOk(result);
+      return;
+    }
     final res = await _supabase.rpc('set_cleaning_reporter_blocked', params: {
       'p_occasion': occasionId,
       'p_user': userId,
@@ -95,6 +119,11 @@ class DbCleaning {
 
   /// Crew-only: resolve every open report of a toilet. Returns the count closed.
   static Future<int> resolvePlace(int placeId) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.resolve(placeId);
+      _ensureCommandOk(result);
+      return (result.data['resolved'] as num?)?.toInt() ?? 0;
+    }
     final res = await _supabase.rpc('resolve_cleaning_place', params: {
       'place_id': placeId,
     });
@@ -107,6 +136,12 @@ class DbCleaning {
     if (res is Map && res['code'] != null && res['code'] != 200) {
       throw CleaningException(
           (res['code'] as num).toInt(), res['message'] as String?);
+    }
+  }
+
+  static void _ensureCommandOk(CleaningCommandResult result) {
+    if (result.status == 'rejected' || result.status == 'conflict') {
+      throw CleaningException(result.code, result.data['message'] as String?);
     }
   }
 }

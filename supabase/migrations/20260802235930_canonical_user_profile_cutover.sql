@@ -26,7 +26,7 @@ SET birth_date = left(data->>'birthDate', 10)::date
 WHERE birth_date IS NULL
   AND data->>'birthDate' ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}T';
 
-CREATE OR REPLACE FUNCTION public.save_occasion_user_for_edit(input_data jsonb)
+CREATE OR REPLACE FUNCTION public.save_occasion_user_for_edit_internal_v1(input_data jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -139,7 +139,7 @@ EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object('code', 500, 'message', SQLERRM);
 END;
 $$;
-CREATE OR REPLACE FUNCTION public.update_user(
+CREATE OR REPLACE FUNCTION public.update_user_internal_v1(
   input_data jsonb
 ) RETURNS jsonb
 SECURITY DEFINER
@@ -369,7 +369,7 @@ BEGIN
     RETURN usr;
 END;
 $$;
-CREATE OR REPLACE FUNCTION public.import_occasion_users_from_csv(
+CREATE OR REPLACE FUNCTION public.import_occasion_users_from_csv_internal_v1(
     p_occasion_id bigint,
     p_rows jsonb,
     p_delete_user_ids jsonb DEFAULT '[]'::jsonb
@@ -584,7 +584,30 @@ BEGIN
         ) THEN
             RAISE EXCEPTION 'DELETE_USER_NOT_ON_OCCASION';
         END IF;
-        PERFORM public.delete_occasion_user(v_user_id, p_occasion_id);
+        UPDATE public.news
+           SET created_by = NULL
+         WHERE created_by = v_user_id
+           AND occasion = p_occasion_id;
+        DELETE FROM public.user_groups
+         WHERE "user" = v_user_id
+           AND "group" IN (
+               SELECT id FROM public.user_group_info
+                WHERE occasion = p_occasion_id
+           );
+        DELETE FROM public.event_users
+         WHERE "user" = v_user_id
+           AND event IN (
+               SELECT id FROM public.events WHERE occasion = p_occasion_id
+           );
+        DELETE FROM public.user_news
+         WHERE "user" = v_user_id AND occasion = p_occasion_id;
+        DELETE FROM public.event_users_saved
+         WHERE "user" = v_user_id
+           AND event IN (
+               SELECT id FROM public.events WHERE occasion = p_occasion_id
+           );
+        DELETE FROM public.occasion_users
+         WHERE "user" = v_user_id AND occasion = p_occasion_id;
         v_deleted := v_deleted + 1;
     END LOOP;
 

@@ -114,9 +114,9 @@ BEGIN
     PERFORM assert_eq(
         (SELECT imported_user->>'group_title'
          FROM jsonb_array_elements(
-             public.get_occasion_users_for_edit(v_occasion)
+             public.get_occasion_users_for_edit(v_occasion)::jsonb
                  #> '{data,occasion_users}') AS imported_user
-         WHERE imported_user->>'id' = v_user::text),
+         WHERE imported_user->>'user' = v_user::text),
         'Přesunutá testovací skupina CSV',
         'users editor exposes the standard group title');
     PERFORM assert_eq(

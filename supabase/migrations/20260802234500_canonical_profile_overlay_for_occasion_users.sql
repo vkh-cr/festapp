@@ -170,7 +170,7 @@ BEGIN
     );
 END;
 $$;
-CREATE OR REPLACE FUNCTION public.save_occasion_user_for_edit(input_data jsonb)
+CREATE OR REPLACE FUNCTION public.save_occasion_user_for_edit_internal_v1(input_data jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER

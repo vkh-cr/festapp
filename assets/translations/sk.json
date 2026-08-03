@@ -83,7 +83,7 @@
     "invite": "Pozvať",
     "invitedUser": "Pozvaný: {user}.",
     "profile": "Profil",
-    "deleteAccountInstructions": "Požiadajte o zmazanie účtu zaslaním e-mailu s vašimi prihlasovacími údajmi na info@festapp.net.",
+    "deleteAccountScope": "Smazání odstraní celý účet a soukromá účastnická data. Potvrzení proběhne bezpečným jednorázovým odkazem zaslaným na adresu účtu.",
     "showCode": "Zobraziť kód",
     "showMyCode": "Zobraziť môj kód",
     "signIn": "Prihlásiť sa",

@@ -6,7 +6,8 @@ BEGIN;
 -- everyone may submit. Aggregated results (get_event_feedback_for_edit) are
 -- editor-only (403 otherwise).
 --
--- Backend objects come from database/recovery/2026-06_csmostrava_lost_backend.sql.
+-- Backend objects come from the canonical database/tables/event_feedback.sql
+-- and database/functions/events/*event_feedback*.sql sources.
 -- Style follows database/tests/speakers_test.sql: fixtures built inline,
 -- callers impersonated via request.jwt.claim.sub, auto-rollback.
 

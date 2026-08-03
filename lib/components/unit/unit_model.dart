@@ -11,6 +11,7 @@ class UnitModel {
   int? organization;
   List<OccasionModel>? occasions;
   UnitUserModel? unitUser;
+  int aggregateVersion;
 
   UnitModel({
     this.id,
@@ -20,6 +21,7 @@ class UnitModel {
     this.organization,
     this.occasions,
     this.unitUser,
+    this.aggregateVersion = 0,
   });
 
   factory UnitModel.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,7 @@ class UnitModel {
       unitUser: json["unit_user"] != null
           ? UnitUserModel.fromJson(json["unit_user"])
           : null,
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -50,6 +53,7 @@ class UnitModel {
       Tb.units.features: features,
       Tb.units.organization: organization,
       "unit_user": unitUser?.toJson(),
+      'aggregate_version': aggregateVersion,
     };
   }
 }

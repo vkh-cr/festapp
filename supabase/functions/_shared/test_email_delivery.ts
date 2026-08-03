@@ -92,6 +92,18 @@ Deno.test("deliverEmail preserves an inline template and adds the resolved wrapp
   assertEquals(sentMessages[0].html, "<main><p>Edited Ada</p></main>");
 });
 
+Deno.test("deliverEmail forwards a stable worker message id", async () => {
+  const { dependencies, sentMessages } = createDependencies();
+  await createEmailDelivery(dependencies)({
+    ...input,
+    messageId: "<ticket-order-command@example.test>",
+  });
+  assertEquals(
+    sentMessages[0].messageId,
+    "<ticket-order-command@example.test>",
+  );
+});
+
 Deno.test("deliverEmail keeps legacy inline templates without a code compatible", async () => {
   const { dependencies, sentMessages } = createDependencies();
   await createEmailDelivery(dependencies)({

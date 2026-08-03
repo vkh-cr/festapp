@@ -5,7 +5,6 @@ import 'package:fstapp/config/url_strategy_noop.dart'
     if (dart.library.html) 'package:fstapp/config/url_strategy_web.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.dart';
-import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
@@ -14,13 +13,14 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/occasion/occasion_home_page.dart';
 import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/services/health_tracking_http_client.dart';
 import 'package:fstapp/services/notification_helper.dart';
+import 'package:fstapp/services/installation_cutover_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -58,6 +58,17 @@ Future<void> initializeEverything() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   AppLogger.debug('Widgets binding initialized');
+
+  var allowPersistedOccasionData = false;
+  try {
+    await InstallationCutoverService().run();
+    allowPersistedOccasionData = true;
+    AppLogger.debug('Installation generation is current');
+  } catch (e) {
+    // Fail closed: startup may continue online, but no pre-cutover occasion
+    // cache is read until the idempotent migration succeeds.
+    AppLogger.error('Installation cutover failed: $e');
+  }
 
   SynchroService.configure(
     isLoggedIn: AuthService.isLoggedIn,
@@ -102,6 +113,7 @@ Future<void> initializeEverything() async {
       // network interface is down.
       httpClient: HealthTrackingHttpClient(),
     ).timeout(const Duration(seconds: 2));
+    ClientSyncRuntime.configure(Supabase.instance.client);
     AppLogger.debug('Supabase initialized');
     if (AuthService.isLoggedIn()) {
       await AuthService.refreshSession().timeout(const Duration(seconds: 2));
@@ -109,6 +121,10 @@ Future<void> initializeEverything() async {
     } else {
       await AuthService.tryAuthUser().timeout(const Duration(seconds: 2));
       AppLogger.debug('Stored session recovery completed');
+    }
+    if (AuthService.isLoggedIn()) {
+      await AuthService.validateCurrentOrganization()
+          .timeout(const Duration(seconds: 2));
     }
   } catch (e) {
     AppLogger.error('Supabase initialization failed: $e');
@@ -122,7 +138,9 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    var settings = await OfflineDataService.getGlobalSettings();
+    var settings = allowPersistedOccasionData
+        ? await OfflineDataService.getGlobalSettings()
+        : null;
     if (settings != null) {
       SynchroService.globalSettingsModel = settings;
       RightsService.occasionLinkModelNotifier.value = OccasionLinkModel(

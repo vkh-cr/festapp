@@ -14,6 +14,8 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/update_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/news/db_news.dart';
 import 'package:fstapp/components/users/views/login_page.dart';
@@ -97,7 +99,12 @@ class _OccasionHomePageState extends State<OccasionHomePage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      ClientSyncRuntime.setForeground(true);
       loadData();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      ClientSyncRuntime.setForeground(false);
     }
   }
 
@@ -133,9 +140,7 @@ class _OccasionHomePageState extends State<OccasionHomePage>
   @override
   Widget build(BuildContext context) {
     return AutoTabsRouter(
-      routes: visibleTabKeys
-          .map((key) => _availableTabs[key]!.route)
-          .toList(),
+      routes: visibleTabKeys.map((key) => _availableTabs[key]!.route).toList(),
       builder: (tabsContext, child) {
         final tabsRouter = AutoTabsRouter.of(tabsContext);
         return Scaffold(
@@ -145,86 +150,97 @@ class _OccasionHomePageState extends State<OccasionHomePage>
               // Hide the bottom navigation while drawing a path on the map.
               if (isEditingMap) return const SizedBox.shrink();
               return ValueListenableBuilder<OccasionLinkModel?>(
-            valueListenable: RightsService.occasionLinkModelNotifier,
-            builder: (listenableContext, occasionLinkModel, __) {
-              return BottomNavigationBar(
-                backgroundColor:
-                    ThemeConfig.bottomNavBackgroundColor(listenableContext),
-                selectedItemColor:
-                    ThemeConfig.bottomNavSelectedItemColor(listenableContext),
-                unselectedItemColor:
-                    ThemeConfig.bottomNavUnselectedItemColor(listenableContext),
-                currentIndex: tabsRouter.activeIndex,
-                type: BottomNavigationBarType.fixed,
-                onTap: (int index) async {
-                  final key = visibleTabKeys[index];
-                  final tab = _availableTabs[key]!;
+                valueListenable: RightsService.occasionLinkModelNotifier,
+                builder: (listenableContext, occasionLinkModel, __) {
+                  return BottomNavigationBar(
+                    backgroundColor:
+                        ThemeConfig.bottomNavBackgroundColor(listenableContext),
+                    selectedItemColor: ThemeConfig.bottomNavSelectedItemColor(
+                        listenableContext),
+                    unselectedItemColor:
+                        ThemeConfig.bottomNavUnselectedItemColor(
+                            listenableContext),
+                    currentIndex: tabsRouter.activeIndex,
+                    type: BottomNavigationBarType.fixed,
+                    onTap: (int index) async {
+                      final key = visibleTabKeys[index];
+                      final tab = _availableTabs[key]!;
+                      unawaited(ClientSyncRuntime.refresh(SyncReason.navigation,
+                          privateConsumer: tab.requiresLogin));
 
-                  // Search is a modal overlay, not a real tab — show it and
-                  // keep the current tab active (matches production).
-                  if (key == OccasionTab.search) {
-                    GlobalSearchDialog.show(listenableContext);
-                    return;
-                  }
+                      // Search is a modal overlay, not a real tab — show it and
+                      // keep the current tab active (matches production).
+                      if (key == OccasionTab.search) {
+                        GlobalSearchDialog.show(listenableContext);
+                        return;
+                      }
 
-                  if (tab.requiresLogin && !AuthService.isLoggedIn()) {
-                    await RouterService.navigate(
-                        listenableContext, LoginPage.ROUTE);
-                    await loadData();
-                  } else {
-                    handleNewsBadgeTabTap(
-                      isNewsTab: key == OccasionTab.news,
-                      isLoggedIn: AuthService.isLoggedIn(),
-                      loadUnreadCount: DbNews.countNewMessages,
-                      setUnreadCount: (count) {
-                        if (mounted) {
-                          setState(() => _messageCount = count);
+                      if (tab.requiresLogin && !AuthService.isLoggedIn()) {
+                        await RouterService.navigate(
+                            listenableContext, LoginPage.ROUTE);
+                        await loadData();
+                      } else {
+                        handleNewsBadgeTabTap(
+                          isNewsTab: key == OccasionTab.news,
+                          isLoggedIn: AuthService.isLoggedIn(),
+                          loadUnreadCount: DbNews.countNewMessages,
+                          setUnreadCount: (count) {
+                            if (mounted) {
+                              setState(() => _messageCount = count);
+                            }
+                          },
+                        );
+                        // A bottom-bar tap must always land on the section's
+                        // homepage, even when the user is deep in a nested detail
+                        // page (e.g. an event opened directly via URL / reload /
+                        // notification, where the nested stack contains only the
+                        // detail and popUntilRoot() would do nothing). Navigating
+                        // by the section path re-resolves the whole hierarchy: the
+                        // nested router lands on its initial child (the configured
+                        // schedule variant for Program) and the active tab switches
+                        // on its own — so no setActiveIndex is needed.
+                        final tabPath = tab.path;
+                        if (tabPath != null) {
+                          listenableContext.router.navigatePath(
+                              RouterService.getCurrentLink() + tabPath);
+                        } else {
+                          tabsRouter.stackRouterOfIndex(index)?.popUntilRoot();
+                          tabsRouter.setActiveIndex(index);
                         }
-                      },
-                    );
-                    // A bottom-bar tap must always land on the section's
-                    // homepage, even when the user is deep in a nested detail
-                    // page (e.g. an event opened directly via URL / reload /
-                    // notification, where the nested stack contains only the
-                    // detail and popUntilRoot() would do nothing). Navigating
-                    // by the section path re-resolves the whole hierarchy: the
-                    // nested router lands on its initial child (the configured
-                    // schedule variant for Program) and the active tab switches
-                    // on its own — so no setActiveIndex is needed.
-                    final tabPath = tab.path;
-                    if (tabPath != null) {
-                      listenableContext.router
-                          .navigatePath(RouterService.getCurrentLink() + tabPath);
-                    } else {
-                      tabsRouter.stackRouterOfIndex(index)?.popUntilRoot();
-                      tabsRouter.setActiveIndex(index);
-                    }
-                  }
-                },
-                items: visibleTabKeys.map((key) {
-                  final tab = _availableTabs[key]!;
-                  return BottomNavigationBarItem(
-                    icon: tab.buildIcon(
-                        listenableContext, _messageCount, messageCountString),
-                    activeIcon: tab.buildActiveIcon(
-                        listenableContext, _messageCount, messageCountString),
-                    label: key == OccasionTab.user
-                        ? (occasionLinkModel?.userInfo?.name ??
-                            UserStrings.signIn)
-                        : tab.label,
+                      }
+                    },
+                    items: visibleTabKeys.map((key) {
+                      final tab = _availableTabs[key]!;
+                      return BottomNavigationBarItem(
+                        icon: tab.buildIcon(listenableContext, _messageCount,
+                            messageCountString),
+                        activeIcon: tab.buildActiveIcon(listenableContext,
+                            _messageCount, messageCountString),
+                        label: key == OccasionTab.user
+                            ? (occasionLinkModel?.userInfo?.name ??
+                                UserStrings.signIn)
+                            : tab.label,
+                      );
+                    }).toList(),
                   );
-                }).toList(),
+                },
               );
             },
-          );
-            },
           ),
-          body: Column(
-            children: [
-              // Offline indicator for every tab; renders nothing when online.
-              const OfflineBanner(),
-              Expanded(child: child),
-            ],
+          body: ValueListenableBuilder<int>(
+            valueListenable: ClientSyncRuntime.projectionEpoch,
+            builder: (context, projectionEpoch, _) => Column(
+              children: [
+                // Offline indicator for every tab; renders nothing when online.
+                const OfflineBanner(),
+                Expanded(
+                  child: KeyedSubtree(
+                    key: ValueKey(projectionEpoch),
+                    child: child,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

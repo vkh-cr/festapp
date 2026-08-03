@@ -1,5 +1,12 @@
 /// One feedback row for the current viewer (from get_event_feedback /
 /// submit_event_feedback).
+class EventFeedbackException implements Exception {
+  final int code;
+  final String? message;
+
+  EventFeedbackException(this.code, this.message);
+}
+
 class EventFeedbackModel {
   final int? id;
   final int event;

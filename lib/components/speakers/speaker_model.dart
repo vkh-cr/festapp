@@ -9,6 +9,7 @@ class SpeakerModel {
   int order;
   bool isHidden;
   Map<String, dynamic> data;
+  int aggregateVersion;
 
   /// Competence topic ids (from get_speakers_for_edit / update_speaker).
   List<int> topics;
@@ -27,6 +28,7 @@ class SpeakerModel {
     Map<String, dynamic>? data,
     List<int>? topics,
     List<SpeakerEventRef>? events,
+    this.aggregateVersion = 0,
   })  : data = data ?? {},
         topics = topics ?? [],
         events = events ?? [];
@@ -41,10 +43,12 @@ class SpeakerModel {
       order: (json['order'] as num?)?.toInt() ?? 0,
       isHidden: json['is_hidden'] as bool? ?? false,
       data: (json['data'] as Map?)?.cast<String, dynamic>() ?? {},
-      topics: (json['topics'] as List?)
-              ?.map((e) => (e as num).toInt())
-              .toList() ??
-          [],
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ??
+          (json['aggregateVersion'] as num?)?.toInt() ??
+          0,
+      topics:
+          (json['topics'] as List?)?.map((e) => (e as num).toInt()).toList() ??
+              [],
       events: (json['events'] as List?)
               ?.map((e) =>
                   SpeakerEventRef.fromJson((e as Map).cast<String, dynamic>()))
@@ -77,6 +81,7 @@ class SpeakerEventRef {
   final int? maxParticipants;
   final int occupied;
   final bool isCounselingSlot;
+  final int aggregateVersion;
 
   SpeakerEventRef({
     required this.id,
@@ -86,6 +91,7 @@ class SpeakerEventRef {
     this.maxParticipants,
     this.occupied = 0,
     this.isCounselingSlot = false,
+    this.aggregateVersion = 0,
   });
 
   factory SpeakerEventRef.fromJson(Map<String, dynamic> json) {
@@ -101,6 +107,7 @@ class SpeakerEventRef {
       maxParticipants: (json['max_participants'] as num?)?.toInt(),
       occupied: (json['occupied'] as num?)?.toInt() ?? 0,
       isCounselingSlot: json['is_counseling_slot'] as bool? ?? false,
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
     );
   }
 }

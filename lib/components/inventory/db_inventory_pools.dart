@@ -2,10 +2,15 @@ import 'package:fstapp/components/inventory/models/inventory_pool_bundle.dart';
 import 'package:fstapp/components/inventory/models/inventory_pools_list_bundle.dart';
 import 'package:fstapp/components/inventory/models/resource_model.dart';
 import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart';
+import 'package:fstapp/components/inventory/inventory_commands.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbInventoryPools {
   static final _supabase = Supabase.instance.client;
+  static InventoryCommands get _commands =>
+      SupabaseInventoryCommands(_supabase);
 
   static Future<UserInventoryBundle> getUserInventory() async {
     // 1. Call the RPC function.
@@ -60,6 +65,9 @@ class DbInventoryPools {
 
   static Future<InventoryPoolBundle> updateInventoryPoolBundle(
       InventoryPoolBundle bundle) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      return _commands.savePool(bundle);
+    }
     final response = await _supabase.rpc(
       'update_inventory_pool_bundle',
       params: {'p_bundle_data': bundle},
@@ -67,21 +75,48 @@ class DbInventoryPools {
     return InventoryPoolBundle.fromJson(response);
   }
 
-  static Future<void> deleteInventoryPool(int poolId) async {
+  static Future<void> deleteInventoryPool(
+    int poolId, {
+    int expectedVersion = 0,
+  }) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.deletePool(
+        RightsService.currentOccasionId()!,
+        poolId,
+        expectedVersion,
+      );
+      return;
+    }
     await _supabase.rpc(
       'delete_inventory_pool',
       params: {'p_inventory_pool_id': poolId},
     );
   }
 
-  static Future<void> deleteResource(int resourceId) async {
+  static Future<void> deleteResource(ResourceModel resource) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.deleteResource(
+        RightsService.currentOccasionId()!,
+        resource,
+      );
+      return;
+    }
     await _supabase.rpc(
       'delete_resource',
-      params: {'p_resource_id': resourceId},
+      params: {'p_resource_id': resource.id},
     );
   }
 
   static Future<void> updateResource(ResourceModel resource) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final saved = await _commands.saveResource(
+        RightsService.currentOccasionId()!,
+        resource,
+      );
+      resource.id = saved.id;
+      resource.aggregateVersion = saved.aggregateVersion;
+      return;
+    }
     await _supabase.rpc(
       'update_resource',
       params: {'p_input': resource.toJson()},

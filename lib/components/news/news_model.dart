@@ -10,6 +10,7 @@ class NewsModel {
   int id;
   int views = 0;
   bool isRead = false;
+  int aggregateVersion;
 
   NewsModel({
     required this.createdAt,
@@ -17,6 +18,7 @@ class NewsModel {
     required this.createdBy,
     required this.id,
     required this.views,
+    this.aggregateVersion = 0,
   });
 
   Map toJson() => {
@@ -35,6 +37,7 @@ class NewsModel {
             : null,
         message: json[Tb.news.message],
         createdBy: json[Tb.user_info.name],
-        views: json[NewsModel.viewsColumn]);
+        views: json[NewsModel.viewsColumn] ?? 0,
+        aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0);
   }
 }

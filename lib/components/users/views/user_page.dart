@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/users/user_strings.dart';
+import 'package:fstapp/components/users/account_deletion_service.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart' show Uint8List;
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ import 'package:fstapp/components/users/views/login_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/services/launch_url_service.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
@@ -394,18 +396,29 @@ class _UserPageState extends State<UserPage> {
                 Container(
                   alignment: Alignment.topCenter,
                   child: TextButton(
-                    onPressed: () => DialogHelper.showInformationDialog(
-                      context,
-                      UserStrings.deleteAccount,
-                      UserStrings.deleteAccountInstructions,
-                    ),
+                    onPressed: _requestAccountDeletion,
                     child: Text(
                       UserStrings.deleteAccount,
                       style: TextStyle(
-                          fontSize: StylesConfig.normalClickableFontSize),
+                        fontSize: StylesConfig.normalClickableFontSize,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                   ),
-                )
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    _legalLink(
+                        UserStrings.privacy, '${AppConfig.webLink}/privacy'),
+                    _legalLink(UserStrings.privacyChoices,
+                        '${AppConfig.webLink}/privacy/choices'),
+                    _legalLink(UserStrings.terms, '${AppConfig.webLink}/terms'),
+                    _legalLink(
+                        UserStrings.support, '${AppConfig.webLink}/support'),
+                  ],
+                ),
               ],
             ),
           ),
@@ -447,6 +460,54 @@ class _UserPageState extends State<UserPage> {
     await AuthService.logout();
     ToastHelper.Show(context, ScheduleStrings.youHaveBeenSignedOut(trPrefix));
     RouterService.popOrHome(context);
+  }
+
+  Widget _legalLink(String label, String url) => TextButton(
+        onPressed: () => LaunchUrlService.launchURL(url),
+        child: Text(label),
+      );
+
+  Future<void> _requestAccountDeletion() async {
+    final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(UserStrings.deleteAccount),
+            content: Text(
+              '${UserStrings.deleteAccountScope}\n\n${UserStrings.deleteAccountConfirm}',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(CommonStrings.cancel),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(UserStrings.deleteAccount),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!confirmed) return;
+    try {
+      final result = await AccountDeletionService().request();
+      if (!mounted) return;
+      await DialogHelper.showInformationDialog(
+        context,
+        UserStrings.deleteAccount,
+        UserStrings.accountDeletionEmailSent(result.maskedEmail),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      await DialogHelper.showInformationDialog(
+        context,
+        UserStrings.deleteAccount,
+        UserStrings.accountDeletionFailed,
+      );
+    }
   }
 
   void _redirectToAdminPage() {

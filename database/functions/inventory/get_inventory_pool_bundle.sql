@@ -54,6 +54,14 @@ BEGIN
                 'occasion', r.occasion,
                 'unit', r.unit,
                 'data', r.data,
+                'aggregate_version', COALESCE((
+                    SELECT av.version
+                    FROM public.client_aggregate_versions av
+                    WHERE av.aggregate_type = 'resource'
+                      AND av.scope_type = 'occasion'
+                      AND av.scope_id = v_occasion_id
+                      AND av.aggregate_id = r.id::text
+                ), 0),
                 'slots', (
                     SELECT COALESCE(jsonb_agg(
                         jsonb_build_object(
@@ -112,6 +120,11 @@ BEGIN
         'places', v_places_data,
         'products', v_products_data,
         'product_inventory_contexts', v_product_inventory_contexts_data
+        ,'aggregate_version', COALESCE((SELECT av.version
+          FROM public.client_aggregate_versions av
+          WHERE av.aggregate_type='inventory_pool' AND av.scope_type='occasion'
+            AND av.scope_id=v_occasion_id
+            AND av.aggregate_id=p_inventory_pool_id::text),0)
     );
     -- MODIFICATION END
 

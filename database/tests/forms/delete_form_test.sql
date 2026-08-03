@@ -9,6 +9,7 @@ DECLARE
     v_full_json jsonb;
     v_form_data jsonb;
     v_order_id bigint;
+    v_delete_result jsonb;
 BEGIN
     -- 1. Setup Context
     SELECT id INTO v_user_id FROM auth.users LIMIT 1;
@@ -56,15 +57,13 @@ BEGIN
         RAISE EXCEPTION 'Form should NOT be deletable with orders';
     END IF;
 
-    -- 6. Try delete -> expect failure (using existing delete_form logic)
-    BEGIN
-        PERFORM delete_form(v_form_id);
-        RAISE EXCEPTION 'Delete should have failed';
-    EXCEPTION WHEN OTHERS THEN
-        IF SQLERRM NOT LIKE '%cannot be deleted%' THEN
-            RAISE EXCEPTION 'Unexpected error message: %', SQLERRM;
-        END IF;
-    END;
+    -- 6. The canonical receipt-backed command reports the conflict explicitly.
+    v_delete_result := public.delete_form_client_sync_v1(
+        v_form_id, gen_random_uuid());
+    PERFORM assert_eq(v_delete_result->>'status', 'conflict',
+        'form with responses should return conflict');
+    PERFORM assert_eq((v_delete_result->>'code')::integer, 409,
+        'form with responses should return HTTP-like code 409');
 
     -- 7. Delete Order (cleanup)
     DELETE FROM eshop.orders WHERE id = v_order_id;
@@ -78,7 +77,10 @@ BEGIN
     END IF;
 
     -- 9. Delete Form -> Success
-    PERFORM delete_form(v_form_id);
+    v_delete_result := public.delete_form_client_sync_v1(
+        v_form_id, gen_random_uuid());
+    PERFORM assert_eq(v_delete_result->>'status', 'applied',
+        'deletable form should be removed');
 
     -- 10. Verify deletion
     PERFORM * FROM public.forms WHERE id = v_form_id;

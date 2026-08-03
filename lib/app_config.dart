@@ -28,6 +28,8 @@ class AppConfig {
   static const bool showBankSupportRole = false;
 
   static const String webLink = "https://csmostrava.festapp.net";
+  static const String syncHeadOrigin = "https://sync.festapp.net";
+  static const String syncAssetOrigin = "https://assets.festapp.net";
   static const String imageWorkerUrl = 'https://img.festapp.net';
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;

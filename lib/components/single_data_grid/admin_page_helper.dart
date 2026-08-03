@@ -23,6 +23,8 @@ import 'package:fstapp/components/single_data_grid/data_grid_strings.dart';
 import 'package:fstapp/components/occasion_services/service_tab.dart';
 import 'package:fstapp/components/groups/user_groups_tab.dart';
 import 'package:fstapp/components/users/views/users_tab.dart';
+import 'package:fstapp/components/client_changes/client_changes_tab.dart';
+import 'package:fstapp/components/client_changes/client_changes_strings.dart';
 
 import '../eshop/views/products_tab.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
@@ -61,6 +63,7 @@ class AdminTabDefinition {
   static String get emailTemplates => EmailTemplatesStrings.title;
   static const String settings = "Settings";
   static const String volunteers = "volunteers";
+  static const String changes = "changes";
 
   // Available tabs defined in a dictionary.
   // No changes are needed here because isEnabled defaults to true.
@@ -138,5 +141,9 @@ class AdminTabDefinition {
             label: CommonStrings.settings,
             icon: Icons.settings,
             widget: OccasionSettingsTab()),
+        changes: AdminTabDefinition(
+            label: ClientChangesStrings.title,
+            icon: Icons.history,
+            widget: const ClientChangesTab()),
       };
 }

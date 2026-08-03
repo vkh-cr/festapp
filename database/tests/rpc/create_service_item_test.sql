@@ -13,6 +13,7 @@ DECLARE
     v_oc      bigint;
     v_result  jsonb;
     v_services jsonb;
+    v_rejected boolean;
 BEGIN
     -- Impersonate a real user so auth.uid() (used by the manager gate) resolves.
     SELECT id INTO v_user_id FROM auth.users LIMIT 1;
@@ -71,10 +72,17 @@ BEGIN
     PERFORM assert_eq(jsonb_array_length(v_services->'food'), 1,
         'food array should hold the new item');
 
-    -- 5. Non-manager callers are rejected.
+    -- 5. The canonical command boundary rejects non-manager callers before
+    -- entering the legacy JSON-returning domain handler.
     PERFORM set_config('request.jwt.claim.sub', gen_random_uuid()::text, true);
-    v_result := public.create_service_item(v_oc, 'accommodation', 'A9', 'NoRights', 8);
-    PERFORM assert_eq(v_result->>'code', '403', 'non-manager should get 403');
+    v_rejected := false;
+    BEGIN
+        PERFORM public.create_service_item(
+            v_oc, 'accommodation', 'A9', 'NoRights', 8);
+    EXCEPTION WHEN insufficient_privilege THEN
+        v_rejected := SQLERRM = 'occasion manager required';
+    END;
+    PERFORM assert_eq(v_rejected, true, 'non-manager should be rejected');
 
     RAISE NOTICE 'create_service_item regression tests passed';
 END $$ LANGUAGE plpgsql;

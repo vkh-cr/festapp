@@ -10,27 +10,28 @@ DECLARE
     src text;
 BEGIN
     ----------------------------------------------------------------------------
-    -- 1. Check duplicate_occasion
+    -- 1. Check the canonical duplicate command. duplicate_occasion is now a
+    -- thin compatibility facade and intentionally delegates this guard.
     ----------------------------------------------------------------------------
-    RAISE NOTICE 'Verifying duplicate_occasion...';
+    RAISE NOTICE 'Verifying duplicate_occasion_client_sync_v1...';
     
     SELECT prosecdef, prosrc INTO rec, src
     FROM pg_proc 
-    WHERE proname = 'duplicate_occasion';
+    WHERE proname = 'duplicate_occasion_client_sync_v1';
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Function duplicate_occasion not found';
+        RAISE EXCEPTION 'Function duplicate_occasion_client_sync_v1 not found';
     END IF;
 
     IF NOT rec THEN
-        RAISE EXCEPTION 'duplicate_occasion MUST be SECURITY DEFINER (for deep cloning)';
+        RAISE EXCEPTION 'duplicate_occasion_client_sync_v1 MUST be SECURITY DEFINER';
     END IF;
 
-    IF src NOT ILIKE '%check_is_manager_on_unit%' THEN
-        RAISE EXCEPTION 'duplicate_occasion MUST contain explicit permission guard (check_is_manager_on_unit)';
+    IF src NOT ILIKE '%get_is_manager_on_unit%' THEN
+        RAISE EXCEPTION 'duplicate_occasion_client_sync_v1 MUST contain an explicit manager guard';
     END IF;
 
-    RAISE NOTICE '✅ duplicate_occasion is DEFINER and Guarded.';
+    RAISE NOTICE '✅ duplicate_occasion_client_sync_v1 is DEFINER and guarded.';
 
     ----------------------------------------------------------------------------
     -- 2. Check recalculate_order_payment_status

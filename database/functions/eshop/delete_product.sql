@@ -37,7 +37,7 @@ BEGIN
 
   -- **INTEGRATION:** Before deleting the product, clear all its inventory context associations.
   -- This call will also trigger the necessary de-allocation of spots.
-  PERFORM public.update_product_inventory_contexts(p_product_id, '[]'::jsonb);
+  PERFORM public.update_product_inventory_contexts_internal_v1(p_product_id, '[]'::jsonb);
 
   -- Finally, delete the product itself.
   DELETE FROM eshop.products

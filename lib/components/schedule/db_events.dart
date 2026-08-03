@@ -10,9 +10,15 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/workshop_feature.dart';
 import 'package:fstapp/components/activities/activity_model.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/event_commands.dart';
+import 'package:fstapp/components/schedule/attendance_commands.dart';
+import 'package:fstapp/components/schedule/saved_program_commands.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/speakers/speakers_strings.dart';
 import 'package:fstapp/components/schedule/exclusive_group_model.dart';
+import 'package:fstapp/components/schedule/exclusive_group_commands.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -31,6 +37,14 @@ import 'get_events_helper.dart';
 
 class DbEvents {
   static final _supabase = Supabase.instance.client;
+  static EventCommands get _commands => SupabaseEventCommands(_supabase);
+  static AttendanceCommands get _attendanceCommands =>
+      SupabaseAttendanceCommands(_supabase);
+  static SavedProgramCommands get _savedProgramCommands =>
+      SupabaseSavedProgramCommands(
+          _supabase, RightsService.currentOccasionId()!);
+  static ExclusiveGroupCommands get _exclusiveGroupCommands =>
+      SupabaseExclusiveGroupCommands(_supabase);
 
   static Future<HashSet<EventModel>> loadAllMySchedule() async {
     var dataEventUsersSaved = await _supabase
@@ -109,13 +123,28 @@ class DbEvents {
     var withParentSelect = withParent
         ? "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent})"
         : "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})";
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select(
-            "${Tb.events.id},${Tb.events.updated_at},${Tb.events.occasion},${Tb.events.title},${Tb.events.description},${Tb.events.start_time},${Tb.events.end_time},${Tb.events.max_participants},${Tb.events.split_for_men_women},${Tb.events.is_group_event},${Tb.events.is_hidden},${Tb.events.type},${Tb.events.data},${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),$withParentSelect")
-        .eq(Tb.events.id, eventId)
-        .single();
-    var event = EventModel.fromJson(data);
+    late EventModel event;
+    if (ClientSyncRuntime.isV1Selected && RightsService.canSeeAdmin()) {
+      final response = await _supabase.rpc('get_event_editor_v1', params: {
+        'p_occasion': RightsService.currentOccasionId()!,
+        'p_event': eventId,
+      });
+      final body = (response as Map).cast<String, dynamic>();
+      final data = (body['data'] as Map).cast<String, dynamic>();
+      event = EventModel.fromCommandJson(
+        (data['event'] as Map).cast<String, dynamic>(),
+        (data['version'] as num).toInt(),
+      );
+      event.occasionId = RightsService.currentOccasionId();
+    } else {
+      var data = await _supabase
+          .from(Tb.events.table)
+          .select(
+              "${Tb.events.id},${Tb.events.updated_at},${Tb.events.occasion},${Tb.events.title},${Tb.events.description},${Tb.events.start_time},${Tb.events.end_time},${Tb.events.max_participants},${Tb.events.split_for_men_women},${Tb.events.is_group_event},${Tb.events.is_hidden},${Tb.events.type},${Tb.events.data},${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),$withParentSelect")
+          .eq(Tb.events.id, eventId)
+          .single();
+      event = EventModel.fromJson(data);
+    }
 
     if (AuthService.isLoggedIn()) {
       event.isInMySchedule = await isEventSaved(event.id!);
@@ -206,8 +235,21 @@ class DbEvents {
 
     dynamic result;
     try {
-      result = await _supabase
-          .rpc("sign_user_to_event", params: {"ev": eventId, "usr": userId});
+      if (ClientSyncRuntime.isV1Selected) {
+        final response = await _attendanceCommands.setAttendance(
+          eventId: eventId,
+          participantId: userId,
+          action: AttendanceAction.signIn,
+        );
+        result = {
+          'code': response.code,
+          if (response.eventsRegistrationStart != null)
+            'events_registration_start': response.eventsRegistrationStart,
+        };
+      } else {
+        result = await _supabase
+            .rpc("sign_user_to_event", params: {"ev": eventId, "usr": userId});
+      }
     } catch (e) {
       // Offline: say so readably and behave like the non-200 branches
       // (toast + return); other errors keep today's behavior.
@@ -352,6 +394,12 @@ class DbEvents {
   }
 
   static Future<bool> isEventSaved(int id) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final privateProgram = await ClientSyncRuntime.readPrivate(
+          ClientSyncComponent.privateProgram);
+      return privateProgram is Map &&
+          ((privateProgram['saved'] as List?) ?? const []).contains(id);
+    }
     var data = await _supabase
         .from(Tb.event_users_saved.table)
         .select()
@@ -362,6 +410,11 @@ class DbEvents {
   }
 
   static Future<void> removeFromMySchedule(BuildContext context, int id) async {
+    if (ClientSyncRuntime.isV1Selected && AuthService.isLoggedIn()) {
+      await _savedProgramCommands.update([id], SavedProgramMode.remove);
+      ToastHelper.Show(context, ScheduleStrings.removedFromMySchedule);
+      return;
+    }
     if (AuthService.isLoggedIn()) {
       await _supabase
           .from(Tb.event_users_saved.table)
@@ -381,10 +434,14 @@ class DbEvents {
       return false;
     }
     if (AuthService.isLoggedIn()) {
-      await _supabase.rpc('synchronize_my_schedule', params: {
-        'p_event_ids': [id],
-        'p_join_mode': true,
-      });
+      if (ClientSyncRuntime.isV1Selected) {
+        await _savedProgramCommands.update([id], SavedProgramMode.join);
+      } else {
+        await _supabase.rpc('synchronize_my_schedule', params: {
+          'p_event_ids': [id],
+          'p_join_mode': true,
+        });
+      }
     }
     await OfflineDataService.addToMySchedule(id);
     ToastHelper.Show(context, ScheduleStrings.addedToMySchedule);
@@ -414,6 +471,14 @@ class DbEvents {
 
     await OfflineDataService.saveMyScheduleData(eventIdsToSynchronize);
 
+    if (ClientSyncRuntime.isV1Selected) {
+      await _savedProgramCommands.update(
+        eventIdsToSynchronize,
+        join ? SavedProgramMode.join : SavedProgramMode.replace,
+      );
+      return;
+    }
+
     if (!join) {
       return;
     }
@@ -425,6 +490,18 @@ class DbEvents {
   }
 
   static Future<EventModel> updateEvent(EventModel event) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      event.occasionId ??= RightsService.currentOccasionId();
+      final result = await _commands.save(event);
+      if (result.status == EventCommandStatus.conflict) {
+        throw StateError('Event was changed by another editor');
+      }
+      if (result.status == EventCommandStatus.rejected ||
+          result.event == null) {
+        throw StateError('Event save was rejected');
+      }
+      return result.event!;
+    }
     var upsertObj = event.toUpsertMap();
 
     if (event.description != null) {
@@ -467,6 +544,8 @@ class DbEvents {
   static Future<void> updateEventFromDataGrid(EventModel event) async {
     var updatedEvent = await updateEvent(event);
 
+    if (ClientSyncRuntime.isV1Selected) return;
+
     var insertRoles = [];
     for (var eParent in event.eventRolesIds!) {
       insertRoles.add({
@@ -499,6 +578,17 @@ class DbEvents {
   }
 
   static Future<void> deleteEvent(EventModel data) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      data.occasionId ??= RightsService.currentOccasionId();
+      final result = await _commands.delete(data);
+      if (result.status == EventCommandStatus.conflict) {
+        throw StateError('Event was changed by another editor');
+      }
+      if (result.status == EventCommandStatus.rejected) {
+        throw StateError('Event deletion was rejected');
+      }
+      return;
+    }
     // Editor-guarded server-side delete that unbinds sign-ups and other child
     // rows (event_users, event_users_saved, exclusive/roles/groups) atomically,
     // so events with attendees — including counseling slots — delete cleanly.
@@ -525,6 +615,9 @@ class DbEvents {
   }
 
   static Future<List<ExclusiveGroupModel>> getAllExclusiveGroups() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      return _exclusiveGroupCommands.list(RightsService.currentOccasionId()!);
+    }
     var data = await _supabase
         .from(Tb.exclusive_groups.table)
         .select("${Tb.exclusive_groups.id}, "
@@ -536,6 +629,18 @@ class DbEvents {
   }
 
   static Future<void> updateExclusiveGroup(ExclusiveGroupModel model) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final saved = await _exclusiveGroupCommands.save(
+        RightsService.currentOccasionId()!,
+        model,
+      );
+      model
+        ..id = saved.id
+        ..title = saved.title
+        ..events = saved.events
+        ..aggregateVersion = saved.aggregateVersion;
+      return;
+    }
     Map<String, dynamic> upsertObj = {
       Tb.exclusive_groups.title: model.title,
     };
@@ -576,6 +681,13 @@ class DbEvents {
   }
 
   static Future<void> deleteExclusiveGroup(ExclusiveGroupModel data) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _exclusiveGroupCommands.delete(
+        RightsService.currentOccasionId()!,
+        data,
+      );
+      return;
+    }
     await _supabase
         .from(Tb.exclusive_events.table)
         .delete()
@@ -593,8 +705,17 @@ class DbEvents {
 
     dynamic result;
     try {
-      result = await _supabase.rpc("sign_user_out_of_event",
-          params: {"ev": eventId, "usr": userId});
+      if (ClientSyncRuntime.isV1Selected) {
+        final response = await _attendanceCommands.setAttendance(
+          eventId: eventId,
+          participantId: userId,
+          action: AttendanceAction.signOut,
+        );
+        result = {'code': response.code};
+      } else {
+        result = await _supabase.rpc("sign_user_out_of_event",
+            params: {"ev": eventId, "usr": userId});
+      }
     } catch (e) {
       // Offline: say so readably and behave like the non-200 branches
       // (toast + return); other errors keep today's behavior.

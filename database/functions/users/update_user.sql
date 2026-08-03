@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.update_user(
+CREATE OR REPLACE FUNCTION public.update_user_internal_v1(
   input_data jsonb
 ) RETURNS jsonb
 SECURITY DEFINER
@@ -162,3 +162,8 @@ EXCEPTION WHEN OTHERS THEN
   RETURN jsonb_build_object('code', 500, 'message', SQLERRM);
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public.update_user(input_data jsonb)
+RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = '' AS $$
+  SELECT public.update_user_internal_v1(input_data);
+$$;

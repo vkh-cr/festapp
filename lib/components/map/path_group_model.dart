@@ -19,6 +19,7 @@ class PathGroupsModel extends ITrinaRowModel {
   bool? isHidden;
   int? icon;
   int? order; // new ordering field
+  int aggregateVersion;
 
   PathGroupsModel({
     required this.id,
@@ -29,6 +30,7 @@ class PathGroupsModel extends ITrinaRowModel {
     this.isHidden,
     this.icon,
     this.order,
+    this.aggregateVersion = 0,
   });
 
   /// Deserialize from server JSON
@@ -38,10 +40,8 @@ class PathGroupsModel extends ITrinaRowModel {
     final raw = json[Tb.path_groups.path_data] as List<dynamic>?;
     final pathData = raw
         ?.cast<List<dynamic>>()
-        .map((sub) => sub
-            .map((n) => PathNode.fromJson(n))
-            .whereType<PathNode>()
-            .toList())
+        .map((sub) =>
+            sub.map((n) => PathNode.fromJson(n)).whereType<PathNode>().toList())
         .toList();
 
     final data = json[Tb.path_groups.data] as Map<String, dynamic>?;
@@ -56,6 +56,7 @@ class PathGroupsModel extends ITrinaRowModel {
       isHidden: hidden,
       icon: json[Tb.path_groups.icon] as int?,
       order: json[Tb.path_groups.order] as int?, // extract order
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -196,9 +197,7 @@ class PathGroupsModel extends ITrinaRowModel {
   /// and that [fromPlutoJson] parses back.
   static String pathDataToCsv(List<List<PathNode>>? pathData) {
     if (pathData == null || pathData.isEmpty) return "";
-    return pathData
-        .map((sub) => sub.map(_nodeToCsv).join(','))
-        .join(';');
+    return pathData.map((sub) => sub.map(_nodeToCsv).join(',')).join(';');
   }
 
   @override

@@ -4,6 +4,7 @@ import 'package:fstapp/components/news/news_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/news/db_news.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/news/news_form_page.dart';
@@ -68,8 +69,7 @@ class _NewsPageState extends State<NewsPage> {
   void _onTabChanged() {
     final router = _tabsRouter;
     if (router == null) return;
-    final newsIndex =
-        OccasionHomePage.baseTabKeys.indexOf(OccasionTab.news);
+    final newsIndex = OccasionHomePage.baseTabKeys.indexOf(OccasionTab.news);
     final active = router.activeIndex;
     if (active == newsIndex && _lastActiveIndex != newsIndex) {
       _checkAsRead();
@@ -138,8 +138,10 @@ class _NewsPageState extends State<NewsPage> {
     _isLoading = true;
     try {
       await loadOfflineData();
-      await loadNewsMessages();
-      await OfflineDataService.saveAllMessages(newsMessages);
+      if (!ClientSyncRuntime.isV1Selected) {
+        await loadNewsMessages();
+        await OfflineDataService.saveAllMessages(newsMessages);
+      }
       _checkAsRead();
     } finally {
       _isLoading = false;
@@ -208,11 +210,9 @@ class _NewsPageState extends State<NewsPage> {
                                     // banner).
                                     if (message.createdAt != null)
                                       Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 8),
+                                        padding: const EdgeInsets.only(left: 8),
                                         child: Text(
-                                          TimeHelper.timeAgo(
-                                              message.createdAt!,
+                                          TimeHelper.timeAgo(message.createdAt!,
                                               context.locale.languageCode),
                                           style: TextStyle(
                                             color: ThemeConfig.grey600(context),
@@ -279,8 +279,8 @@ class _NewsPageState extends State<NewsPage> {
                                   onSelected: (choice) async {
                                     if (choice == ContextMenuChoice.delete) {
                                       await DbNews.deleteNewsMessage(message);
-                                      ToastHelper.Show(context,
-                                          NewsStrings.messageRemoved);
+                                      ToastHelper.Show(
+                                          context, NewsStrings.messageRemoved);
                                     } else {
                                       await RouterService.navigatePageInfo(
                                         context,

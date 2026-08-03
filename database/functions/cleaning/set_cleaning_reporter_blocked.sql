@@ -7,7 +7,7 @@
 -- BLOCK a repeat offender straight from a report, but UN-blocking is editor/admin
 -- only. So p_blocked = true requires crew rights, p_blocked = false requires
 -- editor rights. Envelope {code, message, data} like resolve_cleaning_place.
-CREATE OR REPLACE FUNCTION set_cleaning_reporter_blocked(
+CREATE OR REPLACE FUNCTION set_cleaning_reporter_blocked_internal_v1(
   p_occasion bigint,
   p_user uuid,
   p_blocked boolean
@@ -64,4 +64,14 @@ BEGIN
     'data', jsonb_build_object('blocked', p_blocked)
   );
 END;
+$$;
+
+CREATE OR REPLACE FUNCTION set_cleaning_reporter_blocked(
+  p_occasion bigint,
+  p_user uuid,
+  p_blocked boolean
+) RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = public, extensions AS $$
+  SELECT public.set_cleaning_reporter_blocked_internal_v1(
+    p_occasion, p_user, p_blocked
+  );
 $$;

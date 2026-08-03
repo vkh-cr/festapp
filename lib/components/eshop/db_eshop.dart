@@ -1,8 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/eshop/eshop_commands.dart';
+import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/components/inventory/models/inventory_context_model.dart';
 import 'package:fstapp/components/inventory/models/inventory_pool_model.dart';
 import 'package:fstapp/components/inventory/models/resource_model.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/payment_info_model.dart';
 import 'package:fstapp/components/eshop/models/product_edit_bundle.dart';
@@ -20,6 +23,7 @@ import '../inventory/models/product_inventory_context_model.dart';
 
 class DbEshop {
   static final _supabase = Supabase.instance.client;
+  static EshopCommands get _commands => SupabaseEshopCommands(_supabase);
 
   /// Fetches transactions based on a form link using a Supabase Function.
   static Future<FunctionResponse> fetchTransactions(String formLink) async {
@@ -112,33 +116,9 @@ class DbEshop {
 
   static Future<void> createOrderFromSpots(
       List<int> spotIds, Map<String, dynamic> inputData) async {
-    // STEP 1: Call SQL to perform Storno and get order payload
-    // We pass the full inputData map (containing email, and potentially name/note)
-    final dbResponse = await _supabase.rpc(
-      'confirm_blueprint_order_change',
-      params: {
-        'p_spot_ids': spotIds,
-        'p_input_data': inputData,
-      },
-    );
-
-    if (dbResponse == null || dbResponse['success'] != true) {
-      throw Exception(
-          dbResponse?['message'] ?? 'Database error during order preparation.');
-    }
-
-    // Extract the payload prepared by SQL
-    final orderDetails = dbResponse['orderDetails'];
-
-    // STEP 2: Call Edge Function to create the new order
-    final edgeResponse = await _supabase.functions.invoke(
-      "send-ticket-order",
-      body: {"orderDetails": orderDetails},
-    );
+    final edgeResponse = await DbOrders.replaceTicketOrder(spotIds, inputData);
 
     if (edgeResponse.status != 200) {
-      // NOTE: At this point, Storno is already committed in DB step 1.
-      // If this fails, the spots are free but no order is created.
       throw Exception("Order creation failed: ${edgeResponse.data}");
     }
   }
@@ -206,6 +186,10 @@ class DbEshop {
     final productsJson =
         products.map((p) => {'id': p.id, 'price': p.price}).toList();
 
+    if (ClientSyncRuntime.isV1Selected) {
+      return _commands.updateTicketProducts(ticketId, productsJson);
+    }
+
     // Directly return the Future. The calling code will handle success or exceptions.
     return _supabase.rpc(
       'update_ticket_products_wsv2',
@@ -224,6 +208,11 @@ class DbEshop {
               'quantity': c.quantity
             })
         .toList();
+
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.updateProductInventoryContexts(productId, contextsJson);
+      return;
+    }
 
     await _supabase.rpc(
       'update_product_inventory_contexts',
@@ -311,6 +300,9 @@ class DbEshop {
   }
 
   static Future<int> updateProduct(ProductModel product) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      return _commands.saveProduct(product.toJson());
+    }
     return await _supabase.rpc(
       'update_product',
       params: {'p_input': product},
@@ -318,6 +310,10 @@ class DbEshop {
   }
 
   static Future<void> deleteProduct(int productId) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.deleteProduct(productId);
+      return;
+    }
     await _supabase.rpc(
       'delete_product',
       params: {'p_product_id': productId},
@@ -329,7 +325,9 @@ class DbEshop {
       int inventoryPoolId) async {
     try {
       final response = await _supabase.rpc(
-        'get_resources_for_inventory_pool',
+        ClientSyncRuntime.isV1Selected
+            ? 'get_resources_for_inventory_pool_v1'
+            : 'get_resources_for_inventory_pool',
         params: {'p_inventory_pool_id': inventoryPoolId},
       );
 

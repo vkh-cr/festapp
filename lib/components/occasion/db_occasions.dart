@@ -2,16 +2,20 @@ import 'package:fstapp/components/features/ticket_feature.dart';
 import 'package:fstapp/components/information/game/game_settings_model.dart';
 import 'package:fstapp/components/images/image_model.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
+import 'package:fstapp/components/occasion/occasion_commands.dart';
 import 'package:fstapp/components/occasion_services/service_item_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/images/db_images.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbOccasions {
   static final _supabase = Supabase.instance.client;
+  static final OccasionCommands _commands = SupabaseOccasionCommands(_supabase);
 
   static const String serviceNone = "none";
   static const String servicePaid = "paid";
@@ -34,6 +38,15 @@ class DbOccasions {
   /// 403 = not a manager on the occasion.
   static Future<Map<String, dynamic>> createService(
       String type, ServiceItemModel item) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      return _commands.createService(
+        RightsService.currentOccasionId()!,
+        type,
+        item.code,
+        item.title ?? '',
+        item.reference,
+      );
+    }
     var result = await _supabase.rpc("create_service_item", params: {
       'oc': RightsService.currentOccasionId(),
       'type': type,
@@ -45,6 +58,16 @@ class DbOccasions {
   }
 
   static Future<bool> updateService(String type, ServiceItemModel item) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.updateService(
+        RightsService.currentOccasionId()!,
+        type,
+        item.code,
+        item.title ?? '',
+        item.reference,
+      );
+      return result['code'] == 200;
+    }
     var result = await _supabase.rpc("update_service_item", params: {
       'oc': RightsService.currentOccasionId(),
       'type': type,
@@ -57,16 +80,28 @@ class DbOccasions {
 
   static Future<bool> deleteService(String type, ServiceItemModel item,
       [bool force = false]) async {
-    var result = await _supabase.rpc("delete_service_item", params: {
-      'oc': RightsService.currentOccasionId(),
-      'code': item.code,
-      'type': type,
-      'force': force
-    });
+    final occasionId = RightsService.currentOccasionId()!;
+    final result = ClientSyncRuntime.isV1Selected
+        ? await _commands.deleteService(occasionId, type, item.code, force)
+        : await _supabase.rpc("delete_service_item", params: {
+            'oc': occasionId,
+            'code': item.code,
+            'type': type,
+            'force': force,
+          });
     return result["code"] == 200;
   }
 
   static Future<GameSettingsModel?> loadGameSettings() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final data = (await ClientSyncProjection.occasionConfig())['data'];
+      if (data is Map && data[Tb.occasions.data_game] is Map) {
+        return GameSettingsModel.fromJson(
+          (data[Tb.occasions.data_game] as Map).cast<String, dynamic>(),
+        );
+      }
+      return null;
+    }
     final response = await _supabase
         .from(Tb.occasions.table)
         .select(Tb.occasions.data)
@@ -83,6 +118,14 @@ class DbOccasions {
   }
 
   static Future<bool> updateGameSettings(GameSettingsModel settings) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final response = await _commands.updateGameSettings(
+        RightsService.currentOccasionId()!,
+        settings.start,
+        settings.end,
+      );
+      return response['code'] == 200;
+    }
     final response = await _supabase.rpc('game_update_settings', params: {
       'oc': RightsService.currentOccasionId(),
       'new_start_time': settings.start?.toIso8601String(),
@@ -106,9 +149,13 @@ class DbOccasions {
   }
 
   static Future<OccasionModel> getOccasionByLink(String link) async {
-    var data = await _supabase.rpc("get_occasion_by_link", params: {
-      'link_param': link,
-    });
+    var data = await _supabase.rpc(
+        ClientSyncRuntime.isV1Selected
+            ? 'get_occasion_for_edit_v1'
+            : 'get_occasion_by_link',
+        params: {
+          ClientSyncRuntime.isV1Selected ? 'p_link' : 'link_param': link,
+        });
 
     if (data == null) {
       throw const PostgrestException(message: 'Occasion not found');
@@ -125,6 +172,14 @@ class DbOccasions {
   }
 
   static Future<void> updateOccasion(OccasionModel occasionModel) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final saved = occasionModel.id == null
+          ? await _commands.create(occasionModel)
+          : await _commands.save(occasionModel);
+      occasionModel.id = saved.id;
+      occasionModel.aggregateVersion = saved.aggregateVersion;
+      return;
+    }
     final Map<String, dynamic> occasionJson = occasionModel.toJson();
     await _supabase.rpc("update_occasion_203", params: {
       "input_data": occasionJson,
@@ -132,9 +187,9 @@ class DbOccasions {
   }
 
   static Future<void> duplicateOccasion(int oc, int? unit) async {
-    var ocId = await _supabase.rpc("duplicate_occasion", params: {
-      "oc": oc,
-    });
+    final ocId = ClientSyncRuntime.isV1Selected
+        ? await _commands.duplicate(oc)
+        : await _supabase.rpc("duplicate_occasion", params: {"oc": oc}) as int;
 
     var occasion = await getOccasion(ocId);
 
@@ -159,7 +214,11 @@ class DbOccasions {
   }
 
   static Future<void> deleteOccasion(int oc) async {
-    await _supabase.rpc('delete_occasion', params: {'oc': oc});
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.delete(oc);
+    } else {
+      await _supabase.rpc('delete_occasion', params: {'oc': oc});
+    }
 
     final data = await _supabase
         .from(Tb.images.table)

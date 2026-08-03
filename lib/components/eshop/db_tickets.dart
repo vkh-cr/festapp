@@ -7,14 +7,17 @@ import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/tb_eshop.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
+import 'package:fstapp/components/eshop/ticket_commands.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/components/eshop/db_orders.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app_config.dart';
 
 class DbTickets {
   static final _supabase = Supabase.instance.client;
+  static TicketCommands get _commands => SupabaseTicketCommands(_supabase);
 
   static Future<void> stornoTicket(int ticketId) async {
     await stornoTickets([ticketId]);
@@ -24,6 +27,11 @@ class DbTickets {
   /// Uses 'storno_tickets_bulk' to ensure efficient processing and single history entries per order.
   static Future<void> stornoTickets(List<int> ticketIds) async {
     if (ticketIds.isEmpty) return;
+
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.cancel(ticketIds);
+      return;
+    }
 
     await _supabase.rpc(
       'storno_tickets_bulk',
@@ -170,7 +178,8 @@ class DbTickets {
     }
 
     // 6. Attach deposit info from scan response
-    if (response.containsKey("deposit_info") && response["deposit_info"] != null) {
+    if (response.containsKey("deposit_info") &&
+        response["deposit_info"] != null) {
       ticket.depositInfo = response["deposit_info"] as Map<String, dynamic>;
     }
 
@@ -243,6 +252,10 @@ class DbTickets {
     int spotId1,
     int spotId2,
   ) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.swapSpots(spotId1, spotId2);
+      return;
+    }
     await _supabase.rpc(
       'swap_spot_tickets',
       params: {

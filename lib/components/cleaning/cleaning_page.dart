@@ -25,6 +25,7 @@ import 'package:fstapp/components/map/map_page.dart';
 import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/components/offline/offline_strings.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
@@ -79,8 +80,9 @@ class _CleaningPageState extends State<CleaningPage> {
     super.initState();
     _loadData();
     // Live data matters for the crew; poll quietly while the page is open.
-    if (_isCrew) {
-      _pollTimer = Timer.periodic(_pollInterval, (_) => _loadData(silent: true));
+    if (_isCrew && !ClientSyncRuntime.isV1Selected) {
+      _pollTimer =
+          Timer.periodic(_pollInterval, (_) => _loadData(silent: true));
     }
   }
 
@@ -91,6 +93,18 @@ class _CleaningPageState extends State<CleaningPage> {
   }
 
   Future<void> _loadData({bool silent = false}) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final cached = await OfflineDataService.getCleaningStatus();
+      if (!mounted) return;
+      setState(() {
+        _places = cached?.places ?? [];
+        _reports = [];
+        _cacheFetchedAt = cached?.fetchedAt;
+        _loading = false;
+      });
+      _maybeHandleDeepLink();
+      return;
+    }
     Future<CleaningData> fetch() async {
       final status = await DbCleaning.getStatus(_occasionId);
       // Refresh-on-read: keep the offline copy of the public statuses fresh.
@@ -418,8 +432,8 @@ class _CleaningPageState extends State<CleaningPage> {
           Expanded(
             child: Text(
               "${OfflineStrings.youAreOffline} ${OfflineStrings.lastUpdated(time)}",
-              style: TextStyle(
-                  color: ThemeConfig.grey600(context), fontSize: 13),
+              style:
+                  TextStyle(color: ThemeConfig.grey600(context), fontSize: 13),
             ),
           ),
         ],
@@ -470,8 +484,7 @@ class _CleaningPageState extends State<CleaningPage> {
               ),
             ],
             selected: {_showHistory},
-            onSelectionChanged: (s) =>
-                setState(() => _showHistory = s.first),
+            onSelectionChanged: (s) => setState(() => _showHistory = s.first),
           ),
         ),
         const SizedBox(height: 16),
@@ -532,8 +545,7 @@ class _CleaningPageState extends State<CleaningPage> {
         SizedBox(
           width: double.infinity,
           child: FilledButton.tonalIcon(
-            onPressed:
-                _exportingHistory ? null : () => _exportHistory(history),
+            onPressed: _exportingHistory ? null : () => _exportHistory(history),
             icon: _exportingHistory
                 ? const SizedBox(
                     width: 18,
@@ -563,8 +575,8 @@ class _CleaningPageState extends State<CleaningPage> {
             child: Text(
               CleaningStrings.noToilets,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: ThemeConfig.grey600(context), fontSize: 16),
+              style:
+                  TextStyle(color: ThemeConfig.grey600(context), fontSize: 16),
             ),
           ),
         ),
@@ -585,8 +597,8 @@ class _CleaningPageState extends State<CleaningPage> {
             child: Text(
               CleaningStrings.featureDisabled,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: ThemeConfig.grey600(context), fontSize: 16),
+              style:
+                  TextStyle(color: ThemeConfig.grey600(context), fontSize: 16),
             ),
           ),
         ),

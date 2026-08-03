@@ -85,7 +85,6 @@ export class AuthService {
         // In Flutter: 
         // DbEvents.synchronizeMySchedule(join: true);
         // SynchroService.refreshOfflineData();
-        // NotificationHelper.login();
         
         // In Web:
         // We mostly just need to ensure RightsService picks up the new user

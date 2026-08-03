@@ -165,6 +165,14 @@ if [ -f "$FLUTTER_CONFIG" ]; then
         sed_inplace "s|static const String webLink = \".*\";|static const String webLink = \"$WEB_LINK\";|g" "$FLUTTER_CONFIG"
     fi
 
+    if [ ! -z "$SYNC_HEAD_ORIGIN" ]; then
+        sed_inplace "s|static const String syncHeadOrigin = \".*\";|static const String syncHeadOrigin = \"$SYNC_HEAD_ORIGIN\";|g" "$FLUTTER_CONFIG"
+    fi
+
+    if [ ! -z "$SYNC_ASSET_ORIGIN" ]; then
+        sed_inplace "s|static const String syncAssetOrigin = \".*\";|static const String syncAssetOrigin = \"$SYNC_ASSET_ORIGIN\";|g" "$FLUTTER_CONFIG"
+    fi
+
     # Update Force Occasion Link (empty value -> null)
     if [ -z "$FORCE_OCCASION_LINK" ]; then
         sed_inplace "s|static const String? forceOccasionLink = .*;|static const String? forceOccasionLink = null;|g" "$FLUTTER_CONFIG"

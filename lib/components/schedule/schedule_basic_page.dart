@@ -10,6 +10,7 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/occasion/add_new_event_dialog.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
@@ -49,7 +50,9 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    if (!ClientSyncRuntime.isV1Selected) {
+      WidgetsBinding.instance.addObserver(this);
+    }
     loadData();
   }
 
@@ -113,6 +116,8 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
     if (mounted) {
       setState(() {});
     }
+
+    if (ClientSyncRuntime.isV1Selected) return;
 
     final fast = await DbEvents.getAllEvents(
       RightsService.currentOccasionId()!,

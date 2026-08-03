@@ -10,13 +10,16 @@ import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/users/occasion_user_model.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/unit/unit_model.dart';
+import 'package:fstapp/components/unit/unit_commands.dart';
 import 'package:fstapp/components/users/unit_user_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
+import 'package:fstapp/components/users/profile_commands.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/components/occasion_services/service_item_model.dart';
 import 'package:fstapp/components/users/occasion_editor_payload.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OccasionEditorData {
@@ -50,6 +53,9 @@ class OccasionUsersBundle {
 
 class DbUsers {
   static final _supabase = Supabase.instance.client;
+  static UnitCommands get _unitCommands => SupabaseUnitCommands(_supabase);
+  static final ProfileCommands _profileCommands =
+      SupabaseProfileCommands(_supabase);
 
   static const String formIdKey = 'form_id';
   static const String orderCreatedAtKey = 'order_created_at';
@@ -57,8 +63,14 @@ class DbUsers {
   static const String groupTitleKey = 'group_title';
 
   static Future<OccasionEditorData> getOccasionEditorDataBundle() async {
-    final result = await _supabase.rpc('get_occasion_users_for_edit',
-        params: {'p_occasion_id': RightsService.currentOccasionId()!});
+    final result = await _supabase.rpc(
+        ClientSyncRuntime.isV1Selected
+            ? 'get_occasion_users_editor_bundle_v1'
+            : 'get_occasion_users_for_edit',
+        params: {
+          ClientSyncRuntime.isV1Selected ? 'p_occasion' : 'p_occasion_id':
+              RightsService.currentOccasionId()!,
+        });
     return parseOccasionEditorData(result);
   }
 
@@ -376,6 +388,17 @@ class DbUsers {
     // Existing occasion users are updated atomically by one authoritative RPC.
     // This is the path used by both the Users and Stay grids.
     if (oum.user != null) {
+      if (ClientSyncRuntime.isV1Selected) {
+        final result = await _profileCommands.save(oum);
+        if (result.status == ProfileCommandStatus.conflict) {
+          throw StateError('Profile was changed by another editor');
+        }
+        if (result.status == ProfileCommandStatus.rejected) {
+          throw StateError('Profile save was rejected');
+        }
+        oum.aggregateVersion = result.version;
+        return;
+      }
       final response = await _supabase.rpc(
         'save_occasion_user_for_edit',
         params: {'input_data': oum.toUpdateJson()},
@@ -384,6 +407,18 @@ class DbUsers {
       if (code != 200) {
         throw Exception(response['message']);
       }
+      return;
+    }
+
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _profileCommands.create(oum);
+      if (result.status != ProfileCommandStatus.applied ||
+          result.userId == null) {
+        throw StateError('Profile create was rejected');
+      }
+      oum
+        ..user = result.userId
+        ..aggregateVersion = result.version;
       return;
     }
 
@@ -409,6 +444,10 @@ class DbUsers {
   }
 
   static Future<void> addUserToOccasion(String id, int occasion) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _profileCommands.ensureMembership(occasion, id);
+      return;
+    }
     await _supabase.rpc("add_user_to_occasion", params: {
       "usr": id,
       "oc": occasion,
@@ -424,6 +463,20 @@ class DbUsers {
 
   static Future<void> importOccasionUsersFromCsv(
       List<Map<String, dynamic>> rows, List<String> deleteUserIds) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _profileCommands.importProfiles(
+        RightsService.currentOccasionId()!,
+        rows,
+        deleteUserIds,
+      );
+      if (result.status == ProfileCommandStatus.rejected) {
+        throw StateError('CSV import was rejected');
+      }
+      if (result.status == ProfileCommandStatus.conflict) {
+        throw StateError('CSV import conflicted with another change');
+      }
+      return;
+    }
     final response = await _supabase.rpc(
       'import_occasion_users_from_csv',
       params: {
@@ -438,13 +491,29 @@ class DbUsers {
   }
 
   static Future<void> deleteUnitUser(String user, int unit) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _unitCommands.deleteUserAccess(unit, user);
+      return;
+    }
     await _supabase
         .rpc("delete_unit_user", params: {"usr": user, "unit_id": unit});
   }
 
-  static Future<void> deleteOccasionUser(String user, int occasion) async {
-    await _supabase.rpc("delete_occasion_user_ws",
-        params: {"usr_to_delete": user, "occasion_id": occasion});
+  static Future<void> deleteOccasionUser(OccasionUserModel profile) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _profileCommands.delete(profile);
+      if (result.status == ProfileCommandStatus.conflict) {
+        throw StateError('Profile was changed by another editor');
+      }
+      if (result.status == ProfileCommandStatus.rejected) {
+        throw StateError('Profile delete was rejected');
+      }
+      return;
+    }
+    await _supabase.rpc("delete_occasion_user_ws", params: {
+      "usr_to_delete": profile.user,
+      "occasion_id": profile.occasion,
+    });
   }
 
   static Future<void> deleteUser(String user, int occasion) async {
@@ -497,6 +566,9 @@ class DbUsers {
   }
 
   static Future<dynamic> importUsersFromTickets(int occasionId) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      return _profileCommands.importFromTickets(occasionId);
+    }
     return await _supabase.rpc('import_users_from_tickets_ws',
         params: {'p_occasion_id': occasionId});
   }

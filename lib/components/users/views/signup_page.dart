@@ -13,6 +13,8 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
+import 'package:fstapp/app_config.dart';
+import 'package:fstapp/services/launch_url_service.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 @RoutePage()
@@ -97,6 +99,16 @@ class _SignupPageState extends State<SignupPage> {
                           const SizedBox(
                             height: 16,
                           ),
+                          Semantics(
+                            link: true,
+                            child: TextButton.icon(
+                              onPressed: () => LaunchUrlService.launchURL(
+                                  '${AppConfig.webLink}/privacy'),
+                              icon: const Icon(Icons.privacy_tip_outlined),
+                              label: Text(UserStrings.signupPrivacyNotice),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
                           ButtonsHelper.bigButton(
                             context: context,
                             onPressed: _isLoading

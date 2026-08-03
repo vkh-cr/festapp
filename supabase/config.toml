@@ -4,6 +4,15 @@
 # working directory name when running `supabase init`.
 project_id = "festapp"
 
+# Both account-deletion functions implement their own authorization contract.
+# The request endpoint validates the current user JWT explicitly; the public
+# confirmation endpoint is authenticated only by a 256-bit single-use token.
+[functions.request-account-deletion]
+verify_jwt = false
+
+[functions.confirm-account-deletion]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

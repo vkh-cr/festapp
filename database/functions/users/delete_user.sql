@@ -22,7 +22,6 @@ BEGIN
     WHERE created_by = usr;
 
     -- Perform the deletion process for user
-    UPDATE user_group_info SET leader = null WHERE leader = usr;
     DELETE FROM user_groups WHERE "user" = usr;
     DELETE FROM event_users WHERE "user" = usr;
     DELETE FROM user_news WHERE "user" = usr;

@@ -89,8 +89,7 @@ class UserStrings {
       .tr(); // "Some users have already been invited. Do you want to invite them again and send a new sign-in code?"
   static String invitedUser({required String user}) => 'FeatureUser.invitedUser'
       .tr(namedArgs: {'user': user}); // "Invited: {user}."
-  static String inviteFailed(
-          {required String user, required String retries}) =>
+  static String inviteFailed({required String user, required String retries}) =>
       'FeatureUser.inviteFailed'.tr(namedArgs: {
         'user': user,
         'retries': retries
@@ -111,13 +110,22 @@ class UserStrings {
       'FeatureUser.passwordResetLinkSent'.tr(namedArgs: {
         'email': email
       }); // "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
-  static String get insertHere =>
-      'FeatureUser.insertHere'.tr(); // "Input here"
+  static String get insertHere => 'FeatureUser.insertHere'.tr(); // "Input here"
   static String get deleteAccount =>
       'FeatureUser.deleteAccount'.tr(); // "Delete account"
-  static String get deleteAccountInstructions =>
-      'FeatureUser.deleteAccountInstructions'
-          .tr(); // "Request account deletion by sending email with your credentials to info@festapp.net."
+  static String get deleteAccountScope => 'FeatureUser.deleteAccountScope'.tr();
+  static String get deleteAccountConfirm =>
+      'FeatureUser.deleteAccountConfirm'.tr();
+  static String accountDeletionEmailSent(String email) =>
+      'FeatureUser.accountDeletionEmailSent'.tr(namedArgs: {'email': email});
+  static String get accountDeletionFailed =>
+      'FeatureUser.accountDeletionFailed'.tr();
+  static String get privacy => 'FeatureUser.privacy'.tr();
+  static String get privacyChoices => 'FeatureUser.privacyChoices'.tr();
+  static String get terms => 'FeatureUser.terms'.tr();
+  static String get support => 'FeatureUser.support'.tr();
+  static String get signupPrivacyNotice =>
+      'FeatureUser.signupPrivacyNotice'.tr();
   static String get showMyCode =>
       'FeatureUser.showMyCode'.tr(); // "Show my code"
   static String get showCode => 'FeatureUser.showCode'.tr(); // "Show Code"
@@ -138,12 +146,10 @@ class UserStrings {
       'FeatureUser.companionInfo'.tr(namedArgs: {
         'max_companions': maxCompanions
       }); // "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}."
-  static String get companionEventsEmpty =>
-      'FeatureUser.companionEventsEmpty'
-          .tr(); // "Companion's events will appear here."
+  static String get companionEventsEmpty => 'FeatureUser.companionEventsEmpty'
+      .tr(); // "Companion's events will appear here."
   static String get deleteCompanion =>
       'FeatureUser.deleteCompanion'.tr(); // "Delete companion"
-  static String get deleteCompanionConfirm =>
-      'FeatureUser.deleteCompanionConfirm'
-          .tr(); // "By deleting your companion you will also sign him/her out of all signed in sessions."
+  static String get deleteCompanionConfirm => 'FeatureUser.deleteCompanionConfirm'
+      .tr(); // "By deleting your companion you will also sign him/her out of all signed in sessions."
 }

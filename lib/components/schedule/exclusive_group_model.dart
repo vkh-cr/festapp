@@ -9,11 +9,13 @@ class ExclusiveGroupModel extends ITrinaRowModel {
   int? id;
   String? title;
   List<int>? events;
+  int aggregateVersion;
 
   ExclusiveGroupModel({
     required this.id,
     this.title,
     this.events,
+    this.aggregateVersion = 0,
   });
 
   factory ExclusiveGroupModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class ExclusiveGroupModel extends ITrinaRowModel {
           ? List<int>.from(
               json[Tb.exclusive_events.table].map((e) => e["event"]))
           : null,
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
     );
   }
 

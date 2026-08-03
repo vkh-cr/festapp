@@ -11,6 +11,7 @@ import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart' show ThemeConfig;
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'dart:async';
 
 @RoutePage()
@@ -44,9 +45,11 @@ class _GamePageState extends State<GamePage> {
   void initState() {
     super.initState();
     loadGameData();
-    _correctGuessesTimer = Timer.periodic(refreshInterval, (timer) {
-      loadCorrectGuesses();
-    });
+    if (!ClientSyncRuntime.isV1Selected) {
+      _correctGuessesTimer = Timer.periodic(refreshInterval, (timer) {
+        loadCorrectGuesses();
+      });
+    }
 
     _connectivitySubscription =
         Connectivity().onConnectivityChanged.listen((result) {

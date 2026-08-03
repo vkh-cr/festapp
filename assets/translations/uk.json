@@ -95,7 +95,7 @@
     "invite": "Запросити",
     "invitedUser": "Запрошено: {user}.",
     "profile": "Профіль",
-    "deleteAccountInstructions": "Запитайте видалення акаунту, надіславши лист із даними на info@festapp.net.",
+    "deleteAccountScope": "Smazání odstraní celý účet a soukromá účastnická data. Potvrzení proběhne bezpečným jednorázovým odkazem zaslaným na adresu účtu.",
     "showCode": "Показати код",
     "showMyCode": "Показати мій код",
     "signIn": "Увійти",

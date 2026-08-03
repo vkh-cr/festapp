@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION game_guess(check_point_id BIGINT, guess TEXT)
+CREATE OR REPLACE FUNCTION game_guess_internal_v1(check_point_id BIGINT, guess TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
@@ -117,4 +117,10 @@ BEGIN
         RETURN jsonb_build_object('code', 4001, 'message', 'Incorrect guess');
     END IF;
 END;
+$$;
+
+CREATE OR REPLACE FUNCTION game_guess(check_point_id bigint, guess text)
+RETURNS jsonb LANGUAGE sql VOLATILE SECURITY DEFINER
+SET search_path = public, extensions AS $$
+  SELECT public.game_guess_internal_v1(check_point_id,guess);
 $$;

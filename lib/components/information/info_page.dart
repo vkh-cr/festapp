@@ -6,6 +6,7 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/information/db_information.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/router_service.dart';
@@ -174,8 +175,10 @@ class _InfoPageState extends State<InfoPage> {
                                                 });
                                                 await DbInformation
                                                     .updateInformation(item);
-                                                ToastHelper.Show(context,
-                                                    CommonStrings.contentChanged);
+                                                ToastHelper.Show(
+                                                    context,
+                                                    CommonStrings
+                                                        .contentChanged);
                                               }
                                             },
                                             child:
@@ -212,6 +215,7 @@ class _InfoPageState extends State<InfoPage> {
   Future<void> loadData() async {
     await loadDataOffline();
     setState(() {});
+    if (ClientSyncRuntime.isV1Selected) return;
     var allInfo = await DbInformation.getAllActiveInformation();
     await OfflineDataService.saveAllInfo(allInfo);
     await loadDataOffline();

@@ -64,7 +64,7 @@ SQL functions organized by domain:
 | `eshop_forms/` | Form-order bridge | `create_form`, `get_form_by_link`, form CRUD |
 | `eshop_orders/` | Order lifecycle | `scan_ticket`, `get_orders`, status transitions |
 | `eshop_transactions/` | Transactions | `add_transaction_to_payment_info_ws` |
-| `events/` | Schedule events | Event CRUD, sign-up logic |
+| `events/` | Schedule events | Event CRUD, sign-up logic, event feedback |
 | `inventory/` | Capacity pools | Pool allocation, availability checks |
 | `organization/` | Domain ops | Org settings, admin management |
 | `others/` | Cross-cutting | `duplicate_occasion`, `check_is_*` guards, image records, email templates |
@@ -171,6 +171,7 @@ erDiagram
 | `events` | Schedule entries | `id`, `occasion`, time fields |
 | `event_users` | Event sign-ups | `user`, `event` |
 | `event_users_saved` | My schedule items | `user`, `event` |
+| `event_feedback` | Per-event rating/comment owned by a user or anonymous client ID | `event`, `occasion`, `user`, `client_id`, `rating` |
 | `information` | CMS pages | `id`, `occasion` |
 | `news` | Announcements | `id`, `occasion`, `created_by` |
 | `places` | Map locations | `id`, `occasion` |
@@ -207,8 +208,8 @@ Dart or `supabase.rpc(...)` in JS):
 
 | RPC Function | Called From | Purpose |
 |-------------|-------------|---------|
-| `send-ticket-order` (Edge Function) | Web Client, Flutter | Order creation (NOT an RPC) |
-| `confirm_blueprint_order_change` | Flutter | Seat reservation |
+| `send-ticket-order` (Edge Function) | Web Client, Flutter | Receipted order create/replace + transactional effect queue |
+| `replace_blueprint_order_client_sync_v1` | Edge Function | Atomic seat replacement and new order |
 | `scan_ticket` | Flutter | Ticket verification |
 | `delete_user` | Flutter | User deletion |
 | `create_user_in_organization_with_data_pure` | SQL Functions (internal) | User creation |

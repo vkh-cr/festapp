@@ -104,7 +104,7 @@ BEGIN
     VALUES (new_companion, companion_email, c_name, org);
 
     -- Add the new companion user to the occasion
-    PERFORM add_user_to_occasion(oc, new_companion);
+    PERFORM public.add_user_to_occasion_internal_v1(oc, new_companion);
 
     -- Insert into user_companions table to link the user with the companion
     INSERT INTO public.user_companions ("user", companion)

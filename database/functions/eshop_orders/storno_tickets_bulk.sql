@@ -55,7 +55,7 @@ BEGIN
         -- -----------------------------------------------------
         IF v_remaining_count <= 0 THEN
             -- Helper function to cancel the entire order
-            PERFORM update_order_and_tickets_to_storno_ws_221(v_order_id);
+            PERFORM update_order_and_tickets_to_storno_ws_internal_v1(v_order_id);
 
         -- -----------------------------------------------------
         -- SCENARIO B: Partial Cancellation (Modify Order)

@@ -43,8 +43,7 @@ class SynchroService {
     if (_isLoggedIn() && occasionId != null) {
       var userInfo = await _getFullUserInfo();
       await OfflineDataService.saveUserInfo(userInfo);
-      var bundle =
-          await DbEvents.getMyEventsAndActivities(occasionId, true);
+      var bundle = await DbEvents.getMyEventsAndActivities(occasionId, true);
       await OfflineDataService.saveAllActivities(bundle!.activities);
       var userInventoryBundle = await DbInventoryPools.getUserInventory();
       await OfflineDataService.saveUserInventoryBundle(userInventoryBundle);
@@ -69,8 +68,8 @@ class SynchroService {
 
     // Speakers are core — always cached when an occasion is present (R7).
     if (occasionId != null) {
-      final speakers = await DbSpeakers.getSpeakers(occasionId,
-          includeDescription: true);
+      final speakers =
+          await DbSpeakers.getSpeakers(occasionId, includeDescription: true);
       await OfflineDataService.saveSpeakers(speakers);
 
       // Cleaning statuses are public data — cache them so the toilet list and
@@ -105,9 +104,7 @@ class SynchroService {
   }
 
   static Future<OccasionLinkModel> getAppConfig(LinkModel link) async {
-
-
-    var data = await _supabase.rpc("get_app_config_v217", params: {
+    var data = await _supabase.rpc("get_app_config_v219", params: {
       "data_in": {
         "link": link.occasionLink,
         "form_link": link.formLink,
@@ -116,7 +113,6 @@ class SynchroService {
         "platform": await PlatformHelper.getPlatform()
       }
     });
-
 
     return OccasionLinkModel.fromJson(data);
   }

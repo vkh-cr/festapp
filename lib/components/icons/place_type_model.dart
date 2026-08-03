@@ -18,6 +18,7 @@ class PlaceTypeModel extends ITrinaRowModel {
   int? order;
   bool? isHidden;
   bool? isDefault;
+  int aggregateVersion;
 
   PlaceTypeModel({
     this.id,
@@ -28,6 +29,7 @@ class PlaceTypeModel extends ITrinaRowModel {
     this.order,
     this.isHidden,
     this.isDefault,
+    this.aggregateVersion = 0,
   });
 
   /// Deserialize from server JSON.
@@ -41,6 +43,7 @@ class PlaceTypeModel extends ITrinaRowModel {
       order: (json[Tb.place_types.order] as num?)?.toInt(),
       isHidden: json[Tb.place_types.is_hidden] as bool? ?? false,
       isDefault: json[Tb.place_types.is_default] as bool? ?? false,
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -76,7 +79,8 @@ class PlaceTypeModel extends ITrinaRowModel {
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
       Tb.place_types.id: TrinaCell(value: id),
-      Tb.place_types.is_hidden: TrinaCell(value: (isHidden ?? false).toString()),
+      Tb.place_types.is_hidden:
+          TrinaCell(value: (isHidden ?? false).toString()),
       Tb.place_types.is_default:
           TrinaCell(value: (isDefault ?? false).toString()),
       Tb.place_types.code: TrinaCell(value: code ?? ""),
@@ -88,12 +92,15 @@ class PlaceTypeModel extends ITrinaRowModel {
 
   @override
   Future<void> deleteMethod(BuildContext context) async {
-    if (id != null) await DbPlaceTypes.delete(id!);
+    if (id != null) await DbPlaceTypes.delete(this);
   }
 
   @override
   Future<void> updateMethod(BuildContext context) async {
-    await DbPlaceTypes.upsert(this);
+    final updated = await DbPlaceTypes.upsert(this);
+    id = updated.id;
+    occasion = updated.occasion;
+    aggregateVersion = updated.aggregateVersion;
   }
 
   @override

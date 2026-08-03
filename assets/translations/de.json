@@ -83,7 +83,7 @@
     "invite": "Einladen",
     "invitedUser": "Eingeladen: {user}.",
     "profile": "Profil",
-    "deleteAccountInstructions": "Fordern Sie die Löschung des Kontos an, indem Sie eine E-Mail mit Ihren Zugangsdaten an info@festapp.net senden.",
+    "deleteAccountScope": "Smazání odstraní celý účet a soukromá účastnická data. Potvrzení proběhne bezpečným jednorázovým odkazem zaslaným na adresu účtu.",
     "showCode": "Code anzeigen",
     "showMyCode": "Meinen Code anzeigen",
     "signIn": "Anmelden",

@@ -223,8 +223,10 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
 
     final success = await ExceptionHandler.guardVoid(
       currentContext,
-      futureFunction: () =>
-          DbInventoryPools.deleteInventoryPool(_bundle!.pool.id!),
+      futureFunction: () => DbInventoryPools.deleteInventoryPool(
+        _bundle!.pool.id!,
+        expectedVersion: _bundle!.aggregateVersion,
+      ),
       defaultErrorMessage: InventoryStrings.settingsErrorDelete,
     );
 

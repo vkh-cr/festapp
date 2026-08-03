@@ -71,7 +71,7 @@ class _SpeakersTabState extends State<SpeakersTab> {
     if (confirm != true) return;
     final ok = await ExceptionHandler.guardVoid(
       context,
-      futureFunction: () => DbSpeakers.deleteSpeaker(speaker.id!),
+      futureFunction: () => DbSpeakers.deleteSpeaker(speaker),
     );
     if (ok && mounted) {
       ToastHelper.Show(context, CommonStrings.deleted);
@@ -96,7 +96,7 @@ class _SpeakersTabState extends State<SpeakersTab> {
     if (confirm != true) return;
     final ok = await ExceptionHandler.guardVoid(
       context,
-      futureFunction: () => DbSpeakers.deleteTopic(topic.id!),
+      futureFunction: () => DbSpeakers.deleteTopic(topic),
     );
     if (ok && mounted) {
       ToastHelper.Show(context, CommonStrings.deleted);

@@ -27,6 +27,10 @@ BEGIN
         'csv-atomic-' || gen_random_uuid(), now(), now() + interval '1 day', true
     ) RETURNING id INTO v_occasion;
 
+    INSERT INTO public.role_info (id, title, occasion)
+    VALUES (1, 'CSV role 1', v_occasion), (2, 'CSV role 2', v_occasion)
+    ON CONFLICT (id) DO NOTHING;
+
     UPDATE public.user_info
        SET organization = v_org,
            email_readonly = CASE id

@@ -22,15 +22,16 @@ fi
 
 fail=0
 
-# 1. YAML parse.
-if ! python3 -c "import yaml,sys; yaml.safe_load(open('$WORKFLOW'))" 2>/dev/null; then
-    if ! command -v python3 >/dev/null 2>&1; then
-        echo "  skip: python3 not available, cannot YAML-parse"
-    else
+# 1. YAML parse when the optional PyYAML parser is available. The structural
+# checks below remain the dependency-free fallback.
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "  skip: python3 not available, using structural checks"
+elif ! python3 -c "import yaml" 2>/dev/null; then
+    echo "  skip: PyYAML not available, using structural checks"
+elif ! python3 -c "import yaml; yaml.safe_load(open('$WORKFLOW'))" 2>/dev/null; then
         echo "  FAIL: deploy.yml is not valid YAML"
-        python3 -c "import yaml,sys; yaml.safe_load(open('$WORKFLOW'))" || true
+        python3 -c "import yaml; yaml.safe_load(open('$WORKFLOW'))" || true
         fail=1
-    fi
 else
     echo "  ok: deploy.yml parses as YAML"
 fi

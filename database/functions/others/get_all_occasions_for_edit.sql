@@ -54,6 +54,13 @@ BEGIN
       'organization', o.organization,
       'services', o.services,
       'unit', o.unit,
+      'aggregate_version', COALESCE((
+        SELECT av.version FROM public.client_aggregate_versions av
+        WHERE av.aggregate_type = 'occasion'
+          AND av.scope_type = 'occasion'
+          AND av.scope_id = o.id
+          AND av.aggregate_id = o.id::text
+      ), 0),
       -- 'features', o.features, -- OPTIMIZED: Return only essential fields
       'features', (
         SELECT jsonb_agg(

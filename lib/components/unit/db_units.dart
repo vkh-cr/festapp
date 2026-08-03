@@ -1,4 +1,6 @@
 import 'package:fstapp/components/unit/unit_model.dart';
+import 'package:fstapp/components/unit/unit_commands.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/database_tables/tb.dart';
 
@@ -6,6 +8,7 @@ import '../occasion/occasion_model.dart';
 
 class DbUnits {
   static final _supabase = Supabase.instance.client;
+  static UnitCommands get _commands => SupabaseUnitCommands(_supabase);
 
   static Future<bool> hasOccasions(int unitId) async {
     final count = await _supabase
@@ -43,6 +46,14 @@ class DbUnits {
   }
 
   static Future<void> updateUnit(UnitModel unit) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final saved = await _commands.save(unit);
+      unit
+        ..title = saved.title
+        ..data = saved.data
+        ..aggregateVersion = saved.aggregateVersion;
+      return;
+    }
     await _supabase.rpc(
       "update_unit",
       params: {
@@ -54,9 +65,11 @@ class DbUnits {
   }
 
   static Future<UnitEditDataBundle> getUnitEditData(int unitId) async {
-    final response = await _supabase.rpc('get_unit_edit_data', params: {
-      'p_unit_id': unitId,
-    });
+    final isV1 = ClientSyncRuntime.isV1Selected;
+    final response = await _supabase.rpc(
+      isV1 ? 'get_unit_edit_data_v1' : 'get_unit_edit_data',
+      params: isV1 ? {'p_unit': unitId} : {'p_unit_id': unitId},
+    );
 
     if (response == null) {
       throw Exception("Failed to load unit edit data.");

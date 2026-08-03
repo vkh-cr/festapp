@@ -44,6 +44,7 @@ class OccasionUserModel extends ITrinaRowModel {
 
   Map<String, dynamic>? data;
   Map<String, dynamic>? services;
+  int aggregateVersion;
   OccasionUserModel(
       {this.createdAt,
       this.lastSignInAt,
@@ -65,7 +66,8 @@ class OccasionUserModel extends ITrinaRowModel {
       this.unit,
       this.formId,
       this.groupTitle,
-      this.form});
+      this.form,
+      this.aggregateVersion = 0});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
@@ -94,7 +96,9 @@ class OccasionUserModel extends ITrinaRowModel {
         isManager: json[Tb.occasion_users.is_manager],
         role: json[Tb.occasion_users.role],
         data: json[Tb.occasion_users.data],
-        services: json[Tb.occasion_users.services]);
+        services: json[Tb.occasion_users.services],
+        aggregateVersion:
+            (json['aggregate_version'] as num?)?.toInt() ?? 0);
   }
 
   dynamic toUpdateJson() {
@@ -172,7 +176,7 @@ class OccasionUserModel extends ITrinaRowModel {
 
   @override
   Future<void> deleteMethod(BuildContext context) async {
-    await DbUsers.deleteOccasionUser(user!, occasion!);
+    await DbUsers.deleteOccasionUser(this);
   }
 
   @override

@@ -138,8 +138,8 @@ class _EventEditPageState extends State<EventEditPage> {
       _selectedSpeakerIds
         ..clear()
         ..addAll(speakerData.speakers
-            .where((s) =>
-                s.events.any((e) => e.id == widget.id) && s.id != null)
+            .where(
+                (s) => s.events.any((e) => e.id == widget.id) && s.id != null)
             .map((s) => s.id!));
     }
 
@@ -211,11 +211,17 @@ class _EventEditPageState extends State<EventEditPage> {
         final updatedEvent = await DbEvents.updateEvent(originalEvent!);
 
         if (updatedEvent.id != null) {
-          await ExceptionHandler.guardVoid(
+          final speakerVersion = await ExceptionHandler.guard(
             context,
             futureFunction: () => DbSpeakers.setEventSpeakers(
-                updatedEvent.id!, _selectedSpeakerIds.toList()),
+              updatedEvent.id!,
+              _selectedSpeakerIds.toList(),
+              updatedEvent.aggregateVersion,
+            ),
           );
+          if (speakerVersion != null) {
+            updatedEvent.aggregateVersion = speakerVersion;
+          }
         }
 
         ToastHelper.Show(
@@ -235,8 +241,8 @@ class _EventEditPageState extends State<EventEditPage> {
   Future<int?> _addSpeaker() async {
     final result = await showDialog<Object?>(
       context: context,
-      builder: (_) =>
-          SpeakerEditorDialog(speaker: SpeakerModel(), topics: _allTopics ?? []),
+      builder: (_) => SpeakerEditorDialog(
+          speaker: SpeakerModel(), topics: _allTopics ?? []),
     );
     // _save pops the freshly saved SpeakerModel (decision R6b); a bool from the
     // close button or null means nothing was created.
@@ -303,16 +309,16 @@ class _EventEditPageState extends State<EventEditPage> {
                             if (FeatureService.isFeatureEnabled(
                                 FeatureConstants.eventFeedback))
                               SwitchListTile(
-                                title:
-                                    Text(EventFeedbackStrings.enableEventFeedback),
+                                title: Text(
+                                    EventFeedbackStrings.enableEventFeedback),
                                 value: feedbackEnabled,
                                 onChanged: (value) =>
                                     setState(() => feedbackEnabled = value),
                               ),
                             if (FeatureService.isCounselingEnabled())
                               SwitchListTile(
-                                title: Text(
-                                    SpeakersStrings.counselingEntryToggle),
+                                title:
+                                    Text(SpeakersStrings.counselingEntryToggle),
                                 value: counselingEntry,
                                 onChanged: (value) =>
                                     setState(() => counselingEntry = value),
@@ -519,14 +525,16 @@ class _EventEditPageState extends State<EventEditPage> {
                                     // sharing the same code without tripping the
                                     // DropdownButton "exactly one item" assert.
                                     final seenValues = <String?>{};
-                                    final typeItems = <DropdownMenuItem<String?>>[
+                                    final typeItems =
+                                        <DropdownMenuItem<String?>>[
                                       DropdownMenuItem<String?>(
                                         value: "",
                                         child: Text(FeaturesStrings.noType),
                                       ),
                                     ];
                                     seenValues.add("");
-                                    for (final eventType in _definedEventTypes) {
+                                    for (final eventType
+                                        in _definedEventTypes) {
                                       if (seenValues.add(eventType.code)) {
                                         typeItems.add(DropdownMenuItem<String?>(
                                           value: eventType.code,
@@ -543,8 +551,8 @@ class _EventEditPageState extends State<EventEditPage> {
                                     } else if (seenValues.contains(type)) {
                                       resolvedType = type;
                                     } else {
-                                      final byTitle = _definedEventTypes
-                                          .firstWhereOrNull(
+                                      final byTitle =
+                                          _definedEventTypes.firstWhereOrNull(
                                               (e) => e.title == type);
                                       resolvedType = byTitle?.code;
                                     }
@@ -570,7 +578,8 @@ class _EventEditPageState extends State<EventEditPage> {
                                 TextFormField(
                                   initialValue: showInsideEvent,
                                   decoration: InputDecoration(
-                                      labelText: ScheduleStrings.showInsideEvent),
+                                      labelText:
+                                          ScheduleStrings.showInsideEvent),
                                   onSaved: (value) => showInsideEvent = value,
                                 ),
                               ],

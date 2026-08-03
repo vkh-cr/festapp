@@ -14,6 +14,7 @@ class ResourceEditorView extends StatefulWidget {
   static const String RESOURCE_CAPACITY = "resourceCapacity";
   // Hidden fields
   static const String INVENTORY_POOL_ID_FIELD = "inventoryPoolId";
+  static const String AGGREGATE_VERSION_FIELD = "aggregateVersion";
   static const String OCCASION_ID_FIELD = "occasionId";
 
   final int inventoryPoolId;
@@ -69,6 +70,14 @@ class _ResourceEditorViewState extends State<ResourceEditorView> {
         title: '',
         field: ResourceEditorView.INVENTORY_POOL_ID_FIELD,
         type: TrinaColumnType.number(),
+        readOnly: true,
+        width: 50,
+      ),
+      TrinaColumn(
+        hide: true,
+        title: '',
+        field: ResourceEditorView.AGGREGATE_VERSION_FIELD,
+        type: TrinaColumnType.number(defaultValue: 0),
         readOnly: true,
         width: 50,
       ),

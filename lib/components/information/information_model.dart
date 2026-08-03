@@ -21,6 +21,7 @@ class InformationModel extends ITrinaRowModel {
   int? order;
   int? unit;
   Map<String, dynamic>? data;
+  int aggregateVersion;
   int getOrder() => order ?? 0;
   DateTime getDateTime() => data?[Tb.information.data_date] != null
       ? DateTime.parse(data?[Tb.information.data_date])
@@ -43,6 +44,7 @@ class InformationModel extends ITrinaRowModel {
             ? DateTime.parse(json[Tb.occasions.updated_at])
             : null,
         data: json[Tb.information.data],
+        aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
         informationHidden: json[Tb.information_hidden.table] != null
             ? InformationHiddenModel(
                 id: json[Tb.information_hidden.table][Tb.information_hidden.id],
@@ -167,7 +169,8 @@ class InformationModel extends ITrinaRowModel {
       this.order,
       this.unit,
       this.informationHidden,
-      this.data});
+      this.data,
+      this.aggregateVersion = 0});
 }
 
 class InformationHiddenModel {

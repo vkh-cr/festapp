@@ -15,6 +15,7 @@ import 'package:fstapp/theme_config.dart';
 class EventSpeakersCell extends StatefulWidget {
   /// The persisted event id, or null for a not-yet-saved row.
   final int? eventId;
+  final int aggregateVersion;
 
   /// All selectable speakers for the occasion (shared list instance so a
   /// speaker created inline becomes visible to every cell).
@@ -24,7 +25,8 @@ class EventSpeakersCell extends StatefulWidget {
   final List<int> initialSelectedIds;
 
   /// Persists the new selection (set_event_speakers). Called on confirm.
-  final Future<void> Function(int eventId, List<int> speakerIds) onSave;
+  final Future<int?> Function(
+      int eventId, int expectedVersion, List<int> speakerIds) onSave;
 
   /// Opens the "add speaker" editor and returns the new speaker's id to
   /// pre-select, or null. When null, the add affordance is hidden.
@@ -33,6 +35,7 @@ class EventSpeakersCell extends StatefulWidget {
   const EventSpeakersCell({
     super.key,
     required this.eventId,
+    required this.aggregateVersion,
     required this.allSpeakers,
     required this.initialSelectedIds,
     required this.onSave,
@@ -45,11 +48,13 @@ class EventSpeakersCell extends StatefulWidget {
 
 class _EventSpeakersCellState extends State<EventSpeakersCell> {
   late List<int> _selected;
+  late int _aggregateVersion;
 
   @override
   void initState() {
     super.initState();
     _selected = List.of(widget.initialSelectedIds);
+    _aggregateVersion = widget.aggregateVersion;
   }
 
   @override
@@ -59,6 +64,9 @@ class _EventSpeakersCellState extends State<EventSpeakersCell> {
     // changes, resync the selection from the new row's data.
     if (oldWidget.eventId != widget.eventId) {
       _selected = List.of(widget.initialSelectedIds);
+      _aggregateVersion = widget.aggregateVersion;
+    } else if (oldWidget.aggregateVersion != widget.aggregateVersion) {
+      _aggregateVersion = widget.aggregateVersion;
     }
   }
 
@@ -77,7 +85,8 @@ class _EventSpeakersCellState extends State<EventSpeakersCell> {
     );
     if (result == null) return;
     setState(() => _selected = result);
-    await widget.onSave(eventId, result);
+    final version = await widget.onSave(eventId, _aggregateVersion, result);
+    if (version != null) _aggregateVersion = version;
   }
 
   @override
@@ -86,8 +95,7 @@ class _EventSpeakersCellState extends State<EventSpeakersCell> {
     // event, so defer the affordance until the row's been saved.
     if (widget.eventId == null || widget.eventId! <= 0) {
       return Center(
-        child: Text('—',
-            style: TextStyle(color: ThemeConfig.grey500(context))),
+        child: Text('—', style: TextStyle(color: ThemeConfig.grey500(context))),
       );
     }
 

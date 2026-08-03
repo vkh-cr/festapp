@@ -7,11 +7,26 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
+import 'package:fstapp/components/news/news_commands.dart';
 import 'package:html/parser.dart';
 
 class DbNews {
   static final _supabase = Supabase.instance.client;
+  static final NewsCommands _commands = SupabaseNewsCommands(_supabase);
   static Future<void> deleteNewsMessage(NewsModel message) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result =
+          await _commands.delete(RightsService.currentOccasionId()!, message);
+      if (result.status == NewsCommandStatus.conflict) {
+        throw StateError('News was changed by another editor');
+      }
+      if (result.status == NewsCommandStatus.rejected) {
+        throw StateError('News delete was rejected');
+      }
+      return;
+    }
     var lastMes = await _supabase
         .from(Tb.news.table)
         .select(Tb.news.id)
@@ -51,6 +66,20 @@ class DbNews {
   }
 
   static Future<void> updateNewsMessage(NewsModel message) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result =
+          await _commands.update(RightsService.currentOccasionId()!, message);
+      if (result.status == NewsCommandStatus.conflict) {
+        throw StateError('News was changed by another editor');
+      }
+      if (result.status == NewsCommandStatus.rejected || result.news == null) {
+        throw StateError('News save was rejected');
+      }
+      message
+        ..message = result.news!.message
+        ..aggregateVersion = result.version;
+      return;
+    }
     await _supabase
         .from(Tb.news.table)
         .update({Tb.news.message: message.message}).eq(Tb.news.id, message.id);
@@ -58,6 +87,18 @@ class DbNews {
 
   static Future<void> sendGroupNotification(
       List<String> to, String message, String title) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.publish(
+        occasionId: RightsService.currentOccasionId()!,
+        addToNews: false,
+        newsMessage: null,
+        sendNotification: true,
+        notificationHeading: title,
+        notificationContent: message,
+        recipients: to,
+      );
+      return;
+    }
     await _supabase.from(Tb.log_notifications.table).insert({
       Tb.log_notifications.occasion: RightsService.currentOccasionId()!,
       Tb.log_notifications.to: to,
@@ -75,9 +116,46 @@ class DbNews {
       bool addToNews,
       bool withNotification,
       List<String>? to) async {
+    var messageForNews =
+        heading != null ? "<strong>$heading</strong><br>$message" : message;
+    String? basicMessage;
+    if (withNotification) {
+      var plainText = '';
+      var document = parse(message);
+      for (var child in document.getElementsByTagName('p')) {
+        var innerText = '${child.text}\n';
+        if (innerText.trim().isNotEmpty) plainText += innerText;
+      }
+      basicMessage = plainText.trim();
+    }
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.publish(
+        occasionId: RightsService.currentOccasionId()!,
+        addToNews: addToNews,
+        newsMessage: addToNews ? messageForNews : null,
+        sendNotification: withNotification,
+        notificationHeading:
+            withNotification ? heading ?? headingDefault : null,
+        notificationContent: basicMessage,
+        recipients: to,
+      );
+      if (!context.mounted) return;
+      if (withNotification) {
+        ToastHelper.Show(
+          context,
+          addToNews
+              ? (to == null
+                  ? NewsStrings.messageSentToEveryone
+                  : NewsStrings.messageSentToSelf)
+              : NewsStrings.testSentToSelf,
+        );
+      } else if (addToNews) {
+        ToastHelper.Show(
+            context, NewsStrings.messageCreatedWithoutNotification);
+      }
+      return;
+    }
     if (addToNews) {
-      var messageForNews =
-          heading != null ? "<strong>$heading</strong><br>$message" : message;
       await _supabase.from(Tb.news.table).insert({
         Tb.news.occasion: RightsService.currentOccasionId()!,
         Tb.news.message: messageForNews,
@@ -86,16 +164,6 @@ class DbNews {
     }
 
     if (withNotification) {
-      String basicMessage = "";
-      var document = parse(message);
-      for (var child in document.getElementsByTagName("p")) {
-        var innerText = "${child.text}\n";
-        if (innerText.trim().isEmpty) {
-          continue;
-        }
-        basicMessage += innerText;
-      }
-      basicMessage = basicMessage.trim();
       await _supabase.from(Tb.log_notifications.table).insert({
         Tb.log_notifications.occasion: RightsService.currentOccasionId()!,
         Tb.log_notifications.to: to,
@@ -104,6 +172,7 @@ class DbNews {
         Tb.log_notifications.organization: AppConfig.organization,
       });
 
+      if (!context.mounted) return;
       ToastHelper.Show(
         context,
         addToNews
@@ -116,12 +185,16 @@ class DbNews {
     }
 
     if (addToNews) {
+      if (!context.mounted) return;
       ToastHelper.Show(context, NewsStrings.messageCreatedWithoutNotification);
     }
   }
 
   static Future<int> countNewMessages() async {
     AuthService.ensureUserIsLoggedIn();
+    if (ClientSyncRuntime.isV1Selected) {
+      return ClientSyncProjection.unreadNewsCount();
+    }
     int lastMessageId = await getLastReadMessage();
     var result = await _supabase
         .from(Tb.news.table)
@@ -151,6 +224,10 @@ class DbNews {
 
   static Future<void> setMessagesAsRead(int newId) async {
     AuthService.ensureUserIsLoggedIn();
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.markRead(RightsService.currentOccasionId()!, newId);
+      return;
+    }
     await _supabase
         .from(Tb.user_news.table)
         .delete()

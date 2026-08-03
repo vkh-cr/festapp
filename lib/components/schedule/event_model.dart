@@ -34,6 +34,8 @@ class EventModel extends ITrinaRowModel {
       startTime.day != endTime.day;
 
   int? maxParticipants;
+  int aggregateVersion;
+  int order;
   int maxParticipantsNumber() => maxParticipants == null ? 0 : maxParticipants!;
 
   @override
@@ -104,6 +106,8 @@ class EventModel extends ITrinaRowModel {
     this.title,
     this.description,
     this.maxParticipants,
+    this.aggregateVersion = 0,
+    this.order = 0,
     this.data,
     this.place,
     this.type,
@@ -184,6 +188,8 @@ class EventModel extends ITrinaRowModel {
       maxParticipants: json.containsKey(maxParticipantsColumn)
           ? json[maxParticipantsColumn]
           : null,
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
+      order: (json['order'] as num?)?.toInt() ?? 0,
       data: eventData,
       place: (json.containsKey(placesTable) && json[placesTable] != null)
           ? PlaceModel.fromJson(json[placesTable])
@@ -222,6 +228,31 @@ class EventModel extends ITrinaRowModel {
           : null,
       isCancelled: cancelled, // Added
     );
+  }
+
+  /// Decodes the closed DTO returned by canonical event commands/editor reads.
+  factory EventModel.fromCommandJson(
+      Map<String, dynamic> json, int aggregateVersion) {
+    return EventModel.fromJson({
+      ...json,
+      'start_time': json['startTime'],
+      'end_time': json['endTime'],
+      'max_participants': json['maxParticipants'],
+      'description': json['description'],
+      'place': json['placeId'],
+      'split_for_men_women': json['splitForMenWomen'],
+      'is_group_event': json['isGroupEvent'],
+      'is_hidden': json['isHidden'],
+      'event_groups': [
+        for (final id in (json['parentEventIds'] as List?) ?? const [])
+          {'event_parent': id},
+      ],
+      'event_roles': [
+        for (final id in (json['eventRoleIds'] as List?) ?? const [])
+          {'role': id},
+      ],
+      'aggregate_version': aggregateVersion,
+    });
   }
 
   /// A generated counseling slot (get_events strips `false` jsonb values, so
@@ -287,6 +318,7 @@ class EventModel extends ITrinaRowModel {
   static const String isGroupEventColumn = "is_group_event";
 
   static const String currentParticipantsColumn = "currentParticipants";
+  static const String aggregateVersionColumn = "aggregate_version";
   static const String isSignedInColumn = "isSignedIn";
   static const String isEventInMyProgramColumn = "isEventInMyProgram";
 
@@ -357,6 +389,7 @@ class EventModel extends ITrinaRowModel {
       description: json[descriptionColumn],
       maxParticipants:
           json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
+      aggregateVersion: (json[aggregateVersionColumn] as num?)?.toInt() ?? 0,
       data: dataFromTab,
       place: placeId == null
           ? null
@@ -378,6 +411,7 @@ class EventModel extends ITrinaRowModel {
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
       idColumn: TrinaCell(value: id),
+      aggregateVersionColumn: TrinaCell(value: aggregateVersion),
       isHiddenColumn: TrinaCell(value: isHidden.toString()),
       titleColumn: TrinaCell(value: title),
       descriptionColumn: TrinaCell(value: description),

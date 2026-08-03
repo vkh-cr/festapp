@@ -47,6 +47,7 @@ class UserGroupInfoModel extends ITrinaRowModel {
   int? persistedPlaceId;
   bool persistedPlaceWasPrivate;
   bool shouldSavePlace = false;
+  int aggregateVersion;
 
   UserGroupInfoModel({
     required this.id,
@@ -60,13 +61,15 @@ class UserGroupInfoModel extends ITrinaRowModel {
     this.isAdmin,
     this.persistedPlaceId,
     this.persistedPlaceWasPrivate = false,
+    this.aggregateVersion = 0,
   });
 
   factory UserGroupInfoModel.fromJson(Map<String, dynamic> json) {
     final place = json[Tb.places.table] != null
         ? PlaceModel.fromJson(json[Tb.places.table])
-        : json[PlaceModel.placeObjectColumn] != null
-            ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
+        : (json[PlaceModel.placeObjectColumn] ?? json['placeData']) != null
+            ? PlaceModel.fromJson(
+                json[PlaceModel.placeObjectColumn] ?? json['placeData'])
             : null;
     return UserGroupInfoModel(
       id: json[Tb.user_group_info.id],
@@ -86,6 +89,7 @@ class UserGroupInfoModel extends ITrinaRowModel {
                   .map((p) => GroupParticipantModel.fromJson(p)))
               : {},
       isAdmin: json[isAdminColumn],
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
     );
   }
 

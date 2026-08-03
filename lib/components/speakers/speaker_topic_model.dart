@@ -7,12 +7,14 @@ class SpeakerTopicModel {
   String? title;
   int order;
   bool isHidden;
+  int aggregateVersion;
 
   SpeakerTopicModel({
     this.id,
     this.title,
     this.order = 0,
     this.isHidden = false,
+    this.aggregateVersion = 0,
   });
 
   factory SpeakerTopicModel.fromJson(Map<String, dynamic> json) {
@@ -21,6 +23,9 @@ class SpeakerTopicModel {
       title: json['title'] as String?,
       order: (json['order'] as num?)?.toInt() ?? 0,
       isHidden: json['is_hidden'] as bool? ?? false,
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ??
+          (json['aggregateVersion'] as num?)?.toInt() ??
+          0,
     );
   }
 

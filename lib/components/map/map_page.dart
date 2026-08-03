@@ -47,6 +47,7 @@ import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/groups/db_groups.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'place_model.dart';
 import '../../services/js/js_interop.dart';
@@ -1035,7 +1036,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       });
       return;
     }
-    await DbPlaces.saveLocation(selectedPlace!.place.id!,
+    await DbPlaces.saveLocation(selectedPlace!.place,
         selectedPlace!.point.latitude, selectedPlace!.point.longitude);
     if (!mounted) return;
     ToastHelper.Show(context, MapStrings.placeChanged);
@@ -1191,6 +1192,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         isPlaceSetToOnePlace = true;
       }
     }
+
+    // v1 readers consume the closed map_catalog aggregate above. Missing
+    // places/types/paths/icons block publication; they are never side-loaded.
+    if (ClientSyncRuntime.isV1Selected) return;
 
     // The cache-first scene above is a complete, usable map state. The
     // forceOfflineMap setting selects only the base-map renderer; live places,
