@@ -103,6 +103,19 @@
         object-position: top center;
         border-radius: 23px;
       }
+      .island {
+        display: none;
+        position: absolute;
+        z-index: 2;
+        top: 11px;
+        left: 50%;
+        width: 76px;
+        height: 13px;
+        border-radius: 999px;
+        background: #050505;
+        transform: translateX(-50%);
+      }
+      body.iphone .island { display: block; }
       .date-card {
         position: absolute;
         z-index: 5;
@@ -135,6 +148,12 @@
     <div class="date-card">11.–16. SRPNA<br />2026</div>
     <div class="phone">
       <img src="source/09-program-happening-now.png" alt="Program CSM Ostrava" />
+      <span class="island"></span>
     </div>
+    <script>
+      if (new URLSearchParams(location.search).get("platform") === "iphone") {
+        document.body.classList.add("iphone");
+      }
+    </script>
   </body>
 </html>

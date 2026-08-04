@@ -467,10 +467,16 @@ class _UserPageState extends State<UserPage> {
     RouterService.popOrHome(context);
   }
 
-  Widget _legalLink(String label, String url) => TextButton(
-        onPressed: () => LaunchUrlService.launchURL('$url/', true),
-        child: Text(label),
-      );
+  Widget _legalLink(String label, String url) {
+    final targetUrl = '$url/';
+    return TextButton(
+      onPressed: () => LaunchUrlService.openExternalUrl(
+        targetUrl,
+        inCurrentWindow: true,
+      ),
+      child: Text(label),
+    );
+  }
 
   Future<void> _requestAccountDeletion() async {
     final confirmed = await showDialog<bool>(

@@ -61,7 +61,7 @@ try {
   let cachePutFails = false;
   const cachedPuts = [];
   const deletedCaches = [];
-  const navigatedClients = [];
+  const openedCaches = [];
   let claimedExistingClients = 0;
   const cache = {
     addAll: async () => {},
@@ -73,6 +73,7 @@ try {
       const url = typeof request === 'string' ? request : request.url;
       if (url === fontUrl) return cachedFont.clone();
       if (url.includes('/flutter?pwa-cache=1')) return cachedShell.clone();
+      if (url.includes('/assets/translation.json')) return new Response('{}');
       return undefined;
     },
   };
@@ -82,7 +83,10 @@ try {
     Response,
     Promise,
     caches: {
-      open: async () => cache,
+      open: async (name) => {
+        openedCaches.push(name);
+        return cache;
+      },
       keys: async () => [
         'festapp-app-shell-1.2.3+3',
         'festapp-app-shell-1.2.3+4',
@@ -110,20 +114,16 @@ try {
       navigator: { onLine: false },
       clients: {
         claim: async () => { claimedExistingClients++; },
-        matchAll: async () => [{
-          id: 'older-open-tab',
-          postMessage: () => {},
-        }],
-        get: async (id) => ({
-          id,
-          url: `https://app.test/${id}`,
-          navigate: () => {
-            navigatedClients.push(id);
-            // Real navigation waits for the activating worker. Awaiting this
-            // promise from activate would therefore deadlock both operations.
-            return new Promise(() => {});
+        matchAll: async () => [
+          {
+            id: 'updating-tab',
+            postMessage: () => {},
           },
-        }),
+          {
+            id: 'older-open-tab',
+            postMessage: () => {},
+          },
+        ],
       },
       skipWaiting: async () => {},
       addEventListener: (type, handler) => { handlers[type] = handler; },
@@ -131,33 +131,28 @@ try {
   };
   vm.runInNewContext(worker, context);
 
-  // The tab requesting an update may still run the previous update script,
-  // which waits for controllerchange. Navigate just that client once the new
-  // worker activates; never seize or reload the other open tabs.
+  // The requesting tab needs controllerchange so its existing update script
+  // can reload it. Other tabs are claimed too, but must remain mapped to the
+  // cache generation from which their JavaScript is already executing.
   handlers.message({
     data: 'SKIP_WAITING',
     source: {id: 'updating-tab'},
   });
 
-  // A newly activated worker must not seize an already-open tab or delete the
-  // shell that tab is still executing. Both tabs share Cache Storage; doing
-  // either can strand the older tab on Flutter's loader when it later asks for
-  // a deferred chunk from its own build.
+  // Claim both tabs so the updating tab's next navigation cannot fall back
+  // through the old worker. Keep the other tab pinned to its original shell;
+  // both tabs share Cache Storage and it can still request deferred chunks.
   let activation;
   handlers.activate({ waitUntil: (promise) => { activation = promise; } });
-  const activationCompleted = await Promise.race([
-    activation.then(() => true),
-    new Promise((resolve) => setTimeout(() => resolve(false), 25)),
-  ]);
-  assert.equal(activationCompleted, true);
-  assert.equal(claimedExistingClients, 0);
+  await activation;
+  assert.equal(claimedExistingClients, 1);
   assert.deepEqual(deletedCaches, []);
-  assert.deepEqual(navigatedClients, ['updating-tab']);
 
-  async function dispatchFetch(request) {
+  async function dispatchFetch(request, clientId = '') {
     let responsePromise;
     handlers.fetch({
       request,
+      clientId,
       respondWith: (promise) => { responsePromise = promise; },
     });
     assert.ok(responsePromise, `worker did not handle ${request.url}`);
@@ -168,8 +163,10 @@ try {
   assert.equal(await fontResponse.text(), 'cached emoji font');
   const navigation = new Request('https://app.test/csmostrava2026/');
   Object.defineProperty(navigation, 'mode', { value: 'navigate' });
-  const shellResponse = await dispatchFetch(navigation);
+  const shellResponse = await dispatchFetch(navigation, 'updating-tab');
   assert.equal(await shellResponse.text(), '<html>offline shell</html>');
+  assert.equal(openedCaches.at(-1), 'festapp-app-shell-1.2.3+4',
+    'the tab that requested the update must navigate through the new shell');
   const versionResponse = await dispatchFetch(
     new Request('https://app.test/festapp-version.json?t=offline'),
   );
@@ -185,6 +182,12 @@ try {
   );
   assert.equal(missingChunkResponse.type, 'error');
   assert.equal(networkCalls, 1);
+
+  await dispatchFetch(
+    new Request('https://app.test/assets/translation.json'),
+    'older-open-tab',
+  );
+  assert.equal(openedCaches.at(-1), 'festapp-app-shell-1.2.3+3');
 
   // If storage eviction/corruption removed an executable from this worker's
   // own build, recover that exact build from the network instead of leaving
@@ -219,6 +222,10 @@ try {
   assert.match(flutterIndex, /performance\.getEntriesByType\('resource'\)/);
   assert.match(flutterIndex, /window\.recoverFestappStartup\('bootstrap-error'\)/);
   assert.match(flutterIndex, /festapp-app-ready/);
+  assert.match(flutterIndex, /__FESTAPP_LOCAL_DEVELOPMENT__/);
+  assert.match(flutterIndex, /festappLocalDevelopmentReady/);
+  assert.match(flutterIndex, /serviceWorker\.getRegistrations\(\)/);
+  assert.match(flutterIndex, /festapp-app-shell-/);
   const updatePrompt = await readFile(
     path.join(projectRoot, 'web/festapp_update_prompt.js'),
     'utf8',
@@ -228,6 +235,10 @@ try {
   assert.match(updatePrompt, /startupRecoveryStorageKey/);
   assert.match(updatePrompt, /navigator\.onLine === false/);
   assert.match(updatePrompt, /FESTAPP_CLIENT_VERSION/);
+  assert.match(
+    updatePrompt,
+    /if \(window\.__FESTAPP_LOCAL_DEVELOPMENT__\) return;/,
+  );
   const networkReload = updatePrompt.match(
     /async function prepareNetworkReload\(\) \{[\s\S]*?\n  \}/,
   )?.[0];

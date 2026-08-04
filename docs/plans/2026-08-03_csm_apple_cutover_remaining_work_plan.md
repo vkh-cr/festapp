@@ -77,7 +77,7 @@ The following is the accepted implementation baseline. Execution starts by
 confirming it is still present, then changes it only when a wave's validation
 finds a concrete defect:
 
-- `automation/release/app_store_cutover.json`, split Fastlane lanes, store
+- `automation/release/app_store_config.json`, split Fastlane lanes, store
   checklist/privacy/review/legal artifacts and local preflight.
 - `InstallationCutoverService` plus targeted installation-cutover tests.
 - Dedicated account-deletion migration, request/confirm Edge Functions, Flutter
@@ -112,7 +112,7 @@ finds a concrete defect:
 
 ### Canonical owners and contracts
 
-- `automation/release/app_store_cutover.json` owns the pinned Apple identity,
+- `automation/release/app_store_config.json` owns the pinned Apple identity,
   target version, URLs, screenshot classes and manual release policy.
 - The MapLibre package resolution owns native plugin registration; Flutter's
   generated registrant is disposable output, not an edit point.
@@ -400,7 +400,7 @@ Consume the already completed screenshot work without recreating or revising it.
 **Changes**
 
 - Receive the screenshot session's final numbered PNGs and its content/privacy
-  approval note in the canonical paths declared by `app_store_cutover.json`.
+  approval note in the canonical paths declared by `app_store_config.json`.
 - Confirm that both `iphone69` (1320x2868) and `ipad13` (2064x2752) sets exist,
   are non-empty and contain no source-only or archived concept files.
 - Do not open a new visual review or alter pixels/copy/selection in this plan. If

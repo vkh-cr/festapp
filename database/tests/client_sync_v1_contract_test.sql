@@ -12,7 +12,7 @@ BEGIN
   FROM unnest(ARRAY[
     'get_private_client_sync_v1','get_client_commits_v1','get_client_commit_v1',
     'claim_client_projection_dirty_v1','get_public_client_sync_component_v1',
-    'complete_client_sync_publication_v1','mark_news_read_client_sync_v1',
+    'complete_client_sync_publication_classes_v1','mark_news_read_client_sync_v1',
     'save_event_client_sync_v1','delete_event_client_sync_v1',
     'set_event_attendance_client_sync_v1',
     'publish_activities_client_sync_v1',
@@ -109,7 +109,8 @@ BEGIN
     'client_sync_scopes','client_sync_private_scopes','client_commits',
     'client_mutation_receipts','client_aggregate_versions',
     'client_commit_items','client_commit_components','client_projection_dirty_keys',
-    'event_public_state','cleaning_public_state']) AND NOT c.relrowsecurity;
+    'event_public_state','cleaning_public_state','news_notification_outbox'])
+    AND NOT c.relrowsecurity;
   PERFORM assert_true(v_unsecured IS NULL,'all client sync state tables have RLS');
 
   SELECT count(*) INTO v_trigger_count FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid
@@ -152,6 +153,25 @@ BEGIN
     SELECT 1 FROM pg_indexes WHERE schemaname='public'
       AND indexname='queue_emails_ticket_order_command_idx'),
     'ticket confirmation effects have a durable idempotent queue identity');
+  PERFORM assert_true(EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='news_notification_outbox'
+      AND column_name='required_content_revision') AND EXISTS (
+    SELECT 1 FROM pg_indexes WHERE schemaname='public'
+      AND indexname='news_notification_outbox_ready_idx'),
+    'news pushes have a durable publication-revision gate');
+  PERFORM assert_true(pg_get_functiondef(
+      'public.publish_news_client_sync_v1(bigint,boolean,text,boolean,text,text,jsonb,uuid)'::regprocedure)
+      LIKE '%INSERT INTO public.news_notification_outbox%',
+    'combined news publication queues its push behind content_catalog');
+  PERFORM assert_true(pg_get_functiondef(
+      'public.complete_client_sync_publication_classes_v1(text,bigint,bigint,jsonb,text,text,bigint,jsonb,jsonb,text,uuid[],uuid[])'::regprocedure)
+      LIKE '%DELETE FROM public.news_notification_outbox%',
+    'canonical catalog completion releases publication-ready news pushes');
+  PERFORM assert_true(NOT EXISTS (
+    SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname='complete_client_sync_publication_v1'),
+    'superseded all-or-nothing publisher completion is absent');
   PERFORM assert_true(NOT EXISTS (
     SELECT 1 FROM public.client_sync_component_sources s
     WHERE s.cutover_ready),

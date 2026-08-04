@@ -124,18 +124,24 @@ test('RouterService.Sanitization', async (t) => {
     };
     const { RouterService } = await import('../../src/services/router_service.js');
 
-    await t.test('should PRESERVE query params in navigateToExternal', () => {
-        let openedUrl = '';
-        global.window.open = (url) => { openedUrl = url; };
+    await t.test('should PRESERVE query params in a new window', () => {
+        let opened;
+        global.window.open = (url, target, features) => {
+            opened = { url, target, features };
+        };
 
-        RouterService.navigateToExternal('https://example.com?foo=bar');
-        assert.strictEqual(openedUrl, 'https://example.com?foo=bar');
+        RouterService.openExternalUrl('https://example.com?foo=bar');
+        assert.deepStrictEqual(opened, {
+            url: 'https://example.com?foo=bar',
+            target: '_blank',
+            features: 'noopener,noreferrer'
+        });
 
-        RouterService.navigateToExternal('https://example.com?foo=bar&baz=1');
-        assert.strictEqual(openedUrl, 'https://example.com?foo=bar&baz=1');
+        RouterService.openExternalUrl('https://example.com?foo=bar&baz=1');
+        assert.strictEqual(opened.url, 'https://example.com?foo=bar&baz=1');
     });
 
-    await t.test('should PRESERVE query params in navigateExternal', () => {
+    await t.test('should PRESERVE query params in the current window', () => {
         let locationHref = '';
         // Mock setter
         Object.defineProperty(global.window.location, 'href', {
@@ -143,7 +149,7 @@ test('RouterService.Sanitization', async (t) => {
             configurable: true
         });
 
-        RouterService.navigateExternal('/some/path?query=1');
+        RouterService.openExternalUrl('/some/path?query=1', { inCurrentWindow: true });
         assert.strictEqual(locationHref, '/some/path?query=1');
     });
 
@@ -442,4 +448,3 @@ test('RouterService.handleInitialLoad', async (t) => {
         assert.strictEqual(replaceStateCalled, false, 'Should NOT sanitize URL if preview=true is present mixed with others');
     });
 });
-

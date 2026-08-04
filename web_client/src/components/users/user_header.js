@@ -105,7 +105,7 @@ export class UserHeader extends HTMLElement {
         logo.style.cursor = 'pointer';
         logo.onclick = () => {
              // Force redirect to root
-             RouterService.navigateExternal("/");
+             RouterService.openExternalUrl("/", { inCurrentWindow: true });
         };
         container.appendChild(logo);
 

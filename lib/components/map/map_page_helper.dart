@@ -328,6 +328,38 @@ class MapPageHelper {
     );
   }
 
+  /// Brief confirmation shown above the compact place-type filter after a tap.
+  static Widget buildPlaceTypeSelectionFeedback(
+    BuildContext context,
+    String? label,
+  ) {
+    if (label == null || label.isEmpty) return const SizedBox.shrink();
+
+    return Positioned(
+      left: 24,
+      right: 24,
+      bottom: 72,
+      child: IgnorePointer(
+        child: Center(
+          child: Material(
+            color: ThemeConfig.appBarColor(),
+            borderRadius: BorderRadius.circular(12),
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Shows the selected path‑group’s title in a pill overlay with matching border.
   static Widget buildSelectedGroupTitle(
     BuildContext context,

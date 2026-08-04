@@ -82,6 +82,45 @@ void main() {
     expect(find.byIcon(Icons.place), findsOneWidget);
   });
 
+  testWidgets('place type names are not permanently shown in the compact bar',
+      (tester) async {
+    await pumpBar(tester,
+        types: placeTypes, selectedCode: "ubytovani", onTap: (_) {});
+
+    expect(find.text("Ubytování"), findsNothing);
+    expect(find.text("Hlavní programy"), findsNothing);
+    expect(find.text(IconsStrings.placeTypesOther), findsNothing);
+  });
+
+  testWidgets('selection feedback briefly shows the selected type name',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Stack(
+            children: [
+              Builder(
+                builder: (context) =>
+                    MapPageHelper.buildPlaceTypeSelectionFeedback(
+                  context,
+                  "Hlavní programy",
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text("Hlavní programy"), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is IgnorePointer && widget.ignoring,
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('tapping a type chip reports that type code', (tester) async {
     String? tapped;
     await pumpBar(tester,

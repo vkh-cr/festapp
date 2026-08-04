@@ -6,6 +6,7 @@ import { Modal } from '../ui/modal.js';
 import { RightsService } from '../../services/rights_service.js';
 import { AppConfig } from '../../app_config.js';
 import { SHARED_MODAL_STYLES } from '../shared/modal_styles.js';
+import { RouterService } from '../../services/router_service.js';
 // import './login_modal.css'; // Removed in favor of inline styles for test compatibility
 
 const LOGIN_MODAL_STYLES = SHARED_MODAL_STYLES;
@@ -511,7 +512,7 @@ export class LoginModal extends HTMLElement {
 
                  ToastHelper.showSuccess(CommonStrings.passwordChanged);
                  this.modal.close();
-                 window.location.href = '/';
+                 RouterService.openExternalUrl('/', { inCurrentWindow: true });
             } else if (result.code === 403 || result.code === 404) {
                  console.error("Change Password RPC Failed with code:", result.code);
                  throw new Error(CommonStrings.tokenInvalid);

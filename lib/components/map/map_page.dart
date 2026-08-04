@@ -36,6 +36,7 @@ import 'package:fstapp/components/cleaning/cleaning_report_flow.dart';
 import 'package:fstapp/components/cleaning/models/cleaning_place_status.dart';
 import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/components/map/icon_model.dart';
+import 'package:fstapp/components/icons/icons_strings.dart';
 import 'package:fstapp/components/icons/place_type_model.dart';
 import 'package:fstapp/components/icons/db_place_types.dart';
 import 'package:fstapp/components/map/path_group_model.dart';
@@ -62,7 +63,7 @@ import 'package:fstapp/widgets/pop_button.dart';
 import 'package:collection/collection.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:fstapp/components/map/map_strings.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:fstapp/services/launch_url_service.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../schedule/event_page.dart';
@@ -157,6 +158,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   /// or null while no types are loaded). Single-select.
   String? _selectedPlaceTypeCode;
   bool _placeTypeInitialized = false;
+  String? _placeTypeSelectionFeedback;
+  Timer? _placeTypeSelectionFeedbackTimer;
 
   /// Deep-link place-type filter (from `map?placeType=…`). When set it wins over
   /// the saved/default selection and filters even if that code is not a catalog
@@ -218,6 +221,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       MapPage.isEditingNotifier.value = false;
     }
     _iconScrollController.dispose();
+    _placeTypeSelectionFeedbackTimer?.cancel();
     _legacyOfflineConfiguration?.dispose();
     super.dispose();
   }
@@ -779,6 +783,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
               _onPlaceTypeTap,
               _icons,
             ),
+          if (!_isDrawingPath && selectedPlace == null)
+            MapPageHelper.buildPlaceTypeSelectionFeedback(
+              context,
+              _placeTypeSelectionFeedback,
+            ),
         ],
       ),
     );
@@ -861,7 +870,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           color: Colors.white.withValues(alpha: 0.88),
           borderRadius: BorderRadius.circular(4),
           child: InkWell(
-            onTap: link == null ? null : () => launchUrl(Uri.parse(link)),
+            onTap: link == null
+                ? null
+                : () => LaunchUrlService.openExternalUrl(link),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
               child: Text(text, style: const TextStyle(fontSize: 10)),
@@ -1890,7 +1901,21 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     if (code == null) return;
     // Tapping a chip returns to normal filtering, dropping any deep-link filter.
     _deepLinkPlaceType = null;
-    setState(() => _selectedPlaceTypeCode = code);
+    final feedback = code == _otherPlaceTypeCode
+        ? IconsStrings.placeTypesOther
+        : _placeTypes.firstWhereOrNull((type) => type.code == code)?.title;
+    _placeTypeSelectionFeedbackTimer?.cancel();
+    setState(() {
+      _selectedPlaceTypeCode = code;
+      _placeTypeSelectionFeedback = feedback;
+    });
+    _placeTypeSelectionFeedbackTimer = Timer(
+      const Duration(milliseconds: 1800),
+      () {
+        if (!mounted) return;
+        setState(() => _placeTypeSelectionFeedback = null);
+      },
+    );
     await OfflineDataService.saveSelectedPlaceType(code);
 
     final points = _places

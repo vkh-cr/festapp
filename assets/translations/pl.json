@@ -385,6 +385,7 @@
     "publishAndSendSelf": "Wyślij test tylko do mnie",
     "publishAndSendEveryone": "Opublikuj i wyślij wszystkim",
     "selectRecipients": "Wybierz odbiorców",
+    "contentRequired": "Najpierw wpisz treść wiadomości.",
     "messageSentToSelf": "Wiadomość została opublikowana. Powiadomienie wysłano tylko do Ciebie.",
     "messageSentToEveryone": "Wiadomość została opublikowana. Powiadomienie wysłano do wszystkich subskrybentów aplikacji.",
     "testSentToSelf": "Powiadomienie testowe wysłano tylko do Ciebie. Wiadomość nie została opublikowana.",

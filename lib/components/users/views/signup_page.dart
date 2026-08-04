@@ -102,7 +102,7 @@ class _SignupPageState extends State<SignupPage> {
                           Semantics(
                             link: true,
                             child: TextButton.icon(
-                              onPressed: () => LaunchUrlService.launchURL(
+                              onPressed: () => LaunchUrlService.openExternalUrl(
                                   '${AppConfig.webLink}/privacy'),
                               icon: const Icon(Icons.privacy_tip_outlined),
                               label: Text(UserStrings.signupPrivacyNotice),

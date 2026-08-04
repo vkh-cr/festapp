@@ -1,0 +1,55 @@
+{
+  "event": "CSM Ostrava 2026",
+  "created": "2026-08-04",
+  "selectionSource": "Chrome localStorage csm-2026-store-selection-v1, sequence 129603",
+  "presentation": "Every image uses a CSM marketing composition, a concise feature benefit, and unchanged real app UI inside a platform-appropriate frame.",
+  "sets": {
+    "appleIphone69": {
+      "size": [1260, 2736],
+      "files": [
+        "01-marketing.png",
+        "02-program-happening-now.png",
+        "03-speaker-profile.png",
+        "04-map.png",
+        "05-search.png",
+        "06-news.png",
+        "07-counseling.png"
+      ]
+    },
+    "googlePhone": {
+      "size": [1440, 2560],
+      "files": [
+        "01-marketing.png",
+        "02-program-happening-now.png",
+        "03-speaker-profile.png",
+        "04-map.png",
+        "05-search.png",
+        "06-news.png",
+        "07-counseling.png"
+      ]
+    },
+    "appleIpad13": {
+      "size": [2064, 2752],
+      "contentMappedFromTabletSelection": true,
+      "files": [
+        "01-marketing.png",
+        "02-program.png",
+        "03-map.png",
+        "04-my-program.png",
+        "05-information.png",
+        "06-program-saturday.png"
+      ]
+    },
+    "googleTablet": {
+      "size": [1440, 2560],
+      "files": [
+        "01-marketing.png",
+        "02-program.png",
+        "03-map.png",
+        "04-my-program.png",
+        "05-information.png",
+        "06-program-saturday.png"
+      ]
+    }
+  }
+}

@@ -48,29 +48,50 @@ class ClientSyncProjection {
   }
 
   static Future<List<EventModel>> events() async {
-    final catalog =
-        await ClientSyncRuntime.readPublic(ClientSyncComponent.programCatalog);
+    final catalog = await ClientSyncRuntime.readPublic(
+            ClientSyncComponent.programCatalog) ??
+        const <String, dynamic>{};
+    final map = await _map();
     final live =
-        await ClientSyncRuntime.readPublic(ClientSyncComponent.livePublic);
+        await ClientSyncRuntime.readPublic(ClientSyncComponent.livePublic) ??
+            const <String, dynamic>{};
     final privateProgram =
         await ClientSyncRuntime.readPrivate(ClientSyncComponent.privateProgram);
+    return projectEvents(
+      catalog: catalog,
+      map: map,
+      live: live,
+      privateProgram: privateProgram,
+    );
+  }
+
+  static List<EventModel> projectEvents({
+    required Map<String, dynamic> catalog,
+    required Map<String, dynamic> map,
+    required Map<String, dynamic> live,
+    required Object? privateProgram,
+  }) {
+    final placesById = {
+      for (final place in projectPlaces(map))
+        if (place.id case final id?) id: place,
+    };
     final liveById = <int, Map>{
       for (final item
-          in ((live?['events'] as List?) ?? const []).whereType<Map>())
+          in ((live['events'] as List?) ?? const []).whereType<Map>())
         (item['eventId'] as num).toInt(): item,
     };
     final privateProgramMap = privateProgram is Map ? privateProgram : null;
     final signedIn = _ids(privateProgramMap?['signedIn']);
     final saved = _ids(privateProgramMap?['saved']);
     final groups =
-        ((catalog?['eventGroups'] as List?) ?? const []).whereType<Map>();
+        ((catalog['eventGroups'] as List?) ?? const []).whereType<Map>();
     final roles =
-        ((catalog?['eventRoles'] as List?) ?? const []).whereType<Map>();
+        ((catalog['eventRoles'] as List?) ?? const []).whereType<Map>();
     final events =
-        ((catalog?['events'] as List?) ?? const []).whereType<Map>().map((raw) {
+        ((catalog['events'] as List?) ?? const []).whereType<Map>().map((raw) {
       final id = (raw['id'] as num).toInt();
       final liveEvent = liveById[id];
-      return EventModel.fromJson({
+      final event = EventModel.fromJson({
         'id': id,
         'title': raw['title'],
         'start_time': raw['startTime'],
@@ -100,6 +121,12 @@ class ClientSyncProjection {
             if (role['eventId'] == id) {'role': role['roleId']},
         ],
       });
+      final placeId = event.place?.id;
+      final place = placeId == null ? null : placesById[placeId];
+      if (place != null) {
+        event.place = place;
+      }
+      return event;
     }).toList(growable: false);
     final eventsById = <int, EventModel>{
       for (final event in events)
@@ -121,15 +148,18 @@ class ClientSyncProjection {
   static Future<Map<String, dynamic>> _map() async =>
       await ClientSyncRuntime.readPublic(ClientSyncComponent.mapCatalog) ?? {};
 
-  static Future<List<PlaceModel>> places() async =>
-      ((await _map())['places'] as List? ?? const [])
+  static Future<List<PlaceModel>> places() async => projectPlaces(await _map());
+
+  static List<PlaceModel> projectPlaces(Map<String, dynamic> map) =>
+      ((map['places'] as List?) ?? const [])
           .whereType<Map>()
           .map((raw) => PlaceModel.fromJson({
                 'id': raw['id'],
                 'title': raw['title'],
                 'description': raw['description'],
                 'type': raw['type'],
-                'coordinates': raw['coordinates'],
+                if (raw['coordinates'] != null)
+                  'coordinates': raw['coordinates'],
                 'order': raw['order'],
                 'icon': raw['icon'],
                 'is_hidden': false,

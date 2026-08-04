@@ -42,8 +42,12 @@
       }
 
       h1 {
+        width: fit-content;
         max-width: 84vw;
         margin: 3vh 0 0;
+        padding: 0.8vh 1.6vw 1vh;
+        border-radius: clamp(12px, 2.5vw, 28px);
+        background: rgba(245, 244, 237, 0.96);
         font-size: clamp(34px, 7.7vw, 104px);
         line-height: 0.92;
         letter-spacing: -0.055em;
@@ -63,7 +67,7 @@
         position: relative;
         width: min(78vw, 34vh, 690px);
         aspect-ratio: 1179 / 2556;
-        transform: rotate(2.2deg) translateY(2.4%);
+        transform: translateY(2.4%);
         filter: drop-shadow(0 2.4vh 2.2vh rgba(0, 0, 0, 0.25));
       }
 
@@ -106,7 +110,7 @@
         border: clamp(4px, 0.8vw, 10px) solid #111927;
         border-radius: clamp(24px, 5.5vw, 72px);
         background: #111927;
-        transform: rotate(-1.4deg) translateY(2.8%);
+        transform: translateY(2.8%);
       }
 
       body.android .screen { inset: clamp(6px, 1.2vw, 16px); border-radius: clamp(17px, 4.1vw, 54px); }
@@ -139,6 +143,14 @@
       const platform = params.get("platform") === "android" ? "android" : "iphone";
       const src = params.get("src") || "source/09-program-happening-now.png";
       const sourceTitle = params.get("title") || "Program — právě probíhá";
+      const headlineByKind = {
+        program: "Program živě a vždy po ruce",
+        speaker: "Poznej řečníky ještě před programem",
+        map: "Najdi místa i doporučené trasy",
+        search: "Najdi rychle, co právě hledáš",
+        news: "Měj všechny novinky po ruce",
+        counseling: "Vyber si z volných termínů",
+      };
       const headlineMap = [
         [/mapa|tras/i, "Všechny cesty CSM po ruce"],
         [/můj program/i, "Tvůj program. Tvůj rytmus."],
@@ -149,7 +161,7 @@
       ];
       document.body.className = platform;
       document.getElementById("screenshot").src = src;
-      document.getElementById("headline").textContent = headlineMap.find(([pattern]) => pattern.test(sourceTitle))?.[1] || sourceTitle;
+      document.getElementById("headline").textContent = headlineByKind[params.get("kind")] || headlineMap.find(([pattern]) => pattern.test(sourceTitle))?.[1] || sourceTitle;
     </script>
   </body>
 </html>

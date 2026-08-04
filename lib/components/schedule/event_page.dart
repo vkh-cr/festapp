@@ -786,8 +786,9 @@ class _EventPageState extends State<EventPage> {
                     canSave: _canSaveSavedProgram,
                     color: fg,
                     addIcon: Icons.add_circle_outline,
-                    savedIcon: Icons.check_circle,
+                    savedIcon: Icons.check,
                     size: 30,
+                    diameter: 30,
                   ),
                 ),
               ] else if ((_event?.maxParticipants ?? 0) > 0) ...[
@@ -1042,6 +1043,7 @@ class _EventPageState extends State<EventPage> {
             addIcon: Icons.add,
             savedIcon: Icons.check,
             size: 30,
+            diameter: 56,
           ),
         ),
       ),

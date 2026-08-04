@@ -25,17 +25,37 @@ abstract interface class PrivateSyncRemote {
       SyncContext context, Map<ClientSyncComponent, int> knownVector);
 }
 
+typedef ArtifactRequestUriResolver = Uri Function(Uri artifactUri);
+
+Uri resolvePublicArtifactRequestUriForPage(
+  Uri artifactUri,
+  Uri pageUri,
+) {
+  const localHosts = {'localhost', '127.0.0.1', '::1'};
+  if (!localHosts.contains(pageUri.host) ||
+      artifactUri.scheme != 'https' ||
+      artifactUri.host != 'assets.festapp.net') {
+    return artifactUri;
+  }
+  return pageUri.replace(
+    path: '/__festapp_sync_asset__${artifactUri.path}',
+    query: artifactUri.hasQuery ? artifactUri.query : null,
+    fragment: null,
+  );
+}
+
 class HttpPublicSyncRemote
     implements PublicSyncHeadRemote, PublicComponentRemote {
   HttpPublicSyncRemote({
     required this.headOrigin,
     required this.artifactOrigin,
+    this.artifactRequestUriResolver,
     http.Client? client,
-  })
-      : _client = client ?? http.Client();
+  }) : _client = client ?? http.Client();
 
   final Uri headOrigin;
   final Uri artifactOrigin;
+  final ArtifactRequestUriResolver? artifactRequestUriResolver;
   final http.Client _client;
   final Map<String, String> _etags = {};
 
@@ -74,18 +94,19 @@ class HttpPublicSyncRemote
         descriptor.url.scheme != artifactOrigin.scheme ||
         descriptor.url.host != artifactOrigin.host ||
         descriptor.url.port != artifactOrigin.port) {
-      throw const FormatException(
-          'Public sync artifact origin is not allowed');
+      throw const FormatException('Public sync artifact origin is not allowed');
     }
     if (descriptor.bytes < 0 || descriptor.bytes > maxBytes) {
       throw FormatException('Artifact size is outside the component budget');
     }
-    final response = await _client.get(descriptor.url, headers: {
+    final requestUri =
+        artifactRequestUriResolver?.call(descriptor.url) ?? descriptor.url;
+    final response = await _client.get(requestUri, headers: {
       'Accept': descriptor.mediaType,
     });
     if (response.statusCode != 200) {
       throw http.ClientException(
-          'Artifact returned ${response.statusCode}', descriptor.url);
+          'Artifact returned ${response.statusCode}', requestUri);
     }
     final bytes = response.bodyBytes;
     if (bytes.length != descriptor.bytes || bytes.length > maxBytes) {

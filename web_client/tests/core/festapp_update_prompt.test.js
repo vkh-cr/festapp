@@ -67,14 +67,15 @@ function boot({
                 window.__skipWaitingMessages = [];
                 window.__festappUnregisterCalls = 0;
                 window.__deletedCaches = [];
-                const candidate = {
-                    state: 'installed',
-                    postMessage(message) {
-                        window.__skipWaitingMessages.push(message);
-                        window.navigator.serviceWorker.dispatchEvent(
-                            new window.Event('controllerchange')
-                        );
-                    },
+                const candidate = new window.EventTarget();
+                candidate.state = 'installed';
+                candidate.postMessage = (message) => {
+                    window.__skipWaitingMessages.push(message);
+                    candidate.state = 'activated';
+                    candidate.dispatchEvent(new window.Event('statechange'));
+                    window.navigator.serviceWorker.dispatchEvent(
+                        new window.Event('controllerchange')
+                    );
                 };
                 const registration = {
                     active: { scriptURL: 'https://csmostrava.festapp.net/festapp_service_worker.js' },
@@ -220,7 +221,7 @@ describe('festapp_update_prompt.js', () => {
         assert.ok(banner(window), 'a running app should let the user choose when to reload');
     });
 
-    test('Reload refreshes a stale page when the new worker is already active', async () => {
+    test('Reload refreshes a stale page without deleting shared worker state', async () => {
         const { window } = boot({
             buildVersion: '1.0.0+1',
             latestVersion: '1.0.0+2',
@@ -235,10 +236,10 @@ describe('festapp_update_prompt.js', () => {
 
         assert.strictEqual(window.__navigationErrors.length, 1,
             'an explicit Reload should refresh even when no worker is waiting');
-        assert.strictEqual(window.__festappUnregisterCalls, 1,
-            'the stale Festapp worker must release the next navigation');
-        assert.deepStrictEqual([...window.__deletedCaches], ['festapp-app-shell-1.0.0+1'],
-            'only the stale versioned app shell should be deleted');
+        assert.strictEqual(window.__festappUnregisterCalls, 0,
+            'one tab must not unregister the worker shared by other tabs');
+        assert.deepStrictEqual([...window.__deletedCaches], [],
+            'one tab must not delete an app shell still used by another tab');
     });
 
     test('version check stays silent when the server build matches', async () => {

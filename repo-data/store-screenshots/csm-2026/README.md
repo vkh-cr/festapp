@@ -26,6 +26,26 @@ Text titulku se automaticky volí podle typu označené obrazovky.
 ukázky obou obalů v přesných cílových rozměrech a jsou vidět také přímo v
 `preview.html`.
 
+## Finální sada
+
+Adresář `final/` obsahuje seřazené exporty připravené k nahrání do obchodů:
+
+- `apple-iphone/` — sedm snímků pro 6,9″ iPhone, 1260 × 2736 px
+- `google-phone/` — sedm snímků pro telefon, 1440 × 2560 px
+- `apple-ipad/` — šest snímků pro 13″ iPad, 2064 × 2752 px
+- `google-tablet/` — šest snímků pro tablet, 1440 × 2560 px
+
+V každé sadě je `01-marketing.png` jako první marketingový panel. Také všechny
+další obrázky jsou vložené do jednotného CSM obalu s krátkým popisem konkrétní
+funkce a platformně odpovídajícím rámem zařízení; samotné UI zůstává beze změn.
+Pouze první marketingová úvodka používá dynamicky nakloněné zařízení. Všechny
+funkční snímky mají rám rovně a na středu a jejich nadpis leží na světlé ploše
+kvůli spolehlivému kontrastu.
+Obsah pěti označených Google tabletů je pro Apple sadu namapovaný na jejich již
+pořízené iPadové protějšky.
+`final/preview.html` zobrazuje všechny čtyři sady v pořadí pro upload a
+`final/manifest.json` je strojově čitelný seznam souborů a rozměrů.
+
 ## Zdrojové snímky
 
 - `source/01-program.png` — hlavní program

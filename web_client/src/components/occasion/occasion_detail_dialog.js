@@ -158,7 +158,7 @@ export class OccasionDetailDialog {
              if (formFeature.use_external_form === true) {
                  const externalUrl = formFeature.external_form_link;
                  if (externalUrl && externalUrl.length > 0) {
-                     RouterService.navigateToExternal(externalUrl);
+                     RouterService.openExternalUrl(externalUrl);
                      return;
                  }
              }

@@ -97,7 +97,8 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   void _showMessageDialog(BuildContext context) {
-    RouterService.navigateOccasion(context, NewsFormPage.ROUTE)
+    context.router.root
+        .pushPath(RouterService.getCurrentLink() + NewsFormPage.ROUTE)
         .then((value) async {
       if (value != null) {
         var data = value as Map<String, dynamic>;

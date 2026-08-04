@@ -9,6 +9,7 @@ import 'package:fstapp/components/organization/organization_model.dart';
 import 'package:fstapp/components/organization/db_organizations.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/js/js_interop.dart';
+import 'package:fstapp/services/launch_url_service.dart';
 import 'package:fstapp/services/platform_helper.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -257,7 +258,7 @@ class _InstallPageState extends State<InstallPage> {
                     ? AppManagementStrings.downloadApp
                     : AppManagementStrings.installNow,
                 onPressed: hasNativeLink
-                    ? () => InstallPage.jsInterop.openLinkInNewTab(link)
+                    ? () => LaunchUrlService.openExternalUrl(link)
                     : _canInstallPWA
                         ? handleInstallButtonPress
                         : null,

@@ -30,10 +30,6 @@ class JSInterop {
     throw UnsupportedError('JS interop is not supported on this platform');
   }
 
-  void openLinkInNewTab(String link) {
-    throw UnsupportedError('JS interop is not supported on this platform');
-  }
-
   /// Kept for compatibility.
   void changeUrl(String newUrl) {
     throw UnsupportedError('JS interop is not supported on this platform');
@@ -48,10 +44,6 @@ class JSInterop {
   }
 
   String getCurrentUrl() {
-    throw UnsupportedError('JS interop is not supported on this platform');
-  }
-
-  void navigateExternal(String url) {
     throw UnsupportedError('JS interop is not supported on this platform');
   }
 }

@@ -63,7 +63,7 @@ class UpdateService {
     );
     alreadyChecked = true;
     if (updateConfirmed) {
-      await LaunchUrlService.launchURL(target.link!);
+      await LaunchUrlService.openExternalUrl(target.link!);
     }
   }
 

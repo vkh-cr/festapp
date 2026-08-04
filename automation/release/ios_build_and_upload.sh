@@ -21,7 +21,8 @@ fi
 
 cd "$PROJECT_ROOT"
 node automation/release/store_preflight.mjs --local --read-only
-fvm flutter build ipa --release
+"$SCRIPT_DIR/prepare_signing_keychain.sh"
+fvm flutter build ipa --release --export-options-plist="$SCRIPT_DIR/ExportOptions.plist"
 
 ipa_files=("$PROJECT_ROOT"/build/ios/ipa/*.ipa)
 if [ "${#ipa_files[@]}" -ne 1 ] || [ ! -f "${ipa_files[0]}" ]; then

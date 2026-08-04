@@ -2,7 +2,7 @@
 
 Účinnost: 3. srpna 2026. Verze: 1.0.
 
-Aplikace CSM Ostrava slouží jako průvodce Celostátním setkáním mládeže. Správce a provozovatel akce, jeho vztah k vývojáři/prodejci v App Store a kontaktní údaje budou před zveřejněním potvrzeny AKSM. Pro dotazy k soukromí a uplatnění práv je určen kontakt `info@aksm.cz`.
+Aplikace CSM Ostrava slouží jako průvodce Celostátním setkáním mládeže. Navrženým správcem a provozovatelem je Asociace křesťanských spolků mládeže, z. s. (AKSM), IČ 67775861, Thákurova 676/3, 160 00 Praha 6–Dejvice. Oficiální kontakt spolku je `kancelar@aksm.cz`, telefon +420 220 181 739 nebo +420 731 625 720. Pro dotazy k soukromí a uplatnění práv je navržen kontakt `info@aksm.cz`. Určení správce, tento specializovaný kontakt a vztah AKSM k vývojáři/prodejci v App Store musí AKSM před zveřejněním výslovně potvrdit.
 
 Zpracováváme údaje nutné pro účet a profil, účast na akci, uložený program, přihlášení na aktivity, zpětnou vazbu a hlášení, komunikaci a volitelná oznámení. Pro bezpečný a spolehlivý provoz mohou vznikat omezené technické, síťové a chybové záznamy. Aplikace ukládá část dat lokálně pro offline provoz. Poloha je používána pouze při práci s mapou v zařízení; před zveřejněním bude síťovým ověřením potvrzeno, že se neodesílá jako profilový údaj.
 

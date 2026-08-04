@@ -1,4 +1,5 @@
 import { LocalizationService } from '../../services/localization_service.js';
+import { RouterService } from '../../services/router_service.js';
 
 export class FeedbackDialog {
     static init() {
@@ -101,7 +102,7 @@ export class FeedbackDialog {
         // Open Mail Button Action
         document.getElementById('fd-open-mail').onclick = () => {
             const mailto = `mailto:${toEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
-            window.location.href = mailto;
+            RouterService.openExternalUrl(mailto, { inCurrentWindow: true });
         };
 
         const root = document.getElementById('feedback-dialog-root');

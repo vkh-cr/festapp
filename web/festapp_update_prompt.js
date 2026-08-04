@@ -1,4 +1,6 @@
 (function initFestappUpdatePrompt() {
+  if (window.__FESTAPP_LOCAL_DEVELOPMENT__) return;
+
   const currentVersion = window.__FESTAPP_BUILD_VERSION__;
   const dismissedStorageKey = 'festappDismissedVersion';
   const cutoverStorageKey = 'festappCutoverVersion';
@@ -407,6 +409,7 @@
   }
 
   async function checkVersion() {
+    reportClientVersion();
     if (checkInFlight || !currentVersion || navigator.onLine === false) {
       return;
     }

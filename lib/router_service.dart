@@ -10,6 +10,7 @@ import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/js/js_interop.dart';
+import 'package:fstapp/services/launch_url_service.dart';
 import 'dart:async';
 
 import 'package:fstapp/components/forms/views/form_page.dart';
@@ -66,7 +67,10 @@ class RouterService {
       // This can be expanded. For now, we know 'form' is one.
     // Check against list of known web-client routes
       if (path.startsWith("/${FormPage.ROUTE}/")) {
-        navigateExternal(path);
+        unawaited(LaunchUrlService.openExternalUrl(
+          path,
+          inCurrentWindow: true,
+        ));
         return Future.value(null);
       }
     }
@@ -210,14 +214,20 @@ class RouterService {
     // Check if the current path is already the target home path
     if (context.routeData.path == targetHomePath) {
       if (kIsWeb && AppConfig.isWebclientSupported) {
-        navigateExternal("/");
+        await LaunchUrlService.openExternalUrl(
+          "/",
+          inCurrentWindow: true,
+        );
       }
       // Already at home, so don't navigate
       return;
     }
 
     if (kIsWeb && AppConfig.isWebclientSupported) {
-      navigateExternal("/");
+      await LaunchUrlService.openExternalUrl(
+        "/",
+        inCurrentWindow: true,
+      );
       return;
     }
 
@@ -341,15 +351,6 @@ class RouterService {
   static void changeUrl(String newUrl) {
     if (kIsWeb) {
       _js.changeUrl(newUrl);
-    }
-  }
-
-  static void navigateExternal(String url) {
-    if (kIsWeb) {
-      _js.navigateExternal(url);
-    } else {
-      // Fallback or no-op for non-web
-      AppLogger.debug("External navigation not supported on this platform: $url");
     }
   }
 

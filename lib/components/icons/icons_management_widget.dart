@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/gestures.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cross_file/cross_file.dart';
@@ -13,6 +12,7 @@ import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/services/launch_url_service.dart';
 
 /// Occasion/unit SVG icon library manager. Mirrors the deployed layout: a
 /// wrap of icon tiles + an Upload button; upload opens a dialog (pick SVG ≤50KB,
@@ -474,9 +474,8 @@ class _GoogleIconsHint extends StatelessWidget {
                     decoration: TextDecoration.underline,
                   ),
                   recognizer: TapGestureRecognizer()
-                    ..onTap = () => launchUrl(
-                          Uri.parse('https://fonts.google.com/icons'),
-                          mode: LaunchMode.externalApplication,
+                    ..onTap = () => LaunchUrlService.openExternalUrl(
+                          'https://fonts.google.com/icons',
                         ),
                 ),
               ],

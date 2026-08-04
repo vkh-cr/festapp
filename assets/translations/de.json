@@ -385,6 +385,7 @@
     "publishAndSendSelf": "Test nur an mich senden",
     "publishAndSendEveryone": "Veröffentlichen und an alle senden",
     "selectRecipients": "Empfänger auswählen",
+    "contentRequired": "Schreiben Sie zuerst den Inhalt der Nachricht.",
     "messageSentToSelf": "Die Nachricht wurde veröffentlicht. Die Benachrichtigung wurde nur an Sie gesendet.",
     "messageSentToEveryone": "Die Nachricht wurde veröffentlicht. Die Benachrichtigung wurde an alle App-Abonnenten gesendet.",
     "testSentToSelf": "Die Testbenachrichtigung wurde nur an Sie gesendet. Die Nachricht wurde nicht veröffentlicht.",

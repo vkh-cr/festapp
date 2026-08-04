@@ -54,6 +54,12 @@ class ClientSyncRuntime {
     final publicRemote = HttpPublicSyncRemote(
       headOrigin: Uri.parse(AppConfig.syncHeadOrigin),
       artifactOrigin: Uri.parse(AppConfig.syncAssetOrigin),
+      artifactRequestUriResolver: kIsWeb
+          ? (artifactUri) => resolvePublicArtifactRequestUriForPage(
+                artifactUri,
+                Uri.base,
+              )
+          : null,
     );
     _service = ClientSyncService(
       publicHeadRemote: publicRemote,

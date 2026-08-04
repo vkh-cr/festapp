@@ -237,7 +237,9 @@
     atomic updates and offline cold starts.
   -->
   <script>
-    window.__FESTAPP_BUILD_VERSION__ = "0.19.84+365";
+    window.__FESTAPP_BUILD_VERSION__ = "0.19.84+369";
+    window.__FESTAPP_LOCAL_DEVELOPMENT__ =
+      ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
   </script>
   <script src="festapp_update_prompt.js" defer></script>
 </head>
@@ -251,9 +253,9 @@
   let deferredPrompt;
 
   window.addEventListener('beforeinstallprompt', (e) => {
+    // Keep Chrome's native install entry enabled. We retain the event only so
+    // the in-app install button can offer the same prompt as a fallback.
     deferredPrompt = e;
-    e.preventDefault();
-    return false;
   });
 
   async function promptInstall(){
@@ -310,9 +312,54 @@
     }));
   }
 
-  // Register before Flutter starts so installability and app-shell caching do
-  // not depend on Dart initialization or backend availability.
-  if ('serviceWorker' in navigator) {
+  async function prepareFestappLocalDevelopment() {
+    if (!('serviceWorker' in navigator)) return;
+
+    const resetKey = 'festappLocalDevelopmentServiceWorkerReset';
+    const hadAppShellController =
+      navigator.serviceWorker.controller?.scriptURL.includes('festapp_service_worker.js') ||
+      navigator.serviceWorker.controller?.scriptURL.includes('flutter_service_worker.js');
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations
+      .filter(function(registration) {
+        const scriptUrl = registration.active?.scriptURL ||
+          registration.waiting?.scriptURL ||
+          registration.installing?.scriptURL ||
+          '';
+        return scriptUrl.includes('festapp_service_worker.js') ||
+          scriptUrl.includes('flutter_service_worker.js');
+      })
+      .map(function(registration) { return registration.unregister(); }));
+
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames
+        .filter(function(cacheName) {
+          return cacheName.startsWith('festapp-app-shell-') ||
+            cacheName.startsWith('flutter-app-cache');
+        })
+        .map(function(cacheName) { return caches.delete(cacheName); }));
+    }
+
+    // An unregistered worker keeps controlling the current page until the next
+    // navigation. Reload once so debug assets can no longer come from its old
+    // production cache.
+    if (hadAppShellController && sessionStorage.getItem(resetKey) !== '1') {
+      sessionStorage.setItem(resetKey, '1');
+      window.location.reload();
+      return new Promise(function() {});
+    }
+    sessionStorage.removeItem(resetKey);
+  }
+
+  // Production builds install the offline shell. Local Flutter development
+  // instead removes stale production workers before booting the debug bundle.
+  if (window.__FESTAPP_LOCAL_DEVELOPMENT__) {
+    window.festappLocalDevelopmentReady =
+      prepareFestappLocalDevelopment().catch(function(error) {
+        console.warn('Festapp localhost service worker cleanup failed:', error);
+      });
+  } else if ('serviceWorker' in navigator) {
     window.festappOfflineReady = navigator.serviceWorker.register('/festapp_service_worker.js', {
       scope: '/',
       updateViaCache: 'none'
@@ -323,7 +370,10 @@
 </script>
 
 <script>
-  window.addEventListener('load', function(ev) {
+  window.addEventListener('load', async function(ev) {
+      if (window.festappLocalDevelopmentReady) {
+        await window.festappLocalDevelopmentReady;
+      }
       {{flutter_js}}
       {{flutter_build_config}}
 

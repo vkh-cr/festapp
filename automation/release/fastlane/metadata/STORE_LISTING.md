@@ -9,7 +9,7 @@ Zdroj obsahu: objednávkový formulář „Festapp Order - CS" (řádek CSM Ostr
 | Podtitul | subtitle.txt — **Průvodce setkáním mládeže** | 25/30 |
 | Propagační text | promotional_text.txt | 156/170 |
 | Klíčová slova | keywords.txt | 88/100 |
-| Popis | description.txt | 1934/4000 |
+| Popis | description.txt | 2013/4000 |
 | Novinky verze | release_notes.txt | – |
 | Privacy URL | privacy_url.txt | – |
 | Support / Marketing URL | support_url.txt / marketing_url.txt | – |
@@ -17,17 +17,16 @@ Zdroj obsahu: objednávkový formulář „Festapp Order - CS" (řádek CSM Ostr
 ## Google Play (cs-CZ) — `metadata/googleplay/cs-CZ/`
 - title.txt — **CSM Ostrava**
 - short_description.txt — 73/80
-- full_description.txt — 1934/4000 (shodný s App Store popisem)
+- full_description.txt — 2013/4000 (shodný s App Store popisem)
 
 ## Privacy Policy
-- `PRIVACY_POLICY.md` — app-specific návrh (doporučeno vystavit na `https://csmostrava.festapp.net/privacy`).
-- Dočasně lze použít obecné zásady AKSM: https://aksm.cz/informace-o-zpracovani-osobnich-udaju/
+- Kanonická app-specific verze: `PRIVACY_POLICY.md` a veřejná stránka https://csmostrava.festapp.net/privacy.
 
 ## App Review Information (do ASC „App Review Information", NE do popisu)
 - **Sign-in required: ANO.** Demo účet pro reviewery:
-  - E-mail: **test@test.com**
-  - Heslo: **test**
-- Poznámka pro reviewera (návrh): „Some features (event sign-up, personal profile) require a free e-mail login. Public content (schedule, map, info) works without login. Demo account above is a regular attendee of CSM Ostrava 2026."
+  - E-mail a Keychain service: kanonický manifest `app_store_config.json`, sekce `review.demoAccount`
+  - Heslo: pouze macOS Keychain; neukládat do gitu
+- Poznámka pro reviewera: „CSM Ostrava is intended for registered event participants. Attendee accounts are issued by the organizer; public account registration is not available. Schedule, map and practical information are accessible without signing in. The supplied demo account represents a regular CSM Ostrava 2026 attendee and provides access to the personal profile, personal schedule and capacity-limited activity registration."
 
 ## Ještě je potřeba (mimo tento balík)
 - **Ikona / feature graphic** – v objednávce jsou 3 soubory na Google Drive (ikona, baner pro Google Store, logo). Lze stáhnout a nasadit.

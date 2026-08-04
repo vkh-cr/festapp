@@ -1,7 +1,53 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
+import 'package:timezone/data/latest.dart' as timezone_data;
+import 'package:timezone/timezone.dart' as timezone;
 
 void main() {
+  setUpAll(() {
+    timezone_data.initializeTimeZones();
+    timezone.setLocalLocation(timezone.getLocation('Europe/Prague'));
+  });
+
+  test('event projection hydrates a saved event place from the map catalog',
+      () {
+    final events = ClientSyncProjection.projectEvents(
+      catalog: {
+        'events': [
+          {
+            'id': 42,
+            'title': 'Večerní program',
+            'startTime': '2026-08-14T18:00:00Z',
+            'endTime': '2026-08-14T19:00:00Z',
+            'placeId': 7,
+          },
+        ],
+      },
+      map: {
+        'places': [
+          {
+            'id': 7,
+            'title': 'Hlavní hala',
+            'description': null,
+            'type': 'hall',
+            'coordinates': null,
+            'order': 1,
+            'icon': null,
+            'aggregateVersion': 3,
+          },
+        ],
+      },
+      live: const {},
+      privateProgram: const {
+        'saved': [42],
+      },
+    );
+
+    expect(events.single.isInMySchedule, isTrue);
+    expect(events.single.place?.id, 7);
+    expect(events.single.place?.title, 'Hlavní hala');
+  });
+
   test('news projection preserves legacy newest-first order and view counts',
       () {
     final news = ClientSyncProjection.projectNews(

@@ -24,6 +24,7 @@ class SavedProgramActionIcon extends StatelessWidget {
     required this.addIcon,
     required this.savedIcon,
     required this.size,
+    required this.diameter,
     super.key,
   });
 
@@ -32,17 +33,37 @@ class SavedProgramActionIcon extends StatelessWidget {
   final IconData addIcon;
   final IconData savedIcon;
   final double size;
+  final double diameter;
 
   @override
-  Widget build(BuildContext context) => ValueListenableBuilder(
-        valueListenable: canSave,
-        builder: (context, canSave, _) => IndexedStack(
-          index: canSave ? 0 : 1,
-          alignment: Alignment.center,
-          children: [
-            Icon(addIcon, color: color, size: size),
-            Icon(savedIcon, color: color, size: size),
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return ValueListenableBuilder(
+      valueListenable: canSave,
+      builder: (context, canSave, _) => IndexedStack(
+        index: canSave ? 0 : 1,
+        alignment: Alignment.center,
+        children: [
+          Icon(addIcon, color: color, size: size),
+          Container(
+            width: diameter,
+            height: diameter,
+            decoration: BoxDecoration(
+              color: colors.primary,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              savedIcon,
+              color: colors.onPrimary,
+              size: size,
+              weight: 700,
+              grade: 100,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

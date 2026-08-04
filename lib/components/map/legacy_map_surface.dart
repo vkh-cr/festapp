@@ -19,7 +19,7 @@ import 'package:fstapp/components/map/offline_map_bundle_manager.dart';
 import 'package:fstapp/components/map/offline_map_bundle_manifest.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mbtiles/mbtiles.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:fstapp/services/launch_url_service.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart' as vmt;
 import 'package:vector_map_tiles_mbtiles/vector_map_tiles_mbtiles.dart' as vmtm;
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' as vtr;
@@ -159,14 +159,18 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
             fm.LogoSourceAttribution(
               SvgPicture.network(widget.layer.logo!, height: 28),
               onTap: widget.layer.logoLink?.isNotEmpty ?? false
-                  ? () => launchUrl(Uri.parse(widget.layer.logoLink!))
+                  ? () => LaunchUrlService.openExternalUrl(
+                        widget.layer.logoLink!,
+                      )
                   : null,
             ),
           if (widget.layer.text?.isNotEmpty ?? false)
             fm.TextSourceAttribution(
               widget.layer.text!,
               onTap: widget.layer.textLink?.isNotEmpty ?? false
-                  ? () => launchUrl(Uri.parse(widget.layer.textLink!))
+                  ? () => LaunchUrlService.openExternalUrl(
+                        widget.layer.textLink!,
+                      )
                   : null,
             ),
         ],

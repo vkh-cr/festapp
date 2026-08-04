@@ -39,9 +39,16 @@ void main() {
 
   testWidgets('saved-program icon changes atomically without an old icon frame',
       (tester) async {
+    const primary = Color(0xff0000f4);
     final canSave = ValueNotifier(true);
     addTearDown(canSave.dispose);
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        colorScheme: const ColorScheme.light(
+          primary: primary,
+          onPrimary: Colors.white,
+        ),
+      ),
       home: IconButton(
         style: savedProgramActionButtonStyle,
         onPressed: () {},
@@ -51,6 +58,7 @@ void main() {
           addIcon: Icons.add,
           savedIcon: Icons.check,
           size: 30,
+          diameter: 48,
         ),
       ),
     ));
@@ -71,6 +79,21 @@ void main() {
     expect(find.byIcon(Icons.check, skipOffstage: false), findsOneWidget);
     expect(find.byIcon(Icons.add), findsNothing);
     expect(find.byIcon(Icons.check), findsOneWidget);
+
+    final savedCircle = tester.widget<Container>(find.byType(Container));
+    final decoration = savedCircle.decoration! as BoxDecoration;
+    expect(
+        savedCircle.constraints,
+        const BoxConstraints.tightFor(
+          width: 48,
+          height: 48,
+        ));
+    expect(decoration.shape, BoxShape.circle);
+    expect(decoration.color, primary);
+    final savedGlyph = tester.widget<Icon>(find.byIcon(Icons.check));
+    expect(savedGlyph.color, Colors.white);
+    expect(savedGlyph.weight, 700);
+    expect(savedGlyph.fontWeight, FontWeight.w700);
   });
 
   test('saved-program button has no transient material overlay', () {

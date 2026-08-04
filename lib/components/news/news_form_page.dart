@@ -7,7 +7,6 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/html/html_editor_widget.dart';
@@ -17,6 +16,13 @@ import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/news/news_strings.dart';
 import 'package:fstapp/components/news/news_send_confirmation_dialog.dart';
 import 'package:fstapp/components/news/news_notification_audience_selector.dart';
+
+@visibleForTesting
+bool shouldUseNativeNewsEditor({
+  required bool isWeb,
+  required TargetPlatform platform,
+}) =>
+    isWeb;
 
 @RoutePage()
 class NewsFormPage extends StatefulWidget {
@@ -74,6 +80,12 @@ class _NewsFormPageState extends State<NewsFormPage> {
         : await _controller.getText();
     if (!mounted) return;
     htmlContent = HtmlHelper.removeColor(htmlContent);
+    if (HtmlHelper.htmlToSnippet(htmlContent, maxLen: 1).trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(NewsStrings.contentRequired)),
+      );
+      return;
+    }
     if (process == true) {
       htmlContent = HtmlHelper.detectAndReplaceLinks(htmlContent);
     }
@@ -113,8 +125,6 @@ class _NewsFormPageState extends State<NewsFormPage> {
         ...deliveryFields,
       };
       Navigator.pop(context, toReturn);
-    } else {
-      AppLogger.debug('Content is required');
     }
   }
 
@@ -128,7 +138,10 @@ class _NewsFormPageState extends State<NewsFormPage> {
 
   bool get _usesNativeHtmlEditor =>
       widget.useNativeHtmlEditor ??
-      (kIsWeb && defaultTargetPlatform == TargetPlatform.android);
+      shouldUseNativeNewsEditor(
+        isWeb: kIsWeb,
+        platform: defaultTargetPlatform,
+      );
 
   String get _publishButtonText => switch (_audience) {
         NewsNotificationAudience.none => NewsStrings.publishWithoutNotification,

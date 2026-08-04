@@ -1,12 +1,12 @@
 # Zásady ochrany osobních údajů – aplikace CSM Ostrava
 
-_Poslední aktualizace: 12. 7. 2026_
+_Poslední aktualizace: 4. 8. 2026_
 
 Tento dokument popisuje, jak mobilní a webová aplikace **CSM Ostrava** (dále „aplikace") zpracovává osobní údaje. Aplikaci provozuje **Asociace křesťanských spolků mládeže, z. s.**, IČO 67775861, Thákurova 676/3, 160 00 Praha 6 (dále „provozovatel") na otevřené platformě [Festapp](https://github.com/vkh-cr/festapp).
 
 ## Jaké údaje zpracováváme
 
-- **Údaje účtu** – e-mailová adresa a heslo (heslo je uloženo v zašifrované podobě). Bez účtu lze prohlížet program, mapu a informace; účet je potřeba jen pro registraci na aktivity a osobní profil.
+- **Údaje účtu** – e-mailová adresa a heslo (heslo je uloženo v zašifrované podobě). Osobní účet poskytuje účastníkům pořadatel; veřejná registrace účtu není dostupná. Bez přihlášení lze prohlížet program, mapu a praktické informace, zatímco účet zpřístupňuje osobní profil, Můj program a registrace na aktivity s omezenou kapacitou.
 - **Profilové údaje** – jméno, příjmení, pohlaví, případně telefon, přiřazení ke skupině a k ubytování; údaje, které sám/sama zadáš při registraci na akci.
 - **Aktivita v aplikaci** – přihlášení na jednotlivé programy a tebou vytvořený „Můj program".
 - **Oznámení (push notifikace)** – pokud je povolíš, ukládáme technický identifikátor zařízení pro doručování oznámení (přes službu OneSignal).
@@ -46,6 +46,4 @@ Máš právo na přístup ke svým údajům, jejich opravu či výmaz, na omezen
 
 E-mail provozovatele: info@aksm.cz · Web: https://aksm.cz
 
----
-
-**Poznámka k nasazení:** tento text doporučuji vystavit na veřejné URL (např. `https://csmostrava.festapp.net/privacy`) a použít ji jako Privacy Policy URL v App Store Connect i Google Play Console. Do doby vystavení lze dočasně použít obecné zásady AKSM: https://aksm.cz/informace-o-zpracovani-osobnich-udaju/
+Veřejná verze těchto zásad je dostupná na https://csmostrava.festapp.net/privacy.

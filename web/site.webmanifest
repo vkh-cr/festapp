@@ -2,7 +2,7 @@
   "name": "CSM Ostrava",
   "short_name": "CSM 2026",
   "description": "Oficiální průvodce Celostátním setkáním mládeže Ostrava 2026.",
-  "id": "/csmostrava2026/",
+  "id": "/",
   "start_url": "/csmostrava2026/",
   "scope": "/",
   "orientation": "portrait-primary",

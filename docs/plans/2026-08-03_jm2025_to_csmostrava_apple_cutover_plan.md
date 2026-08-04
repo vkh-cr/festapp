@@ -184,7 +184,7 @@ incorrect AASA app IDs/domains.
 
 #### 1. Product/release identity
 
-`automation/release/app_store_cutover.json` is the machine-readable release
+`automation/release/app_store_config.json` is the machine-readable release
 identity manifest. It pins:
 
 - existing Apple ID and bundle ID;
@@ -359,7 +359,7 @@ surface and checklist.
 Repository artifacts become:
 
 ```text
-automation/release/app_store_cutover.json
+automation/release/app_store_config.json
 automation/release/APP_STORE_CHECKLIST.md
 automation/release/APP_PRIVACY_DISCLOSURE.md
 automation/release/APP_REVIEW_NOTES.md
@@ -575,7 +575,7 @@ and a data-retention inventory before destructive implementation.
 
 **Changes**
 
-- Add `automation/release/app_store_cutover.json` with pinned identity, version,
+- Add `automation/release/app_store_config.json` with pinned identity, version,
   locale, URLs, dimensions, release mode and legacy allowlist.
 - Add `APP_STORE_CHECKLIST.md`, `APP_PRIVACY_DISCLOSURE.md`, and
   `APP_REVIEW_NOTES.md` with status/evidence/owner fields rather than unchecked prose.

@@ -23,6 +23,30 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Read-only numeric identity and version inspection
 
+### ios signing_check
+
+```sh
+[bundle exec] fastlane ios signing_check
+```
+
+Read-only signing certificate and provisioning profile inventory
+
+### ios bootstrap_signing
+
+```sh
+[bundle exec] fastlane ios bootstrap_signing
+```
+
+Create the first release certificate and exact App Store profiles
+
+### ios create_version
+
+```sh
+[bundle exec] fastlane ios create_version
+```
+
+Create the target version on the existing app only
+
 ### ios upload_build
 
 ```sh
@@ -38,6 +62,62 @@ Upload one already-built IPA; never submit or release
 ```
 
 Upload canonical metadata only; never submit or release
+
+### ios upload_review_information
+
+```sh
+[bundle exec] fastlane ios upload_review_information
+```
+
+Upload reviewer contact, demo credentials and notes from external secrets
+
+### ios review_information_check
+
+```sh
+[bundle exec] fastlane ios review_information_check
+```
+
+Read-only reviewer-contact and demo-account audit against the canonical manifest
+
+### ios upload_privacy_urls
+
+```sh
+[bundle exec] fastlane ios upload_privacy_urls
+```
+
+Upload the two privacy URLs not fully covered by deliver metadata
+
+### ios listing_check
+
+```sh
+[bundle exec] fastlane ios listing_check
+```
+
+Read-only App Store listing, privacy URL and screenshot audit
+
+### ios compliance_check
+
+```sh
+[bundle exec] fastlane ios compliance_check
+```
+
+Read-only category, age-rating, content-rights and availability audit
+
+### ios upload_store_classification
+
+```sh
+[bundle exec] fastlane ios upload_store_classification
+```
+
+Upload canonical age-rating answers after preserving inherited classification fields
+
+### ios deduplicate_screenshots
+
+```sh
+[bundle exec] fastlane ios deduplicate_screenshots
+```
+
+Delete retry-created screenshot duplicates only
 
 ### ios upload_screenshots
 

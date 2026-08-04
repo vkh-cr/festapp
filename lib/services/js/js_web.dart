@@ -96,11 +96,6 @@ class JSInterop {
     return 'web';
   }
 
-  /// window.open(link, "_blank")
-  void openLinkInNewTab(String link) {
-    web.window.open(link, '_blank');
-  }
-
   /// history.replaceState(null, "", newUrl)
   /// Kept for compatibility with older code (e.g. NotificationHelper).
   void changeUrl(String newUrl) {
@@ -120,10 +115,5 @@ class JSInterop {
   /// Returns window.location.href
   String getCurrentUrl() {
     return web.window.location.href;
-  }
-
-  /// window.location.href = url
-  void navigateExternal(String url) {
-    web.window.location.href = url;
   }
 }

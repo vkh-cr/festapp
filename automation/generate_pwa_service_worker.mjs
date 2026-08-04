@@ -100,6 +100,7 @@ const WEB_CLIENT_ENTRY = ${JSON.stringify(deploymentUrl(webClientEntry))};
 const PRECACHE_PATHS = new Set(PRECACHE_URLS.map((url) =>
   new URL(url, self.location.origin).pathname));
 const clientVersions = new Map();
+const clientCacheNames = new Map();
 let cutoverClientId = null;
 
 async function precacheAtomically() {
@@ -141,6 +142,14 @@ self.addEventListener('message', (event) => {
   }
   if (event.data?.type === 'FESTAPP_CLIENT_VERSION' && event.source?.id) {
     clientVersions.set(event.source.id, event.data.version);
+    if (event.data.version === BUILD_VERSION) {
+      clientCacheNames.delete(event.source.id);
+    } else {
+      clientCacheNames.set(
+        event.source.id,
+        CACHE_PREFIX + event.data.version,
+      );
+    }
     event.waitUntil(deleteUnusedShellsWhenSafe());
   }
 });
@@ -151,20 +160,24 @@ self.addEventListener('activate', (event) => {
       type: 'window',
       includeUncontrolled: true,
     });
-    // Do not claim existing tabs. They must stay paired with the worker and
-    // cache generation from which their JavaScript was loaded.
+    const names = await caches.keys();
+    const previousCacheName = names
+      .filter((name) => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
+      .at(-1);
+    // Route already-open tabs to the previous shell before claiming them. The
+    // requesting tab is about to reload and must receive this worker's shell.
+    if (previousCacheName) {
+      for (const client of windowClients) {
+        if (client.id !== cutoverClientId) {
+          clientCacheNames.set(client.id, previousCacheName);
+        }
+      }
+    }
+    await self.clients.claim();
     for (const client of windowClients) {
       client.postMessage({ type: 'FESTAPP_REPORT_VERSION' });
     }
     await deleteUnusedShellsWhenSafe();
-    if (cutoverClientId) {
-      const cutoverClient = await self.clients.get(cutoverClientId);
-      if (cutoverClient) {
-        // Do not await this promise from activate: navigation itself waits for
-        // the new worker to finish activating, so awaiting it would deadlock.
-        cutoverClient.navigate(cutoverClient.url).catch(() => {});
-      }
-    }
   })());
 });
 
@@ -242,7 +255,13 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith((async () => {
-    const cache = await caches.open(CACHE_NAME);
+    // A full-page navigation is the explicit cutover boundary for that tab.
+    // Runtime requests from an older, still-open tab stay on its mapped shell.
+    if (request.mode === 'navigate' && event.clientId) {
+      clientCacheNames.delete(event.clientId);
+    }
+    const selectedCacheName = clientCacheNames.get(event.clientId) || CACHE_NAME;
+    const cache = await caches.open(selectedCacheName);
     const cached = await cache.match(request, { ignoreSearch: true });
     if (cached) return cached;
 

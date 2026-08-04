@@ -2,4 +2,4 @@
 AuthKey_*.p8
 /fastlane/report.xml
 /fastlane/Appfile
-/fastlane/Fastfile
+/signing/

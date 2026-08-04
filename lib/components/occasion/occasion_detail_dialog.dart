@@ -28,7 +28,7 @@ class OccasionDetailDialog extends StatelessWidget {
       if (details.formUseExternal == true) {
         final externalUrl = details.formExternalLink;
         if (externalUrl != null && externalUrl.isNotEmpty) {
-          await LaunchUrlService.launchURL(externalUrl);
+          await LaunchUrlService.openExternalUrl(externalUrl);
           return;
         }
       }

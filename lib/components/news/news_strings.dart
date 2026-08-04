@@ -32,6 +32,7 @@ class NewsStrings {
   static String get publishAndSendEveryone =>
       'FeatureNews.publishAndSendEveryone'.tr();
   static String get selectRecipients => 'FeatureNews.selectRecipients'.tr();
+  static String get contentRequired => 'FeatureNews.contentRequired'.tr();
 
   // Notification confirmation
   static String get notificationAudienceTitle =>

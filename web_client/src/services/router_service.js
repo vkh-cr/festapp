@@ -5,12 +5,12 @@ export class RouterService {
 
     static FORM_PATH_PREFIX = '/form/';
 
-    static navigateToExternal(url) {
-        window.open(url, '_blank');
-    }
-
-    static navigateExternal(url) {
-        window.location.href = url;
+    static openExternalUrl(url, { inCurrentWindow = false } = {}) {
+        if (inCurrentWindow) {
+            window.location.href = url;
+            return;
+        }
+        window.open(url, '_blank', 'noopener,noreferrer');
     }
 
     static navigateToOccasionApp(link) {
@@ -20,7 +20,7 @@ export class RouterService {
         // For now, simple href is safest to ensure full load or external handling.
         const cleanLink = link.split('?')[0];
         const path = `/${cleanLink}`;
-        window.location.href = path; 
+        RouterService.openExternalUrl(path, { inCurrentWindow: true });
     }
 
     static navigateToOccasion(link) {
@@ -59,17 +59,17 @@ export class RouterService {
 
     static navigateToLogin() {
         const url = RouterService.getLoginUrl();
-        window.location.href = url;
+        RouterService.openExternalUrl(url, { inCurrentWindow: true });
     }
 
     static navigateToAdmin() {
         const url = RouterService.getAdminUrl();
-        window.location.href = url;
+        RouterService.openExternalUrl(url, { inCurrentWindow: true });
     }
     
     static navigateToHandover() {
         const url = RouterService.getHandoverUrl();
-        window.location.href = url;
+        RouterService.openExternalUrl(url, { inCurrentWindow: true });
     }
 
     static getHandoverUrl() {

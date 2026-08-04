@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/services/app_logger.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:fstapp/services/launch_url_service.dart';
 import 'feedback_strings.dart';
 
 class FeedbackFloatingButton extends StatefulWidget {
@@ -224,9 +224,9 @@ class _EmailOptionDialog extends StatelessWidget {
           <String, String>{'subject': subject, 'body': body}),
     );
 
-    if (await canLaunchUrl(emailLaunchUri)) {
-      await launchUrl(emailLaunchUri);
-    } else {
+    final launched =
+        await LaunchUrlService.openExternalUrl(emailLaunchUri.toString());
+    if (!launched) {
       AppLogger.error("Could not launch email client");
     }
   }

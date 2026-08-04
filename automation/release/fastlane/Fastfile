@@ -1,0 +1,435 @@
+require 'json'
+require 'spaceship'
+require 'fileutils'
+require 'open3'
+require 'tmpdir'
+
+default_platform(:ios)
+
+MANIFEST = JSON.parse(File.read(File.expand_path('../app_store_config.json', __dir__)))
+APPLE_ID = MANIFEST.fetch('appleId')
+BUNDLE_ID = MANIFEST.fetch('bundleId')
+TARGET_VERSION = MANIFEST.fetch('target').fetch('version')
+
+def app_store_connect_key_path!
+  path = File.expand_path(ENV.fetch('APP_STORE_CONNECT_KEY_PATH'))
+  UI.user_error!("App Store Connect key not found: #{path}") unless File.file?(path)
+  mode = File.stat(path).mode & 0o777
+  UI.user_error!("App Store Connect key must not be accessible by group/others: #{path}") unless (mode & 0o077).zero?
+  path
+end
+
+def api_key
+  app_store_connect_api_key(
+    key_id: ENV.fetch('APP_STORE_CONNECT_KEY_ID'),
+    issuer_id: ENV.fetch('APP_STORE_CONNECT_ISSUER_ID'),
+    key_filepath: app_store_connect_key_path!
+  )
+end
+
+def target_app!(operation)
+  key_path = app_store_connect_key_path!
+  token = Spaceship::ConnectAPI::Token.create(
+    key_id: ENV.fetch('APP_STORE_CONNECT_KEY_ID'),
+    issuer_id: ENV.fetch('APP_STORE_CONNECT_ISSUER_ID'),
+    key: File.read(key_path)
+  )
+  Spaceship::ConnectAPI.token = token
+  app = Spaceship::ConnectAPI::App.find(BUNDLE_ID)
+  UI.user_error!("Existing bundle #{BUNDLE_ID} not found") if app.nil?
+  UI.user_error!("Refusing Apple ID #{app.id}; expected #{APPLE_ID}") unless app.id.to_s == APPLE_ID
+  UI.user_error!("Refusing bundle #{app.bundle_id}; expected #{BUNDLE_ID}") unless app.bundle_id == BUNDLE_ID
+  editable = app.get_edit_app_store_version
+  UI.message("OPERATION=#{operation} APP=#{app.name} APPLE_ID=#{app.id} BUNDLE=#{app.bundle_id} TARGET=#{TARGET_VERSION} EDITABLE=#{editable&.version_string || 'none'} STATE=#{editable&.app_store_state || 'none'}")
+  app
+end
+
+def exact_gate!(operation)
+  expected = "#{APPLE_ID}|#{BUNDLE_ID}|#{TARGET_VERSION}|#{operation}"
+  UI.user_error!("Set CUTOVER_CONFIRMATION exactly to #{expected}") unless ENV['CUTOVER_CONFIRMATION'] == expected
+end
+
+def reviewer_password_from_keychain(email, service)
+  password, _stderr, status = Open3.capture3(
+    'security', 'find-generic-password',
+    '-a', email, '-s', service, '-w'
+  )
+  UI.user_error!("Reviewer password is missing from macOS Keychain service #{service}") unless status.success? && !password.strip.empty?
+  password.strip
+end
+
+def canonical_age_rating_attributes
+  age = MANIFEST.fetch('storeClassification').fetch('ageRating')
+  {
+    age_rating_override_v2: age.fetch('ageRatingOverrideV2'),
+    alcohol_tobacco_or_drug_use_or_references: age.fetch('alcoholTobaccoOrDrugUseOrReferences'),
+    advertising: age.fetch('advertising'),
+    age_assurance: age.fetch('ageAssurance'),
+    contests: age.fetch('contests'),
+    gambling: age.fetch('gambling'),
+    gambling_simulated: age.fetch('gamblingSimulated'),
+    guns_or_other_weapons: age.fetch('gunsOrOtherWeapons'),
+    health_or_wellness_topics: age.fetch('healthOrWellnessTopics'),
+    horror_or_fear_themes: age.fetch('horrorOrFearThemes'),
+    korea_age_rating_override: age.fetch('koreaAgeRatingOverride'),
+    loot_box: age.fetch('lootBox'),
+    mature_or_suggestive_themes: age.fetch('matureOrSuggestiveThemes'),
+    medical_or_treatment_information: age.fetch('medicalOrTreatmentInformation'),
+    messaging_and_chat: age.fetch('messagingAndChat'),
+    parental_controls: age.fetch('parentalControls'),
+    profanity_or_crude_humor: age.fetch('profanityOrCrudeHumor'),
+    sexual_content_graphic_and_nudity: age.fetch('sexualContentGraphicAndNudity'),
+    sexual_content_or_nudity: age.fetch('sexualContentOrNudity'),
+    unrestricted_web_access: age.fetch('unrestrictedWebAccess'),
+    user_generated_content: age.fetch('userGeneratedContent'),
+    violence_cartoon_or_fantasy: age.fetch('violenceCartoonOrFantasy'),
+    violence_realistic: age.fetch('violenceRealistic'),
+    violence_realistic_prolonged_graphic_or_sadistic: age.fetch('violenceRealisticProlongedGraphicOrSadistic')
+  }
+end
+
+platform :ios do
+  desc 'Read-only numeric identity and version inspection'
+  lane :asc_check do
+    app = target_app!('READ_ONLY_ASC_CHECK')
+    editable = app.get_edit_app_store_version
+    if editable
+      UI.success("EDITABLE VERSION: #{editable.version_string} (#{editable.app_store_state})")
+      UI.message("LOCALES: #{editable.get_app_store_version_localizations.map(&:locale).join(', ')}")
+    else
+      live = app.get_live_app_store_version
+      UI.important('NO EDITABLE VERSION')
+      UI.message("LIVE: #{live&.version_string || '-'}")
+    end
+  end
+
+  desc 'Read-only signing certificate and provisioning profile inventory'
+  lane :signing_check do
+    target_app!('READ_ONLY_SIGNING_CHECK')
+    certs = Spaceship::ConnectAPI::Certificate.all.select do |cert|
+      %w[DISTRIBUTION IOS_DISTRIBUTION].include?(cert.certificate_type)
+    end
+    profiles = Spaceship::ConnectAPI::Profile.all(
+      filter: { profileType: 'IOS_APP_STORE' }, includes: 'bundleId,certificates'
+    ).select do |profile|
+      [BUNDLE_ID, MANIFEST.fetch('notificationExtensionBundleId')].include?(profile.bundle_id&.identifier)
+    end
+    certs.each do |cert|
+      UI.message("CERT ID=#{cert.id} TYPE=#{cert.certificate_type} VALID=#{cert.valid?} EXPIRES=#{cert.expiration_date} NAME=#{cert.display_name || cert.name}")
+    end
+    profiles.each do |profile|
+      UI.message("PROFILE ID=#{profile.id} BUNDLE=#{profile.bundle_id&.identifier} STATE=#{profile.profile_state} VALID=#{profile.valid?} EXPIRES=#{profile.expiration_date} NAME=#{profile.name}")
+    end
+    UI.message("SIGNING INVENTORY: #{certs.size} distribution certificate(s), #{profiles.size} matching App Store profile(s)")
+  end
+
+  desc 'Create the first release certificate and exact App Store profiles'
+  lane :bootstrap_signing do
+    exact_gate!('BOOTSTRAP_SIGNING')
+    target_app!('BOOTSTRAP_RELEASE_SIGNING')
+    existing = Spaceship::ConnectAPI::Certificate.all.select do |cert|
+      cert.valid? && %w[DISTRIBUTION IOS_DISTRIBUTION].include?(cert.certificate_type)
+    end
+    UI.user_error!("Refusing signing bootstrap: #{existing.size} valid distribution certificate(s) already exist") unless existing.empty?
+
+    signing_dir = File.expand_path('../signing', __dir__)
+    FileUtils.mkdir_p(signing_dir)
+    FileUtils.chmod(0o700, signing_dir)
+    get_certificates(
+      api_key: api_key, development: false, generate_apple_certs: true,
+      force: true, output_path: signing_dir
+    )
+    cert_id = lane_context[SharedValues::CERT_CERTIFICATE_ID]
+    UI.user_error!('Distribution certificate creation did not return an ID') if cert_id.to_s.empty?
+
+    {
+      BUNDLE_ID => 'CSM Ostrava AppStore',
+      MANIFEST.fetch('notificationExtensionBundleId') => 'CSM Ostrava OneSignal AppStore'
+    }.each do |identifier, profile_name|
+      get_provisioning_profile(
+        api_key: api_key, app_identifier: identifier, cert_id: cert_id,
+        provisioning_name: profile_name, filename: "#{identifier}.mobileprovision",
+        output_path: signing_dir, force: true
+      )
+    end
+    Dir.glob(File.join(signing_dir, '*')).each { |path| FileUtils.chmod(0o600, path) if File.file?(path) }
+    UI.success("Created one distribution certificate and two App Store profiles for the existing bundle identifiers")
+  end
+
+  desc 'Create the target version on the existing app only'
+  lane :create_version do
+    exact_gate!('CREATE_VERSION')
+    app = target_app!('CREATE_TARGET_VERSION')
+    editable = app.get_edit_app_store_version
+    UI.user_error!("Refusing to replace editable version #{editable.version_string}") if editable && editable.version_string != TARGET_VERSION
+    if editable
+      UI.success("Target version #{TARGET_VERSION} already exists")
+    else
+      app.ensure_version!(TARGET_VERSION, platform: Spaceship::ConnectAPI::Platform::IOS)
+      created = app.get_edit_app_store_version
+      UI.user_error!("Target version creation readback failed") unless created&.version_string == TARGET_VERSION
+      UI.success("Created target version #{created.version_string} on Apple ID #{APPLE_ID}")
+    end
+  end
+
+  desc 'Upload one already-built IPA; never submit or release'
+  lane :upload_build do
+    app = target_app!('UPLOAD_BUILD_ONLY')
+    editable = app.get_edit_app_store_version
+    UI.user_error!("No editable existing-app version") unless editable&.version_string == TARGET_VERSION
+    ipa = ENV.fetch('IPA_PATH')
+    UI.user_error!("IPA not found: #{ipa}") unless File.file?(ipa)
+    upload_to_app_store(
+      api_key: api_key, ipa: ipa, app_identifier: BUNDLE_ID,
+      skip_metadata: true, skip_screenshots: true,
+      submit_for_review: false, automatic_release: false,
+      run_precheck_before_submit: false, force: true
+    )
+  end
+
+  desc 'Upload canonical metadata only; never submit or release'
+  lane :upload_metadata do
+    app = target_app!('UPLOAD_METADATA_ONLY')
+    editable = app.get_edit_app_store_version
+    UI.user_error!("No editable target version") unless editable&.version_string == TARGET_VERSION
+    metadata_root = File.expand_path('metadata', __dir__)
+    Dir.mktmpdir('festapp-apple-metadata') do |staging|
+      FileUtils.cp_r(File.join(metadata_root, 'cs'), staging)
+      %w[trade_representative_contact_information copyright.txt primary_category.txt secondary_category.txt primary_first_sub_category.txt primary_second_sub_category.txt secondary_first_sub_category.txt secondary_second_sub_category.txt].each do |name|
+        source = File.join(metadata_root, name)
+        FileUtils.cp_r(source, staging) if File.exist?(source)
+      end
+      deliver(
+        api_key: api_key, app_identifier: BUNDLE_ID,
+        metadata_path: staging,
+        skip_binary_upload: true, skip_metadata: false, skip_screenshots: true,
+        submit_for_review: false, automatic_release: false,
+        run_precheck_before_submit: false, force: true
+      )
+    end
+  end
+
+  desc 'Upload reviewer contact, demo credentials and notes from external secrets'
+  lane :upload_review_information do
+    exact_gate!('UPLOAD_REVIEW_INFORMATION')
+    app = target_app!('UPLOAD_REVIEW_INFORMATION_ONLY')
+    version = app.get_edit_app_store_version
+    UI.user_error!('No editable target version') unless version&.version_string == TARGET_VERSION
+    review = MANIFEST.fetch('review')
+    contact = review.fetch('contact')
+    demo_account = review.fetch('demoAccount')
+    contact_values = {
+      contact_first_name: ['APP_REVIEW_CONTACT_FIRST_NAME', contact.fetch('firstName')],
+      contact_last_name: ['APP_REVIEW_CONTACT_LAST_NAME', contact.fetch('lastName')],
+      contact_email: ['APP_REVIEW_CONTACT_EMAIL', contact.fetch('email')],
+      contact_phone: ['APP_REVIEW_CONTACT_PHONE', contact['phone'].to_s]
+    }
+    attributes = contact_values.to_h do |attribute, (variable, fallback)|
+      value = ENV.fetch(variable, fallback).to_s.strip
+      UI.user_error!("Missing #{variable}") if value.empty?
+      [attribute, value]
+    end
+    attributes[:demo_account_name] = demo_account.fetch('email')
+    attributes[:demo_account_password] = ENV['APP_REVIEW_DEMO_PASSWORD'].to_s.strip
+    if attributes[:demo_account_password].empty?
+      attributes[:demo_account_password] = reviewer_password_from_keychain(
+        demo_account.fetch('authEmail'), demo_account.fetch('passwordKeychainService')
+      )
+    end
+    notes_path = File.expand_path(review.fetch('notesPath'), File.expand_path('..', __dir__))
+    attributes[:notes] = File.read(notes_path).strip
+    attributes[:demo_account_required] = true
+    detail = begin
+      version.fetch_app_store_review_detail
+    rescue
+      nil
+    end
+    detail ? detail.update(attributes: attributes) : version.create_app_store_review_detail(attributes: attributes)
+    readback = version.fetch_app_store_review_detail
+    UI.user_error!('Reviewer information readback failed') unless readback.demo_account_required && readback.demo_account_name == attributes[:demo_account_name] && readback.contact_email == attributes[:contact_email]
+    UI.success('Reviewer contact, demo-account requirement and notes match App Store Connect readback')
+  end
+
+  desc 'Read-only reviewer-contact and demo-account audit against the canonical manifest'
+  lane :review_information_check do
+    app = target_app!('READ_ONLY_REVIEW_INFORMATION_CHECK')
+    version = app.get_edit_app_store_version
+    UI.user_error!('No editable target version') unless version&.version_string == TARGET_VERSION
+    detail = version.fetch_app_store_review_detail
+    review = MANIFEST.fetch('review')
+    contact = review.fetch('contact')
+    demo_account = review.fetch('demoAccount')
+    UI.message("REVIEW_CONTACT name_match=#{detail.contact_first_name == contact.fetch('firstName') && detail.contact_last_name == contact.fetch('lastName')} email_match=#{detail.contact_email == contact.fetch('email')} phone_present=#{!detail.contact_phone.to_s.strip.empty?}")
+    UI.message("REVIEW_DEMO email_match=#{detail.demo_account_name == demo_account.fetch('email')} required=#{detail.demo_account_required}")
+    UI.important('This lane is read-only; mismatches require the gated upload_review_information lane.')
+  end
+
+  desc 'Upload the two privacy URLs not fully covered by deliver metadata'
+  lane :upload_privacy_urls do
+    exact_gate!('UPLOAD_PRIVACY_URLS')
+    app = target_app!('UPLOAD_PRIVACY_URLS_ONLY')
+    app_info = app.fetch_edit_app_info
+    UI.user_error!('No editable App Info for the existing app') unless app_info
+    localization = app_info.get_app_info_localizations.find { |item| item.locale == MANIFEST.fetch('target').fetch('locale') }
+    UI.user_error!('Missing Czech App Info localization') unless localization
+    localization.update(attributes: {
+      privacy_policy_url: MANIFEST.fetch('urls').fetch('privacy'),
+      privacy_choices_url: MANIFEST.fetch('urls').fetch('privacyChoices')
+    })
+    readback = app.fetch_edit_app_info.get_app_info_localizations.find { |item| item.locale == MANIFEST.fetch('target').fetch('locale') }
+    UI.user_error!('Privacy policy URL readback mismatch') unless readback&.privacy_policy_url == MANIFEST.fetch('urls').fetch('privacy')
+    UI.user_error!('Privacy choices URL readback mismatch') unless readback&.privacy_choices_url == MANIFEST.fetch('urls').fetch('privacyChoices')
+    UI.success('Privacy policy and privacy choices URLs match the release manifest')
+  end
+
+  desc 'Read-only App Store listing, privacy URL and screenshot audit'
+  lane :listing_check do
+    app = target_app!('READ_ONLY_LISTING_CHECK')
+    version = app.get_edit_app_store_version
+    UI.user_error!('No editable target version') unless version&.version_string == TARGET_VERSION
+    version_localization = version.get_app_store_version_localizations.find { |item| item.locale == MANIFEST.fetch('target').fetch('locale') }
+    UI.user_error!('Missing Czech version localization') unless version_localization
+    app_info = app.fetch_edit_app_info
+    info_localization = app_info&.get_app_info_localizations&.find { |item| item.locale == MANIFEST.fetch('target').fetch('locale') }
+    UI.user_error!('Missing Czech App Info localization') unless info_localization
+
+    expected_urls = MANIFEST.fetch('urls')
+    checks = {
+      'privacy' => [info_localization.privacy_policy_url, expected_urls.fetch('privacy')],
+      'privacyChoices' => [info_localization.privacy_choices_url, expected_urls.fetch('privacyChoices')],
+      'support' => [version_localization.support_url, expected_urls.fetch('support')],
+      'marketing' => [version_localization.marketing_url, expected_urls.fetch('marketing')]
+    }
+    checks.each do |name, (actual, expected)|
+      UI.user_error!("#{name} URL mismatch: #{actual.inspect}") unless actual == expected
+      UI.message("URL #{name}=#{actual}")
+    end
+    UI.user_error!('Store name mismatch') unless info_localization.name == MANIFEST.fetch('target').fetch('name')
+    UI.user_error!('Localized description is empty') if version_localization.description.to_s.strip.empty?
+
+    sets = version_localization.get_app_screenshot_sets
+    counts = sets.to_h { |set| [set.screenshot_display_type, set.app_screenshots&.size || 0] }
+    UI.message("SCREENSHOTS: #{counts.sort.to_h}")
+    UI.user_error!("Expected 7 iPhone screenshots, got #{counts['APP_IPHONE_67'] || 0}") unless counts['APP_IPHONE_67'] == 7
+    UI.user_error!("Expected 6 iPad screenshots, got #{counts['APP_IPAD_PRO_3GEN_129'] || 0}") unless counts['APP_IPAD_PRO_3GEN_129'] == 6
+    UI.success("LISTING READY: name=#{info_localization.name.inspect}, locale=cs, iPhone=7, iPad=6")
+  end
+
+  desc 'Read-only category, age-rating, content-rights and availability audit'
+  lane :compliance_check do
+    app = target_app!('READ_ONLY_COMPLIANCE_CHECK')
+    app_info = app.fetch_edit_app_info
+    UI.user_error!('No editable App Info for compliance audit') unless app_info
+    age = app_info.fetch_age_rating_declaration
+    age_values = age.instance_variables.to_h do |variable|
+      [variable.to_s.delete_prefix('@'), age.instance_variable_get(variable)]
+    end.reject { |name, value| name == 'raw_data' || value.nil? }
+    availability = app.get_app_availabilities(includes: nil, limit: nil)
+    expected = MANIFEST.fetch('storeClassification')
+    UI.message("EXPECTED_CLASSIFICATION=#{expected}")
+    UI.message("CATEGORY primary=#{app_info.primary_category&.id || 'none'} secondary=#{app_info.secondary_category&.id || 'none'}")
+    UI.message("CONTENT_RIGHTS=#{app.content_rights_declaration || 'unset'}")
+    UI.message("AGE_RATING=#{age_values.sort.to_h}")
+    UI.message("AVAILABILITY new_territories=#{availability&.available_in_new_territories}")
+    UI.important('This lane is read-only; product/legal owners must approve any changed compliance answers.')
+  end
+
+  desc 'Upload canonical age-rating answers after preserving inherited classification fields'
+  lane :upload_store_classification do
+    exact_gate!('UPLOAD_STORE_CLASSIFICATION')
+    app = target_app!('UPLOAD_STORE_CLASSIFICATION_ONLY')
+    app_info = app.fetch_edit_app_info
+    UI.user_error!('No editable App Info for classification upload') unless app_info
+    expected = MANIFEST.fetch('storeClassification')
+    availability = app.get_app_availabilities(includes: nil, limit: nil)
+
+    UI.user_error!('Primary category changed; refusing upload') unless app_info.primary_category&.id == expected.fetch('primaryCategory')
+    UI.user_error!('Secondary category changed; refusing upload') unless app_info.secondary_category&.id == expected.fetch('secondaryCategory')
+    UI.user_error!('Content-rights declaration changed; refusing upload') unless app.content_rights_declaration == expected.fetch('contentRights')
+    UI.user_error!('New-territory availability changed; refusing upload') unless availability&.available_in_new_territories == expected.fetch('availableInNewTerritories')
+
+    app_info.fetch_age_rating_declaration.update(attributes: canonical_age_rating_attributes)
+    readback = app.fetch_edit_app_info.fetch_age_rating_declaration
+    canonical_age_rating_attributes.each do |attribute, expected_value|
+      actual = readback.public_send(attribute)
+      UI.user_error!("Age-rating readback failed for #{attribute}: #{actual.inspect}") unless actual == expected_value
+    end
+    UI.success('Canonical age-rating answers match App Store Connect readback; inherited classification stayed unchanged')
+  end
+
+  desc 'Delete retry-created screenshot duplicates only'
+  lane :deduplicate_screenshots do
+    exact_gate!('DEDUPLICATE_SCREENSHOTS')
+    app = target_app!('DEDUPLICATE_SCREENSHOTS_ONLY')
+    version = app.get_edit_app_store_version
+    UI.user_error!('No editable target version') unless version&.version_string == TARGET_VERSION
+    localization = version.get_app_store_version_localizations.find { |item| item.locale == MANIFEST.fetch('target').fetch('locale') }
+    UI.user_error!('Missing Czech version localization') unless localization
+    expected_counts = { 'APP_IPHONE_67' => 7, 'APP_IPAD_PRO_3GEN_129' => 6 }
+
+    localization.get_app_screenshot_sets.each do |set|
+      expected = expected_counts[set.screenshot_display_type]
+      next unless expected
+      screenshots = set.app_screenshots || []
+      duplicates = screenshots.group_by { |shot| [shot.file_name, shot.source_file_checksum] }.values.flat_map { |items| items.drop(1) }
+      UI.user_error!("Refusing non-identical screenshot cleanup for #{set.screenshot_display_type}") unless screenshots.size - duplicates.size == expected
+      duplicates.each do |duplicate|
+        UI.message("Deleting exact duplicate #{set.screenshot_display_type}/#{duplicate.file_name}")
+        duplicate.delete!
+      end
+    end
+
+    refreshed = version.get_app_store_version_localizations.find { |item| item.locale == MANIFEST.fetch('target').fetch('locale') }
+    counts = refreshed.get_app_screenshot_sets.to_h { |set| [set.screenshot_display_type, set.app_screenshots&.size || 0] }
+    expected_counts.each do |display_type, expected|
+      UI.user_error!("Screenshot cleanup readback failed for #{display_type}") unless counts[display_type] == expected
+    end
+    UI.success('Removed only exact retry duplicates; App Store now has 7 iPhone and 6 iPad screenshots')
+  end
+
+  desc 'Upload canonical screenshots only; never submit or release'
+  lane :upload_screenshots do
+    app = target_app!('UPLOAD_SCREENSHOTS_ONLY')
+    editable = app.get_edit_app_store_version
+    UI.user_error!("No editable target version") unless editable&.version_string == TARGET_VERSION
+    ENV['FASTLANE_ENABLE_BETA_DELIVER_SYNC_SCREENSHOTS'] = '1'
+    deliver(
+      api_key: api_key, app_identifier: BUNDLE_ID,
+      screenshots_path: File.expand_path('screenshots', __dir__),
+      metadata_path: File.expand_path('screenshots', __dir__),
+      skip_binary_upload: true, skip_metadata: true, skip_screenshots: false,
+      overwrite_screenshots: false, sync_screenshots: true, submit_for_review: false,
+      automatic_release: false, run_precheck_before_submit: false, force: true
+    )
+  end
+
+  desc 'Read-only submission completeness summary'
+  lane :submission_check do
+    app = target_app!('READ_ONLY_SUBMISSION_CHECK')
+    editable = app.get_edit_app_store_version
+    UI.user_error!("No editable target version") unless editable&.version_string == TARGET_VERSION
+    UI.message("Builds: #{app.get_builds(includes: 'preReleaseVersion').size}")
+    UI.message("Locales: #{editable.get_app_store_version_localizations.map(&:locale).join(', ')}")
+    UI.important('This lane does not submit or release.')
+  end
+
+  desc 'Explicitly gated submission with manual release selected'
+  lane :submit_for_review do
+    exact_gate!('SUBMIT')
+    target_app!('SUBMIT_FOR_REVIEW')
+    deliver(
+      api_key: api_key, app_identifier: BUNDLE_ID,
+      submit_for_review: true, skip_binary_upload: true,
+      skip_metadata: true, skip_screenshots: true,
+      automatic_release: false, run_precheck_before_submit: true,
+      precheck_include_in_app_purchases: false, force: true
+    )
+  end
+
+  desc 'Separate approval gate; release itself remains a manual ASC action'
+  lane :release_approved_version do
+    exact_gate!('RELEASE')
+    target_app!('RELEASE_APPROVED_VERSION')
+    UI.user_error!('Gate verified. Perform the irreversible manual release in App Store Connect and record its readback evidence.')
+  end
+end
