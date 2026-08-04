@@ -30,6 +30,8 @@ Dual storage: remote `event_users_saved` table + local `OfflineDataService`. Syn
 ## SQL RPCs
 
 - `get_events` -- all events with places, groups, roles, counts in one payload
+- `get_event_participants_for_edit` -- participant names for editor-view,
+  editor, or organization admin
 - `sign_user_to_event` -- sign-in with full validation (capacity, timing, exclusivity, gender)
 - `sign_user_out_of_event` -- sign-out with validation
 - `synchronize_my_schedule` -- merges local and remote saved event IDs

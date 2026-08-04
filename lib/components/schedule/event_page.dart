@@ -8,6 +8,7 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/timeline/light_timeline_view.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/event_participants_access.dart';
 import 'package:fstapp/components/schedule/event_page_theme.dart';
 import 'package:fstapp/components/schedule/saved_program_ui.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
@@ -79,6 +80,7 @@ class _EventPageState extends State<EventPage> {
   bool isLoadingEvent = true;
   bool _isUpdatingSavedProgram = false;
   int _savedProgramMutationRevision = 0;
+  final ValueNotifier<bool> _canSaveSavedProgram = ValueNotifier(false);
 
   final ScrollController _scrollController = ScrollController();
   bool _blockScroll = false;
@@ -125,6 +127,7 @@ class _EventPageState extends State<EventPage> {
   @override
   void dispose() {
     PaintingBinding.instance.systemFonts.removeListener(_scheduleHeaderMeasure);
+    _canSaveSavedProgram.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -173,6 +176,11 @@ class _EventPageState extends State<EventPage> {
       MediaQuery.paddingOf(context).top,
     );
     final bool showAddButton = _showAddButton(isEventCancelled);
+    final bool canViewParticipants = EventParticipantsAccess.canView(
+      isEditorView: RightsService.isEditorView(),
+      isEditor: RightsService.isEditor(),
+      isAdmin: RightsService.isAdmin(),
+    );
     final onPinchStart = _onPinchStart;
     final onPinchEnd = _onPinchEnd;
 
@@ -340,7 +348,7 @@ class _EventPageState extends State<EventPage> {
                               ),
                             ),
                           Visibility(
-                            visible: RightsService.isEditor() &&
+                            visible: canViewParticipants &&
                                 _event?.maxParticipants != null,
                             child: ExpansionTile(
                               title: Row(children: [
@@ -369,11 +377,12 @@ class _EventPageState extends State<EventPage> {
                                         padding: const EdgeInsets.all(8.0),
                                         child: Row(
                                           children: [
-                                            IconButton(
-                                                onPressed: () => signOutOther(
-                                                    _participants[index]),
-                                                icon: const Icon(Icons
-                                                    .remove_circle_outline)),
+                                            if (RightsService.isEditor())
+                                              IconButton(
+                                                  onPressed: () => signOutOther(
+                                                      _participants[index]),
+                                                  icon: const Icon(Icons
+                                                      .remove_circle_outline)),
                                             Text("${_participants[index]}"),
                                           ],
                                         ),
@@ -726,7 +735,6 @@ class _EventPageState extends State<EventPage> {
   Widget _buildCollapsedBar(BuildContext context) {
     final Color fg = ThemeConfig.blackColor(context);
     final bool showAdd = _showAddButton(_event?.isCancelled ?? false);
-    final bool canSave = _event?.canSaveEventToMyProgram() ?? false;
     return SafeArea(
       bottom: false,
       child: SizedBox(
@@ -768,11 +776,14 @@ class _EventPageState extends State<EventPage> {
               if (showAdd) ...[
                 const SizedBox(width: 8),
                 IconButton(
-                  onPressed: _isUpdatingSavedProgram
-                      ? null
-                      : () => _setSavedProgram(canSave),
+                  style: savedProgramActionButtonStyle,
+                  onPressed: () {
+                    if (!_isUpdatingSavedProgram) {
+                      _setSavedProgram(_canSaveSavedProgram.value);
+                    }
+                  },
                   icon: SavedProgramActionIcon(
-                    canSave: canSave,
+                    canSave: _canSaveSavedProgram,
                     color: fg,
                     addIcon: Icons.add_circle_outline,
                     savedIcon: Icons.check_circle,
@@ -1009,19 +1020,24 @@ class _EventPageState extends State<EventPage> {
   Widget _buildAddButton(BuildContext context) {
     final Color fill = _headerForeground();
     final Color glyph = ThemeConfig.eventTypeToColor(context, _event?.type);
-    final bool canSave = _event?.canSaveEventToMyProgram() ?? false;
     return Material(
       color: fill,
       shape: const CircleBorder(),
       elevation: 4,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: _isUpdatingSavedProgram ? null : () => _setSavedProgram(canSave),
+        splashFactory: NoSplash.splashFactory,
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        onTap: () {
+          if (!_isUpdatingSavedProgram) {
+            _setSavedProgram(_canSaveSavedProgram.value);
+          }
+        },
         child: SizedBox(
           width: 56,
           height: 56,
           child: SavedProgramActionIcon(
-            canSave: canSave,
+            canSave: _canSaveSavedProgram,
             color: glyph,
             addIcon: Icons.add,
             savedIcon: Icons.check,
@@ -1243,34 +1259,54 @@ class _EventPageState extends State<EventPage> {
     final event = _event;
     if (event?.id == null || _isUpdatingSavedProgram) return;
     final previous = event!.isInMySchedule ?? false;
-    if (mounted) {
-      setState(() {
-        event.isInMySchedule = saved;
-        _isUpdatingSavedProgram = true;
-        _savedProgramMutationRevision++;
-      });
-    }
+    event.isInMySchedule = saved;
+    _isUpdatingSavedProgram = true;
+    _savedProgramMutationRevision++;
+    _canSaveSavedProgram.value = event.canSaveEventToMyProgram() ?? false;
+    if (event.isCancelled && mounted) setState(() {});
     try {
       var completed = true;
       if (saved) {
-        completed = await DbEvents.addToMySchedule(context, event.id!);
+        completed = await DbEvents.addToMySchedule(
+          context,
+          event.id!,
+          showSuccessToast: false,
+        );
       } else {
-        await DbEvents.removeFromMySchedule(context, event.id!);
+        await DbEvents.removeFromMySchedule(
+          context,
+          event.id!,
+          showSuccessToast: false,
+        );
       }
       if (!completed && mounted) {
-        setState(() => event.isInMySchedule = previous);
+        event.isInMySchedule = previous;
+        _syncSavedProgramUi();
+        if (event.isCancelled) setState(() {});
       }
     } catch (_) {
-      if (mounted) setState(() => event.isInMySchedule = previous);
+      if (mounted) {
+        event.isInMySchedule = previous;
+        _syncSavedProgramUi();
+        if (event.isCancelled) setState(() {});
+      }
       rethrow;
     } finally {
       if (mounted) {
-        setState(() {
-          _isUpdatingSavedProgram = false;
-          _savedProgramMutationRevision++;
-        });
+        _isUpdatingSavedProgram = false;
+        _savedProgramMutationRevision++;
+        _syncSavedProgramUi();
       }
     }
+  }
+
+  void _syncSavedProgramUi() {
+    _canSaveSavedProgram.value = _event?.canSaveEventToMyProgram() ?? false;
+  }
+
+  void _setLoadedEvent(EventModel event) {
+    _event = event;
+    if (mounted) _syncSavedProgramUi();
   }
 
   bool showLoginLogoutButton() {
@@ -1285,12 +1321,19 @@ class _EventPageState extends State<EventPage> {
       await loadOfflineData(widget.id!);
       if (await _redirectIfCounselingSlot()) return;
 
-      final localOnly = ClientSyncRuntime.isV1Selected ||
-          ConnectivityService.isOfflineNotifier.value;
+      final isOffline = ConnectivityService.isOfflineNotifier.value;
+      final localOnly = ClientSyncRuntime.isV1Selected || isOffline;
       if (!localOnly) {
         await loadEvent(id);
         if (await _redirectIfCounselingSlot()) return;
-        if (RightsService.isEditor()) await loadParticipants(id);
+      }
+      if (EventParticipantsAccess.shouldLoad(
+        isOffline: isOffline,
+        isEditorView: RightsService.isEditorView(),
+        isEditor: RightsService.isEditor(),
+        isAdmin: RightsService.isAdmin(),
+      )) {
+        await loadParticipants(id);
       }
       if (localOnly) {
         final cachedSpeakers = await OfflineDataService.getSpeakers();
@@ -1451,7 +1494,7 @@ class _EventPageState extends State<EventPage> {
 
       if (mounted) {
         setState(() {
-          _event = event;
+          _setLoadedEvent(event);
         });
       }
     }
@@ -1476,7 +1519,7 @@ class _EventPageState extends State<EventPage> {
       event.title = group.title;
       event.place = group.place;
       _groupInfoModel = group;
-      _event = event;
+      _setLoadedEvent(event);
       if (mounted) setState(() {});
       return;
     }
@@ -1484,7 +1527,7 @@ class _EventPageState extends State<EventPage> {
     var currentParticipants =
         await DbEvents.getParticipantsPerEventCount(eventId);
     event.currentParticipants = currentParticipants;
-    _event = event;
+    _setLoadedEvent(event);
     _childDots.clear();
     _childDots.addAll(
         _event!.childEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)));

@@ -23,7 +23,6 @@ import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
-import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/offline/offline_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -209,14 +208,16 @@ class DbEvents {
 
   static Future<List<UserInfoModel>> getParticipantsPerEvent(
       int eventId) async {
-    var data = await _supabase
-        .from(Tb.event_users.table)
-        .select(Tb.event_users.user)
-        .eq(Tb.event_users.event, eventId);
-    var listOfIds =
-        List<String>.from(data.map((par) => par[Tb.event_users.user]));
-    var users = await DbUsers.getUsersInfo(listOfIds);
-    return users;
+    final response = await _supabase.rpc(
+      'get_event_participants_for_edit',
+      params: {'p_event': eventId},
+    );
+    final result = (response as Map).cast<String, dynamic>();
+    if (result['code'] != 200) return [];
+    return List<UserInfoModel>.from(
+      (result['data'] as List).map((item) =>
+          UserInfoModel.fromJson((item as Map).cast<String, dynamic>())),
+    );
   }
 
   static Future<int> getParticipantsPerEventCount(int eventId) async {
@@ -418,7 +419,8 @@ class DbEvents {
     return data != null;
   }
 
-  static Future<void> removeFromMySchedule(BuildContext context, int id) async {
+  static Future<void> removeFromMySchedule(BuildContext context, int id,
+      {bool showSuccessToast = true}) async {
     if (ClientSyncRuntime.isV1Selected && AuthService.isLoggedIn()) {
       await _savedProgramCommands.update([id], SavedProgramMode.remove);
     } else if (AuthService.isLoggedIn()) {
@@ -432,10 +434,13 @@ class DbEvents {
     } else {
       await OfflineDataService.removeFromMySchedule(id);
     }
-    ToastHelper.Show(context, ScheduleStrings.removedFromMySchedule);
+    if (showSuccessToast) {
+      ToastHelper.Show(context, ScheduleStrings.removedFromMySchedule);
+    }
   }
 
-  static Future<bool> addToMySchedule(BuildContext context, int id) async {
+  static Future<bool> addToMySchedule(BuildContext context, int id,
+      {bool showSuccessToast = true}) async {
     if (!AppConfig.isOwnProgramSupportedWithoutSignIn &&
         !AuthService.isLoggedIn()) {
       ToastHelper.Show(context, ScheduleStrings.signInBeforeAddingToMySchedule);
@@ -454,7 +459,9 @@ class DbEvents {
     } else {
       await OfflineDataService.addToMySchedule(id);
     }
-    ToastHelper.Show(context, ScheduleStrings.addedToMySchedule);
+    if (showSuccessToast) {
+      ToastHelper.Show(context, ScheduleStrings.addedToMySchedule);
+    }
     return true;
   }
 
