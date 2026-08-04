@@ -26,4 +26,21 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('uses an iframe-free message editor on Android web',
+      (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: NewsFormPage(usePlainTextEditor: true),
+      ),
+    );
+
+    expect(
+        find.byKey(const ValueKey('news-plain-text-editor')), findsOneWidget);
+    final editor = tester.widget<TextField>(
+      find.byKey(const ValueKey('news-plain-text-editor')),
+    );
+    expect(editor.keyboardType, TextInputType.multiline);
+    expect(editor.maxLines, isNull);
+  });
 }

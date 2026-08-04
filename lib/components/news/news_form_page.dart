@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -20,10 +23,12 @@ import 'package:fstapp/components/news/news_notification_audience_selector.dart'
 class NewsFormPage extends StatefulWidget {
   static const ROUTE = "newsForm";
   final Widget? editorOverride;
+  final bool? usePlainTextEditor;
 
   const NewsFormPage({
     super.key,
     @visibleForTesting this.editorOverride,
+    @visibleForTesting this.usePlainTextEditor,
   });
 
   @override
@@ -33,6 +38,7 @@ class NewsFormPage extends StatefulWidget {
 class _NewsFormPageState extends State<NewsFormPage> {
   final _formKey = GlobalKey<FormBuilderState>();
   late QuillEditorController _controller;
+  final TextEditingController _plainTextController = TextEditingController();
   NewsNotificationAudience? _audience;
   final FocusNode _toFocusNode = FocusNode();
   UserInfoModel? _currentUser;
@@ -53,6 +59,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _plainTextController.dispose();
     _toFocusNode.dispose();
     super.dispose();
   }
@@ -62,7 +69,9 @@ class _NewsFormPageState extends State<NewsFormPage> {
   }
 
   Future<void> _sendPressed({bool process = false}) async {
-    var htmlContent = await _controller.getText();
+    var htmlContent = _usesPlainTextEditor
+        ? _plainTextAsHtml(_plainTextController.text)
+        : await _controller.getText();
     if (!mounted) return;
     htmlContent = HtmlHelper.removeColor(htmlContent);
     if (process == true) {
@@ -116,6 +125,16 @@ class _NewsFormPageState extends State<NewsFormPage> {
     if (name.isNotEmpty) return name;
     return email;
   }
+
+  bool get _usesPlainTextEditor =>
+      widget.usePlainTextEditor ??
+      (kIsWeb && defaultTargetPlatform == TargetPlatform.android);
+
+  String _plainTextAsHtml(String text) => const HtmlEscape()
+      .convert(text)
+      .replaceAll('\r\n', '\n')
+      .replaceAll('\r', '\n')
+      .replaceAll('\n', '<br>');
 
   String get _publishButtonText => switch (_audience) {
         NewsNotificationAudience.none => NewsStrings.publishWithoutNotification,
@@ -171,10 +190,27 @@ class _NewsFormPageState extends State<NewsFormPage> {
                     ),
                   ),
                   widget.editorOverride ??
-                      HtmlEditorWidget(
-                        initialContent: '',
-                        controller: _controller,
-                      ),
+                      (_usesPlainTextEditor
+                          ? Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              child: TextField(
+                                key: const ValueKey('news-plain-text-editor'),
+                                controller: _plainTextController,
+                                keyboardType: TextInputType.multiline,
+                                minLines: 8,
+                                maxLines: null,
+                                decoration: InputDecoration(
+                                  labelText: CommonStrings.content,
+                                  alignLabelWithHint: true,
+                                  border: const OutlineInputBorder(),
+                                ),
+                              ),
+                            )
+                          : HtmlEditorWidget(
+                              initialContent: '',
+                              controller: _controller,
+                            )),
                   _NewsFormActions(
                     onCancel: _stornoPressed,
                     onPublish: _audience == null
