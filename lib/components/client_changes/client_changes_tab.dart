@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/client_changes/client_change_model.dart';
 import 'package:fstapp/components/client_changes/client_changes_strings.dart';
@@ -7,18 +9,39 @@ import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:intl/intl.dart';
 
+typedef ClientChangesPageLoader = Future<ClientChangesPage> Function({
+  required int occasionId,
+  DateTime? beforeTime,
+  String? beforeId,
+  required Map<String, dynamic> filters,
+});
+typedef ClientChangeDetailLoader = Future<ClientChangeDetail> Function(
+    String commitId);
+
 class ClientChangesTab extends StatefulWidget {
-  const ClientChangesTab({super.key, this.clientSyncEnabled});
+  const ClientChangesTab({
+    super.key,
+    this.clientSyncEnabled,
+    this.pageLoader,
+    this.detailLoader,
+    this.isOffline,
+    this.occasionId,
+  });
 
   final bool? clientSyncEnabled;
+  final ClientChangesPageLoader? pageLoader;
+  final ClientChangeDetailLoader? detailLoader;
+  final Future<bool> Function()? isOffline;
+  final int? occasionId;
 
   @override
   State<ClientChangesTab> createState() => _ClientChangesTabState();
 }
 
 class _ClientChangesTabState extends State<ClientChangesTab> {
-  late final DbClientChanges _repository;
+  DbClientChanges? _repository;
   final _actorController = TextEditingController();
+  Timer? _actorSearchDebounce;
   final _items = <ClientChangeSummary>[];
   DateTime? _cursorTime;
   String? _cursorId;
@@ -59,37 +82,42 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
   void initState() {
     super.initState();
     if (_clientSyncEnabled) {
-      _repository = DbClientChanges();
+      if (widget.pageLoader == null || widget.detailLoader == null) {
+        _repository = DbClientChanges();
+      }
       _load();
     }
   }
 
   @override
   void dispose() {
+    _actorSearchDebounce?.cancel();
     _actorController.dispose();
     super.dispose();
   }
 
   Future<void> _load() async {
     final epoch = ++_loadEpoch;
-    final isOffline = await ConnectivityService.isOffline();
-    if (!mounted || epoch != _loadEpoch) return;
-    if (isOffline) {
-      setState(() {
-        _error = true;
-        _offline = true;
-      });
-      return;
-    }
     setState(() {
       _loading = true;
       _error = false;
       _offline = false;
     });
+    final isOffline =
+        await (widget.isOffline ?? ConnectivityService.isOffline)();
+    if (!mounted || epoch != _loadEpoch) return;
+    if (isOffline) {
+      setState(() {
+        _error = true;
+        _offline = true;
+        _loading = false;
+      });
+      return;
+    }
     final page = await ExceptionHandler.guard(
       context,
-      futureFunction: () => _repository.list(
-        occasionId: RightsService.currentOccasionId()!,
+      futureFunction: () => (widget.pageLoader ?? _repository!.list)(
+        occasionId: widget.occasionId ?? RightsService.currentOccasionId()!,
         beforeTime: _cursorTime,
         beforeId: _cursorId,
         filters: {
@@ -118,7 +146,8 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
   Future<void> _showDetail(ClientChangeSummary change) async {
     final detail = await ExceptionHandler.guard(
       context,
-      futureFunction: () => _repository.detail(change.commitId),
+      futureFunction: () =>
+          (widget.detailLoader ?? _repository!.detail)(change.commitId),
     );
     if (detail == null) return;
     if (!mounted) return;
@@ -194,8 +223,18 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
     return value.isEmpty ? null : value;
   }
 
-  void _applyActorFilter() =>
-      _setFilters(component: _componentFilter, changeClass: _classFilter);
+  void _applyActorFilter() {
+    _actorSearchDebounce?.cancel();
+    _setFilters(component: _componentFilter, changeClass: _classFilter);
+  }
+
+  void _scheduleActorFilter() {
+    _actorSearchDebounce?.cancel();
+    _actorSearchDebounce = Timer(
+      const Duration(milliseconds: 350),
+      _applyActorFilter,
+    );
+  }
 
   void _nextPage() {
     if (!_hasMore || _loading || _cursorTime == null || _cursorId == null) {
@@ -240,24 +279,6 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
           ],
         ),
       );
-    }
-    if (_error && _items.isEmpty) {
-      return Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(_offline
-            ? ClientChangesStrings.onlineOnly
-            : ClientChangesStrings.loadError),
-        TextButton(onPressed: _load, child: Text(ClientChangesStrings.retry)),
-      ]));
-    }
-    if (_items.isEmpty && _loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (_items.isEmpty &&
-        _componentFilter == null &&
-        _classFilter == null &&
-        _actorFilter == null) {
-      return Center(child: Text(ClientChangesStrings.empty));
     }
     return Column(children: [
       Padding(
@@ -308,6 +329,7 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
                   icon: const Icon(Icons.search),
                 ),
               ),
+              onChanged: (_) => _scheduleActorFilter(),
               onSubmitted: (_) => _applyActorFilter(),
             ),
           ),
@@ -315,24 +337,37 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
       ),
       if (_loading) const LinearProgressIndicator(),
       Expanded(
-          child: _items.isEmpty
-              ? Center(child: Text(ClientChangesStrings.empty))
-              : ListView.builder(
-                  itemCount: _items.length,
-                  itemBuilder: (context, index) {
-                    final change = _items[index];
-                    return ListTile(
-                      onTap: () => _showDetail(change),
-                      leading: const Icon(Icons.history),
-                      title: Text(
-                          '${change.source} · ${ClientChangesStrings.itemCount(change.itemCount)}'),
-                      subtitle: Text(change.actorDisplay ??
-                          ClientChangesStrings.deletedActor),
-                      trailing: Text(
-                          DateFormat.yMd().add_Hm().format(change.occurredAt)),
-                    );
-                  },
-                )),
+          child: _error && _items.isEmpty
+              ? Center(
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Text(_offline
+                      ? ClientChangesStrings.onlineOnly
+                      : ClientChangesStrings.loadError),
+                  TextButton(
+                      onPressed: _load,
+                      child: Text(ClientChangesStrings.retry)),
+                ]))
+              : _items.isEmpty && _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _items.isEmpty
+                      ? Center(child: Text(ClientChangesStrings.empty))
+                      : ListView.builder(
+                          itemCount: _items.length,
+                          itemBuilder: (context, index) {
+                            final change = _items[index];
+                            return ListTile(
+                              onTap: () => _showDetail(change),
+                              leading: const Icon(Icons.history),
+                              title: Text(
+                                  '${change.source} · ${ClientChangesStrings.itemCount(change.itemCount)}'),
+                              subtitle: Text(change.actorDisplay ??
+                                  ClientChangesStrings.deletedActor),
+                              trailing: Text(DateFormat.yMd()
+                                  .add_Hm()
+                                  .format(change.occurredAt)),
+                            );
+                          },
+                        )),
       SafeArea(
         top: false,
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
