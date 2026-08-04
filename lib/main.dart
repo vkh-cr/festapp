@@ -21,6 +21,7 @@ import 'package:fstapp/services/notification_helper.dart';
 import 'package:fstapp/services/installation_cutover_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -304,6 +305,7 @@ class _MyAppState extends State<MyApp> {
         localizationsDelegates: [
           ...context.localizationDelegates,
           FormBuilderLocalizations.delegate,
+          FlutterQuillLocalizations.delegate,
         ],
         supportedLocales: context.supportedLocales,
         locale: context.locale,

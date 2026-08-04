@@ -169,6 +169,16 @@ try {
   const flutterIndex = await readFile(path.join(projectRoot, 'web/index.html'), 'utf8');
   assert.match(flutterIndex, /await window\.festappOfflineReady/);
   assert.match(flutterIndex, /performance\.getEntriesByType\('resource'\)/);
+  assert.match(flutterIndex, /window\.recoverFestappStartup\('bootstrap-error'\)/);
+  assert.match(flutterIndex, /festapp-app-ready/);
+  const updatePrompt = await readFile(
+    path.join(projectRoot, 'web/festapp_update_prompt.js'),
+    'utf8',
+  );
+  assert.match(updatePrompt, /function recoverStalledStartup\(reason\)/);
+  assert.match(updatePrompt, /scheduleStartupRecovery\(\)/);
+  assert.match(updatePrompt, /startupRecoveryStorageKey/);
+  assert.match(updatePrompt, /navigator\.onLine === false/);
   console.log('pwa_offline.test: ok');
 } finally {
   await rm(tempRoot, { recursive: true, force: true });

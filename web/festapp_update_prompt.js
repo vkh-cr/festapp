@@ -2,6 +2,7 @@
   const currentVersion = window.__FESTAPP_BUILD_VERSION__;
   const dismissedStorageKey = 'festappDismissedVersion';
   const cutoverStorageKey = 'festappCutoverVersion';
+  const startupRecoveryStorageKey = 'festappStartupRecoveryVersion';
   const bannerId = 'festapp-update-banner';
   let checkInFlight = false;
 
@@ -384,6 +385,45 @@
     return true;
   }
 
+  async function recoverStalledStartup(reason) {
+    if (window.__FESTAPP_APP_READY__ === true) return false;
+
+    // Never destroy the only available offline shell. Recovery needs the
+    // network so that the next navigation can fetch one coherent build.
+    if (navigator.onLine === false) {
+      showUpdateBanner(currentVersion, 'legacy-cache');
+      return false;
+    }
+
+    if (sessionStorage.getItem(startupRecoveryStorageKey) === currentVersion) {
+      console.error('Festapp startup remained stalled after recovery:', reason);
+      showUpdateBanner(currentVersion, 'legacy-cache');
+      return false;
+    }
+
+    console.warn('Festapp startup stalled; retrying from the network:', reason);
+    sessionStorage.setItem(startupRecoveryStorageKey, currentVersion || '1');
+    await clearLegacyFlutterCaches();
+    await prepareNetworkReload();
+    window.location.reload();
+    return true;
+  }
+
+  function scheduleStartupRecovery() {
+    window.setTimeout(function checkStartup() {
+      if (window.__FESTAPP_APP_READY__ === true) return;
+      if (document.visibilityState !== 'visible') {
+        document.addEventListener('visibilitychange', function retryWhenVisible() {
+          if (document.visibilityState !== 'visible') return;
+          document.removeEventListener('visibilitychange', retryWhenVisible);
+          recoverStalledStartup('resume-timeout');
+        });
+        return;
+      }
+      recoverStalledStartup('timeout');
+    }, 20000);
+  }
+
   async function checkVersion() {
     if (checkInFlight || !currentVersion || navigator.onLine === false) {
       return;
@@ -426,12 +466,17 @@
   window.prepareFestappNetworkReload = prepareNetworkReload;
   window.deepRefreshIfStale = deepRefreshIfStale;
   window.cutOverToVersion = cutOverToVersion;
+  window.recoverFestappStartup = recoverStalledStartup;
+  window.addEventListener('festapp-app-ready', function() {
+    sessionStorage.removeItem(startupRecoveryStorageKey);
+  });
   window.addEventListener('load', function() {
     // Self-heal first: if a stale build is cached this triggers a one-time
     // hard reload, so skip the (now moot) passive version check for this load.
     deepRefreshIfStale().then(function(reloading) {
       if (!reloading) {
         window.setTimeout(checkVersion, 3000);
+        scheduleStartupRecovery();
       }
     });
   });

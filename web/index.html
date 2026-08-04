@@ -237,7 +237,7 @@
     atomic updates and offline cold starts.
   -->
   <script>
-    window.__FESTAPP_BUILD_VERSION__ = "0.19.84+360";
+    window.__FESTAPP_BUILD_VERSION__ = "0.19.84+361";
   </script>
   <script src="festapp_update_prompt.js" defer></script>
 </head>
@@ -329,18 +329,26 @@
 
       _flutter.loader.load({
         onEntrypointLoaded: async function(engineInitializer) {
-          const appRunner = await engineInitializer.initializeEngine({
-            useColorEmoji: true
-          });
-          await appRunner.runApp();
-          window.__FESTAPP_APP_READY__ = true;
-          const loader = document.getElementById('loader-content');
-          if (loader) {
-            loader.style.opacity = '0';
-            loader.style.pointerEvents = 'none';
-            setTimeout(function() {
-              loader.remove();
-            }, 400);
+          try {
+            const appRunner = await engineInitializer.initializeEngine({
+              useColorEmoji: true
+            });
+            await appRunner.runApp();
+            window.__FESTAPP_APP_READY__ = true;
+            window.dispatchEvent(new Event('festapp-app-ready'));
+            const loader = document.getElementById('loader-content');
+            if (loader) {
+              loader.style.opacity = '0';
+              loader.style.pointerEvents = 'none';
+              setTimeout(function() {
+                loader.remove();
+              }, 400);
+            }
+          } catch (error) {
+            console.error('Festapp Flutter startup failed:', error);
+            if (window.recoverFestappStartup) {
+              window.recoverFestappStartup('bootstrap-error');
+            }
           }
         }
       });

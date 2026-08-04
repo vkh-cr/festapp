@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +11,7 @@ import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/components/html/html_editor_widget.dart';
+import 'package:fstapp/components/html/native_html_editor_widget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/news/news_strings.dart';
@@ -23,12 +22,12 @@ import 'package:fstapp/components/news/news_notification_audience_selector.dart'
 class NewsFormPage extends StatefulWidget {
   static const ROUTE = "newsForm";
   final Widget? editorOverride;
-  final bool? usePlainTextEditor;
+  final bool? useNativeHtmlEditor;
 
   const NewsFormPage({
     super.key,
     @visibleForTesting this.editorOverride,
-    @visibleForTesting this.usePlainTextEditor,
+    @visibleForTesting this.useNativeHtmlEditor,
   });
 
   @override
@@ -38,7 +37,7 @@ class NewsFormPage extends StatefulWidget {
 class _NewsFormPageState extends State<NewsFormPage> {
   final _formKey = GlobalKey<FormBuilderState>();
   late QuillEditorController _controller;
-  final TextEditingController _plainTextController = TextEditingController();
+  late NativeHtmlEditorController _nativeHtmlController;
   NewsNotificationAudience? _audience;
   final FocusNode _toFocusNode = FocusNode();
   UserInfoModel? _currentUser;
@@ -47,6 +46,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
   void initState() {
     super.initState();
     _controller = QuillEditorController();
+    _nativeHtmlController = NativeHtmlEditorController();
   }
 
   @override
@@ -59,7 +59,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
   @override
   void dispose() {
     _controller.dispose();
-    _plainTextController.dispose();
+    _nativeHtmlController.dispose();
     _toFocusNode.dispose();
     super.dispose();
   }
@@ -69,8 +69,8 @@ class _NewsFormPageState extends State<NewsFormPage> {
   }
 
   Future<void> _sendPressed({bool process = false}) async {
-    var htmlContent = _usesPlainTextEditor
-        ? _plainTextAsHtml(_plainTextController.text)
+    var htmlContent = _usesNativeHtmlEditor
+        ? _nativeHtmlController.getHtml()
         : await _controller.getText();
     if (!mounted) return;
     htmlContent = HtmlHelper.removeColor(htmlContent);
@@ -126,15 +126,9 @@ class _NewsFormPageState extends State<NewsFormPage> {
     return email;
   }
 
-  bool get _usesPlainTextEditor =>
-      widget.usePlainTextEditor ??
+  bool get _usesNativeHtmlEditor =>
+      widget.useNativeHtmlEditor ??
       (kIsWeb && defaultTargetPlatform == TargetPlatform.android);
-
-  String _plainTextAsHtml(String text) => const HtmlEscape()
-      .convert(text)
-      .replaceAll('\r\n', '\n')
-      .replaceAll('\r', '\n')
-      .replaceAll('\n', '<br>');
 
   String get _publishButtonText => switch (_audience) {
         NewsNotificationAudience.none => NewsStrings.publishWithoutNotification,
@@ -190,22 +184,9 @@ class _NewsFormPageState extends State<NewsFormPage> {
                     ),
                   ),
                   widget.editorOverride ??
-                      (_usesPlainTextEditor
-                          ? Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              child: TextField(
-                                key: const ValueKey('news-plain-text-editor'),
-                                controller: _plainTextController,
-                                keyboardType: TextInputType.multiline,
-                                minLines: 8,
-                                maxLines: null,
-                                decoration: InputDecoration(
-                                  labelText: CommonStrings.content,
-                                  alignLabelWithHint: true,
-                                  border: const OutlineInputBorder(),
-                                ),
-                              ),
+                      (_usesNativeHtmlEditor
+                          ? NativeHtmlEditorWidget(
+                              controller: _nativeHtmlController,
                             )
                           : HtmlEditorWidget(
                               initialContent: '',
