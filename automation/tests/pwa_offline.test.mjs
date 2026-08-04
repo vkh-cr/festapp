@@ -60,6 +60,8 @@ try {
   let serverVersion = '1.2.3+5';
   let cachePutFails = false;
   const cachedPuts = [];
+  const deletedCaches = [];
+  let claimedExistingClients = 0;
   const cache = {
     addAll: async () => {},
     put: async (request) => {
@@ -80,8 +82,14 @@ try {
     Promise,
     caches: {
       open: async () => cache,
-      keys: async () => [],
-      delete: async () => true,
+      keys: async () => [
+        'festapp-app-shell-1.2.3+3',
+        'festapp-app-shell-1.2.3+4',
+      ],
+      delete: async (name) => {
+        deletedCaches.push(name);
+        return true;
+      },
     },
     fetch: async (request) => {
       networkCalls++;
@@ -99,12 +107,28 @@ try {
     self: {
       location: { origin: 'https://app.test' },
       navigator: { onLine: false },
-      clients: { claim: async () => {} },
+      clients: {
+        claim: async () => { claimedExistingClients++; },
+        matchAll: async () => [{
+          id: 'older-open-tab',
+          postMessage: () => {},
+        }],
+      },
       skipWaiting: async () => {},
       addEventListener: (type, handler) => { handlers[type] = handler; },
     },
   };
   vm.runInNewContext(worker, context);
+
+  // A newly activated worker must not seize an already-open tab or delete the
+  // shell that tab is still executing. Both tabs share Cache Storage; doing
+  // either can strand the older tab on Flutter's loader when it later asks for
+  // a deferred chunk from its own build.
+  let activation;
+  handlers.activate({ waitUntil: (promise) => { activation = promise; } });
+  await activation;
+  assert.equal(claimedExistingClients, 0);
+  assert.deepEqual(deletedCaches, []);
 
   async function dispatchFetch(request) {
     let responsePromise;
@@ -179,6 +203,14 @@ try {
   assert.match(updatePrompt, /scheduleStartupRecovery\(\)/);
   assert.match(updatePrompt, /startupRecoveryStorageKey/);
   assert.match(updatePrompt, /navigator\.onLine === false/);
+  assert.match(updatePrompt, /FESTAPP_CLIENT_VERSION/);
+  const networkReload = updatePrompt.match(
+    /async function prepareNetworkReload\(\) \{[\s\S]*?\n  \}/,
+  )?.[0];
+  assert.ok(networkReload);
+  assert.match(networkReload, /registration\.update\(\)/);
+  assert.doesNotMatch(networkReload, /unregister\(\)/);
+  assert.doesNotMatch(networkReload, /caches\.delete|festapp-app-shell-/);
   console.log('pwa_offline.test: ok');
 } finally {
   await rm(tempRoot, { recursive: true, force: true });

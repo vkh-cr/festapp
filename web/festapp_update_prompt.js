@@ -38,34 +38,14 @@
     }
   }
 
-  // An explicit user refresh must not depend on a large/stuck worker install.
-  // Remove only Festapp's versioned app shell and registration; the following
-  // navigation then comes from the network and registers the current worker.
+  // Refresh the registration without unregistering the worker or deleting its
+  // caches. Both are origin-wide operations and could strand another open tab
+  // that is still executing the previous build.
   async function prepareNetworkReload() {
     try {
       if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        const festappRegistrations = registrations.filter(function(registration) {
-          const scriptUrl = registration.active?.scriptURL ||
-            registration.waiting?.scriptURL ||
-            registration.installing?.scriptURL ||
-            '';
-          return scriptUrl.includes('festapp_service_worker.js');
-        });
-        await Promise.all(festappRegistrations.map(function(registration) {
-          return registration.unregister();
-        }));
-      }
-
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames
-          .filter(function(cacheName) {
-            return cacheName.startsWith('festapp-app-shell-');
-          })
-          .map(function(cacheName) {
-            return caches.delete(cacheName);
-          }));
+        const registration = await navigator.serviceWorker.getRegistration('/');
+        if (registration) await registration.update();
       }
     } catch (error) {
       console.warn('Festapp network reload preparation failed:', error);
@@ -318,8 +298,10 @@
       reloadButton.disabled = true;
       reloadButton.textContent = copy.loading;
       await clearLegacyFlutterCaches();
-      await prepareNetworkReload();
-      window.location.reload();
+      if (!(await cutOverToVersion(latestVersion))) {
+        await prepareNetworkReload();
+        window.location.reload();
+      }
     });
 
     actions.append(laterButton, reloadButton);
@@ -353,18 +335,19 @@
       }
       candidate = registration.waiting || candidate;
       if (candidate && candidate.state === 'installed') {
-        const changed = new Promise(function(resolve) {
+        const activated = new Promise(function(resolve) {
           const timeout = window.setTimeout(function() { resolve(false); }, 15000);
-          navigator.serviceWorker.addEventListener('controllerchange', function onChange() {
+          candidate.addEventListener('statechange', function onStateChange() {
+            if (candidate.state !== 'activated' && candidate.state !== 'redundant') return;
             window.clearTimeout(timeout);
-            navigator.serviceWorker.removeEventListener('controllerchange', onChange);
-            resolve(true);
+            candidate.removeEventListener('statechange', onStateChange);
+            resolve(candidate.state === 'activated');
           });
         });
         candidate.postMessage('SKIP_WAITING');
-        return await changed;
+        return await activated;
       }
-      return candidate?.state === 'activated';
+      return candidate?.state === 'activated' || registration.active?.state === 'activated';
     } catch (error) {
       console.warn('Festapp service worker activation failed:', error);
       return false;
@@ -403,7 +386,6 @@
 
     console.warn('Festapp startup stalled; retrying from the network:', reason);
     sessionStorage.setItem(startupRecoveryStorageKey, currentVersion || '1');
-    await clearLegacyFlutterCaches();
     await prepareNetworkReload();
     window.location.reload();
     return true;
@@ -467,8 +449,21 @@
   window.deepRefreshIfStale = deepRefreshIfStale;
   window.cutOverToVersion = cutOverToVersion;
   window.recoverFestappStartup = recoverStalledStartup;
+  function reportClientVersion() {
+    navigator.serviceWorker?.controller?.postMessage({
+      type: 'FESTAPP_CLIENT_VERSION',
+      version: currentVersion,
+    });
+  }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function(event) {
+      if (event.data?.type === 'FESTAPP_REPORT_VERSION') reportClientVersion();
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', reportClientVersion);
+  }
   window.addEventListener('festapp-app-ready', function() {
     sessionStorage.removeItem(startupRecoveryStorageKey);
+    reportClientVersion();
   });
   window.addEventListener('load', function() {
     // Self-heal first: if a stale build is cached this triggers a one-time

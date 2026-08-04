@@ -99,6 +99,7 @@ const FLUTTER_ENTRY = ${JSON.stringify(deploymentUrl(flutterEntry))};
 const WEB_CLIENT_ENTRY = ${JSON.stringify(deploymentUrl(webClientEntry))};
 const PRECACHE_PATHS = new Set(PRECACHE_URLS.map((url) =>
   new URL(url, self.location.origin).pathname));
+const clientVersions = new Map();
 
 async function precacheAtomically() {
   const cache = await caches.open(CACHE_NAME);
@@ -113,18 +114,47 @@ self.addEventListener('install', (event) => {
   event.waitUntil(precacheAtomically());
 });
 
+async function deleteUnusedShellsWhenSafe() {
+  const windowClients = await self.clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true,
+  });
+  // An unreported client can be an older open tab that still executes from an
+  // older shell. Keep every version until all tabs explicitly report that they
+  // are running this build.
+  if (windowClients.some((client) =>
+    clientVersions.get(client.id) !== BUILD_VERSION)) return;
+
+  const names = await caches.keys();
+  await Promise.all(names
+    .filter((name) => (name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME) ||
+      name.startsWith('flutter-app-cache'))
+    .map((name) => caches.delete(name)));
+}
+
 self.addEventListener('message', (event) => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+    return;
+  }
+  if (event.data?.type === 'FESTAPP_CLIENT_VERSION' && event.source?.id) {
+    clientVersions.set(event.source.id, event.data.version);
+    event.waitUntil(deleteUnusedShellsWhenSafe());
+  }
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const names = await caches.keys();
-    await Promise.all(names
-      .filter((name) => (name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME) ||
-        name.startsWith('flutter-app-cache'))
-      .map((name) => caches.delete(name)));
-    await self.clients.claim();
+    const windowClients = await self.clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true,
+    });
+    // Do not claim existing tabs. They must stay paired with the worker and
+    // cache generation from which their JavaScript was loaded.
+    for (const client of windowClients) {
+      client.postMessage({ type: 'FESTAPP_REPORT_VERSION' });
+    }
+    await deleteUnusedShellsWhenSafe();
   })());
 });
 
