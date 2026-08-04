@@ -30,4 +30,41 @@ void main() {
     expect(parameters['p_command_id'], isA<String>());
     expect(saved, [4, 9, 21]);
   });
+
+  test('accepts authoritative program and live cache replacements', () async {
+    final commands = SupabaseSavedProgramCommands.withTransport(
+      ClientCommandTransport((_, __) async {
+        return {
+          'status': 'applied',
+          'code': 200,
+          'data': {
+            'saved': [9, 21],
+          },
+          'sync': {
+            'replacements': [
+              {
+                'component': 'live_public',
+                'revision': 12,
+                'payload': {'events': <Object>[]},
+              },
+              {
+                'component': 'private_program',
+                'revision': 7,
+                'payload': {
+                  'signedIn': <int>[],
+                  'saved': [9, 21],
+                },
+              },
+            ],
+          },
+        };
+      }, maxAttempts: 1),
+      643,
+    );
+
+    expect(
+      await commands.update([21], SavedProgramMode.join),
+      [9, 21],
+    );
+  });
 }

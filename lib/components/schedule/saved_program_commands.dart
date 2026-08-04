@@ -30,16 +30,26 @@ class SupabaseSavedProgramCommands implements SavedProgramCommands {
       'p_mode': mode.name,
     });
     final response = ClientCommandResponse.from(raw);
-    await response.applyReplacements();
+    // EventPage owns this tiny optimistic state transition. Activating the
+    // authoritative cache replacements must not bump the process-wide
+    // projection epoch: OccasionHomePage keys its routed child by that epoch,
+    // which would otherwise dispose and recreate the entire event detail.
+    await response.applyReplacements(notifyProjection: false);
     final data = response.data;
     final saved = ((data['saved'] as List?) ?? const [])
         .whereType<num>()
         .map((id) => id.toInt())
         .toList(growable: false);
-    await ClientSyncRuntime.patchPrivateComponent(
-      component: ClientSyncComponent.privateProgram,
-      fields: {'saved': saved},
-    );
+    final replacedPrivateProgram = response.replacements.any((replacement) =>
+        replacement['component'] ==
+        ClientSyncComponent.privateProgram.wireName);
+    if (!replacedPrivateProgram) {
+      await ClientSyncRuntime.patchPrivateComponent(
+        component: ClientSyncComponent.privateProgram,
+        fields: {'saved': saved},
+        notifyProjection: false,
+      );
+    }
     return saved;
   }
 }

@@ -45,7 +45,7 @@ class ClientCommandResponse {
     );
   }
 
-  Future<void> applyReplacements() async {
+  Future<void> applyReplacements({bool notifyProjection = true}) async {
     for (final replacement in replacements) {
       final component =
           ClientSyncComponentWireName.parse(replacement['component'] as String);
@@ -54,18 +54,21 @@ class ClientCommandResponse {
         await ClientSyncRuntime.applyLiveReplacement(
           revision: revision,
           payload: replacement['payload'],
+          notifyProjection: notifyProjection,
         );
       } else if (component.isPrivate) {
         await ClientSyncRuntime.applyPrivateReplacement(
           component: component,
           revision: revision,
           payload: replacement['payload'],
+          notifyProjection: notifyProjection,
         );
       } else {
         await ClientSyncRuntime.applyPublicReplacement(
           component: component,
           revision: revision,
           payload: replacement['payload'],
+          notifyProjection: notifyProjection,
         );
       }
     }

@@ -216,6 +216,7 @@ class ClientSyncRuntime {
     required ClientSyncComponent component,
     required int revision,
     required Object? payload,
+    bool notifyProjection = true,
   }) async {
     final context = _context;
     final scope = context?.privateScope;
@@ -242,7 +243,7 @@ class ClientSyncRuntime {
       revisions: revisions,
       payloads: payloads,
     );
-    _notifyProjectionChanged();
+    if (notifyProjection) _notifyProjectionChanged();
   }
 
   /// Reconciles fields returned authoritatively by a private mutation even
@@ -250,6 +251,7 @@ class ClientSyncRuntime {
   static Future<void> patchPrivateComponent({
     required ClientSyncComponent component,
     required Map<String, dynamic> fields,
+    bool notifyProjection = true,
   }) async {
     final context = _context;
     final scope = context?.privateScope;
@@ -268,6 +270,7 @@ class ClientSyncRuntime {
       component: component,
       revision: revision,
       payload: {...raw.cast<String, dynamic>(), ...fields},
+      notifyProjection: notifyProjection,
     );
   }
 
@@ -275,6 +278,7 @@ class ClientSyncRuntime {
     required ClientSyncComponent component,
     required int revision,
     required Object? payload,
+    bool notifyProjection = true,
   }) async {
     final context = _context;
     if (!_v1Selected || context == null) return;
@@ -298,12 +302,16 @@ class ClientSyncRuntime {
       revisions: revisions,
       payloads: payloads,
     );
-    _notifyProjectionChanged(searchIndexChanged: component.affectsSearchIndex);
+    if (notifyProjection) {
+      _notifyProjectionChanged(
+          searchIndexChanged: component.affectsSearchIndex);
+    }
   }
 
   static Future<void> applyLiveReplacement({
     required int revision,
     required Object? payload,
+    bool notifyProjection = true,
   }) async {
     final context = _context;
     if (!_v1Selected || context == null) return;
@@ -321,7 +329,7 @@ class ClientSyncRuntime {
       revisions: {ClientSyncComponent.livePublic: revision},
       payloads: {ClientSyncComponent.livePublic: payload},
     );
-    _notifyProjectionChanged();
+    if (notifyProjection) _notifyProjectionChanged();
   }
 
   static void _notifyProjectionChanged({bool searchIndexChanged = false}) {
