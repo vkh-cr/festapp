@@ -36,10 +36,18 @@ function boot({
     activeWorkerWithoutUpdate = false,
     appReady = false,
 } = {}) {
+    const navigationErrors = [];
+    const virtualConsole = new VirtualConsole();
+    virtualConsole.on('jsdomError', (error) => {
+        if (error.type === 'not-implemented' &&
+            error.message.includes('navigation to another Document')) {
+            navigationErrors.push(error);
+        }
+    });
     const dom = new JSDOM('<!DOCTYPE html><html><head></head><body></body></html>', {
         url: 'https://csmostrava.festapp.net/',
         runScripts: 'dangerously',
-        virtualConsole: new VirtualConsole(),
+        virtualConsole,
         beforeParse(window) {
             window.__FESTAPP_BUILD_VERSION__ = buildVersion;
             window.__FESTAPP_APP_READY__ = appReady;
@@ -57,6 +65,8 @@ function boot({
 
             if (waitingWorker || activeWorkerWithoutUpdate) {
                 window.__skipWaitingMessages = [];
+                window.__festappUnregisterCalls = 0;
+                window.__deletedCaches = [];
                 const candidate = {
                     state: 'installed',
                     postMessage(message) {
@@ -66,18 +76,30 @@ function boot({
                         );
                     },
                 };
-                const serviceWorker = new window.EventTarget();
-                serviceWorker.getRegistrations = async () => [];
-                serviceWorker.getRegistration = async () => ({
+                const registration = {
                     active: { scriptURL: 'https://csmostrava.festapp.net/festapp_service_worker.js' },
                     waiting: waitingWorker ? candidate : null,
                     installing: null,
                     update: async () => {},
-                });
+                    unregister: async () => {
+                        window.__festappUnregisterCalls++;
+                        return true;
+                    },
+                };
+                const serviceWorker = new window.EventTarget();
+                serviceWorker.getRegistrations = async () => [registration];
+                serviceWorker.getRegistration = async () => registration;
                 Object.defineProperty(window.navigator, 'serviceWorker', {
                     configurable: true,
                     value: serviceWorker,
                 });
+                window.caches = {
+                    keys: async () => ['festapp-app-shell-1.0.0+1', 'festapp-used-fonts-v1'],
+                    delete: async (name) => {
+                        window.__deletedCaches.push(name);
+                        return true;
+                    },
+                };
             }
         },
     });
@@ -85,6 +107,7 @@ function boot({
     const script = dom.window.document.createElement('script');
     script.textContent = SCRIPT;
     dom.window.document.body.appendChild(script);
+    dom.window.__navigationErrors = navigationErrors;
     return dom;
 }
 
@@ -197,17 +220,25 @@ describe('festapp_update_prompt.js', () => {
         assert.ok(banner(window), 'a running app should let the user choose when to reload');
     });
 
-    test('active old worker without an installed update never triggers a false reload', async () => {
+    test('Reload refreshes a stale page when the new worker is already active', async () => {
         const { window } = boot({
             buildVersion: '1.0.0+1',
             latestVersion: '1.0.0+2',
             activeWorkerWithoutUpdate: true,
+            appReady: true,
         });
         window.dispatchEvent(new window.Event('focus'));
         await flush();
 
-        assert.strictEqual(window.sessionStorage.getItem('festappCutoverVersion'), null);
-        assert.ok(banner(window), 'failed activation must leave a retry path visible');
+        button(window, 'reload').click();
+        await flush();
+
+        assert.strictEqual(window.__navigationErrors.length, 1,
+            'an explicit Reload should refresh even when no worker is waiting');
+        assert.strictEqual(window.__festappUnregisterCalls, 1,
+            'the stale Festapp worker must release the next navigation');
+        assert.deepStrictEqual([...window.__deletedCaches], ['festapp-app-shell-1.0.0+1'],
+            'only the stale versioned app shell should be deleted');
     });
 
     test('version check stays silent when the server build matches', async () => {

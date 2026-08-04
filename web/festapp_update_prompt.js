@@ -37,6 +37,40 @@
     }
   }
 
+  // An explicit user refresh must not depend on a large/stuck worker install.
+  // Remove only Festapp's versioned app shell and registration; the following
+  // navigation then comes from the network and registers the current worker.
+  async function prepareNetworkReload() {
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        const festappRegistrations = registrations.filter(function(registration) {
+          const scriptUrl = registration.active?.scriptURL ||
+            registration.waiting?.scriptURL ||
+            registration.installing?.scriptURL ||
+            '';
+          return scriptUrl.includes('festapp_service_worker.js');
+        });
+        await Promise.all(festappRegistrations.map(function(registration) {
+          return registration.unregister();
+        }));
+      }
+
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames
+          .filter(function(cacheName) {
+            return cacheName.startsWith('festapp-app-shell-');
+          })
+          .map(function(cacheName) {
+            return caches.delete(cacheName);
+          }));
+      }
+    } catch (error) {
+      console.warn('Festapp network reload preparation failed:', error);
+    }
+  }
+
   // Detects the obsolete Flutter-generated worker/cache. Current builds use
   // festapp_service_worker.js; it must never be removed by this migration.
   async function hasStaleFlutterServiceWorker() {
@@ -283,12 +317,8 @@
       reloadButton.disabled = true;
       reloadButton.textContent = copy.loading;
       await clearLegacyFlutterCaches();
-      if (await activateWaitingFestappWorker()) {
-        window.location.reload();
-        return;
-      }
-      reloadButton.disabled = false;
-      reloadButton.textContent = copy.reload;
+      await prepareNetworkReload();
+      window.location.reload();
     });
 
     actions.append(laterButton, reloadButton);
@@ -393,6 +423,7 @@
   }
 
   window.clearLegacyFlutterCaches = clearLegacyFlutterCaches;
+  window.prepareFestappNetworkReload = prepareNetworkReload;
   window.deepRefreshIfStale = deepRefreshIfStale;
   window.cutOverToVersion = cutOverToVersion;
   window.addEventListener('load', function() {

@@ -70,22 +70,43 @@ function deploymentUrl(url) {
   return url.endsWith('/index.html') ? url.slice(0, -'index.html'.length) : url;
 }
 const assets = [...new Set(files.map(deploymentUrl))];
+const installCriticalNames = new Set([
+  '/flutter.js',
+  '/flutter_bootstrap.js',
+  '/main.dart.js',
+  '/festapp_update_prompt.js',
+  '/festapp-version.json',
+  '/manifest.json',
+  '/manifest.webmanifest',
+  '/AssetManifest.json',
+  '/FontManifest.json',
+]);
+const coreAssets = assets.filter((url) =>
+  url === deploymentUrl(flutterEntry) ||
+  url === deploymentUrl(webClientEntry) ||
+  installCriticalNames.has(url.split('?')[0])
+);
 const cacheName = `festapp-app-shell-${version}`;
 const source = `'use strict';
 
+const BUILD_VERSION = ${JSON.stringify(version)};
 const CACHE_NAME = ${JSON.stringify(cacheName)};
 const CACHE_PREFIX = 'festapp-app-shell-';
 const FONT_CACHE_NAME = 'festapp-used-fonts-v1';
 const PRECACHE_URLS = ${JSON.stringify(assets, null, 2)};
+const CORE_URLS = ${JSON.stringify(coreAssets, null, 2)};
 const FLUTTER_ENTRY = ${JSON.stringify(deploymentUrl(flutterEntry))};
 const WEB_CLIENT_ENTRY = ${JSON.stringify(deploymentUrl(webClientEntry))};
+const PRECACHE_PATHS = new Set(PRECACHE_URLS.map((url) =>
+  new URL(url, self.location.origin).pathname));
 
 async function precacheAtomically() {
   const cache = await caches.open(CACHE_NAME);
-  // Small batches avoid opening hundreds of requests at once on mobile.
-  for (let index = 0; index < PRECACHE_URLS.length; index += 12) {
-    await cache.addAll(PRECACHE_URLS.slice(index, index + 12));
-  }
+  // Keep installation small so an Android client can activate an update in
+  // seconds. The remaining known assets are cached lazily after activation;
+  // preloading the entire Flutter build used to make every update download
+  // hundreds of files before the new worker could take control.
+  await cache.addAll(CORE_URLS);
 }
 
 self.addEventListener('install', (event) => {
@@ -119,6 +140,29 @@ function isFlutterExecutable(pathname) {
     /^\\/main\\.dart\\.js_\\d+\\.part\\.js$/.test(pathname) ||
     pathname === '/flutter.js' ||
     pathname === '/flutter_bootstrap.js';
+}
+
+async function recoverCurrentExecutable(request, cache) {
+  if (self.navigator.onLine === false) return Response.error();
+  try {
+    const versionResponse = await fetch('/festapp-version.json?sw-recovery=' +
+      encodeURIComponent(BUILD_VERSION), { cache: 'no-store' });
+    if (!versionResponse.ok) return Response.error();
+    const manifest = await versionResponse.json();
+    if (manifest?.version !== BUILD_VERSION) return Response.error();
+
+    const response = await fetch(request);
+    if (!response.ok) return Response.error();
+    try {
+      await cache.put(request, response.clone());
+    } catch (_) {
+      // A full/evicted cache must not discard an executable already verified
+      // against this exact deployment. This reload can still finish online.
+    }
+    return response;
+  } catch (_) {
+    return Response.error();
+  }
 }
 
 self.addEventListener('fetch', (event) => {
@@ -171,15 +215,25 @@ self.addEventListener('fetch', (event) => {
 
 
     // A Flutter main bundle and its deferred parts are one indivisible build.
-    // Fetching a cache miss from the currently deployed (newer) build mixes
-    // generations and can leave the page stuck on the loader. The update
-    // prompt performs the atomic worker activation/reload instead.
-    if (isFlutterExecutable(url.pathname)) return Response.error();
+    // Recover an evicted/corrupt cache entry only while the network deployment
+    // still matches this worker. A newer manifest must cut over atomically via
+    // the update prompt instead of mixing executable generations.
+    if (isFlutterExecutable(url.pathname)) {
+      return recoverCurrentExecutable(request, cache);
+    }
 
-    // Same-origin resources not known at build time may still work online.
-    // They are intentionally not written into the immutable app-shell cache.
+    // Fill the rest of this build's known shell lazily. This keeps updates
+    // quick while preserving offline access for resources the user has used.
     if (self.navigator.onLine === false) return Response.error();
-    return fetch(request);
+    const response = await fetch(request);
+    if (response.ok && PRECACHE_PATHS.has(url.pathname)) {
+      try {
+        await cache.put(request, response.clone());
+      } catch (_) {
+        // A storage quota issue must not break an otherwise valid online load.
+      }
+    }
+    return response;
   })());
 });
 `;

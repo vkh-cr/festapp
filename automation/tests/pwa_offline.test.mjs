@@ -46,15 +46,26 @@ try {
   assert.match(worker, /url\.origin === 'https:\/\/fonts\.googleapis\.com'/);
   assert.match(worker, /festapp-used-fonts-v1/);
   assert.match(worker, /cache\.put\(request, response\.clone\(\)\)/);
+  const coreUrls = JSON.parse(worker.match(/const CORE_URLS = (\[[\s\S]*?\]);/)[1]);
+  assert.ok(coreUrls.includes('/main.dart.js'));
+  assert.ok(coreUrls.includes('/flutter?pwa-cache=1'));
+  assert.ok(!coreUrls.includes('/main.dart.js_7.part.js'),
+    'deferred chunks must not delay worker activation');
 
   const handlers = {};
   const fontUrl = 'https://fonts.gstatic.com/s/notocoloremoji/test.woff2';
   const cachedFont = new Response('cached emoji font');
   const cachedShell = new Response('<html>offline shell</html>');
   let networkCalls = 0;
+  let serverVersion = '1.2.3+5';
+  let cachePutFails = false;
+  const cachedPuts = [];
   const cache = {
     addAll: async () => {},
-    put: async () => {},
+    put: async (request) => {
+      if (cachePutFails) throw new Error('storage quota exceeded');
+      cachedPuts.push(String(request.url || request));
+    },
     match: async (request) => {
       const url = typeof request === 'string' ? request : request.url;
       if (url === fontUrl) return cachedFont.clone();
@@ -72,9 +83,18 @@ try {
       keys: async () => [],
       delete: async () => true,
     },
-    fetch: async () => {
+    fetch: async (request) => {
       networkCalls++;
-      throw new Error('network must not be used');
+      const url = String(request.url || request);
+      if (url.includes('/festapp-version.json')) {
+        return new Response(JSON.stringify({ version: serverVersion }), {
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      if (url.includes('/main.dart.js')) {
+        return new Response('recovered current executable');
+      }
+      throw new Error(`unexpected network request: ${url}`);
     },
     self: {
       location: { origin: 'https://app.test' },
@@ -116,7 +136,28 @@ try {
     new Request('https://app.test/main.dart.js_99.part.js'),
   );
   assert.equal(missingChunkResponse.type, 'error');
-  assert.equal(networkCalls, 0);
+  assert.equal(networkCalls, 1);
+
+  // If storage eviction/corruption removed an executable from this worker's
+  // own build, recover that exact build from the network instead of leaving
+  // every controlled reload permanently stuck on the Flutter loader.
+  serverVersion = '1.2.3+4';
+  const recoveredMainResponse = await dispatchFetch(
+    new Request('https://app.test/main.dart.js'),
+  );
+  assert.equal(await recoveredMainResponse.text(), 'recovered current executable');
+  assert.deepEqual(cachedPuts, ['https://app.test/main.dart.js']);
+  assert.equal(networkCalls, 3);
+
+  // A full/evicted cache must not discard an already verified executable.
+  // Serving it keeps this reload alive even if persistence cannot self-heal.
+  cachePutFails = true;
+  const uncachedMainResponse = await dispatchFetch(
+    new Request('https://app.test/main.dart.js_7.part.js'),
+  );
+  assert.equal(await uncachedMainResponse.text(), 'recovered current executable');
+  assert.deepEqual(cachedPuts, ['https://app.test/main.dart.js']);
+  assert.equal(networkCalls, 5);
 
   const webClientIndex = await readFile(
     path.join(projectRoot, 'web_client/index.html'),
