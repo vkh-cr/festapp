@@ -117,7 +117,12 @@ try {
         get: async (id) => ({
           id,
           url: `https://app.test/${id}`,
-          navigate: async () => { navigatedClients.push(id); },
+          navigate: () => {
+            navigatedClients.push(id);
+            // Real navigation waits for the activating worker. Awaiting this
+            // promise from activate would therefore deadlock both operations.
+            return new Promise(() => {});
+          },
         }),
       },
       skipWaiting: async () => {},
@@ -140,7 +145,11 @@ try {
   // a deferred chunk from its own build.
   let activation;
   handlers.activate({ waitUntil: (promise) => { activation = promise; } });
-  await activation;
+  const activationCompleted = await Promise.race([
+    activation.then(() => true),
+    new Promise((resolve) => setTimeout(() => resolve(false), 25)),
+  ]);
+  assert.equal(activationCompleted, true);
   assert.equal(claimedExistingClients, 0);
   assert.deepEqual(deletedCaches, []);
   assert.deepEqual(navigatedClients, ['updating-tab']);

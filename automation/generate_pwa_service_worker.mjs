@@ -159,7 +159,11 @@ self.addEventListener('activate', (event) => {
     await deleteUnusedShellsWhenSafe();
     if (cutoverClientId) {
       const cutoverClient = await self.clients.get(cutoverClientId);
-      if (cutoverClient) await cutoverClient.navigate(cutoverClient.url);
+      if (cutoverClient) {
+        // Do not await this promise from activate: navigation itself waits for
+        // the new worker to finish activating, so awaiting it would deadlock.
+        cutoverClient.navigate(cutoverClient.url).catch(() => {});
+      }
     }
   })());
 });
