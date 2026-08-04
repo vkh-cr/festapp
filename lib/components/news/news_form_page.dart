@@ -70,15 +70,21 @@ class _NewsFormPageState extends State<NewsFormPage> {
       final headingForNotification = heading?.trim().isNotEmpty == true
           ? heading!.trim()
           : _currentUser!.name;
-      final sendsNotification = _audience != NewsNotificationAudience.none;
-      final sendsToSelf = _audience == NewsNotificationAudience.self ||
-          AppConfig.isPublicNotificationSendingDisabled;
+      final audience = _audience!;
+      final sendsNotification = audience.sendsNotification;
+      final sendsToSelf = audience.sendsToSelfOnly ||
+          (sendsNotification && AppConfig.isPublicNotificationSendingDisabled);
+      final deliveryFields = audience.deliveryFields(
+        currentUserId: AuthService.currentUserId(),
+        forceSelfOnly: AppConfig.isPublicNotificationSendingDisabled,
+      );
 
       if (sendsNotification) {
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (dialogContext) => NewsSendConfirmationDialog(
             isSelfOnly: sendsToSelf,
+            isTest: !audience.publishesNews,
             recipientIdentity: _currentUserIdentity,
             heading: headingForNotification ?? '',
             htmlContent: htmlContent,
@@ -91,8 +97,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
         "content": htmlContent,
         "heading": heading,
         "heading_default": _currentUser!.name,
-        "with_notification": sendsNotification,
-        if (sendsToSelf) "to": [AuthService.currentUserId()],
+        ...deliveryFields,
       };
       Navigator.pop(context, toReturn);
     } else {
@@ -110,7 +115,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
 
   String get _publishButtonText => switch (_audience) {
         NewsNotificationAudience.none => NewsStrings.publishWithoutNotification,
-        NewsNotificationAudience.self => NewsStrings.publishAndSendSelf,
+        NewsNotificationAudience.selfTest => NewsStrings.publishAndSendSelf,
         NewsNotificationAudience.everyone => NewsStrings.publishAndSendEveryone,
         null => NewsStrings.selectRecipients,
       };
@@ -199,6 +204,7 @@ class _NewsFormActions extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Center(
+          heightFactor: 1,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
             child: SizedBox(

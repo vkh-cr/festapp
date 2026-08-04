@@ -46,10 +46,15 @@ class NewsStrings {
   static String get notificationPreviewTitle =>
       'FeatureNews.notificationPreviewTitle'.tr();
   static String get confirmSendTitle => 'FeatureNews.confirmSendTitle'.tr();
+  static String get confirmTestSendTitle =>
+      'FeatureNews.confirmTestSendTitle'.tr();
   static String get sendExplanation => 'FeatureNews.sendExplanation'.tr();
+  static String get testSendExplanation =>
+      'FeatureNews.testSendExplanation'.tr();
   static String get notificationCannotBeRecalled =>
       'FeatureNews.notificationCannotBeRecalled'.tr();
   static String get confirmSend => 'FeatureNews.confirmSend'.tr();
+  static String get confirmTestSend => 'FeatureNews.confirmTestSend'.tr();
   static String get cancel => 'FeatureNews.cancel'.tr();
 
   // Feedback

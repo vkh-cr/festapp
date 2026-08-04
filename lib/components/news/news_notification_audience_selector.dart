@@ -2,7 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/news/news_strings.dart';
 
-enum NewsNotificationAudience { none, self, everyone }
+enum NewsNotificationAudience { none, everyone, selfTest }
+
+extension NewsNotificationAudienceBehavior on NewsNotificationAudience {
+  bool get sendsNotification => this != NewsNotificationAudience.none;
+
+  bool get publishesNews => this != NewsNotificationAudience.selfTest;
+
+  bool get sendsToSelfOnly => this == NewsNotificationAudience.selfTest;
+
+  Map<String, Object> deliveryFields({
+    required String currentUserId,
+    bool forceSelfOnly = false,
+  }) {
+    final selfOnly = sendsNotification && (sendsToSelfOnly || forceSelfOnly);
+    return {
+      'with_notification': sendsNotification,
+      if (!publishesNews) 'add_to_news': false,
+      if (selfOnly) 'to': [currentUserId],
+    };
+  }
+}
 
 /// A single decision point for the delivery mode. Keeping "no push" alongside
 /// the two audiences avoids contradictory checkbox + recipient states.
@@ -45,16 +65,6 @@ class NewsNotificationAudienceSelector extends StatelessWidget {
           detail: NewsStrings.newsWithoutNotificationDetail,
           onTap: () => onChanged(NewsNotificationAudience.none),
         ),
-        const SizedBox(height: 8),
-        _AudienceOption(
-          selected: selected == NewsNotificationAudience.self,
-          icon: Icons.person_outline,
-          title: NewsStrings.notificationAudienceSelf,
-          detail: NewsStrings.notificationAudienceSelfDetail(
-            currentUserIdentity,
-          ),
-          onTap: () => onChanged(NewsNotificationAudience.self),
-        ),
         if (allowEveryone) ...[
           const SizedBox(height: 8),
           _AudienceOption(
@@ -67,6 +77,16 @@ class NewsNotificationAudienceSelector extends StatelessWidget {
             onTap: () => onChanged(NewsNotificationAudience.everyone),
           ),
         ],
+        const SizedBox(height: 8),
+        _AudienceOption(
+          selected: selected == NewsNotificationAudience.selfTest,
+          icon: Icons.person_outline,
+          title: NewsStrings.notificationAudienceSelf,
+          detail: NewsStrings.notificationAudienceSelfDetail(
+            currentUserIdentity,
+          ),
+          onTap: () => onChanged(NewsNotificationAudience.selfTest),
+        ),
       ],
     );
   }

@@ -10,12 +10,14 @@ import 'package:fstapp/components/news/news_strings.dart';
 /// happen, who the audience is, and what the notification will look like.
 class NewsSendConfirmationDialog extends StatelessWidget {
   final bool isSelfOnly;
+  final bool isTest;
   final String recipientIdentity;
   final String heading;
   final String htmlContent;
 
   const NewsSendConfirmationDialog({
     required this.isSelfOnly,
+    required this.isTest,
     required this.recipientIdentity,
     required this.heading,
     required this.htmlContent,
@@ -31,13 +33,21 @@ class NewsSendConfirmationDialog extends StatelessWidget {
       icon: Icon(
         Icons.notifications_active_outlined,
       ),
-      title: Text(NewsStrings.confirmSendTitle),
+      title: Text(
+        isTest
+            ? NewsStrings.confirmTestSendTitle
+            : NewsStrings.confirmSendTitle,
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(NewsStrings.sendExplanation),
+            Text(
+              isTest
+                  ? NewsStrings.testSendExplanation
+                  : NewsStrings.sendExplanation,
+            ),
             const SizedBox(height: 16),
             _InfoCard(
               icon: isSelfOnly ? Icons.person_outline : Icons.groups_outlined,
@@ -112,7 +122,9 @@ class NewsSendConfirmationDialog extends StatelessWidget {
         FilledButton.icon(
           onPressed: () => Navigator.of(context).pop(true),
           icon: const Icon(Icons.campaign_outlined),
-          label: Text(NewsStrings.confirmSend),
+          label: Text(
+            isTest ? NewsStrings.confirmTestSend : NewsStrings.confirmSend,
+          ),
         ),
       ],
     );

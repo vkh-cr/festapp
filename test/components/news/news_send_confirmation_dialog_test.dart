@@ -5,12 +5,14 @@ import 'package:fstapp/components/news/news_send_confirmation_dialog.dart';
 Future<void> _pumpDialog(
   WidgetTester tester, {
   required bool isSelfOnly,
+  bool isTest = false,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
         body: NewsSendConfirmationDialog(
           isSelfOnly: isSelfOnly,
+          isTest: isTest,
           recipientIdentity: 'Marie Nováková · marie@example.com',
           heading: 'Změna programu',
           htmlContent: '<p>Začínáme <strong>o hodinu dříve</strong>.</p>',
@@ -23,10 +25,11 @@ Future<void> _pumpDialog(
 void main() {
   testWidgets('self-only confirmation makes recipient explicit',
       (tester) async {
-    await _pumpDialog(tester, isSelfOnly: true);
+    await _pumpDialog(tester, isSelfOnly: true, isTest: true);
 
     expect(find.byIcon(Icons.notifications_active_outlined), findsOneWidget);
-    expect(find.text('FeatureNews.confirmSendTitle'), findsOneWidget);
+    expect(find.text('FeatureNews.confirmTestSendTitle'), findsOneWidget);
+    expect(find.text('FeatureNews.testSendExplanation'), findsOneWidget);
     expect(find.text('FeatureNews.notificationAudienceSelf'), findsOneWidget);
     expect(
       find.text('Marie Nováková · marie@example.com'),
