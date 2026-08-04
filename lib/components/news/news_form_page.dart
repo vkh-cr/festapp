@@ -19,8 +19,12 @@ import 'package:fstapp/components/news/news_notification_audience_selector.dart'
 @RoutePage()
 class NewsFormPage extends StatefulWidget {
   static const ROUTE = "newsForm";
+  final Widget? editorOverride;
 
-  const NewsFormPage({super.key});
+  const NewsFormPage({
+    super.key,
+    @visibleForTesting this.editorOverride,
+  });
 
   @override
   _NewsFormPageState createState() => _NewsFormPageState();
@@ -131,53 +135,57 @@ class _NewsFormPageState extends State<NewsFormPage> {
             onPressed: () => RouterService.popOrHome(context),
           ),
         ),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: FormBuilder(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        FormBuilderTextField(
-                          name: "heading",
-                          focusNode: _toFocusNode,
-                          decoration: InputDecoration(
-                              labelText: NewsStrings.heading,
-                              hintText: _currentUser?.name,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always),
-                        ),
-                        NewsNotificationAudienceSelector(
-                          selected: _audience,
-                          currentUserIdentity: _currentUserIdentity,
-                          allowEveryone:
-                              !AppConfig.isPublicNotificationSendingDisabled,
-                          onChanged: (value) =>
-                              setState(() => _audience = value),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
+        body: SingleChildScrollView(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: FormBuilder(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          FormBuilderTextField(
+                            name: "heading",
+                            focusNode: _toFocusNode,
+                            decoration: InputDecoration(
+                                labelText: NewsStrings.heading,
+                                hintText: _currentUser?.name,
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always),
+                          ),
+                          NewsNotificationAudienceSelector(
+                            selected: _audience,
+                            currentUserIdentity: _currentUserIdentity,
+                            allowEveryone:
+                                !AppConfig.isPublicNotificationSendingDisabled,
+                            onChanged: (value) =>
+                                setState(() => _audience = value),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                HtmlEditorWidget(
-                  initialContent: '',
-                  controller: _controller,
-                ),
-              ],
+                  widget.editorOverride ??
+                      HtmlEditorWidget(
+                        initialContent: '',
+                        controller: _controller,
+                      ),
+                  _NewsFormActions(
+                    onCancel: _stornoPressed,
+                    onPublish: _audience == null
+                        ? null
+                        : () => _sendPressed(process: true),
+                    publishLabel: _publishButtonText,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        bottomNavigationBar: _NewsFormActions(
-          onCancel: _stornoPressed,
-          onPublish:
-              _audience == null ? null : () => _sendPressed(process: true),
-          publishLabel: _publishButtonText,
         ),
       ),
     );
@@ -198,57 +206,47 @@ class _NewsFormActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Material(
-      color: colors.surface,
-      elevation: 8,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Center(
-          heightFactor: 1,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-            child: SizedBox(
-              width: double.infinity,
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 12,
-                runSpacing: 8,
-                children: [
-                  TextButton(
-                    onPressed: onCancel,
-                    style: TextButton.styleFrom(
-                      foregroundColor: colors.onSurfaceVariant,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 14,
-                      ),
-                    ),
-                    child: Text(CommonStrings.storno),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: onPublish,
-                    icon: const Icon(Icons.publish_outlined, size: 20),
-                    label: Text(publishLabel),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colors.primary,
-                      foregroundColor: colors.onPrimary,
-                      disabledBackgroundColor: colors.onSurface.withAlpha(30),
-                      disabledForegroundColor: colors.onSurface.withAlpha(95),
-                      elevation: onPublish == null ? 0 : 2,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      child: SizedBox(
+        width: double.infinity,
+        child: Wrap(
+          alignment: WrapAlignment.end,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            TextButton(
+              onPressed: onCancel,
+              style: TextButton.styleFrom(
+                foregroundColor: colors.onSurfaceVariant,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
+              ),
+              child: Text(CommonStrings.storno),
+            ),
+            ElevatedButton.icon(
+              onPressed: onPublish,
+              icon: const Icon(Icons.publish_outlined, size: 20),
+              label: Text(publishLabel),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
+                disabledBackgroundColor: colors.onSurface.withAlpha(30),
+                disabledForegroundColor: colors.onSurface.withAlpha(95),
+                elevation: onPublish == null ? 0 : 2,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
