@@ -61,6 +61,7 @@ try {
   let cachePutFails = false;
   const cachedPuts = [];
   const deletedCaches = [];
+  const navigatedClients = [];
   let claimedExistingClients = 0;
   const cache = {
     addAll: async () => {},
@@ -113,12 +114,25 @@ try {
           id: 'older-open-tab',
           postMessage: () => {},
         }],
+        get: async (id) => ({
+          id,
+          url: `https://app.test/${id}`,
+          navigate: async () => { navigatedClients.push(id); },
+        }),
       },
       skipWaiting: async () => {},
       addEventListener: (type, handler) => { handlers[type] = handler; },
     },
   };
   vm.runInNewContext(worker, context);
+
+  // The tab requesting an update may still run the previous update script,
+  // which waits for controllerchange. Navigate just that client once the new
+  // worker activates; never seize or reload the other open tabs.
+  handlers.message({
+    data: 'SKIP_WAITING',
+    source: {id: 'updating-tab'},
+  });
 
   // A newly activated worker must not seize an already-open tab or delete the
   // shell that tab is still executing. Both tabs share Cache Storage; doing
@@ -129,6 +143,7 @@ try {
   await activation;
   assert.equal(claimedExistingClients, 0);
   assert.deepEqual(deletedCaches, []);
+  assert.deepEqual(navigatedClients, ['updating-tab']);
 
   async function dispatchFetch(request) {
     let responsePromise;

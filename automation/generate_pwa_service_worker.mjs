@@ -100,6 +100,7 @@ const WEB_CLIENT_ENTRY = ${JSON.stringify(deploymentUrl(webClientEntry))};
 const PRECACHE_PATHS = new Set(PRECACHE_URLS.map((url) =>
   new URL(url, self.location.origin).pathname));
 const clientVersions = new Map();
+let cutoverClientId = null;
 
 async function precacheAtomically() {
   const cache = await caches.open(CACHE_NAME);
@@ -134,6 +135,7 @@ async function deleteUnusedShellsWhenSafe() {
 
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') {
+    cutoverClientId = event.source?.id || null;
     self.skipWaiting();
     return;
   }
@@ -155,6 +157,10 @@ self.addEventListener('activate', (event) => {
       client.postMessage({ type: 'FESTAPP_REPORT_VERSION' });
     }
     await deleteUnusedShellsWhenSafe();
+    if (cutoverClientId) {
+      const cutoverClient = await self.clients.get(cutoverClientId);
+      if (cutoverClient) await cutoverClient.navigate(cutoverClient.url);
+    }
   })());
 });
 
