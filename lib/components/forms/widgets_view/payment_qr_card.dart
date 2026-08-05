@@ -6,32 +6,34 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 /// "Scan to pay" card shown on the public order confirmation when the form has
-/// `show_payment_qr` enabled. The SPD/QR-platba payload (`spd`) is produced
+/// `show_payment_qr` enabled. The currency-aware payload is produced
 /// server-side and delivered with the order data; this widget renders it plus
 /// the human-readable payment details. Layout mirrors the deployed build:
 /// title, subtitle, QR, then bankAccount / IBAN(if different) / variableSymbol
 /// / amountToPay / paymentNote(if any) — every row copyable — then a
 /// "Download QR" button.
 class PaymentQrCard extends StatelessWidget {
-  /// SPD ("QR Platba") string, e.g.
-  /// `SPD*1.0*ACC:CZ...*AM:1234.00*CC:CZK*X-VS:12345*MSG:...`.
-  final String spd;
+  final String payload;
+  final String format;
 
   /// Human-readable account number (shown as "Bank account").
   final String? bankAccount;
 
   /// Machine account number / IBAN (shown only when different from [bankAccount]).
   final String? iban;
-  final String? variableSymbol;
+  final String? paymentReference;
+  final String? referenceKind;
   final String? amountFormatted;
   final String? note;
 
   const PaymentQrCard({
     super.key,
-    required this.spd,
+    required this.payload,
+    required this.format,
     this.bankAccount,
     this.iban,
-    this.variableSymbol,
+    this.paymentReference,
+    this.referenceKind,
     this.amountFormatted,
     this.note,
   });
@@ -50,7 +52,12 @@ class PaymentQrCard extends StatelessWidget {
     if ((iban?.isNotEmpty ?? false) && iban != bankAccount) {
       rows.add(_CopyRow(label: PublicOrderStrings.iban, value: iban!));
     }
-    addRow(PublicOrderStrings.variableSymbol, variableSymbol);
+    addRow(
+      referenceKind == 'RF'
+          ? PublicOrderStrings.paymentReference
+          : PublicOrderStrings.variableSymbol,
+      paymentReference,
+    );
     addRow(PublicOrderStrings.amountToPay, amountFormatted);
     addRow(PublicOrderStrings.paymentNote, note);
 
@@ -61,19 +68,24 @@ class PaymentQrCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(PublicOrderStrings.paymentQrTitle,
-                style: theme.textTheme.titleMedium,
-                textAlign: TextAlign.center),
+            Text(
+              PublicOrderStrings.paymentQrTitle,
+              style: theme.textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 4),
-            Text(PublicOrderStrings.paymentQrSubtitle,
-                style: theme.textTheme.bodySmall, textAlign: TextAlign.center),
+            Text(
+              PublicOrderStrings.paymentQrSubtitle,
+              style: theme.textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             Center(
               child: Container(
                 color: Colors.white,
                 padding: const EdgeInsets.all(8),
                 child: QrImageView(
-                  data: spd,
+                  data: payload,
                   version: QrVersions.auto,
                   size: 220,
                 ),
@@ -96,7 +108,7 @@ class PaymentQrCard extends StatelessWidget {
   Future<void> _downloadQr(BuildContext context) async {
     try {
       final painter = QrPainter(
-        data: spd,
+        data: payload,
         version: QrVersions.auto,
         gapless: true,
       );
@@ -132,13 +144,13 @@ class _CopyRow extends StatelessWidget {
               text: TextSpan(
                 style: theme.textTheme.bodyMedium,
                 children: [
+                  TextSpan(text: '$label: ', style: theme.textTheme.bodyMedium),
                   TextSpan(
-                      text: '$label: ',
-                      style: theme.textTheme.bodyMedium),
-                  TextSpan(
-                      text: value,
-                      style: theme.textTheme.bodyMedium
-                          ?.copyWith(fontWeight: FontWeight.bold)),
+                    text: value,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ),

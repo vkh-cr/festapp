@@ -148,7 +148,7 @@ BEGIN
         v_acc_id, 99999, NOW(), 1000, 'CZK', NOW()
     );
     
-    -- Step 2: Attempt to import same transaction via Email (ID 99999)
+    -- Step 2: Reconcile the same movement imported through verified email.
     PERFORM public.process_email_transaction(jsonb_build_object(
         'bank_account_id', v_acc_id,
         'external_id', 'msg-dedup-test',
@@ -158,21 +158,22 @@ BEGIN
         'ks', '999',
         'message', 'Dual Import',
         'date', NOW(),
-        'transaction_id', 99999
+        'movement_id', 99999,
+        'ingest_source', 'airbank_email'
     ));
     
-    -- Step 3: Verify it was ignored
-    -- Should be 0 records with external_id 'msg-dedup-test' because the function returns early
+    -- Step 3: Verify the transport ID was attached to the one canonical row.
     SELECT count(*) INTO v_count FROM eshop.transactions WHERE external_id = 'msg-dedup-test';
     
-    IF v_count != 0 THEN
-        RAISE EXCEPTION 'Deduplication failed! Email import inserted duplicate transaction.';
+    IF v_count != 1 OR (SELECT count(*) FROM eshop.transactions
+      WHERE bank_account_id = v_acc_id AND transaction_id = 99999) != 1 THEN
+        RAISE EXCEPTION 'Movement reconciliation failed.';
     END IF;
     
     RAISE NOTICE 'Cross-channel deduplication verified.';
 
-    -- 8. Test Fuzzy Deduplication (Missing ID)
-    RAISE NOTICE 'Test 6: Fuzzy Deduplication...';
+    -- 8. Similar data without a shared bank ID must not be deduplicated.
+    RAISE NOTICE 'Test 6: Missing identity fails closed...';
     
     -- Step 1: Simulate existing API transaction (ID 88888, VS 777)
     -- Using correct columns: vs (was variable_symbol)
@@ -182,7 +183,7 @@ BEGIN
         v_acc_id, 88888, NOW(), 2000, 'CZK', '777', NOW()
     );
     
-    -- Step 2: Attempt duplicate import via Email (No ID, but matching VS/Amount)
+    -- Step 2: Import a similar unverified email (no shared bank ID).
     PERFORM public.process_email_transaction(jsonb_build_object(
         'bank_account_id', v_acc_id, 
         'external_id', 'msg-fuzzy-test', 
@@ -193,14 +194,16 @@ BEGIN
         'date', NOW()
     ));
     
-    -- Step 3: Verify ignored
-    SELECT count(*) INTO v_count FROM eshop.transactions WHERE external_id = 'msg-fuzzy-test';
+    -- Step 3: It is retained for later reconciliation but remains unpaired.
+    SELECT count(*) INTO v_count FROM eshop.transactions
+    WHERE external_id = 'msg-fuzzy-test' AND payment_info IS NULL
+      AND ingest_source = 'legacy_email';
     
-    IF v_count != 0 THEN
-        RAISE EXCEPTION 'Fuzzy Deduplication failed! Duplicate inserted.';
+    IF v_count != 1 THEN
+        RAISE EXCEPTION 'Unverified email was not retained safely.';
     END IF;
     
-    RAISE NOTICE 'Fuzzy deduplication verified.';
+    RAISE NOTICE 'Missing identity correctly remained unpaired.';
 
     RAISE NOTICE 'All tests passed!';
 END;

@@ -1,11 +1,16 @@
-CREATE OR REPLACE FUNCTION public.update_bank_account(
+DROP FUNCTION IF EXISTS public.update_bank_account(bigint,text,text,text,text[]);
+DROP FUNCTION IF EXISTS public.update_bank_account(bigint,text,text,text,text[],text,bigint);
+DROP FUNCTION IF EXISTS public.update_bank_account(bigint,text,text,text,text[],text,bigint,text);
+
+CREATE FUNCTION public.update_bank_account(
     p_id bigint,
     p_account_number text,
     p_title text,
     p_type text DEFAULT 'FIO',
     p_supported_currencies text[] DEFAULT NULL,
     p_account_number_human_readable text DEFAULT NULL,
-    p_unit_id bigint DEFAULT NULL
+    p_unit_id bigint DEFAULT NULL,
+    p_creditor_name text DEFAULT NULL
 )
 RETURNS bigint
 LANGUAGE plpgsql
@@ -35,8 +40,8 @@ BEGIN
              RAISE EXCEPTION 'ACCOUNT_NUMBER_EXISTS';
         END IF;
 
-        INSERT INTO eshop.bank_accounts (account_number, title, type, supported_currencies, account_number_human_readable)
-        VALUES (v_account_number, p_title, p_type, p_supported_currencies, p_account_number_human_readable)
+        INSERT INTO eshop.bank_accounts (account_number, title, type, supported_currencies, account_number_human_readable, creditor_name)
+        VALUES (v_account_number, p_title, p_type, p_supported_currencies, p_account_number_human_readable, nullif(trim(p_creditor_name), ''))
         RETURNING id INTO v_id;
 
         -- Automatically make the creator an Admin
@@ -69,6 +74,7 @@ BEGIN
             type = p_type,
             supported_currencies = p_supported_currencies,
             account_number_human_readable = p_account_number_human_readable,
+            creditor_name = nullif(trim(p_creditor_name), ''),
             updated_at = NOW()
         WHERE id = p_id
         RETURNING id INTO v_id;

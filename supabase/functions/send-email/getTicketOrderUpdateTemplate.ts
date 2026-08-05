@@ -5,6 +5,7 @@ import {
 } from "../_shared/utilities.ts";
 import { generateFullOrder } from "../_shared/orderOverview.ts";
 import { generateQrCode } from "../_shared/qrCodePayment.ts";
+import { paymentReferenceValue } from "../_shared/paymentPresentation.ts";
 import { getBaseOrderData } from "./shared.ts";
 import { translations } from "../_shared/translations/translations.ts";
 import { generateChangeOverview } from "../_shared/changeOverview.ts";
@@ -65,7 +66,7 @@ export async function getTicketOrderUpdateTemplate(
         formatCurrency(orderPrice, currency),
         bank_account.account_number_human_readable,
         iban,
-        payment_info.variable_symbol,
+        paymentReferenceValue(payment_info),
         formatDatetime(payment_info.deadline, lang),
         tone, // Pass tone
       );
@@ -75,7 +76,7 @@ export async function getTicketOrderUpdateTemplate(
         formatCurrency(balance, currency),
         bank_account.account_number_human_readable,
         iban,
-        payment_info.variable_symbol,
+        paymentReferenceValue(payment_info),
         formatDatetime(payment_info.deadline, lang),
         tone, // Pass tone
       );
@@ -90,6 +91,8 @@ export async function getTicketOrderUpdateTemplate(
         account_number_human_readable:
           bank_account.account_number_human_readable,
         variable_symbol: payment_info.variable_symbol,
+        creditor_reference: payment_info.creditor_reference,
+        creditor_name: bank_account.creditor_name,
       };
       const qrCodeBytes = await generateQrCode(
         qrPaymentData,

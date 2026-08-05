@@ -3,6 +3,7 @@ class BankAccountModel {
   // force cache invalidation
   final String? accountNumber;
   final String? title;
+  final String? creditorName;
   final String type;
   final bool isAdmin;
   final int priority;
@@ -19,6 +20,7 @@ class BankAccountModel {
     required this.id,
     this.accountNumber,
     this.title,
+    this.creditorName,
     this.priority = 0,
     this.type = 'FIO',
     this.isAdmin = false,
@@ -36,6 +38,7 @@ class BankAccountModel {
       id: json['id'],
       accountNumber: json['account_number'],
       title: json['title'],
+      creditorName: json['creditor_name'],
       priority: json['priority'] ?? 0,
       type: json['type'] ?? 'FIO',
       isAdmin: json['is_admin'] ?? false,
@@ -43,11 +46,13 @@ class BankAccountModel {
       tokenExpiryDate: json['token_expiry_date'] != null
           ? DateTime.parse(json['token_expiry_date'])
           : null,
-      supportedCurrencies: (json['supported_currencies'] as List<dynamic>?)
+      supportedCurrencies:
+          (json['supported_currencies'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      linkedUnits: (json['linked_units'] as List<dynamic>?)
+      linkedUnits:
+          (json['linked_units'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
@@ -55,7 +60,9 @@ class BankAccountModel {
       lastFetchTime: json['last_fetch_time'] != null
           ? DateTime.parse(json['last_fetch_time'])
           : null,
-      pairingCode: json['pairing_code'] == '************' ? null : json['pairing_code'],
+      pairingCode: json['pairing_code'] == '************'
+          ? null
+          : json['pairing_code'],
     );
   }
 
@@ -64,6 +71,7 @@ class BankAccountModel {
       'id': id,
       'account_number': accountNumber,
       'title': title,
+      'creditor_name': creditorName,
       'priority': priority,
       'type': type,
       'is_admin': isAdmin,
@@ -80,6 +88,7 @@ class BankAccountModel {
     int? id,
     String? accountNumber,
     String? title,
+    String? creditorName,
     String? type,
     bool? isAdmin,
     int? priority,
@@ -95,6 +104,7 @@ class BankAccountModel {
       id: id ?? this.id,
       accountNumber: accountNumber ?? this.accountNumber,
       title: title ?? this.title,
+      creditorName: creditorName ?? this.creditorName,
       type: type ?? this.type,
       isAdmin: isAdmin ?? this.isAdmin,
       priority: priority ?? this.priority,

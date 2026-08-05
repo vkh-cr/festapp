@@ -25,7 +25,7 @@ const INTEGRATION_DIR = path.join(PROJECT_ROOT, 'database/tests/eshop/integratio
 const FUNCTION_FILES = [
   'database/functions/eshop_orders/update_order_and_tickets_to_paid.sql',
   'database/functions/eshop_orders/recalculate_order_payment_status.sql',
-  'database/functions/eshop_transactions/add_transaction_to_payment_info.sql',
+  'database/functions/eshop_transactions/apply_transaction_pairing.sql',
   'database/functions/emails/queue_payment_reminders.sql',
   'database/functions/emails/get_due_queue_emails.sql',
   'database/functions/eshop_orders/scan_ticket.sql',

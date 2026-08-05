@@ -1,4 +1,5 @@
 import { createUserClient, supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { presentPayment } from "../_shared/paymentPresentation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -108,8 +109,31 @@ Deno.serve(async (req) => {
       });
     }
 
+    const paymentInfo = ticketOrder.order?.payment_info;
+    const payment = paymentInfo && Number(paymentInfo.amount) > 0
+      ? presentPayment(paymentInfo)
+      : null;
+    const paymentQr = payment
+      ? {
+        format: payment.qrFormat,
+        payload: payment.qrPayload,
+        reference_kind: payment.referenceKind,
+        reference: payment.referenceDisplay,
+        account_number: paymentInfo.account_number,
+        account_number_human_readable:
+          paymentInfo.account_number_human_readable,
+        amount: payment.amount,
+        currency_code: payment.currency,
+      }
+      : null;
+
     return new Response(
-      JSON.stringify({ ticketOrder, code: 200, delivery: "queued" }),
+      JSON.stringify({
+        ticketOrder,
+        payment_qr: paymentQr,
+        code: 200,
+        delivery: "queued",
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,

@@ -40,6 +40,7 @@ export class OrderResult {
                 </div>
                 <h2 class="result-title ${colorClass}">${title}</h2>
                 <p class="result-subtitle">${subtitle}</p>
+                <div class="result-payment-details"></div>
                 
                 <div class="result-actions">
                     <button class="btn btn-outline-secondary btn-back-to-form">
@@ -113,6 +114,9 @@ export class OrderResult {
                     cursor: pointer;
                     transition: all 0.2s;
                 }
+                .result-payment-details { width: 100%; max-width: 420px; margin: 0 0 24px; }
+                .result-payment-row { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; text-align: left; }
+                .result-payment-value { font-weight: 600; text-align: right; overflow-wrap: anywhere; }
                 .result-actions button:hover {
                     background-color: rgba(0,0,0,0.05);
                 }
@@ -123,6 +127,28 @@ export class OrderResult {
                 }
             </style>
         `;
+
+        const paymentQr = success ? resultData?.payment_qr : null;
+        const paymentHost = container.querySelector('.result-payment-details');
+        if (paymentHost && paymentQr) {
+            const rows = [
+                [PublicOrderStrings.bankAccount, paymentQr.account_number_human_readable || paymentQr.account_number],
+                [paymentQr.reference_kind === 'RF' ? PublicOrderStrings.paymentReference : PublicOrderStrings.variableSymbol, paymentQr.reference],
+                [PublicOrderStrings.amountToPay, `${paymentQr.amount} ${paymentQr.currency_code}`],
+            ];
+            for (const [label, value] of rows) {
+                if (value == null || String(value).trim() === '') continue;
+                const row = document.createElement('div');
+                row.className = 'result-payment-row';
+                const labelNode = document.createElement('span');
+                const valueNode = document.createElement('span');
+                valueNode.className = 'result-payment-value';
+                labelNode.textContent = label;
+                valueNode.textContent = String(value);
+                row.append(labelNode, valueNode);
+                paymentHost.appendChild(row);
+            }
+        }
 
         // Attach Event
         const backBtn = container.querySelector('.btn-back-to-form');
