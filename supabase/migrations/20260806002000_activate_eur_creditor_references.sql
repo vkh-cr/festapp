@@ -1,7 +1,7 @@
 -- Customer-visible RF writer activation. Apply only after the authorized SEPA pilot.
 -- Historical RF backfill is deliberately a separate explicit-ID operation.
 
-CREATE OR REPLACE FUNCTION create_ticket_order(input_data JSONB)
+CREATE OR REPLACE FUNCTION create_ticket_order_internal_v1(input_data JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER

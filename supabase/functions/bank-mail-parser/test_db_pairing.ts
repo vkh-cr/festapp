@@ -90,9 +90,9 @@ Deno.test("Integration: Email Pairing Logic", async () => {
     const result = (q.rows[0] as any).data;
 
     console.log("RPC Result:", result);
-    assertExists(result.id);
-    assertEquals(result.status, "inserted");
-    assertEquals(result.paired, true);
+    assertExists(result.stored_id);
+    assertEquals(result.ingest_status, "inserted");
+    assertEquals(result.match_verdict, "paired");
 
     // 3. Verify order state
     const oRes = await client.queryObject(
