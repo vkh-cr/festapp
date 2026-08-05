@@ -123,11 +123,14 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
         controller.headerChildren!.isNotEmpty) {
       for (var a in controller.headerChildren!) {
         leftActions.add(
-          ElevatedButton(
-            onPressed: a.isEnabled != null && !a.isEnabled!()
-                ? null
-                : () => a.action!(controller, null),
-            child: Text(a.name ?? "---"),
+          AnimatedBuilder(
+            animation: widget.stateManager,
+            builder: (context, _) => ElevatedButton(
+              onPressed: a.isEnabled != null && !a.isEnabled!()
+                  ? null
+                  : () => a.action!(controller, null),
+              child: Text(a.name ?? "---"),
+            ),
           ),
         );
       }

@@ -1,5 +1,18 @@
 # Users Component
 
+## Companion projection and commands
+
+Companion policy comes from cached `occasion_config`. Relationship identity,
+origin, live standard groups and attendance come only from the active
+identity's full `private_profile` replacement. Self-created account lifecycle
+and admin assignment are separate commands; admin unassignment removes only
+the occasion relationship. Admin mutations invalidate the owner's private head
+without activating the owner's payload in the admin identity scope.
+Companion identity and accommodation remain normal `user_info` and
+`occasion_users.services` data. The relationship never copies participant
+fields; the client resolves accommodation with the same occasion catalog and
+map projection used for the signed-in user's profile.
+
 ## The User Bundle (CRITICAL)
 
 `get_users_from_occasion_with_orders` RPC returns dictionary-style maps (not nested JSON) to avoid duplication. Dart (`db_users.dart`) manually re-stitches the graph by resolving IDs across: users -> tickets -> orderProductTickets -> orders -> forms -> formFields.

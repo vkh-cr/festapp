@@ -50,7 +50,9 @@ BEGIN
     'delete_empty_counseling_slots_client_sync_v1','game_guess_client_sync_v1',
     'get_exclusive_groups_for_edit_v1','save_exclusive_group_client_sync_v1',
     'delete_exclusive_group_client_sync_v1',
-    'create_companion_client_sync_v1','delete_companion_client_sync_v1',
+    'create_companion_client_sync_v1','delete_owned_companion_client_sync_v1',
+    'assign_existing_companion_client_sync_v1',
+    'unassign_existing_companion_client_sync_v1',
     'submit_event_feedback_client_sync_v1',
     'delete_event_feedback_client_sync_v1',
     'begin_client_mutation_v1','finish_client_mutation_v1',
@@ -116,6 +118,7 @@ BEGIN
   SELECT count(*) INTO v_trigger_count FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid
   JOIN pg_namespace n ON n.oid=c.relnamespace
   WHERE n.nspname='public' AND NOT t.tgisinternal AND
+    t.tgname<>'handle_updated_at' AND
     (c.relname LIKE 'client_sync_%' OR c.relname IN ('events','event_users','event_users_saved','places','news'));
   PERFORM assert_eq(v_trigger_count::text,'0','client sync creates no persistent application trigger');
 
@@ -261,6 +264,16 @@ BEGIN
     WHERE n.nspname='public' AND p.proname='record_client_sync_commit_v1'
       AND p.proargnames && ARRAY['p_idempotency_key','p_authoritative_result']::text[]),
     'commit helper owns audit/revisions only; receipts own replay');
+  PERFORM assert_true(EXISTS (
+    SELECT 1 FROM pg_proc p
+    WHERE p.oid='public.update_ticket_products_internal_v1(bigint,jsonb)'::regprocedure
+      AND p.proconfig @> ARRAY['search_path=public, eshop, extensions']),
+    'ticket product implementation resolves its permission helper on a trusted path');
+  PERFORM assert_true(EXISTS (
+    SELECT 1 FROM pg_proc p
+    WHERE p.oid='public.update_occasion_internal_v1(jsonb)'::regprocedure
+      AND p.proconfig @> ARRAY['search_path=public, extensions']),
+    'occasion implementation resolves its legacy helpers on a trusted path');
 END $$;
 
 ROLLBACK;

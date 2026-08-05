@@ -11,6 +11,24 @@ const source = await readFile(
   'utf8',
 );
 
+const clickHandler = source.match(
+  /reloadButton\.addEventListener\('click',[\s\S]*?\n    \}\);/,
+)?.[0] ?? '';
+assert.match(clickHandler, /cutOverToVersion\(latestVersion\)/);
+assert.doesNotMatch(
+  clickHandler,
+  /recoverFailedCutover\(latestVersion\)/,
+  'accepting an update must preserve the currently working offline shell',
+);
+const cutoverFunction = source.match(
+  /async function cutOverToVersion\(latestVersion\) \{[\s\S]*?\n  \}/,
+)?.[0] ?? '';
+assert.ok(
+  cutoverFunction.indexOf('activateWaitingFestappWorker') <
+    cutoverFunction.indexOf('sessionStorage.setItem'),
+  'a failed activation must not mark the version as an attempted cutover',
+);
+
 function storage(initial = {}) {
   const values = new Map(Object.entries(initial));
   return {

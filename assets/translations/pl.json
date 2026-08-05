@@ -64,6 +64,12 @@
     "scanCameraInstruction": "Skieruj kamerę na kod uczestnika, aby zweryfikować wejście.",
     "signedInCompanions": "Zalogowani towarzysze"
   },
+  "FeatureCompanions": {
+    "description": "Zarządza programem osobnych uczestników bez własnego urządzenia.",
+    "enterNumberGreaterThanZero": "Wpisz liczbę większą od zera",
+    "allowUserCreate": "Uczestnicy mogą tworzyć techniczne konta towarzyszy",
+    "allowAdminAssign": "Administratorzy mogą przypisywać istniejących uczestników"
+  },
   "FeatureUser": {
     "passwordResetLinkSent": "Link do resetowania hasła został wysłany na {email}. Sprawdź swoją skrzynkę odbiorczą i postępuj zgodnie z instrukcjami, aby zresetować hasło.",
     "admin": "Admin",
@@ -78,7 +84,17 @@
     "deleteCompanion": "Usuń towarzysza",
     "inviteFailed": "Nie udało się zaprosić {user}. Liczba prób: ({retries}).",
     "fillPassword": "Wpisz hasło!",
-    "companionInfo": "Jeśli masz dziecko, partnera lub przyjaciela bez telefonu, możesz ich zarejestrować jako towarzysza. Do wejścia na wydarzenie będą potrzebować opaski festiwalowej. Maksymalna liczba towarzyszy to {max_companions}.",
+    "companionInfo": "Towarzysz jest osobnym uczestnikiem bez własnego urządzenia. Maksymalna liczba: {max_companions}.",
+    "noGroup": "Bez grupy",
+    "manageCompanions": "Zarządzaj towarzyszami",
+    "assignCompanion": "Przypisz",
+    "companionAssigned": "Osoba towarzysząca została pomyślnie przypisana.",
+    "unassignCompanion": "Odłącz",
+    "searchCompanion": "Szukaj uczestnika",
+    "companionLimitReached": "Właściciel osiągnął limit towarzyszy",
+    "companionAlreadyAssigned": "Uczestnik jest już przypisany do innego właściciela",
+    "companionOwnsAnother": "Uczestnik zarządza już własnym towarzyszem",
+    "companionOwnerIsAssigned": "Właściciel jest sam przypisany jako towarzysz",
     "insertHere": "Wstaw tutaj",
     "invite": "Zaproś",
     "invitedUser": "Zaproszony: {user}.",
@@ -88,6 +104,8 @@
     "showMyCode": "Pokaż mój kod",
     "signIn": "Zaloguj się",
     "signOut": "Wyloguj się",
+    "companionSignIn": "Zapisz",
+    "companionSignOut": "Wypisz",
     "signedInEvents": "Zalogowane wydarzenia: {count}",
     "reinviteConfirm": "Niektórzy użytkownicy zostali już zaproszeni. Czy chcesz zaprosić ich ponownie i wysłać nowy kod logowania?",
     "inviteInfo": "Użytkownicy otrzymają kod logowania za pomocą e-maila.",
@@ -196,6 +214,11 @@
     "news": "Wiadomości"
   },
   "FeatureSchedule": {
+    "programRemindersTitle": "Przypomnienia o programie",
+    "programRemindersDescription": "Ustaw powiadomienie przed rozpoczęciem pozycji w Moim programie.",
+    "programRemindersToggle": "Powiadamiaj przed rozpoczęciem programu",
+    "programRemindersLeadTime": "Jak długo wcześniej?",
+    "programRemindersMinutes": "{minutes} min",
     "addToSchedule": "Dodaj do programu",
     "addedToMySchedule": "Dodane do Mojego programu.",
     "afternoon": "Popołudnie",
@@ -409,6 +432,10 @@
     "discardChangesConfirm": "Naprawdę odrzucić wszystkie zmiany?",
     "savingChanges": "Zapisywanie zmian",
     "tabService": "Pobyt"
+  },
+  "FeatureProgramNotifications": {
+    "title": "Przypomnienia o programie",
+    "description": "Pozwala użytkownikom ustawić powiadomienia przed rozpoczęciem pozycji w Moim programie."
   },
   "Dialogs": {
     "noResults": "Brak wyników."

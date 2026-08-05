@@ -74,6 +74,11 @@
     "dateFormatDayMonth": "EEEE, d. MMMM"
   },
   "FeatureSchedule": {
+    "programRemindersTitle": "Program reminders",
+    "programRemindersDescription": "Choose when to be notified before items in My program begin.",
+    "programRemindersToggle": "Notify me before the program starts",
+    "programRemindersLeadTime": "How long beforehand?",
+    "programRemindersMinutes": "{minutes} min",
     "labelScheduleType": "Schedule Type",
     "optionBasic": "basic",
     "optionAdvanced": "advanced",
@@ -1175,7 +1180,7 @@
     "deleteCompanion": "Delete companion",
     "passwordChangeFailed": "Failed for user {user}: {error}",
     "inviteFailed": "Failed to invite {user}. Number of retries: ({retries}).",
-    "companionInfo": "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.",
+    "companionInfo": "A companion is a separate participant without their own device. Maximum companions: {max_companions}.",
     "insertHere": "Input here",
     "invite": "Invite",
     "invitedUser": "Invited: {user}.",
@@ -1198,7 +1203,19 @@
     "privacyChoices": "Privacy choices and deletion",
     "terms": "Terms and license",
     "support": "Support",
-    "signupPrivacyNotice": "Before registering, read how CSM Ostrava processes personal data. This notice does not replace separate acceptance of event-specific rules."
+    "signupPrivacyNotice": "Before registering, read how CSM Ostrava processes personal data. This notice does not replace separate acceptance of event-specific rules.",
+    "noGroup": "No group",
+    "manageCompanions": "Manage companions",
+    "assignCompanion": "Assign",
+    "unassignCompanion": "Unassign",
+    "searchCompanion": "Search participant",
+    "companionLimitReached": "The owner has reached the companion limit",
+    "companionAlreadyAssigned": "The participant is already assigned to another owner",
+    "companionOwnsAnother": "The participant already manages a companion",
+    "companionOwnerIsAssigned": "The owner is assigned as a companion",
+    "companionAssigned": "Companion assigned successfully.",
+    "companionSignIn": "Sign in",
+    "companionSignOut": "Sign out"
   },
   "Common": {
     "fieldCannotBeEmpty": "Field cannot be empty",
@@ -1560,7 +1577,9 @@
   },
   "FeatureCompanions": {
     "description": "Allows adding companions (partner, child, or friend without a phone) and signing them up for workshops.",
-    "enterNumberGreaterThanZero": "Enter a number greater than 0"
+    "enterNumberGreaterThanZero": "Enter a number greater than 0",
+    "allowUserCreate": "Participants may create technical companion accounts",
+    "allowAdminAssign": "Administrators may assign existing participants"
   },
   "FeatureForm": {
     "description": "Allows creating a form to reserve one or more seats at an event.",
@@ -1716,6 +1735,10 @@
   },
   "FeatureMySchedule": {
     "description": "Enables adding program items to favorites."
+  },
+  "FeatureProgramNotifications": {
+    "title": "Program reminders",
+    "description": "Lets users configure reminders before items in My program begin."
   },
   "FeatureEntryCode": {
     "title": "Entry Code",

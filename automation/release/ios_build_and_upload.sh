@@ -22,7 +22,7 @@ fi
 cd "$PROJECT_ROOT"
 node automation/release/store_preflight.mjs --local --read-only
 target_version="$(node -p "require('./automation/release/app_store_config.json').target.version")"
-target_build="$(node -p "require('./automation/release/app_store_config.json').target.build")"
+target_build="$(node automation/release/project_version.mjs --build)"
 "$SCRIPT_DIR/prepare_signing_keychain.sh"
 fvm flutter build ipa --release \
   --build-name="$target_version" \

@@ -26,6 +26,7 @@ import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:fstapp/components/timeline/light_timeline_view.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
+import 'package:fstapp/components/schedule/program_notification_settings.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/users/companion/companion_dialog.dart';
 import 'package:fstapp/components/users/companion/db_companions.dart';
@@ -51,22 +52,29 @@ class _MySchedulePageState extends State<MySchedulePage> {
   final Map<int, String?> _eventAndActivitiesDescriptions = {};
   int? _openId;
   int _loadRevision = 0;
+  bool _hasOwnedCompanions = false;
 
   @override
   void initState() {
     super.initState();
     savedProgramPendingState.addListener(_refreshPendingProgram);
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
   }
 
   @override
   void dispose() {
     _loadRevision++;
     savedProgramPendingState.removeListener(_refreshPendingProgram);
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
     super.dispose();
   }
 
   void _refreshPendingProgram() {
     if (mounted) unawaited(loadDataOffline());
+  }
+
+  void _onProjectionChanged() {
+    if (mounted && ClientSyncRuntime.isV1Selected) unawaited(loadData());
   }
 
   @override
@@ -101,6 +109,9 @@ class _MySchedulePageState extends State<MySchedulePage> {
       return;
     }
     final loadRevision = ++_loadRevision;
+    final companions = await DbCompanions.getAllCompanions();
+    if (!mounted || loadRevision != _loadRevision) return;
+    _hasOwnedCompanions = companions.isNotEmpty;
     late final MyEventsBundle data;
     if (!_fullEventsLoaded) {
       final loaded = await DbEvents.getMyEventsAndActivities(
@@ -243,9 +254,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(builder: (bCtx, setDialogState) {
-          return CompanionDialog(
+          return CompanionAttendanceDialog(
             eventId: timeBlockItem.id,
-            maxCompanions: FeatureService.getMaxCompanions() ?? 0,
             companions: companions,
             refreshData: () async {
               await loadData();
@@ -266,6 +276,39 @@ class _MySchedulePageState extends State<MySchedulePage> {
       },
     );
   }
+
+  bool get _showProgramNotificationSettings =>
+      FeatureService.isProgramNotificationsEnabled();
+
+  Future<void> _openProgramNotificationSettings() => showModalBottomSheet<void>(
+        context: context,
+        showDragHandle: true,
+        isScrollControlled: true,
+        builder: (sheetContext) => SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewInsetsOf(sheetContext).bottom + 12,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                child: ProgramNotificationSettingsCard(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+  List<Widget>? _programNotificationActions(Color color) =>
+      _showProgramNotificationSettings
+          ? [
+              IconButton(
+                tooltip: ScheduleStrings.programRemindersTitle,
+                onPressed: _openProgramNotificationSettings,
+                icon: Icon(Icons.notifications_outlined, color: color),
+              ),
+            ]
+          : null;
 
   @override
   Widget build(BuildContext context) {
@@ -302,6 +345,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
             color: ThemeConfig.blackColor(context),
             onPressed: () => RouterService.popOrHome(context),
           ),
+          actions: _programNotificationActions(ThemeConfig.blackColor(context)),
         ),
         body: SafeArea(
           child: Align(
@@ -343,6 +387,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
               isUserApprover: _isUserApprover,
               onScanButtonPressed: _handleScanButtonPressed,
               onCompanionButtonPressed: _handleCompanionButtonPressed,
+              hasOwnedCompanions: _hasOwnedCompanions,
             ),
             openId: _openId,
             onToggle: (id) =>
@@ -363,6 +408,9 @@ class _MySchedulePageState extends State<MySchedulePage> {
           leading: BackButton(
             color: ThemeConfig.appBarColorNegative(),
             onPressed: () => RouterService.popOrHome(context),
+          ),
+          actions: _programNotificationActions(
+            ThemeConfig.appBarColorNegative(),
           ),
         ),
         body: SafeArea(

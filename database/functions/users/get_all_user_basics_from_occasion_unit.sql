@@ -106,6 +106,7 @@ BEGIN
   FROM public.user_info ui
   JOIN aggregated_user_roles aur ON ui.id = aur."user"
   LEFT JOIN public.user_companions uc ON ui.id = uc.companion
+    AND uc.occasion IN (SELECT id FROM public.occasions WHERE unit=p_unit_id)
   LEFT JOIN public.organization_users ou ON ui.id = ou."user" AND ou.organization = org_id
   WHERE (ou.is_hidden IS NOT TRUE);
 

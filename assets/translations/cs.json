@@ -74,6 +74,11 @@
     "dateFormatDayMonth": "EEEE, d. MMMM"
   },
   "FeatureSchedule": {
+    "programRemindersTitle": "Připomenutí programu",
+    "programRemindersDescription": "Nastavte si upozornění před začátkem položek v Mém programu.",
+    "programRemindersToggle": "Upozorňovat na začátek programu",
+    "programRemindersLeadTime": "Jak dlouho předem?",
+    "programRemindersMinutes": "{minutes} min",
     "labelScheduleType": "Typ programu",
     "optionBasic": "základní",
     "optionAdvanced": "pokročilý",
@@ -1175,7 +1180,7 @@
     "deleteCompanion": "Smazat společníka",
     "passwordChangeFailed": "Nezdařilo se u uživatele {user}: {error}",
     "inviteFailed": "Nepodařilo se pozvat {user}. Počet pokusů: ({retries}).",
-    "companionInfo": "Pokud máte dítě, partnera nebo kamaráda bez telefonu, můžete je přihlásit jako společníka. K vstupu na akci budou potřebovat festivalový náramek. Maximální počet společníků je {max_companions}.",
+    "companionInfo": "Společník je samostatný účastník bez vlastního zařízení. Maximální počet společníků je {max_companions}.",
     "insertHere": "Vložit zde",
     "invite": "Pozvat",
     "invitedUser": "Pozván: {user}.",
@@ -1198,7 +1203,19 @@
     "privacyChoices": "Volby a smazání údajů",
     "terms": "Podmínky a licence",
     "support": "Podpora",
-    "signupPrivacyNotice": "Před registrací si přečtěte, jak CSM Ostrava zpracovává osobní údaje. Nejde o náhradu samostatného souhlasu s pravidly konkrétní akce."
+    "signupPrivacyNotice": "Před registrací si přečtěte, jak CSM Ostrava zpracovává osobní údaje. Nejde o náhradu samostatného souhlasu s pravidly konkrétní akce.",
+    "noGroup": "Bez skupinky",
+    "manageCompanions": "Spravovat společníky",
+    "assignCompanion": "Přiřadit",
+    "unassignCompanion": "Odpojit",
+    "searchCompanion": "Hledat účastníka",
+    "companionLimitReached": "Vlastník už dosáhl maximálního počtu společníků",
+    "companionAlreadyAssigned": "Účastník už je přiřazen jinému vlastníkovi",
+    "companionOwnsAnother": "Účastník už spravuje vlastního společníka",
+    "companionOwnerIsAssigned": "Vlastník je sám přiřazen jako společník",
+    "companionAssigned": "Společník byl úspěšně přiřazen.",
+    "companionSignIn": "Přihlásit",
+    "companionSignOut": "Odhlásit"
   },
   "Common": {
     "fieldCannotBeEmpty": "Pole nemůže být prázdné",
@@ -1560,7 +1577,9 @@
   },
   "FeatureCompanions": {
     "description": "Umožňuje vytváření společníků (partner, dítě nebo kamarád bez telefonu) a jejich přihlašování na workshopy.",
-    "enterNumberGreaterThanZero": "Zadejte číslo větší než 0"
+    "enterNumberGreaterThanZero": "Zadejte číslo větší než 0",
+    "allowUserCreate": "Účastníci mohou vytvářet technické účty společníků",
+    "allowAdminAssign": "Administrátoři mohou přiřazovat existující účastníky"
   },
   "FeatureForm": {
     "description": "Umožňuje vytvoření formuláře pro rezervaci místa nebo míst na akci.",
@@ -1716,6 +1735,10 @@
   },
   "FeatureMySchedule": {
     "description": "Umožní přidávat si body programu do oblíbených."
+  },
+  "FeatureProgramNotifications": {
+    "title": "Připomenutí programu",
+    "description": "Umožní uživatelům nastavit upozornění na začátek položek v Mém programu."
   },
   "FeatureEntryCode": {
     "title": "Vstupní kód",

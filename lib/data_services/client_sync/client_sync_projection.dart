@@ -355,35 +355,20 @@ class ClientSyncProjection {
     result.userGroups = projectedGroups.toSet();
     result.eventUserGroup =
         projectedGroups.where((group) => group.type == null).firstOrNull;
-    result.companions = await companions();
-
-    final userServices = occasion is Map ? occasion['services'] : null;
-    final accommodationCodes =
-        userServices is Map ? userServices['accommodation'] as Map? : null;
-    final accommodationCode = accommodationCodes?.keys
-        .whereType<String>()
-        .where((code) => code.isNotEmpty)
-        .firstOrNull;
-    if (accommodationCode != null) {
-      final config = await occasionConfig();
-      final services = config['services'];
-      final accommodation =
-          services is Map ? services['accommodation'] as List? : null;
-      final service = accommodation
-          ?.whereType<Map>()
-          .firstWhereOrNull((item) => item['code'] == accommodationCode);
-      final reference = (service?['reference'] as num?)?.toInt();
-      if (reference != null) {
-        result.accommodationPlace = (await places())
-                .firstWhereOrNull((place) => place.id == reference) ??
-            PlaceModel(
-              id: reference,
-              title: service?['title'] as String?,
-              description: '',
-              type: '',
-            );
-      }
-    }
+    final config = await occasionConfig();
+    final projectedPlaces = await places();
+    final projectedCompanions = projectCompanions(profile);
+    hydrateCompanionAccommodations(
+      projectedCompanions,
+      occasionServices: config['services'],
+      places: projectedPlaces,
+    );
+    result.companions = projectedCompanions;
+    result.accommodationPlace = projectAccommodationPlace(
+      userServices: occasion is Map ? occasion['services'] : null,
+      occasionServices: config['services'],
+      places: projectedPlaces,
+    );
     return result;
   }
 
@@ -422,11 +407,67 @@ class ClientSyncProjection {
   static Future<List<CompanionModel>> companions() async {
     final profile =
         await ClientSyncRuntime.readPrivate(ClientSyncComponent.privateProfile);
+    final companions = projectCompanions(profile);
+    final config = await occasionConfig();
+    hydrateCompanionAccommodations(
+      companions,
+      occasionServices: config['services'],
+      places: await places(),
+    );
+    return companions;
+  }
+
+  static List<CompanionModel> projectCompanions(Object? profile) {
     if (profile is! Map) return const [];
     return ((profile['companions'] as List?) ?? const [])
         .whereType<Map>()
         .map((raw) => CompanionModel.fromJson(raw.cast<String, dynamic>()))
         .toList(growable: false);
+  }
+
+  static PlaceModel? projectAccommodationPlace({
+    required Object? userServices,
+    required Object? occasionServices,
+    required List<PlaceModel> places,
+  }) {
+    final assignments =
+        userServices is Map ? userServices['accommodation'] : null;
+    if (assignments is! Map) return null;
+    final code = assignments.keys
+        .whereType<String>()
+        .where((key) => key.isNotEmpty && assignments[key] != 'none')
+        .firstOrNull;
+    if (code == null) return null;
+
+    final catalog =
+        occasionServices is Map ? occasionServices['accommodation'] : null;
+    final service = catalog is List
+        ? catalog
+            .whereType<Map>()
+            .firstWhereOrNull((item) => item['code'] == code)
+        : null;
+    final rawReference = service?['reference'];
+    final reference = rawReference is num
+        ? rawReference.toInt()
+        : int.tryParse(rawReference?.toString() ?? '');
+    final title = service?['title']?.toString() ?? code;
+    if (reference == null) return PlaceModel(title: title);
+    return places.firstWhereOrNull((place) => place.id == reference) ??
+        PlaceModel(id: reference, title: title);
+  }
+
+  static void hydrateCompanionAccommodations(
+    List<CompanionModel> companions, {
+    required Object? occasionServices,
+    required List<PlaceModel> places,
+  }) {
+    for (final companion in companions) {
+      companion.accommodationPlace = projectAccommodationPlace(
+        userServices: companion.occasionServices,
+        occasionServices: occasionServices,
+        places: places,
+      );
+    }
   }
 
   static Future<List<ActivityModel>> activities() async {

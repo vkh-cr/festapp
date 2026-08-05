@@ -89,7 +89,8 @@ const coreAssets = assets.filter((url) =>
   url === deploymentUrl(flutterEntry) ||
   url === deploymentUrl(webClientEntry) ||
   standaloneDocumentSet.has(url) ||
-  installCriticalNames.has(url.split('?')[0])
+  installCriticalNames.has(url.split('?')[0]) ||
+  /^\/main\.dart\.js_\d+\.part\.js$/.test(url.split('?')[0])
 );
 const cacheName = `festapp-app-shell-${version}`;
 const source = `'use strict';
@@ -111,10 +112,10 @@ let cutoverClientId = null;
 
 async function precacheAtomically() {
   const cache = await caches.open(CACHE_NAME);
-  // Keep installation small so an Android client can activate an update in
-  // seconds. The remaining known assets are cached lazily after activation;
-  // preloading the entire Flutter build used to make every update download
-  // hundreds of files before the new worker could take control.
+  // Install every executable chunk atomically. Flutter defers routes into
+  // main.dart.js_<n>.part.js files; omitting an unvisited route can make an
+  // installed PWA stall when it is cold-started offline on that URL. Large
+  // non-code assets remain lazy so maps/media do not delay activation.
   await cache.addAll(CORE_URLS);
 }
 
@@ -151,9 +152,15 @@ self.addEventListener('message', (event) => {
     return;
   }
   if (event.data?.type === 'FESTAPP_CLIENT_VERSION' && event.source?.id) {
+    // controllerchange fires in the old page before its accepted reload. Its
+    // report still contains the previous build number; mapping that cutover
+    // client back to the old shell recreates a mixed-generation mobile reload.
+    if (event.source.id === cutoverClientId &&
+        event.data.version !== BUILD_VERSION) return;
     clientVersions.set(event.source.id, event.data.version);
     if (event.data.version === BUILD_VERSION) {
       clientCacheNames.delete(event.source.id);
+      if (event.source.id === cutoverClientId) cutoverClientId = null;
     } else {
       clientCacheNames.set(
         event.source.id,

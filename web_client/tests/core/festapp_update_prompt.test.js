@@ -259,7 +259,7 @@ describe('festapp_update_prompt.js', () => {
         assert.ok(banner(window), 'a running app should let the user choose when to reload');
     });
 
-    test('Reload waits for the new worker to control the page before navigating', async () => {
+    test('Reload preserves the working shell through the mobile controller handoff', async () => {
         const { window } = boot({
             buildVersion: '1.0.0+1',
             latestVersion: '1.0.0+2',
@@ -274,14 +274,19 @@ describe('festapp_update_prompt.js', () => {
         await flush();
 
         assert.deepStrictEqual([...window.__skipWaitingMessages], ['SKIP_WAITING']);
+        assert.strictEqual(window.__festappUnregisterCalls, 0,
+            'the last working worker must remain registered until cutover succeeds');
+        assert.deepStrictEqual([...window.__deletedCaches], [],
+            'the last working offline shell must not be deleted before cutover');
         assert.strictEqual(window.__navigationErrors.length, 0,
-            'the previous controller must not receive the cutover reload');
+            'reload must wait until the new worker controls this tab');
 
         window.__activateWaitingController();
         await flush();
 
+        assert.strictEqual(window.sessionStorage.getItem('festappCutoverVersion'), '1.0.0+2');
         assert.strictEqual(window.__navigationErrors.length, 1,
-            'reload should start only after controllerchange');
+            'the controlled new shell should reload exactly once');
     });
 
     test('an old page after accepted cutover cleans Festapp state once without repeating the banner', async () => {

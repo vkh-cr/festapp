@@ -815,12 +815,19 @@ create table if not exists public.organization_users (
 ) TABLESPACE pg_default;
 
 create table if not exists public.user_companions (
+  occasion BIGINT NOT NULL,
   "user" UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   companion UUID NOT NULL,
-  CONSTRAINT user_companions_pkey PRIMARY KEY ("user", companion),
-  CONSTRAINT user_companions_companion_fkey FOREIGN KEY (companion) REFERENCES public.user_info (id),
-  CONSTRAINT user_companions_user_fkey FOREIGN KEY ("user") REFERENCES public.user_info (id)
+  origin TEXT NOT NULL,
+  created_by UUID NULL,
+  CONSTRAINT user_companions_pkey PRIMARY KEY (occasion, "user", companion),
+  CONSTRAINT user_companions_one_owner UNIQUE (occasion, companion),
+  CONSTRAINT user_companions_not_self CHECK ("user" <> companion),
+  CONSTRAINT user_companions_origin_check CHECK (origin IN ('self_created', 'admin_assigned')),
+  CONSTRAINT user_companions_owner_fkey FOREIGN KEY (occasion, "user") REFERENCES public.occasion_users (occasion, "user") ON DELETE CASCADE,
+  CONSTRAINT user_companions_companion_fkey FOREIGN KEY (occasion, companion) REFERENCES public.occasion_users (occasion, "user") ON DELETE CASCADE,
+  CONSTRAINT user_companions_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_info (id) ON DELETE SET NULL
 ) TABLESPACE pg_default;
 
 create table if not exists public.user_groups (

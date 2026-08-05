@@ -399,8 +399,12 @@
       reloadButton.disabled = true;
       reloadButton.textContent = copy.loading;
       await clearLegacyFlutterCaches();
+      // Keep the last working shell until the matching new worker is installed,
+      // activated and controlling this tab. If preparation fails, the user can
+      // retry without losing the version that still launches offline.
       if (!(await cutOverToVersion(latestVersion))) {
-        await recoverFailedCutover(latestVersion);
+        reloadButton.disabled = false;
+        reloadButton.textContent = copy.reload;
       }
     });
 
@@ -461,9 +465,9 @@
 
   async function cutOverToVersion(latestVersion) {
     if (!latestVersion) return false;
-    sessionStorage.setItem(cutoverStorageKey, latestVersion);
     const ready = await activateWaitingFestappWorker(latestVersion);
     if (!ready) return false;
+    sessionStorage.setItem(cutoverStorageKey, latestVersion);
     window.location.reload();
     return true;
   }

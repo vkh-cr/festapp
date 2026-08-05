@@ -45,7 +45,7 @@ BEGIN
         ), '[]'::jsonb)
         FROM public.user_companions uc
         JOIN public.user_info comp_ui ON uc.companion = comp_ui.id
-        WHERE uc."user" = ui.id
+        WHERE uc."user" = ui.id AND uc.occasion=oc
       )
     ))
   ) INTO users_data

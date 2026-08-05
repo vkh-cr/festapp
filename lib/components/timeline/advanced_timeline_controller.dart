@@ -26,6 +26,7 @@ class AdvancedTimelineController {
   final void Function(BuildContext context, TimeBlockItem timeBlockItem)?
       onCompanionButtonPressed;
   final bool Function()? isUserApprover;
+  final bool hasOwnedCompanions;
 
   AdvancedTimelineController({
     required this.events,
@@ -44,5 +45,6 @@ class AdvancedTimelineController {
     this.onScanButtonPressed,
     this.onCompanionButtonPressed,
     this.isUserApprover,
+    this.hasOwnedCompanions = false,
   });
 }

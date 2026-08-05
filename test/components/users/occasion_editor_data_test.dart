@@ -95,4 +95,26 @@ void main() {
       'Budova Orion',
     );
   });
+
+  test('editor row parses companion owner metadata', () {
+    final user = DbUsers.parseOccasionEditorData({
+      'code': 200,
+      'data': {
+        'occasion_users': [
+          {
+            'user': 'companion',
+            'data': <String, dynamic>{},
+            'companion_owner_id': 'owner',
+            'companion_owner_name': 'Owner Name',
+            'companion_origin': 'admin_assigned',
+          }
+        ],
+        'forms': <dynamic>[],
+        'services': <String, dynamic>{},
+      }
+    }).users.single;
+    expect(user.companionOwnerId, 'owner');
+    expect(user.companionOwnerName, 'Owner Name');
+    expect(user.companionOrigin, 'admin_assigned');
+  });
 }

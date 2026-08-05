@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -63,6 +65,7 @@ class _SchedulePageState extends State<SchedulePage>
   final ScrollController _scrollController = ScrollController();
   List<TimeBlockItem> _dots = [];
   List<EventModel> _events = [];
+  bool _hasOwnedCompanions = false;
   static final Map<int, String?> _eventDescriptions = {};
 
   TabsRouter? _tabsRouter;
@@ -79,6 +82,7 @@ class _SchedulePageState extends State<SchedulePage>
     if (!ClientSyncRuntime.isV1Selected) {
       context.tabsRouter.addListener(_onTabSwitch);
     }
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
     loadData();
   }
 
@@ -100,8 +104,22 @@ class _SchedulePageState extends State<SchedulePage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _tabsRouter?.removeListener(_onTabSwitch);
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onProjectionChanged() {
+    if (ClientSyncRuntime.isV1Selected) {
+      unawaited(_reloadCompanionOwnership());
+    }
+  }
+
+  Future<void> _reloadCompanionOwnership() async {
+    final hasOwnedCompanions = AuthService.isLoggedIn() &&
+        (await DbCompanions.getAllCompanions()).isNotEmpty;
+    if (!mounted || hasOwnedCompanions == _hasOwnedCompanions) return;
+    setState(() => _hasOwnedCompanions = hasOwnedCompanions);
   }
 
   bool _isRoutePresent(String routeName) {
@@ -137,6 +155,9 @@ class _SchedulePageState extends State<SchedulePage>
 
   Future<void> loadData() async {
     if (_isLoading) return;
+
+    _hasOwnedCompanions = AuthService.isLoggedIn() &&
+        (await DbCompanions.getAllCompanions()).isNotEmpty;
 
     setState(() {
       _isLoading = true;
@@ -292,9 +313,8 @@ class _SchedulePageState extends State<SchedulePage>
       context: context,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(builder: (bCtx, setDialogState) {
-          return CompanionDialog(
+          return CompanionAttendanceDialog(
             eventId: timeBlockItem.id,
-            maxCompanions: FeatureService.getMaxCompanions() ?? 0,
             companions: companions,
             refreshData: () async {
               await loadData();
@@ -527,6 +547,7 @@ class _SchedulePageState extends State<SchedulePage>
                         isUserApprover: _isUserApprover,
                         onScanButtonPressed: _handleScanButtonPressed,
                         onCompanionButtonPressed: _handleCompanionButtonPressed,
+                        hasOwnedCompanions: _hasOwnedCompanions,
                       ),
                     ),
                 ],

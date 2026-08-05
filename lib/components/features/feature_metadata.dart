@@ -26,6 +26,10 @@ class FeatureMetadata {
           'title': EventFeedbackStrings.featureTitle,
           'description': EventFeedbackStrings.featureDescription,
         },
+        FeatureConstants.programNotifications: {
+          'title': FeaturesStrings.programNotificationsTitle,
+          'description': FeaturesStrings.programNotificationsDescription,
+        },
         FeatureConstants.counseling: {
           'title': SpeakersStrings.counselingFeatureTitle,
           'description': SpeakersStrings.counselingFeatureDescription,

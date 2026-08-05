@@ -1,27 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
-import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/users/companion/companion_model.dart';
 import 'package:fstapp/components/users/companion/companion_commands.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
+import 'package:fstapp/components/map/db_places.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbCompanions {
   static final _supabase = Supabase.instance.client;
-  static CompanionCommands get _commands =>
+  static SupabaseCompanionCommands get _commands =>
       SupabaseCompanionCommands(_supabase);
 
   static Future<List<CompanionModel>> getAllCompanions() async {
     if (ClientSyncRuntime.isV1Selected) {
       return ClientSyncProjection.companions();
     }
-    var data = await _supabase.rpc("get_user_companions_data");
+    var data = await _supabase.rpc("get_user_companions_data", params: {
+      'p_occasion': RightsService.currentOccasionId(),
+    });
     var companions = List<CompanionModel>.from(
         data["data"].map((x) => CompanionModel.fromJson(x)));
+    ClientSyncProjection.hydrateCompanionAccommodations(
+      companions,
+      occasionServices: RightsService.currentOccasion()?.services,
+      places: await DbPlaces.getMapPlaces(),
+    );
     return companions;
   }
 
@@ -39,25 +45,31 @@ class DbCompanions {
 
   static Future<void> create(String name) async {
     if (ClientSyncRuntime.isV1Selected) {
-      await _commands.create(RightsService.currentOccasionId()!, name);
+      await _commands.createSelf(RightsService.currentOccasionId()!, name);
       return;
     }
-    await _supabase.rpc("create_companion_in_organization", params: {
-      'org': AppConfig.organization,
+    final response =
+        await _supabase.rpc("create_companion_in_organization", params: {
       'oc': RightsService.currentOccasionId(),
-      'usr': RightsService.currentOccasionUser()!.user!,
       'c_name': name,
     });
+    if (response is! Map || response['code'] != 200) {
+      throw StateError('Companion create was rejected');
+    }
   }
 
-  static Future<void> delete(CompanionModel companion) async {
-    if (ClientSyncRuntime.isV1Selected) {
-      await _commands.delete(
-        RightsService.currentOccasionId()!,
-        companion.id,
-      );
-      return;
-    }
-    await DbUsers.deleteUser(companion.id, RightsService.currentOccasionId()!);
+  static Future<void> deleteSelf(CompanionModel companion) async {
+    await _commands.deleteSelf(
+      RightsService.currentOccasionId()!,
+      companion.id,
+    );
   }
+
+  static Future<void> assignExisting(String ownerId, String companionId) =>
+      _commands.assignExisting(
+          RightsService.currentOccasionId()!, ownerId, companionId);
+
+  static Future<void> unassignExisting(String ownerId, String companionId) =>
+      _commands.unassignExisting(
+          RightsService.currentOccasionId()!, ownerId, companionId);
 }

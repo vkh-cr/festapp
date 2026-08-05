@@ -1,14 +1,14 @@
 # CSM Ostrava App Store checklist
 
-Target: existing Apple ID `6745415882`, bundle ID `festapp.jm2025`, version `0.19.84` (370). No new app may be created. Release is manual after approval. Canonical app-specific values live in `app_store_config.json`.
+Target: existing Apple ID `6745415882`, bundle ID `festapp.jm2025`. No new app may be created. Release is manual after approval. The iOS target version is explicit in `app_store_config.json`; its numeric build comes from the `+build` part of `VERSION` in `automation/project.conf`.
 
 | Gate | Status | Owner | Evidence / required action |
 |---|---|---|---|
 | Numeric app, bundle and team identity | passed 2026-08-04 | Release engineer | API readback: Apple ID `6745415882`, bundle `festapp.jm2025`, editable `0.19.84`, state `PREPARE_FOR_SUBMISSION`; live version remains `0.14.25` |
-| Reproducible release archive | intentionally deferred | Release engineer | Signing inputs are prepared and the script pins `0.19.84` / `370`, but per product-owner direction no IPA is being built or uploaded yet |
+| Reproducible release archive | locally passed for current version | Release engineer | Build and upload tooling combines the explicit iOS target version with the canonical numeric build used by Flutter and web; no IPA has been uploaded yet |
 | Release signing | passed pre-build checks 2026-08-04 | Release engineer | One Apple Distribution certificate plus active App Store profiles for `festapp.jm2025` and its OneSignal extension. Both profiles contain `group.festapp.festapp.onesignal`; the extension profile was regenerated after assigning that capability. Local profiles are mode `0600` |
 | Apple SDK deadline | passed 2026-08-04 | Release engineer | Xcode 26.6 with iPhoneOS SDK 26.5 satisfies Apple's iOS/iPadOS 26 SDK submission requirement effective April 2026 |
-| iOS extension upload contract | passed pre-build checks 2026-08-04 | Release engineer | The OneSignal notification extension inherits `CFBundleShortVersionString` and `CFBundleVersion` from Flutter (`0.19.84` / `370`), uses the shared App Group entitlement and custom OneSignal App Group key, and export method is `app-store-connect` |
+| iOS extension upload contract | passed pre-build checks 2026-08-04 | Release engineer | The OneSignal notification extension inherits `CFBundleShortVersionString` and `CFBundleVersion` from Flutter's canonical project version, uses the shared App Group entitlement and custom OneSignal App Group key, and export method is `app-store-connect` |
 | Required-reason SDK privacy manifests | passed inventory 2026-08-04 | Release engineer | All Apple-listed third-party SDKs present in the resolved iOS dependencies expose `PrivacyInfo.xcprivacy`; OneSignal declares unlinked User ID/Product Interaction and no tracking, consistent with the published disclosure |
 | Isolated OneSignal audience contract | local code proof passed; external observation pending | Release + backend owner | Subscription tags are independent of login; exact generation+occasion AND and legacy/wrong-tag negative tests pass. Production dashboard/device matrix and disposable vendor deletion still require separate authority |
 | Editable existing-app version | passed 2026-08-04 | Release engineer | Gated API lane created `0.19.84` only on Apple ID `6745415882`; readback is `PREPARE_FOR_SUBMISSION` |
@@ -25,7 +25,7 @@ Target: existing Apple ID `6745415882`, bundle ID `festapp.jm2025`, version `0.1
 | Final screenshots | passed locally and in ASC 2026-08-04 | Screenshot-session owner | Seven iPhone and six iPad PNGs selected by the product owner; dimensions/alpha passed locally and API readback confirms exact counts after removal of two retry-created identical duplicates |
 | Live-JM to CSM upgrade | pending external | QA owner | Online and first-launch-offline device checklist against the uploaded App Store build; TestFlight is not part of this release path |
 | Disposable account deletion | local proof passed 2026-08-03; deployed test pending | Privacy + QA owner | Repository-local Supabase CLI ran the SQL contract and a unique create/seed/email/GET/POST/replay lifecycle; Auth/profile/occasion/event/request leftovers were all zero. Production-like rehearsal still needs separate destructive authority |
-| Target build selection | intentionally absent | Release engineer | No build is selected for `0.19.84`, consistent with the product owner's instruction not to build or upload yet. The read-only submission lane now fails explicitly until build `370` is uploaded and selected |
+| Target build selection | intentionally absent | Release engineer | No build is selected yet, consistent with the product owner's instruction not to upload. The read-only submission lane fails explicitly until the build currently declared in `automation/project.conf` is uploaded and selected |
 | Submit for review | blocked until build and explicit authority | App Store Account Holder | Exact gate: Apple ID + bundle + target version; never implied by build upload |
 | Public release | blocked until separate authority | App Store Account Holder | Manual release only after approval |
 

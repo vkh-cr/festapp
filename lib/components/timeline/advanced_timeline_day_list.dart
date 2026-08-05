@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/activities/activities_component_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/users/companion/companion_visibility.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 // ignore: unused_import
 import 'package:fstapp/components/features/schedule_feature.dart';
@@ -204,9 +205,13 @@ class _EventCardState extends State<_EventCard>
 
   bool _shouldShowCompanionButton(BuildContext context, TimeBlockItem event,
       AdvancedTimelineController controller) {
-    return AuthService.isLoggedIn() &&
-        event.isSupportingSignIn() &&
-        FeatureService.isFeatureEnabled(FeatureConstants.companions);
+    return canShowCompanionAttendanceAction(
+      isLoggedIn: AuthService.isLoggedIn(),
+      eventSupportsSignIn: event.isSupportingSignIn(),
+      featureEnabled:
+          FeatureService.isFeatureEnabled(FeatureConstants.companions),
+      hasOwnedCompanions: controller.hasOwnedCompanions,
+    );
   }
 
   @override
@@ -337,9 +342,8 @@ class _EventCardState extends State<_EventCard>
                     controller.onScanButtonPressed?.call(context, event.id),
                 icon:
                     Icon(Icons.qr_code_scanner, size: 14, color: selectedColor),
-                label:
-                    Text(ScheduleStrings.scan,
-                        style: TextStyle(color: selectedColor)),
+                label: Text(ScheduleStrings.scan,
+                    style: TextStyle(color: selectedColor)),
                 style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 4)),
               ));

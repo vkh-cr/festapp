@@ -14,6 +14,9 @@ class UserColumns {
   static const String NAME = "name";
   static const String SURNAME = "surname";
   static const String GROUP = "group";
+  static const String COMPANION_OWNER = "companionOwner";
+  static const String COMPANION_OWNER_ID = "companionOwnerId";
+  static const String COMPANION_ORIGIN = "companionOrigin";
   static const String SEX = "sex";
   static const String ACCOMMODATION = "accommodation";
   static const String PHONE = "phone";
@@ -99,6 +102,15 @@ class UserColumns {
             type: TrinaColumnType.text(),
             readOnly: true,
             width: 160,
+          ),
+        ],
+        COMPANION_OWNER: [
+          TrinaColumn(
+            title: UserStrings.companionOf,
+            field: COMPANION_OWNER,
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            width: 180,
           ),
         ],
         SEX: [

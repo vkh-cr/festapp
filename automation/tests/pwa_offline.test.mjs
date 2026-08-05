@@ -57,8 +57,8 @@ try {
   assert.ok(coreUrls.includes('/flutter?pwa-cache=1'));
   assert.ok(coreUrls.includes('/privacy/'),
     'standalone documents must be available before their first navigation');
-  assert.ok(!coreUrls.includes('/main.dart.js_7.part.js'),
-    'deferred chunks must not delay worker activation');
+  assert.ok(coreUrls.includes('/main.dart.js_7.part.js'),
+    'every deferred executable must be installed for offline cold-start routes');
 
   const handlers = {};
   const fontUrl = 'https://fonts.gstatic.com/s/notocoloremoji/test.woff2';
@@ -164,6 +164,15 @@ try {
   await activation;
   assert.equal(claimedExistingClients, 1);
   assert.deepEqual(deletedCaches, []);
+
+  // controllerchange runs inside the old page before its accepted reload and
+  // therefore reports the previous version to the new worker. The updating
+  // tab must stay on the new shell instead of being pinned back to the old one.
+  handlers.message({
+    data: { type: 'FESTAPP_CLIENT_VERSION', version: '1.2.3+3' },
+    source: { id: 'updating-tab' },
+    waitUntil: () => {},
+  });
 
   async function dispatchFetch(request, clientId = '') {
     let responsePromise;

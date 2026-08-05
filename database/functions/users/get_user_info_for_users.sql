@@ -43,7 +43,7 @@ BEGIN
     )
   ) INTO companions
   FROM public.user_info ui
-  LEFT JOIN public.user_companions uc ON ui.id = uc.companion
+  LEFT JOIN public.user_companions uc ON ui.id = uc.companion AND uc.occasion=oc
   WHERE ui.id = ANY(user_ids);
 
   -- If no companions are found, return an empty array

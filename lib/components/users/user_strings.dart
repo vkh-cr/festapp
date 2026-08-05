@@ -39,6 +39,8 @@ class UserStrings {
   // FeatureUser
   static String get signIn => 'FeatureUser.signIn'.tr();
   static String get signOut => 'FeatureUser.signOut'.tr();
+  static String get companionSignIn => 'FeatureUser.companionSignIn'.tr();
+  static String get companionSignOut => 'FeatureUser.companionSignOut'.tr();
   static String get emailLabel => 'FeatureUser.email'.tr();
   static String get password => 'FeatureUser.password'.tr();
   static String get confirmPassword => 'FeatureUser.confirmPassword'.tr();
@@ -152,4 +154,18 @@ class UserStrings {
       'FeatureUser.deleteCompanion'.tr(); // "Delete companion"
   static String get deleteCompanionConfirm => 'FeatureUser.deleteCompanionConfirm'
       .tr(); // "By deleting your companion you will also sign him/her out of all signed in sessions."
+  static String get noGroup => 'FeatureUser.noGroup'.tr();
+  static String get manageCompanions => 'FeatureUser.manageCompanions'.tr();
+  static String get assignCompanion => 'FeatureUser.assignCompanion'.tr();
+  static String get companionAssigned => 'FeatureUser.companionAssigned'.tr();
+  static String get unassignCompanion => 'FeatureUser.unassignCompanion'.tr();
+  static String get searchCompanion => 'FeatureUser.searchCompanion'.tr();
+  static String get companionLimitReached =>
+      'FeatureUser.companionLimitReached'.tr();
+  static String get companionAlreadyAssigned =>
+      'FeatureUser.companionAlreadyAssigned'.tr();
+  static String get companionOwnsAnother =>
+      'FeatureUser.companionOwnsAnother'.tr();
+  static String get companionOwnerIsAssigned =>
+      'FeatureUser.companionOwnerIsAssigned'.tr();
 }
