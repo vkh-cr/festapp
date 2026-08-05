@@ -57,6 +57,14 @@ VALUES (3000, 999999999, 500.0, 'CZK', 2000, now(), 300.0);
 INSERT INTO eshop.orders (id, occasion, payment_info, state, price, currency_code, created_at)
 VALUES (6000, 888, 3000, 'created', 500.0, 'CZK', now());
 
+-- Canonical aggregates are derived from linked source rows. This existing
+-- 200 CZK movement is the baseline that remains after each tested removal.
+INSERT INTO eshop.transactions (
+  payment_info, bank_account_id, amount, currency, vs, transaction_type, date, transaction_id
+) VALUES (
+  3000, 2000, 200.0, 'CZK', '999999999', 'incoming', now(), 987654320
+);
+
 
 -- TEST CASE 1: Delete Manual Transaction
 DO $$

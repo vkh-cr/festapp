@@ -3,6 +3,36 @@
 This feature allows the system to automatically import bank transactions by
 parsing incoming emails from banks (e.g., Fio, AirBank).
 
+## Canonical transaction and pairing contract
+
+Both e-mail and API imports are ingest adapters. They store a transaction and
+delegate automatic decisions to `public.match_bank_transaction`; only
+`public.apply_transaction_pairing` may change the payment-info link, derived
+paid/returned totals, order state, and pairing audit.
+
+Fio fields have fixed meanings:
+
+- `column22` → bank movement `transaction_id`;
+- `column17` and Fio e-mail `ID pokynu` → `command_id`;
+- `column27` → raw `payer_reference`;
+- `column5`, `column7`, `column16`, and `column25` retain VS/reference text.
+
+Never deduplicate on amount, date, payer name, or VS. A transport retry uses
+the same `(bank_account_id, external_id)` and an API retry uses the same
+`(bank_account_id, transaction_id)`. E-mail/API reconciliation is allowed only
+when a provider-issued shared identifier has the same verified meaning. An
+e-mail without such an identity is stored but remains unpaired.
+
+Matcher verdicts are `paired`, `already_paired`, `unmatched`, `ambiguous`, and
+`ineligible`. Only `paired` changes accounting state. Ambiguous transactions
+must be reviewed through the authorized manual UI; do not add a fuzzy fallback.
+
+EUR orders use ISO 11649 references in the form `RF{check digits}{numeric
+payment-info id}`. The RF prefix and check digits are mandatory; the payload is
+otherwise numeric. Customer activation requires a valid IBAN and explicit legal
+`creditor_name` on the bank account. Run the authorized real-bank pilot before
+deploying the RF activation migration.
+
 ## Documentation Map
 
 - **Architecture**: `AI_README.md` (See "Split Brain Logic" and "Supabase

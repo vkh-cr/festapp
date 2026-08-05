@@ -132,6 +132,7 @@ class PaymentInfoTb {
   String get created_at => "created_at";
   String get bank_account => "bank_account";
   String get variable_symbol => "variable_symbol";
+  String get creditor_reference => "creditor_reference";
   String get amount => "amount";
   String get deposit_amount => "deposit_amount";
   String get deposit_deadline => "deposit_deadline";
@@ -180,6 +181,8 @@ class TransactionsTb {
   String get created_at => "created_at";
   String get message_for_recipient => "message_for_recipient";
   String get counter_account_name => "counter_account_name";
+  String get payer_reference => "payer_reference";
+  String get ingest_source => "ingest_source";
 }
 
 class BankAccountsTb {
@@ -191,6 +194,7 @@ class BankAccountsTb {
   String get secret => "secret";
   String get account_number => "account_number";
   String get title => "title";
+  String get creditor_name => "creditor_name";
   String get type => "type";
   String get min_fetch_wait_seconds => "min_fetch_wait_seconds";
   String get last_fetch_time => "last_fetch_time";

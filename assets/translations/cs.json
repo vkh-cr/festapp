@@ -364,7 +364,8 @@
     "depositInfo": "záloha",
     "depositDeadline": "Doplatek do",
     "depositPaymentDeadline": "Záloha do",
-    "depositOnSiteLabel": "Na místě"
+    "depositOnSiteLabel": "Na místě",
+    "paymentReference": "Reference platby"
   },
   "FormsFeature": {
     "showDepositDescription": "Zobrazit popisek zálohy / doplatku u produktů",
@@ -1102,7 +1103,8 @@
     "amountToPay": "Částka k úhradě",
     "paymentNote": "Zpráva pro příjemce",
     "copied": "Zkopírováno",
-    "orderLabel": "Objednávka"
+    "orderLabel": "Objednávka",
+    "paymentReference": "Reference platby"
   },
   "FeatureTicket": {
     "enableManualTicketScan": "Povolit ruční skenování vstupenek",
@@ -1441,7 +1443,9 @@
     "maskedEmailExplanation": "Emailová adresa je z bezpečnostních důvodů skryta. Pokud ji potřebujete vidět, požádejte prosím administrátora tohoto bankovního účtu.",
     "setupConnectionNow": "Nastavit připojení nyní",
     "safeSenderInfo": "Tato adresa je bezpečná. Je to speciální robot, který čte pouze e-maily o platbách a nic jiného.",
-    "forwardingEmailWarning": "Upozornění: Prosím, udržujte tento e-mail v tajnosti. S nikým jej nesdílejte."
+    "forwardingEmailWarning": "Upozornění: Prosím, udržujte tento e-mail v tajnosti. S nikým jej nesdílejte.",
+    "creditorNameLabel": "Jméno majitele účtu",
+    "creditorNameHelp": "Povinné pro EUR EPC platební QR kódy; uveďte právní název příjemce."
   },
   "FeatureContract": {
     "title": "Smlouva",

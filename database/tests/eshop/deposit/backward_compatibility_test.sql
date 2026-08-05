@@ -102,7 +102,7 @@ BEGIN
     RETURNING id INTO v_transaction_id;
 
     -- Link transaction to payment_info
-    PERFORM add_transaction_to_payment_info(v_transaction_id, v_payment_info_id);
+    PERFORM public.apply_transaction_pairing(v_transaction_id, v_payment_info_id, 'test', 'system');
 
     -- Verify order became 'paid' only after full payment
     SELECT state INTO v_order_state FROM eshop.orders WHERE id = v_order_id;
@@ -139,7 +139,7 @@ BEGIN
     RETURNING id INTO v_transaction_id;
 
     -- Link transaction to payment_info
-    PERFORM add_transaction_to_payment_info(v_transaction_id, v_payment_info_id);
+    PERFORM public.apply_transaction_pairing(v_transaction_id, v_payment_info_id, 'test', 'system');
 
     -- Verify order stays 'ordered' because threshold is full price (1000), not deposit
     SELECT state INTO v_order_state FROM eshop.orders WHERE id = v_order_id;
@@ -158,7 +158,7 @@ BEGIN
     RETURNING id INTO v_transaction_id;
 
     -- Link transaction to payment_info
-    PERFORM add_transaction_to_payment_info(v_transaction_id, v_payment_info_id);
+    PERFORM public.apply_transaction_pairing(v_transaction_id, v_payment_info_id, 'test', 'system');
 
     -- Now order should become 'paid'
     SELECT state INTO v_order_state FROM eshop.orders WHERE id = v_order_id;

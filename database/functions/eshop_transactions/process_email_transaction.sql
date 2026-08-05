@@ -1,141 +1,71 @@
-CREATE OR REPLACE FUNCTION public.process_email_transaction(
-    p_data jsonb
-)
+CREATE OR REPLACE FUNCTION public.process_email_transaction(p_data jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, extensions
 AS $$
 DECLARE
-    v_bank_account_id bigint;
-    v_external_id text;
-    v_transaction_id bigint;
-    v_variable_symbol text;
-    v_bank_code text;
-    v_bank_name text;
-    
-    v_existing_id bigint;
-    v_new_id int;
-    v_payment_info_id bigint;
-    v_amount numeric;
-    v_date timestamptz;
+  v_bank_account_id bigint := (p_data->>'bank_account_id')::bigint;
+  v_external_id text := nullif(p_data->>'external_id', '');
+  v_movement_id bigint := nullif(p_data->>'movement_id', '')::bigint;
+  v_command_id bigint := nullif(p_data->>'bank_command_id', '')::bigint;
+  v_source text := COALESCE(nullif(p_data->>'ingest_source', ''), 'legacy_email');
+  v_existing_id bigint;
+  v_id bigint;
+  v_match jsonb;
 BEGIN
-    v_bank_account_id := (p_data->>'bank_account_id')::bigint;
-    v_external_id := p_data->>'external_id';
-    v_transaction_id := (p_data->>'transaction_id')::bigint;
-    v_variable_symbol := p_data->>'vs';
-    v_bank_code := p_data->>'bank_code';
-    v_amount := (p_data->>'amount')::numeric;
-    -- Use date parsing that respects inputs
-    v_date := (p_data->>'date')::timestamptz;
-    
-    -- Derive bank_name from code if not provided in JSON
-    v_bank_name := p_data->>'bank_name';
-    IF v_bank_name IS NULL AND v_bank_code IS NOT NULL THEN
-        v_bank_name := public.get_bank_name_from_code(v_bank_code);
+  PERFORM public.require_service_role();
+  IF v_source NOT IN ('fio_email', 'airbank_email', 'legacy_email') THEN RAISE EXCEPTION 'EMAIL_SOURCE_INVALID'; END IF;
+
+  UPDATE eshop.bank_accounts SET last_fetch_time = timezone('UTC', now()), updated_at = now()
+  WHERE id = v_bank_account_id;
+
+  IF v_external_id IS NOT NULL THEN
+    SELECT id INTO v_existing_id FROM eshop.transactions
+    WHERE bank_account_id = v_bank_account_id AND external_id = v_external_id;
+    IF FOUND THEN
+      RETURN jsonb_build_object('ingest_status', 'skipped', 'reason', 'transport_replay',
+        'stored_id', v_existing_id, 'match_verdict', 'already_ingested');
     END IF;
+  END IF;
 
-    IF v_bank_account_id IS NOT NULL THEN
-        UPDATE eshop.bank_accounts 
-        SET last_fetch_time = now() AT TIME ZONE 'UTC', 
-            updated_at = now() 
-        WHERE id = v_bank_account_id;
-    END IF;
+  IF v_movement_id IS NOT NULL THEN
+    SELECT id INTO v_existing_id FROM eshop.transactions
+    WHERE bank_account_id = v_bank_account_id AND transaction_id = v_movement_id;
+  ELSIF v_command_id IS NOT NULL THEN
+    SELECT min(id) INTO v_existing_id FROM eshop.transactions
+    WHERE bank_account_id = v_bank_account_id AND command_id = v_command_id
+    HAVING count(*) = 1;
+  END IF;
 
-    IF v_transaction_id IS NOT NULL THEN
-        SELECT id INTO v_existing_id 
-        FROM eshop.transactions 
-        WHERE bank_account_id = v_bank_account_id AND transaction_id = v_transaction_id
-        LIMIT 1;
-        
-        IF v_existing_id IS NOT NULL THEN
-            RETURN jsonb_build_object('status', 'skipped', 'reason', 'duplicate_transaction_id', 'id', v_existing_id);
-        END IF;
-    END IF;
+  IF v_existing_id IS NOT NULL THEN
+    UPDATE eshop.transactions SET external_id = COALESCE(external_id, v_external_id)
+    WHERE id = v_existing_id;
+    RETURN jsonb_build_object('ingest_status', 'reconciled', 'stored_id', v_existing_id,
+      'match_verdict', 'already_ingested');
+  END IF;
 
-    IF v_external_id IS NOT NULL THEN
-        SELECT id INTO v_existing_id 
-        FROM eshop.transactions 
-        WHERE external_id = v_external_id
-        LIMIT 1;
-        
-        IF v_existing_id IS NOT NULL THEN
-            RETURN jsonb_build_object('status', 'skipped', 'reason', 'duplicate_external_id', 'id', v_existing_id);
-        END IF;
-    END IF;
+  INSERT INTO eshop.transactions (
+    bank_account_id, amount, currency, counter_account, bank_code, bank_name,
+    vs, ks, ss, message_for_recipient, date, external_id, transaction_id,
+    command_id, counter_account_name, payer_reference, ingest_source
+  ) VALUES (
+    v_bank_account_id, (p_data->>'amount')::numeric, upper(trim(p_data->>'currency')),
+    p_data->>'counter_account', p_data->>'bank_code', p_data->>'bank_name',
+    nullif(p_data->>'vs', ''), nullif(p_data->>'ks', ''), nullif(p_data->>'ss', ''),
+    p_data->>'message', (p_data->>'date')::timestamptz, v_external_id, v_movement_id,
+    v_command_id, p_data->>'sender_name', p_data->>'payer_reference', v_source
+  ) RETURNING id INTO v_id;
 
-    -- Fuzzy Deduplication for Email Imports (Missing Transaction ID)
-    -- If we have VS and Amount, check if an authoritative transaction (from API, has transaction_id) exists
-    -- OR if another email import already exists (though external_id catch that usually)
-    -- But mainly this is for preventing "Email" vs "API" duplicates if they lack common IDs.
-    -- However, API usually provides transaction_id. Email usually provides external_id (Message-ID).
-    -- They might not match. So we check fuzzy.
-    
-    IF v_variable_symbol IS NOT NULL AND v_amount IS NOT NULL AND v_date IS NOT NULL THEN
-         SELECT id INTO v_existing_id
-         FROM eshop.transactions
-         WHERE bank_account_id = v_bank_account_id
-           AND vs = v_variable_symbol
-           AND amount = v_amount
-           AND date >= (v_date - interval '3 days')
-           AND date <= (v_date + interval '3 days')
-         LIMIT 1;
-
-         IF v_existing_id IS NOT NULL THEN
-             RETURN jsonb_build_object('status', 'skipped', 'reason', 'fuzzy_duplicate_found', 'id', v_existing_id);
-         END IF;
-    END IF;
-
-    INSERT INTO eshop.transactions (
-        bank_account_id,
-        amount,
-        currency,
-        counter_account,
-        bank_code,
-        bank_name,
-        vs,
-        ks,
-        ss,
-        message_for_recipient,
-        date,
-        created_at,
-        external_id,
-        transaction_id,
-        counter_account_name
-    ) VALUES (
-        v_bank_account_id,
-        v_amount,
-        p_data->>'currency',
-        p_data->>'counter_account',
-        v_bank_code,
-        v_bank_name,
-        v_variable_symbol,
-        p_data->>'ks',
-        p_data->>'ss',
-        p_data->>'message',
-        v_date,
-        now(),
-        v_external_id,
-        v_transaction_id,
-        p_data->>'sender_name'
-    )
-    RETURNING id INTO v_new_id;
-
-    IF v_variable_symbol IS NOT NULL AND v_variable_symbol != '' THEN
-        BEGIN
-            SELECT id INTO v_payment_info_id
-            FROM eshop.payment_info
-            WHERE variable_symbol = v_variable_symbol::bigint
-            LIMIT 1;
-        EXCEPTION WHEN OTHERS THEN
-             v_payment_info_id := NULL;
-        END;
-
-        IF v_payment_info_id IS NOT NULL THEN
-             PERFORM public.add_transaction_to_payment_info(v_new_id::bigint, v_payment_info_id);
-        END IF;
-    END IF;
-
-    RETURN jsonb_build_object('status', 'inserted', 'id', v_new_id, 'paired', v_payment_info_id IS NOT NULL);
+  BEGIN
+    v_match := public.match_bank_transaction(v_id);
+  EXCEPTION WHEN OTHERS THEN
+    v_match := jsonb_build_object('verdict', 'failed', 'reason', SQLSTATE);
+  END;
+  RETURN jsonb_build_object('ingest_status', 'inserted', 'stored_id', v_id,
+    'match_verdict', v_match->>'verdict', 'reason', v_match->>'reason');
 END;
 $$;
+
+REVOKE ALL ON FUNCTION public.process_email_transaction(jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.process_email_transaction(jsonb) TO service_role;

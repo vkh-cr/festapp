@@ -1,4 +1,3 @@
-
 import { assertEquals } from "https://deno.land/std@0.168.0/testing/asserts.ts";
 import { parseEmail } from "./parser.ts";
 
@@ -18,24 +17,25 @@ Přejeme Vám pěkný den.
 `;
 
 Deno.test("Parse Air Bank Email", () => {
-    const result = parseEmail("airbank_email", "Subject", airbankEmailBody);
-    
-    // Assert structure
-    if (!result) {
-        throw new Error("Result is null");
-    }
-    
-    console.log("Parsed result:", result);
+  const result = parseEmail("airbank_email", "Subject", airbankEmailBody);
 
-    assertEquals(result.amount, 1.00);
-    assertEquals(result.currency, "CZK");
-    assertEquals(result.counterpartyAccount, "2300409288");
-    assertEquals(result.counterpartyBankCode, "2010");
-    assertEquals(result.transactionId, "148260268562");
-    
-    // Date verification (24.01.2026) -> ISO
-    // Just check it contains year, month, day
-    if (!result.date.includes("2026-01-24")) {
-         throw new Error(`Date invalid: ${result.date}`);
-    }
+  // Assert structure
+  if (!result) {
+    throw new Error("Result is null");
+  }
+
+  console.log("Parsed result:", result);
+
+  assertEquals(result.amount, 1.00);
+  assertEquals(result.currency, "CZK");
+  assertEquals(result.counterpartyAccount, "2300409288");
+  assertEquals(result.counterpartyBankCode, "2010");
+  assertEquals(result.movementId, "148260268562");
+  assertEquals(result.bankCommandId, null);
+
+  // Date verification (24.01.2026) -> ISO
+  // Just check it contains year, month, day
+  if (!result.date.includes("2026-01-24")) {
+    throw new Error(`Date invalid: ${result.date}`);
+  }
 });

@@ -59,8 +59,10 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
     try {
       final result = await widget.orderFutureFunction();
       final elapsed = DateTime.now().difference(start).inMilliseconds;
-      code = int.tryParse(
-              result.data["code"].toString().replaceAll(RegExp(r'\D'), '')) ??
+      code =
+          int.tryParse(
+            result.data["code"].toString().replaceAll(RegExp(r'\D'), ''),
+          ) ??
           0;
       _isSuccess = code == 200;
       _orderData = (result.data is Map)
@@ -117,8 +119,10 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         child: Container(
           width: 100,
           height: 100,
-          decoration:
-              BoxDecoration(shape: BoxShape.circle, color: Colors.grey[300]),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey[300],
+          ),
           child: Center(
             child: CircularProgressIndicator(
               color: Theme.of(context).primaryColor,
@@ -133,8 +137,10 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
   Widget _buildResult() {
     String title, subtitle;
     if (_isSuccess) {
-      title = PublicOrderStrings.successTitle(widget.tone,
-          hasTickets: widget.hasTickets);
+      title = PublicOrderStrings.successTitle(
+        widget.tone,
+        hasTickets: widget.hasTickets,
+      );
       subtitle = PublicOrderStrings.paymentInfo(widget.tone);
     } else if (code == 1017) {
       final prodTitle = _errorProduct?["title"] ?? "";
@@ -146,97 +152,98 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
     }
     return SingleChildScrollView(
       child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ScaleTransition(
-          scale: _scaleAnimation,
-          child: Container(
-            width: 150,
-            height: 150,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _isSuccess
-                  ? ThemeConfig.darkGreen
-                  : ThemeConfig.redColor(context),
-            ),
-            child: Icon(
-              _isSuccess ? Icons.check_circle : Icons.error,
-              size: 80,
-              color: Colors.white,
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                // Use Theme text style
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ScaleTransition(
+            scale: _scaleAnimation,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
                 color: _isSuccess
                     ? ThemeConfig.darkGreen
                     : ThemeConfig.redColor(context),
               ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                // Use Theme text style
-                fontSize: 14,
-                color: ThemeConfig.blackColor(context).withOpacity(0.7),
+              child: Icon(
+                _isSuccess ? Icons.check_circle : Icons.error,
+                size: 80,
+                color: Colors.white,
               ),
-          textAlign: TextAlign.center,
-        ),
-        if (_isSuccess) _buildPaymentQr(),
-        const SizedBox(height: 24),
-        OutlinedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
             ),
           ),
-          child: Text(PublicOrderStrings.backToForm),
-        ),
-      ],
+          const SizedBox(height: 24),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              // Use Theme text style
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: _isSuccess
+                  ? ThemeConfig.darkGreen
+                  : ThemeConfig.redColor(context),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              // Use Theme text style
+              fontSize: 14,
+              color: ThemeConfig.blackColor(context).withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          if (_isSuccess) _buildPaymentQr(),
+          const SizedBox(height: 24),
+          OutlinedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+            child: Text(PublicOrderStrings.backToForm),
+          ),
+        ],
       ),
     );
   }
 
   /// Renders the "Scan to pay" card when the form enabled `show_payment_qr`
-  /// and the order response carries a `payment_qr` block (server-built SPD).
+  /// and the order response carries a currency-aware `payment_qr` block.
   Widget _buildPaymentQr() {
     final data = _orderData;
     if (data == null) return const SizedBox.shrink();
     final pq = (data['payment_qr'] as Map?)?.cast<String, dynamic>();
     if (pq == null) return const SizedBox.shrink();
-    final formData =
-        ((data['form'] as Map?)?['data'] as Map?)?.cast<String, dynamic>();
+    final formData = ((data['form'] as Map?)?['data'] as Map?)
+        ?.cast<String, dynamic>();
     final showQr =
         formData?[FeatureConstants.formShowPaymentQr]?.toString() == 'true';
     if (!showQr) return const SizedBox.shrink();
-    final spd = pq['spd']?.toString() ?? '';
-    if (spd.isEmpty) return const SizedBox.shrink();
+    final payload = pq['payload']?.toString() ?? '';
+    if (payload.isEmpty) return const SizedBox.shrink();
 
     final amount = pq['amount'];
     final currency = pq['currency_code']?.toString() ?? '';
-    final amountFormatted =
-        (amount is num) ? '$amount $currency'.trim() : null;
+    final amountFormatted = (amount is num) ? '$amount $currency'.trim() : null;
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 420),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: PaymentQrCard(
-          spd: spd,
+          payload: payload,
+          format: pq['format']?.toString() ?? '',
           bankAccount: pq['account_number_human_readable']?.toString(),
           iban: pq['account_number']?.toString(),
-          variableSymbol: pq['variable_symbol']?.toString(),
+          paymentReference: pq['reference']?.toString(),
+          referenceKind: pq['reference_kind']?.toString(),
           amountFormatted: amountFormatted,
           note: pq['message']?.toString(),
         ),

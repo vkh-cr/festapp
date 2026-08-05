@@ -44,8 +44,9 @@ class PublicOrderStrings {
       '$_prefix.orderError'.tr(namedArgs: {"code": code});
 
   static String productUnavailable(String productTitle) =>
-      '$_prefix.productUnavailable'
-          .tr(namedArgs: {"product_title": productTitle});
+      '$_prefix.productUnavailable'.tr(
+        namedArgs: {"product_title": productTitle},
+      );
 
   static String chooseDifferentVariant(String? tone) =>
       _tr('$_prefix.chooseDifferentVariant', tone);
@@ -67,6 +68,7 @@ class PublicOrderStrings {
   static String get bankAccount => '$_prefix.bankAccount'.tr();
   static String get iban => '$_prefix.iban'.tr();
   static String get variableSymbol => '$_prefix.variableSymbol'.tr();
+  static String get paymentReference => '$_prefix.paymentReference'.tr();
   static String get paymentNote => '$_prefix.paymentNote'.tr();
   static String get orderLabel => '$_prefix.orderLabel'.tr();
   static String get downloadQr => '$_prefix.downloadQr'.tr();

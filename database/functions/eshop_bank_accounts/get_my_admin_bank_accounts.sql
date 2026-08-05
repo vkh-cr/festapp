@@ -1,9 +1,12 @@
-CREATE OR REPLACE FUNCTION public.get_my_admin_bank_accounts()
+DROP FUNCTION IF EXISTS public.get_my_admin_bank_accounts();
+
+CREATE FUNCTION public.get_my_admin_bank_accounts()
 RETURNS TABLE (
     id bigint,
     account_number text,
     account_number_human_readable text,
     title text,
+    creditor_name text,
     type text,
     token_masked text,
     token_expiry_date timestamptz,
@@ -22,6 +25,7 @@ BEGIN
         ba.account_number,
         ba.account_number_human_readable,
         ba.title,
+        ba.creditor_name,
         ba.type,
         CASE WHEN s.secret IS NULL THEN NULL
              WHEN length(s.secret) <= 4 THEN '************'

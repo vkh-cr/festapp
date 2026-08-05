@@ -92,7 +92,7 @@ BEGIN
     VALUES (90301, now(), 500, 'CZK', v_acc_id,
         (SELECT variable_symbol FROM eshop.payment_info WHERE id = v_payment_info_id)::text)
     RETURNING id INTO v_transaction_id;
-    PERFORM add_transaction_to_payment_info(v_transaction_id, v_payment_info_id);
+    PERFORM public.apply_transaction_pairing(v_transaction_id, v_payment_info_id, 'test', 'system');
 
     SELECT state INTO v_order_state FROM eshop.orders WHERE id = v_order_id;
     PERFORM assert_eq(v_order_state, 'paid', 'Step 2: Order should be paid after deposit');
@@ -134,7 +134,7 @@ BEGIN
     VALUES (90302, now(), 500, 'CZK', v_acc_id,
         (SELECT variable_symbol FROM eshop.payment_info WHERE id = v_payment_info_id)::text)
     RETURNING id INTO v_transaction_id;
-    PERFORM add_transaction_to_payment_info(v_transaction_id, v_payment_info_id);
+    PERFORM public.apply_transaction_pairing(v_transaction_id, v_payment_info_id, 'test', 'system');
 
     SELECT paid INTO v_paid FROM eshop.payment_info WHERE id = v_payment_info_id;
     PERFORM assert_eq(v_paid, 1000::numeric, 'Step 5: paid should be 1000');

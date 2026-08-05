@@ -74,7 +74,10 @@ Deno.test("Integration: Email Pairing Logic", async () => {
       ss: null,
       message: "Test Email Pairing",
       date: new Date().toISOString(),
-      transaction_id: Date.now(),
+      ingest_source: "fio_email",
+      movement_id: null,
+      bank_command_id: Date.now(),
+      payer_reference: null,
       sender_name: "Test Sender",
     };
 

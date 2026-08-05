@@ -31,6 +31,8 @@ class TransactionModel extends ITrinaRowModel {
   DateTime? createdAt;
   String? messageForRecipient;
   String? counterAccountName;
+  String? payerReference;
+  String? ingestSource;
   String? createdById;
   String? createdByName;
   UserInfoModel? createdBy;
@@ -66,6 +68,8 @@ class TransactionModel extends ITrinaRowModel {
     this.createdAt,
     this.messageForRecipient,
     this.counterAccountName,
+    this.payerReference,
+    this.ingestSource,
     this.createdById,
     this.createdByName,
     this.createdBy,
@@ -97,11 +101,14 @@ class TransactionModel extends ITrinaRowModel {
       bankAccountId: json[TbEshop.transactions.bank_account_id],
       paymentInfo: json[TbEshop.transactions.payment_info],
       createdAt: json[TbEshop.transactions.created_at] != null
-          ? DateTime.parse(json[TbEshop.transactions.created_at])
-              .toOccasionTime()
+          ? DateTime.parse(
+              json[TbEshop.transactions.created_at],
+            ).toOccasionTime()
           : null,
       messageForRecipient: json[TbEshop.transactions.message_for_recipient],
       counterAccountName: json[TbEshop.transactions.counter_account_name],
+      payerReference: json[TbEshop.transactions.payer_reference],
+      ingestSource: json[TbEshop.transactions.ingest_source],
       createdById: json['created_by'],
       createdByName: json['createdByName'],
       // relatedBankAccount: json[TbEshop.transactions.bank_account_id] != null
@@ -116,53 +123,72 @@ class TransactionModel extends ITrinaRowModel {
   /// Converts the TransactionModel instance to a TrinaRow for the data grid.
   @override
   TrinaRow toTrinaRow(BuildContext context) {
-    return TrinaRow(cells: {
-      TbEshop.transactions.id: TrinaCell(value: id ?? 0),
-      TbEshop.transactions.transaction_id: TrinaCell(value: transactionId ?? 0),
-      TbEshop.transactions.date: TrinaCell(
+    return TrinaRow(
+      cells: {
+        TbEshop.transactions.id: TrinaCell(value: id ?? 0),
+        TbEshop.transactions.transaction_id: TrinaCell(
+          value: transactionId ?? 0,
+        ),
+        TbEshop.transactions.date: TrinaCell(
           value: date != null
               ? DateFormat('yyyy-MM-dd HH:mm:ss').format(date!)
-              : ""),
-      TbEshop.transactions.amount: TrinaCell(
-          value: amount != null ? Utilities.formatPrice(context, amount!) : ""),
-      TbEshop.transactions.currency: TrinaCell(value: currency ?? ""),
-      TbEshop.transactions.counter_account:
-          TrinaCell(value: counterAccount ?? ""),
-      TbEshop.transactions.bank_code: TrinaCell(value: bankCode ?? ""),
-      TbEshop.transactions.bank_name: TrinaCell(value: bankName ?? ""),
-      TbEshop.transactions.ks: TrinaCell(value: ks ?? ""),
-      TbEshop.transactions.vs: TrinaCell(value: vs ?? ""),
-      TbEshop.transactions.ss: TrinaCell(value: ss ?? ""),
-      TbEshop.transactions.user_identification:
-          TrinaCell(value: userIdentification ?? ""),
-      TbEshop.transactions.transaction_type: TrinaCell(
+              : "",
+        ),
+        TbEshop.transactions.amount: TrinaCell(
+          value: amount != null ? Utilities.formatPrice(context, amount!) : "",
+        ),
+        TbEshop.transactions.currency: TrinaCell(value: currency ?? ""),
+        TbEshop.transactions.counter_account: TrinaCell(
+          value: counterAccount ?? "",
+        ),
+        TbEshop.transactions.bank_code: TrinaCell(value: bankCode ?? ""),
+        TbEshop.transactions.bank_name: TrinaCell(value: bankName ?? ""),
+        TbEshop.transactions.ks: TrinaCell(value: ks ?? ""),
+        TbEshop.transactions.vs: TrinaCell(value: vs ?? ""),
+        TbEshop.transactions.ss: TrinaCell(value: ss ?? ""),
+        TbEshop.transactions.user_identification: TrinaCell(
+          value: userIdentification ?? "",
+        ),
+        TbEshop.transactions.transaction_type: TrinaCell(
           value: transactionType == 'manual'
               ? OrdersStrings.transactionTypeCash
-              : (transactionType ?? "")),
-      TbEshop.transactions.performed_by: TrinaCell(value: performedBy ?? ""),
-      TbEshop.transactions.comment: TrinaCell(value: comment ?? ""),
-      TbEshop.transactions.command_id: TrinaCell(value: commandId ?? 0),
-      TbEshop.transactions.bank_account_id:
-          TrinaCell(value: bankAccountId ?? 0),
-      TbEshop.transactions.payment_info: TrinaCell(value: paymentInfo ?? 0),
-      TbEshop.transactions.created_at: TrinaCell(
+              : (transactionType ?? ""),
+        ),
+        TbEshop.transactions.performed_by: TrinaCell(value: performedBy ?? ""),
+        TbEshop.transactions.comment: TrinaCell(value: comment ?? ""),
+        TbEshop.transactions.command_id: TrinaCell(value: commandId ?? 0),
+        TbEshop.transactions.bank_account_id: TrinaCell(
+          value: bankAccountId ?? 0,
+        ),
+        TbEshop.transactions.payment_info: TrinaCell(value: paymentInfo ?? 0),
+        TbEshop.transactions.created_at: TrinaCell(
           value: createdAt != null
               ? DateFormat('yyyy-MM-dd HH:mm:ss').format(createdAt!)
-              : ""),
-      TbEshop.transactions.message_for_recipient:
-          TrinaCell(value: messageForRecipient ?? ""),
-      TbEshop.transactions.counter_account_name:
-          TrinaCell(value: counterAccountName ?? ""),
-      // Add related entities if necessary
-      // metaRelatedBankAccount: TrinaCell(
-      //     value: relatedBankAccount != null
-      //         ? relatedBankAccount!.toBasicString()
-      //         : ""),
-      // metaRelatedPaymentInfo: TrinaCell(
-      //     value: relatedPaymentInfo != null
-      //         ? relatedPaymentInfo!.toBasicString()
-      //         : ""),
-    });
+              : "",
+        ),
+        TbEshop.transactions.message_for_recipient: TrinaCell(
+          value: messageForRecipient ?? "",
+        ),
+        TbEshop.transactions.counter_account_name: TrinaCell(
+          value: counterAccountName ?? "",
+        ),
+        TbEshop.transactions.payer_reference: TrinaCell(
+          value: payerReference ?? "",
+        ),
+        TbEshop.transactions.ingest_source: TrinaCell(
+          value: ingestSource ?? "",
+        ),
+        // Add related entities if necessary
+        // metaRelatedBankAccount: TrinaCell(
+        //     value: relatedBankAccount != null
+        //         ? relatedBankAccount!.toBasicString()
+        //         : ""),
+        // metaRelatedPaymentInfo: TrinaCell(
+        //     value: relatedPaymentInfo != null
+        //         ? relatedPaymentInfo!.toBasicString()
+        //         : ""),
+      },
+    );
   }
 
   /// Factory method to create a TransactionModel from a TrinaRow JSON.
@@ -189,6 +215,8 @@ class TransactionModel extends ITrinaRowModel {
       paymentInfo: json[TbEshop.transactions.payment_info],
       messageForRecipient: json[TbEshop.transactions.message_for_recipient],
       counterAccountName: json[TbEshop.transactions.counter_account_name],
+      payerReference: json[TbEshop.transactions.payer_reference],
+      ingestSource: json[TbEshop.transactions.ingest_source],
       // relatedBankAccount: json[TbEshop.transactions.bank_account_id] != null
       //     ? BankAccountModel.fromJson(jsonRelatedBankAccount)
       //     : null,
@@ -231,7 +259,7 @@ class TransactionModel extends ITrinaRowModel {
       }
       return bankName!;
     }
-    
+
     return accountPart;
   }
 }
