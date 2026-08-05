@@ -17,7 +17,7 @@ if (!process.argv.includes('--local') || !process.argv.includes('--read-only')) 
 if (manifest.schemaVersion !== 2) fail('unsupported app-store manifest schema');
 if (manifest.appleId !== '6745415882' || manifest.bundleId !== 'festapp.jm2025') fail('immutable Apple identity mismatch');
 if (manifest.signingTeamId !== '8WKBB6L8LT') fail('signing team mismatch');
-if (manifest.releaseMode !== 'manual_after_approval') fail('release mode must remain manual');
+if (manifest.releaseMode !== 'automatic_after_approval') fail('release mode must be automatic after Apple approval');
 
 const review = manifest.review;
 if (!review?.contact?.firstName || !review?.contact?.lastName || !review?.contact?.email || !review?.contact?.phone) {
@@ -122,7 +122,12 @@ for (const configuration of ['Debug', 'Release', 'Profile']) {
   }
 }
 const fastfile = fs.readFileSync(path.join(root, 'automation/release/fastlane/Fastfile'), 'utf8');
-if (/produce\s*\(|lane\s+:publish_ipa|automatic_release:\s*true/.test(fastfile)) fail('unsafe app creation/monolithic/automatic release path found');
+if (/produce\s*\(|lane\s+:publish_ipa/.test(fastfile)) fail('unsafe app creation or monolithic release path found');
+const submitLane = fastfile.match(/lane :submit_for_review do([\s\S]*?)^  end/m)?.[1] ?? '';
+if (!/automatic_release:\s*true/.test(submitLane) || /automatic_release:\s*false/.test(submitLane)) {
+  fail('Fastlane submission must use automatic release after Apple approval');
+}
+if (/release_approved_version|manual ASC action/.test(fastfile)) fail('obsolete manual release path found');
 if (/9\+test@test\.com|bujnmi@gmail\.com|festapp-csm-reviewer/.test(fastfile)) {
   fail('Fastfile duplicates app-specific reviewer configuration');
 }

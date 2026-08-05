@@ -111,7 +111,7 @@
     "manualAscConfirmationRequired": false,
     "confirmedInAppStoreConnectAt": "2026-08-04"
   },
-  "releaseMode": "manual_after_approval",
+  "releaseMode": "automatic_after_approval",
   "externalGates": [
     "legal_approval",
     "app_privacy_questionnaire",
@@ -119,8 +119,7 @@
     "backend_and_web_deployment",
     "onesignal_change",
     "app_store_upload",
-    "app_store_submission",
-    "manual_release"
+    "app_store_submission"
   ],
   "allowedLegacyIdentityStrings": [
     "festapp.jm2025",

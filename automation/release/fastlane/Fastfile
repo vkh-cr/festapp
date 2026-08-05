@@ -462,7 +462,7 @@ platform :ios do
     UI.important('This lane does not submit or release.')
   end
 
-  desc 'Explicitly gated submission with manual release selected'
+  desc 'Explicitly gated submission with automatic release after Apple approval'
   lane :submit_for_review do
     exact_gate!('SUBMIT')
     target_app!('SUBMIT_FOR_REVIEW')
@@ -471,15 +471,8 @@ platform :ios do
       submit_for_review: true, skip_binary_upload: true,
       skip_metadata: true, skip_screenshots: true,
       ignore_language_directory_validation: true,
-      automatic_release: false, run_precheck_before_submit: true,
+      automatic_release: true, run_precheck_before_submit: true,
       precheck_include_in_app_purchases: false, force: true
     )
-  end
-
-  desc 'Separate approval gate; release itself remains a manual ASC action'
-  lane :release_approved_version do
-    exact_gate!('RELEASE')
-    target_app!('RELEASE_APPROVED_VERSION')
-    UI.user_error!('Gate verified. Perform the irreversible manual release in App Store Connect and record its readback evidence.')
   end
 end
