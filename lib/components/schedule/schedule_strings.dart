@@ -126,6 +126,17 @@ class ScheduleStrings {
   static String get signInBeforeAddingToMySchedule =>
       'FeatureSchedule.signInBeforeAddingToMySchedule'
           .tr(); // "Before adding to 'My schedule', please sign in first."
+  static String get programRemindersTitle =>
+      'FeatureSchedule.programRemindersTitle'.tr();
+  static String get programRemindersDescription =>
+      'FeatureSchedule.programRemindersDescription'.tr();
+  static String get programRemindersToggle =>
+      'FeatureSchedule.programRemindersToggle'.tr();
+  static String get programRemindersLeadTime =>
+      'FeatureSchedule.programRemindersLeadTime'.tr();
+  static String programRemindersMinutes(int minutes) =>
+      'FeatureSchedule.programRemindersMinutes'
+          .tr(namedArgs: {'minutes': minutes.toString()});
 
   // --- Event sign-in results ---
   static String get cannotSignIn =>

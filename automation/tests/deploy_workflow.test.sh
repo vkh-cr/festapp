@@ -94,6 +94,17 @@ for needle in '/sitemap.xml' '/form/' 'WEB_CLIENT_INDEX' 'FLUTTER_ENTRY' 'AUTH_B
     fi
 done
 
+# 8. A deploy is not successful until the custom domain repeatedly serves one
+# coherent HTML/manifest/main/service-worker generation.
+for needle in 'verify_web_deployment.mjs' '"https://${DOMAIN}" "${VERSION}"'; do
+    if grep -F -q "$needle" "$WORKFLOW"; then
+        echo "  ok: deploy workflow contains release gate '$needle'"
+    else
+        echo "  FAIL: deploy workflow missing release gate '$needle'"
+        fail=1
+    fi
+done
+
 echo
 if [ $fail -ne 0 ]; then
     echo "❌ deploy workflow test FAILED"

@@ -52,7 +52,10 @@ begin
 
   IF auth.uid() <> usr THEN
       IF NOT EXISTS (
-        SELECT 1 FROM user_companions WHERE "user" = auth.uid() AND companion = usr) THEN
+        SELECT 1 FROM user_companions uc
+        JOIN events ce ON ce.id=ev AND ce.occasion=uc.occasion
+        WHERE uc."user" = auth.uid() AND uc.companion = usr
+          AND (public.get_companion_feature_policy_v1(uc.occasion)->>'is_enabled')::boolean) THEN
           IF (SELECT get_is_editor_on_occasion((SELECT occasion FROM events WHERE id = ev))) <> TRUE THEN
             RETURN json_build_object('code', 403);
           END IF;

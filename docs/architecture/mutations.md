@@ -268,10 +268,13 @@ longer composes two writes.
 Attendance exclusivity and companions are also closed command boundaries.
 `save/delete_exclusive_group_client_sync_v1` replaces the complete constraint
 aggregate under a monotonic version even though it is server-side decision
-state rather than a cached payload. `create/delete_companion_client_sync_v1`
-owns companion lifecycle; `private_profile` includes the owner's companion
-list and companion attendance advances that owner's profile revision, so the
-offline UI cannot retain a stale companion schedule.
+state rather than a cached payload. Companion lifecycle uses explicit
+`create_companion_client_sync_v1`, `delete_owned_companion_client_sync_v1`,
+`assign_existing_companion_client_sync_v1`, and
+`unassign_existing_companion_client_sync_v1` commands. Admin unassignment
+removes only the occasion relationship. `private_profile` is the sole
+identity-scoped companion projection. Admin commands advance the owner's
+private head without returning that owner's private payload to the admin.
 
 The speaker editor uses `save/delete_speaker_client_sync_v1`; competence-topic
 links are children of the speaker aggregate and are replaced atomically with

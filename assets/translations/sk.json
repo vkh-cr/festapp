@@ -64,6 +64,12 @@
     "scanCameraInstruction": "Namierte kameru na kód účastníka na overenie vstupu.",
     "signedInCompanions": "Prihlásení spoločníci"
   },
+  "FeatureCompanions": {
+    "description": "Spravuje program samostatných účastníkov bez vlastného zariadenia.",
+    "enterNumberGreaterThanZero": "Zadajte číslo väčšie ako nula",
+    "allowUserCreate": "Účastníci môžu vytvárať technické účty spoločníkov",
+    "allowAdminAssign": "Administrátori môžu priraďovať existujúcich účastníkov"
+  },
   "FeatureUser": {
     "passwordResetLinkSent": "Odkaz na resetovanie hesla bol odoslaný na {email}. Skontrolujte si prosím svoju schránku a postupujte podľa pokynov na resetovanie hesla.",
     "admin": "Admin",
@@ -78,7 +84,17 @@
     "deleteCompanion": "Odstrániť spoločníka",
     "inviteFailed": "Nepodarilo sa pozvať {user}. Počet pokusov: ({retries}).",
     "fillPassword": "Vyplňte heslo!",
-    "companionInfo": "Ak máte dieťa, partnera alebo priateľa bez telefónu, môžete ich prihlásiť ako spoločníka. Na vstup na podujatie budú potrebovať festivalový náramok. Maximálny počet spoločníkov je {max_companions}.",
+    "companionInfo": "Spoločník je samostatný účastník bez vlastného zariadenia. Maximálny počet: {max_companions}.",
+    "noGroup": "Bez skupinky",
+    "manageCompanions": "Spravovať spoločníkov",
+    "assignCompanion": "Priradiť",
+    "companionAssigned": "Spoločník bol úspešne priradený.",
+    "unassignCompanion": "Odpojiť",
+    "searchCompanion": "Hľadať účastníka",
+    "companionLimitReached": "Vlastník dosiahol maximálny počet spoločníkov",
+    "companionAlreadyAssigned": "Účastník je už priradený inému vlastníkovi",
+    "companionOwnsAnother": "Účastník už spravuje vlastného spoločníka",
+    "companionOwnerIsAssigned": "Vlastník je sám priradený ako spoločník",
     "insertHere": "Vložiť tu",
     "invite": "Pozvať",
     "invitedUser": "Pozvaný: {user}.",
@@ -88,6 +104,8 @@
     "showMyCode": "Zobraziť môj kód",
     "signIn": "Prihlásiť sa",
     "signOut": "Odhlásiť sa",
+    "companionSignIn": "Prihlásiť",
+    "companionSignOut": "Odhlásiť",
     "signedInEvents": "Prihlásené udalosti: {count}",
     "reinviteConfirm": "Niektorí používatelia už boli pozvaní. Chceš ich pozvať znova a poslať nový prihlasovací kód?",
     "inviteInfo": "Používatelia dostanú prihlasovací kód e-mailom.",
@@ -196,6 +214,11 @@
     "news": "Novinky"
   },
   "FeatureSchedule": {
+    "programRemindersTitle": "Pripomienky programu",
+    "programRemindersDescription": "Nastavte si upozornenie pred začiatkom položiek v Mojom programe.",
+    "programRemindersToggle": "Upozorniť pred začiatkom programu",
+    "programRemindersLeadTime": "Ako dlho vopred?",
+    "programRemindersMinutes": "{minutes} min",
     "addToSchedule": "Pridať do programu",
     "addedToMySchedule": "Pridané do Môjho programu.",
     "afternoon": "Popoludnie",
@@ -408,6 +431,10 @@
     "discardChangesConfirm": "Naozaj zrušiť všetky zmeny?",
     "savingChanges": "Ukladanie zmien",
     "tabService": "Pobyt"
+  },
+  "FeatureProgramNotifications": {
+    "title": "Pripomienky programu",
+    "description": "Umožní používateľom nastaviť upozornenia pred začiatkom položiek v Mojom programe."
   },
   "Dialogs": {
     "noResults": "Žiadne výsledky."

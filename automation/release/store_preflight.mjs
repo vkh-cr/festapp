@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { parseProjectVersion } from './project_version.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'automation/release/app_store_config.json'), 'utf8'));
@@ -84,8 +85,15 @@ const config = fs.readFileSync(path.join(root, 'automation/project.conf'), 'utf8
 const getConfig = (key) => config.match(new RegExp(`^${key}=(?:"([^"]*)"|(.*))$`, 'm'))?.slice(1).find((v) => v !== undefined)?.trim();
 if (getConfig('APP_NAME') !== manifest.target.name) fail('project.conf APP_NAME disagrees with manifest');
 if (getConfig('DOMAIN') !== new URL(manifest.urls.marketing).hostname) fail('project.conf DOMAIN disagrees with manifest');
-const [version, build] = (getConfig('VERSION') || '').split('+');
-if (version !== manifest.target.version || build !== manifest.target.build) fail('project.conf version/build disagrees with manifest');
+try {
+  parseProjectVersion(config);
+} catch (error) {
+  fail(error.message);
+}
+if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(manifest.target.version ?? '')) {
+  fail('app-store target version must be an explicit semantic version');
+}
+if ('build' in manifest.target) fail('app-store manifest must not duplicate the canonical build number');
 
 const project = fs.readFileSync(path.join(root, 'ios/Runner.xcodeproj/project.pbxproj'), 'utf8');
 if (!project.includes('PRODUCT_BUNDLE_IDENTIFIER = festapp.jm2025;')) fail('main bundle identifier is not pinned');

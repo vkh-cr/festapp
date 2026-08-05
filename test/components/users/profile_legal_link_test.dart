@@ -33,7 +33,7 @@ void main() {
     expect(find.text('Privacy'), findsOneWidget);
   });
 
-  testWidgets('legal links panel exposes the complete public document set',
+  testWidgets('legal links stay lightweight and expose all public documents',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -56,7 +56,24 @@ void main() {
       Uri.parse('https://example.festapp.net/terms/'),
       Uri.parse('https://example.festapp.net/support/'),
     ]);
-    expect(find.byType(Card), findsOneWidget);
-    expect(find.byType(ListTile), findsNWidgets(4));
+    expect(find.byType(Wrap), findsOneWidget);
+    expect(find.byType(TextButton), findsNWidgets(4));
+    expect(find.byType(Card), findsNothing);
+    expect(find.byType(ListTile), findsNothing);
+  });
+
+  test('web legal links preserve a safe return path to the app', () {
+    expect(
+      resolveProfileLegalUri(
+        Uri.parse('https://csmostrava.festapp.net/privacy/'),
+        appUri: Uri.parse(
+          'https://csmostrava.festapp.net/csmostrava2026/user?tab=profile',
+        ),
+        includeReturnTo: true,
+      ),
+      Uri.parse(
+        'https://csmostrava.festapp.net/privacy/?returnTo=%2Fcsmostrava2026%2Fuser%3Ftab%3Dprofile',
+      ),
+    );
   });
 }

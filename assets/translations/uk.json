@@ -90,7 +90,17 @@
     "deleteCompanion": "Видалити супутника",
     "inviteFailed": "Не вдалося запросити {user}. Спроб: ({retries}).",
     "fillPassword": "Введіть пароль!",
-    "companionInfo": "Якщо у вас є дитина, партнер або друг без телефону, ви можете зареєструвати їх як супутника. Для входу їм потрібен фестивальний браслет. Максимум супутників — {max_companions}.",
+    "companionInfo": "Супутник є окремим учасником без власного пристрою. Максимум: {max_companions}.",
+    "noGroup": "Без групи",
+    "manageCompanions": "Керувати супутниками",
+    "assignCompanion": "Призначити",
+    "companionAssigned": "Супутника успішно призначено.",
+    "unassignCompanion": "Від’єднати",
+    "searchCompanion": "Шукати учасника",
+    "companionLimitReached": "Власник досяг максимальної кількості супутників",
+    "companionAlreadyAssigned": "Учасника вже призначено іншому власнику",
+    "companionOwnsAnother": "Учасник уже керує власним супутником",
+    "companionOwnerIsAssigned": "Власника самого призначено супутником",
     "insertHere": "Вставте тут",
     "invite": "Запросити",
     "invitedUser": "Запрошено: {user}.",
@@ -100,6 +110,8 @@
     "showMyCode": "Показати мій код",
     "signIn": "Увійти",
     "signOut": "Вийти",
+    "companionSignIn": "Зареєструвати",
+    "companionSignOut": "Скасувати реєстрацію",
     "signedInEvents": "Зареєстровані події: {count}",
     "reinviteConfirm": "Деякі користувачі вже запрошені. Запросити знову та надіслати новий код?",
     "inviteInfo": "Користувачі отримають код для входу на e‑mail.",
@@ -257,6 +269,11 @@
     "news": "Новини"
   },
   "FeatureSchedule": {
+    "programRemindersTitle": "Нагадування про програму",
+    "programRemindersDescription": "Виберіть, коли отримувати сповіщення перед початком пунктів у Моїй програмі.",
+    "programRemindersToggle": "Сповіщати перед початком програми",
+    "programRemindersLeadTime": "За скільки часу?",
+    "programRemindersMinutes": "{minutes} хв",
     "addToSchedule": "Додати до розкладу",
     "addedToMySchedule": "Додано до мого розкладу.",
     "afternoon": "Післяобід",
@@ -339,7 +356,10 @@
     "ageRestriction": "Ви повинні бути віком від {minAge} до {maxAge} років."
   },
   "FeatureCompanions": {
-    "description": "Дозволяє додавати супутників (партнер, дитина, друг без телефону) та реєструвати їх на майстер‑класи."
+    "description": "Дозволяє керувати програмою окремих учасників без власного пристрою.",
+    "enterNumberGreaterThanZero": "Введіть число більше нуля",
+    "allowUserCreate": "Учасники можуть створювати технічні облікові записи супутників",
+    "allowAdminAssign": "Адміністратори можуть призначати наявних учасників"
   },
   "FeatureForm": {
     "description": "Дозволяє створювати форму для резервування місць на події.",
@@ -543,6 +563,10 @@
   },
   "FeatureMySchedule": {
     "description": "Дозволяє додавати елементи програми до обраного."
+  },
+  "FeatureProgramNotifications": {
+    "title": "Нагадування про програму",
+    "description": "Дозволяє користувачам налаштовувати сповіщення перед початком пунктів у Моїй програмі."
   },
   "FeatureEntryCode": {
     "title": "Код входу",

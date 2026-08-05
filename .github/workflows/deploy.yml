@@ -93,6 +93,13 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy build/web --project-name=${{ needs.detect.outputs.cf_project }} --branch=${{ needs.detect.outputs.branch }}
 
+      - name: Verify coherent release on the production domain
+        shell: bash
+        run: |
+          set -e
+          source automation/project.conf
+          node automation/verify_web_deployment.mjs "https://${DOMAIN}" "${VERSION}"
+
   netlify:
     needs: detect
     if: needs.detect.outputs.target == 'netlify'

@@ -1,34 +1,17 @@
-CREATE OR REPLACE FUNCTION get_user_companions_data ()
+CREATE OR REPLACE FUNCTION public.get_user_companions_data(p_occasion bigint)
 RETURNS jsonb
-LANGUAGE plpgsql VOLATILE
+LANGUAGE sql STABLE
 SECURITY DEFINER
 SET search_path = public, extensions
 AS $$
-DECLARE
-    companions jsonb;
-BEGIN
-    -- Aggregate companion data into JSONB format
-    SELECT jsonb_agg(
-        jsonb_build_object(
-            'id', ui.id,
-            'name', ui.name,
-            'event_ids', (
-                SELECT jsonb_agg(eu.event)
-                FROM public.event_users eu
-                WHERE eu."user" = ui.id
-            )
-        )
-    ) INTO companions
-    FROM public.user_companions uc
-    JOIN public.user_info ui ON uc.companion = ui.id
-    WHERE uc."user"::text = auth.uid()::TEXT;
-
-    -- If no companions are found, return an empty array
-    IF companions IS NULL THEN
-        companions := '[]'::jsonb;
-    END IF;
-
-    -- Return the companions data with a code of 200
-    RETURN jsonb_build_object('code', 200, 'data', companions);
-END;
+  SELECT jsonb_build_object('code',200,'data',payload->'companions')
+  FROM (SELECT public.get_private_profile_payload_v1(
+    p_occasion,auth.uid()) payload) projected
+  WHERE EXISTS (SELECT 1 FROM public.occasion_users ou
+    WHERE ou.occasion=p_occasion AND ou."user"=auth.uid());
 $$;
+
+REVOKE ALL ON FUNCTION public.get_user_companions_data(bigint)
+  FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.get_user_companions_data(bigint)
+  TO authenticated;

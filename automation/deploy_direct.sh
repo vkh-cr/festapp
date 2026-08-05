@@ -85,4 +85,7 @@ npx --yes wrangler@latest pages deploy build/web \
   --branch "${BRANCH}" \
   --commit-dirty=true
 
-echo "Done. Verify at the project's production domain."
+DOMAIN="$(grep -E '^DOMAIN=' automation/project.conf | head -1 | sed 's/^DOMAIN=//' | tr -d '"'"'"'\r ')"
+VERSION="$(grep -E '^VERSION=' automation/project.conf | head -1 | sed 's/^VERSION=//' | tr -d '"'"'"'\r ')"
+echo "Verifying coherent production release at https://${DOMAIN}..."
+node automation/verify_web_deployment.mjs "https://${DOMAIN}" "${VERSION}"

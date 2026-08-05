@@ -24,6 +24,9 @@ class OccasionUserModel extends ITrinaRowModel {
   int? unit;
   String? formId;
   String? groupTitle;
+  String? companionOwnerId;
+  String? companionOwnerName;
+  String? companionOrigin;
   FormModel? form;
 
   bool? isEditor = false;
@@ -67,6 +70,9 @@ class OccasionUserModel extends ITrinaRowModel {
       this.unit,
       this.formId,
       this.groupTitle,
+      this.companionOwnerId,
+      this.companionOwnerName,
+      this.companionOrigin,
       this.form,
       this.aggregateVersion = 0});
 
@@ -86,6 +92,9 @@ class OccasionUserModel extends ITrinaRowModel {
         unit: json[Tb.unit_users.unit],
         formId: json[DbUsers.formIdKey],
         groupTitle: json[DbUsers.groupTitleKey],
+        companionOwnerId: json['companion_owner_id'],
+        companionOwnerName: json['companion_owner_name'],
+        companionOrigin: json['companion_origin'],
         isEditor: json[Tb.occasion_users.is_editor],
         isEditorView: json[Tb.occasion_users.is_editor_view],
         isEditorOrder: json[Tb.occasion_users.is_editor_order],
@@ -212,6 +221,9 @@ class OccasionUserModel extends ITrinaRowModel {
       UserColumns.SURNAME:
           TrinaCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
       UserColumns.GROUP: TrinaCell(value: groupTitle ?? ""),
+      UserColumns.COMPANION_OWNER: TrinaCell(value: companionOwnerName ?? ""),
+      UserColumns.COMPANION_OWNER_ID: TrinaCell(value: companionOwnerId ?? ""),
+      UserColumns.COMPANION_ORIGIN: TrinaCell(value: companionOrigin ?? ""),
       UserColumns.SEX: TrinaCell(value: data?[Tb.occasion_users.data_sex]),
       UserColumns.PHONE:
           TrinaCell(value: data?[Tb.occasion_users.data_phone] ?? ""),
@@ -292,6 +304,16 @@ class OccasionUserModel extends ITrinaRowModel {
       occasion: RightsService.currentOccasionId(),
       aggregateVersion: TrinaRowVersion.read(json),
       user: json[UserColumns.ID]?.isEmpty == true ? null : json[UserColumns.ID],
+      groupTitle: json[UserColumns.GROUP],
+      companionOwnerId: json[UserColumns.COMPANION_OWNER_ID]?.isEmpty == true
+          ? null
+          : json[UserColumns.COMPANION_OWNER_ID],
+      companionOwnerName: json[UserColumns.COMPANION_OWNER]?.isEmpty == true
+          ? null
+          : json[UserColumns.COMPANION_OWNER],
+      companionOrigin: json[UserColumns.COMPANION_ORIGIN]?.isEmpty == true
+          ? null
+          : json[UserColumns.COMPANION_ORIGIN],
       isApprover: json[UserColumns.APPROVER] == "true" ? true : false,
       isApproved: json[UserColumns.APPROVED] == "true" ? true : false,
       isManager: json[UserColumns.MANAGER] == "true" ? true : false,

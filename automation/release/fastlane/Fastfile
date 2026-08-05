@@ -9,8 +9,12 @@ default_platform(:ios)
 MANIFEST = JSON.parse(File.read(File.expand_path('../app_store_config.json', __dir__)))
 APPLE_ID = MANIFEST.fetch('appleId')
 BUNDLE_ID = MANIFEST.fetch('bundleId')
+version_helper = File.expand_path('../project_version.mjs', __dir__)
+version_json, version_error, version_status = Open3.capture3('node', version_helper, '--json')
+raise "Cannot read canonical project version: #{version_error}" unless version_status.success?
+PROJECT_VERSION = JSON.parse(version_json)
 TARGET_VERSION = MANIFEST.fetch('target').fetch('version')
-TARGET_BUILD = MANIFEST.fetch('target').fetch('build')
+TARGET_BUILD = PROJECT_VERSION.fetch('build')
 
 def app_store_connect_key_path!
   path = File.expand_path(ENV.fetch('APP_STORE_CONNECT_KEY_PATH'))
@@ -206,6 +210,7 @@ platform :ios do
     upload_to_app_store(
       api_key: api_key, ipa: ipa, app_identifier: BUNDLE_ID,
       skip_metadata: true, skip_screenshots: true,
+      ignore_language_directory_validation: true,
       submit_for_review: false, automatic_release: false,
       run_precheck_before_submit: false, force: true
     )

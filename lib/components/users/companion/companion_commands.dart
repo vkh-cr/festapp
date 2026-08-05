@@ -3,12 +3,20 @@ import 'package:fstapp/data_services/client_sync/client_command_response.dart';
 import 'package:fstapp/data_services/client_sync/client_command_transport.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-abstract interface class CompanionCommands {
-  Future<CompanionModel> create(int occasionId, String name);
-  Future<void> delete(int occasionId, String companionId);
+abstract interface class ParticipantCompanionCommands {
+  Future<CompanionModel> createSelf(int occasionId, String name);
+  Future<void> deleteSelf(int occasionId, String companionId);
 }
 
-class SupabaseCompanionCommands implements CompanionCommands {
+abstract interface class AdminCompanionCommands {
+  Future<void> assignExisting(
+      int occasionId, String ownerId, String companionId);
+  Future<void> unassignExisting(
+      int occasionId, String ownerId, String companionId);
+}
+
+class SupabaseCompanionCommands
+    implements ParticipantCompanionCommands, AdminCompanionCommands {
   SupabaseCompanionCommands(SupabaseClient client)
       : _transport = ClientCommandTransport.supabase(client);
 
@@ -17,7 +25,7 @@ class SupabaseCompanionCommands implements CompanionCommands {
   final ClientCommandTransport _transport;
 
   @override
-  Future<CompanionModel> create(int occasionId, String name) async {
+  Future<CompanionModel> createSelf(int occasionId, String name) async {
     final response = ClientCommandResponse.from(await _transport.invoke(
       'create_companion_client_sync_v1',
       {'p_occasion': occasionId, 'p_name': name},
@@ -31,9 +39,9 @@ class SupabaseCompanionCommands implements CompanionCommands {
   }
 
   @override
-  Future<void> delete(int occasionId, String companionId) async {
+  Future<void> deleteSelf(int occasionId, String companionId) async {
     final response = ClientCommandResponse.from(await _transport.invoke(
-      'delete_companion_client_sync_v1',
+      'delete_owned_companion_client_sync_v1',
       {'p_occasion': occasionId, 'p_companion': companionId},
     ));
     await response.applyReplacements();
@@ -42,4 +50,29 @@ class SupabaseCompanionCommands implements CompanionCommands {
       throw StateError('Companion delete was rejected');
     }
   }
+
+  Future<void> _adminCommand(
+      String name, int occasionId, String ownerId, String companionId) async {
+    final response = ClientCommandResponse.from(await _transport.invoke(name, {
+      'p_occasion': occasionId,
+      'p_owner': ownerId,
+      'p_companion': companionId,
+    }));
+    if (response.code != 200 ||
+        (response.status != 'applied' && response.status != 'unchanged')) {
+      throw StateError('Companion assignment was rejected');
+    }
+  }
+
+  @override
+  Future<void> assignExisting(
+          int occasionId, String ownerId, String companionId) =>
+      _adminCommand('assign_existing_companion_client_sync_v1', occasionId,
+          ownerId, companionId);
+
+  @override
+  Future<void> unassignExisting(
+          int occasionId, String ownerId, String companionId) =>
+      _adminCommand('unassign_existing_companion_client_sync_v1', occasionId,
+          ownerId, companionId);
 }

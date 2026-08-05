@@ -60,6 +60,8 @@ abstract class Feature {
         return ServicesFeature.fromJson(json);
       case FeatureConstants.counseling:
         return CounselingFeature.fromJson(json);
+      case FeatureConstants.programNotifications:
+        return ProgramNotificationsFeature.fromJson(json);
       default:
         return SimpleFeature.fromJson(json);
     }
@@ -101,4 +103,20 @@ class SimpleFeature extends Feature {
   Widget buildFormField(BuildContext context) {
     return Container();
   }
+}
+
+/// Reserved feature whose UI proposal stays in the codebase, but which cannot
+/// be enabled until notification delivery has been implemented.
+class ProgramNotificationsFeature extends SimpleFeature {
+  ProgramNotificationsFeature()
+      : super(
+          code: FeatureConstants.programNotifications,
+          isEnabled: false,
+        );
+
+  factory ProgramNotificationsFeature.fromJson(Map<String, dynamic> json) =>
+      ProgramNotificationsFeature();
+
+  @override
+  bool get canBeDisabled => false;
 }

@@ -173,6 +173,10 @@ class FeaturesStrings {
   static String get enterNumberGreaterThanZero =>
       'FeatureCompanions.enterNumberGreaterThanZero'
           .tr(); // "Enter a number greater than 0"
+  static String get companionsAllowUserCreate =>
+      'FeatureCompanions.allowUserCreate'.tr();
+  static String get companionsAllowAdminAssign =>
+      'FeatureCompanions.allowAdminAssign'.tr();
 
   // Feature Songbook
   static String get songbookDescription => 'FeatureSongbook.description'
@@ -189,6 +193,12 @@ class FeaturesStrings {
   // Feature My Schedule
   static String get myScheduleDescription => 'FeatureMySchedule.description'
       .tr(); // "Enables adding program items to favorites."
+
+  // Program notifications
+  static String get programNotificationsTitle =>
+      'FeatureProgramNotifications.title'.tr();
+  static String get programNotificationsDescription =>
+      'FeatureProgramNotifications.description'.tr();
 
   // Feature Entry Code
   static String get entryCodeTitle =>

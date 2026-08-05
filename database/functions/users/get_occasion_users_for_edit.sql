@@ -55,6 +55,13 @@ BEGIN
         WHERE ugi.occasion = p_occasion_id
           AND ugi.type IS NULL
         GROUP BY ug."user"
+    ),
+    companion_owners AS (
+        SELECT uc.companion, uc."user" AS owner_id, uc.origin,
+               concat_ws(' ', owner_info.name, owner_info.surname) AS owner_name
+        FROM public.user_companions uc
+        JOIN public.user_info owner_info ON owner_info.id = uc."user"
+        WHERE uc.occasion = p_occasion_id
     )
     SELECT json_agg(row_to_json(user_row))
     INTO users_data
@@ -94,12 +101,16 @@ BEGIN
             order_info.form_id,
             order_info.created_at AS order_created_at,
             au.last_sign_in_at,
-            standard_groups.titles AS group_title
+            standard_groups.titles AS group_title,
+            companion_owners.owner_id AS companion_owner_id,
+            companion_owners.owner_name AS companion_owner_name,
+            companion_owners.origin AS companion_origin
         FROM visible_users vu
         LEFT JOIN public.user_info ui ON ui.id = vu."user"
         LEFT JOIN auth.users au ON au.id = vu."user"
         LEFT JOIN order_info ON order_info.ticket = vu.ticket
         LEFT JOIN standard_groups ON standard_groups."user" = vu."user"
+        LEFT JOIN companion_owners ON companion_owners.companion = vu."user"
     ) user_row;
 
     -- 2. Get all forms associated with the occasion, selecting only the specified fields.

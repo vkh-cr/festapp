@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
+import 'package:fstapp/components/map/place_model.dart';
 import 'package:timezone/data/latest.dart' as timezone_data;
 import 'package:timezone/timezone.dart' as timezone;
 
@@ -88,5 +89,50 @@ void main() {
     expect(news.map((item) => item.id), [204, 202, 199]);
     expect(news.map((item) => item.views), [1145, 1157, 2041]);
     expect(news.map((item) => item.isRead), [false, true, true]);
+  });
+
+  test('private-profile replacement fully adds and removes companions', () {
+    final withCompanion = ClientSyncProjection.projectCompanions({
+      'companions': [
+        {
+          'id': 'companion',
+          'name': 'Ada',
+          'surname': 'Lovelace',
+          'group_title': 'DISK 19',
+          'origin': 'admin_assigned',
+          'can_owner_delete': false,
+          'event_ids': [42],
+        },
+      ],
+    });
+    final withoutCompanion =
+        ClientSyncProjection.projectCompanions({'companions': []});
+
+    expect(withCompanion.single.fullName, 'Ada Lovelace');
+    expect(withCompanion.single.groupTitle, 'DISK 19');
+    expect(withCompanion.single.canOwnerDelete, isFalse);
+    expect(withoutCompanion, isEmpty,
+        reason: 'an empty full replacement cannot retain the prior relation');
+  });
+
+  test('normal participant services resolve companion accommodation', () {
+    final place = ClientSyncProjection.projectAccommodationPlace(
+      userServices: const {
+        'accommodation': {'room-a': 'paid'},
+      },
+      occasionServices: const {
+        'accommodation': [
+          {
+            'code': 'room-a',
+            'title': 'Fallback room title',
+            'reference': 73,
+          },
+        ],
+      },
+      places: [PlaceModel(id: 73, title: 'Domov mládeže A')],
+    );
+
+    expect(place?.id, 73);
+    expect(place?.title, 'Domov mládeže A');
   });
 }

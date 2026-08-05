@@ -1,170 +1,209 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
-import 'package:fstapp/components/users/companion/db_companions.dart';
 import 'package:fstapp/components/users/companion/companion_model.dart';
+import 'package:fstapp/components/users/companion/db_companions.dart';
 import 'package:fstapp/components/users/user_strings.dart';
-import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/connectivity_service.dart';
+import 'package:fstapp/services/exception_handler.dart';
 
-class CompanionDialog extends StatefulWidget {
-  final int eventId;
-  final bool Function()? canSignIn;
-  final int maxCompanions;
-  final List<CompanionModel> companions;
-  final Future<void> Function()? refreshData;
-
-  const CompanionDialog({
+class CompanionManagementDialog extends StatefulWidget {
+  const CompanionManagementDialog({
     super.key,
-    required this.eventId,
+    required this.allowUserCreate,
     required this.maxCompanions,
     required this.companions,
-    this.refreshData,
-    this.canSignIn,
+    required this.refreshData,
+    this.createCompanion,
+    this.deleteCompanion,
+    this.reloadCompanions,
   });
 
+  final bool allowUserCreate;
+  final int maxCompanions;
+  final List<CompanionModel> companions;
+  final Future<void> Function() refreshData;
+  final Future<void> Function(String name)? createCompanion;
+  final Future<void> Function(CompanionModel companion)? deleteCompanion;
+  final Future<List<CompanionModel>> Function()? reloadCompanions;
+
   @override
-  _CompanionDialogState createState() => _CompanionDialogState();
+  State<CompanionManagementDialog> createState() =>
+      _CompanionManagementDialogState();
 }
 
-class _CompanionDialogState extends State<CompanionDialog> {
-  final TextEditingController _nameController = TextEditingController();
-  late List<CompanionModel> _companions;
+class _CompanionManagementDialogState extends State<CompanionManagementDialog> {
+  final _nameController = TextEditingController();
+  late List<CompanionModel> _companions = widget.companions;
 
   @override
-  void initState() {
-    super.initState();
-    _companions = widget.companions;
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
   }
 
-  Future<void> _createCompanion() async {
-    if (_companions.length < widget.maxCompanions &&
-        _nameController.text.isNotEmpty) {
-      await DbCompanions.create(_nameController.text);
-      _nameController.clear();
-      _companions = await DbCompanions.getAllCompanions();
-      if (mounted) setState(() {});
-    }
+  Future<void> _create() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty || _companions.length >= widget.maxCompanions) return;
+    final ok = await ExceptionHandler.guardVoid(
+      context,
+      futureFunction: () =>
+          (widget.createCompanion ?? DbCompanions.create)(name),
+    );
+    if (!ok) return;
+    await _reload();
   }
 
-  Future<void> _deleteCompanion(CompanionModel companion) async {
-    var answer = await DialogHelper.showConfirmationDialog(context,
+  Future<void> _delete(CompanionModel companion) async {
+    final confirmed = await DialogHelper.showConfirmationDialog(context,
         UserStrings.deleteCompanion, UserStrings.deleteCompanionConfirm);
-    if (!answer) {
-      return;
-    }
-    await DbCompanions.delete(companion);
-    await widget.refreshData?.call();
-    _companions = await DbCompanions.getAllCompanions();
-    if (mounted) setState(() {});
+    if (!confirmed || !mounted) return;
+    final ok = await ExceptionHandler.guardVoid(
+      context,
+      futureFunction: () =>
+          (widget.deleteCompanion ?? DbCompanions.deleteSelf)(companion),
+    );
+    if (!ok) return;
+    await _reload();
   }
 
-  Future<void> _signInCompanion(CompanionModel companion) async {
-    // This check could also be done inside DbCompanions.signIn, but UI disabling is clearer.
-    if (!(widget.canSignIn?.call() ?? false)) return;
-    await DbCompanions.signIn(context, widget.eventId, companion);
-    await widget.refreshData?.call();
-    _companions = await DbCompanions.getAllCompanions();
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _signOutCompanion(CompanionModel companion) async {
-    await DbCompanions.signOut(context, widget.eventId, companion);
-    await widget.refreshData?.call();
-    _companions = await DbCompanions.getAllCompanions();
-    if (mounted) setState(() {});
+  Future<void> _reload() async {
+    await widget.refreshData();
+    final companions =
+        await (widget.reloadCompanions ?? DbCompanions.getAllCompanions)();
+    if (mounted) setState(() => _companions = companions);
   }
 
   @override
-  Widget build(BuildContext context) {
-    bool currentCanSignIn = widget.canSignIn?.call() ?? false;
-    return AlertDialog(
-      title: Text(CommonStrings.companions),
-      content: SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                UserStrings.companionInfo(
-                    maxCompanions:
-                        FeatureService.getMaxCompanions().toString()),
-              ),
-              const SizedBox(height: 20),
-              Visibility(
-                visible: _companions.length < widget.maxCompanions,
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                          labelText: UserStrings.companionName),
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(30),
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+      valueListenable: ConnectivityService.isOfflineNotifier,
+      builder: (context, isOffline, _) => AlertDialog(
+            title: Text(CommonStrings.companions),
+            content: SizedBox(
+              width: 520,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.allowUserCreate &&
+                      _companions.length < widget.maxCompanions)
+                    Row(children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                              labelText: UserStrings.companionName),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: isOffline ? null : _create,
+                        child: Text(UserStrings.createCompanion),
+                      ),
+                    ]),
+                  Flexible(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        for (final companion in _companions)
+                          ListTile(
+                            title: Text(companion.fullName),
+                            subtitle: Text(companion.groupTitle.isEmpty
+                                ? UserStrings.noGroup
+                                : companion.groupTitle),
+                            trailing: companion.origin == 'self_created' &&
+                                    companion.canOwnerDelete
+                                ? IconButton(
+                                    tooltip: UserStrings.deleteCompanion,
+                                    icon: const Icon(Icons.delete_outline),
+                                    onPressed: isOffline
+                                        ? null
+                                        : () => _delete(companion),
+                                  )
+                                : null,
+                          ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _createCompanion,
-                      child: Text(UserStrings.createCompanion),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: 380,
-                height: 150,
-                child: ListView.builder(
-                  shrinkWrap: false,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _companions.length,
-                  itemBuilder: (context, index) {
-                    final companion = _companions[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 8.0),
-                      child: Row(
-                        children: [
-                          if (companion.isSignedIn(widget.eventId))
-                            const Icon(Icons.check_circle),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(companion.name),
-                          ),
-                          if (!companion.isSignedIn(widget.eventId))
-                            ElevatedButton(
-                              onPressed: currentCanSignIn
-                                  ? () => _signInCompanion(companion)
-                                  : null,
-                              child: Text(UserStrings.signIn),
-                            ),
-                          if (companion.isSignedIn(widget.eventId))
-                            ElevatedButton(
-                              child: Text(UserStrings.signOut),
-                              onPressed: () => _signOutCompanion(companion),
-                            ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _deleteCompanion(companion),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(CommonStrings.ok),
-        ),
-      ],
-    );
+            ),
+          ));
+}
+
+class CompanionAttendanceDialog extends StatefulWidget {
+  const CompanionAttendanceDialog({
+    super.key,
+    required this.eventId,
+    required this.companions,
+    required this.canSignIn,
+    required this.refreshData,
+    this.changeAttendance,
+    this.reloadCompanions,
+  });
+
+  final int eventId;
+  final List<CompanionModel> companions;
+  final bool Function() canSignIn;
+  final Future<void> Function() refreshData;
+  final Future<void> Function(
+      int eventId, CompanionModel companion, bool signIn)? changeAttendance;
+  final Future<List<CompanionModel>> Function()? reloadCompanions;
+
+  @override
+  State<CompanionAttendanceDialog> createState() =>
+      _CompanionAttendanceDialogState();
+}
+
+class _CompanionAttendanceDialogState extends State<CompanionAttendanceDialog> {
+  late List<CompanionModel> _companions = widget.companions;
+
+  Future<void> _change(CompanionModel companion, bool signIn) async {
+    final changeAttendance = widget.changeAttendance;
+    if (changeAttendance != null) {
+      await changeAttendance(widget.eventId, companion, signIn);
+    } else if (signIn) {
+      await DbCompanions.signIn(context, widget.eventId, companion);
+    } else {
+      await DbCompanions.signOut(context, widget.eventId, companion);
+    }
+    await widget.refreshData();
+    final companions =
+        await (widget.reloadCompanions ?? DbCompanions.getAllCompanions)();
+    if (mounted) setState(() => _companions = companions);
   }
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+      valueListenable: ConnectivityService.isOfflineNotifier,
+      builder: (context, isOffline, _) => AlertDialog(
+            title: Text(CommonStrings.companions),
+            content: SizedBox(
+              width: 480,
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final companion in _companions)
+                    ListTile(
+                      title: Text(companion.fullName),
+                      subtitle: Text(companion.groupTitle.isEmpty
+                          ? UserStrings.noGroup
+                          : companion.groupTitle),
+                      trailing: companion.isSignedIn(widget.eventId)
+                          ? TextButton(
+                              onPressed: isOffline
+                                  ? null
+                                  : () => _change(companion, false),
+                              child: Text(UserStrings.companionSignOut),
+                            )
+                          : FilledButton(
+                              onPressed: !isOffline && widget.canSignIn()
+                                  ? () => _change(companion, true)
+                                  : null,
+                              child: Text(UserStrings.companionSignIn),
+                            ),
+                    ),
+                ],
+              ),
+            ),
+          ));
 }

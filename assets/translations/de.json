@@ -64,6 +64,12 @@
     "scanCameraInstruction": "Richten Sie die Kamera auf den Code des Teilnehmers, um den Eintritt zu überprüfen.",
     "signedInCompanions": "Angemeldete Begleiter"
   },
+  "FeatureCompanions": {
+    "description": "Verwaltet das Programm eigenständiger Teilnehmer ohne eigenes Gerät.",
+    "enterNumberGreaterThanZero": "Geben Sie eine Zahl größer als null ein",
+    "allowUserCreate": "Teilnehmer dürfen technische Begleiterkonten erstellen",
+    "allowAdminAssign": "Administratoren dürfen bestehende Teilnehmer zuweisen"
+  },
   "FeatureUser": {
     "passwordResetLinkSent": "Ein Link zum Zurücksetzen des Passworts wurde an {email} gesendet. Bitte überprüfen Sie Ihren Posteingang und folgen Sie den Anweisungen, um Ihr Passwort zurückzusetzen.",
     "admin": "Admin",
@@ -78,7 +84,17 @@
     "deleteCompanion": "Begleiter löschen",
     "inviteFailed": "Es konnte nicht eingeladen werden: {user}. Anzahl der Versuche: ({retries}).",
     "fillPassword": "Gib das Passwort ein!",
-    "companionInfo": "Wenn Sie ein Kind, einen Partner oder einen Freund ohne Telefon haben, können Sie ihn als Begleiter anmelden. Sie benötigen ein Festivalband, um die Veranstaltung zu betreten. Die maximale Anzahl an Begleitern beträgt {max_companions}.",
+    "companionInfo": "Ein Begleiter ist ein eigenständiger Teilnehmer ohne eigenes Gerät. Maximale Anzahl: {max_companions}.",
+    "noGroup": "Keine Gruppe",
+    "manageCompanions": "Begleiter verwalten",
+    "assignCompanion": "Zuweisen",
+    "companionAssigned": "Begleitperson wurde erfolgreich zugewiesen.",
+    "unassignCompanion": "Trennen",
+    "searchCompanion": "Teilnehmer suchen",
+    "companionLimitReached": "Der Besitzer hat die maximale Begleiterzahl erreicht",
+    "companionAlreadyAssigned": "Der Teilnehmer ist bereits einem anderen Besitzer zugeordnet",
+    "companionOwnsAnother": "Der Teilnehmer verwaltet bereits einen Begleiter",
+    "companionOwnerIsAssigned": "Der Besitzer ist selbst als Begleiter zugeordnet",
     "insertHere": "Hier einfügen",
     "invite": "Einladen",
     "invitedUser": "Eingeladen: {user}.",
@@ -88,6 +104,8 @@
     "showMyCode": "Meinen Code anzeigen",
     "signIn": "Anmelden",
     "signOut": "Abmelden",
+    "companionSignIn": "Anmelden",
+    "companionSignOut": "Abmelden",
     "signedInEvents": "Angemeldete Veranstaltungen: {count}",
     "reinviteConfirm": "Einige Benutzer wurden bereits eingeladen. Möchtest du sie erneut einladen und einen neuen Anmeldecode senden?",
     "inviteInfo": "Benutzer erhalten einen Anmeldecode per E-Mail.",
@@ -196,6 +214,11 @@
     "news": "Nachrichten"
   },
   "FeatureSchedule": {
+    "programRemindersTitle": "Programmerinnerungen",
+    "programRemindersDescription": "Lege fest, wann du vor Beginn der Einträge in Mein Programm benachrichtigt wirst.",
+    "programRemindersToggle": "Vor Programmbeginn benachrichtigen",
+    "programRemindersLeadTime": "Wie lange vorher?",
+    "programRemindersMinutes": "{minutes} Min.",
     "addToSchedule": "Zum Zeitplan hinzufügen",
     "addedToMySchedule": "Zum Zeitplan hinzugefügt.",
     "afternoon": "Nachmittag",
@@ -409,6 +432,10 @@
     "discardChangesConfirm": "Wirklich alle Änderungen verwerfen?",
     "savingChanges": "Änderungen speichern",
     "tabService": "Aufenthalt"
+  },
+  "FeatureProgramNotifications": {
+    "title": "Programmerinnerungen",
+    "description": "Ermöglicht Benutzern, Erinnerungen vor Beginn der Einträge in Mein Programm einzustellen."
   },
   "Dialogs": {
     "noResults": "Keine Ergebnisse."

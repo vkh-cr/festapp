@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +18,7 @@ import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/users/companion/db_companions.dart';
+import 'package:fstapp/components/users/companion/companion_visibility.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/groups/db_groups.dart';
@@ -101,6 +104,7 @@ class _EventPageState extends State<EventPage> {
     // Web fonts settle after first paint; remeasure the header when they do so
     // its (taller) real height replaces the fallback-font estimate.
     PaintingBinding.instance.systemFonts.addListener(_scheduleHeaderMeasure);
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
   }
 
   @override
@@ -127,9 +131,24 @@ class _EventPageState extends State<EventPage> {
   @override
   void dispose() {
     PaintingBinding.instance.systemFonts.removeListener(_scheduleHeaderMeasure);
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
     _canSaveSavedProgram.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onProjectionChanged() {
+    if (mounted && ClientSyncRuntime.isV1Selected) {
+      unawaited(_reloadCompanions());
+    }
+  }
+
+  Future<void> _reloadCompanions() async {
+    final companions = AuthService.isLoggedIn()
+        ? await DbCompanions.getAllCompanions()
+        : const <CompanionModel>[];
+    if (!mounted) return;
+    setState(() => _companions = companions);
   }
 
   void _scheduleHeaderMeasure() {
@@ -1065,8 +1084,12 @@ class _EventPageState extends State<EventPage> {
     if (showLoginLogoutButton() && (_event?.isSignedIn ?? false)) {
       buttons.add(_actionButton(null, UserStrings.signOut, () => signOut()));
     }
-    if (showLoginLogoutButton() &&
-        FeatureService.isFeatureEnabled(FeatureConstants.companions)) {
+    if (canShowCompanionAttendanceAction(
+      isLoggedIn: AuthService.isLoggedIn(),
+      eventSupportsSignIn: EventModel.isEventSupportingSignIn(_event),
+      featureEnabled: FeatureService.isCompanionsEnabled(),
+      hasOwnedCompanions: _companions.isNotEmpty,
+    )) {
       buttons.add(_actionButton(Icons.group_add_outlined,
           CommonStrings.companions, () => signInCompanion()));
     }
@@ -1300,6 +1323,9 @@ class _EventPageState extends State<EventPage> {
     // New event → its header content differs, so remeasure from scratch.
     _measuredExpandedHeight = null;
     try {
+      _companions = AuthService.isLoggedIn()
+          ? await DbCompanions.getAllCompanions()
+          : const [];
       await loadOfflineData(widget.id!);
       if (await _redirectIfCounselingSlot()) return;
 
@@ -1546,10 +1572,9 @@ class _EventPageState extends State<EventPage> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return CompanionDialog(
+            return CompanionAttendanceDialog(
               eventId: _event!.id!,
               canSignIn: () => _event!.canSignIn(),
-              maxCompanions: FeatureService.getMaxCompanions() ?? 0,
               companions: _companions,
               refreshData: () async {
                 await loadData(widget.id!);

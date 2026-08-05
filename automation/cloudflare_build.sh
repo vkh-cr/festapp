@@ -90,6 +90,7 @@ fi
 #     complete app-shell cache after both frontends have been merged.
 rm -f build/web/flutter_service_worker.js
 node automation/generate_pwa_service_worker.mjs build/web "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')"
+node automation/verify_web_build.mjs build/web "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')"
 
 # 6. Cloudflare-specific routing via Pages Function (_worker.js).
 #    Cloudflare Pages applies _redirects BEFORE static assets, so a catch-all

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/users/user_strings.dart';
@@ -9,7 +11,11 @@ import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/users/companion/db_companions.dart';
+import 'package:fstapp/components/users/companion/companion_dialog.dart';
+import 'package:fstapp/components/users/companion/companion_accommodation_field.dart';
+import 'package:fstapp/components/users/companion/companion_visibility.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
@@ -52,6 +58,25 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   bool _didStartLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
+  }
+
+  @override
+  void dispose() {
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
+    super.dispose();
+  }
+
+  void _onProjectionChanged() {
+    if (mounted && _didStartLoading && ClientSyncRuntime.isV1Selected) {
+      unawaited(loadData());
+    }
+  }
+
   void _showFullScreenDialog(
     BuildContext context,
     String name,
@@ -192,9 +217,11 @@ class _UserPageState extends State<UserPage> {
                       label: UserStrings.showMyCode,
                     ),
                   ),
-                if (FeatureService.isFeatureEnabled(
-                        FeatureConstants.companions) &&
-                    (userData?.companions?.isNotEmpty ?? false))
+                if (canShowCompanionManagement(
+                  featureEnabled: FeatureService.isCompanionsEnabled(),
+                  allowUserCreate: FeatureService.allowsUserCompanionCreation(),
+                  hasOwnedCompanions: userData?.companions?.isNotEmpty ?? false,
+                ))
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
@@ -211,11 +238,28 @@ class _UserPageState extends State<UserPage> {
                         if (index == 0) {
                           return ListTile(
                             title: Text(
-                              CommonStrings.companions,
+                              UserStrings.manageCompanions,
                               style: TextStyle(
                                 color: ThemeConfig.blackColor(context),
                                 fontWeight: FontWeight.bold,
                               ),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.manage_accounts_outlined),
+                              onPressed: () async {
+                                await showDialog(
+                                  context: context,
+                                  builder: (_) => CompanionManagementDialog(
+                                    allowUserCreate: FeatureService
+                                        .allowsUserCompanionCreation(),
+                                    maxCompanions:
+                                        FeatureService.getMaxCompanions(),
+                                    companions:
+                                        userData?.companions ?? const [],
+                                    refreshData: loadData,
+                                  ),
+                                );
+                              },
                             ),
                           );
                         }
@@ -233,7 +277,7 @@ class _UserPageState extends State<UserPage> {
                                 child: ExpansionTile(
                                   shape: const Border(),
                                   title: Text(
-                                    companion!.name,
+                                    companion!.fullName,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Theme.of(context)
@@ -242,10 +286,7 @@ class _UserPageState extends State<UserPage> {
                                     ),
                                   ),
                                   subtitle: Text(
-                                    UserStrings.signedInEvents(
-                                        count: companion.schedule?.length
-                                                .toString() ??
-                                            "0"),
+                                    '${companion.groupTitle.isEmpty ? UserStrings.noGroup : companion.groupTitle} · ${UserStrings.signedInEvents(count: companion.schedule?.length.toString() ?? "0")}',
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -253,20 +294,38 @@ class _UserPageState extends State<UserPage> {
                                       fontSize: 13,
                                     ),
                                   ),
-                                  trailing: ButtonsHelper.buildReferenceButton(
-                                    context: context,
-                                    onPressed: () => _showFullScreenDialog(
-                                      context,
-                                      companion.name,
-                                      AppConfig.appName,
-                                      companion.id,
+                                  trailing: canShowCompanionQrAction(
+                                    entryCodeEnabled:
+                                        FeatureService.isFeatureEnabled(
+                                      FeatureConstants.entryCode,
                                     ),
-                                    icon: Icons.qr_code,
-                                    label: UserStrings.showCode,
-                                  ),
+                                  )
+                                      ? ButtonsHelper.buildReferenceButton(
+                                          context: context,
+                                          onPressed: () =>
+                                              _showFullScreenDialog(
+                                            context,
+                                            companion.name,
+                                            AppConfig.appName,
+                                            companion.id,
+                                          ),
+                                          icon: Icons.qr_code,
+                                          label: UserStrings.showCode,
+                                        )
+                                      : null,
                                   expandedCrossAxisAlignment:
                                       CrossAxisAlignment.center,
                                   children: [
+                                    if (FeatureService
+                                        .isServiceAccommodationEnabled())
+                                      CompanionAccommodationField(
+                                        companion: companion,
+                                        onOpenPlace: (placeId) =>
+                                            MapNavigation.openPlace(
+                                          context,
+                                          placeId,
+                                        ),
+                                      ),
                                     const SizedBox(height: 36),
                                     ConstrainedBox(
                                       constraints: const BoxConstraints(
@@ -302,24 +361,28 @@ class _UserPageState extends State<UserPage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        TextButton(
-                                          onPressed: () async {
-                                            var answer = await DialogHelper
-                                                .showConfirmationDialog(
-                                                    context,
-                                                    UserStrings.deleteCompanion,
-                                                    UserStrings
-                                                        .deleteCompanionConfirm);
-                                            if (!answer) {
-                                              return;
-                                            }
-                                            await DbCompanions.delete(
-                                                companion);
-                                            await loadData();
-                                          },
-                                          child:
-                                              Text(UserStrings.deleteCompanion),
-                                        ),
+                                        if (companion.origin ==
+                                                'self_created' &&
+                                            companion.canOwnerDelete)
+                                          TextButton(
+                                            onPressed: () async {
+                                              var answer = await DialogHelper
+                                                  .showConfirmationDialog(
+                                                      context,
+                                                      UserStrings
+                                                          .deleteCompanion,
+                                                      UserStrings
+                                                          .deleteCompanionConfirm);
+                                              if (!answer) {
+                                                return;
+                                              }
+                                              await DbCompanions.deleteSelf(
+                                                  companion);
+                                              await loadData();
+                                            },
+                                            child: Text(
+                                                UserStrings.deleteCompanion),
+                                          ),
                                       ],
                                     ),
                                   ],

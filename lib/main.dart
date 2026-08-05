@@ -38,18 +38,69 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   debugProfileBuildsEnabled = true;
-  await initializeEverything();
-  runApp(
-    EasyLocalization(
-        supportedLocales:
-            AppConfig.availableLanguages().map((e) => e.locale).toList(),
-        path: "assets/translations",
-        fallbackLocale:
-            AppConfig.availableLanguages().map((e) => e.locale).first,
-        useOnlyLangCode: true,
-        saveLocale: true,
-        child: MyApp()),
-  );
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(FestappBootstrap(
+    initialize: initializeEverything,
+    buildReadyApp: () => EasyLocalization(
+      supportedLocales:
+          AppConfig.availableLanguages().map((e) => e.locale).toList(),
+      path: "assets/translations",
+      fallbackLocale: AppConfig.availableLanguages().map((e) => e.locale).first,
+      useOnlyLangCode: true,
+      saveLocale: true,
+      child: MyApp(),
+    ),
+  ));
+}
+
+/// Paints immediately on PWA, Android and iOS while startup restores the local
+/// context and probes online services. A slow or unreachable backend therefore
+/// cannot leave the process sitting on an OS/browser splash with no Flutter UI.
+class FestappBootstrap extends StatefulWidget {
+  static const loadingKey = Key('festapp-startup-loading');
+
+  final Future<void> Function() initialize;
+  final Widget Function() buildReadyApp;
+
+  const FestappBootstrap({
+    required this.initialize,
+    required this.buildReadyApp,
+    super.key,
+  });
+
+  @override
+  State<FestappBootstrap> createState() => _FestappBootstrapState();
+}
+
+class _FestappBootstrapState extends State<FestappBootstrap> {
+  late final Future<void> _initialization = _initialize();
+
+  Future<void> _initialize() async {
+    try {
+      await widget.initialize();
+    } catch (error) {
+      // initializeEverything isolates its individual steps already. This final
+      // boundary still guarantees a usable app shell after an unexpected error.
+      AppLogger.error('Unexpected startup failure: $error');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<void>(
+        future: _initialization,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return widget.buildReadyApp();
+          }
+          return const MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+              key: FestappBootstrap.loadingKey,
+              body: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        },
+      );
 }
 
 Future<void> initializeEverything() async {
@@ -198,7 +249,8 @@ Future<void> initializeEverything() async {
       RightsService.useOfflineVersion = true;
       AppLogger.debug('Offline start: using cached occasion data');
     } else {
-      await RightsService.updateAppData(force: true, refreshOffline: false);
+      await RightsService.updateAppData(force: true, refreshOffline: false)
+          .timeout(const Duration(seconds: 5));
       AppLogger.debug('Occasion loaded');
       if (AuthService.isLoggedIn() && !ClientSyncRuntime.isV1Selected) {
         unawaited(SynchroService.refreshUserOfflineData().then((_) {

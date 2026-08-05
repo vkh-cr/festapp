@@ -8,6 +8,7 @@ Uri resolveProfileLegalUri(
   Uri configuredUri, {
   Uri? appUri,
   bool? useLocalStaticDocument,
+  bool? includeReturnTo,
 }) {
   final currentAppUri = appUri ?? Uri.base;
   final isLoopback = currentAppUri.host == 'localhost' ||
@@ -15,15 +16,27 @@ Uri resolveProfileLegalUri(
       currentAppUri.host == '::1';
   final shouldUseLocalDocument =
       useLocalStaticDocument ?? (kIsWeb && kDebugMode && isLoopback);
-  if (!shouldUseLocalDocument) return configuredUri;
+  final targetUri = shouldUseLocalDocument
+      ? currentAppUri.replace(
+          path:
+              '${configuredUri.path.endsWith('/') ? configuredUri.path : '${configuredUri.path}/'}index.html',
+          query: null,
+          fragment: null,
+        )
+      : configuredUri;
 
-  final directoryPath = configuredUri.path.endsWith('/')
-      ? configuredUri.path
-      : '${configuredUri.path}/';
-  return currentAppUri.replace(
-    path: '${directoryPath}index.html',
-    query: null,
-    fragment: null,
+  if (!(includeReturnTo ?? kIsWeb)) return targetUri;
+
+  final returnTo = StringBuffer(
+    currentAppUri.path.isEmpty ? '/' : currentAppUri.path,
+  )
+    ..write(currentAppUri.hasQuery ? '?${currentAppUri.query}' : '')
+    ..write(currentAppUri.hasFragment ? '#${currentAppUri.fragment}' : '');
+  return targetUri.replace(
+    queryParameters: {
+      ...targetUri.queryParameters,
+      'returnTo': returnTo.toString(),
+    },
   );
 }
 
@@ -32,14 +45,10 @@ class ProfileLegalLink extends StatelessWidget {
     super.key,
     required this.label,
     required this.uri,
-    this.icon,
-    this.asListTile = false,
   });
 
   final String label;
   final Uri uri;
-  final IconData? icon;
-  final bool asListTile;
 
   @override
   Widget build(BuildContext context) {
@@ -47,20 +56,10 @@ class ProfileLegalLink extends StatelessWidget {
     return Link(
       uri: targetUri,
       target: LinkTarget.self,
-      builder: (context, followLink) {
-        if (asListTile) {
-          return ListTile(
-            leading: icon == null ? null : Icon(icon),
-            title: Text(label),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: followLink,
-          );
-        }
-        return TextButton(
-          onPressed: followLink,
-          child: Text(label),
-        );
-      },
+      builder: (context, followLink) => TextButton(
+        onPressed: followLink,
+        child: Text(label),
+      ),
     );
   }
 }
@@ -78,46 +77,35 @@ class AppLegalLinks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rootUri = baseUri ?? Uri.parse(AppConfig.webLink);
-    final links = <({String label, String path, IconData icon})>[
+    final links = <({String label, String path})>[
       (
         label: UserStrings.privacy,
         path: 'privacy/',
-        icon: Icons.privacy_tip_outlined,
       ),
       (
         label: UserStrings.privacyChoices,
         path: 'privacy/choices/',
-        icon: Icons.tune,
       ),
       (
         label: UserStrings.terms,
         path: 'terms/',
-        icon: Icons.description_outlined,
       ),
       (
         label: UserStrings.support,
         path: 'support/',
-        icon: Icons.help_outline,
       ),
     ];
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var index = 0; index < links.length; index++) ...[
-            if (index > 0) const Divider(height: 1),
-            ProfileLegalLink(
-              label: links[index].label,
-              uri: rootUri.resolve(links[index].path),
-              icon: links[index].icon,
-              asListTile: true,
-            ),
-          ],
-        ],
-      ),
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 4,
+      children: [
+        for (final link in links)
+          ProfileLegalLink(
+            label: link.label,
+            uri: rootUri.resolve(link.path),
+          ),
+      ],
     );
   }
 }

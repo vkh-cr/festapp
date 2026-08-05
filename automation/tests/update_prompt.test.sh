@@ -90,6 +90,22 @@ else
     echo "  FAIL: stamped main.dart copy differs from main.dart.js"; fail=1
 fi
 
+# The release gate must accept only a self-consistent HTML/manifest/main/worker
+# set carrying the same version.
+printf '<script>window.__FESTAPP_BUILD_VERSION__ = "1.2.3+456";</script>\n' > "$BUILD_DIR/flutter"
+printf 'const BUILD_VERSION = "1.2.3+456"; // FESTAPP_QUERY_BUILD_VERSION\n' > "$BUILD_DIR/festapp_service_worker.js"
+if node "$PROJECT_ROOT/automation/verify_web_build.mjs" "$BUILD_DIR" "1.2.3+456" > /dev/null; then
+    echo "  ok: coherent web release passes the build gate"
+else
+    echo "  FAIL: coherent web release was rejected by the build gate"; fail=1
+fi
+printf '// mismatched bundle\n' > "$BUILD_DIR/main.dart.1.2.3-456.js"
+if node "$PROJECT_ROOT/automation/verify_web_build.mjs" "$BUILD_DIR" "1.2.3+456" > /dev/null 2>&1; then
+    echo "  FAIL: build gate accepted mismatched main bundles"; fail=1
+else
+    echo "  ok: build gate rejects mismatched main bundles"
+fi
+
 # Missing main.dart.js must fail loudly rather than emit a dangling manifest.
 echo
 echo "--- emit_version_manifest.sh fails when main.dart.js is absent ---"

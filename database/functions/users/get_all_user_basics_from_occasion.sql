@@ -47,7 +47,7 @@ BEGIN
     )
   ) INTO user_basics
   FROM public.user_info ui
-  LEFT JOIN public.user_companions uc ON ui.id = uc.companion
+  LEFT JOIN public.user_companions uc ON ui.id = uc.companion AND uc.occasion=oc
   JOIN public.occasion_users uo ON ui.id = uo."user"
 
   -- LEFT JOIN to check visibility settings

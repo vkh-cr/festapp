@@ -28,6 +28,7 @@ class FeatureConstants {
   static const String import = "import"; // New feature
   static const String globalSearch = "global_search";
   static const String eventFeedback = "event_feedback";
+  static const String programNotifications = "program_notifications";
   // Counseling feature. Speakers themselves are core (no feature); the
   // "counseling" feature gates only the counseling flow (areas, slots,
   // rozcestník, booking window/limit). Replaces the retired "speakers" feature.
@@ -82,6 +83,8 @@ class FeatureConstants {
 
   // Extra field for companions feature
   static const String companionsMax = "max_companions";
+  static const String companionsAllowUserCreate = "allow_user_create";
+  static const String companionsAllowAdminAssign = "allow_admin_assign";
 
   // Extra fields for map feature
   static const String onlineMapLayer = "map_layer";

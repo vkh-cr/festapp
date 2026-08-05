@@ -516,10 +516,6 @@ class DbUsers {
     });
   }
 
-  static Future<void> deleteUser(String user, int occasion) async {
-    await _supabase.rpc("delete_user", params: {"usr": user, "oc": occasion});
-  }
-
   static Future<String?> getUserByEmail(String email) async {
     var data = await _supabase.rpc("get_user_id_by_email",
         params: {"email": email.toLowerCase()}).maybeSingle();

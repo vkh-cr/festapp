@@ -17,6 +17,7 @@ import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/users/views/users_tab_helper.dart';
 import 'package:fstapp/components/occasion_services/service_item_model.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
+import 'package:fstapp/components/users/companion/companion_admin_dialog.dart';
 
 class UsersTab extends StatefulWidget {
   const UsersTab({super.key});
@@ -26,6 +27,9 @@ class UsersTab extends StatefulWidget {
 }
 
 class _UsersTabState extends State<UsersTab> {
+  static bool get _canManageCompanions =>
+      RightsService.isManager() || RightsService.isAdmin();
+
   static List<String> getColumnIdentifiers() {
     final identifiers = [
       UserColumns.ID,
@@ -33,6 +37,9 @@ class _UsersTabState extends State<UsersTab> {
       UserColumns.NAME,
       UserColumns.SURNAME,
       UserColumns.GROUP,
+      if (FeatureService.allowsAdminCompanionAssignment() &&
+          _canManageCompanions)
+        UserColumns.COMPANION_OWNER,
       UserColumns.SEX,
       if (FeatureService.isServiceAccommodationEnabled())
         UserColumns.ACCOMMODATION,
@@ -117,6 +124,29 @@ class _UsersTabState extends State<UsersTab> {
         },
         isEnabled: RightsService.canUpdateUsers,
       ),
+      if (FeatureService.allowsAdminCompanionAssignment() &&
+          _canManageCompanions)
+        DataGridAction(
+          name: UserStrings.manageCompanions,
+          action: (SingleDataGridController p0, [_]) async {
+            final selected = UsersTabHelper.getCheckedUsers(p0);
+            if (selected.length != 1) return;
+            await showDialog(
+              context: context,
+              builder: (_) => CompanionAdminDialog(
+                owner: selected.single,
+                users: p0.stateManager.refRows.originalList
+                    .map((row) => OccasionUserModel.fromPlutoJson(row.toJson()))
+                    .toList(growable: false),
+                maxCompanions: FeatureService.getMaxCompanions(),
+                onChanged: refreshData,
+              ),
+            );
+          },
+          isEnabled: () =>
+              _canManageCompanions &&
+              UsersTabHelper.getCheckedUsers(controller!).length == 1,
+        ),
       DataGridAction(
         name: UserStrings.changePassword,
         action: (SingleDataGridController p0, [_]) =>

@@ -1,5 +1,21 @@
 # Database Documentation
 
+## Occasion-scoped companion relationships
+
+`public.user_companions` stores `(occasion, user, companion)` with a unique
+companion per occasion and an explicit `origin` of `self_created` or
+`admin_assigned`. Client roles have no table privileges. Reads come from the
+occasion-aware legacy projection or the identity-scoped `private_profile`;
+writable profile fields, groups, services (including accommodation), and
+attendance remain sourced from the companion's normal user/occasion records;
+the relationship stores none of them. Reads from `private_profile` resolve
+those normal records for the owner UI.
+writes use only `create_companion_client_sync_v1`,
+`delete_owned_companion_client_sync_v1`,
+`assign_existing_companion_client_sync_v1`, and
+`unassign_existing_companion_client_sync_v1`. Admin unassignment removes only
+the relation; account deletion is restricted to self-created companions.
+
 This directory contains the source code for the PostgreSQL database schema,
 logic, and security policies.
 
@@ -159,7 +175,7 @@ erDiagram
 | `occasion_users` | User-occasion link | `user`, `occasion`, `is_editor_view` |
 | `unit_users` | User-unit link | `user`, `unit` |
 | `organization_users` | User-org link | `user`, `organization` |
-| `user_companions` | Companion relationships | `user`, `companion` |
+| `user_companions` | Occasion-scoped companion relationships | `occasion`, `user`, `companion`, `origin`, `created_by` |
 | `user_groups` | Group membership | `user`, `group` |
 | `user_group_info` | Group metadata | `id`, `occasion`, `title` |
 | `user_reset_token` | Password reset | `user`, `token` |
