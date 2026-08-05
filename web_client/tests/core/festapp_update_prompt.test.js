@@ -33,8 +33,10 @@ function boot({
     latestVersion,
     fetchOk = true,
     waitingWorker = false,
+    delayedControllerChange = false,
     activeWorkerWithoutUpdate = false,
     appReady = false,
+    cutoverVersion,
 } = {}) {
     const navigationErrors = [];
     const virtualConsole = new VirtualConsole();
@@ -52,6 +54,18 @@ function boot({
             window.__FESTAPP_BUILD_VERSION__ = buildVersion;
             window.__FESTAPP_APP_READY__ = appReady;
             if (locale) window.localStorage.setItem('flutter.Locale', JSON.stringify(locale));
+            if (cutoverVersion) {
+                window.sessionStorage.setItem('festappCutoverVersion', cutoverVersion);
+            }
+
+            window.MessageChannel = class {
+                constructor() {
+                    this.port1 = { onmessage: null };
+                    this.port2 = {
+                        postMessage: (data) => this.port1.onmessage?.({ data }),
+                    };
+                }
+            };
 
             // Deterministic timers: record calls, never auto-run.
             window.setTimeout = () => 0;
@@ -69,16 +83,34 @@ function boot({
                 window.__deletedCaches = [];
                 const candidate = new window.EventTarget();
                 candidate.state = 'installed';
-                candidate.postMessage = (message) => {
+                candidate.postMessage = (message, ports = []) => {
+                    if (message?.type === 'FESTAPP_QUERY_BUILD_VERSION') {
+                        ports[0]?.postMessage({ version: latestVersion });
+                        return;
+                    }
+                    if (typeof message !== 'string') return;
                     window.__skipWaitingMessages.push(message);
                     candidate.state = 'activated';
+                    registration.active = candidate;
                     candidate.dispatchEvent(new window.Event('statechange'));
-                    window.navigator.serviceWorker.dispatchEvent(
-                        new window.Event('controllerchange')
-                    );
+                    if (!delayedControllerChange) {
+                        serviceWorker.controller = candidate;
+                        window.navigator.serviceWorker.dispatchEvent(
+                            new window.Event('controllerchange')
+                        );
+                    }
+                };
+                const activeWorker = {
+                    scriptURL: 'https://csmostrava.festapp.net/festapp_service_worker.js',
+                    state: 'activated',
+                    postMessage: (message, ports = []) => {
+                        if (message?.type === 'FESTAPP_QUERY_BUILD_VERSION') {
+                            ports[0]?.postMessage({ version: buildVersion });
+                        }
+                    },
                 };
                 const registration = {
-                    active: { scriptURL: 'https://csmostrava.festapp.net/festapp_service_worker.js' },
+                    active: activeWorker,
                     waiting: waitingWorker ? candidate : null,
                     installing: null,
                     update: async () => {},
@@ -90,10 +122,15 @@ function boot({
                 const serviceWorker = new window.EventTarget();
                 serviceWorker.getRegistrations = async () => [registration];
                 serviceWorker.getRegistration = async () => registration;
+                serviceWorker.controller = activeWorker;
                 Object.defineProperty(window.navigator, 'serviceWorker', {
                     configurable: true,
                     value: serviceWorker,
                 });
+                window.__activateWaitingController = () => {
+                    serviceWorker.controller = candidate;
+                    serviceWorker.dispatchEvent(new window.Event('controllerchange'));
+                };
                 window.caches = {
                     keys: async () => ['festapp-app-shell-1.0.0+1', 'festapp-used-fonts-v1'],
                     delete: async (name) => {
@@ -183,14 +220,15 @@ describe('festapp_update_prompt.js', () => {
         assert.strictEqual(button(window, 'reload').textContent, 'Obnovit');
     });
 
-    test('version check shows a banner when the server build is newer', async () => {
+    test('version check stays silent until the matching worker is installed', async () => {
         const { window } = boot({ buildVersion: '1.0.0+1', latestVersion: '1.0.0+2' });
         window.dispatchEvent(new window.Event('focus'));
         await flush();
 
         assert.ok(window.__fetchCalls.some((u) => u.includes('/festapp-version.json')),
             'should poll /festapp-version.json');
-        assert.ok(banner(window), 'newer server version should surface the banner');
+        assert.strictEqual(banner(window), null,
+            'a manifest alone must not advertise a potentially incomplete deployment');
     });
 
     test('newer build atomically activates its waiting worker before fallback UI', async () => {
@@ -221,11 +259,12 @@ describe('festapp_update_prompt.js', () => {
         assert.ok(banner(window), 'a running app should let the user choose when to reload');
     });
 
-    test('Reload refreshes a stale page without deleting shared worker state', async () => {
+    test('Reload waits for the new worker to control the page before navigating', async () => {
         const { window } = boot({
             buildVersion: '1.0.0+1',
             latestVersion: '1.0.0+2',
-            activeWorkerWithoutUpdate: true,
+            waitingWorker: true,
+            delayedControllerChange: true,
             appReady: true,
         });
         window.dispatchEvent(new window.Event('focus'));
@@ -234,12 +273,33 @@ describe('festapp_update_prompt.js', () => {
         button(window, 'reload').click();
         await flush();
 
+        assert.deepStrictEqual([...window.__skipWaitingMessages], ['SKIP_WAITING']);
+        assert.strictEqual(window.__navigationErrors.length, 0,
+            'the previous controller must not receive the cutover reload');
+
+        window.__activateWaitingController();
+        await flush();
+
         assert.strictEqual(window.__navigationErrors.length, 1,
-            'an explicit Reload should refresh even when no worker is waiting');
-        assert.strictEqual(window.__festappUnregisterCalls, 0,
-            'one tab must not unregister the worker shared by other tabs');
-        assert.deepStrictEqual([...window.__deletedCaches], [],
-            'one tab must not delete an app shell still used by another tab');
+            'reload should start only after controllerchange');
+    });
+
+    test('an old page after accepted cutover cleans Festapp state once without repeating the banner', async () => {
+        const { window } = boot({
+            buildVersion: '1.0.0+1',
+            latestVersion: '1.0.0+2',
+            activeWorkerWithoutUpdate: true,
+            appReady: true,
+            cutoverVersion: '1.0.0+2',
+        });
+        window.dispatchEvent(new window.Event('focus'));
+        await flush();
+
+        assert.strictEqual(banner(window), null, 'accepted version must not be offered again');
+        assert.strictEqual(window.__navigationErrors.length, 1,
+            'failed cutover should perform one cache-busted navigation');
+        assert.strictEqual(window.__festappUnregisterCalls, 1);
+        assert.deepStrictEqual([...window.__deletedCaches], ['festapp-app-shell-1.0.0+1']);
     });
 
     test('version check stays silent when the server build matches', async () => {

@@ -46,6 +46,7 @@ try {
   assert.match(worker, /request\.mode === 'navigate'/);
   assert.match(worker, /cache\.match\(request, \{ ignoreSearch: true \}\)/);
   assert.match(worker, /event\.data === 'SKIP_WAITING'/);
+  assert.match(worker, /FESTAPP_QUERY_BUILD_VERSION/);
   assert.match(worker, /url\.pathname === '\/festapp-version\.json'/);
   assert.match(worker, /url\.origin === 'https:\/\/fonts\.gstatic\.com'/);
   assert.match(worker, /url\.origin === 'https:\/\/fonts\.googleapis\.com'/);

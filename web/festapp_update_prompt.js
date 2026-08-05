@@ -4,6 +4,7 @@
   const currentVersion = window.__FESTAPP_BUILD_VERSION__;
   const dismissedStorageKey = 'festappDismissedVersion';
   const cutoverStorageKey = 'festappCutoverVersion';
+  const cleanRecoveryStorageKey = 'festappCleanRecoveryVersion';
   const startupRecoveryStorageKey = 'festappStartupRecoveryVersion';
   const bannerId = 'festapp-update-banner';
   let checkInFlight = false;
@@ -51,6 +52,104 @@
       }
     } catch (error) {
       console.warn('Festapp network reload preparation failed:', error);
+    }
+  }
+
+  // The manifest can reach an edge before the matching executable shell. A
+  // worker version handshake proves that the coherent shell was installed.
+  async function queryWorkerVersion(worker) {
+    if (!worker || typeof MessageChannel === 'undefined') return null;
+    return new Promise(function(resolve) {
+      const channel = new MessageChannel();
+      const timeout = window.setTimeout(function() { resolve(null); }, 3000);
+      channel.port1.onmessage = function(event) {
+        window.clearTimeout(timeout);
+        resolve(event.data?.version || null);
+      };
+      try {
+        worker.postMessage({ type: 'FESTAPP_QUERY_BUILD_VERSION' }, [channel.port2]);
+      } catch (_) {
+        window.clearTimeout(timeout);
+        resolve(null);
+      }
+    });
+  }
+
+  async function waitUntilInstalled(worker) {
+    if (!worker) return null;
+    if (worker.state === 'installed' || worker.state === 'activated') return worker;
+    return new Promise(function(resolve) {
+      const timeout = window.setTimeout(function() { resolve(null); }, 120000);
+      worker.addEventListener('statechange', function onStateChange() {
+        if (worker.state !== 'installed' && worker.state !== 'activated' &&
+            worker.state !== 'redundant') return;
+        window.clearTimeout(timeout);
+        worker.removeEventListener('statechange', onStateChange);
+        resolve(worker.state === 'redundant' ? null : worker);
+      });
+    });
+  }
+
+  async function getReadyWorkerForVersion(expectedVersion) {
+    if (!('serviceWorker' in navigator)) return null;
+    try {
+      const registration = await navigator.serviceWorker.getRegistration('/');
+      if (!registration) return null;
+      await registration.update();
+      const candidate = await waitUntilInstalled(
+        registration.waiting || registration.installing,
+      );
+      if (candidate && await queryWorkerVersion(candidate) === expectedVersion) {
+        return { registration: registration, worker: candidate };
+      }
+      if (registration.active &&
+          await queryWorkerVersion(registration.active) === expectedVersion) {
+        return { registration: registration, worker: registration.active };
+      }
+    } catch (error) {
+      console.warn('Festapp update preparation failed:', error);
+    }
+    return null;
+  }
+
+  // If the user accepted a version but the old HTML returned, the normal
+  // cutover has failed. Perform one clean, cache-busted restart and never
+  // offer the same update banner again from that stale page.
+  async function recoverFailedCutover(latestVersion) {
+    if (!latestVersion || navigator.onLine === false ||
+        sessionStorage.getItem(cleanRecoveryStorageKey) === latestVersion) {
+      return false;
+    }
+    sessionStorage.setItem(cleanRecoveryStorageKey, latestVersion);
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations
+          .filter(function(registration) {
+            const scriptUrl = registration.active?.scriptURL ||
+              registration.waiting?.scriptURL ||
+              registration.installing?.scriptURL || '';
+            return scriptUrl.includes('festapp_service_worker.js') ||
+              scriptUrl.includes('flutter_service_worker.js');
+          })
+          .map(function(registration) { return registration.unregister(); }));
+      }
+      if ('caches' in window) {
+        const names = await caches.keys();
+        await Promise.all(names
+          .filter(function(name) {
+            return name.startsWith('festapp-app-shell-') ||
+              name.startsWith('flutter-app-cache');
+          })
+          .map(function(name) { return caches.delete(name); }));
+      }
+      const recoveryUrl = new URL(window.location.href);
+      recoveryUrl.searchParams.set('festapp-recovery', latestVersion);
+      window.location.replace(recoveryUrl.toString());
+      return true;
+    } catch (error) {
+      console.error('Festapp clean update recovery failed:', error);
+      return false;
     }
   }
 
@@ -301,8 +400,7 @@
       reloadButton.textContent = copy.loading;
       await clearLegacyFlutterCaches();
       if (!(await cutOverToVersion(latestVersion))) {
-        await prepareNetworkReload();
-        window.location.reload();
+        await recoverFailedCutover(latestVersion);
       }
     });
 
@@ -311,32 +409,35 @@
     document.body.appendChild(banner);
   }
 
-  async function activateWaitingFestappWorker() {
-    if (!('serviceWorker' in navigator)) return false;
+  async function activateWaitingFestappWorker(expectedVersion) {
     try {
-      const registration = await navigator.serviceWorker.getRegistration('/');
-      if (!registration || !registration.active?.scriptURL.includes('festapp_service_worker.js')) {
-        return false;
-      }
-      await registration.update();
-      let candidate = registration.waiting || registration.installing;
-      if (!candidate) return false;
-      if (candidate && candidate.state !== 'installed' && candidate.state !== 'activated') {
-        await new Promise(function(resolve) {
-          // The complete offline shell is intentionally large. A cold mobile
-          // cache can legitimately need longer than 30 seconds to install.
-          const timeout = window.setTimeout(resolve, 120000);
-          candidate.addEventListener('statechange', function onStateChange() {
-            if (candidate.state === 'installed' || candidate.state === 'activated' || candidate.state === 'redundant') {
-              window.clearTimeout(timeout);
-              candidate.removeEventListener('statechange', onStateChange);
-              resolve();
-            }
-          });
-        });
-      }
-      candidate = registration.waiting || candidate;
+      const ready = await getReadyWorkerForVersion(expectedVersion);
+      if (!ready) return false;
+      const registration = ready.registration;
+      const candidate = ready.worker;
+      if (candidate === registration.active &&
+          navigator.serviceWorker.controller === candidate) return true;
       if (candidate && candidate.state === 'installed') {
+        // `activated` can be observed just before this page's controller is
+        // replaced. Reloading in that gap lets the previous worker handle the
+        // navigation and serve the previous shell again, leaving the cutover
+        // guard set even though the tab never reached the new build.
+        const controlled = new Promise(function(resolve) {
+          if (navigator.serviceWorker.controller === candidate) {
+            resolve(true);
+            return;
+          }
+          const timeout = window.setTimeout(function() {
+            navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+            resolve(false);
+          }, 15000);
+          function onControllerChange() {
+            window.clearTimeout(timeout);
+            navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+            resolve(true);
+          }
+          navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
+        });
         const activated = new Promise(function(resolve) {
           const timeout = window.setTimeout(function() { resolve(false); }, 15000);
           candidate.addEventListener('statechange', function onStateChange() {
@@ -347,9 +448,11 @@
           });
         });
         candidate.postMessage('SKIP_WAITING');
-        return await activated;
+        if (!(await activated)) return false;
+        return await controlled;
       }
-      return candidate?.state === 'activated' || registration.active?.state === 'activated';
+      return candidate?.state === 'activated' &&
+        navigator.serviceWorker.controller === candidate;
     } catch (error) {
       console.warn('Festapp service worker activation failed:', error);
       return false;
@@ -357,15 +460,10 @@
   }
 
   async function cutOverToVersion(latestVersion) {
-    if (!latestVersion || sessionStorage.getItem(cutoverStorageKey) === latestVersion) {
-      return false;
-    }
+    if (!latestVersion) return false;
     sessionStorage.setItem(cutoverStorageKey, latestVersion);
-    const ready = await activateWaitingFestappWorker();
-    if (!ready) {
-      sessionStorage.removeItem(cutoverStorageKey);
-      return false;
-    }
+    const ready = await activateWaitingFestappWorker(latestVersion);
+    if (!ready) return false;
     window.location.reload();
     return true;
   }
@@ -430,9 +528,24 @@
 
       const data = await response.json();
       const latestVersion = data && data.version;
-      if (!latestVersion || latestVersion === currentVersion) {
+      if (!latestVersion) {
         return;
       }
+      if (latestVersion === currentVersion) {
+        sessionStorage.removeItem(cutoverStorageKey);
+        sessionStorage.removeItem(cleanRecoveryStorageKey);
+        return;
+      }
+
+      if (sessionStorage.getItem(cutoverStorageKey) === latestVersion) {
+        await recoverFailedCutover(latestVersion);
+        return;
+      }
+
+      // Do not advertise a deployment merely because its manifest reached an
+      // edge cache. The matching worker proves that the executable core was
+      // downloaded and installed as one coherent shell.
+      if (!(await getReadyWorkerForVersion(latestVersion))) return;
 
       // A page still on its loader may already have hit an incomplete stale
       // shell, so recover it automatically. Once Flutter is running, preserve
@@ -451,6 +564,7 @@
   window.prepareFestappNetworkReload = prepareNetworkReload;
   window.deepRefreshIfStale = deepRefreshIfStale;
   window.cutOverToVersion = cutOverToVersion;
+  window.recoverFailedFestappCutover = recoverFailedCutover;
   window.recoverFestappStartup = recoverStalledStartup;
   function reportClientVersion() {
     navigator.serviceWorker?.controller?.postMessage({

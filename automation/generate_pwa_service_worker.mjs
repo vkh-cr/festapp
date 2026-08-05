@@ -141,6 +141,10 @@ async function deleteUnusedShellsWhenSafe() {
 }
 
 self.addEventListener('message', (event) => {
+  if (event.data?.type === 'FESTAPP_QUERY_BUILD_VERSION') {
+    event.ports?.[0]?.postMessage({ version: BUILD_VERSION });
+    return;
+  }
   if (event.data === 'SKIP_WAITING') {
     cutoverClientId = event.source?.id || null;
     self.skipWaiting();
