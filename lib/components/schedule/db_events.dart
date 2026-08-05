@@ -13,6 +13,7 @@ import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/event_commands.dart';
 import 'package:fstapp/components/schedule/attendance_commands.dart';
 import 'package:fstapp/components/schedule/saved_program_commands.dart';
+import 'package:fstapp/components/schedule/saved_program_mutation_coordinator.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
@@ -24,6 +25,7 @@ import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/saved_program_pending_state.dart';
 import 'package:fstapp/components/offline/offline_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
@@ -36,6 +38,12 @@ import 'get_events_helper.dart';
 
 class DbEvents {
   static final _supabase = Supabase.instance.client;
+  static int _savedProgramScopeEpoch = 0;
+  static final SavedProgramMutationCoordinator
+      _savedProgramMutationCoordinator = SavedProgramMutationCoordinator(
+    currentScope: _currentSavedProgramScope,
+    persist: _persistSavedProgram,
+  );
   static EventCommands get _commands => SupabaseEventCommands(_supabase);
   static AttendanceCommands get _attendanceCommands =>
       SupabaseAttendanceCommands(_supabase);
@@ -44,6 +52,17 @@ class DbEvents {
           _supabase, RightsService.currentOccasionId()!);
   static ExclusiveGroupCommands get _exclusiveGroupCommands =>
       SupabaseExclusiveGroupCommands(_supabase);
+
+  static String _currentSavedProgramScope() {
+    final userId =
+        AuthService.isLoggedIn() ? AuthService.currentUserId() : 'anonymous';
+    return '$_savedProgramScopeEpoch|$userId|${RightsService.currentOccasionId()}|${ClientSyncRuntime.mutationContextToken}';
+  }
+
+  static void invalidateSavedProgramMutationScope() {
+    _savedProgramScopeEpoch++;
+    savedProgramPendingState.clearAll();
+  }
 
   static Future<HashSet<EventModel>> loadAllMySchedule() async {
     var dataEventUsersSaved = await _supabase
@@ -421,22 +440,12 @@ class DbEvents {
 
   static Future<void> removeFromMySchedule(BuildContext context, int id,
       {bool showSuccessToast = true}) async {
-    if (ClientSyncRuntime.isV1Selected && AuthService.isLoggedIn()) {
-      await _savedProgramCommands.update([id], SavedProgramMode.remove);
-    } else if (AuthService.isLoggedIn()) {
-      await _supabase
-          .from(Tb.event_users_saved.table)
-          .delete()
-          .eq(Tb.event_users_saved.event, id)
-          .eq(EventModel.eventUsersSavedUserColumn,
-              AuthService.currentUserId());
-      await OfflineDataService.removeFromMySchedule(id);
-    } else {
-      await OfflineDataService.removeFromMySchedule(id);
-    }
-    if (showSuccessToast) {
-      ToastHelper.Show(context, ScheduleStrings.removedFromMySchedule);
-    }
+    await setSavedProgram(
+      context,
+      id,
+      false,
+      showSuccessToast: showSuccessToast,
+    );
   }
 
   static Future<bool> addToMySchedule(BuildContext context, int id,
@@ -446,64 +455,144 @@ class DbEvents {
       ToastHelper.Show(context, ScheduleStrings.signInBeforeAddingToMySchedule);
       return false;
     }
-    if (AuthService.isLoggedIn()) {
-      if (ClientSyncRuntime.isV1Selected) {
-        await _savedProgramCommands.update([id], SavedProgramMode.join);
-      } else {
-        await _supabase.rpc('synchronize_my_schedule', params: {
-          'p_event_ids': [id],
-          'p_join_mode': true,
-        });
-        await OfflineDataService.addToMySchedule(id);
-      }
-    } else {
-      await OfflineDataService.addToMySchedule(id);
-    }
-    if (showSuccessToast) {
-      ToastHelper.Show(context, ScheduleStrings.addedToMySchedule);
-    }
-    return true;
+    final result = await setSavedProgram(
+      context,
+      id,
+      true,
+      showSuccessToast: showSuccessToast,
+    );
+    return result.wasApplied;
   }
 
-  static Future<void> synchronizeMySchedule(
-      {bool join = false, List<int>? currentIds}) async {
+  static Future<SavedProgramMutationResult> setSavedProgram(
+    BuildContext context,
+    int id,
+    bool saved, {
+    bool showSuccessToast = true,
+  }) async {
+    if (saved &&
+        !AppConfig.isOwnProgramSupportedWithoutSignIn &&
+        !AuthService.isLoggedIn()) {
+      ToastHelper.Show(context, ScheduleStrings.signInBeforeAddingToMySchedule);
+      return const SavedProgramMutationResult(
+        SavedProgramMutationOutcome.rejected,
+      );
+    }
+    final scope = _currentSavedProgramScope();
+    final owner = savedProgramPendingState.createOwner();
+    savedProgramPendingState.set(id, owner, saved);
+    late final SavedProgramMutationResult result;
+    try {
+      result = await _savedProgramMutationCoordinator.enqueue(
+        scope: scope,
+        eventId: id,
+        saved: saved,
+      );
+    } finally {
+      savedProgramPendingState.clear(id, owner);
+    }
+
+    if (result.error != null && context.mounted) {
+      await ExceptionHandler.handle(context, error: result.error!);
+    }
+    if (result.wasApplied && showSuccessToast && context.mounted) {
+      ToastHelper.Show(
+        context,
+        saved
+            ? ScheduleStrings.addedToMySchedule
+            : ScheduleStrings.removedFromMySchedule,
+      );
+    }
+    return result;
+  }
+
+  static Future<bool> _persistSavedProgram(
+      String scope, int id, bool saved) async {
+    if (_currentSavedProgramScope() != scope) return false;
+    if (AuthService.isLoggedIn()) {
+      if (ClientSyncRuntime.isV1Selected) {
+        await _savedProgramCommands.update(
+          [id],
+          saved ? SavedProgramMode.join : SavedProgramMode.remove,
+        );
+      } else {
+        final response = await _supabase.rpc('set_saved_program', params: {
+          'p_occasion': RightsService.currentOccasionId()!,
+          'p_event_ids': [id],
+          'p_mode': saved ? 'join' : 'remove',
+        });
+        if (_currentSavedProgramScope() != scope) return false;
+        await OfflineDataService.saveMyScheduleDataIfCurrent(
+          (response as List)
+              .whereType<num>()
+              .map((value) => value.toInt())
+              .toList(growable: false),
+          () => _currentSavedProgramScope() == scope,
+        );
+      }
+    } else if (saved) {
+      await OfflineDataService.addToMySchedule(
+        id,
+        isCurrent: () => _currentSavedProgramScope() == scope,
+      );
+    } else {
+      await OfflineDataService.removeFromMySchedule(
+        id,
+        isCurrent: () => _currentSavedProgramScope() == scope,
+      );
+    }
+    return _currentSavedProgramScope() == scope;
+  }
+
+  static Future<void> synchronizeMySchedule({bool join = false}) async {
     if (!AuthService.isLoggedIn() || !AppConfig.isOwnProgramSupported) {
       return;
     }
-    List<int> eventIdsToSynchronize = [];
-
-    if (currentIds != null) {
-      eventIdsToSynchronize = currentIds;
-    } else {
-      // If currentIds are not provided, load remote events
-      var remoteEvents = await loadAllMySchedule();
-      eventIdsToSynchronize = remoteEvents.map((x) => x.id!).toList();
+    if (ClientSyncRuntime.isV1Selected && !join) {
+      return;
     }
-
+    final scope = _currentSavedProgramScope();
     if (join) {
-      var localEventsIds = await OfflineDataService.getMyScheduleData();
-      eventIdsToSynchronize.addAll(localEventsIds);
-      eventIdsToSynchronize = eventIdsToSynchronize.toSet().toList();
+      final mergeVersion = savedProgramPendingState.mutationVersion;
+      final localEventIds = await OfflineDataService.getMyScheduleData();
+      if (_currentSavedProgramScope() != scope ||
+          savedProgramPendingState.mutationVersion != mergeVersion) {
+        return;
+      }
+      for (final eventId in localEventIds.toSet()) {
+        if (_currentSavedProgramScope() != scope ||
+            savedProgramPendingState.mutationVersion != mergeVersion) {
+          return;
+        }
+        final result = await _savedProgramMutationCoordinator.enqueue(
+          scope: scope,
+          eventId: eventId,
+          saved: true,
+        );
+        if (result.error != null) throw result.error!;
+        if (result.outcome == SavedProgramMutationOutcome.scopeChanged) return;
+        if (!result.wasApplied &&
+            result.outcome != SavedProgramMutationOutcome.superseded) {
+          throw StateError('Saved-program merge was rejected');
+        }
+      }
+      return;
     }
 
-    await OfflineDataService.saveMyScheduleData(eventIdsToSynchronize);
+    final mutationVersion = savedProgramPendingState.mutationVersion;
+    final remoteEvents = await loadAllMySchedule();
+    final eventIdsToSynchronize =
+        remoteEvents.map((event) => event.id!).toList();
 
-    if (ClientSyncRuntime.isV1Selected) {
-      await _savedProgramCommands.update(
+    if (_currentSavedProgramScope() == scope &&
+        savedProgramPendingState.mutationVersion == mutationVersion) {
+      await OfflineDataService.saveMyScheduleDataIfCurrent(
         eventIdsToSynchronize,
-        join ? SavedProgramMode.join : SavedProgramMode.replace,
+        () =>
+            _currentSavedProgramScope() == scope &&
+            savedProgramPendingState.mutationVersion == mutationVersion,
       );
-      return;
     }
-
-    if (!join) {
-      return;
-    }
-
-    await _supabase.rpc('synchronize_my_schedule', params: {
-      'p_event_ids': eventIdsToSynchronize,
-      'p_join_mode': join,
-    });
   }
 
   static Future<EventModel> updateEvent(EventModel event) async {

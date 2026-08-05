@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
 
@@ -16,11 +17,36 @@ import 'package:fstapp/services/storage_helper.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
+import 'package:fstapp/data_services/saved_program_pending_state.dart';
 
 import 'package:fstapp/components/activities/activity_model.dart';
 
 import '../components/map/place_model.dart';
 import '../components/occasion/occasion_model.dart';
+
+List<int> resolveMyScheduleIds({
+  required bool isV1Selected,
+  required Object? privateProgram,
+  required List<int> legacyIds,
+}) {
+  if (!isV1Selected) return List<int>.of(legacyIds);
+  final privateProgramMap = privateProgram is Map ? privateProgram : null;
+  return ((privateProgramMap?['saved'] as List?) ?? const [])
+      .whereType<num>()
+      .map((id) => id.toInt())
+      .toSet()
+      .toList(growable: false);
+}
+
+List<int> updateConfirmedScheduleIds(
+  Iterable<int> confirmedIds,
+  int eventId,
+  bool saved,
+) {
+  final result = confirmedIds.toSet();
+  saved ? result.add(eventId) : result.remove(eventId);
+  return result.toList(growable: false);
+}
 
 class OfflineDataService {
   static const String myScheduleOffline = "mySchedule";
@@ -32,32 +58,80 @@ class OfflineDataService {
   static const String speakersOfflineStorage = "speakers";
   static const String cleaningStatusOfflineStorage = "cleaningStatus";
   static const String eventFeedbackOfflineStorage = "eventFeedback";
+  static Future<void> _myScheduleWriteTail = Future<void>.value();
 
-  static Future<void> saveMyScheduleData(List<int> offlineData) async {
-    var encoded = jsonEncode(offlineData);
-    await StorageHelper.set(myScheduleOffline, encoded);
+  static Future<void> saveMyScheduleData(List<int> offlineData) =>
+      saveMyScheduleDataIfCurrent(offlineData, () => true);
+
+  static Future<void> saveMyScheduleDataIfCurrent(
+    List<int> offlineData,
+    bool Function() isCurrent,
+  ) {
+    return _enqueueMyScheduleWrite(() async {
+      if (isCurrent()) {
+        await StorageHelper.set(myScheduleOffline, jsonEncode(offlineData));
+      }
+    });
+  }
+
+  static Future<void> clearMyScheduleData() => _enqueueMyScheduleWrite(
+        () => StorageHelper.remove(myScheduleOffline),
+      );
+
+  static Future<void> _enqueueMyScheduleWrite(
+    Future<void> Function() write,
+  ) {
+    final completer = Completer<void>();
+    _myScheduleWriteTail = _myScheduleWriteTail.then((_) async {
+      try {
+        await write();
+        completer.complete();
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    return completer.future;
   }
 
   static Future<List<int>> getMyScheduleData() async {
-    var eventData = await StorageHelper.get(myScheduleOffline);
-    if (eventData == null) {
-      return <int>[];
-    }
-    List<dynamic> offlineData = json.decode(eventData);
-    return List<int>.from(offlineData.map((x) => x));
+    return savedProgramPendingState.apply(await _getConfirmedMyScheduleData());
   }
 
-  static Future<void> addToMySchedule(int id) async {
-    var offlineData = await getMyScheduleData();
-    if (!offlineData.contains(id)) {
-      // Avoid duplicates
-      offlineData.add(id);
-      await saveMyScheduleData(offlineData);
+  static Future<List<int>> _getConfirmedMyScheduleData() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final privateProgram = await ClientSyncRuntime.readPrivate(
+        ClientSyncComponent.privateProgram,
+      );
+      return resolveMyScheduleIds(
+        isV1Selected: true,
+        privateProgram: privateProgram,
+        legacyIds: const [],
+      );
     }
+    var eventData = await StorageHelper.get(myScheduleOffline);
+    final offlineData = eventData == null
+        ? const <dynamic>[]
+        : json.decode(eventData) as List<dynamic>;
+    return resolveMyScheduleIds(
+      isV1Selected: false,
+      privateProgram: null,
+      legacyIds: List<int>.from(offlineData.map((x) => x)),
+    );
+  }
+
+  static Future<void> addToMySchedule(
+    int id, {
+    bool Function()? isCurrent,
+  }) async {
+    final confirmed = await _getConfirmedMyScheduleData();
+    await saveMyScheduleDataIfCurrent(
+      updateConfirmedScheduleIds(confirmed, id, true),
+      isCurrent ?? () => true,
+    );
   }
 
   static Future<void> addAllToMySchedule(List<int> ids) async {
-    var offlineData = await getMyScheduleData();
+    var offlineData = await _getConfirmedMyScheduleData();
     for (var id in ids) {
       if (!offlineData.contains(id)) {
         // Avoid duplicates
@@ -67,10 +141,15 @@ class OfflineDataService {
     await saveMyScheduleData(offlineData);
   }
 
-  static Future<void> removeFromMySchedule(int id) async {
-    var offlineData = await getMyScheduleData();
-    offlineData.remove(id);
-    await saveMyScheduleData(offlineData);
+  static Future<void> removeFromMySchedule(
+    int id, {
+    bool Function()? isCurrent,
+  }) async {
+    final confirmed = await _getConfirmedMyScheduleData();
+    await saveMyScheduleDataIfCurrent(
+      updateConfirmedScheduleIds(confirmed, id, false),
+      isCurrent ?? () => true,
+    );
   }
 
   static Future<bool> isEventSaved(int id) async {
@@ -313,10 +392,11 @@ class OfflineDataService {
   /// **Clears all user-specific data from offline storage.**
   static Future<void> clearUserData() async {
     await deleteOffline(UserInfoModel.userInfoOffline);
-    await deleteOffline(myScheduleOffline);
+    await clearMyScheduleData();
     await deleteOffline(activitiesOfflineStorage);
     await deleteOffline(userInventoryBundleOffline);
     await deleteOffline(eventFeedbackOfflineStorage);
+    savedProgramPendingState.clearAll();
   }
 
   static Future<void> saveAllOffline<T>(

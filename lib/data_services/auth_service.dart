@@ -29,6 +29,7 @@ class AuthService {
   static const metaLang = 'lang';
 
   static Future<void> login(String email, String password) async {
+    DbEvents.invalidateSavedProgramMutationScope();
     var data = await _supabase.auth
         .signInWithPassword(email: email, password: password);
     if (!await validateCurrentOrganization()) {
@@ -43,14 +44,15 @@ class AuthService {
         await ClientSyncRuntime.refresh(SyncReason.login,
             privateConsumer: true);
       } else {
-        DbEvents.synchronizeMySchedule(join: true);
-        SynchroService.refreshOfflineData();
+        await DbEvents.synchronizeMySchedule(join: true);
+        await SynchroService.refreshOfflineData();
       }
     }
     await NotificationHelper.loginCurrentUser();
   }
 
   static Future<void> logout() async {
+    DbEvents.invalidateSavedProgramMutationScope();
     await NotificationHelper.logoutCurrentUser()
         .timeout(const Duration(seconds: 2));
     await OfflineDataService.clearUserData();

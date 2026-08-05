@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const checkOnly = process.argv.includes('--check');
 const sources = [
   ['privacy-policy.cs.md', 'privacy/index.html', 'Ochrana osobních údajů'],
   ['privacy-choices.cs.md', 'privacy/choices/index.html', 'Vaše volby a práva'],
@@ -33,11 +34,23 @@ function document(title, content) {
 <body><main><nav aria-label="Právní informace"><a href="/privacy">Soukromí</a><a href="/privacy/choices">Volby</a><a href="/terms">Podmínky</a><a href="/">CSM Ostrava</a></nav>${content}</main></body></html>\n`;
 }
 
+let stale = false;
 for (const [source, output, title] of sources) {
   const markdownText = fs.readFileSync(path.join(root, 'automation/release/legal', source), 'utf8');
   const target = path.join(root, 'web', output);
-  fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.writeFileSync(target, document(title, markdown(markdownText)));
+  const rendered = document(title, markdown(markdownText));
+  if (checkOnly) {
+    if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8') !== rendered) {
+      console.error(`Stale generated legal page: ${output}`);
+      stale = true;
+    }
+  } else {
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, rendered);
+  }
 }
 
-console.log(`Rendered ${sources.length} legal pages.`);
+if (stale) process.exit(1);
+console.log(checkOnly
+  ? `Verified ${sources.length} generated legal pages.`
+  : `Rendered ${sources.length} legal pages.`);

@@ -6,6 +6,7 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/users/views/forgot_password_page.dart';
 import 'package:fstapp/components/app_management/settings_page.dart';
 import 'package:fstapp/components/users/views/signup_page.dart';
+import 'package:fstapp/components/users/widgets/profile_legal_link.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -174,6 +175,8 @@ class _LoginPageState extends State<LoginPage> {
                                 context, ForgotPasswordPage.ROUTE),
                             child: Text(UserStrings.forgotPassword,
                                 style: StylesConfig.normalTextStyle))),
+                    const AppLegalLinks(),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),

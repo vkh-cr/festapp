@@ -176,6 +176,47 @@ BEGIN
 END $$ LANGUAGE plpgsql;
 
 -- ---------------------------------------------------------------------------
+-- 2c. The canonical event-speaker command accepts an empty array and a
+--     non-empty array. This guards both unnest paths against ambiguous `id`
+--     aliases used by the event editor save flow.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc      bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_sp      bigint := (SELECT v FROM _spk WHERE k = 'speaker');
+    v_event   bigint;
+    v_res     jsonb;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spk_editor')::text, true);
+    INSERT INTO public.events (occasion, title, start_time, end_time)
+    VALUES (v_oc, 'Event speaker command', now() + interval '6 days',
+      now() + interval '6 days 1 hour')
+    RETURNING id INTO v_event;
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_event, v_sp);
+
+    v_res := public.save_event_speakers_client_sync_v1(
+      v_oc, v_event, gen_random_uuid(), 0, '{}'::bigint[]);
+    PERFORM assert_eq(v_res->>'status', 'applied',
+        'v1 event speaker save accepts an empty array');
+    PERFORM assert_eq((v_res->'data'->>'version')::int, 1,
+        'empty event speaker save advances the aggregate version');
+    PERFORM assert_true(NOT EXISTS (
+        SELECT 1 FROM public.event_speakers WHERE event=v_event),
+        'empty event speaker save removes existing links');
+
+    v_res := public.save_event_speakers_client_sync_v1(
+      v_oc, v_event, gen_random_uuid(), 1, ARRAY[v_sp]);
+    PERFORM assert_eq(v_res->>'status', 'applied',
+        'v1 event speaker save accepts a non-empty array');
+    PERFORM assert_eq((v_res->'data'->>'version')::int, 2,
+        'non-empty event speaker save advances the aggregate version');
+    PERFORM assert_true(EXISTS (
+        SELECT 1 FROM public.event_speakers
+        WHERE event=v_event AND speaker=v_sp),
+        'non-empty event speaker save creates the requested link');
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
 -- 3. Cross-occasion protection: updating a speaker under the wrong occasion →
 --    404; set_event_speakers with a foreign speaker → 400.
 -- ---------------------------------------------------------------------------

@@ -20,7 +20,8 @@ Zdroj obsahu: objednávkový formulář „Festapp Order - CS" (řádek CSM Ostr
 - full_description.txt — 2013/4000 (shodný s App Store popisem)
 
 ## Privacy Policy
-- Kanonická app-specific verze: `PRIVACY_POLICY.md` a veřejná stránka https://csmostrava.festapp.net/privacy.
+- Jediný kanonický app-specific zdroj: `../../legal/privacy-policy.cs.md`.
+- `../../render_legal_pages.mjs` z něj generuje veřejnou stránku https://csmostrava.festapp.net/privacy; preflight odmítne zastaralé HTML.
 
 ## App Review Information (do ASC „App Review Information", NE do popisu)
 - **Sign-in required: ANO.** Demo účet pro reviewery:

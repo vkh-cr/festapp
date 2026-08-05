@@ -31,6 +31,14 @@ Read-only numeric identity and version inspection
 
 Read-only signing certificate and provisioning profile inventory
 
+### ios refresh_notification_extension_profile
+
+```sh
+[bundle exec] fastlane ios refresh_notification_extension_profile
+```
+
+Regenerate only the notification-extension App Store profile after capability changes
+
 ### ios bootstrap_signing
 
 ```sh

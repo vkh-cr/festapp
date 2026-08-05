@@ -21,7 +21,17 @@ These map to localized messages in Dart.
 
 ## My Schedule & Offline Sync
 
-Dual storage: remote `event_users_saved` table + local `OfflineDataService`. Sync merges via `synchronize_my_schedule` RPC.
+Dual storage: remote `event_users_saved` table + local `OfflineDataService`.
+Writes go through the occasion-scoped `set_saved_program` / Client Sync command
+and the process-wide mutation coordinator; read refreshes never replace remote
+state from a client snapshot.
+
+Detail-page toggles use a latest-intent queue: the UI changes optimistically,
+backend writes stay serialized, rapid opposite clicks converge to the newest
+choice, and failed writes roll back to the last confirmed state.
+While a write is in flight, its latest intent is projected over the shared
+saved-program cache so opening My Program reflects the click immediately. The
+overlay is owner-guarded against stale completions and cleared with user data.
 
 ## Exclusive Groups
 
@@ -34,5 +44,5 @@ Dual storage: remote `event_users_saved` table + local `OfflineDataService`. Syn
   editor, or organization admin
 - `sign_user_to_event` -- sign-in with full validation (capacity, timing, exclusivity, gender)
 - `sign_user_out_of_event` -- sign-out with validation
-- `synchronize_my_schedule` -- merges local and remote saved event IDs
+- `set_saved_program` -- atomically joins/removes saved event IDs within one occasion
 - `get_my_events_and_activities` -- user's events + volunteer activities

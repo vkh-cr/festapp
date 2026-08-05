@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -36,9 +37,15 @@ if (classification?.primaryCategory !== 'TRAVEL' || classification?.secondaryCat
 }
 if (classification?.contentRights !== 'USES_THIRD_PARTY_CONTENT') fail('content-rights decision mismatch');
 if (classification?.availableInNewTerritories !== true) fail('new-territory availability decision mismatch');
+if (classification?.availability?.currentCountryOrRegionCount !== 174 ||
+    classification?.availability?.chinaMainland !== 'EXCLUDED' ||
+    classification?.availability?.confirmedInAppStoreConnectAt !== '2026-08-04') {
+  fail('country-availability decision state mismatch');
+}
 const expectedBooleanAgeAnswers = [
   'advertising', 'ageAssurance', 'gambling', 'healthOrWellnessTopics', 'lootBox',
   'messagingAndChat', 'parentalControls', 'unrestrictedWebAccess', 'userGeneratedContent',
+  'socialMedia', 'socialMediaDisabledForUsersUnder13',
 ];
 for (const field of expectedBooleanAgeAnswers) {
   if (classification?.ageRating?.[field] !== false) fail(`age-rating ${field} must be false`);
@@ -47,11 +54,19 @@ if (classification?.ageRating?.medicalOrTreatmentInformation !== 'NONE') {
   fail('medical/treatment age-rating answer must remain NONE');
 }
 const appPrivacy = manifest.appPrivacy;
-if (appPrivacy?.entryMode !== 'manual_app_store_connect' || appPrivacy?.approvalRequired !== true) {
-  fail('App Privacy must remain an explicitly approved manual ASC step');
+if (appPrivacy?.entryMode !== 'manual_app_store_connect' || appPrivacy?.approvalRequired !== false ||
+    appPrivacy?.published !== true || appPrivacy?.lastPublishedAt !== '2026-08-04') {
+  fail('published App Privacy state mismatch');
 }
 if (!appPrivacy?.questionnairePath) fail('App Privacy questionnaire path is missing');
 else requireFile(path.join('automation/release', appPrivacy.questionnairePath));
+const dsa = manifest.dsa;
+if (dsa?.publisher !== 'Michael Bujnovský' || dsa?.accountEnrollment !== 'INDIVIDUAL' ||
+    dsa?.traderStatus !== 'NOT_TRADER' || dsa?.commercialization !== false ||
+    dsa?.organizerRelationshipRelevant !== false || dsa?.manualAscConfirmationRequired !== false ||
+    dsa?.confirmedInAppStoreConnectAt !== '2026-08-04') {
+  fail('canonical individual-publisher DSA NOT_TRADER decision mismatch');
+}
 const expectedNoneAgeAnswers = [
   'ageRatingOverrideV2', 'alcoholTobaccoOrDrugUseOrReferences', 'contests',
   'gamblingSimulated', 'gunsOrOtherWeapons', 'horrorOrFearThemes',
@@ -75,6 +90,29 @@ if (version !== manifest.target.version || build !== manifest.target.build) fail
 const project = fs.readFileSync(path.join(root, 'ios/Runner.xcodeproj/project.pbxproj'), 'utf8');
 if (!project.includes('PRODUCT_BUNDLE_IDENTIFIER = festapp.jm2025;')) fail('main bundle identifier is not pinned');
 if (!project.includes('DEVELOPMENT_TEAM = 8WKBB6L8LT;')) fail('expected signing team is absent');
+const notificationExtensionInfo = fs.readFileSync(
+  path.join(root, 'ios/OneSignalNotificationServiceExtension/Info.plist'),
+  'utf8',
+);
+for (const key of ['CFBundleShortVersionString', 'CFBundleVersion']) {
+  if (!notificationExtensionInfo.includes(`<key>${key}</key>`)) {
+    fail(`notification extension Info.plist is missing ${key}`);
+  }
+}
+for (const configuration of ['Debug', 'Release', 'Profile']) {
+  const name = `OneSignalExtension${configuration}.xcconfig`;
+  const relative = path.join('ios', 'Flutter', name);
+  requireFile(relative);
+  if (fs.existsSync(path.join(root, relative))) {
+    const contents = fs.readFileSync(path.join(root, relative), 'utf8');
+    if (!contents.includes('Generated.xcconfig')) {
+      fail(`${name} does not inherit the Flutter app version`);
+    }
+  }
+  if (!new RegExp(`baseConfigurationReference = [^;]+ /\\* ${name.replace('.', '\\.')} \\*/;`).test(project)) {
+    fail(`notification extension ${configuration} configuration does not use ${name}`);
+  }
+}
 const fastfile = fs.readFileSync(path.join(root, 'automation/release/fastlane/Fastfile'), 'utf8');
 if (/produce\s*\(|lane\s+:publish_ipa|automatic_release:\s*true/.test(fastfile)) fail('unsafe app creation/monolithic/automatic release path found');
 if (/9\+test@test\.com|bujnmi@gmail\.com|festapp-csm-reviewer/.test(fastfile)) {
@@ -89,6 +127,26 @@ for (const file of [
   'web/privacy/index.html', 'web/privacy/choices/index.html', 'web/terms/index.html',
   'web/apple-app-site-association', 'web/.well-known/apple-app-site-association',
 ]) requireFile(file);
+
+const legalCheck = spawnSync(process.execPath, [
+  path.join(root, 'automation/release/render_legal_pages.mjs'), '--check',
+], { encoding: 'utf8' });
+if (legalCheck.status !== 0) fail(legalCheck.stderr.trim() || 'generated legal pages are stale');
+const legalText = [
+  'automation/release/legal/privacy-policy.cs.md',
+  'automation/release/legal/privacy-choices.cs.md',
+  'automation/release/legal/terms.cs.md',
+].map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
+const legal = manifest.legal;
+if (legal?.sourceDirectory !== 'legal' || legal?.privacyPolicyVersion !== '1.1' ||
+    legal?.effectiveDate !== '2026-08-04' || legal?.privacyContact !== 'info@festapp.net' ||
+    legal?.approvalRequired !== true || legal?.productionDeploymentRequired !== false ||
+    legal?.productionDeployedAt !== '2026-08-04' || legal?.productionDeploymentId !== '8f6479e1') {
+  fail('canonical legal publication state mismatch');
+}
+if (/navrženým?|před zveřejněním|bez tohoto schválení/i.test(legalText)) {
+  fail('internal legal-draft wording remains in publishable sources');
+}
 
 const metadataDir = path.join(root, 'automation/release/fastlane/metadata/cs');
 const limits = { name: 30, subtitle: 30, keywords: 100, promotional_text: 170, description: 4000, release_notes: 4000 };
@@ -146,7 +204,7 @@ if (/credentials to info@festapp\.net|přihlašovacími údaji na info@festapp\.
   runtimeFiles.map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n')
 )) fail('legacy credential-by-email deletion copy remains');
 
-warnings.push('Legal/DSA/reviewer/production gates require external evidence.');
+warnings.push('Legal approval and production-deployment gates require external evidence.');
 for (const warning of warnings) console.warn(`WARN: ${warning}`);
 if (errors.length) {
   for (const error of errors) console.error(`ERROR: ${error}`);

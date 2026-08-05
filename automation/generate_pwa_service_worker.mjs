@@ -70,6 +70,10 @@ function deploymentUrl(url) {
   return url.endsWith('/index.html') ? url.slice(0, -'index.html'.length) : url;
 }
 const assets = [...new Set(files.map(deploymentUrl))];
+const standaloneDocuments = files
+  .filter((url) => url !== '/index.html' && url.endsWith('/index.html'))
+  .map(deploymentUrl);
+const standaloneDocumentSet = new Set(standaloneDocuments);
 const installCriticalNames = new Set([
   '/flutter.js',
   '/flutter_bootstrap.js',
@@ -84,6 +88,7 @@ const installCriticalNames = new Set([
 const coreAssets = assets.filter((url) =>
   url === deploymentUrl(flutterEntry) ||
   url === deploymentUrl(webClientEntry) ||
+  standaloneDocumentSet.has(url) ||
   installCriticalNames.has(url.split('?')[0])
 );
 const cacheName = `festapp-app-shell-${version}`;
@@ -97,6 +102,7 @@ const PRECACHE_URLS = ${JSON.stringify(assets, null, 2)};
 const CORE_URLS = ${JSON.stringify(coreAssets, null, 2)};
 const FLUTTER_ENTRY = ${JSON.stringify(deploymentUrl(flutterEntry))};
 const WEB_CLIENT_ENTRY = ${JSON.stringify(deploymentUrl(webClientEntry))};
+const STANDALONE_DOCUMENT_PATHS = new Set(${JSON.stringify(standaloneDocuments, null, 2)});
 const PRECACHE_PATHS = new Set(PRECACHE_URLS.map((url) =>
   new URL(url, self.location.origin).pathname));
 const clientVersions = new Map();
@@ -182,6 +188,10 @@ self.addEventListener('activate', (event) => {
 });
 
 function cachedNavigationTarget(pathname) {
+  const normalizedPath = pathname.endsWith('/') ? pathname : pathname + '/';
+  if (STANDALONE_DOCUMENT_PATHS.has(normalizedPath)) {
+    return normalizedPath;
+  }
   if (pathname === '/' || pathname.startsWith('/form/')) {
     return WEB_CLIENT_ENTRY;
   }
@@ -278,6 +288,24 @@ self.addEventListener('fetch', (event) => {
     // still matches this worker. A newer manifest must cut over atomically via
     // the update prompt instead of mixing executable generations.
     if (isFlutterExecutable(url.pathname)) {
+      // A client that is still executing an older main.dart.js must never be
+      // given a deferred chunk from this worker's newer deployment. That is a
+      // valid situation when the route was not opened before the deployment,
+      // because deferred chunks are populated lazily. Reload the stale tab
+      // through the current versioned shell; otherwise AutoRoute keeps its
+      // loading placeholder forever after the incompatible chunk fails.
+      if (selectedCacheName !== CACHE_NAME) {
+        try {
+          const client = event.clientId
+            ? await self.clients.get(event.clientId)
+            : null;
+          if (client) await client.navigate(client.url);
+        } catch (_) {
+          // Returning a failed executable request is still safer than mixing
+          // Flutter builds if the browser rejects the navigation request.
+        }
+        return Response.error();
+      }
       return recoverCurrentExecutable(request, cache);
     }
 

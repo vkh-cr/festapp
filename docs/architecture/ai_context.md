@@ -2,6 +2,20 @@
 
 Festapp is an event management platform: Flutter (mobile+web) + Supabase (PostgreSQL, Edge Functions, Auth) + vanilla JS web client for public forms/eshop.
 
+## Critical: Resolve the Live Supabase Project from Project Config
+
+For live-data investigation, the canonical target is the `SUPABASE_URL` in
+`automation/project.conf`. Extract the project ref from that URL and verify that
+the same database contains the occasion named by `FORCE_OCCASION_LINK` before
+querying user or event data.
+
+Do not select the live project from `FESTAPP_SUPABASE_PROJECT_REF` in
+`.env.local`: that value may point to a different Festapp development or legacy
+instance. `.env.local` credentials may be used to authenticate to the Supabase
+management interface, but they do not determine the target project. If the
+configured occasion is absent, stop and report a target mismatch instead of
+searching another project and treating an empty result as authoritative.
+
 ## Critical: Split Brain Logic
 
 Business logic is split between **SQL functions** (`database/functions/`) and Dart/JS. Before modifying any data flow, check if the logic lives in SQL.

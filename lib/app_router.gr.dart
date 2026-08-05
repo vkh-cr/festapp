@@ -13,72 +13,53 @@ import 'package:auto_route/auto_route.dart' as _i41;
 import 'package:collection/collection.dart' as _i44;
 import 'package:flutter/foundation.dart' as _i43;
 import 'package:flutter/material.dart' as _i42;
-import 'package:fstapp/components/app_management/install_page.dart'
-    deferred as _i13;
+import 'package:fstapp/components/app_management/install_page.dart' as _i13;
 import 'package:fstapp/components/app_management/instance_install_page.dart'
-    deferred as _i14;
-import 'package:fstapp/components/app_management/settings_page.dart'
-    deferred as _i32;
-import 'package:fstapp/components/cleaning/cleaning_page.dart' deferred as _i3;
-import 'package:fstapp/components/forms/views/form_page.dart' deferred as _i8;
-import 'package:fstapp/components/forms/views/forms_tab.dart' deferred as _i9;
-import 'package:fstapp/components/forms/views/reservation_page.dart'
-    deferred as _i25;
-import 'package:fstapp/components/html/html_editor_page.dart' deferred as _i11;
-import 'package:fstapp/components/information/game/game_page.dart'
-    deferred as _i10;
-import 'package:fstapp/components/information/info_page.dart' deferred as _i12;
-import 'package:fstapp/components/information/song/song_page.dart'
-    deferred as _i34;
+    as _i14;
+import 'package:fstapp/components/app_management/settings_page.dart' as _i32;
+import 'package:fstapp/components/cleaning/cleaning_page.dart' as _i3;
+import 'package:fstapp/components/forms/views/form_page.dart' as _i8;
+import 'package:fstapp/components/forms/views/forms_tab.dart' as _i9;
+import 'package:fstapp/components/forms/views/reservation_page.dart' as _i25;
+import 'package:fstapp/components/html/html_editor_page.dart' as _i11;
+import 'package:fstapp/components/information/game/game_page.dart' as _i10;
+import 'package:fstapp/components/information/info_page.dart' as _i12;
+import 'package:fstapp/components/information/song/song_page.dart' as _i34;
 import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart'
-    deferred as _i15;
-import 'package:fstapp/components/inventory/views/user_stay_page.dart'
-    deferred as _i40;
-import 'package:fstapp/components/map/map_page.dart' deferred as _i17;
+    as _i15;
+import 'package:fstapp/components/inventory/views/user_stay_page.dart' as _i40;
+import 'package:fstapp/components/map/map_page.dart' as _i17;
 import 'package:fstapp/components/map/path_group_model.dart' as _i46;
 import 'package:fstapp/components/map/place_model.dart' as _i45;
-import 'package:fstapp/components/news/news_form_page.dart' deferred as _i19;
-import 'package:fstapp/components/news/news_page.dart' deferred as _i20;
-import 'package:fstapp/components/occasion/admin_page.dart' deferred as _i1;
-import 'package:fstapp/components/occasion/occasion_home_page.dart'
-    deferred as _i21;
+import 'package:fstapp/components/news/news_form_page.dart' as _i19;
+import 'package:fstapp/components/news/news_page.dart' as _i20;
+import 'package:fstapp/components/occasion/admin_page.dart' as _i1;
+import 'package:fstapp/components/occasion/occasion_home_page.dart' as _i21;
 import 'package:fstapp/components/organization/views/organization_edit_page.dart'
-    deferred as _i22;
+    as _i22;
 import 'package:fstapp/components/organization/views/organization_edit_redirect_page.dart'
-    deferred as _i23;
-import 'package:fstapp/components/scan/check_page.dart' deferred as _i2;
-import 'package:fstapp/components/scan/scan_page.dart' deferred as _i27;
-import 'package:fstapp/components/schedule/event_edit_page.dart'
-    deferred as _i5;
-import 'package:fstapp/components/schedule/event_page.dart' deferred as _i6;
-import 'package:fstapp/components/schedule/my_schedule_page.dart'
-    deferred as _i18;
-import 'package:fstapp/components/schedule/schedule_basic_page.dart'
-    deferred as _i28;
-import 'package:fstapp/components/schedule/schedule_light_page.dart'
-    deferred as _i29;
+    as _i23;
+import 'package:fstapp/components/scan/check_page.dart' as _i2;
+import 'package:fstapp/components/scan/scan_page.dart' as _i27;
+import 'package:fstapp/components/schedule/event_edit_page.dart' as _i5;
+import 'package:fstapp/components/schedule/event_page.dart' as _i6;
+import 'package:fstapp/components/schedule/my_schedule_page.dart' as _i18;
+import 'package:fstapp/components/schedule/schedule_basic_page.dart' as _i28;
+import 'package:fstapp/components/schedule/schedule_light_page.dart' as _i29;
 import 'package:fstapp/components/schedule/schedule_navigation_screen.dart'
-    deferred as _i30;
-import 'package:fstapp/components/schedule/schedule_page.dart' deferred as _i31;
-import 'package:fstapp/components/schedule/timetable_page.dart'
-    deferred as _i35;
-import 'package:fstapp/components/speakers/counseling_page.dart'
-    deferred as _i4;
-import 'package:fstapp/components/unit/views/organization_page.dart'
-    deferred as _i24;
-import 'package:fstapp/components/unit/views/unit_admin_page.dart'
-    deferred as _i37;
-import 'package:fstapp/components/unit/views/unit_page.dart' deferred as _i38;
-import 'package:fstapp/components/users/views/forgot_password_page.dart'
-    deferred as _i7;
-import 'package:fstapp/components/users/views/login_page.dart' deferred as _i16;
-import 'package:fstapp/components/users/views/reset_password_page.dart'
-    deferred as _i26;
-import 'package:fstapp/components/users/views/signup_page.dart'
-    deferred as _i33;
-import 'package:fstapp/components/users/views/transfer_page.dart'
-    deferred as _i36;
-import 'package:fstapp/components/users/views/user_page.dart' deferred as _i39;
+    as _i30;
+import 'package:fstapp/components/schedule/schedule_page.dart' as _i31;
+import 'package:fstapp/components/schedule/timetable_page.dart' as _i35;
+import 'package:fstapp/components/speakers/counseling_page.dart' as _i4;
+import 'package:fstapp/components/unit/views/organization_page.dart' as _i24;
+import 'package:fstapp/components/unit/views/unit_admin_page.dart' as _i37;
+import 'package:fstapp/components/unit/views/unit_page.dart' as _i38;
+import 'package:fstapp/components/users/views/forgot_password_page.dart' as _i7;
+import 'package:fstapp/components/users/views/login_page.dart' as _i16;
+import 'package:fstapp/components/users/views/reset_password_page.dart' as _i26;
+import 'package:fstapp/components/users/views/signup_page.dart' as _i33;
+import 'package:fstapp/components/users/views/transfer_page.dart' as _i36;
+import 'package:fstapp/components/users/views/user_page.dart' as _i39;
 
 /// generated route for
 /// [_i1.AdminPage]
@@ -91,7 +72,7 @@ class AdminRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i1.loadLibrary, () => _i1.AdminPage());
+      return const _i1.AdminPage();
     },
   );
 }
@@ -119,10 +100,7 @@ class CheckRoute extends _i41.PageRouteInfo<CheckRouteArgs> {
       final args = data.argsAs<CheckRouteArgs>(
         orElse: () => CheckRouteArgs(id: pathParams.getInt('id')),
       );
-      return _i41.DeferredWidget(
-        _i2.loadLibrary,
-        () => _i2.CheckPage(id: args.id, key: args.key),
-      );
+      return _i2.CheckPage(id: args.id, key: args.key);
     },
   );
 }
@@ -170,10 +148,7 @@ class CleaningRoute extends _i41.PageRouteInfo<CleaningRouteArgs> {
       final args = data.argsAs<CleaningRouteArgs>(
         orElse: () => CleaningRouteArgs(id: pathParams.optInt('id')),
       );
-      return _i41.DeferredWidget(
-        _i3.loadLibrary,
-        () => _i3.CleaningPage(id: args.id, key: args.key),
-      );
+      return _i3.CleaningPage(id: args.id, key: args.key);
     },
   );
 }
@@ -212,7 +187,7 @@ class CounselingRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i4.loadLibrary, () => _i4.CounselingPage());
+      return const _i4.CounselingPage();
     },
   );
 }
@@ -237,10 +212,7 @@ class EventEditRoute extends _i41.PageRouteInfo<EventEditRouteArgs> {
       final args = data.argsAs<EventEditRouteArgs>(
         orElse: () => EventEditRouteArgs(id: pathParams.optInt('id')),
       );
-      return _i41.DeferredWidget(
-        _i5.loadLibrary,
-        () => _i5.EventEditPage(key: args.key, id: args.id),
-      );
+      return _i5.EventEditPage(key: args.key, id: args.id);
     },
   );
 }
@@ -288,10 +260,7 @@ class EventRoute extends _i41.PageRouteInfo<EventRouteArgs> {
       final args = data.argsAs<EventRouteArgs>(
         orElse: () => EventRouteArgs(id: pathParams.optInt('id')),
       );
-      return _i41.DeferredWidget(
-        _i6.loadLibrary,
-        () => _i6.EventPage(id: args.id, key: args.key),
-      );
+      return _i6.EventPage(id: args.id, key: args.key);
     },
   );
 }
@@ -330,10 +299,7 @@ class ForgotPasswordRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(
-        _i7.loadLibrary,
-        () => _i7.ForgotPasswordPage(),
-      );
+      return const _i7.ForgotPasswordPage();
     },
   );
 }
@@ -361,10 +327,7 @@ class FormRoute extends _i41.PageRouteInfo<FormRouteArgs> {
       final args = data.argsAs<FormRouteArgs>(
         orElse: () => FormRouteArgs(formLink: pathParams.optString('formLink')),
       );
-      return _i41.DeferredWidget(
-        _i8.loadLibrary,
-        () => _i8.FormPage(key: args.key, formLink: args.formLink),
-      );
+      return _i8.FormPage(key: args.key, formLink: args.formLink);
     },
   );
 }
@@ -403,7 +366,7 @@ class FormsTab extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i9.loadLibrary, () => _i9.FormsTab());
+      return const _i9.FormsTab();
     },
   );
 }
@@ -419,7 +382,7 @@ class GameRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i10.loadLibrary, () => _i10.GamePage());
+      return const _i10.GamePage();
     },
   );
 }
@@ -450,13 +413,10 @@ class HtmlEditorRoute extends _i41.PageRouteInfo<HtmlEditorRouteArgs> {
       final args = data.argsAs<HtmlEditorRouteArgs>(
         orElse: () => const HtmlEditorRouteArgs(),
       );
-      return _i41.DeferredWidget(
-        _i11.loadLibrary,
-        () => _i11.HtmlEditorPage(
-          content: args.content,
-          occasionId: args.occasionId,
-          key: args.key,
-        ),
+      return _i11.HtmlEditorPage(
+        content: args.content,
+        occasionId: args.occasionId,
+        key: args.key,
       );
     },
   );
@@ -515,10 +475,7 @@ class InfoRoute extends _i41.PageRouteInfo<InfoRouteArgs> {
       final args = data.argsAs<InfoRouteArgs>(
         orElse: () => InfoRouteArgs(id: pathParams.optInt('id')),
       );
-      return _i41.DeferredWidget(
-        _i12.loadLibrary,
-        () => _i12.InfoPage(id: args.id, key: args.key),
-      );
+      return _i12.InfoPage(id: args.id, key: args.key);
     },
   );
 }
@@ -557,7 +514,7 @@ class InstallRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i13.loadLibrary, () => _i13.InstallPage());
+      return const _i13.InstallPage();
     },
   );
 }
@@ -573,10 +530,7 @@ class InstanceInstallRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(
-        _i14.loadLibrary,
-        () => _i14.InstanceInstallPage(),
-      );
+      return const _i14.InstanceInstallPage();
     },
   );
 }
@@ -592,10 +546,7 @@ class InventoryPoolsTab extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(
-        _i15.loadLibrary,
-        () => _i15.InventoryPoolsTab(),
-      );
+      return const _i15.InventoryPoolsTab();
     },
   );
 }
@@ -611,7 +562,7 @@ class LoginRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i16.loadLibrary, () => _i16.LoginPage());
+      return const _i16.LoginPage();
     },
   );
 }
@@ -653,15 +604,12 @@ class MapRoute extends _i41.PageRouteInfo<MapRouteArgs> {
           placeType: queryParams.optString('placeType'),
         ),
       );
-      return _i41.DeferredWidget(
-        _i17.loadLibrary,
-        () => _i17.MapPage(
-          id: args.id,
-          place: args.place,
-          editPathGroup: args.editPathGroup,
-          placeType: args.placeType,
-          key: args.key,
-        ),
+      return _i17.MapPage(
+        id: args.id,
+        place: args.place,
+        editPathGroup: args.editPathGroup,
+        placeType: args.placeType,
+        key: args.key,
       );
     },
   );
@@ -722,25 +670,76 @@ class MyScheduleRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i18.loadLibrary, () => _i18.MySchedulePage());
+      return const _i18.MySchedulePage();
     },
   );
 }
 
 /// generated route for
 /// [_i19.NewsFormPage]
-class NewsFormRoute extends _i41.PageRouteInfo<void> {
-  const NewsFormRoute({List<_i41.PageRouteInfo>? children})
-      : super(NewsFormRoute.name, initialChildren: children);
+class NewsFormRoute extends _i41.PageRouteInfo<NewsFormRouteArgs> {
+  NewsFormRoute({
+    _i43.Key? key,
+    _i42.Widget? editorOverride,
+    bool? useNativeHtmlEditor,
+    List<_i41.PageRouteInfo>? children,
+  }) : super(
+          NewsFormRoute.name,
+          args: NewsFormRouteArgs(
+            key: key,
+            editorOverride: editorOverride,
+            useNativeHtmlEditor: useNativeHtmlEditor,
+          ),
+          initialChildren: children,
+        );
 
   static const String name = 'NewsFormRoute';
 
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i19.loadLibrary, () => _i19.NewsFormPage());
+      final args = data.argsAs<NewsFormRouteArgs>(
+        orElse: () => const NewsFormRouteArgs(),
+      );
+      return _i19.NewsFormPage(
+        key: args.key,
+        editorOverride: args.editorOverride,
+        useNativeHtmlEditor: args.useNativeHtmlEditor,
+      );
     },
   );
+}
+
+class NewsFormRouteArgs {
+  const NewsFormRouteArgs({
+    this.key,
+    this.editorOverride,
+    this.useNativeHtmlEditor,
+  });
+
+  final _i43.Key? key;
+
+  final _i42.Widget? editorOverride;
+
+  final bool? useNativeHtmlEditor;
+
+  @override
+  String toString() {
+    return 'NewsFormRouteArgs{key: $key, editorOverride: $editorOverride, useNativeHtmlEditor: $useNativeHtmlEditor}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! NewsFormRouteArgs) return false;
+    return key == other.key &&
+        editorOverride == other.editorOverride &&
+        useNativeHtmlEditor == other.useNativeHtmlEditor;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^ editorOverride.hashCode ^ useNativeHtmlEditor.hashCode;
 }
 
 /// generated route for
@@ -764,10 +763,7 @@ class NewsRoute extends _i41.PageRouteInfo<NewsRouteArgs> {
       final args = data.argsAs<NewsRouteArgs>(
         orElse: () => const NewsRouteArgs(),
       );
-      return _i41.DeferredWidget(
-        _i20.loadLibrary,
-        () => _i20.NewsPage(key: args.key, onSetAsRead: args.onSetAsRead),
-      );
+      return _i20.NewsPage(key: args.key, onSetAsRead: args.onSetAsRead);
     },
   );
 }
@@ -806,10 +802,7 @@ class OccasionHomeRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(
-        _i21.loadLibrary,
-        () => _i21.OccasionHomePage(),
-      );
+      return const _i21.OccasionHomePage();
     },
   );
 }
@@ -838,10 +831,7 @@ class OrganizationEditRoute
       final args = data.argsAs<OrganizationEditRouteArgs>(
         orElse: () => OrganizationEditRouteArgs(id: pathParams.getInt('id')),
       );
-      return _i41.DeferredWidget(
-        _i22.loadLibrary,
-        () => _i22.OrganizationEditPage(key: args.key, id: args.id),
-      );
+      return _i22.OrganizationEditPage(key: args.key, id: args.id);
     },
   );
 }
@@ -880,10 +870,7 @@ class OrganizationEditRedirectRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(
-        _i23.loadLibrary,
-        () => _i23.OrganizationEditRedirectPage(),
-      );
+      return const _i23.OrganizationEditRedirectPage();
     },
   );
 }
@@ -911,10 +898,7 @@ class OrganizationRoute extends _i41.PageRouteInfo<OrganizationRouteArgs> {
       final args = data.argsAs<OrganizationRouteArgs>(
         orElse: () => OrganizationRouteArgs(id: pathParams.optInt('id')),
       );
-      return _i41.DeferredWidget(
-        _i24.loadLibrary,
-        () => _i24.OrganizationPage(id: args.id, key: args.key),
-      );
+      return _i24.OrganizationPage(id: args.id, key: args.key);
     },
   );
 }
@@ -953,10 +937,7 @@ class ReservationsRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(
-        _i25.loadLibrary,
-        () => _i25.ReservationsPage(),
-      );
+      return const _i25.ReservationsPage();
     },
   );
 }
@@ -972,10 +953,7 @@ class ResetPasswordRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(
-        _i26.loadLibrary,
-        () => _i26.ResetPasswordPage(),
-      );
+      return const _i26.ResetPasswordPage();
     },
   );
 }
@@ -1003,10 +981,7 @@ class ScanRoute extends _i41.PageRouteInfo<ScanRouteArgs> {
       final args = data.argsAs<ScanRouteArgs>(
         orElse: () => ScanRouteArgs(scanCode: pathParams.optString('scanCode')),
       );
-      return _i41.DeferredWidget(
-        _i27.loadLibrary,
-        () => _i27.ScanPage(scanCode: args.scanCode, key: args.key),
-      );
+      return _i27.ScanPage(scanCode: args.scanCode, key: args.key);
     },
   );
 }
@@ -1045,10 +1020,7 @@ class ScheduleBasicRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(
-        _i28.loadLibrary,
-        () => _i28.ScheduleBasicPage(),
-      );
+      return const _i28.ScheduleBasicPage();
     },
   );
 }
@@ -1064,10 +1036,7 @@ class ScheduleLightRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(
-        _i29.loadLibrary,
-        () => _i29.ScheduleLightPage(),
-      );
+      return const _i29.ScheduleLightPage();
     },
   );
 }
@@ -1083,10 +1052,7 @@ class ScheduleNavigationRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(
-        _i30.loadLibrary,
-        () => _i30.ScheduleNavigationPage(),
-      );
+      return const _i30.ScheduleNavigationPage();
     },
   );
 }
@@ -1102,7 +1068,7 @@ class ScheduleRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i31.loadLibrary, () => _i31.SchedulePage());
+      return const _i31.SchedulePage();
     },
   );
 }
@@ -1118,7 +1084,7 @@ class SettingsRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i32.loadLibrary, () => _i32.SettingsPage());
+      return const _i32.SettingsPage();
     },
   );
 }
@@ -1134,7 +1100,7 @@ class SignupRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i33.loadLibrary, () => _i33.SignupPage());
+      return const _i33.SignupPage();
     },
   );
 }
@@ -1150,7 +1116,7 @@ class SongbookRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i34.loadLibrary, () => _i34.SongbookPage());
+      return const _i34.SongbookPage();
     },
   );
 }
@@ -1166,7 +1132,7 @@ class TimetableRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i35.loadLibrary, () => _i35.TimetablePage());
+      return const _i35.TimetablePage();
     },
   );
 }
@@ -1209,14 +1175,11 @@ class TransferRoute extends _i41.PageRouteInfo<TransferRouteArgs> {
           redirect: queryParams.optString('redirect'),
         ),
       );
-      return _i41.DeferredWidget(
-        _i36.loadLibrary,
-        () => _i36.TransferPage(
-          key: args.key,
-          access_token: args.access_token,
-          refresh_token: args.refresh_token,
-          redirect: args.redirect,
-        ),
+      return _i36.TransferPage(
+        key: args.key,
+        access_token: args.access_token,
+        refresh_token: args.refresh_token,
+        redirect: args.redirect,
       );
     },
   );
@@ -1284,10 +1247,7 @@ class UnitAdminRoute extends _i41.PageRouteInfo<UnitAdminRouteArgs> {
       final args = data.argsAs<UnitAdminRouteArgs>(
         orElse: () => UnitAdminRouteArgs(id: pathParams.optInt('id')),
       );
-      return _i41.DeferredWidget(
-        _i37.loadLibrary,
-        () => _i37.UnitAdminPage(id: args.id, key: args.key),
-      );
+      return _i37.UnitAdminPage(id: args.id, key: args.key);
     },
   );
 }
@@ -1335,10 +1295,7 @@ class UnitRoute extends _i41.PageRouteInfo<UnitRouteArgs> {
       final args = data.argsAs<UnitRouteArgs>(
         orElse: () => UnitRouteArgs(id: pathParams.optInt('id')),
       );
-      return _i41.DeferredWidget(
-        _i38.loadLibrary,
-        () => _i38.UnitPage(id: args.id, key: args.key),
-      );
+      return _i38.UnitPage(id: args.id, key: args.key);
     },
   );
 }
@@ -1377,7 +1334,7 @@ class UserRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i39.loadLibrary, () => _i39.UserPage());
+      return const _i39.UserPage();
     },
   );
 }
@@ -1393,7 +1350,7 @@ class UserStayRoute extends _i41.PageRouteInfo<void> {
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return _i41.DeferredWidget(_i40.loadLibrary, () => _i40.UserStayPage());
+      return const _i40.UserStayPage();
     },
   );
 }

@@ -295,4 +295,19 @@ class _MemoryStore extends ClientSyncStore {
   }) async {
     activations.add(_Activation(type, payloads));
   }
+
+  @override
+  Future<bool> activateGuarded({
+    required String scope,
+    required SyncFreshnessClass type,
+    required String pointer,
+    required DateTime updatedAt,
+    required Map<ClientSyncComponent, int> revisions,
+    required Map<ClientSyncComponent, Object?> payloads,
+    required bool Function() precondition,
+  }) async {
+    if (!precondition()) return false;
+    activations.add(_Activation(type, payloads));
+    return true;
+  }
 }

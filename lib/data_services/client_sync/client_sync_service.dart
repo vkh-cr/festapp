@@ -259,7 +259,7 @@ class ClientSyncService {
     final payloads =
         Map<ClientSyncComponent, Object?>.fromEntries(payloadEntries);
     _validateMapClosure(payloads[ClientSyncComponent.mapCatalog]);
-    await _store.activate(
+    final activated = await _store.activateGuarded(
       scope: context.publicScope,
       type: SyncFreshnessClass.catalog,
       pointer: descriptor.sha256,
@@ -267,7 +267,15 @@ class ClientSyncService {
       revisions: manifest.components
           .map((key, value) => MapEntry(key, value.revision)),
       payloads: payloads,
+      precondition: () => _isCurrent(context, requestEpoch),
     );
+    if (!activated) {
+      _replaceClass(
+        SyncFreshnessClass.catalog,
+        _state!.classes[SyncFreshnessClass.catalog]!.copyWith(inFlight: false),
+      );
+      return;
+    }
     _replaceClass(
         SyncFreshnessClass.catalog,
         _state!.classes[SyncFreshnessClass.catalog]!.copyWith(
@@ -310,14 +318,22 @@ class ClientSyncService {
       throw const FormatException('live_public artifact metadata mismatch');
     }
     if (!_isCurrent(context, requestEpoch)) return;
-    await _store.activate(
+    final activated = await _store.activateGuarded(
       scope: context.publicScope,
       type: SyncFreshnessClass.live,
       pointer: descriptor.sha256,
       updatedAt: serverTime,
       revisions: {ClientSyncComponent.livePublic: descriptor.revision},
       payloads: {ClientSyncComponent.livePublic: payload},
+      precondition: () => _isCurrent(context, requestEpoch),
     );
+    if (!activated) {
+      _replaceClass(
+        SyncFreshnessClass.live,
+        _state!.classes[SyncFreshnessClass.live]!.copyWith(inFlight: false),
+      );
+      return;
+    }
     _replaceClass(
         SyncFreshnessClass.live,
         _state!.classes[SyncFreshnessClass.live]!.copyWith(
@@ -387,7 +403,7 @@ class ClientSyncService {
                 scope, SyncFreshnessClass.privateIdentity, component);
           }
         }
-        await _store.activate(
+        final activated = await _store.activateGuarded(
           scope: scope,
           type: SyncFreshnessClass.privateIdentity,
           pointer:
@@ -395,7 +411,16 @@ class ClientSyncService {
           updatedAt: response.serverTime,
           revisions: response.vector,
           payloads: replacements,
+          precondition: () => _isCurrent(context, requestEpoch),
         );
+        if (!activated) {
+          _replaceClass(
+            SyncFreshnessClass.privateIdentity,
+            _state!.classes[SyncFreshnessClass.privateIdentity]!
+                .copyWith(inFlight: false),
+          );
+          return;
+        }
       }
       final revision =
           response.vector.values.fold<int>(0, (a, b) => a > b ? a : b);

@@ -1,9 +1,11 @@
 # Vaše volby a práva – CSM Ostrava
 
-Účinnost: 3. srpna 2026. Verze: 1.0.
+Účinnost: 4. srpna 2026. Verze: 1.1.
 
-V profilu můžete opravit své údaje, spravovat účast a zahájit smazání celého účtu. Žádost o smazání odešle jednorázový odkaz na adresu účtu. Pouhé otevření odkazu nic nemaže; smazání spustí až závěrečné potvrzení tlačítkem.
+V profilu můžete zkontrolovat své údaje, spravovat osobní program a registrace a zahájit smazání celého účtu. Žádost o smazání odešle časově omezený jednorázový odkaz na e-mailovou adresu účtu. Pouhé otevření odkazu nic nemaže; smazání spustí až závěrečné potvrzení tlačítkem.
 
-Po potvrzení je účet okamžitě zablokován pro další použití. Odstranění databázového účtu, autentizace a identity OneSignal probíhá jako sledovatelná operace. Přechodný výpadek může zobrazit stav „zpracovává se“, nikoli nepravdivé dokončení. Schválené zákonné záznamy mohou zůstat pouze bez přímé identity.
+Po potvrzení se účet zablokuje pro další použití a odstranění databázového účtu, autentizace a propojené identity OneSignal proběhne jako sledovatelná operace. Přechodný výpadek může zobrazit stav „zpracovává se“, nikoli nepravdivé dokončení. Záznamy, které musí správce uchovat kvůli zákonné povinnosti nebo obhajobě právních nároků, mohou zůstat pouze v nezbytném rozsahu.
 
-O přístup, opravu, námitku nebo export můžete požádat na `info@aksm.cz`. Nikdy neposílejte heslo, kód ani jednorázový odkaz.
+Push oznámení a oprávnění k poloze lze kdykoli změnit v systémovém nastavení zařízení. Bez přihlášení lze nadále používat program, mapu, novinky a praktické informace.
+
+O přístup, opravu, výmaz, omezení zpracování, přenositelnost, odvolání souhlasu nebo námitku související s aplikací můžete požádat Michaela Bujnovského na `info@festapp.net`. Nikdy neposílejte heslo, přihlašovací kód ani jednorázový odkaz.

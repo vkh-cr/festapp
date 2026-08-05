@@ -21,8 +21,13 @@ fi
 
 cd "$PROJECT_ROOT"
 node automation/release/store_preflight.mjs --local --read-only
+target_version="$(node -p "require('./automation/release/app_store_config.json').target.version")"
+target_build="$(node -p "require('./automation/release/app_store_config.json').target.build")"
 "$SCRIPT_DIR/prepare_signing_keychain.sh"
-fvm flutter build ipa --release --export-options-plist="$SCRIPT_DIR/ExportOptions.plist"
+fvm flutter build ipa --release \
+  --build-name="$target_version" \
+  --build-number="$target_build" \
+  --export-options-plist="$SCRIPT_DIR/ExportOptions.plist"
 
 ipa_files=("$PROJECT_ROOT"/build/ios/ipa/*.ipa)
 if [ "${#ipa_files[@]}" -ne 1 ] || [ ! -f "${ipa_files[0]}" ]; then

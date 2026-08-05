@@ -5,6 +5,7 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_projection_tracker.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_remote.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_service.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_store.dart';
@@ -25,10 +26,16 @@ class ClientSyncRuntime {
   static bool _v1Selected = false;
   static int _identityEpoch = 0;
   static SyncContext? _context;
-  static String? _projectionSignature;
+  static final ClientSyncProjectionTracker _projectionTracker =
+      ClientSyncProjectionTracker();
   static String? _searchProjectionSignature;
 
   static bool get isV1Selected => _v1Selected;
+  static String get mutationContextToken =>
+      '$_identityEpoch|$_v1Selected|${_context?.publicScope}|${_context?.privateScope}';
+
+  static bool isCurrentMutationContext(String token) =>
+      mutationContextToken == token;
   static DateTime? get latestLastSuccess {
     DateTime? latest;
     for (final classState
@@ -116,7 +123,7 @@ class ClientSyncRuntime {
     _selectedModel = model;
     _v1Selected = model.clientSyncV1;
     _context = null;
-    _projectionSignature = null;
+    _projectionTracker.reset();
     projectionEpoch.value++;
     if (searchContextChanged) {
       _searchProjectionSignature = null;
@@ -215,7 +222,7 @@ class ClientSyncRuntime {
     if (!_v1Selected || scope == null) return null;
     final payload = await _store.readComponent(
         scope, SyncFreshnessClass.privateIdentity, component);
-    return payload;
+    return _v1Selected && _context == context ? payload : null;
   }
 
   static Future<void> applyPrivateReplacement({
@@ -223,7 +230,12 @@ class ClientSyncRuntime {
     required int revision,
     required Object? payload,
     bool notifyProjection = true,
+    String? expectedContextToken,
   }) async {
+    if (expectedContextToken != null &&
+        !isCurrentMutationContext(expectedContextToken)) {
+      return;
+    }
     final context = _context;
     final scope = context?.privateScope;
     if (!_v1Selected || context == null || scope == null) return;
@@ -240,16 +252,47 @@ class ClientSyncRuntime {
           : await _store.readComponent(
               scope, SyncFreshnessClass.privateIdentity, item);
     }
-    await _store.activate(
+    if (_context != context ||
+        (expectedContextToken != null &&
+            !isCurrentMutationContext(expectedContextToken))) {
+      return;
+    }
+    final pointer =
+        '${context.identityEpoch}-${DateTime.now().toUtc().microsecondsSinceEpoch}';
+    final activated = await _store.activateGuarded(
       scope: scope,
       type: SyncFreshnessClass.privateIdentity,
-      pointer:
-          '${context.identityEpoch}-${DateTime.now().toUtc().microsecondsSinceEpoch}',
+      pointer: pointer,
       updatedAt: DateTime.now().toUtc(),
       revisions: revisions,
       payloads: payloads,
+      precondition: () =>
+          _context == context &&
+          (expectedContextToken == null ||
+              isCurrentMutationContext(expectedContextToken)),
     );
-    if (notifyProjection) _notifyProjectionChanged();
+    if (_context != context ||
+        (expectedContextToken != null &&
+            !isCurrentMutationContext(expectedContextToken))) {
+      return;
+    }
+    if (!activated) {
+      return applyPrivateReplacement(
+        component: component,
+        revision: revision,
+        payload: payload,
+        notifyProjection: notifyProjection,
+        expectedContextToken: expectedContextToken,
+      );
+    }
+    if (notifyProjection) {
+      _notifyProjectionChanged();
+    } else {
+      _projectionTracker.acknowledgePrivate(
+        scope: scope,
+        pointer: pointer,
+      );
+    }
   }
 
   /// Reconciles fields returned authoritatively by a private mutation even
@@ -258,7 +301,12 @@ class ClientSyncRuntime {
     required ClientSyncComponent component,
     required Map<String, dynamic> fields,
     bool notifyProjection = true,
+    String? expectedContextToken,
   }) async {
+    if (expectedContextToken != null &&
+        !isCurrentMutationContext(expectedContextToken)) {
+      return;
+    }
     final context = _context;
     final scope = context?.privateScope;
     if (!_v1Selected || context == null || scope == null) return;
@@ -268,6 +316,11 @@ class ClientSyncRuntime {
     );
     final raw = await readPrivate(component);
     final revision = current?.revisions[component];
+    if (_context != context ||
+        (expectedContextToken != null &&
+            !isCurrentMutationContext(expectedContextToken))) {
+      return;
+    }
     if (raw is! Map || revision == null) {
       await refresh(SyncReason.manual, privateConsumer: true);
       return;
@@ -277,6 +330,7 @@ class ClientSyncRuntime {
       revision: revision,
       payload: {...raw.cast<String, dynamic>(), ...fields},
       notifyProjection: notifyProjection,
+      expectedContextToken: expectedContextToken,
     );
   }
 
@@ -285,7 +339,12 @@ class ClientSyncRuntime {
     required int revision,
     required Object? payload,
     bool notifyProjection = true,
+    String? expectedContextToken,
   }) async {
+    if (expectedContextToken != null &&
+        !isCurrentMutationContext(expectedContextToken)) {
+      return;
+    }
     final context = _context;
     if (!_v1Selected || context == null) return;
     final current = await _store.activeGeneration(
@@ -300,17 +359,46 @@ class ClientSyncRuntime {
           : await _store.readComponent(
               context.publicScope, SyncFreshnessClass.catalog, item);
     }
-    await _store.activate(
+    if (_context != context ||
+        (expectedContextToken != null &&
+            !isCurrentMutationContext(expectedContextToken))) {
+      return;
+    }
+    final pointer = 'mutation-${DateTime.now().toUtc().microsecondsSinceEpoch}';
+    final activated = await _store.activateGuarded(
       scope: context.publicScope,
       type: SyncFreshnessClass.catalog,
-      pointer: 'mutation-${DateTime.now().toUtc().microsecondsSinceEpoch}',
+      pointer: pointer,
       updatedAt: DateTime.now().toUtc(),
       revisions: revisions,
       payloads: payloads,
+      precondition: () =>
+          _context == context &&
+          (expectedContextToken == null ||
+              isCurrentMutationContext(expectedContextToken)),
     );
+    if (_context != context ||
+        (expectedContextToken != null &&
+            !isCurrentMutationContext(expectedContextToken))) {
+      return;
+    }
+    if (!activated) {
+      return applyPublicReplacement(
+        component: component,
+        revision: revision,
+        payload: payload,
+        notifyProjection: notifyProjection,
+        expectedContextToken: expectedContextToken,
+      );
+    }
     if (notifyProjection) {
       _notifyProjectionChanged(
           searchIndexChanged: component.affectsSearchIndex);
+    } else {
+      _projectionTracker.acknowledgeCatalog(
+        scope: context.publicScope,
+        pointer: pointer,
+      );
     }
   }
 
@@ -318,7 +406,12 @@ class ClientSyncRuntime {
     required int revision,
     required Object? payload,
     bool notifyProjection = true,
+    String? expectedContextToken,
   }) async {
+    if (expectedContextToken != null &&
+        !isCurrentMutationContext(expectedContextToken)) {
+      return;
+    }
     final context = _context;
     if (!_v1Selected || context == null) return;
     final current = await _store.activeGeneration(
@@ -327,15 +420,38 @@ class ClientSyncRuntime {
         (current.revisions[ClientSyncComponent.livePublic] ?? -1) > revision) {
       return;
     }
-    await _store.activate(
+    if (_context != context ||
+        (expectedContextToken != null &&
+            !isCurrentMutationContext(expectedContextToken))) {
+      return;
+    }
+    final pointer = 'mutation-live-$revision';
+    final activated = await _store.activateGuarded(
       scope: context.publicScope,
       type: SyncFreshnessClass.live,
-      pointer: 'mutation-live-$revision',
+      pointer: pointer,
       updatedAt: DateTime.now().toUtc(),
       revisions: {ClientSyncComponent.livePublic: revision},
       payloads: {ClientSyncComponent.livePublic: payload},
+      precondition: () =>
+          _context == context &&
+          (expectedContextToken == null ||
+              isCurrentMutationContext(expectedContextToken)),
     );
-    if (notifyProjection) _notifyProjectionChanged();
+    if (_context != context ||
+        (expectedContextToken != null &&
+            !isCurrentMutationContext(expectedContextToken))) {
+      return;
+    }
+    if (!activated) return;
+    if (notifyProjection) {
+      _notifyProjectionChanged();
+    } else {
+      _projectionTracker.acknowledgeLive(
+        scope: context.publicScope,
+        pointer: pointer,
+      );
+    }
   }
 
   static void _notifyProjectionChanged({bool searchIndexChanged = false}) {
@@ -345,7 +461,7 @@ class ClientSyncRuntime {
       context: current.context,
       classes: {...current.classes},
     );
-    _projectionSignature = null;
+    _projectionTracker.reset();
     projectionEpoch.value++;
     if (searchIndexChanged) {
       _searchProjectionSignature = null;
@@ -366,15 +482,13 @@ class ClientSyncRuntime {
         : await _store.activeGeneration(
             privateScope, SyncFreshnessClass.privateIdentity);
     if (_context != context) return;
-    final signature = [
-      context.publicScope,
-      catalog?.pointer ?? '-',
-      live?.pointer ?? '-',
-      privateScope ?? '-',
-      private?.pointer ?? '-',
-    ].join('|');
-    if (_projectionSignature != signature) {
-      _projectionSignature = signature;
+    if (_projectionTracker.observe(
+      publicScope: context.publicScope,
+      catalogPointer: catalog?.pointer,
+      livePointer: live?.pointer,
+      privateScope: privateScope,
+      privatePointer: private?.pointer,
+    )) {
       projectionEpoch.value++;
     }
 

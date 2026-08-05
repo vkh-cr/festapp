@@ -23,6 +23,8 @@ readback on 2026-08-04. The canonical values were uploaded and matched readback.
 | Loot boxes | `false` | No game economy found. |
 | Messaging and chat | `false` | Feedback/reports are not user-to-user chat. |
 | Parental controls | `false` | No parental-control feature found. |
+| Social media | `false` | No social feed or redistribution, amplification, discovery or interaction with broadly distributed user-generated content. Published in ASC on 2026-08-04. |
+| Social media disabled for users under 13 | `false` | Not applicable because the app has no social-media capability. Published in ASC on 2026-08-04. |
 | Unrestricted web access | `false` | Keep the current readback. |
 | User-generated content | `false` | Feedback/profile content is not publicly published to other users. |
 
@@ -32,12 +34,22 @@ wellness product.
 
 ## DSA / trader information
 
-The official AKSM site identifies Asociace křesťanských spolků mládeže, z. s.,
-IČ 67775861, Thákurova 676/3, 160 00 Praha 6–Dejvice,
-`kancelar@aksm.cz`, +420 220 181 739 / +420 731 625 720. The Apple signing
-certificate identifies Michael Bujnovsk. The Account Holder must confirm the
-seller/trader status, which contact Apple should display, and Michael
-Bujnovsk's authority/relationship to AKSM. Automation must not assert it.
+The publisher and Apple Developer Account Holder is Michael Bujnovský under an
+individual account. The product owner declares `NOT_TRADER`: the app is free,
+contains no advertising or in-app purchases, and is not commercialized. In App
+Store Connect select “This is not a trader account”. This declaration concerns
+the publisher only; no organizer relationship or organizer contact belongs in
+the DSA answer.
+
+App Store Connect readback on 2026-08-04 shows this declaration as `Active`
+for all 27 EU countries or regions, with the non-trader option selected. No
+further DSA action is pending for this release.
+
+## Country availability
+
+The product owner approved excluding China mainland. App Store Connect now
+reports 174 available countries or regions and China mainland as `Processing to
+Not Available`. Automatic availability in new territories remains enabled.
 
 ## Reviewer information
 

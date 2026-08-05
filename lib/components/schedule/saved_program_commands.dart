@@ -24,17 +24,27 @@ class SupabaseSavedProgramCommands implements SavedProgramCommands {
 
   @override
   Future<List<int>> update(List<int> eventIds, SavedProgramMode mode) async {
+    final contextToken = ClientSyncRuntime.mutationContextToken;
     final raw = await _transport.invoke('set_saved_program_client_sync_v1', {
       'p_occasion': _occasionId,
       'p_event_ids': eventIds.toSet().toList()..sort(),
       'p_mode': mode.name,
     });
+    if (!ClientSyncRuntime.isCurrentMutationContext(contextToken)) {
+      throw StateError('Saved-program identity changed during mutation');
+    }
     final response = ClientCommandResponse.from(raw);
     // EventPage owns this tiny optimistic state transition. Activating the
     // authoritative cache replacements must not bump the process-wide
     // projection epoch: OccasionHomePage keys its routed child by that epoch,
     // which would otherwise dispose and recreate the entire event detail.
-    await response.applyReplacements(notifyProjection: false);
+    await response.applyReplacements(
+      notifyProjection: false,
+      expectedContextToken: contextToken,
+    );
+    if (!ClientSyncRuntime.isCurrentMutationContext(contextToken)) {
+      throw StateError('Saved-program identity changed during mutation');
+    }
     final data = response.data;
     final saved = ((data['saved'] as List?) ?? const [])
         .whereType<num>()
@@ -44,10 +54,9 @@ class SupabaseSavedProgramCommands implements SavedProgramCommands {
         replacement['component'] ==
         ClientSyncComponent.privateProgram.wireName);
     if (!replacedPrivateProgram) {
-      await ClientSyncRuntime.patchPrivateComponent(
-        component: ClientSyncComponent.privateProgram,
-        fields: {'saved': saved},
-        notifyProjection: false,
+      await ClientSyncRuntime.refresh(
+        SyncReason.manual,
+        privateConsumer: true,
       );
     }
     return saved;

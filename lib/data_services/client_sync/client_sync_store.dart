@@ -1,7 +1,15 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 import 'package:fstapp/services/storage_helper.dart';
+
+bool clientSyncRevisionsRegress(
+  Map<ClientSyncComponent, int> current,
+  Map<ClientSyncComponent, int> incoming,
+) =>
+    current.entries.any((entry) =>
+        incoming[entry.key] == null || incoming[entry.key]! < entry.value);
 
 class StoredSyncGeneration {
   const StoredSyncGeneration({
@@ -56,6 +64,7 @@ class ClientSyncStore {
   ClientSyncStore({this.databasePath = 'client_sync_v1.db'});
 
   final String databasePath;
+  Future<void> _mutationTail = Future<void>.value();
   static const _lastContextKey = 'context/last';
 
   String _blobKey(String digest) => 'blob/$digest';
@@ -113,26 +122,87 @@ class ClientSyncStore {
     required Map<ClientSyncComponent, int> revisions,
     required Map<ClientSyncComponent, Object?> payloads,
   }) async {
-    final prefix = _generationKey(scope, type, pointer);
-    final metadata = jsonEncode({
-      'revisions': revisions.map((key, value) => MapEntry(key.wireName, value)),
-      'updatedAt': updatedAt.toUtc().toIso8601String(),
-    });
-    await StorageHelper.setAllAtomic({
-      prefix: metadata,
-      for (final entry in payloads.entries)
-        '$prefix/${entry.key.wireName}': jsonEncode(entry.value),
-      _pointerKey(scope, type): pointer,
-    }, databasePath);
+    await _activate(
+      scope: scope,
+      type: type,
+      pointer: pointer,
+      updatedAt: updatedAt,
+      revisions: revisions,
+      payloads: payloads,
+    );
   }
 
-  Future<void> clearPrivateScope(String scope) async {
-    await StorageHelper.setAllAtomic(
-        {_pointerKey(scope, SyncFreshnessClass.privateIdentity): null},
-        databasePath);
-    await StorageHelper.removeByPrefix(
-        'generation/$scope/${SyncFreshnessClass.privateIdentity.name}/',
-        databasePath);
+  Future<bool> activateGuarded({
+    required String scope,
+    required SyncFreshnessClass type,
+    required String pointer,
+    required DateTime updatedAt,
+    required Map<ClientSyncComponent, int> revisions,
+    required Map<ClientSyncComponent, Object?> payloads,
+    required bool Function() precondition,
+  }) =>
+      _activate(
+        scope: scope,
+        type: type,
+        pointer: pointer,
+        updatedAt: updatedAt,
+        revisions: revisions,
+        payloads: payloads,
+        precondition: precondition,
+      );
+
+  Future<bool> _activate({
+    required String scope,
+    required SyncFreshnessClass type,
+    required String pointer,
+    required DateTime updatedAt,
+    required Map<ClientSyncComponent, int> revisions,
+    required Map<ClientSyncComponent, Object?> payloads,
+    bool Function()? precondition,
+  }) {
+    return _serializeMutation(() async {
+      if (precondition != null && !precondition()) return false;
+      final current = await activeGeneration(scope, type);
+      if (current != null &&
+          clientSyncRevisionsRegress(current.revisions, revisions)) {
+        return false;
+      }
+      if (precondition != null && !precondition()) return false;
+      final prefix = _generationKey(scope, type, pointer);
+      final metadata = jsonEncode({
+        'revisions':
+            revisions.map((key, value) => MapEntry(key.wireName, value)),
+        'updatedAt': updatedAt.toUtc().toIso8601String(),
+      });
+      await StorageHelper.setAllAtomic({
+        prefix: metadata,
+        for (final entry in payloads.entries)
+          '$prefix/${entry.key.wireName}': jsonEncode(entry.value),
+        _pointerKey(scope, type): pointer,
+      }, databasePath);
+      return true;
+    });
+  }
+
+  Future<void> clearPrivateScope(String scope) => _serializeMutation(() async {
+        await StorageHelper.setAllAtomic(
+            {_pointerKey(scope, SyncFreshnessClass.privateIdentity): null},
+            databasePath);
+        await StorageHelper.removeByPrefix(
+            'generation/$scope/${SyncFreshnessClass.privateIdentity.name}/',
+            databasePath);
+      });
+
+  Future<T> _serializeMutation<T>(Future<T> Function() mutation) {
+    final completer = Completer<T>();
+    _mutationTail = _mutationTail.then((_) async {
+      try {
+        completer.complete(await mutation());
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    return completer.future;
   }
 
   Future<void> saveLastContext(StoredSyncContext context) => StorageHelper.set(

@@ -10,6 +10,7 @@ MANIFEST = JSON.parse(File.read(File.expand_path('../app_store_config.json', __d
 APPLE_ID = MANIFEST.fetch('appleId')
 BUNDLE_ID = MANIFEST.fetch('bundleId')
 TARGET_VERSION = MANIFEST.fetch('target').fetch('version')
+TARGET_BUILD = MANIFEST.fetch('target').fetch('build')
 
 def app_store_connect_key_path!
   path = File.expand_path(ENV.fetch('APP_STORE_CONNECT_KEY_PATH'))
@@ -121,6 +122,29 @@ platform :ios do
       UI.message("PROFILE ID=#{profile.id} BUNDLE=#{profile.bundle_id&.identifier} STATE=#{profile.profile_state} VALID=#{profile.valid?} EXPIRES=#{profile.expiration_date} NAME=#{profile.name}")
     end
     UI.message("SIGNING INVENTORY: #{certs.size} distribution certificate(s), #{profiles.size} matching App Store profile(s)")
+  end
+
+  desc 'Regenerate only the notification-extension App Store profile after capability changes'
+  lane :refresh_notification_extension_profile do
+    exact_gate!('REFRESH_NOTIFICATION_EXTENSION_PROFILE')
+    target_app!('REFRESH_NOTIFICATION_EXTENSION_PROFILE')
+    certs = Spaceship::ConnectAPI::Certificate.all.select do |cert|
+      cert.valid? && %w[DISTRIBUTION IOS_DISTRIBUTION].include?(cert.certificate_type)
+    end
+    UI.user_error!("Expected exactly one valid distribution certificate, found #{certs.size}") unless certs.one?
+
+    extension_id = MANIFEST.fetch('notificationExtensionBundleId')
+    signing_dir = File.expand_path('../signing', __dir__)
+    FileUtils.mkdir_p(signing_dir)
+    FileUtils.chmod(0o700, signing_dir)
+    profile_path = File.join(signing_dir, "#{extension_id}.mobileprovision")
+    get_provisioning_profile(
+      api_key: api_key, app_identifier: extension_id, cert_id: certs.first.id,
+      provisioning_name: 'CSM Ostrava OneSignal AppStore',
+      filename: File.basename(profile_path), output_path: signing_dir, force: true
+    )
+    FileUtils.chmod(0o600, profile_path)
+    UI.success("Refreshed notification-extension profile at #{profile_path}")
   end
 
   desc 'Create the first release certificate and exact App Store profiles'
@@ -259,9 +283,21 @@ platform :ios do
     review = MANIFEST.fetch('review')
     contact = review.fetch('contact')
     demo_account = review.fetch('demoAccount')
-    UI.message("REVIEW_CONTACT name_match=#{detail.contact_first_name == contact.fetch('firstName') && detail.contact_last_name == contact.fetch('lastName')} email_match=#{detail.contact_email == contact.fetch('email')} phone_present=#{!detail.contact_phone.to_s.strip.empty?}")
-    UI.message("REVIEW_DEMO email_match=#{detail.demo_account_name == demo_account.fetch('email')} required=#{detail.demo_account_required}")
-    UI.important('This lane is read-only; mismatches require the gated upload_review_information lane.')
+    notes_path = File.expand_path(review.fetch('notesPath'), File.expand_path('..', __dir__))
+    expected = {
+      contact_first_name: contact.fetch('firstName'),
+      contact_last_name: contact.fetch('lastName'),
+      contact_email: contact.fetch('email'),
+      contact_phone: contact.fetch('phone'),
+      demo_account_name: demo_account.fetch('email'),
+      demo_account_required: true,
+      notes: File.read(notes_path).strip
+    }
+    mismatches = expected.filter_map do |attribute, value|
+      attribute.to_s unless detail.public_send(attribute) == value
+    end
+    UI.user_error!("Reviewer information mismatch: #{mismatches.join(', ')}") unless mismatches.empty?
+    UI.success('Reviewer contact, demo-account requirement and notes match the canonical manifest')
   end
 
   desc 'Upload the two privacy URLs not fully covered by deliver metadata'
@@ -408,7 +444,15 @@ platform :ios do
     app = target_app!('READ_ONLY_SUBMISSION_CHECK')
     editable = app.get_edit_app_store_version
     UI.user_error!("No editable target version") unless editable&.version_string == TARGET_VERSION
-    UI.message("Builds: #{app.get_builds(includes: 'preReleaseVersion').size}")
+    selected_build = begin
+      editable.get_build
+    rescue RuntimeError => error
+      raise unless error.message == 'No data'
+      nil
+    end
+    UI.user_error!("No build is selected for version #{TARGET_VERSION}") unless selected_build
+    UI.user_error!("Selected build #{selected_build.version}; expected #{TARGET_BUILD}") unless selected_build.version.to_s == TARGET_BUILD
+    UI.message("Selected build: #{selected_build.version}")
     UI.message("Locales: #{editable.get_app_store_version_localizations.map(&:locale).join(', ')}")
     UI.important('This lane does not submit or release.')
   end

@@ -45,7 +45,10 @@ class ClientCommandResponse {
     );
   }
 
-  Future<void> applyReplacements({bool notifyProjection = true}) async {
+  Future<void> applyReplacements({
+    bool notifyProjection = true,
+    String? expectedContextToken,
+  }) async {
     for (final replacement in replacements) {
       final component =
           ClientSyncComponentWireName.parse(replacement['component'] as String);
@@ -55,6 +58,7 @@ class ClientCommandResponse {
           revision: revision,
           payload: replacement['payload'],
           notifyProjection: notifyProjection,
+          expectedContextToken: expectedContextToken,
         );
       } else if (component.isPrivate) {
         await ClientSyncRuntime.applyPrivateReplacement(
@@ -62,6 +66,7 @@ class ClientCommandResponse {
           revision: revision,
           payload: replacement['payload'],
           notifyProjection: notifyProjection,
+          expectedContextToken: expectedContextToken,
         );
       } else {
         await ClientSyncRuntime.applyPublicReplacement(
@@ -69,6 +74,7 @@ class ClientCommandResponse {
           revision: revision,
           payload: replacement['payload'],
           notifyProjection: notifyProjection,
+          expectedContextToken: expectedContextToken,
         );
       }
     }

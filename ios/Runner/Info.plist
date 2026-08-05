@@ -16,11 +16,7 @@
 	<string>6.0</string>
 	<key>CFBundleLocalizations</key>
 	<array>
-		<string>en</string>
 		<string>cs</string>
-		<string>sk</string>
-		<string>pl</string>
-		<string>de</string>
 	</array>
 	<key>CFBundleName</key>
 	<string>CSMOstrava</string>
@@ -48,11 +44,13 @@
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>This app needs camera access to scan QR codes.</string>
+	<string>Fotoaparát se používá pouze ke skenování QR kódů.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Poloha se používá pouze při otevřené mapě pro zobrazení vaší pozice a navigaci.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Přístup k fotkám je potřeba pouze při výběru profilového obrázku.</string>
+	<key>OneSignal_app_groups_key</key>
+	<string>group.festapp.festapp.onesignal</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

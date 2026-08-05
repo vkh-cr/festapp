@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +20,7 @@ import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/saved_program_pending_state.dart';
 import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
@@ -47,6 +50,24 @@ class _MySchedulePageState extends State<MySchedulePage> {
   bool _isLightTimeline = false;
   final Map<int, String?> _eventAndActivitiesDescriptions = {};
   int? _openId;
+  int _loadRevision = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    savedProgramPendingState.addListener(_refreshPendingProgram);
+  }
+
+  @override
+  void dispose() {
+    _loadRevision++;
+    savedProgramPendingState.removeListener(_refreshPendingProgram);
+    super.dispose();
+  }
+
+  void _refreshPendingProgram() {
+    if (mounted) unawaited(loadDataOffline());
+  }
 
   @override
   Future<void> didChangeDependencies() async {
@@ -63,8 +84,11 @@ class _MySchedulePageState extends State<MySchedulePage> {
       _isLightTimeline = true;
     }
     await loadDataOffline();
-    if (ClientSyncRuntime.isV1Selected ||
-        ConnectivityService.isOfflineNotifier.value) {
+    if (!shouldLoadSavedProgramOnline(
+      isV1Selected: ClientSyncRuntime.isV1Selected,
+      isOffline: ConnectivityService.isOfflineNotifier.value,
+      hasPendingMutation: savedProgramPendingState.hasPending,
+    )) {
       return;
     }
     await loadData();
@@ -72,64 +96,64 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
   MyEventsBundle? _data;
 
-  Future<void> _loadFullData() async {
-    _data = await DbEvents.getMyEventsAndActivities(
-        RightsService.currentOccasionId()!, true);
-
-    // init _eventAndActivitiesDescriptions
-    for (var e in _data!.events) {
-      if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
-    }
-    for (var e in _data!.activities) {
-      _eventAndActivitiesDescriptions[e.id.hashCode] = e.description;
-    }
-    _fullEventsLoaded = true;
-  }
-
   Future<void> loadData() async {
     if (!AuthService.isLoggedIn()) {
       return;
     }
+    final loadRevision = ++_loadRevision;
+    late final MyEventsBundle data;
     if (!_fullEventsLoaded) {
-      await _loadFullData();
+      final loaded = await DbEvents.getMyEventsAndActivities(
+          RightsService.currentOccasionId()!, true);
+      if (loaded == null) return;
+      data = loaded;
+      if (!mounted || loadRevision != _loadRevision) return;
+      for (var e in data.events) {
+        if (e.id != null) {
+          _eventAndActivitiesDescriptions[e.id!] = e.description;
+        }
+      }
+      for (var e in data.activities) {
+        _eventAndActivitiesDescriptions[e.id.hashCode] = e.description;
+      }
+      _fullEventsLoaded = true;
     } else {
-      _data = await DbEvents.getMyEventsAndActivities(
+      final loaded = await DbEvents.getMyEventsAndActivities(
           RightsService.currentOccasionId()!, false);
-      for (var e in _data!.events) {
+      if (loaded == null) return;
+      data = loaded;
+      if (!mounted || loadRevision != _loadRevision) return;
+      for (var e in data.events) {
         if (e.id != null &&
             _eventAndActivitiesDescriptions.containsKey(e.id!)) {
           e.description = _eventAndActivitiesDescriptions[e.id!];
         }
       }
-      for (var e in _data!.activities) {
+      for (var e in data.activities) {
         if (_eventAndActivitiesDescriptions.containsKey(e.id)) {
           e.description = _eventAndActivitiesDescriptions[e.id];
         }
       }
     }
 
-    var actDots = ActivityDataHelper.activitiesToTimeBlocks(
-        _data!.activities, _data!.events);
+    var actDots =
+        ActivityDataHelper.activitiesToTimeBlocks(data.activities, data.events);
 
-    var events = _data!.events
+    var events = data.events
         .where((e) => canBeShownInMySchedule(RightsService.currentUser(), e));
+    late final List<TimeBlockItem> dots;
     if (_isAdvancedTimeline ?? false) {
-      _dots = events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
+      dots = events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
     } else {
-      _dots =
-          events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
+      dots = events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
 
-    _dots!.addAll(actDots);
-
-    _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
+    dots.addAll(actDots);
+    dots.sort((a, b) => a.startTime.compareTo(b.startTime));
+    if (!mounted || loadRevision != _loadRevision) return;
+    _data = data;
+    _dots = dots;
     setState(() {});
-
-    await DbEvents.synchronizeMySchedule(
-        currentIds: events
-            .where((e) => e.isInMySchedule == true)
-            .map((e) => e.id!)
-            .toList());
   }
 
   bool canBeShownInMySchedule(UserInfoModel? userInfo, EventModel e) {
@@ -139,16 +163,15 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   Future<void> loadDataOffline() async {
+    final loadRevision = ++_loadRevision;
     var offlineEvents = await OfflineDataService.getAllEvents();
     await OfflineDataService.updateEventsWithMySchedule(offlineEvents);
     await OfflineDataService.updateEventsWithGroupName(offlineEvents);
     var userInfo = await OfflineDataService.getUserInfo();
 
-    var myEvents =
-        offlineEvents.where((e) => canBeShownInMySchedule(userInfo, e));
-
-    _events.clear();
-    _events.addAll(myEvents);
+    final myEvents = offlineEvents
+        .where((e) => canBeShownInMySchedule(userInfo, e))
+        .toList(growable: false);
 
     var activities = await OfflineDataService.getAllActivities();
 
@@ -163,17 +186,17 @@ class _MySchedulePageState extends State<MySchedulePage> {
     var actDots =
         ActivityDataHelper.activitiesToTimeBlocks(activities, offlineEvents);
 
-    if (_isAdvancedTimeline ?? false) {
-      _dots = _events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
-    } else {
-      _dots =
-          _events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
-    }
+    final dots = (_isAdvancedTimeline ?? false)
+        ? myEvents.map((e) => TimeBlockItem.fromEventModel(e)).toList()
+        : myEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
+    dots.addAll(actDots);
+    dots.sort((a, b) => a.startTime.compareTo(b.startTime));
 
-    _dots!.addAll(actDots);
-
-    _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
-
+    if (!mounted || loadRevision != _loadRevision) return;
+    _events
+      ..clear()
+      ..addAll(myEvents);
+    _dots = dots;
     setState(() {});
   }
 

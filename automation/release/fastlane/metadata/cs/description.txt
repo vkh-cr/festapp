@@ -2,7 +2,7 @@ CSM Ostrava je oficiální mobilní aplikace Celostátního setkání mládeže,
 
 CO APLIKACE UMÍ
 
-• Program po dnech – přehledný harmonogram den po dni. U každého bodu najdeš čas, místo, popis i medailonek přednášejícího s fotkou a životopisem.
+• Program po dnech – přehledný harmonogram den po dni. U jednotlivých bodů najdeš čas, místo a popis; u přednášek také medailonek řečníka s fotkou a životopisem.
 • Registrace na programy s omezenou kapacitou – k vybraným workshopům, poradnám a aktivitám se přihlásíš přímo v aplikaci a hned vidíš, kolik zbývá volných míst.
 • Můj program – oblíbené body si přidáš k sobě a máš je vždy po ruce.
 • Mapa Ostravy – interaktivní mapa všech míst setkání: sály a pódia programu, kostely, ubytování, diecézní centra i hygienické zázemí. Filtrem si zobrazíš jen to, co tě zajímá.

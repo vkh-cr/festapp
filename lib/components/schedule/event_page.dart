@@ -777,11 +777,7 @@ class _EventPageState extends State<EventPage> {
                 const SizedBox(width: 8),
                 IconButton(
                   style: savedProgramActionButtonStyle,
-                  onPressed: () {
-                    if (!_isUpdatingSavedProgram) {
-                      _setSavedProgram(_canSaveSavedProgram.value);
-                    }
-                  },
+                  onPressed: () => _setSavedProgram(_canSaveSavedProgram.value),
                   icon: SavedProgramActionIcon(
                     canSave: _canSaveSavedProgram,
                     color: fg,
@@ -1029,11 +1025,7 @@ class _EventPageState extends State<EventPage> {
         customBorder: const CircleBorder(),
         splashFactory: NoSplash.splashFactory,
         overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-        onTap: () {
-          if (!_isUpdatingSavedProgram) {
-            _setSavedProgram(_canSaveSavedProgram.value);
-          }
-        },
+        onTap: () => _setSavedProgram(_canSaveSavedProgram.value),
         child: SizedBox(
           width: 56,
           height: 56,
@@ -1254,52 +1246,40 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  /// Updates both header actions immediately and keeps them locked until the
-  /// authoritative command finishes. A failed command restores the previous
-  /// state, avoiding the delayed check/plus flicker and accidental double tap.
   Future<void> _setSavedProgram(bool saved) async {
     final event = _event;
-    if (event?.id == null || _isUpdatingSavedProgram) return;
-    final previous = event!.isInMySchedule ?? false;
+    if (event?.id == null) return;
+    final eventId = event!.id!;
+    final mutationRevision = ++_savedProgramMutationRevision;
     event.isInMySchedule = saved;
     _isUpdatingSavedProgram = true;
-    _savedProgramMutationRevision++;
-    _canSaveSavedProgram.value = event.canSaveEventToMyProgram() ?? false;
-    if (event.isCancelled && mounted) setState(() {});
-    try {
-      var completed = true;
-      if (saved) {
-        completed = await DbEvents.addToMySchedule(
-          context,
-          event.id!,
-          showSuccessToast: false,
-        );
-      } else {
-        await DbEvents.removeFromMySchedule(
-          context,
-          event.id!,
-          showSuccessToast: false,
-        );
-      }
-      if (!completed && mounted) {
-        event.isInMySchedule = previous;
-        _syncSavedProgramUi();
-        if (event.isCancelled) setState(() {});
-      }
-    } catch (_) {
-      if (mounted) {
-        event.isInMySchedule = previous;
-        _syncSavedProgramUi();
-        if (event.isCancelled) setState(() {});
-      }
-      rethrow;
-    } finally {
-      if (mounted) {
-        _isUpdatingSavedProgram = false;
-        _savedProgramMutationRevision++;
-        _syncSavedProgramUi();
+    _syncSavedProgramUi();
+    if (event.isCancelled) setState(() {});
+
+    final result = await DbEvents.setSavedProgram(
+      context,
+      eventId,
+      saved,
+      showSuccessToast: false,
+    );
+    if (!mounted ||
+        _event?.id != eventId ||
+        mutationRevision != _savedProgramMutationRevision) {
+      return;
+    }
+
+    if (!result.wasApplied) {
+      event.isInMySchedule = await OfflineDataService.isEventSaved(eventId);
+      if (!mounted ||
+          _event?.id != eventId ||
+          mutationRevision != _savedProgramMutationRevision) {
+        return;
       }
     }
+    _isUpdatingSavedProgram = false;
+    _savedProgramMutationRevision++;
+    _syncSavedProgramUi();
+    if (event.isCancelled) setState(() {});
   }
 
   void _syncSavedProgramUi() {

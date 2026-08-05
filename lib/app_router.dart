@@ -36,7 +36,10 @@ import 'package:fstapp/components/app_management/instance_install_page.dart';
 import 'app_router.gr.dart';
 import 'components/information/game/game_page.dart';
 
-@AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
+// Keep web routes in one executable bundle. Separate deferred JS chunks can
+// strand an already-installed PWA on AutoRoute's loading placeholder when a
+// deployment replaces a chunk that the older runtime has not cached yet.
+@AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: false)
 class AppRouter extends RootStackRouter {
   static const String LINK = "occasionLink";
   static const String linkFormatted = "{$LINK}";
@@ -238,6 +241,10 @@ class AppRouter extends RootStackRouter {
       FormPage.ROUTE,
       ScanPage.ROUTE,
       TransferPage.ROUTE,
+      'privacy',
+      'terms',
+      'support',
+      'delete-account',
     ];
   }
 }

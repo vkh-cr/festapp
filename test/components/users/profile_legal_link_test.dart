@@ -1,0 +1,62 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fstapp/components/users/widgets/profile_legal_link.dart';
+import 'package:url_launcher/link.dart';
+
+void main() {
+  test('localhost debug links resolve to static legal documents', () {
+    expect(
+      resolveProfileLegalUri(
+        Uri.parse('https://csmostrava.festapp.net/privacy/'),
+        appUri: Uri.parse('http://localhost:8081/csmostrava2026/user'),
+        useLocalStaticDocument: true,
+      ),
+      Uri.parse('http://localhost:8081/privacy/index.html'),
+    );
+  });
+
+  testWidgets('profile legal item exposes a real same-window link',
+      (tester) async {
+    final uri = Uri.parse('https://csmostrava.festapp.net/privacy/');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ProfileLegalLink(label: 'Privacy', uri: uri),
+        ),
+      ),
+    );
+
+    final link = tester.widget<Link>(find.byType(Link));
+    expect(link.uri, uri);
+    expect(link.target, LinkTarget.self);
+    expect(find.text('Privacy'), findsOneWidget);
+  });
+
+  testWidgets('legal links panel exposes the complete public document set',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AppLegalLinks(
+            baseUri: Uri.parse('https://example.festapp.net'),
+          ),
+        ),
+      ),
+    );
+
+    final uris = tester
+        .widgetList<Link>(find.byType(Link))
+        .map((link) => link.uri)
+        .toList();
+
+    expect(uris, <Uri>[
+      Uri.parse('https://example.festapp.net/privacy/'),
+      Uri.parse('https://example.festapp.net/privacy/choices/'),
+      Uri.parse('https://example.festapp.net/terms/'),
+      Uri.parse('https://example.festapp.net/support/'),
+    ]);
+    expect(find.byType(Card), findsOneWidget);
+    expect(find.byType(ListTile), findsNWidgets(4));
+  });
+}

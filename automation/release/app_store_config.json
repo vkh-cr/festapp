@@ -5,7 +5,7 @@
   "signingTeamId": "8WKBB6L8LT",
   "notificationExtensionBundleId": "festapp.jm2025.OneSignalNotificationServiceExtension",
   "source": { "name": "JM 2025", "version": "0.14.25" },
-  "target": { "name": "CSM Ostrava", "version": "0.19.84", "build": "369", "locale": "cs" },
+  "target": { "name": "CSM Ostrava", "version": "0.19.84", "build": "371", "locale": "cs" },
   "organizationId": 9,
   "occasionLink": "csmostrava2026",
   "installationGeneration": "csm_ostrava_2026_v1",
@@ -40,6 +40,11 @@
     "secondaryCategory": "EDUCATION",
     "contentRights": "USES_THIRD_PARTY_CONTENT",
     "availableInNewTerritories": true,
+    "availability": {
+      "currentCountryOrRegionCount": 174,
+      "chinaMainland": "EXCLUDED",
+      "confirmedInAppStoreConnectAt": "2026-08-04"
+    },
     "ageRating": {
       "ageRatingOverrideV2": "NONE",
       "alcoholTobaccoOrDrugUseOrReferences": "NONE",
@@ -60,6 +65,8 @@
       "profanityOrCrudeHumor": "NONE",
       "sexualContentGraphicAndNudity": "NONE",
       "sexualContentOrNudity": "NONE",
+      "socialMedia": false,
+      "socialMediaDisabledForUsersUnder13": false,
       "unrestrictedWebAccess": false,
       "userGeneratedContent": false,
       "violenceCartoonOrFantasy": "NONE",
@@ -70,7 +77,8 @@
   "appPrivacy": {
     "questionnairePath": "APP_PRIVACY_DISCLOSURE.md",
     "entryMode": "manual_app_store_connect",
-    "approvalRequired": true,
+    "approvalRequired": false,
+    "published": true,
     "lastPublishedAt": "2026-08-04",
     "publishedDataTypes": [
       "NAME",
@@ -83,10 +91,29 @@
     ],
     "tracking": false
   },
+  "legal": {
+    "sourceDirectory": "legal",
+    "privacyPolicyVersion": "1.1",
+    "effectiveDate": "2026-08-04",
+    "controller": "Asociace křesťanských spolků mládeže, z. s.",
+    "privacyContact": "info@festapp.net",
+    "approvalRequired": true,
+    "productionDeploymentRequired": false,
+    "productionDeployedAt": "2026-08-04",
+    "productionDeploymentId": "8f6479e1"
+  },
+  "dsa": {
+    "publisher": "Michael Bujnovský",
+    "accountEnrollment": "INDIVIDUAL",
+    "traderStatus": "NOT_TRADER",
+    "commercialization": false,
+    "organizerRelationshipRelevant": false,
+    "manualAscConfirmationRequired": false,
+    "confirmedInAppStoreConnectAt": "2026-08-04"
+  },
   "releaseMode": "manual_after_approval",
   "externalGates": [
     "legal_approval",
-    "dsa_seller_verification",
     "app_privacy_questionnaire",
     "production_migration",
     "backend_and_web_deployment",

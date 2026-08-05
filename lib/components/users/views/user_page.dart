@@ -27,7 +27,6 @@ import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/services/launch_url_service.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
@@ -35,6 +34,7 @@ import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/_shared/person_fields_strings.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:fstapp/components/users/widgets/profile_place_field.dart';
+import 'package:fstapp/components/users/widgets/profile_legal_link.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -409,18 +409,8 @@ class _UserPageState extends State<UserPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  children: [
-                    _legalLink(
-                        UserStrings.privacy, '${AppConfig.webLink}/privacy'),
-                    _legalLink(UserStrings.privacyChoices,
-                        '${AppConfig.webLink}/privacy/choices'),
-                    _legalLink(UserStrings.terms, '${AppConfig.webLink}/terms'),
-                    _legalLink(
-                        UserStrings.support, '${AppConfig.webLink}/support'),
-                  ],
-                ),
+                const AppLegalLinks(),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -465,17 +455,6 @@ class _UserPageState extends State<UserPage> {
     await AuthService.logout();
     ToastHelper.Show(context, ScheduleStrings.youHaveBeenSignedOut(trPrefix));
     RouterService.popOrHome(context);
-  }
-
-  Widget _legalLink(String label, String url) {
-    final targetUrl = '$url/';
-    return TextButton(
-      onPressed: () => LaunchUrlService.openExternalUrl(
-        targetUrl,
-        inCurrentWindow: true,
-      ),
-      child: Text(label),
-    );
   }
 
   Future<void> _requestAccountDeletion() async {
