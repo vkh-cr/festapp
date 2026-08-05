@@ -36,7 +36,12 @@ export const generatePaymentDetails = (options: PaymentDetailsOptions) => {
     details.push({ label: "IBAN:", value: iban });
   }
 
-  details.push({ label: lang === 'cs' ? "Variabilní symbol:" : "Variable Symbol:", value: variableSymbol });
+  const isRf = variableSymbol.replace(/\s/g, '').toUpperCase().startsWith('RF');
+  details.push({
+    label: isRf ? (lang === 'cs' ? "Reference platby:" : "Payment Reference:")
+                : (lang === 'cs' ? "Variabilní symbol:" : "Variable Symbol:"),
+    value: variableSymbol,
+  });
 
   if (note) {
     details.push({

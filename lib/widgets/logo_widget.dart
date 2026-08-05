@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/theme_config.dart';
 
 class LogoWidget extends StatelessWidget {
@@ -14,8 +15,8 @@ class LogoWidget extends StatelessWidget {
   final bool? forceDark;
 
   /// Opt-in alternate asset for schedule/program-style pages.
-  /// Default keeps the normal logo; brand branches may override
-  /// `fstapplogo_program.*` to differentiate the schedule header.
+  /// Default keeps the normal logo; brand branches configure an alternate
+  /// asset through `PROGRAM_LOGO_ASSET` when needed.
   final bool programVariant;
 
   const LogoWidget({
@@ -29,31 +30,22 @@ class LogoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine the asset path based on the current theme or forceDark flag.
-    // Change these asset paths to match your actual file names.
     final String logoAsset = programVariant
-        ? 'assets/icons/fstapplogo_program.png'
+        ? AppConfig.programLogoAsset
         : (ThemeConfig.isDarkMode(context) || forceDark == true
-            ? 'assets/icons/fstapplogo.png'
-            : 'assets/icons/fstapplogo.png');
+              ? AppConfig.darkLogoAsset
+              : AppConfig.logoAsset);
 
     // If the asset file is an SVG, use SvgPicture; otherwise, use Image.
     final Widget logo = logoAsset.toLowerCase().endsWith('.svg')
         ? SvgPicture.asset(
-      logoAsset,
-      height: height,
-      width: width,
-      semanticsLabel: 'Festapp logo',
-    )
-        : Image.asset(
-      logoAsset,
-      height: height,
-      width: width,
-    );
+            logoAsset,
+            height: height,
+            width: width,
+            semanticsLabel: 'Festapp logo',
+          )
+        : Image.asset(logoAsset, height: height, width: width);
 
-    return InkWell(
-      onTap: onTap,
-      child: logo,
-    );
+    return InkWell(onTap: onTap, child: logo);
   }
 }

@@ -74,7 +74,10 @@ Deno.test("Integration: Email Pairing Logic", async () => {
       ss: null,
       message: "Test Email Pairing",
       date: new Date().toISOString(),
-      transaction_id: Date.now(),
+      ingest_source: "fio_email",
+      movement_id: null,
+      bank_command_id: Date.now(),
+      payer_reference: null,
       sender_name: "Test Sender",
     };
 
@@ -87,9 +90,9 @@ Deno.test("Integration: Email Pairing Logic", async () => {
     const result = (q.rows[0] as any).data;
 
     console.log("RPC Result:", result);
-    assertExists(result.id);
-    assertEquals(result.status, "inserted");
-    assertEquals(result.paired, true);
+    assertExists(result.stored_id);
+    assertEquals(result.ingest_status, "inserted");
+    assertEquals(result.match_verdict, "paired");
 
     // 3. Verify order state
     const oRes = await client.queryObject(

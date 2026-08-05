@@ -6,7 +6,8 @@ import 'package:fstapp/components/occasion/admin_page.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
-  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3ZnBkanhzZG1rZnlyenFicmxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTEyMjgwNDksImV4cCI6MjAyNjgwNDA0OX0.440P3yf8ZqNjOHEQTn9uJhkKyObhD_7PZ2NwaE9e4J0';
+  static const String anonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
   static const String appName = 'CSM Ostrava';
   static String get mapTitle => CommonStrings.map;
   static const bool showPWAInstallOption = true;
@@ -15,6 +16,10 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
   static const String oneSignalAppId = '7140cfd2-280d-4971-a81a-b78503e99e6e';
+  static const String pushAppGeneration = 'csm_ostrava_2026_v1';
+  static const String logoAsset = 'assets/icons/fstapplogo.png';
+  static const String darkLogoAsset = 'assets/icons/fstapplogo.png';
+  static const String programLogoAsset = 'assets/icons/fstapplogo_program.png';
   static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
   static const int organization = 9;
@@ -52,8 +57,6 @@ class AppConfig {
   static List<LanguageModel> availableLanguages() => [
     LanguageModel(const Locale("cs"), "Čeština"),
   ];
-
-
 
   /// This is the single definition place for the prefix structure.
   /// It combines the organization ID and the separator (e.g., "2+").

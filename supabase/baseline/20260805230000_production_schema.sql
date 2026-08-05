@@ -39562,7 +39562,7 @@ CREATE OR REPLACE TRIGGER "handle_updated_at" BEFORE UPDATE ON "public"."user_in
 
 
 
-CREATE OR REPLACE TRIGGER "push_log_notifications" AFTER INSERT ON "public"."log_notifications" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://lwfpdjxsdmkfyrzqbrlk.supabase.co/functions/v1/notify', 'POST', '{"Content-type": "application/json"}', '{}', '1000');
+CREATE OR REPLACE TRIGGER "push_log_notifications" AFTER INSERT ON "public"."log_notifications" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('http://127.0.0.1:54321/functions/v1/notify', 'POST', '{"Content-type": "application/json"}', '{}', '1000');
 
 
 

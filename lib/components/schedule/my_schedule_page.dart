@@ -324,7 +324,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
     // Light schedule type renders "My program" as a single continuous scroll
     // of light rows grouped by day (no cards, no day tabs) — matching the
-    // production csmostrava layout and the main light schedule's row style.
+    // production layout and the main light schedule's row style.
     if (_isLightTimeline) {
       return Scaffold(
         backgroundColor: ThemeConfig.whiteColor(context),

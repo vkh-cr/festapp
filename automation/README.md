@@ -12,6 +12,8 @@ defines:
 - Deployment domains.
 - Supabase credentials.
 - Theme colors.
+- Android/iOS application identity and OneSignal public IDs.
+- Brand asset paths and optional installation-generation cutover marker.
 - Version numbers.
 
 ### Applying Configuration

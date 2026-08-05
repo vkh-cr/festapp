@@ -7,7 +7,7 @@
 -- 20260710120000_speakers_searchable.sql.
 --
 -- This file is now the repo home of the function; it supersedes the verbatim
--- copy in database/recovery/2026-06_csmostrava_lost_backend.sql (which was
+-- historical recovery copy (which was
 -- recovered from the live catalog). The only functional change versus that copy
 -- is in the events branch: counseling slots (data.is_counseling_slot = true)
 -- are excluded from search results. Slots are ordinary, non-hidden events

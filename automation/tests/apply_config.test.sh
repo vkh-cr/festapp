@@ -32,6 +32,12 @@ echo "Temp project root: $TMP_ROOT"
 # 1. Stage the files apply_config.sh writes to. Use the real ones in the repo
 #    as the starting state — that way we test against actual templates.
 mkdir -p "$TMP_ROOT/automation" \
+         "$TMP_ROOT/android/app/src/main/kotlin/fstapp/example" \
+         "$TMP_ROOT/android/app/src/main" \
+         "$TMP_ROOT/ios/Runner.xcodeproj" \
+         "$TMP_ROOT/ios/Runner" \
+         "$TMP_ROOT/ios/OneSignalNotificationServiceExtension" \
+         "$TMP_ROOT/web/.well-known" \
          "$TMP_ROOT/web" \
          "$TMP_ROOT/web_client/src" \
          "$TMP_ROOT/web_client/public" \
@@ -48,6 +54,16 @@ cp "$PROJECT_ROOT/web_client/public/site.webmanifest" "$TMP_ROOT/web_client/publ
 cp "$PROJECT_ROOT/web_client/src/app_config.js" "$TMP_ROOT/web_client/src/app_config.js"
 cp "$PROJECT_ROOT/lib/app_config.dart"       "$TMP_ROOT/lib/app_config.dart"
 cp "$PROJECT_ROOT/lib/theme_config.dart"     "$TMP_ROOT/lib/theme_config.dart"
+cp "$PROJECT_ROOT/android/app/build.gradle" "$TMP_ROOT/android/app/build.gradle"
+cp "$PROJECT_ROOT/android/app/src/main/AndroidManifest.xml" "$TMP_ROOT/android/app/src/main/AndroidManifest.xml"
+cp "$PROJECT_ROOT/android/app/src/main/kotlin/fstapp/MainActivity.kt" "$TMP_ROOT/android/app/src/main/kotlin/fstapp/example/MainActivity.kt"
+cp "$PROJECT_ROOT/ios/Runner.xcodeproj/project.pbxproj" "$TMP_ROOT/ios/Runner.xcodeproj/project.pbxproj"
+cp "$PROJECT_ROOT/ios/Runner/Info.plist" "$TMP_ROOT/ios/Runner/Info.plist"
+cp "$PROJECT_ROOT/ios/Runner/Runner.entitlements" "$TMP_ROOT/ios/Runner/Runner.entitlements"
+cp "$PROJECT_ROOT/ios/OneSignalNotificationServiceExtension/Info.plist" "$TMP_ROOT/ios/OneSignalNotificationServiceExtension/Info.plist"
+cp "$PROJECT_ROOT/ios/OneSignalNotificationServiceExtension/OneSignalNotificationServiceExtensionRelease.entitlements" "$TMP_ROOT/ios/OneSignalNotificationServiceExtension/OneSignalNotificationServiceExtensionRelease.entitlements"
+cp "$PROJECT_ROOT/web/apple-app-site-association" "$TMP_ROOT/web/apple-app-site-association"
+cp "$PROJECT_ROOT/web/.well-known/apple-app-site-association" "$TMP_ROOT/web/.well-known/apple-app-site-association"
 
 # theme_config.css is optional but typically present.
 if [ -f "$PROJECT_ROOT/web_client/src/theme_config.css" ]; then
@@ -93,6 +109,22 @@ echo
 echo "--- web/index.html (Flutter template) ---"
 assert_contains "$TMP_ROOT/web/index.html" "<title>Test App Name</title>"
 assert_contains "$TMP_ROOT/web/index.html" '<meta name="apple-mobile-web-app-title" content="TST">'
+assert_contains "$TMP_ROOT/web/index.html" 'appId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"'
+assert_contains "$TMP_ROOT/web/index.html" 'safari_web_id: "web.onesignal.auto.test"'
+assert_contains "$TMP_ROOT/web/index.html" "app_generation: 'test_generation_v1'"
+assert_contains "$TMP_ROOT/web/index.html" "occasion: 'test-occasion'"
+assert_contains "$TMP_ROOT/web/index.html" '<img class="initial-logo" src="fstapplogo.png"'
+
+echo
+echo "--- installable PWA manifests ---"
+for manifest in "$TMP_ROOT/web/site.webmanifest" "$TMP_ROOT/web_client/public/site.webmanifest"; do
+    assert_contains "$manifest" '"name": "Test App Name"'
+    # Preserve the historical root identity so existing installations update
+    # instead of becoming a competing nested PWA after an occasion cutover.
+    assert_contains "$manifest" '"id": "/"'
+    assert_contains "$manifest" '"start_url": "/test-occasion/"'
+    assert_contains "$manifest" '"scope": "/"'
+done
 
 echo
 echo "--- installable PWA manifests ---"
@@ -123,6 +155,26 @@ assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String supabaseUrl
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const int organization = 42;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String webLink = "https://test.example.com";'
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String? forceOccasionLink = "test-occasion";'
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String oneSignalAppId = '11111111-2222-3333-4444-555555555555';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String pushAppGeneration = 'test_generation_v1';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String programLogoAsset = 'assets/icons/fstapplogo_program.svg';"
+
+echo
+echo "--- native tenant identity ---"
+assert_contains "$TMP_ROOT/android/app/build.gradle" 'namespace = "example.testapp"'
+assert_contains "$TMP_ROOT/android/app/build.gradle" 'applicationId = "example.testapp"'
+assert_contains "$TMP_ROOT/android/app/src/main/AndroidManifest.xml" 'android:label="Test App Name"'
+assert_contains "$TMP_ROOT/android/app/src/main/kotlin/fstapp/example/MainActivity.kt" 'package example.testapp'
+assert_contains "$TMP_ROOT/ios/Runner.xcodeproj/project.pbxproj" 'PRODUCT_BUNDLE_IDENTIFIER = example.testapp;'
+assert_contains "$TMP_ROOT/ios/Runner.xcodeproj/project.pbxproj" 'PRODUCT_BUNDLE_IDENTIFIER = example.testapp.OneSignalNotificationServiceExtension;'
+assert_contains "$TMP_ROOT/ios/Runner.xcodeproj/project.pbxproj" 'DEVELOPMENT_TEAM = TESTTEAM01;'
+assert_contains "$TMP_ROOT/ios/Runner.xcodeproj/project.pbxproj" 'PROVISIONING_PROFILE_SPECIFIER = "Test AppStore";'
+assert_contains "$TMP_ROOT/ios/Runner.xcodeproj/project.pbxproj" 'PROVISIONING_PROFILE_SPECIFIER = "Test OneSignal AppStore";'
+assert_contains "$TMP_ROOT/ios/Runner/Runner.entitlements" '<string>group.example.testapp.onesignal</string>'
+assert_contains "$TMP_ROOT/ios/Runner/Runner.entitlements" '<string>applinks:test.example.com</string>'
+assert_contains "$TMP_ROOT/ios/OneSignalNotificationServiceExtension/Info.plist" '<string>group.example.testapp.onesignal</string>'
+assert_contains "$TMP_ROOT/web/apple-app-site-association" 'TESTTEAM01.example.testapp'
+assert_contains "$TMP_ROOT/web/.well-known/apple-app-site-association" 'TESTTEAM01.example.testapp'
 
 echo
 echo "--- lib/theme_config.dart (seed colors) ---"

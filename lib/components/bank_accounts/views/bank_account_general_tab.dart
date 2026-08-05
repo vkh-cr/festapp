@@ -10,6 +10,7 @@ class BankAccountGeneralTab extends StatefulWidget {
   final GlobalKey<FormState> formKey;
 
   final TextEditingController titleController;
+  final TextEditingController creditorNameController;
   final TextEditingController ibanController;
   final TextEditingController prefixController;
   final TextEditingController accountBodyController;
@@ -37,6 +38,7 @@ class BankAccountGeneralTab extends StatefulWidget {
     required this.isSaving,
     required this.formKey,
     required this.titleController,
+    required this.creditorNameController,
     required this.ibanController,
     required this.prefixController,
     required this.accountBodyController,
@@ -71,39 +73,62 @@ class _BankAccountGeneralTabState extends State<BankAccountGeneralTab> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: widget.titleController,
-                decoration:
-                    InputDecoration(labelText: BankAccountStrings.titleLabel),
+                decoration: InputDecoration(
+                  labelText: BankAccountStrings.titleLabel,
+                ),
                 readOnly: widget.isReadOnly,
                 validator: (v) =>
                     v!.isEmpty ? CommonStrings.fieldCannotBeEmpty : null,
               ),
               const SizedBox(height: 16),
+              TextFormField(
+                controller: widget.creditorNameController,
+                decoration: InputDecoration(
+                  labelText: BankAccountStrings.creditorNameLabel,
+                  helperText: BankAccountStrings.creditorNameHelp,
+                ),
+                readOnly: widget.isReadOnly,
+                maxLength: 70,
+                validator: (value) {
+                  if (widget.supportedCurrencies.contains('EUR') &&
+                      (value == null || value.trim().isEmpty)) {
+                    return CommonStrings.fieldCannotBeEmpty;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
               const SizedBox(height: 24),
               if (!widget.isReadOnly)
-                LayoutBuilder(builder: (context, constraints) {
-                  return ToggleButtons(
-                    isSelected: [!widget.useIbanInput, widget.useIbanInput],
-                    onPressed: (index) =>
-                        widget.onUseIbanInputChanged(index == 1),
-                    borderRadius: BorderRadius.circular(8),
-                    constraints: BoxConstraints.expand(
-                        width: (constraints.maxWidth - 4) / 2, height: 40),
-                    children: [
-                      Text(BankAccountStrings.inputModeSplit),
-                      Text(BankAccountStrings.inputModeIban),
-                    ],
-                  );
-                }),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return ToggleButtons(
+                      isSelected: [!widget.useIbanInput, widget.useIbanInput],
+                      onPressed: (index) =>
+                          widget.onUseIbanInputChanged(index == 1),
+                      borderRadius: BorderRadius.circular(8),
+                      constraints: BoxConstraints.expand(
+                        width: (constraints.maxWidth - 4) / 2,
+                        height: 40,
+                      ),
+                      children: [
+                        Text(BankAccountStrings.inputModeSplit),
+                        Text(BankAccountStrings.inputModeIban),
+                      ],
+                    );
+                  },
+                ),
               const SizedBox(height: 16),
               if (widget.useIbanInput)
                 TextFormField(
                   controller: widget.ibanController,
                   decoration: InputDecoration(
-                      labelText: BankAccountStrings.accountNumberLabel,
-                      errorText: widget.ibanError,
-                      helperText: widget.useIbanInput && !widget.isReadOnly
-                          ? BankAccountStrings.ibanValidationHelp
-                          : null),
+                    labelText: BankAccountStrings.accountNumberLabel,
+                    errorText: widget.ibanError,
+                    helperText: widget.useIbanInput && !widget.isReadOnly
+                        ? BankAccountStrings.ibanValidationHelp
+                        : null,
+                  ),
                   readOnly: widget.isReadOnly,
                   onChanged: (_) => widget.onIbanChanged(),
                   validator: (v) =>
@@ -126,10 +151,11 @@ class _BankAccountGeneralTabState extends State<BankAccountGeneralTab> {
                             child: TextFormField(
                               controller: widget.prefixController,
                               decoration: InputDecoration(
-                                  labelText: BankAccountStrings.prefixLabel),
+                                labelText: BankAccountStrings.prefixLabel,
+                              ),
                               keyboardType: TextInputType.number,
                               inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
+                                FilteringTextInputFormatter.digitsOnly,
                               ],
                               onChanged: (_) => widget.onHumanChanged(),
                               readOnly: widget.isReadOnly,
@@ -140,11 +166,12 @@ class _BankAccountGeneralTabState extends State<BankAccountGeneralTab> {
                             child: TextFormField(
                               controller: widget.accountBodyController,
                               decoration: InputDecoration(
-                                  labelText:
-                                      BankAccountStrings.accountNumberLabel),
+                                labelText:
+                                    BankAccountStrings.accountNumberLabel,
+                              ),
                               keyboardType: TextInputType.number,
                               inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
+                                FilteringTextInputFormatter.digitsOnly,
                               ],
                               onChanged: (_) => widget.onHumanChanged(),
                               readOnly: widget.isReadOnly,
@@ -159,13 +186,18 @@ class _BankAccountGeneralTabState extends State<BankAccountGeneralTab> {
                             ? widget.selectedBankCode
                             : null,
                         decoration: InputDecoration(
-                            labelText: BankAccountStrings.bankCodeLabel),
+                          labelText: BankAccountStrings.bankCodeLabel,
+                        ),
                         items: czBanks.entries
-                            .map((e) => DropdownMenuItem(
-                                  value: e.key,
-                                  child: Text("${e.value} (${e.key})",
-                                      overflow: TextOverflow.ellipsis),
-                                ))
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: e.key,
+                                child: Text(
+                                  "${e.value} (${e.key})",
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            )
                             .toList(),
                         onChanged: widget.isReadOnly
                             ? null
@@ -181,8 +213,9 @@ class _BankAccountGeneralTabState extends State<BankAccountGeneralTab> {
                           child: Text(
                             "${BankAccountStrings.fullFormatLabel} ${widget.buildLegacyHumanReadable() ?? ''}",
                             style: TextStyle(
-                                color: Theme.of(context).hintColor,
-                                fontSize: 13),
+                              color: Theme.of(context).hintColor,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                     ],
@@ -200,12 +233,14 @@ class _BankAccountGeneralTabState extends State<BankAccountGeneralTab> {
                     Wrap(
                       spacing: 8,
                       children: [
-                        ...widget.supportedCurrencies.map((c) => Chip(
-                              label: Text(c),
-                              onDeleted: widget.isReadOnly
-                                  ? null
-                                  : () => widget.onRemoveCurrency(c),
-                            )),
+                        ...widget.supportedCurrencies.map(
+                          (c) => Chip(
+                            label: Text(c),
+                            onDeleted: widget.isReadOnly
+                                ? null
+                                : () => widget.onRemoveCurrency(c),
+                          ),
+                        ),
                         if (!widget.isReadOnly)
                           ActionChip(
                             avatar: const Icon(Icons.add, size: 16),

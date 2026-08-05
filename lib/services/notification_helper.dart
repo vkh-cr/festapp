@@ -27,9 +27,8 @@ class NotificationAudienceCoordinator {
     required this.isLoggedIn,
     required this.currentUserId,
     required this.occasionLink,
+    this.installationGeneration = AppConfig.pushAppGeneration,
   });
-
-  static const installationGeneration = 'csm_ostrava_2026_v1';
 
   final NotificationAudienceClient client;
   final bool Function() notificationsSupported;
@@ -37,13 +36,17 @@ class NotificationAudienceCoordinator {
   final bool Function() isLoggedIn;
   final String Function() currentUserId;
   final String Function() occasionLink;
+  final String installationGeneration;
 
   notification_helper.Future<void> tagCurrentSubscription() async {
     if (!notificationsSupported() || !notificationPermission()) return;
-    await client.addTags({
-      'app_generation': installationGeneration,
-      'occasion': occasionLink(),
-    });
+    final tags = <String, String>{};
+    if (installationGeneration.isNotEmpty) {
+      tags['app_generation'] = installationGeneration;
+    }
+    final occasion = occasionLink();
+    if (occasion.isNotEmpty) tags['occasion'] = occasion;
+    if (tags.isNotEmpty) await client.addTags(tags);
   }
 
   notification_helper.Future<void> loginCurrentUser() async {
@@ -65,8 +68,10 @@ class _RuntimeNotificationAudienceClient implements NotificationAudienceClient {
   @override
   notification_helper.Future<void> addTags(Map<String, String> tags) async {
     if (kIsWeb) {
-      await NotificationHelper.jsInterop
-          .callFutureMethod('tagCurrentSubscription', []);
+      await NotificationHelper.jsInterop.callFutureMethod(
+        'tagCurrentSubscription',
+        [],
+      );
       return;
     }
     await OneSignal.User.addTags(tags);
@@ -75,8 +80,9 @@ class _RuntimeNotificationAudienceClient implements NotificationAudienceClient {
   @override
   notification_helper.Future<void> login(String externalId) async {
     if (kIsWeb) {
-      await NotificationHelper.jsInterop
-          .callFutureMethod('login', [externalId]);
+      await NotificationHelper.jsInterop.callFutureMethod('login', [
+        externalId,
+      ]);
       return;
     }
     await OneSignal.login(externalId);
@@ -98,13 +104,13 @@ class NotificationHelper {
   static bool _isNotificationDialogShown = false;
   static final NotificationAudienceCoordinator _audience =
       NotificationAudienceCoordinator(
-    client: _RuntimeNotificationAudienceClient(),
-    notificationsSupported: AppConfig.isNotificationsCurrentlySupported,
-    notificationPermission: getNotificationPermission,
-    isLoggedIn: AuthService.isLoggedIn,
-    currentUserId: AuthService.currentUserId,
-    occasionLink: () => AppConfig.forceOccasionLink ?? 'csmostrava2026',
-  );
+        client: _RuntimeNotificationAudienceClient(),
+        notificationsSupported: AppConfig.isNotificationsCurrentlySupported,
+        notificationPermission: getNotificationPermission,
+        isLoggedIn: AuthService.isLoggedIn,
+        currentUserId: AuthService.currentUserId,
+        occasionLink: () => AppConfig.forceOccasionLink ?? '',
+      );
 
   static notification_helper.Future<bool> isNotificationOnOff() async {
     var isPermissionOn = getNotificationPermission();
@@ -154,8 +160,9 @@ class NotificationHelper {
   }
 
   static notification_helper.Future<void> checkForNotificationPermission(
-      BuildContext context,
-      [bool forceAsk = false]) async {
+    BuildContext context, [
+    bool forceAsk = false,
+  ]) async {
     if (!PlatformHelper.isPwaInstalledOrNative() && !forceAsk) {
       return;
     }
@@ -164,8 +171,9 @@ class NotificationHelper {
       var wasAsked = await StorageHelper.get(notificationAllowedAsked);
       if (wasAsked == null && !_isNotificationDialogShown) {
         _isNotificationDialogShown = true;
-        var dialogResult =
-            await DialogHelper.showNotificationPermissionDialog(context);
+        var dialogResult = await DialogHelper.showNotificationPermissionDialog(
+          context,
+        );
         _isNotificationDialogShown = false;
 
         // save default so user don't get ask again, even if later code fails
@@ -177,7 +185,9 @@ class NotificationHelper {
         }
         var requestResult = await requestNotificationPermission();
         await StorageHelper.set(
-            notificationAllowedAsked, requestResult.toString());
+          notificationAllowedAsked,
+          requestResult.toString(),
+        );
         if (requestResult) {
           ToastHelper.Show(context, CommonStrings.notificationsAllowed);
         } else {
@@ -193,7 +203,9 @@ class NotificationHelper {
       currentPermission = await requestNotificationPermission();
     }
     await StorageHelper.set(
-        notificationAllowedAsked, currentPermission.toString());
+      notificationAllowedAsked,
+      currentPermission.toString(),
+    );
     if (currentPermission) {
       await optInNotifications();
       await tagCurrentSubscription();
@@ -208,10 +220,12 @@ class NotificationHelper {
   }
 
   static notification_helper.Future<bool>
-      requestNotificationPermission() async {
+  requestNotificationPermission() async {
     if (kIsWeb) {
-      return await jsInterop
-          .callFutureBoolMethod('requestNotificationPermission', []);
+      return await jsInterop.callFutureBoolMethod(
+        'requestNotificationPermission',
+        [],
+      );
     }
     return await OneSignal.Notifications.requestPermission(false);
   }

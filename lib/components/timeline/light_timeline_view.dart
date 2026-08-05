@@ -81,7 +81,7 @@ class _LightTimelineViewState extends State<LightTimelineView> {
           children: [
             // Brand-identity day tab strip — thin white dividers + thin
             // underline on the active day on a saturated app-bar background.
-            // Built to match the CSM Ostrava visual identity (thin lines on
+            // Built to match the configured visual identity (thin lines on
             // solid color), not the advanced pill style.
             // Day tabs — mirrors the advanced view's structure (chevrons,
             // weekday+date+today dot) but uses a thin rounded underline
@@ -243,7 +243,7 @@ class _LightSubprogramListState extends State<LightSubprogramList> {
 // Day-grouped, continuously-scrolling light list for the "My program" page.
 // Unlike the main schedule (LightTimelineView) this is NOT tabbed — every day
 // is stacked in one scroll under a left-aligned day header with a trailing
-// hairline rule, matching the production csmostrava layout. Reuses the same
+// hairline rule, matching the production layout. Reuses the same
 // `_EventRow` / `_SectionHeader` / `_RowDivider` primitives so a My-program row
 // is visually identical to a main-schedule row.
 // ---------------------------------------------------------------------------
@@ -1209,7 +1209,7 @@ Color _hairline(BuildContext context) =>
 
 /// Brand accent used inside the white body — currently runs, sub-card place
 /// names. Pulls from the theme's primary so the body stays inside the
-/// organization palette (CSM Ostrava = brand blue) instead of using the
+/// organization palette instead of using the
 /// generic red highlight.
 Color _accent(BuildContext context) => ThemeConfig.darkColor(context);
 

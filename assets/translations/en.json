@@ -364,7 +364,8 @@
     "depositInfo": "deposit",
     "depositDeadline": "Surcharge deadline",
     "depositPaymentDeadline": "Deposit by",
-    "depositOnSiteLabel": "On site"
+    "depositOnSiteLabel": "On site",
+    "paymentReference": "Payment reference"
   },
   "FormsFeature": {
     "showDepositDescription": "Show deposit / surcharge note on products",
@@ -1102,7 +1103,8 @@
     "amountToPay": "Amount to pay",
     "paymentNote": "Message for recipient",
     "copied": "Copied",
-    "orderLabel": "Order"
+    "orderLabel": "Order",
+    "paymentReference": "Payment reference"
   },
   "FeatureTicket": {
     "enableManualTicketScan": "Enable Manual Ticket Scan",
@@ -1447,7 +1449,9 @@
     "maskedEmailExplanation": "The email address is hidden for security reasons. If you need to see it, please ask an administrator of this bank account.",
     "setupConnectionNow": "Setup connection now",
     "safeSenderInfo": "This address is safe. It is a special robot that only reads payment e-mails and nothing else.",
-    "forwardingEmailWarning": "Warning: Please keep this e-mail secret. Do not share it with anyone."
+    "forwardingEmailWarning": "Warning: Please keep this e-mail secret. Do not share it with anyone.",
+    "creditorNameLabel": "Account holder name",
+    "creditorNameHelp": "Required for EUR EPC payment QR codes; use the legal beneficiary name."
   },
   "FeatureContract": {
     "title": "Contract",

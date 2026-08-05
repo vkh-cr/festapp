@@ -83,4 +83,9 @@ export class PublicOrderStrings {
     static depositInfoDaysBefore(days) {
         return LocalizationService.tr(`${PublicOrderStrings._prefix}.depositInfoDaysBefore`, { days: days });
     }
+
+    static get bankAccount() { return LocalizationService.tr(`${PublicOrderStrings._prefix}.bankAccount`); }
+    static get amountToPay() { return LocalizationService.tr(`${PublicOrderStrings._prefix}.amountToPay`); }
+    static get variableSymbol() { return LocalizationService.tr(`${PublicOrderStrings._prefix}.variableSymbol`); }
+    static get paymentReference() { return LocalizationService.tr(`${PublicOrderStrings._prefix}.paymentReference`); }
 }

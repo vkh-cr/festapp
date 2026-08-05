@@ -17,7 +17,7 @@ import 'package:fstapp/services/toast_helper.dart';
 /// [isOpen] = feedback window is open (now >= event start). When closed and the
 /// viewer is an editor, [isEditorPreview] shows the UI as a preview.
 ///
-/// Layout mirrors the deployed csmostrava build 1:1: an outlined rounded
+/// Uses an outlined rounded
 /// container (not a Card), three equal-width colour-coded smiley tiles laid out
 /// by a LayoutBuilder, and icon buttons for submit/remove.
 class EventFeedbackWidget extends StatefulWidget {

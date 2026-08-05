@@ -107,7 +107,7 @@ BEGIN
     RETURNING id INTO v_transaction_id;
 
     -- Link transaction to payment_info
-    PERFORM add_transaction_to_payment_info(v_transaction_id, v_payment_info_id);
+    PERFORM public.apply_transaction_pairing(v_transaction_id, v_payment_info_id, 'test', 'system');
 
     -- Verify order became 'paid'
     SELECT state INTO v_order_state FROM eshop.orders WHERE id = v_order_id;
@@ -140,7 +140,7 @@ BEGIN
     RETURNING id INTO v_transaction_id;
 
     -- Link transaction to payment_info
-    PERFORM add_transaction_to_payment_info(v_transaction_id, v_payment_info_id);
+    PERFORM public.apply_transaction_pairing(v_transaction_id, v_payment_info_id, 'test', 'system');
 
     -- Verify order became 'paid'
     SELECT state INTO v_order_state FROM eshop.orders WHERE id = v_order_id;
@@ -173,7 +173,7 @@ BEGIN
     RETURNING id INTO v_transaction_id;
 
     -- Link transaction to payment_info
-    PERFORM add_transaction_to_payment_info(v_transaction_id, v_payment_info_id);
+    PERFORM public.apply_transaction_pairing(v_transaction_id, v_payment_info_id, 'test', 'system');
 
     -- Verify order still 'ordered'
     SELECT state INTO v_order_state FROM eshop.orders WHERE id = v_order_id;
@@ -205,7 +205,7 @@ BEGIN
     VALUES (99004, now(), 500, 'CZK', v_acc_id, (SELECT variable_symbol FROM eshop.payment_info WHERE id = v_payment_info_id)::text)
     RETURNING id INTO v_transaction_id;
 
-    PERFORM add_transaction_to_payment_info(v_transaction_id, v_payment_info_id);
+    PERFORM public.apply_transaction_pairing(v_transaction_id, v_payment_info_id, 'test', 'system');
 
     -- Verify order became 'paid' after deposit
     SELECT state INTO v_order_state FROM eshop.orders WHERE id = v_order_id;
@@ -216,7 +216,7 @@ BEGIN
     VALUES (99005, now(), 500, 'CZK', v_acc_id, (SELECT variable_symbol FROM eshop.payment_info WHERE id = v_payment_info_id)::text)
     RETURNING id INTO v_transaction_id;
 
-    PERFORM add_transaction_to_payment_info(v_transaction_id, v_payment_info_id);
+    PERFORM public.apply_transaction_pairing(v_transaction_id, v_payment_info_id, 'test', 'system');
 
     -- Verify order still 'paid' and total paid is 1000
     SELECT state INTO v_order_state FROM eshop.orders WHERE id = v_order_id;

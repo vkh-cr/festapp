@@ -47,6 +47,9 @@ export async function useFakturoid(
   const d = order.data;
   const today = new Date().toISOString().slice(0, 10);
   const total = Number(order.payment_info.amount).toFixed(2);
+  const isEur =
+    String(order.payment_info.currency_code).toUpperCase() === "EUR";
+  const originalVariableSymbol = String(order.payment_info.variable_symbol);
 
   const createBody: any = {
     custom_id: idempotencyKey,
@@ -68,6 +71,12 @@ export async function useFakturoid(
       },
     ],
   };
+
+  // EUR RF is derived from this exact VS. Keep Fakturoid on the same numeric
+  // base instead of accepting its document-number default.
+  if (isEur) {
+    createBody.variable_symbol = originalVariableSymbol;
+  }
 
   // Add the note from the config to the payload if it exists
   if (note) {
@@ -98,7 +107,7 @@ export async function useFakturoid(
   }
 
   // 3) Update our payment_info.variable_symbol
-  if (result.variable_symbol) {
+  if (!isEur && result.variable_symbol) {
     await supabaseAdmin.rpc("update_payment_info_variable_symbol", {
       p_payment_info_id: order.payment_info.id,
       p_variable_symbol: result.variable_symbol,
@@ -116,6 +125,9 @@ export async function useFakturoid(
     client_has_delivery_address: false,
     client_phone: d.phone,
   };
+  if (isEur) {
+    patchBody.variable_symbol = originalVariableSymbol;
+  }
 
   const patchRes = await fetch(
     `https://app.fakturoid.cz/api/v3/accounts/${slug}/invoices/${result.id}.json`,

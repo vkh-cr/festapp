@@ -36,6 +36,7 @@ void main() {
       isLoggedIn: () => loggedIn,
       currentUserId: () => 'user-uuid',
       occasionLink: () => 'csmostrava2026',
+      installationGeneration: 'csm_ostrava_2026_v1',
     );
   });
 
@@ -44,23 +45,22 @@ void main() {
     await coordinator.loginCurrentUser();
 
     expect(client.addedTags, [
-      {
-        'app_generation': 'csm_ostrava_2026_v1',
-        'occasion': 'csmostrava2026',
-      }
+      {'app_generation': 'csm_ostrava_2026_v1', 'occasion': 'csmostrava2026'},
     ]);
     expect(client.logins, isEmpty);
   });
 
-  test('authenticated identity login is separate from subscription tags',
-      () async {
-    loggedIn = true;
+  test(
+    'authenticated identity login is separate from subscription tags',
+    () async {
+      loggedIn = true;
 
-    await coordinator.loginCurrentUser();
+      await coordinator.loginCurrentUser();
 
-    expect(client.logins, ['user-uuid']);
-    expect(client.addedTags, isEmpty);
-  });
+      expect(client.logins, ['user-uuid']);
+      expect(client.addedTags, isEmpty);
+    },
+  );
 
   test('permission blocks both tags and identity login', () async {
     permitted = false;
@@ -73,10 +73,31 @@ void main() {
     expect(client.logins, isEmpty);
   });
 
-  test('logout clears a stale external identity without an auth session',
-      () async {
-    await coordinator.logoutCurrentUser();
+  test(
+    'logout clears a stale external identity without an auth session',
+    () async {
+      await coordinator.logoutCurrentUser();
 
-    expect(client.logoutCount, 1);
-  });
+      expect(client.logoutCount, 1);
+    },
+  );
+
+  test(
+    'omits tenant generation and empty occasion when not configured',
+    () async {
+      coordinator = NotificationAudienceCoordinator(
+        client: client,
+        notificationsSupported: () => supported,
+        notificationPermission: () => permitted,
+        isLoggedIn: () => loggedIn,
+        currentUserId: () => 'user-uuid',
+        occasionLink: () => '',
+        installationGeneration: '',
+      );
+
+      await coordinator.tagCurrentSubscription();
+
+      expect(client.addedTags, isEmpty);
+    },
+  );
 }

@@ -10,7 +10,6 @@ import 'package:fstapp/components/bank_accounts/views/bank_account_connection_ta
 import 'package:fstapp/components/bank_accounts/views/bank_account_users_tab.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-
 class BankAccountSettingsScreen extends StatefulWidget {
   final int unitId;
   final int? organizationId;
@@ -45,6 +44,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
   String? _selectedBankCode;
 
   late TextEditingController _titleController;
+  late TextEditingController _creditorNameController;
   late TextEditingController _priorityController;
   late TextEditingController _tokenController;
   late TabController _tabController;
@@ -69,8 +69,12 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
     super.initState();
     _account = widget.account;
     _titleController = TextEditingController(text: _account.title);
-    _priorityController =
-        TextEditingController(text: _account.priority.toString());
+    _creditorNameController = TextEditingController(
+      text: _account.creditorName,
+    );
+    _priorityController = TextEditingController(
+      text: _account.priority.toString(),
+    );
     _tokenController = TextEditingController();
 
     _ibanController = TextEditingController(text: _account.accountNumber);
@@ -80,13 +84,13 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
 
     _pairingCode = _account.pairingCode;
 
-
     _parseInitialIban();
 
     bool hasData = _ibanController.text.isNotEmpty;
-    bool isCzParsed = _prefixController.text.isNotEmpty ||
-                      _accountBodyController.text.isNotEmpty ||
-                      (_selectedBankCode != null);
+    bool isCzParsed =
+        _prefixController.text.isNotEmpty ||
+        _accountBodyController.text.isNotEmpty ||
+        (_selectedBankCode != null);
 
     _useIbanInput = hasData && !isCzParsed;
     _supportedCurrencies = List.from(_account.supportedCurrencies);
@@ -106,7 +110,8 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
   }
 
   bool get _isFio {
-    if (_ibanController.text.isNotEmpty && isFioBank(_ibanController.text)) return true;
+    if (_ibanController.text.isNotEmpty && isFioBank(_ibanController.text))
+      return true;
     if (_selectedBankCode != null && isFioBank(_selectedBankCode)) return true;
     return false;
   }
@@ -119,6 +124,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
     _bankCodeController.dispose();
 
     _titleController.dispose();
+    _creditorNameController.dispose();
     _priorityController.dispose();
     _tokenController.dispose();
     _tabController.dispose();
@@ -132,7 +138,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
       if (parsed != null) {
         _prefixController.text = parsed.prefix == '0' ? '' : parsed.prefix;
         _accountBodyController.text = parsed.number;
-          if (czBanks.containsKey(parsed.bankCode)) {
+        if (czBanks.containsKey(parsed.bankCode)) {
           _selectedBankCode = parsed.bankCode;
         }
       }
@@ -154,18 +160,18 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
     }
 
     if (isValid && iban.toUpperCase().startsWith('CZ')) {
-       final parsed = IbanUtils.parseCzIban(iban);
-       if (parsed != null) {
-         _isUpdating = true;
-         _prefixController.text = parsed.prefix == '0' ? '' : parsed.prefix;
-         _accountBodyController.text = parsed.number;
-          if (czBanks.containsKey(parsed.bankCode)) {
-             setState(() {
-               _selectedBankCode = parsed.bankCode;
-             });
-          }
-         _isUpdating = false;
-       }
+      final parsed = IbanUtils.parseCzIban(iban);
+      if (parsed != null) {
+        _isUpdating = true;
+        _prefixController.text = parsed.prefix == '0' ? '' : parsed.prefix;
+        _accountBodyController.text = parsed.number;
+        if (czBanks.containsKey(parsed.bankCode)) {
+          setState(() {
+            _selectedBankCode = parsed.bankCode;
+          });
+        }
+        _isUpdating = false;
+      }
     }
   }
 
@@ -177,7 +183,7 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
     String? bank = _selectedBankCode;
 
     if (body.isEmpty || bank == null) {
-       return;
+      return;
     }
 
     try {
@@ -191,23 +197,21 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
         setState(() => _ibanError = null);
       }
       _isUpdating = false;
-
     } catch (e) {
       // Don't generate IBAN on error
     }
   }
 
-
   Future<void> _saveGeneralInfo() async {
     if (!_formKey.currentState!.validate()) return;
 
     if (_ibanError != null) {
-        _showError("Please fix validaton errors: $_ibanError");
-        return;
+      _showError("Please fix validaton errors: $_ibanError");
+      return;
     }
     if (!IbanUtils.isValidIban(_ibanController.text)) {
-         _showError("Invalid IBAN format");
-         return;
+      _showError("Invalid IBAN format");
+      return;
     }
 
     final isCreation = _account.id == 0;
@@ -215,21 +219,27 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
     setState(() => _isSaving = true);
     try {
       final updatedAccount = BankAccountModel(
-          id: _account.id,
-          title: _titleController.text,
-          accountNumber: _ibanController.text.trim(),
-          priority: int.tryParse(_priorityController.text) ?? _account.priority,
-          type: _isFio ? 'FIO' : 'OTHER',
-          isAdmin: _account.isAdmin,
-          supportedCurrencies: _supportedCurrencies,
-          accountNumberHumanReadable: _buildLegacyHumanReadable(),
-          tokenMasked: _account.tokenMasked,
-          lastFetchTime: _account.lastFetchTime,
-          tokenExpiryDate: _account.tokenExpiryDate,
-          pairingCode: _pairingCode,
+        id: _account.id,
+        title: _titleController.text,
+        creditorName: _creditorNameController.text.trim().isEmpty
+            ? null
+            : _creditorNameController.text.trim(),
+        accountNumber: _ibanController.text.trim(),
+        priority: int.tryParse(_priorityController.text) ?? _account.priority,
+        type: _isFio ? 'FIO' : 'OTHER',
+        isAdmin: _account.isAdmin,
+        supportedCurrencies: _supportedCurrencies,
+        accountNumberHumanReadable: _buildLegacyHumanReadable(),
+        tokenMasked: _account.tokenMasked,
+        lastFetchTime: _account.lastFetchTime,
+        tokenExpiryDate: _account.tokenExpiryDate,
+        pairingCode: _pairingCode,
       );
-      final newId = await DbBankAccounts.updateBankAccount(updatedAccount,
-          unitId: widget.unitId, organizationId: widget.organizationId);
+      final newId = await DbBankAccounts.updateBankAccount(
+        updatedAccount,
+        unitId: widget.unitId,
+        organizationId: widget.organizationId,
+      );
       final savedAccount = updatedAccount.copyWith(id: newId);
 
       if (!mounted) return;
@@ -239,19 +249,22 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
       });
 
       if (isCreation) {
-         await _regenerateToken(silent: true);
-         _tabController.animateTo(1);
-         ToastHelper.Show(context, "${BankAccountStrings.save}. ${BankAccountStrings.setupConnectionNow}");
+        await _regenerateToken(silent: true);
+        _tabController.animateTo(1);
+        ToastHelper.Show(
+          context,
+          "${BankAccountStrings.save}. ${BankAccountStrings.setupConnectionNow}",
+        );
       } else {
-         ToastHelper.Show(context, BankAccountStrings.save);
+        ToastHelper.Show(context, BankAccountStrings.save);
       }
 
       if (widget.isDialog && _account.pairingCode == null) {
-          if (!isCreation) {
-             Navigator.pop(context, savedAccount);
-          }
+        if (!isCreation) {
+          Navigator.pop(context, savedAccount);
+        }
       } else if (!isCreation && widget.isDialog) {
-         Navigator.pop(context, savedAccount);
+        Navigator.pop(context, savedAccount);
       }
     } catch (e) {
       if (e.toString().contains("ACCOUNT_NUMBER_EXISTS")) {
@@ -265,11 +278,12 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
   }
 
   String? _buildLegacyHumanReadable() {
-    if (_accountBodyController.text.isEmpty || _selectedBankCode == null) return null;
+    if (_accountBodyController.text.isEmpty || _selectedBankCode == null)
+      return null;
     String prefix = _prefixController.text.trim();
     String body = _accountBodyController.text.trim();
     if (prefix.isNotEmpty && prefix != '0') {
-        return "$prefix-$body/$_selectedBankCode";
+      return "$prefix-$body/$_selectedBankCode";
     }
     return "$body/$_selectedBankCode";
   }
@@ -299,7 +313,10 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
     setState(() => _isSaving = true);
     try {
       await DbBankAccounts.updateBankAccountToken(
-          _account.id, _tokenController.text, _expiryDate);
+        _account.id,
+        _tokenController.text,
+        _expiryDate,
+      );
       if (!mounted) return;
 
       final newToken = _tokenController.text;
@@ -329,13 +346,16 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
           content: Text(BankAccountStrings.regenerateTokenConfirmation),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(BankAccountStrings.cancel)),
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(BankAccountStrings.cancel),
+            ),
             TextButton(
-                style: TextButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.error),
-                onPressed: () => Navigator.pop(context, true),
-                child: Text(BankAccountStrings.regenerateToken)),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(BankAccountStrings.regenerateToken),
+            ),
           ],
         ),
       );
@@ -344,8 +364,9 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
 
     setState(() => _isSaving = true);
     try {
-      final newToken =
-          await DbBankAccounts.regenerateBankAccountPairingCode(_account.id);
+      final newToken = await DbBankAccounts.regenerateBankAccountPairingCode(
+        _account.id,
+      );
       setState(() {
         _pairingCode = newToken;
         _account = _account.copyWith(pairingCode: newToken);
@@ -375,10 +396,12 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
               spacing: 8,
               children: ['CZK', 'EUR']
                   .where((c) => !_supportedCurrencies.contains(c))
-                  .map((c) => ActionChip(
-                        label: Text(c),
-                        onPressed: () => Navigator.pop(context, c),
-                      ))
+                  .map(
+                    (c) => ActionChip(
+                      label: Text(c),
+                      onPressed: () => Navigator.pop(context, c),
+                    ),
+                  )
                   .toList(),
             ),
             const SizedBox(height: 16),
@@ -395,8 +418,9 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(BankAccountStrings.cancel)),
+            onPressed: () => Navigator.pop(context),
+            child: Text(BankAccountStrings.cancel),
+          ),
           ElevatedButton(
             onPressed: () {
               final val = controller.text.toUpperCase();
@@ -404,7 +428,9 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
                 Navigator.pop(context, val);
               } else {
                 ToastHelper.Show(
-                    context, BankAccountStrings.invalidCurrencyCode);
+                  context,
+                  BankAccountStrings.invalidCurrencyCode,
+                );
               }
             },
             child: Text(BankAccountStrings.addCurrency),
@@ -450,17 +476,20 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
                 isSaving: _isSaving,
                 formKey: _formKey,
                 titleController: _titleController,
+                creditorNameController: _creditorNameController,
                 ibanController: _ibanController,
                 prefixController: _prefixController,
                 accountBodyController: _accountBodyController,
                 useIbanInput: _useIbanInput,
                 onUseIbanInputChanged: (v) => setState(() => _useIbanInput = v),
                 selectedBankCode: _selectedBankCode,
-                onSelectedBankCodeChanged: (v) => setState(() => _selectedBankCode = v),
+                onSelectedBankCodeChanged: (v) =>
+                    setState(() => _selectedBankCode = v),
                 ibanError: _ibanError,
                 supportedCurrencies: _supportedCurrencies,
                 onAddCurrency: _showAddCurrencyDialog,
-                onRemoveCurrency: (c) => setState(() => _supportedCurrencies.remove(c)),
+                onRemoveCurrency: (c) =>
+                    setState(() => _supportedCurrencies.remove(c)),
                 buildLegacyHumanReadable: _buildLegacyHumanReadable,
                 onSave: _saveGeneralInfo,
                 onIbanChanged: _onIbanChanged,
@@ -514,8 +543,9 @@ class _BankAccountSettingsScreenState extends State<BankAccountSettingsScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(_account.title ?? BankAccountStrings.bankAccountSettingsTitle),
+        title: Text(
+          _account.title ?? BankAccountStrings.bankAccountSettingsTitle,
+        ),
       ),
       body: content,
     );

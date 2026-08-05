@@ -162,7 +162,10 @@ describe.skipIf(skip)('Bank Import: process_email_transaction RPC', () => {
       ss: null,
       message: 'Test Email Pairing',
       date: new Date().toISOString(),
-      transaction_id: Date.now(),
+      ingest_source: 'fio_email',
+      movement_id: null,
+      bank_command_id: Date.now(),
+      payer_reference: null,
       sender_name: 'Test Sender',
     };
 
@@ -172,11 +175,11 @@ describe.skipIf(skip)('Bank Import: process_email_transaction RPC', () => {
     );
     const result = rows[0].data;
 
-    expect(result.id).toBeTruthy();
-    expect(result.status).toBe('inserted');
-    expect(result.paired).toBe(true);
+    expect(result.stored_id).toBeTruthy();
+    expect(result.ingest_status).toBe('inserted');
+    expect(result.match_verdict).toBe('paired');
 
-    transactionIds.push(result.id);
+    transactionIds.push(result.stored_id);
   });
 
   it('marks order as paid after pairing', async () => {

@@ -14,6 +14,8 @@ class BankAccountStrings {
   static String get typeGeneral => 'BankAccount.typeGeneral'.tr();
 
   static String get titleLabel => CommonStrings.title;
+  static String get creditorNameLabel => 'BankAccount.creditorNameLabel'.tr();
+  static String get creditorNameHelp => 'BankAccount.creditorNameHelp'.tr();
   static String get accountNumberLabel => 'BankAccount.accountNumberLabel'.tr();
 
   static String get inputModeSplit => 'BankAccount.inputModeSplit'.tr();

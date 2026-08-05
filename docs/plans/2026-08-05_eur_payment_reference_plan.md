@@ -1,7 +1,7 @@
 # Kanonický EUR platební kontrakt a bezpečné párování bankovních transakcí
 
 Date: 2026-08-05
-Status: Ready for local implementation; production rollout and EUR activation are gated
+Status: Implemented and locally verified; production rollout remains gated
 Verification: standard
 
 ## Outcome
@@ -76,23 +76,18 @@ hranice jsou pouze:
   kontroluje oprávnění/volající roli a nepoužívá raw dynamic SQL.
 - Nevznikne persistentní application trigger. Neměnnost RF se prosadí přes
   privátní zápisovou hranici, ACL/RLS a test absence jiných writerů.
-- Forward migrace nad současným baseline layoutem jsou dva nové unikátní
-  čtrnáctimístné soubory v `supabase/migrations/` s timestampem větším než
+- Forward změny tvoří dva nové unikátní čtrnáctimístné soubory po tracked
   baseline `20260805230000`: nejprve foundation schema/ACL/ingest/pairing,
-  potom oddělená RF writer activation. To umožní produkční pilot mezi nimi.
-  Aplikovaná historie se nepřepisuje a data backfill není schovaný v žádné z nich.
-- `supabase/baseline/20260805230000_production_schema.sql` je testovací snapshot,
-  ne místo pro novou změnu. `database/tables/tables.sql` a relevantní
-  `database/functions/**` musí odrážet cílový čistý install; deploy kontrakt je
-  forward migrace.
-- Současný worktree na `prod/csmostrava2026` je špinavý nesouvisejícími
-  uživatelskými změnami. Implementace začne v čistém izolovaném worktree ze SHA
-  `526e322a999b396dfa9730b66661f49ad3fe1059`, případně z uživatelem určeného
-  novějšího základu. Pokud tyto dva plánovací artefakty ještě nejsou v commitu,
-  do izolovaného worktree se přenesou pouze ony; žádný jiný dirty soubor se
-  nekopíruje, nepřepisuje ani nepřibaluje.
+  potom oddělená RF writer activation. Aplikovaná historie se nepřepisuje a
+  data backfill není schovaný v žádné z nich.
+- `supabase/baseline/20260805230000_production_schema.sql` je testovací fixed
+  point. `database/tables/tables.sql` a relevantní `database/functions/**`
+  odrážejí cílový čistý install; produkční deploy kontrakt jsou forward migrace.
+- Implementace vznikla v čistém izolovaném worktree ze SHA
+  `526e322a999b396dfa9730b66661f49ad3fe1059` a po lokálním ověření byla
+  přenesena do tenant-neutral `main` historie.
 - Produkční migrace, deploy Edge Functions/klientů, živá mikroplatba, změna
-  produkčních dat, commit, push a cherry-pick vyžadují samostatné oprávnění.
+  produkčních dat a push vyžadují samostatné oprávnění.
 - RF je po prvním zveřejnění neměnná. Rollback může zastavit vydávání nových
   referencí, ne smazat či regenerovat vydané reference.
 - EPC payload smí obsahovat structured reference nebo unstructured remittance,
@@ -125,7 +120,7 @@ Oficiální kontrakty:
 
 | Type | Claim | Evidence | Consequence |
 |---|---|---|---|
-| Fact | Aktivní veřejný writer je wrapper `create_ticket_order` → `create_ticket_order_client_sync_v1` → `create_ticket_order_internal_v1`; source file se stále jmenuje `create_ticket_order.sql`. | `supabase/migrations/20260802234000_client_sync_v1_expansion.sql`; `supabase/baseline/20260805230000_production_schema.sql`; `database/functions/eshop/create_ticket_order.sql` | RF se přidá do interního writeru i do nové forward migrace. Nesmí se editovat jen live funkce ani stará historická migrace. |
+| Fact | Aktivní veřejný writer je wrapper `create_ticket_order` → `create_ticket_order_client_sync_v1` → `create_ticket_order_internal_v1`; source file se stále jmenuje `create_ticket_order.sql`. | `supabase/migrations/20260802234000_client_sync_v1_expansion.sql`; `database/functions/eshop/create_ticket_order.sql` | RF se přidá do interního writeru i do nové forward migrace. Nesmí se editovat jen live funkce ani stará historická migrace. |
 | Fact | Order writer dnes generuje pouze VS a response obsahuje `order.payment_info`, nikoli `payment_qr`. | `database/functions/eshop/create_ticket_order.sql`: insert `eshop.payment_info`, final `JSONB_BUILD_OBJECT` | Nový QR kontrakt musí mít skutečného producenta; Flutter fallback na neexistující `payment_qr.spd` není rollout kompatibilita, ale dead assumption. |
 | Fact | Fio import ukládá `column5/7/16/25`, ignoruje `column27`, deduplikuje podle `transaction_id` a páruje přes `LIMIT 1`. Pairing exception pouze vypíše jako `NOTICE`. | `database/functions/eshop_transactions/insert_transactions.sql` | Import musí uložit raw reference, vracet per-item verdict a odstranit swallowed error i inline matcher. |
 | Fact | Fio API definuje `column22` jako ID pohybu, `column17` jako ID pokynu a `column27` jako Reference plátce. | Fio API PDF, mapping `Column*` | Tyto identity se nesmí zaměnit; source schema musí pojmenovat movement ID a command ID odděleně. |
@@ -133,12 +128,12 @@ Oficiální kontrakty:
 | Fact | Email SQL má fuzzy dedupe `(account, VS, amount, date ±3 days)` a vlastní VS matcher bez account/currency filtru. | `database/functions/eshop_transactions/process_email_transaction.sql` | Fuzzy dedupe i inline matcher musí být odstraněny; mohou zahodit legitimní opakovanou platbu nebo přiřadit cizí objednávku. |
 | Fact | Vazbu/agregace mění minimálně `add_transaction_to_payment_info`, `add_transaction_to_payment_info_ws`, `insert_manual_transaction`, `remove_transaction_from_payment_info_ws` a `delete_manual_transaction_ws`. Dvě unlink cesty ručně odečítají agregáty. | `database/functions/eshop_transactions/*.sql`; focused `rg` writerů | Canonical cutover musí zahrnout všechny tyto cesty, ne jen dva importéry. |
 | Fact | `remove_transaction_from_payment_info_ws` nepoužívá `recalculate_order_payment_status`; obsahuje prázdný placeholder branch. | tentýž SQL soubor | Ruční unlink je dnes druhý, neúplný stavový automat a bude nahrazen tenkým wrapperem nad canonical ownerem. |
-| Fact | `add_transaction_to_payment_info` lze ve baseline spustit z `anon` i `authenticated`. | `supabase/baseline/20260805230000_production_schema.sql`: grants | Nízkourovňová mutace musí být service/internal-only a wrappers musí explicitně autorizovat uživatele. |
+| Assumption to verify before deploy | Live grants nízkoúrovňových pairing funkcí mohou být širší než zamýšlená service/internal boundary. | tracked migration history plus required live `has_function_privilege` preflight | Foundation migrace vždy explicitně revoke/grant nastaví bez spoléhání na současný implicitní stav. |
 | Fact | Email QR helper vždy staví SPD s `X-VS` bez ohledu na měnu. | `supabase/functions/_shared/qrCodePayment.ts` | Potřebuje čistý currency router a samostatný EPC encoder. |
 | Fact | Confirmation, update, reminder a paid šablony si samy skládají payment data a čtou VS přímo. | `supabase/functions/send-email/getTicketOrder*Template.ts` | Jednotný presenter musí být jediným vlastníkem reference, amount due a QR vstupu. |
 | Fact | `eshop.bank_accounts` nemá pole s jasnou sémantikou právního jména příjemce. `title` je obecný název účtu. | `database/tables/tables.sql`; `lib/components/bank_accounts/README.md`; `bank_account_model.dart` | Přidat `creditor_name`; nepoužívat potichu `title` jako EPC beneficiary name. |
 | Fact | Flutter čte `payment_qr.spd`, ale v aktuálních producentech nebyl nalezen žádný `payment_qr`. | `order_finish_screen.dart`, `payment_qr_card.dart`, repository-wide `rg` | Implementovat rovnou jediný `payment_qr.payload` kontrakt. Nedržet dead `spd` fallback rollout okno. |
-| Fact | Fakturoid může po vytvoření objednávky změnit VS. | `supabase/functions/send-ticket-order/fakturoid.ts` | RF odvozená z `payment_info.id` zůstane stabilní a nesmí být regenerována při změně VS. |
+| Fact | Fakturoid standardně dopočítává vlastní VS, ale API dovoluje VS zadat při vytvoření. | `supabase/functions/send-ticket-order/fakturoid.ts`; Fakturoid API v3 invoices | Pro EUR se Fakturoidu předá původní VS a lokální VS se po vytvoření RF nesmí změnit; CZK chování zůstane beze změny. |
 | Fact (live, reverify) | 1 742 payment info, 22 EUR, 10 otevřených EUR; žádný NULL VS. Jedna kolize VS na stejném účtu/měně. | read-only agregace 2026-08-05 | Backfill zůstane omezený; VS `LIMIT 1` je prokazatelně nebezpečný. |
 | Fact (live, reverify) | Dřívější dry-run našel dvě kladné nespárované platby s jediným kandidátem podle symbolu v message. | read-only kandidátní dotaz 2026-08-05 | Historické přiřazení smí proběhnout jen jednotlivě po novém dry-runu a schválení ID. |
 
@@ -165,11 +160,12 @@ Oficiální kontrakty:
 - `variable_symbol bigint NULL` — zachovaná CZK/legacy reference;
 - `creditor_reference text NULL` — canonical uppercase ISO 11649 bez mezer;
 - `creditor_reference` vzniká pro bankovní EUR payment info jako
-  `RF{check}FA{payment_info.id}` až po získání ID řádku;
-- partial unique index zaručí unikátnost neprázdných RF;
+  `RF{check}{variable_symbol}`; jedna až deset číslic VS zůstává v RF beze změny
+  a pouze dostane povinný ISO prefix a dvě kontrolní číslice;
+- partial unique index zaručí unikátnost neprázdných RF v rámci bankovního účtu;
 - normalizace pro zobrazení přidává mezery po čtyřech znacích, DB hodnota ne;
-- `creditor_reference` nikdy nezávisí na VS, Fakturoidu, jménu zákazníka ani
-  tenantovi.
+- po vytvoření RF tvoří VS a RF jednu neměnnou identitu; Fakturoid dostane stejný
+  VS a nesmí lokální hodnotu přepsat. Identita nezávisí na jménu zákazníka.
 
 `eshop.bank_accounts.creditor_name text NULL` je explicitní EPC beneficiary
 name. Je upravitelné pouze bank-account adminem. Bankovní EUR účet není
@@ -304,7 +300,7 @@ compatibility reader ani alias. Flutter widget se přejmenuje z `spd` na
 
 1. Nová aktivovaná bankovní EUR objednávka má právě jednu validní RF a validní
    EPC creditor data; selhání reference/QR prerequisites rollbackne order.
-2. RF po zveřejnění nelze změnit ani při změně VS/Fakturoidu.
+2. RF ani jeho podkladový VS po zveřejnění nelze změnit; Fakturoid dostane stejný VS.
 3. Jedna bankovní observation může mít nejvýše jednu aktivní payment-info vazbu
    a do agregátu vstoupí nejvýše jednou.
 4. Žádný fuzzy dedupe ani fuzzy matcher nezahodí legitimní opakovanou platbu.
@@ -347,8 +343,9 @@ Forbidden:
 
 ### Decisions
 
-- **D1:** RF payload je `FA` + decimal `payment_info.id`; vejde se do ISO 11649
-  maxima i pro bigint a neobsahuje PII.
+- **D1:** RF payload je původní jedno- až desetimístný VS; výsledná reference má
+  povinný ISO prefix `RF` + dvě kontrolní číslice a potom přesně stejné číslice
+  VS. Vejde se do ISO 11649 maxima a neobsahuje PII.
 - **D2:** RF je jen pro bankovní EUR payment info; historické/closed/CASH mohou
   zůstat NULL.
 - **D3:** `creditor_name` je nové explicitní pole bank accountu; `title` se
@@ -446,8 +443,9 @@ topology and every later cutover has an owning regression seam.
 **Validation**
 
 - `bash automation/tests/migration_layout.test.sh`
-- bootstrap local DB once, then run the new focused SQL test. Before code it must
-  fail for the intended assertion, not because setup/function is missing.
+- run the new focused SQL test through the repository's current DB test runner
+  against a disposable database. Before code it must fail for the intended
+  assertion, not because setup/function is missing.
 
 **Exit condition:** evidence table is current and tests identify every mutation
 entry point and original failure without relying on live data.
@@ -511,8 +509,10 @@ order status and audit.
   `remove_transaction_from_payment_info_ws` and
   `delete_manual_transaction_ws` to thin authorized wrappers.
 - Manual insert with explicit payment-info ID validates target via canonical
-  owner. Without explicit ID it does not run an inline `LIMIT 1`; either invokes
-  canonical matcher under manual-safe policy or remains unpaired for selection.
+  owner. Pro zachování veřejného kontraktu může wrapper bez explicitního ID
+  rozpoznat VS pouze v rámci zadaného unit + měny a pokračuje jen při právě
+  jednom kandidátovi; nikdy nepoužije `LIMIT 1`. Samotnou vazbu, agregace a audit
+  stále provede výhradně canonical owner.
 - Delete-manual flow: authorize, canonical unlink + audit, assert type `manual`,
   delete row, preserve audit snapshot.
 - Remove old `add_transaction_to_payment_info` implementation and migrate
@@ -703,7 +703,6 @@ Suggested final focused commands (adapt exact test paths created by the change):
 
 ```bash
 bash automation/tests/migration_layout.test.sh
-./automation/bootstrap_local_db.sh
 DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:55432/postgres?sslmode=disable' node web_client/scripts/run_db_tests.js database/tests/eshop/transactions/payment_pairing_contract_test.sql
 deno test supabase/functions/bank-mail-parser supabase/functions/_shared
 fvm flutter test test/components/forms test/components/bank_accounts test/components/eshop

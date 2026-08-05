@@ -1,8 +1,11 @@
-CREATE OR REPLACE FUNCTION get_bank_accounts_for_unit_management(p_unit_id bigint)
+DROP FUNCTION IF EXISTS public.get_bank_accounts_for_unit_management(bigint);
+
+CREATE FUNCTION public.get_bank_accounts_for_unit_management(p_unit_id bigint)
 RETURNS TABLE (
     id bigint,
     account_number text,
     title text,
+    creditor_name text,
     type text,
     is_admin boolean,
     token_masked text,
@@ -19,6 +22,7 @@ BEGIN
         ba.id,
         ba.account_number,
         ba.title,
+        ba.creditor_name,
         ba.type,
         EXISTS (
             SELECT 1 

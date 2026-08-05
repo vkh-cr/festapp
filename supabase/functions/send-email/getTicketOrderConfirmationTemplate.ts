@@ -1,5 +1,6 @@
 import { generateFullOrder } from "../_shared/orderOverview.ts";
 import { generateQrCode } from "../_shared/qrCodePayment.ts";
+import { paymentReferenceValue } from "../_shared/paymentPresentation.ts";
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import {
   formatCurrency,
@@ -47,7 +48,7 @@ async function addExternalAttachment(
   );
   attachments.push({
     filename: result.filename ??
-      `contract-${ticketOrder.order.payment_info.variable_symbol}.pdf`,
+      `contract-${paymentReferenceValue(ticketOrder.order.payment_info)}.pdf`,
     content: bytes,
     contentType: "application/pdf",
     encoding: "binary",
@@ -140,7 +141,7 @@ export async function getTicketOrderConfirmationTemplate(task: any) {
       deadline,
       paymentInfo.account_number_human_readable,
       formatIBAN(paymentInfo.account_number),
-      paymentInfo.variable_symbol,
+      paymentReferenceValue(paymentInfo),
       tone,
     );
   } else {
@@ -148,7 +149,7 @@ export async function getTicketOrderConfirmationTemplate(task: any) {
       formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
       paymentInfo.account_number_human_readable,
       formatIBAN(paymentInfo.account_number),
-      paymentInfo.variable_symbol,
+      paymentReferenceValue(paymentInfo),
       formatDatetime(paymentInfo.deadline, lang) ?? "",
       tone,
     );
@@ -163,7 +164,7 @@ export async function getTicketOrderConfirmationTemplate(task: any) {
       amount: formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
       accountNumber: paymentInfo.account_number_human_readable,
       iban: formatIBAN(paymentInfo.account_number),
-      variableSymbol: paymentInfo.variable_symbol,
+      variableSymbol: paymentReferenceValue(paymentInfo),
       deadline: formatDatetime(paymentInfo.deadline, lang),
       fullOrder: generateFullOrder(
         order.data,

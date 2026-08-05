@@ -25,8 +25,9 @@ BEGIN
 
     PERFORM public.check_is_editor_order_on_occasion(occasion_id);
 
-    -- Call the original function to add the transaction
-    PERFORM public.add_transaction_to_payment_info(p_transaction_id, p_payment_info_id);
+    PERFORM public.apply_transaction_pairing(
+      p_transaction_id, p_payment_info_id, 'manual_attach', 'user'
+    );
 
     -- Return success message
     RETURN jsonb_build_object(
@@ -34,12 +35,10 @@ BEGIN
         'message', 'Transaction added successfully.'
     );
 
-EXCEPTION WHEN OTHERS THEN
-    -- Handle any exceptions and return as JSON
-    RETURN jsonb_build_object(
-        'code', 500,
-        'message', SQLERRM,
-        'detail', COALESCE(SQLERRM, 'An unexpected error occurred.')
-    );
 END;
 $$ LANGUAGE plpgsql;
+
+REVOKE ALL ON FUNCTION public.add_transaction_to_payment_info_ws(bigint,bigint)
+  FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.add_transaction_to_payment_info_ws(bigint,bigint)
+  TO authenticated;
