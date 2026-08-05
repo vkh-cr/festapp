@@ -25,7 +25,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/search/global_search_dialog.dart';
@@ -43,7 +42,7 @@ Future<void> main() async {
   configureUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   final initialRoute = kIsWeb
-      ? '${Uri.base.path}${Uri.base.hasQuery ? '?${Uri.base.query}' : ''}'
+      ? _routeForUri(RouterService.getCurrentBrowserUri())
       : WidgetsBinding.instance.platformDispatcher.defaultRouteName;
   runApp(FestappBootstrap(
     initialRoute: initialRoute,
@@ -59,6 +58,9 @@ Future<void> main() async {
     ),
   ));
 }
+
+String _routeForUri(Uri uri) =>
+    '${uri.path}${uri.hasQuery ? '?${uri.query}' : ''}';
 
 /// Paints immediately on PWA, Android and iOS while startup restores the local
 /// context and probes online services. A slow or unreachable backend therefore
@@ -314,14 +316,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Offset _offset = Offset.zero;
-  bool _builtInitialDeepLink = false;
 
-  DeepLink _buildInitialDeepLink(DeepLink platformDeepLink) {
-    if (_builtInitialDeepLink) {
-      return platformDeepLink;
+  DeepLink _resolveDeepLink(PlatformDeepLink platformDeepLink) {
+    if (platformDeepLink.initial) {
+      return DeepLink.path(
+        widget.initialRoute,
+        includePrefixMatches: false,
+      );
     }
-    _builtInitialDeepLink = true;
-    return DeepLink.path(widget.initialRoute, includePrefixMatches: false);
+    return platformDeepLink;
   }
 
   /// Ctrl+F opens Global Search when the feature is enabled. Uses the root
@@ -352,7 +355,7 @@ class _MyAppState extends State<MyApp> {
       initial: ThemeConfig.defaultThemeMode,
       builder: (theme, darkTheme) => MaterialApp.router(
         routerConfig: RouterService.router.config(
-          deepLinkBuilder: _buildInitialDeepLink,
+          deepLinkBuilder: _resolveDeepLink,
           navigatorObservers: () => [RoutingObserver()],
         ),
         debugShowCheckedModeBanner: false,
@@ -395,9 +398,7 @@ class _MyAppState extends State<MyApp> {
         title: OccasionHomePage.homePageTitle,
         theme: theme,
         darkTheme: darkTheme,
-      ).animate().fadeIn(
-            duration: 300.ms,
-          ),
+      ),
     );
   }
 }

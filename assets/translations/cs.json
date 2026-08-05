@@ -1217,7 +1217,11 @@
     "companionSignIn": "Přihlásit",
     "companionSignOut": "Odhlásit",
     "companionManagedBy": "Spravován uživatelem: {name}",
-    "companionManages": "Spravuje: {names}"
+    "companionManages": "Spravuje: {names}",
+    "passwordResetFailed": "E-mail pro změnu hesla se nepodařilo odeslat. Zkuste to prosím znovu později.",
+    "passwordResetEmailMissing": "Účet nemá e-mail pro změnu hesla. Kontaktujte prosím podporu.",
+    "passwordChangedSignInRequired": "Heslo bylo změněno. Přihlaste se prosím novým heslem.",
+    "passwordChangeFailedGeneric": "Heslo se nepodařilo změnit. Zkuste si prosím vyžádat nový odkaz."
   },
   "Common": {
     "fieldCannotBeEmpty": "Pole nemůže být prázdné",

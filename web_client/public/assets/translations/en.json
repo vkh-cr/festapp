@@ -1217,7 +1217,11 @@
     "companionSignIn": "Sign in",
     "companionSignOut": "Sign out",
     "companionManagedBy": "Managed by: {name}",
-    "companionManages": "Manages: {names}"
+    "companionManages": "Manages: {names}",
+    "passwordResetFailed": "The password reset email could not be sent. Please try again later.",
+    "passwordResetEmailMissing": "This account has no email address for password reset. Please contact support.",
+    "passwordChangedSignInRequired": "Your password was changed. Please sign in with the new password.",
+    "passwordChangeFailedGeneric": "The password could not be changed. Please request a new link."
   },
   "Common": {
     "fieldCannotBeEmpty": "Field cannot be empty",

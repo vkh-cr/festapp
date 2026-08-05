@@ -65,7 +65,7 @@ class RouterService {
     if (kIsWeb && AppConfig.isWebclientSupported) {
       // List of paths that should be handled by the web client
       // This can be expanded. For now, we know 'form' is one.
-    // Check against list of known web-client routes
+      // Check against list of known web-client routes
       if (path.startsWith("/${FormPage.ROUTE}/")) {
         unawaited(LaunchUrlService.openExternalUrl(
           path,
@@ -177,7 +177,13 @@ class RouterService {
   }
 
   static Uri getCurrentUri() {
-    return Uri.base;
+    return getCurrentBrowserUri();
+  }
+
+  /// Returns the actual browser address rather than [Uri.base], whose value on
+  /// web is affected by the document's `<base href>` and can lose a deep link.
+  static Uri getCurrentBrowserUri() {
+    return Uri.parse(getCurrentBrowserUrl());
   }
 
   static String getCurrentUriWithOccasion() {

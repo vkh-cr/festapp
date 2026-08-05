@@ -61,6 +61,10 @@ class UserStrings {
   static String Function(String email) get emailInUse =>
       (email) => 'FeatureUser.emailInUse'.tr(namedArgs: {"email": email});
   static String get passwordChanged => 'FeatureUser.passwordChanged'.tr();
+  static String get passwordChangedSignInRequired =>
+      'FeatureUser.passwordChangedSignInRequired'.tr();
+  static String get passwordChangeFailedGeneric =>
+      'FeatureUser.passwordChangeFailedGeneric'.tr();
   static String get tokenInvalid => 'FeatureUser.tokenInvalid'.tr();
   static String get firstTime => 'FeatureUser.firstTime'.tr();
   static String get signUp => 'FeatureUser.signUp'.tr();
@@ -112,6 +116,10 @@ class UserStrings {
       'FeatureUser.passwordResetLinkSent'.tr(namedArgs: {
         'email': email
       }); // "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
+  static String get passwordResetFailed =>
+      'FeatureUser.passwordResetFailed'.tr();
+  static String get passwordResetEmailMissing =>
+      'FeatureUser.passwordResetEmailMissing'.tr();
   static String get insertHere => 'FeatureUser.insertHere'.tr(); // "Input here"
   static String get deleteAccount =>
       'FeatureUser.deleteAccount'.tr(); // "Delete account"

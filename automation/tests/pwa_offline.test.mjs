@@ -237,6 +237,18 @@ try {
   assert.equal(networkCalls, 1,
     'a stale runtime must never download an executable from the new build');
 
+  // If an old controller outlives its evicted cache while the deployment has
+  // already advanced, the entry bundle is the safe cutover boundary. Returning
+  // Response.error() here reproduces the production blank-canvas cold start.
+  serverVersion = '1.2.3+5';
+  const latestMainResponse = await dispatchFetch(
+    new Request('https://app.test/main.dart.js'),
+  );
+  assert.equal(await latestMainResponse.text(), 'recovered current executable');
+  assert.deepEqual(cachedPuts, [],
+    'a newer entry bundle must not be written into the old worker cache');
+  assert.equal(networkCalls, 3);
+
   // If storage eviction/corruption removed an executable from this worker's
   // own build, recover that exact build from the network instead of leaving
   // every controlled reload permanently stuck on the Flutter loader.
@@ -246,7 +258,7 @@ try {
   );
   assert.equal(await recoveredMainResponse.text(), 'recovered current executable');
   assert.deepEqual(cachedPuts, ['https://app.test/main.dart.js']);
-  assert.equal(networkCalls, 3);
+  assert.equal(networkCalls, 5);
 
   // A full/evicted cache must not discard an already verified executable.
   // Serving it keeps this reload alive even if persistence cannot self-heal.
@@ -256,7 +268,7 @@ try {
   );
   assert.equal(await uncachedMainResponse.text(), 'recovered current executable');
   assert.deepEqual(cachedPuts, ['https://app.test/main.dart.js']);
-  assert.equal(networkCalls, 5);
+  assert.equal(networkCalls, 7);
 
   const webClientIndex = await readFile(
     path.join(projectRoot, 'web_client/index.html'),

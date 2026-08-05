@@ -72,6 +72,8 @@
   },
   "FeatureUser": {
     "passwordResetLinkSent": "Link do resetowania hasła został wysłany na {email}. Sprawdź swoją skrzynkę odbiorczą i postępuj zgodnie z instrukcjami, aby zresetować hasło.",
+    "passwordResetFailed": "Nie udało się wysłać wiadomości do resetowania hasła. Spróbuj ponownie później.",
+    "passwordResetEmailMissing": "To konto nie ma adresu e-mail do resetowania hasła. Skontaktuj się z pomocą techniczną.",
     "admin": "Admin",
     "deleteCompanionConfirm": "Usuwając swojego towarzysza, wylogujesz go również ze wszystkich zalogowanych wydarzeń.",
     "changePasswordInstructions": "Instrukcja zmiany hasła",

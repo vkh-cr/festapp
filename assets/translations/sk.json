@@ -72,6 +72,8 @@
   },
   "FeatureUser": {
     "passwordResetLinkSent": "Odkaz na resetovanie hesla bol odoslaný na {email}. Skontrolujte si prosím svoju schránku a postupujte podľa pokynov na resetovanie hesla.",
+    "passwordResetFailed": "E-mail na resetovanie hesla sa nepodarilo odoslať. Skúste to prosím neskôr.",
+    "passwordResetEmailMissing": "Tento účet nemá e-mail na resetovanie hesla. Kontaktujte prosím podporu.",
     "admin": "Admin",
     "deleteCompanionConfirm": "Odstránením svojho spoločníka ho tiež odhlásite zo všetkých prihlásených udalostí.",
     "changePasswordInstructions": "Pokyny na zmenu hesla",

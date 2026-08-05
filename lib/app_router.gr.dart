@@ -944,18 +944,54 @@ class ReservationsRoute extends _i41.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i26.ResetPasswordPage]
-class ResetPasswordRoute extends _i41.PageRouteInfo<void> {
-  const ResetPasswordRoute({List<_i41.PageRouteInfo>? children})
-      : super(ResetPasswordRoute.name, initialChildren: children);
+class ResetPasswordRoute extends _i41.PageRouteInfo<ResetPasswordRouteArgs> {
+  ResetPasswordRoute({
+    String? token,
+    _i42.Key? key,
+    List<_i41.PageRouteInfo>? children,
+  }) : super(
+          ResetPasswordRoute.name,
+          args: ResetPasswordRouteArgs(token: token, key: key),
+          rawQueryParams: {'token': token},
+          initialChildren: children,
+        );
 
   static const String name = 'ResetPasswordRoute';
 
   static _i41.PageInfo page = _i41.PageInfo(
     name,
     builder: (data) {
-      return const _i26.ResetPasswordPage();
+      final queryParams = data.queryParams;
+      final args = data.argsAs<ResetPasswordRouteArgs>(
+        orElse: () =>
+            ResetPasswordRouteArgs(token: queryParams.optString('token')),
+      );
+      return _i26.ResetPasswordPage(token: args.token, key: args.key);
     },
   );
+}
+
+class ResetPasswordRouteArgs {
+  const ResetPasswordRouteArgs({this.token, this.key});
+
+  final String? token;
+
+  final _i42.Key? key;
+
+  @override
+  String toString() {
+    return 'ResetPasswordRouteArgs{token: $token, key: $key}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ResetPasswordRouteArgs) return false;
+    return token == other.token && key == other.key;
+  }
+
+  @override
+  int get hashCode => token.hashCode ^ key.hashCode;
 }
 
 /// generated route for

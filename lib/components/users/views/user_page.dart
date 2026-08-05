@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/users/user_strings.dart';
+import 'package:fstapp/components/users/password_reset_request.dart';
 import 'package:fstapp/components/users/account_deletion_service.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart' show Uint8List;
@@ -58,6 +59,7 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   bool _didStartLoading = false;
+  bool _isPasswordResetPending = false;
 
   @override
   void initState() {
@@ -74,6 +76,65 @@ class _UserPageState extends State<UserPage> {
   void _onProjectionChanged() {
     if (mounted && _didStartLoading && ClientSyncRuntime.isV1Selected) {
       unawaited(loadData());
+    }
+  }
+
+  Future<void> _requestPasswordReset(String? accountEmail) async {
+    final answer = await DialogHelper.showConfirmationDialog(
+      context,
+      UserStrings.changePasswordInstructions,
+      UserStrings.resetPasswordProceedConfirm,
+      confirmButtonMessage: CommonStrings.proceed,
+    );
+    if (!answer || !mounted) return;
+
+    setState(() => _isPasswordResetPending = true);
+    final email = accountEmail?.trim();
+    final result = await requestPasswordReset(
+      email: email,
+      send: (address) async {
+        await AuthService.resetPasswordForEmail(address);
+      },
+    );
+    if (!mounted) return;
+    setState(() => _isPasswordResetPending = false);
+
+    switch (result) {
+      case PasswordResetRequestResult.sent:
+        await ToastHelper.Show(context, UserStrings.passwordResetSent);
+        if (!mounted) return;
+        await DialogHelper.showInformationDialog(
+          context,
+          UserStrings.changePasswordInstructions,
+          UserStrings.passwordResetLinkSent(email: email!),
+        );
+        break;
+      case PasswordResetRequestResult.missingEmail:
+        await ToastHelper.Show(
+          context,
+          UserStrings.passwordResetEmailMissing,
+          severity: ToastSeverity.NotOk,
+        );
+        if (!mounted) return;
+        await DialogHelper.showInformationDialog(
+          context,
+          UserStrings.changePasswordInstructions,
+          UserStrings.passwordResetEmailMissing,
+        );
+        break;
+      case PasswordResetRequestResult.failed:
+        await ToastHelper.Show(
+          context,
+          UserStrings.passwordResetFailed,
+          severity: ToastSeverity.NotOk,
+        );
+        if (!mounted) return;
+        await DialogHelper.showInformationDialog(
+          context,
+          UserStrings.changePasswordInstructions,
+          UserStrings.passwordResetFailed,
+        );
+        break;
     }
   }
 
@@ -428,33 +489,20 @@ class _UserPageState extends State<UserPage> {
                 Container(
                   alignment: Alignment.topCenter,
                   child: TextButton(
-                    onPressed: () async {
-                      var answer = await DialogHelper.showConfirmationDialog(
-                        context,
-                        UserStrings.changePasswordInstructions,
-                        UserStrings.resetPasswordProceedConfirm,
-                        confirmButtonMessage: CommonStrings.proceed,
-                      );
-                      if (answer) {
-                        final email = userData?.email;
-                        if (email == null || email.isEmpty) return;
-                        await AuthService.resetPasswordForEmail(email)
-                            .then((value) {
-                          ToastHelper.Show(
-                              context, UserStrings.passwordResetSent);
-                          DialogHelper.showInformationDialog(
-                            context,
-                            UserStrings.changePasswordInstructions,
-                            UserStrings.passwordResetLinkSent(email: email),
-                          );
-                        });
-                      }
-                    },
-                    child: Text(
-                      UserStrings.changePassword,
-                      style: TextStyle(
-                          fontSize: StylesConfig.normalClickableFontSize),
-                    ),
+                    onPressed: _isPasswordResetPending
+                        ? null
+                        : () => _requestPasswordReset(userData?.email),
+                    child: _isPasswordResetPending
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            UserStrings.changePassword,
+                            style: TextStyle(
+                                fontSize: StylesConfig.normalClickableFontSize),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 8),

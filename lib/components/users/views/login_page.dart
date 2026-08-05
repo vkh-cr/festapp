@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_strings.dart';
+import 'package:fstapp/components/users/login_feedback.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/users/views/forgot_password_page.dart';
@@ -147,13 +148,18 @@ class _LoginPageState extends State<LoginPage> {
                           setState(() {
                             _isLoading = true;
                           });
-                          await AuthService.login(
-                                  AppConfig.getUserPrefix(
-                                      _emailController.text),
-                                  _passwordController.text)
-                              .then(_showToast)
-                              .then(_refreshSignedInStatus)
-                              .catchError(_onError);
+                          try {
+                            await AuthService.login(
+                              AppConfig.getUserPrefix(_emailController.text),
+                              _passwordController.text,
+                            );
+                            await finishSuccessfulSignIn(
+                              navigate: () => _refreshSignedInStatus(null),
+                              showFeedback: _showSignInSuccess,
+                            );
+                          } catch (error) {
+                            _onError(error);
+                          }
                           if (!mounted) return;
                           setState(() {
                             _isLoading = false;
@@ -195,11 +201,13 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _showToast(value) {
-    ToastHelper.Show(context, UserStrings.signInSuccess);
+  Future<void> _showSignInSuccess() async {
+    final visibleContext = RouterService.router.navigatorKey.currentContext;
+    if (visibleContext == null) return;
+    await ToastHelper.Show(visibleContext, UserStrings.signInSuccess);
   }
 
-  void _onError(err) {
+  void _onError(Object error) {
     ToastHelper.Show(context, UserStrings.invalidCredentials,
         severity: ToastSeverity.NotOk);
   }

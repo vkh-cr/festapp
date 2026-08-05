@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/news/news_model.dart';
+import 'package:fstapp/components/news/news_refresh_coordinator.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/news/db_news.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
@@ -36,7 +39,7 @@ class NewsPage extends StatefulWidget {
 class _NewsPageState extends State<NewsPage> {
   List<NewsModel> newsMessages = [];
   bool _isSetAsReadCalled = false;
-  bool _isLoading = false;
+  final NewsRefreshCoordinator _refreshCoordinator = NewsRefreshCoordinator();
 
   // The tabs router this page is subscribed to, plus the last active index we
   // saw. Kept as fields so the listener can be removed in dispose() — otherwise
@@ -49,7 +52,12 @@ class _NewsPageState extends State<NewsPage> {
   @override
   void initState() {
     super.initState();
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
     loadData();
+  }
+
+  void _onProjectionChanged() {
+    if (ClientSyncRuntime.isV1Selected) unawaited(loadData());
   }
 
   @override
@@ -80,6 +88,7 @@ class _NewsPageState extends State<NewsPage> {
 
   @override
   void dispose() {
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
     _tabsRouter?.removeListener(_onTabChanged);
     super.dispose();
   }
@@ -121,6 +130,7 @@ class _NewsPageState extends State<NewsPage> {
 
   Future<void> loadNewsMessages() async {
     var loadedMessages = await DbNews.getAllNewsMessages();
+    if (!mounted) return;
     setState(() {
       newsMessages = loadedMessages;
     });
@@ -128,26 +138,24 @@ class _NewsPageState extends State<NewsPage> {
 
   Future<void> loadOfflineData() async {
     var loadedMessages = await OfflineDataService.getAllMessages();
+    if (!mounted) return;
     setState(() {
       newsMessages = loadedMessages;
     });
   }
 
-  Future<void> loadData() async {
-    // Coalesce concurrent/rapid triggers so we never stack overlapping loads.
-    if (_isLoading) return;
-    _isLoading = true;
-    try {
-      await loadOfflineData();
-      if (!ClientSyncRuntime.isV1Selected) {
-        await loadNewsMessages();
-        await OfflineDataService.saveAllMessages(newsMessages);
-      }
-      _checkAsRead();
-    } finally {
-      _isLoading = false;
-    }
-  }
+  Future<void> loadData() => _refreshCoordinator.run(() async {
+        // If the live projection changes during this load, the coordinator
+        // queues one more pass instead of losing the newer view counts.
+        await loadOfflineData();
+        if (!mounted) return;
+        if (!ClientSyncRuntime.isV1Selected) {
+          await loadNewsMessages();
+          if (!mounted) return;
+          await OfflineDataService.saveAllMessages(newsMessages);
+        }
+        _checkAsRead();
+      });
 
   @override
   Widget build(BuildContext context) {

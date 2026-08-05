@@ -216,14 +216,29 @@ function isFlutterExecutable(pathname) {
     pathname === '/flutter_bootstrap.js';
 }
 
-async function recoverCurrentExecutable(request, cache) {
+function isFlutterBootstrapExecutable(pathname) {
+  return pathname === '/main.dart.js' ||
+    pathname === '/flutter.js' ||
+    pathname === '/flutter_bootstrap.js';
+}
+
+async function recoverCurrentExecutable(request, cache, allowNewerBootstrap) {
   if (self.navigator.onLine === false) return Response.error();
   try {
     const versionResponse = await fetch('/festapp-version.json?sw-recovery=' +
       encodeURIComponent(BUILD_VERSION), { cache: 'no-store' });
     if (!versionResponse.ok) return Response.error();
     const manifest = await versionResponse.json();
-    if (manifest?.version !== BUILD_VERSION) return Response.error();
+    if (manifest?.version !== BUILD_VERSION) {
+      // The active worker can outlive its cache while a newer deployment is
+      // already live. Failing the entry bundle here leaves every cold start on
+      // a blank canvas. A bootstrap request is a safe generation boundary: no
+      // Dart runtime is executing yet, so let the network's coherent release
+      // start and allow its worker to take over. Deferred chunks remain strict.
+      if (!allowNewerBootstrap) return Response.error();
+      const latestResponse = await fetch(request);
+      return latestResponse.ok ? latestResponse : Response.error();
+    }
 
     const response = await fetch(request);
     if (!response.ok) return Response.error();
@@ -306,6 +321,15 @@ self.addEventListener('fetch', (event) => {
       // through the current versioned shell; otherwise AutoRoute keeps its
       // loading placeholder forever after the incompatible chunk fails.
       if (selectedCacheName !== CACHE_NAME) {
+        if (isFlutterBootstrapExecutable(url.pathname)) {
+          clientCacheNames.delete(event.clientId);
+          const currentCache = await caches.open(CACHE_NAME);
+          const currentExecutable = await currentCache.match(request, {
+            ignoreSearch: true,
+          });
+          if (currentExecutable) return currentExecutable;
+          return recoverCurrentExecutable(request, currentCache, true);
+        }
         try {
           const client = event.clientId
             ? await self.clients.get(event.clientId)
@@ -317,7 +341,11 @@ self.addEventListener('fetch', (event) => {
         }
         return Response.error();
       }
-      return recoverCurrentExecutable(request, cache);
+      return recoverCurrentExecutable(
+        request,
+        cache,
+        isFlutterBootstrapExecutable(url.pathname),
+      );
     }
 
     // Fill the rest of this build's known shell lazily. This keeps updates
