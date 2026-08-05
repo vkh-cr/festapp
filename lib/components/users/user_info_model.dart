@@ -44,6 +44,7 @@ class UserInfoModel extends IHasId {
 
   static const String idColumn = "id";
   static const String emailReadonlyColumn = "email_readonly";
+  static const String emailDeliveryColumn = "email_delivery";
   static const String nameColumn = "name";
   static const String surnameColumn = "surname";
   static const String sexColumn = "sex";

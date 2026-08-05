@@ -87,6 +87,149 @@ BEGIN
     );
 END $$;
 
+-- If a proposed +N address already belongs to a real account, email_readonly
+-- wins. The server reuses that canonical identity and never guesses +2 from
+-- delivery address or profile name.
+DO $$
+DECLARE
+    v_context _csv_import_context%rowtype;
+    v_org bigint;
+    v_reserved_user uuid;
+    v_result jsonb;
+BEGIN
+    SELECT * INTO v_context FROM _csv_import_context;
+    SELECT organization INTO v_org FROM public.occasions
+     WHERE id = v_context.occasion;
+    PERFORM set_config(
+        'request.jwt.claim.sub', get_user_id('csv_manager')::text, true);
+
+    v_reserved_user := public.create_user_in_organization_with_data_pure(
+        v_org, 'reserved+1@test.local', 'reserved+1@test.local',
+        'test-password',
+        jsonb_build_object('name', 'Reserved', 'surname', 'Mailbox')
+    );
+
+    v_result := public.import_occasion_users_from_csv(
+        v_context.occasion,
+        jsonb_build_array(
+            jsonb_build_object(
+                'email_delivery', 'reserved@test.local',
+                'data', jsonb_build_object(
+                    'email', 'reserved@test.local', 'name', 'First',
+                    'surname', 'Shared'
+                )
+            ),
+            jsonb_build_object(
+                'email_delivery', 'reserved@test.local',
+                'data', jsonb_build_object(
+                    'email', 'reserved+1@test.local', 'name', 'Second',
+                    'surname', 'Shared'
+                )
+            )
+        ),
+        '[]'::jsonb
+    );
+
+    PERFORM assert_eq((v_result->>'created')::integer, 2,
+        'both canonical account identities are added to the occasion');
+    PERFORM assert_eq(
+        (SELECT count(*) FROM public.user_info
+         WHERE organization = v_org
+           AND lower(email_readonly) = 'reserved+2@test.local'),
+        0::bigint,
+        'the server does not invent a new identity from delivery email');
+    PERFORM assert_eq(
+        (SELECT count(*) FROM public.occasion_users
+         WHERE occasion = v_context.occasion AND "user" = v_reserved_user),
+        1::bigint,
+        'the existing +1 account is resolved only by email_readonly');
+
+END $$;
+
+-- Two people may share one delivery mailbox. They receive distinct sign-in
+-- identifiers and retain the same canonical delivery address. Repeating the
+-- same payload updates the same two identities instead of allocating +2.
+DO $$
+DECLARE
+    v_context _csv_import_context%rowtype;
+    v_result jsonb;
+BEGIN
+    SELECT * INTO v_context FROM _csv_import_context;
+    PERFORM set_config(
+        'request.jwt.claim.sub', get_user_id('csv_manager')::text, true);
+
+    v_result := public.import_occasion_users_from_csv(
+        v_context.occasion,
+        jsonb_build_array(
+            jsonb_build_object(
+                'email_delivery', 'shared@test.local',
+                'data', jsonb_build_object(
+                    'email', 'shared@test.local', 'name', 'Klára',
+                    'surname', 'Vomelová'
+                )
+            ),
+            jsonb_build_object(
+                'email_delivery', 'shared@test.local',
+                'data', jsonb_build_object(
+                    'email', 'shared+1@test.local', 'name', 'Marie',
+                    'surname', 'Vomelová'
+                )
+            )
+        ),
+        '[]'::jsonb
+    );
+
+    PERFORM assert_eq((v_result->>'created')::integer, 2,
+        'both people sharing a mailbox are created');
+    PERFORM assert_eq(
+        (SELECT count(*) FROM public.user_info
+         WHERE organization = (SELECT organization FROM public.occasions
+                                WHERE id = v_context.occasion)
+           AND email_delivery = 'shared@test.local'),
+        1::bigint,
+        'only the aliased identity needs a delivery override');
+    PERFORM assert_eq(
+        (SELECT count(*) FROM public.user_info ui
+         WHERE ui.organization = (SELECT organization FROM public.occasions
+                                   WHERE id = v_context.occasion)
+           AND public.get_user_delivery_email(ui.id) = 'shared@test.local'),
+        2::bigint,
+        'both identities resolve to the shared delivery address');
+    PERFORM assert_eq(
+        (SELECT count(*) FROM public.user_info
+         WHERE organization = (SELECT organization FROM public.occasions
+                                WHERE id = v_context.occasion)
+           AND email_readonly IN ('shared@test.local', 'shared+1@test.local')),
+        2::bigint,
+        'sign-in identifiers are distinct');
+
+    v_result := public.import_occasion_users_from_csv(
+        v_context.occasion,
+        jsonb_build_array(
+            jsonb_build_object(
+                'email_delivery', 'shared@test.local',
+                'data', jsonb_build_object(
+                    'email', 'shared@test.local', 'name', 'Klára',
+                    'surname', 'Vomelová'
+                )
+            ),
+            jsonb_build_object(
+                'email_delivery', 'shared@test.local',
+                'data', jsonb_build_object(
+                    'email', 'shared+1@test.local', 'name', 'Marie',
+                    'surname', 'Vomelová'
+                )
+            )
+        ),
+        '[]'::jsonb
+    );
+
+    PERFORM assert_eq((v_result->>'created')::integer, 0,
+        'retry creates no new identity');
+    PERFORM assert_eq((v_result->>'updated')::integer, 2,
+        'retry updates both existing identities');
+END $$;
+
 -- Update, add-to-occasion, delete and group replacement commit together while
 -- omitted fields, services, roles and permissions remain untouched.
 DO $$

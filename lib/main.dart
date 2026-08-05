@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/config/url_strategy_noop.dart'
     if (dart.library.html) 'package:fstapp/config/url_strategy_web.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -20,6 +21,7 @@ import 'package:fstapp/services/health_tracking_http_client.dart';
 import 'package:fstapp/services/notification_helper.dart';
 import 'package:fstapp/services/installation_cutover_service.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter/services.dart';
@@ -38,8 +40,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   debugProfileBuildsEnabled = true;
+  configureUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
+  final initialRoute = kIsWeb
+      ? '${Uri.base.path}${Uri.base.hasQuery ? '?${Uri.base.query}' : ''}'
+      : WidgetsBinding.instance.platformDispatcher.defaultRouteName;
   runApp(FestappBootstrap(
+    initialRoute: initialRoute,
     initialize: initializeEverything,
     buildReadyApp: () => EasyLocalization(
       supportedLocales:
@@ -48,7 +55,7 @@ Future<void> main() async {
       fallbackLocale: AppConfig.availableLanguages().map((e) => e.locale).first,
       useOnlyLangCode: true,
       saveLocale: true,
-      child: MyApp(),
+      child: MyApp(initialRoute: initialRoute),
     ),
   ));
 }
@@ -59,10 +66,12 @@ Future<void> main() async {
 class FestappBootstrap extends StatefulWidget {
   static const loadingKey = Key('festapp-startup-loading');
 
+  final String initialRoute;
   final Future<void> Function() initialize;
   final Widget Function() buildReadyApp;
 
   const FestappBootstrap({
+    this.initialRoute = '/',
     required this.initialize,
     required this.buildReadyApp,
     super.key,
@@ -74,6 +83,7 @@ class FestappBootstrap extends StatefulWidget {
 
 class _FestappBootstrapState extends State<FestappBootstrap> {
   late final Future<void> _initialization = _initialize();
+  late final String _initialRoute = widget.initialRoute;
 
   Future<void> _initialize() async {
     try {
@@ -85,6 +95,15 @@ class _FestappBootstrapState extends State<FestappBootstrap> {
     }
   }
 
+  MaterialPageRoute<void> _loadingRoute(RouteSettings settings) =>
+      MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => const Scaffold(
+          key: FestappBootstrap.loadingKey,
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) => FutureBuilder<void>(
         future: _initialization,
@@ -92,12 +111,14 @@ class _FestappBootstrapState extends State<FestappBootstrap> {
           if (snapshot.connectionState == ConnectionState.done) {
             return widget.buildReadyApp();
           }
-          return const MaterialApp(
+          return MaterialApp(
+            key: const ValueKey('festapp-startup-material-app'),
             debugShowCheckedModeBanner: false,
-            home: Scaffold(
-              key: FestappBootstrap.loadingKey,
-              body: Center(child: CircularProgressIndicator()),
-            ),
+            initialRoute: _initialRoute,
+            onGenerateRoute: _loadingRoute,
+            onGenerateInitialRoutes: (initialRoute) => [
+              _loadingRoute(RouteSettings(name: initialRoute)),
+            ],
           );
         },
       );
@@ -105,8 +126,6 @@ class _FestappBootstrapState extends State<FestappBootstrap> {
 
 Future<void> initializeEverything() async {
   AppLogger.debug('Initialization started');
-
-  configureUrlStrategy();
 
   WidgetsFlutterBinding.ensureInitialized();
   AppLogger.debug('Widgets binding initialized');
@@ -284,9 +303,10 @@ Future<void> initializeEverything() async {
 }
 
 class MyApp extends StatefulWidget {
+  final String initialRoute;
   bool isTimeTravelVisible = false;
 
-  MyApp({super.key});
+  MyApp({required this.initialRoute, super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -294,6 +314,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Offset _offset = Offset.zero;
+  bool _builtInitialDeepLink = false;
+
+  DeepLink _buildInitialDeepLink(DeepLink platformDeepLink) {
+    if (_builtInitialDeepLink) {
+      return platformDeepLink;
+    }
+    _builtInitialDeepLink = true;
+    return DeepLink.path(widget.initialRoute, includePrefixMatches: false);
+  }
 
   /// Ctrl+F opens Global Search when the feature is enabled. Uses the root
   /// navigator's context because the shortcut lives above the Navigator.
@@ -322,8 +351,10 @@ class _MyAppState extends State<MyApp> {
           : baseTheme,
       initial: ThemeConfig.defaultThemeMode,
       builder: (theme, darkTheme) => MaterialApp.router(
-        routerConfig: RouterService.router
-            .config(navigatorObservers: () => [RoutingObserver()]),
+        routerConfig: RouterService.router.config(
+          deepLinkBuilder: _buildInitialDeepLink,
+          navigatorObservers: () => [RoutingObserver()],
+        ),
         debugShowCheckedModeBanner: false,
         builder: (context, child) {
           return CallbackShortcuts(

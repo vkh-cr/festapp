@@ -63,4 +63,12 @@ export class R2NativeObjectStore implements ObjectStore {
     }
     return { etag: winner.httpEtag, head: accepted };
   }
+
+  async exists(key: string): Promise<boolean> {
+    return (await this.bucket.head(key)) !== null;
+  }
+
+  async deleteExact(key: string): Promise<void> {
+    await this.bucket.delete(key);
+  }
 }

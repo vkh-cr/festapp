@@ -1,4 +1,4 @@
-import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { digest, type ObjectStore } from './publisher.js';
 
 export class R2S3ObjectStore implements ObjectStore {
@@ -38,5 +38,19 @@ export class R2S3ObjectStore implements ObjectStore {
     await this.client.send(new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: bytes, ContentType: 'application/json', CacheControl: 'public, max-age=0, must-revalidate', ...(previousEtag ? { IfMatch: previousEtag } : { IfNoneMatch: '*' }) }));
     const verified = await this.client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: key }));
     return { etag: verified.ETag ?? `"${await digest(bytes)}"`, head: next };
+  }
+
+  async exists(key: string): Promise<boolean> {
+    try {
+      await this.client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: key }));
+      return true;
+    } catch (error) {
+      if ((error as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode === 404) return false;
+      throw error;
+    }
+  }
+
+  async deleteExact(key: string): Promise<void> {
+    await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
   }
 }

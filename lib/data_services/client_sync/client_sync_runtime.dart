@@ -172,11 +172,13 @@ class ClientSyncRuntime {
       SyncFreshnessClass.catalog,
     );
     if (activated != null) {
-      await _store.saveLastContext(StoredSyncContext(
-        organizationId: context.organizationId,
-        occasionId: context.occasionId,
-        occasionLink: context.occasionLink,
-      ));
+      await _store.saveLastContext(
+          StoredSyncContext(
+            organizationId: context.organizationId,
+            occasionId: context.occasionId,
+            occasionLink: context.occasionLink,
+          ),
+          privateScope: context.privateScope);
     }
   }
 

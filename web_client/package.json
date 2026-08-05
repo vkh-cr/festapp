@@ -21,7 +21,9 @@
   },
   "devDependencies": {
     "jsdom": "^27.3.0",
-    "netlify-cli": "^23.13.4",
     "vite": "^7.3.0"
+  },
+  "overrides": {
+    "rollup": "^4.62.4"
   }
 }

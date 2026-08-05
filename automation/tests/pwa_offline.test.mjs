@@ -279,7 +279,13 @@ try {
   assert.match(flutterIndex, /serviceWorkerPath: "\.\/push\/OneSignalSDKWorker\.js"/);
   assert.match(flutterIndex, /serviceWorkerParam: \{ scope: "\/push\/" \}/);
   assert.match(oneSignalWorker, /OneSignalSDK\.sw\.js/);
-  assert.match(flutterIndex, /await window\.festappOfflineReady/);
+  assert.match(flutterIndex, /e\.preventDefault\(\)/);
+  assert.match(flutterIndex, /function promptInstall\(\)/);
+  assert.doesNotMatch(
+    flutterIndex,
+    /promptInstall\(\)[\s\S]*?await window\.festappOfflineReady/,
+    'the browser install prompt must run synchronously while user activation is valid',
+  );
   assert.match(flutterIndex, /performance\.getEntriesByType\('resource'\)/);
   assert.match(flutterIndex, /window\.recoverFestappStartup\('bootstrap-error'\)/);
   assert.match(flutterIndex, /festapp-app-ready/);

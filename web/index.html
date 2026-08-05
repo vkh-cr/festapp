@@ -237,7 +237,7 @@
     atomic updates and offline cold starts.
   -->
   <script>
-    window.__FESTAPP_BUILD_VERSION__ = "0.19.84+379";
+    window.__FESTAPP_BUILD_VERSION__ = "0.19.84+380";
     window.__FESTAPP_LOCAL_DEVELOPMENT__ =
       ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
   </script>
@@ -253,16 +253,17 @@
   let deferredPrompt;
 
   window.addEventListener('beforeinstallprompt', (e) => {
-    // Keep Chrome's native install entry enabled. We retain the event only so
-    // the in-app install button can offer the same prompt as a fallback.
+    // Retain the browser event for Festapp's explicit install button.
+    e.preventDefault();
     deferredPrompt = e;
+    if (typeof hasPrompt === 'function') hasPrompt();
   });
 
-  async function promptInstall(){
+  function promptInstall(){
      if (!deferredPrompt) return;
-     // ready resolves only after the complete app-shell install succeeded.
-     if (window.festappOfflineReady) await window.festappOfflineReady;
-     await deferredPrompt.prompt();
+     // Open synchronously from the click. Waiting here can consume the browser's
+     // transient user activation and make the prompt silently fail on Android.
+     deferredPrompt.prompt();
   }
 
   // Listen for app install event

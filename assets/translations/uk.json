@@ -84,6 +84,8 @@
     "changePassword": "Змінити пароль",
     "companionName": "Ім’я супутника",
     "companionOf": "Супутник —",
+    "companionManagedBy": "Керує користувач: {name}",
+    "companionManages": "Керує: {names}",
     "companionEventsEmpty": "Події супутника з’являться тут.",
     "createCompanion": "Створити супутника",
     "deleteAccount": "Видалити акаунт",

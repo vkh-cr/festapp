@@ -22,3 +22,21 @@ The profile-shaped information captured when a user registered for an occasion.
 It is historical evidence, not a second current profile and not an implicit
 occasion override.
 _Avoid_: User profile, occasion profile override
+
+**Account Email**:
+The canonical e-mail identity used across the application for sign-in, account
+lookup, display, and relationships. It may contain a deterministic `+N` alias
+when multiple people share one delivery mailbox.
+_Avoid_: Delivery override, order contact email
+
+**Delivery Override**:
+An optional, non-unique mailbox used only for outbound account e-mail. When it
+is absent, account e-mail is sent to the Account Email. It never identifies an
+account elsewhere in the application.
+_Avoid_: Account email, Auth email, order contact email
+
+**Order Contact Email**:
+The historical mailbox captured on an order. It belongs to the Registration
+Snapshot and is used for order communication, not as the current account-mail
+source of truth.
+_Avoid_: Delivery email, current user email

@@ -40,6 +40,13 @@ if [ -f ".env.local" ]; then
     [ -n "$FESTAPP_SUPABASE_SERVICE_ROLE_KEY_OVERRIDE" ] && export SUPABASE_SERVICE_ROLE_KEY="$FESTAPP_SUPABASE_SERVICE_ROLE_KEY_OVERRIDE"
 fi
 
+# Use the isolated schema-baseline database when it is already running and no
+# explicit database target was supplied. Never start or rebuild it implicitly.
+if [ -z "${DATABASE_URL-}" ] && command -v pg_isready >/dev/null 2>&1 \
+    && pg_isready -h 127.0.0.1 -p 55432 -d postgres >/dev/null 2>&1; then
+    export DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:55432/postgres?sslmode=disable"
+fi
+
 echo "========================================"
 if [ -n "$DATABASE_URL" ]; then
     echo "Database: ${DATABASE_URL:0:50}..."
@@ -253,7 +260,7 @@ if [ "$RUN_AUTOMATION" = true ]; then
     echo ""
     echo ">>> Automation Scripts Tests..."
 
-    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/deploy_workflow.test.sh" "$SCRIPT_DIR/tests/update_prompt.test.sh" "$SCRIPT_DIR/tests/update_prompt_behavior.test.mjs" "$SCRIPT_DIR/tests/client_sync_cutover.test.mjs" "$SCRIPT_DIR/tests/pwa_offline.test.mjs" "$SCRIPT_DIR/tests/project_version.test.mjs"; do
+    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/deploy_workflow.test.sh" "$SCRIPT_DIR/tests/migration_layout.test.sh" "$SCRIPT_DIR/tests/update_prompt.test.sh" "$SCRIPT_DIR/tests/update_prompt_behavior.test.mjs" "$SCRIPT_DIR/tests/client_sync_cutover.test.mjs" "$SCRIPT_DIR/tests/pwa_offline.test.mjs" "$SCRIPT_DIR/tests/project_version.test.mjs"; do
         if [ -x "$t" ]; then
             echo "Running $(basename "$t")..."
             set +e

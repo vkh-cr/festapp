@@ -30,11 +30,17 @@ Deno Edge Functions, and Integration tests.
 Use when modifying SQL functions or migrations.
 
 ```bash
+# Rebuild the isolated local DB from the schema baseline (destructive only to
+# the dedicated festapp-db-tests-pg15 Docker volume).
+./automation/bootstrap_local_db.sh
+
 # Run all DB tests
-node web_client/scripts/run_db_tests.js
+DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:55432/postgres?sslmode=disable' \
+  node web_client/scripts/run_db_tests.js
 
 # Run specific test file
-node web_client/scripts/run_db_tests.js database/tests/path/to/test.sql
+DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:55432/postgres?sslmode=disable' \
+  node web_client/scripts/run_db_tests.js database/tests/path/to/test.sql
 ```
 
 **Key concept:** Tests run in a transaction and auto-rollback. Any data inserted
@@ -44,8 +50,9 @@ during a test is undone automatically.
 
 If a test fails saying "function does not exist":
 
-1. Check if local migrations are pushed: `supabase db push`
-2. Run schema check tests if available.
+1. Rebuild the isolated local database: `./automation/bootstrap_local_db.sh`.
+2. Check that every active migration has a unique 14-digit timestamp.
+3. Run schema check tests if available.
 
 ### D. Testing via Supabase MCP (Recommended for Agents/No-Docker)
 

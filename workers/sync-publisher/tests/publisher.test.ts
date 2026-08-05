@@ -16,6 +16,7 @@ function fixture(dirty: string[], failingComponent?: string) {
   const components = Object.fromEntries(REQUIRED_CATALOGS.map((name) => [name, descriptor(1, name)]));
   const db: PublisherDatabase = {
     claim: vi.fn(async () => dirty.map((component) => ({ component, scope_type: 'occasion', scope_id: 42, entity_id: component === 'live_public' ? 7 : 0, source_revision: 3, claim_token: `${component}-token` }))),
+    releaseClaims: vi.fn(async (tokens) => tokens.length),
     refreshEvents: vi.fn(async () => undefined), refreshCleaning: vi.fn(async () => undefined),
     nextReleaseRevision: vi.fn(async () => 11),
     publicationState: vi.fn(async () => ({ scope: '7/42', catalog: descriptor(10, 'manifest'), live: descriptor(2, 'live'), components, headEtag: '"old"' })),
@@ -32,6 +33,8 @@ function fixture(dirty: string[], failingComponent?: string) {
       calls.push(`head:${key}`);
       return { etag: '"etag"', head: JSON.parse(new TextDecoder().decode(bytes)) };
     }),
+    exists: vi.fn(async () => true),
+    deleteExact: vi.fn(async () => undefined),
   };
   return { db, store, calls };
 }
@@ -52,6 +55,7 @@ describe('ClientSyncPublisher', () => {
     expect(db.complete).toHaveBeenCalledWith(expect.objectContaining({
       catalogClaimTokens: [], liveClaimTokens: ['live_public-token'], live: expect.objectContaining({ revision: 3 }),
     }));
+    expect(db.releaseClaims).toHaveBeenCalledWith(['map_catalog-token']);
   });
 
   it('publishes catalog independently when live projection fails', async () => {
@@ -61,6 +65,7 @@ describe('ClientSyncPublisher', () => {
     expect(db.complete).toHaveBeenCalledWith(expect.objectContaining({
       catalogClaimTokens: ['content_catalog-token'], liveClaimTokens: [], releaseRevision: 11,
     }));
+    expect(db.releaseClaims).toHaveBeenCalledWith(['live_public-token']);
   });
 
   it('does not advance a head when the only dirty class cannot upload', async () => {
@@ -68,6 +73,16 @@ describe('ClientSyncPublisher', () => {
     await expect(new ClientSyncPublisher(db, store).runOnce()).rejects.toThrow('one or more');
     expect(store.putHead).not.toHaveBeenCalled();
     expect(db.complete).not.toHaveBeenCalled();
+    expect(db.releaseClaims).toHaveBeenCalledWith(['map_catalog-token']);
+  });
+
+  it('uses null only for an explicit full live projection refresh', async () => {
+    const fixtureValue = fixture(['live_public']);
+    (fixtureValue.db.claim as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
+      { component: 'live_public', scope_type: 'occasion', scope_id: 42, entity_id: 0, source_revision: 3, claim_token: 'full-token' },
+    ]);
+    await new ClientSyncPublisher(fixtureValue.db, fixtureValue.store).runOnce();
+    expect(fixtureValue.db.refreshEvents).toHaveBeenCalledWith(42, null);
   });
 });
 

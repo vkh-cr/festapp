@@ -45,8 +45,10 @@ Deno.serve(async (request) => {
   const requestId = job.requestId as string;
   const userId = job.userId as string;
   const organization = Number(job.organization);
-  const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId);
-  const completionEmail = authUser?.user?.email;
+  const { data: completionEmail } = await supabaseAdmin.rpc(
+    "get_user_delivery_email",
+    { p_user: userId },
+  );
 
   if (!job.publicDeleted) {
     const { error } = await supabaseAdmin.rpc("cleanup_account_deletion_domain", { p_request_id: requestId });

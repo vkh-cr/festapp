@@ -1215,7 +1215,9 @@
     "companionOwnerIsAssigned": "Vlastník je sám přiřazen jako společník",
     "companionAssigned": "Společník byl úspěšně přiřazen.",
     "companionSignIn": "Přihlásit",
-    "companionSignOut": "Odhlásit"
+    "companionSignOut": "Odhlásit",
+    "companionManagedBy": "Spravován uživatelem: {name}",
+    "companionManages": "Spravuje: {names}"
   },
   "Common": {
     "fieldCannotBeEmpty": "Pole nemůže být prázdné",

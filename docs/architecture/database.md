@@ -1,5 +1,15 @@
 # Database Documentation
 
+## Client sync v1 maintenance contracts
+
+The sole publisher releases failed dirty work by exact claim token.
+`live_public entity_id=0` means full event refresh; targeted IDs affect only
+those rows. Drift health is read-only and repair is an explicit forward
+operation, never a trigger. Artifact retention uses bounded service-role
+candidate and exact metadata-ack RPCs with one shared cutoff and current
+reference protection. Receipt compaction preserves command IDs as permanent
+`expired` tombstones; immutable commit audit is never pruned.
+
 ## Occasion-scoped companion relationships
 
 `public.user_companions` stores `(occasion, user, companion)` with a unique
@@ -171,7 +181,7 @@ erDiagram
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
-| `user_info` | User profiles | `id`, `email_readonly`, `organization` |
+| `user_info` | User profiles | `id`, `email_readonly` (canonical account email), `email_delivery` (optional mail override), `organization` |
 | `occasion_users` | User-occasion link | `user`, `occasion`, `is_editor_view` |
 | `unit_users` | User-unit link | `user`, `unit` |
 | `organization_users` | User-org link | `user`, `organization` |

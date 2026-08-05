@@ -2,6 +2,9 @@
 
 import path from 'node:path';
 import process from 'node:process';
+import { execFile } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { promisify } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   managementQuery,
@@ -10,6 +13,7 @@ import {
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDirectory, '../..');
+const execFileAsync = promisify(execFile);
 
 function sqlLiteral(value) {
   return `'${String(value).replaceAll("'", "''")}'`;
@@ -24,6 +28,7 @@ export function loadTarget(root = projectRoot) {
   )?.[1];
   const organization = Number(config.get('ORGANIZATION_ID'));
   const occasionLink = config.get('FORCE_OCCASION_LINK');
+  const syncHeadOrigin = config.get('SYNC_HEAD_ORIGIN');
   const accessToken =
     process.env.SUPABASE_ACCESS_TOKEN ||
     localEnvironment.get('SUPABASE_ACCESS_TOKEN');
@@ -36,8 +41,43 @@ export function loadTarget(root = projectRoot) {
     throw new Error('FORCE_OCCASION_LINK is missing or invalid');
   }
   if (!accessToken) throw new Error('SUPABASE_ACCESS_TOKEN is required');
+  if (!syncHeadOrigin || !/^https:\/\//.test(syncHeadOrigin)) {
+    throw new Error('SYNC_HEAD_ORIGIN is missing or invalid');
+  }
 
-  return { projectRef, organization, occasionLink, accessToken };
+  return { projectRef, organization, occasionLink, syncHeadOrigin, accessToken };
+}
+
+export function buildPreparePublicationSql({ organization, occasionLink }) {
+  return `
+DO $prepare_client_sync_head$
+DECLARE v_occasion bigint; v_commit uuid; v_component text; v_revision bigint;
+BEGIN
+  SELECT o.id INTO STRICT v_occasion FROM public.occasions o
+  WHERE o.organization=${organization} AND o.link=${sqlLiteral(occasionLink)} FOR UPDATE;
+  INSERT INTO public.client_commits
+    (occasion,actor_kind,source,change_class,reason)
+  VALUES (v_occasion,'system','client_sync.cutover.enable','configuration',
+    'prepare a forward public head before enabling client_sync_v1')
+  RETURNING commit_id INTO v_commit;
+  FOREACH v_component IN ARRAY ARRAY['occasion_config','program_catalog','map_catalog',
+    'content_catalog','unit_catalog','live_public'] LOOP
+    INSERT INTO public.client_sync_scopes(component,scope_type,scope_id,source_revision)
+    VALUES (v_component,'occasion',v_occasion,1)
+    ON CONFLICT (component,scope_type,scope_id) DO UPDATE SET
+      source_revision=public.client_sync_scopes.source_revision+1,updated_at=now()
+    RETURNING source_revision INTO v_revision;
+    INSERT INTO public.client_commit_components
+      (commit_id,component,scope_type,scope_id,user_id,resulting_revision)
+    VALUES (v_commit,v_component,'occasion',v_occasion,NULL,v_revision);
+    INSERT INTO public.client_projection_dirty_keys
+      (component,scope_type,scope_id,entity_id,source_revision)
+    VALUES (v_component,'occasion',v_occasion,0,v_revision)
+    ON CONFLICT (component,scope_type,scope_id,entity_id) DO UPDATE SET
+      source_revision=EXCLUDED.source_revision,dirty_since=now(),claimed_at=NULL,claim_token=NULL;
+  END LOOP;
+END
+$prepare_client_sync_head$;`;
 }
 
 export function buildPreflightSql({ organization, occasionLink }) {
@@ -266,6 +306,65 @@ export function activationMissingConfirmations(args, occasionLink) {
   return missing;
 }
 
+export async function executeEnableLifecycle(actions) {
+  await actions.preflight();
+  await actions.preparePublication();
+  await actions.publishInitialHead();
+  await actions.verifyPublishedHead();
+  await actions.setEnabledFlag();
+}
+
+export async function executeDisableLifecycle(actions) {
+  await actions.preflight();
+  await actions.deletePublicHead();
+  await actions.verifyNotPublished();
+  await actions.setDisabledFlag();
+}
+
+async function runPublisherOnce() {
+  await execFileAsync('npm', ['run', 'once'], {
+    cwd: path.join(projectRoot, 'workers/sync-publisher'),
+    env: process.env,
+  });
+}
+
+async function deleteExactPublicHead(organization, occasionId) {
+  const wrangler = path.join(projectRoot, 'workers/sync-publisher/node_modules/.bin/wrangler');
+  await execFileAsync(wrangler, [
+    'r2', 'object', 'delete',
+    `festapp-public/client-sync/v1/${organization}/${occasionId}/public-head.json`,
+    '--remote',
+  ], { cwd: path.join(projectRoot, 'workers/sync-publisher'), env: process.env });
+}
+
+async function verifyHeadStatus(origin, organization, occasionId, expectedStatus) {
+  const deadline = Date.now() + (expectedStatus === 404 ? 8000 : 0);
+  do {
+    const response = await fetch(`${origin}/v1/public-sync/${organization}/${occasionId}/head`, {
+      headers: { 'Cache-Control': 'no-cache' },
+    });
+    if (response.status === expectedStatus) {
+      if (expectedStatus === 200) {
+        const head = await response.json();
+        if (head.protocol !== 1 || !head.catalog?.sha256) throw new Error('published head failed protocol/hash verification');
+        for (const descriptor of [head.catalog, head.live].filter(Boolean)) {
+          const artifact = await fetch(descriptor.url);
+          const bytes = Buffer.from(await artifact.arrayBuffer());
+          const hash = createHash('sha256').update(bytes).digest('hex');
+          if (!artifact.ok || hash !== descriptor.sha256 || bytes.length !== descriptor.bytes) {
+            throw new Error('published immutable artifact failed hash/length verification');
+          }
+        }
+      }
+      return;
+    }
+    if (Date.now() >= deadline) {
+      throw new Error(`public head verification expected ${expectedStatus}, received ${response.status}`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  } while (true);
+}
+
 function parseMode(args) {
   const modes = ['--apply', '--disable'].filter((flag) => args.includes(flag));
   if (modes.length > 1) throw new Error('choose only one operation');
@@ -280,22 +379,41 @@ export async function main(args = process.argv.slice(2)) {
     occasionLink: target.occasionLink,
   };
 
+  const preflight = async () => {
+    const rows = await managementQuery({ ...target, query: buildPreflightSql(queryTarget) });
+    const result = rows[0]?.result;
+    if (!result?.occasion) throw new Error('target occasion was not found');
+    if (result.otherEnabledOccasions !== 0) throw new Error('another occasion already has client_sync_v1 enabled');
+    if (!result.registryRows || result.pgauditInstalled !== true
+        || result.pgauditRolesConfigured !== true) {
+      throw new Error('registry or privileged audit preflight is not ready');
+    }
+    return result;
+  };
+
   if (mode === '--apply') {
     const missing = activationMissingConfirmations(args, target.occasionLink);
     if (missing.length > 0) {
       throw new Error(`activation refused; missing ${missing.join(', ')}`);
     }
-    await managementQuery({
-      ...target,
-      query: buildActivateSql(queryTarget),
+    const current = await preflight();
+    await executeEnableLifecycle({
+      preflight: async () => current,
+      preparePublication: () => managementQuery({ ...target, query: buildPreparePublicationSql(queryTarget) }),
+      publishInitialHead: runPublisherOnce,
+      verifyPublishedHead: () => verifyHeadStatus(target.syncHeadOrigin, target.organization, current.occasion.id, 200),
+      setEnabledFlag: () => managementQuery({ ...target, query: buildActivateSql(queryTarget) }),
     });
   } else if (mode === '--disable') {
     if (!args.includes(`--confirm=${target.occasionLink}`)) {
       throw new Error(`disable refused; missing --confirm=${target.occasionLink}`);
     }
-    await managementQuery({
-      ...target,
-      query: buildDisableSql(queryTarget),
+    const current = await preflight();
+    await executeDisableLifecycle({
+      preflight: async () => current,
+      deletePublicHead: () => deleteExactPublicHead(target.organization, current.occasion.id),
+      verifyNotPublished: () => verifyHeadStatus(target.syncHeadOrigin, target.organization, current.occasion.id, 404),
+      setDisabledFlag: () => managementQuery({ ...target, query: buildDisableSql(queryTarget) }),
     });
   }
 

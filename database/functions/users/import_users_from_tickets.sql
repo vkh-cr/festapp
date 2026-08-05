@@ -7,6 +7,7 @@ DECLARE
     ticket_record RECORD;
     order_data JSONB;
     user_email TEXT;
+    v_sign_in_email TEXT;
     user_name TEXT;
     user_surname TEXT;
     user_sex TEXT;
@@ -24,9 +25,6 @@ DECLARE
 
     v_occasion_user_row public.occasion_users%ROWTYPE;
     new_email TEXT;
-    email_local_part TEXT;
-    email_domain_part TEXT;
-    email_suffix INT;
 
     -- Arrays to store results
     inserted_users JSONB[] := ARRAY[]::JSONB[];
@@ -134,14 +132,19 @@ BEGIN
                 update_payload JSONB := '{}'::jsonb;
                 target_uuid UUID := ticket_record.existing_occasion_user_id; -- STRICT ID DEPENDENCY
             BEGIN
+                SELECT ui.email_readonly
+                  INTO v_sign_in_email
+                  FROM public.user_info ui
+                 WHERE ui.id = target_uuid;
+
                 -- Get current occasion data
                 SELECT data INTO current_ou_data
                 FROM public.occasion_users
                 WHERE "user" = target_uuid AND occasion = p_occasion_id;
 
                 -- Build payload comparing Order Data vs Current DB Data
-                IF user_email IS NOT NULL AND COALESCE(current_ou_data->>'email', 'NULL_FLAG') != user_email THEN
-                    update_payload := update_payload || jsonb_build_object('email', user_email);
+                IF v_sign_in_email IS NOT NULL AND COALESCE(current_ou_data->>'email', 'NULL_FLAG') != v_sign_in_email THEN
+                    update_payload := update_payload || jsonb_build_object('email', v_sign_in_email);
                 END IF;
                 IF user_name IS NOT NULL AND COALESCE(current_ou_data->>'name', 'NULL_FLAG') != user_name THEN
                     update_payload := update_payload || jsonb_build_object('name', user_name);
@@ -216,23 +219,19 @@ BEGIN
                 IF v_occasion_user_row."user" IS NOT NULL AND v_occasion_user_row.ticket IS NOT NULL THEN
                     -- User exists on occasion AND has a ticket -> DUPLICATE EMAIL Conflict
                     -- Create new user with +suffix
-                    email_suffix := 1;
-                    email_local_part := split_part(user_email, '@', 1);
-                    email_domain_part := split_part(user_email, '@', 2);
-                    LOOP
-                        new_email := email_local_part || '+' || email_suffix || '@' || email_domain_part;
-                        IF NOT EXISTS (SELECT 1 FROM public.user_info WHERE email_readonly = new_email AND organization = v_organization_id) THEN
-                            EXIT;
-                        END IF;
-                        email_suffix := email_suffix + 1;
-                    END LOOP;
+                    new_email := public.allocate_user_sign_in_email(
+                        v_organization_id, user_email
+                    );
 
                     user_data := jsonb_build_object('name', user_name, 'surname', user_surname, 'email', new_email, 'sex', user_sex);
 --                    IF v_text1 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text1', v_text1); END IF;
 --                    IF v_text2 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text2', v_text2); END IF;
 --                    IF v_birthDate IS NOT NULL THEN user_data := user_data || jsonb_build_object('birthDate', v_birthDate); END IF;
 
-                    v_user_id := create_user_in_organization_with_data_pure(v_organization_id, new_email, gen_random_uuid()::text, user_data);
+                    v_user_id := create_user_in_organization_with_data_pure(
+                        v_organization_id, new_email, user_email,
+                        gen_random_uuid()::text, user_data
+                    );
                     PERFORM public.add_user_to_occasion_internal_v1(p_occasion_id, v_user_id);
                     UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
 
@@ -275,7 +274,10 @@ BEGIN
 --                IF v_text2 IS NOT NULL THEN user_data := user_data || jsonb_build_object('text2', v_text2); END IF;
 --                IF v_birthDate IS NOT NULL THEN user_data := user_data || jsonb_build_object('birthDate', v_birthDate); END IF;
 
-                v_user_id := create_user_in_organization_with_data_pure(v_organization_id, user_email, gen_random_uuid()::text, user_data);
+                v_user_id := create_user_in_organization_with_data_pure(
+                    v_organization_id, user_email, user_email,
+                    gen_random_uuid()::text, user_data
+                );
                 PERFORM public.add_user_to_occasion_internal_v1(p_occasion_id, v_user_id);
                 UPDATE public.occasion_users SET ticket = ticket_record.ticket_id WHERE "user" = v_user_id AND occasion = p_occasion_id;
 

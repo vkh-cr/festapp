@@ -17,7 +17,9 @@ DECLARE
     v_group_assignments jsonb := '[]'::jsonb;
     v_user_id uuid;
     v_email text;
+    v_delivery_email text;
     v_existing_email text;
+    v_has_delivery_email boolean;
     v_response jsonb;
     v_is_occasion_member boolean;
     v_created integer := 0;
@@ -54,6 +56,11 @@ BEGIN
     -- Serialize all CSV imports for one occasion. The group RPC uses the same
     -- lock, which is transaction-reentrant for this session.
     PERFORM pg_catalog.pg_advisory_xact_lock(p_occasion_id);
+    PERFORM pg_catalog.pg_advisory_xact_lock(
+        pg_catalog.hashtextextended(
+            'user-sign-in-email:' || v_organization_id::text, 0
+        )
+    );
 
     FOR v_row IN SELECT value FROM jsonb_array_elements(p_rows)
     LOOP
@@ -64,8 +71,15 @@ BEGIN
 
         v_data_patch := v_row->'data';
         v_email := lower(btrim(v_data_patch->>'email'));
+        v_has_delivery_email := v_row ? 'email_delivery';
+        v_delivery_email := lower(btrim(COALESCE(
+            v_row->>'email_delivery', v_data_patch->>'email'
+        )));
         IF v_email IS NULL OR v_email = '' THEN
             RAISE EXCEPTION 'EMAIL_REQUIRED';
+        END IF;
+        IF v_delivery_email IS NULL OR v_delivery_email = '' THEN
+            RAISE EXCEPTION 'DELIVERY_EMAIL_REQUIRED';
         END IF;
 
         v_user_id := NULLIF(v_row->>'user_id', '')::uuid;
@@ -93,11 +107,23 @@ BEGIN
             IF v_user_id IS NULL THEN
                 SELECT ui.id
                   INTO v_user_id
-                  FROM public.user_info ui
+                 FROM public.user_info ui
                  WHERE ui.organization = v_organization_id
                    AND lower(btrim(ui.email_readonly)) = v_email
                  ORDER BY ui.created_at
                  LIMIT 1;
+            END IF;
+
+            IF v_user_id IS NULL AND EXISTS (
+                SELECT 1 FROM public.user_info ui
+                 WHERE ui.organization = v_organization_id
+                   AND lower(btrim(ui.email_readonly)) = v_email
+            ) THEN
+                -- The client assigns deterministic +N account emails for a
+                -- CSV batch. Reassigning one here would make a later retry
+                -- point at a different person. Without a stable external ID,
+                -- reject the stale/colliding input instead of guessing identity.
+                RAISE EXCEPTION 'ACCOUNT_EMAIL_ALREADY_EXISTS';
             END IF;
 
             IF v_user_id IS NULL THEN
@@ -113,6 +139,7 @@ BEGIN
                 v_user_id := public.create_user_in_organization_with_data_pure(
                     v_organization_id,
                     v_email,
+                    NULLIF(v_delivery_email, v_email),
                     encode(gen_random_bytes(16), 'hex'),
                     v_data_patch
                 );
@@ -120,11 +147,13 @@ BEGIN
                 SELECT 1 FROM public.user_info ui WHERE ui.id = v_user_id
             ) THEN
                 INSERT INTO public.user_info (
-                    id, organization, email_readonly, data, name, surname, sex
+                    id, organization, email_readonly, email_delivery, data,
+                    name, surname, sex
                 ) VALUES (
                     v_user_id,
                     v_organization_id,
                     v_email,
+                    v_delivery_email,
                     v_data_patch,
                     v_data_patch->>'name',
                     v_data_patch->>'surname',
@@ -163,6 +192,11 @@ BEGIN
         UPDATE public.user_info ui
            SET data = COALESCE(ui.data, '{}'::jsonb)
                       || public.get_user_profile_data_patch(v_data_patch),
+               email_delivery = CASE
+                   WHEN v_has_delivery_email
+                       THEN NULLIF(v_delivery_email, v_email)
+                   ELSE ui.email_delivery
+               END,
                name = CASE WHEN v_data_patch ? 'name'
                            THEN v_data_patch->>'name' ELSE ui.name END,
                surname = CASE WHEN v_data_patch ? 'surname'

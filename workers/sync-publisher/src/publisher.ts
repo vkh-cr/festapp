@@ -43,7 +43,8 @@ export interface PublicationState {
 
 export interface PublisherDatabase {
   claim(limit: number): Promise<DirtyKey[]>;
-  refreshEvents(occasionId: number, eventIds: number[]): Promise<void>;
+  releaseClaims(tokens: string[]): Promise<number>;
+  refreshEvents(occasionId: number, eventIds: number[] | null): Promise<void>;
   refreshCleaning(occasionId: number): Promise<void>;
   nextReleaseRevision(): Promise<number>;
   component(name: string, scopeType: string, scopeId: number): Promise<unknown>;
@@ -69,6 +70,8 @@ export interface CompletionInput {
 export interface ObjectStore {
   putImmutable(key: string, bytes: Uint8Array, contentType: string): Promise<void>;
   putHead(key: string, bytes: Uint8Array, expectedPreviousEtag?: string): Promise<{ etag: string; head: unknown }>;
+  exists(key: string): Promise<boolean>;
+  deleteExact(key: string): Promise<void>;
 }
 
 function encoded(value: unknown): Uint8Array {
@@ -171,7 +174,9 @@ export class ClientSyncPublisher {
 
     if (liveKeys.length) {
       try {
-        const eventIds = [...new Set(liveKeys.filter((key) => key.entity_id > 0).map((key) => key.entity_id))];
+        const eventIds = liveKeys.some((key) => key.entity_id === 0)
+          ? null
+          : [...new Set(liveKeys.filter((key) => key.entity_id > 0).map((key) => key.entity_id))];
         await this.db.refreshEvents(scopeId, eventIds);
         await this.db.refreshCleaning(scopeId);
         live = await this.artifact('live_public', scopeType, scopeId, previous.scope);
@@ -180,8 +185,12 @@ export class ClientSyncPublisher {
 
     const catalogSucceeded = catalogKeys.length > 0 && !catalogFailure;
     const liveSucceeded = liveKeys.length > 0 && !liveFailure;
-    if (!catalogSucceeded && !liveSucceeded) throw (catalogFailure ?? liveFailure ?? new Error('nothing publishable'));
+    if (!catalogSucceeded && !liveSucceeded) {
+      await this.release(keys);
+      throw (catalogFailure ?? liveFailure ?? new Error('nothing publishable'));
+    }
     if (!catalog) {
+      await this.release(keys);
       const detail = catalogFailure instanceof Error ? `: ${catalogFailure.message}` : '';
       throw new Error(`cannot publish a public head without an initial catalog${detail}`);
     }
@@ -190,21 +199,46 @@ export class ClientSyncPublisher {
     const headBytes = encoded(head);
     if (headBytes.byteLength > 16 * 1024) throw new Error('public head exceeds 16 KiB');
     const headKey = `client-sync/v1/${previous.scope}/public-head.json`;
-    const headWrite = await this.store.putHead(headKey, headBytes, previous.headEtag);
+    let headWrite: { etag: string; head: unknown };
+    try {
+      headWrite = await this.store.putHead(headKey, headBytes, previous.headEtag);
+    } catch (error) {
+      await this.release(keys);
+      throw error;
+    }
     const acceptedHead = headWrite.head as typeof head;
     const acceptedLive = acceptedHead.live;
     if (liveSucceeded && !acceptedLive) {
+      await this.release(keys);
       throw new Error('accepted public head omitted the live descriptor');
     }
-    const accepted = await this.db.complete({
-      scopeType, scopeId,
-      ...(catalogSucceeded ? { releaseRevision, manifest, manifestUrl, manifestSha256, manifestBytes } : {}),
-      ...(liveSucceeded ? { live: acceptedLive! } : {}),
-      head: acceptedHead, headEtag: headWrite.etag,
-      catalogClaimTokens: catalogSucceeded ? [...new Set(catalogKeys.map((key) => key.claim_token))] : [],
-      liveClaimTokens: liveSucceeded ? [...new Set(liveKeys.map((key) => key.claim_token))] : [],
-    });
-    if (!accepted) throw new Error('database rejected a stale public head');
+    let accepted: boolean;
+    try {
+      accepted = await this.db.complete({
+        scopeType, scopeId,
+        ...(catalogSucceeded ? { releaseRevision, manifest, manifestUrl, manifestSha256, manifestBytes } : {}),
+        ...(liveSucceeded ? { live: acceptedLive! } : {}),
+        head: acceptedHead, headEtag: headWrite.etag,
+        catalogClaimTokens: catalogSucceeded ? [...new Set(catalogKeys.map((key) => key.claim_token))] : [],
+        liveClaimTokens: liveSucceeded ? [...new Set(liveKeys.map((key) => key.claim_token))] : [],
+      });
+    } catch (error) {
+      await this.release(keys);
+      throw error;
+    }
+    if (!accepted) {
+      await this.release(keys);
+      throw new Error('database rejected a stale public head');
+    }
+    await this.release([
+      ...(catalogFailure ? catalogKeys : []),
+      ...(liveFailure ? liveKeys : []),
+    ]);
     if (catalogFailure || liveFailure) throw (catalogFailure ?? liveFailure);
+  }
+
+  private async release(keys: DirtyKey[]): Promise<void> {
+    const tokens = [...new Set(keys.map((key) => key.claim_token))];
+    if (tokens.length) await this.db.releaseClaims(tokens);
   }
 }

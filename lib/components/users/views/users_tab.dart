@@ -18,6 +18,7 @@ import 'package:fstapp/components/users/views/users_tab_helper.dart';
 import 'package:fstapp/components/occasion_services/service_item_model.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/components/users/companion/companion_admin_dialog.dart';
+import 'package:fstapp/components/users/companion/admin_companion_relationships.dart';
 
 class UsersTab extends StatefulWidget {
   const UsersTab({super.key});
@@ -37,9 +38,6 @@ class _UsersTabState extends State<UsersTab> {
       UserColumns.NAME,
       UserColumns.SURNAME,
       UserColumns.GROUP,
-      if (FeatureService.allowsAdminCompanionAssignment() &&
-          _canManageCompanions)
-        UserColumns.COMPANION_OWNER,
       UserColumns.SEX,
       if (FeatureService.isServiceAccommodationEnabled())
         UserColumns.ACCOMMODATION,
@@ -95,6 +93,7 @@ class _UsersTabState extends State<UsersTab> {
 
   Future<List<OccasionUserModel>> _loadUsersForGrid() async {
     final bundle = await DbUsers.getOccasionEditorDataBundle();
+    annotateAdminCompanionRelationships(bundle.users);
     _accommodations =
         bundle.services[DbOccasions.serviceTypeAccommodation] ?? [];
     controller!.columns = UserColumns.generateColumns(

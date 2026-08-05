@@ -55,9 +55,25 @@ class StorageHelper {
   /// crash; callers must stage and validate payloads before invoking it.
   static Future<void> setAllAtomic(Map<String, String?> values,
       [String? dbPath]) async {
+    await replaceByPrefixesAtomic(values, const [], dbPath);
+  }
+
+  /// Applies writes and removes matching key families in one transaction.
+  /// Prefix removals happen before writes so a replacement may reuse a key.
+  static Future<void> replaceByPrefixesAtomic(
+    Map<String, String?> values,
+    List<String> removePrefixes, [
+    String? dbPath,
+  ]) async {
     final store = StoreRef.main();
     final db = await _getDatabase(dbPath);
+    final keys =
+        removePrefixes.isEmpty ? const <Object?>[] : await store.findKeys(db);
     await db.transaction((transaction) async {
+      for (final key in keys.whereType<String>().where(
+          (key) => removePrefixes.any((prefix) => key.startsWith(prefix)))) {
+        await store.record(key).delete(transaction);
+      }
       for (final entry in values.entries) {
         if (entry.value == null) {
           await store.record(entry.key).delete(transaction);
@@ -66,6 +82,14 @@ class StorageHelper {
         }
       }
     });
+  }
+
+  static Future<List<String>> keys([String? dbPath]) async {
+    final store = StoreRef.main();
+    final db = await _getDatabase(dbPath);
+    return (await store.findKeys(db))
+        .whereType<String>()
+        .toList(growable: false);
   }
 
   static Future<void> removeByPrefix(String prefix, [String? dbPath]) async {

@@ -1,5 +1,8 @@
 # Kanonický polling sync, offline revize a distribuční cache
 
+> Historical design baseline. Current hardening and operational contracts are
+> authoritative in `client-sync-production-hardening-plan-2026-08-05.md`.
+
 Date: 2026-08-02; mutation architecture hardened 2026-08-03
 
 Status: Ready for execution

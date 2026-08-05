@@ -31,11 +31,16 @@ Deno.serve(async (request) => {
   const { data: profile } = await supabaseAdmin.from("user_info")
     .select("organization").eq("id", user.id).eq("organization", organizationId).maybeSingle();
   if (!profile) return jsonResponse({ error: "account_unavailable" }, 403);
+  const { data: deliveryEmail, error: deliveryEmailError } =
+    await supabaseAdmin.rpc("get_user_delivery_email", { p_user: user.id });
+  if (deliveryEmailError || !deliveryEmail) {
+    return jsonResponse({ error: "account_unavailable" }, 403);
+  }
 
   const token = createOpaqueToken();
   const tokenHash = await sha256(token);
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-  const maskedEmail = maskEmail(user.email);
+  const maskedEmail = maskEmail(deliveryEmail);
   const { data: created, error: createError } = await supabaseAdmin.rpc(
     "create_account_deletion_request",
     { p_user: user.id, p_organization: organizationId, p_token_hash: tokenHash,
@@ -49,7 +54,7 @@ Deno.serve(async (request) => {
   const requestId = created.requestId as string;
   try {
     await deliverEmail({
-      to: user.email,
+      to: deliveryEmail,
       templateCode: "ACCOUNT_DELETION_CONFIRM",
       context: { organization: organizationId },
       substitutions: {

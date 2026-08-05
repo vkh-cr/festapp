@@ -78,6 +78,8 @@
     "changePassword": "Zmeniť heslo",
     "companionName": "Meno spoločníka",
     "companionOf": "Spoločník od",
+    "companionManagedBy": "Spravovaný používateľom: {name}",
+    "companionManages": "Spravuje: {names}",
     "companionEventsEmpty": "Udalosti spoločníka sa zobrazia tu.",
     "createCompanion": "Vytvoriť spoločníka",
     "deleteAccount": "Zmazať účet",

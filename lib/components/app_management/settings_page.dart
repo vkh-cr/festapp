@@ -53,7 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _notificationsEnabled = isEnabled;
       _currentLanguage = currentLanguage;
       _isAppInstalled = isAppInstalled;
-      _isPromptEnabled = true; //PWAInstall().installPromptEnabled;
+      _isPromptEnabled = PWAInstall().installPromptEnabled;
     });
   }
 
@@ -220,7 +220,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               : Colors.grey,
                           textColor: ThemeConfig.whiteColor(context),
                         ),
-                        if (!_isPlatformSupported)
+                        if (!_isAppInstalled &&
+                            (!_isPlatformSupported || !_isPromptEnabled))
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
@@ -230,7 +231,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               textAlign: TextAlign.center,
                             ),
                           ),
-                        if (_isAppInstalled || !_isPromptEnabled)
+                        if (_isAppInstalled)
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(

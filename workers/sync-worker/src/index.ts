@@ -2,8 +2,14 @@ export interface Env {
   PUBLIC_SYNC: R2Bucket;
 }
 
+export interface ResponseCache {
+  match(request: Request): Promise<Response | undefined>;
+  put(request: Request, response: Response): Promise<void>;
+}
+
 const PATH = /^\/v1\/public-sync\/(\d+)\/(\d+)\/head$/;
 const CACHE_CONTROL = 'public, max-age=0, must-revalidate, s-maxage=5';
+const NOT_PUBLISHED_CACHE_CONTROL = 'public, max-age=0, must-revalidate, s-maxage=5';
 
 function responseHeaders(etag: string): Headers {
   return new Headers({
@@ -26,7 +32,32 @@ function matchesEtag(header: string | null, current: string): boolean {
   });
 }
 
-export async function handleRequest(request: Request, env: Env): Promise<Response> {
+function canonicalCacheKey(request: Request): Request {
+  const url = new URL(request.url);
+  url.hash = '';
+  url.search = '';
+  return new Request(url.toString(), { method: 'GET' });
+}
+
+function forCaller(request: Request, cached: Response): Response {
+  const headers = new Headers(cached.headers);
+  const etag = headers.get('ETag');
+  if (cached.status === 200 && etag && matchesEtag(request.headers.get('If-None-Match'), etag)) {
+    return new Response(null, { status: 304, headers });
+  }
+  return new Response(request.method === 'HEAD' ? null : cached.body, {
+    status: cached.status,
+    statusText: cached.statusText,
+    headers,
+  });
+}
+
+export async function handleRequest(
+  request: Request,
+  env: Env,
+  ctx?: ExecutionContext,
+  cache: ResponseCache = (caches as unknown as { default: ResponseCache }).default,
+): Promise<Response> {
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: responseHeaders('"options"') });
   }
@@ -37,28 +68,44 @@ export async function handleRequest(request: Request, env: Env): Promise<Respons
   const url = new URL(request.url);
   const match = PATH.exec(url.pathname);
   if (!match) return new Response('Not found', { status: 404 });
+
+  const cacheKey = canonicalCacheKey(request);
+  const cached = await cache.match(cacheKey);
+  if (cached) return forCaller(request, cached);
+
   const [, organizationId, occasionId] = match;
   const object = await env.PUBLIC_SYNC.get(
     `client-sync/v1/${organizationId}/${occasionId}/public-head.json`,
   );
   if (!object) {
-    return Response.json(
+    const headers = responseHeaders('"not-published"');
+    headers.set('Cache-Control', NOT_PUBLISHED_CACHE_CONTROL);
+    const response = Response.json(
       { protocol: 1, code: 'not_published' },
-      { status: 404, headers: { 'Cache-Control': 'public, max-age=0, s-maxage=5' } },
+      { status: 404, headers },
     );
+    const population = cache.put(cacheKey, response.clone()).catch((error: unknown) => {
+      console.warn(JSON.stringify({ event: 'public_sync_cache_put_failed', message: error instanceof Error ? error.message : String(error) }));
+    });
+    if (ctx) ctx.waitUntil(population); else await population;
+    return forCaller(request, response);
   }
 
   const etag = object.httpEtag;
   const headers = responseHeaders(etag);
-  if (matchesEtag(request.headers.get('If-None-Match'), etag)) {
-    return new Response(null, { status: 304, headers });
-  }
-  return new Response(request.method === 'HEAD' ? null : object.body, {
+  const response = new Response(object.body, {
     status: 200,
     headers,
   });
+  const population = cache.put(cacheKey, response.clone()).catch((error: unknown) => {
+    console.warn(JSON.stringify({ event: 'public_sync_cache_put_failed', message: error instanceof Error ? error.message : String(error) }));
+  });
+  if (ctx) ctx.waitUntil(population); else await population;
+  return forCaller(request, response);
 }
 
 export default {
-  fetch: handleRequest,
+  fetch(request, env, ctx) {
+    return handleRequest(request, env, ctx);
+  },
 } satisfies ExportedHandler<Env>;

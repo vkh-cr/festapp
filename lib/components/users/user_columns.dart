@@ -17,6 +17,7 @@ class UserColumns {
   static const String COMPANION_OWNER = "companionOwner";
   static const String COMPANION_OWNER_ID = "companionOwnerId";
   static const String COMPANION_ORIGIN = "companionOrigin";
+  static const String MANAGED_COMPANION_NAMES = "managedCompanionNames";
   static const String SEX = "sex";
   static const String ACCOMMODATION = "accommodation";
   static const String PHONE = "phone";
@@ -84,6 +85,39 @@ class UserColumns {
             field: NAME,
             type: TrinaColumnType.text(),
             width: 120,
+            renderer: (rendererContext) {
+              final ownerName = rendererContext
+                      .row.cells[COMPANION_OWNER]?.value
+                      ?.toString()
+                      .trim() ??
+                  '';
+              final managedNames = (rendererContext
+                          .row.cells[MANAGED_COMPANION_NAMES]?.value as List?)
+                      ?.whereType<String>()
+                      .toList(growable: false) ??
+                  const <String>[];
+              final tooltip = ownerName.isNotEmpty
+                  ? UserStrings.companionManagedBy(ownerName)
+                  : managedNames.isNotEmpty
+                      ? UserStrings.companionManages(managedNames.join(', '))
+                      : null;
+              return Row(children: [
+                Expanded(
+                  child: Text(
+                    rendererContext.row.cells[NAME]?.value?.toString() ?? '',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (tooltip != null)
+                  Tooltip(
+                    message: tooltip,
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: Icon(Icons.link, size: 16),
+                    ),
+                  ),
+              ]);
+            },
           ),
         ],
         SURNAME: [

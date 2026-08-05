@@ -95,16 +95,32 @@ Deno.serve(async (req) => {
 
     const context = { organization: organizationId, occasion: occasionId };
 
+    const { data: userProfile, error: userProfileError } = await supabaseAdmin
+      .from("user_info")
+      .select("email_readonly,name,surname")
+      .eq("id", userId)
+      .single();
+
+    if (userProfileError || !userProfile?.email_readonly) {
+      return new Response(JSON.stringify({ error: "User profile not found" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
     const subs = {
-        name: occasionUser.data.data.name,
-        surname: occasionUser.data.data.surname,
+        name: userProfile.name,
+        surname: userProfile.surname,
         code: code,
-        email: occasionUser.data.data.email,
+        email: userProfile.email_readonly,
         appName: appName,
         platformLinks: platformLinksHtml,
     };
 
-    const { data: userEmail, error: emailError } = await supabaseAdmin.rpc('get_occasion_user_email', { p_occasion: occasionId, p_user: userId });
+    const { data: userEmail, error: emailError } = await supabaseAdmin.rpc(
+      'get_user_delivery_email',
+      { p_user: userId },
+    );
 
     if (emailError || !userEmail) {
       console.error("Failed to get user's email:", emailError);

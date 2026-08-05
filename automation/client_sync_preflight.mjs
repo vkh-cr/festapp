@@ -48,6 +48,10 @@ const requiredSources = [
   'docs/plans/offline-sync-revision-cache-plan-2026-08-02.md',
   'docs/plans/offline-sync-revision-cache-EXECUTION-PROMPT-2026-08-02.md',
   'docs/plans/offline-sync-preflight-baseline-2026-08-02.md',
+  'supabase/migrations/20260806100000_client_sync_production_hardening.sql',
+  'automation/release/client_sync_health.mjs',
+  'automation/release/configure_client_sync_publisher_schedule.mjs',
+  'automation/release/client_sync_cutover.mjs',
   ...feedbackFunctions.values(),
 ];
 
@@ -204,17 +208,41 @@ function runLocalChecks() {
         .filter(([, present]) => !present)
         .map(([clause]) => clause)
     : [];
+  const hardeningPath = path.join(
+    projectRoot,
+    'supabase/migrations/20260806100000_client_sync_production_hardening.sql',
+  );
+  const hardening = fs.existsSync(hardeningPath)
+    ? fs.readFileSync(hardeningPath, 'utf8')
+    : '';
+  const publisherPackage = fs.readFileSync(
+    path.join(projectRoot, 'workers/sync-publisher/package.json'),
+    'utf8',
+  );
+  const hardeningFailures = [
+    ...(fs.existsSync(path.join(projectRoot, 'workers/sync-publisher/src/loop.ts'))
+      ? ['unmanaged_loop_runtime'] : []),
+    ...(JSON.parse(publisherPackage).scripts?.start ? ['publisher_start_script'] : []),
+    ...(/CREATE\s+(?:OR\s+REPLACE\s+)?TRIGGER/i.test(hardening)
+      ? ['persistent_application_trigger'] : []),
+    ...(!hardening.includes('release_client_projection_claims_v1')
+      ? ['claim_release_missing'] : []),
+    ...(!hardening.includes('delete_client_sync_artifact_metadata_v1')
+      ? ['retention_recheck_missing'] : []),
+  ];
 
   return {
     ok:
       missingSources.length === 0 &&
       invalidFunctions.length === 0 &&
-      invalidTableSecurity.length === 0,
+      invalidTableSecurity.length === 0 &&
+      hardeningFailures.length === 0,
     requiredSourceCount: requiredSources.length,
     feedbackFunctionCount: feedbackFunctions.size,
     missingSources,
     invalidFunctions,
     invalidTableSecurity,
+    hardeningFailures,
   };
 }
 

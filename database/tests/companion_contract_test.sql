@@ -168,6 +168,10 @@ UPDATE public.occasion_users
 SET services='{"accommodation":{"room-a":"paid"}}'::jsonb
 WHERE occasion=990001
   AND "user"='99000000-0000-0000-0000-000000000003';
+INSERT INTO public.user_group_info(id,title,occasion)
+VALUES (990001,'Fixture discussion group',990001);
+INSERT INTO public.user_groups("user","group")
+VALUES ('99000000-0000-0000-0000-000000000003',990001);
 SELECT set_config('request.jwt.claim.sub',
   '99000000-0000-0000-0000-000000000001',true);
 
@@ -234,6 +238,8 @@ BEGIN
   PERFORM assert_eq(
     v_companion->'services'->'accommodation'->>'room-a','paid',
     'companion profile uses the normal participant accommodation assignment');
+  PERFORM assert_eq(v_companion->>'group_title','Fixture discussion group',
+    'companion profile includes the normal participant discussion group');
 
   v_result:=public.assign_existing_companion_client_sync_v1(
     990001,'99000000-0000-0000-0000-000000000002',
@@ -287,6 +293,41 @@ VALUES (990001,'99000000-0000-0000-0000-000000000002',
   '99000000-0000-0000-0000-000000000001');
 SELECT set_config('request.jwt.claim.sub',
   '99000000-0000-0000-0000-000000000002',true);
+INSERT INTO public.events(id,title,start_time,end_time,occasion)
+VALUES (990001,'Companion attendance visibility',now()+interval '1 hour',
+  now()+interval '2 hours',990001);
+DO $$
+DECLARE v_result jsonb; v_owner_profile jsonb; v_companion_sync jsonb;
+  v_companion_program jsonb;
+BEGIN
+  v_result:=public.set_event_attendance_client_sync_v1(
+    990001,'99000000-0000-0000-0000-000000000003','sign_in',
+    '99000000-0000-0000-0000-000000000114');
+  PERFORM assert_eq(v_result->>'status','applied',
+    'owner can sign the assigned companion into an event');
+  PERFORM assert_true(EXISTS (SELECT 1 FROM public.event_users
+    WHERE event=990001
+      AND "user"='99000000-0000-0000-0000-000000000003'),
+    'companion attendance is stored under the companion identity');
+
+  v_owner_profile:=public.get_private_profile_payload_v1(
+    990001,'99000000-0000-0000-0000-000000000002');
+  PERFORM assert_true((v_owner_profile->'companions'->0->'event_ids')
+      @> '[990001]'::jsonb,
+    'owner private profile immediately contains companion attendance');
+
+  PERFORM set_config('request.jwt.claim.sub',
+    '99000000-0000-0000-0000-000000000003',true);
+  v_companion_sync:=public.get_private_client_sync_v1(
+    jsonb_build_object('organizationId',990001,'occasionId',990001),'{}');
+  SELECT component->'payload' INTO v_companion_program
+  FROM jsonb_array_elements(v_companion_sync#>'{data,components}') component
+  WHERE component->>'component'='private_program';
+  PERFORM assert_true((v_companion_program->'signedIn') @> '[990001]'::jsonb,
+    'companion self-login receives brother-created attendance');
+  PERFORM set_config('request.jwt.claim.sub',
+    '99000000-0000-0000-0000-000000000002',true);
+END $$;
 DO $$
 BEGIN
   BEGIN

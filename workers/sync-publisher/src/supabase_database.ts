@@ -1,6 +1,7 @@
 import type { CompletionInput, DirtyKey, PublicationState, PublisherDatabase } from './publisher.js';
+import type { ArtifactCandidate, RetentionDatabase } from './retention.js';
 
-export class SupabasePublisherDatabase implements PublisherDatabase {
+export class SupabasePublisherDatabase implements PublisherDatabase, RetentionDatabase {
   constructor(
     private readonly origin: string,
     private readonly serviceKey: string,
@@ -31,7 +32,12 @@ export class SupabasePublisherDatabase implements PublisherDatabase {
     }
     return this.rpc<DirtyKey[]>('claim_client_projection_dirty_v1', { p_limit: limit });
   }
-  refreshEvents(occasionId: number, eventIds: number[]) {
+  releaseClaims(tokens: string[]) {
+    return this.rpc<number>('release_client_projection_claims_v1', {
+      p_claim_tokens: tokens,
+    });
+  }
+  refreshEvents(occasionId: number, eventIds: number[] | null) {
     return this.rpc<void>('refresh_event_public_state_v1', { p_occasion: occasionId, p_event_ids: eventIds });
   }
   refreshCleaning(occasionId: number) {
@@ -67,6 +73,24 @@ export class SupabasePublisherDatabase implements PublisherDatabase {
       p_head_etag: input.headEtag,
       p_catalog_claim_tokens: input.catalogClaimTokens,
       p_live_claim_tokens: input.liveClaimTokens,
+    });
+  }
+  artifactCandidates(cutoff: string, limit: number) {
+    return this.rpc<ArtifactCandidate[]>('get_client_sync_artifact_retention_candidates_v1', {
+      p_cutoff: cutoff,
+      p_limit: limit,
+    });
+  }
+  acknowledgeArtifact(url: string, cutoff: string) {
+    return this.rpc<boolean>('delete_client_sync_artifact_metadata_v1', {
+      p_artifact_url: url,
+      p_cutoff: cutoff,
+    });
+  }
+  compactReceipts(cutoff: string, limit: number) {
+    return this.rpc<unknown>('compact_client_mutation_receipts_v1', {
+      p_cutoff: cutoff,
+      p_limit: limit,
     });
   }
 }

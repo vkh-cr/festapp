@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
 
   const userData = await supabaseAdmin
     .from("user_info")
-    .select()
+    .select("id,email_readonly")
     .eq("organization", organizationId)
     .ilike("email_readonly", userEmail)
     .maybeSingle();
@@ -57,6 +57,14 @@ Deno.serve(async (req) => {
   }
 
   const userId = userData.data.id;
+  const { data: deliveryEmail, error: deliveryEmailError } =
+    await supabaseAdmin.rpc("get_user_delivery_email", { p_user: userId });
+  if (deliveryEmailError || !deliveryEmail) {
+    return new Response(JSON.stringify({ error: "Delivery email unavailable" }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    });
+  }
   const token = crypto.randomUUID();
 
   await supabaseAdmin
@@ -85,7 +93,7 @@ Deno.serve(async (req) => {
 
   try {
     await deliverEmail({
-      to: userEmail,
+      to: deliveryEmail,
       templateCode: "RESET_PASSWORD",
       context,
       substitutions: subs,

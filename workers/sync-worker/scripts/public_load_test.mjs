@@ -14,6 +14,8 @@ const conditionalLatencies = [];
 const initialStatuses = new Map();
 const conditionalStatuses = new Map();
 const errors = [];
+const cacheStatuses = new Map();
+let responseBytes = 0;
 
 function increment(target, value) {
   target.set(value, (target.get(value) ?? 0) + 1);
@@ -32,7 +34,8 @@ async function request(headers, latencies, statuses) {
   });
   latencies.push(performance.now() - started);
   increment(statuses, response.status);
-  await response.arrayBuffer();
+  increment(cacheStatuses, response.headers.get('cf-cache-status') ?? 'unreported');
+  responseBytes += (await response.arrayBuffer()).byteLength;
   return response;
 }
 
@@ -73,6 +76,11 @@ const result = {
   },
   errors: errors.length,
   sample_errors: [...new Set(errors)].slice(0, 5),
+  cache_evidence: {
+    cf_cache_statuses: Object.fromEntries(cacheStatuses),
+    response_bytes: responseBytes,
+    note: 'Synthetic cache headers are operational evidence, not Cloudflare billing truth; confirm R2 reads and cost in the dashboard.',
+  },
 };
 
 console.log(JSON.stringify(result, null, 2));

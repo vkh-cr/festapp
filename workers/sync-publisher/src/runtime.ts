@@ -19,8 +19,16 @@ export function createPublisher(): ClientSyncPublisher {
       secretAccessKey: required('R2_SECRET_ACCESS_KEY'),
     },
   });
+  const scopeIds = required('SYNC_SCOPE_IDS').split(',').map((value) => Number(value.trim()));
+  if (!scopeIds.length || scopeIds.some((value) => !Number.isSafeInteger(value) || value <= 0)) {
+    throw new Error('SYNC_SCOPE_IDS must contain positive integer IDs');
+  }
   return new ClientSyncPublisher(
-    new SupabasePublisherDatabase(required('SUPABASE_URL'), required('SUPABASE_SERVICE_ROLE_KEY')),
+    new SupabasePublisherDatabase(
+      required('SUPABASE_URL'),
+      required('SUPABASE_SERVICE_ROLE_KEY'),
+      scopeIds,
+    ),
     new R2S3ObjectStore(s3, required('R2_BUCKET')),
     required('SYNC_ASSET_ORIGIN'),
   );

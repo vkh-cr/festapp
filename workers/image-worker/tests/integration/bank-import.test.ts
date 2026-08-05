@@ -59,6 +59,9 @@ describe.skipIf(skip)('Bank Import: process_email_transaction RPC', () => {
   let createdBankAccount = false;
   let paymentInfoId: number | null = null;
   let orderId: number | null = null;
+  let organizationId: number | null = null;
+  let unitId: number | null = null;
+  let occasionId: number | null = null;
   const transactionIds: number[] = [];
 
   afterAll(async () => {
@@ -73,6 +76,15 @@ describe.skipIf(skip)('Bank Import: process_email_transaction RPC', () => {
       if (paymentInfoId) {
         await pool.query('DELETE FROM eshop.payment_info WHERE id = $1', [paymentInfoId]);
       }
+      if (occasionId) {
+        await pool.query('DELETE FROM public.occasions WHERE id = $1', [occasionId]);
+      }
+      if (unitId) {
+        await pool.query('DELETE FROM public.units WHERE id = $1', [unitId]);
+      }
+      if (organizationId) {
+        await pool.query('DELETE FROM public.organizations WHERE id = $1', [organizationId]);
+      }
       if (createdBankAccount && bankAccountId) {
         await pool.query('DELETE FROM eshop.bank_accounts WHERE id = $1', [bankAccountId]);
       }
@@ -84,6 +96,29 @@ describe.skipIf(skip)('Bank Import: process_email_transaction RPC', () => {
 
   it('sets up test data (bank account, order, payment_info)', async () => {
     pool = await getPool();
+
+    const { rows: organizationRows } = await pool.query(
+      `INSERT INTO public.organizations (title)
+       VALUES ($1) RETURNING id`,
+      [`Bank import integration ${rnd}`]
+    );
+    organizationId = organizationRows[0].id;
+
+    const { rows: unitRows } = await pool.query(
+      `INSERT INTO public.units (title, organization)
+       VALUES ($1, $2) RETURNING id`,
+      [`Bank import integration ${rnd}`, organizationId]
+    );
+    unitId = unitRows[0].id;
+
+    const { rows: occasionRows } = await pool.query(
+      `INSERT INTO public.occasions
+         (title, link, start_time, end_time, organization, unit)
+       VALUES ($1, $2, now(), now() + interval '1 day', $3, $4)
+       RETURNING id`,
+      [`Bank import integration ${rnd}`, `bank-import-integration-${rnd}`, organizationId, unitId]
+    );
+    occasionId = occasionRows[0].id;
 
     const { rows: baRows } = await pool.query('SELECT id FROM eshop.bank_accounts LIMIT 1');
     if (baRows.length > 0) {
@@ -106,8 +141,8 @@ describe.skipIf(skip)('Bank Import: process_email_transaction RPC', () => {
 
     const { rows: oRows } = await pool.query(
       `INSERT INTO eshop.orders (payment_info, price, currency_code, state, occasion)
-       VALUES ($1, $2, 'CZK', 'ordered', 1) RETURNING id`,
-      [paymentInfoId, testAmount]
+       VALUES ($1, $2, 'CZK', 'ordered', $3) RETURNING id`,
+      [paymentInfoId, testAmount, occasionId]
     );
     orderId = oRows[0].id;
 

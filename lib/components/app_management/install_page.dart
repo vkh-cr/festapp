@@ -81,7 +81,7 @@ class _InstallPageState extends State<InstallPage> {
     bool isAppInstalled = PlatformHelper.isPwaInstalledOrNative();
     setState(() {
       _isAppInstalled = isAppInstalled;
-      _isPromptEnabled = true;
+      _isPromptEnabled = PWAInstall().installPromptEnabled;
     });
   }
 
@@ -310,6 +310,15 @@ class _InstallPageState extends State<InstallPage> {
                           ],
                         ),
                       ],
+                    ),
+                  ),
+                if (!_isAppInstalled && !_installFailed && !_isPromptEnabled)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      AppManagementStrings.pwaPromptNotSupported,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
                     ),
                   ),
               ]

@@ -78,6 +78,8 @@
     "changePassword": "Passwort ändern",
     "companionName": "Name des Begleiters",
     "companionOf": "Begleiter von",
+    "companionManagedBy": "Verwaltet von: {name}",
+    "companionManages": "Verwaltet: {names}",
     "companionEventsEmpty": "Die Ereignisse des Begleiters werden hier angezeigt.",
     "createCompanion": "Begleiter erstellen",
     "deleteAccount": "Konto löschen",

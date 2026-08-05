@@ -27,6 +27,7 @@ class OccasionUserModel extends ITrinaRowModel {
   String? companionOwnerId;
   String? companionOwnerName;
   String? companionOrigin;
+  List<String> managedCompanionNames;
   FormModel? form;
 
   bool? isEditor = false;
@@ -73,6 +74,7 @@ class OccasionUserModel extends ITrinaRowModel {
       this.companionOwnerId,
       this.companionOwnerName,
       this.companionOrigin,
+      this.managedCompanionNames = const [],
       this.form,
       this.aggregateVersion = 0});
 
@@ -224,6 +226,8 @@ class OccasionUserModel extends ITrinaRowModel {
       UserColumns.COMPANION_OWNER: TrinaCell(value: companionOwnerName ?? ""),
       UserColumns.COMPANION_OWNER_ID: TrinaCell(value: companionOwnerId ?? ""),
       UserColumns.COMPANION_ORIGIN: TrinaCell(value: companionOrigin ?? ""),
+      UserColumns.MANAGED_COMPANION_NAMES:
+          TrinaCell(value: managedCompanionNames),
       UserColumns.SEX: TrinaCell(value: data?[Tb.occasion_users.data_sex]),
       UserColumns.PHONE:
           TrinaCell(value: data?[Tb.occasion_users.data_phone] ?? ""),

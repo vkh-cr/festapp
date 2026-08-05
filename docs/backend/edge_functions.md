@@ -12,8 +12,8 @@ Deno-based edge functions for privileged operations, external API calls, and ema
 | `register` | User registration: creates user via RPC, sends welcome email with sign-in code and platform links. |
 | `send-email` | Transactional emails for ticket orders. Supports single sends and batch queue. Template codes: `TICKET_ORDER_STORNO`, `TICKET_ORDER_UPDATE`, `TICKET_ORDER_REMINDER`. Strategy Pattern for data gathering. |
 | `send-custom-email` | Editor-initiated custom email. Validates editor role, then sends with provided template/substitutions. |
-| `send-sign-in-code` | Resets password and sends sign-in code. Used by admins/editors to invite users. |
-| `send-reset-password-link` | Self-service "Forgot Password" flow. Sends reset email with branding from org config. |
+| `send-sign-in-code` | Resets password and sends sign-in code through the delivery resolver (`email_delivery`, otherwise `email_readonly`). Used by admins/editors to invite users. |
+| `send-reset-password-link` | Self-service "Forgot Password" flow. Looks up by `email_readonly` and uses the same delivery resolver. |
 | `send-ticket-order` | Creates/replaces an order through one receipted RPC; confirmation effects are queued transactionally. |
 | `send-tickets` | Generates and emails PDF tickets (standard or named) for an order. |
 | `download-ticket` | Returns a single ticket PDF as Base64 JSON for in-app download. |

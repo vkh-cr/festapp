@@ -58,3 +58,18 @@ dedicated `user_info` columns remain authoritative. Occasion notes, invitations,
 diet, arbitrary form answers, and `occasion_users.services` must never be copied
 into the profile. Existing legacy JSON is retained as a registration snapshot;
 it is not an implicit current-profile override.
+
+## Email identity
+
+`user_info.email_readonly` is the organization-unique canonical account email
+used throughout the application, including sign-in and account lookup. When
+multiple people share one mailbox, later identities use deterministic `+N`
+aliases. `user_info.email_delivery` is an optional, non-unique override used
+only for outbound account messages. If it is blank, delivery falls back to
+`email_readonly`. Order email remains a historical registration snapshot.
+
+CSV imports preserve every row, assign collision-free `+N` sign-in aliases,
+and send the original address separately as `email_delivery`. Ticket imports
+use `allocate_user_sign_in_email` for the same rule. User-account email delivery
+must resolve through `get_user_delivery_email`; it must not traverse orders or
+send to the organization-prefixed Auth email.

@@ -160,6 +160,7 @@ class UserInfoTb {
   String get created_at => "created_at";
   String get updated_at => "updated_at";
   String get email_readonly => "email_readonly";
+  String get email_delivery => "email_delivery";
   String get name => "name";
   String get surname => "surname";
   String get sex => "sex";

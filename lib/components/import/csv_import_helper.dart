@@ -18,6 +18,7 @@ class CsvImportHelper {
   static const String payloadUserId = 'user_id';
   static const String payloadData = 'data';
   static const String payloadGroupTitle = 'group_title';
+  static const String payloadDeliveryEmail = 'email_delivery';
 
   static Future<void> importFromCsv(BuildContext context) async {
     // Replaced the direct file picker with a dialog that allows drag-and-drop.
@@ -105,10 +106,12 @@ class CsvImportHelper {
       final existing = existingByEmail[email];
       final dataPatch = Map<String, dynamic>.from(imported)
         ..remove(ImportHelper.groupColumn)
+        ..remove(ImportHelper.deliveryEmailField)
         ..remove(Tb.occasion_users.services);
 
       return <String, dynamic>{
         payloadUserId: existing?.user,
+        payloadDeliveryEmail: imported[ImportHelper.deliveryEmailField],
         payloadData: dataPatch,
         if (imported.containsKey(Tb.occasion_users.services))
           Tb.occasion_users.services: imported[Tb.occasion_users.services],

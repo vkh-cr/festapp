@@ -3,7 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx src/loop.ts",
     "once": "tsx src/once.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

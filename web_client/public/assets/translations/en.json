@@ -1215,7 +1215,9 @@
     "companionOwnerIsAssigned": "The owner is assigned as a companion",
     "companionAssigned": "Companion assigned successfully.",
     "companionSignIn": "Sign in",
-    "companionSignOut": "Sign out"
+    "companionSignOut": "Sign out",
+    "companionManagedBy": "Managed by: {name}",
+    "companionManages": "Manages: {names}"
   },
   "Common": {
     "fieldCannotBeEmpty": "Field cannot be empty",

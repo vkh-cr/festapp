@@ -59,6 +59,71 @@ void main() {
     expect(users.single, isNot(contains(ImportHelper.groupColumn)));
   });
 
+  test('CSV import preserves duplicate delivery emails with sign-in aliases',
+      () {
+    final users = ImportHelper.getUsersFromCsv(
+      'E-mailová adresa,Jméno:,Příjmení:\n'
+      'shared@example.com,Klára,Vomelová\n'
+      'shared@example.com,Marie,Vomelová',
+    );
+
+    expect(users, hasLength(2));
+    expect(
+      users.map((user) => user[Tb.occasion_users.data_email]),
+      ['shared@example.com', 'shared+1@example.com'],
+    );
+    expect(
+      users.map((user) => user[ImportHelper.deliveryEmailField]),
+      everyElement('shared@example.com'),
+    );
+  });
+
+  test('CSV aliases do not collide with another real delivery address', () {
+    final users = ImportHelper.getUsersFromCsv(
+      'E-mailová adresa,Jméno:,Příjmení:\n'
+      'shared@example.com,Klára,Vomelová\n'
+      'shared+1@example.com,Petr,Novák\n'
+      'shared@example.com,Marie,Vomelová',
+    );
+
+    expect(
+      users.map((user) => user[Tb.occasion_users.data_email]),
+      ['shared@example.com', 'shared+1@example.com', 'shared+2@example.com'],
+    );
+  });
+
+  test('CSV aliases stay attached to people when duplicate rows are reordered',
+      () {
+    final firstOrder = ImportHelper.getUsersFromCsv(
+      'E-mailová adresa,Jméno:,Příjmení:\n'
+      'shared@example.com,Klára,Vomelová\n'
+      'shared@example.com,Marie,Vomelová',
+    );
+    final reversedOrder = ImportHelper.getUsersFromCsv(
+      'E-mailová adresa,Jméno:,Příjmení:\n'
+      'shared@example.com,Marie,Vomelová\n'
+      'shared@example.com,Klára,Vomelová',
+    );
+
+    Map<String, String> aliasesByName(List<Map<String, dynamic>> users) => {
+          for (final user in users)
+            user[Tb.occasion_users.data_name] as String:
+                user[Tb.occasion_users.data_email] as String,
+        };
+    expect(aliasesByName(reversedOrder), aliasesByName(firstOrder));
+  });
+
+  test('CSV rejects ambiguous people sharing both mailbox and name', () {
+    expect(
+      () => ImportHelper.getUsersFromCsv(
+        'E-mailová adresa,Jméno:,Příjmení:\n'
+        'shared@example.com,Jan,Novák\n'
+        'shared@example.com,Jan,Novák',
+      ),
+      throwsFormatException,
+    );
+  });
+
   test('prepared files update the same user on the second import', () {
     final first = ImportHelper.getUsersFromCsv(
       File('test/fixtures/bujnmi_group_import_01.csv').readAsStringSync(),
@@ -181,6 +246,24 @@ void main() {
     expect(row, isNot(contains(Tb.occasion_users.is_editor_view)));
     expect(row[CsvImportHelper.payloadGroupTitle],
         'Přesunutá testovací skupina CSV');
+  });
+
+  test('import payload separates sign-in and delivery email', () {
+    final imported = ImportHelper.getUsersFromCsv(
+      'E-mailová adresa,Jméno:,Příjmení:\n'
+      'shared@example.com,Klára,Vomelová\n'
+      'shared@example.com,Marie,Vomelová',
+    );
+    final rows = CsvImportHelper.buildImportRows(imported, const []);
+
+    expect(rows[1][CsvImportHelper.payloadDeliveryEmail], 'shared@example.com');
+    expect(
+      (rows[1][CsvImportHelper.payloadData]
+          as Map<String, dynamic>)[Tb.occasion_users.data_email],
+      'shared+1@example.com',
+    );
+    expect(rows[1][CsvImportHelper.payloadData],
+        isNot(contains(ImportHelper.deliveryEmailField)));
   });
 
   test('reimport sends only service families present in CSV', () {

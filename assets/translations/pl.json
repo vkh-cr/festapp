@@ -78,6 +78,8 @@
     "changePassword": "Zmień hasło",
     "companionName": "Nazwa towarzysza",
     "companionOf": "Towarzysz od",
+    "companionManagedBy": "Zarządzany przez: {name}",
+    "companionManages": "Zarządza: {names}",
     "companionEventsEmpty": "Wydarzenia towarzysza pojawią się tutaj.",
     "createCompanion": "Utwórz towarzysza",
     "deleteAccount": "Usuń konto",

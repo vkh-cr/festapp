@@ -142,6 +142,10 @@ class UserStrings {
       'FeatureUser.companionName'.tr(); // "Companion Name"
   static String get companionOf =>
       'FeatureUser.companionOf'.tr(); // "Companion of"
+  static String companionManagedBy(String name) =>
+      'FeatureUser.companionManagedBy'.tr(namedArgs: {'name': name});
+  static String companionManages(String names) =>
+      'FeatureUser.companionManages'.tr(namedArgs: {'names': names});
   static String get createCompanion =>
       'FeatureUser.createCompanion'.tr(); // "Create Companion"
   static String companionInfo({required String maxCompanions}) =>

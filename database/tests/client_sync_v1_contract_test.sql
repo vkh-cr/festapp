@@ -84,6 +84,10 @@ BEGIN
     'delete_service_item_client_sync_v1',
     'import_users_from_tickets_client_sync_v1',
     'complete_client_mutation_outcome_v1','complete_client_mutation_applied_v1'
+    ,'release_client_projection_claims_v1'
+    ,'get_client_sync_artifact_retention_candidates_v1'
+    ,'delete_client_sync_artifact_metadata_v1'
+    ,'compact_client_mutation_receipts_v1'
   ]) expected(name)
   WHERE NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
     WHERE n.nspname='public' AND p.proname=expected.name);
@@ -274,6 +278,35 @@ BEGIN
     WHERE p.oid='public.update_occasion_internal_v1(jsonb)'::regprocedure
       AND p.proconfig @> ARRAY['search_path=public, extensions']),
     'occasion implementation resolves its legacy helpers on a trusted path');
+  PERFORM assert_true(NOT has_function_privilege('authenticated',
+    'public.release_client_projection_claims_v1(uuid[])','EXECUTE'),
+    'ordinary clients cannot release publisher claims');
+  PERFORM assert_true(has_function_privilege('service_role',
+    'public.release_client_projection_claims_v1(uuid[])','EXECUTE'),
+    'service role owns token-scoped claim release');
+  PERFORM assert_true(EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='client_mutation_receipts'
+      AND column_name='expired_at'),
+    'receipt compaction has a permanent tombstone timestamp');
+  PERFORM assert_true(pg_get_functiondef(
+    'public.save_occasion_client_sync_v1(bigint,uuid,bigint,jsonb)'::regprocedure)
+      LIKE '%client_sync_v1 before hiding%',
+    'ordinary occasion save cannot hide an enabled sync scope');
+  PERFORM assert_true(pg_get_functiondef(
+    'public.delete_occasion_client_sync_v1(bigint,uuid)'::regprocedure)
+      LIKE '%client_sync_v1 before deleting%',
+    'ordinary occasion delete requires guarded disable first');
+  PERFORM assert_true(pg_get_functiondef(
+    'public.create_occasion_client_sync_v1(uuid,jsonb)'::regprocedure)
+      LIKE '%client_sync_v1%false%',
+    'ordinary occasion create forces the activation flag false');
+  PERFORM assert_true(pg_get_functiondef(
+    'public.duplicate_occasion_client_sync_v1(bigint,uuid)'::regprocedure)
+      LIKE '%client_sync_v1%false%',
+    'occasion duplication cannot copy an enabled activation flag');
+  PERFORM assert_eq((SELECT count(*) FROM pg_trigger t
+    WHERE NOT t.tgisinternal AND pg_get_triggerdef(t.oid) ILIKE '%client_sync%'),
+    0::bigint,'client sync hardening adds no persistent application trigger');
 END $$;
 
 ROLLBACK;

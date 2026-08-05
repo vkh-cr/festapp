@@ -1,4 +1,10 @@
-CREATE OR REPLACE FUNCTION public.create_user_in_organization_with_data_pure(org bigint, email text, password text, data jsonb)
+CREATE OR REPLACE FUNCTION public.create_user_in_organization_with_data_pure(
+    org bigint,
+    email text,
+    email_delivery text,
+    password text,
+    data jsonb
+)
 RETURNS uuid
 LANGUAGE plpgsql
 SET search_path = public, extensions
@@ -11,9 +17,32 @@ DECLARE
     _value text;
     trimmed_data jsonb := '{}';
     original_email text;
+    normalized_delivery_email text;
 BEGIN
-    -- Trim and lower the email input
     original_email := lower(trim(email));
+    normalized_delivery_email := COALESCE(
+        NULLIF(lower(trim(email_delivery)), ''), original_email
+    );
+
+    IF original_email IS NULL OR original_email = ''
+       OR normalized_delivery_email IS NULL OR normalized_delivery_email = ''
+       OR position('@' IN original_email) <= 1
+       OR position('@' IN normalized_delivery_email) <= 1 THEN
+        RAISE EXCEPTION 'INVALID_USER_EMAIL';
+    END IF;
+
+    -- All application writers serialize identity creation per organization.
+    PERFORM pg_catalog.pg_advisory_xact_lock(
+        pg_catalog.hashtextextended('user-sign-in-email:' || org::text, 0)
+    );
+
+    IF EXISTS (
+        SELECT 1 FROM public.user_info ui
+         WHERE ui.organization = org
+           AND lower(btrim(ui.email_readonly)) = original_email
+    ) THEN
+        RAISE EXCEPTION 'SIGN_IN_EMAIL_ALREADY_EXISTS';
+    END IF;
 
     -- Add organization prefix to the email for auth tables
     email := format('%s+%s', org, original_email);
@@ -44,14 +73,15 @@ BEGIN
     VALUES
       (gen_random_uuid(), usr, usr, format('{"sub":"%s","email":"%s"}', usr::text, email)::jsonb, 'email', NULL, now(), now());
 
-    -- Insert into user_info with the original email (without prefix)
+    -- The account email is canonical; store only a distinct delivery override.
     INSERT INTO user_info (
-      id, email_readonly, name, surname, sex, phone, birth_date, data,
+      id, email_readonly, email_delivery, name, surname, sex, phone, birth_date, data,
       organization
     )
     VALUES (
       usr,
       original_email,
+      NULLIF(normalized_delivery_email, original_email),
       COALESCE(trimmed_data->>'name', ''),
       COALESCE(trimmed_data->>'surname', ''),
       COALESCE(trimmed_data->>'sex', ''),
@@ -63,4 +93,21 @@ BEGIN
 
     RETURN usr;
 END;
+$$;
+
+-- Compatibility boundary for released callers. New code supplies the delivery
+-- address explicitly; ordinary registrations use the sign-in email for both.
+CREATE OR REPLACE FUNCTION public.create_user_in_organization_with_data_pure(
+    org bigint,
+    email text,
+    password text,
+    data jsonb
+)
+RETURNS uuid
+LANGUAGE sql
+SET search_path = public, extensions
+AS $$
+    SELECT public.create_user_in_organization_with_data_pure(
+        org, email, email, password, data
+    );
 $$;
