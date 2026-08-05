@@ -35,7 +35,8 @@ source "$CONFIG_FILE"
 for required_key in DOMAIN APP_NAME APP_TITLE_SHORT APP_DESCRIPTION \
     ANDROID_APPLICATION_ID IOS_BUNDLE_ID IOS_DEVELOPMENT_TEAM \
     IOS_ONESIGNAL_APP_GROUP IOS_ASSOCIATED_DOMAIN LOGO_ASSET DARK_LOGO_ASSET \
-    PROGRAM_LOGO_ASSET WEB_LOADING_LOGO_ASSET; do
+    PROGRAM_LOGO_ASSET WEB_LOADING_LOGO_ASSET WEB_IS_ALL_UNIT \
+    WEB_SUPPORTED_LANGUAGES; do
     if [ -z "${!required_key}" ]; then
         echo "Error: $required_key must be defined in $CONFIG_FILE"
         exit 1
@@ -142,6 +143,24 @@ if [ -f "$APP_CONFIG" ]; then
         sed_inplace "s|static isAppSupported = .*;|static isAppSupported = $IS_APP_SUPPORTED;|g" "$APP_CONFIG"
     fi
 
+    # Update tenant-specific web behavior from the canonical configuration.
+    python3 - "$APP_CONFIG" "$WEB_IS_ALL_UNIT" "$WEB_SUPPORTED_LANGUAGES" <<'PY'
+import re
+import sys
+
+path, is_all_unit, supported_languages = sys.argv[1:]
+if is_all_unit not in {"true", "false"}:
+    raise SystemExit("WEB_IS_ALL_UNIT must be true or false")
+languages = supported_languages.split(",")
+if not languages or any(not re.fullmatch(r"[a-z]{2}", language) for language in languages):
+    raise SystemExit("WEB_SUPPORTED_LANGUAGES must be comma-separated ISO 639-1 codes")
+source = open(path, encoding="utf-8").read()
+source = re.sub(r"static isAllUnit = .*;", f"static isAllUnit = {is_all_unit};", source)
+language_list = ", ".join(repr(language) for language in languages)
+source = re.sub(r"static supportedLanguages = .*;", f"static supportedLanguages = [{language_list}];", source)
+open(path, "w", encoding="utf-8").write(source)
+PY
+
     # Update Web Link
     if [ ! -z "$WEB_LINK" ]; then
         sed_inplace "s|static webLink = \".*\";|static webLink = \"$WEB_LINK\";|g" "$APP_CONFIG"
@@ -154,7 +173,7 @@ if [ -f "$APP_CONFIG" ]; then
         sed_inplace "s|static forceOccasionLink = .*;|static forceOccasionLink = \"$FORCE_OCCASION_LINK\";|g" "$APP_CONFIG"
     fi
 
-    echo "✔ Updated app_config.js (Url, Key, Org, FlutterUrl, IsAppSupported, WebLink, ForceOccasionLink)"
+    echo "✔ Updated app_config.js (tenant identity, behavior, and endpoints)"
 else
     echo "Warning: $APP_CONFIG not found."
 fi

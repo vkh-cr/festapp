@@ -3,7 +3,7 @@
 DO $$
 DECLARE
     v_bank_id bigint;
-    v_pairing_code text := 'ABCDEF' || floor(random()*10000)::text;  -- unique per run
+    v_pairing_code text := 'ABCDEF' || lpad(floor(random()*10000)::text, 4, '0');  -- unique per run, exactly 10 chars
     v_count bigint;
 BEGIN
     -- 1. Setup: bank account with uppercase pairing_code

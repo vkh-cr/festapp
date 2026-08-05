@@ -135,6 +135,8 @@ echo "--- web_client/src/app_config.js ---"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static supabaseUrl = 'https://test.supabase.co';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static anonKey = 'test-anon-key-fixture';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static organization = 42;"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static isAllUnit = true;"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static supportedLanguages = ['cs', 'en'];"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static webLink = "https://test.example.com";'
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static forceOccasionLink = "test-occasion";'
 
