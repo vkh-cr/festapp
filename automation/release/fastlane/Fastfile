@@ -470,6 +470,7 @@ platform :ios do
       api_key: api_key, app_identifier: BUNDLE_ID,
       submit_for_review: true, skip_binary_upload: true,
       skip_metadata: true, skip_screenshots: true,
+      ignore_language_directory_validation: true,
       automatic_release: false, run_precheck_before_submit: true,
       precheck_include_in_app_purchases: false, force: true
     )
