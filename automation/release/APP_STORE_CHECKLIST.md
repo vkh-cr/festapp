@@ -1,6 +1,6 @@
 # CSM Ostrava App Store checklist
 
-Target: existing Apple ID `6745415882`, bundle ID `festapp.jm2025`. No new app may be created. Release is manual after approval. The iOS target version is explicit in `app_store_config.json`; its numeric build comes from the `+build` part of `VERSION` in `automation/project.conf`.
+Target: existing Apple ID `6745415882`, bundle ID `festapp.jm2025`. No new app may be created. Release is automatic after Apple approval. The iOS target version is explicit in `app_store_config.json`; its numeric build comes from the `+build` part of `VERSION` in `automation/project.conf`.
 
 | Gate | Status | Owner | Evidence / required action |
 |---|---|---|---|
@@ -27,6 +27,6 @@ Target: existing Apple ID `6745415882`, bundle ID `festapp.jm2025`. No new app m
 | Disposable account deletion | local proof passed 2026-08-03; deployed test pending | Privacy + QA owner | Repository-local Supabase CLI ran the SQL contract and a unique create/seed/email/GET/POST/replay lifecycle; Auth/profile/occasion/event/request leftovers were all zero. Production-like rehearsal still needs separate destructive authority |
 | Target build selection | passed 2026-08-05 | Release engineer | Exact API readback selected build `379` for version `0.19.84`; the read-only submission gate passed |
 | Submit for review | submitted 2026-08-05 | App Store Account Holder | Exact gated submission succeeded; App Store Connect readback is `WAITING_FOR_REVIEW` |
-| Public release | waiting for Apple approval | App Store Account Holder | Release mode remains manual; perform the separate release gate only after Apple approves the version |
+| Public release | waiting for Apple approval | App Store Account Holder | Release type is `AFTER_APPROVAL`; App Store Connect publishes the approved version automatically |
 
 Old-binary compatibility owner: backend owner. Review date: 2026-10-01 or after an approved adoption threshold, whichever is later.

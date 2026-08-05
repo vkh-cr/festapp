@@ -149,15 +149,7 @@ Read-only submission completeness summary
 [bundle exec] fastlane ios submit_for_review
 ```
 
-Explicitly gated submission with manual release selected
-
-### ios release_approved_version
-
-```sh
-[bundle exec] fastlane ios release_approved_version
-```
-
-Separate approval gate; release itself remains a manual ASC action
+Explicitly gated submission with automatic release after Apple approval
 
 ----
 
