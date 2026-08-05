@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
+import 'package:fstapp/components/scan/scan_strings.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
@@ -106,8 +107,8 @@ class _ScanPageState extends State<ScanPage> {
     if (widget.scanCode == null) {
       String? inputScanCode = await DialogHelper.showInputDialog(
         context: context,
-        dialogTitle: OrdersStrings.enterScanCode,
-        labelText: OrdersStrings.scanCodeLabel,
+        dialogTitle: ScanStrings.enterScanCode,
+        labelText: ScanStrings.scanCode,
       );
       if (inputScanCode != null && inputScanCode.isNotEmpty) {
         widget.scanCode = inputScanCode;
@@ -358,7 +359,7 @@ class _ScanPageState extends State<ScanPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(OrdersStrings.resetPasswordTitle),
+          title: Text(ScanStrings.resetPassword),
           content: Text(OrdersStrings.resetPasswordConfirmationContent(
               _defaultResetPassword)),
           actions: [

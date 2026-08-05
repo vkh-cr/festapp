@@ -14,9 +14,8 @@ class OccasionLinkModel {
   OccasionUserModel? unitUser;
   List<int>? bankAccountsAdmin;
   bool? isAdmin = false;
-  String? versionRecommended;
-  String? versionLink;
   OrganizationModel? organization;
+  bool clientSyncV1;
 
   bool isAvailable() => code == 200;
   bool isAccessDenied() => code == 403;
@@ -54,9 +53,8 @@ class OccasionLinkModel {
           : null,
       unit: json["unit"] != null ? UnitModel.fromJson(json["unit"]) : null,
       isAdmin: json["is_admin"],
-      versionRecommended: json["version_recommended"],
-      versionLink: json["version_link"],
       organization: organization,
+      clientSyncV1: json['client_sync_v1'] as bool? ?? false,
     );
   }
 
@@ -69,8 +67,7 @@ class OccasionLinkModel {
     this.occasion,
     this.unit,
     this.isAdmin,
-    this.versionRecommended,
-    this.versionLink,
     this.organization,
+    this.clientSyncV1 = false,
   });
 }

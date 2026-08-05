@@ -13,6 +13,11 @@ class UserColumns {
   static const String EMAIL = "email";
   static const String NAME = "name";
   static const String SURNAME = "surname";
+  static const String GROUP = "group";
+  static const String COMPANION_OWNER = "companionOwner";
+  static const String COMPANION_OWNER_ID = "companionOwnerId";
+  static const String COMPANION_ORIGIN = "companionOrigin";
+  static const String MANAGED_COMPANION_NAMES = "managedCompanionNames";
   static const String SEX = "sex";
   static const String ACCOMMODATION = "accommodation";
   static const String PHONE = "phone";
@@ -29,6 +34,8 @@ class UserColumns {
   static const String EDITOR_VIEW = "editorView";
   static const String EDITOR_ORDER = "editorOrder";
   static const String EDITOR_ORDER_VIEW = "editorOrderView";
+  static const String CLEANING_CREW = "cleaningCrew";
+  static const String CLEANING_BLOCKED = "cleaningBlocked";
   static const String UNIT_MANAGER = "unitManager";
   static const String UNIT_EDITOR = "unitEditor";
   static const String UNIT_EDITOR_VIEW = "unitEditorView";
@@ -78,6 +85,39 @@ class UserColumns {
             field: NAME,
             type: TrinaColumnType.text(),
             width: 120,
+            renderer: (rendererContext) {
+              final ownerName = rendererContext
+                      .row.cells[COMPANION_OWNER]?.value
+                      ?.toString()
+                      .trim() ??
+                  '';
+              final managedNames = (rendererContext
+                          .row.cells[MANAGED_COMPANION_NAMES]?.value as List?)
+                      ?.whereType<String>()
+                      .toList(growable: false) ??
+                  const <String>[];
+              final tooltip = ownerName.isNotEmpty
+                  ? UserStrings.companionManagedBy(ownerName)
+                  : managedNames.isNotEmpty
+                      ? UserStrings.companionManages(managedNames.join(', '))
+                      : null;
+              return Row(children: [
+                Expanded(
+                  child: Text(
+                    rendererContext.row.cells[NAME]?.value?.toString() ?? '',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (tooltip != null)
+                  Tooltip(
+                    message: tooltip,
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: Icon(Icons.link, size: 16),
+                    ),
+                  ),
+              ]);
+            },
           ),
         ],
         SURNAME: [
@@ -87,6 +127,24 @@ class UserColumns {
             field: SURNAME,
             type: TrinaColumnType.text(),
             width: 120,
+          ),
+        ],
+        GROUP: [
+          TrinaColumn(
+            title: UserStrings.group,
+            field: GROUP,
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            width: 160,
+          ),
+        ],
+        COMPANION_OWNER: [
+          TrinaColumn(
+            title: UserStrings.companionOf,
+            field: COMPANION_OWNER,
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            width: 180,
           ),
         ],
         SEX: [
@@ -223,19 +281,47 @@ class UserColumns {
           return columns;
         },
         ACCOMMODATION: (Map<String, dynamic> data) {
-          var select = data[DbOccasions.serviceTypeAccommodation]
-              ?.map((a) => a.code)
-              .toList();
-          select ??= [];
-          select.add("");
+          final items = List<ServiceItemModel>.from(
+            data[DbOccasions.serviceTypeAccommodation] ?? const [],
+          );
+          final labels = {
+            for (final item in items)
+              item.code: [
+                if (item.title?.trim().isNotEmpty == true) item.title!.trim(),
+                if (item.placeTitle?.trim().isNotEmpty == true &&
+                    item.placeTitle!.trim() != item.title?.trim())
+                  item.placeTitle!.trim(),
+              ].join(' — '),
+          };
+          final select = <String>["", ...items.map((item) => item.code)];
+          String labelFor(dynamic code) {
+            if (code == null || code.toString().isEmpty) return "—";
+            final title = labels[code];
+            return title == null || title.isEmpty
+                ? code.toString()
+                : '$title (${code.toString()})';
+          }
+
           return [
             TrinaColumn(
-                title: UserStrings.accommodation,
-                field: ACCOMMODATION,
-                type: TrinaColumnType.select(select),
-                applyFormatterInEditing: true,
-                enableEditingMode: RightsService.canUpdateUsers(),
-                width: 100)
+              title: UserStrings.accommodation,
+              field: ACCOMMODATION,
+              type: TrinaColumnType.select<String>(
+                select,
+                itemToString: labelFor,
+                menuItemBuilder: (code) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(labelFor(code)),
+                  ),
+                ),
+              ),
+              formatter: labelFor,
+              applyFormatterInEditing: true,
+              enableEditingMode: RightsService.canUpdateUsers(),
+              width: 190,
+            )
           ];
         },
         IS_VOLUNTEER: [_statusColumn(UserStrings.volunteer, IS_VOLUNTEER)],
@@ -245,6 +331,10 @@ class UserColumns {
         EDITOR_ORDER: [_statusColumn(UserStrings.editOrders, EDITOR_ORDER)],
         EDITOR_ORDER_VIEW: [
           _statusColumn(UserStrings.readOrders, EDITOR_ORDER_VIEW)
+        ],
+        CLEANING_CREW: [_statusColumn(UserStrings.cleaningCrew, CLEANING_CREW)],
+        CLEANING_BLOCKED: [
+          _statusColumn(UserStrings.cleaningBlocked, CLEANING_BLOCKED)
         ],
         UNIT_MANAGER: [
           _statusColumn(UserStrings.administrator, UNIT_MANAGER,

@@ -1,5 +1,7 @@
 // feature_service.dart
 
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -12,6 +14,8 @@ import 'form_feature.dart';
 import 'import_feature.dart';
 import 'map_feature.dart';
 import 'schedule_feature.dart';
+import 'services_feature.dart';
+import 'counseling_feature.dart';
 import 'ticket_feature.dart';
 import 'workshop_feature.dart';
 import 'contract_feature.dart';
@@ -31,13 +35,19 @@ class FeatureService {
     FeatureConstants.companions,
     ScheduleFeature.metaSchedule,
     FeatureConstants.import,
+    FeatureConstants.globalSearch,
+    FeatureConstants.eventFeedback,
+    FeatureConstants.programNotifications,
+    FeatureConstants.counseling,
+    FeatureConstants.cleaning,
   ];
 
   /// Checks whether the feature with [featureCode] is enabled.
   /// Expects [features] to be a list of Feature objects.
   static bool isFeatureEnabled(String featureCode, {List<Feature>? features}) {
-    if (RightsService.currentOccasion() == null && features == null)
+    if (RightsService.currentOccasion() == null && features == null) {
       return false;
+    }
     final featureList = features ?? RightsService.currentOccasion()!.features;
     return featureList
         .any((feature) => feature.code == featureCode && feature.isEnabled);
@@ -70,7 +80,7 @@ class FeatureService {
         SimpleFeature(code: FeatureConstants.songbook, isEnabled: false),
         SimpleFeature(code: FeatureConstants.game, isEnabled: false),
         SimpleFeature(code: FeatureConstants.mySchedule, isEnabled: false),
-        SimpleFeature(code: FeatureConstants.services, isEnabled: false),
+        ServicesFeature(code: FeatureConstants.services, isEnabled: false),
         SimpleFeature(code: FeatureConstants.userGroups, isEnabled: false),
         SimpleFeature(code: FeatureConstants.entryCode, isEnabled: false),
         SimpleFeature(code: FeatureConstants.timetable, isEnabled: false),
@@ -78,13 +88,20 @@ class FeatureService {
         CompanionsFeature(
             code: FeatureConstants.companions,
             isEnabled: false,
-            companionsMax: 1),
+            companionsMax: 1,
+            allowUserCreate: true,
+            allowAdminAssign: false),
         ScheduleFeature(
             code: ScheduleFeature.metaSchedule,
             isEnabled: true,
             scheduleType: 'basic'),
         ImportFeature(code: FeatureConstants.import, isEnabled: true),
         ContractFeature(code: FeatureConstants.contract, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.globalSearch, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.eventFeedback, isEnabled: false),
+        ProgramNotificationsFeature(),
+        CounselingFeature(code: FeatureConstants.counseling, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.cleaning, isEnabled: false),
       ],
     ];
   }
@@ -157,12 +174,66 @@ class FeatureService {
     return (desc != null && desc.trim().isNotEmpty) ? desc : null;
   }
 
-  /// Returns the maximum number of companions allowed.
-  static int? getMaxCompanions() {
-    final companionFeature = getFeatureDetails(FeatureConstants.companions);
-    if (companionFeature is CompanionsFeature) {
-      return companionFeature.companionsMax;
-    }
-    return null;
+  /// Returns the [ServicesFeature] (Inventory / "Pobyt") config, or null when
+  /// the feature is absent or stored as a plain feature.
+  static ServicesFeature? getServicesFeature() {
+    final feature = getFeatureDetails(FeatureConstants.services);
+    return feature is ServicesFeature ? feature : null;
   }
+
+  /// True when the services feature is enabled AND accommodation is permitted
+  /// by its mode/sub-toggle. Falls back to the plain enabled flag when the
+  /// feature predates the mode config.
+  static bool isServiceAccommodationEnabled() =>
+      isFeatureEnabled(FeatureConstants.services) &&
+      (getServicesFeature()?.allowsAccommodation ?? true);
+
+  /// True when the services feature is enabled AND food/diet is permitted.
+  static bool isServiceFoodEnabled() =>
+      isFeatureEnabled(FeatureConstants.services) &&
+      (getServicesFeature()?.allowsFood ?? true);
+
+  /// True when the services feature is enabled AND generic capacity groups are
+  /// permitted (capacity-groups mode).
+  static bool isServiceCapacityGroupsEnabled() =>
+      isFeatureEnabled(FeatureConstants.services) &&
+      (getServicesFeature()?.allowsCapacityGroups ?? true);
+
+  /// Returns the [CounselingFeature] config, or null when the feature is absent
+  /// or stored as a plain feature.
+  static CounselingFeature? getCounselingFeature({List<Feature>? features}) {
+    final feature =
+        getFeatureDetails(FeatureConstants.counseling, features: features);
+    return feature is CounselingFeature ? feature : null;
+  }
+
+  /// True when the counseling feature is enabled. Speakers are core and never
+  /// gated; only the counseling flow depends on this (decision R4).
+  static bool isCounselingEnabled({List<Feature>? features}) =>
+      isFeatureEnabled(FeatureConstants.counseling, features: features);
+
+  /// Returns the maximum number of companions allowed.
+  static CompanionsFeature? getCompanionsFeature({List<Feature>? features}) {
+    final feature =
+        getFeatureDetails(FeatureConstants.companions, features: features);
+    return feature is CompanionsFeature ? feature : null;
+  }
+
+  static bool isCompanionsEnabled({List<Feature>? features}) =>
+      isFeatureEnabled(FeatureConstants.companions, features: features);
+
+  /// The feature is deliberately unavailable until notification delivery is
+  /// implemented. Keep this hard gate even if stored configuration says true.
+  static bool isProgramNotificationsEnabled({List<Feature>? features}) => false;
+
+  static bool allowsUserCompanionCreation({List<Feature>? features}) =>
+      isCompanionsEnabled(features: features) &&
+      (getCompanionsFeature(features: features)?.allowUserCreate ?? true);
+
+  static bool allowsAdminCompanionAssignment({List<Feature>? features}) =>
+      isCompanionsEnabled(features: features) &&
+      (getCompanionsFeature(features: features)?.allowAdminAssign ?? false);
+
+  static int getMaxCompanions({List<Feature>? features}) =>
+      max(1, getCompanionsFeature(features: features)?.companionsMax ?? 1);
 }

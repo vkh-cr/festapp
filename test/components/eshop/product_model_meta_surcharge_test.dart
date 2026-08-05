@@ -18,7 +18,10 @@ void main() {
     test('getters read from data.meta_surcharge', () {
       final product = ProductModel();
       product.data = {
-        TbEshop.products.data_meta_surcharge: {'amount': 150.0, 'currency': 'CZK'},
+        TbEshop.products.data_meta_surcharge: {
+          'amount': 150.0,
+          'currency': 'CZK'
+        },
       };
       expect(product.metaSurchargeAmount, 150.0);
       expect(product.metaSurchargeCurrency, 'CZK');
@@ -56,7 +59,10 @@ void main() {
     test('amount accepts string from JSON and parses it', () {
       final product = ProductModel();
       product.data = {
-        TbEshop.products.data_meta_surcharge: {'amount': '125.5', 'currency': 'EUR'},
+        TbEshop.products.data_meta_surcharge: {
+          'amount': '125.5',
+          'currency': 'EUR'
+        },
       };
       expect(product.metaSurchargeAmount, 125.5);
     });

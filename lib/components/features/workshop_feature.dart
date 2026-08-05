@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/services/time_helper.dart';
 
 import 'feature.dart';
@@ -76,8 +77,8 @@ class WorkshopsFeature extends Feature {
             TextFormField(
               controller: startTimeController,
               decoration: InputDecoration(
-                labelText: 'Workshop Registration Start Time'.tr(),
-                hintText: 'Select start time'.tr(),
+                labelText: FeaturesStrings.registrationStartTime,
+                hintText: FeaturesStrings.selectStartTime,
               ),
               readOnly: true,
               onTap: () async {
@@ -121,9 +122,8 @@ class WorkshopsFeature extends Feature {
             TextFormField(
               controller: messageController,
               decoration: InputDecoration(
-                labelText: 'Early Registration Attempt Message'.tr(),
-                hintText:
-                    'Enter message for users trying to register too early'.tr(),
+                labelText: FeaturesStrings.earlyRegistrationMessage,
+                hintText: FeaturesStrings.earlyRegistrationMessageHint,
               ),
               onSaved: (val) {
                 registrationNotOpenMessage =

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
@@ -60,7 +61,7 @@ class _LightTimelineViewState extends State<LightTimelineView> {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Text(
-            "No events".tr(),
+            ScheduleStrings.noEvents,
             style: TextStyle(color: _mutedText(context), fontSize: 14),
           ),
         ),
@@ -80,7 +81,7 @@ class _LightTimelineViewState extends State<LightTimelineView> {
           children: [
             // Brand-identity day tab strip — thin white dividers + thin
             // underline on the active day on a saturated app-bar background.
-            // Built to match the CSM Ostrava visual identity (thin lines on
+            // Built to match the configured visual identity (thin lines on
             // solid color), not the advanced pill style.
             // Day tabs — mirrors the advanced view's structure (chevrons,
             // weekday+date+today dot) but uses a thin rounded underline
@@ -154,6 +155,237 @@ class _LightTimelineViewState extends State<LightTimelineView> {
 
 
 // ---------------------------------------------------------------------------
+// Flat, non-tabbed list of the same rows — used to render an event's
+// sub-program with the identical look of the main (light) schedule page.
+// ---------------------------------------------------------------------------
+class LightSubprogramList extends StatefulWidget {
+  final List<TimeBlockItem> events;
+  final void Function(int eventId)? onEventPressed;
+  final bool Function()? showAddNewEventButton;
+  final void Function(BuildContext context, List<TimeBlockGroup> groups,
+      TimeBlockItem? parent)? onAddNewEvent;
+
+  const LightSubprogramList({
+    super.key,
+    required this.events,
+    this.onEventPressed,
+    this.showAddNewEventButton,
+    this.onAddNewEvent,
+  });
+
+  @override
+  State<LightSubprogramList> createState() => _LightSubprogramListState();
+}
+
+class _LightSubprogramListState extends State<LightSubprogramList> {
+  int? _openId;
+
+  @override
+  Widget build(BuildContext context) {
+    final sorted = [...widget.events]
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
+    final canAdd =
+        FeatureService.isFeatureEnabled(FeatureConstants.mySchedule) &&
+            (widget.showAddNewEventButton?.call() ?? false) &&
+            widget.onAddNewEvent != null;
+
+    final sections = TimeBlockHelper.groupEventsByFeatureSettings(sorted);
+    final children = <Widget>[];
+    for (final section in sections) {
+      if (section.title.isNotEmpty) {
+        children.add(_SectionHeader(label: section.title));
+      }
+      for (var i = 0; i < section.events.length; i++) {
+        final e = section.events[i];
+        final hasChildren = e.haveChildren();
+        final isOpen = hasChildren && _openId == e.id;
+        children.add(_EventRow(
+          event: e,
+          isOpen: isOpen,
+          showEndTime: true,
+          onTap: hasChildren
+              ? () => setState(() => _openId = _openId == e.id ? null : e.id)
+              : (widget.onEventPressed != null
+                  ? () => widget.onEventPressed!(e.id)
+                  : null),
+          onChildTap: widget.onEventPressed,
+        ));
+        if (i < section.events.length - 1) {
+          children.add(_RowDivider());
+        }
+      }
+    }
+
+    if (canAdd) {
+      children.add(Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Center(
+          child: _AddEventButton(
+            onPressed: () => widget.onAddNewEvent!(context, sections, null),
+          ),
+        ),
+      ));
+    }
+
+    if (children.isEmpty) return const SizedBox.shrink();
+    return Container(
+      color: ThemeConfig.whiteColor(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Day-grouped, continuously-scrolling light list for the "My program" page.
+// Unlike the main schedule (LightTimelineView) this is NOT tabbed — every day
+// is stacked in one scroll under a left-aligned day header with a trailing
+// hairline rule, matching the production layout. Reuses the same
+// `_EventRow` / `_SectionHeader` / `_RowDivider` primitives so a My-program row
+// is visually identical to a main-schedule row.
+// ---------------------------------------------------------------------------
+class LightMyScheduleList extends StatefulWidget {
+  final List<TimeBlockItem> events;
+  final void Function(int eventId)? onEventPressed;
+  final Widget? emptyContent;
+
+  const LightMyScheduleList({
+    super.key,
+    required this.events,
+    this.onEventPressed,
+    this.emptyContent,
+  });
+
+  @override
+  State<LightMyScheduleList> createState() => _LightMyScheduleListState();
+}
+
+class _LightMyScheduleListState extends State<LightMyScheduleList> {
+  int? _openId;
+
+  @override
+  Widget build(BuildContext context) {
+    final sorted = [...widget.events]
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    if (sorted.isEmpty) {
+      return Container(
+        color: ThemeConfig.whiteColor(context),
+        alignment: Alignment.topCenter,
+        child: widget.emptyContent ??
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
+              child: Text(ScheduleStrings.noEvents,
+                  style:
+                      TextStyle(color: _mutedText(context), fontSize: 14)),
+            ),
+      );
+    }
+
+    final days = TimeBlockHelper.splitTimeBlocksByDate(
+      sorted,
+      context,
+      AppConfig.daySplitHour,
+    );
+
+    final children = <Widget>[];
+    for (final day in days) {
+      children.add(_LightDayHeader(group: day));
+      final sections = TimeBlockHelper.groupEventsByFeatureSettings(day.events);
+      for (final section in sections) {
+        if (section.title.isNotEmpty) {
+          children.add(_SectionHeader(label: section.title));
+        }
+        for (var i = 0; i < section.events.length; i++) {
+          final e = section.events[i];
+          final hasChildren = e.haveChildren();
+          final isOpen = hasChildren && _openId == e.id;
+          children.add(_EventRow(
+            event: e,
+            isOpen: isOpen,
+            showEndTime: true,
+            onTap: hasChildren
+                ? () => setState(() => _openId = _openId == e.id ? null : e.id)
+                : (widget.onEventPressed != null
+                    ? () => widget.onEventPressed!(e.id)
+                    : null),
+            onChildTap: widget.onEventPressed,
+          ));
+          if (i < section.events.length - 1) {
+            children.add(_RowDivider());
+          }
+        }
+      }
+    }
+
+    return Container(
+      color: ThemeConfig.whiteColor(context),
+      child: ListView(
+        padding: const EdgeInsets.only(top: 4, bottom: 24),
+        children: children,
+      ),
+    );
+  }
+}
+
+/// Left-aligned day header for the My-program list: bold weekday + smaller
+/// muted "d. M." date, followed by a hairline rule that fills the row.
+class _LightDayHeader extends StatelessWidget {
+  final TimeBlockGroup group;
+  const _LightDayHeader({required this.group});
+
+  @override
+  Widget build(BuildContext context) {
+    final dt = group.dateTime;
+    var weekday = group.title;
+    if (weekday.isNotEmpty) {
+      weekday = weekday[0].toUpperCase() + weekday.substring(1);
+    }
+    final dateLabel = dt != null ? DateFormat('d. M.').format(dt) : '';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 26, 20, 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            weekday,
+            style: TextStyle(
+              fontSize: 23,
+              fontWeight: FontWeight.w800,
+              color: _strongText(context),
+              letterSpacing: 0.2,
+            ),
+          ),
+          if (dateLabel.isNotEmpty) ...[
+            const SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Text(
+                dateLabel,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: _mutedText(context),
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(width: 14),
+          Expanded(
+            child: Container(height: 1, color: _hairline(context)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // One day's list of rows.
 // ---------------------------------------------------------------------------
 class _DayList extends StatelessWidget {
@@ -189,7 +421,7 @@ class _DayList extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("No events".tr(),
+              Text(ScheduleStrings.noEvents,
                   style:
                       TextStyle(color: _mutedText(context), fontSize: 14)),
               if (canAdd) ...[
@@ -262,7 +494,7 @@ class _AddEventButton extends StatelessWidget {
       onPressed: onPressed,
       icon: Icon(Icons.add_circle_outline, size: 20, color: accent),
       label: Text(
-        "Add To Schedule".tr(),
+        ScheduleStrings.addToSchedule,
         style: TextStyle(
           color: accent,
           fontSize: 14,
@@ -321,12 +553,14 @@ class _EventRow extends StatelessWidget {
   final bool isOpen;
   final VoidCallback? onTap;
   final void Function(int eventId)? onChildTap;
+  final bool showEndTime;
 
   const _EventRow({
     required this.event,
     required this.isOpen,
     required this.onTap,
     required this.onChildTap,
+    this.showEndTime = false,
   });
 
   @override
@@ -334,12 +568,28 @@ class _EventRow extends StatelessWidget {
     final hasChildren = event.haveChildren();
     final strong = _strongText(context);
     final muted = _mutedText(context);
-    final accent = _accent(context);
-    final time = DateFormat.Hm().format(event.startTime);
-
     final now = TimeHelper.now();
-    final isNow =
-        event.startTime.isBefore(now) && event.endTime.isAfter(now);
+    final isNow = !event.isCancelled &&
+        event.startTime.isBefore(now) &&
+        event.endTime.isAfter(now);
+
+    // Variant C (My schedule): start over end in a narrow column — the end
+    // time a step smaller and muted so the start keeps the visual weight.
+    final showTimeRange = showEndTime && event.endTime.isAfter(event.startTime);
+    final startStyle = TextStyle(
+      color: strong,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      letterSpacing: 0.2,
+    );
+    final endStyle = TextStyle(
+      color: muted,
+      fontSize: 12.5,
+      fontWeight: FontWeight.w500,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      letterSpacing: 0.2,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -356,34 +606,55 @@ class _EventRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      width: 56,
-                      child: Text(
-                        time,
-                        style: TextStyle(
-                          color: isNow ? accent : strong,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          fontFeatures: const [
-                            FontFeature.tabularFigures(),
-                          ],
-                          letterSpacing: 0.2,
-                        ),
-                      ),
+                      width: showEndTime ? 64 : 56,
+                      child: showTimeRange
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    DateFormat.Hm().format(event.startTime),
+                                    style: startStyle),
+                                const SizedBox(height: 2),
+                                Text(DateFormat.Hm().format(event.endTime),
+                                    style: endStyle),
+                              ],
+                            )
+                          : Text(DateFormat.Hm().format(event.startTime),
+                              style: startStyle),
                     ),
                     Expanded(
-                      child: Text(
-                        event.title.isNotEmpty
-                            ? event.title
-                            : (event.data?.toString() ?? ''),
-                        style: TextStyle(
-                          color: strong,
-                          fontSize: 15,
-                          height: 1.3,
-                          fontWeight: FontWeight.w600,
-                          decoration: event.isCancelled
-                              ? TextDecoration.lineThrough
-                              : TextDecoration.none,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (isNow)
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 4),
+                              child: _RightNowBadge(),
+                            ),
+                          Text(
+                            event.title.isNotEmpty
+                                ? event.title
+                                : (event.data?.toString() ?? ''),
+                            style: TextStyle(
+                              color: strong,
+                              fontSize: 16,
+                              height: 1.3,
+                              fontWeight: FontWeight.w600,
+                              decoration: event.isCancelled
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                            ),
+                          ),
+                          // With the wider from–to time column (My schedule)
+                          // the place moves under the title as a second line.
+                          if (showEndTime && event.timeBlockPlace != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: _PlaceChip(
+                                  label: event.timeBlockPlace!.title,
+                                  maxWidth: double.infinity),
+                            ),
+                        ],
                       ),
                     ),
                     if (event.isSupportingSignIn())
@@ -391,7 +662,7 @@ class _EventRow extends StatelessWidget {
                         padding: const EdgeInsets.only(left: 10),
                         child: _CapacityChip(event: event),
                       ),
-                    if (event.timeBlockPlace != null)
+                    if (!showEndTime && event.timeBlockPlace != null)
                       Padding(
                         padding: const EdgeInsets.only(left: 10),
                         child: _PlaceChip(label: event.timeBlockPlace!.title),
@@ -410,8 +681,8 @@ class _EventRow extends StatelessWidget {
                 ),
               ),
             ),
-            // Left accent strip for the currently-running event — soft cue
-            // without dominating the row.
+            // Left strip for the currently-running event — soft cue
+            // without dominating the row; red to match the badge.
             if (isNow)
               Positioned(
                 left: 0,
@@ -420,7 +691,7 @@ class _EventRow extends StatelessWidget {
                 child: Container(
                   width: 3,
                   decoration: BoxDecoration(
-                    color: accent,
+                    color: ThemeConfig.redColor(context),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -739,37 +1010,48 @@ class _LightDayTabBar extends StatelessWidget {
                                       ? group.title
                                       : weekdays[dt.weekday - 1],
                                   style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
                                     color: labelColor,
                                     letterSpacing: 0.5,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
-                                if (dt != null)
+                                // Today swaps its date for a small "TODAY"
+                                // label — always full-strength so the marker
+                                // reads even when another day is selected.
+                                if (isToday)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 5, vertical: 1.5),
+                                    decoration: BoxDecoration(
+                                      color: ThemeConfig.redColor(context),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      ScheduleStrings.today.toUpperCase(),
+                                      style: const TextStyle(
+                                        fontSize: 8.5,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  )
+                                else if (dt != null)
                                   Text(
                                     DateFormat.Md(
                                             context.locale.toString())
                                         .format(dt),
                                     style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
                                       color: labelColor,
                                       fontFeatures: const [
                                         FontFeature.tabularFigures()
                                       ],
                                     ),
                                   ),
-                                if (isToday) ...[
-                                  const SizedBox(height: 4),
-                                  Container(
-                                    width: 5,
-                                    height: 5,
-                                    decoration: BoxDecoration(
-                                      color: accent,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ],
                               ],
                             );
                           },
@@ -841,10 +1123,11 @@ class _RoundedUnderlinePainter extends BoxPainter {
 }
 
 /// Place rendered as a subtle chip with a leading dot — keeps the place
-/// visible without competing with the title weight, ellipsised at 140 px.
+/// visible without competing with the title weight, ellipsised at [maxWidth].
 class _PlaceChip extends StatelessWidget {
   final String label;
-  const _PlaceChip({required this.label});
+  final double maxWidth;
+  const _PlaceChip({required this.label, this.maxWidth = 140});
 
   @override
   Widget build(BuildContext context) {
@@ -861,16 +1144,18 @@ class _PlaceChip extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 140),
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: muted,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.1,
+        Flexible(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: muted,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.1,
+              ),
             ),
           ),
         ),
@@ -890,6 +1175,32 @@ List<String> _weekdays(BuildContext context) => List.generate(7, (i) {
           .toUpperCase();
     });
 
+/// Red "RIGHT NOW" pill marking a currently running event — same look as the
+/// badge in the advanced schedule view.
+class _RightNowBadge extends StatelessWidget {
+  const _RightNowBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: ThemeConfig.redColor(context),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        ScheduleStrings.rightNow.toUpperCase(),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+}
+
 Color _strongText(BuildContext context) => ThemeConfig.blackColor(context);
 Color _mutedText(BuildContext context) =>
     ThemeConfig.blackColor(context).withValues(alpha: 0.55);
@@ -898,7 +1209,7 @@ Color _hairline(BuildContext context) =>
 
 /// Brand accent used inside the white body — currently runs, sub-card place
 /// names. Pulls from the theme's primary so the body stays inside the
-/// organization palette (CSM Ostrava = brand blue) instead of using the
+/// organization palette instead of using the
 /// generic red highlight.
 Color _accent(BuildContext context) => ThemeConfig.darkColor(context);
 

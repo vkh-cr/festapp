@@ -12,6 +12,7 @@ export async function useFakturoid(
   { client_id, client_secret, slug, subject_id, note }: FakturoidConfig,
   order: any,
   unitName: string,
+  idempotencyKey: string,
   attachments: Array<{
     filename: string;
     content: Uint8Array;
@@ -48,6 +49,7 @@ export async function useFakturoid(
   const total = Number(order.payment_info.amount).toFixed(2);
 
   const createBody: any = {
+    custom_id: idempotencyKey,
     document_type: "proforma",
     subject_id,
     issued_on: today,
@@ -72,16 +74,28 @@ export async function useFakturoid(
     createBody.note = note;
   }
 
-  const invRes = await fetch(
+  const lookupUrl = new URL(
     `https://app.fakturoid.cz/api/v3/accounts/${slug}/invoices.json`,
-    {
-      method: "POST",
-      headers: apiHeaders,
-      body: JSON.stringify(createBody),
-    },
   );
-  const result = await invRes.json();
-  console.log("Proforma created:", result);
+  lookupUrl.searchParams.set("custom_id", idempotencyKey);
+  const lookupResponse = await fetch(lookupUrl, { headers: apiHeaders });
+  if (!lookupResponse.ok) {
+    throw new Error(`Fakturoid lookup failed ${lookupResponse.status}`);
+  }
+  const existing = await lookupResponse.json();
+  let result = Array.isArray(existing) ? existing[0] : undefined;
+  if (!result) {
+    const invRes = await fetch(
+      `https://app.fakturoid.cz/api/v3/accounts/${slug}/invoices.json`,
+      {
+        method: "POST",
+        headers: apiHeaders,
+        body: JSON.stringify(createBody),
+      },
+    );
+    if (!invRes.ok) throw new Error(`Fakturoid create failed ${invRes.status}`);
+    result = await invRes.json();
+  }
 
   // 3) Update our payment_info.variable_symbol
   if (result.variable_symbol) {

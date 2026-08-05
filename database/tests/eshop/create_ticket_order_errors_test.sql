@@ -18,14 +18,35 @@ DECLARE
     v_hidden_product_id bigint;
     v_unit_id bigint;
     v_bank_account_id bigint;
+    v_org_id bigint;
+    v_secret_id bigint;
+    v_rejected boolean;
 BEGIN
     -- ========================================================================
     -- SETUP
     -- ========================================================================
-    
-    -- 1. Get an existing occasion and create a form
-    SELECT id INTO v_occasion_id FROM public.occasions LIMIT 1;
-    IF v_occasion_id IS NULL THEN PERFORM assert_fail('No occasion found'); END IF;
+
+    -- 1. Build a self-contained occasion (org + unit + CZK bank account), like
+    --    create_ticket_order_test.sql — do not rely on pre-seeded data. The
+    --    spot product type + product are created by create_form below.
+    INSERT INTO public.organizations (title) VALUES ('Test Org Eshop Errors')
+    RETURNING id INTO v_org_id;
+    INSERT INTO public.units (title, organization) VALUES ('Test Unit Eshop Errors', v_org_id)
+    RETURNING id INTO v_unit_id;
+
+    INSERT INTO eshop.secrets (secret) VALUES ('error-test-secret-' || floor(random()*100000)::text)
+    RETURNING id INTO v_secret_id;
+    INSERT INTO eshop.bank_accounts (title, supported_currencies, secret, type)
+    VALUES ('Test Bank CZK Errors', ARRAY['CZK'], v_secret_id, 'FIO')
+    RETURNING id INTO v_bank_account_id;
+    INSERT INTO eshop.unit_bank_accounts (unit, bank_account, priority)
+    VALUES (v_unit_id, v_bank_account_id, 1);
+
+    INSERT INTO public.occasions (title, unit, link, start_time, end_time)
+    VALUES ('Test Occasion Eshop Errors', v_unit_id,
+            'test-occ-eshop-errors-' || floor(random()*100000)::text,
+            now(), now() + interval '1 day')
+    RETURNING id INTO v_occasion_id;
 
     SELECT create_form(v_occasion_id, 'error-test-' || floor(random()*100000)::text, 'Error Test Form') 
     INTO v_form_json;
@@ -55,10 +76,16 @@ BEGIN
     -- ========================================================================
 
     ---------------------------------------------------------------------------
-    -- 1001: Missing form key
+    -- The canonical receipt-backed boundary rejects a missing form before the
+    -- legacy domain handler's numeric error mapping.
     ---------------------------------------------------------------------------
-    v_result := create_ticket_order('{}'::jsonb);
-    PERFORM assert_eq((v_result->>'code')::int, 1001, 'Error 1001 mismatch (Missing form)');
+    v_rejected := false;
+    BEGIN
+        PERFORM create_ticket_order('{}'::jsonb);
+    EXCEPTION WHEN invalid_parameter_value THEN
+        v_rejected := SQLERRM = 'ticket order form not found';
+    END;
+    PERFORM assert_eq(v_rejected, true, 'Missing form should be rejected');
 
     ---------------------------------------------------------------------------
     -- 1002: Missing email
@@ -68,13 +95,16 @@ BEGIN
     PERFORM assert_eq((v_result->>'code')::int, 1002, 'Error 1002 mismatch (Missing email)');
 
     ---------------------------------------------------------------------------
-    -- 1003: Form not linked to any occasion (Simulated by invalid ID key logic)
-    -- If we pass a random UUID that doesn't exist in forms table, SELECT INTO returns NULLs.
-    -- Then 'IF occasion_id IS NULL' triggers 1003.
+    -- Unknown forms are rejected by the same canonical aggregate lookup.
     ---------------------------------------------------------------------------
     v_input_data := jsonb_build_object('form', gen_random_uuid(), 'email', v_user_email);
-    v_result := create_ticket_order(v_input_data);
-    PERFORM assert_eq((v_result->>'code')::int, 1003, 'Error 1003 mismatch (Invalid form/occasion)');
+    v_rejected := false;
+    BEGIN
+        PERFORM create_ticket_order(v_input_data);
+    EXCEPTION WHEN invalid_parameter_value THEN
+        v_rejected := SQLERRM = 'ticket order form not found';
+    END;
+    PERFORM assert_eq(v_rejected, true, 'Unknown form should be rejected');
 
     ---------------------------------------------------------------------------
     -- 1021: Form is closed (manually)

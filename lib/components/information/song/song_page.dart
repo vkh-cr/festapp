@@ -5,7 +5,7 @@ import 'package:fstapp/components/information/db_information.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/components/information/song/song_dialog.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -56,7 +56,7 @@ class _SongbookPageState extends State<SongbookPage> {
         child: Scaffold(
           appBar: AppBar(
             title: Text(
-              "Songbook".tr(),
+              CommonStrings.songbook,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
             leading: BackButton(

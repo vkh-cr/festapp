@@ -1,7 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/groups/game_checkpoints_content.dart';
+import 'package:fstapp/components/groups/group_strings.dart';
 import 'package:fstapp/components/groups/game_settings_content.dart';
 import 'package:fstapp/components/groups/game_user_groups_content.dart';
 import 'package:fstapp/theme_config.dart';
@@ -43,8 +43,9 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
               isScrollable: true,
               tabs: [
                 DataGridHelper.buildTab(
-                    context, Icons.gamepad, "Check points".tr()),
-                DataGridHelper.buildTab(context, Icons.groups, "Groups".tr()),
+                    context, Icons.gamepad, GroupsStrings.checkPoints),
+                DataGridHelper.buildTab(
+                    context, Icons.groups, CommonStrings.groups),
                 DataGridHelper.buildTab(
                     context, Icons.settings, CommonStrings.settings),
               ],

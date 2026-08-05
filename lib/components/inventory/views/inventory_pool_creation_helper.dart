@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/models/inventory_pool_bundle.dart';
 import 'package:fstapp/components/inventory/db_inventory_pools.dart';
@@ -75,6 +74,7 @@ class InventoryPoolCreationHelper {
                             id: null,
                             title: titleController.text.trim(),
                             occasionId: occasionId,
+                            type: allowedInventoryPoolTypes().first,
                           );
 
                           final bundle = InventoryPoolBundle(
@@ -117,7 +117,7 @@ class InventoryPoolCreationHelper {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text("Create".tr()),
+                      : Text(CommonStrings.create),
                 ),
               ],
             );

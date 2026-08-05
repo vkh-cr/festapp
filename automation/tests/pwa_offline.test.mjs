@@ -1,0 +1,331 @@
+#!/usr/bin/env node
+
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import vm from 'node:vm';
+
+const projectRoot = path.resolve(import.meta.dirname, '../..');
+const tempRoot = await mkdtemp(path.join(tmpdir(), 'festapp-pwa-'));
+
+try {
+  await mkdir(path.join(tempRoot, 'assets'), { recursive: true });
+  await mkdir(path.join(tempRoot, 'privacy'), { recursive: true });
+  await writeFile(path.join(tempRoot, 'flutter'), '<html>flutter</html>');
+  await writeFile(path.join(tempRoot, 'webclient'), '<html>web</html>');
+  await writeFile(path.join(tempRoot, 'main.dart.js'), 'main');
+  await writeFile(path.join(tempRoot, 'main.dart.js_7.part.js'), 'deferred');
+  await writeFile(path.join(tempRoot, 'main.dart.1.2.3-4.js'), 'duplicate');
+  await writeFile(path.join(tempRoot, 'flutter_service_worker.js'), 'obsolete');
+  await writeFile(path.join(tempRoot, '_worker.js'), 'server only');
+  await writeFile(path.join(tempRoot, 'assets', 'translation.json'), '{}');
+  await writeFile(
+    path.join(tempRoot, 'privacy', 'index.html'),
+    '<html>privacy policy</html>',
+  );
+
+  const result = spawnSync(process.execPath, [
+    path.join(projectRoot, 'automation/generate_pwa_service_worker.mjs'),
+    tempRoot,
+    '1.2.3+4',
+  ], { encoding: 'utf8' });
+
+  assert.equal(result.status, 0, result.stderr);
+  const worker = await readFile(path.join(tempRoot, 'festapp_service_worker.js'), 'utf8');
+  assert.match(worker, /festapp-app-shell-1\.2\.3\+4/);
+  assert.match(worker, /"\/flutter\?pwa-cache=1"/);
+  assert.match(worker, /"\/webclient\?pwa-cache=1"/);
+  assert.match(worker, /"\/main\.dart\.js"/);
+  assert.match(worker, /"\/main\.dart\.js_7\.part\.js"/);
+  assert.match(worker, /"\/assets\/translation\.json"/);
+  assert.doesNotMatch(worker, /main\.dart\.1\.2\.3-4\.js/);
+  assert.doesNotMatch(worker, /"\/flutter_service_worker\.js"/);
+  assert.doesNotMatch(worker, /"\/_worker\.js"/);
+  assert.match(worker, /request\.mode === 'navigate'/);
+  assert.match(worker, /cache\.match\(request, \{ ignoreSearch: true \}\)/);
+  assert.match(worker, /event\.data === 'SKIP_WAITING'/);
+  assert.match(worker, /FESTAPP_QUERY_BUILD_VERSION/);
+  assert.match(worker, /url\.pathname === '\/festapp-version\.json'/);
+  assert.match(worker, /url\.origin === 'https:\/\/fonts\.gstatic\.com'/);
+  assert.match(worker, /url\.origin === 'https:\/\/fonts\.googleapis\.com'/);
+  assert.match(worker, /festapp-used-fonts-v1/);
+  assert.match(worker, /cache\.put\(request, response\.clone\(\)\)/);
+  const coreUrls = JSON.parse(worker.match(/const CORE_URLS = (\[[\s\S]*?\]);/)[1]);
+  assert.ok(coreUrls.includes('/main.dart.js'));
+  assert.ok(coreUrls.includes('/flutter?pwa-cache=1'));
+  assert.ok(coreUrls.includes('/privacy/'),
+    'standalone documents must be available before their first navigation');
+  assert.ok(coreUrls.includes('/main.dart.js_7.part.js'),
+    'every deferred executable must be installed for offline cold-start routes');
+
+  const handlers = {};
+  const fontUrl = 'https://fonts.gstatic.com/s/notocoloremoji/test.woff2';
+  const cachedFont = new Response('cached emoji font');
+  const cachedShell = new Response('<html>offline shell</html>');
+  const cachedPrivacy = new Response('<html>privacy policy</html>');
+  let networkCalls = 0;
+  let serverVersion = '1.2.3+5';
+  let cachePutFails = false;
+  const cachedPuts = [];
+  const deletedCaches = [];
+  const openedCaches = [];
+  let claimedExistingClients = 0;
+  const navigatedClients = [];
+  const clientsById = new Map([
+    ['updating-tab', {
+      id: 'updating-tab',
+      url: 'https://app.test/csmostrava2026/news',
+      navigate: async (url) => { navigatedClients.push(['updating-tab', url]); },
+      postMessage: () => {},
+    }],
+    ['older-open-tab', {
+      id: 'older-open-tab',
+      url: 'https://app.test/csmostrava2026/news',
+      navigate: async (url) => { navigatedClients.push(['older-open-tab', url]); },
+      postMessage: () => {},
+    }],
+  ]);
+  const cache = {
+    addAll: async () => {},
+    put: async (request) => {
+      if (cachePutFails) throw new Error('storage quota exceeded');
+      cachedPuts.push(String(request.url || request));
+    },
+    match: async (request) => {
+      const url = typeof request === 'string' ? request : request.url;
+      if (url === fontUrl) return cachedFont.clone();
+      if (url.includes('/flutter?pwa-cache=1')) return cachedShell.clone();
+      if (url === '/privacy/') return cachedPrivacy.clone();
+      if (url.includes('/assets/translation.json')) return new Response('{}');
+      return undefined;
+    },
+  };
+  const context = {
+    URL,
+    Request,
+    Response,
+    Promise,
+    caches: {
+      open: async (name) => {
+        openedCaches.push(name);
+        return cache;
+      },
+      keys: async () => [
+        'festapp-app-shell-1.2.3+3',
+        'festapp-app-shell-1.2.3+4',
+      ],
+      delete: async (name) => {
+        deletedCaches.push(name);
+        return true;
+      },
+    },
+    fetch: async (request) => {
+      networkCalls++;
+      const url = String(request.url || request);
+      if (url.includes('/festapp-version.json')) {
+        return new Response(JSON.stringify({ version: serverVersion }), {
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      if (url.includes('/main.dart.js')) {
+        return new Response('recovered current executable');
+      }
+      throw new Error(`unexpected network request: ${url}`);
+    },
+    self: {
+      location: { origin: 'https://app.test' },
+      navigator: { onLine: false },
+      clients: {
+        claim: async () => { claimedExistingClients++; },
+        get: async (id) => clientsById.get(id),
+        matchAll: async () => [...clientsById.values()],
+      },
+      skipWaiting: async () => {},
+      addEventListener: (type, handler) => { handlers[type] = handler; },
+    },
+  };
+  vm.runInNewContext(worker, context);
+
+  // The requesting tab needs controllerchange so its existing update script
+  // can reload it. Other tabs are claimed too, but must remain mapped to the
+  // cache generation from which their JavaScript is already executing.
+  handlers.message({
+    data: 'SKIP_WAITING',
+    source: {id: 'updating-tab'},
+  });
+
+  // Claim both tabs so the updating tab's next navigation cannot fall back
+  // through the old worker. Keep the other tab pinned to its original shell;
+  // both tabs share Cache Storage and it can still request deferred chunks.
+  let activation;
+  handlers.activate({ waitUntil: (promise) => { activation = promise; } });
+  await activation;
+  assert.equal(claimedExistingClients, 1);
+  assert.deepEqual(deletedCaches, []);
+
+  // controllerchange runs inside the old page before its accepted reload and
+  // therefore reports the previous version to the new worker. The updating
+  // tab must stay on the new shell instead of being pinned back to the old one.
+  handlers.message({
+    data: { type: 'FESTAPP_CLIENT_VERSION', version: '1.2.3+3' },
+    source: { id: 'updating-tab' },
+    waitUntil: () => {},
+  });
+
+  async function dispatchFetch(request, clientId = '') {
+    let responsePromise;
+    handlers.fetch({
+      request,
+      clientId,
+      respondWith: (promise) => { responsePromise = promise; },
+    });
+    assert.ok(responsePromise, `worker did not handle ${request.url}`);
+    return responsePromise;
+  }
+
+  const fontResponse = await dispatchFetch(new Request(fontUrl));
+  assert.equal(await fontResponse.text(), 'cached emoji font');
+  const navigation = new Request('https://app.test/csmostrava2026/');
+  Object.defineProperty(navigation, 'mode', { value: 'navigate' });
+  const shellResponse = await dispatchFetch(navigation, 'updating-tab');
+  assert.equal(await shellResponse.text(), '<html>offline shell</html>');
+  assert.equal(openedCaches.at(-1), 'festapp-app-shell-1.2.3+4',
+    'the tab that requested the update must navigate through the new shell');
+  const privacyNavigation = new Request('https://app.test/privacy');
+  Object.defineProperty(privacyNavigation, 'mode', { value: 'navigate' });
+  const privacyResponse = await dispatchFetch(privacyNavigation, 'updating-tab');
+  assert.equal(await privacyResponse.text(), '<html>privacy policy</html>',
+    'standalone documents must not fall through to the Flutter router');
+  const versionResponse = await dispatchFetch(
+    new Request('https://app.test/festapp-version.json?t=offline'),
+  );
+  assert.equal(versionResponse.type, 'error');
+  assert.equal(networkCalls, 0);
+
+  // An incomplete/stale app-shell must never fill an executable Flutter chunk
+  // from a newer deployment. Mixing main.dart.js generations leaves the app
+  // permanently stuck on its loader; the version cutover owns recovery.
+  context.self.navigator.onLine = true;
+  const missingChunkResponse = await dispatchFetch(
+    new Request('https://app.test/main.dart.js_99.part.js'),
+  );
+  assert.equal(missingChunkResponse.type, 'error');
+  assert.equal(networkCalls, 1);
+
+  await dispatchFetch(
+    new Request('https://app.test/assets/translation.json'),
+    'older-open-tab',
+  );
+  assert.equal(openedCaches.at(-1), 'festapp-app-shell-1.2.3+3');
+
+  // An older open Flutter runtime cannot execute a deferred chunk from this
+  // worker's newer build. If its versioned cache never saw that route before
+  // the deployment, cut the tab over to the complete current shell instead of
+  // mixing JS generations and leaving AutoRoute on an endless spinner.
+  serverVersion = '1.2.3+4';
+  const staleChunkResponse = await dispatchFetch(
+    new Request('https://app.test/main.dart.js_7.part.js'),
+    'older-open-tab',
+  );
+  assert.equal(staleChunkResponse.type, 'error');
+  assert.deepEqual(navigatedClients, [[
+    'older-open-tab',
+    'https://app.test/csmostrava2026/news',
+  ]]);
+  assert.equal(networkCalls, 1,
+    'a stale runtime must never download an executable from the new build');
+
+  // If an old controller outlives its evicted cache while the deployment has
+  // already advanced, the entry bundle is the safe cutover boundary. Returning
+  // Response.error() here reproduces the production blank-canvas cold start.
+  serverVersion = '1.2.3+5';
+  const latestMainResponse = await dispatchFetch(
+    new Request('https://app.test/main.dart.js'),
+  );
+  assert.equal(await latestMainResponse.text(), 'recovered current executable');
+  assert.deepEqual(cachedPuts, [],
+    'a newer entry bundle must not be written into the old worker cache');
+  assert.equal(networkCalls, 3);
+
+  // If storage eviction/corruption removed an executable from this worker's
+  // own build, recover that exact build from the network instead of leaving
+  // every controlled reload permanently stuck on the Flutter loader.
+  serverVersion = '1.2.3+4';
+  const recoveredMainResponse = await dispatchFetch(
+    new Request('https://app.test/main.dart.js'),
+  );
+  assert.equal(await recoveredMainResponse.text(), 'recovered current executable');
+  assert.deepEqual(cachedPuts, ['https://app.test/main.dart.js']);
+  assert.equal(networkCalls, 5);
+
+  // A full/evicted cache must not discard an already verified executable.
+  // Serving it keeps this reload alive even if persistence cannot self-heal.
+  cachePutFails = true;
+  const uncachedMainResponse = await dispatchFetch(
+    new Request('https://app.test/main.dart.js_7.part.js'),
+  );
+  assert.equal(await uncachedMainResponse.text(), 'recovered current executable');
+  assert.deepEqual(cachedPuts, ['https://app.test/main.dart.js']);
+  assert.equal(networkCalls, 7);
+
+  const webClientIndex = await readFile(
+    path.join(projectRoot, 'web_client/index.html'),
+    'utf8',
+  );
+  assert.match(webClientIndex, /serviceWorker\.register\('\/festapp_service_worker\.js'/);
+  assert.doesNotMatch(webClientIndex, /serviceWorker\.getRegistrations\(\)/);
+  assert.match(webClientIndex, /performance\.getEntriesByType\('resource'\)/);
+  const flutterIndex = await readFile(path.join(projectRoot, 'web/index.html'), 'utf8');
+  const appConfig = await readFile(path.join(projectRoot, 'lib/app_config.dart'), 'utf8');
+  const oneSignalWorker = await readFile(
+    path.join(projectRoot, 'web/push/OneSignalSDKWorker.js'),
+    'utf8',
+  );
+  assert.match(
+    appConfig,
+    /static const bool isWebNotificationsSupported = true;/,
+    'installed PWA notifications must remain enabled for this deployment',
+  );
+  assert.match(flutterIndex, /serviceWorkerPath: "\.\/push\/OneSignalSDKWorker\.js"/);
+  assert.match(flutterIndex, /serviceWorkerParam: \{ scope: "\/push\/" \}/);
+  assert.match(oneSignalWorker, /OneSignalSDK\.sw\.js/);
+  assert.match(flutterIndex, /e\.preventDefault\(\)/);
+  assert.match(flutterIndex, /function promptInstall\(\)/);
+  assert.doesNotMatch(
+    flutterIndex,
+    /promptInstall\(\)[\s\S]*?await window\.festappOfflineReady/,
+    'the browser install prompt must run synchronously while user activation is valid',
+  );
+  assert.match(flutterIndex, /performance\.getEntriesByType\('resource'\)/);
+  assert.match(flutterIndex, /window\.recoverFestappStartup\('bootstrap-error'\)/);
+  assert.match(flutterIndex, /festapp-app-ready/);
+  assert.match(flutterIndex, /__FESTAPP_LOCAL_DEVELOPMENT__/);
+  assert.match(flutterIndex, /festappLocalDevelopmentReady/);
+  assert.match(flutterIndex, /serviceWorker\.getRegistrations\(\)/);
+  assert.match(flutterIndex, /festapp-app-shell-/);
+  const updatePrompt = await readFile(
+    path.join(projectRoot, 'web/festapp_update_prompt.js'),
+    'utf8',
+  );
+  assert.match(updatePrompt, /function recoverStalledStartup\(reason\)/);
+  assert.match(updatePrompt, /scheduleStartupRecovery\(\)/);
+  assert.match(updatePrompt, /startupRecoveryStorageKey/);
+  assert.match(updatePrompt, /navigator\.onLine === false/);
+  assert.match(updatePrompt, /FESTAPP_CLIENT_VERSION/);
+  assert.match(
+    updatePrompt,
+    /if \(window\.__FESTAPP_LOCAL_DEVELOPMENT__\) return;/,
+  );
+  const networkReload = updatePrompt.match(
+    /async function prepareNetworkReload\(\) \{[\s\S]*?\n  \}/,
+  )?.[0];
+  assert.ok(networkReload);
+  assert.match(networkReload, /registration\.update\(\)/);
+  assert.doesNotMatch(networkReload, /unregister\(\)/);
+  assert.doesNotMatch(networkReload, /caches\.delete|festapp-app-shell-/);
+  console.log('pwa_offline.test: ok');
+} finally {
+  await rm(tempRoot, { recursive: true, force: true });
+}

@@ -15,6 +15,7 @@ class InventoryPoolBundle {
   List<PlaceModel>? places;
   List<ProductModel>? products;
   List<ProductInventoryContextModel>? productInventoryContexts;
+  int aggregateVersion;
 
   InventoryPoolBundle({
     required this.pool,
@@ -24,6 +25,7 @@ class InventoryPoolBundle {
     this.places,
     this.products,
     this.productInventoryContexts,
+    this.aggregateVersion = 0,
   });
 
   factory InventoryPoolBundle.fromJson(Map<String, dynamic> json) {
@@ -85,6 +87,7 @@ class InventoryPoolBundle {
       contexts: contexts,
       products: products,
       productInventoryContexts: productContextLinks,
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
     );
   }
 

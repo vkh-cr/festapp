@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/timeline/schedule_tab_view.dart';
@@ -10,6 +10,7 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/occasion/add_new_event_dialog.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
@@ -49,7 +50,9 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    if (!ClientSyncRuntime.isV1Selected) {
+      WidgetsBinding.instance.addObserver(this);
+    }
     loadData();
   }
 
@@ -105,6 +108,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
       }
       _dots = _events
           .filterRootEvents()
+          .where((e) => !e.isCounselingSlot)
           .map((e) => TimeBlockItem.fromEventModelBasicTimeline(e))
           .toList();
     }
@@ -112,6 +116,8 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
     if (mounted) {
       setState(() {});
     }
+
+    if (ClientSyncRuntime.isV1Selected) return;
 
     final fast = await DbEvents.getAllEvents(
       RightsService.currentOccasionId()!,
@@ -128,6 +134,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
 
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModelBasicTimeline(e))
         .toList();
 
@@ -148,6 +155,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
 
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModelBasicTimeline(e))
         .toList();
     await OfflineDataService.saveAllEvents(_events);
@@ -224,9 +232,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: LogoWidget(
-                            width: 120,
-                          ),
+                          child: LogoWidget(width: 64, programVariant: true),
                         ),
                       ),
                       const Spacer(),
@@ -243,7 +249,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                                     color: ThemeConfig.profileButtonTextColor(
                                         context)),
                               ),
-                              Text("My schedule".tr()),
+                              Text(CommonStrings.mySchedule),
                             ]),
                       if (FeatureService.isFeatureEnabled(
                           FeatureConstants.timetable))
@@ -258,7 +264,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                                     color: ThemeConfig.profileButtonTextColor(
                                         context)),
                               ),
-                              Text("Schedule".tr()),
+                              Text(CommonStrings.schedule),
                             ]),
                     ]),
               ),

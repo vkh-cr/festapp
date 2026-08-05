@@ -6,6 +6,13 @@ import 'package:fstapp/components/map/db_places.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class PlaceModel extends ITrinaRowModel {
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
+
+  /// Raw `{"lat": .., "lng": ..}` map (may be null). It is stored unwrapped:
+  /// [fromJson] reads `coordinates["latLng"]`, [fromPlutoJson] reads the cell
+  /// value directly, and [toJson] wraps it back into `{"latLng": ...}`.
+  /// Do not change one side without the other. Use [hasCoordinates] before
+  /// calling [getLat]/[getLng] — a place may legitimately have no coordinates.
   dynamic latLng;
   @override
   int? id;
@@ -14,22 +21,39 @@ class PlaceModel extends ITrinaRowModel {
   String? type;
   int? order;
   int? icon;
+  int aggregateVersion;
   bool isHidden = false;
 
   static const String WithoutValue = "---";
+  static const String groupType = 'group';
+  static const String coordinatesLatLngKey = 'latLng';
+  static const String latitudeKey = 'lat';
+  static const String longitudeKey = 'lng';
 
   static const String placesOffline = "places";
   static const String placeObjectColumn = "placeObject";
 
   List<EventModel> events = [];
 
-  double getLat() => latLng["lat"];
-  double getLng() => latLng["lng"];
+  double getLat() => latLng[latitudeKey];
+  double getLng() => latLng[longitudeKey];
+
+  /// Whether this place has usable map coordinates. A place without them must
+  /// be filtered out before building a [MapPlaceModel] (which force-reads lat/lng).
+  bool get hasCoordinates =>
+      latLng != null &&
+      latLng?[latitudeKey] != null &&
+      latLng?[longitudeKey] != null;
+
+  /// A hidden `group` place is an implementation-owned point created solely
+  /// for one group. Visible catalog places are shared references and must never
+  /// be updated or deleted as a side effect of editing that group.
+  bool get isPrivateGroupLocation => type == groupType && isHidden;
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(
       latLng: json.containsKey(Tb.places.coordinates)
-          ? json[Tb.places.coordinates]["latLng"]
+          ? json[Tb.places.coordinates][coordinatesLatLngKey]
           : null,
       id: json[Tb.places.id],
       title: json.containsKey(Tb.places.title) ? json[Tb.places.title] : null,
@@ -42,6 +66,7 @@ class PlaceModel extends ITrinaRowModel {
           : false,
       order: json[Tb.places.order],
       icon: json[Tb.places.icon],
+      aggregateVersion: TrinaRowVersion.read(json),
     );
   }
 
@@ -49,6 +74,7 @@ class PlaceModel extends ITrinaRowModel {
     return PlaceModel(
         latLng: json[Tb.places.coordinates],
         id: json[Tb.places.id] == -1 ? null : json[Tb.places.id],
+        aggregateVersion: TrinaRowVersion.read(json),
         title: json[Tb.places.title],
         description: json[Tb.places.description].isEmpty
             ? null
@@ -63,7 +89,7 @@ class PlaceModel extends ITrinaRowModel {
   Map<String, dynamic> toJson() => {
         Tb.places.id: id,
         Tb.places.title: title,
-        Tb.places.coordinates: {"latLng": latLng},
+        Tb.places.coordinates: {coordinatesLatLngKey: latLng},
         Tb.places.description: description,
         Tb.places.type: type,
         Tb.places.is_hidden: isHidden,
@@ -79,6 +105,7 @@ class PlaceModel extends ITrinaRowModel {
       this.type,
       this.order,
       this.icon,
+      this.aggregateVersion = 0,
       this.isHidden = false});
 
   String toPlutoSelectString() => "$id:$title";
@@ -96,6 +123,7 @@ class PlaceModel extends ITrinaRowModel {
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       Tb.places.id: TrinaCell(value: id),
       Tb.places.title: TrinaCell(value: title),
       Tb.places.description: TrinaCell(value: description ?? ""),
@@ -109,6 +137,8 @@ class PlaceModel extends ITrinaRowModel {
 
   @override
   Future<void> updateMethod(BuildContext context) async {
-    await DbPlaces.updatePlace(this);
+    final updated = await DbPlaces.updatePlace(this);
+    id = updated.id;
+    aggregateVersion = updated.aggregateVersion;
   }
 }

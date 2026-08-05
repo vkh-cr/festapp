@@ -1,6 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/email_templates/email_template_model.dart';
+import 'package:fstapp/components/email_templates/email_templates_strings.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
@@ -57,7 +57,7 @@ class EmailTemplateCard extends StatelessWidget {
                   children: [
                     // Meta title in italic with reduced opacity and overflow handling.
                     Text(
-                      "${'Template'.tr()} - ${contextTitle.isNotEmpty ? contextTitle : 'default'.tr()}",
+                      "${EmailTemplatesStrings.template} - ${contextTitle.isNotEmpty ? contextTitle : CommonStrings.defaultLabel}",
                       style: TextStyle(
                         fontSize: 12,
                         fontStyle: FontStyle.italic,

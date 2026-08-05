@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/holder_models/id_document_field_holder.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
+import 'package:fstapp/components/_shared/person_fields_strings.dart';
 
 class IdDocumentEditor {
-  static String get _defaultExpiryDateLabelText => "Expiry Date".tr();
+  static String get _defaultExpiryDateLabelText => PersonFieldsStrings.expiryDate;
 
   static Widget buildIdDocumentReadOnly(
       BuildContext context, FormFieldModel field) {
@@ -60,10 +61,10 @@ class IdDocumentEditor {
       children: [
         // --- VISUAL PREVIEW ---
         buildReadOnlyTextField(
-            "ID Card / Passport Number".tr(), Icons.badge_outlined),
+            FormStrings.idCardPassportNumber, Icons.badge_outlined),
         if (showExpiry) ...[
           const SizedBox(height: 8),
-          buildReadOnlyTextField("Expiry Date".tr(), Icons.calendar_today),
+          buildReadOnlyTextField(PersonFieldsStrings.expiryDate, Icons.calendar_today),
         ],
 
         // --- CUSTOM LABEL DISPLAY ---
@@ -75,7 +76,7 @@ class IdDocumentEditor {
             child: Text.rich(
               TextSpan(children: [
                 // Using the string from the editor part as requested for the label.
-                TextSpan(text: "${"Expiry Date Label".tr()}: "),
+                TextSpan(text: "${FormStrings.expiryDateLabel}: "),
                 TextSpan(
                   text: '"$expiryDateLabel"',
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -120,7 +121,7 @@ class IdDocumentEditor {
           children: [
             Row(
               children: [
-                Text("Show Expiry Date".tr()),
+                Text(FormStrings.showExpiryDate),
                 Switch(
                   value: currentShowExpiryState,
                   onChanged: (value) {
@@ -148,7 +149,7 @@ class IdDocumentEditor {
               TextFormField(
                 controller: expiryDateLabelController,
                 decoration: InputDecoration(
-                  labelText: "Expiry Date Label".tr(),
+                  labelText: FormStrings.expiryDateLabel,
                 ),
                 onChanged: (value) {
                   var toSave = value.trim().isEmpty ? null : value;

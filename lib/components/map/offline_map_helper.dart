@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:path_provider/path_provider.dart';
@@ -25,22 +23,42 @@ class OfflineMapHelper {
       // No connection and no cache.
       return null;
     }
+    final part = File('$filePath.part');
+    final client = HttpClient();
+    IOSink? output;
     try {
-      final request = await HttpClient().getUrl(Uri.parse(url));
+      await file.parent.create(recursive: true);
+      if (await part.exists()) await part.delete();
+      final request = await client.getUrl(Uri.parse(url));
       final response = await request.close();
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw HttpException(
+          'Offline map download failed: ${response.statusCode}',
+        );
+      }
       final contentLength = response.contentLength;
-      List<int> bytes = [];
-      int downloaded = 0;
-      await for (var data in response) {
-        bytes.addAll(data);
+      var downloaded = 0;
+      output = part.openWrite();
+      await for (final data in response) {
+        output.add(data);
         downloaded += data.length;
         onProgress(contentLength > 0 ? downloaded / contentLength : 0.0);
       }
-      await file.writeAsBytes(bytes);
+      await output.flush();
+      await output.close();
+      output = null;
+      if (contentLength >= 0 && downloaded != contentLength) {
+        throw HttpException('Offline map download was incomplete.');
+      }
+      await part.rename(filePath);
       return file;
     } catch (e) {
-      if (await file.exists()) return file;
+      AppLogger.error('Offline map download failed: $e');
+      await output?.close();
+      if (await part.exists()) await part.delete();
       return null;
+    } finally {
+      client.close(force: true);
     }
   }
 

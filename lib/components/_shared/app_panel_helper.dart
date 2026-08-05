@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/_shared/project_picker_widget.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -149,7 +149,7 @@ class AppPanelHelper {
       // Build the state-aware action menu
       if (AppConfig.isAppSupported) {
         final adminAction = _ActionMenuItem(
-          label: 'Event management'.tr(),
+          label: CommonStrings.eventManagement,
           icon: Icons.admin_panel_settings,
           onSelect: () async =>
               await RouterService.navigateOccasion(context, AdminPage.ROUTE),
@@ -434,12 +434,14 @@ class AppPanelHelper {
                     onCreateNew: onCreateNew,
                     searchHintText: searchHintText,
                     createNewText: createNewText,
-                    happeningNowText:
-                        itemDateBuilder != null ? "Happening Now".tr() : null,
-                    upcomingText:
-                        itemDateBuilder != null ? "Upcoming Events".tr() : null,
+                    happeningNowText: itemDateBuilder != null
+                        ? CommonStrings.happeningNow
+                        : null,
+                    upcomingText: itemDateBuilder != null
+                        ? CommonStrings.upcomingEvents
+                        : null,
                     pastText:
-                        itemDateBuilder != null ? "Past Events".tr() : null,
+                        itemDateBuilder != null ? CommonStrings.pastEvents : null,
                   );
                 },
                 hoverColor: hoverColor,
@@ -793,9 +795,9 @@ class AppPanelHelper {
                         onCreateNew: null,
                         searchHintText: AdministrationStrings.findOccasionHint,
                         createNewText: AdministrationStrings.newOccasionButton,
-                        happeningNowText: "Happening Now".tr(),
-                        upcomingText: "Upcoming Events".tr(),
-                        pastText: "Past Events".tr(),
+                        happeningNowText: CommonStrings.happeningNow,
+                        upcomingText: CommonStrings.upcomingEvents,
+                        pastText: CommonStrings.pastEvents,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -840,7 +842,7 @@ class AppPanelHelper {
             // Condition for Event Management: User has editor view rights
             if (RightsService.canSeeAdministration()) {
               actions.add(_ActionMenuItem(
-                  label: 'Event management'.tr(),
+                  label: CommonStrings.eventManagement,
                   icon: Icons.admin_panel_settings,
                   onSelect: () async => await RouterService.navigateOccasion(
                       context, AdminPage.ROUTE)));
@@ -870,7 +872,7 @@ class AppPanelHelper {
             // Action menu
             return PopupMenuButton<_ActionMenuItem>(
               icon: Icon(Icons.more_vert, color: iconColor),
-              tooltip: "More Options".tr(),
+              tooltip: CommonStrings.moreOptions,
               onSelected: (action) => action.onSelect(),
               itemBuilder: (BuildContext context) {
                 return actions.map((_ActionMenuItem action) {

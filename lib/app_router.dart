@@ -21,6 +21,8 @@ import 'package:fstapp/components/map/map_page.dart';
 import 'package:fstapp/components/news/news_form_page.dart';
 import 'package:fstapp/components/news/news_page.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
+import 'package:fstapp/components/speakers/counseling_page.dart';
+import 'package:fstapp/components/cleaning/cleaning_page.dart';
 import 'package:fstapp/components/users/views/forgot_password_page.dart';
 import 'package:fstapp/components/scan/scan_page.dart';
 import 'package:fstapp/components/app_management/settings_page.dart';
@@ -34,7 +36,10 @@ import 'package:fstapp/components/app_management/instance_install_page.dart';
 import 'app_router.gr.dart';
 import 'components/information/game/game_page.dart';
 
-@AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
+// Keep web routes in one executable bundle. Separate deferred JS chunks can
+// strand an already-installed PWA on AutoRoute's loading placeholder when a
+// deployment replaces a chunk that the older runtime has not cached yet.
+@AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: false)
 class AppRouter extends RootStackRouter {
   static const String LINK = "occasionLink";
   static const String linkFormatted = "{$LINK}";
@@ -107,6 +112,23 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
             page: MyScheduleRoute.page,
             path: "/:$linkFormatted/${MySchedulePage.ROUTE}"),
+        // Counseling rozcestník is a full-screen page (own Scaffold + back
+        // button), NOT a bottom-nav tab — so it must be a top-level occasion
+        // route. As a child of the tabbed OccasionHomeRoute it could not be
+        // resolved by the AutoTabsRouter (which only knows its tab routes), so
+        // deep links / redirects to it fell back to the default Program tab.
+        AutoRoute(
+            page: CounselingRoute.page,
+            path: "/:$linkFormatted/${CounselingPage.ROUTE}"),
+        // Cleaning page: top-level occasion route (own Scaffold like Counseling)
+        // with an optional `:id` self-child so `cleaning/:placeId` deep-links
+        // straight into the report dialog (same idiom as EventEditPage).
+        AutoRoute(
+            page: CleaningRoute.page,
+            path: "/:$linkFormatted/${CleaningPage.ROUTE}",
+            children: [
+              AutoRoute(path: ':id', page: CleaningRoute.page),
+            ]),
         AutoRoute(
             page: TimetableRoute.page,
             path: "/:$linkFormatted/${TimetablePage.ROUTE}"),
@@ -219,6 +241,10 @@ class AppRouter extends RootStackRouter {
       FormPage.ROUTE,
       ScanPage.ROUTE,
       TransferPage.ROUTE,
+      'privacy',
+      'terms',
+      'support',
+      'delete-account',
     ];
   }
 }
@@ -226,19 +252,13 @@ class AppRouter extends RootStackRouter {
 /// Observer to monitor routing events for debugging or analytics purposes.
 class RoutingObserver extends AutoRouteObserver {
   @override
-  void didPush(Route route, Route? previousRoute) {
-
-  }
+  void didPush(Route route, Route? previousRoute) {}
 
   @override
-  void didInitTabRoute(TabPageRoute route, TabPageRoute? previousRoute) {
-
-  }
+  void didInitTabRoute(TabPageRoute route, TabPageRoute? previousRoute) {}
 
   @override
-  void didChangeTabRoute(TabPageRoute route, TabPageRoute previousRoute) {
-
-  }
+  void didChangeTabRoute(TabPageRoute route, TabPageRoute previousRoute) {}
 }
 
 /// This guard checks if the app is supported when landing on the root '/'.

@@ -13,6 +13,7 @@ import 'package:trina_grid/trina_grid.dart';
 
 class OccasionUserModel extends ITrinaRowModel {
   static const String birthDateJsonFormat = "yyyy-MM-dd";
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
 
   DateTime? createdAt;
   DateTime? lastSignInAt;
@@ -22,12 +23,19 @@ class OccasionUserModel extends ITrinaRowModel {
   int? role;
   int? unit;
   String? formId;
+  String? groupTitle;
+  String? companionOwnerId;
+  String? companionOwnerName;
+  String? companionOrigin;
+  List<String> managedCompanionNames;
   FormModel? form;
 
   bool? isEditor = false;
   bool? isEditorView = false;
   bool? isEditorOrder = false;
   bool? isEditorOrderView = false;
+  bool? isCleaningCrew = false;
+  bool? isCleaningBlocked = false;
   bool? isManager = false;
   bool? isApprover = false;
   bool? isApproved = false;
@@ -41,6 +49,7 @@ class OccasionUserModel extends ITrinaRowModel {
 
   Map<String, dynamic>? data;
   Map<String, dynamic>? services;
+  int aggregateVersion;
   OccasionUserModel(
       {this.createdAt,
       this.lastSignInAt,
@@ -53,13 +62,21 @@ class OccasionUserModel extends ITrinaRowModel {
       this.isEditorView,
       this.isEditorOrder,
       this.isEditorOrderView,
+      this.isCleaningCrew,
+      this.isCleaningBlocked,
       this.isManager,
       this.isApprover,
       this.isApproved,
       this.services,
       this.unit,
       this.formId,
-      this.form});
+      this.groupTitle,
+      this.companionOwnerId,
+      this.companionOwnerName,
+      this.companionOrigin,
+      this.managedCompanionNames = const [],
+      this.form,
+      this.aggregateVersion = 0});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
@@ -76,16 +93,23 @@ class OccasionUserModel extends ITrinaRowModel {
         user: json[Tb.occasion_users.user],
         unit: json[Tb.unit_users.unit],
         formId: json[DbUsers.formIdKey],
+        groupTitle: json[DbUsers.groupTitleKey],
+        companionOwnerId: json['companion_owner_id'],
+        companionOwnerName: json['companion_owner_name'],
+        companionOrigin: json['companion_origin'],
         isEditor: json[Tb.occasion_users.is_editor],
         isEditorView: json[Tb.occasion_users.is_editor_view],
         isEditorOrder: json[Tb.occasion_users.is_editor_order],
         isEditorOrderView: json[Tb.occasion_users.is_editor_order_view],
+        isCleaningCrew: json[Tb.occasion_users.is_cleaning_crew],
+        isCleaningBlocked: json[Tb.occasion_users.is_cleaning_blocked],
         isApprover: json[Tb.occasion_users.is_approver],
         isApproved: json[Tb.occasion_users.is_approved],
         isManager: json[Tb.occasion_users.is_manager],
         role: json[Tb.occasion_users.role],
         data: json[Tb.occasion_users.data],
-        services: json[Tb.occasion_users.services]);
+        services: json[Tb.occasion_users.services],
+        aggregateVersion: TrinaRowVersion.read(json));
   }
 
   dynamic toUpdateJson() {
@@ -101,6 +125,8 @@ class OccasionUserModel extends ITrinaRowModel {
       Tb.occasion_users.is_editor_view: isEditorView ?? false,
       Tb.occasion_users.is_editor_order: isEditorOrder ?? false,
       Tb.occasion_users.is_editor_order_view: isEditorOrderView ?? false,
+      Tb.occasion_users.is_cleaning_crew: isCleaningCrew ?? false,
+      Tb.occasion_users.is_cleaning_blocked: isCleaningBlocked ?? false,
       Tb.occasion_users.is_approver: isApprover ?? false,
       Tb.occasion_users.is_approved: isApproved ?? false,
       Tb.occasion_users.is_manager: isManager ?? false,
@@ -108,30 +134,6 @@ class OccasionUserModel extends ITrinaRowModel {
       Tb.occasion_users.data: data,
       Tb.occasion_users.services: services,
     };
-  }
-
-  factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json,
-      [OccasionUserModel? original]) {
-    return OccasionUserModel(
-        occasion: RightsService.currentOccasionId()!,
-        user: original?.user ?? json[UserColumns.ID],
-        role: json[UserColumns.ROLE],
-        data: {
-          Tb.occasion_users.data_email: json[UserColumns.EMAIL],
-          Tb.occasion_users.data_name: json[UserColumns.NAME],
-          Tb.occasion_users.data_surname: json[UserColumns.SURNAME],
-          Tb.occasion_users.data_sex: json[UserColumns.SEX],
-          Tb.occasion_users.data_phone: json[UserColumns.PHONE],
-          Tb.occasion_users.data_text1: json[UserColumns.TEXT1],
-          Tb.occasion_users.data_text2: json[UserColumns.TEXT2],
-          Tb.occasion_users.data_text3: json[UserColumns.TEXT3],
-          Tb.occasion_users.data_birthDate: json[UserColumns.BIRTHDAY],
-          Tb.occasion_users.data_note: json[UserColumns.NOTE],
-          Tb.occasion_users.data_diet: json[UserColumns.DIET],
-          Tb.occasion_users.data_isInvited:
-              original?.data?[Tb.occasion_users.data_isInvited],
-        },
-        services: json[Tb.occasion_users.services]);
   }
 
   factory OccasionUserModel.newRow(int occasionId) {
@@ -147,17 +149,6 @@ class OccasionUserModel extends ITrinaRowModel {
       }
     });
     return map;
-  }
-
-  Map<String, dynamic> toImportedUpdateJson() {
-    return {
-      Tb.occasion_users.occasion: occasion,
-      Tb.occasion_users.user: user,
-      Tb.occasion_users.role: role,
-      Tb.occasion_users.is_editor_view: isEditorView ?? false,
-      Tb.occasion_users.data: data,
-      Tb.occasion_users.services: services,
-    };
   }
 
   Map<String, TrinaCell> serviceToOneColumnTrinaRow(
@@ -196,7 +187,7 @@ class OccasionUserModel extends ITrinaRowModel {
 
   @override
   Future<void> deleteMethod(BuildContext context) async {
-    await DbUsers.deleteOccasionUser(user!, occasion!);
+    await DbUsers.deleteOccasionUser(this);
   }
 
   @override
@@ -211,12 +202,16 @@ class OccasionUserModel extends ITrinaRowModel {
     json.addAll(servicesToOneColumnTrinaRow(
         services, DbOccasions.serviceTypeAccommodation));
     json.addAll({
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       UserColumns.ID: TrinaCell(value: user),
       UserColumns.EDITOR: TrinaCell(value: isEditor.toString()),
       UserColumns.EDITOR_VIEW: TrinaCell(value: isEditorView.toString()),
       UserColumns.EDITOR_ORDER: TrinaCell(value: isEditorOrder.toString()),
       UserColumns.EDITOR_ORDER_VIEW:
           TrinaCell(value: isEditorOrderView.toString()),
+      UserColumns.CLEANING_CREW: TrinaCell(value: isCleaningCrew.toString()),
+      UserColumns.CLEANING_BLOCKED:
+          TrinaCell(value: isCleaningBlocked.toString()),
       UserColumns.MANAGER: TrinaCell(value: isManager.toString()),
       UserColumns.APPROVED: TrinaCell(value: isApproved.toString()),
       UserColumns.APPROVER: TrinaCell(value: isApprover.toString()),
@@ -227,6 +222,12 @@ class OccasionUserModel extends ITrinaRowModel {
           TrinaCell(value: data?[Tb.occasion_users.data_name] ?? ""),
       UserColumns.SURNAME:
           TrinaCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
+      UserColumns.GROUP: TrinaCell(value: groupTitle ?? ""),
+      UserColumns.COMPANION_OWNER: TrinaCell(value: companionOwnerName ?? ""),
+      UserColumns.COMPANION_OWNER_ID: TrinaCell(value: companionOwnerId ?? ""),
+      UserColumns.COMPANION_ORIGIN: TrinaCell(value: companionOrigin ?? ""),
+      UserColumns.MANAGED_COMPANION_NAMES:
+          TrinaCell(value: managedCompanionNames),
       UserColumns.SEX: TrinaCell(value: data?[Tb.occasion_users.data_sex]),
       UserColumns.PHONE:
           TrinaCell(value: data?[Tb.occasion_users.data_phone] ?? ""),
@@ -290,14 +291,33 @@ class OccasionUserModel extends ITrinaRowModel {
     }
     Map<String, dynamic> services = {};
     mapJsonToServices(json, services, DbOccasions.serviceTypeFood);
-    var value = json[UserColumns.ACCOMMODATION]?.isEmpty ?? true
-        ? DbOccasions.serviceNone
-        : DbOccasions.servicePaid;
-    mapOneToServices(services, DbOccasions.serviceTypeAccommodation,
-        json[UserColumns.ACCOMMODATION], value);
+    final accommodationCode = json[UserColumns.ACCOMMODATION]?.toString() ?? '';
+    // Presence of the accommodation object is intentional: an empty object
+    // clears the current assignment, while missing service types are preserved
+    // by save_occasion_user_for_edit.
+    services[DbOccasions.serviceTypeAccommodation] = <String, dynamic>{};
+    if (accommodationCode.isNotEmpty) {
+      mapOneToServices(
+        services,
+        DbOccasions.serviceTypeAccommodation,
+        accommodationCode,
+        DbOccasions.servicePaid,
+      );
+    }
     return OccasionUserModel(
       occasion: RightsService.currentOccasionId(),
+      aggregateVersion: TrinaRowVersion.read(json),
       user: json[UserColumns.ID]?.isEmpty == true ? null : json[UserColumns.ID],
+      groupTitle: json[UserColumns.GROUP],
+      companionOwnerId: json[UserColumns.COMPANION_OWNER_ID]?.isEmpty == true
+          ? null
+          : json[UserColumns.COMPANION_OWNER_ID],
+      companionOwnerName: json[UserColumns.COMPANION_OWNER]?.isEmpty == true
+          ? null
+          : json[UserColumns.COMPANION_OWNER],
+      companionOrigin: json[UserColumns.COMPANION_ORIGIN]?.isEmpty == true
+          ? null
+          : json[UserColumns.COMPANION_ORIGIN],
       isApprover: json[UserColumns.APPROVER] == "true" ? true : false,
       isApproved: json[UserColumns.APPROVED] == "true" ? true : false,
       isManager: json[UserColumns.MANAGER] == "true" ? true : false,
@@ -306,6 +326,9 @@ class OccasionUserModel extends ITrinaRowModel {
       isEditorOrder: json[UserColumns.EDITOR_ORDER] == "true" ? true : false,
       isEditorOrderView:
           json[UserColumns.EDITOR_ORDER_VIEW] == "true" ? true : false,
+      isCleaningCrew: json[UserColumns.CLEANING_CREW] == "true" ? true : false,
+      isCleaningBlocked:
+          json[UserColumns.CLEANING_BLOCKED] == "true" ? true : false,
       role: int.tryParse(json[UserColumns.ROLE] ?? ""),
       services: services,
       data: {
@@ -346,38 +369,40 @@ class OccasionUserModel extends ITrinaRowModel {
   }
 
   bool importedEquals(Map<String, dynamic> iu) {
-    return compareField(
-            iu, Tb.occasion_users.data_email, Tb.occasion_users.data_email) &&
-        compareField(
-            iu, Tb.occasion_users.data_name, Tb.occasion_users.data_name) &&
-        compareField(iu, Tb.occasion_users.data_surname,
-            Tb.occasion_users.data_surname) &&
-        compareField(
-            iu, Tb.occasion_users.data_sex, Tb.occasion_users.data_sex) &&
-        iu[Tb.user_info.role] == role &&
-        compareField(
-            iu, Tb.occasion_users.data_phone, Tb.occasion_users.data_phone) &&
-        compareField(
-            iu, Tb.occasion_users.data_text1, Tb.occasion_users.data_text1) &&
-        compareField(
-            iu, Tb.occasion_users.data_text2, Tb.occasion_users.data_text2) &&
-        compareField(
-            iu, Tb.occasion_users.data_text3, Tb.occasion_users.data_text3) &&
-        compareField(
-            iu, Tb.occasion_users.data_text4, Tb.occasion_users.data_text4) &&
-        compareField(
-            iu, Tb.occasion_users.data_diet, Tb.occasion_users.data_diet) &&
-        compareField(
-            iu, Tb.occasion_users.data_note, Tb.occasion_users.data_note) &&
-        compareServicesJson(iu[Tb.occasion_users.services], services, [
-          DbOccasions.serviceTypeFood,
-          DbOccasions.serviceTypeAccommodation
-        ]) &&
-        iu[Tb.occasion_users.data_birthDate] ==
-            data?[Tb.occasion_users.data_birthDate];
+    final importedDataFields = [
+      Tb.occasion_users.data_email,
+      Tb.occasion_users.data_name,
+      Tb.occasion_users.data_surname,
+      Tb.occasion_users.data_sex,
+      Tb.occasion_users.data_phone,
+      Tb.occasion_users.data_text1,
+      Tb.occasion_users.data_text2,
+      Tb.occasion_users.data_text3,
+      Tb.occasion_users.data_text4,
+      Tb.occasion_users.data_diet,
+      Tb.occasion_users.data_note,
+      Tb.occasion_users.data_birthDate,
+    ];
 
-    // Uncomment and adjust for additional fields
-    // && (u[Tb.user_info.sex].toString().trim().toLowerCase().startsWith("m") ? "male" : "female") == data?[Tb.occasion_users.data_sex];
+    for (final field in importedDataFields) {
+      if (iu.containsKey(field) && !compareField(iu, field, field)) {
+        return false;
+      }
+    }
+
+    if (iu.containsKey(Tb.occasion_users.role) &&
+        iu[Tb.occasion_users.role] != role) {
+      return false;
+    }
+
+    final importedServices = iu[Tb.occasion_users.services];
+    if (iu.containsKey(Tb.occasion_users.services) &&
+        importedServices is Map<String, dynamic>) {
+      return compareServicesJson(
+          importedServices, services, importedServices.keys.toList());
+    }
+
+    return true;
   }
 
   static bool compareJson(

@@ -1,8 +1,10 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
@@ -15,8 +17,12 @@ import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/unit/views/unit_page.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/components/users/views/login_page.dart';
+import 'package:fstapp/components/users/views/user_page.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
@@ -45,7 +51,9 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    if (!ClientSyncRuntime.isV1Selected) {
+      WidgetsBinding.instance.addObserver(this);
+    }
     loadData();
   }
 
@@ -88,13 +96,16 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
       }
       _dots = _events
           .filterRootEvents()
+          .where((e) => !e.isCounselingSlot)
           .map((e) => TimeBlockItem.fromEventModel(e))
           .toList();
     }
     if (mounted) setState(() {});
 
-    final fast = await DbEvents.getAllEvents(
-        RightsService.currentOccasionId()!, false);
+    if (ClientSyncRuntime.isV1Selected) return;
+
+    final fast =
+        await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
     for (var e in fast) {
       if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
         e.description = _eventDescriptions[e.id!];
@@ -103,20 +114,22 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
     _events = fast;
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
     if (mounted) setState(() {});
   }
 
   Future<void> _loadFullData() async {
-    final full = await DbEvents.getAllEvents(
-        RightsService.currentOccasionId()!, true);
+    final full =
+        await DbEvents.getAllEvents(RightsService.currentOccasionId()!, true);
     for (var e in full) {
       if (e.id != null) _eventDescriptions[e.id!] = e.description;
     }
     _events = full;
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
     await OfflineDataService.saveAllEvents(_events);
@@ -194,7 +207,7 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
                           child: const Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 4, vertical: 4),
-                            child: LogoWidget(height: 40),
+                            child: LogoWidget(height: 40, programVariant: true),
                           ),
                         ),
                         const Spacer(),
@@ -202,15 +215,35 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
                             FeatureConstants.mySchedule))
                           _HeaderIconButton(
                             icon: Icons.favorite_border,
-                            label: "My schedule".tr(),
+                            label: CommonStrings.mySchedule,
                             onPressed: _mySchedulePressed,
                           ),
                         if (FeatureService.isFeatureEnabled(
                             FeatureConstants.timetable))
                           _HeaderIconButton(
                             icon: Icons.calendar_month_outlined,
-                            label: "Schedule".tr(),
+                            label: CommonStrings.schedule,
                             onPressed: _schedulePressed,
+                          ),
+                        // GlobalSearch moves profile/sign-in into the app bar.
+                        if (FeatureService.isFeatureEnabled(
+                            FeatureConstants.globalSearch))
+                          _HeaderIconButton(
+                            icon: AuthService.isLoggedIn()
+                                ? Icons.account_circle
+                                : Icons.account_circle_outlined,
+                            label: AuthService.isLoggedIn()
+                                ? (RightsService.currentUser()?.name ??
+                                    ScheduleStrings.profile)
+                                : UserStrings.signIn,
+                            onPressed: () {
+                              final f = AuthService.isLoggedIn()
+                                  ? RouterService.navigateOccasion(
+                                      context, UserPage.ROUTE)
+                                  : RouterService.navigate(
+                                      context, LoginPage.ROUTE);
+                              f.then((_) => loadData());
+                            },
                           ),
                       ],
                     ),
@@ -219,8 +252,8 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
                   // (also white). Keeps the airy feel but separates the two.
                   Container(
                     height: 1,
-                    color: ThemeConfig.blackColor(context)
-                        .withValues(alpha: 0.06),
+                    color:
+                        ThemeConfig.blackColor(context).withValues(alpha: 0.06),
                   ),
                 ],
               ),

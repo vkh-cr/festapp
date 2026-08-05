@@ -1,6 +1,6 @@
 {
   "name": "festapp-web-client",
-  "version": "0.19.31",
+  "version": "0.19.84",
   "description": "Standalone Web Client for Festapp",
   "type": "module",
   "scripts": {
@@ -21,7 +21,9 @@
   },
   "devDependencies": {
     "jsdom": "^27.3.0",
-    "netlify-cli": "^23.13.4",
     "vite": "^7.3.0"
+  },
+  "overrides": {
+    "rollup": "^4.62.4"
   }
 }

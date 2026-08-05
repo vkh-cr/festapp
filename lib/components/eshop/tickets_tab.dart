@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
@@ -134,7 +133,7 @@ class _TicketsTabState extends State<TicketsTab> {
     // If loading is finished but the controller is still null,
     // it means initialization failed or there was no data context.
     if (_controller == null) {
-      return Center(child: Text("No data to display.".tr()));
+      return Center(child: Text(OrdersStrings.noDataToDisplay));
     }
 
     return SingleTableDataGrid<TicketModel>(_controller!);
@@ -169,10 +168,8 @@ class _TicketsTabState extends State<TicketsTab> {
           if (mounted) {
             ToastHelper.Show(
               context,
-              OrdersStrings.stornoCompletedText.tr(
-                namedArgs: {
-                  "item": ticket.ticketSymbol ?? ticket.id.toString(),
-                },
+              OrdersStrings.stornoCompleted(
+                item: ticket.ticketSymbol ?? ticket.id.toString(),
               ),
             );
           }

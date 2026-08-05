@@ -1,11 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_strings.dart';
+import 'package:fstapp/components/users/login_feedback.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/users/views/forgot_password_page.dart';
 import 'package:fstapp/components/app_management/settings_page.dart';
 import 'package:fstapp/components/users/views/signup_page.dart';
+import 'package:fstapp/components/users/widgets/profile_legal_link.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -52,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _checkAutoRedirect() async {
     if (AuthService.isLoggedIn() || await AuthService.tryAuthUser()) {
       var loggedIn = await AuthService.tryAuthUser();
+      if (!mounted) return;
       if (loggedIn) {
         var userUnits = RightsService.currentUser()?.units;
         if (userUnits != null && userUnits.isNotEmpty) {
@@ -145,13 +148,19 @@ class _LoginPageState extends State<LoginPage> {
                           setState(() {
                             _isLoading = true;
                           });
-                          await AuthService.login(
-                                  AppConfig.getUserPrefix(
-                                      _emailController.text),
-                                  _passwordController.text)
-                              .then(_showToast)
-                              .then(_refreshSignedInStatus)
-                              .catchError(_onError);
+                          try {
+                            await AuthService.login(
+                              AppConfig.getUserPrefix(_emailController.text),
+                              _passwordController.text,
+                            );
+                            await finishSuccessfulSignIn(
+                              navigate: () => _refreshSignedInStatus(null),
+                              showFeedback: _showSignInSuccess,
+                            );
+                          } catch (error) {
+                            _onError(error);
+                          }
+                          if (!mounted) return;
                           setState(() {
                             _isLoading = false;
                           });
@@ -172,6 +181,8 @@ class _LoginPageState extends State<LoginPage> {
                                 context, ForgotPasswordPage.ROUTE),
                             child: Text(UserStrings.forgotPassword,
                                 style: StylesConfig.normalTextStyle))),
+                    const AppLegalLinks(),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -184,16 +195,19 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _refreshSignedInStatus(dynamic value) async {
     var loggedIn = await AuthService.tryAuthUser();
+    if (!mounted) return;
     if (loggedIn) {
       await RouterService.handlePostLoginNavigation(context);
     }
   }
 
-  void _showToast(value) {
-    ToastHelper.Show(context, UserStrings.signInSuccess);
+  Future<void> _showSignInSuccess() async {
+    final visibleContext = RouterService.router.navigatorKey.currentContext;
+    if (visibleContext == null) return;
+    await ToastHelper.Show(visibleContext, UserStrings.signInSuccess);
   }
 
-  void _onError(err) {
+  void _onError(Object error) {
     ToastHelper.Show(context, UserStrings.invalidCredentials,
         severity: ToastSeverity.NotOk);
   }

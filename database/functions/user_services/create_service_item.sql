@@ -7,6 +7,11 @@ CREATE OR REPLACE FUNCTION create_service_item(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
+-- SECURITY DEFINER: the function self-gates on get_is_manager_on_occasion below,
+-- then writes occasions.services. The occasions RLS write policy only allows org
+-- admins, so as INVOKER a plain manager's UPDATE silently matches 0 rows (no error)
+-- and the item is never saved. DEFINER lets the manager-gated write bypass RLS.
+SECURITY DEFINER
 SET search_path = public, extensions
 AS $$
 DECLARE
@@ -41,12 +46,15 @@ BEGIN
     'reference', reference
   );
 
-  -- Update the occasion to add the new item to the specified type array in services
+  -- Update the occasion to add the new item to the specified type array in services.
+  -- Guard against `services` being SQL NULL *or* a JSON scalar/`null` (which
+  -- COALESCE does not catch and which makes jsonb_set raise
+  -- "cannot set path in scalar"). Same guard for the per-type array.
   UPDATE public.occasions
   SET services = jsonb_set(
-    COALESCE(services, '{}'::jsonb),                    -- Ensure services is an empty JSON if NULL
+    CASE WHEN jsonb_typeof(services) = 'object' THEN services ELSE '{}'::jsonb END,
     ARRAY[type],
-    COALESCE(services->type, '[]'::jsonb) || new_service_item,
+    CASE WHEN jsonb_typeof(services->type) = 'array' THEN services->type ELSE '[]'::jsonb END || new_service_item,
     true
   )
   WHERE id = oc;

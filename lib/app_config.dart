@@ -1,6 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/app_management/language_model.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 
@@ -8,14 +8,18 @@ class AppConfig {
   static const String supabaseUrl = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
   static const String anonKey =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
-  static const String appName = 'Vstupenky.online';
-  static String mapTitle = "Map".tr();
+  static const String appName = 'Festapp';
+  static String get mapTitle => CommonStrings.map;
   static const bool showPWAInstallOption = true;
   static const bool isOwnProgramSupportedWithoutSignIn = true;
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
   static const String oneSignalAppId = '';
+  static const String pushAppGeneration = '';
+  static const String logoAsset = 'assets/icons/fstapplogo.svg';
+  static const String darkLogoAsset = 'assets/icons/fstapplogo.dark.svg';
+  static const String programLogoAsset = 'assets/icons/fstapplogo.svg';
   static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
   static const int organization = 1;
@@ -28,10 +32,12 @@ class AppConfig {
   static const bool isContractFeatureEnabled = false;
   static const bool showBankSupportRole = false;
 
-  static const String webLink = "https://live.festapp.net";
+  static const String webLink = "https://vstupenky.online";
+  static const String syncHeadOrigin = "";
+  static const String syncAssetOrigin = "";
   static const String imageWorkerUrl = 'https://img.festapp.net';
-  static bool isProLicense = false;
-  static const int imagesMaxWidth = 980;
+  static bool isProLicense = true;
+  static const int imagesMaxWidth = 780;
   static const int imagesMaxBytes = 800000;
 
   static const int daySplitHour = 4;
@@ -49,13 +55,8 @@ class AppConfig {
   }
 
   static List<LanguageModel> availableLanguages() => [
-        LanguageModel(const Locale("cs"), "Čeština"),
-        LanguageModel(const Locale("en"), "English"),
-        // LanguageModel(const Locale("sk"), "Slovenčina"),
-        // LanguageModel(const Locale("pl"), "Polski"),
-        // LanguageModel(const Locale("de"), "Deutsch"),
-        // LanguageModel(const Locale("uk"), "українська"),
-      ];
+    LanguageModel(const Locale("cs"), "Čeština"),
+  ];
 
   /// This is the single definition place for the prefix structure.
   /// It combines the organization ID and the separator (e.g., "2+").

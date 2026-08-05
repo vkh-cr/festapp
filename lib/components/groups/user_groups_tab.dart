@@ -9,6 +9,7 @@ import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/groups/user_group_info_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/components/groups/db_groups.dart';
+import 'package:fstapp/components/groups/group_place_dialog.dart';
 import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
@@ -28,12 +29,76 @@ class UserGroupsTab extends StatefulWidget {
 
 class _UserGroupsTabState extends State<UserGroupsTab> {
   Map<String, UserInfoModel> _allUsersMap = {};
+  List<PlaceModel> _places = [];
   SingleDataGridController<UserGroupInfoModel>? controller;
 
   @override
   void initState() {
     super.initState();
     _loadAllUsers();
+  }
+
+  Future<List<UserGroupInfoModel>> _loadGroupsForGrid() async {
+    final data = await DbGroups.getUserGroupsEditorData();
+    _places = data.places;
+    return data.groups;
+  }
+
+  Future<void> _chooseGroupPlace(
+    TrinaColumnRendererContext rendererContext,
+  ) async {
+    final row = rendererContext.row;
+    final model = row.cells[UserGroupInfoModel.modelReference]!.value
+        as UserGroupInfoModel;
+    final currentPlace =
+        row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
+    final result = await showDialog<Object?>(
+      context: context,
+      builder: (_) => GroupPlaceDialog(
+        places: _places,
+        currentPlace: currentPlace,
+      ),
+    );
+    if (!mounted || result == null) return;
+
+    var shouldSavePlace = false;
+    PlaceModel? selectedPlace;
+    if (result is PlaceModel) {
+      selectedPlace = result;
+    } else if (result is RemoveGroupPlaceAction) {
+      selectedPlace = null;
+    } else if (result is UseCustomGroupLocationAction) {
+      final title = row.cells[Tb.user_group_info.title]?.value as String?;
+      final customPlace = currentPlace?.isPrivateGroupLocation == true
+          ? currentPlace!
+          : PlaceModel(
+              title: title,
+              description: '',
+              type: PlaceModel.groupType,
+              isHidden: true,
+              latLng: currentPlace?.hasCoordinates == true
+                  ? Map<String, dynamic>.from(currentPlace!.latLng as Map)
+                  : FeatureService.getDefaultLocation(),
+            );
+      final coordinates = await RouterService.navigatePageInfo(
+        context,
+        MapRoute(place: customPlace),
+      );
+      if (!mounted || coordinates == null) return;
+      customPlace.latLng = coordinates;
+      shouldSavePlace = true;
+      selectedPlace = customPlace;
+    } else {
+      return;
+    }
+
+    model.setPlaceForEditing(selectedPlace, savePlace: shouldSavePlace);
+    final cell = row.cells[Tb.user_group_info.place]!;
+    rendererContext.stateManager.changeCellValue(
+      cell,
+      selectedPlace,
+      force: true,
+    );
   }
 
   Future<void> _loadAllUsers() async {
@@ -49,7 +114,7 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
     super.didChangeDependencies();
     controller ??= SingleDataGridController<UserGroupInfoModel>(
       context: context,
-      loadData: DbGroups.getAllUserGroupInfo,
+      loadData: _loadGroupsForGrid,
       fromPlutoJson: UserGroupInfoModel.fromPlutoJson,
       firstColumnType: DataGridFirstColumn.delete,
       idColumn: Tb.user_group_info.id,
@@ -163,7 +228,7 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                       color: Theme.of(context)
                           .colorScheme
                           .onSurface
-                          .withOpacity(0.6),
+                          .withValues(alpha: 0.6),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -243,43 +308,27 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
           },
         ),
         TrinaColumn(
-          width: 150,
+          width: 220,
           title: GroupsStrings.columnPlace,
           field: Tb.user_group_info.place,
-          type: TrinaColumnType.text(defaultValue: null),
+          type: UserGroupInfoModel.placeColumnType(),
+          enableEditingMode: false,
           renderer: (rendererContext) {
+            final place = rendererContext
+                .row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
             return ElevatedButton(
-              onPressed: () async {
-                var title =
-                    rendererContext.row.cells[Tb.user_group_info.title]?.value;
-                var placeModel = rendererContext
-                    .row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
-                placeModel ??= PlaceModel(
-                    id: null,
-                    title: title,
-                    description: "",
-                    type: "group",
-                    isHidden: true,
-                    latLng: FeatureService.getDefaultLocation());
-                RouterService.navigatePageInfo(
-                  context,
-                  MapRoute(place: placeModel),
-                ).then((value) async {
-                  if (value != null) {
-                    placeModel!.latLng = value;
-                    var cell =
-                        rendererContext.row.cells[Tb.user_group_info.place]!;
-                    rendererContext.stateManager
-                        .changeCellValue(cell, placeModel, force: true);
-                  }
-                });
-              },
+              onPressed: () => _chooseGroupPlace(rendererContext),
               child: Row(
                 children: [
-                  const Icon(Icons.location_pin),
+                  Icon(place == null
+                      ? Icons.add_location_alt_outlined
+                      : Icons.location_pin),
                   Padding(
                     padding: const EdgeInsets.all(6),
-                    child: Text(GroupsStrings.buttonLocation),
+                    child: Text(
+                      place?.title ?? GroupsStrings.choosePlace,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),

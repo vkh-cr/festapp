@@ -22,15 +22,16 @@ fi
 
 fail=0
 
-# 1. YAML parse.
-if ! python3 -c "import yaml,sys; yaml.safe_load(open('$WORKFLOW'))" 2>/dev/null; then
-    if ! command -v python3 >/dev/null 2>&1; then
-        echo "  skip: python3 not available, cannot YAML-parse"
-    else
+# 1. YAML parse when the optional PyYAML parser is available. The structural
+# checks below remain the dependency-free fallback.
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "  skip: python3 not available, using structural checks"
+elif ! python3 -c "import yaml" 2>/dev/null; then
+    echo "  skip: PyYAML not available, using structural checks"
+elif ! python3 -c "import yaml; yaml.safe_load(open('$WORKFLOW'))" 2>/dev/null; then
         echo "  FAIL: deploy.yml is not valid YAML"
-        python3 -c "import yaml,sys; yaml.safe_load(open('$WORKFLOW'))" || true
+        python3 -c "import yaml; yaml.safe_load(open('$WORKFLOW'))" || true
         fail=1
-    fi
 else
     echo "  ok: deploy.yml parses as YAML"
 fi
@@ -89,6 +90,17 @@ for needle in '/sitemap.xml' '/form/' 'WEB_CLIENT_INDEX' 'FLUTTER_ENTRY' 'AUTH_B
         echo "  ok: cloudflare_build.sh worker covers '$needle'"
     else
         echo "  FAIL: cloudflare_build.sh worker missing '$needle'"
+        fail=1
+    fi
+done
+
+# 8. A deploy is not successful until the custom domain repeatedly serves one
+# coherent HTML/manifest/main/service-worker generation.
+for needle in 'verify_web_deployment.mjs' '"https://${DOMAIN}" "${VERSION}"'; do
+    if grep -F -q "$needle" "$WORKFLOW"; then
+        echo "  ok: deploy workflow contains release gate '$needle'"
+    else
+        echo "  FAIL: deploy workflow missing release gate '$needle'"
         fail=1
     fi
 done

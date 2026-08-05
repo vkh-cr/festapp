@@ -1,116 +1,79 @@
-# Local Development with Supabase
+# Local database development
 
-## First-Time Setup
+Festapp has an existing production schema that predates Supabase CLI migration
+tracking. Timestamped files in `supabase/migrations/` are forward upgrades, not
+a complete historical bootstrap. A clean local database therefore starts from
+the versioned schema-only baseline and applies only migrations newer than that
+baseline.
 
-1. Ensure Docker Desktop is running
-2. Start local Supabase stack:
+The baseline contains no production rows or secrets. It is a schema dump of the
+`public` and `eshop` schemas, including functions, policies, grants and triggers.
+
+## First-time setup and reset
+
+1. Start Docker Desktop, Colima, or another Docker-compatible runtime.
+2. Rebuild the dedicated local database:
+
    ```bash
-   supabase start
+   ./automation/bootstrap_local_db.sh
    ```
-   This will:
-   - Pull Docker images (first time only, ~2-3 minutes)
-   - Apply all migrations from `supabase/migrations/` (37 files)
-   - Create storage buckets (public-files, editor-files, images-temp)
-   - Run seed data from `supabase/seed.sql` (creates test org + user t@t.com)
 
-3. Verify services are running:
-   ```bash
-   supabase status
-   ```
-   All services should show as "running"
+The command deletes and recreates only the Docker volume belonging to
+`festapp-db-tests-pg15`, starts PostgreSQL 15 on port `55432`, restores
+`supabase/baseline/20260805230000_production_schema.sql`, records all migration
+versions included in that baseline, applies newer forward migrations, and runs
+`supabase/seed.sql`.
 
-4. Access local services:
-   - API: http://localhost:54321
-   - DB: postgresql://postgres:postgres@localhost:54322/postgres
-   - Studio UI: http://localhost:54323
-   - Inbucket (email testing): http://localhost:54324
+Database URL:
 
-## Stopping/Restarting
+```text
+postgresql://postgres:postgres@127.0.0.1:55432/postgres?sslmode=disable
+```
 
-- Stop: `supabase stop` (preserves data in Docker volumes)
-- Reset: `supabase db reset` (WARNING: deletes all local data, reapplies migrations + seed)
-
----
-
-# Local Testing Environment
-
-## Default Test Behavior
-
-All tests run against **local Supabase** by default. This ensures:
-- Zero risk to production data
-- Fast test execution
-- No network dependencies
-- Identical results across all developers
-
-## Running Tests
+Stop and remove the isolated database with:
 
 ```bash
-# All tests (requires local Supabase running)
-./automation/test_all.sh
+./automation/bootstrap_local_db.sh --stop
+```
 
-# Database tests only
-node web_client/scripts/run_db_tests.js
+## Running tests
 
-# Specific database test file
-node web_client/scripts/run_db_tests.js database/tests/bank_accounts_test.sql
+```bash
+# The test runner detects the isolated DB when it is running.
+./automation/test_all.sh db
 
-# Deno edge function tests
-source .env.development
-deno test --allow-env --allow-net --allow-read supabase/functions/**/*test*.ts
+# Run one SQL contract directly.
+DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:55432/postgres?sslmode=disable' \
+  node web_client/scripts/run_db_tests.js database/tests/companion_contract_test.sql
 
-# Flutter tests (unit tests only, no database dependency)
+# Flutter unit tests do not require the database.
 fvm flutter test
 ```
 
-## Testing Against Production (Advanced)
+Each SQL test runs in a transaction and rolls back its fixture data. The runner
+may reset sequences, which is why it must target the dedicated local database,
+never production.
 
-**Warning: Use with caution.** Only needed for verifying production schema parity or debugging production-specific issues.
+## Migration rules
 
-Database tests against production:
-```bash
-DATABASE_URL=<your-production-url> ./automation/test_all.sh
-```
+- Active migrations use one unique `YYYYMMDDHHMMSS_name.sql` filename in
+  `supabase/migrations/`.
+- Files at or below the baseline version are retained for production history
+  but are recorded as already represented when a local database is rebuilt.
+- Newer migrations are applied normally by `supabase migration up` during the
+  bootstrap.
+- Pre-Supabase `0.x.sql` upgrade fragments live in
+  `database/migrations_legacy/`; they are historical records and are not active
+  migrations.
+- Never edit an applied production migration. Add a new forward migration.
 
-Edge function tests against production:
-```bash
-TEST_ENV=production ./automation/test_all.sh
-```
+When deliberately refreshing the baseline, create a schema-only dump, verify
+that it contains no `COPY` or `INSERT INTO` statements, update the baseline
+version in `automation/bootstrap_local_db.sh`, and prove a clean rebuild plus
+the database contract suite before replacing the old baseline.
 
-**Safety:** Test runner will prompt for confirmation before executing against production.
+## Production safety
 
-## Troubleshooting
-
-**"Local Supabase is not running"**
-- Start Supabase: `supabase start`
-- Verify status: `supabase status`
-
-**"No DATABASE_URL found"**
-- Ensure local Supabase is running
-- Default URL is set automatically when not specified
-
-**Database tests fail with "function does not exist"**
-- Schema may be out of sync with migrations
-- Reset local database: `supabase db reset` (WARNING: deletes local data)
-- Restart Supabase: `supabase stop && supabase start`
-
-**Deno tests can't access SUPABASE_URL**
-- Load environment: `source .env.development`
-- Verify: `echo $SUPABASE_URL` (should show http://localhost:54321)
-
-**Edge function tests timeout**
-- Check if function is served: `supabase functions serve <function-name>`
-- Verify port 54321 is accessible: `curl http://localhost:54321/functions/v1/<function-name>`
-
-## Migration Parity Verification
-
-Verify local schema matches production:
-```bash
-supabase db diff --linked
-```
-
-**Expected output:** "No schema differences detected"
-
-If differences found:
-1. Pull latest migrations from production: `supabase db pull`
-2. Review generated migration file
-3. Apply to local: `supabase db reset`
+`bootstrap_local_db.sh` uses only `127.0.0.1:55432` and the dedicated local
+Supabase project ID. It does not read `DATABASE_URL`, link a remote project, or
+run `db push`. Testing against production is not part of the supported workflow.

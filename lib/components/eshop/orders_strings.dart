@@ -71,6 +71,47 @@ class OrdersStrings {
   static String get stornoFailed =>
       'FeatureOrders.stornoFailed'.tr(); // "Action has failed."
   static String get ordersTab => 'FeatureOrders.ordersTab'.tr(); // "Orders"
+
+  // --- Order States ---
+  static String get stateNotSet =>
+      'FeatureOrders.stateNotSet'.tr(); // "Not Set"
+  static String get stateOrdered =>
+      'FeatureOrders.stateOrdered'.tr(); // "Ordered"
+  static String get stateSent => 'FeatureOrders.stateSent'.tr(); // "Sent"
+  static String get stateUsed => 'FeatureOrders.stateUsed'.tr(); // "Used"
+
+  // --- Transactions ---
+  static String get message => 'FeatureOrders.message'.tr(); // "Message"
+  static String get notAvailable => 'FeatureOrders.notAvailable'.tr(); // "N/A"
+  static String get addTransactionConfirmation =>
+      'FeatureOrders.addTransactionConfirmation'
+          .tr(); // "Are you sure you want to add this transaction?"
+  static String get transactionAddedSuccess =>
+      'FeatureOrders.transactionAddedSuccess'
+          .tr(); // "Transaction added successfully."
+  static String get searchTransactionsHint =>
+      'FeatureOrders.searchTransactionsHint'
+          .tr(); // "Search by message, account, symbol, name, or amount"
+
+  // --- Products Search ---
+  static String get searchProductsHint =>
+      'FeatureOrders.searchProductsHint'.tr(); // "By title, type or price"
+  static String get noProductsFound =>
+      'FeatureOrders.noProductsFound'.tr(); // "No products found."
+  static String get noDataToDisplay =>
+      'FeatureOrders.noDataToDisplay'.tr(); // "No data to display."
+
+  // --- Scan Code Sharing Dialog ---
+  static String get copy => 'FeatureOrders.copy'.tr(); // "Copy"
+  static String get copyLink => 'FeatureOrders.copyLink'.tr(); // "Copy Link"
+  static String get generateNewCode =>
+      'FeatureOrders.generateNewCode'.tr(); // "Generate New Code"
+  static String get generateNewCodeWarning =>
+      'FeatureOrders.generateNewCodeWarning'
+          .tr(); // "By generating a new code, the old one will be replaced and will no longer work."
+  static String get provideScanLinkInstruction =>
+      'FeatureOrders.provideScanLinkInstruction'
+          .tr(); // "Provide the following link or code to the people who will be checking the tickets."
   static String get ordersHistoryTab =>
       'FeatureOrders.ordersHistoryTab'.tr(); // "Orders History"
 
@@ -78,8 +119,9 @@ class OrdersStrings {
       'FeatureOrders.setAsUsed'.tr(); // "Set as used"
 
   // --- Tickets/Items Tab ---
-  static String get stornoCompletedText => 'FeatureOrders.stornoCompletedItem'
-      .tr(); // "Storno completed for {item}."
+  static String stornoCompleted({required String item}) =>
+      'FeatureOrders.stornoCompletedItem'
+          .tr(namedArgs: {'item': item}); // "Storno completed for {item}."
 
   /// Returns "Tickets" or "Applications" based on whether the ticket feature is enabled.
   static String get itemsPlural {
@@ -133,21 +175,10 @@ class OrdersStrings {
   }
 
   // --- Scan Page Specific ---
-  static String get scanCodeLabel => 'Scan Code'.tr(); // "Scan Code"
-  static String get enterScanCode =>
-      'Enter Scan Code'.tr(); // "Enter Scan Code"
-  static String get confirmTicketAction =>
-      'Confirm Ticket'.tr(); // "Confirm Ticket"
-  static String get scanCameraInstruction =>
-      'Point the camera at the attendee\'s code for an entry verification.'
-          .tr(); // "Point the camera at the attendee's code for an entry verification."
+  // (Scan-specific labels moved to ScanStrings in lib/components/scan/scan_strings.dart)
   static String get scanInstructionsAppUser =>
       'FeatureOrders.scanInstructionsAppUser'
           .tr(); // "Tip: Users can show their QR code from their ticket or directly from the mobile app Profile."
-  static String get searchAttendees =>
-      'Search Attendees'.tr(); // "Search Attendees"
-  static String get resetPasswordTitle =>
-      'Reset Password'.tr(); // "Reset Password"
   static String get scanningForOccasion =>
       'FeatureOrders.scanningForOccasion'.tr(); // "Scanning for: "
 

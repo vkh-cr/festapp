@@ -5,6 +5,8 @@ import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/components/activities/activity_model.dart';
+import 'package:fstapp/components/activities/activity_commands.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 
 class ActivityHistoryInfo {
   final int id;
@@ -27,6 +29,7 @@ class ActivityHistoryInfo {
 
 class DbActivities {
   static final _supabase = Supabase.instance.client;
+  static ActivityCommands get _commands => SupabaseActivityCommands(_supabase);
 
   static Future<EditDataBundle?> getForEdit(int occasionId) async {
     final resp = await _supabase.rpc(
@@ -57,6 +60,7 @@ class DbActivities {
       assignmentPlaceLinks: ActivityDataHelper.parseAssignmentPlaceLinks(data),
       assignmentEventLinks: ActivityDataHelper.parseAssignmentEventLinks(data),
       activityAssignments: ActivityDataHelper.parseActivityAssignments(data),
+      aggregateVersion: (data['aggregate_version'] as num?)?.toInt() ?? 0,
     );
 
     ActivityDataHelper.linkAssignmentsToActivities(bundle);
@@ -132,6 +136,29 @@ class DbActivities {
       BuildContext context, int occasionId, EditDataBundle bundle) async {
     final historyPayload = bundle.toJsonEditor();
     final updatePayload = _buildUpdatePayload(bundle);
+
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.publish(
+        occasionId: occasionId,
+        expectedVersion: bundle.aggregateVersion,
+        activities: updatePayload,
+        history: historyPayload,
+        parentHistoryId: bundle.parentHistoryId,
+      );
+      if (result.status == 'conflict') {
+        throw StateError('Activities were changed by another editor');
+      }
+      if (result.status == 'rejected') {
+        throw StateError('Activities publish was rejected');
+      }
+      bundle.aggregateVersion = result.version;
+      bundle.parentHistoryId = result.historyId ?? bundle.parentHistoryId;
+      if (context.mounted) {
+        ToastHelper.Show(context, ActivitiesComponentStrings.publishedSuccessfully,
+            severity: ToastSeverity.Ok);
+      }
+      return;
+    }
 
     try {
       final historyResponse =

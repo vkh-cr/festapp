@@ -47,4 +47,75 @@ class StorageHelper {
     final db = await _getDatabase(dbPath);
     await store.record(key).delete(db);
   }
+
+  /// Applies a group of string writes as one Sembast transaction.
+  ///
+  /// A null value deletes the key. This is the primitive used by the client
+  /// sync store to make generation-pointer activation old-or-new after a
+  /// crash; callers must stage and validate payloads before invoking it.
+  static Future<void> setAllAtomic(Map<String, String?> values,
+      [String? dbPath]) async {
+    await replaceByPrefixesAtomic(values, const [], dbPath);
+  }
+
+  /// Applies writes and removes matching key families in one transaction.
+  /// Prefix removals happen before writes so a replacement may reuse a key.
+  static Future<void> replaceByPrefixesAtomic(
+    Map<String, String?> values,
+    List<String> removePrefixes, [
+    String? dbPath,
+  ]) async {
+    final store = StoreRef.main();
+    final db = await _getDatabase(dbPath);
+    final keys =
+        removePrefixes.isEmpty ? const <Object?>[] : await store.findKeys(db);
+    await db.transaction((transaction) async {
+      for (final key in keys.whereType<String>().where(
+          (key) => removePrefixes.any((prefix) => key.startsWith(prefix)))) {
+        await store.record(key).delete(transaction);
+      }
+      for (final entry in values.entries) {
+        if (entry.value == null) {
+          await store.record(entry.key).delete(transaction);
+        } else {
+          await store.record(entry.key).put(transaction, entry.value!);
+        }
+      }
+    });
+  }
+
+  static Future<List<String>> keys([String? dbPath]) async {
+    final store = StoreRef.main();
+    final db = await _getDatabase(dbPath);
+    return (await store.findKeys(db))
+        .whereType<String>()
+        .toList(growable: false);
+  }
+
+  static Future<void> removeByPrefix(String prefix, [String? dbPath]) async {
+    final store = StoreRef.main();
+    final db = await _getDatabase(dbPath);
+    final keys = await store.findKeys(db);
+    await db.transaction((transaction) async {
+      for (final key
+          in keys.whereType<String>().where((key) => key.startsWith(prefix))) {
+        await store.record(key).delete(transaction);
+      }
+    });
+  }
+
+  /// Removes several key families in one database transaction.
+  static Future<void> removeByPrefixesAtomic(List<String> prefixes,
+      [String? dbPath]) async {
+    final store = StoreRef.main();
+    final db = await _getDatabase(dbPath);
+    final keys = await store.findKeys(db);
+    await db.transaction((transaction) async {
+      for (final key in keys
+          .whereType<String>()
+          .where((key) => prefixes.any((prefix) => key.startsWith(prefix)))) {
+        await store.record(key).delete(transaction);
+      }
+    });
+  }
 }

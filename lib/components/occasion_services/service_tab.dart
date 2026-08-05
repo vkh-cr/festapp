@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
@@ -12,7 +11,10 @@ import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_columns.dart';
 import 'package:fstapp/components/occasion_services/service_dialog.dart';
+import 'package:fstapp/components/occasion_services/occasion_services_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class ServiceTab extends StatefulWidget {
   const ServiceTab({super.key});
@@ -22,93 +24,87 @@ class ServiceTab extends StatefulWidget {
 }
 
 class _ServiceTabState extends State<ServiceTab> {
-  static const List<String> columnIdentifiers = [
-    UserColumns.ID,
-    UserColumns.EMAIL,
-    UserColumns.NAME,
-    UserColumns.SURNAME,
-    UserColumns.TEXT1,
-    UserColumns.TEXT2,
-    UserColumns.ACCOMMODATION,
-    UserColumns.FOOD,
-    UserColumns.DIET,
-    UserColumns.NOTE,
-  ];
+  /// Whether the occasion's ServicesFeature permits accommodation management.
+  bool get _allowAccommodation =>
+      FeatureService.isServiceAccommodationEnabled();
 
-  List<ServiceItemModel>? allFood;
-  List<ServiceItemModel>? allAccommodation;
+  /// Whether the occasion's ServicesFeature permits food/diet management.
+  bool get _allowFood => FeatureService.isServiceFoodEnabled();
+
+  /// Grid columns limited to what the ServicesFeature permits. Accommodation
+  /// and food/diet columns are only included when their setting is enabled.
+  List<String> get _columnIdentifiers => [
+        UserColumns.ID,
+        UserColumns.EMAIL,
+        UserColumns.NAME,
+        UserColumns.SURNAME,
+        if (_allowAccommodation) UserColumns.ACCOMMODATION,
+        if (_allowFood) ...[
+          UserColumns.FOOD,
+          UserColumns.DIET,
+        ],
+        UserColumns.NOTE,
+      ];
+
+  List<ServiceItemModel> allFood = [];
+  List<ServiceItemModel> allAccommodation = [];
   SingleDataGridController<OccasionUserModel>? _controller;
 
   @override
-  void initState() {
-    super.initState();
-    loadData();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _controller ??= _createController();
   }
 
-  /// Loads service data for food and accommodation and updates the grid.
-  Future<void> loadData() async {
-    var af = await DbOccasions.getAllServices(DbOccasions.serviceTypeFood);
-    var aa =
-        await DbOccasions.getAllServices(DbOccasions.serviceTypeAccommodation);
+  /// Loads the complete editor bundle in one RPC call for every grid reload.
+  Future<List<OccasionUserModel>> _loadUsersForGrid() async {
+    final bundle = await DbUsers.getOccasionEditorDataBundle();
+    allFood = bundle.services[DbOccasions.serviceTypeFood] ?? [];
+    allAccommodation =
+        bundle.services[DbOccasions.serviceTypeAccommodation] ?? [];
+    _controller!.columns = _buildColumns();
+    return bundle.users;
+  }
 
-    setState(() {
-      allFood = af;
-      allAccommodation = aa;
-    });
-
-    // If the controller is already created, update its columns and force a reload.
-    if (_controller != null) {
-      _controller!.columns = UserColumns.generateColumns(
-        columnIdentifiers,
+  List<TrinaColumn> _buildColumns() => UserColumns.generateColumns(
+        _columnIdentifiers,
         data: {
           UserColumns.FOOD: allFood,
           UserColumns.ACCOMMODATION: allAccommodation,
         },
       );
-      _controller!.forceReload();
-    }
-  }
+
+  SingleDataGridController<OccasionUserModel> _createController() =>
+      SingleDataGridController<OccasionUserModel>(
+        context: context,
+        loadData: _loadUsersForGrid,
+        fromPlutoJson: OccasionUserModel.fromPlutoJson,
+        firstColumnType: DataGridFirstColumn.none,
+        idColumn: Tb.occasion_users.user,
+        actionsExtended: DataGridActionsController(
+          areAllActionsEnabled: RightsService.canUpdateUsers,
+          isAddActionPossible: () => false,
+        ),
+        headerChildren: [
+          if (_allowAccommodation)
+            DataGridAction(
+              name: OccasionServicesStrings.accommodationSettings,
+              action: (SingleDataGridController p0, [_]) =>
+                  _accommodationDefinition(p0),
+              isEnabled: RightsService.isManager,
+            ),
+          if (_allowFood)
+            DataGridAction(
+              name: OccasionServicesStrings.foodSettings,
+              action: (SingleDataGridController p0, [_]) => _foodDefinition(p0),
+              isEnabled: RightsService.isManager,
+            ),
+        ],
+        columns: _buildColumns(),
+      );
 
   @override
   Widget build(BuildContext context) {
-    // Show a loading indicator until the data is available.
-    if (allFood == null || allAccommodation == null) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    // Create the controller only once.
-    _controller ??= SingleDataGridController<OccasionUserModel>(
-      context: context,
-      loadData: DbUsers.getOccasionUsersServiceTab,
-      fromPlutoJson: OccasionUserModel.fromPlutoJson,
-      firstColumnType: DataGridFirstColumn.none,
-      idColumn: Tb.occasion_users.user,
-      actionsExtended: DataGridActionsController(
-        areAllActionsEnabled: RightsService.canUpdateUsers,
-        isAddActionPossible: () => false,
-      ),
-      headerChildren: [
-        DataGridAction(
-          name: "Accommodation settings".tr(),
-          action: (SingleDataGridController p0, [_]) =>
-              _accommodationDefinition(p0),
-          isEnabled: RightsService.isManager,
-        ),
-        DataGridAction(
-          name: "Food settings".tr(),
-          action: (SingleDataGridController p0, [_]) => _foodDefinition(p0),
-          isEnabled: RightsService.isManager,
-        ),
-      ],
-      columns: UserColumns.generateColumns(
-        columnIdentifiers,
-        data: {
-          UserColumns.FOOD: allFood,
-          UserColumns.ACCOMMODATION: allAccommodation,
-        },
-      ),
-    );
-
     return SingleTableDataGrid<OccasionUserModel>(_controller!);
   }
 
@@ -119,17 +115,14 @@ class _ServiceTabState extends State<ServiceTab> {
       builder: (BuildContext context) {
         return ServiceDialog(
           type: DbOccasions.serviceTypeAccommodation,
-          title: "Accommodation".tr(),
-          description:
-              "To create accommodation, fill in the title, unique code, and the reference of the place."
-                  .tr(),
+          title: OccasionServicesStrings.accommodation,
+          description: OccasionServicesStrings.accommodationCreateHint,
           referenceString: CommonStrings.place,
         );
       },
     );
 
-    // Reload the service data and refresh the grid.
-    await loadData();
+    await _controller!.forceReload();
   }
 
   Future<void> _foodDefinition(
@@ -139,16 +132,13 @@ class _ServiceTabState extends State<ServiceTab> {
       builder: (BuildContext context) {
         return ServiceDialog(
           type: DbOccasions.serviceTypeFood,
-          title: "Food".tr(),
-          description:
-              "To create food, fill in the title, unique code, and the reference of the event."
-                  .tr(),
-          referenceString: "Event".tr(),
+          title: CommonStrings.food,
+          description: OccasionServicesStrings.foodCreateHint,
+          referenceString: CommonStrings.event,
         );
       },
     );
 
-    // Reload the service data and refresh the grid.
-    await loadData();
+    await _controller!.forceReload();
   }
 }

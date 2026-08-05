@@ -6,16 +6,18 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/information/db_information.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/information/game/game_page.dart';
+import 'package:fstapp/components/information/information_strings.dart';
 import 'package:fstapp/components/information/song/song_page.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/js/js_stub.dart';
 import 'package:fstapp/styles/styles_config.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
@@ -42,7 +44,7 @@ class _InfoPageState extends State<InfoPage> {
   Map<int, bool> _isItemLoading = {};
   List<GlobalKey> _itemKeys = [];
 
-  String title = "Information".tr();
+  String title = InformationStrings.information;
 
   @override
   void didChangeDependencies() {
@@ -96,16 +98,14 @@ class _InfoPageState extends State<InfoPage> {
                                 onPressed: () {
                                   if (!AuthService.isLoggedIn()) {
                                     ToastHelper.Show(
-                                        context,
-                                        "Sign in to participate in the game."
-                                            .tr());
+                                        context, InformationStrings.gameSignIn);
                                     return;
                                   }
                                   RouterService.navigateOccasion(
                                       context, GamePage.ROUTE);
                                 },
                                 icon: Icons.gamepad,
-                                label: "Game",
+                                label: CommonStrings.game,
                               ),
                             if (FeatureService.isFeatureEnabled(
                                 FeatureConstants.songbook))
@@ -119,7 +119,7 @@ class _InfoPageState extends State<InfoPage> {
                                       context, SongbookPage.ROUTE);
                                 },
                                 icon: Icons.library_music,
-                                label: "Songbook",
+                                label: CommonStrings.songbook,
                               ),
                           ],
                         ),
@@ -177,12 +177,12 @@ class _InfoPageState extends State<InfoPage> {
                                                     .updateInformation(item);
                                                 ToastHelper.Show(
                                                     context,
-                                                    "Content has been changed."
-                                                        .tr());
+                                                    CommonStrings
+                                                        .contentChanged);
                                               }
                                             },
                                             child:
-                                                const Text("Edit content").tr(),
+                                                Text(CommonStrings.editContent),
                                           ),
                                         Padding(
                                           padding:
@@ -215,6 +215,7 @@ class _InfoPageState extends State<InfoPage> {
   Future<void> loadData() async {
     await loadDataOffline();
     setState(() {});
+    if (ClientSyncRuntime.isV1Selected) return;
     var allInfo = await DbInformation.getAllActiveInformation();
     await OfflineDataService.saveAllInfo(allInfo);
     await loadDataOffline();

@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -8,6 +7,7 @@ import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/forms/models/holder_models/id_document_field_holder.dart';
 import 'package:fstapp/components/forms/public_order_strings.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/components/forms/widgets_view/form_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
@@ -139,7 +139,7 @@ class FormFieldBuilders {
                   }
                   formHolder.controller!.updateTotalPrice?.call();
                 },
-                label: "Seat selection".tr(),
+                label: FormStrings.seatSelection,
                 height: 50.0,
                 width: 250.0,
                 suffixIcon: Icon(Icons.event_seat),

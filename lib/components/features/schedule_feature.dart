@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart';
 
@@ -253,11 +252,11 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
   String _getTranslatedScheduleOption(String value) {
     switch (value) {
       case ScheduleFeature.scheduleTypeBasic:
-        return FeaturesStrings.optionBasic.tr();
+        return FeaturesStrings.optionBasic;
       case ScheduleFeature.scheduleTypeAdvanced:
-        return FeaturesStrings.optionAdvanced.tr();
+        return FeaturesStrings.optionAdvanced;
       case ScheduleFeature.scheduleTypeLight:
-        return FeaturesStrings.optionLight.tr();
+        return FeaturesStrings.optionLight;
       default:
         return value;
     }
@@ -266,9 +265,9 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
   String _getTranslatedBreakOption(String value) {
     switch (value) {
       case ScheduleFeature.breakDefinitionTime:
-        return FeaturesStrings.optionTime.tr();
+        return FeaturesStrings.optionTime;
       case ScheduleFeature.breakDefinitionPlace:
-        return FeaturesStrings.optionPlace.tr();
+        return FeaturesStrings.optionPlace;
       default:
         return value;
     }
@@ -278,7 +277,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
     setState(() {
       _eventTypes.add(EventType(
           code: 'new_type_${_eventTypes.length + 1}',
-          title: FeaturesStrings.eventTypeDefaultTitle.tr(),
+          title: FeaturesStrings.eventTypeDefaultTitle,
           colorDefinition: 'seed1'));
     });
   }
@@ -306,7 +305,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
         DropdownButtonFormField<String>(
             initialValue: _scheduleType,
             decoration: InputDecoration(
-                labelText: FeaturesStrings.labelScheduleType.tr()),
+                labelText: FeaturesStrings.labelScheduleType),
             items: <String>[
               ScheduleFeature.scheduleTypeBasic,
               ScheduleFeature.scheduleTypeAdvanced,
@@ -329,8 +328,8 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
         const SizedBox(height: 8),
         // New Switch for enabling children
         SwitchListTile(
-          title: Text(FeaturesStrings.labelEnableChildren.tr()),
-          subtitle: Text(FeaturesStrings.subtitleEnableChildren.tr()),
+          title: Text(FeaturesStrings.labelEnableChildren),
+          subtitle: Text(FeaturesStrings.subtitleEnableChildren),
           value: _enableChildren,
           onChanged: (bool value) {
             setState(() {
@@ -345,7 +344,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
         DropdownButtonFormField<String>(
             initialValue: _breakDefinition,
             decoration: InputDecoration(
-                labelText: FeaturesStrings.labelBreakDefinition.tr()),
+                labelText: FeaturesStrings.labelBreakDefinition),
             items: <String>[
               ScheduleFeature.breakDefinitionTime,
               ScheduleFeature.breakDefinitionPlace
@@ -367,12 +366,12 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
             }),
         if (_breakDefinition == ScheduleFeature.breakDefinitionTime) ...[
           const SizedBox(height: 24),
-          Text(FeaturesStrings.titleTimeBasedBreaks.tr(),
+          Text(FeaturesStrings.titleTimeBasedBreaks,
               style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           _buildTimePickerField(
             context: context,
-            label: FeaturesStrings.labelAfternoonTime.tr(),
+            label: FeaturesStrings.labelAfternoonTime,
             time: _afternoonBreakTime,
             onTap: () => _selectTime(context, _afternoonBreakTime, (newTime) {
               _afternoonBreakTime = newTime;
@@ -382,7 +381,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
           const SizedBox(height: 16),
           _buildTimePickerField(
             context: context,
-            label: FeaturesStrings.labelEveningTime.tr(),
+            label: FeaturesStrings.labelEveningTime,
             time: _eveningBreakTime,
             onTap: () => _selectTime(context, _eveningBreakTime, (newTime) {
               _eveningBreakTime = newTime;
@@ -392,7 +391,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
         ],
         const SizedBox(height: 24),
         ExpansionTile(
-          title: Text(FeaturesStrings.titleEventTypes.tr(),
+          title: Text(FeaturesStrings.titleEventTypes,
               style: Theme.of(context).textTheme.titleLarge),
           initiallyExpanded: false,
           tilePadding: const EdgeInsets.symmetric(horizontal: 0.0),
@@ -402,7 +401,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
             if (_eventTypes.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(FeaturesStrings.emptyEventTypes.tr(),
+                child: Text(FeaturesStrings.emptyEventTypes,
                     style: Theme.of(context).textTheme.bodyMedium),
               ),
             ListView.builder(
@@ -419,7 +418,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.add_circle_outline),
                 onPressed: _addEventType,
-                label: Text(FeaturesStrings.buttonAddEventType.tr()),
+                label: Text(FeaturesStrings.buttonAddEventType),
               ),
             ),
           ],
@@ -472,7 +471,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
             TextFormField(
               initialValue: eventType.code,
               decoration: InputDecoration(
-                  labelText: FeaturesStrings.labelEventTypeCode.tr(),
+                  labelText: FeaturesStrings.labelEventTypeCode,
                   filled: true),
               onChanged: (value) {
                 _updateEventType(
@@ -487,7 +486,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
             TextFormField(
               initialValue: eventType.title,
               decoration: InputDecoration(
-                  labelText: FeaturesStrings.labelEventTypeTitle.tr(),
+                  labelText: FeaturesStrings.labelEventTypeTitle,
                   filled: true),
               onChanged: (value) {
                 _updateEventType(
@@ -506,13 +505,13 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
                   child: DropdownButtonFormField<String>(
                     initialValue: currentDropdownValue,
                     decoration: InputDecoration(
-                        labelText: FeaturesStrings.labelColorSource.tr(),
+                        labelText: FeaturesStrings.labelColorSource,
                         filled: true),
                     items: _seedColorOptions.map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(value == "custom"
-                            ? FeaturesStrings.optionCustomColor.tr()
+                            ? FeaturesStrings.optionCustomColor
                             : value),
                       );
                     }).toList(),
@@ -562,7 +561,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
                 child: TextFormField(
                   controller: hexColorController,
                   decoration: InputDecoration(
-                      labelText: FeaturesStrings.labelCustomColorHex.tr(),
+                      labelText: FeaturesStrings.labelCustomColorHex,
                       hintText: "#RRGGBB or #AARRGGBB",
                       filled: true),
                   onChanged: (value) {
@@ -593,7 +592,7 @@ class _ScheduleFeatureFormState extends State<_ScheduleFeatureForm> {
               child: IconButton(
                 icon: Icon(Icons.delete_outline,
                     color: Theme.of(context).colorScheme.error, size: 28),
-                tooltip: FeaturesStrings.tooltipRemoveEventType.tr(),
+                tooltip: FeaturesStrings.tooltipRemoveEventType,
                 onPressed: () => _removeEventType(index),
               ),
             ),

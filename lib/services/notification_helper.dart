@@ -1,7 +1,7 @@
 import 'dart:async' as notification_helper;
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/news/news_page.dart';
 import 'package:fstapp/router_service.dart';
@@ -13,10 +13,104 @@ import 'package:fstapp/services/js/js_interop.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:fstapp/app_config.dart';
 
+abstract interface class NotificationAudienceClient {
+  notification_helper.Future<void> addTags(Map<String, String> tags);
+  notification_helper.Future<void> login(String externalId);
+  notification_helper.Future<void> logout();
+}
+
+class NotificationAudienceCoordinator {
+  NotificationAudienceCoordinator({
+    required this.client,
+    required this.notificationsSupported,
+    required this.notificationPermission,
+    required this.isLoggedIn,
+    required this.currentUserId,
+    required this.occasionLink,
+    this.installationGeneration = AppConfig.pushAppGeneration,
+  });
+
+  final NotificationAudienceClient client;
+  final bool Function() notificationsSupported;
+  final bool Function() notificationPermission;
+  final bool Function() isLoggedIn;
+  final String Function() currentUserId;
+  final String Function() occasionLink;
+  final String installationGeneration;
+
+  notification_helper.Future<void> tagCurrentSubscription() async {
+    if (!notificationsSupported() || !notificationPermission()) return;
+    final tags = <String, String>{};
+    if (installationGeneration.isNotEmpty) {
+      tags['app_generation'] = installationGeneration;
+    }
+    final occasion = occasionLink();
+    if (occasion.isNotEmpty) tags['occasion'] = occasion;
+    if (tags.isNotEmpty) await client.addTags(tags);
+  }
+
+  notification_helper.Future<void> loginCurrentUser() async {
+    if (!notificationsSupported() ||
+        !notificationPermission() ||
+        !isLoggedIn()) {
+      return;
+    }
+    await client.login(currentUserId());
+  }
+
+  notification_helper.Future<void> logoutCurrentUser() async {
+    if (!notificationsSupported()) return;
+    await client.logout();
+  }
+}
+
+class _RuntimeNotificationAudienceClient implements NotificationAudienceClient {
+  @override
+  notification_helper.Future<void> addTags(Map<String, String> tags) async {
+    if (kIsWeb) {
+      await NotificationHelper.jsInterop.callFutureMethod(
+        'tagCurrentSubscription',
+        [],
+      );
+      return;
+    }
+    await OneSignal.User.addTags(tags);
+  }
+
+  @override
+  notification_helper.Future<void> login(String externalId) async {
+    if (kIsWeb) {
+      await NotificationHelper.jsInterop.callFutureMethod('login', [
+        externalId,
+      ]);
+      return;
+    }
+    await OneSignal.login(externalId);
+  }
+
+  @override
+  notification_helper.Future<void> logout() async {
+    if (kIsWeb) {
+      await NotificationHelper.jsInterop.callFutureMethod('logout', []);
+      return;
+    }
+    OneSignal.logout();
+  }
+}
+
 class NotificationHelper {
   static const notificationAllowedAsked = "NotificationAllowed";
   static final JSInterop jsInterop = JSInterop();
   static bool _isNotificationDialogShown = false;
+  static final NotificationAudienceCoordinator _audience =
+      NotificationAudienceCoordinator(
+        client: _RuntimeNotificationAudienceClient(),
+        notificationsSupported: AppConfig.isNotificationsCurrentlySupported,
+        notificationPermission: getNotificationPermission,
+        isLoggedIn: AuthService.isLoggedIn,
+        currentUserId: AuthService.currentUserId,
+        occasionLink: () => AppConfig.forceOccasionLink ?? '',
+      );
 
   static notification_helper.Future<bool> isNotificationOnOff() async {
     var isPermissionOn = getNotificationPermission();
@@ -61,12 +155,14 @@ class NotificationHelper {
         RouterService.navigateOccasionNoContext(NewsPage.ROUTE);
       });
     }
-    await NotificationHelper.login();
+    await tagCurrentSubscription();
+    await loginCurrentUser();
   }
 
   static notification_helper.Future<void> checkForNotificationPermission(
-      BuildContext context,
-      [bool forceAsk = false]) async {
+    BuildContext context, [
+    bool forceAsk = false,
+  ]) async {
     if (!PlatformHelper.isPwaInstalledOrNative() && !forceAsk) {
       return;
     }
@@ -75,24 +171,27 @@ class NotificationHelper {
       var wasAsked = await StorageHelper.get(notificationAllowedAsked);
       if (wasAsked == null && !_isNotificationDialogShown) {
         _isNotificationDialogShown = true;
-        var dialogResult =
-            await DialogHelper.showNotificationPermissionDialog(context);
+        var dialogResult = await DialogHelper.showNotificationPermissionDialog(
+          context,
+        );
         _isNotificationDialogShown = false;
 
         // save default so user don't get ask again, even if later code fails
         await StorageHelper.set(notificationAllowedAsked, false.toString());
 
         if (!dialogResult) {
-          ToastHelper.Show(context, "Notifications have been disabled.".tr());
+          ToastHelper.Show(context, CommonStrings.notificationsDisabled);
           return;
         }
         var requestResult = await requestNotificationPermission();
         await StorageHelper.set(
-            notificationAllowedAsked, requestResult.toString());
+          notificationAllowedAsked,
+          requestResult.toString(),
+        );
         if (requestResult) {
-          ToastHelper.Show(context, "Notifications have been allowed.".tr());
+          ToastHelper.Show(context, CommonStrings.notificationsAllowed);
         } else {
-          ToastHelper.Show(context, "Notifications have been disabled.".tr());
+          ToastHelper.Show(context, CommonStrings.notificationsDisabled);
         }
       }
     }
@@ -104,10 +203,13 @@ class NotificationHelper {
       currentPermission = await requestNotificationPermission();
     }
     await StorageHelper.set(
-        notificationAllowedAsked, currentPermission.toString());
+      notificationAllowedAsked,
+      currentPermission.toString(),
+    );
     if (currentPermission) {
       await optInNotifications();
-      await NotificationHelper.login();
+      await tagCurrentSubscription();
+      await loginCurrentUser();
     }
     return currentPermission;
   }
@@ -118,39 +220,22 @@ class NotificationHelper {
   }
 
   static notification_helper.Future<bool>
-      requestNotificationPermission() async {
+  requestNotificationPermission() async {
     if (kIsWeb) {
-      return await jsInterop
-          .callFutureBoolMethod('requestNotificationPermission', []);
+      return await jsInterop.callFutureBoolMethod(
+        'requestNotificationPermission',
+        [],
+      );
     }
     return await OneSignal.Notifications.requestPermission(false);
   }
 
-  static notification_helper.Future<void> login() async {
-    if (!AppConfig.isNotificationsCurrentlySupported() ||
-        !getNotificationPermission() ||
-        !AuthService.isLoggedIn()) {
-      return;
-    }
+  static notification_helper.Future<void> tagCurrentSubscription() =>
+      _audience.tagCurrentSubscription();
 
-    if (kIsWeb) {
-      await jsInterop.callFutureMethod('login', [AuthService.currentUserId()]);
-      return;
-    }
+  static notification_helper.Future<void> loginCurrentUser() =>
+      _audience.loginCurrentUser();
 
-    await OneSignal.login(AuthService.currentUserId());
-  }
-
-  static notification_helper.Future<void> logout() async {
-    if (!AppConfig.isNotificationsCurrentlySupported() ||
-        !AuthService.isLoggedIn()) {
-      return;
-    }
-    if (kIsWeb) {
-      await jsInterop.callFutureMethod('logout', []);
-      return;
-    }
-
-    OneSignal.logout();
-  }
+  static notification_helper.Future<void> logoutCurrentUser() =>
+      _audience.logoutCurrentUser();
 }

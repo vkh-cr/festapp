@@ -14,8 +14,12 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>cs</string>
+	</array>
 	<key>CFBundleName</key>
-	<string>festapp</string>
+	<string>Festapp</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -24,8 +28,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
-	<key>LSMinimumSystemVersion</key>
-    <string>11.0</string>
+	<key>FlutterDeepLinkingEnabled</key>
+	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationQueriesSchemes</key>
@@ -33,30 +37,49 @@
 		<string>sms</string>
 		<string>tel</string>
 	</array>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
-    <true/>
-    <key>UIFileSharingEnabled</key>
-    <true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>11.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>NSCameraUsageDescription</key>
-    <string>This app needs camera access to scan QR codes.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Your location is used to provide a customized map experience, showing relevant information and navigation based on your position.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Your location is used to provide a customized map experience, showing relevant information and navigation based on your position.</string>
+	<string>Fotoaparát se používá pouze ke skenování QR kódů.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Your location is used to provide a customized map experience, showing relevant information and navigation based on your position.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app does not require access to the microphone.</string>
+	<string>Poloha se používá pouze při otevřené mapě pro zobrazení vaší pozice a navigaci.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app requires access to the photo library to upload profile image.</string>
+	<string>Přístup k fotkám je potřeba pouze při výběru profilového obrázku.</string>
+	<key>OneSignal_app_groups_key</key>
+	<string>group.festapp.festapp.onesignal</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -76,15 +99,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>CFBundleLocalizations</key>
-    <array>
-    	<string>en</string>
-    	<string>cs</string>
-    	<string>sk</string>
-    	<string>pl</string>
-    	<string>de</string>
-    </array>
-    <key>FlutterDeepLinkingEnabled</key>
-    <true/>
 </dict>
 </plist>

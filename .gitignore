@@ -162,8 +162,17 @@ supabase/.env
 automation/image-migration/.env
 automation/image-migration/node_modules/
 
+# Generated offline map packages and preview artifacts
+automation/offline-map/out/
+
+# Local Codex diagnostics, screenshots, and tool environments
+.codex-local/
+
 # GSD Planning
 .planning/
+
+# Kickoff prompts (scratch task briefs, not shared docs)
+docs/plans/*_kickoff.md
 
 # Workers
 workers/*/node_modules/
@@ -171,3 +180,10 @@ workers/*/node_modules/
 
 # Project-root tool caches (wrangler, vitest)
 /node_modules/
+
+# Production build backups (mirrored CF Pages deployments — large binaries).
+# NOTE: gitignored, so `git clean -xfd` WOULD delete these. Keep a copy elsewhere too.
+/backups/
+
+# Serena MCP (local code-navigation cache/config)
+.serena/

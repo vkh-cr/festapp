@@ -6,6 +6,10 @@ CREATE OR REPLACE FUNCTION delete_service_item(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
+-- SECURITY DEFINER: self-gates on get_is_manager_on_occasion below. The occasions
+-- RLS write policy only allows org admins, so as INVOKER a manager's UPDATE would
+-- silently touch 0 rows. DEFINER lets the manager-gated write bypass RLS.
+SECURITY DEFINER
 SET search_path = public, extensions
 AS $$
 DECLARE

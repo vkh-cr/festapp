@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -8,6 +7,7 @@ import 'package:fstapp/components/html/html_helper.dart';
 import 'product_detail_editor_dialog.dart';
 import 'ticket_editor_widgets.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
 import 'description_tooltip.dart';
 
 class TicketProductEditorRow extends StatefulWidget {
@@ -122,7 +122,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
             context: context,
             builder: (context) {
               return SimpleDialog(
-                title: Text("Currency".tr()),
+                title: Text(CommonStrings.currency),
                 children: widget.availableCurrencies.map((currency) {
                   return SimpleDialogOption(
                     onPressed: () => Navigator.pop(context, currency),
@@ -293,7 +293,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
             // Right column: Visibility switch.
             Column(
               children: [
-                Text("Show".tr(), style: Theme.of(context).textTheme.bodySmall),
+                Text(FormStrings.show, style: Theme.of(context).textTheme.bodySmall),
                 Switch(
                   value: !(widget.product.isHidden ?? false),
                   onChanged: (val) {
@@ -320,7 +320,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
                   value: 'additional_settings',
-                  child: Text("Additional Settings".tr()),
+                  child: Text(FormStrings.additionalSettings),
                 ),
               ],
               icon: const Icon(Icons.more_vert),

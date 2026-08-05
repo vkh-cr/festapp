@@ -1,17 +1,21 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 
 import 'package:fstapp/components/blueprint/get_orders_helper.dart';
 import 'package:fstapp/components/eshop/models/orders_history_model.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
+import 'package:fstapp/components/eshop/order_commands.dart';
 import 'package:fstapp/components/eshop/models/order_product_ticket_model.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/models/ticket_model.dart';
 import 'package:fstapp/components/forms/models/form_response_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/client_sync/client_command_identity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ReservationsBundle {
@@ -32,26 +36,69 @@ class OrderHistoryBundle {
 
 class DbOrders {
   static final _supabase = Supabase.instance.client;
+  static OrderCommands get _commands => SupabaseOrderCommands(_supabase);
 
   static Future<FunctionResponse> sendTicketOrder(
       Map<String, dynamic> data) async {
-    return await _supabase.functions
-        .invoke("send-ticket-order", body: {"orderDetails": data});
+    return _sendTicketOrderIntent(
+      namespace: 'ticket_order',
+      payload: data,
+      bodyKey: 'orderDetails',
+    );
+  }
+
+  static Future<FunctionResponse> replaceTicketOrder(
+    List<int> spotIds,
+    Map<String, dynamic> inputData,
+  ) async {
+    final replacement = {
+      'spotIds': spotIds,
+      'inputData': inputData,
+    };
+    return _sendTicketOrderIntent(
+      namespace: 'ticket_order_replace',
+      payload: replacement,
+      bodyKey: 'replacement',
+    );
+  }
+
+  static Future<FunctionResponse> _sendTicketOrderIntent({
+    required String namespace,
+    required Map<String, dynamic> payload,
+    required String bodyKey,
+  }) async {
+    final clientId = await ClientCommandIdentity.clientId();
+    final commandId = await ClientCommandIdentity.claimIntent(
+      namespace,
+      payload,
+    );
+    final response = await _supabase.functions.invoke(
+      "send-ticket-order",
+      body: {
+        bodyKey: payload,
+        "commandId": commandId,
+        "clientId": clientId,
+      },
+    );
+    await ClientCommandIdentity.completeIntent(namespace, payload);
+    return response;
   }
 
   static Future<void> stornoOrder(int id) async {
-    await _supabase.rpc(
-      'update_order_and_tickets_to_storno_ws_221',
-      params: {
-        'order_id': id,
-      },
-    );
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.cancel(id);
+    } else {
+      await _supabase.rpc(
+        'update_order_and_tickets_to_storno_ws_221',
+        params: {'order_id': id},
+      );
+    }
 
     await sendStornoTicketOrderEmail(orderId: id);
   }
 
-  static Future<bool> selectSpot(context, String formKey, String secret,
-      int spotId, bool selecting) async {
+  static Future<bool> selectSpot(BuildContext context, String formKey,
+      String secret, int spotId, bool selecting) async {
     final response = await _supabase.rpc(
       'select_spot',
       params: {
@@ -213,6 +260,10 @@ class DbOrders {
   }
 
   static Future<void> deleteOrder(OrderModel model) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.delete(model.id!);
+      return;
+    }
     await _supabase.rpc(
       'delete_order_221',
       params: {
@@ -361,9 +412,7 @@ class DbOrders {
         'insert_manual_transaction',
         params: params,
       );
-
     } catch (e) {
-
       rethrow;
     }
   }

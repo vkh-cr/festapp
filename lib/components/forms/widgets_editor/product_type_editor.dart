@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/components/forms/models/form_field_model.dart';
@@ -80,7 +79,7 @@ class ProductTypeEditorWidgets {
               ),
               const SizedBox(height: 8),
               if (group.products!.isEmpty)
-                Text('No Products'.tr())
+                Text(FormStrings.noProducts)
               else ...[
                 // Header Row for the product list
                 Padding(
@@ -108,7 +107,7 @@ class ProductTypeEditorWidgets {
                         Expanded(
                           flex: 3,
                           child: Tooltip(
-                            message: "Product Quantity".tr(),
+                            message: FormStrings.productQuantity,
                             child: Icon(Icons.stacked_bar_chart,
                                 size: 16,
                                 color: Theme.of(context)
@@ -341,7 +340,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                       controller:
                           groupTitleController, // Use the stateful controller
                       decoration: InputDecoration(
-                          labelText: "Product Type Title".tr(),
+                          labelText: FormStrings.productTypeTitle,
                           border: const UnderlineInputBorder()),
                       onChanged: (val) {
                         // Update the model, but DO NOT call refresh().
@@ -354,7 +353,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                   const SizedBox(width: 12),
                   ProductTypeEditorWidgets._buildControl(
                       context,
-                      "Required".tr(),
+                      FormStrings.requiredLabel,
                       Checkbox(
                           value: groupIsRequired,
                           onChanged: (val) {
@@ -364,7 +363,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                   const SizedBox(width: 12),
                   ProductTypeEditorWidgets._buildControl(
                       context,
-                      "Multiple Choice".tr(),
+                      FormStrings.multipleChoice,
                       Switch(
                           value: canSelectMany,
                           onChanged: (val) {
@@ -381,7 +380,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                   const SizedBox(width: 12),
                   ProductTypeEditorWidgets._buildControl(
                       context,
-                      "Show".tr(),
+                      FormStrings.show,
                       Switch(
                           value: !groupIsHidden,
                           onChanged: (val) {
@@ -401,7 +400,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                     itemBuilder: (context) => [
                       PopupMenuItem<String>(
                           value: "add_description",
-                          child: Text("Add description".tr())),
+                          child: Text(FormStrings.addDescription)),
                     ],
                     icon: const Icon(Icons.more_vert),
                   ),
@@ -468,7 +467,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                   onPressed: () {
                     group.products!.add(
                       ProductModel(
-                        title: "New Product".tr(),
+                        title: FormStrings.newProduct,
                         price: 0.0,
                         isHidden: false,
                         order: (group.products!.isNotEmpty
@@ -480,7 +479,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                     refresh();
                   },
                   icon: const Icon(Icons.add),
-                  label: Text("Add Product".tr()),
+                  label: Text(FormStrings.addProduct),
                 ),
               ),
             ],

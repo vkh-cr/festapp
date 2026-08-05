@@ -17,6 +17,7 @@ BEGIN
     SELECT *
     FROM public.queue_emails
     WHERE target_time <= NOW()
+      AND (processing_at IS NULL OR processing_at < NOW() - INTERVAL '10 minutes')
   ),
   validated_emails AS (
     -- 2. For each due email, check if it's still valid.

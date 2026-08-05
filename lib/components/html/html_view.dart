@@ -10,7 +10,7 @@ import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:fstapp/services/launch_url_service.dart';
 
 import '../images/zoomable_image/zoomable_image.dart';
 
@@ -155,8 +155,7 @@ class _HtmlViewState extends State<HtmlView> {
                 return Expanded(
                   child: GestureDetector(
                     onTap: () async {
-                      final uri = Uri.parse(url);
-                      if (await canLaunchUrl(uri)) launchUrl(uri);
+                      await LaunchUrlService.openExternalUrl(url);
                     },
                     child: Text(
                       t.isNotEmpty ? t : 'Loading title…',

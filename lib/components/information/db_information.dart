@@ -1,16 +1,21 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/information/information_model.dart';
+import 'package:fstapp/components/information/information_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/components/information/information_commands.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbInformation {
   static final _supabase = Supabase.instance.client;
+  static final InformationCommands _commands =
+      SupabaseInformationCommands(_supabase);
 
   static List<InformationModel> _sortViaDatetime(
       List<InformationModel> infoList) {
@@ -36,6 +41,21 @@ class DbInformation {
 
   static Future<List<InformationModel>> getAllInformationForDataGrid(
       [String? type]) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final response = await _supabase.rpc(
+        'get_information_editor_bundle_v1',
+        params: {
+          'p_occasion': RightsService.currentOccasionId()!,
+          'p_type': type,
+        },
+      );
+      final bundle = (response as Map).cast<String, dynamic>();
+      final information = ((bundle['information'] as List?) ?? const [])
+          .map((x) =>
+              InformationModel.fromJson((x as Map).cast<String, dynamic>()))
+          .toList();
+      return _sortInformationList(information);
+    }
     var select = "${Tb.information.id},"
         "${Tb.information.occasion},"
         "${Tb.information.created_at},"
@@ -124,6 +144,24 @@ class DbInformation {
   }
 
   static Future<void> updateInformation(InformationModel info) async {
+    if (ClientSyncRuntime.isV1Selected && info.unit == null) {
+      final result =
+          await _commands.save(RightsService.currentOccasionId()!, info);
+      if (result.status == InformationCommandStatus.conflict) {
+        throw StateError('Information was changed by another editor');
+      }
+      if (result.status == InformationCommandStatus.rejected ||
+          result.information == null) {
+        throw StateError('Information save was rejected');
+      }
+      final updated = result.information!;
+      info
+        ..id = updated.id
+        ..informationHidden = updated.informationHidden
+        ..updatedAt = updated.updatedAt
+        ..aggregateVersion = result.version;
+      return;
+    }
     if (info.type == InformationModel.gameType) {
       Map<String, dynamic> upsertObj = {
         Tb.information_hidden.data: info.informationHidden?.data,
@@ -180,6 +218,17 @@ class DbInformation {
   }
 
   static Future<void> deleteInformation(InformationModel info) async {
+    if (ClientSyncRuntime.isV1Selected && info.unit == null) {
+      final result =
+          await _commands.delete(RightsService.currentOccasionId()!, info);
+      if (result.status == InformationCommandStatus.conflict) {
+        throw StateError('Information was changed by another editor');
+      }
+      if (result.status == InformationCommandStatus.rejected) {
+        throw StateError('Information delete was rejected');
+      }
+      return;
+    }
     await _supabase
         .from(Tb.information.table)
         .delete()
@@ -206,50 +255,56 @@ class DbInformation {
 
   static Future<bool> makeGameGuess(
       BuildContext context, int checkPointId, String guess) async {
-    var result = await _supabase.rpc("game_guess", params: {
-      "check_point_id": checkPointId,
-      "guess": guess,
-    });
+    final int resultCode;
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.guess(checkPointId, guess);
+      resultCode = result.domainCode;
+    } else {
+      final result = await _supabase.rpc("game_guess", params: {
+        "check_point_id": checkPointId,
+        "guess": guess,
+      });
+      resultCode = (result['code'] as num).toInt();
+    }
 
-    switch (result["code"]) {
+    switch (resultCode) {
       case 200: // Correct answer
-        ToastHelper.Show(context, "Correct!".tr());
+        ToastHelper.Show(context, InformationStrings.gameCorrect);
         return true;
 
       case 4031: // User not in occasion
-        ToastHelper.Show(context, "You are not part of this occasion.".tr(),
+        ToastHelper.Show(context, InformationStrings.gameNotInOccasion,
             severity: ToastSeverity.NotOk);
         break;
 
       case 4032: // User not part of a game group
-        ToastHelper.Show(context, "You are not part of a game group.".tr(),
+        ToastHelper.Show(context, InformationStrings.gameNotInGroup,
             severity: ToastSeverity.NotOk);
         break;
 
       case 4033: // Guessing outside allowed time window
-        ToastHelper.Show(
-            context, "Guessing is only allowed within the game time window.",
+        ToastHelper.Show(context, InformationStrings.gameOutsideWindow,
             severity: ToastSeverity.NotOk);
         break;
 
       case 4041: // Correct reference not found
         ToastHelper.Show(
-            context, "Correct answer for this check point was not set.".tr(),
+            context, InformationStrings.gameAnswerNotSetForCheckPoint,
             severity: ToastSeverity.NotOk);
         break;
 
       case 4042: // Hidden info not found
-        ToastHelper.Show(context, "Correct answer was not set.".tr(),
+        ToastHelper.Show(context, InformationStrings.gameAnswerNotSet,
             severity: ToastSeverity.NotOk);
         break;
 
       case 4001: // Incorrect guess
-        ToastHelper.Show(context, "Incorrect, try again!".tr(),
+        ToastHelper.Show(context, InformationStrings.gameIncorrect,
             severity: ToastSeverity.NotOk);
         break;
 
       default:
-        ToastHelper.Show(context, "An unexpected error occurred.".tr(),
+        ToastHelper.Show(context, CommonStrings.unexpectedError,
             severity: ToastSeverity.NotOk);
         break;
     }

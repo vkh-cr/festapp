@@ -1,10 +1,14 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:csv/csv.dart';
+import 'package:csv/csv_settings_autodetection.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:intl/intl.dart';
 
 class ImportHelper {
+  static const String groupColumn = 'group';
+  static const String deliveryEmailField = 'email_delivery';
+
   static Map<String, String> get migrateColumns => {
         Tb.occasion_users.data_email: "E-mailová adresa",
         Tb.occasion_users.data_sex: "Jsi:",
@@ -18,6 +22,7 @@ class ImportHelper {
         Tb.occasion_users.data_note: "Poznámka:",
         Tb.occasion_users.data_diet: "Stravovací omezení:",
         Tb.occasion_users.services_food: "Stravování:",
+        groupColumn: "Skupina:",
       };
 
   static int getIndex(String s, List<String> row) {
@@ -26,7 +31,14 @@ class ImportHelper {
 
   static Future<List<Map<String, dynamic>>> getUsersFromFile(XFile file) async {
     final rawData = await file.readAsString();
-    final fields = const CsvToListConverter().convert(rawData);
+    return getUsersFromCsv(rawData);
+  }
+
+  static List<Map<String, dynamic>> getUsersFromCsv(String rawData) {
+    final fields = const CsvToListConverter(
+      csvSettingsDetector:
+          FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']),
+    ).convert(rawData);
 
     List<Map<String, dynamic>> userList = [];
 
@@ -34,6 +46,10 @@ class ImportHelper {
     Map<String, int> userColumnIndex = {};
     for (var keyValue in migrateColumns.entries) {
       var index = firstRow.indexOf(keyValue.value);
+      if (index == -1 && keyValue.key == groupColumn) {
+        index = firstRow
+            .indexWhere((header) => header.trim().toLowerCase() == 'skupina');
+      }
       if (index == -1) {
         continue;
       }
@@ -59,14 +75,14 @@ class ImportHelper {
           trimmedString = trimmedString.toLowerCase();
         } else if (entry.key == Tb.occasion_users.role) {
           if (trimmedString.isEmpty) {
-            break;
+            continue;
           }
           var role = trimmedString.toLowerCase().startsWith("p") ? 1 : 2;
           userJsonObject[entry.key] = role;
           continue;
         } else if (entry.key == Tb.occasion_users.data_sex) {
           if (trimmedString.isEmpty) {
-            break;
+            continue;
           }
           trimmedString = (trimmedString.toLowerCase().startsWith("m") ||
                   trimmedString.toLowerCase().startsWith("k"))
@@ -104,20 +120,78 @@ class ImportHelper {
       ])) {
         continue;
       }
-      if (userList.any((element) =>
-          element[Tb.occasion_users.data_email] ==
-          userJsonObject[Tb.occasion_users.data_email])) {
-        //omit with duplicate email
-        continue;
-      }
       userList.add(userJsonObject);
     }
+
+    _assignSignInEmails(userList);
     return userList;
+  }
+
+  static void _assignSignInEmails(List<Map<String, dynamic>> users) {
+    final reservedDeliveryEmails = users
+        .map((user) => user[Tb.occasion_users.data_email] as String)
+        .toSet();
+    final usedSignInEmails = <String>{};
+
+    final usersByDeliveryEmail = <String, List<Map<String, dynamic>>>{};
+    for (final user in users) {
+      final deliveryEmail = user[Tb.occasion_users.data_email] as String;
+      usersByDeliveryEmail.putIfAbsent(deliveryEmail, () => []).add(user);
+    }
+
+    final deliveryEmails = usersByDeliveryEmail.keys.toList()..sort();
+    for (final deliveryEmail in deliveryEmails) {
+      final sharedMailboxUsers = usersByDeliveryEmail[deliveryEmail]!
+        ..sort((first, second) =>
+            _stableIdentityKey(first).compareTo(_stableIdentityKey(second)));
+      final identityKeys = sharedMailboxUsers.map(_stableIdentityKey).toList();
+      if (identityKeys.toSet().length != identityKeys.length) {
+        throw const FormatException(
+          'People sharing an email address need distinct names or a stable ID.',
+        );
+      }
+
+      var suffix = 0;
+      for (final user in sharedMailboxUsers) {
+        var signInEmail = suffix == 0
+            ? deliveryEmail
+            : _withNumericAlias(deliveryEmail, suffix);
+        while (usedSignInEmails.contains(signInEmail) ||
+            (signInEmail != deliveryEmail &&
+                reservedDeliveryEmails.contains(signInEmail))) {
+          signInEmail = _withNumericAlias(deliveryEmail, ++suffix);
+        }
+
+        user[deliveryEmailField] = deliveryEmail;
+        user[Tb.occasion_users.data_email] = signInEmail;
+        usedSignInEmails.add(signInEmail);
+        suffix++;
+      }
+    }
+  }
+
+  static String _stableIdentityKey(Map<String, dynamic> user) => [
+        user[Tb.occasion_users.data_surname],
+        user[Tb.occasion_users.data_name],
+      ]
+          .map((value) => value?.toString().trim().toLowerCase() ?? '')
+          .join('\u0000');
+
+  static String _withNumericAlias(String email, int suffix) {
+    final at = email.lastIndexOf('@');
+    if (at <= 0 || at == email.length - 1) {
+      throw const FormatException('Invalid email address in CSV import.');
+    }
+    return '${email.substring(0, at)}+$suffix${email.substring(at)}';
   }
 
   static Map<String, dynamic> createServicesJson(
       String data, String serviceType) {
-    List<String> items = data.split(',').map((item) => item.trim()).toList();
+    final items = data
+        .split(',')
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .toList();
 
     Map<String, String> servicesMap = {
       for (var item in items) item: DbOccasions.servicePaid,

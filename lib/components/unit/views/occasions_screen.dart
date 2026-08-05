@@ -1,8 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/admin_strings.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/unit/unit_model.dart';
+import 'package:fstapp/components/unit/unit_strings.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
@@ -123,22 +123,22 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
       await RouterService.navigateToOccasionAdministration(context,
           occasion: occasion);
     } catch (e) {
-      ToastHelper.Show(context, "Could not load event. Please try again.".tr());
+      ToastHelper.Show(context, UnitStrings.loadEventFailed);
     }
   }
 
   Future<void> _handleCreateCopy(OccasionModel occasion) async {
-    final conf = await DialogHelper.showConfirmationDialog(context,
-        "Create Copy".tr(), "Do you want to create copy of this event?".tr());
+    final conf = await DialogHelper.showConfirmationDialog(
+        context, UnitStrings.createCopy, UnitStrings.createCopyConfirm);
     if (conf == true) {
       try {
         await DbOccasions.duplicateOccasion(occasion.id!, occasion.unit);
         if (!mounted) return;
-        ToastHelper.Show(context, "Event copy created successfully.".tr());
+        ToastHelper.Show(context, UnitStrings.createCopySuccess);
         await _loadOccasions();
       } catch (e) {
         if (!mounted) return;
-        ToastHelper.Show(context, "Failed to create event copy.".tr());
+        ToastHelper.Show(context, UnitStrings.createCopyFailed);
       }
     }
   }
@@ -169,18 +169,21 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                     if (_filteredOccasions.isEmpty &&
                         _searchController.text.isNotEmpty)
                       SliverFillRemaining(
-                          child: Center(child: Text("No events found.".tr())))
+                          child: Center(
+                              child: Text(UnitStrings.noEventsFound)))
                     else ...[
                       if (presentEvents.isNotEmpty) ...[
-                        _buildSectionHeader(context, "Happening Now".tr()),
+                        _buildSectionHeader(
+                            context, CommonStrings.happeningNow),
                         _buildGrid(presentEvents, isPresent: true),
                       ],
                       if (upcomingEvents.isNotEmpty) ...[
-                        _buildSectionHeader(context, "Upcoming Events".tr()),
+                        _buildSectionHeader(
+                            context, CommonStrings.upcomingEvents),
                         _buildGrid(upcomingEvents),
                       ],
                       if (pastEvents.isNotEmpty) ...[
-                        _buildSectionHeader(context, "Past Events".tr()),
+                        _buildSectionHeader(context, CommonStrings.pastEvents),
                         _buildGrid(pastEvents),
                       ],
                     ],
@@ -231,7 +234,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                               ElevatedButton.icon(
                                 onPressed: _addNewEvent,
                                 icon: const Icon(Icons.add, size: 18),
-                                label: Text('Add New Event'.tr()),
+                                label: Text(UnitStrings.addNewEvent),
                                 style: ElevatedButton.styleFrom(
                                   // This will force the button to be at least 48px tall.
                                   minimumSize: const Size(0, 48),

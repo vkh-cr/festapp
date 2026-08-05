@@ -1,10 +1,10 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 
 class ConfirmationDialogs {
   static Future<void> showInformationDialog(
       BuildContext context, String titleMessage, String textMessage,
-      [String buttonMessage = "Ok"]) async {
+      [String? buttonMessage]) async {
     await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -13,7 +13,7 @@ class ConfirmationDialogs {
             content: SelectableText(textMessage),
             actions: [
               ElevatedButton(
-                child: Text(buttonMessage),
+                child: Text(buttonMessage ?? CommonStrings.ok),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -27,8 +27,8 @@ class ConfirmationDialogs {
     BuildContext context,
     String titleMessage,
     String textMessage, {
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
+    String? confirmButtonMessage,
+    String? cancelButtonMessage,
   }) async {
     bool result = false;
     await showDialog(
@@ -39,7 +39,7 @@ class ConfirmationDialogs {
           content: Container(),
           actions: [
             ElevatedButton(
-              child: Text(confirmButtonMessage),
+              child: Text(confirmButtonMessage ?? CommonStrings.ok),
               onPressed: () {
                 result = true;
                 Navigator.of(context).pop();
@@ -56,8 +56,8 @@ class ConfirmationDialogs {
     BuildContext context,
     String titleMessage,
     String textMessage, {
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
+    String? confirmButtonMessage,
+    String? cancelButtonMessage,
   }) async {
     bool result = false;
     await showDialog(
@@ -68,14 +68,14 @@ class ConfirmationDialogs {
           content: SingleChildScrollView(child: Text(textMessage)),
           actions: [
             TextButton(
-              child: Text(cancelButtonMessage),
+              child: Text(cancelButtonMessage ?? CommonStrings.storno),
               onPressed: () {
                 result = false;
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text(confirmButtonMessage),
+              child: Text(confirmButtonMessage ?? CommonStrings.ok),
               onPressed: () {
                 result = true;
                 Navigator.of(context).pop();
@@ -92,8 +92,8 @@ class ConfirmationDialogs {
     BuildContext context,
     String titleMessage,
     Text textMessage, {
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
+    String? confirmButtonMessage,
+    String? cancelButtonMessage,
   }) async {
     bool result = false;
     await showDialog(
@@ -104,14 +104,14 @@ class ConfirmationDialogs {
           content: SingleChildScrollView(child: textMessage),
           actions: [
             TextButton(
-              child: Text(cancelButtonMessage),
+              child: Text(cancelButtonMessage ?? CommonStrings.storno),
               onPressed: () {
                 result = false;
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text(confirmButtonMessage),
+              child: Text(confirmButtonMessage ?? CommonStrings.ok),
               onPressed: () {
                 result = true;
                 Navigator.of(context).pop();
@@ -128,8 +128,8 @@ class ConfirmationDialogs {
     required BuildContext context,
     required String title,
     required Widget content,
-    String confirmButtonText = "Ok",
-    String cancelButtonText = "Storno",
+    String? confirmButtonText,
+    String? cancelButtonText,
   }) async {
     final result = await showDialog<bool>(
       context: context,
@@ -139,13 +139,13 @@ class ConfirmationDialogs {
           content: content,
           actions: [
             TextButton(
-              child: Text(cancelButtonText),
+              child: Text(cancelButtonText ?? CommonStrings.storno),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
             ),
             ElevatedButton(
-              child: Text(confirmButtonText),
+              child: Text(confirmButtonText ?? CommonStrings.ok),
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
@@ -166,26 +166,24 @@ class ConfirmationDialogs {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Notifications").tr(),
+          title: Text(CommonStrings.notifications),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                const Text(
-                        "Notifications will inform you about schedule changes and other selected news.")
-                    .tr(),
+                Text(CommonStrings.notificationsInfo),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text("Disable").tr(),
+              child: Text(CommonStrings.disable),
               onPressed: () {
                 result = false;
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text("Enable").tr(),
+              child: Text(CommonStrings.enable),
               onPressed: () async {
                 result = true;
                 Navigator.of(context).pop();

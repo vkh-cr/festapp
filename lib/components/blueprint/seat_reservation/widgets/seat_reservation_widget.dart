@@ -1,6 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_strings.dart';
 import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -95,7 +96,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                             widget.onCloseSeatReservation
                                 ?.call(widget.selectedSeats);
                           },
-                          label: "Continue".tr(),
+                          label: CommonStrings.continueAction,
                           width: 250),
                     ),
                   ),
@@ -148,8 +149,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
       // Select
       if (widget.maxTickets != null &&
           widget.selectedSeats.length >= widget.maxTickets!) {
-        ToastHelper.Show(
-            context, "It is not possible to select more tickets.".tr());
+        ToastHelper.Show(context, BlueprintStrings.toastMaxTicketsReached);
         return;
       }
       model.seatState = SeatState.selected_by_me; // Optimistic update

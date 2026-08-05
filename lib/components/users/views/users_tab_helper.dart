@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/import/import_dialog_helper.dart';
@@ -48,9 +47,9 @@ class UsersTabHelper {
         await UserManagementHelper.unsafeChangeUserPassword(context, u);
         ToastHelper.Show(context, UserStrings.passwordChanged);
       } catch (e) {
-        String errorMessage =
-            "Failed for user ${u.data?[Tb.occasion_users.data_email] ?? '[no email]'}: ${e.toString()}"
-                .tr();
+        String errorMessage = UserStrings.passwordChangeFailed(
+            user: u.data?[Tb.occasion_users.data_email] ?? '[no email]',
+            error: e.toString());
         ToastHelper.Show(context, errorMessage, severity: ToastSeverity.NotOk);
         errorMessages.add(errorMessage);
       }
@@ -68,8 +67,8 @@ class UsersTabHelper {
           (u) => GroupParticipantModel(userInfo: UserInfoModel(id: u.id))));
       await DbGroups.updateUserGroupParticipants(
           chosenGroup, chosenGroup.participants!);
-      ToastHelper.Show(context,
-          "Updated {item}.".tr(namedArgs: {"item": chosenGroup.title}));
+      ToastHelper.Show(
+          context, CommonStrings.updatedItem(item: chosenGroup.title));
     }
   }
 
@@ -89,8 +88,8 @@ class UsersTabHelper {
     DialogHelper.chooseUser(context, (chosenUser) async {
       await DbUsers.addUserToOccasion(
           chosenUser.id!, RightsService.currentOccasionId()!);
-      ToastHelper.Show(context,
-          "Updated {item}.".tr(namedArgs: {"item": chosenUser.toString()}));
+      ToastHelper.Show(
+          context, CommonStrings.updatedItem(item: chosenUser.toString()));
       await reloadUsers();
     }, nonAdded, CommonStrings.add);
   }
@@ -107,8 +106,8 @@ class UsersTabHelper {
         .toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
       await DbUsers.addUserToUnit(chosenUser.id!, unit);
-      ToastHelper.Show(context,
-          "Updated {item}.".tr(namedArgs: {"item": chosenUser.toString()}));
+      ToastHelper.Show(
+          context, CommonStrings.updatedItem(item: chosenUser.toString()));
       await reloadUsers();
     }, nonAdded, CommonStrings.add);
   }
@@ -132,9 +131,8 @@ class UsersTabHelper {
     if (alreadyInvitedUsers.isNotEmpty) {
       var reinviteConfirm = await DialogHelper.showConfirmationDialog(
         context,
-        "Invite".tr(),
-        "Some users have already been invited. Do you want to invite them again and send a new sign-in code?"
-            .tr(),
+        UserStrings.invite,
+        UserStrings.reinviteConfirm,
       );
       if (!reinviteConfirm) {
         await processInvites(context, newUsers);
@@ -152,8 +150,8 @@ class UsersTabHelper {
       {int retryLimit = 3}) async {
     var confirm = await DialogHelper.showConfirmationDialog(
       context,
-      "Invite".tr(),
-      "${"Users will get a sign-in code via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}",
+      UserStrings.invite,
+      "${UserStrings.inviteInfo} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}",
     );
 
     if (confirm) {
@@ -168,9 +166,8 @@ class UsersTabHelper {
               await AuthService.sendSignInCode(user);
               ToastHelper.Show(
                 context,
-                "Invited: {user}.".tr(namedArgs: {
-                  "user": user.data![Tb.occasion_users.data_email]
-                }),
+                UserStrings.invitedUser(
+                    user: user.data![Tb.occasion_users.data_email]),
               );
               return;
             } catch (e) {
@@ -178,11 +175,9 @@ class UsersTabHelper {
               if (retryAttempts[user]! >= retryLimit) {
                 ToastHelper.Show(
                   context,
-                  "Failed to invite {user}. Number of retries: ({retries})."
-                      .tr(namedArgs: {
-                    "retries": retryLimit.toString(),
-                    "user": user.data![Tb.occasion_users.data_email]
-                  }),
+                  UserStrings.inviteFailed(
+                      user: user.data![Tb.occasion_users.data_email],
+                      retries: retryLimit.toString()),
                   severity: ToastSeverity.NotOk,
                 );
                 // Retrying to invite user
@@ -195,7 +190,7 @@ class UsersTabHelper {
 
       await DialogHelper.showProgressDialogAsync(
         context,
-        "Invite".tr(),
+        UserStrings.invite,
         inviteFutures.length,
         futures: inviteFutures,
         delay: Duration(milliseconds: 500),

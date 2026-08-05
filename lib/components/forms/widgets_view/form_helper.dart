@@ -15,6 +15,8 @@ import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/html/html_view.dart';
 import '../../_shared/common_strings.dart';
+import '../form_strings.dart';
+import 'package:fstapp/components/_shared/person_fields_strings.dart';
 import '../models/holder_models/birth_date_field_holder.dart';
 import '../models/holder_models/field_holder.dart';
 import '../models/holder_models/form_holder.dart';
@@ -67,29 +69,29 @@ class FormHelper {
   static const String metaDefaultValue = "default_value";
 
   // Labels and messages
-  static String noteLabel() => "Note".tr();
+  static String noteLabel() => CommonStrings.note;
   static String nameLabel() => CommonStrings.name;
-  static String surnameLabel() => "Surname".tr();
-  static String cityLabel() => "City".tr();
-  static String spotLabel() => "Spot".tr();
-  static String emailLabel() => "E-mail".tr();
-  static String phoneLabel() => "Phone".tr();
-  static String addressLabel() => "Address".tr();
-  static String nationalityLabel() => "Nationality".tr();
-  static String sexLabel() => "I am".tr();
-  static String birthYearLabel() => "Birth year".tr();
-  static String birthDateLabel() => "Birth Date".tr();
-  static String idDocumentLabel() => "ID Card / Passport Number".tr();
-  static String emailInvalidMessage() => "E-mail is not valid!".tr();
-  static String maleLabel() => "Male".tr();
-  static String femaleLabel() => "Female".tr();
-  static String notSpecifiedLabel() => "Not specified".tr();
+  static String surnameLabel() => PersonFieldsStrings.surname;
+  static String cityLabel() => PersonFieldsStrings.city;
+  static String spotLabel() => CommonStrings.spot;
+  static String emailLabel() => PersonFieldsStrings.email;
+  static String phoneLabel() => PersonFieldsStrings.phone;
+  static String addressLabel() => PersonFieldsStrings.address;
+  static String nationalityLabel() => PersonFieldsStrings.nationality;
+  static String sexLabel() => PersonFieldsStrings.sexLabel;
+  static String birthYearLabel() => PersonFieldsStrings.birthYear;
+  static String birthDateLabel() => PersonFieldsStrings.birthDate;
+  static String idDocumentLabel() => FormStrings.idCardPassportNumber;
+  static String emailInvalidMessage() => PersonFieldsStrings.emailInvalid;
+  static String maleLabel() => PersonFieldsStrings.male;
+  static String femaleLabel() => PersonFieldsStrings.female;
+  static String notSpecifiedLabel() => PersonFieldsStrings.notSpecified;
 
   static String ticketLabel() => OrdersStrings.itemSingular;
-  static String textLabel() => "Text".tr();
-  static String selectOneLabel() => "Single Choice".tr();
-  static String selectManyLabel() => "Multiple Choice".tr();
-  static String productTypeLabel() => "Product Type".tr();
+  static String textLabel() => FormStrings.textFieldType;
+  static String selectOneLabel() => FormStrings.singleChoice;
+  static String selectManyLabel() => FormStrings.multipleChoice;
+  static String productTypeLabel() => FormStrings.productType;
 
   static const Map<String, IconData> fieldTypeIcons = {
     FormHelper.fieldTypeText: Icons.text_fields,
@@ -536,7 +538,7 @@ class FormHelper {
           ),
         );
       },
-      child: Text("View more".tr()),
+      child: Text(FormStrings.viewMore),
     );
   }
 

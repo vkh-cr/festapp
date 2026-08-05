@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/groups/group_strings.dart';
 import 'package:fstapp/components/information/game/game_settings_model.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/services/time_helper.dart';
@@ -42,8 +42,7 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
     if (_startDateTime != null &&
         _endDateTime != null &&
         _startDateTime!.isAfter(_endDateTime!)) {
-      ToastHelper.Show(
-          context, "Start time must be earlier than end time.".tr(),
+      ToastHelper.Show(context, GroupsStrings.startBeforeEnd,
           severity: ToastSeverity.NotOk);
       return;
     }

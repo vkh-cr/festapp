@@ -60,17 +60,17 @@ class OrderModel extends ITrinaRowModel {
   ];
 
   static String stateToLocale(String? state) {
-    if (state == null || state.isEmpty) return "Not Set".tr();
+    if (state == null || state.isEmpty) return OrdersStrings.stateNotSet;
     switch (state) {
       case orderedState:
       case expiredState:
-        return 'Ordered'.tr();
+        return OrdersStrings.stateOrdered;
       case paidState:
-        return 'Paid'.tr();
+        return OrdersStrings.paid;
       case sentState:
-        return 'Sent'.tr();
+        return OrdersStrings.stateSent;
       case usedState:
-        return 'Used'.tr();
+        return OrdersStrings.stateUsed;
       case stornoState:
         return CommonStrings.storno;
       default:

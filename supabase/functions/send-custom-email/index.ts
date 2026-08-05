@@ -1,5 +1,5 @@
-import { getSupabaseUser, isUserEditor, isUserEditorOrder, supabaseAdmin } from "../_shared/supabaseUtil.ts";
-import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { getSupabaseUser, isUserEditor, isUserEditorOrder } from "../_shared/supabaseUtil.ts";
+import { deliverEmail } from "../_shared/emailDelivery.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 const corsHeaders = {
@@ -62,32 +62,20 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Send the email using the provided template and substitutions.
-    await sendEmailWithSubs({
+    await deliverEmail({
       to: email,
-      subject: template.subject,
-      content: template.html,
-      subs,
+      templateCode: template.code,
+      context: {
+        organization: template.organization,
+        unit: template.unit,
+        occasion: template.occasion,
+      },
+      substitutions: subs,
+      template,
       from: `Festapp <${_DEFAULT_EMAIL}>`,
     });
 
     console.log("Email sent to:", email);
-
-    // Log the email in the "log_emails" table.
-    const { error: logError } = await supabaseAdmin
-      .from("log_emails")
-      .insert({
-        from: _DEFAULT_EMAIL,
-        to: email,
-        template: template.id, // Assuming the template model includes an 'id'
-        organization: template.organization,
-      });
-
-    if (logError) {
-      console.error("Error logging email:", logError);
-    } else {
-      console.log("Email logged successfully.");
-    }
 
     return new Response(JSON.stringify({ email }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

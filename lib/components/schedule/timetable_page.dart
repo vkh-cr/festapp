@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/timetable/timetable_controller.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/occasion/occasion_home_page.dart';
@@ -52,7 +53,7 @@ class _TimetablePageState extends State<TimetablePage>
     _tabsRouterListener = () async {
       if (mounted &&
           context.tabsRouter.activeIndex ==
-              OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.timetable)) {
+              OccasionHomePage.baseTabKeys.indexOf(OccasionTab.timetable)) {
         await loadData();
       }
     };
@@ -171,7 +172,7 @@ class _TimetablePageState extends State<TimetablePage>
     return Scaffold(
         backgroundColor: ThemeConfig.timetableBackgroundOutside(context),
         appBar: AppBar(
-          title: Text("Schedule".tr()),
+          title: Text(CommonStrings.schedule),
           leading: PopButton(),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(40),

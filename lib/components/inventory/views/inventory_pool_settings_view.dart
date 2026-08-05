@@ -223,8 +223,10 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
 
     final success = await ExceptionHandler.guardVoid(
       currentContext,
-      futureFunction: () =>
-          DbInventoryPools.deleteInventoryPool(_bundle!.pool.id!),
+      futureFunction: () => DbInventoryPools.deleteInventoryPool(
+        _bundle!.pool.id!,
+        expectedVersion: _bundle!.aggregateVersion,
+      ),
       defaultErrorMessage: InventoryStrings.settingsErrorDelete,
     );
 
@@ -252,6 +254,53 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
         _bundle!.pool.placeId = _originalPlace?.id;
       }
     });
+  }
+
+  /// Builds the pool-type selector limited to the types the occasion's
+  /// ServicesFeature permits. When exactly one type is permitted and the pool
+  /// already matches it, the selector is hidden ("exclusive" mode). A legacy
+  /// pool whose type is no longer permitted keeps its type as an extra option
+  /// so it can be migrated rather than silently misrepresented.
+  Widget _buildTypeSelector(BuildContext context) {
+    final allowed = allowedInventoryPoolTypes();
+    if (allowed.length == 1 && allowed.first == _selectedType) {
+      return const SizedBox.shrink();
+    }
+    final types = allowed.contains(_selectedType)
+        ? allowed
+        : <InventoryPoolType>[_selectedType, ...allowed];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          InventoryStrings.settingsTypeLabel,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        const SizedBox(height: 8),
+        Center(
+          child: ToggleButtons(
+            isSelected: types.map((t) => t == _selectedType).toList(),
+            onPressed: (int index) {
+              setState(() => _selectedType = types[index]);
+            },
+            borderRadius: BorderRadius.circular(8.0),
+            children: types.map((type) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(type.icon, size: 18),
+                    const SizedBox(width: 8),
+                    Text(type.displayName),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
   }
 
   void _removeContext(InventoryContextModel context) {
@@ -544,7 +593,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                             Center(
                               child: ElevatedButton.icon(
                                 icon: const Icon(Icons.edit),
-                                label: Text("Edit content".tr()),
+                                label: Text(CommonStrings.editContent),
                                 onPressed: () async {
                                   final result =
                                       await RouterService.navigatePageInfo(
@@ -562,56 +611,7 @@ class _InventoryPoolSettingsViewState extends State<InventoryPoolSettingsView> {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  InventoryStrings.settingsTypeLabel,
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                                const SizedBox(height: 8),
-                                Center(
-                                  child: ToggleButtons(
-                                    isSelected: [
-                                      _selectedType ==
-                                          InventoryPoolType.accommodation,
-                                      _selectedType == InventoryPoolType.food,
-                                      _selectedType == InventoryPoolType.other,
-                                    ],
-                                    onPressed: (int index) {
-                                      setState(() {
-                                        if (index == 0) {
-                                          _selectedType =
-                                              InventoryPoolType.accommodation;
-                                        } else if (index == 1) {
-                                          _selectedType =
-                                              InventoryPoolType.food;
-                                        } else if (index == 2) {
-                                          _selectedType =
-                                              InventoryPoolType.other;
-                                        }
-                                      });
-                                    },
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    children:
-                                        InventoryPoolType.values.map((type) {
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(type.icon, size: 18),
-                                            const SizedBox(width: 8),
-                                            Text(type.displayName),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            _buildTypeSelector(context),
                             const SizedBox(height: 24),
                             Text(InventoryStrings.settingsPlaceLabel,
                                 style: Theme.of(context).textTheme.labelLarge),

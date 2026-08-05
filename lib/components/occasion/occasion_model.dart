@@ -77,6 +77,7 @@ class OccasionModel {
   FormModel? form;
   List<Feature> features;
   StatsModel? stats;
+  int aggregateVersion;
 
   OccasionModel({
     this.id,
@@ -98,6 +99,7 @@ class OccasionModel {
     this.form,
     List<Feature>? features,
     this.stats,
+    this.aggregateVersion = 0,
   }) : features = features ?? [];
 
   factory OccasionModel.fromJson(Map<String, dynamic> json) {
@@ -145,6 +147,7 @@ class OccasionModel {
               .map((featureJson) => Feature.fromJson(featureJson)))
           : [],
       stats: json['stats'] != null ? StatsModel.fromJson(json['stats']) : null,
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
     );
   }
 

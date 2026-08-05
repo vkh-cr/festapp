@@ -1,6 +1,6 @@
 // schedule_timeline.dart
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/widgets/detail_dialog.dart';
 import 'package:fstapp/components/html/html_helper.dart';
@@ -122,7 +122,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
                 Icons.add_circle_outline,
                 size: 24,
               ),
-              label: const Text("Add To Schedule").tr(),
+              label: Text(ScheduleStrings.addToSchedule),
               style: TextButton.styleFrom(
                 foregroundColor: ThemeConfig.timelineAddNewEventColor(context),
                 padding:

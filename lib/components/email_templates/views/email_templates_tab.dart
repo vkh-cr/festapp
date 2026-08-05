@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/email_templates/email_template_model.dart';
 import 'package:fstapp/components/email_templates/db_email_templates.dart';
 import 'package:fstapp/components/email_templates/views/email_template_card.dart';
@@ -72,7 +72,7 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
     } else if (template.organization != null) {
       return emailTemplatesResponse!.organization.title ?? '';
     } else {
-      return 'default'.tr();
+      return CommonStrings.defaultLabel;
     }
   }
 

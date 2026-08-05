@@ -1,8 +1,11 @@
 import 'package:fstapp/components/inventory/models/spot_management_bundle.dart';
+import 'package:fstapp/components/inventory/spot_commands.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbSpots {
   static final _supabase = Supabase.instance.client;
+  static SpotCommands get _commands => SupabaseSpotCommands(_supabase);
 
   /// Fetches a bundle of spots and all related data for a given inventory pool.
   static Future<SpotManagementBundle> getSpotManagementBundle(
@@ -68,6 +71,10 @@ class DbSpots {
   static Future<void> updateSpotAssignments(
       List<Map<String, dynamic>> changes) async {
     if (changes.isEmpty) {
+      return;
+    }
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.updateAssignments(changes);
       return;
     }
     await _supabase.rpc(

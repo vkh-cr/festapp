@@ -20,6 +20,7 @@ class Tb {
   static RoleInfoTb role_info = const RoleInfoTb();
   static UserCompanionsTb user_companions = const UserCompanionsTb();
   static IconsTb icons = const IconsTb();
+  static PlaceTypesTb place_types = const PlaceTypesTb();
   static OrganizationsTb organizations = const OrganizationsTb();
   static OrganizationUsersTb organization_users = const OrganizationUsersTb();
   static FormsTb forms = const FormsTb();
@@ -103,6 +104,8 @@ class OccasionUsersTb {
   String get is_editor_view => "is_editor_view";
   String get is_editor_order => "is_editor_order";
   String get is_editor_order_view => "is_editor_order_view";
+  String get is_cleaning_crew => "is_cleaning_crew";
+  String get is_cleaning_blocked => "is_cleaning_blocked";
   String get is_editor => "is_editor";
   String get is_manager => "is_manager";
   String get is_approved => "is_approved";
@@ -157,6 +160,7 @@ class UserInfoTb {
   String get created_at => "created_at";
   String get updated_at => "updated_at";
   String get email_readonly => "email_readonly";
+  String get email_delivery => "email_delivery";
   String get name => "name";
   String get surname => "surname";
   String get sex => "sex";
@@ -336,8 +340,25 @@ class IconsTb {
   String get created_at => "created_at";
   String get updated_at => "updated_at";
   String get organization => "organization";
+  String get unit => "unit";
+  String get created_by => "created_by";
   String get link => "link";
   String get data => "data";
+}
+
+class PlaceTypesTb {
+  const PlaceTypesTb();
+  String get table => "place_types";
+  String get id => "id";
+  String get occasion => "occasion";
+  String get code => "code";
+  String get title => "title";
+  String get icon => "icon";
+  String get order => "order";
+  String get is_hidden => "is_hidden";
+  String get is_default => "is_default";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
 }
 
 class OrganizationsTb {

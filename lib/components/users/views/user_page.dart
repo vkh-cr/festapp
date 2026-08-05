@@ -1,33 +1,47 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/users/user_strings.dart';
+import 'package:fstapp/components/users/password_reset_request.dart';
+import 'package:fstapp/components/users/account_deletion_service.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart' show Uint8List;
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/users/companion/db_companions.dart';
+import 'package:fstapp/components/users/companion/companion_dialog.dart';
+import 'package:fstapp/components/users/companion/companion_accommodation_field.dart';
+import 'package:fstapp/components/users/companion/companion_visibility.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/cleaning/cleaning_page.dart';
+import 'package:fstapp/components/cleaning/cleaning_strings.dart';
+import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/components/app_management/settings_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/components/users/views/login_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/_shared/person_fields_strings.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
+import 'package:fstapp/components/users/widgets/profile_place_field.dart';
+import 'package:fstapp/components/users/widgets/profile_legal_link.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -44,6 +58,86 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
+  bool _didStartLoading = false;
+  bool _isPasswordResetPending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
+  }
+
+  @override
+  void dispose() {
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
+    super.dispose();
+  }
+
+  void _onProjectionChanged() {
+    if (mounted && _didStartLoading && ClientSyncRuntime.isV1Selected) {
+      unawaited(loadData());
+    }
+  }
+
+  Future<void> _requestPasswordReset(String? accountEmail) async {
+    final answer = await DialogHelper.showConfirmationDialog(
+      context,
+      UserStrings.changePasswordInstructions,
+      UserStrings.resetPasswordProceedConfirm,
+      confirmButtonMessage: CommonStrings.proceed,
+    );
+    if (!answer || !mounted) return;
+
+    setState(() => _isPasswordResetPending = true);
+    final email = accountEmail?.trim();
+    final result = await requestPasswordReset(
+      email: email,
+      send: (address) async {
+        await AuthService.resetPasswordForEmail(address);
+      },
+    );
+    if (!mounted) return;
+    setState(() => _isPasswordResetPending = false);
+
+    switch (result) {
+      case PasswordResetRequestResult.sent:
+        await ToastHelper.Show(context, UserStrings.passwordResetSent);
+        if (!mounted) return;
+        await DialogHelper.showInformationDialog(
+          context,
+          UserStrings.changePasswordInstructions,
+          UserStrings.passwordResetLinkSent(email: email!),
+        );
+        break;
+      case PasswordResetRequestResult.missingEmail:
+        await ToastHelper.Show(
+          context,
+          UserStrings.passwordResetEmailMissing,
+          severity: ToastSeverity.NotOk,
+        );
+        if (!mounted) return;
+        await DialogHelper.showInformationDialog(
+          context,
+          UserStrings.changePasswordInstructions,
+          UserStrings.passwordResetEmailMissing,
+        );
+        break;
+      case PasswordResetRequestResult.failed:
+        await ToastHelper.Show(
+          context,
+          UserStrings.passwordResetFailed,
+          severity: ToastSeverity.NotOk,
+        );
+        if (!mounted) return;
+        await DialogHelper.showInformationDialog(
+          context,
+          UserStrings.changePasswordInstructions,
+          UserStrings.passwordResetFailed,
+        );
+        break;
+    }
+  }
+
   void _showFullScreenDialog(
     BuildContext context,
     String name,
@@ -153,9 +247,8 @@ class _UserPageState extends State<UserPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Profile",
-                style: TextStyle(color: ThemeConfig.appBarColorNegative()))
-            .tr(),
+        title: Text(UserStrings.profile,
+            style: TextStyle(color: ThemeConfig.appBarColorNegative())),
         leading: BackButton(
           color: ThemeConfig.appBarColorNegative(),
           onPressed: () => RouterService.popOrHome(context),
@@ -177,18 +270,19 @@ class _UserPageState extends State<UserPage> {
                       context: context,
                       onPressed: () => _showFullScreenDialog(
                         context,
-                        userData
-                            ?.occasionUser!.data![Tb.occasion_users.data_name],
+                        userData?.name ?? "",
                         AppConfig.appName,
-                        userData?.occasionUser!.user ?? "",
+                        userData?.id ?? "",
                       ),
                       icon: Icons.qr_code,
-                      label: "Show my code".tr(),
+                      label: UserStrings.showMyCode,
                     ),
                   ),
-                if (FeatureService.isFeatureEnabled(
-                        FeatureConstants.companions) &&
-                    (userData?.companions?.isNotEmpty ?? false))
+                if (canShowCompanionManagement(
+                  featureEnabled: FeatureService.isCompanionsEnabled(),
+                  allowUserCreate: FeatureService.allowsUserCompanionCreation(),
+                  hasOwnedCompanions: userData?.companions?.isNotEmpty ?? false,
+                ))
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
@@ -205,12 +299,29 @@ class _UserPageState extends State<UserPage> {
                         if (index == 0) {
                           return ListTile(
                             title: Text(
-                              "Companions",
+                              UserStrings.manageCompanions,
                               style: TextStyle(
                                 color: ThemeConfig.blackColor(context),
                                 fontWeight: FontWeight.bold,
                               ),
-                            ).tr(),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.manage_accounts_outlined),
+                              onPressed: () async {
+                                await showDialog(
+                                  context: context,
+                                  builder: (_) => CompanionManagementDialog(
+                                    allowUserCreate: FeatureService
+                                        .allowsUserCompanionCreation(),
+                                    maxCompanions:
+                                        FeatureService.getMaxCompanions(),
+                                    companions:
+                                        userData?.companions ?? const [],
+                                    refreshData: loadData,
+                                  ),
+                                );
+                              },
+                            ),
                           );
                         }
                         final companion = userData?.companions![index - 1];
@@ -227,7 +338,7 @@ class _UserPageState extends State<UserPage> {
                                 child: ExpansionTile(
                                   shape: const Border(),
                                   title: Text(
-                                    companion!.name,
+                                    companion!.fullName,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Theme.of(context)
@@ -236,11 +347,7 @@ class _UserPageState extends State<UserPage> {
                                     ),
                                   ),
                                   subtitle: Text(
-                                    "Signed in events: {count}".tr(namedArgs: {
-                                      "count": companion.schedule?.length
-                                              .toString() ??
-                                          "0"
-                                    }),
+                                    '${companion.groupTitle.isEmpty ? UserStrings.noGroup : companion.groupTitle} · ${UserStrings.signedInEvents(count: companion.schedule?.length.toString() ?? "0")}',
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -248,20 +355,38 @@ class _UserPageState extends State<UserPage> {
                                       fontSize: 13,
                                     ),
                                   ),
-                                  trailing: ButtonsHelper.buildReferenceButton(
-                                    context: context,
-                                    onPressed: () => _showFullScreenDialog(
-                                      context,
-                                      companion.name,
-                                      AppConfig.appName,
-                                      companion.id,
+                                  trailing: canShowCompanionQrAction(
+                                    entryCodeEnabled:
+                                        FeatureService.isFeatureEnabled(
+                                      FeatureConstants.entryCode,
                                     ),
-                                    icon: Icons.qr_code,
-                                    label: "Show Code".tr(),
-                                  ),
+                                  )
+                                      ? ButtonsHelper.buildReferenceButton(
+                                          context: context,
+                                          onPressed: () =>
+                                              _showFullScreenDialog(
+                                            context,
+                                            companion.name,
+                                            AppConfig.appName,
+                                            companion.id,
+                                          ),
+                                          icon: Icons.qr_code,
+                                          label: UserStrings.showCode,
+                                        )
+                                      : null,
                                   expandedCrossAxisAlignment:
                                       CrossAxisAlignment.center,
                                   children: [
+                                    if (FeatureService
+                                        .isServiceAccommodationEnabled())
+                                      CompanionAccommodationField(
+                                        companion: companion,
+                                        onOpenPlace: (placeId) =>
+                                            MapNavigation.openPlace(
+                                          context,
+                                          placeId,
+                                        ),
+                                      ),
                                     const SizedBox(height: 36),
                                     ConstrainedBox(
                                       constraints: const BoxConstraints(
@@ -283,12 +408,12 @@ class _UserPageState extends State<UserPage> {
                                         nodePosition: 0.3,
                                         emptyContent: Center(
                                           child: Text(
-                                            "Companion's events will appear here.",
+                                            UserStrings.companionEventsEmpty,
                                             style: TextStyle(
                                               color:
                                                   ThemeConfig.grey600(context),
                                             ),
-                                          ).tr(),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -297,23 +422,28 @@ class _UserPageState extends State<UserPage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        TextButton(
-                                          onPressed: () async {
-                                            var answer = await DialogHelper
-                                                .showConfirmationDialog(
-                                                    context,
-                                                    "Delete companion".tr(),
-                                                    "By deleting your companion you will also sign him/her out of all signed in sessions."
-                                                        .tr());
-                                            if (!answer) {
-                                              return;
-                                            }
-                                            await DbCompanions.delete(
-                                                companion);
-                                            await loadData();
-                                          },
-                                          child: Text("Delete companion").tr(),
-                                        ),
+                                        if (companion.origin ==
+                                                'self_created' &&
+                                            companion.canOwnerDelete)
+                                          TextButton(
+                                            onPressed: () async {
+                                              var answer = await DialogHelper
+                                                  .showConfirmationDialog(
+                                                      context,
+                                                      UserStrings
+                                                          .deleteCompanion,
+                                                      UserStrings
+                                                          .deleteCompanionConfirm);
+                                              if (!answer) {
+                                                return;
+                                              }
+                                              await DbCompanions.deleteSelf(
+                                                  companion);
+                                              await loadData();
+                                            },
+                                            child: Text(
+                                                UserStrings.deleteCompanion),
+                                          ),
                                       ],
                                     ),
                                   ],
@@ -326,99 +456,32 @@ class _UserPageState extends State<UserPage> {
                     ),
                   ),
                 const SizedBox(height: 15),
+                buildTextField(CommonStrings.name, userData?.name ?? ""),
                 buildTextField(
-                    CommonStrings.name,
-                    userData?.occasionUser
-                            ?.data![Tb.occasion_users.data_name] ??
-                        ""),
+                    PersonFieldsStrings.surname, userData?.surname ?? ""),
                 buildTextField(
-                    "Surname".tr(),
-                    userData?.occasionUser
-                            ?.data![Tb.occasion_users.data_surname] ??
-                        ""),
-                buildTextField(
-                    "E-mail".tr(),
-                    userData?.occasionUser
-                            ?.data![Tb.occasion_users.data_email] ??
-                        ""),
-                buildTextField(
-                    "I am".tr(),
-                    UserInfoModel.sexToLocale(userData
-                        ?.occasionUser?.data![Tb.occasion_users.data_sex])),
+                    PersonFieldsStrings.email, userData?.email ?? ""),
+                buildTextField(PersonFieldsStrings.sexLabel,
+                    UserInfoModel.sexToLocale(userData?.sex)),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.services))
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // const Text("Accommodation").tr(),
-                        // const SizedBox(height: 4),
-                        // Container(
-                        //   alignment: Alignment.topLeft,
-                        //   child: TextButton(
-                        //     onPressed: userData?.accommodationPlace == null
-                        //         ? null
-                        //         : () => RouterService.navigateOccasion(
-                        //       context,
-                        //       "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}",
-                        //     ),
-                        //     child: userData?.accommodationPlace == null
-                        //         ? Text(
-                        //       userData?.accommodationPlace?.title ?? "Without accommodation".tr(),
-                        //       style: const TextStyle(fontSize: 20),
-                        //     )
-                        //         : IntrinsicWidth(
-                        //       child: Row(
-                        //         children: [
-                        //           const Icon(Icons.place),
-                        //           const SizedBox(width: 4),
-                        //           Text(
-                        //             userData!.accommodationPlace!.title!,
-                        //             style: const TextStyle(fontSize: 20),
-                        //           ),
-                        //           const SizedBox(width: 4),
-                        //         ],
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                        // const SizedBox(height: 16),
-                        ListTile(
-                          tileColor: ThemeConfig.qrButtonColor(
-                              context), // Added this line
-                          leading: Icon(Icons.hotel,
-                              color: Theme.of(context).colorScheme.primary),
-                          title: Text(InventoryStrings.userStayLinkTitle,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(InventoryStrings.userStayLinkSubtitle),
-                          trailing:
-                              const Icon(Icons.arrow_forward_ios, size: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            // The side border has been removed to allow the background color to fill the shape fully without a separate outline.
-                            // If you still want a border, you can keep the 'side' property.
-                          ),
-                          onTap: () => RouterService.navigateOccasion(
-                              context, UserStayPage.ROUTE),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _buildStaySection(context),
+                if (userData?.eventUserGroup != null) _buildGroupField(context),
+                if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
+                  _buildCleaningSection(context),
                 const SizedBox(height: 16),
                 Visibility(
                   visible: RightsService.canSeeAdmin(),
                   child: ButtonsHelper.bigButton(
                     context: context,
                     onPressed: () async => _redirectToAdminPage(),
-                    label: "Event management".tr(),
+                    label: CommonStrings.eventManagement,
                   ),
                 ),
                 const SizedBox(height: 16),
                 ButtonsHelper.bigButton(
                   context: context,
                   onPressed: () async => _logout(),
-                  label: "Sign out".tr(),
+                  label: UserStrings.signOut,
                   color: ThemeConfig.seed1,
                   textColor: Colors.white,
                 ),
@@ -426,57 +489,39 @@ class _UserPageState extends State<UserPage> {
                 Container(
                   alignment: Alignment.topCenter,
                   child: TextButton(
-                    onPressed: () async {
-                      var answer = await DialogHelper.showConfirmationDialog(
-                        context,
-                        "Change Password Instructions".tr(),
-                        "You'll receive an email with a link to reset your password. Do you want to proceed?"
-                            .tr(),
-                        confirmButtonMessage: CommonStrings.proceed,
-                      );
-                      if (answer) {
-                        await AuthService.resetPasswordForEmail(userData!
-                                .occasionUser!
-                                .data![Tb.occasion_users.data_email])
-                            .then((value) {
-                          ToastHelper.Show(
-                              context, UserStrings.passwordResetSent);
-                          DialogHelper.showInformationDialog(
-                            context,
-                            "Change Password Instructions".tr(),
-                            "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
-                                .tr(namedArgs: {
-                              "email": userData!.occasionUser!
-                                  .data![Tb.occasion_users.data_email]
-                            }),
-                          );
-                        });
-                      }
-                    },
-                    child: Text(
-                      "Change password".tr(),
-                      style: TextStyle(
-                          fontSize: StylesConfig.normalClickableFontSize),
-                    ).tr(),
+                    onPressed: _isPasswordResetPending
+                        ? null
+                        : () => _requestPasswordReset(userData?.email),
+                    child: _isPasswordResetPending
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            UserStrings.changePassword,
+                            style: TextStyle(
+                                fontSize: StylesConfig.normalClickableFontSize),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Container(
                   alignment: Alignment.topCenter,
                   child: TextButton(
-                    onPressed: () => DialogHelper.showInformationDialog(
-                      context,
-                      "Delete account".tr(),
-                      "Request account deletion by sending email with your credentials to info@festapp.net."
-                          .tr(),
-                    ),
+                    onPressed: _requestAccountDeletion,
                     child: Text(
-                      "Delete account".tr(),
+                      UserStrings.deleteAccount,
                       style: TextStyle(
-                          fontSize: StylesConfig.normalClickableFontSize),
-                    ).tr(),
+                        fontSize: StylesConfig.normalClickableFontSize,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
                   ),
-                )
+                ),
+                const SizedBox(height: 8),
+                const AppLegalLinks(),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -488,8 +533,11 @@ class _UserPageState extends State<UserPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_didStartLoading) return;
+    _didStartLoading = true;
     if (!AuthService.isLoggedIn()) {
       RouterService.navigateOccasion(context, LoginPage.ROUTE);
+      return;
     }
     loadData();
   }
@@ -516,8 +564,51 @@ class _UserPageState extends State<UserPage> {
   Future<void> _logout() async {
     var trPrefix = RightsService.currentUser()?.getGenderPrefix();
     await AuthService.logout();
-    ToastHelper.Show(context, "${trPrefix}You have been signed out.".tr());
+    ToastHelper.Show(context, ScheduleStrings.youHaveBeenSignedOut(trPrefix));
     RouterService.popOrHome(context);
+  }
+
+  Future<void> _requestAccountDeletion() async {
+    final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(UserStrings.deleteAccount),
+            content: Text(
+              '${UserStrings.deleteAccountScope}\n\n${UserStrings.deleteAccountConfirm}',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(CommonStrings.cancel),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(UserStrings.deleteAccount),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!confirmed) return;
+    try {
+      final result = await AccountDeletionService().request();
+      if (!mounted) return;
+      await DialogHelper.showInformationDialog(
+        context,
+        UserStrings.deleteAccount,
+        UserStrings.accountDeletionEmailSent(result.maskedEmail),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      await DialogHelper.showInformationDialog(
+        context,
+        UserStrings.deleteAccount,
+        UserStrings.accountDeletionFailed,
+      );
+    }
   }
 
   void _redirectToAdminPage() {
@@ -525,19 +616,100 @@ class _UserPageState extends State<UserPage> {
         .then((value) => loadData());
   }
 
-  Future<void> loadData() async {
-    loadDataOffline();
-    var userInfo = await AuthService.getFullUserInfo();
-    await OfflineDataService.saveUserInfo(userInfo);
-    await addOfflineEventsToCompanions(userInfo);
-    setState(() {
-      userData = userInfo;
-    });
+  /// Chooses how to present the user's stay/accommodation.
+  ///
+  /// In accommodation ("stay") mode we show the user's single, stable
+  /// accommodation as a direct link to its place on the map (or a
+  /// "not specified" note). In capacity-groups / food modes we keep the link
+  /// to the full stay page, which lists rooms, meals and program slots.
+  Widget _buildStaySection(BuildContext context) {
+    if (FeatureService.isServiceAccommodationEnabled()) {
+      return _buildAccommodationField(context);
+    }
+    return _buildStayDetailsCard(context);
   }
 
-  Future<void> loadDataOffline() async {
-    var userInfo = await OfflineDataService.getUserInfo();
-    addOfflineEventsToCompanions(userInfo);
+  /// Simple accommodation field, rendered as a normal read-only profile row
+  /// (label + value with an underline, matching "I am" / "E-mail"). When a
+  /// place is assigned the value is a clickable link to it on the map;
+  /// otherwise it shows a "not specified" note.
+  Widget _buildAccommodationField(BuildContext context) {
+    final place = userData?.accommodationPlace;
+    return ProfilePlaceField(
+      label: InventoryStrings.typeAccommodation,
+      value: place?.title ?? InventoryStrings.accommodationNotSpecified,
+      place: place,
+      icon: Icons.place,
+      onOpenPlace: (placeId) => MapNavigation.openPlace(context, placeId),
+    );
+  }
+
+  Widget _buildGroupField(BuildContext context) {
+    final group = userData!.eventUserGroup!;
+    return ProfilePlaceField(
+      label: ScheduleStrings.group,
+      value: group.title,
+      place: group.place,
+      icon: Icons.groups_outlined,
+      onOpenPlace: (placeId) => MapNavigation.openPlace(context, placeId),
+    );
+  }
+
+  /// Entry point to the Cleaning service page (visible to every participant when
+  /// the feature is enabled — anyone can report; Q7).
+  Widget _buildCleaningSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: ListTile(
+        tileColor: ThemeConfig.qrButtonColor(context),
+        leading: Icon(Icons.cleaning_services,
+            color: Theme.of(context).colorScheme.primary),
+        title: Text(CleaningStrings.pageTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(CleaningStrings.tapToReport),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        onTap: () =>
+            RouterService.navigateOccasion(context, CleaningPage.ROUTE),
+      ),
+    );
+  }
+
+  /// Link to the full stay page (rooms, meals, program) used by the inventory /
+  /// capacity-groups system.
+  Widget _buildStayDetailsCard(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: ListTile(
+        tileColor: ThemeConfig.qrButtonColor(context),
+        leading:
+            Icon(Icons.hotel, color: Theme.of(context).colorScheme.primary),
+        title: Text(InventoryStrings.userStayLinkTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(InventoryStrings.userStayLinkSubtitle),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        onTap: () =>
+            RouterService.navigateOccasion(context, UserStayPage.ROUTE),
+      ),
+    );
+  }
+
+  Future<void> loadData() async {
+    UserInfoModel? userInfo;
+    if (ConnectivityService.isOfflineNotifier.value) {
+      userInfo = await OfflineDataService.getUserInfo();
+    } else {
+      try {
+        userInfo = await AuthService.getFullUserInfo();
+        await OfflineDataService.saveUserInfo(userInfo);
+      } catch (_) {
+        userInfo = await OfflineDataService.getUserInfo();
+        if (userInfo == null) rethrow;
+      }
+    }
+    await addOfflineEventsToCompanions(userInfo);
+    if (!mounted) return;
     setState(() {
       userData = userInfo;
     });
@@ -546,6 +718,8 @@ class _UserPageState extends State<UserPage> {
   Future<void> addOfflineEventsToCompanions(UserInfoModel? userInfo) async {
     var events = await OfflineDataService.getAllEvents();
     userInfo?.companions?.forEach((c) {
+      c.schedule?.clear();
+      c.timeBlocks.clear();
       for (var ei in c.eventIds) {
         var match = events.firstWhereOrNull((e) => e.id == ei);
         if (match != null) {

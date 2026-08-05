@@ -348,6 +348,7 @@ class ActivityAssignmentModel {
 class EditDataBundle {
   int? id;
   int? parentHistoryId;
+  int aggregateVersion;
 
   List<ActivityEventModel>? events;
   List<ActivityPlaceModel>? places;
@@ -367,12 +368,14 @@ class EditDataBundle {
     this.activityAssignments,
     this.id,
     this.parentHistoryId,
+    this.aggregateVersion = 0,
   });
 
   factory EditDataBundle.fromJson(Map<String, dynamic> j) {
     return EditDataBundle(
       id: j['id'] as int?,
       parentHistoryId: j['parent_history_id'] as int?,
+      aggregateVersion: (j['aggregate_version'] as num?)?.toInt() ?? 0,
       events: (j['events'] as List<dynamic>?)
           ?.map((e) => ActivityEventModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -405,6 +408,7 @@ class EditDataBundle {
     return EditDataBundle(
       id: j['id'] as int?,
       parentHistoryId: j['parent_history_id'] as int?,
+      aggregateVersion: (j['aggregate_version'] as num?)?.toInt() ?? 0,
       activities: (j[Tb.activities.table] as List<dynamic>?)
           ?.map((a) => ActivityModel.fromJson(a as Map<String, dynamic>))
           .toList(),

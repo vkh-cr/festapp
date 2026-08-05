@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/eshop/models/product_model.dart';
 import 'package:fstapp/components/eshop/db_eshop.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
@@ -90,7 +90,7 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Products".tr()),
+        title: Text(CommonStrings.products),
         actions: [
           TextButton(
             onPressed: _confirm,
@@ -106,7 +106,7 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
             child: TextField(
               decoration: InputDecoration(
                 labelText: CommonStrings.search,
-                hintText: "By title, type or price".tr(),
+                hintText: OrdersStrings.searchProductsHint,
                 prefixIcon: const Icon(Icons.search),
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -118,7 +118,7 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _filt.isEmpty
-                    ? Center(child: Text("No products found.".tr()))
+                    ? Center(child: Text(OrdersStrings.noProductsFound))
                     : ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         itemCount: _filt.length,

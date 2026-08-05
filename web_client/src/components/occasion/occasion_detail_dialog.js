@@ -35,7 +35,7 @@ export class OccasionDetailDialog {
         
         // Feature Details for Button Title
         const formFeature = FeatureService.getFeatureDetails(FeatureConstants.form, occasion.features);
-        let reserveTitle = LocalizationService.tr("Reserve a spot");
+        let reserveTitle = LocalizationService.tr("Common.reserveASpot");
         if (formFeature && formFeature.reserveButtonTitle) {
             reserveTitle = formFeature.reserveButtonTitle;
         }
@@ -158,7 +158,7 @@ export class OccasionDetailDialog {
              if (formFeature.use_external_form === true) {
                  const externalUrl = formFeature.external_form_link;
                  if (externalUrl && externalUrl.length > 0) {
-                     RouterService.navigateToExternal(externalUrl);
+                     RouterService.openExternalUrl(externalUrl);
                      return;
                  }
              }

@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -11,8 +10,13 @@ import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/icons/db_place_types.dart';
+import 'package:fstapp/components/icons/place_type_model.dart';
+import 'package:fstapp/components/map/place_type_column_builder.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/map/map_strings.dart';
 
 import 'place_model.dart';
 
@@ -26,22 +30,29 @@ class PlacesContent extends StatefulWidget {
 class _PlacesContentState extends State<PlacesContent> {
   List<IconModel> svgIcons = [];
   List<int?> mapIcons = [];
+  List<PlaceTypeModel> placeTypes = [];
   bool isLoading = true;
   SingleDataGridController<PlaceModel>? controller;
 
   @override
   void initState() {
     super.initState();
-    loadIcons();
+    loadOptions();
   }
 
-  Future<void> loadIcons() async {
+  Future<void> loadOptions() async {
     try {
-      var icons = await DbPlaces.getAllIcons();
+      final results = await Future.wait([
+        DbPlaces.getAllIcons(),
+        DbPlaceTypes.getPlaceTypes(),
+      ]);
+      final icons = results[0] as List<IconModel>;
+      final loadedPlaceTypes = results[1] as List<PlaceTypeModel>;
       setState(() {
         svgIcons = icons;
         mapIcons = svgIcons.map((icon) => icon.id).toList();
         mapIcons.add(null); // "no icon" option
+        placeTypes = loadedPlaceTypes;
         isLoading = false;
       });
       if (controller == null) initController();
@@ -59,7 +70,7 @@ class _PlacesContentState extends State<PlacesContent> {
       idColumn: Tb.places.id,
       columns: [
         TrinaColumn(
-          title: "Id".tr(),
+          title: CommonStrings.id,
           field: Tb.places.id,
           type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
@@ -100,7 +111,7 @@ class _PlacesContentState extends State<PlacesContent> {
           },
         ),
         TrinaColumn(
-          title: "Icon".tr(),
+          title: CommonStrings.icon,
           field: Tb.places.icon,
           applyFormatterInEditing: true,
           formatter: (d) =>
@@ -115,8 +126,13 @@ class _PlacesContentState extends State<PlacesContent> {
           renderer: (ctx) =>
               DataGridHelper.mapIconRenderer(context, ctx, svgIcons),
         ),
+        buildPlaceTypeColumn(
+          placeTypes: placeTypes,
+          includeToilet:
+              FeatureService.isFeatureEnabled(FeatureConstants.cleaning),
+        ),
         TrinaColumn(
-          title: "Location on map".tr(),
+          title: MapStrings.locationOnMap,
           field: Tb.places.coordinates,
           type: TrinaColumnType.text(
             defaultValue: FeatureService.getDefaultLocation(),
@@ -153,7 +169,7 @@ class _PlacesContentState extends State<PlacesContent> {
           },
         ),
         TrinaColumn(
-          title: "Order".tr(),
+          title: CommonStrings.order,
           field: Tb.places.order,
           type: TrinaColumnType.number(defaultValue: null),
           applyFormatterInEditing: true,

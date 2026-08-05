@@ -1,5 +1,18 @@
 # Users Component
 
+## Companion projection and commands
+
+Companion policy comes from cached `occasion_config`. Relationship identity,
+origin, live standard groups and attendance come only from the active
+identity's full `private_profile` replacement. Self-created account lifecycle
+and admin assignment are separate commands; admin unassignment removes only
+the occasion relationship. Admin mutations invalidate the owner's private head
+without activating the owner's payload in the admin identity scope.
+Companion identity and accommodation remain normal `user_info` and
+`occasion_users.services` data. The relationship never copies participant
+fields; the client resolves accommodation with the same occasion catalog and
+map projection used for the signed-in user's profile.
+
 ## The User Bundle (CRITICAL)
 
 `get_users_from_occasion_with_orders` RPC returns dictionary-style maps (not nested JSON) to avoid duplication. Dart (`db_users.dart`) manually re-stitches the graph by resolving IDs across: users -> tickets -> orderProductTickets -> orders -> forms -> formFields.
@@ -20,3 +33,43 @@
 - `add_user_to_occasion` -- adds existing user to an occasion
 - `import_users_from_tickets_ws` -- bulk-creates users from ticket data
 - `update_user` -- updates user profile for an occasion
+
+## Users Editor Performance
+
+The Users admin tab intentionally loads the complete occasion roster. Keep
+`get_occasion_users_for_edit` set-based: order metadata and standard-group
+titles must be aggregated once per occasion and joined back to visible users.
+Do not reintroduce per-user correlated/LATERAL lookups. Ticket-to-order lookups
+depend on `eshop.order_product_ticket (ticket, id)`.
+
+Both the Users and Stay tabs consume this same bundle. Build its roster with
+`json_agg(row_to_json(...))` from the `occasion_users` editor contract. The
+effective `data` object starts with `occasion_users.data`, then overlays only
+the dedicated canonical profile columns from `user_info` (email, name, surname,
+sex, phone, and birth date). Never merge the complete `user_info` row or
+`user_info.data`: it contains historical occasion-specific fields, adds
+substantial payload, and can leak values between occasions. Keep the profile
+join optional so legacy `occasion_users` rows without `user_info` remain
+visible.
+
+Profile writers use `get_user_profile_data_patch` to copy only name, surname,
+sex, phone, and birth date into the legacy `user_info.data` mirror while the
+dedicated `user_info` columns remain authoritative. Occasion notes, invitations,
+diet, arbitrary form answers, and `occasion_users.services` must never be copied
+into the profile. Existing legacy JSON is retained as a registration snapshot;
+it is not an implicit current-profile override.
+
+## Email identity
+
+`user_info.email_readonly` is the organization-unique canonical account email
+used throughout the application, including sign-in and account lookup. When
+multiple people share one mailbox, later identities use deterministic `+N`
+aliases. `user_info.email_delivery` is an optional, non-unique override used
+only for outbound account messages. If it is blank, delivery falls back to
+`email_readonly`. Order email remains a historical registration snapshot.
+
+CSV imports preserve every row, assign collision-free `+N` sign-in aliases,
+and send the original address separately as `email_delivery`. Ticket imports
+use `allocate_user_sign_in_email` for the same rule. User-account email delivery
+must resolve through `get_user_delivery_email`; it must not traverse orders or
+send to the organization-prefixed Auth email.

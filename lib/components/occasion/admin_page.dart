@@ -5,6 +5,7 @@ import 'package:fstapp/components/_shared/app_panel_helper.dart';
 import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 
 @RoutePage()
 class AdminPage extends StatefulWidget {
@@ -24,6 +25,8 @@ class _AdminPageState extends State<AdminPage>
     AdminTabDefinition.info,
     if (!AppConfig.isAllUnit) AdminTabDefinition.events,
     AdminTabDefinition.places,
+    // Speakers are a core concept — the tab is always available (decision R5).
+    AdminTabDefinition.speakers,
     if (FeatureService.isFeatureEnabled(FeatureConstants.userGroups))
       AdminTabDefinition.groups,
     if (FeatureService.isFeatureEnabled(FeatureConstants.game))
@@ -34,6 +37,8 @@ class _AdminPageState extends State<AdminPage>
       AdminTabDefinition.volunteers,
     AdminTabDefinition.emailTemplates,
     AdminTabDefinition.users,
+    if (RightsService.isManager() || RightsService.isAdmin())
+      AdminTabDefinition.changes,
     AdminTabDefinition.settings,
   ];
 

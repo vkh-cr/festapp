@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:flutter/material.dart';
@@ -18,11 +19,23 @@ class EventModel extends ITrinaRowModel {
       "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
   String durationString(BuildContext context) =>
       "${DateFormat("EEEE, MMM d, HH:mm", context.locale.languageCode).format(startTime)} - ${DateFormat.Hm().format(endTime)}";
+  String durationCompactString(BuildContext context) =>
+      "${DateFormat("EEEE d. M. HH:mm", context.locale.languageCode).format(startTime)} - ${DateFormat.Hm().format(endTime)}";
   Duration duration() => startTime.isBefore(endTime)
       ? (DateTimeRange(start: startTime, end: endTime)).duration
       : Duration.zero;
 
+  /// Flags timing that deserves an editor's attention without preventing
+  /// legitimate overnight events from being saved.
+  bool get hasSuspiciousTiming =>
+      !endTime.isAfter(startTime) ||
+      startTime.year != endTime.year ||
+      startTime.month != endTime.month ||
+      startTime.day != endTime.day;
+
   int? maxParticipants;
+  int aggregateVersion;
+  int order;
   int maxParticipantsNumber() => maxParticipants == null ? 0 : maxParticipants!;
 
   @override
@@ -39,7 +52,7 @@ class EventModel extends ITrinaRowModel {
   List<int>? childEventIds;
   int? currentParticipants;
   int? currentUsersSaved;
-  String? title = "Event".tr();
+  String? title = CommonStrings.event;
   String? description = "";
   bool? isSignedIn = false;
   bool? splitForMenWomen = false;
@@ -50,6 +63,12 @@ class EventModel extends ITrinaRowModel {
   bool? isInMySchedule;
   int? occasionId;
   bool isCancelled;
+
+  /// Transient, grid-only: a searchable string of the attached speakers' names.
+  /// The schedule grid stamps this after load so the "Přednášející" column's
+  /// text filter can match events by speaker name. Never persisted, never read
+  /// back from JSON.
+  String? speakerNamesSearch;
 
   bool? canSaveEventToMyProgram() {
     var canSave = (maxParticipants == null || maxParticipants == 0) &&
@@ -66,6 +85,15 @@ class EventModel extends ITrinaRowModel {
         currentParticipants! < maxParticipants!;
   }
 
+  void updateCurrentUserRegistration({required bool isRegistered}) {
+    if (isSignedIn == isRegistered) return;
+
+    final participantDelta = isRegistered ? 1 : -1;
+    currentParticipants =
+        ((currentParticipants ?? 0) + participantDelta).clamp(0, 1 << 31);
+    isSignedIn = isRegistered;
+  }
+
   DateTime startTime;
   DateTime endTime;
 
@@ -78,6 +106,8 @@ class EventModel extends ITrinaRowModel {
     this.title,
     this.description,
     this.maxParticipants,
+    this.aggregateVersion = 0,
+    this.order = 0,
     this.data,
     this.place,
     this.type,
@@ -158,10 +188,12 @@ class EventModel extends ITrinaRowModel {
       maxParticipants: json.containsKey(maxParticipantsColumn)
           ? json[maxParticipantsColumn]
           : null,
+      aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0,
+      order: (json['order'] as num?)?.toInt() ?? 0,
       data: eventData,
       place: (json.containsKey(placesTable) && json[placesTable] != null)
           ? PlaceModel.fromJson(json[placesTable])
-          : json.containsKey(placeColumn)
+          : json[placeColumn] != null
               ? PlaceModel(
                   id: json[placeColumn],
                   title: null,
@@ -197,6 +229,42 @@ class EventModel extends ITrinaRowModel {
       isCancelled: cancelled, // Added
     );
   }
+
+  /// Decodes the closed DTO returned by canonical event commands/editor reads.
+  factory EventModel.fromCommandJson(
+      Map<String, dynamic> json, int aggregateVersion) {
+    return EventModel.fromJson({
+      ...json,
+      'start_time': json['startTime'],
+      'end_time': json['endTime'],
+      'max_participants': json['maxParticipants'],
+      'description': json['description'],
+      'place': json['placeId'],
+      'split_for_men_women': json['splitForMenWomen'],
+      'is_group_event': json['isGroupEvent'],
+      'is_hidden': json['isHidden'],
+      'event_groups': [
+        for (final id in (json['parentEventIds'] as List?) ?? const [])
+          {'event_parent': id},
+        for (final id in (json['childEventIds'] as List?) ?? const [])
+          {'event_child': id},
+      ],
+      'event_roles': [
+        for (final id in (json['eventRoleIds'] as List?) ?? const [])
+          {'role': id},
+      ],
+      'aggregate_version': aggregateVersion,
+    });
+  }
+
+  /// A generated counseling slot (get_events strips `false` jsonb values, so
+  /// the flag arrives as `true` or absent). Hidden from the main timeline and
+  /// offline search but still shown in "My program".
+  bool get isCounselingSlot => data?[FeatureConstants.isCounselingSlot] == true;
+
+  /// The counseling entry point ("rozcestník") — shows the enter-counseling
+  /// button under its description.
+  bool get isCounselingEntry => data?[FeatureConstants.counselingEntry] == true;
 
   bool isFull() =>
       currentParticipants != null &&
@@ -252,8 +320,17 @@ class EventModel extends ITrinaRowModel {
   static const String isGroupEventColumn = "is_group_event";
 
   static const String currentParticipantsColumn = "currentParticipants";
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
   static const String isSignedInColumn = "isSignedIn";
   static const String isEventInMyProgramColumn = "isEventInMyProgram";
+
+  /// Synthetic grid column: attaching speakers to the event. Not persisted via
+  /// the row upsert — the schedule grid saves it directly through
+  /// set_event_speakers. The cell value holds the attached speakers' names so
+  /// the column's text filter can search by speaker; the renderer keys off the
+  /// id column instead.
+  static const String speakersColumn = "speakers";
+  static const String suspiciousReasonColumn = "suspicious_reason";
 
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
     var startTimeString = json[startDateColumn] + "-" + json[startTimeColumn];
@@ -294,6 +371,14 @@ class EventModel extends ITrinaRowModel {
     }
     dataFromTab[Tb.events.dataIsCancelled] = resolvedIsCancelled;
 
+    // Rozcestník flag lives in the data jsonb; the grid cell round-trips it as
+    // a "true"/"false" string (missing when the counseling column is hidden,
+    // which resolves to the existing value staying untouched below).
+    if (json.containsKey(FeatureConstants.counselingEntry)) {
+      dataFromTab[FeatureConstants.counselingEntry] =
+          json[FeatureConstants.counselingEntry]?.toString() == 'true';
+    }
+
     return EventModel(
       startTime: dateFormat.parse(startTimeString),
       endTime: dateFormat.parse(endTimeString),
@@ -306,6 +391,7 @@ class EventModel extends ITrinaRowModel {
       description: json[descriptionColumn],
       maxParticipants:
           json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
+      aggregateVersion: TrinaRowVersion.read(json),
       data: dataFromTab,
       place: placeId == null
           ? null
@@ -327,6 +413,7 @@ class EventModel extends ITrinaRowModel {
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
       idColumn: TrinaCell(value: id),
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       isHiddenColumn: TrinaCell(value: isHidden.toString()),
       titleColumn: TrinaCell(value: title),
       descriptionColumn: TrinaCell(value: description),
@@ -354,6 +441,10 @@ class EventModel extends ITrinaRowModel {
       Tb.events.dataHeaderImage:
           TrinaCell(value: data?[Tb.events.dataHeaderImage]),
       Tb.events.dataIsCancelled: TrinaCell(value: isCancelled.toString()),
+      FeatureConstants.counselingEntry:
+          TrinaCell(value: isCounselingEntry.toString()),
+      speakersColumn: TrinaCell(value: speakerNamesSearch ?? ''),
+      suspiciousReasonColumn: TrinaCell(value: ''),
     });
   }
 
@@ -378,12 +469,10 @@ class EventModel extends ITrinaRowModel {
 
   @override
   Future<void> deleteMethod(BuildContext context) async {
-    var participants = await DbEvents.getParticipantsPerEvent(id!);
-    for (var p in participants) {
-      await DbEvents.signOutFromEvent(null, id!, p);
-    }
-    await DbEvents.removeEventFromSaved(this);
-    await DbEvents.removeEventFromEventGroups(this);
+    // delete_event unbinds sign-ups, saved rows and group/exclusive/role links
+    // server-side in one editor-guarded transaction, so we no longer sign out
+    // each participant from the client (which also couldn't touch other users'
+    // rows under RLS). Works for ordinary events and counseling slots alike.
     await DbEvents.deleteEvent(this);
   }
 

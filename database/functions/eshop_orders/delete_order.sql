@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION delete_order_221(order_id BIGINT)
+CREATE OR REPLACE FUNCTION public.delete_order_221(order_id BIGINT)
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -29,7 +29,7 @@ BEGIN
   FROM public.occasions
   WHERE id = order_oc;
 
-  PERFORM check_is_manager_on_unit(unit_id);
+  PERFORM public.check_is_manager_on_unit(unit_id);
 
   -- Collect all order_product_ticket IDs for the order.
   SELECT ARRAY(SELECT id FROM eshop.order_product_ticket WHERE "order" = order_id)

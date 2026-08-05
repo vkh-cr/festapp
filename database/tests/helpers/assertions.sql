@@ -8,6 +8,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION assert_false(condition boolean, message text) RETURNS void AS $$
+BEGIN
+    IF condition IS DISTINCT FROM false THEN
+        RAISE EXCEPTION 'ASSERTION FAILED: %. Expected false, but got %', message, condition;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION assert_eq(actual anyelement, expected anyelement, message text) RETURNS void AS $$
 BEGIN
     IF actual IS DISTINCT FROM expected THEN

@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
+import 'package:fstapp/components/_shared/person_fields_strings.dart';
 import 'package:fstapp/components/single_data_grid/i_has_id.dart';
+import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/users/companion/companion_model.dart';
 import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/components/users/occasion_user_model.dart';
@@ -42,6 +44,7 @@ class UserInfoModel extends IHasId {
 
   static const String idColumn = "id";
   static const String emailReadonlyColumn = "email_readonly";
+  static const String emailDeliveryColumn = "email_delivery";
   static const String nameColumn = "name";
   static const String surnameColumn = "surname";
   static const String sexColumn = "sex";
@@ -89,6 +92,39 @@ class UserInfoModel extends IHasId {
     this.groupFeatureAnswer,
   });
 
+  /// Combines the current organization-wide profile with one occasion's
+  /// participation. Profile identity stays owned by this model; roles,
+  /// services and other occasion-specific state stay on [occasionUser].
+  UserInfoModel withOccasionParticipation(OccasionUserModel participation) {
+    final combined = UserInfoModel(
+      id: id,
+      email: email,
+      name: name,
+      surname: surname,
+      sex: sex,
+      birthDate: birthDate,
+      role: role,
+      isAdmin: isAdmin,
+      isEditor: isEditor,
+      phone: phone,
+      accommodationPlace: accommodationPlace,
+      eventUserGroup: eventUserGroup,
+      occasionUser: participation,
+      roleString: roleString,
+      companions: companions,
+      companionParent: companionParent,
+      units: units,
+      occasions: occasions,
+      eventIds: eventIds,
+      userGroups: userGroups,
+      ticketId: ticketId,
+      ticket: ticket,
+      groupFeatureAnswer: groupFeatureAnswer,
+    );
+    combined.isSignedIn = isSignedIn;
+    return combined;
+  }
+
   static UserInfoModel fromJson(Map<String, dynamic> json) {
     return UserInfoModel(
       id: json[idColumn],
@@ -124,6 +160,7 @@ class UserInfoModel extends IHasId {
           ? List<String>.from(json[scheduleColumn]!.map((s) => s))
           : null,
       sex: json[sexColumn],
+      phone: json[phoneColumn],
       birthDate: json[birthDateColumn] != null
           ? DateTime.tryParse(json[birthDateColumn] as String)
           : null,
@@ -157,7 +194,7 @@ class UserInfoModel extends IHasId {
   String toFullNameString() {
     if (companionParent != null) {
       return (name ?? "") +
-          (" (${"Companion of".tr()}: ${companionParent!.toFullNameString()})");
+          (" (${UserStrings.companionOf}: ${companionParent!.toFullNameString()})");
     }
     return "${name ?? ""} ${surname ?? ""}".trim();
   }
@@ -209,11 +246,11 @@ class UserInfoModel extends IHasId {
 
   static String sexToLocale(String? sx) {
     if (sx == "female") {
-      return "Female".tr();
+      return PersonFieldsStrings.female;
     } else if (sx == "male") {
-      return "Male".tr();
+      return PersonFieldsStrings.male;
     }
-    return "Not specified".tr();
+    return PersonFieldsStrings.notSpecified;
   }
 
   static String? sexFromLocale(String? localeString) {
@@ -223,9 +260,9 @@ class UserInfoModel extends IHasId {
 
     String trimmedVal = localeString.trim();
 
-    if (trimmedVal == "Female".tr() || trimmedVal == "Female") {
+    if (trimmedVal == PersonFieldsStrings.female || trimmedVal == "Female") {
       return "female";
-    } else if (trimmedVal == "Male".tr() || trimmedVal == "Male") {
+    } else if (trimmedVal == PersonFieldsStrings.male || trimmedVal == "Male") {
       return "male";
     }
 

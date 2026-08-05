@@ -8,9 +8,8 @@ class HtmlEditorWidget extends StatefulWidget {
   final String initialContent;
   final QuillEditorController controller;
   final Function(String)? onTextChanged;
-  FocusNode? intermediateFocusNode = FocusNode();
 
-  HtmlEditorWidget({
+  const HtmlEditorWidget({
     required this.initialContent,
     required this.controller,
     this.onTextChanged,
@@ -92,39 +91,33 @@ class _HtmlEditorWidgetState extends State<HtmlEditorWidget> {
         ),
         Flexible(
           fit: FlexFit.tight,
-          child: Focus(
-            focusNode: widget.intermediateFocusNode,
-            child: QuillHtmlEditor(
-              hintText: null,
-              controller: widget.controller,
-              isEnabled: true,
-              ensureVisible: false,
-              minHeight: 200,
-              textStyle: _editorTextStyle,
-              hintTextStyle: _hintTextStyle,
-              hintTextAlign: TextAlign.start,
-              padding: const EdgeInsets.only(left: 10, top: 10),
-              hintTextPadding: const EdgeInsets.only(left: 20),
-              backgroundColor: _backgroundColor,
-              loadingBuilder: (context) {
-                return isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                        strokeWidth: 0.4,
-                      ))
-                    : const SizedBox.shrink();
-              },
-              onFocusChanged: (focus) async {
-                if (focus) {
-                  widget.intermediateFocusNode?.requestFocus();
-                }
-              },
-              onTextChanged: (text) => AppLogger.debug('widget text change $text'),
-              onEditorCreated: () {},
-              onEditorResized: (height) => AppLogger.debug('Editor resized $height'),
-              onSelectionChanged: (sel) =>
-                  AppLogger.debug('index ${sel.index}, range ${sel.length}'),
-            ),
+          child: QuillHtmlEditor(
+            hintText: null,
+            controller: widget.controller,
+            isEnabled: true,
+            ensureVisible: false,
+            minHeight: 200,
+            textStyle: _editorTextStyle,
+            hintTextStyle: _hintTextStyle,
+            hintTextAlign: TextAlign.start,
+            padding: const EdgeInsets.only(left: 10, top: 10),
+            hintTextPadding: const EdgeInsets.only(left: 20),
+            backgroundColor: _backgroundColor,
+            loadingBuilder: (context) {
+              return isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                      strokeWidth: 0.4,
+                    ))
+                  : const SizedBox.shrink();
+            },
+            onTextChanged: (text) =>
+                AppLogger.debug('widget text change $text'),
+            onEditorCreated: () {},
+            onEditorResized: (height) =>
+                AppLogger.debug('Editor resized $height'),
+            onSelectionChanged: (sel) =>
+                AppLogger.debug('index ${sel.index}, range ${sel.length}'),
           ),
         ),
       ],

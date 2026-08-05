@@ -11,6 +11,7 @@ DECLARE
     v_result_json jsonb;
     v_user_name text;
     v_user_surname text;
+    v_email_delivery text;
 BEGIN
     -- 0. Enable Registration for Org 1 (Required for WS function)
     UPDATE organizations 
@@ -36,6 +37,12 @@ BEGIN
     PERFORM assert_not_null(v_user_name, 'Name should not be null');
     PERFORM assert_eq(v_user_name, 'Jan', 'Name should be extracted from flat payload');
     PERFORM assert_eq(v_user_surname, 'Novak', 'Surname should be extracted from flat payload');
+    SELECT email_delivery INTO v_email_delivery
+      FROM public.user_info WHERE id = v_user_id;
+    PERFORM assert_true(v_email_delivery IS NULL,
+        'ordinary registration does not need a delivery override');
+    PERFORM assert_eq(public.get_user_delivery_email(v_user_id), lower(v_email),
+        'ordinary registration delivers to the canonical account email');
 
     -- Verify Automatic Unit Creation
     DECLARE

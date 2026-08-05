@@ -6,10 +6,12 @@ import 'package:fstapp/components/information/game/game_settings_model.dart';
 import 'package:fstapp/components/information/db_information.dart';
 import 'package:fstapp/components/occasion/db_occasions.dart';
 import 'package:fstapp/components/groups/db_groups.dart';
+import 'package:fstapp/components/information/information_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/styles/styles_config.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/theme_config.dart' show ThemeConfig;
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'dart:async';
 
 @RoutePage()
@@ -29,7 +31,7 @@ class _GamePageState extends State<GamePage> {
 
   List<InformationModel> _gameList = [];
   Set<int> _correctGuesses = {};
-  String _groupTitle = "Game".tr();
+  String _groupTitle = CommonStrings.game;
   GameSettingsModel? _gameSettings;
   Timer? _countdownTimer;
   Timer? _correctGuessesTimer;
@@ -43,9 +45,11 @@ class _GamePageState extends State<GamePage> {
   void initState() {
     super.initState();
     loadGameData();
-    _correctGuessesTimer = Timer.periodic(refreshInterval, (timer) {
-      loadCorrectGuesses();
-    });
+    if (!ClientSyncRuntime.isV1Selected) {
+      _correctGuessesTimer = Timer.periodic(refreshInterval, (timer) {
+        loadCorrectGuesses();
+      });
+    }
 
     _connectivitySubscription =
         Connectivity().onConnectivityChanged.listen((result) {
@@ -174,12 +178,10 @@ class _GamePageState extends State<GamePage> {
           ),
 
           if (!_isUserInGameGroup)
-            _buildOverlay(
-                "For playing the game, you must be assigned to a game group"
-                    .tr()),
+            _buildOverlay(InformationStrings.gameNeedsGroup),
 
           if (_isUserInGameGroup && hasNotStarted)
-            _buildOverlay("Game has not started yet".tr()),
+            _buildOverlay(InformationStrings.gameNotStarted),
 
           if (_isUserInGameGroup &&
               !hasNotStarted &&
@@ -195,22 +197,19 @@ class _GamePageState extends State<GamePage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  "Time left: {time}".tr(namedArgs: {
-                    "time":
-                        "${_remainingTime!.inHours}:${(_remainingTime!.inMinutes % 60).toString().padLeft(2, '0')}:${(_remainingTime!.inSeconds % 60).toString().padLeft(2, '0')}"
-                  }),
+                  InformationStrings.gameTimeLeft(
+                      time:
+                          "${_remainingTime!.inHours}:${(_remainingTime!.inMinutes % 60).toString().padLeft(2, '0')}:${(_remainingTime!.inSeconds % 60).toString().padLeft(2, '0')}"),
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             ),
 
           if (_isUserInGameGroup && hasEnded)
-            _buildOverlay("Game has ended".tr()),
+            _buildOverlay(InformationStrings.gameEnded),
 
           // Overlay for offline status
-          if (_isOffline)
-            _buildOverlay(
-                "You are offline. Please check your internet connection.".tr()),
+          if (_isOffline) _buildOverlay(InformationStrings.offlineWarning),
         ],
       ),
     );
@@ -239,21 +238,20 @@ class _GamePageState extends State<GamePage> {
 
   Future<void> _showGuessDialog(BuildContext context, int index) async {
     String? userGuess;
-    String gameTitle = _gameList[index].title ?? "Game";
+    String gameTitle = _gameList[index].title ?? CommonStrings.game;
 
     await showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title:
-              Text("Check point {title}".tr(namedArgs: {"title": gameTitle})),
+          title: Text(InformationStrings.gameCheckPoint(title: gameTitle)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 onChanged: (value) => userGuess = value,
                 decoration: InputDecoration(
-                  hintText: "Take a guess".tr(),
+                  hintText: InformationStrings.gameTakeAGuess,
                 ),
               ),
             ],
@@ -270,7 +268,7 @@ class _GamePageState extends State<GamePage> {
                   Navigator.pop(dialogContext);
                 }
               },
-              child: const Text("Guess!").tr(),
+              child: Text(InformationStrings.gameGuess),
             ),
           ],
         );

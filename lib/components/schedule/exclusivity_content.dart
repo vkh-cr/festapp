@@ -1,11 +1,13 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/exclusive_events_cell.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import 'exclusive_group_model.dart';
@@ -20,14 +22,38 @@ class ExclusivityContent extends StatefulWidget {
 class _ExclusivityContentState extends State<ExclusivityContent> {
   SingleDataGridController<ExclusiveGroupModel>? controller;
 
+  // Event catalog for the picker cell: maps the stored event ids to titles
+  // and times so the grid never shows raw ids.
+  List<EventModel> _allEvents = [];
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
+    _loadEvents();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  Future<void> _loadEvents() async {
+    try {
+      _allEvents = await DbEvents.getAllEventsBasic();
+    } catch (e) {
+      AppLogger.error("Error loading events for ExclusivityContent: $e");
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  /// The cell keeps storing a comma-separated id list (the grid's save format);
+  /// only the rendering and editing are name-based.
+  static List<int> _parseIds(dynamic cellValue) =>
+      cellValue
+          .toString()
+          .split(",")
+          .map((e) => int.tryParse(e.trim()))
+          .whereType<int>()
+          .toList();
+
+  void _initController() {
     controller ??= SingleDataGridController<ExclusiveGroupModel>(
       context: context,
       loadData: DbEvents.getAllExclusiveGroups,
@@ -37,7 +63,7 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
       columns: [
         TrinaColumn(
           hide: true,
-          title: "Id".tr(),
+          title: CommonStrings.id,
           field: Tb.exclusive_groups.id,
           type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
@@ -56,7 +82,17 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
           title: CommonStrings.events,
           field: Tb.events.table,
           type: TrinaColumnType.text(),
+          enableEditingMode: false,
           width: 500,
+          renderer: (rendererContext) => ExclusiveEventsCell(
+            allEvents: _allEvents,
+            selectedIds: _parseIds(rendererContext.cell.value),
+            onChanged: (ids) {
+              final cell = rendererContext.row.cells[Tb.events.table]!;
+              rendererContext.stateManager
+                  .changeCellValue(cell, ids.join(","), force: true);
+            },
+          ),
         ),
       ],
     );
@@ -64,6 +100,10 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    _initController();
     return SingleTableDataGrid<ExclusiveGroupModel>(controller!);
   }
 }

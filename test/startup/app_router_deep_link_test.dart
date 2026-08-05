@@ -1,0 +1,42 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fstapp/app_router.dart';
+import 'package:fstapp/components/users/views/reset_password_page.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  test('matches the password-reset route with its token query', () {
+    final matches = AppRouter().matcher.match(
+          '/resetPassword?token=00000000-0000-0000-0000-000000000000',
+        );
+
+    expect(matches, isNotNull);
+    expect(matches, hasLength(1));
+    expect(matches!.single.name, 'ResetPasswordRoute');
+    expect(matches.single.queryParams.getString('token'),
+        '00000000-0000-0000-0000-000000000000');
+  });
+
+  testWidgets('renders the password-reset page from an initial deep link',
+      (tester) async {
+    const resetPath =
+        '/resetPassword?token=00000000-0000-0000-0000-000000000000';
+    final router = AppRouter();
+
+    await tester.pumpWidget(MaterialApp.router(
+      routerConfig: router.config(
+        deepLinkBuilder: (_) => const DeepLink.path(
+          resetPath,
+          includePrefixMatches: false,
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ResetPasswordPage), findsOneWidget);
+    expect(
+      tester.widget<ResetPasswordPage>(find.byType(ResetPasswordPage)).token,
+      '00000000-0000-0000-0000-000000000000',
+    );
+  });
+}

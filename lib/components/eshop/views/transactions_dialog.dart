@@ -231,7 +231,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                               _payment!.currencyCode ?? "N/A",
                                           decimalDigits: 2,
                                         )
-                                      : "N/A".tr(),
+                                      : OrdersStrings.notAvailable,
                                   style: TextStyle(
                                     fontSize: 14,
                                   ),
@@ -258,7 +258,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                               _payment!.currencyCode ?? "N/A",
                                           decimalDigits: 2,
                                         )
-                                      : "N/A".tr(),
+                                      : OrdersStrings.notAvailable,
                                   style: TextStyle(
                                     fontSize: 14,
                                   ),
@@ -285,7 +285,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                               _payment!.currencyCode ?? "N/A",
                                           decimalDigits: 2,
                                         )
-                                      : "N/A".tr(),
+                                      : OrdersStrings.notAvailable,
                                   style: TextStyle(
                                     fontSize: 14,
                                   ),
@@ -315,7 +315,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                 transaction.counterAccountName ??
                                     transaction.performedBy ??
                                     transaction.counterAccount ??
-                                    "N/A".tr();
+                                    OrdersStrings.notAvailable;
 
                             return Card(
                               margin: EdgeInsets.symmetric(vertical: 5),
@@ -413,7 +413,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                           ? DateFormat.yMMMd(
                                                   context.locale.languageCode)
                                               .format(transaction.date!)
-                                          : "N/A".tr(),
+                                          : OrdersStrings.notAvailable,
                                     ),
                                     SizedBox(height: 5),
                                     _buildInfoRow(
@@ -426,7 +426,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                                   transaction.currency ?? "N/A",
                                               decimalDigits: 2,
                                             )
-                                          : "N/A".tr(),
+                                          : OrdersStrings.notAvailable,
                                     ),
                                     SizedBox(height: 5),
                                     if (transaction.transactionType !=
@@ -435,7 +435,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                                         title: BankAccountStrings.bankAccount,
                                         value: transaction.formattedBankAccount.isNotEmpty
                                             ? transaction.formattedBankAccount
-                                            : "N/A".tr(),
+                                            : OrdersStrings.notAvailable,
                                       ),
                                       SizedBox(height: 5),
                                     ],

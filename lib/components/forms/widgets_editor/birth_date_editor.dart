@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/holder_models/birth_date_field_holder.dart';
+import 'package:fstapp/components/forms/form_strings.dart';
+import 'package:fstapp/components/_shared/person_fields_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
 
@@ -54,7 +55,7 @@ class BirthDateEditor {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Birth Date".tr(),
+                PersonFieldsStrings.birthDate,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: contentColor,
                 ),
@@ -72,7 +73,7 @@ class BirthDateEditor {
         if (showAgeLimits) ...[
           const SizedBox(height: 12.0),
           Text(
-            "Constraints".tr().toUpperCase(),
+            FormStrings.constraints.toUpperCase(),
             style: theme.textTheme.labelSmall,
           ),
           const Divider(height: 6, thickness: 0.5),
@@ -80,9 +81,9 @@ class BirthDateEditor {
             spacing: 16.0,
             runSpacing: 2.0,
             children: [
-              Text("${'Min Age'.tr()}: $minAgeInt",
+              Text("${FormStrings.minAge}: $minAgeInt",
                   style: theme.textTheme.bodySmall),
-              Text("${'Max Age'.tr()}: $maxAgeInt",
+              Text("${FormStrings.maxAge}: $maxAgeInt",
                   style: theme.textTheme.bodySmall),
             ],
           ),
@@ -101,9 +102,9 @@ class BirthDateEditor {
                   Expanded(
                     child: Text.rich(
                       TextSpan(children: [
-                        TextSpan(text: "${'Validation Mode'.tr()}: "),
+                        TextSpan(text: "${FormStrings.validationMode}: "),
                         TextSpan(
-                          text: "Strict".tr(),
+                          text: FormStrings.strict,
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: theme.colorScheme.primary),
@@ -158,8 +159,8 @@ class BirthDateEditor {
           field.data?[BirthDateFieldHolder.metaMinYear]?.toString() ?? "";
       final maxAge =
           field.data?[BirthDateFieldHolder.metaMaxYear]?.toString() ?? "";
-      return "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
-          .tr(namedArgs: {"minAge": minAge, "maxAge": maxAge});
+      return PersonFieldsStrings.ageOutsideRecommendedRange(
+          minAge: minAge, maxAge: maxAge);
     }
 
     return StatefulBuilder(
@@ -172,7 +173,7 @@ class BirthDateEditor {
             TextFormField(
               controller: minAgeController,
               decoration: InputDecoration(
-                labelText: "${'Min Age'.tr()}:",
+                labelText: "${FormStrings.minAge}:",
               ),
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -183,7 +184,7 @@ class BirthDateEditor {
                 final currentMax = int.tryParse(maxAgeController.text) ?? 0;
                 final currentMin = int.tryParse(value) ?? 0;
                 if (currentMax > 0 && currentMax < currentMin) {
-                  maxAgeError = "Max age cannot be lower than min age.".tr();
+                  maxAgeError = FormStrings.maxAgeLowerThanMinAge;
                 } else {
                   maxAgeError = null;
                 }
@@ -195,7 +196,7 @@ class BirthDateEditor {
             TextFormField(
               controller: maxAgeController,
               decoration: InputDecoration(
-                labelText: "${'Max Age'.tr()}:",
+                labelText: "${FormStrings.maxAge}:",
                 errorText: maxAgeError,
               ),
               keyboardType: TextInputType.number,
@@ -205,7 +206,7 @@ class BirthDateEditor {
                 final newMax = int.tryParse(value) ?? 0;
                 final currentMin = int.tryParse(minAgeController.text) ?? 0;
                 if (newMax > 0 && newMax < currentMin) {
-                  maxAgeError = "Max age cannot be lower than min age.".tr();
+                  maxAgeError = FormStrings.maxAgeLowerThanMinAge;
                 } else {
                   maxAgeError = null;
                   field.data![BirthDateFieldHolder.metaMaxYear] = newMax;
@@ -216,7 +217,7 @@ class BirthDateEditor {
             const SizedBox(height: 8),
             Row(
               children: [
-                Text("Strict Validation".tr()),
+                Text(FormStrings.strictValidation),
                 Switch(
                   value: isStrict,
                   onChanged: (value) {

@@ -3,6 +3,7 @@ import './feedback_dialog.css';
 import { FeedbackDialog } from './feedback_dialog.js';
 import { LocalizationService } from '../../services/localization_service.js';
 import { FeedbackStrings } from './feedback_strings.js';
+import { RouterService } from '../../services/router_service.js';
 
 export class FeedbackFab {
     static isOpen = false;
@@ -131,6 +132,6 @@ export class FeedbackFab {
     static sendMail(subject, body) {
         const email = 'info@festapp.net';
         const link = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        window.location.href = link;
+        RouterService.openExternalUrl(link, { inCurrentWindow: true });
     }
 }

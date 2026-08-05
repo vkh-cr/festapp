@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/groups/group_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/information/information_model.dart';
@@ -32,7 +32,7 @@ class _GameCheckPointsContentState extends State<GameCheckPointsContent> {
       columns: [
         TrinaColumn(
           hide: true,
-          title: "Id".tr(),
+          title: CommonStrings.id,
           field: Tb.information.id,
           type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
@@ -48,7 +48,7 @@ class _GameCheckPointsContentState extends State<GameCheckPointsContent> {
         ),
         TrinaColumn(
           enableAutoEditing: true,
-          title: "Correct answer".tr(),
+          title: GroupsStrings.correctAnswer,
           field: Tb.information.data_correct,
           type: TrinaColumnType.text(),
         ),

@@ -1,8 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/scan/scan_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
@@ -106,9 +107,7 @@ class _CheckPageState extends State<CheckPage> {
       return Center(
         child: Padding(
             padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
-            child: const Text(
-                    "Point the camera at the attendee's code for an entry verification.")
-                .tr()),
+            child: Text(ScanStrings.scanCameraInstruction)),
       );
     }
 
@@ -152,7 +151,7 @@ class _CheckPageState extends State<CheckPage> {
                 style: TextStyle(color: Colors.black)),
             if (_scannedUser!.companions != null) ...[
               const SizedBox(height: 16),
-              Text("${'Signed in companions'.tr()}:",
+              Text("${ScanStrings.signedInCompanions}:",
                   style: TextStyle(color: Colors.black)),
               ..._scannedUser!.companions!.map((companion) => Row(
                     children: [
@@ -291,7 +290,7 @@ class _CheckPageState extends State<CheckPage> {
                             child: TextField(
                               controller: _searchController,
                               decoration: InputDecoration(
-                                labelText: "Search Attendees".tr(),
+                                labelText: CommonStrings.searchAttendees,
                                 border: const OutlineInputBorder(),
                                 prefixIcon: const Icon(Icons.search),
                               ),

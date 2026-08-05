@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -11,19 +13,25 @@ import 'package:fstapp/components/timeline/advanced_timeline_day_list.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_view.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/users/user_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/occasion/add_new_event_dialog.dart';
 import 'package:fstapp/components/schedule/event_edit_page.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
-import 'package:fstapp/components/map/map_page.dart';
+import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
 import 'package:fstapp/components/schedule/timetable_page.dart';
 import 'package:fstapp/components/occasion/occasion_home_page.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/components/users/views/login_page.dart';
+import 'package:fstapp/components/users/views/user_page.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/app_config.dart';
@@ -57,6 +65,7 @@ class _SchedulePageState extends State<SchedulePage>
   final ScrollController _scrollController = ScrollController();
   List<TimeBlockItem> _dots = [];
   List<EventModel> _events = [];
+  bool _hasOwnedCompanions = false;
   static final Map<int, String?> _eventDescriptions = {};
 
   TabsRouter? _tabsRouter;
@@ -67,8 +76,13 @@ class _SchedulePageState extends State<SchedulePage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    context.tabsRouter.addListener(_onTabSwitch);
+    if (!ClientSyncRuntime.isV1Selected) {
+      WidgetsBinding.instance.addObserver(this);
+    }
+    if (!ClientSyncRuntime.isV1Selected) {
+      context.tabsRouter.addListener(_onTabSwitch);
+    }
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
     loadData();
   }
 
@@ -90,8 +104,22 @@ class _SchedulePageState extends State<SchedulePage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _tabsRouter?.removeListener(_onTabSwitch);
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onProjectionChanged() {
+    if (ClientSyncRuntime.isV1Selected) {
+      unawaited(_reloadCompanionOwnership());
+    }
+  }
+
+  Future<void> _reloadCompanionOwnership() async {
+    final hasOwnedCompanions = AuthService.isLoggedIn() &&
+        (await DbCompanions.getAllCompanions()).isNotEmpty;
+    if (!mounted || hasOwnedCompanions == _hasOwnedCompanions) return;
+    setState(() => _hasOwnedCompanions = hasOwnedCompanions);
   }
 
   bool _isRoutePresent(String routeName) {
@@ -113,7 +141,7 @@ class _SchedulePageState extends State<SchedulePage>
   Future<void> _onTabSwitch() async {
     final String targetRouteName = ScheduleNavigationRoute.name;
     if (context.tabsRouter.activeIndex ==
-            OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.home) &&
+            OccasionHomePage.baseTabKeys.indexOf(OccasionTab.home) &&
         _isRoutePresent(targetRouteName)) {
       final now = DateTime.now();
       if (_lastQuickLoadTime == null ||
@@ -127,6 +155,9 @@ class _SchedulePageState extends State<SchedulePage>
 
   Future<void> loadData() async {
     if (_isLoading) return;
+
+    _hasOwnedCompanions = AuthService.isLoggedIn() &&
+        (await DbCompanions.getAllCompanions()).isNotEmpty;
 
     setState(() {
       _isLoading = true;
@@ -156,6 +187,7 @@ class _SchedulePageState extends State<SchedulePage>
       }
       _dots = _events
           .filterRootEvents()
+          .where((e) => !e.isCounselingSlot)
           .map((e) => TimeBlockItem.fromEventModel(e))
           .toList();
     }
@@ -165,6 +197,7 @@ class _SchedulePageState extends State<SchedulePage>
       await OfflineDataService.updateEventsWithMySchedule(_events);
       _dots = _events
           .filterRootEvents()
+          .where((e) => !e.isCounselingSlot)
           .map((e) => TimeBlockItem.fromEventModel(e))
           .toList();
     }
@@ -172,6 +205,8 @@ class _SchedulePageState extends State<SchedulePage>
     if (mounted) {
       setState(() {});
     }
+
+    if (ClientSyncRuntime.isV1Selected) return;
 
     final fast = await DbEvents.getAllEvents(
       RightsService.currentOccasionId()!,
@@ -195,6 +230,7 @@ class _SchedulePageState extends State<SchedulePage>
     }
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
 
@@ -220,6 +256,7 @@ class _SchedulePageState extends State<SchedulePage>
 
     _dots = _events
         .filterRootEvents()
+        .where((e) => !e.isCounselingSlot)
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
     await OfflineDataService.saveAllEvents(_events);
@@ -254,8 +291,7 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   void _goToMap(int placeId) {
-    RouterService.navigateOccasion(context, "${MapPage.ROUTE}/$placeId")
-        .then((_) => loadData());
+    MapNavigation.openPlace(context, placeId).then((_) => loadData());
   }
 
   void _openAddDialog(
@@ -277,9 +313,8 @@ class _SchedulePageState extends State<SchedulePage>
       context: context,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(builder: (bCtx, setDialogState) {
-          return CompanionDialog(
+          return CompanionAttendanceDialog(
             eventId: timeBlockItem.id,
-            maxCompanions: FeatureService.getMaxCompanions() ?? 0,
             companions: companions,
             refreshData: () async {
               await loadData();
@@ -417,8 +452,11 @@ class _SchedulePageState extends State<SchedulePage>
                             }
                           },
                           child: Padding(
-                            padding: const EdgeInsets.all(0.0),
-                            child: LogoWidget(width: 120, forceDark: true),
+                            padding: const EdgeInsets.all(8.0),
+                            child: LogoWidget(
+                                height: 64,
+                                forceDark: true,
+                                programVariant: true),
                           ),
                         ),
                         const Spacer(),
@@ -426,7 +464,7 @@ class _SchedulePageState extends State<SchedulePage>
                             FeatureConstants.mySchedule))
                           _IconWithLabel(
                             icon: Icons.favorite,
-                            label: "My schedule".tr(),
+                            label: CommonStrings.mySchedule,
                             onPressed: () {
                               RouterService.navigateOccasion(
                                       context, MySchedulePage.ROUTE)
@@ -437,11 +475,32 @@ class _SchedulePageState extends State<SchedulePage>
                             FeatureConstants.timetable))
                           _IconWithLabel(
                             icon: Icons.calendar_month,
-                            label: "Schedule".tr(),
+                            label: CommonStrings.schedule,
                             onPressed: () {
                               RouterService.navigateOccasion(
                                       context, TimetablePage.ROUTE)
                                   .then((_) => loadData());
+                            },
+                          ),
+                        // GlobalSearch moves the profile/sign-in from the bottom
+                        // nav into the app bar (matches production).
+                        if (FeatureService.isFeatureEnabled(
+                            FeatureConstants.globalSearch))
+                          _IconWithLabel(
+                            icon: AuthService.isLoggedIn()
+                                ? Icons.account_circle
+                                : Icons.account_circle_outlined,
+                            label: AuthService.isLoggedIn()
+                                ? (RightsService.currentUser()?.name ??
+                                    ScheduleStrings.profile)
+                                : UserStrings.signIn,
+                            onPressed: () {
+                              final f = AuthService.isLoggedIn()
+                                  ? RouterService.navigateOccasion(
+                                      context, UserPage.ROUTE)
+                                  : RouterService.navigate(
+                                      context, LoginPage.ROUTE);
+                              f.then((_) => loadData());
                             },
                           ),
                       ],
@@ -488,6 +547,7 @@ class _SchedulePageState extends State<SchedulePage>
                         isUserApprover: _isUserApprover,
                         onScanButtonPressed: _handleScanButtonPressed,
                         onCompanionButtonPressed: _handleCompanionButtonPressed,
+                        hasOwnedCompanions: _hasOwnedCompanions,
                       ),
                     ),
                 ],

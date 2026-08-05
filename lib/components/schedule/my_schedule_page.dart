@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/activities/activity_data_helper.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -11,14 +12,21 @@ import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/schedule/event_edit_page.dart';
-import 'package:fstapp/components/map/map_page.dart';
+import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/saved_program_pending_state.dart';
+import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
+import 'package:fstapp/components/timeline/light_timeline_view.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
+import 'package:fstapp/components/schedule/program_notification_settings.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/users/companion/companion_dialog.dart';
 import 'package:fstapp/components/users/companion/db_companions.dart';
@@ -40,8 +48,34 @@ class MySchedulePage extends StatefulWidget {
 class _MySchedulePageState extends State<MySchedulePage> {
   bool _fullEventsLoaded = false;
   bool? _isAdvancedTimeline = false;
+  bool _isLightTimeline = false;
   final Map<int, String?> _eventAndActivitiesDescriptions = {};
   int? _openId;
+  int _loadRevision = 0;
+  bool _hasOwnedCompanions = false;
+
+  @override
+  void initState() {
+    super.initState();
+    savedProgramPendingState.addListener(_refreshPendingProgram);
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
+  }
+
+  @override
+  void dispose() {
+    _loadRevision++;
+    savedProgramPendingState.removeListener(_refreshPendingProgram);
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
+    super.dispose();
+  }
+
+  void _refreshPendingProgram() {
+    if (mounted) unawaited(loadDataOffline());
+  }
+
+  void _onProjectionChanged() {
+    if (mounted && ClientSyncRuntime.isV1Selected) unawaited(loadData());
+  }
 
   @override
   Future<void> didChangeDependencies() async {
@@ -53,70 +87,84 @@ class _MySchedulePageState extends State<MySchedulePage> {
             scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeLight)) {
       _isAdvancedTimeline = true;
     }
+    if (scheduleFeat is ScheduleFeature &&
+        scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeLight) {
+      _isLightTimeline = true;
+    }
     await loadDataOffline();
+    if (!shouldLoadSavedProgramOnline(
+      isV1Selected: ClientSyncRuntime.isV1Selected,
+      isOffline: ConnectivityService.isOfflineNotifier.value,
+      hasPendingMutation: savedProgramPendingState.hasPending,
+    )) {
+      return;
+    }
     await loadData();
   }
 
   MyEventsBundle? _data;
 
-  Future<void> _loadFullData() async {
-    _data = await DbEvents.getMyEventsAndActivities(
-        RightsService.currentOccasionId()!, true);
-
-    // init _eventAndActivitiesDescriptions
-    for (var e in _data!.events) {
-      if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
-    }
-    for (var e in _data!.activities) {
-      _eventAndActivitiesDescriptions[e.id.hashCode] = e.description;
-    }
-    _fullEventsLoaded = true;
-  }
-
   Future<void> loadData() async {
     if (!AuthService.isLoggedIn()) {
       return;
     }
+    final loadRevision = ++_loadRevision;
+    final companions = await DbCompanions.getAllCompanions();
+    if (!mounted || loadRevision != _loadRevision) return;
+    _hasOwnedCompanions = companions.isNotEmpty;
+    late final MyEventsBundle data;
     if (!_fullEventsLoaded) {
-      await _loadFullData();
+      final loaded = await DbEvents.getMyEventsAndActivities(
+          RightsService.currentOccasionId()!, true);
+      if (loaded == null) return;
+      data = loaded;
+      if (!mounted || loadRevision != _loadRevision) return;
+      for (var e in data.events) {
+        if (e.id != null) {
+          _eventAndActivitiesDescriptions[e.id!] = e.description;
+        }
+      }
+      for (var e in data.activities) {
+        _eventAndActivitiesDescriptions[e.id.hashCode] = e.description;
+      }
+      _fullEventsLoaded = true;
     } else {
-      _data = await DbEvents.getMyEventsAndActivities(
+      final loaded = await DbEvents.getMyEventsAndActivities(
           RightsService.currentOccasionId()!, false);
-      for (var e in _data!.events) {
+      if (loaded == null) return;
+      data = loaded;
+      if (!mounted || loadRevision != _loadRevision) return;
+      for (var e in data.events) {
         if (e.id != null &&
             _eventAndActivitiesDescriptions.containsKey(e.id!)) {
           e.description = _eventAndActivitiesDescriptions[e.id!];
         }
       }
-      for (var e in _data!.activities) {
+      for (var e in data.activities) {
         if (_eventAndActivitiesDescriptions.containsKey(e.id)) {
           e.description = _eventAndActivitiesDescriptions[e.id];
         }
       }
     }
 
-    var actDots = ActivityDataHelper.activitiesToTimeBlocks(
-        _data!.activities, _data!.events);
+    var actDots =
+        ActivityDataHelper.activitiesToTimeBlocks(data.activities, data.events);
 
-    var events = _data!.events
+    var events = data.events
         .where((e) => canBeShownInMySchedule(RightsService.currentUser(), e));
+    late final List<TimeBlockItem> dots;
     if (_isAdvancedTimeline ?? false) {
-      _dots = events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
+      dots = events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
     } else {
-      _dots =
-          events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
+      dots = events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
 
-    _dots!.addAll(actDots);
-
-    _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
+    dots.addAll(actDots);
+    dots.sort((a, b) => a.startTime.compareTo(b.startTime));
+    if (!mounted || loadRevision != _loadRevision) return;
+    _data = data;
+    _dots = dots;
     setState(() {});
-
-    await DbEvents.synchronizeMySchedule(
-        currentIds: events
-            .where((e) => e.isInMySchedule == true)
-            .map((e) => e.id!)
-            .toList());
   }
 
   bool canBeShownInMySchedule(UserInfoModel? userInfo, EventModel e) {
@@ -126,16 +174,15 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   Future<void> loadDataOffline() async {
+    final loadRevision = ++_loadRevision;
     var offlineEvents = await OfflineDataService.getAllEvents();
     await OfflineDataService.updateEventsWithMySchedule(offlineEvents);
     await OfflineDataService.updateEventsWithGroupName(offlineEvents);
     var userInfo = await OfflineDataService.getUserInfo();
 
-    var myEvents =
-        offlineEvents.where((e) => canBeShownInMySchedule(userInfo, e));
-
-    _events.clear();
-    _events.addAll(myEvents);
+    final myEvents = offlineEvents
+        .where((e) => canBeShownInMySchedule(userInfo, e))
+        .toList(growable: false);
 
     var activities = await OfflineDataService.getAllActivities();
 
@@ -150,17 +197,17 @@ class _MySchedulePageState extends State<MySchedulePage> {
     var actDots =
         ActivityDataHelper.activitiesToTimeBlocks(activities, offlineEvents);
 
-    if (_isAdvancedTimeline ?? false) {
-      _dots = _events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
-    } else {
-      _dots =
-          _events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
-    }
+    final dots = (_isAdvancedTimeline ?? false)
+        ? myEvents.map((e) => TimeBlockItem.fromEventModel(e)).toList()
+        : myEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
+    dots.addAll(actDots);
+    dots.sort((a, b) => a.startTime.compareTo(b.startTime));
 
-    _dots!.addAll(actDots);
-
-    _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
-
+    if (!mounted || loadRevision != _loadRevision) return;
+    _events
+      ..clear()
+      ..addAll(myEvents);
+    _dots = dots;
     setState(() {});
   }
 
@@ -190,8 +237,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   void _goToMap(int placeId) {
-    RouterService.navigateOccasion(context, "${MapPage.ROUTE}/$placeId")
-        .then((_) => loadData());
+    MapNavigation.openPlace(context, placeId).then((_) => loadData());
   }
 
   bool _isUserApprover() => RightsService.isApprover();
@@ -208,9 +254,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(builder: (bCtx, setDialogState) {
-          return CompanionDialog(
+          return CompanionAttendanceDialog(
             eventId: timeBlockItem.id,
-            maxCompanions: FeatureService.getMaxCompanions() ?? 0,
             companions: companions,
             refreshData: () async {
               await loadData();
@@ -232,17 +277,94 @@ class _MySchedulePageState extends State<MySchedulePage> {
     );
   }
 
+  bool get _showProgramNotificationSettings =>
+      FeatureService.isProgramNotificationsEnabled();
+
+  Future<void> _openProgramNotificationSettings() => showModalBottomSheet<void>(
+        context: context,
+        showDragHandle: true,
+        isScrollControlled: true,
+        builder: (sheetContext) => SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewInsetsOf(sheetContext).bottom + 12,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                child: ProgramNotificationSettingsCard(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+  List<Widget>? _programNotificationActions(Color color) =>
+      _showProgramNotificationSettings
+          ? [
+              IconButton(
+                tooltip: ScheduleStrings.programRemindersTitle,
+                onPressed: _openProgramNotificationSettings,
+                icon: Icon(Icons.notifications_outlined, color: color),
+              ),
+            ]
+          : null;
+
   @override
   Widget build(BuildContext context) {
     final Widget commonEmptyContent = Center(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
-        child: const Text(
-          "There will appear your events.",
-          style: TextStyle(fontSize: 20),
-        ).tr(),
+        child: Text(
+          ScheduleStrings.myScheduleEmpty,
+          style: const TextStyle(fontSize: 20),
+        ),
       ),
     );
+
+    // Light schedule type renders "My program" as a single continuous scroll
+    // of light rows grouped by day (no cards, no day tabs) — matching the
+    // production layout and the main light schedule's row style.
+    if (_isLightTimeline) {
+      return Scaffold(
+        backgroundColor: ThemeConfig.whiteColor(context),
+        appBar: AppBar(
+          backgroundColor: ThemeConfig.whiteColorDarker(context),
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          centerTitle: true,
+          title: Text(
+            CommonStrings.mySchedule,
+            style: TextStyle(
+              color: ThemeConfig.blackColor(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          leading: BackButton(
+            color: ThemeConfig.blackColor(context),
+            onPressed: () => RouterService.popOrHome(context),
+          ),
+          actions: _programNotificationActions(ThemeConfig.blackColor(context)),
+        ),
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: _dots == null
+                ? const Center(child: CircularProgressIndicator())
+                : ConstrainedBox(
+                    constraints:
+                        BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                    child: LightMyScheduleList(
+                      events: _dots!,
+                      onEventPressed: _eventPressed,
+                      emptyContent: commonEmptyContent,
+                    ),
+                  ),
+          ),
+        ),
+      );
+    }
 
     Widget body = (_isAdvancedTimeline == true)
         ? DayList(
@@ -265,6 +387,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
               isUserApprover: _isUserApprover,
               onScanButtonPressed: _handleScanButtonPressed,
               onCompanionButtonPressed: _handleCompanionButtonPressed,
+              hasOwnedCompanions: _hasOwnedCompanions,
             ),
             openId: _openId,
             onToggle: (id) =>
@@ -280,12 +403,14 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text("My schedule",
-                  style: TextStyle(color: ThemeConfig.appBarColorNegative()))
-              .tr(),
+          title: Text(CommonStrings.mySchedule,
+              style: TextStyle(color: ThemeConfig.appBarColorNegative())),
           leading: BackButton(
             color: ThemeConfig.appBarColorNegative(),
             onPressed: () => RouterService.popOrHome(context),
+          ),
+          actions: _programNotificationActions(
+            ThemeConfig.appBarColorNegative(),
           ),
         ),
         body: SafeArea(

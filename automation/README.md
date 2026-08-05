@@ -12,6 +12,8 @@ defines:
 - Deployment domains.
 - Supabase credentials.
 - Theme colors.
+- Android/iOS application identity and OneSignal public IDs.
+- Brand asset paths and optional installation-generation cutover marker.
 - Version numbers.
 
 ### Applying Configuration
@@ -49,6 +51,10 @@ routing, build steps, env vars).
   by `deploy.yml`. Emits `build/web/_worker.js` (single routing source).
 - **`test_all.sh`**: The master test runner. Executes Web Client unit tests,
   Database regression tests, and automation/scripts tests.
+- **`bootstrap_local_db.sh`**: Rebuilds the isolated local PostgreSQL test
+  instance from the versioned production-compatible schema baseline, records
+  the baseline migration cutoff, applies newer forward migrations, and seeds
+  test data. It never connects to or changes production.
 - **`tests/apply_config.test.sh`**: Smoke test for `apply_config.sh` — runs
   against a fixture `project.conf` and asserts the substitutions land in the
   expected files.

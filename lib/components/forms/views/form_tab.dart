@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/forms/views/form_editor_content.dart';
@@ -56,7 +55,7 @@ class _FormTabState extends State<FormTab> with SingleTickerProviderStateMixin {
                   context, Icons.data_object, FormStrings.tabForm),
               DataGridHelper.buildTab(
                   context, Icons.settings, CommonStrings.settings),
-              DataGridHelper.buildTab(context, Icons.palette, "Design".tr()),
+              DataGridHelper.buildTab(context, Icons.palette, FormStrings.tabDesign),
               DataGridHelper.buildTab(
                   context, Icons.list, FormStrings.tabResponses),
             ],

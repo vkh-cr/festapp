@@ -10,14 +10,25 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/workshop_feature.dart';
 import 'package:fstapp/components/activities/activity_model.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/event_commands.dart';
+import 'package:fstapp/components/schedule/attendance_commands.dart';
+import 'package:fstapp/components/schedule/saved_program_commands.dart';
+import 'package:fstapp/components/schedule/saved_program_mutation_coordinator.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/speakers/speakers_strings.dart';
 import 'package:fstapp/components/schedule/exclusive_group_model.dart';
+import 'package:fstapp/components/schedule/exclusive_group_commands.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
-import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/saved_program_pending_state.dart';
+import 'package:fstapp/components/offline/offline_strings.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -27,6 +38,31 @@ import 'get_events_helper.dart';
 
 class DbEvents {
   static final _supabase = Supabase.instance.client;
+  static int _savedProgramScopeEpoch = 0;
+  static final SavedProgramMutationCoordinator
+      _savedProgramMutationCoordinator = SavedProgramMutationCoordinator(
+    currentScope: _currentSavedProgramScope,
+    persist: _persistSavedProgram,
+  );
+  static EventCommands get _commands => SupabaseEventCommands(_supabase);
+  static AttendanceCommands get _attendanceCommands =>
+      SupabaseAttendanceCommands(_supabase);
+  static SavedProgramCommands get _savedProgramCommands =>
+      SupabaseSavedProgramCommands(
+          _supabase, RightsService.currentOccasionId()!);
+  static ExclusiveGroupCommands get _exclusiveGroupCommands =>
+      SupabaseExclusiveGroupCommands(_supabase);
+
+  static String _currentSavedProgramScope() {
+    final userId =
+        AuthService.isLoggedIn() ? AuthService.currentUserId() : 'anonymous';
+    return '$_savedProgramScopeEpoch|$userId|${RightsService.currentOccasionId()}|${ClientSyncRuntime.mutationContextToken}';
+  }
+
+  static void invalidateSavedProgramMutationScope() {
+    _savedProgramScopeEpoch++;
+    savedProgramPendingState.clearAll();
+  }
 
   static Future<HashSet<EventModel>> loadAllMySchedule() async {
     var dataEventUsersSaved = await _supabase
@@ -105,13 +141,37 @@ class DbEvents {
     var withParentSelect = withParent
         ? "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent})"
         : "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})";
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select(
-            "${Tb.events.id},${Tb.events.updated_at},${Tb.events.occasion},${Tb.events.title},${Tb.events.description},${Tb.events.start_time},${Tb.events.end_time},${Tb.events.max_participants},${Tb.events.split_for_men_women},${Tb.events.is_group_event},${Tb.events.is_hidden},${Tb.events.type},${Tb.events.data},${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),$withParentSelect")
-        .eq(Tb.events.id, eventId)
-        .single();
-    var event = EventModel.fromJson(data);
+    late EventModel event;
+    if (ClientSyncRuntime.isV1Selected && RightsService.canSeeAdmin()) {
+      final response = await _supabase.rpc('get_event_editor_v1', params: {
+        'p_occasion': RightsService.currentOccasionId()!,
+        'p_event': eventId,
+      });
+      final body = (response as Map).cast<String, dynamic>();
+      final data = (body['data'] as Map).cast<String, dynamic>();
+      event = EventModel.fromCommandJson(
+        (data['event'] as Map).cast<String, dynamic>(),
+        (data['version'] as num).toInt(),
+      );
+      final placeId = event.place?.id;
+      if (placeId != null) {
+        for (final place in await OfflineDataService.getAllPlaces()) {
+          if (place.id == placeId) {
+            event.place = place;
+            break;
+          }
+        }
+      }
+      event.occasionId = RightsService.currentOccasionId();
+    } else {
+      var data = await _supabase
+          .from(Tb.events.table)
+          .select(
+              "${Tb.events.id},${Tb.events.updated_at},${Tb.events.occasion},${Tb.events.title},${Tb.events.description},${Tb.events.start_time},${Tb.events.end_time},${Tb.events.max_participants},${Tb.events.split_for_men_women},${Tb.events.is_group_event},${Tb.events.is_hidden},${Tb.events.type},${Tb.events.data},${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),$withParentSelect")
+          .eq(Tb.events.id, eventId)
+          .single();
+      event = EventModel.fromJson(data);
+    }
 
     if (AuthService.isLoggedIn()) {
       event.isInMySchedule = await isEventSaved(event.id!);
@@ -129,6 +189,7 @@ class DbEvents {
               "${Tb.events.end_time},"
               "${Tb.events.max_participants},"
               "${Tb.events.data},"
+              "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
               "${Tb.event_users.table}(count)")
           .inFilter(Tb.events.id, event.childEventIds!)
           .eq(Tb.events.is_hidden, false);
@@ -166,14 +227,16 @@ class DbEvents {
 
   static Future<List<UserInfoModel>> getParticipantsPerEvent(
       int eventId) async {
-    var data = await _supabase
-        .from(Tb.event_users.table)
-        .select(Tb.event_users.user)
-        .eq(Tb.event_users.event, eventId);
-    var listOfIds =
-        List<String>.from(data.map((par) => par[Tb.event_users.user]));
-    var users = await DbUsers.getUsersInfo(listOfIds);
-    return users;
+    final response = await _supabase.rpc(
+      'get_event_participants_for_edit',
+      params: {'p_event': eventId},
+    );
+    final result = (response as Map).cast<String, dynamic>();
+    if (result['code'] != 200) return [];
+    return List<UserInfoModel>.from(
+      (result['data'] as List).map((item) =>
+          UserInfoModel.fromJson((item as Map).cast<String, dynamic>())),
+    );
   }
 
   static Future<int> getParticipantsPerEventCount(int eventId) async {
@@ -195,12 +258,39 @@ class DbEvents {
     return result.count > 0;
   }
 
-  static Future<void> signInToEvent(BuildContext context, int eventId,
+  static Future<bool> signInToEvent(BuildContext context, int eventId,
       [UserInfoModel? participant]) async {
     var userId = participant?.id ?? AuthService.currentUserId();
 
-    var result = await _supabase
-        .rpc("sign_user_to_event", params: {"ev": eventId, "usr": userId});
+    dynamic result;
+    try {
+      if (ClientSyncRuntime.isV1Selected) {
+        final response = await _attendanceCommands.setAttendance(
+          eventId: eventId,
+          participantId: userId,
+          action: AttendanceAction.signIn,
+        );
+        result = {
+          'code': response.code,
+          if (response.eventsRegistrationStart != null)
+            'events_registration_start': response.eventsRegistrationStart,
+        };
+      } else {
+        result = await _supabase
+            .rpc("sign_user_to_event", params: {"ev": eventId, "usr": userId});
+      }
+    } catch (e) {
+      // Offline: say so readably and behave like the non-200 branches
+      // (toast + return); other errors keep today's behavior.
+      if (ExceptionHandler.isNetworkError(e)) {
+        if (context.mounted) {
+          ToastHelper.Show(context, OfflineStrings.writeRequiresConnection,
+              severity: ToastSeverity.NotOk);
+        }
+        return false;
+      }
+      rethrow;
+    }
 
     switch (result["code"]) {
       case 200:
@@ -208,82 +298,82 @@ class DbEvents {
           if (participant == null) {
             var trPrefix = RightsService.currentUser()?.getGenderPrefix();
             ToastHelper.Show(
-                context, "${trPrefix}You have been signed in.".tr());
+                context, ScheduleStrings.youHaveBeenSignedIn(trPrefix));
           } else {
             var trPrefix = participant.getGenderPrefix();
             ToastHelper.Show(
                 context,
-                "$trPrefix{user} has been signed in."
-                    .tr(namedArgs: {"user": participant.toString()}));
+                ScheduleStrings.userHasBeenSignedIn(trPrefix,
+                    user: participant.toString()));
           }
-          return;
+          return true;
         }
       case 100:
-        ToastHelper.Show(
-            context, "${"Cannot sign in!".tr()} ${"Event is over.".tr()}",
+        ToastHelper.Show(context,
+            "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.eventOver}",
             severity: ToastSeverity.NotOk);
-        return;
+        return false;
       case 101:
-        ToastHelper.Show(
-            context, "${"Cannot sign in!".tr()} ${"Event is full.".tr()}",
+        ToastHelper.Show(context,
+            "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.eventFull}",
             severity: ToastSeverity.NotOk);
-        return;
+        return false;
       case 102:
         {
           if (participant == null) {
             var trPrefix = RightsService.currentUser()?.getGenderPrefix();
-            var message =
-                "${trPrefix}You are already signed in at an event of this type."
-                    .tr();
-            ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message",
+            var message = ScheduleStrings.alreadySignedInSameType(trPrefix);
+            ToastHelper.Show(
+                context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           } else {
             var trPrefix = participant.getGenderPrefix();
-            var message =
-                "$trPrefix{user} is already signed in at an event of this type."
-                    .tr(namedArgs: {"user": participant.toString()});
-            ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message",
+            var message = ScheduleStrings.userAlreadySignedInSameType(trPrefix,
+                user: participant.toString());
+            ToastHelper.Show(
+                context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           }
-          return;
+          return false;
         }
       case 103:
         {
           if (participant == null) {
             var trPrefix = RightsService.currentUser()?.getGenderPrefix();
-            var message = "${trPrefix}You are already signed in.".tr();
-            ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message",
+            var message = ScheduleStrings.alreadySignedIn(trPrefix);
+            ToastHelper.Show(
+                context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           } else {
             var trPrefix = participant.getGenderPrefix();
-            var message = "$trPrefix{user} is already signed in."
-                .tr(namedArgs: {"user": participant.toString()});
-            ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message",
+            var message = ScheduleStrings.userAlreadySignedIn(trPrefix,
+                user: participant.toString());
+            ToastHelper.Show(
+                context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           }
-          return;
+          return false;
         }
       case 107:
         {
           if (participant == null) {
             var trPrefix = RightsService.currentUser()?.getGenderPrefix();
-            var message =
-                "${trPrefix}You are already signed in at another event at the same time."
-                    .tr();
-            ToastHelper.Show(context, "${"Cannot sign in!".tr()} $message",
+            var message = ScheduleStrings.alreadySignedInSameTime(trPrefix);
+            ToastHelper.Show(
+                context, "${ScheduleStrings.cannotSignIn} $message",
                 severity: ToastSeverity.NotOk);
           } else {
             var trPrefix = participant.getGenderPrefix();
             ToastHelper.Show(
                 context,
-                "$trPrefix{user} is already signed in at another event at the same time."
-                    .tr(namedArgs: {"user": participant.toString()}));
+                ScheduleStrings.userAlreadySignedInSameTime(trPrefix,
+                    user: participant.toString()));
           }
-          return;
+          return false;
         }
       case 104:
         {
-          String answerWhy = "It's too soon!".tr();
+          String answerWhy = ScheduleStrings.tooSoon;
           if (result["events_registration_start"] != null) {
             var start = DateTime.parse(result["events_registration_start"])
                 .toOccasionTime();
@@ -292,8 +382,7 @@ class DbEvents {
             var timePart =
                 DateFormat.Hm(context.locale.languageCode).format(start);
             String startString = "$datePart $timePart";
-            answerWhy = "You can sign in from {time}."
-                .tr(namedArgs: {"time": startString});
+            answerWhy = ScheduleStrings.signInFrom(time: startString);
           }
 
           var workshopsFeature =
@@ -303,32 +392,43 @@ class DbEvents {
           if (message != null && message.isNotEmpty) {
             answerWhy = workshopsFeature.registrationNotOpenMessage!;
             ToastHelper.Show(context, answerWhy, severity: ToastSeverity.NotOk);
-            return;
+            return false;
           }
 
-          ToastHelper.Show(context, "${"Cannot sign in!".tr()} $answerWhy",
+          ToastHelper.Show(
+              context, "${ScheduleStrings.cannotSignIn} $answerWhy",
               severity: ToastSeverity.NotOk);
-          return;
+          return false;
         }
       case 105:
         ToastHelper.Show(context,
-            "${"Cannot sign in!".tr()} ${"There is already the maximum of men.".tr()}",
+            "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.maxMenReached}",
             severity: ToastSeverity.NotOk);
-        return;
+        return false;
       case 106:
         ToastHelper.Show(context,
-            "${"Cannot sign in!".tr()} ${"There is already the maximum of women.".tr()}",
+            "${ScheduleStrings.cannotSignIn} ${ScheduleStrings.maxWomenReached}",
             severity: ToastSeverity.NotOk);
-        return;
-      //403, 108
+        return false;
+      case 109:
+        ToastHelper.Show(context, SpeakersStrings.bookingLimitReached,
+            severity: ToastSeverity.NotOk);
+        return false;
+      //403, 108, 109
       default:
-        ToastHelper.Show(context, "Cannot sign in!".tr(),
+        ToastHelper.Show(context, ScheduleStrings.cannotSignIn,
             severity: ToastSeverity.NotOk);
-        return;
+        return false;
     }
   }
 
   static Future<bool> isEventSaved(int id) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final privateProgram = await ClientSyncRuntime.readPrivate(
+          ClientSyncComponent.privateProgram);
+      return privateProgram is Map &&
+          ((privateProgram['saved'] as List?) ?? const []).contains(id);
+    }
     var data = await _supabase
         .from(Tb.event_users_saved.table)
         .select()
@@ -338,71 +438,176 @@ class DbEvents {
     return data != null;
   }
 
-  static Future<void> removeFromMySchedule(BuildContext context, int id) async {
-    if (AuthService.isLoggedIn()) {
-      await _supabase
-          .from(Tb.event_users_saved.table)
-          .delete()
-          .eq(Tb.event_users_saved.event, id)
-          .eq(EventModel.eventUsersSavedUserColumn,
-              AuthService.currentUserId());
-    }
-    await OfflineDataService.removeFromMySchedule(id);
-    ToastHelper.Show(context, "Removed from My schedule.".tr());
+  static Future<void> removeFromMySchedule(BuildContext context, int id,
+      {bool showSuccessToast = true}) async {
+    await setSavedProgram(
+      context,
+      id,
+      false,
+      showSuccessToast: showSuccessToast,
+    );
   }
 
-  static Future<bool> addToMySchedule(BuildContext context, int id) async {
+  static Future<bool> addToMySchedule(BuildContext context, int id,
+      {bool showSuccessToast = true}) async {
     if (!AppConfig.isOwnProgramSupportedWithoutSignIn &&
         !AuthService.isLoggedIn()) {
-      ToastHelper.Show(context,
-          "Before adding to 'My schedule', please sign in first.".tr());
+      ToastHelper.Show(context, ScheduleStrings.signInBeforeAddingToMySchedule);
       return false;
     }
-    if (AuthService.isLoggedIn()) {
-      await _supabase.from(Tb.event_users_saved.table).insert({
-        Tb.event_users_saved.event: id,
-        EventModel.eventUsersSavedUserColumn: AuthService.currentUserId()
-      });
-    }
-    await OfflineDataService.addToMySchedule(id);
-    ToastHelper.Show(context, "Added to My schedule.".tr());
-    return true;
+    final result = await setSavedProgram(
+      context,
+      id,
+      true,
+      showSuccessToast: showSuccessToast,
+    );
+    return result.wasApplied;
   }
 
-  static Future<void> synchronizeMySchedule(
-      {bool join = false, List<int>? currentIds}) async {
+  static Future<SavedProgramMutationResult> setSavedProgram(
+    BuildContext context,
+    int id,
+    bool saved, {
+    bool showSuccessToast = true,
+  }) async {
+    if (saved &&
+        !AppConfig.isOwnProgramSupportedWithoutSignIn &&
+        !AuthService.isLoggedIn()) {
+      ToastHelper.Show(context, ScheduleStrings.signInBeforeAddingToMySchedule);
+      return const SavedProgramMutationResult(
+        SavedProgramMutationOutcome.rejected,
+      );
+    }
+    final scope = _currentSavedProgramScope();
+    final owner = savedProgramPendingState.createOwner();
+    savedProgramPendingState.set(id, owner, saved);
+    late final SavedProgramMutationResult result;
+    try {
+      result = await _savedProgramMutationCoordinator.enqueue(
+        scope: scope,
+        eventId: id,
+        saved: saved,
+      );
+    } finally {
+      savedProgramPendingState.clear(id, owner);
+    }
+
+    if (result.error != null && context.mounted) {
+      await ExceptionHandler.handle(context, error: result.error!);
+    }
+    if (result.wasApplied && showSuccessToast && context.mounted) {
+      ToastHelper.Show(
+        context,
+        saved
+            ? ScheduleStrings.addedToMySchedule
+            : ScheduleStrings.removedFromMySchedule,
+      );
+    }
+    return result;
+  }
+
+  static Future<bool> _persistSavedProgram(
+      String scope, int id, bool saved) async {
+    if (_currentSavedProgramScope() != scope) return false;
+    if (AuthService.isLoggedIn()) {
+      if (ClientSyncRuntime.isV1Selected) {
+        await _savedProgramCommands.update(
+          [id],
+          saved ? SavedProgramMode.join : SavedProgramMode.remove,
+        );
+      } else {
+        final response = await _supabase.rpc('set_saved_program', params: {
+          'p_occasion': RightsService.currentOccasionId()!,
+          'p_event_ids': [id],
+          'p_mode': saved ? 'join' : 'remove',
+        });
+        if (_currentSavedProgramScope() != scope) return false;
+        await OfflineDataService.saveMyScheduleDataIfCurrent(
+          (response as List)
+              .whereType<num>()
+              .map((value) => value.toInt())
+              .toList(growable: false),
+          () => _currentSavedProgramScope() == scope,
+        );
+      }
+    } else if (saved) {
+      await OfflineDataService.addToMySchedule(
+        id,
+        isCurrent: () => _currentSavedProgramScope() == scope,
+      );
+    } else {
+      await OfflineDataService.removeFromMySchedule(
+        id,
+        isCurrent: () => _currentSavedProgramScope() == scope,
+      );
+    }
+    return _currentSavedProgramScope() == scope;
+  }
+
+  static Future<void> synchronizeMySchedule({bool join = false}) async {
     if (!AuthService.isLoggedIn() || !AppConfig.isOwnProgramSupported) {
       return;
     }
-    List<int> eventIdsToSynchronize = [];
-
-    if (currentIds != null) {
-      eventIdsToSynchronize = currentIds;
-    } else {
-      // If currentIds are not provided, load remote events
-      var remoteEvents = await loadAllMySchedule();
-      eventIdsToSynchronize = remoteEvents.map((x) => x.id!).toList();
+    if (ClientSyncRuntime.isV1Selected && !join) {
+      return;
     }
-
+    final scope = _currentSavedProgramScope();
     if (join) {
-      var localEventsIds = await OfflineDataService.getMyScheduleData();
-      eventIdsToSynchronize.addAll(localEventsIds);
-      eventIdsToSynchronize = eventIdsToSynchronize.toSet().toList();
-    }
-
-    await OfflineDataService.saveMyScheduleData(eventIdsToSynchronize);
-
-    if (!join) {
+      final mergeVersion = savedProgramPendingState.mutationVersion;
+      final localEventIds = await OfflineDataService.getMyScheduleData();
+      if (_currentSavedProgramScope() != scope ||
+          savedProgramPendingState.mutationVersion != mergeVersion) {
+        return;
+      }
+      for (final eventId in localEventIds.toSet()) {
+        if (_currentSavedProgramScope() != scope ||
+            savedProgramPendingState.mutationVersion != mergeVersion) {
+          return;
+        }
+        final result = await _savedProgramMutationCoordinator.enqueue(
+          scope: scope,
+          eventId: eventId,
+          saved: true,
+        );
+        if (result.error != null) throw result.error!;
+        if (result.outcome == SavedProgramMutationOutcome.scopeChanged) return;
+        if (!result.wasApplied &&
+            result.outcome != SavedProgramMutationOutcome.superseded) {
+          throw StateError('Saved-program merge was rejected');
+        }
+      }
       return;
     }
 
-    await _supabase.rpc('synchronize_my_schedule', params: {
-      'p_event_ids': eventIdsToSynchronize,
-      'p_join_mode': join,
-    });
+    final mutationVersion = savedProgramPendingState.mutationVersion;
+    final remoteEvents = await loadAllMySchedule();
+    final eventIdsToSynchronize =
+        remoteEvents.map((event) => event.id!).toList();
+
+    if (_currentSavedProgramScope() == scope &&
+        savedProgramPendingState.mutationVersion == mutationVersion) {
+      await OfflineDataService.saveMyScheduleDataIfCurrent(
+        eventIdsToSynchronize,
+        () =>
+            _currentSavedProgramScope() == scope &&
+            savedProgramPendingState.mutationVersion == mutationVersion,
+      );
+    }
   }
 
   static Future<EventModel> updateEvent(EventModel event) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      event.occasionId ??= RightsService.currentOccasionId();
+      final result = await _commands.save(event);
+      if (result.status == EventCommandStatus.conflict) {
+        throw StateError('Event was changed by another editor');
+      }
+      if (result.status == EventCommandStatus.rejected ||
+          result.event == null) {
+        throw StateError('Event save was rejected');
+      }
+      return result.event!;
+    }
     var upsertObj = event.toUpsertMap();
 
     if (event.description != null) {
@@ -445,6 +650,8 @@ class DbEvents {
   static Future<void> updateEventFromDataGrid(EventModel event) async {
     var updatedEvent = await updateEvent(event);
 
+    if (ClientSyncRuntime.isV1Selected) return;
+
     var insertRoles = [];
     for (var eParent in event.eventRolesIds!) {
       insertRoles.add({
@@ -477,10 +684,46 @@ class DbEvents {
   }
 
   static Future<void> deleteEvent(EventModel data) async {
-    await _supabase.from(Tb.events.table).delete().eq(Tb.events.id, data.id!);
+    if (ClientSyncRuntime.isV1Selected) {
+      data.occasionId ??= RightsService.currentOccasionId();
+      final result = await _commands.delete(data);
+      if (result.status == EventCommandStatus.conflict) {
+        throw StateError('Event was changed by another editor');
+      }
+      if (result.status == EventCommandStatus.rejected) {
+        throw StateError('Event deletion was rejected');
+      }
+      return;
+    }
+    // Editor-guarded server-side delete that unbinds sign-ups and other child
+    // rows (event_users, event_users_saved, exclusive/roles/groups) atomically,
+    // so events with attendees — including counseling slots — delete cleanly.
+    final res =
+        await _supabase.rpc('delete_event', params: {'p_event': data.id});
+    final code = (res is Map && res['code'] != null)
+        ? (res['code'] as num).toInt()
+        : null;
+    if (code != 200) {
+      throw Exception('delete_event failed with code $code');
+    }
+  }
+
+  /// Lightweight id/title/time list of all occasion events (hidden included),
+  /// for pickers like the exclusivity editor. Editor-guarded server-side.
+  static Future<List<EventModel>> getAllEventsBasic() async {
+    final res = await _supabase.rpc('get_events_catalog',
+        params: {'p_occasion': RightsService.currentOccasionId()!});
+    if (res['code'] != 200) {
+      throw Exception('get_events_catalog failed with code ${res['code']}');
+    }
+    return List<EventModel>.from((res['data'] as List)
+        .map((x) => EventModel.fromJson((x as Map).cast<String, dynamic>())));
   }
 
   static Future<List<ExclusiveGroupModel>> getAllExclusiveGroups() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      return _exclusiveGroupCommands.list(RightsService.currentOccasionId()!);
+    }
     var data = await _supabase
         .from(Tb.exclusive_groups.table)
         .select("${Tb.exclusive_groups.id}, "
@@ -492,6 +735,18 @@ class DbEvents {
   }
 
   static Future<void> updateExclusiveGroup(ExclusiveGroupModel model) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final saved = await _exclusiveGroupCommands.save(
+        RightsService.currentOccasionId()!,
+        model,
+      );
+      model
+        ..id = saved.id
+        ..title = saved.title
+        ..events = saved.events
+        ..aggregateVersion = saved.aggregateVersion;
+      return;
+    }
     Map<String, dynamic> upsertObj = {
       Tb.exclusive_groups.title: model.title,
     };
@@ -532,6 +787,13 @@ class DbEvents {
   }
 
   static Future<void> deleteExclusiveGroup(ExclusiveGroupModel data) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _exclusiveGroupCommands.delete(
+        RightsService.currentOccasionId()!,
+        data,
+      );
+      return;
+    }
     await _supabase
         .from(Tb.exclusive_events.table)
         .delete()
@@ -547,15 +809,38 @@ class DbEvents {
     AuthService.ensureUserIsLoggedIn();
     var userId = participant?.id ?? AuthService.currentUserId();
 
-    var result = await _supabase
-        .rpc("sign_user_out_of_event", params: {"ev": eventId, "usr": userId});
+    dynamic result;
+    try {
+      if (ClientSyncRuntime.isV1Selected) {
+        final response = await _attendanceCommands.setAttendance(
+          eventId: eventId,
+          participantId: userId,
+          action: AttendanceAction.signOut,
+        );
+        result = {'code': response.code};
+      } else {
+        result = await _supabase.rpc("sign_user_out_of_event",
+            params: {"ev": eventId, "usr": userId});
+      }
+    } catch (e) {
+      // Offline: say so readably and behave like the non-200 branches
+      // (toast + return); other errors keep today's behavior.
+      if (ExceptionHandler.isNetworkError(e)) {
+        if (context != null && context.mounted) {
+          ToastHelper.Show(context, OfflineStrings.writeRequiresConnection,
+              severity: ToastSeverity.NotOk);
+        }
+        return;
+      }
+      rethrow;
+    }
     switch (result["code"]) {
       case 200:
         if (participant == null) {
           var trPrefix = RightsService.currentUser()?.getGenderPrefix();
           if (context != null) {
             ToastHelper.Show(
-                context, "${trPrefix}You have been signed out.".tr());
+                context, ScheduleStrings.youHaveBeenSignedOut(trPrefix));
           }
           return;
         } else {
@@ -563,17 +848,14 @@ class DbEvents {
           if (context != null) {
             ToastHelper.Show(
                 context,
-                "$trPrefix{user} has been signed out."
-                    .tr(namedArgs: {"user": participant.toString()}));
+                ScheduleStrings.userHasBeenSignedOut(trPrefix,
+                    user: participant.toString()));
           }
         }
         return;
       case 201:
         if (context != null) {
-          ToastHelper.Show(
-              context,
-              "It is not possible to sign out from an event that has already taken place."
-                  .tr(),
+          ToastHelper.Show(context, ScheduleStrings.cannotSignOutPastEvent,
               severity: ToastSeverity.NotOk);
         }
         return;
@@ -676,7 +958,8 @@ class DbEvents {
       final code = response is Map ? response['code'] : 'N/A';
       final message =
           response is Map ? response['message'] : response.toString();
-      AppLogger.error('Failed to load my events bundle. Code: $code, Message: $message');
+      AppLogger.error(
+          'Failed to load my events bundle. Code: $code, Message: $message');
       return null;
     }
 

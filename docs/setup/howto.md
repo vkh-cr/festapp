@@ -140,6 +140,8 @@ fvm dart run flutter_launcher_icons
   - [Privacy Policy](https://raw.githack.com/vkh-cr/festapp/prod/festapp/PrivacyPolicy.html)
   - [Request Privacy Policy](https://raw.githack.com/vkh-cr/festapp/prod/festapp/PrivacyPolicy.html#request)
 - Import data types as CSV from Festapp standard csv file or fill them.
+- For participant imports, including the optional `Skupina:` column, see
+  [CSV user import](csv_user_import.md).
 - Upload assets:
   - Icon: 512×512 px
   - Feature Graphic: 1024×500 px

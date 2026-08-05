@@ -1,6 +1,6 @@
-import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { deliverEmail, EmailTemplateNotFoundError } from "../_shared/emailDelivery.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
-import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
+import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -75,16 +75,6 @@ Deno.serve(async (req) => {
       unit_title: unitTitle,
     });
 
-    // Use the wrapper style to retrieve both the email template and wrapper
-    const templateAndWrapper: any = await getEmailTemplateAndWrapper("SIGN_IN_CODE", { organization: organizationId });
-    if (!templateAndWrapper || !templateAndWrapper.template) {
-      console.error("Template not found for code SIGN_IN_CODE.");
-      return new Response(
-        JSON.stringify({ error: "Template not found" }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
-      );
-    }
-
     const platforms = orgConfig.PLATFORMS || [];
     const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
 
@@ -96,23 +86,23 @@ Deno.serve(async (req) => {
       appName: appName,
     };
 
-    await sendEmailWithSubs({
-      to: userEmail,
-      subject: templateAndWrapper.template.subject,
-      content: templateAndWrapper.template.html,
-      subs,
-      wrapper: templateAndWrapper.wrapper.html,
-      from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
-    });
-
-    await supabaseAdmin
-      .from("log_emails")
-      .insert({
-        from: _DEFAULT_EMAIL,
+    try {
+      await deliverEmail({
         to: userEmail,
-        template: templateAndWrapper.template.id,
-        organization: organizationId,
+        templateCode: "SIGN_IN_CODE",
+        context: { organization: organizationId },
+        substitutions: subs,
+        from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
       });
+    } catch (error) {
+      if (error instanceof EmailTemplateNotFoundError) {
+        return new Response(
+          JSON.stringify({ error: "Template not found" }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+        );
+      }
+      throw error;
+    }
 
     return new Response(
       JSON.stringify({ email: userEmail, code: 200 }),

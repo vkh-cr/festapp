@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'schedule_helper.dart'; // Assuming this is a local file
@@ -124,13 +125,13 @@ class AdvancedTimelineView extends StatelessWidget {
                                       fontSize: 10, color: labelColor),
                                 ),
                                 if (isToday) ...[
-                                  const SizedBox(height: 4),
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    ScheduleStrings.today.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 8,
+                                      height: 1,
                                       color: ThemeConfig.redColor(context),
-                                      shape: BoxShape.circle,
                                     ),
                                   ),
                                 ],

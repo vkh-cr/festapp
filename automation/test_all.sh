@@ -22,12 +22,29 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# Load environment from .env.local if it exists
+# Load defaults from .env.local without overriding explicit CI/shell values.
+# This is especially important for DATABASE_URL: callers must be able to force
+# tests onto a disposable local database even when .env.local points elsewhere.
 cd "$PROJECT_ROOT"
 if [ -f ".env.local" ]; then
+    FESTAPP_DATABASE_URL_OVERRIDE="${DATABASE_URL-}"
+    FESTAPP_SUPABASE_URL_OVERRIDE="${SUPABASE_URL-}"
+    FESTAPP_SUPABASE_ANON_KEY_OVERRIDE="${SUPABASE_ANON_KEY-}"
+    FESTAPP_SUPABASE_SERVICE_ROLE_KEY_OVERRIDE="${SUPABASE_SERVICE_ROLE_KEY-}"
     set -a
     source .env.local
     set +a
+    [ -n "$FESTAPP_DATABASE_URL_OVERRIDE" ] && export DATABASE_URL="$FESTAPP_DATABASE_URL_OVERRIDE"
+    [ -n "$FESTAPP_SUPABASE_URL_OVERRIDE" ] && export SUPABASE_URL="$FESTAPP_SUPABASE_URL_OVERRIDE"
+    [ -n "$FESTAPP_SUPABASE_ANON_KEY_OVERRIDE" ] && export SUPABASE_ANON_KEY="$FESTAPP_SUPABASE_ANON_KEY_OVERRIDE"
+    [ -n "$FESTAPP_SUPABASE_SERVICE_ROLE_KEY_OVERRIDE" ] && export SUPABASE_SERVICE_ROLE_KEY="$FESTAPP_SUPABASE_SERVICE_ROLE_KEY_OVERRIDE"
+fi
+
+# Use the isolated schema-baseline database when it is already running and no
+# explicit database target was supplied. Never start or rebuild it implicitly.
+if [ -z "${DATABASE_URL-}" ] && command -v pg_isready >/dev/null 2>&1 \
+    && pg_isready -h 127.0.0.1 -p 55432 -d postgres >/dev/null 2>&1; then
+    export DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:55432/postgres?sslmode=disable"
 fi
 
 echo "========================================"
@@ -243,7 +260,7 @@ if [ "$RUN_AUTOMATION" = true ]; then
     echo ""
     echo ">>> Automation Scripts Tests..."
 
-    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/deploy_workflow.test.sh"; do
+    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/deploy_workflow.test.sh" "$SCRIPT_DIR/tests/migration_layout.test.sh" "$SCRIPT_DIR/tests/update_prompt.test.sh" "$SCRIPT_DIR/tests/update_prompt_behavior.test.mjs" "$SCRIPT_DIR/tests/client_sync_cutover.test.mjs" "$SCRIPT_DIR/tests/pwa_offline.test.mjs" "$SCRIPT_DIR/tests/project_version.test.mjs"; do
         if [ -x "$t" ]; then
             echo "Running $(basename "$t")..."
             set +e

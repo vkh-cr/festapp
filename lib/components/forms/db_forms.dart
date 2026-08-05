@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/forms/models/form_field_model.dart';
+import 'package:fstapp/components/forms/form_commands.dart';
 import 'package:fstapp/components/forms/models/form_response_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/bank_accounts/bank_account_model.dart';
@@ -8,6 +9,7 @@ import 'package:fstapp/components/eshop/models/product_type_model.dart';
 import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 
 // Bundle class to hold all related data for editing a form
 class FormEditBundle {
@@ -28,6 +30,7 @@ class FormEditBundle {
 
 class DbForms {
   static final _supabase = Supabase.instance.client;
+  static FormCommands get _commands => SupabaseFormCommands(_supabase);
 
   static Future<List<FormModel>> getAllFormsForOccasionOrUnit() async {
     final response = await _supabase.rpc('get_all_viewable_forms_for_copying');
@@ -39,6 +42,13 @@ class DbForms {
     required int sourceFormId,
     required String targetOccasionLink,
   }) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.duplicate(
+        sourceFormId: sourceFormId,
+        targetOccasionLink: targetOccasionLink,
+      );
+      return;
+    }
     await _supabase.rpc(
       'duplicate_form_to_occasion',
       params: {
@@ -76,6 +86,14 @@ class DbForms {
     required String link,
     required String occasionLink,
   }) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.create(
+        title: title,
+        link: link,
+        occasionLink: occasionLink,
+      );
+      return;
+    }
     final response = await _supabase.rpc(
       'create_form_ws',
       params: {
@@ -94,6 +112,10 @@ class DbForms {
   }
 
   static Future<void> updateForm(FormModel form) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.save(form.toEditedJson());
+      return;
+    }
     final response = await _supabase.rpc(
       'update_form',
       params: {
@@ -107,6 +129,10 @@ class DbForms {
   }
 
   static Future<void> deleteForm(int formId) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.delete(formId);
+      return;
+    }
     final response = await _supabase.rpc(
       'delete_form_ws',
       params: {'p_form_id': formId},
@@ -233,6 +259,10 @@ class DbForms {
   }
 
   static Future<void> updateBlueprint(BlueprintModel blueprint) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await _commands.saveBlueprint(blueprint.toJson());
+      return;
+    }
     final response = await _supabase.rpc(
       'update_blueprint',
       params: {

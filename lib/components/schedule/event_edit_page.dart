@@ -1,16 +1,26 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/event_feedback/event_feedback_strings.dart';
 import 'package:fstapp/components/features/features_strings.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/map/db_places.dart';
+import 'package:fstapp/components/speakers/admin/speaker_editor_dialog.dart';
+import 'package:fstapp/components/speakers/admin/speaker_picker_field.dart';
+import 'package:fstapp/components/speakers/db_speakers.dart';
+import 'package:fstapp/components/speakers/speaker_model.dart';
+import 'package:fstapp/components/speakers/speaker_topic_model.dart';
+import 'package:fstapp/components/speakers/speakers_strings.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -21,6 +31,7 @@ import 'package:fstapp/components/html/html_view.dart';
 import 'package:fstapp/widgets/mouse_detector.dart';
 import 'package:fstapp/widgets/time_data_range_picker.dart';
 import '../map/place_model.dart';
+import '../map/place_picker_field.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 
 @RoutePage()
@@ -48,7 +59,15 @@ class _EventEditPageState extends State<EventEditPage> {
   int? maxParticipants, placeId;
   bool? splitForMenWomen, isGroupEvent;
   bool? isCancelled;
+  bool feedbackEnabled = false;
+  bool counselingEntry = false;
   bool isFormValid = true;
+
+  // Speakers attached to this event. Speakers are core (no feature gate); the
+  // picker shows for any saved event (decision R6).
+  List<SpeakerModel>? _allSpeakers;
+  List<SpeakerTopicModel>? _allTopics;
+  final Set<int> _selectedSpeakerIds = {};
 
   DateTime? minDate;
   DateTime? maxDate;
@@ -97,7 +116,33 @@ class _EventEditPageState extends State<EventEditPage> {
           originalEvent!.parentEventIds?.map((e) => e.toString()).join(",") ??
               "";
       isCancelled = originalEvent!.isCancelled; // Load isCancelled status
+      feedbackEnabled =
+          originalEvent!.data?[FeatureConstants.feedbackEnabled]?.toString() ==
+              'true';
+      counselingEntry =
+          originalEvent!.data?[FeatureConstants.counselingEntry]?.toString() ==
+              'true';
     }
+
+    // Load speakers + the set currently attached to this event. Speakers are
+    // core (no feature gate) and the load needs only the occasion, so it runs
+    // for every event; the current selection is matched by event id (R6a).
+    final speakerData = await ExceptionHandler.guard(
+      context,
+      futureFunction: () =>
+          DbSpeakers.getSpeakersForEdit(RightsService.currentOccasionId()!),
+    );
+    if (speakerData != null) {
+      _allSpeakers = speakerData.speakers;
+      _allTopics = speakerData.topics;
+      _selectedSpeakerIds
+        ..clear()
+        ..addAll(speakerData.speakers
+            .where(
+                (s) => s.events.any((e) => e.id == widget.id) && s.id != null)
+            .map((s) => s.id!));
+    }
+
     validateForm();
     if (mounted) {
       setState(() {});
@@ -117,8 +162,8 @@ class _EventEditPageState extends State<EventEditPage> {
   Future<void> deleteEvent() async {
     final confirmation = await DialogHelper.showConfirmationDialog(
       context,
-      "Confirm removal".tr(),
-      "Are you sure you want to delete this event?".tr(),
+      CommonStrings.confirmRemoval,
+      ScheduleStrings.deleteEventConfirm,
     );
     if (confirmation) {
       await originalEvent!.deleteMethod(context);
@@ -154,8 +199,31 @@ class _EventEditPageState extends State<EventEditPage> {
                       .map((e) => int.parse(e.trim()))
                       .toList()
                   : [];
+        originalEvent!.data = {
+          ...?originalEvent!.data,
+          FeatureConstants.feedbackEnabled: feedbackEnabled,
+          if (FeatureService.isCounselingEnabled())
+            FeatureConstants.counselingEntry: counselingEntry,
+        };
 
-        await DbEvents.updateEvent(originalEvent!);
+        // updateEvent returns an EventModel carrying the id even after an
+        // insert, so speaker attachment never relies on widget.id (decision R6a).
+        final updatedEvent = await DbEvents.updateEvent(originalEvent!);
+
+        if (updatedEvent.id != null) {
+          final speakerVersion = await ExceptionHandler.guard(
+            context,
+            futureFunction: () => DbSpeakers.setEventSpeakers(
+              updatedEvent.id!,
+              _selectedSpeakerIds.toList(),
+              updatedEvent.aggregateVersion,
+            ),
+          );
+          if (speakerVersion != null) {
+            updatedEvent.aggregateVersion = speakerVersion;
+          }
+        }
+
         ToastHelper.Show(
             context, "${CommonStrings.saved}: ${originalEvent!.title!}");
         Navigator.of(context).pop();
@@ -165,6 +233,34 @@ class _EventEditPageState extends State<EventEditPage> {
 
   void cancelEdit() {
     Navigator.of(context).pop();
+  }
+
+  /// Opens the speaker editor to create a new speaker, reloads the list, and
+  /// returns the newly created speaker's id so the picker can pre-select it.
+  /// RPC lives here, not in [SpeakerPickerField] (decision R6).
+  Future<int?> _addSpeaker() async {
+    final result = await showDialog<Object?>(
+      context: context,
+      builder: (_) => SpeakerEditorDialog(
+          speaker: SpeakerModel(), topics: _allTopics ?? []),
+    );
+    // _save pops the freshly saved SpeakerModel (decision R6b); a bool from the
+    // close button or null means nothing was created.
+    if (result is! SpeakerModel) return null;
+
+    // Reload so the picker's list includes the new speaker.
+    final data = await ExceptionHandler.guard(
+      context,
+      futureFunction: () =>
+          DbSpeakers.getSpeakersForEdit(RightsService.currentOccasionId()!),
+    );
+    if (data != null) {
+      setState(() {
+        _allSpeakers = data.speakers;
+        _allTopics = data.topics;
+      });
+    }
+    return result.id;
   }
 
   @override
@@ -198,7 +294,7 @@ class _EventEditPageState extends State<EventEditPage> {
                         child: ListView(
                           children: [
                             SwitchListTile(
-                              title: Text("Hide").tr(),
+                              title: Text(CommonStrings.hide),
                               value: isHidden ?? false,
                               onChanged: (value) =>
                                   setState(() => isHidden = value),
@@ -210,6 +306,23 @@ class _EventEditPageState extends State<EventEditPage> {
                                   setState(() => isCancelled = value),
                               activeThumbColor: ThemeConfig.redColor(context),
                             ),
+                            if (FeatureService.isFeatureEnabled(
+                                FeatureConstants.eventFeedback))
+                              SwitchListTile(
+                                title: Text(
+                                    EventFeedbackStrings.enableEventFeedback),
+                                value: feedbackEnabled,
+                                onChanged: (value) =>
+                                    setState(() => feedbackEnabled = value),
+                              ),
+                            if (FeatureService.isCounselingEnabled())
+                              SwitchListTile(
+                                title:
+                                    Text(SpeakersStrings.counselingEntryToggle),
+                                value: counselingEntry,
+                                onChanged: (value) =>
+                                    setState(() => counselingEntry = value),
+                              ),
                             TextFormField(
                               initialValue: title,
                               decoration: InputDecoration(
@@ -273,30 +386,16 @@ class _EventEditPageState extends State<EventEditPage> {
                               maxDate: maxDate!,
                             ),
                             const SizedBox(height: 16),
-                            DropdownButtonFormField<PlaceModel?>(
-                              initialValue: places
-                                  ?.firstWhereOrNull((p) => p.id == placeId),
-                              items: [
-                                DropdownMenuItem<PlaceModel?>(
-                                  value: null,
-                                  child: Text("---"),
-                                ),
-                                if (places != null)
-                                  ...places!.map((place) {
-                                    return DropdownMenuItem<PlaceModel?>(
-                                      value: place,
-                                      child: Text(place.title ?? "???"),
-                                    );
-                                  }),
-                              ],
-                              onChanged: (selectedPlace) {
+                            PlacePickerField(
+                              places: places ?? [],
+                              selectedPlaceId: placeId,
+                              labelText: CommonStrings.place,
+                              placeholder: "---",
+                              onChanged: (id) {
                                 setState(() {
-                                  placeId = selectedPlace?.id;
+                                  placeId = id;
                                 });
                               },
-                              decoration: InputDecoration(
-                                labelText: CommonStrings.place,
-                              ),
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
@@ -305,7 +404,7 @@ class _EventEditPageState extends State<EventEditPage> {
                                   ? maxParticipants.toString()
                                   : "",
                               decoration: InputDecoration(
-                                labelText: "Maximum of participants".tr(),
+                                labelText: ScheduleStrings.maxParticipants,
                               ),
                               keyboardType: TextInputType.number,
                               validator: (value) {
@@ -326,6 +425,22 @@ class _EventEditPageState extends State<EventEditPage> {
                                         : int.tryParse(value.trim());
                               },
                             ),
+                            // Speakers are core: the picker shows whenever the
+                            // speaker list has loaded — no feature gate and no
+                            // widget.id condition (decision R6).
+                            if (_allSpeakers != null) ...[
+                              const SizedBox(height: 16),
+                              SpeakerPickerField(
+                                allSpeakers: _allSpeakers!,
+                                selectedIds: _selectedSpeakerIds.toList(),
+                                onChanged: (ids) => setState(() {
+                                  _selectedSpeakerIds
+                                    ..clear()
+                                    ..addAll(ids);
+                                }),
+                                onAddSpeaker: _addSpeaker,
+                              ),
+                            ],
                             const SizedBox(height: 16),
                             Text(
                               CommonStrings.content,
@@ -351,7 +466,7 @@ class _EventEditPageState extends State<EventEditPage> {
                                     }
                                   });
                                 },
-                                child: Text("Edit content").tr(),
+                                child: Text(CommonStrings.editContent),
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -381,7 +496,7 @@ class _EventEditPageState extends State<EventEditPage> {
                             const SizedBox(height: 16),
                             ExpansionTile(
                               title: Text(
-                                "Advanced Settings".tr(),
+                                CommonStrings.advancedSettings,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -389,13 +504,13 @@ class _EventEditPageState extends State<EventEditPage> {
                               ),
                               children: [
                                 SwitchListTile(
-                                  title: Text("Group").tr(),
+                                  title: Text(ScheduleStrings.group),
                                   value: isGroupEvent ?? false,
                                   onChanged: (value) =>
                                       setState(() => isGroupEvent = value),
                                 ),
                                 SwitchListTile(
-                                  title: Text("M/F 50/50").tr(),
+                                  title: Text(ScheduleStrings.splitMenWomen),
                                   value: splitForMenWomen ?? false,
                                   onChanged: (value) =>
                                       setState(() => splitForMenWomen = value),
@@ -410,14 +525,16 @@ class _EventEditPageState extends State<EventEditPage> {
                                     // sharing the same code without tripping the
                                     // DropdownButton "exactly one item" assert.
                                     final seenValues = <String?>{};
-                                    final typeItems = <DropdownMenuItem<String?>>[
+                                    final typeItems =
+                                        <DropdownMenuItem<String?>>[
                                       DropdownMenuItem<String?>(
                                         value: "",
                                         child: Text(FeaturesStrings.noType),
                                       ),
                                     ];
                                     seenValues.add("");
-                                    for (final eventType in _definedEventTypes) {
+                                    for (final eventType
+                                        in _definedEventTypes) {
                                       if (seenValues.add(eventType.code)) {
                                         typeItems.add(DropdownMenuItem<String?>(
                                           value: eventType.code,
@@ -434,8 +551,8 @@ class _EventEditPageState extends State<EventEditPage> {
                                     } else if (seenValues.contains(type)) {
                                       resolvedType = type;
                                     } else {
-                                      final byTitle = _definedEventTypes
-                                          .firstWhereOrNull(
+                                      final byTitle =
+                                          _definedEventTypes.firstWhereOrNull(
                                               (e) => e.title == type);
                                       resolvedType = byTitle?.code;
                                     }
@@ -461,7 +578,8 @@ class _EventEditPageState extends State<EventEditPage> {
                                 TextFormField(
                                   initialValue: showInsideEvent,
                                   decoration: InputDecoration(
-                                      labelText: "Show inside event".tr()),
+                                      labelText:
+                                          ScheduleStrings.showInsideEvent),
                                   onSaved: (value) => showInsideEvent = value,
                                 ),
                               ],

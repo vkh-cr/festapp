@@ -97,7 +97,7 @@ class TimeDateRangePicker extends StatelessWidget {
                     enabled: enabled, // Use isEnabled property here
                     readOnly: true,
                     decoration: InputDecoration(
-                      labelText: "Start date".tr(),
+                      labelText: CommonStrings.startDate,
                       labelStyle: TextStyle(
                         color:
                             isStartValid ? null : ThemeConfig.redColor(context),
@@ -197,7 +197,7 @@ class TimeDateRangePicker extends StatelessWidget {
                     enabled: enabled, // Use isEnabled property here
                     readOnly: true,
                     decoration: InputDecoration(
-                      labelText: "End date".tr(),
+                      labelText: CommonStrings.endDate,
                       labelStyle: TextStyle(
                         color:
                             isEndValid ? null : ThemeConfig.redColor(context),

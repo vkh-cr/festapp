@@ -1,5 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/information/information_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -49,10 +50,10 @@ class _InformationTabState extends State<InformationTab>
               isScrollable: true,
               tabs: [
                 DataGridHelper.buildTab(
-                    context, Icons.info, "Information".tr()),
+                    context, Icons.info, InformationStrings.information),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.songbook))
                   DataGridHelper.buildTab(
-                      context, Icons.library_music, "Songbook".tr()),
+                      context, Icons.library_music, CommonStrings.songbook),
               ],
             ),
           ),

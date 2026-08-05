@@ -35,7 +35,7 @@ BEGIN
 
   -- 3. Perform Storno (if any conflicts exist)
   IF v_ticket_ids_to_cancel IS NOT NULL AND array_length(v_ticket_ids_to_cancel, 1) > 0 THEN
-      PERFORM public.storno_tickets_bulk(v_ticket_ids_to_cancel);
+      PERFORM public.storno_tickets_bulk_internal_v1(v_ticket_ids_to_cancel);
   END IF;
 
   -- 4. Clean up Secrets on selected spots

@@ -1,6 +1,7 @@
 import { SupabaseService } from './supabase_service.js';
 import { AppConfig } from '../app_config.js';
 import { RightsService } from './rights_service.js';
+import { RouterService } from './router_service.js';
 
 export class AuthService {
     static REFRESH_TOKEN_KEY = 'refresh'; // Typically handled by Supabase JS automatically, but we might mirror logic if needed.
@@ -30,7 +31,7 @@ export class AuthService {
         await RightsService.updateAppData(); 
         
         // Redirect to homepage/root which will handle default routing
-        window.location.href = '/';
+        RouterService.openExternalUrl('/', { inCurrentWindow: true });
     }
 
     static async register(data) {
@@ -85,7 +86,6 @@ export class AuthService {
         // In Flutter: 
         // DbEvents.synchronizeMySchedule(join: true);
         // SynchroService.refreshOfflineData();
-        // NotificationHelper.login();
         
         // In Web:
         // We mostly just need to ensure RightsService picks up the new user

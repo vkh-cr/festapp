@@ -46,8 +46,8 @@ class InputDialogs {
     BuildContext context,
     String titleMessage,
     String hint, [
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
+    String? confirmButtonMessage,
+    String? cancelButtonMessage,
   ]) async {
     final TextEditingController messageController = TextEditingController();
     String? result;
@@ -71,7 +71,7 @@ class InputDialogs {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(cancelButtonMessage),
+              child: Text(cancelButtonMessage ?? CommonStrings.storno),
             ),
             ElevatedButton(
               onPressed: () {
@@ -79,7 +79,7 @@ class InputDialogs {
                 messageController.clear();
                 Navigator.pop(context);
               },
-              child: Text(confirmButtonMessage),
+              child: Text(confirmButtonMessage ?? CommonStrings.ok),
             ),
           ],
         );
@@ -93,8 +93,8 @@ class InputDialogs {
     String titleMessage, {
     required bool showCsvImport,
     required bool showTicketImport,
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno",
+    String? confirmButtonMessage,
+    String? cancelButtonMessage,
   }) async {
     XFile? filePath;
     ImportDialogChoice? result;
@@ -146,7 +146,7 @@ class InputDialogs {
                     result = null;
                     Navigator.pop(context);
                   },
-                  child: Text(cancelButtonMessage),
+                  child: Text(cancelButtonMessage ?? CommonStrings.storno),
                 ),
                 if (showCsvImport)
                   ElevatedButton(
@@ -171,8 +171,9 @@ class InputDialogs {
     BuildContext context,
     String titleMessage,
     String confirmButtonMessage,
-    String cancelButtonMessage,
-  ) async {
+    String cancelButtonMessage, {
+    Widget? headerContent,
+  }) async {
     XFile? filePath;
     final dropFileWidget = DropFile(
       onFilePathChanged: (file) => filePath = file,
@@ -189,7 +190,17 @@ class InputDialogs {
             titleMessage,
           ),
           content: SingleChildScrollView(
-            child: dropFileWidget,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (headerContent != null) ...[
+                  headerContent,
+                  const SizedBox(height: 16),
+                ],
+                dropFileWidget,
+              ],
+            ),
           ),
           actions: [
             TextButton(

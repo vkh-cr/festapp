@@ -88,6 +88,9 @@ class BlueprintStrings {
       'FeatureBlueprint.toastImageUploadFail'.tr(); // "Failed to upload image."
   static String get toastBackgroundRemoved =>
       'FeatureBlueprint.toastBackgroundRemoved'.tr(); // "Background removed."
+  static String get toastMaxTicketsReached =>
+      'FeatureBlueprint.toastMaxTicketsReached'
+          .tr(); // "It is not possible to select more tickets."
 
   // --- Swap Seats Feature ---
   static String get swapHelpIntro => 'FeatureBlueprint.swapHelpIntro'

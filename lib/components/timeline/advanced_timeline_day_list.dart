@@ -1,8 +1,8 @@
 // day_list.dart
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/activities/activities_component_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/users/companion/companion_visibility.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 // ignore: unused_import
 import 'package:fstapp/components/features/schedule_feature.dart';
@@ -22,6 +22,7 @@ import 'advanced_timeline_controller.dart';
 import 'package:fstapp/app_config.dart';
 import 'schedule_timeline.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 
 class DayList extends StatelessWidget {
@@ -70,7 +71,7 @@ class DayList extends StatelessWidget {
               onPressed: () =>
                   controller.onAddNewEvent?.call(context, [dayGroup], null),
               icon: const Icon(Icons.add_circle_outline, size: 24),
-              label: const Text("Add To Schedule").tr(),
+              label: Text(ScheduleStrings.addToSchedule),
               style: TextButton.styleFrom(
                 foregroundColor: ThemeConfig.timelineAddNewEventColor(context),
                 padding:
@@ -204,9 +205,13 @@ class _EventCardState extends State<_EventCard>
 
   bool _shouldShowCompanionButton(BuildContext context, TimeBlockItem event,
       AdvancedTimelineController controller) {
-    return AuthService.isLoggedIn() &&
-        event.isSupportingSignIn() &&
-        FeatureService.isFeatureEnabled(FeatureConstants.companions);
+    return canShowCompanionAttendanceAction(
+      isLoggedIn: AuthService.isLoggedIn(),
+      eventSupportsSignIn: event.isSupportingSignIn(),
+      featureEnabled:
+          FeatureService.isFeatureEnabled(FeatureConstants.companions),
+      hasOwnedCompanions: controller.hasOwnedCompanions,
+    );
   }
 
   @override
@@ -323,7 +328,7 @@ class _EventCardState extends State<_EventCard>
                     controller.onCompanionButtonPressed?.call(context, event),
                 icon:
                     Icon(Icons.people_outline, size: 14, color: selectedColor),
-                label: Text('Companions'.tr(),
+                label: Text(CommonStrings.companions,
                     style: TextStyle(color: selectedColor)),
                 style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 4)),
@@ -337,8 +342,8 @@ class _EventCardState extends State<_EventCard>
                     controller.onScanButtonPressed?.call(context, event.id),
                 icon:
                     Icon(Icons.qr_code_scanner, size: 14, color: selectedColor),
-                label:
-                    Text('Scan'.tr(), style: TextStyle(color: selectedColor)),
+                label: Text(ScheduleStrings.scan,
+                    style: TextStyle(color: selectedColor)),
                 style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 4)),
               ));
@@ -402,7 +407,7 @@ class _EventCardState extends State<_EventCard>
                       onPressed: () => _handleSignOutEvent(event.id),
                       style: _signButtonStyle(
                           buttonTextColor, signInSignOutButtonBorderColor),
-                      child: Text('Sign out'.tr()),
+                      child: Text(UserStrings.signOut),
                     )
                   : OutlinedButton(
                       onPressed: () {
@@ -410,7 +415,7 @@ class _EventCardState extends State<_EventCard>
                       },
                       style: _signButtonStyle(
                           buttonTextColor, signInSignOutButtonBorderColor),
-                      child: Text('Sign in'.tr()),
+                      child: Text(UserStrings.signIn),
                     ),
             ),
             const SizedBox(height: 8),
@@ -547,7 +552,7 @@ class _EventCardState extends State<_EventCard>
                   onPressed: () => _handleSignOutEvent(event.id),
                   style: _signButtonStyle(
                       buttonTextColor, signInSignOutButtonBorderColor),
-                  child: Text('Sign out'.tr()),
+                  child: Text(UserStrings.signOut),
                 )
               : OutlinedButton(
                   onPressed: () {
@@ -555,7 +560,7 @@ class _EventCardState extends State<_EventCard>
                   },
                   style: _signButtonStyle(
                       buttonTextColor, signInSignOutButtonBorderColor),
-                  child: Text('Sign in'.tr()),
+                  child: Text(UserStrings.signIn),
                 ),
         ],
       ]);
@@ -650,7 +655,7 @@ class _EventCardState extends State<_EventCard>
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    "Right Now".tr().toUpperCase(),
+                                    ScheduleStrings.rightNow.toUpperCase(),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 10,

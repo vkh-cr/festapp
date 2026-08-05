@@ -1,5 +1,31 @@
 # Database Documentation
 
+## Client sync v1 maintenance contracts
+
+The sole publisher releases failed dirty work by exact claim token.
+`live_public entity_id=0` means full event refresh; targeted IDs affect only
+those rows. Drift health is read-only and repair is an explicit forward
+operation, never a trigger. Artifact retention uses bounded service-role
+candidate and exact metadata-ack RPCs with one shared cutoff and current
+reference protection. Receipt compaction preserves command IDs as permanent
+`expired` tombstones; immutable commit audit is never pruned.
+
+## Occasion-scoped companion relationships
+
+`public.user_companions` stores `(occasion, user, companion)` with a unique
+companion per occasion and an explicit `origin` of `self_created` or
+`admin_assigned`. Client roles have no table privileges. Reads come from the
+occasion-aware legacy projection or the identity-scoped `private_profile`;
+writable profile fields, groups, services (including accommodation), and
+attendance remain sourced from the companion's normal user/occasion records;
+the relationship stores none of them. Reads from `private_profile` resolve
+those normal records for the owner UI.
+writes use only `create_companion_client_sync_v1`,
+`delete_owned_companion_client_sync_v1`,
+`assign_existing_companion_client_sync_v1`, and
+`unassign_existing_companion_client_sync_v1`. Admin unassignment removes only
+the relation; account deletion is restricted to self-created companions.
+
 This directory contains the source code for the PostgreSQL database schema,
 logic, and security policies.
 
@@ -64,7 +90,7 @@ SQL functions organized by domain:
 | `eshop_forms/` | Form-order bridge | `create_form`, `get_form_by_link`, form CRUD |
 | `eshop_orders/` | Order lifecycle | `scan_ticket`, `get_orders`, status transitions |
 | `eshop_transactions/` | Transactions | `add_transaction_to_payment_info_ws` |
-| `events/` | Schedule events | Event CRUD, sign-up logic |
+| `events/` | Schedule events | Event CRUD, sign-up logic, event feedback |
 | `inventory/` | Capacity pools | Pool allocation, availability checks |
 | `organization/` | Domain ops | Org settings, admin management |
 | `others/` | Cross-cutting | `duplicate_occasion`, `check_is_*` guards, image records, email templates |
@@ -74,7 +100,7 @@ SQL functions organized by domain:
 | `units/` | Unit management | Unit CRUD, user-unit linking |
 | `user_permissions/` | RBAC | `get_is_*` permission checks (boolean returns) |
 | `user_services/` | Service assignments | User-service linking |
-| `users/` | User management | `create_user_in_organization_with_data_pure`, `delete_user` |
+| `users/` | User management | `create_user_in_organization_with_data_pure`, `delete_user`, `import_user_group_assignments` |
 | `utilities/` | Shared utilities | Helper functions |
 | `utils/` | Additional utils | Format helpers |
 
@@ -155,11 +181,11 @@ erDiagram
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
-| `user_info` | User profiles | `id`, `email_readonly`, `organization` |
+| `user_info` | User profiles | `id`, `email_readonly` (canonical account email), `email_delivery` (optional mail override), `organization` |
 | `occasion_users` | User-occasion link | `user`, `occasion`, `is_editor_view` |
 | `unit_users` | User-unit link | `user`, `unit` |
 | `organization_users` | User-org link | `user`, `organization` |
-| `user_companions` | Companion relationships | `user`, `companion` |
+| `user_companions` | Occasion-scoped companion relationships | `occasion`, `user`, `companion`, `origin`, `created_by` |
 | `user_groups` | Group membership | `user`, `group` |
 | `user_group_info` | Group metadata | `id`, `occasion`, `title` |
 | `user_reset_token` | Password reset | `user`, `token` |
@@ -171,6 +197,7 @@ erDiagram
 | `events` | Schedule entries | `id`, `occasion`, time fields |
 | `event_users` | Event sign-ups | `user`, `event` |
 | `event_users_saved` | My schedule items | `user`, `event` |
+| `event_feedback` | Per-event rating/comment owned by a user or anonymous client ID | `event`, `occasion`, `user`, `client_id`, `rating` |
 | `information` | CMS pages | `id`, `occasion` |
 | `news` | Announcements | `id`, `occasion`, `created_by` |
 | `places` | Map locations | `id`, `occasion` |
@@ -207,8 +234,8 @@ Dart or `supabase.rpc(...)` in JS):
 
 | RPC Function | Called From | Purpose |
 |-------------|-------------|---------|
-| `send-ticket-order` (Edge Function) | Web Client, Flutter | Order creation (NOT an RPC) |
-| `confirm_blueprint_order_change` | Flutter | Seat reservation |
+| `send-ticket-order` (Edge Function) | Web Client, Flutter | Receipted order create/replace + transactional effect queue |
+| `replace_blueprint_order_client_sync_v1` | Edge Function | Atomic seat replacement and new order |
 | `scan_ticket` | Flutter | Ticket verification |
 | `delete_user` | Flutter | User deletion |
 | `create_user_in_organization_with_data_pure` | SQL Functions (internal) | User creation |

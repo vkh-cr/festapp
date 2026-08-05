@@ -1,6 +1,5 @@
 import { formatCurrency } from "./utilities.ts";
 import { qrcode } from "https://deno.land/x/qrcode/mod.ts";
-import { encode } from "https://deno.land/std/encoding/base64.ts";
 import { createCanvas, loadImage } from "https://deno.land/x/canvas/mod.ts";
 
 function encodeSPDMessage(message: string): string {
@@ -19,24 +18,23 @@ function determinePaymentMessage(order: any, occasionTitle: string): string {
   const messageType = order?.form?.data?.payment_message?.type;
 
   // New Case: If the type is 'none', explicitly return an empty string.
-  if (messageType === 'none') {
-    return '';
+  if (messageType === "none") {
+    return "";
   }
 
-  if (messageType === 'occasion_title') {
+  if (messageType === "occasion_title") {
     // If the type is 'occasion_title', use the provided occasion title.
-    return occasionTitle || ''; // Return empty string if occasionTitle is null/undefined
+    return occasionTitle || ""; // Return empty string if occasionTitle is null/undefined
   }
 
   // Default behavior: for 'name_surname', or if the setting is missing or invalid.
   // We construct the message from the order's customer data.
-  const name = order?.data?.name || '';
-  const surname = order?.data?.surname || '';
+  const name = order?.data?.name || "";
+  const surname = order?.data?.surname || "";
 
   // Combine name and surname, and trim any leading/trailing whitespace.
   return `${name} ${surname}`.trim();
 }
-
 
 function generateSpdString(paymentInfo: any, message: string | null): string {
   // Start with the mandatory parts of the SPD string.
@@ -46,7 +44,7 @@ function generateSpdString(paymentInfo: any, message: string | null): string {
     `*X-VS:${paymentInfo.variable_symbol}`;
 
   // **Conditional Logic:** Only add the MSG field if the message is not null or empty.
-  if (message && message.trim() !== '') {
+  if (message && message.trim() !== "") {
     spdString += `*MSG:${encodeSPDMessage(message)}`;
   }
 
@@ -70,7 +68,9 @@ export async function generateQrCode(
 
   // 2. Generate the SPD string using the determined message.
   const qrData = generateSpdString(paymentInfo, paymentMessage);
-  const base64Qr = await qrcode(qrData, { size: 500 });
+  // qrcode@v2 returns a data URL at runtime, while its bundled declaration
+  // incorrectly exposes the underlying QRCode interface.
+  const base64Qr = await qrcode(qrData, { size: 500 }) as unknown as string;
   const qrImage = await loadImage(
     `data:image/png;base64,${base64Qr.split(",")[1]}`,
   );
@@ -103,10 +103,12 @@ export async function generateQrCode(
   }
 
   ctx.fillText(
-    `Celková cena: ${formatCurrency(
-      paymentInfo.amount,
-      paymentInfo.currency_code,
-    )}`,
+    `Celková cena: ${
+      formatCurrency(
+        paymentInfo.amount,
+        paymentInfo.currency_code,
+      )
+    }`,
     32,
     currentY,
   );

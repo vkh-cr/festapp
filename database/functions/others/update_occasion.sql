@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_occasion_203(input_data JSONB)
+CREATE OR REPLACE FUNCTION update_occasion_internal_v1(input_data JSONB)
  RETURNS void
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -240,3 +240,11 @@ SET search_path = public, extensions
      END IF;
  END;
  $$;
+
+CREATE OR REPLACE FUNCTION update_occasion_203(input_data jsonb)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, extensions AS $$
+BEGIN
+  PERFORM public.update_occasion_internal_v1(input_data);
+END;
+$$;

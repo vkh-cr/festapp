@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/forms/form_strings.dart';
 import 'package:fstapp/components/forms/models/form_field_model.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
@@ -14,7 +13,7 @@ class SelectManyEditor {
     final options = field.options;
     if (options.isEmpty) {
       return Text(
-        'No options'.tr(),
+        FormStrings.noOptions,
         style: Theme.of(context).textTheme.bodyMedium,
       );
     }
@@ -51,7 +50,7 @@ class SelectManyEditor {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Options'.tr(), style: Theme.of(context).textTheme.titleSmall),
+          Text(FormStrings.options, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 2),
           Text(
             FormStrings.defaultSelectionHintMulti,
@@ -110,7 +109,7 @@ class SelectManyEditor {
                         <PopupMenuEntry<String>>[
                       PopupMenuItem<String>(
                         value: 'additional_settings',
-                        child: Text("Additional Settings".tr()),
+                        child: Text(FormStrings.additionalSettings),
                       ),
                     ],
                     icon: const Icon(Icons.more_vert),
@@ -135,7 +134,7 @@ class SelectManyEditor {
                 child: TextField(
                   controller: optionsController,
                   decoration: InputDecoration(
-                    hintText: 'Enter option value'.tr(),
+                    hintText: FormStrings.enterOptionValue,
                     border: const UnderlineInputBorder(),
                   ),
                 ),

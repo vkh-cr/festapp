@@ -8,6 +8,8 @@ import 'form_feature.dart';
 import 'import_feature.dart';
 import 'map_feature.dart';
 import 'schedule_feature.dart';
+import 'services_feature.dart';
+import 'counseling_feature.dart';
 import 'ticket_feature.dart';
 import 'workshop_feature.dart';
 import 'contract_feature.dart';
@@ -54,6 +56,12 @@ abstract class Feature {
         return ImportFeature.fromJson(json);
       case FeatureConstants.contract:
         return ContractFeature.fromJson(json);
+      case FeatureConstants.services:
+        return ServicesFeature.fromJson(json);
+      case FeatureConstants.counseling:
+        return CounselingFeature.fromJson(json);
+      case FeatureConstants.programNotifications:
+        return ProgramNotificationsFeature.fromJson(json);
       default:
         return SimpleFeature.fromJson(json);
     }
@@ -95,4 +103,20 @@ class SimpleFeature extends Feature {
   Widget buildFormField(BuildContext context) {
     return Container();
   }
+}
+
+/// Reserved feature whose UI proposal stays in the codebase, but which cannot
+/// be enabled until notification delivery has been implemented.
+class ProgramNotificationsFeature extends SimpleFeature {
+  ProgramNotificationsFeature()
+      : super(
+          code: FeatureConstants.programNotifications,
+          isEnabled: false,
+        );
+
+  factory ProgramNotificationsFeature.fromJson(Map<String, dynamic> json) =>
+      ProgramNotificationsFeature();
+
+  @override
+  bool get canBeDisabled => false;
 }

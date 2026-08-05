@@ -24,6 +24,7 @@ BEGIN
         SELECT
             jsonb_build_object(
                 'id', e.id,
+                'aggregate_version', COALESCE(av.version, 0),
                 'is_hidden', e.is_hidden,
                 'title', e.title,
                 'start_time', e.start_time,
@@ -60,6 +61,11 @@ BEGIN
             public.events AS e
         LEFT JOIN
             public.places AS p ON e.place = p.id
+        LEFT JOIN public.client_aggregate_versions av
+            ON av.aggregate_type = 'event'
+           AND av.scope_type = 'occasion'
+           AND av.scope_id = p_occasion_id
+           AND av.aggregate_id = e.id::text
         WHERE
             e.occasion = p_occasion_id
         ORDER BY

@@ -1,7 +1,8 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/activities/activities_component_strings.dart';
 import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/unit/unit_model.dart';
@@ -201,8 +202,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText:
-                          "ActivitiesComponentStrings.hintSearchEvents".tr(),
+                      hintText: ActivitiesComponentStrings.hintSearchEvents,
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: ThemeConfig.whiteColor(context),
@@ -270,7 +270,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                 padding: const EdgeInsets.symmetric(
                     vertical: 16.0, horizontal: 16.0),
                 child: Text(
-                  "Happening Now".tr(),
+                  CommonStrings.happeningNow,
                   style: const TextStyle(
                       fontSize: 24, fontWeight: FontWeight.bold),
                 ),
@@ -305,7 +305,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                 padding: const EdgeInsets.symmetric(
                     vertical: 16.0, horizontal: 16.0),
                 child: Text(
-                  "Upcoming Events".tr(),
+                  CommonStrings.upcomingEvents,
                   style: const TextStyle(
                       fontSize: 24, fontWeight: FontWeight.bold),
                 ),
@@ -339,7 +339,7 @@ abstract class UnitPageBaseState<T extends UnitPageBase> extends State<T> {
                 padding: const EdgeInsets.symmetric(
                     vertical: 16.0, horizontal: 16.0),
                 child: Text(
-                  "Past Events".tr(),
+                  CommonStrings.pastEvents,
                   style: const TextStyle(
                       fontSize: 24, fontWeight: FontWeight.bold),
                 ),

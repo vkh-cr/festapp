@@ -1,4 +1,7 @@
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/cleaning/db_cleaning.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
 import 'package:fstapp/components/occasion_settings/occasion_settings_model.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
@@ -10,6 +13,8 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/services/platform_helper.dart';
+import 'package:fstapp/components/search/db_search.dart';
+import 'package:fstapp/components/speakers/db_speakers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SynchroService {
@@ -34,19 +39,9 @@ class SynchroService {
   }
 
   static Future<void> refreshOfflineData() async {
-    final occasionId = _getCurrentOccasionId();
-    if (_isLoggedIn() && occasionId != null) {
-      var userInfo = await _getFullUserInfo();
-      await OfflineDataService.saveUserInfo(userInfo);
-      var bundle =
-          await DbEvents.getMyEventsAndActivities(occasionId, true);
-      await OfflineDataService.saveAllActivities(bundle!.activities);
-      var userInventoryBundle = await DbInventoryPools.getUserInventory();
-      await OfflineDataService.saveUserInventoryBundle(userInventoryBundle);
-    } else {
-      await OfflineDataService.deleteUserInfo();
-    }
+    await refreshUserOfflineData();
 
+    final occasionId = _getCurrentOccasionId();
     var places = await DbPlaces.getAllPlaces();
     await OfflineDataService.saveAllPlaces(places);
 
@@ -62,18 +57,62 @@ class SynchroService {
     var messages = await DbNews.getAllNewsMessages();
     await OfflineDataService.saveAllMessages(messages);
 
-    if (PlatformHelper.isPwaInstalledOrNative()) {
-      var events = await DbEvents.getAllEvents(occasionId!, true);
+    // Speakers are core — always cached when an occasion is present (R7).
+    if (occasionId != null) {
+      final speakers =
+          await DbSpeakers.getSpeakers(occasionId, includeDescription: true);
+      await OfflineDataService.saveSpeakers(speakers);
+
+      // Cleaning statuses are public data — cache them so the toilet list and
+      // map pin colors survive offline (R2.2). Own try/catch: a cleaning
+      // failure must not break the rest of the sync chain.
+      if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning)) {
+        try {
+          final status = await DbCleaning.getStatus(occasionId);
+          await OfflineDataService.saveCleaningStatus(
+              status.places, DateTime.now());
+        } catch (_) {
+          // Best-effort cache only.
+        }
+      }
+    }
+
+    // Full event list (incl. HTML descriptions) — cached on every platform,
+    // plain browser tabs included (R5). Guarded: an anonymous web visit
+    // without an occasion used to hit `occasionId!` here.
+    if (occasionId != null) {
+      var events = await DbEvents.getAllEvents(occasionId, true);
       await OfflineDataService.saveAllEvents(events);
     }
 
     await DbEvents.synchronizeMySchedule();
+
+    // Refresh the GlobalSearch offline index from the freshly cached data.
+    await DbSearch.rebuildOfflineIndex();
+
+    // One "last synced" stamp for the whole bundle (the offline banner).
+    await OfflineDataService.saveLastSyncedAt(DateTime.now());
+  }
+
+  /// Refreshes the signed-in user's profile, activities, and stay assignment.
+  /// Kept separate so startup can make this private offline snapshot available
+  /// without blocking first paint on the complete public-data refresh.
+  static Future<void> refreshUserOfflineData() async {
+    final occasionId = _getCurrentOccasionId();
+    if (_isLoggedIn() && occasionId != null) {
+      var userInfo = await _getFullUserInfo();
+      await OfflineDataService.saveUserInfo(userInfo);
+      var bundle = await DbEvents.getMyEventsAndActivities(occasionId, true);
+      await OfflineDataService.saveAllActivities(bundle!.activities);
+      var userInventoryBundle = await DbInventoryPools.getUserInventory();
+      await OfflineDataService.saveUserInventoryBundle(userInventoryBundle);
+    } else {
+      await OfflineDataService.deleteUserInfo();
+    }
   }
 
   static Future<OccasionLinkModel> getAppConfig(LinkModel link) async {
-
-
-    var data = await _supabase.rpc("get_app_config_v217", params: {
+    var data = await _supabase.rpc("get_app_config_v219", params: {
       "data_in": {
         "link": link.occasionLink,
         "form_link": link.formLink,
@@ -82,7 +121,6 @@ class SynchroService {
         "platform": await PlatformHelper.getPlatform()
       }
     });
-
 
     return OccasionLinkModel.fromJson(data);
   }

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/search/global_search_dialog.dart';
+import 'package:fstapp/components/search/search_strings.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/logo_widget.dart';
@@ -46,10 +50,22 @@ class UniversalHeader extends StatelessWidget {
               },
               child: LogoWidget(height: 60),
             ),
-            UserHeaderWidget(
-              onSignIn: onSignIn,
-              onAdminPressed: onAdminPressed,
-            ), // Pass callback here
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (FeatureService.isFeatureEnabled(
+                    FeatureConstants.globalSearch))
+                  IconButton(
+                    tooltip: SearchStrings.tooltip,
+                    icon: const Icon(Icons.search),
+                    onPressed: () => GlobalSearchDialog.show(context),
+                  ),
+                UserHeaderWidget(
+                  onSignIn: onSignIn,
+                  onAdminPressed: onAdminPressed,
+                ),
+              ],
+            ),
           ],
         ),
       ),

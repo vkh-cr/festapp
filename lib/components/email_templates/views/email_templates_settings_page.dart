@@ -159,7 +159,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "Available Substitutions:".tr(),
+                        EmailTemplatesStrings.availableSubstitutions,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -175,10 +175,11 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
               // Subject text field.
               TextFormField(
                 initialValue: _subject,
-                decoration: InputDecoration(labelText: "Subject".tr()),
+                decoration:
+                    InputDecoration(labelText: EmailTemplatesStrings.subject),
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(
-                      errorText: "Subject is required".tr()),
+                      errorText: EmailTemplatesStrings.subjectRequired),
                 ]),
                 onSaved: (val) => _subject = val,
                 style: TextStyle(
@@ -198,7 +199,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                   ),
                 ),
                 child: Text(
-                  "Email Template Content".tr(),
+                  EmailTemplatesStrings.emailTemplateContent,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -236,7 +237,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                         });
                       }
                     },
-                    child: Text("Edit content".tr()),
+                    child: Text(CommonStrings.editContent),
                   ),
                   if ((widget.template.occasion != null &&
                           widget.template.occasion ==

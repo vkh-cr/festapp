@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -7,10 +8,11 @@ import 'package:fstapp/components/features/schedule_feature.dart';
 class ThemeConfig {
   static bool isDarkMode(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
-  static bool isDarkModeEnabled = true;
+  static const bool isDarkModeEnabled = true;
+  static const AdaptiveThemeMode defaultThemeMode = AdaptiveThemeMode.light;
 
   // Base theme to hold common properties
-  static final fontFamily = "Futura PT";
+  static final fontFamily = "Futura";
   static ThemeData baseTheme() => ThemeData(
       fontFamily: fontFamily,
       useMaterial3: false,
@@ -36,8 +38,8 @@ class ThemeConfig {
           primaryColor: dddPrimary,
           colorScheme: ColorScheme.fromSwatch(
             primarySwatch: ThemeConfig.dddPrimary.getMaterialColorFromColor(),
-          ).copyWith(
             brightness: Brightness.dark,
+          ).copyWith(
             surface: dddPrimary
                 .changeColorSaturation(0.06)
                 .changeColorLightness(0.20),
@@ -54,21 +56,18 @@ class ThemeConfig {
 
   static Color surfaceColor(BuildContext context) => grey200(context);
   static Color seed1 = const Color(0xFF253759);
-  static Color seed2 = const Color(0xFF80BDF2); // brighter
-  static Color seed3 = const Color(0xFF4465A6); // darker
+  static Color seed2 = const Color(0xFF80BDF2);
+  static Color seed3 = const Color(0xFF4465A6);
   static Color seed4 = const Color(0xFF0D0D0D);
 
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
   static Color dddPrimary = seed2;
-  static Color lllPrimary = seed3;
+  static Color lllPrimary = seed1;
 
-  static Color dddBackground =
-      seed3.changeColorSaturation(0.08).changeColorLightness(0.14);
-  static Color lllBackground =
-      seed2.changeColorSaturation(0.10).changeColorLightness(0.92);
-  static Color dddText =
-      seed3.changeColorSaturation(0.1).changeColorLightness(0.82);
+  static Color dddBackground = seed3.changeColorSaturation(0.08).changeColorLightness(0.14);
+  static Color lllBackground = Color(0xFFe3e2d3);
+  static Color dddText = seed3.changeColorSaturation(0.1).changeColorLightness(0.82);
 
   static Color dddBackgroundDarker = const Color(0xFF191a1e);
 
@@ -98,15 +97,10 @@ class ThemeConfig {
       ? dddBackgroundDarker
       : whiteColor(context).changeColorLightness(0.95);
 
-  static Color timelineAll(BuildContext context) => isDarkMode(context)
-      ? seed2.changeColorSaturation(0.6)
-      : seed3.changeColorSaturation(0.4).changeColorLightness(0.4);
-  static Color timelineSplitLabelColor(BuildContext context) =>
-      timelineAll(context);
-  static Color timelineTabLabelColor(BuildContext context) =>
-      timelineAll(context);
-  static Color timelineTabIndicatorColor(BuildContext context) =>
-      timelineAll(context);
+  static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.6) : seed1.changeColorSaturation(0.4).changeColorLightness(0.4);
+  static Color timelineSplitLabelColor(BuildContext context) => timelineAll(context);
+  static Color timelineTabLabelColor(BuildContext context) => timelineAll(context);
+  static Color timelineTabIndicatorColor(BuildContext context) => timelineAll(context);
   static Color timelineColor(BuildContext context) => timelineAll(context);
   static Color timelineTextColor(BuildContext context) => blackColor(context);
   static Color timelineAddNewEventColor(BuildContext context) =>
@@ -126,8 +120,7 @@ class ThemeConfig {
   static Color indicatorTextColor(BuildContext context) =>
       whiteColorDarker(context); //header color
 
-  static Color appBarColor() =>
-      seed3.changeColorSaturation(0.4).changeColorLightness(0.10);
+  static Color appBarColor() => seed3.changeColorSaturation(0.5).changeColorLightness(0.10);
   static Color appBarColorNegative() => Colors.grey.changeColorLightness(0.8);
 
   static Color bottomNavBackgroundColor(BuildContext context) => appBarColor();
@@ -189,12 +182,9 @@ class ThemeConfig {
   static Color grey150(BuildContext context) =>
       isDarkMode(context) ? Colors.grey[850]! : Colors.grey[200]!;
 
-  static Color defaultHtmlViewColor(BuildContext context) =>
-      blackColor(context);
-  static Color htmlLinkColor(BuildContext context) =>
-      isDarkMode(context) ? seed2 : seed3;
-  static Color correctGuessColor(BuildContext context) =>
-      isDarkMode(context) ? seed3 : seed4;
+  static Color defaultHtmlViewColor(BuildContext context) => blackColor(context);
+  static Color htmlLinkColor(BuildContext context) => isDarkMode(context) ? seed2 : seed1;
+  static Color correctGuessColor(BuildContext context) => isDarkMode(context) ? seed3 : seed4;
 
   static Color textColorForBackground(Color background) {
     return background.computeLuminance() > 0.5 ? Colors.black : Colors.white;

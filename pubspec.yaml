@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.19.33+273
+version: 0.19.84+387
 
 environment:
   sdk: '>=3.0.0 <3.32.8'
@@ -38,6 +38,9 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  maplibre: 0.3.5
+  crypto: ^3.0.6
+  convert: ^3.1.2
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
   flutter_map_marker_popup: ^7.0.0
@@ -56,7 +59,12 @@ dependencies:
     git:
       url: https://github.com/the-airbender/quill_html_editor.git
       ref: a2beeb5bfd436e86f2635c8db1154b4190eeedb5
+  flutter_quill: ^11.5.1
+  vsc_quill_delta_to_html: ^1.0.5
   trina_grid: ^2.1.1
+  # trina_grid's select-column popup requires a ShadTheme ancestor; we wrap
+  # our grids in one (see single_table_data_grid.dart).
+  shadcn_ui: ^0.43.0
   url_strategy: ^0.3.0
   desktop_drop: ^0.7.0
   csv: ^6.0.0
@@ -126,6 +134,13 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
 
+# maplibre_ios 0.3.5 publishes its Swift plugin class without a stable public
+# Objective-C declaration during a clean Release build. Keep this path override
+# until upstream exposes MapLibrePlugin.h before the Runner registrant compiles.
+dependency_overrides:
+  maplibre_ios:
+    path: packages/maplibre_ios
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -137,10 +152,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   fonts:
-    - family: Futura PT
+    - family: Futura
       fonts:
         - asset: fonts/Futura PT Book.ttf
         - asset: fonts/Futura PT Medium.ttf
+        - asset: fonts/Gill Sans Bold.otf
   assets:
     - assets/icons/
     - assets/translations/

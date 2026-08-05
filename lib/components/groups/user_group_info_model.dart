@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/groups/group_strings.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/components/information/information_model.dart';
@@ -11,6 +11,7 @@ import '../map/place_model.dart';
 import 'group_participant_model.dart';
 
 class UserGroupInfoModel extends ITrinaRowModel {
+  static const String aggregateVersionColumn = TrinaRowVersion.column;
   Map<int, String> checkpointTitlesDict = {};
 
   static const String progressColumn = "progress";
@@ -18,6 +19,21 @@ class UserGroupInfoModel extends ITrinaRowModel {
   static const String participantsManagementColumn = "participantsManagement";
   static const String isAdminColumn = "is_admin";
   static const String modelReference = "modelReference";
+
+  /// Grid cells store the complete place object so saving can retain both the
+  /// selected ID and the immediately renderable title. A text column rejects
+  /// that object before Trina can mark the row as changed.
+  static TrinaColumnType placeColumnType() => TrinaColumnType.custom(
+        defaultValue: null,
+        isValid: (value) => value == null || value is PlaceModel,
+        compare: (a, b) {
+          final aTitle = a is PlaceModel ? a.title ?? '' : '';
+          final bTitle = b is PlaceModel ? b.title ?? '' : '';
+          return aTitle.compareTo(bTitle);
+        },
+        toDisplayString: (value) =>
+            value is PlaceModel ? value.toBasicString() : '',
+      );
 
   @override
   int? id;
@@ -29,6 +45,10 @@ class UserGroupInfoModel extends ITrinaRowModel {
   Map<String, dynamic>? data;
   Set<GroupParticipantModel>? participants = {};
   bool? isAdmin;
+  int? persistedPlaceId;
+  bool persistedPlaceWasPrivate;
+  bool shouldSavePlace = false;
+  int aggregateVersion;
 
   UserGroupInfoModel({
     required this.id,
@@ -40,20 +60,27 @@ class UserGroupInfoModel extends ITrinaRowModel {
     this.placeId,
     this.participants,
     this.isAdmin,
+    this.persistedPlaceId,
+    this.persistedPlaceWasPrivate = false,
+    this.aggregateVersion = 0,
   });
 
   factory UserGroupInfoModel.fromJson(Map<String, dynamic> json) {
+    final place = json[Tb.places.table] != null
+        ? PlaceModel.fromJson(json[Tb.places.table])
+        : (json[PlaceModel.placeObjectColumn] ?? json['placeData']) != null
+            ? PlaceModel.fromJson(
+                json[PlaceModel.placeObjectColumn] ?? json['placeData'])
+            : null;
     return UserGroupInfoModel(
       id: json[Tb.user_group_info.id],
       title: json[Tb.user_group_info.title],
       type: json[Tb.user_group_info.type],
       data: json[Tb.user_group_info.data],
       placeId: json[Tb.user_group_info.place],
-      place: json[Tb.places.table] != null
-          ? PlaceModel.fromJson(json[Tb.places.table])
-          : json[PlaceModel.placeObjectColumn] != null
-              ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
-              : null,
+      place: place,
+      persistedPlaceId: json[Tb.user_group_info.place] ?? place?.id,
+      persistedPlaceWasPrivate: place?.isPrivateGroupLocation ?? false,
       description: json[Tb.user_group_info.description],
       participants: json.containsKey(Tb.user_groups.table)
           ? Set<GroupParticipantModel>.from(json[Tb.user_groups.table]
@@ -63,6 +90,7 @@ class UserGroupInfoModel extends ITrinaRowModel {
                   .map((p) => GroupParticipantModel.fromJson(p)))
               : {},
       isAdmin: json[isAdminColumn],
+      aggregateVersion: TrinaRowVersion.read(json),
     );
   }
 
@@ -75,12 +103,14 @@ class UserGroupInfoModel extends ITrinaRowModel {
     model.description =
         DataGridHelper.getValueOrNull(json[Tb.user_group_info.description]);
     model.place = json[Tb.user_group_info.place] as PlaceModel?;
+    model.aggregateVersion = TrinaRowVersion.read(json);
     return model;
   }
 
   static UserGroupInfoModel fromGamePlutoJson(Map<String, dynamic> json) {
     return UserGroupInfoModel(
         id: json[Tb.user_group_info.id],
+        aggregateVersion: TrinaRowVersion.read(json),
         title: json[Tb.user_group_info.title],
         description: json[Tb.user_group_info.description],
         type: InformationModel.gameType,
@@ -101,6 +131,7 @@ class UserGroupInfoModel extends ITrinaRowModel {
     var progressText = "${checkpoints.length} [${checkpoints.join(",")}]";
 
     return TrinaRow(cells: {
+      aggregateVersionColumn: TrinaRowVersion.cell(aggregateVersion),
       Tb.user_group_info.id: TrinaCell(value: id),
       Tb.user_group_info.title: TrinaCell(value: title),
       Tb.user_group_info.description: TrinaCell(value: description),
@@ -116,7 +147,7 @@ class UserGroupInfoModel extends ITrinaRowModel {
 
   String getParticipantsDisplayValue() {
     if (participants == null || participants!.isEmpty) {
-      return "No one assigned".tr();
+      return GroupsStrings.noOneAssigned;
     }
     final leader = participants!.firstWhereOrNull((p) => p.isAdmin == true);
     final members = participants!.where((p) => p.isAdmin != true);
@@ -129,6 +160,11 @@ class UserGroupInfoModel extends ITrinaRowModel {
       parts.add(members.map((p) => p.userInfo!.toFullNameString()).join(', '));
     }
     return parts.join(' | ');
+  }
+
+  void setPlaceForEditing(PlaceModel? value, {bool savePlace = false}) {
+    place = value;
+    shouldSavePlace = savePlace;
   }
 
   Map<String, dynamic> toJson() {
@@ -144,6 +180,11 @@ class UserGroupInfoModel extends ITrinaRowModel {
           ?.map((p) => {
                 "user_id": p.userInfo?.id,
                 "is_admin": p.isAdmin ?? false,
+                // Full user info so the offline cache round-trip keeps the
+                // member names (this json is only consumed by the offline
+                // cache — DbGroups builds its own payloads for backend
+                // writes; GroupParticipantModel.fromJson reads this key).
+                Tb.user_info.table: p.userInfo?.toJson(),
               })
           .toList(),
     };

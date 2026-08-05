@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -72,7 +71,7 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
         ),
         TrinaColumn(
           hide: true,
-          title: "Id".tr(),
+          title: CommonStrings.id,
           field: Tb.user_group_info.id,
           type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
@@ -88,14 +87,14 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
           width: 200,
         ),
         TrinaColumn(
-          title: "Progress".tr(),
+          title: CommonStrings.progress,
           field: UserGroupInfoModel.progressColumn,
           readOnly: true,
           type: TrinaColumnType.text(),
           width: 200,
         ),
         TrinaColumn(
-          title: "Participants".tr(),
+          title: CommonStrings.participants,
           // Using the standard participants column field, but the logic now uses the modelReference
           field: UserGroupInfoModel.participantsManagementColumn,
           type: TrinaColumnType.text(defaultValue: <UserInfoModel>{}),
@@ -126,7 +125,7 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
                     iconSize: 20,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    tooltip: "Manage participants".tr(),
+                    tooltip: GroupsStrings.manageParticipantsTooltip,
                     onPressed: () async {
                       // Ensure user data is fully populated from the map
                       if (model.participants != null &&

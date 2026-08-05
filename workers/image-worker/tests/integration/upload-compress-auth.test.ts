@@ -66,7 +66,20 @@ const ANON_KEY = env('SUPABASE_ANON_KEY');
 // OCCASION_ID is auto-discovered from DB in beforeAll if not provided.
 let OCCASION_ID = process.env.TEST_OCCASION_ID || '';
 
-const skip = !SUPABASE_URL || !DATABASE_URL || !ANON_KEY;
+function isLocalDatabase(databaseUrl: string): boolean {
+  try {
+    const hostname = new URL(databaseUrl).hostname;
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+  } catch {
+    return false;
+  }
+}
+
+// The remote worker validates JWTs against the configured Supabase project.
+// A user inserted into the isolated local database can never authenticate
+// there, so keep this remote integration test out of local schema test runs.
+const skip =
+  !SUPABASE_URL || !DATABASE_URL || !ANON_KEY || isLocalDatabase(DATABASE_URL);
 
 // Minimal valid JPEG (1x1 pixel, 107 bytes)
 const MINIMAL_JPEG = new Uint8Array([

@@ -208,7 +208,7 @@ export class FormPage extends Component {
              }
              
              const path = `/${occasionLink}/reservations`;
-             RouterService.navigateExternal(path);
+             RouterService.openExternalUrl(path, { inCurrentWindow: true });
         };
 
         document.body.appendChild(btn);

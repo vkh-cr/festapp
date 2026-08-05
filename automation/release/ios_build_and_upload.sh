@@ -1,143 +1,41 @@
 #!/bin/bash
+set -euo pipefail
 
-# Exit if any command fails
-set -e
-
-# Step 0: Load environment variables
-SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 ENV_SCRIPT="$SCRIPT_DIR/.set_appstore_env.sh"
-
-if [ -f "$ENV_SCRIPT" ]; then
-  echo "🔄 Loading App Store Connect environment variables..."
-  source "$ENV_SCRIPT"
-else
-  echo "⚠️  Warning: Environment script not found: $ENV_SCRIPT"
+if [ ! -f "$ENV_SCRIPT" ]; then echo "Missing $ENV_SCRIPT"; exit 1; fi
+source "$ENV_SCRIPT"
+: "${APP_STORE_CONNECT_KEY_ID:?missing APP_STORE_CONNECT_KEY_ID}"
+: "${APP_STORE_CONNECT_ISSUER_ID:?missing APP_STORE_CONNECT_ISSUER_ID}"
+: "${APP_STORE_CONNECT_KEY_PATH:?missing APP_STORE_CONNECT_KEY_PATH}"
+if [ ! -f "$APP_STORE_CONNECT_KEY_PATH" ]; then
+  echo "App Store Connect key not found: $APP_STORE_CONNECT_KEY_PATH"
+  exit 1
+fi
+key_mode="$(stat -f '%Lp' "$APP_STORE_CONNECT_KEY_PATH")"
+if [ $((8#$key_mode & 077)) -ne 0 ]; then
+  echo "App Store Connect key must not be accessible by group/others."
   exit 1
 fi
 
-# Check required variables
-if [[ -z "$APP_STORE_CONNECT_KEY_ID" || -z "$APP_STORE_CONNECT_ISSUER_ID" ]]; then
-  echo "❌ Missing required environment variables: APP_STORE_CONNECT_KEY_ID or APP_STORE_CONNECT_ISSUER_ID"
+cd "$PROJECT_ROOT"
+node automation/release/store_preflight.mjs --local --read-only
+target_version="$(node -p "require('./automation/release/app_store_config.json').target.version")"
+target_build="$(node automation/release/project_version.mjs --build)"
+"$SCRIPT_DIR/prepare_signing_keychain.sh"
+fvm flutter build ipa --release \
+  --build-name="$target_version" \
+  --build-number="$target_build" \
+  --export-options-plist="$SCRIPT_DIR/ExportOptions.plist"
+
+ipa_files=("$PROJECT_ROOT"/build/ios/ipa/*.ipa)
+if [ "${#ipa_files[@]}" -ne 1 ] || [ ! -f "${ipa_files[0]}" ]; then
+  echo "Expected exactly one IPA in build/ios/ipa."
   exit 1
 fi
-
-# Step 1: Prompt for release notes
-echo "📝 What’s new in this version? (release notes):"
-read -r RELEASE_NOTES
-export RELEASE_NOTES
-
-# Step 2: Build IPA using FVM
-echo "📦 Building IPA with FVM..."
-cd .. # Go to project root
-
-fvm flutter build ipa --release
-
-# Step 3: Determine IPA name and app identifier from Info.plist
-INFO_PLIST="ios/Runner/Info.plist"
-if [ ! -f "$INFO_PLIST" ]; then
-  echo "❌ Info.plist not found at $INFO_PLIST"
-  exit 1
-fi
-
-# Get bundle name for IPA filename
-APP_NAME=$(plutil -extract CFBundleName xml1 -o - "$INFO_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
-APP_NAME=${APP_NAME:-Runner}
-
-# Get bundle identifier for FASTLANE from the built .app Info.plist
-APP_PLIST="build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist"
-
-if [ ! -f "$APP_PLIST" ]; then
-  echo "❌ App Info.plist not found: $APP_PLIST"
-  exit 1
-fi
-
-APP_IDENTIFIER=$(plutil -extract CFBundleIdentifier xml1 -o - "$APP_PLIST" | \
-  grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
-
-export FASTLANE_APP_IDENTIFIER="$APP_IDENTIFIER"
-echo "📱 App Identifier: $FASTLANE_APP_IDENTIFIER"
-
-# Construct expected IPA path
-IPA_PATH="build/ios/ipa/${APP_NAME}.ipa"
-
-# If IPA not found, let user select one
-if [ ! -f "$IPA_PATH" ]; then
-  echo "❌ IPA not found at expected path: $IPA_PATH"
-  echo "🔍 Searching for IPA files..."
-  IPA_FILES=(build/ios/ipa/*.ipa)
-
-  if [ ${#IPA_FILES[@]} -eq 0 ]; then
-    echo "❌ No IPA files found."
-    exit 1
-  fi
-
-  echo "✅ Found IPA files:"
-  select IPA_PATH in "${IPA_FILES[@]}"; do
-    if [ -n "$IPA_PATH" ]; then
-      echo "📁 Selected: $IPA_PATH"
-      break
-    fi
-  done
-else
-  echo "✅ Using IPA: $IPA_PATH"
-fi
-
-# Step 3.5: Extract version and build number from compiled Info.plist
-if [ ! -f "$APP_PLIST" ]; then
-  echo "❌ Compiled Info.plist not found at: $APP_PLIST"
-  exit 1
-fi
-
-IPA_VERSION=$(plutil -extract CFBundleShortVersionString xml1 -o - "$APP_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
-IPA_BUILD_NUMBER=$(plutil -extract CFBundleVersion xml1 -o - "$APP_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
-
-export IPA_VERSION
-export IPA_BUILD_NUMBER
-
-echo "📦 IPA Version: $IPA_VERSION"
-echo "🔢 IPA Build Number: $IPA_BUILD_NUMBER"
-
-# Step 4: Copy API key to expected location
-TARGET_KEY_DIR="$HOME/.appstoreconnect/private_keys"
-PRIVATE_KEY_NAME="AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
-SOURCE_KEY_PATH="$SCRIPT_DIR/$PRIVATE_KEY_NAME"
-TARGET_KEY_PATH="$TARGET_KEY_DIR/$PRIVATE_KEY_NAME"
-
-mkdir -p "$TARGET_KEY_DIR"
-
-if [ ! -f "$SOURCE_KEY_PATH" ]; then
-  echo "❌ Private key missing: $SOURCE_KEY_PATH"
-  exit 1
-fi
-
-if [ ! -f "$TARGET_KEY_PATH" ]; then
-  echo "📁 Copying private key to $TARGET_KEY_PATH..."
-  cp "$SOURCE_KEY_PATH" "$TARGET_KEY_PATH"
-else
-  echo "✅ Private key already exists."
-fi
-
-# Step 5: Prepare and run Fastlane
-export IPA_FILENAME="$(basename "$IPA_PATH")"
-FASTLANE_DIR="$SCRIPT_DIR/fastlane"
-
-if command -v fastlane &> /dev/null; then
-  if [ ! -f "$FASTLANE_DIR/Fastfile" ]; then
-    echo "❌ Fastfile not found at: $FASTLANE_DIR/Fastfile"
-    exit 1
-  fi
-
-  echo "🚀 Running Fastlane to publish IPA..."
-  (
-    cd "$FASTLANE_DIR"
-    FASTLANE_SKIP_UPDATE_CHECK=1 \
-    FASTLANE_SKIP_INIT=true \
-    fastlane publish_ipa
-  )
-else
-  echo "❌ Fastlane not installed. Please run ./fastlane_setup.sh"
-  exit 1
-fi
-
-
-
+export IPA_PATH="${ipa_files[0]}"
+export FASTLANE_APP_IDENTIFIER="festapp.jm2025"
+echo "Uploading build only; submission and release are separate gates."
+cd "$SCRIPT_DIR/fastlane"
+FASTLANE_SKIP_UPDATE_CHECK=1 FASTLANE_SKIP_INIT=true fastlane upload_build

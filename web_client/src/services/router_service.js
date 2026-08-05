@@ -5,12 +5,12 @@ export class RouterService {
 
     static FORM_PATH_PREFIX = '/form/';
 
-    static navigateToExternal(url) {
-        window.open(url, '_blank');
-    }
-
-    static navigateExternal(url) {
-        window.location.href = url;
+    static openExternalUrl(url, { inCurrentWindow = false } = {}) {
+        if (inCurrentWindow) {
+            window.location.href = url;
+            return;
+        }
+        window.open(url, '_blank', 'noopener,noreferrer');
     }
 
     static navigateToOccasionApp(link) {
@@ -20,7 +20,7 @@ export class RouterService {
         // For now, simple href is safest to ensure full load or external handling.
         const cleanLink = link.split('?')[0];
         const path = `/${cleanLink}`;
-        window.location.href = path; 
+        RouterService.openExternalUrl(path, { inCurrentWindow: true });
     }
 
     static navigateToOccasion(link) {
@@ -59,17 +59,17 @@ export class RouterService {
 
     static navigateToLogin() {
         const url = RouterService.getLoginUrl();
-        window.location.href = url;
+        RouterService.openExternalUrl(url, { inCurrentWindow: true });
     }
 
     static navigateToAdmin() {
         const url = RouterService.getAdminUrl();
-        window.location.href = url;
+        RouterService.openExternalUrl(url, { inCurrentWindow: true });
     }
     
     static navigateToHandover() {
         const url = RouterService.getHandoverUrl();
-        window.location.href = url;
+        RouterService.openExternalUrl(url, { inCurrentWindow: true });
     }
 
     static getHandoverUrl() {
@@ -294,20 +294,14 @@ export class RouterService {
     static normalizeUrl(url) {
         let path = url;
 
-        // 1. Determine base to strip (Configured URL or dynamic localhost origin)
-        const matchedBase = AppConfig.compatibleUrls.find(u => u && url.startsWith(u));
-
-        if (matchedBase) {
-            path = url.substring(matchedBase.length);
-        } else if (url.includes("localhost")) {
-            try {
-                const uri = new URL(url);
-                if (url.startsWith(uri.origin)) {
-                    path = url.substring(uri.origin.length);
-                }
-            } catch (e) {
-                // Ignore invalid URLs
-            }
+        // Absolute URLs can come from any valid deployment origin, including
+        // Cloudflare preview domains. Routing depends on their path, never on
+        // whether the origin happens to be listed in compatibleUrls.
+        try {
+            const uri = new URL(url);
+            path = `${uri.pathname}${uri.search}${uri.hash}`;
+        } catch (_) {
+            // Relative and legacy malformed paths are normalized below.
         }
 
         // Handle malformed paths e.g. /https://domain.com/path

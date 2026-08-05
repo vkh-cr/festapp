@@ -1,5 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -7,19 +7,34 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
-import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/html/html_editor_widget.dart';
+import 'package:fstapp/components/html/native_html_editor_widget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/news/news_strings.dart';
+import 'package:fstapp/components/news/news_send_confirmation_dialog.dart';
+import 'package:fstapp/components/news/news_notification_audience_selector.dart';
+
+@visibleForTesting
+bool shouldUseNativeNewsEditor({
+  required bool isWeb,
+  required TargetPlatform platform,
+}) =>
+    isWeb;
 
 @RoutePage()
 class NewsFormPage extends StatefulWidget {
   static const ROUTE = "newsForm";
+  final Widget? editorOverride;
+  final bool? useNativeHtmlEditor;
 
-  const NewsFormPage({super.key});
+  const NewsFormPage({
+    super.key,
+    @visibleForTesting this.editorOverride,
+    @visibleForTesting this.useNativeHtmlEditor,
+  });
 
   @override
   _NewsFormPageState createState() => _NewsFormPageState();
@@ -28,7 +43,8 @@ class NewsFormPage extends StatefulWidget {
 class _NewsFormPageState extends State<NewsFormPage> {
   final _formKey = GlobalKey<FormBuilderState>();
   late QuillEditorController _controller;
-  final bool _sendWithNotification = true;
+  late NativeHtmlEditorController _nativeHtmlController;
+  NewsNotificationAudience? _audience;
   final FocusNode _toFocusNode = FocusNode();
   UserInfoModel? _currentUser;
 
@@ -36,6 +52,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
   void initState() {
     super.initState();
     _controller = QuillEditorController();
+    _nativeHtmlController = NativeHtmlEditorController();
   }
 
   @override
@@ -48,6 +65,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _nativeHtmlController.dispose();
     _toFocusNode.dispose();
     super.dispose();
   }
@@ -56,32 +74,81 @@ class _NewsFormPageState extends State<NewsFormPage> {
     Navigator.pop(context);
   }
 
-  Future<void> _sendPressed({bool isTest = false, bool process = false}) async {
-    var htmlContent = await _controller.getText();
+  Future<void> _sendPressed({bool process = false}) async {
+    var htmlContent = _usesNativeHtmlEditor
+        ? _nativeHtmlController.getHtml()
+        : await _controller.getText();
+    if (!mounted) return;
     htmlContent = HtmlHelper.removeColor(htmlContent);
+    if (HtmlHelper.htmlToSnippet(htmlContent, maxLen: 1).trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(NewsStrings.contentRequired)),
+      );
+      return;
+    }
     if (process == true) {
       htmlContent = HtmlHelper.detectAndReplaceLinks(htmlContent);
     }
     if (htmlContent.isNotEmpty) {
+      final heading =
+          _formKey.currentState?.fields["heading"]?.value as String?;
+      final headingForNotification = heading?.trim().isNotEmpty == true
+          ? heading!.trim()
+          : _currentUser!.name;
+      final audience = _audience!;
+      final sendsNotification = audience.sendsNotification;
+      final sendsToSelf = audience.sendsToSelfOnly ||
+          (sendsNotification && AppConfig.isPublicNotificationSendingDisabled);
+      final deliveryFields = audience.deliveryFields(
+        currentUserId: AuthService.currentUserId(),
+        forceSelfOnly: AppConfig.isPublicNotificationSendingDisabled,
+      );
+
+      if (sendsNotification) {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => NewsSendConfirmationDialog(
+            isSelfOnly: sendsToSelf,
+            isTest: !audience.publishesNews,
+            recipientIdentity: _currentUserIdentity,
+            heading: headingForNotification ?? '',
+            htmlContent: htmlContent,
+          ),
+        );
+        if (confirmed != true || !mounted) return;
+      }
+
       var toReturn = {
         "content": htmlContent,
-        "heading": _formKey.currentState?.fields["heading"]!.value,
+        "heading": heading,
         "heading_default": _currentUser!.name,
-        "with_notification":
-            _formKey.currentState?.fields["with_notification"]!.value,
-        if (isTest || AppConfig.isPublicNotificationSendingDisabled)
-          "to": [AuthService.currentUserId()],
-        if (isTest) "add_to_news": false,
+        ...deliveryFields,
       };
       Navigator.pop(context, toReturn);
-    } else {
-      AppLogger.debug('Content is required');
     }
   }
 
-  Future<void> _processAndSendTest() async {
-    _sendPressed(isTest: true, process: true);
+  String get _currentUserIdentity {
+    final name = _currentUser?.toFullNameString() ?? '';
+    final email = _currentUser?.email ?? '';
+    if (name.isNotEmpty && email.isNotEmpty) return '$name · $email';
+    if (name.isNotEmpty) return name;
+    return email;
   }
+
+  bool get _usesNativeHtmlEditor =>
+      widget.useNativeHtmlEditor ??
+      shouldUseNativeNewsEditor(
+        isWeb: kIsWeb,
+        platform: defaultTargetPlatform,
+      );
+
+  String get _publishButtonText => switch (_audience) {
+        NewsNotificationAudience.none => NewsStrings.publishWithoutNotification,
+        NewsNotificationAudience.selfTest => NewsStrings.publishAndSendSelf,
+        NewsNotificationAudience.everyone => NewsStrings.publishAndSendEveryone,
+        null => NewsStrings.selectRecipients,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -89,73 +156,127 @@ class _NewsFormPageState extends State<NewsFormPage> {
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text("Create news").tr(),
+          title: Text(NewsStrings.createNews),
           leading: BackButton(
             onPressed: () => RouterService.popOrHome(context),
           ),
         ),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: FormBuilder(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        FormBuilderTextField(
-                          name: "heading",
-                          focusNode: _toFocusNode,
-                          decoration: InputDecoration(
-                              labelText: "Heading".tr(),
-                              hintText: _currentUser?.name,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always),
-                        ),
-                        FormBuilderCheckbox(
-                          name: 'with_notification',
-                          initialValue: _sendWithNotification,
-                          title: const Text("Send with notification").tr(),
-                        ),
-                      ],
+        body: SingleChildScrollView(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: FormBuilder(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          FormBuilderTextField(
+                            name: "heading",
+                            focusNode: _toFocusNode,
+                            decoration: InputDecoration(
+                                labelText: NewsStrings.heading,
+                                hintText: _currentUser?.name,
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always),
+                          ),
+                          NewsNotificationAudienceSelector(
+                            selected: _audience,
+                            currentUserIdentity: _currentUserIdentity,
+                            allowEveryone:
+                                !AppConfig.isPublicNotificationSendingDisabled,
+                            onChanged: (value) =>
+                                setState(() => _audience = value),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                HtmlEditorWidget(
-                  initialContent: '',
-                  controller: _controller,
-                ),
-              ],
-            ),
-          ),
-        ),
-        bottomNavigationBar: Container(
-          width: double.maxFinite,
-          color: Colors.grey.shade200,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: IntrinsicWidth(
-              child: Row(
-                children: [
-                  ButtonsHelper.bottomBarButton(
-                    onPressed: _stornoPressed,
-                    text: CommonStrings.storno,
-                  ),
-                  ButtonsHelper.bottomBarButton(
-                    onPressed: _processAndSendTest,
-                    text: "Test",
-                  ),
-                  ButtonsHelper.bottomBarButton(
-                    onPressed: () => _sendPressed(process: true),
-                    text: "Send".tr(),
+                  widget.editorOverride ??
+                      (_usesNativeHtmlEditor
+                          ? NativeHtmlEditorWidget(
+                              controller: _nativeHtmlController,
+                            )
+                          : HtmlEditorWidget(
+                              initialContent: '',
+                              controller: _controller,
+                            )),
+                  _NewsFormActions(
+                    onCancel: _stornoPressed,
+                    onPublish: _audience == null
+                        ? null
+                        : () => _sendPressed(process: true),
+                    publishLabel: _publishButtonText,
                   ),
                 ],
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NewsFormActions extends StatelessWidget {
+  final VoidCallback onCancel;
+  final VoidCallback? onPublish;
+  final String publishLabel;
+
+  const _NewsFormActions({
+    required this.onCancel,
+    required this.onPublish,
+    required this.publishLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      child: SizedBox(
+        width: double.infinity,
+        child: Wrap(
+          alignment: WrapAlignment.end,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            TextButton(
+              onPressed: onCancel,
+              style: TextButton.styleFrom(
+                foregroundColor: colors.onSurfaceVariant,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
+              ),
+              child: Text(CommonStrings.storno),
+            ),
+            ElevatedButton.icon(
+              onPressed: onPublish,
+              icon: const Icon(Icons.publish_outlined, size: 20),
+              label: Text(publishLabel),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
+                disabledBackgroundColor: colors.onSurface.withAlpha(30),
+                disabledForegroundColor: colors.onSurface.withAlpha(95),
+                elevation: onPublish == null ? 0 : 2,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

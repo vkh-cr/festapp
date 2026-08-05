@@ -1,8 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/eshop/db_tickets.dart';
+import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/scan/scan_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -45,8 +46,7 @@ class TicketCodeHelper {
               bool confirm = await DialogHelper.showConfirmationDialog(
                   context,
                   titleMessage,
-                  "By generating a new code, the old one will be replaced and will no longer work."
-                      .tr());
+                  OrdersStrings.generateNewCodeWarning);
               if (confirm) {
                 String newCode = generateRandomCode(5);
                 await DbTickets.updateScanCode(formLink, newCode);
@@ -61,12 +61,12 @@ class TicketCodeHelper {
 
             void handleCopyCode() {
               Clipboard.setData(ClipboardData(text: generatedCode));
-              ToastHelper.Show(context, "Copied to clipboard".tr());
+              ToastHelper.Show(context, CommonStrings.copiedToClipboard);
             }
 
             void handleCopyLink() {
               Clipboard.setData(ClipboardData(text: fullLink));
-              ToastHelper.Show(context, "Copied to clipboard".tr());
+              ToastHelper.Show(context, CommonStrings.copiedToClipboard);
             }
 
             return AlertDialog(
@@ -90,9 +90,9 @@ class TicketCodeHelper {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Provide the following link or code to the people who will be checking the tickets.",
+                        OrdersStrings.provideScanLinkInstruction,
                         style: TextStyle(fontSize: 15),
-                      ).tr(),
+                      ),
                       const SizedBox(height: 28),
                       Row(
                         children: [
@@ -106,7 +106,7 @@ class TicketCodeHelper {
                           ),
                           IconButton(
                             icon: Icon(Icons.copy),
-                            tooltip: 'Copy Link'.tr(),
+                            tooltip: OrdersStrings.copyLink,
                             onPressed:
                                 fullLink.isNotEmpty ? handleCopyLink : null,
                           ),
@@ -123,7 +123,7 @@ class TicketCodeHelper {
                           ),
                           IconButton(
                             icon: Icon(Icons.copy),
-                            tooltip: 'Copy'.tr(),
+                            tooltip: OrdersStrings.copy,
                             onPressed: generatedCode.isNotEmpty
                                 ? handleCopyCode
                                 : null,
@@ -134,7 +134,7 @@ class TicketCodeHelper {
                       Center(
                         child: ElevatedButton(
                           onPressed: handleGenerateCode,
-                          child: Text("Generate New Code").tr(),
+                          child: Text(OrdersStrings.generateNewCode),
                         ),
                       ),
                     ],

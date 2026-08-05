@@ -10,9 +10,11 @@ import 'package:fstapp/components/forms/views/reservation_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/js/js_interop.dart';
+import 'package:fstapp/services/launch_url_service.dart';
 import 'dart:async';
 
 import 'package:fstapp/components/forms/views/form_page.dart';
+import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -63,9 +65,12 @@ class RouterService {
     if (kIsWeb && AppConfig.isWebclientSupported) {
       // List of paths that should be handled by the web client
       // This can be expanded. For now, we know 'form' is one.
-    // Check against list of known web-client routes
+      // Check against list of known web-client routes
       if (path.startsWith("/${FormPage.ROUTE}/")) {
-        navigateExternal(path);
+        unawaited(LaunchUrlService.openExternalUrl(
+          path,
+          inCurrentWindow: true,
+        ));
         return Future.value(null);
       }
     }
@@ -132,10 +137,15 @@ class RouterService {
   }
 
   static void scheduleBack(BuildContext context) {
-    //if(context.router.canPop()){
-    context.router.replace(ScheduleRoute());
-    context.router.maybePopTop();
-    //}
+    if (context.router.canPop()) {
+      context.router.maybePop();
+    } else {
+      // No history (e.g. event page opened directly via URL): replace with
+      // the occasion schedule. Navigate by path so the router resolves the
+      // schedule variant configured for this occasion (basic/light/advanced);
+      // replace(ScheduleRoute()) throws on occasions not using "advanced".
+      context.router.replacePath(getCurrentLink() + EventPage.ROUTE);
+    }
   }
 
   static bool canPop(BuildContext context) => context.router.canPop();
@@ -167,7 +177,13 @@ class RouterService {
   }
 
   static Uri getCurrentUri() {
-    return Uri.base;
+    return getCurrentBrowserUri();
+  }
+
+  /// Returns the actual browser address rather than [Uri.base], whose value on
+  /// web is affected by the document's `<base href>` and can lose a deep link.
+  static Uri getCurrentBrowserUri() {
+    return Uri.parse(getCurrentBrowserUrl());
   }
 
   static String getCurrentUriWithOccasion() {
@@ -204,14 +220,20 @@ class RouterService {
     // Check if the current path is already the target home path
     if (context.routeData.path == targetHomePath) {
       if (kIsWeb && AppConfig.isWebclientSupported) {
-        navigateExternal("/");
+        await LaunchUrlService.openExternalUrl(
+          "/",
+          inCurrentWindow: true,
+        );
       }
       // Already at home, so don't navigate
       return;
     }
 
     if (kIsWeb && AppConfig.isWebclientSupported) {
-      navigateExternal("/");
+      await LaunchUrlService.openExternalUrl(
+        "/",
+        inCurrentWindow: true,
+      );
       return;
     }
 
@@ -335,15 +357,6 @@ class RouterService {
   static void changeUrl(String newUrl) {
     if (kIsWeb) {
       _js.changeUrl(newUrl);
-    }
-  }
-
-  static void navigateExternal(String url) {
-    if (kIsWeb) {
-      _js.navigateExternal(url);
-    } else {
-      // Fallback or no-op for non-web
-      AppLogger.debug("External navigation not supported on this platform: $url");
     }
   }
 

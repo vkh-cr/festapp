@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -32,7 +31,7 @@ class _InformationContentState extends State<InformationContent> {
       columns: [
         TrinaColumn(
           hide: true,
-          title: "Id".tr(),
+          title: CommonStrings.id,
           field: Tb.information.id,
           type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
@@ -75,7 +74,7 @@ class _InformationContentState extends State<InformationContent> {
           },
         ),
         TrinaColumn(
-          title: "Order".tr(),
+          title: CommonStrings.order,
           field: Tb.information.order,
           type: TrinaColumnType.number(defaultValue: null),
           applyFormatterInEditing: true,

@@ -1,19 +1,37 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/organization/organization_model.dart';
 import 'package:fstapp/services/launch_url_service.dart';
+import 'package:fstapp/services/platform_helper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 
 class UpdateService {
-  static String? versionRecommended;
-  static String? versionLink;
+  static List<PlatformModel> _platforms = const [];
+  static String _configurationSignature = '';
   static bool alreadyChecked = false;
   static Future<void>? _pendingCheck;
 
+  static void configurePlatforms(List<PlatformModel>? platforms) {
+    final next = List<PlatformModel>.unmodifiable(platforms ?? const []);
+    final signature = next
+        .map((item) => '${item.platform}|${item.prompt}|${item.link}')
+        .join('\n');
+    if (signature != _configurationSignature) {
+      _configurationSignature = signature;
+      alreadyChecked = false;
+    }
+    _platforms = next;
+  }
+
   static Future<void> versionCheck(BuildContext context) async {
     if (alreadyChecked) return;
-    // Deduplicate concurrent calls — reuse the pending future.
-    if (_pendingCheck != null) return;
+    // Deduplicate concurrent calls and let every caller observe completion.
+    final pending = _pendingCheck;
+    if (pending != null) {
+      await pending;
+      return;
+    }
     _pendingCheck = _doVersionCheck(context);
     try {
       await _pendingCheck;
@@ -23,45 +41,87 @@ class UpdateService {
   }
 
   static Future<void> _doVersionCheck(BuildContext context) async {
-    if (versionRecommended != null) {
-      var packageInfo = await PackageInfo.fromPlatform();
-      String currentVersion = packageInfo.version;
+    final platform = _nativePlatformName();
+    final target = resolveNativeTarget(_platforms, platform);
+    if (target == null) {
+      alreadyChecked = true;
+      return;
+    }
 
-      if (_isVersionOutdated(currentVersion, versionRecommended!)) {
-        bool updateConfirmed = await DialogHelper.showConfirmationDialog(
-            context,
-            "New Version Available".tr(),
-            "Update the app to the latest version to access all features.".tr(),
-            confirmButtonMessage: "Update".tr());
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (!isVersionOutdated(packageInfo.version, target.prompt!)) {
+      alreadyChecked = true;
+      return;
+    }
+    if (!context.mounted) return;
 
-        if (updateConfirmed) {
-          _redirectToUpdate();
-        } else {
-          alreadyChecked = true;
-        }
-      }
+    final updateConfirmed = await DialogHelper.showConfirmationDialog(
+      context,
+      CommonStrings.newVersionAvailable,
+      CommonStrings.updateAppPrompt,
+      confirmButtonMessage: CommonStrings.update,
+    );
+    alreadyChecked = true;
+    if (updateConfirmed) {
+      await LaunchUrlService.openExternalUrl(target.link!);
     }
   }
 
-  static bool _isVersionOutdated(
-      String currentVersion, String versionRecommended) {
-    List<String> currentVersionParts = currentVersion.split('.');
-    List<String> recommendedVersionParts = versionRecommended.split('.');
+  static String? _nativePlatformName() {
+    if (!PlatformHelper.isNative) return null;
+    if (PlatformHelper.isIOS) return 'ios';
+    if (PlatformHelper.isAndroid) return 'droid';
+    return null;
+  }
 
-    for (int i = 0; i < recommendedVersionParts.length; i++) {
-      int current = int.parse(currentVersionParts[i]);
-      int recommended = int.parse(recommendedVersionParts[i]);
+  @visibleForTesting
+  static PlatformModel? resolveNativeTarget(
+    List<PlatformModel> platforms,
+    String? platform,
+  ) {
+    if (platform != 'ios' && platform != 'droid') return null;
+    for (final candidate in platforms) {
+      if (candidate.platform?.toLowerCase() == platform &&
+          candidate.prompt?.trim().isNotEmpty == true &&
+          candidate.link?.trim().isNotEmpty == true) {
+        return candidate;
+      }
+    }
+    return null;
+  }
 
-      if (current < recommended) {
+  @visibleForTesting
+  static bool isVersionOutdated(
+      String currentVersion, String recommendedVersion) {
+    final current = _parseVersion(currentVersion);
+    final recommended = _parseVersion(recommendedVersion);
+    if (current == null || recommended == null) return false;
+
+    final length = current.length > recommended.length
+        ? current.length
+        : recommended.length;
+    for (var index = 0; index < length; index++) {
+      final currentPart = index < current.length ? current[index] : 0;
+      final recommendedPart =
+          index < recommended.length ? recommended[index] : 0;
+      if (currentPart < recommendedPart) {
         return true;
-      } else if (current > recommended) {
+      } else if (currentPart > recommendedPart) {
         return false;
       }
     }
     return false;
   }
 
-  static void _redirectToUpdate() {
-    LaunchUrlService.launchURL(versionLink!, true);
+  static List<int>? _parseVersion(String value) {
+    final normalized = value.split('+').first.trim();
+    if (normalized.isEmpty) return null;
+    final parts = <int>[];
+    for (final rawPart in normalized.split('.')) {
+      final part = int.tryParse(rawPart);
+      if (part == null || part < 0) return null;
+      parts.add(part);
+    }
+    return parts;
   }
 }

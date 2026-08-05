@@ -8,13 +8,15 @@ import 'package:fstapp/components/inventory/models/user_inventory_bundle.dart';
 import 'package:fstapp/components/inventory/views/inventory_strings.dart';
 import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/components/offline/offline_banner.dart';
 import 'package:fstapp/services/app_logger.dart';
+import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/components/html/html_view.dart';
-import '../../map/map_page.dart';
+import '../../map/map_navigation.dart';
 
 @RoutePage()
 class UserStayPage extends StatefulWidget {
@@ -56,6 +58,11 @@ class _UserStayPageState extends State<UserStayPage> {
     } catch (e) {
       AppLogger.error("Could not load offline user stay data: $e");
       // It's okay to fail here, we proceed to fetch fresh data.
+    }
+
+    if (ConnectivityService.isOfflineNotifier.value) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
     }
 
     // 2. Fetch fresh data from the network.
@@ -131,12 +138,19 @@ class _UserStayPageState extends State<UserStayPage> {
           onPressed: () => RouterService.goBack(context),
         ),
       ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: _buildContent(),
-        ),
+      body: Column(
+        children: [
+          const OfflineBanner(),
+          Expanded(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                child: _buildContent(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -199,9 +213,9 @@ class _UserStayPageState extends State<UserStayPage> {
                               color: Theme.of(context).colorScheme.secondary),
                           label: Text(pool.place!.title!),
                           onPressed: () {
-                            RouterService.navigateOccasion(
+                            MapNavigation.openPlace(
                               context,
-                              "${MapPage.ROUTE}/${pool.place!.id}",
+                              pool.place!.id!,
                             );
                           },
                           shape: StadiumBorder(

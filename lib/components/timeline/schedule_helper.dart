@@ -6,6 +6,7 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/time_helper.dart';
@@ -391,7 +392,7 @@ class TimeBlockHelper {
     // Helper to create a TimeBlockGroup. A title is only applied if there are multiple groups.
     TimeBlockGroup createGroup(String title, List<TimeBlockItem> eventList) {
       return TimeBlockGroup(
-        title: hasMultipleGroups ? title.tr() : '',
+        title: hasMultipleGroups ? title : '',
         events: eventList,
       );
     }
@@ -399,8 +400,10 @@ class TimeBlockHelper {
     // Construct the final list of groups, only including those that contain events.
     return [
       if (morningEvents.isNotEmpty) createGroup('', morningEvents),
-      if (afternoonEvents.isNotEmpty) createGroup('Afternoon', afternoonEvents),
-      if (eveningEvents.isNotEmpty) createGroup('Evening', eveningEvents),
+      if (afternoonEvents.isNotEmpty)
+        createGroup(ScheduleStrings.afternoon, afternoonEvents),
+      if (eveningEvents.isNotEmpty)
+        createGroup(ScheduleStrings.evening, eveningEvents),
     ];
   }
 

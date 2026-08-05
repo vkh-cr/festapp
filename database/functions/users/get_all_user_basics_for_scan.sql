@@ -46,7 +46,7 @@ BEGIN
     )
   ) INTO user_basics
   FROM public.user_info ui
-  LEFT JOIN public.user_companions uc ON ui.id = uc.companion
+  LEFT JOIN public.user_companions uc ON ui.id = uc.companion AND uc.occasion=oid
   JOIN public.occasion_users uo ON ui.id = uo."user"
 
   -- This keeps the user in the list even if they have no record in organization_users

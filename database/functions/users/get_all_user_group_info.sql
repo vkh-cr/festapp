@@ -6,12 +6,24 @@ SET search_path = public, extensions AS $$
 DECLARE
     groups_json jsonb;
     game_defs_json jsonb;
+    places_json jsonb;
     result_data jsonb;
 BEGIN
     -- Authorization Check: User must have editor view permissions for the occasion.
     IF NOT get_is_editor_view_on_occasion(p_occasion_id) THEN
         RAISE EXCEPTION 'NOT_AUTHORIZED';
     END IF;
+
+    SELECT COALESCE(
+        jsonb_agg(to_jsonb(p) ORDER BY p."order" NULLS LAST, p.title),
+        '[]'::jsonb
+    )
+    INTO places_json
+    FROM public.places p
+    WHERE p.occasion = p_occasion_id
+      AND NOT p.is_hidden
+      AND p.coordinates->'latLng'->>'lat' IS NOT NULL
+      AND p.coordinates->'latLng'->>'lng' IS NOT NULL;
 
     -- If authorized, fetch all matching groups for the occasion.
     SELECT
@@ -62,7 +74,8 @@ BEGIN
     -- Combine the results into a single data object.
     result_data := jsonb_build_object(
         'groups', groups_json,
-        'game_definitions', game_defs_json
+        'game_definitions', game_defs_json,
+        'places', places_json
     );
 
     -- Return the data directly on success.

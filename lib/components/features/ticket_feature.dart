@@ -1,6 +1,6 @@
 // ticket_feature.dart
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/images/db_images.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -96,7 +96,7 @@ class TicketFeature extends Feature {
           ),
           DropdownButtonFormField<String>(
             initialValue: ticketType ?? 'named',
-            decoration: InputDecoration(labelText: 'Ticket Type'.tr()),
+            decoration: InputDecoration(labelText: FeaturesStrings.ticketType),
             items: ['named', 'wide']
                 .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                 .toList(),
@@ -109,18 +109,20 @@ class TicketFeature extends Feature {
             const SizedBox(height: 16),
             TextFormField(
               controller: lightCtrl,
-              decoration: InputDecoration(labelText: 'Background color'.tr()),
+              decoration:
+                  InputDecoration(labelText: FeaturesStrings.backgroundColor),
               onSaved: (val) => ticketLightColor = val,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: darkCtrl,
-              decoration: InputDecoration(labelText: 'Font color'.tr()),
+              decoration:
+                  InputDecoration(labelText: FeaturesStrings.fontColor),
               onSaved: (val) => ticketDarkColor = val,
             ),
             const SizedBox(height: 16),
             ImageArea(
-              hint: '(1600x900 px)'.tr(),
+              hint: FeaturesStrings.backgroundImageHint,
               imageUrl: ticketBackground,
               onFileSelected: (file) async {
                 try {
@@ -130,9 +132,10 @@ class TicketFeature extends Feature {
                   final url = await DbImages.uploadImage(compressedImageData,
                       RightsService.currentOccasionId(), null);
                   setLocal(() => ticketBackground = url);
-                  ToastHelper.Show(context, 'File uploaded successfully.'.tr());
+                  ToastHelper.Show(
+                      context, FeaturesStrings.uploadImageSuccess);
                 } catch (e) {
-                  ToastHelper.Show(context, "Failed to upload image.".tr());
+                  ToastHelper.Show(context, FeaturesStrings.uploadImageError);
                 }
                 return null;
               },
@@ -142,17 +145,18 @@ class TicketFeature extends Feature {
                   final confirmation =
                       await DialogHelper.showConfirmationDialog(
                     context,
-                    "Confirm removal".tr(),
-                    "Are you sure you want to delete this image?".tr(),
+                    CommonStrings.confirmRemoval,
+                    FeaturesStrings.deleteImageConfirm,
                   );
                   if (confirmation == true) {
                     try {
                       await DbImages.removeImage(imageUrl);
                       setLocal(() => ticketBackground = null);
                       ToastHelper.Show(
-                          context, "Image removed successfully.".tr());
+                          context, FeaturesStrings.removeImageSuccess);
                     } catch (e) {
-                      ToastHelper.Show(context, "Failed to remove image.".tr());
+                      ToastHelper.Show(
+                          context, FeaturesStrings.removeImageError);
                     }
                   }
                 }

@@ -11,6 +11,7 @@ class MapPlaceModel {
   final LatLng latLng;
   final int? icon;
   final List<TimeBlockItem>? events;
+  int aggregateVersion;
 
   MapPlaceModel({
     required this.id,
@@ -20,6 +21,7 @@ class MapPlaceModel {
     required this.latLng,
     this.icon,
     this.events,
+    this.aggregateVersion = 0,
   });
 
   factory MapPlaceModel.fromPlaceModel(PlaceModel place) {
@@ -30,6 +32,7 @@ class MapPlaceModel {
         type: place.type,
         latLng: LatLng(place.getLat(), place.getLng()),
         icon: place.icon,
+        aggregateVersion: place.aggregateVersion,
         events: List<TimeBlockItem>.from(
             place.events.map((e) => TimeBlockItem.fromEventModelAsChild(e))));
   }

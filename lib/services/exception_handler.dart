@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'toast_helper.dart';
@@ -103,6 +103,24 @@ class ExceptionHandler {
     }
   }
 
+  /// True when [e] is a network-level failure (no connection / server
+  /// unreachable) rather than a server-side error. The supabase client
+  /// surfaces these as http.ClientException — "Failed to fetch" on web,
+  /// a wrapped SocketException on native (matched by message; dart:io is
+  /// off-limits in shared code). Server responses (PostgrestException with a
+  /// code, RPC envelopes) never match.
+  static bool isNetworkError(Object e) {
+    if (e is http.ClientException) return true;
+    if (e is AuthRetryableFetchException) return true;
+    final message = e.toString();
+    return message.contains('SocketException') ||
+        message.contains('Failed to fetch') ||
+        message.contains('Failed host lookup') ||
+        message.contains('Connection refused') ||
+        message.contains('Network is unreachable') ||
+        message.contains('Connection timed out');
+  }
+
   /// Returns a user-friendly message for any exception. Postgrest errors carrying
   /// a JSON body are parsed; everything else falls back to [defaultMessage] or a
   /// generic message.
@@ -124,7 +142,7 @@ class ExceptionHandler {
       return AppError(
         code: jsonMap['code'] ?? 'N/A',
         message: jsonMap['message'] as String? ??
-            'An unknown database error occurred.'.tr(),
+            CommonStrings.unknownDatabaseError,
         rawJson: jsonString,
       );
     } catch (e) {
@@ -142,7 +160,7 @@ class ExceptionHandler {
         return AlertDialog(
           backgroundColor: scheme.surface,
           title: Text(
-            'Error (Code: ${appError.code})'.tr(),
+            CommonStrings.errorWithCode(code: appError.code.toString()),
             style: TextStyle(color: scheme.error),
           ),
           content: SingleChildScrollView(
@@ -159,7 +177,7 @@ class ExceptionHandler {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Details:'.tr(),
+                  CommonStrings.detailsLabel,
                   style: TextStyle(color: scheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 8),
@@ -185,7 +203,7 @@ class ExceptionHandler {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('OK'.tr()),
+              child: Text(CommonStrings.ok),
             ),
           ],
         );
